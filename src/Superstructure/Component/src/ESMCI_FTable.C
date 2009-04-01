@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.17 2009/04/01 05:28:27 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.18 2009/04/01 22:28:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.17 2009/04/01 05:28:27 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.18 2009/04/01 22:28:42 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -498,14 +498,6 @@ extern "C" {
       break;
     }
     
-#if 0
-    int slen = strlen(methodString);
-    ESMCI::FTable::setTypedEP(ptr, methodString, slen, phase, 0,
-      ESMCI::FT_COMP2STAT, func, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
-      return;
-#else
-    
     int slen = strlen(methodString);
     char *fname;
     newtrim(methodString, slen, phase, NULL, &fname);
@@ -514,8 +506,6 @@ extern "C" {
     localrc = (tabptr)->setFuncPtr(fname, func, ESMCI::FT_COMP2STAT);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
-    
-#endif
     
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;

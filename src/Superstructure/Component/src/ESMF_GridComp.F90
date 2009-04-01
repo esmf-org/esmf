@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.118 2009/03/26 03:28:20 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.119 2009/04/01 22:28:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.118 2009/03/26 03:28:20 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.119 2009/04/01 22:28:45 theurich Exp $'
 
 !==============================================================================
 !
@@ -755,16 +755,31 @@ contains
 ! !IROUTINE: ESMF_GridCompReadRestart - Call the GridComp's restore routine
 !
 ! !INTERFACE:
+#ifdef OLD
   recursive subroutine ESMF_GridCompReadRestart(gridcomp, iospec, clock, &
     phase, blockingflag, rc)
+#else
+  recursive subroutine ESMF_GridCompReadRestart(gridcomp, importState, &
+    exportState, clock, phase, blockingflag, rc)
+#endif
 !
 ! !ARGUMENTS:
-      type(ESMF_GridComp),     intent(inout)           :: gridcomp
-      type(ESMF_IOSpec),       intent(inout), optional :: iospec
-      type(ESMF_Clock),        intent(inout), optional :: clock
-      integer,                 intent(in),    optional :: phase
-      type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
-      integer,                 intent(out),   optional :: rc 
+#ifdef OLD
+    type(ESMF_GridComp),     intent(inout)           :: gridcomp
+    type(ESMF_IOSpec),       intent(inout), optional :: iospec
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: phase
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(out),   optional :: rc 
+#else
+    type (ESMF_GridComp)                              :: gridcomp
+    type (ESMF_State),        intent(inout), optional :: importState
+    type (ESMF_State),        intent(inout), optional :: exportState
+    type (ESMF_Clock),        intent(inout), optional :: clock
+    integer,                  intent(in),    optional :: phase
+    type (ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                  intent(out),   optional :: rc 
+#endif
 !
 ! !DESCRIPTION:
 ! Call the associated user restore code for a {\tt gridcomp}.
@@ -780,7 +795,6 @@ contains
 !   This is generally the parent component's clock, and will be treated
 !   as read-only by the child component.  The child component can maintain
 !   a private clock for its own internal time computations.
-!   {\tt ESMF\_State} containing export data for coupling.
 ! \item[{[phase]}]
 !   Component providers must document whether their each of their
 !   routines are {\em single-phase} or {\em multi-phase}.  
@@ -815,8 +829,14 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     ! call Comp method
+#ifdef OLD
     call ESMF_CompReadRestart(gridcomp%compp, iospec, clock, phase, &
       blockingflag, rc=localrc)
+#else
+    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETREADRESTART, &
+      importState=importState, exportState=exportState, clock=clock, &
+      phase=phase, blockingflag=blockingflag, rc=localrc)
+#endif
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1077,6 +1097,7 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
 !------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1702,16 +1723,31 @@ contains
 ! !IROUTINE: ESMF_GridCompWriteRestart - Call the GridComp's checkpoint routine
 !
 ! !INTERFACE:
+#ifdef OLD
   recursive subroutine ESMF_GridCompWriteRestart(gridcomp, iospec, clock, &
     phase, blockingflag, rc)
+#else
+  recursive subroutine ESMF_GridCompWriteRestart(gridcomp, importState, &
+    exportState, clock, phase, blockingflag, rc)
+#endif
 !
 ! !ARGUMENTS:
+#ifdef OLD
     type(ESMF_GridComp),     intent(inout)           :: gridcomp
     type(ESMF_IOSpec),       intent(inout), optional :: iospec
     type(ESMF_Clock),        intent(inout), optional :: clock
     integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
     integer,                 intent(out),   optional :: rc 
+#else
+    type(ESMF_GridComp)                              :: gridcomp
+    type(ESMF_State),        intent(inout), optional :: importState
+    type(ESMF_State),        intent(inout), optional :: exportState
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: phase
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(out),   optional :: rc 
+#endif
 !
 ! !DESCRIPTION:
 ! Call the associated user checkpoint code for an {\tt ESMF\_GridComp}.
@@ -1761,8 +1797,14 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     ! call Comp method
+#ifdef OLD
     call ESMF_CompWriteRestart(gridcomp%compp, iospec, clock, phase, &
       blockingflag, rc=localrc)
+#else
+    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETWRITERESTART, &
+      importState=importState, exportState=exportState, clock=clock, &
+      phase=phase, blockingflag=blockingflag, rc=localrc)
+#endif
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

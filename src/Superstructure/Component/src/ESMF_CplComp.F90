@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.105 2009/03/26 03:28:20 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.106 2009/04/01 22:28:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.105 2009/03/26 03:28:20 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.106 2009/04/01 22:28:43 theurich Exp $'
 
 !==============================================================================
 !
@@ -731,16 +731,31 @@ contains
 ! !IROUTINE: ESMF_CplCompReadRestart -- Call the CplComp's restore routine
 !
 ! !INTERFACE:
+#ifdef OLD
   recursive subroutine ESMF_CplCompReadRestart(cplcomp, iospec, clock, phase, &
     blockingflag, rc)
+#else
+  recursive subroutine ESMF_CplCompReadRestart(cplcomp, importState, &
+    exportState, clock, phase, blockingflag, rc)
+#endif
 !
 ! !ARGUMENTS:
+#ifdef OLD
     type(ESMF_CplComp),      intent(inout)           :: cplcomp
     type(ESMF_IOSpec),       intent(inout), optional :: iospec
     type(ESMF_Clock),        intent(inout), optional :: clock
     integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
     integer,                 intent(out),   optional :: rc 
+#else
+    type (ESMF_CplComp)                               :: cplcomp
+    type (ESMF_State),        intent(inout), optional :: importState
+    type (ESMF_State),        intent(inout), optional :: exportState
+    type (ESMF_Clock),        intent(inout), optional :: clock
+    integer,                  intent(in),    optional :: phase
+    type (ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                  intent(out),   optional :: rc 
+#endif
 !
 ! !DESCRIPTION:
 ! Call the associated user restore code for an {\tt ESMF\_CplComp}.
@@ -756,7 +771,6 @@ contains
 !   This is generally the parent component's clock, and will be treated
 !   as read-only by the child component.  The child component can maintain
 !   a private clock for its own internal time computations.
-!   {\tt ESMF\_State} containing export data for coupling.
 ! \item[{[phase]}]  
 !   Component providers must document whether their each of their
 !   routines are {\em single-phase} or {\em multi-phase}.  
@@ -791,8 +805,14 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     ! call Comp method
+#ifdef OLD
     call ESMF_CompReadRestart(cplcomp%compp, iospec, clock, phase, &
       blockingflag, rc=localrc)
+#else
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETREADRESTART, &
+      importState=importState, exportState=exportState, clock=clock, &
+      phase=phase, blockingflag=blockingflag, rc=localrc)
+#endif
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1045,6 +1065,7 @@ contains
   end subroutine
 !------------------------------------------------------------------------------
 
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_CplCompSetInternalState - Set private data block pointer
@@ -1088,6 +1109,7 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1667,16 +1689,31 @@ contains
 ! !IROUTINE: ESMF_CplCompWriteRestart -- Call the CplComp's checkpoint routine
 
 ! !INTERFACE:
+#ifdef OLD
   recursive subroutine ESMF_CplCompWriteRestart(cplcomp, iospec, clock, &
     phase, blockingflag, rc)
+#else
+  recursive subroutine ESMF_CplCompWriteRestart(cplcomp, importState, &
+    exportState, clock, phase, blockingflag, rc)
+#endif
 !
 ! !ARGUMENTS:
+#ifdef OLD
     type(ESMF_CplComp),      intent(inout)           :: cplcomp
     type(ESMF_IOSpec),       intent(inout), optional :: iospec
     type(ESMF_Clock),        intent(inout), optional :: clock
     integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
     integer,                 intent(out),   optional :: rc 
+#else
+    type(ESMF_CplComp),      intent(inout)           :: cplcomp
+    type(ESMF_State),        intent(inout), optional :: importState
+    type(ESMF_State),        intent(inout), optional :: exportState
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: phase
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(out),   optional :: rc 
+#endif
 !
 ! !DESCRIPTION:
 ! Call the associated user checkpoint code for an {\tt ESMF\_CplComp}.
@@ -1726,8 +1763,14 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     ! call Comp method
+#ifdef OLD
     call ESMF_CompWriteRestart(cplcomp%compp, iospec, clock, phase, &
       blockingflag, rc=localrc)
+#else
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETWRITERESTART, &
+      importState=importState, exportState=exportState, clock=clock, &
+      phase=phase, blockingflag=blockingflag, rc=localrc)
+#endif
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
