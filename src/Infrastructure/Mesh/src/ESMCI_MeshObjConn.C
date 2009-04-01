@@ -689,8 +689,8 @@ template void common_objs<>(MeshObj** in_obj_begin, MeshObj** in_obj_end,
                  UInt out_obj_type, 
                  std::vector<MeshObj*> &out_obj);
 
-#if (__INTEL_COMPILER < 1100)
-// Intel's icpc version < 11.0 on ia64 have a problem with implicit template
+#if (__INTEL_COMPILER)
+// Intel's icpc version < 11.0 have a problem with implicit template
 // instantiation if compiled and linked into a shared library.
 // Use explicit instantiation to help these compilers.
 
