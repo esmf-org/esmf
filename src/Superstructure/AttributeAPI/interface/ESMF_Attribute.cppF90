@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.26 2009/03/28 22:10:15 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.27 2009/04/01 05:41:46 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.26 2009/03/28 22:10:15 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.27 2009/04/01 05:41:46 eschwab Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -374,9 +374,9 @@ module ESMF_AttributeMod
 !        module procedure ESMF_CplCompAttRead
         module procedure ESMF_GridCompAttRead
 !        module procedure ESMF_DistGridAttRead
-!        module procedure ESMF_FieldAttRead
+        module procedure ESMF_FieldAttRead
 !        module procedure ESMF_FieldBundleAttRead
-!        module procedure ESMF_GridAttRead
+        module procedure ESMF_GridAttRead
 !        module procedure ESMF_StateAttRead
 
 ! !DESCRIPTION:
@@ -3300,11 +3300,6 @@ contains
       ! check input variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      call mclass##Validate(mthis, rc=localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                  ESMF_ERR_PASSTHRU, & @\
-                                  ESMF_CONTEXT, rc)) return @\
-  @\
       ! get length of given fileName for C++ validation @\
       if (present(fileName)) then @\
         fileNameLen = len_trim(fileName) @\
@@ -5023,6 +5018,8 @@ AttGetCharacterMacro(ESMF_Field, field, field%ftypep%base)
 
 GetCountNameNumberMacro(ESMF_Field, field, field%ftypep%base)
 
+AttReadMacro(ESMF_Field, field, field%ftypep%base)
+
 AttRemoveMacro(ESMF_Field, field, field%ftypep%base)
 
 TypeKind3DeclarationMacro(AttSet, ESMF_Field, field, field%ftypep%base)
@@ -5261,6 +5258,8 @@ AttGetLogicalMacro(ESMF_Grid, grid, grid)
 AttGetCharacterMacro(ESMF_Grid, grid, grid)
 
 GetCountNameNumberMacro(ESMF_Grid, grid, grid)
+
+AttReadMacro(ESMF_Grid, grid, grid)
 
 AttRemoveMacro(ESMF_Grid, grid, grid)
 
