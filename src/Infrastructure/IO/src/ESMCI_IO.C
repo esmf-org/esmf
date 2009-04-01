@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.C,v 1.3 2009/03/25 05:57:29 eschwab Exp $
+// $Id: ESMCI_IO.C,v 1.4 2009/04/01 05:41:03 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO.C,v 1.3 2009/03/25 05:57:29 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO.C,v 1.4 2009/04/01 05:41:03 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 #ifdef ESMF_XERCES
@@ -67,12 +67,12 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
                             const   XMLCh* const    qname,
                             const   Attributes&     attrs)
 {
+    int status;
     char* msg1 = XMLString::transcode(uri);
     char* msg2 = XMLString::transcode(localname);
     char* msg3 = XMLString::transcode(qname);
     cout << "I saw element: "<< msg1 << ", " << msg2 << ", "
                              << msg3 << ", " << endl;
-
     // remember this name to associate with the subsequent value callback
     //   to MySAX2Handler::characters()
     // TODO:  qname better than localname?
@@ -93,6 +93,39 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
       value = XMLString::transcode(attrs.getValue(i));
       cout << "  Attributes: " << Qname << ", " << URI << ", " << local << ", "
                                << type << ", " << value << endl;
+
+      string cname(Qname, strlen(Qname));
+      string cvalue(value, strlen(value));
+      cname.resize(cname.find_last_not_of(" ")+1);
+      cvalue.resize(cvalue.find_last_not_of(" ")+1);
+
+      if (cname.empty()) {
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                             "bad attribute name conversion", &status);
+          //if (rc) *rc = status;  TODO
+          return;
+      }
+ 
+      if (cvalue.empty()) {
+          ESMC_LogDefault.Write("Attribute has an empty value argument",
+                                  ESMC_LOG_INFO);
+          cvalue = '\0';
+      }
+
+      // Set the attribute on the object.
+      status = this->attr->AttributeSet(cname, &cvalue);
+
+      // TODO: the following is based on F90->C->C++ glue code call for F90
+      //    ESMF_AttributeSet(gridcomp, ...), which appears not to work;
+      //    produces garbage chars appended after good chars when retrieved
+      //    from F90 via ESMF_AttributeGet().
+     // status = this->attr->AttPackSet(cname, ESMC_TYPEKIND_CHARACTER, 1, 
+     //                                      &cvalue, "ESG", "general", "comp");
+
+      if (status != ESMF_SUCCESS) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                             "failed setting attribute value", &status);
+      }
     }
 
     if (value != NULL) XMLString::release(&value);
