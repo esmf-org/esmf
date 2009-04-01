@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.16 2009/03/30 23:31:27 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.17 2009/04/01 05:28:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.16 2009/03/30 23:31:27 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.17 2009/04/01 05:28:27 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -224,7 +224,7 @@ extern "C" {
     // the right function to call; the other is the actual return code
     // from the user function itself.
 
-    localrc = (*ptr)->callVFuncPtr(name, &funcrc);
+    localrc = (*ptr)->callVFuncPtr(name, NULL, &funcrc);
 
     if (status) {
       if (localrc != ESMF_SUCCESS)
@@ -497,11 +497,27 @@ extern "C" {
     default:
       break;
     }
+    
+#if 0
     int slen = strlen(methodString);
     ESMCI::FTable::setTypedEP(ptr, methodString, slen, phase, 0,
       ESMCI::FT_COMP2STAT, func, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
+#else
+    
+    int slen = strlen(methodString);
+    char *fname;
+    newtrim(methodString, slen, phase, NULL, &fname);
+         
+    ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
+    localrc = (tabptr)->setFuncPtr(fname, func, ESMCI::FT_COMP2STAT);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      return;
+    
+#endif
+    
+    // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
   
@@ -1026,7 +1042,7 @@ void FTable::setVM(void *ptr, void (*func)(), int *status) {
       return;
   }
 
-  localrc = (tabptr)->callVFuncPtr("setVM", &funcrc);
+  localrc = (tabptr)->callVFuncPtr("setVM", NULL, &funcrc);
   if (localrc != ESMF_SUCCESS) {
       if (status) *status = localrc;
       return;
@@ -1164,7 +1180,7 @@ void FTable::setVM(void *ptr, void (*func)(), int *status) {
         funcalloc = thisfunc+4;
     }
     funcs[thisfunc].funcptr = func;
-    funcs[thisfunc].ftype = FT_VOID;
+    funcs[thisfunc].ftype = FT_NULL;
     // do these only if not replacing an existing entry.
     if (thisfunc == funccount) {
         funcs[thisfunc].funcname = new char[strlen(name)+1];
@@ -1199,7 +1215,7 @@ void FTable::setVM(void *ptr, void (*func)(), int *status) {
 // !DESCRIPTION:
 //    Sets the named function pointer and type, but specifies no argument 
 //    values.  Before this can be called successfully, the user must call
-//    ESMC\_FTableSetFuncArgs to fill in the argument list.
+//    FTable::setFuncArgs to fill in the argument list.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -1526,44 +1542,38 @@ void FTable::setVM(void *ptr, void (*func)(), int *status) {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::FTable::getFuncPtr()"
+#define ESMC_METHOD "ESMCI::FTable::getEntry()"
 //BOP
-// !IROUTINE:  getFuncPtr - get function pointer from name
+// !IROUTINE:  getEntry - get FTable entry from name
 //
 // !INTERFACE:
-      int FTable::getFuncPtr(
+int FTable::getEntry(
 //
 // !RETURN VALUE:
-//    integer return code
+//    entry index, or -1 if not found.
 //
 // !ARGUMENTS:
-      char *name,            // in, function name
-      void **func,           // out, function address
-      enum ftype *ftype) {   // out, function type
+  char *name,            // in, function name
+  int *rc) {             // out, return code
 //
 // !DESCRIPTION:
-//    Returns the named function pointer
+//    Returns the named entry
 //
 //EOP
-// !REQUIREMENTS:  
+//-----------------------------------------------------------------------------
+  // Initialize rc and localrc ; assume functions not implemented
+  if (*rc) *rc = ESMC_RC_NOT_IMPL;
 
-    // Initialize return code; assume routine not implemented
-    int rc = ESMC_RC_NOT_IMPL;
-
-    int i;
-
-    for (i=0; i<funccount; i++) {
-        if (strcmp(name, funcs[i].funcname))
-           continue;
-   
-        *func = funcs[i].funcptr;
-        *ftype = funcs[i].ftype;
-
-        return ESMF_SUCCESS;
-    }
-
-    return ESMF_FAILURE;
-
+  int i;
+  for (i=0; i<funccount; i++) {
+    if (!strcmp(name, funcs[i].funcname))
+      break;
+  }
+  if (i==funccount) i=-1; // indicate entry not found
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return i;
 }
 //-----------------------------------------------------------------------------
 
@@ -1574,303 +1584,110 @@ void FTable::setVM(void *ptr, void (*func)(), int *status) {
 // !IROUTINE:  callVFuncPtr - call a function w/ proper args
 //
 // !INTERFACE:
-      int FTable::callVFuncPtr(
+int FTable::callVFuncPtr(
 //
 // !RETURN VALUE:
 //    integer return code
 //
 // !ARGUMENTS:
-      char *name,         // in, function name 
-      int *rc) {          // out, function return
+  char *name,           // in, function name
+  VM *vm_pointer,       // in, pointer to this PET's VM instance
+  int *userrc) {        // out, function return
 //
 // !DESCRIPTION:
 //    Calls the named function pointer
 //
 //EOP
-// !REQUIREMENTS:  
-
-    int i, status;
-    status = ESMC_RC_NOT_IMPL;
-
-    *rc = ESMC_RC_NOT_IMPL;
-    for (i=0; i<funccount; i++) {
-        if (strcmp(name, funcs[i].funcname))
-           continue;
-   
-        switch (funcs[i].ftype) {
-          case FT_VOID: {
-            VoidFunc vf;
-//printf("calling out of case FT_VOID\n");
-            vf = (VoidFunc)funcs[i].funcptr;
-            (*vf)();
-            break;
-          }
-          case FT_INT: {
-            IntFunc vf;
-//printf("calling out of case FT_INT\n");
-            vf = (IntFunc)funcs[i].funcptr;
-            (*vf)(*(int *)funcs[i].funcarg[0]);
-            break;
-          }
-          case FT_2INT: {
-            Int2Func vf;
-//printf("calling out of case FT_2INT\n");
-            vf = (Int2Func)funcs[i].funcptr;
-            (*vf)(*(int *)funcs[i].funcarg[0], *(int *)funcs[i].funcarg[1]);
-            break;
-          }
-          case FT_INTP: {
-            IntPtrFunc vf;
-//printf("calling out of case FT_INTP\n");
-            vf = (IntPtrFunc)funcs[i].funcptr;
-            (*vf)((int *)funcs[i].funcarg[0]);
-            break;
-          }
-          case FT_VOIDP: {
-            VoidPtrFunc vf;
-//printf("calling out of case FT_VOIDP\n");
-            vf = (VoidPtrFunc)funcs[i].funcptr;
-            (*vf)(funcs[i].funcarg[0]);
-            break;
-          }
-          case FT_VOIDPINTP: {
-            VoidPtrIntPtrFunc vf;
-//printf("calling out of case FT_VOIDPINTP\n");
-            vf = (VoidPtrIntPtrFunc)funcs[i].funcptr;
-            (*vf)((void *)funcs[i].funcarg[0], (int *)funcs[i].funcarg[1]);
-            *rc = *(int *)(funcs[i].funcarg[1]);
-            break;
-          }
-          case FT_COMP1STAT: {
-            C1SFunc vf;
-//printf("calling out of case FT_COMP1STAT\n");
-            vf = (C1SFunc)funcs[i].funcptr;
-            (*vf)(funcs[i].funcarg[0], funcs[i].funcarg[1],
-                  funcs[i].funcarg[2], (int *)funcs[i].funcarg[3]);
-            *rc = *(int *)(funcs[i].funcarg[3]);
-            break;
-          }
-          case FT_COMP2STAT: {
-            C2SFunc vf;
-//printf("calling out of case FT_COMP2STAT\n");
-            vf = (C2SFunc)funcs[i].funcptr;
-            (*vf)(funcs[i].funcarg[0], funcs[i].funcarg[1],
-                  funcs[i].funcarg[2], funcs[i].funcarg[3],
-                 (int *)funcs[i].funcarg[4]);
-            *rc = *(int *)(funcs[i].funcarg[4]);
-            break;
-          }
-          case FT_COMPSLIST: {
-            CSLFunc vf;
-//printf("calling out of case FT_COMPSLIST\n");
-            vf = (CSLFunc)funcs[i].funcptr;
-            (*vf)(funcs[i].funcarg[0], funcs[i].funcarg[1],
-                  funcs[i].funcarg[2], (int *)funcs[i].funcarg[3]);
-            *rc = *(int *)(funcs[i].funcarg[3]);
-            break;
-          }
-          default:
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-                                         "unknown function type", &status);
-            return status;
-        }
-
-        return ESMF_SUCCESS;
-    }
-
-    return ESMF_FAILURE;
-
-}
 //-----------------------------------------------------------------------------
- 
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::FTable::callVFuncPtr()"
-//BOP
-// !IROUTINE:  callVFuncPtr - call a function w/ proper args
-//
-// !INTERFACE:
-      int FTable::callVFuncPtr(
-//
-// !RETURN VALUE:
-//    integer return code
-//
-// !ARGUMENTS:
-      char *name,           // in, function name
-      VM *vm_pointer,  // in, pointer to this PET's VM instance
-      int *rc) {            // out, function return
-//
-// !DESCRIPTION:
-//    Calls the named function pointer
-//
-//EOP
-// !REQUIREMENTS:  
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (userrc!=NULL) *userrc = -99999;     // set userrc to something obvious
 
-    int i, status;
+  // find the "name" entry
+  int i = getEntry(name, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc))
+    return localrc; // bail out
+  if (i == -1){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    "unknown function name", &localrc);
+    return localrc; // bail out
+  }
+  
+  // optionally insert vm and replicate Component object, according to situation
+  Comp *comp;
+  if (vm_pointer){
+    // vm_pointer was provided -> use to set VM in Component object
     VM *vmm = vm_pointer;
     VM **vm = &vmm;
-    
-    *rc = ESMC_RC_NOT_IMPL;
-    status = ESMC_RC_NOT_IMPL;
-
-    for (i=0; i<funccount; i++) {
-        if (strcmp(name, funcs[i].funcname))
-           continue;
-   
-        switch (funcs[i].ftype) {
-          case FT_VOID: {
-            VoidFuncVM vf;
-//printf("calling out of case FT_VOID VM\n");
-            vf = (VoidFuncVM)funcs[i].funcptr;
-            (*vf)(vm);
-            break;
-          }
-          case FT_INT: {
-            IntFuncVM vf;
-//printf("calling out of case FT_INT VM\n");
-            vf = (IntFuncVM)funcs[i].funcptr;
-            (*vf)(*(int *)funcs[i].funcarg[0], vm);
-            break;
-          }
-          case FT_2INT: {
-            Int2FuncVM vf;
-//printf("calling out of case FT_2INT VM\n");
-            vf = (Int2FuncVM)funcs[i].funcptr;
-            (*vf)(*(int *)funcs[i].funcarg[0], *(int *)funcs[i].funcarg[1], vm);
-            break;
-          }
-          case FT_INTP: {
-            IntPtrFuncVM vf;
-//printf("calling out of case FT_INTP VM\n");
-            vf = (IntPtrFuncVM)funcs[i].funcptr;
-            (*vf)((int *)funcs[i].funcarg[0], vm);
-            break;
-          }
-          case FT_VOIDP: {
-            VoidPtrFuncVM vf;
-//printf("calling out of case FT_VOIDP VM\n");
-            vf = (VoidPtrFuncVM)funcs[i].funcptr;
-            (*vf)(funcs[i].funcarg[0], vm);
-            break;
-          }
-          case FT_VOIDPINTP: {
-            VoidPtrIntPtrFuncVM vf;
-//printf("calling out of case FT_VOIDPINTP VM\n");
-            vf = (VoidPtrIntPtrFuncVM)funcs[i].funcptr;
-            (*vf)((void *)funcs[i].funcarg[0], (int *)funcs[i].funcarg[1], vm);
-            *rc = *(int *)(funcs[i].funcarg[1]);
-            break;
-          }
-          case FT_COMP1STAT: {
-            C1SFunc vf;
-//printf("calling out of case FT_COMP1STAT VM\n");
-            int rrc;
-            Comp *comp;
-            CompType ctype;
-            // Replicate the component object on the heap for this thread
-            FTN(f_esmf_compget)((Comp *)funcs[i].funcarg[0], &ctype, &rrc);
-            if (ctype == COMPTYPE_GRID || ctype == COMPTYPE_CPL)
-              comp = new Comp;
-            else
-              comp = (Comp *)NULL;
-            FTN(f_esmf_compreplicate)(comp, 
-              (Comp *)funcs[i].funcarg[0], vm, &rrc);
-            // Callback: prepare prototype, call, store return code
-            vf = (C1SFunc)funcs[i].funcptr;
-            (*vf)(comp, funcs[i].funcarg[1],
-                  funcs[i].funcarg[2], (int *)funcs[i].funcarg[3]);
-            *rc = *(int *)(funcs[i].funcarg[3]);
-            // Update the original with any changes made by the child
-            FTN(f_esmf_compcopy)((Comp *)funcs[i].funcarg[0], 
-                                 (Comp *)comp, &rrc);
-            // Delete the heap copy of the component object for this thread
-            FTN(f_esmf_compdelete)((Comp *)comp, &rrc);
-            delete (Comp *)comp;
-            break;
-          }
-          case FT_COMP2STAT: {
-//printf("calling out of case FT_COMP2STAT VM\n");
-            C2SFunc vf = (C2SFunc)funcs[i].funcptr;
-            int rrc;
-            Comp *comp;
-            int mypet = vm_pointer->getMypet();
-            if (vm_pointer->getNthreads(mypet) > 1){
-              // mypet is part of a thread group
-              CompType ctype;
-              // Replicate the component object on the heap for this thread
-              FTN(f_esmf_compget)((Comp *)funcs[i].funcarg[0], &ctype,
-                &rrc);
-              if (ctype == COMPTYPE_GRID || ctype == COMPTYPE_CPL)
-                comp = new Comp;
-              else
-                comp = (Comp *)NULL;
-              // replicate the component object for each thread
-              FTN(f_esmf_compreplicate)(comp,
-                (Comp *)funcs[i].funcarg[0], vm, &rrc);
-              // call-back into user code with reference to comp object copy
-              (*vf)(comp, funcs[i].funcarg[1],
-                funcs[i].funcarg[2], funcs[i].funcarg[3],
-                (int *)funcs[i].funcarg[4]);
-              // Update the original with any changes made by the child
-              // todo: how can this be done correctly merging all the copies
-              // todo: into a single object?
-              //FTN(f_esmf_compcopy)((Comp *)funcs[i].funcarg[0],
-              //  (Comp *)comp, &rrc);
-              // Delete the heap copy of the component object for this thread
-              FTN(f_esmf_compdelete)((Comp *)comp, &rrc);
-              delete (Comp *)comp;
-            }else{
-              // mypet is a single-threaded process within this VM
-              // insert the current vm object into component object
-              FTN(f_esmf_compinsertvm)((Comp *)funcs[i].funcarg[0], vm,
-                &rrc);
-              // call-back into user code with reference to actual comp object
-              (*vf)((void *)funcs[i].funcarg[0], funcs[i].funcarg[1],
-                funcs[i].funcarg[2], funcs[i].funcarg[3],
-                (int *)funcs[i].funcarg[4]);
-            }
-            // ensure that the return value is set correctly
-            *rc = *(int *)(funcs[i].funcarg[4]);
-            break;
-          }
-          case FT_COMPSLIST: {
-            CSLFunc vf;
-//printf("calling out of case FT_COMPSLIST VM\n");
-            int rrc;
-            Comp *comp;
-            CompType ctype;
-            // Replicate the component object on the heap for this thread
-            FTN(f_esmf_compget)((Comp *)funcs[i].funcarg[0], &ctype, &rrc);
-            if (ctype == COMPTYPE_GRID || ctype == COMPTYPE_CPL)
-              comp = new Comp;
-            else
-              comp = (Comp *)NULL;
-            FTN(f_esmf_compreplicate)(comp, 
-              (Comp *)funcs[i].funcarg[0], vm, &rrc);
-            // Callback: prepare prototype, call, store return code
-            vf = (CSLFunc)funcs[i].funcptr;
-            (*vf)(comp, funcs[i].funcarg[1],
-                  funcs[i].funcarg[2], (int *)funcs[i].funcarg[3]);
-            *rc = *(int *)(funcs[i].funcarg[3]);
-            // Update the original with any changes made by the child
-            FTN(f_esmf_compcopy)((Comp *)funcs[i].funcarg[0], 
-                                 (Comp *)comp, &rrc);
-            // Delete the heap copy of the component object for this thread
-            FTN(f_esmf_compdelete)((Comp *)comp, &rrc);
-            delete (Comp *)comp;
-            break;
-          }
-          default:
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-                                         "unknown function type", &status);
-            return status;
-        }
-
-        return ESMF_SUCCESS;
+    int rrc;
+    int mypet = vm_pointer->getMypet();
+    if (vm_pointer->getNthreads(mypet) > 1){
+      // mypet is part of a thread group
+      CompType ctype;
+      // Replicate the component object on the heap for this thread
+      FTN(f_esmf_compget)((Comp *)funcs[i].funcarg[0], &ctype, &rrc);
+      if (ctype == COMPTYPE_GRID || ctype == COMPTYPE_CPL)
+        comp = new Comp;
+      else
+        comp = (Comp *)NULL;
+      // replicate the component object for each thread
+      FTN(f_esmf_compreplicate)(comp, (Comp *)funcs[i].funcarg[0], vm, &rrc);
+    }else{
+      // mypet is a single-threaded process within this VM
+      // insert the current vm object into component object
+      comp = (Comp *)funcs[i].funcarg[0];
+      FTN(f_esmf_compinsertvm)(comp, vm, &rrc);
     }
+  }else{
+    // vm_pointer was not provided -> simple call-back without vm insertion
+    comp = (Comp *)funcs[i].funcarg[0];
+  }
 
-    return ESMF_FAILURE;
+  // call-back into user code
+  switch (funcs[i].ftype){
+    case FT_VOIDPINTP: {
+//printf("calling out of case FT_VOIDPINTP VM\n");
+      VoidPtrIntPtrFunc vf = (VoidPtrIntPtrFunc)funcs[i].funcptr;
+      (*vf)((void *)comp, (int *)funcs[i].funcarg[1]);
+      *userrc = *(int *)(funcs[i].funcarg[1]);
+      break;
+    }
+    case FT_COMP2STAT: {
+//printf("calling out of case FT_COMP2STAT VM\n");
+      C2SFunc vf = (C2SFunc)funcs[i].funcptr;
+      (*vf)(comp, funcs[i].funcarg[1], funcs[i].funcarg[2],
+        funcs[i].funcarg[3], (int *)funcs[i].funcarg[4]);
+      *userrc = *(int *)(funcs[i].funcarg[4]);
+      break;
+    }
+    default:
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "unknown function type", &localrc);
+      return localrc;
+  }
+  
+  // check if anything needs to be updated after call-back
+  if (vm_pointer){
+    // vm_pointer was provided -> use to set VM in Component object
+    VM *vmm = vm_pointer;
+    VM **vm = &vmm;
+    int rrc;
+    int mypet = vm_pointer->getMypet();
+    if (vm_pointer->getNthreads(mypet) > 1){
+      // mypet is part of a thread group
+      // Update the original with any changes made by the child
+      // todo: how can this be done correctly merging all the copies
+      // todo: into a single object?
+      //FTN(f_esmf_compcopy)((Comp *)funcs[i].funcarg[0],
+      //  (Comp *)comp, &rrc);
+      // Delete the heap copy of the component object for this thread
+      FTN(f_esmf_compdelete)((Comp *)comp, &rrc);
+      delete (Comp *)comp;
+    }
+  }
 
+  // return successfully
+  return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
  
@@ -1891,7 +1708,7 @@ void FTable::setVM(void *ptr, void (*func)(), int *status) {
 //
 // !DESCRIPTION:
 //      Validates that a Component is internally consistent.
-//      Returns error code if problems are found.  ESMC\_Base class method.
+//      Returns error code if problems are found.  Base class method.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -1923,7 +1740,7 @@ void FTable::setVM(void *ptr, void (*func)(), int *status) {
 //
 // !DESCRIPTION:
 //      Print information about a Component.  The options control the
-//      type of information and level of detail.  ESMC\_Base class method.
+//      type of information and level of detail.  Base class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n

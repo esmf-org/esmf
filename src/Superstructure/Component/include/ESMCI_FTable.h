@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.h,v 1.6 2009/03/17 05:21:36 theurich Exp $
+// $Id: ESMCI_FTable.h,v 1.7 2009/04/01 05:28:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,30 +46,14 @@ namespace ESMCI {
 // of void's and a final int * for the return code.)
 // The typedefs are to ease the declarations of the function entry point
 // itself.
+
 enum dtype { DT_VOIDP=1, DT_FORTRAN_UDT_POINTER };
-enum ftype { FT_VOID=1, FT_INT, FT_2INT, FT_INTP, FT_VOIDP, FT_VOIDPINTP,
-              FT_INITFINAL, FT_RUN, FT_COMP1STAT, FT_COMP2STAT, FT_COMPSLIST };
+enum ftype { FT_NULL=1, FT_VOIDPINTP, FT_COMP2STAT };
 enum method { SETINIT=1, SETRUN, SETFINAL, SETWRITERESTART, SETREADRESTART,
   SETREGISTER };
-typedef void (*VoidFunc)(void);
-typedef void (*IntFunc)(int);
-typedef void (*Int2Func)(int, int);
-typedef void (*IntPtrFunc)(int *);
-typedef void (*VoidPtrFunc)(void *);
-typedef void (*VoidPtrIntPtrFunc)(void *, int *);
-typedef void (*C1SFunc)(void *, void *, void *, int *);
-typedef void (*C2SFunc)(void *, void *, void *, void *, int *);
-typedef void (*CSLFunc)(void *, void *, void *, int *);
 
-typedef void (*VoidFuncVM)(void *);
-typedef void (*IntFuncVM)(int, void *);
-typedef void (*Int2FuncVM)(int, int, void *);
-typedef void (*IntPtrFuncVM)(int *, void *);
-typedef void (*VoidPtrFuncVM)(void *, void *);
-typedef void (*VoidPtrIntPtrFuncVM)(void *, int *, void *);
-typedef void (*C1SFuncVM)(void *, void *, void *, int *, void *);
-typedef void (*C2SFuncVM)(void *, void *, void *, void *, int *, void *);
-typedef void (*CSLFuncVM)(void *, void *, void *, int *, void *);
+typedef void (*VoidPtrIntPtrFunc)(void *, int *);
+typedef void (*C2SFunc)(void *, void *, void *, void *, int *);
 
 
 // classes
@@ -90,7 +74,7 @@ class funcinfo {
       funcptr = NULL;
       for (int i=0; i<numargs; i++)
         funcarg[i] = NULL; 
-      ftype = FT_VOID;
+      ftype = FT_NULL;
     }
     ~funcinfo(){
       if (funcname != NULL) 
@@ -139,14 +123,13 @@ class FTable {
     int getDataPtr(char *name, void **data, enum dtype *dtype);
     int setDataPtr(char *name, void **data, enum dtype dtype);
     int setFuncArgs(char *name, int acount, void **arglist);
-    int getFuncPtr(char *name, void **func, enum ftype *ftype);
+    int getEntry(char *name, int *rc);
     int setFuncPtr(char *name, void *func, enum ftype ftype);
     int setFuncPtr(char *name, void *func);
     int setFuncPtr(char *name, void *func, void *arg1, int *arg2);
     int setFuncPtr(char *name, void *func, enum ftype ftype, 
       int acount, void **arglist);
     int extend(int nfuncp, int ndatap);
-    int callVFuncPtr(char *name, int *funcrc);
     int callVFuncPtr(char *name, ESMCI::VM *vm, int *funcrc);
     int validate(const char*) const;
     int print(const char*) const;
