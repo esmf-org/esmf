@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEnsembleSTest.F90,v 1.5 2009/03/26 03:28:21 theurich Exp $
+! $Id: ESMF_InternalStateEnsembleSTest.F90,v 1.6 2009/04/01 20:19:27 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -15,24 +15,24 @@
 !    2D source Array 100x150. A second gridded component also defines three internal
 !    States with three destination Arrays also 100x150.
 !
+!    The Array of internal State 1 is initialized to all ones, the Array of internal 
+!    State 2 to all twos and the Array of internal State 3 to all threes.
+!
 !    The Coupler Component reconciles import and export States which contain 
 !    source and destination Arrays, respectively.    
 !
 !    The following sequential loop is repeated five times using a clock.
 !   
-!    On the first time through the loop, Component 1 intializes it's source Array
-!    in its first internal State to all ones, initializes its source Array in its
-!    second internal State to all twos, and initializes its source array in its  
-!    third internal State to all threes. On subsequent times through the loop it 
-!    mutiplies the Array elements in each internal State by 10. It stores the Arrays
-!    in its export State.
+!    On each time through the loop, Component 1 mutiplies the Array elements 
+!    in each internal State by 10, and stores the Arrays in its export State.
 !
 !    The Coupler Component redistribures the Arrays in the export State
 !    to the import State of the second Gridded Component by calling ArrayRedist.
+!
 !    Finally the second Gridded Component compares the data stored in the
 !    destination Arrays to the expected values as a measure of the accuracy 
 !    of the ArrayRedist() method.
-
+!
 !
 !-------------------------------------------------------------------------
 !\begin{verbatim}
