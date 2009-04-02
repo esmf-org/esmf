@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.5 2009/03/26 03:28:21 theurich Exp $
+! $Id: user_coupler.F90,v 1.6 2009/04/02 20:15:40 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -193,11 +193,6 @@ module user_coupler
     rc = ESMF_SUCCESS
 
     print *, "User Coupler Run starting"
-
-    ! Get import State name
-    call ESMF_StateGet(importState, name=stateName, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    print *, "Import State ", trim(stateName)
 
     ! Get source Array 1 out of import state
     call ESMF_StateGet(importState, "array data1", srcArray, rc=rc)

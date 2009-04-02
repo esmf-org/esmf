@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.6 2009/04/01 20:20:39 svasquez Exp $
+! $Id: user_model1.F90,v 1.7 2009/04/02 20:15:40 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -29,9 +29,9 @@ module user_model1
   ! Internal State Variables
   type testData
   sequence
-      type(ESMF_ArraySpec)  :: arrayspec
-      type(ESMF_DistGrid)   :: distgrid
-      type(ESMF_Array)      :: array
+      type(ESMF_ArraySpec), allocatable  :: arrayspec(:)
+      type(ESMF_DistGrid), allocatable   :: distgrid(:)
+      type(ESMF_Array), allocatable      :: array(:)
   end type
 
    type dataWrapper
@@ -119,11 +119,9 @@ module user_model1
     type(ESMF_VM)         :: vm
     integer               :: petCount
     integer               :: i, j
-    real(ESMF_KIND_R8), pointer :: farrayPtr1(:,:)   ! matching F90 array pointer
-    real(ESMF_KIND_R8), pointer :: farrayPtr2(:,:)   ! matching F90 array pointer
-    real(ESMF_KIND_R8), pointer :: farrayPtr3(:,:)   ! matching F90 array pointer
-    type (testData), pointer :: data1, data2, data3
-    type(dataWrapper) :: wrap1, wrap2, wrap3
+    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
+    type (testData), pointer :: data
+    type(dataWrapper) :: wrap
 
 
     
@@ -138,116 +136,99 @@ module user_model1
     call ESMF_VMGet(vm, petCount=petCount, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! Initialize internal State 1
+    ! Initialize internal State 
     ! Allocate private data block
-    allocate(data1)
+    allocate(data)
+    allocate(data%arrayspec(3))
+    allocate(data%distgrid(3))
+    allocate(data%array(3))
     
-    ! Create the source Array and add it to the export State
-    call ESMF_ArraySpecSet(arrayspec=data1%arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+    ! Create the source Array 1 and add it to the export State
+    call ESMF_ArraySpecSet(arrayspec=data%arrayspec(1), typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    data1%distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,150/), &
+    data%distgrid(1) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,150/), &
       regDecomp=(/petCount,1/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    data1%array = ESMF_ArrayCreate(arrayspec=data1%arrayspec, distgrid=data1%distgrid, &
+    data%array(1) = ESMF_ArrayCreate(arrayspec=data%arrayspec(1), distgrid=data%distgrid(1), &
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArraySet(array=data1%array, name="array data1", rc=rc)
+    call ESMF_ArraySet(array=data%array(1), name="array data1", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(array=data1%array, localDe=0, farrayPtr=farrayPtr1, rc=rc)
+    call ESMF_ArrayGet(array=data%array(1), localDe=0, farrayPtr=farrayPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Fill source Array with data of all one's.
-    do j = lbound(farrayPtr1, 2), ubound(farrayPtr1, 2)
-       do i = lbound(farrayPtr1, 1), ubound(farrayPtr1, 1)
-                  farrayPtr1(i,j) = 1
+    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
+       do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+                  farrayPtr(i,j) = 1
        enddo
     enddo
-print *, " array1 = ", farrayPtr1(1,1)
 
-    call ESMF_StateAdd(exportState, data1%array, rc=rc)
+    call ESMF_StateAdd(exportState, data%array(1), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    wrap1%p => data1
-
-    ! Set internal State 1
-    call ESMF_GridCompSetInternalState(comp, wrap1, rc)
+    ! Create the source Array 2 and add it to the export State
+    call ESMF_ArraySpecSet(arrayspec=data%arrayspec(2), typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-   
-    ! Initialize internal State 2
-    ! Allocate private data block
-    allocate(data2)
-    
-    ! Create the source Array and add it to the export State
-    call ESMF_ArraySpecSet(arrayspec=data2%arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    data2%distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,150/), &
+    data%distgrid(2) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,150/), &
       regDecomp=(/petCount,1/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    data2%array = ESMF_ArrayCreate(arrayspec=data2%arrayspec, distgrid=data2%distgrid, &
+    data%array(2) = ESMF_ArrayCreate(arrayspec=data%arrayspec(2), distgrid=data%distgrid(2), &
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArraySet(array=data2%array, name="array data2", rc=rc)
+    call ESMF_ArraySet(array=data%array(2), name="array data2", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(array=data2%array, localDe=0, farrayPtr=farrayPtr2, rc=rc)
+    call ESMF_ArrayGet(array=data%array(2), localDe=0, farrayPtr=farrayPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Fill source Array with data of all two's.
-    do j = lbound(farrayPtr2, 2), ubound(farrayPtr2, 2)
-       do i = lbound(farrayPtr2, 1), ubound(farrayPtr2, 1)
-                  farrayPtr2(i,j) = 2
+    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
+       do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+                  farrayPtr(i,j) = 2
        enddo
     enddo
-print *, " array2 = ", farrayPtr2(1,1)
 
-    call ESMF_StateAdd(exportState, data2%array, rc=rc)
+    call ESMF_StateAdd(exportState, data%array(2), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    wrap2%p => data2
-    ! Set internal State 2
-    call ESMF_GridCompSetInternalState(comp, wrap2, rc)
+
+
+    ! Create the source Array 3 and add it to the export State
+    call ESMF_ArraySpecSet(arrayspec=data%arrayspec(3), typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-   
-   
-    ! Initialize internal State 3
-    ! Allocate private data block
-    allocate(data3)
-    
-    ! Create the source Array and add it to the export State
-    call ESMF_ArraySpecSet(arrayspec=data3%arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    data3%distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,150/), &
+    data%distgrid(3) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,150/), &
       regDecomp=(/petCount,1/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    data3%array = ESMF_ArrayCreate(arrayspec=data3%arrayspec, distgrid=data3%distgrid, &
+    data%array(3) = ESMF_ArrayCreate(arrayspec=data%arrayspec(3), distgrid=data%distgrid(3), &
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArraySet(array=data3%array, name="array data3", rc=rc)
+    call ESMF_ArraySet(array=data%array(3), name="array data3", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(array=data2%array, localDe=0, farrayPtr=farrayPtr3, rc=rc)
+    call ESMF_ArrayGet(array=data%array(3), localDe=0, farrayPtr=farrayPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Fill source Array with data of all three's.
-    do j = lbound(farrayPtr3, 2), ubound(farrayPtr3, 2)
-       do i = lbound(farrayPtr3, 1), ubound(farrayPtr3, 1)
-                  farrayPtr3(i,j) = 3
+    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
+       do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+                  farrayPtr(i,j) = 3
        enddo
     enddo
-print *, " array3 = ", farrayPtr3(1,1)
 
-    call ESMF_StateAdd(exportState, data3%array, rc=rc)
+    call ESMF_StateAdd(exportState, data%array(3), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    wrap3%p => data3
-    ! Set internal State 3
-    call ESMF_GridCompSetInternalState(comp, wrap3, rc)
+    wrap%p => data
+
+    ! Set internal State 
+    call ESMF_GridCompSetInternalState(comp, wrap, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    
+   
     print *, "User Comp1 Init returning"
 
   end subroutine user_init
@@ -264,14 +245,12 @@ print *, " array3 = ", farrayPtr3(1,1)
     integer, intent(out) :: rc
 
     ! Local variables
-    real(ESMF_KIND_R8), pointer :: farrayPtr1(:,:)   ! matching F90 array pointer
-    real(ESMF_KIND_R8), pointer :: farrayPtr2(:,:)   ! matching F90 array pointer
-    real(ESMF_KIND_R8), pointer :: farrayPtr3(:,:)   ! matching F90 array pointer
+    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
     integer               :: i, j
     type(ESMF_Time) :: startTime, currTime
     type(ESMF_Calendar) :: gregorianCalendar
-    type (testData), pointer :: data1, data2, data3
-    type(dataWrapper) :: wrap1, wrap2, wrap3
+    type (testData), pointer :: data
+    type(dataWrapper) :: wrap
 
     
     ! Initialize return code
@@ -280,71 +259,69 @@ print *, " array3 = ", farrayPtr3(1,1)
     print *, "User Comp1 Run starting"
 
 
-    ! Get internal State 1
-    call ESMF_GridCompGetInternalState(comp, wrap1, rc)
+    ! Get internal State 
+    call ESMF_GridCompGetInternalState(comp, wrap, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    data1 => wrap1%p
+    data => wrap%p
 
+
+    ! Get Array 1 multiply each element by 10 and put in the export State.
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(array=data1%array, localDe=0, farrayPtr=farrayPtr1, rc=rc)
+    call ESMF_ArrayGet(array=data%array(1), localDe=0, farrayPtr=farrayPtr, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_ArraySet(array=data%array(1), name="array data1", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! multiple each element by 10
-    do j = lbound(farrayPtr1, 2), ubound(farrayPtr1, 2)
-           do i = lbound(farrayPtr1, 1), ubound(farrayPtr1, 1)
-                 farrayPtr1(i,j) = farrayPtr1(i,j) * 10
+    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
+           do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+                 farrayPtr(i,j) = farrayPtr(i,j) * 10
            enddo
     enddo
-print *, " array1 = ", farrayPtr1(1,1)
 
     ! Add array to export state
-    call ESMF_StateAdd(exportState, data1%array, rc=rc)
+    call ESMF_StateAdd(exportState, data%array(1), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-
-    ! Get internal State 2
-    call ESMF_GridCompGetInternalState(comp, wrap2, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    data2 => wrap2%p
-
+    ! Get Array 2 multiply each element by 10 and put in the export State.
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(array=data2%array, localDe=0, farrayPtr=farrayPtr2, rc=rc)
+    call ESMF_ArrayGet(array=data%array(2), localDe=0, farrayPtr=farrayPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-   
-    ! multiple each element by 10
-    do j = lbound(farrayPtr2, 2), ubound(farrayPtr2, 2)
-           do i = lbound(farrayPtr2, 1), ubound(farrayPtr2, 1)
-                 farrayPtr2(i,j) = farrayPtr2(i,j) * 10
-           enddo
-    enddo
-print *, " array2 = ", farrayPtr2(1,1)
-
-    ! Add array to export state
-    call ESMF_StateAdd(exportState, data2%array, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-
-
-    ! Get internal State 3
-    call ESMF_GridCompGetInternalState(comp, wrap3, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    data3 => wrap3%p
-
-    ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(array=data3%array, localDe=0, farrayPtr=farrayPtr3, rc=rc)
+    call ESMF_ArraySet(array=data%array(2), name="array data2", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! multiple each element by 10
-    do j = lbound(farrayPtr3, 2), ubound(farrayPtr3, 2)
-           do i = lbound(farrayPtr3, 1), ubound(farrayPtr3, 1)
-                 farrayPtr3(i,j) = farrayPtr3(i,j) * 10
+    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
+           do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+                 farrayPtr(i,j) = farrayPtr(i,j) * 10
            enddo
     enddo
-print *, " array3 = ", farrayPtr3(1,1)
 
     ! Add array to export state
-    call ESMF_StateAdd(exportState, data3%array, rc=rc)
+    call ESMF_StateAdd(exportState, data%array(2), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+
+
+    ! Get Array 3 multiply each element by 10 and put in the export State.
+    ! Gain access to actual data via F90 array pointer
+    call ESMF_ArrayGet(array=data%array(3), localDe=0, farrayPtr=farrayPtr, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_ArraySet(array=data%array(3), name="array data3", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    ! multiple each element by 10
+    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
+           do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+                 farrayPtr(i,j) = farrayPtr(i,j) * 10
+           enddo
+    enddo
+
+    ! Add array to export state
+    call ESMF_StateAdd(exportState, data%array(3), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
 
@@ -364,31 +341,19 @@ print *, " array3 = ", farrayPtr3(1,1)
     integer, intent(out) :: rc
 
     ! Local variables
-    type (dataWrapper) :: wrap1, wrap2, wrap3
-    type (testData), pointer :: data1, data2, data3
+    type (dataWrapper) :: wrap
+    type (testData), pointer :: data
 
     ! Initialize return code
     rc = ESMF_SUCCESS
 
     print *, "User Comp1 Final starting"
 
-    ! Get internal State 1
-    call ESMF_GridCompGetInternalState(comp, wrap1, rc)
+    ! Get internal State 
+    call ESMF_GridCompGetInternalState(comp, wrap, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    data1 = wrap1%p
-    deallocate(data1)
-
-    ! Get internal State 2
-    call ESMF_GridCompGetInternalState(comp, wrap2, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    data2 = wrap2%p
-    deallocate(data2)
-
-    ! Get internal State 3
-    call ESMF_GridCompGetInternalState(comp, wrap3, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    data3 = wrap3%p
-    deallocate(data3)
+    data => wrap%p
+    deallocate(data)
 
     print *, "User Comp1 Final returning"
 

@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.6 2009/04/01 20:20:39 svasquez Exp $
+! $Id: user_model2.F90,v 1.7 2009/04/02 20:15:40 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -26,9 +26,9 @@ module user_model2
   ! Internal State Variables
   type testData
   sequence
-      type(ESMF_ArraySpec)  :: arrayspec
-      type(ESMF_DistGrid)   :: distgrid
-      type(ESMF_Array)      :: array
+      type(ESMF_ArraySpec), allocatable  :: arrayspec(:)
+      type(ESMF_DistGrid), allocatable   :: distgrid(:)
+      type(ESMF_Array), allocatable      :: array(:)
   end type
 
    type dataWrapper
@@ -116,8 +116,8 @@ module user_model2
     ! Local variables
     type(ESMF_VM)         :: vm
     integer               :: petCount
-    type(dataWrapper) :: wrap1, wrap2, wrap3
-    type(testData), pointer :: data1, data2, data3
+    type(dataWrapper) :: wrap
+    type(testData), pointer :: data
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -132,86 +132,68 @@ module user_model2
 
 
 
-    ! Initialize  internal State 1
+    ! Initialize  internal State 
     ! Allocate private data block
-    allocate(data1)
+    allocate(data)
+    allocate(data%arrayspec(3))
+    allocate(data%distgrid(3))
+    allocate(data%array(3))
 
-    ! Create the source Array and add it to the import State
-    call ESMF_ArraySpecSet(arrayspec=data1%arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+    ! Create the destination Array 1 and add it to the import State
+    call ESMF_ArraySpecSet(arrayspec=data%arrayspec(1), typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    data1%distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,150/), &
+    data%distgrid(1) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,150/), &
       regDecomp=(/1,petCount/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    data1%array = ESMF_ArrayCreate(arrayspec=data1%arrayspec, distgrid=data1%distgrid, &
+    data%array(1) = ESMF_ArrayCreate(arrayspec=data%arrayspec(1), distgrid=data%distgrid(1), &
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArraySet(array=data1%array, name="array data1", rc=rc)
+    call ESMF_ArraySet(array=data%array(1), name="array data1", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(importState, data1%array, rc=rc)
+    call ESMF_StateAdd(importState, data%array(1), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    wrap1%p => data1
+
+    ! Create the destination Array 2 and add it to the import State
+    call ESMF_ArraySpecSet(arrayspec=data%arrayspec(2), typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    data%distgrid(2) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,150/), &
+      regDecomp=(/1,petCount/), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    data%array(2) = ESMF_ArrayCreate(arrayspec=data%arrayspec(2), distgrid=data%distgrid(2), &
+      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArraySet(array=data%array(2), name="array data2", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_StateAdd(importState, data%array(2), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+
+
+    ! Create the destination Array 3 and add it to the import State
+    call ESMF_ArraySpecSet(arrayspec=data%arrayspec(3), typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    data%distgrid(3) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,150/), &
+      regDecomp=(/1,petCount/), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    data%array(3) = ESMF_ArrayCreate(arrayspec=data%arrayspec(3), distgrid=data%distgrid(3), &
+      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArraySet(array=data%array(3), name="array data3", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_StateAdd(importState, data%array(3), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+
+
+    wrap%p => data
     ! Set  internal State 1
-    call ESMF_GridCompSetInternalState(comp, wrap1, rc)
+    call ESMF_GridCompSetInternalState(comp, wrap, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
  
-    !Initialize solution
+    !Initialize solutions
     solution1 = 1
-
-
-
-
-    ! Initialize internal State 2
-    ! Allocate private data block
-    allocate(data2)
-
-    ! Create the source Array and add it to the import State
-    call ESMF_ArraySpecSet(arrayspec=data2%arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    data2%distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,150/), &
-      regDecomp=(/1,petCount/), rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    data2%array = ESMF_ArrayCreate(arrayspec=data2%arrayspec, distgrid=data2%distgrid, &
-      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArraySet(array=data2%array, name="array data2", rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(importState, data2%array, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-    wrap2%p => data2
-    ! Set internal State 2
-    call ESMF_GridCompSetInternalState(comp, wrap2, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-    !Initialize solution
     solution2 = 2
-
-
-    ! Initialize internal State 3
-    ! Allocate private data block
-    allocate(data3)
-
-    ! Create the source Array and add it to the import State
-    call ESMF_ArraySpecSet(arrayspec=data3%arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    data3%distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,150/), &
-      regDecomp=(/1,petCount/), rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    data3%array = ESMF_ArrayCreate(arrayspec=data3%arrayspec, distgrid=data3%distgrid, &
-      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArraySet(array=data3%array, name="array data3", rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(importState, data3%array, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-    wrap3%p => data3
-    ! Set internal State 3
-    call ESMF_GridCompSetInternalState(comp, wrap3, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-    !Initialize solution
     solution3 = 3
 
     print *, "User Comp2 Init returning"
@@ -231,16 +213,12 @@ module user_model2
 
     ! Local variables
     type(ESMF_Array)      :: array1, array2, array3
-    real(ESMF_KIND_R8), pointer :: farrayPtr1(:,:)   ! matching F90 array pointer
-    real(ESMF_KIND_R8), pointer :: farrayPtr2(:,:)   ! matching F90 array pointer
-    real(ESMF_KIND_R8), pointer :: farrayPtr3(:,:)   ! matching F90 array pointer
+    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
     integer               :: i, j
     character(len=ESMF_MAXSTR) :: stateName
     type(ESMF_Time) :: startTime, currTime
     type(ESMF_Calendar) :: gregorianCalendar
-    type(dataWrapper) :: wrap1, wrap2, wrap3
-    type(testData), pointer :: data1, data2, data3
-
+    type(ESMF_Array)    :: array
 
     
     ! Initialize return code
@@ -248,84 +226,66 @@ module user_model2
 
     print *, "User Comp2 Run starting"
 
-    ! Get internal State 1
-    call ESMF_GridCompGetInternalState(comp, wrap1, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    data1 => wrap1%p
-
     ! Get the destination Array 1 from the import State
-    call ESMF_StateGet(importState, "array data1", array1, rc=rc)
+    call ESMF_StateGet(importState, "array data1", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(array=data1%array, localDe=0, farrayPtr=farrayPtr1, rc=rc)
+    call ESMF_ArrayGet(array=array, localDe=0, farrayPtr=farrayPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Set up the solution integer
     solution1 = solution1 * 10
 
     ! Test Array in import state against exact solution
-    do j = lbound(farrayPtr1, 2), ubound(farrayPtr1, 2)
-      do i = lbound(farrayPtr1, 1), ubound(farrayPtr1, 1)
-        if (farrayPtr1(i,j) /= solution1 ) then
+    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
+      do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+        if (farrayPtr(i,j) /= solution1 ) then
           rc=ESMF_FAILURE
-print *, " array = ", farrayPtr1(i,j)
           return ! bail out
         endif
       enddo
     enddo
 
 
-print *, " after solution test"
-
-    call ESMF_GridCompGetInternalState(comp, wrap2, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    data2 => wrap2%p
 
     ! Get the destination Array 2 from the import State
-    call ESMF_StateGet(importState, "array data2", array2, rc=rc)
+    call ESMF_StateGet(importState, "array data2", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(array=data2%array, localDe=0, farrayPtr=farrayPtr2, rc=rc)
+    call ESMF_ArrayGet(array=array, localDe=0, farrayPtr=farrayPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Set up the solution integer
     solution2 = solution2 * 10
 
     ! Test Array in import state against exact solution
-    do j = lbound(farrayPtr2, 2), ubound(farrayPtr2, 2)
-      do i = lbound(farrayPtr2, 1), ubound(farrayPtr2, 1)
-        if (farrayPtr2(i,j) /= solution2 ) then
+    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
+      do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+        if (farrayPtr(i,j) /= solution2 ) then
           rc=ESMF_FAILURE
-print *, " array = ", farrayPtr2(i,j)
           return ! bail out
         endif
       enddo
     enddo
 
- 
-    call ESMF_GridCompGetInternalState(comp, wrap3, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    data3 => wrap3%p
-
     ! Get the destination Array 3 from the import State
-    call ESMF_StateGet(importState, "array data3", array3, rc=rc)
+    call ESMF_StateGet(importState, "array data3", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(array=data3%array, localDe=0, farrayPtr=farrayPtr3, rc=rc)
+    call ESMF_ArrayGet(array=array, localDe=0, farrayPtr=farrayPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Set up the solution integer
     solution3 = solution3 * 10
 
     ! Test Array in import state against exact solution
-    do j = lbound(farrayPtr3, 2), ubound(farrayPtr3, 2)
-      do i = lbound(farrayPtr3, 1), ubound(farrayPtr3, 1)
-        if (farrayPtr3(i,j) /= solution3 ) then
+    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
+      do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+        if (farrayPtr(i,j) /= solution3 ) then
           rc=ESMF_FAILURE
-print *, " array = ", farrayPtr3(i,j)
           return ! bail out
         endif
       enddo
@@ -347,8 +307,8 @@ print *, " array = ", farrayPtr3(i,j)
     integer, intent(out) :: rc
 
     ! Local variables
-    type(dataWrapper) :: wrap1, wrap2, wrap3
-    type(testData), pointer :: data1, data2, data3
+    type(dataWrapper) :: wrap
+    type(testData), pointer :: data
 
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -356,23 +316,10 @@ print *, " array = ", farrayPtr3(i,j)
     print *, "User Comp2 Final starting"
 
     ! Get internal State 1
-    call ESMF_GridCompGetInternalState(comp, wrap1, rc)
+    call ESMF_GridCompGetInternalState(comp, wrap, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    data1 = wrap1%p
-    deallocate(data1)
-
-
-    ! Get internal State 2
-    call ESMF_GridCompGetInternalState(comp, wrap2, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    data2 = wrap2%p
-    deallocate(data2)
-
-    ! Get internal State 3
-    call ESMF_GridCompGetInternalState(comp, wrap3, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    data3 = wrap3%p
-    deallocate(data3)
+    data => wrap%p
+    deallocate(data)
 
     print *, "User Comp2 Final returning"
 

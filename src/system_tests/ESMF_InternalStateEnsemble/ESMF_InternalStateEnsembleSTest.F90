@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEnsembleSTest.F90,v 1.6 2009/04/01 20:19:27 svasquez Exp $
+! $Id: ESMF_InternalStateEnsembleSTest.F90,v 1.7 2009/04/02 20:15:40 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -9,14 +9,14 @@
 ! !DESCRIPTION:
 ! System test InternalStateEnsemble.  
 !    The purpose of this system test is to demonstrate how an ensemble can 
-!    be written using internal States
+!    be written using the internal State.
 !
-!    A Gridded Component defines three internal States each with a
-!    2D source Array 100x150. A second gridded component also defines three internal
-!    States with three destination Arrays also 100x150.
+!    A Gridded Component defines an internal State with three
+!    2D source Arrays 100x150. A second gridded component also defines an internal
+!    State with three destination Arrays also 100x150.
 !
-!    The Array of internal State 1 is initialized to all ones, the Array of internal 
-!    State 2 to all twos and the Array of internal State 3 to all threes.
+!    The first Arrays is initialized to all ones, the second Array 
+!    to all twos and the third Array to all threes.
 !
 !    The Coupler Component reconciles import and export States which contain 
 !    source and destination Arrays, respectively.    
@@ -24,7 +24,7 @@
 !    The following sequential loop is repeated five times using a clock.
 !   
 !    On each time through the loop, Component 1 mutiplies the Array elements 
-!    in each internal State by 10, and stores the Arrays in its export State.
+!    by 10, and stores the Arrays in its export State.
 !
 !    The Coupler Component redistribures the Arrays in the export State
 !    to the import State of the second Gridded Component by calling ArrayRedist.
