@@ -1,4 +1,4 @@
-// $Id: ESMCI_Test.C,v 1.11 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMCI_Test.C,v 1.12 2009/04/02 23:24:51 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,    
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Test.C,v 1.11 2009/01/21 21:38:02 cdeluca Exp $";
+static const char *const version = "$Id: ESMCI_Test.C,v 1.12 2009/04/02 23:24:51 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -436,6 +436,7 @@ int TestStart(
 
   char logFileName[160];
   char *underScore = strchr(file, '_');
+  if (underScore == NULL) underScore = file-1;
   char *period = strrchr(file, '.');
   int numChars = period - underScore;
   strncpy(logFileName, underScore+1, numChars);
