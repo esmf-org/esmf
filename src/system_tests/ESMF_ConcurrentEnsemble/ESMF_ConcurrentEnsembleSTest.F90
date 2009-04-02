@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.7 2009/03/26 03:28:20 theurich Exp $
+! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.8 2009/04/02 21:18:47 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -16,23 +16,18 @@
 !    2D source Array 100x150. The fourth gridded component defines three
 !    destination Arrays also 100x150 and also runs on 2 PETs. None of the components
 !    have any PETs in common to allow them to run concurrently
+!    Component 1 intializes its source Array to all one's and adds it to its export
+!    State. Component 2 initializes its source Array to all two's and add it to
+!    its export State. Compoent 3 initializes its Array to all three's and adds it
+!    to its export State.
 !
 !    The coupler component runs on all 8 PETs and reconciles import and export
 !    States which contain source and destination Arrays, respectively.  
 !
 !    The following concurrent loop is repeated five times using a clock.
 !   
-!    On the first time through the loop, Component 1 intializes it's source Array
-!    to all ones. On subsequent times through the loop it mutiplies the Array
-!    elements by 10. It stores the Array in its export State.
-!
-!    On the first time through the loop, Component 2 intializes it's source Array
-!    to all twos. On subsequent times through the loop it mutiplies the Array
-!    elements by 10. It stores the Array in its export State.
-!
-!    On the first time through the loop, Component 3 intializes it's source Array
-!    to all three. On subsequent times through the loop it mutiplies the Array
-!    elements by 10. It stores the Array in its export State.
+!    Each Component multiplies the elements in its Array bt 10 and adds it to
+!    its export State.
 !    
 !    The Coupler Component redistribures the Arrays in the three export States
 !    to the three import States of Component 4 by calling ArrayRedist.
