@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUtil.F90,v 1.5 2009/03/19 01:14:09 w6ws Exp $
+! $Id: ESMF_IOUtil.F90,v 1.6 2009/04/02 18:43:14 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -96,7 +96,7 @@ module ESMF_IOUtilMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version = &
-      '$Id: ESMF_IOUtil.F90,v 1.5 2009/03/19 01:14:09 w6ws Exp $'
+      '$Id: ESMF_IOUtil.F90,v 1.6 2009/04/02 18:43:14 w6ws Exp $'
 !------------------------------------------------------------------------------
 
   contains
@@ -174,7 +174,7 @@ ESMF_IOFlushMacro(unit,status)
 !   optional {\tt IOUnitLower} and {\tt IOUnitUpper} arguments in the initial
 !   {\tt ESMF\_Initialize()} call with values in a safe, alternate, range.
 !
-!   The Fortran unit which is returned is not reserved in any way.
+!   The Fortran unit number which is returned is not reserved in any way.
 !   Successive calls without intervening {\tt OPEN} or {\tt CLOSE} statements
 !   (or other means of connecting to units), might not return a unique unit
 !   number.  It is recommended that an {\tt OPEN} statement immediately follow
