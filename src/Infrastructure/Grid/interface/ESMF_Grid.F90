@@ -221,7 +221,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.110 2009/03/18 23:01:59 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.111 2009/04/02 17:12:02 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2300,6 +2300,10 @@ end subroutine ESMF_GridConvertIndex
     type(ESMF_InterfaceInt) :: coordDimCountArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
     integer :: intDestroyDistgrid,intDestroyDELayout
+    integer, allocatable :: collocationPDim(:)
+    logical  :: arbSeqIndexFlag
+    integer :: i, deCount, distDimCount, arbDim
+    type(ESMF_DELayout) :: delayout
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -2313,6 +2317,37 @@ end subroutine ESMF_GridConvertIndex
     nameLen=0
     if (present(name)) then
        nameLen=len_trim(name)
+    endif
+
+    !! Check if the DistGrid is an arbitrary distgrid
+    arbDim = -1
+    call ESMF_DistGridGet(distgrid, delayout=delayout, dimCount=distDimCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_DELayoutGet(delayout, localDeCount=deCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    if (deCount .gt. 0) then
+      allocate(collocationPDim(distDimCount))  ! dimCount
+      call ESMF_DistGridGet(distgrid,   &
+           collocationPDim=collocationPDim, rc=localrc)
+      do i=1,distDimCount
+          call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocationPDim(i), &
+              arbSeqIndexFlag=arbSeqIndexFlag, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          if (arbSeqIndexFlag) arbDim = i
+      enddo
+      deallocate(collocationPDim)
+    else
+      ! if deCount = 0, proceed
+      arbDim = 1
+    endif
+
+    if (arbDim .ne. -1) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   "- distgrid should not contain arbitrary sequence indices", & 
+                          ESMF_CONTEXT, rc) 
     endif
 
     !! coordTypeKind
@@ -2468,8 +2503,7 @@ end subroutine ESMF_GridConvertIndex
 !       This array specifies which dimensions are arbitrarily distributed.
 !       The size of the array specifies the total distributed dimensions.
 !       if not specified, defaults is all dimensions will be arbitrarily
-!       distributed.  The size has to agree with the size of the second
-!       dimension of {\tt localIndices}.
+!       distributed.  
 ! \item[{[coordDimCount]}]
 !      List that has as many elements as the grid dimCount.
 !      Gives the dimension of each component (e.g. x) array. This is 
@@ -2513,10 +2547,11 @@ end subroutine ESMF_GridConvertIndex
     integer :: patchCount, localCounts
     integer, pointer :: minIndexLocal(:), maxIndexLocal(:)
     logical, pointer :: isDistDim(:)
-    integer :: i, j, d, k, arbDim
+    integer :: i, j, d, k, arbDim, deCount
     integer, allocatable :: distDimLocal(:)
     integer, allocatable :: collocationPDim(:)
     logical  :: arbSeqIndexFlag
+    type(ESMF_DELayout) :: delayout
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -2644,8 +2679,14 @@ end subroutine ESMF_GridConvertIndex
     !! Check the non-arbitrary dimensions in DistGrid and make sure they are
     !! consistent with the minIndex and maxIndex 
     !! First, find out which dimension in DistGrid is arbitrary
-    arbDim = 1
-    if (dimCount1 .gt. 1) then
+    arbDim = -1
+    call ESMF_DistGridGet(distgrid, delayout=delayout, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_DELayoutGet(delayout, localDeCount=deCount, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    if (deCount .gt. 0) then
       allocate(collocationPDim(dimCount1))  ! dimCount
       call ESMF_DistGridGet(distgrid,   &
            collocationPDim=collocationPDim, rc=localrc)
@@ -2659,8 +2700,13 @@ end subroutine ESMF_GridConvertIndex
               ESMF_CONTEXT, rcToReturn=rc)) return
           if (arbSeqIndexFlag) arbDim = i
       enddo
-
       deallocate(collocationPDim)
+    endif
+
+    if (arbDim .ne. -1) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   "- distgrid should contain arbitrary sequence indices", & 
+                          ESMF_CONTEXT, rc) 
     endif
 
     if (undistDimCount .ne. 0) then
