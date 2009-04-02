@@ -26,7 +26,9 @@
 //-----------------------------------------------------------------------------
 
 
+#if defined (__cplusplus)
 extern "C" {
+#endif
 
 typedef struct {
   void* ptr;
@@ -64,5 +66,8 @@ int ESMC_MeshGetNumElements(ESMC_Mesh *mesh, int* num_elems);
 //int ESMC_MeshCreateAll(ESMC_Mesh *mesh, int parametricDim, int *nodeIds, double *nodeCoords,
 //             int *nodeOwners, int *elementIds, int *elementTypes, int *elementConn);
 
+#if defined (__cplusplus)
 } // extern "C"
+#endif
+
 #endif
