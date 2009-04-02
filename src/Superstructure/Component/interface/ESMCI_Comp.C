@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.C,v 1.10 2009/03/17 05:21:36 theurich Exp $
+// $Id: ESMCI_Comp.C,v 1.11 2009/04/02 20:51:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -38,15 +38,15 @@
 #include "ESMCI_FTable.h"
 
 
-
-
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Comp.C,v 1.10 2009/03/17 05:21:36 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Comp.C,v 1.11 2009/04/02 20:51:24 theurich Exp $";
 //-----------------------------------------------------------------------------
 
-// prototypes for fortran interface routines
+
+//==============================================================================
+// prototypes for Fortran interface routines called by C++ code below
 extern "C" {
   void FTN(f_esmf_gridcompcreate)(ESMCI::GridComp *comp, char *name, 
     ESMCI::GridCompType *mtype, char *configFile, ESMCI::Clock **clock, 
@@ -80,6 +80,7 @@ extern "C" {
   void FTN(f_esmf_cplcompprint)(const ESMCI::CplComp *gcomp,
     const char *options, int *rc, ESMCI_FortranStrLenArg olen);
 };
+//==============================================================================
 
 
 namespace ESMCI {
@@ -161,6 +162,13 @@ int Comp::setEntryPoint(
     return rc;
   }
 
+  FTable *ftable = **(FTable***)this;
+  if (ftable==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid FTable pointer", &rc);
+    return rc;
+  }
+
   char *methodString;
   switch(method){
   case ESMCI::SETINIT:
@@ -184,12 +192,16 @@ int Comp::setEntryPoint(
   default:
     break;
   }
+  
   int slen = strlen(methodString);
-
-  FTable::setTypedEP(this, methodString, slen, &phase, 0, 
-    FT_COMP2STAT, (void *)functionPtr, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  char *fname;
+  FTable::newtrim(methodString, slen, &phase, NULL, &fname);
+  
+  localrc = ftable->setFuncPtr(fname, (void *)functionPtr, FT_COMP2STAT);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) 
     return rc;
+
+  delete[] fname;  // delete memory that "newtrim" allocated above
   
   // return successfully
   rc = ESMF_SUCCESS;

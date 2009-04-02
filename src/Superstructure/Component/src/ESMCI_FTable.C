@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.18 2009/04/01 22:28:42 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.19 2009/04/02 20:51:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,12 +46,12 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.18 2009/04/01 22:28:42 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.19 2009/04/02 20:51:25 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
 //==============================================================================
-// prototypes for fortran interface routines
+// prototypes for Fortran interface routines called by C++ code below
 extern "C" {
   void FTN(f_esmf_compsetvminfo)(ESMCI::Comp *compp, void *vm_info, int *rc);
   void FTN(f_esmf_compgetvminfo)(ESMCI::Comp *compp, void *vm_info, int *rc);
@@ -66,100 +66,12 @@ extern "C" {
   void FTN(f_esmf_compcopy)(ESMCI::Comp *compp, ESMCI::Comp *compp_src, int     
     *rc);
   void FTN(f_esmf_compdelete)(ESMCI::Comp *compp, int *rc);
-};
-
-extern "C"{
+  
   void FTN(f_esmf_fortranudtpointersize)(int *size);
   void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);
 }
 //==============================================================================
 
-
-//==============================================================================
-//
-// this trim routine does several things:
-//
-// most importantly, it null terminates a counted-char string passed in
-// from fortran.  it's not guarenteed you can write into the N+1th
-// character location (if the string is full length in fortran, for example)
-// so we're forced to make a copy and copy into it.  this routine allocates,
-// so the char string created here MUST be deleted by the caller when finished.
-//
-// secondly, the phase number (init 1, init 2, etc) is passed in as an int.
-// if > 0 this routine turns it into a 2-char string filled with
-// leading 0s and tacks it onto the end of the name to make it unique.
-//
-// and finally, component routines can be called with either a single
-// state or a pair of states. we can require that the user specify the
-// interface at registration time, or we can decide at run time which
-// form was called and dispatch the corresponding entry point.
-// for now i'm going to fill both types of component entry points for each
-// registration.  i can always remove that code if we force the user
-// to specify at registration time what format the states are expected in.
-// so if nstate > 0, it gets the same treatment as phase: it's turned into
-// a single char string and tacked on the end.
-//
-// (we'd also at some point like to be able to pass back into fortran
-// a really type(State) F90 array - but the bytes on the stack are 
-// compiler dependent - we'd have to create the array in fortran and
-// save a copy of it to be safe.  that code is *NOT* implemented at this
-// point, but i know it would sure seem natural from the user's viewpoint.)
-// 
-
-// this is max of 2 char phase + 'P' + 1 char nstate + 'S' + trailing NULL
-#define MAXPAD 8
-
-static void newtrim(char *c, int clen, int *phase, int *nstate, char **newc) {
-  char *cp, *ctmp;
-  int hasphase = 0;
-  int hasstate = 0;
-  char tspace[MAXPAD];
-  int pad=2;         // if neither phase nor nstate, still need term NULL
-
-  //printf("in newtrim, c = '%s', clen = %d\n", c, clen);
-
-  // warning - on the intel compiler, optional args come in
-  // as -1, not 0.  check for both before dereferencing.
-  if ((phase != NULL) && (phase != (int *)-1) && (*phase > 0))  {
-    pad = MAXPAD;
-    hasphase++;
-  }
-
-  // warning - on the intel compiler, optional args come in
-  // as -1, not 0.  check for both before dereferencing.
-  // if state > 0, use it to alter the EP name.
-  if ((nstate != NULL) && (nstate != (int *)-1) && (*nstate > 0))  {
-    pad = MAXPAD;
-    hasstate++;
-  }
-
-  // make new space and leave room for at least a null terminator, more
-  // if it has either phase or num states or both.
-  ctmp = new char[clen+pad];
-  strncpy(ctmp, c, clen);
-  ctmp[clen] = '\0';
-  for (cp = &ctmp[clen-1]; *cp == ' '; cp--)   // trim() trailing blanks
-    *cp = '\0';
-  
-  // tack on trailing numbers if phase or nstate
-  if (hasphase && hasstate) {
-    sprintf(tspace, "%02dP%1dS", *phase, *nstate);
-    strcat(ctmp, tspace);
-  } else if (hasphase) {
-    sprintf(tspace, "%02dP", *phase);
-    strcat(ctmp, tspace);
-  } else if (hasstate) {
-    sprintf(tspace, "%1dS", *nstate);
-    strcat(ctmp, tspace);
-  }
-
-  // set return pointer.  caller MUST free this when finished with it.
-  *newc = ctmp;
-  //printf("out newtrim, newc = '%s'\n", *newc);
-  
-  return;
-}
-//==============================================================================
 
 
 //==============================================================================
@@ -217,7 +129,7 @@ extern "C" {
     }
     
     int slen = strlen(methodString);
-    newtrim(methodString, slen, phase, NULL, &name);
+    ESMCI::FTable::newtrim(methodString, slen, phase, NULL, &name);
     //printf("after newtrim, name = '%s'\n", name);
 
     // TODO: two return codes here - one is whether we could find
@@ -234,7 +146,7 @@ extern "C" {
       else
         *status = ESMF_SUCCESS;
     }
-    delete[] name;
+    delete[] name;  // delete memory that "newtrim" allocated above
   }
 
   // set arguments for standard Component methods
@@ -272,7 +184,7 @@ extern "C" {
     }
     
     int slen = strlen(methodString);
-    newtrim(methodString, slen, phase, NULL, &fname);
+    ESMCI::FTable::newtrim(methodString, slen, phase, NULL, &fname);
     //printf("after newtrim, name = '%s'\n", fname);
 
     alist[0] = (void *)comp;
@@ -282,7 +194,7 @@ extern "C" {
     alist[4] = (void *)status;
 
     *status = (*ptr)->setFuncArgs(fname, acount, alist);
-    delete[] fname;
+    delete[] fname;  // delete memory that "newtrim" allocated above
   }
 
   // set arguments for RESTART Component methods
@@ -321,7 +233,7 @@ extern "C" {
     }
     
     int slen = strlen(methodString);
-    newtrim(methodString, slen, phase, NULL, &fname);
+    ESMCI::FTable::newtrim(methodString, slen, phase, NULL, &fname);
     //printf("after newtrim, name = '%s'\n", fname);
 
     alist[0] = (void *)comp;
@@ -330,7 +242,7 @@ extern "C" {
     alist[3] = (void *)status;
 
     *status = (*ptr)->setFuncArgs(fname, acount, alist);
-    delete[] fname;
+    delete[] fname;  // delete memory that "newtrim" allocated above
   }
 
   void FTN(c_esmc_ftablesetinternalstate)(ESMCI::FTable ***ptr, char *type,
@@ -339,11 +251,11 @@ extern "C" {
 
     *status = ESMC_RC_NOT_IMPL;
 
-    newtrim(type, slen, NULL, NULL, &name);
+    ESMCI::FTable::newtrim(type, slen, NULL, NULL, &name);
     //printf("after newtrim, name = '%s'\n", name);
 
     *status = (**ptr)->setDataPtr(name, data, *dtype);
-    delete[] name;
+    delete[] name;  // delete memory that "newtrim" allocated above
   }
 
   void FTN(c_esmc_ftablegetinternalstate)(ESMCI::FTable ***ptr, char *type,
@@ -352,22 +264,14 @@ extern "C" {
 
     *status = ESMC_RC_NOT_IMPL;
 
-    newtrim(type, slen, NULL, NULL, &name);
+    ESMCI::FTable::newtrim(type, slen, NULL, NULL, &name);
     //printf("after newtrim, name = '%s'\n", name);
 
     *status = (**ptr)->getDataPtr(name, data, dtype);
 
-    delete[] name;
+    delete[] name;  // delete memory that "newtrim" allocated above
   }
-  
-} // extern "C"
-//==============================================================================
-
-
-//==============================================================================
-// These functions are being called through the Fortran interface layer
-extern "C" {
-  
+    
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setvm"
   void FTN(c_esmc_setvm)(void *ptr, void (*func)(), int *rc){
@@ -500,12 +404,14 @@ extern "C" {
     
     int slen = strlen(methodString);
     char *fname;
-    newtrim(methodString, slen, phase, NULL, &fname);
+    ESMCI::FTable::newtrim(methodString, slen, phase, NULL, &fname);
          
     ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
     localrc = (tabptr)->setFuncPtr(fname, func, ESMCI::FT_COMP2STAT);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
+    
+    delete[] fname;  // delete memory that "newtrim" allocated above
     
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
@@ -563,12 +469,6 @@ extern "C" {
     ESMCI::FTable::setVM(ptr, func, status);
   }
 
-  void FTN(esmf_usercompsetentrypoint)(void *ptr, char *tname, void *func,
-    int *phase, int *status, int slen){
-    ESMCI::FTable::setTypedEP(ptr, tname, slen, phase, 0, ESMCI::FT_VOIDPINTP,
-      func,  status);
-  }
-
   void FTN(esmf_usercompsetinternalstate)(ESMCI::FTable ***ptr, char *name, 
     void **datap, int *status, int slen){
 #undef  ESMC_METHOD
@@ -587,7 +487,7 @@ extern "C" {
       return;
     }
 
-    newtrim(name, slen, NULL, NULL, &tbuf);
+    ESMCI::FTable::newtrim(name, slen, NULL, NULL, &tbuf);
     //printf("after newtrim, name = '%s'\n", tbuf);
 
     localrc = (**ptr)->setDataPtr(tbuf, datap, dtype);
@@ -614,7 +514,7 @@ extern "C" {
       return;
     }
 
-    newtrim(name, slen, NULL, NULL, &tbuf);
+    ESMCI::FTable::newtrim(name, slen, NULL, NULL, &tbuf);
     //printf("after newtrim, name = '%s'\n", tbuf);
 
     localrc = (**ptr)->getDataPtr(tbuf, datap, &dtype);
@@ -709,7 +609,7 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   }
 
   int slen = strlen(methodString);
-  newtrim(methodString, slen, phase, NULL, &name);
+  ESMCI::FTable::newtrim(methodString, slen, phase, NULL, &name);
 
   // Things get a little confusing here with pointers, so I will define
   // some temp. variables that make matters a little clearer I hope:
@@ -786,7 +686,6 @@ void FTN(c_esmc_compwait)(
 //==============================================================================
 
 
-//==============================================================================
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -797,50 +696,6 @@ void FTN(c_esmc_compwait)(
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::FTable::SetTypedEP()"
-void FTable::setTypedEP(void *ptr, char *tname, int slen, int *phase, 
-  int nstate, enum ftype ftype, void *func, int *status) {
-     char *name;
-     int *tablerc;
-     int localrc;
-     void *f90comp = ptr;
-     FTable *tabptr;
-
-     // Initialize return code; assume routine not implemented
-     if (status) *status = ESMC_RC_NOT_IMPL;
-     localrc = ESMC_RC_NOT_IMPL;
-
-     //printf("ptr = 0x%08x\n", (ESMC_POINTER)ptr);
-     //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
-     if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-                                              "null pointer found", status);
-        return;
-     }
-
-     tabptr = **(FTable***)ptr;
-     //printf("tabptr = 0x%08x\n", (ESMC_POINTER)(tabptr));
-     newtrim(tname, slen, phase, &nstate, &name);
-         
-     //printf("SetTypedEP: setting function name = '%s'\n", name);
-     if (ftype == FT_VOIDPINTP) {
-         // TODO: same as the register routine - you cannot delete tablerc
-         // yet - you have to wait until the table is deleted, and then the
-         // table does not know which of the stored args can be deleted and
-         // which cannot.  maybe the args need to all be allocated and all
-         // nuked at table destroy time.
-         tablerc = new int;
-         localrc = (tabptr)->setFuncPtr(name, func, f90comp, tablerc);
-     } else
-         localrc = (tabptr)->setFuncPtr(name, func, ftype);
-
-     if (status) *status = localrc;
-     delete[] name;
-}
-//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -1821,4 +1676,89 @@ int FTable::callVFuncPtr(
 }
 //-----------------------------------------------------------------------------
 
+//==============================================================================
+//
+// this trim routine does several things:
+//
+// most importantly, it null terminates a counted-char string passed in
+// from fortran.  it's not guarenteed you can write into the N+1th
+// character location (if the string is full length in fortran, for example)
+// so we're forced to make a copy and copy into it.  this routine allocates,
+// so the char string created here MUST be deleted by the caller when finished.
+//
+// secondly, the phase number (init 1, init 2, etc) is passed in as an int.
+// if > 0 this routine turns it into a 2-char string filled with
+// leading 0s and tacks it onto the end of the name to make it unique.
+//
+// and finally, component routines can be called with either a single
+// state or a pair of states. we can require that the user specify the
+// interface at registration time, or we can decide at run time which
+// form was called and dispatch the corresponding entry point.
+// for now i'm going to fill both types of component entry points for each
+// registration.  i can always remove that code if we force the user
+// to specify at registration time what format the states are expected in.
+// so if nstate > 0, it gets the same treatment as phase: it's turned into
+// a single char string and tacked on the end.
+//
+// (we'd also at some point like to be able to pass back into fortran
+// a really type(State) F90 array - but the bytes on the stack are 
+// compiler dependent - we'd have to create the array in fortran and
+// save a copy of it to be safe.  that code is *NOT* implemented at this
+// point, but i know it would sure seem natural from the user's viewpoint.)
+// 
+
+// this is max of 2 char phase + 'P' + 1 char nstate + 'S' + trailing NULL
+#define MAXPAD 8
+
+void FTable::newtrim(char *c, int clen, int *phase, int *nstate, char **newc) {
+  char *cp, *ctmp;
+  int hasphase = 0;
+  int hasstate = 0;
+  char tspace[MAXPAD];
+  int pad=2;         // if neither phase nor nstate, still need term NULL
+
+  //printf("in newtrim, c = '%s', clen = %d\n", c, clen);
+
+  // warning - on the intel compiler, optional args come in
+  // as -1, not 0.  check for both before dereferencing.
+  if ((phase != NULL) && (phase != (int *)-1) && (*phase > 0))  {
+    pad = MAXPAD;
+    hasphase++;
+  }
+
+  // warning - on the intel compiler, optional args come in
+  // as -1, not 0.  check for both before dereferencing.
+  // if state > 0, use it to alter the EP name.
+  if ((nstate != NULL) && (nstate != (int *)-1) && (*nstate > 0))  {
+    pad = MAXPAD;
+    hasstate++;
+  }
+
+  // make new space and leave room for at least a null terminator, more
+  // if it has either phase or num states or both.
+  ctmp = new char[clen+pad];
+  strncpy(ctmp, c, clen);
+  ctmp[clen] = '\0';
+  for (cp = &ctmp[clen-1]; *cp == ' '; cp--)   // trim() trailing blanks
+    *cp = '\0';
+  
+  // tack on trailing numbers if phase or nstate
+  if (hasphase && hasstate) {
+    sprintf(tspace, "%02dP%1dS", *phase, *nstate);
+    strcat(ctmp, tspace);
+  } else if (hasphase) {
+    sprintf(tspace, "%02dP", *phase);
+    strcat(ctmp, tspace);
+  } else if (hasstate) {
+    sprintf(tspace, "%1dS", *nstate);
+    strcat(ctmp, tspace);
+  }
+
+  // set return pointer.  caller MUST free this when finished with it.
+  *newc = ctmp;
+  //printf("out newtrim, newc = '%s'\n", *newc);
+  
+  return;
+}
+//==============================================================================
 } // namespace ESMCI
