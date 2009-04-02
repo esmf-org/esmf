@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.4 2009/03/26 03:28:20 theurich Exp $
+! $Id: user_model1.F90,v 1.5 2009/04/02 21:05:49 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -105,7 +105,8 @@ module user_model1
     type(ESMF_DistGrid)   :: distgrid
     type(ESMF_Array)      :: array
     type(ESMF_VM)         :: vm
-    integer               :: petCount
+    integer               :: petCount, i, j
+    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -129,6 +130,18 @@ module user_model1
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArraySet(array, name="array data", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
+
+    ! Gain access to actual data via F90 array pointer
+    call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    ! Fill source Array with data of all one's.
+    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
+       do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+                  farrayPtr(i,j) = 1
+       enddo
+    enddo
+
     call ESMF_StateAdd(exportState, array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
@@ -151,8 +164,6 @@ module user_model1
     type(ESMF_Array)      :: array
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
     integer               :: i, j
-    type(ESMF_Time) :: startTime, currTime
-    type(ESMF_Calendar) :: gregorianCalendar
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -167,34 +178,12 @@ module user_model1
     call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! Determine if this is the first time run is called
-    ! initialize calendar to be Gregorian type
-    gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                              ESMF_CAL_GREGORIAN, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-    call ESMF_TimeSet(startTime, yy=2009, mm=1, dd=1, h=9, &
-                        calendar=gregorianCalendar, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-    call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    
-    if (startTime == currTime) then
-    	! Fill source Array with data of all one's.
-    	do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
-      		do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
-        		farrayPtr(i,j) = 1
-      		enddo
-    	enddo
-    else
-	! multiple each element by 10
-    	do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
-      		do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
-        		farrayPtr(i,j) = farrayPtr(i,j) * 10
-      		enddo
-    	enddo
-    endif
+    ! multiple each element by 10
+    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
+   	do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+       		farrayPtr(i,j) = farrayPtr(i,j) * 10
+      enddo
+   enddo
  
     print *, "User Comp1 Run returning"
 

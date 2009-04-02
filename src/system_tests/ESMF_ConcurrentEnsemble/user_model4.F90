@@ -1,4 +1,4 @@
-! $Id: user_model4.F90,v 1.4 2009/03/26 03:28:20 theurich Exp $
+! $Id: user_model4.F90,v 1.5 2009/04/02 21:05:49 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -132,6 +132,11 @@ module user_model4
     call ESMF_StateAdd(importState, array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
+    ! Initialize solutions.
+    solution1 = 1
+    solution2 = 2
+    solution3 = 3
+
    
     print *, "User Comp4 Init returning"
 
@@ -174,45 +179,17 @@ module user_model4
     ! Get import state name
     call ESMF_StateGet(importState, name=stateName, rc=rc)
 
-    ! Determine if this is the first time run is called
-    ! initialize calendar to be Gregorian type
-    gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                              ESMF_CAL_GREGORIAN, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-    call ESMF_TimeSet(startTime, yy=2009, mm=1, dd=1, h=9, &
-                        calendar=gregorianCalendar, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-    call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-   
-    ! Set up the solution integer
-    if (startTime == currTime) then
-    	select case (trim(stateName))
-        	case ("comp4 import1")
-			solution1 = 1
-                	solution= solution1
-        	case ("comp4 import2")
-                	solution2 = 2
-			solution = solution2
-        	case ("comp4 import3")
-                	solution3 = 3
-			solution = solution3
-    	end select
-     else
-        select case (trim(stateName))
-                case ("comp4 import1")
-                        solution1 = solution1 * 10
-			solution = solution1
-                case ("comp4 import2")
-                        solution2 = solution2 * 10
-                        solution = solution2 
-                case ("comp4 import3")
-                        solution3 = solution3 * 10
-                        solution = solution3
-    	end select
-     endif
+     select case (trim(stateName))
+            case ("comp4 import1")
+                solution1 = solution1 * 10
+		solution = solution1
+            case ("comp4 import2")
+                solution2 = solution2 * 10
+                solution = solution2 
+            case ("comp4 import3")
+                solution3 = solution3 * 10
+                solution = solution3
+   end select
 
     ! Test Array in import state against exact solution
     if (rc/=ESMF_SUCCESS) return ! bail out
