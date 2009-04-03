@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.19 2009/04/02 20:51:25 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.20 2009/04/03 05:06:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.19 2009/04/02 20:51:25 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.20 2009/04/03 05:06:30 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -82,27 +82,41 @@ extern "C" {
 extern "C" {
 
   // call to native class constructor
-  void FTN(c_esmc_ftablecreate)(ESMCI::FTable **ptr, int *status) {
-    *status = ESMC_RC_NOT_IMPL;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_ftablecreate"
+  void FTN(c_esmc_ftablecreate)(ESMCI::FTable **ptr, int *rc) {
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
     (*ptr) = new ESMCI::FTable;
-    (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
+    if (*ptr == NULL){
+      ESMC_LogDefault.MsgAllocError("- Ftable allocation", rc);  
+      return;
+    }
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
   }
 
   // call to native class destructor
-  void FTN(c_esmc_ftabledestroy)(ESMCI::FTable **ptr, int *status) {
-    *status = ESMC_RC_NOT_IMPL;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_ftabledestroy"
+  void FTN(c_esmc_ftabledestroy)(ESMCI::FTable **ptr, int *rc) {
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    if (*ptr == NULL){
+      ESMC_LogDefault.MsgAllocError("- Ftable deallocation", rc);  
+      return;
+    }
     delete (*ptr);
-    *ptr = 0;
-    *status = ESMF_SUCCESS;
+    *ptr = NULL;
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
   }
   
   // call a function through the ftable
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_ftablecallentrypoint"
   void FTN(c_esmc_ftablecallentrypoint)(ESMCI::FTable **ptr, 
-    enum ESMCI::method *method, int *phase, int *status){
-    int funcrc;
-    char *name;
+    enum ESMCI::method *method, int *phase, int *rc){
     int localrc = ESMC_RC_NOT_IMPL;
-    *status = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     char *methodString;
     switch(*method){
@@ -129,35 +143,34 @@ extern "C" {
     }
     
     int slen = strlen(methodString);
+    char *name;
     ESMCI::FTable::newtrim(methodString, slen, phase, NULL, &name);
     //printf("after newtrim, name = '%s'\n", name);
 
-    // TODO: two return codes here - one is whether we could find
-    // the right function to call; the other is the actual return code
-    // from the user function itself.
+    int userRc;
+    localrc = (*ptr)->callVFuncPtr(name, NULL, &userRc);
 
-    localrc = (*ptr)->callVFuncPtr(name, NULL, &funcrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      return;
 
-    if (status) {
-      if (localrc != ESMF_SUCCESS)
-        *status = localrc;
-      else if (funcrc != ESMF_SUCCESS)
-        *status = funcrc;
-      else
-        *status = ESMF_SUCCESS;
-    }
+    // TODO: don't check userRc here, just pass it through as an extra arg!   
+    if (ESMC_LogDefault.MsgFoundError(userRc, ESMF_ERR_PASSTHRU, rc)) 
+      return;
+    
     delete[] name;  // delete memory that "newtrim" allocated above
+
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
   }
 
   // set arguments for standard Component methods
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_ftablesetstateargs"
   void FTN(c_esmc_ftablesetstateargs)(ESMCI::FTable **ptr, 
     enum ESMCI::method *method, int *phase, void *comp, void *importState,
-    void *exportState, void *clock, int *status){
-    char *fname;
-    int acount = 5;
-    void *alist[5];
-
-    *status = ESMC_RC_NOT_IMPL;
+    void *exportState, void *clock, int *rc){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     char *methodString;
     switch(*method){
@@ -184,21 +197,31 @@ extern "C" {
     }
     
     int slen = strlen(methodString);
+    char *fname;
     ESMCI::FTable::newtrim(methodString, slen, phase, NULL, &fname);
     //printf("after newtrim, name = '%s'\n", fname);
 
+    int acount = 5;
+    void *alist[5];
+    int *userRc = new int;  // TODO: this leaves a memory leak
     alist[0] = (void *)comp;
     alist[1] = (void *)importState;
     alist[2] = (void *)exportState;
     alist[3] = (void *)clock;
-    alist[4] = (void *)status;
+    alist[4] = (void *)userRc;
 
-    *status = (*ptr)->setFuncArgs(fname, acount, alist);
+    localrc = (*ptr)->setFuncArgs(fname, acount, alist);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      return;
+
     delete[] fname;  // delete memory that "newtrim" allocated above
+
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
   }
 
   // set arguments for RESTART Component methods
-  // TODO: treat this as standard Component method
+  // TODO: REMOVE this routine, now that RESTART callback follows standard!
   void FTN(c_esmc_ftablesetioargs)(ESMCI::FTable **ptr,
     enum ESMCI::method *method, int *phase,
     void *comp, void *iospec, void *clock, int *status) {
@@ -245,31 +268,48 @@ extern "C" {
     delete[] fname;  // delete memory that "newtrim" allocated above
   }
 
+  // set the InternalState in FTable
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_ftablesetinternalstate"
   void FTN(c_esmc_ftablesetinternalstate)(ESMCI::FTable ***ptr, char *type,
-    void **data, enum ESMCI::dtype *dtype, int *status, int slen) {
+    void **data, enum ESMCI::dtype *dtype, int *rc, int slen) {
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+
     char *name;
-
-    *status = ESMC_RC_NOT_IMPL;
-
     ESMCI::FTable::newtrim(type, slen, NULL, NULL, &name);
     //printf("after newtrim, name = '%s'\n", name);
 
-    *status = (**ptr)->setDataPtr(name, data, *dtype);
+    localrc = (**ptr)->setDataPtr(name, data, *dtype);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      return;
+
     delete[] name;  // delete memory that "newtrim" allocated above
+
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
   }
 
+  // get the InternalState from FTable
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_ftablegetinternalstate"
   void FTN(c_esmc_ftablegetinternalstate)(ESMCI::FTable ***ptr, char *type,
-    void **data, enum ESMCI::dtype *dtype, int *status, int slen) {
+    void **data, enum ESMCI::dtype *dtype, int *rc, int slen) {
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+
     char *name;
-
-    *status = ESMC_RC_NOT_IMPL;
-
     ESMCI::FTable::newtrim(type, slen, NULL, NULL, &name);
     //printf("after newtrim, name = '%s'\n", name);
 
-    *status = (**ptr)->getDataPtr(name, data, dtype);
+    localrc = (**ptr)->getDataPtr(name, data, dtype);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      return;
 
     delete[] name;  // delete memory that "newtrim" allocated above
+
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
   }
     
 #undef  ESMC_METHOD
@@ -280,6 +320,7 @@ extern "C" {
     ESMCI::FTable::setVM(ptr, func, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
+    // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
   
@@ -318,6 +359,7 @@ extern "C" {
     ESMCI::FTable::setVM(ptr, func, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
+    // return successfully
     if (rc) *rc = ESMF_SUCCESS;
 #endif
   }
@@ -330,6 +372,7 @@ extern "C" {
     ESMCI::FTable::setServices(ptr, func, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
+    // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
   
@@ -368,6 +411,7 @@ extern "C" {
     ESMCI::FTable::setServices(ptr, func, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
+    // return successfully
     if (rc) *rc = ESMF_SUCCESS;
 #endif
   }
