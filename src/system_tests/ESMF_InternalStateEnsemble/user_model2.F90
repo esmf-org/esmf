@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.8 2009/04/03 16:32:32 svasquez Exp $
+! $Id: user_model2.F90,v 1.9 2009/04/03 18:52:11 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -319,9 +319,10 @@ module user_model2
     call ESMF_GridCompGetInternalState(comp, wrap, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     data => wrap%p
-    deallocate(data%arrayspec(3))
-    deallocate(data%distgrid(3))
-    deallocate(data%array(3))
+    deallocate(data%arrayspec)
+    deallocate(data%distgrid)
+    deallocate(data%array)
+    deallocate(wrap%p)
 
 
     print *, "User Comp2 Final returning"
