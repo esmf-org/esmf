@@ -41,6 +41,7 @@ WMat &WMat::operator=(const WMat &rhs)
 }
 
 void WMat::InsertRow(const Entry &row, const std::vector<Entry> &cols) {
+
   
   std::pair<WeightMap::iterator, bool> wi =
     weights.insert(std::make_pair(row, cols));
@@ -225,6 +226,105 @@ void WMat::AssimilateConstraints(const WMat &constraints) {
   
 }
 
+
+
+void WMat::AssimilateConstraintsNPnts(const WMat &constraints) {
+  Trace __trace("WMat::AssimilateConstraintsNPnts(const WMat &constraints)");
+  
+  // Loop the current entries; see if any constraint rows need to be resolved;
+  WeightMap::iterator wi = weights.begin(), we = weights.end();
+  
+  for (; wi != we; ++wi) {
+    
+    const Entry &row = wi->first;
+
+    std::vector<Entry> &col = wi->second;
+
+    // Loop constraints; find the entries
+    // Note for the constraints for NPnts the row entry.id is the src element
+    // and the row entry.src_id is the dst id. This is because
+    // this was the only way to get the migration to work based on src element id
+
+    // Here we find the range of constraint rows which would contain row.src_id 
+    //// Lower Bound
+    Entry lower(row.src_id);
+    WeightMap::const_iterator ci = constraints.weights.lower_bound(lower);
+
+    //// Upper Bound
+    Entry upper(row.src_id+1);
+    WeightMap::const_iterator ce = constraints.weights.lower_bound(upper);
+
+    // If there are no constraints which match continue to next row 
+    if (ci == constraints.weights.end()) continue;
+
+    // Loop over contraints which match
+    for (; ci != ce; ++ci) {
+     
+      const Entry &crow = ci->first;
+     
+      // Skip if this constraint isn't for this row
+      if (crow.id != row.src_id) continue;
+ 
+      //      printf(">>>>>>> r0w=%d \n",row.id);
+      // create entry that looks like constraint gid for the search
+      // (e.g. the srd_id where the constraint id is stored)
+      Entry t(crow.src_id);
+
+      std::vector<Entry>::iterator lb = 
+        std::lower_bound(col.begin(), col.end(), t);
+
+      // If we found an entry, condense;
+      if (lb != col.end() && *lb == t) {
+
+        double val = lb->value;
+        
+        const std::vector<Entry> &ccol = ci->second;
+        
+        // Delete entry
+        col.erase(lb);
+        
+        // Add replacements to end
+        std::transform(ccol.begin(), ccol.end(), std::back_inserter(col), entry_mult(val));
+        
+        // Now sort
+        std::sort(col.begin(), col.end());
+        
+        // And condense any duplicates
+        std::vector<Entry>::iterator condi = col.begin(), condn, cond_del;
+        
+        while (condi != col.end()) {
+          
+          condn = condi; condn++;
+          
+          // Sum in result while entries are duplicate
+          while (condn != col.end() && *condn == *condi) {
+            
+            condi->value += condn->value;
+            
+            ++condn;
+          }
+          
+          // Move to next entry
+          ++condi;
+
+          // Condense the list if condn != condi (there were duplicaes)
+          if (condn != condi) {
+            cond_del = std::copy(condn, col.end(), condi);
+            
+            col.erase(cond_del, col.end());
+          }
+          
+        }  // condi; condensation loop
+        
+      } // Found an entry
+      
+    } // for ci
+    
+  } // for wi
+  
+}
+
+
 void WMat::GatherToCol(WMat &rhs) {
   Trace __trace("WMat::GatherToCol(WMat &rhs)");
   
@@ -242,6 +342,28 @@ void WMat::GatherToCol(WMat &rhs) {
     
   }
 }
+
+
+
+void WMat::GatherToRowSrc(WMat &rhs) {
+  Trace __trace("WMat::GatherToCol(WMat &rhs)");
+  
+  // Gather rhs to col dist of this
+  {
+    std::vector<UInt> distd, dists;
+    
+    this->GetRowSrcGIDS(distd);
+    rhs.GetRowGIDS(dists);
+
+    Migrator mig(distd.size(), distd.size() > 0 ? &distd[0] : NULL, 0,
+        dists.size(), dists.size() > 0 ? &dists[0] : NULL);
+    
+    mig.Migrate(rhs);
+    
+  }
+}
+
+
 
 void WMat::GetRowGIDS(std::vector<UInt> &gids) {
   Trace __trace("WMat::GetRowGIDS(std::vector<UInt> &gids)");
@@ -263,6 +385,30 @@ void WMat::GetRowGIDS(std::vector<UInt> &gids) {
   }
   
 }
+
+
+void WMat::GetRowSrcGIDS(std::vector<UInt> &gids) {
+  Trace __trace("WMat::GetRowGIDS(std::vector<UInt> &gids)");
+  
+  gids.clear();
+  
+  WeightMap::iterator ri = weights.begin(), re = weights.end();
+  
+  for (; ri != re;) {
+    
+    gids.push_back(ri->first.src_id);
+    
+    UInt gid = ri->first.src_id;
+    
+    // Don't repeat a row:
+    while (ri != re && ri->first.src_id == gid)
+      ++ri;
+    
+  }
+  
+}
+
+
 
 void WMat::GetColGIDS(std::vector<UInt> &gids) {
   Trace __trace("WMat::GetColGIDS(std::vector<UInt> &gids)");
@@ -320,6 +466,9 @@ SparsePack<WMat::WeightMap::value_type>::SparsePack(SparseMsg::buffer &b, WMat::
   // IDX
  SparsePack<WMat::Entry::idx_type>(b, row.idx);
   
+  // src gid
+  SparsePack<WMat::Entry::id_type>(b, row.src_id);
+
   // Number of columns, this row/idx
   SparsePack<UInt>(b, col.size());
       
@@ -354,6 +503,9 @@ UInt SparsePack<WMat::WeightMap::value_type>::size(WMat::WeightMap::value_type &
   // IDX
   res += SparsePack<WMat::Entry::idx_type>::size();
   
+  // src gid
+  res += SparsePack<WMat::Entry::id_type>::size();
+
   // Number of columns, this row/idx
   res += SparsePack<UInt>::size();
       
@@ -385,6 +537,9 @@ SparseUnpack<WMat::WeightMap::value_type>::SparseUnpack(SparseMsg::buffer &b, WM
   // Idx
   SparseUnpack<WMat::Entry::idx_type>(b, row.idx);
   
+  // Src GID
+  SparseUnpack<WMat::Entry::id_type>(b, row.src_id);
+
   // ncols
   UInt ncols;
   SparseUnpack<UInt>(b, ncols);

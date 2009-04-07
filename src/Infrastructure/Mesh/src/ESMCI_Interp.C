@@ -549,7 +549,7 @@ void mat_patch_serial_transfer(MEField<> &src_coord_field, MEField<> &_sfield, _
             
             data[d] = result[n*nrhs+d].val();
         
-            IWeights::Entry row(snode.get_id(), d);
+            IWeights::Entry row(snode.get_id(), d, 0.0, elem.get_id());
         
             std::vector<IWeights::Entry> col;
             col.reserve(nlocal_dof);
@@ -662,7 +662,7 @@ Par::Out() << std::endl;
         
         ((double*)dfield.data(node))[d] = ires[n*dfield.dim()+d].val();
         
-        IWeights::Entry row(node.get_id(), d);
+        IWeights::Entry row(node.get_id(), d, 0.0, elem.get_id());
         
         std::vector<IWeights::Entry> col;
         col.reserve(nlocal_dof);

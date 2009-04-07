@@ -38,12 +38,12 @@ public:
    * and index on object.
    */
   struct Entry {
-    Entry() : id(0), idx(0), value(0.0) {}
-    Entry(long _id, char _idx = 0, double _value = 0.0) :
-      id(_id), idx(_idx), value(_value) {}
+    Entry() : id(0), idx(0), value(0.0), src_id(0) {}
+    Entry(long _id, char _idx = 0, double _value = 0.0, long _src_id = 0) :
+      id(_id), idx(_idx), value(_value), src_id(_src_id) {}
     
     Entry(const Entry &rhs) :
-     id(rhs.id), idx(rhs.idx), value(rhs.value)
+     id(rhs.id), idx(rhs.idx), value(rhs.value), src_id(rhs.src_id)
     {
     }
     
@@ -52,6 +52,7 @@ public:
       id = rhs.id;
       idx = rhs.idx;
       value = rhs.value;
+      src_id = rhs.src_id;
       return *this;
     }
     
@@ -62,15 +63,17 @@ public:
     id_type id;  // MeshObj id
     idx_type idx; // field index
     value_type value; // weight
-    
+    id_type src_id;  // Src MeshObj id    
+
     bool operator<(const Entry &rhs) const {
       if (id != rhs.id) return id < rhs.id;
-      return idx < rhs.idx;
+      if (idx != rhs.idx) return idx < rhs.idx;
+      return src_id < rhs.src_id;
     }
     
     // Equality does not consider value
     bool operator==(const Entry &rhs) {
-      return (id == rhs.id && idx == rhs.idx);
+      return (id == rhs.id && idx == rhs.idx && src_id == rhs.src_id);
     }
     
   };  
@@ -83,10 +86,11 @@ public:
   
   WMat &operator=(const WMat &);
   
-    
   void InsertRow(const Entry &row, const std::vector<Entry> &cols);
   
   void GetRowGIDS(std::vector<UInt> &gids);
+
+  void GetRowSrcGIDS(std::vector<UInt> &gids);
   
   void GetColGIDS(std::vector<UInt> &gids);
   
@@ -109,6 +113,10 @@ public:
    */
   void GatherToCol(WMat &rhs);
 
+
+ 
+  void GatherToRowSrc(WMat &rhs);
+
   /*
    * Removes the columns referencing the constraint row entries.  
    * Converts current column references to a constrained object into
@@ -116,6 +124,8 @@ public:
    * objects sensitivities.
    */
   void AssimilateConstraints(const WMat &constraints);
+
+  void AssimilateConstraintsNPnts(const WMat &constraints);
   
   typedef std::map<Entry, std::vector<Entry> > WeightMap;
   

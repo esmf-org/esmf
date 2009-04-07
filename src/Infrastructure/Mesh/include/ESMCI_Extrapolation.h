@@ -34,6 +34,10 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
                       UInt constraint_id, 
                       IWeights &cweights);
 
+void MeshAddPoleNPnts(Mesh &mesh, int num_avg_pnts, UInt node_id,
+                      UInt constraint_id, 
+                      IWeights &cweights);
+
 } // namespace
 
 #endif /*ESMC_EXTRAPOLATION_H_*/
