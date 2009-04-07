@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.46 2009/03/17 05:21:36 theurich Exp $
+// $Id: ESMC_Comp.h,v 1.47 2009/04/07 05:34:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -54,19 +54,19 @@ typedef void* ESMC_GridComp;
 
 // Class API
 ESMC_GridComp ESMC_GridCompCreate(char *name, enum ESMC_GridCompType mtype,
- char *configFile, ESMC_Clock clock, int *rc);
+  char *configFile, ESMC_Clock clock, int *rc);
 int ESMC_GridCompDestroy(ESMC_GridComp *comp);
 int ESMC_GridCompSetServices(ESMC_GridComp comp, 
-  void (*func)(ESMC_GridComp, int *));
+  void (*func)(ESMC_GridComp, int *), int *userRc);
 int ESMC_GridCompSetEntryPoint(ESMC_GridComp comp, enum ESMC_Method method,
   void (*func)(ESMC_GridComp, ESMC_State, ESMC_State, ESMC_Clock *, int *),
   int phase);
 int ESMC_GridCompInitialize(ESMC_GridComp comp, ESMC_State importState,
-  ESMC_State exportState, ESMC_Clock clock, int phase);
+  ESMC_State exportState, ESMC_Clock clock, int phase, int *userRc);
 int ESMC_GridCompRun(ESMC_GridComp comp, ESMC_State importState,
-  ESMC_State exportState, ESMC_Clock clock, int phase);
+  ESMC_State exportState, ESMC_Clock clock, int phase, int *userRc);
 int ESMC_GridCompFinalize(ESMC_GridComp comp, ESMC_State importState,
-  ESMC_State exportState, ESMC_Clock clock, int phase);
+  ESMC_State exportState, ESMC_Clock clock, int phase, int *userRc);
 void *ESMC_GridCompGetInternalState(ESMC_GridComp comp, int *rc);
 int ESMC_GridCompSetInternalState(ESMC_GridComp comp, void *data);
 int ESMC_GridCompPrint(ESMC_GridComp comp, const char *options);
@@ -79,16 +79,16 @@ ESMC_CplComp ESMC_CplCompCreate(char *name, char *configFile, ESMC_Clock clock,
   int *rc);
 int ESMC_CplCompDestroy(ESMC_CplComp *comp);
 int ESMC_CplCompSetServices(ESMC_CplComp comp, 
-  void (*func)(ESMC_CplComp, int *));
+  void (*func)(ESMC_CplComp, int *), int *userRc);
 int ESMC_CplCompSetEntryPoint(ESMC_CplComp comp, enum ESMC_Method method,
   void (*func)(ESMC_CplComp, ESMC_State, ESMC_State, ESMC_Clock *, int *),
   int phase);
 int ESMC_CplCompInitialize(ESMC_CplComp comp, ESMC_State importState,
-  ESMC_State exportState, ESMC_Clock clock, int phase);
+  ESMC_State exportState, ESMC_Clock clock, int phase, int *userRc);
 int ESMC_CplCompRun(ESMC_CplComp comp, ESMC_State importState,
-  ESMC_State exportState, ESMC_Clock clock, int phase);
+  ESMC_State exportState, ESMC_Clock clock, int phase, int *userRc);
 int ESMC_CplCompFinalize(ESMC_CplComp comp, ESMC_State importState,
-  ESMC_State exportState, ESMC_Clock clock, int phase);
+  ESMC_State exportState, ESMC_Clock clock, int phase, int *userRc);
 void *ESMC_CplCompGetInternalState(ESMC_CplComp comp, int *rc);
 int ESMC_CplCompSetInternalState(ESMC_CplComp comp, void *data);
 int ESMC_CplCompPrint(ESMC_CplComp comp, const char *options);

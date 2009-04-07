@@ -1,4 +1,4 @@
-! $Id: user_FortranComponent.F90,v 1.9 2009/03/26 03:28:20 theurich Exp $
+! $Id: user_FortranComponent.F90,v 1.10 2009/04/07 05:34:49 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -139,7 +139,7 @@
         if (rc/=ESMF_SUCCESS) return ! bail out
 
         write(name, *) "Adding an Array to a State Test"
-        call ESMF_StateAdd(exportState, array, rc)
+        call ESMF_StateAdd(exportState, array, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
 
         call ESMF_StatePrint(exportState, rc=rc)
@@ -229,7 +229,7 @@
         call ESMF_StateGet(exportState,"array1", array=array, rc=rc)
 
         ! Free up memory
-        call ESMF_ArrayDestroy(array, rc)
+        call ESMF_ArrayDestroy(array, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
         deallocate (farray)    
  

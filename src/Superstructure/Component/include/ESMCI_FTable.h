@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.h,v 1.8 2009/04/02 20:51:21 theurich Exp $
+// $Id: ESMCI_FTable.h,v 1.9 2009/04/07 05:34:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -48,12 +48,12 @@ namespace ESMCI {
 // itself.
 
 enum dtype { DT_VOIDP=1, DT_FORTRAN_UDT_POINTER };
-enum ftype { FT_NULL=1, FT_VOIDPINTP, FT_COMP2STAT };
+enum ftype { FT_NULL=1, FT_VOIDP1INTP, FT_VOIDP4INTP };
 enum method { SETINIT=1, SETRUN, SETFINAL, SETWRITERESTART, SETREADRESTART,
   SETREGISTER };
 
-typedef void (*VoidPtrIntPtrFunc)(void *, int *);
-typedef void (*C2SFunc)(void *, void *, void *, void *, int *);
+typedef void (*VoidP1IntPFunc)(void *, int *);
+typedef void (*VoidP4IntPFunc)(void *, void *, void *, void *, int *);
 
 
 // classes
@@ -114,21 +114,21 @@ class FTable {
     int dataalloc;
     datainfo *data;
   public:
-    static void setServices(void *ptr, void (*func)(), int *status);
-    static void setVM(void *ptr, void (*func)(), int *status);
+    // data
     static void getDP(FTable ***ptr, void **datap, int *status);
     static void setDP(FTable ***ptr, void **datap, int *status);
     int getDataPtr(char *name, void **data, enum dtype *dtype);
     int setDataPtr(char *name, void **data, enum dtype dtype);
-    int setFuncArgs(char *name, int acount, void **arglist);
+    // func
+    static void setServices(void *ptr, void (*func)(), int *userRc, int *rc);
+    static void setVM(void *ptr, void (*func)(), int *userRc, int *rc);
     int getEntry(char *name, int *rc);
     int setFuncPtr(char *name, void *func, enum ftype ftype);
     int setFuncPtr(char *name, void *func);
     int setFuncPtr(char *name, void *func, void *arg1, int *arg2);
-    int setFuncPtr(char *name, void *func, enum ftype ftype, 
-      int acount, void **arglist);
-    int extend(int nfuncp, int ndatap);
+    int setFuncArgs(char *name, int acount, void **arglist);
     int callVFuncPtr(char *name, ESMCI::VM *vm, int *funcrc);
+    int extend(int nfuncp, int ndatap);
     int validate(const char*) const;
     int print(const char*) const;
     // native C++ constructors/destructors

@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.20 2009/04/03 05:06:30 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.21 2009/04/07 05:34:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.20 2009/04/03 05:06:30 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.21 2009/04/07 05:34:48 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -314,10 +314,10 @@ extern "C" {
     
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setvm"
-  void FTN(c_esmc_setvm)(void *ptr, void (*func)(), int *rc){
+  void FTN(c_esmc_setvm)(void *ptr, void (*func)(), int *userRc, int *rc){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
-    ESMCI::FTable::setVM(ptr, func, &localrc);
+    ESMCI::FTable::setVM(ptr, func, userRc, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
     // return successfully
@@ -327,7 +327,7 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setvmshobj"
   void FTN(c_esmc_setvmshobj)(void *ptr, char *routineArg, 
-    char *sharedObjArg, int *rc, 
+    char *sharedObjArg, int *userRc, int *rc, 
     ESMCI_FortranStrLenArg rlen, ESMCI_FortranStrLenArg llen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -356,7 +356,7 @@ extern "C" {
         "routine not found", rc);
       return;
     }
-    ESMCI::FTable::setVM(ptr, func, &localrc);
+    ESMCI::FTable::setVM(ptr, func, userRc, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
     // return successfully
@@ -366,10 +366,10 @@ extern "C" {
   
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setservices"
-  void FTN(c_esmc_setservices)(void *ptr, void (*func)(), int *rc){
+  void FTN(c_esmc_setservices)(void *ptr, void (*func)(), int *userRc, int *rc){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
-    ESMCI::FTable::setServices(ptr, func, &localrc);
+    ESMCI::FTable::setServices(ptr, func, userRc, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
     // return successfully
@@ -379,7 +379,7 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setservicesshobj"
   void FTN(c_esmc_setservicesshobj)(void *ptr, char *routineArg, 
-    char *sharedObjArg, int *rc, 
+    char *sharedObjArg, int *userRc, int *rc, 
     ESMCI_FortranStrLenArg rlen, ESMCI_FortranStrLenArg llen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -408,7 +408,7 @@ extern "C" {
         "routine not found", rc);
       return;
     }
-    ESMCI::FTable::setServices(ptr, func, &localrc);
+    ESMCI::FTable::setServices(ptr, func, userRc, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
     // return successfully
@@ -451,7 +451,7 @@ extern "C" {
     ESMCI::FTable::newtrim(methodString, slen, phase, NULL, &fname);
          
     ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
-    localrc = (tabptr)->setFuncPtr(fname, func, ESMCI::FT_COMP2STAT);
+    localrc = (tabptr)->setFuncPtr(fname, func, ESMCI::FT_VOIDP4INTP);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
     
@@ -505,12 +505,14 @@ extern "C" {
   }
 
   // ---------- UserComp ---------------
-  void FTN(esmf_usercompsetservices)(void *ptr, void (*func)(), int *status){
-    ESMCI::FTable::setServices(ptr, func, status);
+  void FTN(esmf_usercompsetservices)(void *ptr, void (*func)(), int *userRc,
+    int *rc){
+    ESMCI::FTable::setServices(ptr, func, userRc, rc);
   }
 
-  void FTN(esmf_usercompsetvm)(void *ptr, void (*func)(), int *status){
-    ESMCI::FTable::setVM(ptr, func, status);
+  void FTN(esmf_usercompsetvm)(void *ptr, void (*func)(), int *userRc,
+    int *rc){
+    ESMCI::FTable::setVM(ptr, func, userRc, rc);
   }
 
   void FTN(esmf_usercompsetinternalstate)(ESMCI::FTable ***ptr, char *name, 
@@ -591,6 +593,9 @@ static void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargo){
   int userrc;   // user return code from the registered component method 
   
   // call into user code through ESMF function table...
+  // TODO: callVFuncPtr() is _not_ thread-safe, there is a racecondition
+  // where all executing threads are trying to update the same userrc member
+  // in the function table
   esmfrc = ftable->callVFuncPtr(name, (ESMCI::VM*)vm, &userrc);
   // ...back from user code
   
@@ -599,7 +604,8 @@ static void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargo){
   // single parent PET then return codes must be returned as a single value to
   // the parent in the cargo structure (btw, each child PET that's a thread
   // has the same pointer to cargo. Naturally the above must be done in a
-  // threadsafe manner :-). 
+  // threadsafe manner :-). The following code actually suffers from a
+  // racecondition in the multi-threaded case!
   ((ESMCI::cargotype *)cargo)->esmfrc = esmfrc;
   ((ESMCI::cargotype *)cargo)->userrc = userrc;
   
@@ -617,7 +623,7 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   ESMCI::FTable **ptr,        // p2 to the ftable of this component
   enum ESMCI::method *method, // method type
   int *phase,                 // phase selector
-  int *status                 // return error code in status
+  int *rc                     // return error code in status
   ){
        
   // local variables
@@ -625,7 +631,7 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   char *name;               // trimmed type string
 
   // Initialize return code; assume routine not implemented
-  if (status) *status = ESMC_RC_NOT_IMPL;
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
   localrc = ESMC_RC_NOT_IMPL;
 
   char *methodString;
@@ -667,10 +673,11 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   cargo->esmfrc = ESMF_SUCCESS;// initialize return code to SUCCESS for all PETs
   cargo->userrc = ESMF_SUCCESS;// initialize return code to SUCCESS for all PETs
   *vm_cargo=(void*)cargo;      // store pointer to the cargo structure
+  delete[] name;  // delete memory that "newtrim" allocated above
 
   // enter the child VM -> resurface in ESMCI_FTableCallEntryPointVMHop()
   localrc = vm_parent->enter(vmplan, *vm_info, (void*)cargo);
-  ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, status);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
         
   // ... if the child VM uses threads (multi-threading or single-threading) 
   // then this parent PET continues running concurrently to the child PET in the
@@ -680,7 +687,8 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   // The return code of the callback code will be valid in all cases (threading
   // or no threading) _after_ VMK::exit() returns.
   
-  delete[] name;  // delete memory that "newtrim" allocated above
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
 }
 
 #undef  ESMC_METHOD
@@ -690,8 +698,12 @@ void FTN(c_esmc_compwait)(
   ESMCI::VMPlan **ptr_vmplan, // p2 to the VMPlan for component's VM
   void **vm_info,             // p2 to member which holds info
   void **vm_cargo,            // p2 to member which holds cargo
-  int *callrc,                // return code of the user component method
-  int *esmfrc) {              // esmf internal return error code
+  int *userrc,                // return code of the user component method
+  int *rc){                   // esmf internal return error code
+
+  // initialize the return codes
+  int localrc = ESMC_RC_NOT_IMPL;
+  if (rc) *rc = ESMC_RC_NOT_SET; // return code of ESMF callback code
 
   // Things get a little confusing here with pointers, so I will define
   // some temp. variables that make matters a little clearer I hope:
@@ -699,31 +711,27 @@ void FTN(c_esmc_compwait)(
   ESMCI::VMPlan *vmplan = *ptr_vmplan;          // pointer to VMPlan
   ESMCI::cargotype *cargo = (ESMCI::cargotype *)*vm_cargo;  // pointer to cargo
   
-  // initialize the return codes
-  *esmfrc = ESMC_RC_NOT_SET; // return code of ESMF callback code
-  *callrc = ESMC_RC_NOT_SET; // return code of registered user code
-
   // Now call the vmk_exit function which will block respective PETs
   vm_parent->exit(static_cast<ESMCI::VMKPlan *>(vmplan), *vm_info);
   
   // return with errors if there is no cargo to obtain error codes
   if (cargo == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      " - No cargo structure to obtain error codes", esmfrc);
+      " - No cargo structure to obtain error codes", rc);
     return;
   }
   
   // obtain return codes out of cargo
-  *esmfrc = cargo->esmfrc;
-  *callrc = cargo->userrc;
+  localrc = cargo->esmfrc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    return;
+  if (userrc) *userrc = cargo->userrc;
   
   // delete cargo structure
   delete cargo;
   
-  // error check esmfrc
-  if (ESMC_LogDefault.MsgFoundError(*esmfrc,
-    " - ESMF internal error during user function callback", NULL)) return;
-  
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
 }
   
 } // extern "C"
@@ -793,553 +801,12 @@ void FTable::setDP(FTable ***ptr, void **datap, int *status){
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Ftable::setServices"
-void FTable::setServices(void *ptr, void (*func)(), int *status) {
-  int localrc, funcrc;
-  int *tablerc;
-  ESMCI::Comp *f90comp = (ESMCI::Comp *)ptr;
-  ESMCI::FTable *tabptr;
-  
-  if (status) *status = ESMF_SUCCESS;  // assume success 'till problems found
-
-  //printf("ptr = 0x%08x\n", (ESMC_POINTER)ptr);
-  //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
-  //if ((ptr == ESMC_NULL_POINTER)) {
-  if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)) {
-     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-                                           "null pointer found", status);
-     return;
-  }
-  tabptr = **(ESMCI::FTable***)ptr;
-  //printf("tabptr = 0x%08x\n", (ESMC_POINTER)(tabptr));
-
-  // TODO: shouldn't need to expand the table here - should be buried
-  // inside ftable code.
-  localrc = (tabptr)->extend(8, 2); // room for 8 funcs, 2 data
-  if (localrc != ESMF_SUCCESS) {
-      if (status) *status = localrc;
-      return;
-  }
-
-  // TODO: this is going to cause a memory leak, because the 'tablerc'
-  // variable is actually stored in the jump table as one of the arguments.
-  // i believe it is used to call a subroutine which has a return code,
-  // but then that code is ignored.  so there are two problems here:
-  // how to return the error(s), and how to delete the integer when the
-  // table is destroyed.  for now, it is a leak; small, and only shows up
-  // when you delete a component which does not happen often, thankfully.
-  tablerc = new int;
-  localrc = (tabptr)->setFuncPtr("Register", (void *)func, f90comp, tablerc);
-
-  // TODO: decide what to do if tablerc comes back
-  // with an error.  for now, ignore it and look at localrc only.
-  
-  if (localrc != ESMF_SUCCESS) {
-      if (status) *status = localrc;
-      return;
-  }
-
-  // time to startup the VM for this component (if not already started)...
-  ESMCI::VM *vm_parent;
-  FTN(f_esmf_compgetvmparent)(f90comp, &vm_parent, &localrc); //get vm_parent
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-    status)) return;
-  ESMCI::VMPlan *vmplan_p;
-  FTN(f_esmf_compgetvmplan)(f90comp, &vmplan_p, &localrc);    //get vmplan_p
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-    status)) return;
-  void *vm_info;
-  FTN(f_esmf_compgetvminfo)(f90comp, &vm_info, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-    status)) return;
-  if (vm_info==NULL){
-    // VM for this component has not been started yet
-    vm_info = vm_parent->startup(vmplan_p,
-      ESMCI_FTableCallEntryPointVMHop, NULL, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      status)) return;
-    // keep vm_info in a safe place (in parent component) 'till it's used again
-    FTN(f_esmf_compsetvminfo)(f90comp, &vm_info, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      status)) return;
-  }
-  // ...now the component's VM is started up and placed on hold.
-  
-  // call into register routine using the component's VM
-  void *vm_cargo;
-  enum method reg = SETREGISTER;
-  FTN(c_esmc_ftablecallentrypointvm)(&vm_parent, &vmplan_p, &vm_info,
-    &vm_cargo, &tabptr, &reg, NULL, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-    status)) return;
-  
-  int callrc;
-  FTN(c_esmc_compwait)(&vm_parent, &vmplan_p, &vm_info,
-    &vm_cargo, &callrc, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-    status)) return;
-  
-  return;
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Ftable::setVM"
-void FTable::setVM(void *ptr, void (*func)(), int *status) {
-  int localrc, funcrc;
-  int *tablerc;
-  ESMCI::Comp *f90comp = (ESMCI::Comp *)ptr;
-  ESMCI::FTable *tabptr;
-  
-  if (status) *status = ESMF_SUCCESS;  // assume success 'till problems found
-
-  //printf("ptr = 0x%08x\n", (ESMC_POINTER)ptr);
-  //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
-  //if ((ptr == ESMC_NULL_POINTER)) {
-  if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)) {
-     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-                                           "null pointer found", status);
-     return;
-  }
-  tabptr = **(ESMCI::FTable***)ptr;
-  //printf("tabptr = 0x%08x\n", (ESMC_POINTER)(tabptr));
-
-  // TODO: shouldn't need to expand the table here - should be buried
-  // inside ftable code.
-  localrc = (tabptr)->extend(8, 2); // room for 8 funcs, 2 data
-  if (localrc != ESMF_SUCCESS) {
-      if (status) *status = localrc;
-      return;
-  }
-
-  // TODO: this is going to cause a memory leak, because the 'tablerc'
-  // variable is actually stored in the jump table as one of the arguments.
-  // i believe it is used to call a subroutine which has a return code,
-  // but then that code is ignored.  so there are two problems here:
-  // how to return the error(s), and how to delete the integer when the
-  // table is destroyed.  for now, it is a leak; small, and only shows up
-  // when you delete a component which does not happen often, thankfully.
-  tablerc = new int;
-  localrc = (tabptr)->setFuncPtr("setVM", (void *)func, f90comp, tablerc);
-
-  // TODO: decide what to do if tablerc comes back
-  // with an error.  for now, ignore it and look at localrc only.
-  
-  if (localrc != ESMF_SUCCESS) {
-      if (status) *status = localrc;
-      return;
-  }
-
-  localrc = (tabptr)->callVFuncPtr("setVM", NULL, &funcrc);
-  if (localrc != ESMF_SUCCESS) {
-      if (status) *status = localrc;
-      return;
-  }
-
-  if (funcrc != ESMF_SUCCESS) {
-      if (status) *status = funcrc;
-      return;
-  }
-
-  return;
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::FTable::extend()"
-//BOP
-// !IROUTINE:  extend - make space for additional functions/data
-//
-// !INTERFACE:
-      int FTable::extend(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int nfuncp,     // in, number of functions which will be added
-      int ndatap) {   // in, number of data pointers which will be added
-//
-// !DESCRIPTION:
-//
-//EOP
-// !REQUIREMENTS:  
-
-    // Initialize return code; assume routine not implemented
-    int rc = ESMC_RC_NOT_IMPL;
-
-    // TODO: allocate space for N items, rounded up?
-    if (nfuncp > funcalloc) {
-        funcs = (funcinfo *)realloc((void *)funcs, nfuncp * sizeof(funcinfo));
-        funcalloc = nfuncp; 
-    }
-    if (ndatap > dataalloc) {
-        data = (datainfo *)realloc((void *)data, ndatap * sizeof(datainfo));
-        dataalloc = ndatap;
-    }
-
-    //printf("TableExtend called, sizeof(funcinfo)=%d, sizeof(datainfo)=%d\n",
-    //                            sizeof(funcinfo), sizeof(datainfo));
-    rc = ESMF_SUCCESS;
-    return rc;
-
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::FTable::query()"
-//BOP
-// !IROUTINE:  query - return count of functions/data
-//
-// !INTERFACE:
-      int FTable::query(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int *nfuncp,     // out, number of functions which will be added
-      int *ndatap) {   // out, number of data pointers which will be added
-//
-// !DESCRIPTION:
-//
-//EOP
-// !REQUIREMENTS:  
-
-    // Initialize return code; assume routine not implemented
-    int rc = ESMC_RC_NOT_IMPL;
-
-    // fill in values
-    *nfuncp = funccount;
-    *ndatap = datacount;
-
-    //printf("TableQuery method called \n");
-    rc = ESMF_SUCCESS;
-    return rc;
-
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::FTable::setFuncPtr()"
-//BOP
-// !IROUTINE:  setFuncPtr - set function pointer, no extra args
-//
-// !INTERFACE:
-      int FTable::setFuncPtr(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      char *name,            // in, function name
-      void *func) {          // in, function address
-//
-// !DESCRIPTION:
-//    Sets the named function pointer
-//
-//EOP
-// !REQUIREMENTS:  
-
-    // Initialize return code; assume routine not implemented
-    int rc = ESMC_RC_NOT_IMPL;
-
-    int i, thisfunc;
-    //char msgbuf[ESMF_MAXSTR];
-
-    // look for the name already existing in the table.  if found
-    // replace it.  otherwise add it to the end.
-    for (i=0; i<funccount; i++) {
-        if (!strcmp(name, funcs[i].funcname))
-           break;
-    }
-
-    // we found the function, or we got to the end of the table.
-    // either way we are ready to add it.
-
-    thisfunc = i;
-
-    // extend the table if needed
-    if (thisfunc >= funcalloc) {
-        funcs = (funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(funcinfo));
-        funcalloc = thisfunc+4;
-    }
-    funcs[thisfunc].funcptr = func;
-    funcs[thisfunc].ftype = FT_NULL;
-    // do these only if not replacing an existing entry.
-    if (thisfunc == funccount) {
-        funcs[thisfunc].funcname = new char[strlen(name)+1];
-        strcpy(funcs[thisfunc].funcname, name);
-        funccount++;
-    }
-   
-
-    rc = ESMF_SUCCESS;
-    return rc;
-
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::FTable::setFuncPtr()"
-//BOP
-// !IROUTINE:  setFuncPtr - set function pointer, type; no args yet.
-//
-// !INTERFACE:
-      int FTable::setFuncPtr(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      char *name,            // in, function name
-      void *func,            // in, function address
-      enum ftype ftype) {    // in, function type
-//
-// !DESCRIPTION:
-//    Sets the named function pointer and type, but specifies no argument 
-//    values.  Before this can be called successfully, the user must call
-//    FTable::setFuncArgs to fill in the argument list.
-//
-//EOP
-// !REQUIREMENTS:  
-
-    // Initialize return code; assume routine not implemented
-    int rc = ESMC_RC_NOT_IMPL;
-
-    int i, thisfunc;
-    //char msgbuf[ESMF_MAXSTR];
-
-    // look for the name already existing in the table.  if found
-    // replace it.  otherwise add it to the end.
-    for (i=0; i<funccount; i++) {
-        if (!strcmp(name, funcs[i].funcname))
-           break;
-    }
-
-    // we found the function, or we got to the end of the table.
-    // either way we are ready to add it.
-
-    thisfunc = i;
-
-    // extend the table if needed
-    if (thisfunc >= funcalloc) {
-        funcs = (funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(funcinfo));
-        funcalloc = thisfunc+4;
-    }
-    funcs[thisfunc].funcptr = func;
-    funcs[thisfunc].ftype = ftype;
-    // do these only if not replacing an existing entry.
-    if (thisfunc == funccount) {
-        funcs[thisfunc].funcname = new char[strlen(name)+1];
-        strcpy(funcs[thisfunc].funcname, name);
-        funccount++;
-    }
-   
-
-    rc = ESMF_SUCCESS;
-    return rc;
-
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::FTable::setFuncPtr()"
-//BOP
-// !IROUTINE:  setFuncPtr - set voidp, intp specifically
-//
-// !INTERFACE:
-      int FTable::setFuncPtr(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      char *name,            // in, function name
-      void *func,            // in, function address
-      void *arg1,            // in, void *
-      int *arg2) {           // in, int *
-//
-// !DESCRIPTION:
-//    Sets the named function pointer and args.  This is a common case
-//    so it has it's own interface.
-//
-//EOP
-// !REQUIREMENTS:  
-
-    // Initialize return code; assume routine not implemented
-    int rc = ESMC_RC_NOT_IMPL;
-
-    int i, thisfunc;
-    //char msgbuf[ESMF_MAXSTR];
-
-    // look for the name already existing in the table.  if found
-    // replace it.  otherwise add it to the end.
-    for (i=0; i<funccount; i++) {
-        if (!strcmp(name, funcs[i].funcname))
-           break;
-    }
-
-    // we found the function, or we got to the end of the table.
-    // either way we are ready to add it.
-
-    thisfunc = i;
-
-    // The 2nd time I come in, delete the old one
-    if (thisfunc < funccount) 
-       delete ((int *) funcs[thisfunc].funcarg[1]);
-    
-    // extend the table if needed
-    if (thisfunc >= funcalloc) {
-        funcs = (funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(funcinfo));
-        funcalloc = thisfunc+4;
-    }
-    funcs[thisfunc].funcptr = func;
-    funcs[thisfunc].ftype = FT_VOIDPINTP;
-    funcs[thisfunc].funcarg[0] = arg1;
-    funcs[thisfunc].funcarg[1] = (void *)arg2;
-    // do these only if not replacing an existing entry.
-    if (thisfunc == funccount) {
-        funcs[thisfunc].funcname = new char[strlen(name)+1];
-        strcpy(funcs[thisfunc].funcname, name);
-        funccount++;
-    }
-   
-
-    rc = ESMF_SUCCESS;
-    return rc;
-
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::FTable::setFuncPtr()"
-//BOP
-// !IROUTINE:  setFuncPtr - set function pointer, arg list
-//
-// !INTERFACE:
-      int FTable::setFuncPtr(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      char *name,            // in, function name
-      void *func,            // in, function address
-      enum ftype ftype,      // in, function type
-      int acount,            // in, count of args
-      void **arglist) {      // in, address of arg list
-//
-// !DESCRIPTION:
-//    Sets the named function pointer and args
-//
-//EOP
-// !REQUIREMENTS:  
-
-    // Initialize return code; assume routine not implemented
-    int rc = ESMC_RC_NOT_IMPL;
-
-    int i, thisfunc;
-    //char msgbuf[ESMF_MAXSTR];
-
-    // look for the name already existing in the table.  if found
-    // replace it.  otherwise add it to the end.
-    for (i=0; i<funccount; i++) {
-        if (!strcmp(name, funcs[i].funcname))
-           break;
-    }
-
-    // we found the function, or we got to the end of the table.
-    // either way we are ready to add it.
-
-    thisfunc = i;
-
-    // extend the table if needed
-    if (thisfunc >= funcalloc) {
-        funcs = (funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(funcinfo));
-        funcalloc = thisfunc+4;
-    }
-    funcs[thisfunc].funcptr = func;
-    funcs[thisfunc].ftype = ftype;
-    for(i=0; i<acount; i++)
-        funcs[thisfunc].funcarg[i] = arglist[i];
-    // do these only if not replacing an existing entry.
-    if (thisfunc == funccount) {
-        funcs[thisfunc].funcname = new char[strlen(name)+1];
-        strcpy(funcs[thisfunc].funcname, name);
-        funccount++;
-    }
-   
-
-    rc = ESMF_SUCCESS;
-    return rc;
-
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::FTable::setFuncArgs()"
-//BOP
-// !IROUTINE:  setFuncArgs - set arglist for existing function
-//
-// !INTERFACE:
-      int FTable::setFuncArgs(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      char *name,            // in, function name
-      int acount,            // in, count of args
-      void **arglist) {      // in, address of arg list
-//
-// !DESCRIPTION:
-//    Sets the named function args.  The function must already exist.
-//
-//EOP
-// !REQUIREMENTS:  
-
-    // Initialize return code; assume routine not implemented
-    int rc = ESMC_RC_NOT_IMPL;
-    int status = ESMC_RC_NOT_IMPL;
-    int i, j;
-    char msgbuf[ESMF_MAXSTR];
-
-    for (i=0; i<funccount; i++) {
-        if (strcmp(name, funcs[i].funcname))
-           continue;
-   
-        for(j=0; j<acount; j++)
-            funcs[i].funcarg[j] = arglist[j];
-   
-        return ESMF_SUCCESS;
-    }
-
-   
-    sprintf(msgbuf, "Error: function '%s' not found\n", name);
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, msgbuf, &status);
-
-    return status;
-
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::FTable::getDataPtr()"
-//BOP
+//BOPI
 // !IROUTINE:  getDataPtr - get data pointer from name
 //
 // !INTERFACE:
-      int FTable::getDataPtr(
+int FTable::getDataPtr(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1352,9 +819,8 @@ void FTable::setVM(void *ptr, void (*func)(), int *status) {
 // !DESCRIPTION:
 //    Returns the named data pointer
 //
-//EOP
-// !REQUIREMENTS:  
-
+//EOPI
+//-----------------------------------------------------------------------------
     int i;
 
     for (i=0; i<datacount; i++) {
@@ -1379,11 +845,11 @@ void FTable::setVM(void *ptr, void (*func)(), int *status) {
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::FTable::setDataPtr()"
-//BOP
+//BOPI
 // !IROUTINE:  setDataPtr - set data pointer
 //
 // !INTERFACE:
-      int FTable::setDataPtr(
+int FTable::setDataPtr(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1396,9 +862,8 @@ void FTable::setVM(void *ptr, void (*func)(), int *status) {
 // !DESCRIPTION:
 //    Sets the named data pointer
 //
-//EOP
-// !REQUIREMENTS:  
-
+//EOPI
+//-----------------------------------------------------------------------------
     // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
 
@@ -1431,8 +896,108 @@ void FTable::setVM(void *ptr, void (*func)(), int *status) {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Ftable::setServices"
+void FTable::setServices(void *ptr, void (*func)(), int *userRc, int *rc) {
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  // Check input
+  if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found", rc);
+    return;
+  }
+  
+  // TODO: shouldn't need to expand the table here - should be done inside
+  // FTable code on demand.
+  ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
+  localrc = (tabptr)->extend(8, 2); // room for 8 funcs, 2 data
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    return;
+
+  // Set callback function and arguments
+  ESMCI::Comp *f90comp = (ESMCI::Comp *)ptr;
+  localrc = (tabptr)->setFuncPtr("Register", (void *)func, f90comp, userRc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    return;
+
+  // time to startup the VM for this component (if not already started)...
+  ESMCI::VM *vm_parent;
+  FTN(f_esmf_compgetvmparent)(f90comp, &vm_parent, &localrc); //get vm_parent
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return;
+  ESMCI::VMPlan *vmplan_p;
+  FTN(f_esmf_compgetvmplan)(f90comp, &vmplan_p, &localrc);    //get vmplan_p
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return;
+  void *vm_info;
+  FTN(f_esmf_compgetvminfo)(f90comp, &vm_info, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return;
+  if (vm_info==NULL){
+    // VM for this component has not been started yet
+    vm_info = vm_parent->startup(vmplan_p,
+      ESMCI_FTableCallEntryPointVMHop, NULL, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return;
+    // keep vm_info in a safe place (in parent component) 'till it's used again
+    FTN(f_esmf_compsetvminfo)(f90comp, &vm_info, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return;
+  }
+  // ...now the component's VM is started up and placed on hold.
+  
+  // call into register routine using the component's VM
+  void *vm_cargo;
+  enum method reg = SETREGISTER;
+  FTN(c_esmc_ftablecallentrypointvm)(&vm_parent, &vmplan_p, &vm_info,
+    &vm_cargo, &tabptr, &reg, NULL, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return;
+  
+  // wait for the register routine to return
+  FTN(c_esmc_compwait)(&vm_parent, &vmplan_p, &vm_info, &vm_cargo, NULL,
+    &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return;
+  
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Ftable::setVM"
+void FTable::setVM(void *ptr, void (*func)(), int *userRc, int *rc) {
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // Check input
+  if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found", rc);
+    return;
+  }
+
+  // TODO: shouldn't need to expand the table here - should be done inside
+  // FTable code on demand.
+  ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
+  localrc = (tabptr)->extend(8, 2); // room for 8 funcs, 2 data
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    return;
+
+  // Set callback function and arguments
+  ESMCI::Comp *f90comp = (ESMCI::Comp *)ptr;
+  localrc = (tabptr)->setFuncPtr("setVM", (void *)func, f90comp, userRc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    return;
+
+  // Call into user code callback function
+  localrc = (tabptr)->callVFuncPtr("setVM", NULL, NULL);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    return;
+
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::FTable::getEntry()"
-//BOP
+//BOPI
 // !IROUTINE:  getEntry - get FTable entry from name
 //
 // !INTERFACE:
@@ -1448,10 +1013,16 @@ int FTable::getEntry(
 // !DESCRIPTION:
 //    Returns the named entry
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // Initialize rc and localrc ; assume functions not implemented
   if (*rc) *rc = ESMC_RC_NOT_IMPL;
+
+  // Check input
+  if (name == ESMC_NULL_POINTER){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found", rc);
+    return -1;  // indicate entry not found
+  }
 
   int i;
   for (i=0; i<funccount; i++) {
@@ -1468,8 +1039,274 @@ int FTable::getEntry(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::FTable::setFuncPtr()"
+//BOPI
+// !IROUTINE:  setFuncPtr - set function pointer, no extra args
+//
+// !INTERFACE:
+int FTable::setFuncPtr(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    char *name,            // in, function name
+    void *func) {          // in, function address
+//
+// !DESCRIPTION:
+//    Sets the named function pointer
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // Initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+  // Check input
+  if (name == ESMC_NULL_POINTER){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found", &rc);
+    return rc;
+  }
+  if (func == ESMC_NULL_POINTER){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found", &rc);
+    return rc;
+  }
+
+  // look for the name already existing in the table.  if found
+  // replace it.  otherwise add it to the end.
+  int i;
+  for (i=0; i<funccount; i++)
+    if (!strcmp(name, funcs[i].funcname)) break;
+
+  // we found the function, or we got to the end of the table.
+  // either way we are ready to add it.
+
+  int thisfunc = i;
+
+  // extend the table if needed
+  if (thisfunc >= funcalloc){
+    funcs = (funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(funcinfo));
+    funcalloc = thisfunc+4;
+  }
+  funcs[thisfunc].funcptr = func;
+  funcs[thisfunc].ftype = FT_NULL;
+  // do these only if not replacing an existing entry.
+  if (thisfunc == funccount){
+    funcs[thisfunc].funcname = new char[strlen(name)+1];
+    strcpy(funcs[thisfunc].funcname, name);
+    funccount++;
+  }
+   
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::FTable::setFuncPtr()"
+//BOPI
+// !IROUTINE:  setFuncPtr - set function pointer, type; no args yet.
+//
+// !INTERFACE:
+int FTable::setFuncPtr(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    char *name,            // in, function name
+    void *func,            // in, function address
+    enum ftype ftype) {    // in, function type
+//
+// !DESCRIPTION:
+//    Sets the named function pointer and type, but specifies no argument 
+//    values.  Before this can be called successfully, the user must call
+//    FTable::setFuncArgs to fill in the argument list.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // Initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+  // Check input
+  if (name == ESMC_NULL_POINTER){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found", &rc);
+    return rc;
+  }
+  if (func == ESMC_NULL_POINTER){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found", &rc);
+    return rc;
+  }
+
+  // look for the name already existing in the table.  if found
+  // replace it.  otherwise add it to the end.
+  int i;
+  for (i=0; i<funccount; i++)
+    if (!strcmp(name, funcs[i].funcname)) break;
+
+  // we found the function, or we got to the end of the table.
+  // either way we are ready to add it.
+
+  int thisfunc = i;
+
+  // extend the table if needed
+  if (thisfunc >= funcalloc){
+    funcs = (funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(funcinfo));
+    funcalloc = thisfunc+4;
+  }
+  funcs[thisfunc].funcptr = func;
+  funcs[thisfunc].ftype = ftype;
+  // do these only if not replacing an existing entry.
+  if (thisfunc == funccount) {
+    funcs[thisfunc].funcname = new char[strlen(name)+1];
+    strcpy(funcs[thisfunc].funcname, name);
+    funccount++;
+  }
+   
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::FTable::setFuncPtr()"
+//BOPI
+// !IROUTINE:  setFuncPtr - set voidp, intp specifically
+//
+// !INTERFACE:
+int FTable::setFuncPtr(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    char *name,            // in, function name
+    void *func,            // in, function address
+    void *arg1,            // in, void *
+    int *arg2) {           // in, int *
+//
+// !DESCRIPTION:
+//    Sets the named function pointer and args.  This is a common case
+//    so it has it's own interface.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // Initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+  // Check input
+  if (name == ESMC_NULL_POINTER){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found", &rc);
+    return rc;
+  }
+  if (func == ESMC_NULL_POINTER){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found", &rc);
+    return rc;
+  }
+  if (arg1 == ESMC_NULL_POINTER){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found", &rc);
+    return rc;
+  }
+  if (arg2 == ESMC_NULL_POINTER){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found", &rc);
+    return rc;
+  }
+
+  // look for the name already existing in the table.  if found
+  // replace it.  otherwise add it to the end.
+  int i;
+  for (i=0; i<funccount; i++)
+    if (!strcmp(name, funcs[i].funcname)) break;
+
+  // we found the function, or we got to the end of the table.
+  // either way we are ready to add it.
+
+  int thisfunc = i;
+
+  // if entry was found, delete the old one
+  if (thisfunc < funccount) 
+    delete ((int *) funcs[thisfunc].funcarg[1]);
+    
+  // extend the table if needed
+  if (thisfunc >= funcalloc) {
+    funcs = (funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(funcinfo));
+    funcalloc = thisfunc+4;
+  }
+  funcs[thisfunc].funcptr = func;
+  funcs[thisfunc].ftype = FT_VOIDP1INTP;
+  funcs[thisfunc].funcarg[0] = arg1;
+  funcs[thisfunc].funcarg[1] = (void *)arg2;
+  // do these only if not replacing an existing entry.
+  if (thisfunc == funccount) {
+    funcs[thisfunc].funcname = new char[strlen(name)+1];
+    strcpy(funcs[thisfunc].funcname, name);
+    funccount++;
+  }
+   
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::FTable::setFuncArgs()"
+//BOPI
+// !IROUTINE:  setFuncArgs - set arglist for existing function
+//
+// !INTERFACE:
+int FTable::setFuncArgs(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    char *name,            // in, function name
+    int acount,            // in, count of args
+    void **arglist) {      // in, address of arg list
+//
+// !DESCRIPTION:
+//    Sets the named function args.  The function must already exist.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // Initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;
+    
+  // find the "name" entry
+  int i = getEntry(name, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc; // bail out
+  if (i == -1){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    "unknown function name", &rc);
+    return rc; // bail out
+  }
+
+  // Check arglist argument
+  if (arglist == ESMC_NULL_POINTER){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found", &rc);
+    return rc;
+  }
+
+  // fill in arguments
+  for(int j=0; j<acount; j++)
+    funcs[i].funcarg[j] = arglist[j];
+
+  // return successfully
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::FTable::callVFuncPtr()"
-//BOP
+//BOPI
 // !IROUTINE:  callVFuncPtr - call a function w/ proper args
 //
 // !INTERFACE:
@@ -1480,26 +1317,26 @@ int FTable::callVFuncPtr(
 //
 // !ARGUMENTS:
   char *name,           // in, function name
-  VM *vm_pointer,       // in, pointer to this PET's VM instance
-  int *userrc) {        // out, function return
+  VM *vm_pointer,       // in, optional, pointer to this PET's VM instance
+  int *userrc) {        // out, optional, function return
 //
 // !DESCRIPTION:
 //    Calls the named function pointer
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (userrc!=NULL) *userrc = -99999;     // set userrc to something obvious
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // find the "name" entry
   int i = getEntry(name, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc))
-    return localrc; // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc; // bail out
   if (i == -1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-    "unknown function name", &localrc);
-    return localrc; // bail out
+    "unknown function name", &rc);
+    return rc; // bail out
   }
   
   // optionally insert vm and replicate Component object, according to situation
@@ -1534,25 +1371,25 @@ int FTable::callVFuncPtr(
 
   // call-back into user code
   switch (funcs[i].ftype){
-    case FT_VOIDPINTP: {
-//printf("calling out of case FT_VOIDPINTP VM\n");
-      VoidPtrIntPtrFunc vf = (VoidPtrIntPtrFunc)funcs[i].funcptr;
+    case FT_VOIDP1INTP: {
+      //printf("calling out of case FT_VOIDP1INTP\n");
+      VoidP1IntPFunc vf = (VoidP1IntPFunc)funcs[i].funcptr;
       (*vf)((void *)comp, (int *)funcs[i].funcarg[1]);
-      *userrc = *(int *)(funcs[i].funcarg[1]);
+      if (userrc) *userrc = *(int *)(funcs[i].funcarg[1]);
       break;
     }
-    case FT_COMP2STAT: {
-//printf("calling out of case FT_COMP2STAT VM\n");
-      C2SFunc vf = (C2SFunc)funcs[i].funcptr;
+    case FT_VOIDP4INTP: {
+      //printf("calling out of case FT_VOIDP4INTP\n");
+      VoidP4IntPFunc vf = (VoidP4IntPFunc)funcs[i].funcptr;
       (*vf)(comp, funcs[i].funcarg[1], funcs[i].funcarg[2],
         funcs[i].funcarg[3], (int *)funcs[i].funcarg[4]);
-      *userrc = *(int *)(funcs[i].funcarg[4]);
+      if (userrc) *userrc = *(int *)(funcs[i].funcarg[4]);
       break;
     }
     default:
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "unknown function type", &localrc);
-      return localrc;
+        "unknown function type", &rc);
+      return rc;
   }
   
   // check if anything needs to be updated after call-back
@@ -1582,12 +1419,87 @@ int FTable::callVFuncPtr(
  
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::FTable::extend()"
+//BOPI
+// !IROUTINE:  extend - make space for additional functions/data
+//
+// !INTERFACE:
+int FTable::extend(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int nfuncp,     // in, number of functions which will be added
+      int ndatap) {   // in, number of data pointers which will be added
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
+    // TODO: allocate space for N items, rounded up?
+    if (nfuncp > funcalloc) {
+        funcs = (funcinfo *)realloc((void *)funcs, nfuncp * sizeof(funcinfo));
+        funcalloc = nfuncp; 
+    }
+    if (ndatap > dataalloc) {
+        data = (datainfo *)realloc((void *)data, ndatap * sizeof(datainfo));
+        dataalloc = ndatap;
+    }
+
+    //printf("TableExtend called, sizeof(funcinfo)=%d, sizeof(datainfo)=%d\n",
+    //                            sizeof(funcinfo), sizeof(datainfo));
+    rc = ESMF_SUCCESS;
+    return rc;
+
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::FTable::query()"
+//BOPI
+// !IROUTINE:  query - return count of functions/data
+//
+// !INTERFACE:
+int FTable::query(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *nfuncp,     // out, number of functions which will be added
+      int *ndatap) {   // out, number of data pointers which will be added
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+
+    // fill in values
+    *nfuncp = funccount;
+    *ndatap = datacount;
+
+    //printf("TableQuery method called \n");
+    rc = ESMF_SUCCESS;
+    return rc;
+
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::FTable::validate()"
-//BOP
+//BOPI
 // !IROUTINE:  validate - internal consistency check for a Component
 //
 // !INTERFACE:
-      int FTable::validate(
+int FTable::validate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1599,12 +1511,8 @@ int FTable::callVFuncPtr(
 //      Validates that a Component is internally consistent.
 //      Returns error code if problems are found.  Base class method.
 //
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-//
-//  code goes here
-//
+//EOPI
+//-----------------------------------------------------------------------------
     // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
 
@@ -1615,11 +1523,11 @@ int FTable::callVFuncPtr(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::FTable::print()"
-//BOP
+//BOPI
 // !IROUTINE:  print - print contents of a Component
 //
 // !INTERFACE:
-      int FTable::print(
+int FTable::print(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1631,12 +1539,8 @@ int FTable::callVFuncPtr(
 //      Print information about a Component.  The options control the
 //      type of information and level of detail.  Base class method.
 //
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-//
-//  code goes here
-//
+//EOPI
+//-----------------------------------------------------------------------------
     // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
 
@@ -1647,11 +1551,11 @@ int FTable::callVFuncPtr(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::FTable()"
-//BOP
+//BOPI
 // !IROUTINE:  FTable - native C++ constructor
 //
 // !INTERFACE:
-      FTable::FTable(
+FTable::FTable(
 //
 // !RETURN VALUE:
 //    none
@@ -1662,9 +1566,8 @@ int FTable::callVFuncPtr(
 // !DESCRIPTION:
 //   Native constructor.
 //
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
+//EOPI
+//-----------------------------------------------------------------------------
     //printf("in ftable constructor\n");
     funccount = 0;
     funcalloc = 0;
@@ -1678,11 +1581,11 @@ int FTable::callVFuncPtr(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "~ESMCI::FTable()"
-//BOP
+//BOPI
 // !IROUTINE:  ~FTable - native C++ destructor
 //
 // !INTERFACE:
-      FTable::~FTable(void) {
+FTable::~FTable(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -1693,9 +1596,8 @@ int FTable::callVFuncPtr(
 // !DESCRIPTION:
 //      Calls standard ESMF deep or shallow methods for destruction
 //
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-  
+//EOPI
+//-----------------------------------------------------------------------------
     int i;
 
     //printf("in ftable destructor\n");
@@ -1805,4 +1707,5 @@ void FTable::newtrim(char *c, int clen, int *phase, int *nstate, char **newc) {
   return;
 }
 //==============================================================================
+
 } // namespace ESMCI

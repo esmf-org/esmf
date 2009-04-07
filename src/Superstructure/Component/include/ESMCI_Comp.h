@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.h,v 1.12 2009/03/17 05:34:59 theurich Exp $
+// $Id: ESMCI_Comp.h,v 1.13 2009/04/07 05:34:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@ class Comp{
   private:
     F90ClassHolder fortranclass;
   public:
-    int setServices(void (*func)(Comp *, int *));
+    int setServices(void (*func)(Comp *, int *), int *userRc);
     int setEntryPoint(enum method method,
       void (*functionPtr)(Comp *, State *, State *, Clock **, int *),
       int phase);
@@ -65,11 +65,11 @@ class GridComp:public Comp{
     static int destroy(GridComp *comp);
     int print(const char *options) const;
     int initialize(ESMCI::State *importState, ESMCI::State *exportState,
-      ESMCI::Clock *clock, int phase) const;
+      ESMCI::Clock *clock, int phase, int *userRc) const;
     int run(ESMCI::State *importState, ESMCI::State *exportState,
-      ESMCI::Clock *clock, int phase) const;
+      ESMCI::Clock *clock, int phase, int *userRc) const;
     int finalize(ESMCI::State *importState, ESMCI::State *exportState,
-      ESMCI::Clock *clock, int phase) const;
+      ESMCI::Clock *clock, int phase, int *userRc) const;
 };
 
 class CplComp:public Comp{
@@ -79,11 +79,11 @@ class CplComp:public Comp{
     static int destroy(CplComp *comp);
     int print(const char *options) const;
     int initialize(ESMCI::State *importState, ESMCI::State *exportState,
-      ESMCI::Clock *clock, int phase) const;
+      ESMCI::Clock *clock, int phase, int *userRc) const;
     int run(ESMCI::State *importState, ESMCI::State *exportState,
-      ESMCI::Clock *clock, int phase) const;
+      ESMCI::Clock *clock, int phase, int *userRc) const;
     int finalize(ESMCI::State *importState, ESMCI::State *exportState,
-      ESMCI::Clock *clock, int phase) const;
+      ESMCI::Clock *clock, int phase, int *userRc) const;
 };
 
 } // namespace ESMCI

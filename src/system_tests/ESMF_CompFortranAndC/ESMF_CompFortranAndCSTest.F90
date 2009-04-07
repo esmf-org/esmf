@@ -1,4 +1,4 @@
-! $Id: ESMF_CompFortranAndCSTest.F90,v 1.11 2009/03/26 03:28:20 theurich Exp $
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.12 2009/04/07 05:34:49 theurich Exp $
 !
 ! System test CompFortranAndC
 !  Description on Sourceforge under System Test #63029
@@ -102,7 +102,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Get the default global VM
-    call ESMF_VMGetGlobal(vm, rc)
+    call ESMF_VMGetGlobal(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Get our pet number for output print statements
@@ -231,13 +231,13 @@
 !-------------------------------------------------------------------------
 !     Clean up
 
-      call ESMF_GridCompDestroy(compInFortran, rc)
+      call ESMF_GridCompDestroy(compInFortran, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_GridCompDestroy(compInC, rc)
+      call ESMF_GridCompDestroy(compInC, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_StateDestroy(imp, rc)
+      call ESMF_StateDestroy(imp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_StateDestroy(exp, rc)
+      call ESMF_StateDestroy(exp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       print *, "All Destroy routines done"

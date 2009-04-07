@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.119 2009/04/01 22:28:45 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.120 2009/04/07 05:34:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.119 2009/04/01 22:28:45 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.120 2009/04/07 05:34:49 theurich Exp $'
 
 !==============================================================================
 !
@@ -139,7 +139,7 @@ contains
     integer,                 intent(in),    optional :: petList(:)
     type(ESMF_ContextFlag),  intent(in),    optional :: contextflag
     type(ESMF_VM),           intent(inout), optional :: parentVm
-    integer,                 intent(out),   optional :: rc 
+    integer,                 intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 ! This interface creates an {\tt ESMF\_GridComp} object. By default, a
@@ -210,7 +210,6 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-    ! local vars
     type(ESMF_CompClass), pointer :: compclass       ! generic comp
     integer :: localrc                               ! local error status
 
@@ -280,7 +279,6 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-    ! local vars
     integer :: localrc                       ! local error status
 
     ! initialize return code; assume routine not implemented
@@ -325,16 +323,17 @@ contains
 !
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompFinalize(gridcomp, importState, &
-    exportState, clock, phase, blockingflag, rc)
+    exportState, clock, phase, blockingflag, userRc, rc)
 !
 ! !ARGUMENTS:
-    type (ESMF_GridComp)                              :: gridcomp
-    type (ESMF_State),        intent(inout), optional :: importState
-    type (ESMF_State),        intent(inout), optional :: exportState
-    type (ESMF_Clock),        intent(inout), optional :: clock
-    integer,                  intent(in),    optional :: phase
-    type (ESMF_BlockingFlag), intent(in),    optional :: blockingflag
-    integer,                  intent(out),   optional :: rc 
+    type(ESMF_GridComp)                              :: gridcomp
+    type(ESMF_State),        intent(inout), optional :: importState
+    type(ESMF_State),        intent(inout), optional :: exportState
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: phase
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(inout), optional :: userRc
+    integer,                 intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 ! Call the associated user-supplied finalization code for 
@@ -377,6 +376,8 @@ contains
 !   for a list of valid blocking options. Default option is
 !   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
+! \item[{[userRc]}]
+!   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -384,10 +385,14 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
+    integer :: localUserRc
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
+
+    ! initialize localUserRc with incoming value
+    if (present(userRc)) localUserRc = userRc
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
@@ -397,10 +402,13 @@ contains
     ! call Comp method
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETFINAL, &
       importState=importState, exportState=exportState, clock=clock, &
-      phase=phase, blockingflag=blockingflag, rc=localrc)
+      phase=phase, blockingflag=blockingflag, userRc=localUserRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! pass userRc back to user
+    if (present(userRc)) userRc = localUserRc
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -428,7 +436,7 @@ contains
     type(ESMF_Clock),        intent(out), optional :: clock
     type(ESMF_VM),           intent(out), optional :: vm
     type(ESMF_ContextFlag),  intent(out), optional :: contextflag
-    integer,                 intent(out), optional :: rc             
+    integer,                 intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -551,7 +559,7 @@ contains
 
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompInitialize(gridcomp, importState, &
-    exportState, clock, phase, blockingflag, rc)
+    exportState, clock, phase, blockingflag, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)                              :: gridcomp
@@ -560,7 +568,8 @@ contains
     type(ESMF_Clock),        intent(inout), optional :: clock
     integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
-    integer,                 intent(out),   optional :: rc 
+    integer,                 intent(inout), optional :: userRc
+    integer,                 intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 ! Call the associated user initialization code for a GridComp.
@@ -602,6 +611,8 @@ contains
 !   for a list of valid blocking options. Default option is
 !   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
+! \item[{[userRc]}]
+!   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -609,6 +620,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
+    integer :: localUserRc
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -619,13 +631,18 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    ! call Comp method
+    ! initialize localUserRc with incoming value
+    if (present(userRc)) localUserRc = userRc
+
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETINIT, &
       importState=importState, exportState=exportState, clock=clock, &
-      phase=phase, blockingflag=blockingflag, rc=localrc)
+      phase=phase, blockingflag=blockingflag, userRc=localUserRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! pass userRc back to user
+    if (present(userRc)) userRc = localUserRc
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -647,7 +664,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
-    integer,             intent(out), optional :: rc 
+    integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Inquire if this {\tt ESMF\_GridComp} object is to execute on the calling PET.
@@ -703,7 +720,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_GridComp)                       :: gridcomp
     character(len = *), intent(in),  optional :: options
-    integer,            intent(out), optional :: rc 
+    integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Prints information about an {\tt ESMF\_GridComp} to {\tt stdout}. \\
@@ -760,7 +777,7 @@ contains
     phase, blockingflag, rc)
 #else
   recursive subroutine ESMF_GridCompReadRestart(gridcomp, importState, &
-    exportState, clock, phase, blockingflag, rc)
+    exportState, clock, phase, blockingflag, userRc, rc)
 #endif
 !
 ! !ARGUMENTS:
@@ -770,15 +787,16 @@ contains
     type(ESMF_Clock),        intent(inout), optional :: clock
     integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
-    integer,                 intent(out),   optional :: rc 
+    integer,                 intent(out),   optional :: rc
 #else
-    type (ESMF_GridComp)                              :: gridcomp
-    type (ESMF_State),        intent(inout), optional :: importState
-    type (ESMF_State),        intent(inout), optional :: exportState
-    type (ESMF_Clock),        intent(inout), optional :: clock
-    integer,                  intent(in),    optional :: phase
-    type (ESMF_BlockingFlag), intent(in),    optional :: blockingflag
-    integer,                  intent(out),   optional :: rc 
+    type(ESMF_GridComp)                              :: gridcomp
+    type(ESMF_State),        intent(inout), optional :: importState
+    type(ESMF_State),        intent(inout), optional :: exportState
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: phase
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(inout), optional :: userRc
+    integer,                 intent(out),   optional :: rc
 #endif
 !
 ! !DESCRIPTION:
@@ -813,6 +831,8 @@ contains
 !   for a list of valid blocking options. Default option is
 !   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
+! \item[{[userRc]}]
+!   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -820,6 +840,7 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
+    integer :: localUserRc
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -828,18 +849,23 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    ! call Comp method
+    ! initialize localUserRc with incoming value
+    if (present(userRc)) localUserRc = userRc
+
 #ifdef OLD
     call ESMF_CompReadRestart(gridcomp%compp, iospec, clock, phase, &
       blockingflag, rc=localrc)
 #else
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETREADRESTART, &
       importState=importState, exportState=exportState, clock=clock, &
-      phase=phase, blockingflag=blockingflag, rc=localrc)
+      phase=phase, blockingflag=blockingflag, userRc=localUserRc, rc=localrc)
 #endif
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! pass userRc back to user
+    if (present(userRc)) userRc = localUserRc
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -855,16 +881,17 @@ contains
 !
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompRun(gridcomp, importState, exportState,&
-    clock, phase, blockingflag, rc)
+    clock, phase, blockingflag, userRc, rc)
 !
 ! !ARGUMENTS:
-    type (ESMF_GridComp)                              :: gridcomp
-    type (ESMF_State),        intent(inout), optional :: importState
-    type (ESMF_State),        intent(inout), optional :: exportState
-    type (ESMF_Clock),        intent(inout), optional :: clock
-    integer,                  intent(in),    optional :: phase
-    type (ESMF_BlockingFlag), intent(in),    optional :: blockingflag
-    integer,                  intent(out),   optional :: rc 
+    type(ESMF_GridComp)                              :: gridcomp
+    type(ESMF_State),        intent(inout), optional :: importState
+    type(ESMF_State),        intent(inout), optional :: exportState
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: phase
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(inout), optional :: userRc
+    integer,                 intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 ! Call the associated user run code for an {\tt ESMF\_GridComp}.
@@ -906,6 +933,8 @@ contains
 !   for a list of valid blocking options. Default option is
 !   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
+! \item[{[userRc]}]
+!   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -913,6 +942,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
+    integer :: localUserRc
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -923,13 +953,18 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    ! call Comp method
+    ! initialize localUserRc with incoming value
+    if (present(userRc)) localUserRc = userRc
+
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETRUN, &
       importState=importState, exportState=exportState, clock=clock, &
-      phase=phase, blockingflag=blockingflag, rc=localrc)
+      phase=phase, blockingflag=blockingflag, userRc=localUserRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! pass userRc back to user
+    if (present(userRc)) userRc = localUserRc
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -955,7 +990,7 @@ contains
     type(ESMF_Config),       intent(inout), optional :: config
     character(len=*),        intent(in),    optional :: configFile
     type(ESMF_Clock),        intent(inout), optional :: clock
-    integer,                 intent(out),   optional :: rc             
+    integer,                 intent(out),   optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -1075,7 +1110,6 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-    ! local vars
     integer :: localrc                       ! local error status
     integer :: phaseArg
 
@@ -1151,19 +1185,20 @@ contains
 ! !IROUTINE: ESMF_GridCompSetServices - Call user routine to register GridComp methods
 !
 ! !INTERFACE:
-  recursive subroutine ESMF_GridCompSetServices(gridcomp, userRoutine, rc)
+  recursive subroutine ESMF_GridCompSetServices(gridcomp, userRoutine, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)             :: gridcomp
+    type(ESMF_GridComp)              :: gridcomp
     interface
       subroutine userRoutine(gridcomp, rc)
         use ESMF_CompMod
         implicit none
-        type(ESMF_GridComp)         :: gridcomp ! must not be optional
-        integer, intent(out)        :: rc       ! must not be optional
+        type(ESMF_GridComp)          :: gridcomp ! must not be optional
+        integer, intent(out)         :: rc       ! must not be optional
       end subroutine
     end interface
-    integer, intent(out), optional  :: rc 
+    integer, intent(inout), optional :: UserRc
+    integer, intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 ! Call into user provided {\tt userRoutine} which is responsible for
@@ -1175,6 +1210,8 @@ contains
 !   Gridded Component.
 ! \item[userRoutine]
 !   Routine to be called.
+! \item[{[userRc]}]
+!   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1189,8 +1226,8 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-    ! local vars
     integer :: localrc                       ! local error status
+    integer :: localUserRc
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1198,10 +1235,16 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
   
-    call c_ESMC_SetServices(gridcomp, userRoutine, localrc)
+    ! initialize localUserRc with incoming value
+    if (present(userRc)) localUserRc = userRc
+
+    call c_ESMC_SetServices(gridcomp, userRoutine, localUserRc, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! pass userRc back to user
+    if (present(userRc)) userRc = localUserRc
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1218,13 +1261,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCompSetServices()
   recursive subroutine ESMF_GridCompSetServicesShObj(gridcomp, userRoutine, &
-    sharedObj, rc)
+    sharedObj, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp),     intent(inout)         :: gridcomp
-    character(len=*),        intent(in)            :: userRoutine
-    character(len=*),        intent(in),  optional :: sharedObj
-    integer,                 intent(out), optional :: rc 
+    type(ESMF_GridComp), intent(inout)           :: gridcomp
+    character(len=*),    intent(in)              :: userRoutine
+    character(len=*),    intent(in),    optional :: sharedObj
+    integer,             intent(inout), optional :: UserRc
+    integer,             intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 ! Call into user provided routine which is responsible for setting
@@ -1243,6 +1287,8 @@ contains
 !   Name of shared object that contains {\tt userRoutine}. If the
 !   {\tt sharedObj} argument is not provided the executable itself will be
 !   searched for {\tt userRoutine}.
+! \item[{[userRc]}]
+!   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1266,8 +1312,8 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-    ! local vars
     integer :: localrc                       ! local error status
+    integer :: localUserRc
     character(len=0) :: emptyString
 
     ! initialize return code; assume routine not implemented
@@ -1276,14 +1322,22 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
   
+    ! initialize localUserRc with incoming value
+    if (present(userRc)) localUserRc = userRc
+
     if (present(sharedObj)) then
-      call c_ESMC_SetServicesShObj(gridcomp, userRoutine, sharedObj, localrc)
+      call c_ESMC_SetServicesShObj(gridcomp, userRoutine, sharedObj, &
+        localUserRc, localrc)
     else
-      call c_ESMC_SetServicesShObj(gridcomp, userRoutine, emptyString, localrc)
+      call c_ESMC_SetServicesShObj(gridcomp, userRoutine, emptyString, &
+        localUserRc, localrc)
     endif
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! pass userRc back to user
+    if (present(userRc)) userRc = localUserRc
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1298,18 +1352,19 @@ contains
 ! !IROUTINE: ESMF_GridCompSetVM - Call user routine to set GridComp VM properies
 !
 ! !INTERFACE:
-  recursive subroutine ESMF_GridCompSetVM(gridcomp, userRoutine, rc)
+  recursive subroutine ESMF_GridCompSetVM(gridcomp, userRoutine, userRc, rc)
 ! !ARGUMENTS:
-    type(ESMF_GridComp)             :: gridcomp
+    type(ESMF_GridComp)              :: gridcomp
     interface
       subroutine userRoutine(gridcomp, rc)
         use ESMF_CompMod
         implicit none
-        type(ESMF_GridComp)         :: gridcomp ! must not be optional
-        integer, intent(out)        :: rc       ! must not be optional
+        type(ESMF_GridComp)          :: gridcomp ! must not be optional
+        integer, intent(out)         :: rc       ! must not be optional
       end subroutine
     end interface
-    integer, intent(out), optional  :: rc 
+    integer, intent(inout), optional :: UserRc
+    integer, intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 ! Optionally call into user provided {\tt userRoutine} which is responsible for
@@ -1321,6 +1376,8 @@ contains
 !   Gridded Component.
 ! \item[userRoutine]
 !   Routine to be called.
+! \item[{[userRc]}]
+!   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1335,8 +1392,8 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-    ! local vars
     integer :: localrc                       ! local error status
+    integer :: localUserRc
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1344,10 +1401,16 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
   
-    call c_ESMC_SetVM(gridcomp, userRoutine, localrc)
+    ! initialize localUserRc with incoming value
+    if (present(userRc)) localUserRc = userRc
+
+    call c_ESMC_SetVM(gridcomp, userRoutine, localUserRc, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! pass userRc back to user
+    if (present(userRc)) userRc = localUserRc
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1363,13 +1426,15 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCompSetVM()
-  recursive subroutine ESMF_GridCompSetVMShObj(gridcomp, userRoutine, sharedObj, rc)
+  recursive subroutine ESMF_GridCompSetVMShObj(gridcomp, userRoutine, sharedObj, &
+    userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp),     intent(inout)         :: gridcomp
-    character(len=*),        intent(in)            :: userRoutine
-    character(len=*),        intent(in),  optional :: sharedObj
-    integer,                 intent(out), optional :: rc 
+    type(ESMF_GridComp), intent(inout)           :: gridcomp
+    character(len=*),    intent(in)              :: userRoutine
+    character(len=*),    intent(in),    optional :: sharedObj
+    integer,             intent(inout), optional :: UserRc
+    integer,             intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 ! Optionally call into user provided {\tt userRoutine} which is responsible for
@@ -1387,6 +1452,8 @@ contains
 !   Name of shared object that contains {\tt userRoutine}. If the
 !   {\tt sharedObj} argument is not provided the executable itself will be
 !   searched for {\tt userRoutine}.
+! \item[{[userRc]}]
+!   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1410,8 +1477,8 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-    ! local vars
     integer :: localrc                       ! local error status
+    integer :: localUserRc
     character(len=0) :: emptyString
     
     ! initialize return code; assume routine not implemented
@@ -1420,14 +1487,22 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
   
+    ! initialize localUserRc with incoming value
+    if (present(userRc)) localUserRc = userRc
+
     if (present(sharedObj)) then
-      call c_ESMC_SetVMShObj(gridcomp, userRoutine, sharedObj, localrc)
+      call c_ESMC_SetVMShObj(gridcomp, userRoutine, sharedObj, localUserRc, &
+        localrc)
     else
-      call c_ESMC_SetVMShObj(gridcomp, userRoutine, emptyString, localrc)
+      call c_ESMC_SetVMShObj(gridcomp, userRoutine, emptyString, localUserRc, &
+        localrc)
     endif
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! pass userRc back to user
+    if (present(userRc)) userRc = localUserRc
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1451,7 +1526,7 @@ contains
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
     integer,             intent(in),  optional :: pref_inter_ssi
-    integer,             intent(out), optional :: rc           
+    integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
@@ -1511,7 +1586,7 @@ contains
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
     integer,             intent(in),  optional :: pref_inter_ssi
-    integer,             intent(out), optional :: rc           
+    integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
@@ -1571,7 +1646,7 @@ contains
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
     integer,             intent(in),  optional :: pref_inter_ssi
-    integer,             intent(out), optional :: rc           
+    integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
@@ -1627,7 +1702,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_GridComp)                       :: gridcomp
     character(len = *), intent(in),  optional :: options
-    integer,            intent(out), optional :: rc 
+    integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Currently all this method does is to check that the {\tt gridcomp} exists.
@@ -1676,7 +1751,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)         :: gridcomp
     type(ESMF_BlockingFlag), intent(in),  optional :: blockingFlag
-    integer,                 intent(out), optional :: rc           
+    integer,                 intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! When executing asychronously, wait for an {\tt ESMF\_GridComp} to return.
@@ -1728,7 +1803,7 @@ contains
     phase, blockingflag, rc)
 #else
   recursive subroutine ESMF_GridCompWriteRestart(gridcomp, importState, &
-    exportState, clock, phase, blockingflag, rc)
+    exportState, clock, phase, blockingflag, userRc, rc)
 #endif
 !
 ! !ARGUMENTS:
@@ -1738,7 +1813,7 @@ contains
     type(ESMF_Clock),        intent(inout), optional :: clock
     integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
-    integer,                 intent(out),   optional :: rc 
+    integer,                 intent(out),   optional :: rc
 #else
     type(ESMF_GridComp)                              :: gridcomp
     type(ESMF_State),        intent(inout), optional :: importState
@@ -1746,7 +1821,8 @@ contains
     type(ESMF_Clock),        intent(inout), optional :: clock
     integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
-    integer,                 intent(out),   optional :: rc 
+    integer,                 intent(inout), optional :: userRc
+    integer,                 intent(out),   optional :: rc
 #endif
 !
 ! !DESCRIPTION:
@@ -1781,6 +1857,8 @@ contains
 !   for a list of valid blocking options. Default option is
 !   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
+! \item[{[userRc]}]
+!   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1788,6 +1866,7 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
+    integer :: localUserRc
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1796,18 +1875,23 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    ! call Comp method
+    ! initialize localUserRc with incoming value
+    if (present(userRc)) localUserRc = userRc
+
 #ifdef OLD
     call ESMF_CompWriteRestart(gridcomp%compp, iospec, clock, phase, &
       blockingflag, rc=localrc)
 #else
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETWRITERESTART, &
       importState=importState, exportState=exportState, clock=clock, &
-      phase=phase, blockingflag=blockingflag, rc=localrc)
+      phase=phase, blockingflag=blockingflag, userRc=localUserRc, rc=localrc)
 #endif
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! pass userRc back to user
+    if (present(userRc)) userRc = localUserRc
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS

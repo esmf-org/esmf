@@ -1,4 +1,4 @@
-! $Id: ESMF_SeqEnsemExSTest.F90,v 1.4 2009/03/26 03:28:21 theurich Exp $
+! $Id: ESMF_SeqEnsemExSTest.F90,v 1.5 2009/04/07 05:34:49 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -109,31 +109,31 @@ program ESMF_SeqEnsemExSTest
   compA = ESMF_GridCompCreate(name=componentA, rc=rc)
   print *, "Created component ", trim(componentA), " rc =", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
-    !call ESMF_GridCompPrint(compA, "", rc)
+    !call ESMF_GridCompPrint(compA, "", rc=rc)
 
   componentB = "user model B"
   compB = ESMF_GridCompCreate(name=componentB, rc=rc)
   print *, "Created component ", trim(componentB), " rc =", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
-    !call ESMF_GridCompPrint(compB, "", rc)
+    !call ESMF_GridCompPrint(compB, "", rc=rc)
 
   componentC = "user model C"
   compC = ESMF_GridCompCreate(name=componentC, rc=rc)
   print *, "Created component ", trim(componentC), " rc =", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
-    !call ESMF_GridCompPrint(compC, "", rc)
+    !call ESMF_GridCompPrint(compC, "", rc=rc)
 
   componentD = "user model D"
   compD = ESMF_GridCompCreate(name=componentD, rc=rc)
   print *, "Created component ", trim(componentD), " rc =", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
-    !call ESMF_GridCompPrint(compC, "", rc)
+    !call ESMF_GridCompPrint(compC, "", rc=rc)
 
   coupler = "user one-way coupler"
   cpl = ESMF_CplCompCreate(name=coupler, rc=rc)
   print *, "Created component ", trim(coupler), ", rc =", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
-  !  call ESMF_CplCompPrint(coupler, "", rc)
+  !  call ESMF_CplCompPrint(coupler, "", rc=rc)
 
   print *, "Comp Creates finished"
 
@@ -185,7 +185,7 @@ program ESMF_SeqEnsemExSTest
 !------------------------------------------------------------------------------
       ! initialize calendar to be Gregorian type
       gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                              ESMF_CAL_GREGORIAN, rc)
+                                              ESMF_CAL_GREGORIAN, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize time interval to 1 hour
@@ -258,10 +258,10 @@ program ESMF_SeqEnsemExSTest
 !-------------------------------------------------------------------------
 
   print *, "Run Loop Start time"
-  call ESMF_ClockPrint(clock, "currtime string", rc)
+  call ESMF_ClockPrint(clock, "currtime string", rc=rc)
   if (rc .ne. ESMF_SUCCESS) goto 10
 
-  do while (.not. ESMF_ClockIsStopTime(clock, rc))
+  do while (.not. ESMF_ClockIsStopTime(clock, rc=rc))
 
 	! Run Component A
   	call ESMF_GridCompRun(compA, exportState=compAexp, rc=rc)
@@ -301,12 +301,12 @@ program ESMF_SeqEnsemExSTest
         ! Advance the time
         call ESMF_ClockAdvance(clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
-        !call ESMF_ClockPrint(clock, "currtime string", rc)
+        !call ESMF_ClockPrint(clock, "currtime string", rc=rc)
 
 
   enddo
   print *, "Run Loop End time"
-  call ESMF_ClockPrint(clock, "currtime string", rc)
+  call ESMF_ClockPrint(clock, "currtime string", rc=rc)
   if (rc .ne. ESMF_SUCCESS) goto 10
 
 
@@ -343,16 +343,16 @@ program ESMF_SeqEnsemExSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_StateDestroy(compAexp, rc)
-  call ESMF_StateDestroy(compBexp, rc)
-  call ESMF_StateDestroy(compCexp, rc)
-  call ESMF_StateDestroy(compDimp, rc)
+  call ESMF_StateDestroy(compAexp, rc=rc)
+  call ESMF_StateDestroy(compBexp, rc=rc)
+  call ESMF_StateDestroy(compCexp, rc=rc)
+  call ESMF_StateDestroy(compDimp, rc=rc)
 
-  call ESMF_GridCompDestroy(compA, rc)
-  call ESMF_GridCompDestroy(compB, rc)
-  call ESMF_GridCompDestroy(compC, rc)
-  call ESMF_GridCompDestroy(compD, rc)
-  call ESMF_CplCompDestroy(cpl, rc)
+  call ESMF_GridCompDestroy(compA, rc=rc)
+  call ESMF_GridCompDestroy(compB, rc=rc)
+  call ESMF_GridCompDestroy(compC, rc=rc)
+  call ESMF_GridCompDestroy(compD, rc=rc)
+  call ESMF_CplCompDestroy(cpl, rc=rc)
 
   print *, "All Destroy routines done"
 

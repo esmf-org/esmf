@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.181 2009/03/30 17:15:22 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.182 2009/04/07 05:34:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -258,7 +258,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.181 2009/03/30 17:15:22 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.182 2009/04/07 05:34:48 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -544,7 +544,6 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-        ! Local vars
         integer :: status                            ! local error status
         integer :: allocstatus                       ! alloc/dealloc status
         logical :: rcpresent                         ! did user specify rc?
@@ -813,7 +812,6 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-        ! local vars
         integer :: status                       ! local error status
         integer :: allocstatus                  ! alloc/dealloc status
         logical :: rcpresent                    ! did user specify rc?
@@ -900,7 +898,7 @@ contains
 
 ! !INTERFACE:
   recursive subroutine ESMF_CompExecute(compp, method, &
-    importState, exportState, clock, phase, blockingFlag, rc)
+    importState, exportState, clock, phase, blockingFlag, userRc, rc)
 !
 !
 ! !ARGUMENTS:
@@ -911,7 +909,8 @@ contains
     type(ESMF_Clock),        intent(in),    optional :: clock
     integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingFlag
-    integer,                 intent(out),   optional :: rc 
+    integer,                 intent(inout), optional :: userRc
+    integer,                 intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 ! Component Execute method used by GridComp and CplComp for:
@@ -919,189 +918,169 @@ contains
 !   * Run,
 !   * Finalize.
 !
-!  Call into the associated user code for a component's method.
+! Call into the associated user code for a component's method.
 !
-!  The arguments are:
-!  \begin{description}
+! The arguments are:
+! \begin{description}
 !
-!   \item[compp]
-!    Component to call Initialization routine for.
-!   \item[method]
-!    One of the ESMF Component methods. See section \ref{opt:methods} 
-!    for a complete list of valid methods.
-!   \item[{[importState]}]  
-!    Import data for component method.
-!   \item[{[exportState]}]  
-!    Export data for component method.
-!   \item[{[clock]}]  
-!    External clock for passing in time information.
-!   \item[{[phase]}]
-!    If multiple-phase methods, which phase number this is. Default is 1.
-!   \item[{[blockingFlag]}]
-!    Blocking behavior of this method call. See section \ref{opt:blockingflag} 
-!    for a list of valid blocking options. Default option is
-!    {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
-!    across each VAS.
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
+! \item[compp]
+!   Component to call Initialization routine for.
+! \item[method]
+!   One of the ESMF Component methods. See section \ref{opt:methods} 
+!   for a complete list of valid methods.
+! \item[{[importState]}]  
+!   Import data for component method.
+! \item[{[exportState]}]  
+!   Export data for component method.
+! \item[{[clock]}]  
+!   External clock for passing in time information.
+! \item[{[phase]}]
+!   If multiple-phase methods, which phase number this is. Default is 1.
+! \item[{[blockingFlag]}]
+!   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+!   for a list of valid blocking options. Default option is
+!   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   across each VAS.
+! \item[{[userRc]}]
+!   Return code set by {\tt userRoutine} before returning.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
-        ! local vars
-        integer                 :: status       ! local error status
-        logical                 :: rcpresent    ! did user specify rc?
-        integer                 :: callrc       ! return code from user code
-        type(ESMF_BlockingFlag) :: blocking     ! local blocking flag
-        type(ESMF_VM)           :: vm           ! VM for current context
-        integer                 :: phaseArg
+    integer                 :: localrc      ! local return code
+    integer                 :: localUserRc  ! return code from user code
+    type(ESMF_BlockingFlag) :: blocking     ! local blocking flag
+    type(ESMF_VM)           :: vm           ! VM for current context
+    integer                 :: phaseArg
         
-        ! dummys that will provide initializer values if args are not present
-        type(ESMF_State)        :: dummyis, dummyes
-        type(ESMF_Clock)        :: dummyclock
+    ! dummys that will provide initializer values if args are not present
+    type(ESMF_State)        :: dummyis, dummyes
+    type(ESMF_Clock)        :: dummyclock
 
-        ! Initialize return code; assume failure until success is certain
-        status = ESMF_RC_NOT_IMPL
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_RC_NOT_IMPL
-        endif
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
         
+    ! Check input
+    if (.not.associated(compp)) then
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        "Uninitialized or destroyed component", &
+        ESMF_CONTEXT, rc) 
+      return
+    endif
 
-        if (.not.associated(compp)) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                    "Uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc) 
-            return
-        endif
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
-        ! Check init status of arguments
-        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+    if (compp%compstatus .ne. ESMF_STATUS_READY) then
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        "uninitialized or destroyed component", &
+        ESMF_CONTEXT, rc) 
+      return
+    endif
 
+    ! set the default mode to ESMF_VASBLOCKING
+    if (present(blockingFlag)) then
+      blocking = blockingFlag
+    else
+      blocking = ESMF_VASBLOCKING
+    endif
+    
+    ! supply default objects if unspecified by the caller
+    if (present(importState)) then
+      compp%is = importState
+    else
+      ! use dummy variable
+      compp%is = dummyis
+    endif
 
+    if (present(exportState)) then
+      compp%es = exportState
+    else
+      ! use dummy variable
+      compp%es = dummyes
+    endif
 
-        if (compp%compstatus .ne. ESMF_STATUS_READY) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                    "uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc) 
-            return
-        endif
+    ! and something for clocks?
+    if (present(clock)) then
+      compp%argclock = clock
+    else
+      ! use dummy variable
+      compp%argclock = dummyclock
+    endif
 
-        ! set the default mode to ESMF_VASBLOCKING
-        if (present(blockingFlag)) then
-          blocking = blockingFlag
-        else
-          blocking = ESMF_VASBLOCKING
-        endif
-        
-        ! supply default objects if unspecified by the caller
-        if (present(importState)) then
-          compp%is = importState
-        else
-          ! use dummy variable
-          compp%is = dummyis
-        endif
+    ! phase
+    phaseArg = 1 !default
+    if (present(phase)) phaseArg = phase
 
-        if (present(exportState)) then
-          compp%es = exportState
-        else
-          ! use dummy variable
-          compp%es = dummyes
-        endif
+    ! Wrap comp so it's passed to C++ correctly.
+    compp%compw%compp => compp
+    ESMF_INIT_SET_CREATED(compp%compw)
 
-        ! and something for clocks?
-        if (present(clock)) then
-          compp%argclock = clock
-        else
-          ! use dummy variable
-          compp%argclock = dummyclock
-        endif
-
-        ! phase
-        phaseArg = 1 !default
-        if (present(phase)) phaseArg = phase
-
-        ! Wrap comp so it's passed to C++ correctly.
-        compp%compw%compp => compp
-        ESMF_INIT_SET_CREATED(compp%compw)
-
-        ! Set up the arguments
-        if (compp%iAmParticipant) then
-          ! only set arguments on those PETs that are executing the component
-          call c_ESMC_FTableSetStateArgs(compp%this, method, phaseArg, &
-            compp%compw, compp%is, compp%es, compp%argclock, status)
+    ! Set up the arguments
+    if (compp%iAmParticipant) then
+      ! only set arguments on those PETs that are executing the component
+      call c_ESMC_FTableSetStateArgs(compp%this, method, phaseArg, &
+        compp%compw, compp%is, compp%es, compp%argclock, localrc)
 !gjt: ignore return value now that setservices runs in child context
-!          if (ESMF_LogMsgFoundError(status, &
+!gjt: even participating PETs may not have an entry in the FTable if
+!gjt: their participation is simply to provides PEs to other threads.
+!TODO: this needs to be fixed, because flagging not found FTable entries
+!TODO: for PETs that need to have an entry is very important error handling!
+!          if (ESMF_LogMsgFoundError(localrc, &
 !            ESMF_ERR_PASSTHRU, &
 !            ESMF_CONTEXT, rc)) return
-        endif
+    endif
           
-        ! callback into user code
-        call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
-          compp%vm_info, compp%vm_cargo, compp%this, method, phaseArg, &
-          status)
-        if (ESMF_LogMsgFoundError(status, &
+    ! callback into user code
+    call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
+      compp%vm_info, compp%vm_cargo, compp%this, method, phaseArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
+      
+    ! for threaded VMs (single- or multi-threaded) the child VM will 
+    ! now be running concurrently with the parent VM. This is indicated
+    ! by the following flag:  
+    compp%vm_released = .true.
+
+    ! set to incoming userRc    
+    if (present(userRc)) localUserRc = userRc
+    
+    ! sync PETs according to blocking mode
+    if (blocking == ESMF_VASBLOCKING .or. blocking == ESMF_BLOCKING) then
+      ! wait for all child PETs that run in this parent's PET VAS to finish
+      call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
+        compp%vm_cargo, localUserRc, localrc)
+      ! localUserRc - return code of registered user callback method
+      ! localrc     - return code of ESMF internal callback stack
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+      compp%vm_released = .false.       ! indicate child VM has been caught
+      ! for ESMF_BLOCKING _all_ parent PETs will be synced on exit
+      if (blocking == ESMF_BLOCKING) then
+        ! the current context _is_ the parent context...
+        call ESMF_VMGetCurrent(vm=vm, rc=localrc)  ! determine current VM
+        if (ESMF_LogMsgFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
-          
-        ! for threaded VMs (single- or multi-threaded) the child VM will 
-        ! now be running concurrently with the parent VM. This is indicated
-        ! by the following flag:  
-        compp%vm_released = .true.
-        
-        ! sync PETs according to blocking mode
-        if (blocking == ESMF_VASBLOCKING .or. blocking == ESMF_BLOCKING) then
-          ! wait for all child PETs that run in this parent's PET VAS to finish
-          call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-            compp%vm_cargo, callrc, status)
-          ! callrc - return code of registered user callback method
-          ! status - return code of ESMF internal callback stack
-          if (ESMF_LogMsgFoundError(status, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
-          compp%vm_released = .false.       ! indicate child VM has been caught
-          ! for ESMF_BLOCKING _all_ parent PETs will be synced on exit
-          if (blocking == ESMF_BLOCKING) then
-            ! the current context _is_ the parent context...
-            call ESMF_VMGetCurrent(vm=vm, rc=status)  ! determine current VM
-            if (ESMF_LogMsgFoundError(status, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rc)) return
-            call ESMF_VMBarrier(vm=vm, rc=status) ! barrier across parent VM
-            if (ESMF_LogMsgFoundError(status, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rc)) return
-          endif
-          ! TODO: we need to be able to return two return codes here,
-          ! "callrc" for the registered user callback method and "status"
-          ! for to indicate ESMF internal issues. For now, if we haven't
-          ! bailed out down to this point because of ESMF internal error
-          ! codes in status the status variable will be set to the "callrc"
-          ! code that the user method returned.
-          status = callrc
-        endif
+        call ESMF_VMBarrier(vm=vm, rc=localrc) ! barrier across parent VM
+        if (ESMF_LogMsgFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rc)) return
+      endif
+    endif
 
-        ! TODO: Since the current interface does not support returning two
-        ! separate return codes things are inconsistent here. In the 
-        ! blocking cases status holds the return code of the registered
-        ! user method, while in the non-blocking case status holds the
-        ! ESMF internal return code of calling into 
-        ! c_ESMC_FTableCallEntryPointVM() [which has been error checked above
-        ! already!].
-        
-        ! TODO: not sure we want to log an error for user return codes. Are
-        ! users required to abide to the ESMF error code convention? The least
-        ! restrictive thing to do is to just pass the user return code through
-        ! to the parent component and have the user code interpret what it 
-        ! means.
-        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+    ! write back potentially modified userRc
+    if (present(userRc)) userRc = localUserRc
 
-        ! Return success
-        if (present(rc)) rc = ESMF_SUCCESS
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_CompExecute
+  end subroutine ESMF_CompExecute
 !------------------------------------------------------------------------------
 
 
@@ -1142,7 +1121,6 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-        ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
 
@@ -1259,7 +1237,6 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-        ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
 
@@ -1425,7 +1402,6 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-        ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname
@@ -1531,7 +1507,6 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-        ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
 
@@ -1936,71 +1911,72 @@ contains
 ! !IROUTINE: ESMF_CompWait - Wait for component to return
 
 ! !INTERFACE:
-  subroutine ESMF_CompWait(compp, blockingFlag, rc)
+  subroutine ESMF_CompWait(compp, blockingFlag, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CompClass),    pointer               :: compp
-    type(ESMF_BlockingFlag), intent(in),  optional :: blockingFlag
-    integer,                 intent(out), optional :: rc
+    type(ESMF_CompClass),    pointer                 :: compp
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingFlag
+    integer,                 intent(inout), optional :: userRc
+    integer,                 intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
-!     Wait for component to return
+! Wait for component to return
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[compp] 
-!          component object
-!     \item[{[blockingFlag]}]
-!       The blocking behavior determines exactly what this call waits for. The
-!       default is {\tt ESMF\_VASBLOCKING} which blocks PETs across each VAS.
-!       See section \ref{opt:blockingflag} for a list of valid blocking options.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+! The arguments are:
+! \begin{description}
+! \item[compp] 
+!   component object
+! \item[{[blockingFlag]}]
+!   The blocking behavior determines exactly what this call waits for. The
+!   default is {\tt ESMF\_VASBLOCKING} which blocks PETs across each VAS.
+!   See section \ref{opt:blockingflag} for a list of valid blocking options.
+! \item[{[userRc]}]
+!   Return code set by {\tt userRoutine} before returning.
+! \item[{[rc]}] 
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: status       ! local error status
-    logical                 :: rcpresent    ! did user specify rc?
-    integer                 :: callrc       ! return code from user code
+    integer                 :: localrc      ! local return code
+    integer                 :: localUserRc  ! return code from user code
     type(ESMF_BlockingFlag) :: blocking     ! local blocking flag
     type(ESMF_VM)           :: vm           ! VM for current context
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_RC_NOT_IMPL
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_RC_NOT_IMPL
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check input
+    if (.not.associated(compp)) then
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        "Uninitialized or destroyed component", &
+        ESMF_CONTEXT, rc) 
+      return
     endif
 
-
-        if (.not.associated(compp)) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                     "Uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc)
-            return
-        endif
-
-        ! Check init status of arguments
-        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
     if (compp%compstatus .ne. ESMF_STATUS_READY) then
-        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                 "uninitialized or destroyed component", &
-                                 ESMF_CONTEXT, rc)
-            return
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        "uninitialized or destroyed component", &
+        ESMF_CONTEXT, rc) 
+      return
     endif
+
+    ! set to incoming userRc    
+    if (present(userRc)) localUserRc = userRc
 
     ! check if the child VM, i.e. the VM of this component, is currently marked
     ! as running...
     if (compp%vm_released) then
       ! wait for all child PETs that run in this parent's PET VAS to finish
       call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-                           compp%vm_cargo, callrc, status)
-      ! callrc - return code of registered user callback method
-      ! status - return code of ESMF internal callback stack
-      if (ESMF_LogMsgFoundError(status, &
+        compp%vm_cargo, localUserRc, localrc)
+      ! localUserRc - return code of registered user callback method
+      ! localrc     - return code of ESMF internal callback stack
+      if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
       compp%vm_released = .false.       ! indicate child VM has been caught
@@ -2013,46 +1989,23 @@ contains
       ! for ESMF_BLOCKING _all_ parent PETs will be synced on exit
       if (blocking == ESMF_BLOCKING) then
         ! the current context _is_ the parent context...
-        call ESMF_VMGetCurrent(vm=vm, rc=status)  ! determine current VM
-        if (ESMF_LogMsgFoundError(status, &
+        call ESMF_VMGetCurrent(vm=vm, rc=localrc)  ! determine current VM
+        if (ESMF_LogMsgFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
-        call ESMF_VMBarrier(vm=vm, rc=status) ! barrier across parent VM
-        if (ESMF_LogMsgFoundError(status, &
+        call ESMF_VMBarrier(vm=vm, rc=localrc) ! barrier across parent VM
+        if (ESMF_LogMsgFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
       endif
-      ! TODO: we need to be able to return two return codes here,
-      ! "callrc" for the registered user callback method and "status"
-      ! for to indicate ESMF internal issues. For now, if we haven't
-      ! bailed out down to this point because of ESMF internal error
-      ! codes in status the status variable will be set to the "callrc"
-      ! code that the user method returned.
-      status = callrc
-    else
-      ! if the component's VM was not marked as running there is no sense in
-      ! waiting for it to finish. Still it is o.k. to issue a wait in this case.
-      status = ESMF_SUCCESS
     endif
 
-    ! TODO: Since the current interface does not support returning two
-    ! separate return codes things are inconsistent here. In the 
-    ! case where the component's VM was marked released on entering CompWait
-    ! the status will hold the return code of the registered
-    ! user method, while in the opposite case status holds the
-    ! ESMF internal return code.
+    ! write back potentially modified userRc
+    if (present(userRc)) userRc = localUserRc
 
-    ! TODO: not sure we want to log an error for user return codes. Are
-    ! users required to abide by the ESMF error code convention? The least
-    ! restrictive thing to do is to just pass the user return code through
-    ! to the parent component and have the user code interpret what it 
-    ! means.
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Return success
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end subroutine ESMF_CompWait
 !------------------------------------------------------------------------------
 
@@ -2100,7 +2053,6 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-        ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname

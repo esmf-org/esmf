@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.22 2009/03/26 03:28:20 theurich Exp $
+! $Id: user_model.F90,v 1.23 2009/04/07 05:34:49 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -144,8 +144,8 @@
 
         ! This is where the model specific setup code goes.  
 
-        call ESMF_GridCompPrint(comp, "", rc)
-        call ESMF_StatePrint(exportState, "", rc)
+        call ESMF_GridCompPrint(comp, "", rc=rc)
+        call ESMF_StatePrint(exportState, "", rc=rc)
 
         print *, "init, ready to call get data ptr"
         nullify(mydatablock)

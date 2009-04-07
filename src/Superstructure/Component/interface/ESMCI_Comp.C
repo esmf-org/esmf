@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.C,v 1.11 2009/04/02 20:51:24 theurich Exp $
+// $Id: ESMCI_Comp.C,v 1.12 2009/04/07 05:34:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Comp.C,v 1.11 2009/04/02 20:51:24 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Comp.C,v 1.12 2009/04/07 05:34:48 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -54,13 +54,16 @@ extern "C" {
   void FTN(f_esmf_gridcompdestroy)(ESMCI::GridComp *comp, int *rc);
   void FTN(f_esmf_gridcompinitialize)(const ESMCI::GridComp *gcomp,
     ESMCI::State *importState, ESMCI::State *exportState, 
-    ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag, int *rc);
+    ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag, 
+    int *userRc, int *rc);
   void FTN(f_esmf_gridcomprun)(const ESMCI::GridComp *gcomp,
     ESMCI::State *importState, ESMCI::State *exportState, 
-    ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag, int *rc);
+    ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag,
+    int *userRc, int *rc);
   void FTN(f_esmf_gridcompfinalize)(const ESMCI::GridComp *gcomp,
     ESMCI::State *importState, ESMCI::State *exportState, 
-    ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag, int *rc);
+    ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag,
+    int *userRc, int *rc);
   void FTN(f_esmf_gridcompprint)(const ESMCI::GridComp *gcomp,
     const char *options, int *rc, ESMCI_FortranStrLenArg olen);
   
@@ -70,13 +73,16 @@ extern "C" {
   void FTN(f_esmf_cplcompdestroy)(ESMCI::CplComp *comp, int *rc);
   void FTN(f_esmf_cplcompinitialize)(const ESMCI::CplComp *gcomp,
     ESMCI::State *importState, ESMCI::State *exportState, 
-    ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag, int *rc);
+    ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag,
+    int *userRc, int *rc);
   void FTN(f_esmf_cplcomprun)(const ESMCI::CplComp *gcomp,
     ESMCI::State *importState, ESMCI::State *exportState, 
-    ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag, int *rc);
+    ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag,
+    int *userRc, int *rc);
   void FTN(f_esmf_cplcompfinalize)(const ESMCI::CplComp *gcomp,
     ESMCI::State *importState, ESMCI::State *exportState, 
-    ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag, int *rc);
+    ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag,
+    int *userRc, int *rc);
   void FTN(f_esmf_cplcompprint)(const ESMCI::CplComp *gcomp,
     const char *options, int *rc, ESMCI_FortranStrLenArg olen);
 };
@@ -99,7 +105,8 @@ int Comp::setServices(
 //
 // !ARGUMENTS:
 //
-  void (*func)(Comp *, int *)             // (in)
+  void (*func)(Comp *, int *),            // (in)
+  int *userRc                             // (out)
   ){
 //
 // !DESCRIPTION:
@@ -117,7 +124,7 @@ int Comp::setServices(
     return rc;
   }
 
-  FTable::setServices(this, (void(*)())func, &localrc);
+  FTable::setServices(this, (void(*)())func, userRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -197,7 +204,7 @@ int Comp::setEntryPoint(
   char *fname;
   FTable::newtrim(methodString, slen, &phase, NULL, &fname);
   
-  localrc = ftable->setFuncPtr(fname, (void *)functionPtr, FT_COMP2STAT);
+  localrc = ftable->setFuncPtr(fname, (void *)functionPtr, FT_VOIDP4INTP);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) 
     return rc;
 
@@ -422,7 +429,8 @@ int GridComp::initialize(
     State *importState,
     State *exportState,
     Clock *clock,
-    int phase
+    int phase,
+    int *userRc
   )const{
 //
 // !DESCRIPTION:
@@ -442,11 +450,16 @@ int GridComp::initialize(
   
   ESMC_BlockingFlag blockingFlag = ESMF_VASBLOCKING;
   
+  int localUserRc;
+  if (userRc) localUserRc = *userRc;
+  
   FTN(f_esmf_gridcompinitialize)(this, importState, exportState, &clock,
-    &phase, &blockingFlag, &localrc);
+    &phase, &blockingFlag, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
+  if (userRc) *userRc = localUserRc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -471,7 +484,8 @@ int GridComp::run(
     State *importState,
     State *exportState,
     Clock *clock,
-    int phase
+    int phase,
+    int *userRc
   )const{
 //
 // !DESCRIPTION:
@@ -491,11 +505,16 @@ int GridComp::run(
   
   ESMC_BlockingFlag blockingFlag = ESMF_VASBLOCKING;
   
+  int localUserRc;
+  if (userRc) localUserRc = *userRc;
+
   FTN(f_esmf_gridcomprun)(this, importState, exportState, &clock,
-    &phase, &blockingFlag, &localrc);
+    &phase, &blockingFlag, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
+  if (userRc) *userRc = localUserRc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -520,7 +539,8 @@ int GridComp::finalize(
     State *importState,
     State *exportState,
     Clock *clock,
-    int phase
+    int phase,
+    int *userRc
   )const{
 //
 // !DESCRIPTION:
@@ -540,10 +560,15 @@ int GridComp::finalize(
   
   ESMC_BlockingFlag blockingFlag = ESMF_VASBLOCKING;
   
+  int localUserRc;
+  if (userRc) localUserRc = *userRc;
+  
   FTN(f_esmf_gridcompfinalize)(this, importState, exportState, &clock,
-    &phase, &blockingFlag, &localrc);
+    &phase, &blockingFlag, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
+  
+  if (userRc) *userRc = localUserRc;
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -699,7 +724,8 @@ int CplComp::initialize(
     State *importState,
     State *exportState,
     Clock *clock,
-    int phase
+    int phase,
+    int *userRc
   )const{
 //
 // !DESCRIPTION:
@@ -719,10 +745,15 @@ int CplComp::initialize(
   
   ESMC_BlockingFlag blockingFlag = ESMF_VASBLOCKING;
   
+  int localUserRc;
+  if (userRc) localUserRc = *userRc;
+
   FTN(f_esmf_cplcompinitialize)(this, importState, exportState, &clock,
-    &phase, &blockingFlag, &localrc);
+    &phase, &blockingFlag, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
+  
+  if (userRc) *userRc = localUserRc;
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -748,7 +779,8 @@ int CplComp::run(
     State *importState,
     State *exportState,
     Clock *clock,
-    int phase
+    int phase,
+    int *userRc
   )const{
 //
 // !DESCRIPTION:
@@ -768,10 +800,15 @@ int CplComp::run(
   
   ESMC_BlockingFlag blockingFlag = ESMF_VASBLOCKING;
   
+  int localUserRc;
+  if (userRc) localUserRc = *userRc;
+
   FTN(f_esmf_cplcomprun)(this, importState, exportState, &clock,
-    &phase, &blockingFlag, &localrc);
+    &phase, &blockingFlag, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
+  
+  if (userRc) *userRc = localUserRc;
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -797,7 +834,8 @@ int CplComp::finalize(
     State *importState,
     State *exportState,
     Clock *clock,
-    int phase
+    int phase,
+    int *userRc
   )const{
 //
 // !DESCRIPTION:
@@ -817,10 +855,15 @@ int CplComp::finalize(
   
   ESMC_BlockingFlag blockingFlag = ESMF_VASBLOCKING;
   
+  int localUserRc;
+  if (userRc) localUserRc = *userRc;
+
   FTN(f_esmf_cplcompfinalize)(this, importState, exportState, &clock,
-    &phase, &blockingFlag, &localrc);
+    &phase, &blockingFlag, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
+  
+  if (userRc) *userRc = localUserRc;
   
   // return successfully
   rc = ESMF_SUCCESS;
