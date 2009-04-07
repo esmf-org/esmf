@@ -1,0 +1,30 @@
+#!/bin/ksh
+# $Id: mpirun.pc604,v 1.1 2009/04/07 18:46:02 svasquez Exp $
+################################################################################
+# This script is written specifically for bluefire.
+################################################################################
+
+if [ "$1" != "-np" ] 
+then
+	echo "Usage: mpirun -np # prog"
+	exit 1
+fi
+
+num_procs=$2
+shift 2
+prog=$*
+
+MP_EUILIB=ip
+MP_PROCS=$num_procs
+env | grep MP_
+
+MP_STDOUTMODE=ordered
+export MP_STDOUTMODE
+echo "setting MP_STDOUTMODE=ordered, stdout to be sorted by proc"
+
+export MP_PROCS MP_EUILIB
+
+echo "env: MP_PROCS =" $MP_PROCS
+echo "about to <exec poe $prog>"
+
+exec poe $prog
