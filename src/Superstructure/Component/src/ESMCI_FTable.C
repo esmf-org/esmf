@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.21 2009/04/07 05:34:48 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.22 2009/04/07 06:27:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.21 2009/04/07 05:34:48 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.22 2009/04/07 06:27:25 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1226,10 +1226,6 @@ int FTable::setFuncPtr(
 
   int thisfunc = i;
 
-  // if entry was found, delete the old one
-  if (thisfunc < funccount) 
-    delete ((int *) funcs[thisfunc].funcarg[1]);
-    
   // extend the table if needed
   if (thisfunc >= funcalloc) {
     funcs = (funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(funcinfo));
