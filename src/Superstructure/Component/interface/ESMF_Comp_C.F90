@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.53 2009/04/07 05:34:48 theurich Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.54 2009/04/07 06:01:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.53 2009/04/07 05:34:48 theurich Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.54 2009/04/07 06:01:39 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -338,8 +338,8 @@ subroutine f_esmf_gridcompinitialize(comp, importState, exportState, clock, &
   type(ESMF_Clock)        :: clock
   integer                 :: phase
   type(ESMF_BlockingFlag) :: blockingFlag
-  integer                 :: rc
   integer                 :: userRc
+  integer                 :: rc
 
   type(ESMF_Clock)   :: local_clock
   type(ESMF_Pointer) :: this
@@ -602,13 +602,13 @@ subroutine f_esmf_cplcompinitialize(comp, importState, exportState, clock, &
   call ESMF_ClockSetInitCreated(local_clock)
 
   call ESMF_CplCompInitialize(comp, importState, exportState, local_clock, &
-    phase, blockingFlag, userRc)
+    phase, blockingFlag, userRc, rc)
 end subroutine f_esmf_cplcompinitialize
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_cplcomprun"
 subroutine f_esmf_cplcomprun(comp, importState, exportState, clock, phase, &
-  blockingFlag, userRc)
+  blockingFlag, userRc, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ClockMod

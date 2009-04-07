@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.45 2009/04/07 05:34:48 theurich Exp $
+// $Id: ESMC_Comp.C,v 1.46 2009/04/07 06:01:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Comp.C,v 1.45 2009/04/07 05:34:48 theurich Exp $";
+static const char *const version = "$Id: ESMC_Comp.C,v 1.46 2009/04/07 06:01:39 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -198,8 +198,7 @@ int ESMC_GridCompRun(ESMC_GridComp comp, ESMC_State importState,
   ESMCI::Clock *clockp = (ESMCI::Clock *)(clock.ptr);
 
   // call into ESMCI method  
-  localrc = compp->run(importStatep, exportStatep, clockp, phase,
-    userRc);
+  localrc = compp->run(importStatep, exportStatep, clockp, phase, userRc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     
@@ -227,8 +226,7 @@ int ESMC_GridCompFinalize(ESMC_GridComp comp, ESMC_State importState,
   ESMCI::Clock *clockp = (ESMCI::Clock *)(clock.ptr);
 
   // call into ESMCI method  
-  localrc = compp->finalize(importStatep, exportStatep, clockp, phase,
-    userRc);
+  localrc = compp->finalize(importStatep, exportStatep, clockp, phase, userRc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     
@@ -436,7 +434,7 @@ int ESMC_CplCompInitialize(ESMC_CplComp comp, ESMC_State importState,
   ESMCI::Clock *clockp = (ESMCI::Clock *)(clock.ptr);
 
   // call into ESMCI method  
-  localrc = compp->initialize(importStatep, exportStatep, clockp, phase,
+  localrc = compp->initialize(importStatep, exportStatep, clockp, phase, 
     userRc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;  // bail out
@@ -465,8 +463,7 @@ int ESMC_CplCompRun(ESMC_CplComp comp, ESMC_State importState,
   ESMCI::Clock *clockp = (ESMCI::Clock *)(clock.ptr);
 
   // call into ESMCI method  
-  localrc = compp->run(importStatep, exportStatep, clockp, phase,
-    userRc);
+  localrc = compp->run(importStatep, exportStatep, clockp, phase, userRc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     
@@ -494,8 +491,7 @@ int ESMC_CplCompFinalize(ESMC_CplComp comp, ESMC_State importState,
   ESMCI::Clock *clockp = (ESMCI::Clock *)(clock.ptr);
 
   // call into ESMCI method  
-  localrc = compp->finalize(importStatep, exportStatep, clockp, phase,
-    userRc);
+  localrc = compp->finalize(importStatep, exportStatep, clockp, phase, userRc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     
