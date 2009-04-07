@@ -668,8 +668,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
     int num_pole_elems=elems.size();
 
     // Make sure we aren't averaging over more points than exist
-    ThrowRequire(num_avg_pnts<=num_pole_elems,
-      "More pole average points requested than points around pole.");
+    ThrowRequire(num_avg_pnts<=num_pole_elems);
 
     // Hold edges of the pole area 
     EEdge_Map pole_edge_map;
