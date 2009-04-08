@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.27 2009/04/01 05:41:46 eschwab Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.28 2009/04/08 05:50:01 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.27 2009/04/01 05:41:46 eschwab Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.28 2009/04/08 05:50:01 eschwab Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -371,13 +371,13 @@ module ESMF_AttributeMod
 ! TODO
 !        module procedure ESMF_ArrayAttRead
 !        module procedure ESMF_ArrayBundleAttRead
-!        module procedure ESMF_CplCompAttRead
+        module procedure ESMF_CplCompAttRead
         module procedure ESMF_GridCompAttRead
 !        module procedure ESMF_DistGridAttRead
         module procedure ESMF_FieldAttRead
-!        module procedure ESMF_FieldBundleAttRead
+        module procedure ESMF_FieldBundleAttRead
         module procedure ESMF_GridAttRead
-!        module procedure ESMF_StateAttRead
+        module procedure ESMF_StateAttRead
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that read
@@ -4651,6 +4651,8 @@ AttLinkRemoveMacro(ESMF_CplComp, ESMF_GridComp, GridComp, comp1, comp2,  & @\
 AttLinkRemoveMacro(ESMF_CplComp, ESMF_State, State, comp, state,  & @\
                 comp%compp%base, state%statep%base)
 
+AttReadMacro(ESMF_CplComp, comp, comp%compp%base)
+
 AttRemoveMacro(ESMF_CplComp, comp, comp%compp%base)
 
 TypeKind3DeclarationMacro(AttSet, ESMF_CplComp, comp, comp%compp%base)
@@ -5120,6 +5122,8 @@ AttLinkMacro(ESMF_FieldBundle, ESMF_Field, Field, fieldbundle, field, & @\
 AttLinkRemoveMacro(ESMF_FieldBundle, ESMF_Field, Field, fieldbundle, field, & @\
                 fieldbundle%btypep%base, field%ftypep%base)
 
+AttReadMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+
 AttRemoveMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 
 TypeKind3DeclarationMacro(AttSet, ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
@@ -5396,6 +5400,8 @@ AttLinkRemoveMacro(ESMF_State, ESMF_State, State, state1, state2, & @\
                 state1%statep%base, state2%statep%base)
 
 AttRemoveMacro(ESMF_State, state, state%statep%base)
+
+AttReadMacro(ESMF_State, state, state%statep%base)
 
 TypeKind3DeclarationMacro(AttSet, ESMF_State, state, state%statep%base)
 AttSetLogicalMacro(ESMF_State, state, state%statep%base)
