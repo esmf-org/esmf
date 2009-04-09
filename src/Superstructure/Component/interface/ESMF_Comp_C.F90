@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.54 2009/04/07 06:01:39 theurich Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.55 2009/04/09 16:42:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.54 2009/04/07 06:01:39 theurich Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.55 2009/04/09 16:42:47 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -164,8 +164,8 @@ recursive subroutine f_esmf_compinsertvm(comp, vm, rc)
 end subroutine f_esmf_compinsertvm
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_compget"
-recursive subroutine f_esmf_compget(comp, ctype, rc)
+#define ESMF_METHOD "f_esmf_compgetctype"
+recursive subroutine f_esmf_compgetctype(comp, ctype, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
@@ -180,7 +180,7 @@ recursive subroutine f_esmf_compget(comp, ctype, rc)
   rc = ESMF_RC_NOT_IMPL
 
   call ESMF_CompGet(comp%compp, ctype=ctype, rc=rc)
-end subroutine f_esmf_compget
+end subroutine f_esmf_compgetctype
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_compreplicate"
@@ -199,9 +199,11 @@ recursive subroutine f_esmf_compreplicate(comp, comp_src, vm, rc)
 
   type(ESMF_VM) :: vm_cpy
   type(ESMF_Pointer) :: this
-  type (ESMF_CompClass), pointer :: compclass  
+  type (ESMF_CompClass), pointer :: compclass
+  integer :: localrc
   
   ! Initialize return code; assume routine not implemented
+  localrc = ESMF_RC_NOT_IMPL
   rc = ESMF_RC_NOT_IMPL
 
   nullify(comp%compp)
@@ -209,12 +211,19 @@ recursive subroutine f_esmf_compreplicate(comp, comp_src, vm, rc)
   allocate(compclass)
   compclass = comp_src%compp
   call ESMF_CompClassSetInitCreated(compclass)
+  call c_ESMC_FTableCreate(compclass%this, localrc) 
+  if (ESMF_LogMsgFoundError(localrc, &
+    ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rc)) return
   call ESMF_VMGetThis(vm, this)
   call ESMF_VMSetThis(vm_cpy, this)
   call ESMF_VMSetInitCreated(vm_cpy)
   call ESMF_CompSet(compclass, vm=vm_cpy)
   comp%compp => compclass
   call ESMF_CWrapSetInitCreated(comp)
+  
+  ! return successfully
+  rc = ESMF_SUCCESS
 end subroutine f_esmf_compreplicate
 
 #undef  ESMF_METHOD
@@ -241,6 +250,9 @@ recursive subroutine f_esmf_compcopy(comp, comp_src, rc)
   compclass = compclass_src
   call  ESMF_CompClassSetInitCreated(compclass_src)
   call  ESMF_CompClassSetInitCreated(compclass)
+
+  ! return successfully
+  rc = ESMF_SUCCESS
 end subroutine f_esmf_compcopy
 
 #undef  ESMF_METHOD
@@ -258,9 +270,11 @@ recursive subroutine f_esmf_compdelete(comp, rc)
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-
   deallocate(comp%compp)
   nullify(comp%compp)
+
+  ! return successfully
+  rc = ESMF_SUCCESS
 end subroutine f_esmf_compdelete
 
 

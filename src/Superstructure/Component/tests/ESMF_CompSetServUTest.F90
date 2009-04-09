@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.16 2009/03/26 03:28:20 theurich Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.17 2009/04/09 16:42:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -139,7 +139,7 @@
     call ESMF_GridCompSetServices(comp1, userRoutine=SetServ2, rc=rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Setting Component Services"
+    write(name, *) "Setting Component Services for 2nd time"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 

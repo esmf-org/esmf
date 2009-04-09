@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.h,v 1.9 2009/04/07 05:34:48 theurich Exp $
+// $Id: ESMCI_FTable.h,v 1.10 2009/04/09 16:42:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -32,6 +32,7 @@
 //-----------------------------------------------------------------------------
 
 #include "ESMCI_VM.h"
+#include "ESMCI_Comp.h"
 
 
 namespace ESMCI {
@@ -67,6 +68,7 @@ class funcinfo {
     char *funcname;
     void *funcptr;
     void *funcarg[numargs];
+    int  funcintarg;
     enum ftype ftype;
   public:
     funcinfo(){
@@ -114,6 +116,9 @@ class FTable {
     int dataalloc;
     datainfo *data;
   public:
+    int componentcount;
+    Comp *component;
+  public:
     // data
     static void getDP(FTable ***ptr, void **datap, int *status);
     static void setDP(FTable ***ptr, void **datap, int *status);
@@ -125,7 +130,7 @@ class FTable {
     int getEntry(char *name, int *rc);
     int setFuncPtr(char *name, void *func, enum ftype ftype);
     int setFuncPtr(char *name, void *func);
-    int setFuncPtr(char *name, void *func, void *arg1, int *arg2);
+    int setFuncPtr(char *name, void *func, void *arg);
     int setFuncArgs(char *name, int acount, void **arglist);
     int callVFuncPtr(char *name, ESMCI::VM *vm, int *funcrc);
     int extend(int nfuncp, int ndatap);

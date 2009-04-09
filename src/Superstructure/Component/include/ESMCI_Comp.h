@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.h,v 1.13 2009/04/07 05:34:48 theurich Exp $
+// $Id: ESMCI_Comp.h,v 1.14 2009/04/09 16:42:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -30,11 +30,13 @@
 //-----------------------------------------------------------------------------
 
 
+#include "ESMCI_LogErr.h"
+#include "ESMF_LogMacros.inc"             // for LogErr
+
 #include "ESMCI_State.h"
 #include "ESMCI_Clock.h"
 #include "ESMCI_Grid.h"
 #include "ESMCI_F90Interface.h"
-#include "ESMCI_FTable.h"
 
 
 namespace ESMCI {

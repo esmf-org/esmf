@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.182 2009/04/07 05:34:48 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.183 2009/04/09 16:42:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -258,7 +258,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.182 2009/04/07 05:34:48 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.183 2009/04/09 16:42:47 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -1021,17 +1021,12 @@ contains
 
     ! Set up the arguments
     if (compp%iAmParticipant) then
-      ! only set arguments on those PETs that are executing the component
+      ! only need to call this on PETs that participate
       call c_ESMC_FTableSetStateArgs(compp%this, method, phaseArg, &
         compp%compw, compp%is, compp%es, compp%argclock, localrc)
-!gjt: ignore return value now that setservices runs in child context
-!gjt: even participating PETs may not have an entry in the FTable if
-!gjt: their participation is simply to provides PEs to other threads.
-!TODO: this needs to be fixed, because flagging not found FTable entries
-!TODO: for PETs that need to have an entry is very important error handling!
-!          if (ESMF_LogMsgFoundError(localrc, &
-!            ESMF_ERR_PASSTHRU, &
-!            ESMF_CONTEXT, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
     endif
           
     ! callback into user code
