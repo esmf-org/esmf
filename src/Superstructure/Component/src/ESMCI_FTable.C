@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.25 2009/04/09 18:40:40 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.26 2009/04/09 20:22:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.25 2009/04/09 18:40:40 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.26 2009/04/09 20:22:17 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -387,90 +387,140 @@ extern "C" {
 extern "C" {
 
   // ---------- GridComp ---------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "esmf_gridcompsetinternalstate"
   void FTN(esmf_gridcompsetinternalstate)(ESMCI::FTable ***ptr, void **datap,
-    int *status){
-    ESMCI::FTable::setDP(ptr, datap, status);
+    int *rc){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    ESMCI::FTable::setDP(ptr, datap, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      return;
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
   }
   
+#undef  ESMC_METHOD
+#define ESMC_METHOD "esmf_gridcompgetinternalstate"
   void FTN(esmf_gridcompgetinternalstate)(ESMCI::FTable ***ptr, void **datap,
-    int *status){
-    ESMCI::FTable::getDP(ptr, datap, status);
+    int *rc){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    ESMCI::FTable::getDP(ptr, datap, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      return;
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
   }
 
   // ---------- CplComp ---------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "esmf_cplcompsetinternalstate"
   void FTN(esmf_cplcompsetinternalstate)(ESMCI::FTable ***ptr, void **datap,
-    int *status){
-    ESMCI::FTable::setDP(ptr, datap, status);
+    int *rc){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    ESMCI::FTable::setDP(ptr, datap, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      return;
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
   }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "esmf_cplcompgetinternalstate"
   void FTN(esmf_cplcompgetinternalstate)(ESMCI::FTable ***ptr, void **datap,
-    int *status){
-    ESMCI::FTable::getDP(ptr, datap, status);
+    int *rc){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    ESMCI::FTable::getDP(ptr, datap, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      return;
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
   }
 
   // ---------- UserComp ---------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "esmf_usercompsetservices"
   void FTN(esmf_usercompsetservices)(void *ptr, void (*func)(), int *userRc,
     int *rc){
-    ESMCI::FTable::setServices(ptr, func, userRc, rc);
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    ESMCI::FTable::setServices(ptr, func, userRc, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      return;
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
   }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "esmf_usercompsetvm"
   void FTN(esmf_usercompsetvm)(void *ptr, void (*func)(), int *userRc,
     int *rc){
-    ESMCI::FTable::setVM(ptr, func, userRc, rc);
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    ESMCI::FTable::setVM(ptr, func, userRc, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      return;
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
   }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "esmf_usercompsetinternalstate"
   void FTN(esmf_usercompsetinternalstate)(ESMCI::FTable ***ptr, char *name, 
-    void **datap, int *status, int slen){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMF_UserCompSetInternalState"
-    char *tbuf; 
-    enum ESMCI::dtype dtype = ESMCI::DT_FORTRAN_UDT_POINTER;
-    int localrc;
-
-    // Initialize return code; assume routine not implemented
-    if (status) *status = ESMC_RC_NOT_IMPL;
-    localrc = ESMC_RC_NOT_IMPL;
+    void **datap, int *rc, int slen){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "null pointer found", status);
+        "null pointer found", rc);
       return;
     }
 
+    char *tbuf; 
     ESMCI::FTable::newtrim(name, slen, NULL, NULL, &tbuf);
     //printf("after newtrim, name = '%s'\n", tbuf);
 
+    enum ESMCI::dtype dtype = ESMCI::DT_FORTRAN_UDT_POINTER;
     localrc = (**ptr)->setDataPtr(tbuf, datap, dtype);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      return;
   
     delete[] tbuf;
-    if (status) *status = localrc;
+    
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(esmf_usercompgetinternalstate)(ESMCI::FTable ***ptr, char *name,
-    void **datap, int *status, int slen){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMF_UserCompGetInternalState"
-    char *tbuf; 
-    enum ESMCI::dtype dtype;
-    int localrc;
-
-    // Initialize return code; assume routine not implemented
-    if (status) *status = ESMC_RC_NOT_IMPL;
-    localrc = ESMC_RC_NOT_IMPL;
+#define ESMC_METHOD "esmf_usercompgetinternalstate"
+  void FTN(esmf_usercompgetinternalstate)(ESMCI::FTable ***ptr, char *name,
+    void **datap, int *rc, int slen){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "null pointer found", status);
+        "null pointer found", rc);
       return;
     }
 
+    char *tbuf; 
     ESMCI::FTable::newtrim(name, slen, NULL, NULL, &tbuf);
     //printf("after newtrim, name = '%s'\n", tbuf);
 
+    enum ESMCI::dtype dtype;
     localrc = (**ptr)->getDataPtr(tbuf, datap, &dtype);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      return;
   
     delete[] tbuf;
-    if (status) *status = localrc;
+    
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
   }
 
 } // extern "C"
@@ -525,7 +575,7 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   ESMCI::FTable **ptr,        // p2 to the ftable of this component
   enum ESMCI::method *method, // method type
   int *phase,                 // phase selector
-  int *rc                     // return error code in status
+  int *rc                     // return code
   ){
        
   // local variables
@@ -656,50 +706,50 @@ namespace ESMCI {
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::FTable::getDP()"
-void FTable::getDP(FTable ***ptr, void **datap, int *status){
+void FTable::getDP(FTable ***ptr, void **datap, int *rc){
     char *name = "localdata";
     enum dtype dtype;
     int localrc;
 
      // Initialize return code; assume routine not implemented
-     if (status) *status = ESMC_RC_NOT_IMPL;
+     if (rc) *rc = ESMC_RC_NOT_IMPL;
      localrc = ESMC_RC_NOT_IMPL;
 
      //printf("ptr = 0x%08x\n", (ESMC_POINTER)ptr);
      //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
     if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-                                              "null pointer found", status);
+                                              "null pointer found", rc);
        return;
     }
 
     localrc = (**ptr)->getDataPtr(name, datap, &dtype);
-    if (status) *status = localrc;
+    if (rc) *rc = localrc;
 }
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::FTable::setDP()"
-void FTable::setDP(FTable ***ptr, void **datap, int *status){
+void FTable::setDP(FTable ***ptr, void **datap, int *rc){
     char *name = "localdata";
     enum dtype dtype = DT_FORTRAN_UDT_POINTER;
     int localrc;
 
      // Initialize return code; assume routine not implemented
-     if (status) *status = ESMC_RC_NOT_IMPL;
+     if (rc) *rc = ESMC_RC_NOT_IMPL;
      localrc = ESMC_RC_NOT_IMPL;
 
      //printf("ptr = 0x%08x\n", (ESMC_POINTER)ptr);
      //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
     if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-                                              "null pointer found", status);
+                                              "null pointer found", rc);
         return;
     }
 
     localrc = (**ptr)->setDataPtr(name, datap, dtype);
-    if (status) *status = localrc;
+    if (rc) *rc = localrc;
 }
 //-----------------------------------------------------------------------------
 
