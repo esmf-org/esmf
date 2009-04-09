@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.h,v 1.10 2009/04/09 16:42:47 theurich Exp $
+// $Id: ESMCI_FTable.h,v 1.11 2009/04/09 23:05:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -120,8 +120,8 @@ class FTable {
     Comp *component;
   public:
     // data
-    static void getDP(FTable ***ptr, void **datap, int *status);
-    static void setDP(FTable ***ptr, void **datap, int *status);
+    static void getDP(FTable ***ptr, void **datap, int *rc);
+    static void setDP(FTable ***ptr, void **datap, int *rc);
     int getDataPtr(char *name, void **data, enum dtype *dtype);
     int setDataPtr(char *name, void **data, enum dtype dtype);
     // func

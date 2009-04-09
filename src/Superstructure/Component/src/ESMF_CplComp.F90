@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.108 2009/04/09 18:40:40 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.109 2009/04/09 23:05:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.108 2009/04/09 18:40:40 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.109 2009/04/09 23:05:47 theurich Exp $'
 
 !==============================================================================
 !
@@ -316,7 +316,7 @@ contains
     type(ESMF_Clock),        intent(inout), optional :: clock
     integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
-    integer,                 intent(inout), optional :: userRc
+    integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
@@ -380,9 +380,6 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    ! initialize localUserRc with incoming value
-    if (present(userRc)) localUserRc = userRc
-
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETFINAL, &
       importState=importState, exportState=exportState, clock=clock, &
       phase=phase, blockingflag=blockingflag, userRc=localUserRc, rc=localrc)
@@ -390,7 +387,7 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! pass userRc back to user
+    ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
     ! return successfully
@@ -543,7 +540,7 @@ contains
     type(ESMF_Clock),        intent(inout), optional :: clock
     integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
-    integer,                 intent(inout), optional :: userRc
+    integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
@@ -606,9 +603,6 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    ! initialize localUserRc with incoming value
-    if (present(userRc)) localUserRc = userRc
-
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETINIT, &
       importState=importState, exportState=exportState, clock=clock, &
       phase=phase, blockingflag=blockingflag, userRc=localUserRc, rc=localrc)
@@ -616,7 +610,7 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! pass userRc back to user
+    ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
     ! return successfully
@@ -757,7 +751,7 @@ contains
     type(ESMF_Clock),        intent(inout), optional :: clock
     integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
-    integer,                 intent(inout), optional :: userRc
+    integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
@@ -818,9 +812,6 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    ! initialize localUserRc with incoming value
-    if (present(userRc)) localUserRc = userRc
-
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETREADRESTART, &
       importState=importState, exportState=exportState, clock=clock, &
       phase=phase, blockingflag=blockingflag, userRc=localUserRc, rc=localrc)
@@ -828,7 +819,7 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! pass userRc back to user
+    ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
     ! return successfully
@@ -854,7 +845,7 @@ contains
     type(ESMF_Clock),        intent(inout), optional :: clock
     integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
-    integer,                 intent(inout), optional :: userRc
+    integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
@@ -917,9 +908,6 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    ! initialize localUserRc with incoming value
-    if (present(userRc)) localUserRc = userRc
-
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETRUN, &
       importState=importState, exportState=exportState, clock=clock, &
       phase=phase, blockingflag=blockingflag, userRc=localUserRc, rc=localrc)
@@ -927,7 +915,7 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! pass userRc back to user
+    ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
     ! return successfully
@@ -1143,17 +1131,17 @@ contains
   recursive subroutine ESMF_CplCompSetServices(cplcomp, userRoutine, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp)               :: cplcomp
+    type(ESMF_CplComp)             :: cplcomp
     interface
       subroutine userRoutine(cplcomp, rc)
         use ESMF_CompMod
         implicit none
-        type(ESMF_CplComp)           :: cplcomp  ! must not be optional
-        integer, intent(out)         :: rc       ! must not be optional
+        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
       end subroutine
     end interface
-    integer, intent(inout), optional :: UserRc
-    integer, intent(out),   optional :: rc
+    integer, intent(out), optional :: userRc
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Call into user provided {\tt userRoutine} which is responsible for
@@ -1190,15 +1178,12 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
   
-    ! initialize localUserRc with incoming value
-    if (present(userRc)) localUserRc = userRc
-
     call c_ESMC_SetServices(cplcomp, userRoutine, localUserRc, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! pass userRc back to user
+    ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
     ! return successfully
@@ -1219,11 +1204,11 @@ contains
     sharedObj, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp),  intent(inout)           :: cplcomp
-    character(len=*),    intent(in)              :: userRoutine
-    character(len=*),    intent(in),    optional :: sharedObj
-    integer,             intent(inout), optional :: UserRc
-    integer,             intent(out),   optional :: rc
+    type(ESMF_CplComp),  intent(inout)         :: cplcomp
+    character(len=*),    intent(in)            :: userRoutine
+    character(len=*),    intent(in),  optional :: sharedObj
+    integer,             intent(out), optional :: userRc
+    integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Call into user provided routine which is responsible for setting
@@ -1277,9 +1262,6 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
   
-    ! initialize localUserRc with incoming value
-    if (present(userRc)) localUserRc = userRc
-
     if (present(sharedObj)) then
       call c_ESMC_SetServicesShObj(cplcomp, userRoutine, sharedObj, &
         localUserRc, localrc)
@@ -1291,7 +1273,7 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! pass userRc back to user
+    ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
     ! return successfully
@@ -1309,17 +1291,17 @@ contains
 ! !INTERFACE:
   recursive subroutine ESMF_CplCompSetVM(cplcomp, userRoutine, userRc, rc)
 ! !ARGUMENTS:
-    type(ESMF_CplComp)               :: cplcomp
+    type(ESMF_CplComp)             :: cplcomp
     interface
       subroutine userRoutine(cplcomp, rc)
         use ESMF_CompMod
         implicit none
-        type(ESMF_CplComp)           :: cplcomp  ! must not be optional
-        integer, intent(out)         :: rc       ! must not be optional
+        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
       end subroutine
     end interface
-    integer, intent(inout), optional :: UserRc
-    integer, intent(out),   optional :: rc
+    integer, intent(out), optional :: userRc
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Optionally call into user provided {\tt userRoutine} which is responsible for
@@ -1356,15 +1338,12 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
   
-    ! initialize localUserRc with incoming value
-    if (present(userRc)) localUserRc = userRc
-
     call c_ESMC_SetVM(cplcomp, userRoutine, localUserRc, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! pass userRc back to user
+    ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
     ! return successfully
@@ -1384,11 +1363,11 @@ contains
     userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp),  intent(inout)           :: cplcomp
-    character(len=*),    intent(in)              :: userRoutine
-    character(len=*),    intent(in),    optional :: sharedObj
-    integer,             intent(inout), optional :: UserRc
-    integer,             intent(out),   optional :: rc
+    type(ESMF_CplComp),  intent(inout)         :: cplcomp
+    character(len=*),    intent(in)            :: userRoutine
+    character(len=*),    intent(in),  optional :: sharedObj
+    integer,             intent(out), optional :: userRc
+    integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Optionally call into user provided {\tt userRoutine} which is responsible for
@@ -1441,9 +1420,6 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
   
-    ! initialize localUserRc with incoming value
-    if (present(userRc)) localUserRc = userRc
-
     if (present(sharedObj)) then
       call c_ESMC_SetVMShObj(cplcomp, userRoutine, sharedObj, localUserRc, &
         localrc)
@@ -1455,7 +1431,7 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! pass userRc back to user
+    ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
     ! return successfully
@@ -1762,7 +1738,7 @@ contains
     type(ESMF_Clock),        intent(inout), optional :: clock
     integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
-    integer,                 intent(inout), optional :: userRc
+    integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
@@ -1823,9 +1799,6 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    ! initialize localUserRc with incoming value
-    if (present(userRc)) localUserRc = userRc
-
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETWRITERESTART, &
       importState=importState, exportState=exportState, clock=clock, &
       phase=phase, blockingflag=blockingflag, userRc=localUserRc, rc=localrc)
@@ -1833,7 +1806,7 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! pass userRc back to user
+    ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
     ! return successfully

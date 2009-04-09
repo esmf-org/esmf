@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.184 2009/04/09 18:40:40 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.185 2009/04/09 23:05:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -256,7 +256,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.184 2009/04/09 18:40:40 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.185 2009/04/09 23:05:47 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -907,7 +907,7 @@ contains
     type(ESMF_Clock),        intent(in),    optional :: clock
     integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingFlag
-    integer,                 intent(inout), optional :: userRc
+    integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
@@ -1039,9 +1039,6 @@ contains
     ! by the following flag:  
     compp%vm_released = .true.
 
-    ! set to incoming userRc    
-    if (present(userRc)) localUserRc = userRc
-    
     ! sync PETs according to blocking mode
     if (blocking == ESMF_VASBLOCKING .or. blocking == ESMF_BLOCKING) then
       ! wait for all child PETs that run in this parent's PET VAS to finish
@@ -1067,7 +1064,7 @@ contains
       endif
     endif
 
-    ! write back potentially modified userRc
+    ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
     ! return successfully
@@ -1793,10 +1790,10 @@ contains
   subroutine ESMF_CompWait(compp, blockingFlag, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CompClass),    pointer                 :: compp
-    type(ESMF_BlockingFlag), intent(in),    optional :: blockingFlag
-    integer,                 intent(inout), optional :: userRc
-    integer,                 intent(out),   optional :: rc
+    type(ESMF_CompClass),    pointer               :: compp
+    type(ESMF_BlockingFlag), intent(in),  optional :: blockingFlag
+    integer,                 intent(out), optional :: userRc
+    integer,                 intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Wait for component to return
@@ -1844,9 +1841,6 @@ contains
       return
     endif
 
-    ! set to incoming userRc    
-    if (present(userRc)) localUserRc = userRc
-
     ! check if the child VM, i.e. the VM of this component, is currently marked
     ! as running...
     if (compp%vm_released) then
@@ -1879,7 +1873,7 @@ contains
       endif
     endif
 
-    ! write back potentially modified userRc
+    ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
     ! return successfully

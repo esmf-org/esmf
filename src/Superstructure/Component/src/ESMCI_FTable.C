@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.26 2009/04/09 20:22:17 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.27 2009/04/09 23:05:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.26 2009/04/09 20:22:17 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.27 2009/04/09 23:05:47 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -442,12 +442,12 @@ extern "C" {
 
   // ---------- UserComp ---------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "esmf_usercompsetservices"
-  void FTN(esmf_usercompsetservices)(void *ptr, void (*func)(), int *userRc,
+#define ESMC_METHOD "esmf_usercompsetvm"
+  void FTN(esmf_usercompsetvm)(void *ptr, void (*func)(), int *userRc,
     int *rc){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
-    ESMCI::FTable::setServices(ptr, func, userRc, &localrc);
+    ESMCI::FTable::setVM(ptr, func, userRc, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
     // return successfully
@@ -455,12 +455,12 @@ extern "C" {
   }
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "esmf_usercompsetvm"
-  void FTN(esmf_usercompsetvm)(void *ptr, void (*func)(), int *userRc,
+#define ESMC_METHOD "esmf_usercompsetservices"
+  void FTN(esmf_usercompsetservices)(void *ptr, void (*func)(), int *userRc,
     int *rc){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
-    ESMCI::FTable::setVM(ptr, func, userRc, &localrc);
+    ESMCI::FTable::setServices(ptr, func, userRc, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
     // return successfully
@@ -543,13 +543,13 @@ static void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargo){
   char *name = ((ESMCI::cargotype *)cargo)->name;         // name of callback
   ESMCI::FTable *ftable = ((ESMCI::cargotype *)cargo)->ftable; // ptr to ftable
   
-  int esmfrc;   // ESMF return code of ESMCI::FTableCallVFuncPtr()
-  int userrc;   // user return code from the registered component method 
+  int esmfrc;           // ESMF return code of ESMCI::FTable::callVFuncPtr()
+  int userrc = -99999; // user return code from the registered component method 
   
   // call into user code through ESMF function table...
-  esmfrc = ftable->callVFuncPtr(name, (ESMCI::VM*)vm, &userrc);
+  int localrc = ftable->callVFuncPtr(name, (ESMCI::VM*)vm, &userrc);
   // ...back from user code
-  
+
   // put the return codes into cargo 
   // TODO: If this PET is part of a threadgroup that was spawned out of a
   // single parent PET then return codes must be returned as a single value to
@@ -558,9 +558,15 @@ static void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargo){
   // threadsafe manner :-). The following code actually suffers from a
   // racecondition in the multi-threaded case! Should probably be able to 
   // return a list of esmfrc and userrc values in cargo up to the spawning PET
-  ((ESMCI::cargotype *)cargo)->esmfrc = esmfrc;
   ((ESMCI::cargotype *)cargo)->userrc = userrc;
   
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &esmfrc)){
+    ((ESMCI::cargotype *)cargo)->esmfrc = esmfrc;
+    return NULL;
+  }
+  
+  // return successfully
+  ((ESMCI::cargotype *)cargo)->esmfrc = ESMF_SUCCESS;
   return NULL;
 }
 
@@ -620,16 +626,17 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   ESMCI::FTable *ftable = *ptr;               // pointer to function table
          
   ESMCI::cargotype *cargo = new ESMCI::cargotype;
-  strcpy(cargo->name, name);   // copy trimmed type string
-  cargo->ftable = ftable;      // pointer to function table
-  cargo->esmfrc = ESMF_SUCCESS;// initialize return code to SUCCESS for all PETs
-  cargo->userrc = ESMF_SUCCESS;// initialize return code to SUCCESS for all PETs
-  *vm_cargo=(void*)cargo;      // store pointer to the cargo structure
+  strcpy(cargo->name, name);    // copy trimmed type string
+  cargo->ftable = ftable;       // pointer to function table
+  cargo->esmfrc = ESMF_SUCCESS; // initialize return code
+  cargo->userrc = 0;            // initialize user return code
+  *vm_cargo=(void*)cargo;       // store pointer to the cargo structure
   delete[] name;  // delete memory that "newtrim" allocated above
 
   // enter the child VM -> resurface in ESMCI_FTableCallEntryPointVMHop()
   localrc = vm_parent->enter(vmplan, *vm_info, (void*)cargo);
-  ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    return;
         
   // ... if the child VM uses threads (multi-threading or single-threading) 
   // then this parent PET continues running concurrently to the child PET in the
@@ -1356,6 +1363,7 @@ int FTable::callVFuncPtr(
   switch (func->ftype){
     case FT_VOIDP1INTP: {
       //printf("calling out of case FT_VOIDP1INTP\n");
+      if (userrc) func->funcintarg = *userrc;
       VoidP1IntPFunc vf = (VoidP1IntPFunc)func->funcptr;
       (*vf)((void *)comp, &(func->funcintarg));
       if (userrc) *userrc = func->funcintarg;
@@ -1363,6 +1371,7 @@ int FTable::callVFuncPtr(
     }
     case FT_VOIDP4INTP: {
       //printf("calling out of case FT_VOIDP4INTP\n");
+      if (userrc) func->funcintarg = *userrc;
       VoidP4IntPFunc vf = (VoidP4IntPFunc)func->funcptr;
       (*vf)(comp, func->funcarg[1], func->funcarg[2],
         func->funcarg[3], &(func->funcintarg));
