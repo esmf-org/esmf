@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.23 2009/04/09 16:42:47 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.24 2009/04/09 17:37:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.23 2009/04/09 16:42:47 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.24 2009/04/09 17:37:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -64,8 +64,8 @@ extern "C" {
     int *rc);
   void FTN(f_esmf_compreplicate)(ESMCI::Comp *compp, ESMCI::Comp *compp_src,
     void *vm, int *rc);
-  void FTN(f_esmf_compcopy)(ESMCI::Comp *compp, ESMCI::Comp *compp_src, int     
-    *rc);
+  void FTN(f_esmf_comprefcopy)(ESMCI::Comp *compp, ESMCI::Comp *compp_src,
+    int *rc);
   void FTN(f_esmf_compdelete)(ESMCI::Comp *compp, int *rc);
   
   void FTN(f_esmf_fortranudtpointersize)(int *size);
@@ -1351,19 +1351,29 @@ int FTable::callVFuncPtr(
       func = funcs + i; // determine PET-local function entry
       vm_pointer->threadbarrier();  // wait for all the threads to have entered
       if (mytid==0){
-        // master thread allocate components in FTable
+        // master thread allocates component list in FTable
         component = new Comp[mynthreads];
         componentcount = mynthreads;
+        vm_pointer->threadbarrier();  // synchronize with slave threads
+        comp = component;   // determine PET-local component
+        // make a copy of the component reference
+        FTN(f_esmf_comprefcopy)(comp, (Comp *)(func->funcarg[0]), &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+          return rc; // bail out
+        // insert child VM
+        FTN(f_esmf_compinsertvm)(comp, vm, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+          return rc; // bail out
+      }else{
+        // slave thread -> replicate component structure, insert child VM
+        vm_pointer->threadbarrier();  // synchronize with master thread
+        // replicate Component from the parent PET w/ private FTable, insert VM
+        comp = component + mytid; // determine PET-local component
+        FTN(f_esmf_compreplicate)(comp, (Comp *)(func->funcarg[0]), vm,
+          &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+          return rc; // bail out
       }
-      vm_pointer->threadbarrier();  // wait for the master thread to be done
-      // every child PET replicates from the parent PET and inserts its VM
-      comp = component + mytid; // determine PET-local component
-      FTN(f_esmf_compreplicate)(comp, (Comp *)(func->funcarg[0]), vm, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-        return rc; // bail out      
-      FTN(f_esmf_compinsertvm)(comp, vm, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-        return rc; // bail out
     }else if (i>-1){
       // not first time entry, but found name in FTable
       // -> must be SetServices _again_
@@ -1619,7 +1629,8 @@ FTable::~FTable(void) {
   dataalloc = 0; 
   data = NULL;
   
-  for (int i=0; i<componentcount; i++){
+  for (int i=1; i<componentcount; i++){
+    // skip i=0 since that is identical to the actual Component object
     Comp *comp = component + i;
     FTable *ftable = **(FTable ***)comp;
     delete ftable;

@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.55 2009/04/09 16:42:47 theurich Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.56 2009/04/09 17:37:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.55 2009/04/09 16:42:47 theurich Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.56 2009/04/09 17:37:34 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -227,8 +227,8 @@ recursive subroutine f_esmf_compreplicate(comp, comp_src, vm, rc)
 end subroutine f_esmf_compreplicate
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_compcopy"
-recursive subroutine f_esmf_compcopy(comp, comp_src, rc)
+#define ESMF_METHOD "f_esmf_comprefcopy"
+recursive subroutine f_esmf_comprefcopy(comp, comp_src, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
@@ -245,15 +245,12 @@ recursive subroutine f_esmf_compcopy(comp, comp_src, rc)
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  compclass_src => comp_src%compp
-  compclass => comp%compp
-  compclass = compclass_src
-  call  ESMF_CompClassSetInitCreated(compclass_src)
-  call  ESMF_CompClassSetInitCreated(compclass)
+  comp%compp => comp_src%compp
+  call ESMF_CWrapSetInitCreated(comp)
 
   ! return successfully
   rc = ESMF_SUCCESS
-end subroutine f_esmf_compcopy
+end subroutine f_esmf_comprefcopy
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_compdelete"
