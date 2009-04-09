@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.24 2009/04/09 17:37:34 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.25 2009/04/09 18:40:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.24 2009/04/09 17:37:34 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.25 2009/04/09 18:40:40 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -111,60 +111,6 @@ extern "C" {
     if (rc) *rc = ESMF_SUCCESS;
   }
   
-  // call a function through the ftable
-  // TODO: REMOVE this routine, now that RESTART callback follows standard!
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_ftablecallentrypoint"
-  void FTN(c_esmc_ftablecallentrypoint)(ESMCI::FTable **ptr, 
-    enum ESMCI::method *method, int *phase, int *rc){
-    int localrc = ESMC_RC_NOT_IMPL;
-    if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-    char *methodString;
-    switch(*method){
-    case ESMCI::SETINIT:
-      methodString = "Initialize";
-      break;
-    case ESMCI::SETRUN:
-      methodString = "Run";
-      break;
-    case ESMCI::SETFINAL:
-      methodString = "Finalize";
-      break;
-    case ESMCI::SETWRITERESTART:
-      methodString = "WriteRestart";
-      break;
-    case ESMCI::SETREADRESTART:
-      methodString = "ReadRestart";
-      break;
-    case ESMCI::SETREGISTER:
-      methodString = "Register";
-      break;
-    default:
-      break;
-    }
-    
-    int slen = strlen(methodString);
-    char *name;
-    ESMCI::FTable::newtrim(methodString, slen, phase, NULL, &name);
-    //printf("after newtrim, name = '%s'\n", name);
-
-    int userRc;
-    localrc = (*ptr)->callVFuncPtr(name, NULL, &userRc);
-
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
-      return;
-
-    // TODO: don't check userRc here, just pass it through as an extra arg!   
-    if (ESMC_LogDefault.MsgFoundError(userRc, ESMF_ERR_PASSTHRU, rc)) 
-      return;
-    
-    delete[] name;  // delete memory that "newtrim" allocated above
-
-    // return successfully
-    if (rc) *rc = ESMF_SUCCESS;
-  }
-
   // set arguments for standard Component methods
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_ftablesetstateargs"
@@ -224,54 +170,6 @@ extern "C" {
 
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
-  }
-
-  // set arguments for RESTART Component methods
-  // TODO: REMOVE this routine, now that RESTART callback follows standard!
-  void FTN(c_esmc_ftablesetioargs)(ESMCI::FTable **ptr,
-    enum ESMCI::method *method, int *phase,
-    void *comp, void *iospec, void *clock, int *status) {
-    char *fname;
-    int acount = 4;
-    void *alist[4];
-
-    *status = ESMC_RC_NOT_IMPL;
-
-    char *methodString;
-    switch(*method){
-    case ESMCI::SETINIT:
-      methodString = "Initialize";
-      break;
-    case ESMCI::SETRUN:
-      methodString = "Run";
-      break;
-    case ESMCI::SETFINAL:
-      methodString = "Finalize";
-      break;
-    case ESMCI::SETWRITERESTART:
-      methodString = "WriteRestart";
-      break;
-    case ESMCI::SETREADRESTART:
-      methodString = "ReadRestart";
-      break;
-    case ESMCI::SETREGISTER:
-      methodString = "Register";
-      break;
-    default:
-      break;
-    }
-    
-    int slen = strlen(methodString);
-    ESMCI::FTable::newtrim(methodString, slen, phase, NULL, &fname);
-    //printf("after newtrim, name = '%s'\n", fname);
-
-    alist[0] = (void *)comp;
-    alist[1] = (void *)iospec;
-    alist[2] = (void *)clock;
-    alist[3] = (void *)status;
-
-    *status = (*ptr)->setFuncArgs(fname, acount, alist);
-    delete[] fname;  // delete memory that "newtrim" allocated above
   }
 
   // set the InternalState in FTable

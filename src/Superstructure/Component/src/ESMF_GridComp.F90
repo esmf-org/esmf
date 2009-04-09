@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.120 2009/04/07 05:34:49 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.121 2009/04/09 18:40:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.120 2009/04/07 05:34:49 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.121 2009/04/09 18:40:40 theurich Exp $'
 
 !==============================================================================
 !
@@ -768,27 +768,14 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompReadRestart"
-!BOPI
-! !IROUTINE: ESMF_GridCompReadRestart - Call the GridComp's restore routine
+!BOP
+! !IROUTINE: ESMF_GridCompReadRestart - Call the GridComp's read restart routine
 !
 ! !INTERFACE:
-#ifdef OLD
-  recursive subroutine ESMF_GridCompReadRestart(gridcomp, iospec, clock, &
-    phase, blockingflag, rc)
-#else
   recursive subroutine ESMF_GridCompReadRestart(gridcomp, importState, &
     exportState, clock, phase, blockingflag, userRc, rc)
-#endif
 !
 ! !ARGUMENTS:
-#ifdef OLD
-    type(ESMF_GridComp),     intent(inout)           :: gridcomp
-    type(ESMF_IOSpec),       intent(inout), optional :: iospec
-    type(ESMF_Clock),        intent(inout), optional :: clock
-    integer,                 intent(in),    optional :: phase
-    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
-    integer,                 intent(out),   optional :: rc
-#else
     type(ESMF_GridComp)                              :: gridcomp
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
@@ -797,27 +784,34 @@ contains
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
     integer,                 intent(inout), optional :: userRc
     integer,                 intent(out),   optional :: rc
-#endif
 !
 ! !DESCRIPTION:
-! Call the associated user restore code for a {\tt gridcomp}.
-!   
+! Call the associated user read restart code for an {\tt ESMF\_GridComp}.
+!    
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
-!   {\tt ESMF\_GridComp} object to call readrestart routine for.
-! \item[{[iospec]}]
-!   {\tt ESMF\_IOSpec} object which describes I/O options.
-! \item[{[clock]}]
-!   External {\tt ESMF\_Clock} for passing in time information.
+!   {\tt ESMF\_GridComp} to call run routine for.
+! \item[{[importState]}]  
+!   {\tt ESMF\_State} containing import data. If not present, a dummy
+!   argument will be passed to the user-supplied routine.  The 
+!   importState argument in the user code cannot be optional. 
+! \item[{[exportState]}]  
+!   {\tt ESMF\_State} containing export data. If not present, a dummy
+!   argument will be passed to the user-supplied routine.  The 
+!   exportState argument in the user code cannot be optional. 
+! \item[{[clock]}]  
+!   External {\tt ESMF\_Clock} for passing in time information.  
 !   This is generally the parent component's clock, and will be treated
 !   as read-only by the child component.  The child component can maintain
-!   a private clock for its own internal time computations.
-! \item[{[phase]}]
+!   a private clock for its own internal time computations. If not present, a dummy
+!   argument will be passed to the user-supplied routine.  The 
+!   clock argument in the user code cannot be optional. 
+! \item[{[phase]}]   
 !   Component providers must document whether their each of their
-!   routines are {\em single-phase} or {\em multi-phase}.  
+!   routines are {\em single-phase} or {\em multi-phase}.    
 !   Single-phase routines require only one invocation to complete
-!   their work.  
+!   their work.    
 !   Multi-phase routines provide multiple subroutines to accomplish
 !   the work, accomodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
@@ -826,7 +820,7 @@ contains
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
-! \item[{[blockingflag]}]
+! \item[{[blockingflag]}]  
 !   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
 !   for a list of valid blocking options. Default option is
 !   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
@@ -837,7 +831,7 @@ contains
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
     integer :: localUserRc
@@ -852,14 +846,9 @@ contains
     ! initialize localUserRc with incoming value
     if (present(userRc)) localUserRc = userRc
 
-#ifdef OLD
-    call ESMF_CompReadRestart(gridcomp%compp, iospec, clock, phase, &
-      blockingflag, rc=localrc)
-#else
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETREADRESTART, &
       importState=importState, exportState=exportState, clock=clock, &
       phase=phase, blockingflag=blockingflag, userRc=localUserRc, rc=localrc)
-#endif
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1794,27 +1783,14 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompWriteRestart"
-!BOPI
-! !IROUTINE: ESMF_GridCompWriteRestart - Call the GridComp's checkpoint routine
+!BOP
+! !IROUTINE: ESMF_GridCompWriteRestart - Call the GridComp's write restart routine
 !
 ! !INTERFACE:
-#ifdef OLD
-  recursive subroutine ESMF_GridCompWriteRestart(gridcomp, iospec, clock, &
-    phase, blockingflag, rc)
-#else
   recursive subroutine ESMF_GridCompWriteRestart(gridcomp, importState, &
     exportState, clock, phase, blockingflag, userRc, rc)
-#endif
 !
 ! !ARGUMENTS:
-#ifdef OLD
-    type(ESMF_GridComp),     intent(inout)           :: gridcomp
-    type(ESMF_IOSpec),       intent(inout), optional :: iospec
-    type(ESMF_Clock),        intent(inout), optional :: clock
-    integer,                 intent(in),    optional :: phase
-    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
-    integer,                 intent(out),   optional :: rc
-#else
     type(ESMF_GridComp)                              :: gridcomp
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
@@ -1823,36 +1799,43 @@ contains
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
     integer,                 intent(inout), optional :: userRc
     integer,                 intent(out),   optional :: rc
-#endif
 !
 ! !DESCRIPTION:
-! Call the associated user checkpoint code for an {\tt ESMF\_GridComp}.
-!   
+! Call the associated user write restart code for an {\tt ESMF\_GridComp}.
+!    
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
-!   {\tt ESMF\_GridComp} to call writerestart routine for.
-! \item[{[iospec]}]  
-!   {\tt ESMF\_IOSpec} object which describes I/O options.
-! \item[{[clock]}]
-!   External {\tt ESMF\_Clock} for passing in time information.
+!   {\tt ESMF\_GridComp} to call run routine for.
+! \item[{[importState]}]  
+!   {\tt ESMF\_State} containing import data. If not present, a dummy
+!   argument will be passed to the user-supplied routine.  The 
+!   importState argument in the user code cannot be optional. 
+! \item[{[exportState]}]  
+!   {\tt ESMF\_State} containing export data. If not present, a dummy
+!   argument will be passed to the user-supplied routine.  The 
+!   exportState argument in the user code cannot be optional. 
+! \item[{[clock]}]  
+!   External {\tt ESMF\_Clock} for passing in time information.  
 !   This is generally the parent component's clock, and will be treated
 !   as read-only by the child component.  The child component can maintain
-!   a private clock for its own internal time computations.
-! \item[{[phase]}]
+!   a private clock for its own internal time computations. If not present, a dummy
+!   argument will be passed to the user-supplied routine.  The 
+!   clock argument in the user code cannot be optional. 
+! \item[{[phase]}]   
 !   Component providers must document whether their each of their
-!   routines are {\em single-phase} or {\em multi-phase}.
+!   routines are {\em single-phase} or {\em multi-phase}.    
 !   Single-phase routines require only one invocation to complete
-!   their work.
+!   their work.    
 !   Multi-phase routines provide multiple subroutines to accomplish
 !   the work, accomodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
-!   For multiple-phase child components, this is the integer phase
+!   For multiple-phase child components, this is the integer phase  
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
-! \item[{[blockingflag]}]
+! \item[{[blockingflag]}]  
 !   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
 !   for a list of valid blocking options. Default option is
 !   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
@@ -1863,7 +1846,7 @@ contains
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
     integer :: localUserRc
@@ -1878,14 +1861,9 @@ contains
     ! initialize localUserRc with incoming value
     if (present(userRc)) localUserRc = userRc
 
-#ifdef OLD
-    call ESMF_CompWriteRestart(gridcomp%compp, iospec, clock, phase, &
-      blockingflag, rc=localrc)
-#else
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETWRITERESTART, &
       importState=importState, exportState=exportState, clock=clock, &
       phase=phase, blockingflag=blockingflag, userRc=localUserRc, rc=localrc)
-#endif
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

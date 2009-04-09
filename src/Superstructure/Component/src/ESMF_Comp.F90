@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.183 2009/04/09 16:42:47 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.184 2009/04/09 18:40:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -242,14 +242,12 @@ module ESMF_CompMod
   public ESMF_CompGet
   public ESMF_CompIsPetLocal
   public ESMF_CompPrint
-  public ESMF_CompReadRestart
   public ESMF_CompSet
   public ESMF_CompSetVMMaxPEs
   public ESMF_CompSetVMMaxThreads
   public ESMF_CompSetVMMinThreads
   public ESMF_CompValidate
   public ESMF_CompWait
-  public ESMF_CompWriteRestart
 
   public ESMF_CWrapSetInitCreated
 
@@ -258,7 +256,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.183 2009/04/09 16:42:47 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.184 2009/04/09 18:40:40 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -1358,120 +1356,6 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CompReadRestart"
-!BOPI
-! !IROUTINE: ESMF_CompReadRestart -- Call the Component's internal restart routine
-
-! !INTERFACE:
-  recursive subroutine ESMF_CompReadRestart(compp, iospec, clock, phase, &
-    blockingFlag, rc)
-!
-!
-! !ARGUMENTS:
-    type(ESMF_CompClass),    pointer               :: compp
-    type(ESMF_IOSpec),       intent(in),  optional :: iospec
-    type(ESMF_Clock),        intent(in),  optional :: clock
-    integer,                 intent(in),  optional :: phase
-    type(ESMF_BlockingFlag), intent(in),  optional :: blockingFlag
-    integer,                 intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user internal restart code for a component.
-!
-!    
-!  The arguments are:
-!  \begin{description}
-!   \item[compp]
-!    Component to call ReadRestart routine for.
-!   \item[{[iospec]}]  
-!    Controls for how the component's data will be read back.
-!   \item[{[clock]}]  
-!    External clock for passing in time information.
-!   \item[{[phase]}]  
-!     If multiple-phase restore, which phase number this is. Default is 1.
-!   \item[{[blockingFlag]}]  
-!    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-        integer :: status                       ! local error status
-        logical :: rcpresent                    ! did user specify rc?
-        character(ESMF_MAXSTR) :: cname
-        type (ESMF_BlockingFlag) :: blocking
-        integer:: phaseArg
-
-        ! ReadRestart return code; assume failure until success is certain
-        status = ESMF_RC_NOT_IMPL
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_RC_NOT_IMPL
-        endif
-
-
-        if (.not.associated(compp)) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                     "Uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc) 
-            return
-        endif
-
-        ! Check init status of arguments
-        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
-
-
-
-        if (compp%compstatus .ne. ESMF_STATUS_READY) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                     "uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc)  
-            return
-        endif
-
-        call ESMF_GetName(compp%base, cname, status)
-
-        ! set the default mode to ESMF_VASBLOCKING
-        if (present(blockingFlag)) then
-          blocking = blockingFlag
-        else
-          blocking = ESMF_VASBLOCKING
-        endif
-
-        ! phase
-        phaseArg = 1 !default
-        if (present(phase)) phaseArg = phase
-
-        ! TODO: put in rest of default argument handling here
-
-        ! Wrap comp so it's passed to C++ correctly.
-        compp%compw%compp => compp
-
-        ! Set up the arguments before the call     
-        call c_ESMC_FTableSetIOArgs(compp%this, ESMF_SETREADRESTART, phaseArg, &
-          compp%compw, iospec, clock, status)
-
-        ! Call user-defined run routine
-        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETREADRESTART, &
-          phaseArg, status)
-
-        ! set error code but fall thru and clean up states
-        if (ESMF_LogMsgFoundError(status, &
-                                  "Component readrestart error", &
-                                  ESMF_CONTEXT, rc)) continue
-        ! fall thru intentionally
-
-        ! Set return values
-        if (rcpresent) rc = status
-
-  end subroutine ESMF_CompReadRestart
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CompSet"
 !BOPI
 ! !IROUTINE: ESMF_CompSet -- Query a component for various information
@@ -2002,120 +1886,6 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_CompWait
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CompWriteRestart"
-!BOPI
-! !IROUTINE: ESMF_CompWriteRestart -- Call the Component's internal save routine
-
-! !INTERFACE:
-  recursive subroutine ESMF_CompWriteRestart(compp, iospec, clock, phase, &
-    blockingFlag, rc)
-!
-!
-! !ARGUMENTS:
-    type(ESMF_CompClass),    pointer               :: compp
-    type(ESMF_IOSpec),       intent(in),  optional :: iospec
-    type(ESMF_Clock),        intent(in),  optional :: clock
-    integer,                 intent(in),  optional :: phase
-    type(ESMF_BlockingFlag), intent(in),  optional :: blockingFlag
-    integer,                 intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user checkpoint code for a component.
-!    
-!  The arguments are:
-!  \begin{description}
-!   \item[compp]
-!    Component to call WriteRestart routine for.
-!   \item[{[iospec]}]  
-!     Controls for how the component's data will be written.
-!   \item[{[clock]}]  
-!     External clock for passing in time information.
-!   \item[{[phase]}]  
-!     If multiple-phase checkpoint, which phase number this is. Default is 1.
-!   \item[{[blockingFlag]}]  
-!    Blocking behavior of this method call. See section \ref{opt:blockingflag} 
-!    for a list of valid blocking options. Default option is
-!    {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
-!    across each VAS.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-        integer :: status                       ! local error status
-        logical :: rcpresent                    ! did user specify rc?
-        character(ESMF_MAXSTR) :: cname
-        type (ESMF_BlockingFlag) :: blocking
-        integer:: phaseArg
-
-        ! WriteRestart return code; assume failure until success is certain
-        status = ESMF_RC_NOT_IMPL
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_RC_NOT_IMPL
-        endif
-
-        if (.not.associated(compp)) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                    "Uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc) 
-            return
-        endif
-
-        ! Check init status of arguments
-        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
-
-
-        if (compp%compstatus .ne. ESMF_STATUS_READY) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                     "uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc) 
-            return
-        endif
-
-        call ESMF_GetName(compp%base, cname, status)
-
-        ! set the default mode to ESMF_VASBLOCKING
-        if (present(blockingFlag)) then
-          blocking = blockingFlag
-        else
-          blocking = ESMF_VASBLOCKING
-        endif
-
-        ! phase
-        phaseArg = 1 !default
-        if (present(phase)) phaseArg = phase
-
-        ! TODO: add rest of default handling here.
-
-        ! Wrap comp so it's passed to C++ correctly.
-        compp%compw%compp => compp
-
-        ! Set up the arguments before the call     
-        call c_ESMC_FTableSetIOArgs(compp%this, ESMF_SETWRITERESTART, phaseArg,&
-         compp%compw, iospec, clock, status)
-
-        ! Call user-defined run routine
-        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETWRITERESTART, &
-          phaseArg, status)
-
-        ! set error code but fall thru and clean up states
-        if (ESMF_LogMsgFoundError(status, &
-                                  "Component writerestart error", &
-                                  ESMF_CONTEXT, rc)) continue
-        ! fall thru intentionally
-
-        ! Set return values
-        if (rcpresent) rc = status
-
-  end subroutine ESMF_CompWriteRestart
 !------------------------------------------------------------------------------
 
 
