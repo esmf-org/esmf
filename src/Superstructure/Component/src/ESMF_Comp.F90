@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.185 2009/04/09 23:05:47 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.186 2009/04/10 05:24:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -100,11 +100,14 @@ module ESMF_CompMod
   end type
 
   type(ESMF_Method), parameter :: &
+    ESMF_SETNONE          = ESMF_Method(0), &
     ESMF_SETINIT          = ESMF_Method(1), &
     ESMF_SETRUN           = ESMF_Method(2), &
     ESMF_SETFINAL         = ESMF_Method(3), &
     ESMF_SETWRITERESTART  = ESMF_Method(4), &
-    ESMF_SETREADRESTART   = ESMF_Method(5)
+    ESMF_SETREADRESTART   = ESMF_Method(5), &
+    ESMF_SETVM            = ESMF_Method(6), &
+    ESMF_SETSERVICES      = ESMF_Method(7)
     
 !------------------------------------------------------------------------------
 ! ! ESMF Phase number
@@ -179,6 +182,10 @@ module ESMF_CompMod
 
     integer            :: status
     type(ESMF_ContextFlag) :: contextflag    ! contextflag
+    
+    type(ESMF_Method) :: currentMethod      ! current method component is in
+    integer           :: currentPhase       ! current phase of method
+    
     ESMF_INIT_DECLARE
   end type
 
@@ -214,8 +221,10 @@ module ESMF_CompMod
 ! !PUBLIC TYPES:
   public ESMF_GridCompType, ESMF_ATM, ESMF_LAND, ESMF_OCEAN, &
     ESMF_SEAICE, ESMF_RIVER, ESMF_OTHER
-  public ESMF_Method, ESMF_SETINIT, ESMF_SETRUN, ESMF_SETFINAL
+  public ESMF_Method, ESMF_SETNONE, ESMF_SETINIT, ESMF_SETRUN, ESMF_SETFINAL
   public ESMF_SETWRITERESTART, ESMF_SETREADRESTART
+  public ESMF_SETVM, ESMF_SETSERVICES
+  
   public ESMF_SINGLEPHASE
       
   ! These have to be public so other component types can use them, but 
@@ -256,7 +265,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.185 2009/04/09 23:05:47 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.186 2009/04/10 05:24:57 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -771,7 +780,12 @@ contains
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-   
+
+        ! current method/phase
+        compp%currentMethod = ESMF_SETNONE
+        compp%currentPhase  = 0
+
+        ! ready   
         compp%compstatus = ESMF_STATUS_READY
 
         ! Set init code
@@ -1026,6 +1040,10 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
     endif
+    
+    ! set the current method/phase to keep track inside Component for query
+    compp%currentMethod = method
+    compp%currentPhase  = phaseArg
           
     ! callback into user code
     call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
@@ -1062,6 +1080,9 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
       endif
+      ! reset current method/phase
+      compp%currentMethod = ESMF_SETNONE
+      compp%currentPhase  = 0
     endif
 
     ! pass back userRc
@@ -1083,7 +1104,7 @@ contains
 ! !INTERFACE:
   recursive subroutine ESMF_CompGet(compp, name, vm, vm_parent, vmplan, &
     vm_info, contextflag, gridcomptype, grid, clock, dirPath, configFile, &
-    config, ctype, rc)
+    config, ctype, currentMethod, currentPhase, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),    pointer               :: compp
@@ -1100,7 +1121,9 @@ contains
     character(len=*),        intent(out), optional :: configFile
     type(ESMF_Config),       intent(out), optional :: config
     type(ESMF_CompType),     intent(out), optional :: ctype
-    integer,                 intent(out), optional :: rc             
+    type(ESMF_Method),       intent(out), optional :: currentMethod
+    integer,                 intent(out), optional :: currentPhase
+    integer,                 intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -1193,6 +1216,13 @@ contains
           config = compp%config
         endif
 
+        if (present(currentMethod)) then
+          currentMethod = compp%currentMethod
+        endif
+
+        if (present(currentPhase)) then
+          currentPhase = compp%currentPhase
+        endif
 
         ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
@@ -1872,6 +1902,10 @@ contains
           ESMF_CONTEXT, rc)) return
       endif
     endif
+
+    ! reset current method/phase
+    compp%currentMethod = ESMF_SETNONE
+    compp%currentPhase  = 0
 
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc

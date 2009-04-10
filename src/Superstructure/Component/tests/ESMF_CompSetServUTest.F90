@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.17 2009/04/09 16:42:47 theurich Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.18 2009/04/10 05:24:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -33,11 +33,11 @@
     implicit none
     
 !   ! Local variables
-    integer :: rc
+    integer :: rc, userRc
     character(ESMF_MAXSTR) :: cname
     type(ESMF_GridComp) :: comp1
     type(ESMF_VM) :: vm
-    integer:: petCount, i
+    integer:: localPet, petCount, i
     integer, allocatable:: petList(:)
 
     ! individual test failure message
@@ -74,7 +74,7 @@
     call ESMF_VMGetGlobal(vm, rc=rc)
     if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     
-    call ESMF_VMGet(vm, petCount=petCount, rc=rc)
+    call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
     if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     
     allocate(petList((petCount+1)/2))
@@ -122,12 +122,20 @@
     !NEX_UTest
 !   !  Call init
 
-    call ESMF_GridCompInitialize(comp1, rc=rc)
+    call ESMF_GridCompInitialize(comp1, userRc=userRc, rc=rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling Component Init"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+    !NEX_UTest
+    write(failMsg, *) "userRc not ESMF_SUCCESS"
+    write(name, *) "Calling Component Init"
+    if ((localPet/2)*2 == localPet) then
+      call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    else      
+      call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE)
+    endif
 
 
 #ifdef ESMF_TESTEXHAUSTIVE
@@ -148,11 +156,20 @@
     !EX_UTest
 !   !  Call new init
 
-    call ESMF_GridCompInitialize(comp1, rc=rc)
+    call ESMF_GridCompInitialize(comp1, userRc=userRc, rc=rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling Component Init"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    write(failMsg, *) "userRc does not contain expected code"
+    write(name, *) "Calling Component Init"
+    if ((localPet/2)*2 == localPet) then
+      call ESMF_Test((userRc.eq.123456), name, failMsg, result, ESMF_SRCLINE)
+    else
+      call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE)
+    endif
 
 !-------------------------------------------------------------------------
 !   !  Set Internal State
@@ -169,7 +186,6 @@
 !   !
 !   !  Get Internal State
     !EX_UTest
-    !wrap2%p=>data2
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Get Internal State Test"
     call ESMF_GridCompGetInternalState(comp1, wrap2, rc)

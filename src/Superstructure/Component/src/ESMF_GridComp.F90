@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.122 2009/04/09 23:05:47 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.123 2009/04/10 05:24:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.122 2009/04/09 23:05:47 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.123 2009/04/10 05:24:57 theurich Exp $'
 
 !==============================================================================
 !
@@ -421,7 +421,7 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_GridCompGet(gridcomp, name, gridcomptype, grid, config, &
-    configFile, clock, vm, contextflag, rc)
+    configFile, clock, vm, contextflag, currentMethod, currentPhase, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)         :: gridcomp
@@ -433,6 +433,8 @@ contains
     type(ESMF_Clock),        intent(out), optional :: clock
     type(ESMF_VM),           intent(out), optional :: vm
     type(ESMF_ContextFlag),  intent(out), optional :: contextflag
+    type(ESMF_Method),       intent(out), optional :: currentMethod
+    integer,                 intent(out), optional :: currentPhase
     integer,                 intent(out), optional :: rc
 
 !
@@ -465,6 +467,11 @@ contains
 ! \item[{[contextflag]}]
 !   Return the {\tt ESMF\_ContextFlag} for this {\tt ESMF\_GridComp}.
 !   See section \ref{opt:contextflag} for a complete list of valid flags.
+! \item[{[currentMethod]}]
+!   Return the current {\tt ESMF\_Method} of the {\tt ESMF\_GridComp} execution.
+!   See section \ref{opt:method}  for a complete list of valid options.
+! \item[{[currentPhase]}]
+!   Return the current {\tt phase} of the {\tt ESMF\_GridComp} execution.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -482,7 +489,8 @@ contains
     ! call Comp method
     call ESMF_CompGet(gridcomp%compp, name, vm=vm, contextflag=contextflag,&
       gridcomptype=gridcomptype, grid=grid, clock=clock, &
-      configFile=configFile, config=config, rc=localrc)
+      configFile=configFile, config=config, currentMethod=currentMethod, &
+      currentPhase=currentPhase, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1212,10 +1220,16 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
   
+    ! set the current method to keep track inside Component for query
+    gridcomp%compp%currentMethod = ESMF_SETSERVICES
+
     call c_ESMC_SetServices(gridcomp, userRoutine, localUserRc, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! reset the current method to keep track inside Component for query
+    gridcomp%compp%currentMethod = ESMF_SETNONE
 
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
@@ -1296,6 +1310,9 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
   
+    ! set the current method to keep track inside Component for query
+    gridcomp%compp%currentMethod = ESMF_SETSERVICES
+
     if (present(sharedObj)) then
       call c_ESMC_SetServicesShObj(gridcomp, userRoutine, sharedObj, &
         localUserRc, localrc)
@@ -1306,6 +1323,9 @@ contains
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! reset the current method to keep track inside Component for query
+    gridcomp%compp%currentMethod = ESMF_SETNONE
 
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
@@ -1372,11 +1392,17 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
   
+    ! set the current method to keep track inside Component for query
+    gridcomp%compp%currentMethod = ESMF_SETVM
+
     call c_ESMC_SetVM(gridcomp, userRoutine, localUserRc, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
+    ! reset the current method to keep track inside Component for query
+    gridcomp%compp%currentMethod = ESMF_SETNONE
+
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
@@ -1455,6 +1481,9 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
   
+    ! set the current method to keep track inside Component for query
+    gridcomp%compp%currentMethod = ESMF_SETVM
+
     if (present(sharedObj)) then
       call c_ESMC_SetVMShObj(gridcomp, userRoutine, sharedObj, localUserRc, &
         localrc)
@@ -1465,6 +1494,9 @@ contains
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! reset the current method to keep track inside Component for query
+    gridcomp%compp%currentMethod = ESMF_SETNONE
 
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
