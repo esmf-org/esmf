@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.27 2009/04/09 23:05:47 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.28 2009/04/10 03:35:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.27 2009/04/09 23:05:47 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.28 2009/04/10 03:35:48 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -533,40 +533,50 @@ extern "C" {
      
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_FTableCallEntryPointVMHop"
-static void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargo){
+static void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
   // This routine is the first level that gets instantiated in new VM
   // The first argument must be of type (void *) and points to a derived
   // ESMCI::VMK class object. The second argument is also of type (void *)
   // and points to a cargotype structure.
   
   // pull out info from cargo
-  char *name = ((ESMCI::cargotype *)cargo)->name;         // name of callback
-  ESMCI::FTable *ftable = ((ESMCI::cargotype *)cargo)->ftable; // ptr to ftable
+  ESMCI::cargotype *cargo = (ESMCI::cargotype *)cargoCast;
+  char *name = cargo->name;               // name of callback
+  ESMCI::FTable *ftable = cargo->ftable;  // ptr to ftable
   
   int esmfrc;           // ESMF return code of ESMCI::FTable::callVFuncPtr()
-  int userrc = -99999; // user return code from the registered component method 
+  int userrc = -99999;  // user return code from the registered component method
+
+  // prepare return code members in cargo
+  int mypet = ((ESMCI::VM*)vm)->getMypet();
+  int mynthreads = ((ESMCI::VM*)vm)->getNthreads(mypet);
+  int mytid = ((ESMCI::VM*)vm)->getTid(mypet);
+  if (mytid==0){
+    // master thread -> allocate return code members in cargo for all threads
+    if (cargo->rcCount != mynthreads){
+      delete [] cargo->esmfrc;
+      delete [] cargo->userrc;
+      cargo->esmfrc = new int[mynthreads];
+      cargo->userrc = new int[mynthreads];
+      cargo->rcCount = mynthreads;
+    }
+  }
+  ((ESMCI::VM*)vm)->threadbarrier();  // synchronize all threads in local group
   
   // call into user code through ESMF function table...
   int localrc = ftable->callVFuncPtr(name, (ESMCI::VM*)vm, &userrc);
   // ...back from user code
 
   // put the return codes into cargo 
-  // TODO: If this PET is part of a threadgroup that was spawned out of a
-  // single parent PET then return codes must be returned as a single value to
-  // the parent in the cargo structure (btw, each child PET that's a thread
-  // has the same pointer to cargo. Naturally the above must be done in a
-  // threadsafe manner :-). The following code actually suffers from a
-  // racecondition in the multi-threaded case! Should probably be able to 
-  // return a list of esmfrc and userrc values in cargo up to the spawning PET
-  ((ESMCI::cargotype *)cargo)->userrc = userrc;
+  cargo->userrc[mytid] = userrc;
   
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &esmfrc)){
-    ((ESMCI::cargotype *)cargo)->esmfrc = esmfrc;
+    cargo->esmfrc[mytid] = esmfrc;
     return NULL;
   }
   
   // return successfully
-  ((ESMCI::cargotype *)cargo)->esmfrc = ESMF_SUCCESS;
+  cargo->esmfrc[mytid] = ESMF_SUCCESS;
   return NULL;
 }
 
@@ -628,8 +638,11 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   ESMCI::cargotype *cargo = new ESMCI::cargotype;
   strcpy(cargo->name, name);    // copy trimmed type string
   cargo->ftable = ftable;       // pointer to function table
-  cargo->esmfrc = ESMF_SUCCESS; // initialize return code
-  cargo->userrc = 0;            // initialize user return code
+  cargo->rcCount = 1;           // default
+  cargo->esmfrc = new int[1];
+  cargo->userrc = new int[1];
+  cargo->esmfrc[0] = ESMF_SUCCESS; // initialize return code
+  cargo->userrc[0] = 0;            // initialize user return code
   *vm_cargo=(void*)cargo;       // store pointer to the cargo structure
   delete[] name;  // delete memory that "newtrim" allocated above
 
@@ -681,14 +694,15 @@ void FTN(c_esmc_compwait)(
   }
   
   // obtain return codes out of cargo
-  //TODO: for multi-threaded case there should actually be coming back as many
-  //TODO: esmfrc and userrc values as there are threads.
-  localrc = cargo->esmfrc;
+  //TODO: deal with multiple return codes coming back for multi-threaded VMs
+  localrc = cargo->esmfrc[0];
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
     return;
-  if (userrc) *userrc = cargo->userrc;
+  if (userrc) *userrc = cargo->userrc[0];
   
   // delete cargo structure
+  delete [] cargo->esmfrc;
+  delete [] cargo->userrc;
   delete cargo;
   
   // return successfully
