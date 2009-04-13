@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.101 2009/02/16 19:14:31 rokuingh Exp $
+// $Id: ESMC_Base.h,v 1.102 2009/04/13 15:25:29 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -51,7 +51,6 @@ class ESMC_Base
     int           ID;           // unique ID for any object in this VM context
     ESMCI::VMId   *vmID;        // unique vmID for any VM in the system
     int           refCount;     // number of references to this instance
-    int           classID;      // unique ID relative to this class
     ESMC_Status   baseStatus;   // status of an instance of Base derived class
     char          baseName[ESMF_MAXSTR];    // object name, unique over class 
     char          baseNameF90[ESMF_MAXSTR]; // same name, non-null terminated
@@ -65,6 +64,7 @@ class ESMC_Base
     ESMC_Base(const ESMC_Base&);
   
   public:
+    int           classID;      // unique ID relative to this class
     ESMCI::Attribute root;
 
     // required & optional standard interface methods for all ESMF classes.
