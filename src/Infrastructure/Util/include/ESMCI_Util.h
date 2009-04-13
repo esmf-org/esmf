@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.14 2009/02/25 05:30:52 rokuingh Exp $
+// $Id: ESMCI_Util.h,v 1.15 2009/04/13 15:10:54 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -86,9 +86,16 @@ enum ESMC_RegionFlag { ESMF_REGION_TOTAL=0,
                        ESMF_REGION_SELECT,
                        ESMF_REGION_EMPTY};
 
-// attwrite flag type
-enum ESMC_AttWriteFlag { ESMF_ATTWRITE_TAB=0,
-                         ESMF_ATTWRITE_XML};
+// Attribute reconcile type
+enum ESMC_AttCopyFlag { ESMF_ATTCOPY_HYBRID=0,
+                        ESMF_ATTCOPY_REFERENCE,
+                        ESMF_ATTCOPY_VALUE};
+
+// attgetcount flag type
+enum ESMC_AttGetCountFlag { ESMC_ATTGETCOUNT_ATTRIBUTE=0,
+                            ESMC_ATTGETCOUNT_ATTPACK,
+                            ESMC_ATTGETCOUNT_ATTLINK,
+                            ESMC_ATTGETCOUNT_TOTAL};
                         
 // nested Attribute package flag type
 enum ESMC_AttPackNestFlag { ESMF_ATTPACKNEST_OFF=0,
@@ -99,14 +106,13 @@ enum ESMC_AttReconcileFlag { ESMF_ATTRECONCILE_OFF=0,
                             ESMF_ATTRECONCILE_ON};
 
 // Attribute reconcile type
-enum ESMC_AttCopyFlag { ESMF_ATTCOPY_HYBRID=0,
-                        ESMF_ATTCOPY_REFERENCE,
-                        ESMF_ATTCOPY_VALUE};
-
-// Attribute reconcile type
 enum ESMC_AttTreeFlag { ESMF_ATTTREE_OFF=0,
                         ESMF_ATTTREE_ON};
 
+// attwrite flag type
+enum ESMC_AttWriteFlag { ESMF_ATTWRITE_TAB=0,
+                         ESMF_ATTWRITE_XML};
+                        
 // are the index numbers relative to a local chunk or the overall
 // combined igrid?
 typedef enum {

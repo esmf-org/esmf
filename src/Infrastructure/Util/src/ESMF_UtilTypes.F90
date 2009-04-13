@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.75 2009/02/25 06:36:08 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.76 2009/04/13 15:10:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -543,6 +543,23 @@
         ESMF_ATTCOPY_VALUE = ESMF_AttCopyFlag(2)
 
 !------------------------------------------------------------------------------
+!     ! ESMF_AttGetCountFlag
+!
+!     ! Interface flag for Attribute copy
+
+      type ESMF_AttGetCountFlag
+      sequence
+      !private
+        integer :: value
+      end type
+
+      type(ESMF_AttGetCountFlag), parameter ::  &
+        ESMF_ATTGETCOUNT_ATTRIBUTE = ESMF_AttGetCountFlag(0), &
+        ESMF_ATTGETCOUNT_ATTPACK = ESMF_AttGetCountFlag(1), &
+        ESMF_ATTGETCOUNT_ATTLINK = ESMF_AttGetCountFlag(2), &
+        ESMF_ATTGETCOUNT_TOTAL = ESMF_AttGetCountFlag(3)
+
+!------------------------------------------------------------------------------
 !     ! ESMF_AttTreeFlag
 !
 !     ! Interface flag for Attribute tree
@@ -606,12 +623,14 @@
       public ESMF_ContextFlag, ESMF_CHILD_IN_NEW_VM, ESMF_CHILD_IN_PARENT_VM
       public ESMF_TerminationFlag, ESMF_FINAL, ESMF_KEEPMPI, ESMF_ABORT
       public ESMF_DePinFlag, ESMF_DE_PIN_PET, ESMF_DE_PIN_VAS
-      public ESMF_AttWriteFlag, ESMF_ATTWRITE_TAB, ESMF_ATTWRITE_XML
-      public ESMF_AttPackNestFlag, ESMF_ATTPACKNEST_OFF, ESMF_ATTPACKNEST_ON
-      public ESMF_AttReconcileFlag, ESMF_ATTRECONCILE_OFF, ESMF_ATTRECONCILE_ON
       public ESMF_AttCopyFlag, ESMF_ATTCOPY_HYBRID, ESMF_ATTCOPY_REFERENCE, &
                                ESMF_ATTCOPY_VALUE
+      public ESMF_AttGetCountFlag, ESMF_ATTGETCOUNT_ATTRIBUTE, ESMF_ATTGETCOUNT_ATTPACK, &
+                                   ESMF_ATTGETCOUNT_ATTLINK, ESMF_ATTGETCOUNT_TOTAL
+      public ESMF_AttPackNestFlag, ESMF_ATTPACKNEST_OFF, ESMF_ATTPACKNEST_ON
+      public ESMF_AttReconcileFlag, ESMF_ATTRECONCILE_OFF, ESMF_ATTRECONCILE_ON
       public ESMF_AttTreeFlag, ESMF_ATTTREE_OFF, ESMF_ATTTREE_ON
+      public ESMF_AttWriteFlag, ESMF_ATTWRITE_TAB, ESMF_ATTWRITE_XML
 
       public ESMF_FAILURE, ESMF_SUCCESS
       public ESMF_MAXSTR
