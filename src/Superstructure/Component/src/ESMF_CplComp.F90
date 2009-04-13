@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.110 2009/04/10 05:24:57 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.111 2009/04/13 22:15:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.110 2009/04/10 05:24:57 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.111 2009/04/13 22:15:20 theurich Exp $'
 
 !==============================================================================
 !
@@ -369,7 +369,6 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local return code
-    integer :: localUserRc
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -382,13 +381,10 @@ contains
 
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETFINAL, &
       importState=importState, exportState=exportState, clock=clock, &
-      phase=phase, blockingflag=blockingflag, userRc=localUserRc, rc=localrc)
+      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! pass back userRc
-    if (present(userRc)) userRc = localUserRc
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -600,7 +596,6 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    integer :: localUserRc
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -613,13 +608,10 @@ contains
 
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETINIT, &
       importState=importState, exportState=exportState, clock=clock, &
-      phase=phase, blockingflag=blockingflag, userRc=localUserRc, rc=localrc)
+      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! pass back userRc
-    if (present(userRc)) userRc = localUserRc
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -811,7 +803,6 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                  ! local return code
-    integer :: localUserRc
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -822,13 +813,10 @@ contains
 
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETREADRESTART, &
       importState=importState, exportState=exportState, clock=clock, &
-      phase=phase, blockingflag=blockingflag, userRc=localUserRc, rc=localrc)
+      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! pass back userRc
-    if (present(userRc)) userRc = localUserRc
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -905,7 +893,6 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                     ! local return code
-    integer :: localUserRc
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -918,13 +905,10 @@ contains
 
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETRUN, &
       importState=importState, exportState=exportState, clock=clock, &
-      phase=phase, blockingflag=blockingflag, userRc=localUserRc, rc=localrc)
+      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! pass back userRc
-    if (present(userRc)) userRc = localUserRc
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1708,11 +1692,12 @@ contains
 ! !IROUTINE: ESMF_CplCompWait - Wait for a CplComp to return
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompWait(cplcomp, blockingFlag, rc)
+  subroutine ESMF_CplCompWait(cplcomp, blockingflag, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),      intent(inout)         :: cplcomp
-    type(ESMF_BlockingFlag), intent(in),  optional :: blockingFlag
+    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    integer,                 intent(out), optional :: userRc
     integer,                 intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1722,11 +1707,13 @@ contains
 ! \begin{description}
 ! \item[cplcomp] 
 !   {\tt ESMF\_CplComp} to wait for.
-! \item[{[blockingFlag]}]
+! \item[{[blockingflag]}]
 !   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
 !   for a list of valid blocking options. Default option is
 !   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
+! \item[{[userRc]}]
+!   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}] 
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1742,7 +1729,8 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
     ! call Comp method
-    call ESMF_CompWait(cplcomp%compp, blockingFlag, rc=localrc)
+    call ESMF_CompWait(cplcomp%compp, blockingflag=blockingflag, &
+      userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
@@ -1822,7 +1810,6 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    integer :: localUserRc
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1833,13 +1820,10 @@ contains
 
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETWRITERESTART, &
       importState=importState, exportState=exportState, clock=clock, &
-      phase=phase, blockingflag=blockingflag, userRc=localUserRc, rc=localrc)
+      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! pass back userRc
-    if (present(userRc)) userRc = localUserRc
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
