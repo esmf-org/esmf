@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.7 2009/03/23 20:40:48 theurich Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.8 2009/04/13 15:14:59 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -589,8 +589,8 @@ module ESMF_AttributeUpdateMod
 ! application.  We need to first make that data consistent across the
 ! entire VM with the {\tt ESMF\_StateReconcile()} call.
 ! This State level call handles both the data -- Fields and FieldBundles, 
-! and the metadata -- Attribute and Attribute packages.  In future releases a flag will be
-! added to this call to allow the user to specify whether they want 
+! and the metadata -- Attribute and Attribute packages.  There is a flag in
+! this call to allow the user to specify whether they want 
 ! the metadata to be reconciled or not.
 !EOE
 

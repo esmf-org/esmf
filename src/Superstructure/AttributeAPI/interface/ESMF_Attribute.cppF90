@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.28 2009/04/08 05:50:01 eschwab Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.29 2009/04/13 15:14:59 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.28 2009/04/08 05:50:01 eschwab Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.29 2009/04/13 15:14:59 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -318,10 +318,12 @@ module ESMF_AttributeMod
         module procedure ESMF_CplCompAttLinkCplComp
         module procedure ESMF_CplCompAttLinkGridComp
         module procedure ESMF_CplCompAttLinkState
+        module procedure ESMF_FieldBundleAttLinkField
+        module procedure ESMF_FieldBundleAttLinkGrid
+        module procedure ESMF_FieldAttLinkGrid
         module procedure ESMF_GridCompAttLinkCplComp
         module procedure ESMF_GridCompAttLinkGridComp
         module procedure ESMF_GridCompAttLinkState
-        module procedure ESMF_FieldBundleAttLinkField
         module procedure ESMF_StateAttLinkFieldBundle
         module procedure ESMF_StateAttLinkField
         module procedure ESMF_StateAttLinkState
@@ -345,10 +347,12 @@ module ESMF_AttributeMod
         module procedure ESMF_CplCompAttLinkRmCplComp
         module procedure ESMF_CplCompAttLinkRmGridComp
         module procedure ESMF_CplCompAttLinkRmState
+        module procedure ESMF_FieldBundleAttLinkRmField
+        module procedure ESMF_FieldBundleAttLinkRmGrid
+        module procedure ESMF_FieldAttLinkRmGrid
         module procedure ESMF_GridCompAttLinkRmCplComp
         module procedure ESMF_GridCompAttLinkRmGridComp
         module procedure ESMF_GridCompAttLinkRmState
-        module procedure ESMF_FieldBundleAttLinkRmField
         module procedure ESMF_StateAttLinkRmFieldBundle
         module procedure ESMF_StateAttLinkRmField
         module procedure ESMF_StateAttLinkRmState
@@ -776,11 +780,12 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGet() 
-!     subroutine ESMF_AttributeGetCount(<object>, count, rc)
+!     subroutine ESMF_AttributeGetCount(<object>, count, attcountflag, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
 !     integer, intent(out) :: count
+!     type(ESMF_AttCountFlag), intent(in), optional :: attcountflag
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -804,9 +809,20 @@ contains
 !           An {\tt ESMF} object.
 !     \item [count] 
 !           The Attribute count for <object>.
+!     \item [attcountflag]
+!           The flag to specify which attribute count to return, the 
+!           default is ESMF\_ATTGETCOUNT\_ATTRIBUTE (see below).
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
+!
+!     NOTE:  The options for {\tt attcountflag} include:
+!            \begin{enumerate}
+!              \item ESMF\_ATTGETCOUNT\_ATTRIBUTE will get the number of single Attributes
+!              \item ESMF\_ATTGETCOUNT\_ATTPACK will get the number of Attribute packages
+!              \item ESMF\_ATTGETCOUNT\_ATTLINK will get the number of Attribute links
+!              \item ESMF\_ATTGETCOUNT\_TOTAL will get the total number of Attributes
+!            \end{enumerate}
 !
 !
 !EOP
@@ -994,7 +1010,7 @@ contains
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLink()
-!      subroutine ESMF_FieldBundleAttLink(state, <object>, rc)
+!      subroutine ESMF_FieldBundleAttLink(fieldbundle, <object>, rc)
 !
 ! !ARGUMENTS:
 !      type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
@@ -1012,6 +1028,36 @@ contains
 !       An {\tt ESMF\_FieldBundle} object.
 !     \item [field]
 !       An {\tt ESMF\_Field} object.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeLink - Link a Field and Grid Attribute hierarchy
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLink()
+!      subroutine ESMF_FieldAttLink(field, <object>, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF\_Field), intent(inout) :: field
+!      type(ESMF\_Grid), intent(inout) :: grid
+!      integer, intent(out), optional :: rc   
+!
+!
+! !DESCRIPTION:
+!     Attaches a {\tt Field} Attribute hierarchy to the hierarchy of
+!     a {\tt Grid}. 
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!       An {\tt ESMF\_Field} object.
+!     \item [grid]
+!       An {\tt ESMF\_Grid} object.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1104,7 +1150,7 @@ contains
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLinkRemove()
-!      subroutine ESMF_FieldBundleAttLinkRemove(state, <object>, rc)
+!      subroutine ESMF_FieldBundleAttLinkRemove(fieldbundle, <object>, rc)
 !
 ! !ARGUMENTS:
 !      type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
@@ -1122,6 +1168,36 @@ contains
 !       An {\tt ESMF\_FieldBundle} object.
 !     \item [field]
 !       An {\tt ESMF\_Field} object.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a Field and Grid Attribute hierarchy
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLinkRemove()
+!      subroutine ESMF_FieldAttLinkRemove(field, <object>, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF\_Field), intent(inout) :: field
+!      type(ESMF\_Grid), intent(inout) :: grid
+!      integer, intent(out), optional :: rc   
+!
+!
+! !DESCRIPTION:
+!     Unattaches a {\tt Field} Attribute hierarchy from the hierarchy of
+!     a {\tt Grid}. 
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!       An {\tt ESMF\_Field} object.
+!     \item [grid]
+!       An {\tt ESMF\_Grid} object.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1605,117 +1681,6 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
       end subroutine mclass1##AttCopy @\
-
-!------------------------------------------------------------------------------
-
-#define AttRemoveMacro(mclass, mthis, mthisfield) \
-^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_AttRemove" @\
- @\
-!BOPI @\
-! !IROUTINE: ESMF_AttributeRemove  - Remove an Attribute or Attribute Package @\
-! @\
-! !INTERFACE: @\
-      ! Private name; call using ESMF_AttributeRemove() @\
-      subroutine mclass##AttRemove(mthis, name, convention, purpose, rc) @\
-! @\
-! !ARGUMENTS: @\
-      type(mclass), intent(inout) :: mthis   @\
-      character (len = *), intent(in), optional :: name @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
-      integer, intent(out), optional :: rc    @\
-! @\
-! !DESCRIPTION: @\
-!     Removes an Attribute on the object. @\
-! @\
-!     The arguments are: @\
-!     \begin{description} @\
-!     \item [mthis] @\
-!           An ESMF object. @\
-!     \item [name] @\
-!           The name of the Attribute to destroy. @\
-!     \item [convention] @\
-!           The convention of the Attribute package. @\
-!     \item [purpose] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[rc]}]  @\
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
-!     \end{description} @\
-! @\
-! @\
-!EOPI @\
- @\
-      integer :: localrc, directional @\
-      character(len=*), parameter :: fconvention='N/A' @\
-      character(len=*), parameter :: fpurpose='N/A' @\
-      character(len=*), parameter :: fobject=#mthis @\
- @\
-      ! Initialize @\
-      localrc = ESMF_RC_NOT_IMPL @\
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
- @\
-      ! check variables @\
-      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
- @\
-      directional = 0 ! neither convention nor purpose @\
-   @\
-    if (present(convention) .OR. present(purpose)) then @\
-       @\
-      if (present(convention)) then @\
-        directional = 1 ! convention only @\
-      endif @\
- @\
-      if (present(purpose)) then @\
-        directional = 2 ! purpose only @\
-      endif @\
- @\
-      if (present(convention) .AND. present(purpose)) then @\
-        directional = 3 ! convention and purpose @\
-      endif @\
- @\
-      if (directional == 3 .AND. .not.(present(name))) then @\
-      call c_ESMC_AttPackRemove(mthisfield, convention, & @\
-        purpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      else if (directional == 0 .AND. present(name)) then @\
-      call c_ESMC_AttPackRemoveAttribute(mthisfield, name, fconvention, & @\
-        fpurpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      else if (directional == 1 .AND. present(name)) then @\
-      call c_ESMC_AttPackRemoveAttribute(mthisfield, name, convention, & @\
-        fpurpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      else if (directional == 2 .AND. present(name)) then @\
-      call c_ESMC_AttPackRemoveAttribute(mthisfield, name, fconvention, & @\
-        purpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      else if (directional == 3 .AND. present(name)) then @\
-      call c_ESMC_AttPackRemoveAttribute(mthisfield, name, convention, & @\
-        purpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-    else if (present(name)) then @\
- @\
-      call c_ESMC_AttributeRemove(mthisfield, name, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-    endif @\
- @\
-      if (present(rc)) rc = ESMF_SUCCESS @\
- @\
-      end subroutine mclass##AttRemove @\
 
 !------------------------------------------------------------------------------
 
@@ -2880,11 +2845,12 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet()  @\
-      subroutine mclass##AttGetCount(mthis, count, rc) @\
+      subroutine mclass##AttGetCount(mthis, count, attcountflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       integer, intent(out) :: count    @\
+      type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -2898,6 +2864,8 @@ contains
 !           An ESMF object. @\
 !     \item [count] @\
 !           The number of Attributes associated with this object. @\
+!     \item [attcountflag] @\
+!           Flag to determine which Attribute count to return. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -2906,6 +2874,7 @@ contains
 !EOPI @\
  @\
       integer :: localrc  @\
+      type(ESMF_AttGetCountFlag) :: lattcountflag @\
  @\
       ! Initialize  @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -2914,7 +2883,13 @@ contains
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      call c_ESMC_AttributeGetCount(mthisfield, count, localrc) @\
+      if (present(attcountflag)) then @\
+        lattcountflag = attcountflag @\
+      else @\
+        lattcountflag = ESMF_ATTGETCOUNT_ATTRIBUTE @\
+      endif @\
+ @\
+      call c_ESMC_AttributeGetCount(mthisfield, count, lattcountflag, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
@@ -3315,6 +3290,117 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
       end subroutine mclass##AttRead @\
+
+!------------------------------------------------------------------------------
+
+#define AttRemoveMacro(mclass, mthis, mthisfield) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttRemove" @\
+ @\
+!BOPI @\
+! !IROUTINE: ESMF_AttributeRemove  - Remove an Attribute or Attribute Package @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeRemove() @\
+      subroutine mclass##AttRemove(mthis, name, convention, purpose, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(mclass), intent(inout) :: mthis   @\
+      character (len = *), intent(in), optional :: name @\
+      character (len = *), intent(in), optional :: convention @\
+      character (len = *), intent(in), optional :: purpose @\
+      integer, intent(out), optional :: rc    @\
+! @\
+! !DESCRIPTION: @\
+!     Removes an Attribute on the object. @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis] @\
+!           An ESMF object. @\
+!     \item [name] @\
+!           The name of the Attribute to destroy. @\
+!     \item [convention] @\
+!           The convention of the Attribute package. @\
+!     \item [purpose] @\
+!           The purpose of the Attribute package. @\
+!     \item [{[rc]}]  @\
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc, directional @\
+      character(len=*), parameter :: fconvention='N/A' @\
+      character(len=*), parameter :: fpurpose='N/A' @\
+      character(len=*), parameter :: fobject=#mthis @\
+ @\
+      ! Initialize @\
+      localrc = ESMF_RC_NOT_IMPL @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check variables @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      directional = 0 ! neither convention nor purpose @\
+   @\
+    if (present(convention) .OR. present(purpose)) then @\
+       @\
+      if (present(convention)) then @\
+        directional = 1 ! convention only @\
+      endif @\
+ @\
+      if (present(purpose)) then @\
+        directional = 2 ! purpose only @\
+      endif @\
+ @\
+      if (present(convention) .AND. present(purpose)) then @\
+        directional = 3 ! convention and purpose @\
+      endif @\
+ @\
+      if (directional == 3 .AND. .not.(present(name))) then @\
+      call c_ESMC_AttPackRemove(mthisfield, convention, & @\
+        purpose, fobject, localrc) @\
+      if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      else if (directional == 0 .AND. present(name)) then @\
+      call c_ESMC_AttPackRemoveAttribute(mthisfield, name, fconvention, & @\
+        fpurpose, fobject, localrc) @\
+      if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      else if (directional == 1 .AND. present(name)) then @\
+      call c_ESMC_AttPackRemoveAttribute(mthisfield, name, convention, & @\
+        fpurpose, fobject, localrc) @\
+      if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      else if (directional == 2 .AND. present(name)) then @\
+      call c_ESMC_AttPackRemoveAttribute(mthisfield, name, fconvention, & @\
+        purpose, fobject, localrc) @\
+      if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      else if (directional == 3 .AND. present(name)) then @\
+      call c_ESMC_AttPackRemoveAttribute(mthisfield, name, convention, & @\
+        purpose, fobject, localrc) @\
+      if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      end if @\
+    else if (present(name)) then @\
+ @\
+      call c_ESMC_AttributeRemove(mthisfield, name, localrc) @\
+      if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+    endif @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass##AttRemove @\
 
 !------------------------------------------------------------------------------
 
@@ -5020,6 +5106,11 @@ AttGetCharacterMacro(ESMF_Field, field, field%ftypep%base)
 
 GetCountNameNumberMacro(ESMF_Field, field, field%ftypep%base)
 
+AttLinkMacro(ESMF_Field, ESMF_Grid, Grid, field, grid, & @\
+                field%ftypep%base, grid)
+AttLinkRemoveMacro(ESMF_Field, ESMF_Grid, Grid, field, grid, & @\
+                field%ftypep%base, grid)
+
 AttReadMacro(ESMF_Field, field, field%ftypep%base)
 
 AttRemoveMacro(ESMF_Field, field, field%ftypep%base)
@@ -5119,8 +5210,12 @@ GetCountNameNumberMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 
 AttLinkMacro(ESMF_FieldBundle, ESMF_Field, Field, fieldbundle, field, & @\
                 fieldbundle%btypep%base, field%ftypep%base)
+AttLinkMacro(ESMF_FieldBundle, ESMF_Grid, Grid, fieldbundle, grid, & @\
+                fieldbundle%btypep%base, grid)
 AttLinkRemoveMacro(ESMF_FieldBundle, ESMF_Field, Field, fieldbundle, field, & @\
                 fieldbundle%btypep%base, field%ftypep%base)
+AttLinkRemoveMacro(ESMF_FieldBundle, ESMF_Grid, Grid, fieldbundle, grid, & @\
+                fieldbundle%btypep%base, grid)
 
 AttReadMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 

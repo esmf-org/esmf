@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFieldUTest.F90,v 1.11 2009/03/30 20:33:27 rokuingh Exp $
+! $Id: ESMF_AttributeFieldUTest.F90,v 1.12 2009/04/13 15:14:59 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFieldUTest.F90,v 1.11 2009/03/30 20:33:27 rokuingh Exp $'
+      '$Id: ESMF_AttributeFieldUTest.F90,v 1.12 2009/04/13 15:14:59 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -46,6 +46,7 @@ program ESMF_AttributeFieldUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
+      type(ESMF_Grid)        :: grid
       type(ESMF_Field)       :: field, fieldMove
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrnameOut, attrvalue
       integer                :: rc, count, items, itemCount
@@ -96,6 +97,8 @@ program ESMF_AttributeFieldUTest
       ! fields
       field = ESMF_FieldCreateEmpty(name="original field", rc=rc)
       fieldMove = ESMF_FieldCreateEmpty(name="fieldMove", rc=rc)
+
+      grid = ESMF_GridCreateEmpty(rc=rc)
 
       conv = "customconvention"
       purp = "custompurpose"
@@ -1110,6 +1113,38 @@ program ESMF_AttributeFieldUTest
       call c_ESMC_AttributeMove(field%ftypep%base, fieldMove%ftypep%base, rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Moving a Field Attribute hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+#endif
+
+    !-------------------------------------------------------------------------
+    !  Attribute hierarchy linking
+    !-------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Link a Field Attribute hierarchy to a Grid Attribute hierarchy Field Test, again
+      call ESMF_AttributeLink(field, grid, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a Field hierarchy to a Grid hierarchy Test, again"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+#ifdef ESMF_TESTEXHAUSTIVE
+
+      !EX_UTest
+      ! Link a Field Attribute hierarchy to a Grid Attribute hierarchy Field Test, again
+      call ESMF_AttributeLink(field, grid, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a Field hierarchy to a Grid hierarchy Test, again"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink a Field Attribute hierarchy from a Grid Attribute hierarchy Field Test
+      call ESMF_AttributeLinkRemove(field, grid, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a Field hierarchy from a Grid hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 

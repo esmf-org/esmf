@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeDistGridUTest.F90,v 1.8 2009/03/30 20:33:26 rokuingh Exp $
+! $Id: ESMF_AttributeDistGridUTest.F90,v 1.9 2009/04/13 15:14:59 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeDistGridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeDistGridUTest.F90,v 1.8 2009/03/30 20:33:26 rokuingh Exp $'
+      '$Id: ESMF_AttributeDistGridUTest.F90,v 1.9 2009/04/13 15:14:59 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -166,27 +166,27 @@ program ESMF_AttributeDistGridUTest
     !-------------------------------------------------------------------------
       inI4 = 4
       !EX_UTest
-      ! Add an ESMF_I4 Attribute to an DistGrid Test
+      ! Add an ESMF_I4 Attribute to a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="AttrI4", value=inI4, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Adding an ESMF_I4 Attribute to an DistGrid Test"
+      write(name, *) "Adding an ESMF_I4 Attribute to a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Get an ESMF_I4 Attribute from an DistGrid Test
+      ! Get an ESMF_I4 Attribute from a DistGrid Test
       call ESMF_AttributeGet(distgrid, name="AttrI4", value=outI4, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting an ESMF_I4 Attribute from an DistGrid Test"
+      write(name, *) "Getting an ESMF_I4 Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and.(inI4==outI4), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Remove an Attribute on an DistGrid Test
+      ! Remove an Attribute on a DistGrid Test
       call ESMF_AttributeRemove(distgrid, name="AttrI4", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Removing an ESMF_I4 Attribute on an DistGrid Test"
+      write(name, *) "Removing an ESMF_I4 Attribute on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -196,7 +196,7 @@ program ESMF_AttributeDistGridUTest
       call ESMF_AttributeGet(distgrid, name="AttrI4", value=dfltoutI4, &
         defaultvalue=defaultI4, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting a default ESMF_I4 Attribute from an DistGrid Test"
+      write(name, *) "Getting a default ESMF_I4 Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and.(defaultI4==dfltoutI4), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -206,29 +206,29 @@ program ESMF_AttributeDistGridUTest
     !-------------------------------------------------------------------------
       inI4l = (/1,2,3/)
       !EX_UTest
-      ! Add an ESMF_I4 list Attribute to an DistGrid Test
+      ! Add an ESMF_I4 list Attribute to a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="AttrI4l", &
         valueList=inI4l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Adding an ESMF_I4l Attribute to an DistGrid Test"
+      write(name, *) "Adding an ESMF_I4l Attribute to a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Get an ESMF_I4 list Attribute from an DistGrid Test
+      ! Get an ESMF_I4 list Attribute from a DistGrid Test
       call ESMF_AttributeGet(distgrid, name="AttrI4l", &
         valueList=outI4l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting an ESMF_I4l Attribute from an DistGrid Test"
+      write(name, *) "Getting an ESMF_I4l Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and. all (inI4l==outI4l), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Remove an Attribute on an DistGrid Test
+      ! Remove an Attribute on a DistGrid Test
       call ESMF_AttributeRemove(distgrid, name="AttrI4l", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Removeing an ESMF_I4l Attribute on an DistGrid Test"
+      write(name, *) "Removeing an ESMF_I4l Attribute on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -238,7 +238,7 @@ program ESMF_AttributeDistGridUTest
       call ESMF_AttributeGet(distgrid, name="AttrI4l", &
         valueList=dfltoutI4l, defaultvalueList=defaultI4l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting a default ESMF_I4l Attribute from an DistGrid Test"
+      write(name, *) "Getting a default ESMF_I4l Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and. all (defaultI4l==dfltoutI4l), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -248,27 +248,27 @@ program ESMF_AttributeDistGridUTest
     !-------------------------------------------------------------------------
       inI8 = 4
       !EX_UTest
-      ! Add an ESMF_I8 Attribute to an DistGrid Test
+      ! Add an ESMF_I8 Attribute to a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="AttrI8", value=inI8, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Adding an ESMF_I8 Attribute to an DistGrid Test"
+      write(name, *) "Adding an ESMF_I8 Attribute to a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Get an ESMF_I8 Attribute from an DistGrid Test
+      ! Get an ESMF_I8 Attribute from a DistGrid Test
       call ESMF_AttributeGet(distgrid, name="AttrI8", value=outI8, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting an ESMF_I8 Attribute from an DistGrid Test"
+      write(name, *) "Getting an ESMF_I8 Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and. (inI8==outI8), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Remove an Attribute on an DistGrid Test
+      ! Remove an Attribute on a DistGrid Test
       call ESMF_AttributeRemove(distgrid, name="AttrI8", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Removeing an ESMF_I8 Attribute on an DistGrid Test"
+      write(name, *) "Removeing an ESMF_I8 Attribute on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -278,7 +278,7 @@ program ESMF_AttributeDistGridUTest
       call ESMF_AttributeGet(distgrid, name="AttrI8", value=dfltoutI8, &
         defaultvalue=defaultI8, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting a default ESMF_I8 Attribute from an DistGrid Test"
+      write(name, *) "Getting a default ESMF_I8 Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and.(defaultI8==dfltoutI8), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -288,29 +288,29 @@ program ESMF_AttributeDistGridUTest
     !-------------------------------------------------------------------------
       inI8l = (/1,2,3/)
       !EX_UTest
-      ! Add an ESMF_I8 list Attribute to an DistGrid Test
+      ! Add an ESMF_I8 list Attribute to a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="AttrI8l", &
         valueList=inI8l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Adding an ESMF_I8l Attribute to an DistGrid Test"
+      write(name, *) "Adding an ESMF_I8l Attribute to a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Get an ESMF_I8 list Attribute from an DistGrid Test
+      ! Get an ESMF_I8 list Attribute from a DistGrid Test
       call ESMF_AttributeGet(distgrid, name="AttrI8l", &
         valueList=outI8l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting an ESMF_I8l Attribute from an DistGrid Test"
+      write(name, *) "Getting an ESMF_I8l Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and. all (inI8l==outI8l), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Remove an Attribute on an DistGrid Test
+      ! Remove an Attribute on a DistGrid Test
       call ESMF_AttributeRemove(distgrid, name="AttrI8l", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Removeing an ESMF_I8l Attribute on an DistGrid Test"
+      write(name, *) "Removeing an ESMF_I8l Attribute on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -320,7 +320,7 @@ program ESMF_AttributeDistGridUTest
       call ESMF_AttributeGet(distgrid, name="AttrI8l", &
         valueList=dfltoutI8l, defaultvalueList=defaultI8l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting a default ESMF_I8l Attribute from an DistGrid Test"
+      write(name, *) "Getting a default ESMF_I8l Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and. all (defaultI8l==dfltoutI8l), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -330,27 +330,27 @@ program ESMF_AttributeDistGridUTest
     !-------------------------------------------------------------------------
       inR4 = 4
       !EX_UTest
-      ! Add an ESMF_R4 Attribute to an DistGrid Test
+      ! Add an ESMF_R4 Attribute to a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="AttrR4", value=inR4, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Adding an ESMF_R4 Attribute to an DistGrid Test"
+      write(name, *) "Adding an ESMF_R4 Attribute to a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Get an ESMF_R4 Attribute from an DistGrid Test
+      ! Get an ESMF_R4 Attribute from a DistGrid Test
       call ESMF_AttributeGet(distgrid, name="AttrR4", value=outR4, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting an ESMF_R4 Attribute from an DistGrid Test"
+      write(name, *) "Getting an ESMF_R4 Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and.(inR4==outR4), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Remove an Attribute on an DistGrid Test
+      ! Remove an Attribute on a DistGrid Test
       call ESMF_AttributeRemove(distgrid, name="AttrR4", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Removeing an ESMF_R4 Attribute on an DistGrid Test"
+      write(name, *) "Removeing an ESMF_R4 Attribute on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -360,7 +360,7 @@ program ESMF_AttributeDistGridUTest
       call ESMF_AttributeGet(distgrid, name="AttrR4", value=dfltoutR4, &
         defaultvalue=defaultR4, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting a default ESMF_R4 Attribute from an DistGrid Test"
+      write(name, *) "Getting a default ESMF_R4 Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and.(defaultR4==dfltoutR4), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -370,29 +370,29 @@ program ESMF_AttributeDistGridUTest
     !-------------------------------------------------------------------------
       inR4l = (/1,2,3/)
       !EX_UTest
-      ! Add an ESMF_R4 list Attribute to an DistGrid Test
+      ! Add an ESMF_R4 list Attribute to a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="AttrR4l", &
         valueList=inR4l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Adding an ESMF_R4l Attribute to an DistGrid Test"
+      write(name, *) "Adding an ESMF_R4l Attribute to a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Get an ESMF_R4 list Attribute from an DistGrid Test
+      ! Get an ESMF_R4 list Attribute from a DistGrid Test
       call ESMF_AttributeGet(distgrid, name="AttrR4l", &
         valueList=outR4l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting an ESMF_R4l Attribute from an DistGrid Test"
+      write(name, *) "Getting an ESMF_R4l Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR4l==outR4l), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Remove an Attribute on an DistGrid Test
+      ! Remove an Attribute on a DistGrid Test
       call ESMF_AttributeRemove(distgrid, name="AttrR4l", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Removeing an ESMF_R4l Attribute on an DistGrid Test"
+      write(name, *) "Removeing an ESMF_R4l Attribute on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -402,7 +402,7 @@ program ESMF_AttributeDistGridUTest
       call ESMF_AttributeGet(distgrid, name="AttrR4l", &
         valueList=dfltoutR4l, defaultvalueList=defaultR4l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting a default ESMF_R4l Attribute from an DistGrid Test"
+      write(name, *) "Getting a default ESMF_R4l Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and. all (defaultR4l==dfltoutR4l), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -414,27 +414,27 @@ program ESMF_AttributeDistGridUTest
     !-------------------------------------------------------------------------
       inR8 = 4
       !NEX_UTest
-      ! Add an ESMF_R8 Attribute to an DistGrid Test
+      ! Add an ESMF_R8 Attribute to a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="AttrR8", value=inR8, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Adding an ESMF_R8 Attribute to an DistGrid Test"
+      write(name, *) "Adding an ESMF_R8 Attribute to a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Get an ESMF_R8 Attribute from an DistGrid Test
+      ! Get an ESMF_R8 Attribute from a DistGrid Test
       call ESMF_AttributeGet(distgrid, name="AttrR8", value=outR8, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting an ESMF_R8 Attribute from an DistGrid Test"
+      write(name, *) "Getting an ESMF_R8 Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and.(inR8==outR8), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Remove an Attribute on an DistGrid Test
+      ! Remove an Attribute on a DistGrid Test
       call ESMF_AttributeRemove(distgrid, name="AttrR8", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Removeing an ESMF_R8 Attribute on an DistGrid Test"
+      write(name, *) "Removeing an ESMF_R8 Attribute on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -444,7 +444,7 @@ program ESMF_AttributeDistGridUTest
       call ESMF_AttributeGet(distgrid, name="AttrR8", value=dfltoutR8, &
         defaultvalue=defaultR8, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting a default ESMF_R8 Attribute from an DistGrid Test"
+      write(name, *) "Getting a default ESMF_R8 Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and.(defaultR8==dfltoutR8), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -454,29 +454,29 @@ program ESMF_AttributeDistGridUTest
     !-------------------------------------------------------------------------
       inR8l = (/1,2,3/)
       !NEX_UTest
-      ! Add an ESMF_R8 list Attribute to an DistGrid Test
+      ! Add an ESMF_R8 list Attribute to a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="AttrR8l", &
         valueList=inR8l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Adding an ESMF_R8l Attribute to an DistGrid Test"
+      write(name, *) "Adding an ESMF_R8l Attribute to a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Get an ESMF_R8 list Attribute from an DistGrid Test
+      ! Get an ESMF_R8 list Attribute from a DistGrid Test
       call ESMF_AttributeGet(distgrid, name="AttrR8l", &
         valueList=outR8l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting an ESMF_R8l Attribute from an DistGrid Test"
+      write(name, *) "Getting an ESMF_R8l Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (inR8l==outR8l), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Remove an Attribute on an DistGrid Test
+      ! Remove an Attribute on a DistGrid Test
       call ESMF_AttributeRemove(distgrid, name="AttrR8l", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Removeing an ESMF_R8l Attribute on an DistGrid Test"
+      write(name, *) "Removeing an ESMF_R8l Attribute on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -486,7 +486,7 @@ program ESMF_AttributeDistGridUTest
       call ESMF_AttributeGet(distgrid, name="AttrR8l", &
         valueList=dfltoutR8l, defaultvalueList=defaultR8l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting a default ESMF_R8l Attribute from an DistGrid Test"
+      write(name, *) "Getting a default ESMF_R8l Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and. all (defaultR8l==dfltoutR8l), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -497,27 +497,27 @@ program ESMF_AttributeDistGridUTest
       inChar = "charAttribute"
       attrName = "char_"
       !NEX_UTest
-      ! Add a char Attribute to an DistGrid Test
+      ! Add a char Attribute to a DistGrid Test
       call ESMF_AttributeSet(distgrid, name=attrname, value=inChar, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Adding a char Attribute to an DistGrid Test"
+      write(name, *) "Adding a char Attribute to a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Get a char Attribute from an DistGrid Test
+      ! Get a char Attribute from a DistGrid Test
       call ESMF_AttributeGet(distgrid, name=attrname, value=outChar, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting a char Attribute from an DistGrid Test"
+      write(name, *) "Getting a char Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and. (inChar==outChar), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Remove an Attribute on an DistGrid Test
+      ! Remove an Attribute on a DistGrid Test
       call ESMF_AttributeRemove(distgrid, name=attrname, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Removeing a char Attribute on an DistGrid Test"
+      write(name, *) "Removeing a char Attribute on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -527,7 +527,7 @@ program ESMF_AttributeDistGridUTest
       call ESMF_AttributeGet(distgrid, name=attrname, value=dfltoutChar, &
         defaultvalue=defaultChar, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting a default char Attribute from an DistGrid Test"
+      write(name, *) "Getting a default char Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and. (defaultChar==dfltoutChar), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -549,7 +549,7 @@ program ESMF_AttributeDistGridUTest
       call ESMF_AttributeSet(distgrid, name="Charl", &
         valueList=InCharl, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an Attribute char list on an DistGrid test"
+      write(name, *) "Setting an Attribute char list on a DistGrid test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
   
@@ -558,24 +558,24 @@ program ESMF_AttributeDistGridUTest
       call ESMF_AttributeGet(distgrid, name="Charl", &
         valueList=OutCharl, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting an Attribute char list from an DistGrid test"
+      write(name, *) "Getting an Attribute char list from a DistGrid test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (InCharl==OutCharl), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Remove an Attribute on an DistGrid Test
+      ! Remove an Attribute on a DistGrid Test
       call ESMF_AttributeRemove(distgrid, name="Charl", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Removeing a Character list Attribute on an DistGrid Test"
+      write(name, *) "Removeing a Character list Attribute on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Remove an Attribute on an DistGrid Test, again
+      ! Remove an Attribute on a DistGrid Test, again
       call ESMF_AttributeRemove(distgrid, name="Charl", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Removeing a Character list Attribute on an DistGrid Test, again"
+      write(name, *) "Removeing a Character list Attribute on a DistGrid Test, again"
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -614,10 +614,10 @@ program ESMF_AttributeDistGridUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Remove an Attribute on an DistGrid Test
+      ! Remove an Attribute on a DistGrid Test
       call ESMF_AttributeRemove(distgrid, name=attrname, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Removeing a logical Attribute on an DistGrid Test"
+      write(name, *) "Removeing a logical Attribute on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -660,10 +660,10 @@ program ESMF_AttributeDistGridUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Remove an Attribute on an DistGrid Test
+      ! Remove an Attribute on a DistGrid Test
       call ESMF_AttributeRemove(distgrid, name=attrname, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Removeing a logical list Attribute on an DistGrid Test"
+      write(name, *) "Removeing a logical list Attribute on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
   
@@ -791,11 +791,11 @@ program ESMF_AttributeDistGridUTest
       attpackList(3) = "Custom3"
       
       !EX_UTest
-      ! Create a custom Attribute package on an DistGrid Test
+      ! Create a custom Attribute package on a DistGrid Test
       call ESMF_AttributeAdd(distgrid, convention=conv, &
         purpose=purp, attrList=attpackList, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating a custom Attribute package on an DistGrid Test"
+      write(name, *) "Creating a custom Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -817,40 +817,40 @@ program ESMF_AttributeDistGridUTest
       attrvalue = "m/s"
       
       !EX_UTest
-      ! Set an Attribute in an Attribute package on an DistGrid Test
+      ! Set an Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeSet(distgrid, name=attrname, value=attrvalue, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an Attribute in an Attribute package on an DistGrid Test"
+      write(name, *) "Setting an Attribute in an Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       attrname = "Custom2"
 
       !EX_UTest
-      ! Set a char list Attribute in an Attribute package on an DistGrid Test
+      ! Set a char list Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeSet(distgrid, name=attrname, &
         valueList=attpackList, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting a char list Attribute in an Attribute package on an DistGrid Test"
+      write(name, *) "Setting a char list Attribute in an Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Get a char list Attribute in an Attribute package on an DistGrid Test
+      ! Get a char list Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeGet(distgrid, name=attrname, &
         valueList=attpackListOut, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting a char list Attribute in an Attribute package on an DistGrid Test"
+      write(name, *) "Getting a char list Attribute in an Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackList == attpackListOut), &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Remove an Attribute in an Attribute package on an DistGrid Test
+      ! Remove an Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeRemove(distgrid, name=attrname, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Removeing an Attribute in an Attribute package on an DistGrid Test"
+      write(name, *) "Removeing an Attribute in an Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -859,21 +859,21 @@ program ESMF_AttributeDistGridUTest
       attpackDfltList(3) = "Custom6"
 
       !EX_UTest
-      ! Get a char list default Attribute in an Attribute package on an DistGrid Test
+      ! Get a char list default Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeGet(distgrid, name=attrname, &
         valueList=attpackListOut2, defaultvalueList=attpackDfltList, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting a default Attribute character list in an Attribute package on an DistGrid test"
+      write(name, *) "Getting a default Attribute character list in an Attribute package on a DistGrid test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackListOut2 == attpackDfltList), &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Remove the entire Attribute package from an DistGrid Test
+      ! Remove the entire Attribute package from a DistGrid Test
       call ESMF_AttributeRemove(distgrid, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Removing the entire Attribute package from an DistGrid Test"
+      write(name, *) "Removing the entire Attribute package from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -891,146 +891,146 @@ program ESMF_AttributeDistGridUTest
       attpackListTNames(12) = "Character_namelist"
     
       !EX_UTest
-      ! Add multiple Attributes to an Attribute package on an DistGrid Test
+      ! Add multiple Attributes to an Attribute package on a DistGrid Test
       call ESMF_AttributeAdd(distgrid, convention=conv, purpose=purp, &
         attrList=attpackListTNames, attpacknestflag=ESMF_ATTPACKNEST_ON, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Adding multiple Attributes to a standard Attribute package on an DistGrid Test"
+      write(name, *) "Adding multiple Attributes to a standard Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Set an ESMF_I4name Attribute in an Attribute package on an DistGrid Test
+      ! Set an ESMF_I4name Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="ESMF_I4name", value=inI4, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an ESMF_I4name Attribute in an Attribute package on an DistGrid Test"
+      write(name, *) "Setting an ESMF_I4name Attribute in an Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Set an ESMF_I4namelist Attribute in an Attribute package on an DistGrid Test
+      ! Set an ESMF_I4namelist Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="ESMF_I4namelist", valueList=inI4l, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an ESMF_I4namelist Attribute in an Attribute package on an DistGrid Test"
+      write(name, *) "Setting an ESMF_I4namelist Attribute in an Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Set an ESMF_I8name Attribute in an Attribute package on an DistGrid Test
+      ! Set an ESMF_I8name Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="ESMF_I8name", value=inI8, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an ESMF_I8name Attribute in an Attribute package on an DistGrid Test"
+      write(name, *) "Setting an ESMF_I8name Attribute in an Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Set an ESMF_I8namelist Attribute in an Attribute package on an DistGrid Test
+      ! Set an ESMF_I8namelist Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="ESMF_I8namelist", valueList=inI8l, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an ESMF_I8namelist Attribute in an Attribute package on an DistGrid Test"
+      write(name, *) "Setting an ESMF_I8namelist Attribute in an Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Set an ESMF_R4name Attribute in an Attribute package on an DistGrid Test
+      ! Set an ESMF_R4name Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="ESMF_R4name", value=inR4, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an ESMF_R4name Attribute in an Attribute package on an DistGrid Test"
+      write(name, *) "Setting an ESMF_R4name Attribute in an Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Set an ESMF_R4namelist Attribute in an Attribute package on an DistGrid Test
+      ! Set an ESMF_R4namelist Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="ESMF_R4namelist", valueList=inR4l, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an ESMF_R4namelist Attribute in an Attribute package on an DistGrid Test"
+      write(name, *) "Setting an ESMF_R4namelist Attribute in an Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Set an ESMF_R8name Attribute in an Attribute package on an DistGrid Test
+      ! Set an ESMF_R8name Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="ESMF_R8name", value=inR8, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an ESMF_R8name Attribute in an Attribute package on an DistGrid Test"
+      write(name, *) "Setting an ESMF_R8name Attribute in an Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Set an ESMF_R8namelist Attribute in an Attribute package on an DistGrid Test
+      ! Set an ESMF_R8namelist Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="ESMF_R8namelist", valueList=inR8l, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an ESMF_R8namelist Attribute in an Attribute package on an DistGrid Test"
+      write(name, *) "Setting an ESMF_R8namelist Attribute in an Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Set a Logical Attribute in an Attribute package on an DistGrid Test
+      ! Set a Logical Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="Logical_name", value=inLog, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting a logical Attribute in an Attribute package on an DistGrid Test"
+      write(name, *) "Setting a logical Attribute in an Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Set a Logical list Attribute in an Attribute package on an DistGrid Test
+      ! Set a Logical list Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="Logical_namelist", valueList=inLogl, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting a logical list Attribute in an Attribute package on an DistGrid Test"
+      write(name, *) "Setting a logical list Attribute in an Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Set a character Attribute in an Attribute package on an DistGrid Test
+      ! Set a character Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="Character_name", value=attrvalue, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting a Character Attribute in an Attribute package on an DistGrid Test"
+      write(name, *) "Setting a Character Attribute in an Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       attrname = "Character_namelist"
       !EX_UTest
-      ! Set a char list Attribute in an Attribute package on an DistGrid Test
+      ! Set a char list Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeSet(distgrid, name=attrname, &
         valueList=attpackList, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting a char list Attribute in an Attribute package on an DistGrid Test"
+      write(name, *) "Setting a char list Attribute in an Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Get a char list attribute in an Attribute package on an DistGrid Test
+      ! Get a char list attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeGet(distgrid, name=attrname, &
         valueList=attpackListOut3, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting a char list Attribute in an Attribute package on an DistGrid Test"
+      write(name, *) "Getting a char list Attribute in an Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackList == attpackListOut), &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Remove an Attribute in an Attribute package on an DistGrid Test
+      ! Remove an Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeRemove(distgrid, name=attrname, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Removeing an Attribute in an Attribute package on an DistGrid Test"
+      write(name, *) "Removeing an Attribute in an Attribute package on a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Remove an Attribute in an Attribute package on an DistGrid Test, again
+      ! Remove an Attribute in an Attribute package on a DistGrid Test, again
       call ESMF_AttributeRemove(distgrid, name=attrname, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Removeing an Attribute in an Attribute package on an DistGrid Test, again"
+      write(name, *) "Removeing an Attribute in an Attribute package on a DistGrid Test, again"
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -1039,12 +1039,12 @@ program ESMF_AttributeDistGridUTest
       attpackDfltList(3) = "Custom6"
 
       !EX_UTest
-      ! Get a char list default Attribute in an Attribute package on an DistGrid Test
+      ! Get a char list default Attribute in an Attribute package on a DistGrid Test
       call ESMF_AttributeGet(distgrid, name=attrname, &
         valueList=attpackListOut4, defaultvalueList=attpackDfltList2, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting a default Attribute character list in an Attribute package on an DistGrid test"
+      write(name, *) "Getting a default Attribute character list in an Attribute package on a DistGrid test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackListOut2 == attpackDfltList), &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -1069,24 +1069,24 @@ program ESMF_AttributeDistGridUTest
 
       attrname="Character_name"
       attrvalue="stuff"
-      ! Set a Character Attribute on an DistGrid to test the get info calls
+      ! Set a Character Attribute on a DistGrid to test the get info calls
       call ESMF_AttributeSet(distgrid, name=attrname, value=attrvalue, rc=rc)
 
       !NEX_UTest
-      ! Get the Attribute count from an DistGrid Test
+      ! Get the Attribute count from a DistGrid Test
       call ESMF_AttributeGet(distgrid, count=count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting the Attribute count from an DistGrid Test"
+      write(name, *) "Getting the Attribute count from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and.(count.ge.0), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Get Attribute info by name from an DistGrid Test
+      ! Get Attribute info by name from a DistGrid Test
       call ESMF_AttributeGet(distgrid, name=attrname, typekind=attrTK, &
         itemcount=items, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting Attribute info by name from an DistGrid Test"
+      write(name, *) "Getting Attribute info by name from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS) &
                                        .and.(attrTK==ESMF_TYPEKIND_CHARACTER) &
                                        .and.(items==1), &
@@ -1094,11 +1094,11 @@ program ESMF_AttributeDistGridUTest
       !------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Get Attribute info by num from an DistGrid Test
+      ! Get Attribute info by num from a DistGrid Test
       call ESMF_AttributeGet(distgrid, attributeIndex=count, name=attrnameOut, &
         typekind=attrTK, itemcount=items, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting Attribute info by num from an DistGrid Test"
+      write(name, *) "Getting Attribute info by num from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and.(attrname==attrnameOut) &
                                        .and.(attrTK==ESMF_TYPEKIND_CHARACTER) &
                                        .and.(items==1), &
