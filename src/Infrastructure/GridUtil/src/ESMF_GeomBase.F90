@@ -148,7 +148,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.7 2009/01/28 22:22:17 peggyli Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.8 2009/04/13 15:13:51 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -936,13 +936,15 @@ end subroutine ESMF_GeomBaseGet
 ! !IROUTINE: ESMF_GeomBaseSerialize - Serialize gridbase info into a byte stream
 !
 ! !INTERFACE:
-      subroutine ESMF_GeomBaseSerialize(gridbase, buffer, length, offset, rc) 
+      subroutine ESMF_GeomBaseSerialize(gridbase, buffer, length, offset, &
+                                        attreconflag, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_GeomBase), intent(inout) :: gridbase 
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
+      type(ESMF_AttReconcileFlag), optional :: attreconflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -964,6 +966,8 @@ end subroutine ESMF_GeomBaseGet
 !           Current write offset in the current buffer.  This will be
 !           updated by this routine and return pointing to the next
 !           available byte in the buffer.
+!     \item[{[attreconflag]}]
+!           Flag to tell if Attribute serialization is to be done
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -971,6 +975,7 @@ end subroutine ESMF_GeomBaseGet
 !EOPI
     type(ESMF_GeomBaseClass),pointer :: gbcp
     integer :: localrc
+    type(ESMF_AttReconcileFlag) :: lattreconflag
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -978,13 +983,20 @@ end subroutine ESMF_GeomBaseGet
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit, gridbase, rc)
 
+    ! deal with optional attreconflag
+    if (present(attreconflag)) then
+      lattreconflag = attreconflag
+    else
+      lattreconflag = ESMF_ATTRECONCILE_OFF
+    endif
+
     ! Get GeomBaseClass
     gbcp=>gridbase%gbcp
 
     ! serialize GeomBase info
     call c_ESMC_GeomBaseSerialize(gbcp%type%type, &
-                                                    gbcp%staggerloc%staggerloc, &
-                                                    buffer(1), length, offset, localrc)
+                                  gbcp%staggerloc%staggerloc, &
+                                  buffer(1), length, offset, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -994,7 +1006,8 @@ end subroutine ESMF_GeomBaseGet
 
        case (ESMF_GEOMTYPE_GRID%type) ! Grid 
           call ESMF_GridSerialize(grid=gbcp%grid, buffer=buffer, &
-                     length=length, offset=offset, rc=localrc) 
+                     length=length, offset=offset, &
+                     attreconflag=lattreconflag, rc=localrc) 
           if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -1029,7 +1042,7 @@ end subroutine ESMF_GeomBaseGet
 ! !IROUTINE: ESMF_GeomBaseDeserialize - Deserialize a byte stream into a GeomBase
 !
 ! !INTERFACE:
-      function ESMF_GeomBaseDeserialize(vm, buffer, offset, rc) 
+      function ESMF_GeomBaseDeserialize(vm, buffer, offset, attreconflag, rc) 
 !
 ! !RETURN VALUE:
       type(ESMF_GeomBase) :: ESMF_GeomBaseDeserialize   
@@ -1038,6 +1051,7 @@ end subroutine ESMF_GeomBaseGet
       type(ESMF_VM), intent(in) :: vm
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
+      type(ESMF_AttReconcileFlag), optional :: attreconflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -1056,6 +1070,8 @@ end subroutine ESMF_GeomBaseGet
 !           Current read offset in the current buffer.  This will be
 !           updated by this routine and return pointing to the next
 !           unread byte in the buffer.
+!     \item[{[attreconflag]}]
+!           Flag to tell if Attribute serialization is to be done
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1063,9 +1079,17 @@ end subroutine ESMF_GeomBaseGet
 !EOPI
     type(ESMF_GeomBaseClass),pointer :: gbcp
     integer :: localrc
+    type(ESMF_AttReconcileFlag) :: lattreconflag
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! deal with optional attreconflag
+    if (present(attreconflag)) then
+      lattreconflag = attreconflag
+    else
+      lattreconflag = ESMF_ATTRECONCILE_OFF
+    endif
 
     ! allocate GeomBase type
     allocate(gbcp, stat=localrc)
@@ -1086,7 +1110,7 @@ end subroutine ESMF_GeomBaseGet
 
        case (ESMF_GEOMTYPE_GRID%type) ! Grid
           gbcp%grid=ESMF_GridDeserialize(vm=vm, buffer=buffer, &
-              offset=offset, rc=localrc)
+              offset=offset, attreconflag=lattreconflag, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return  

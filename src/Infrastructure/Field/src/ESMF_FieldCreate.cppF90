@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.52 2009/02/20 22:32:09 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.53 2009/04/13 15:11:25 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.52 2009/02/20 22:32:09 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.53 2009/04/13 15:11:25 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -2640,6 +2640,12 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
+    !  link the Attribute hierarchies
+    call c_ESMC_AttributeLink(ESMF_FieldCreateGridArraySpec%ftypep%base, &
+                              grid, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
     if(present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_FieldCreateGridArraySpec
@@ -2826,6 +2832,12 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
  
+    !  link the Attribute hierarchies
+    call c_ESMC_AttributeLink(ESMF_FieldCreateGridArray%ftypep%base, &
+                              grid, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
     if (present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_FieldCreateGridArray
@@ -3055,6 +3067,12 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
+    !  link the Attribute hierarchies @\
+    call c_ESMC_AttributeLink( & @\
+      ESMF_FieldCreateGridData##mrank##D##mtypekind%ftypep%base, & @\
+      grid, localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+                    ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end function ESMF_FieldCreateGridData##mrank##D##mtypekind  @\
@@ -3257,6 +3275,12 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
+    !  link the Attribute hierarchies @\
+    call c_ESMC_AttributeLink( & @\
+      ESMF_FieldCreateGridDataPtr##mrank##D##mtypekind%ftypep%base, & @\
+      grid, localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+                    ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end function ESMF_FieldCreateGridDataPtr##mrank##D##mtypekind  @\

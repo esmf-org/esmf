@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.332 2009/02/17 06:13:27 peggyli Exp $
+! $Id: ESMF_Field.F90,v 1.333 2009/04/13 15:11:25 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -177,7 +177,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.332 2009/02/17 06:13:27 peggyli Exp $'
+    '$Id: ESMF_Field.F90,v 1.333 2009/04/13 15:11:25 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -1063,8 +1063,9 @@ contains
 
 
       if (fp%gridstatus .eq. ESMF_STATUS_READY) then
-         call ESMF_GeomBaseSerialize(fp%geombase, buffer, length, offset, localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+        call ESMF_GeomBaseSerialize(fp%geombase, buffer, length, offset, &
+                                    lattreconflag, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
       endif
@@ -1174,14 +1175,27 @@ contains
                                 ESMF_CONTEXT, rc)) return
 
       if (fp%gridstatus .eq. ESMF_STATUS_READY) then
-          fp%geombase=ESMF_GeomBaseDeserialize(vm, buffer, offset, localrc)
+          fp%geombase=ESMF_GeomBaseDeserialize(vm, buffer, offset, &
+                                              lattreconflag, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
+          
+          !  here we relink the Field Attribute hierarchy to the Attribute
+          !  hierarchy of the object in the GeomBase, Grid for now
+          if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value .and. & 
+              fp%geombase%gbcp%type%type == ESMF_GEOMTYPE_GRID%type) then
+            call c_ESMC_AttributeLink(fp%base, fp%geombase%gbcp%grid, localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+          endif
+
       endif
 
       if (fp%datastatus .eq. ESMF_STATUS_READY) then
-          call c_ESMC_ArrayDeserialize(fp%array, buffer(1), offset, lattreconflag, localrc)
+          call c_ESMC_ArrayDeserialize(fp%array, buffer(1), offset, &
+                                      lattreconflag, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.9 2009/02/20 22:32:09 feiliu Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.10 2009/04/13 15:11:25 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.9 2009/02/20 22:32:09 feiliu Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.10 2009/04/13 15:11:25 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -323,6 +323,10 @@ contains
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
+    !  link the Attribute hierarchies @\
+    call c_ESMC_AttributeLink(field%ftypep%base, grid, localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+                    ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end subroutine ESMF_FieldSetCommitGrid##mrank##D##mtypekind  @\
@@ -524,6 +528,11 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
+@\
+    !  link the Attribute hierarchies @\
+    call c_ESMC_AttributeLink(field%ftypep%base, grid, localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+                    ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end subroutine ESMF_FieldSetCommitGridPtr##mrank##D##mtypekind  @\

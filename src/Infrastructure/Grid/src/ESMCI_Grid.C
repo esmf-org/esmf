@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.84 2009/03/18 23:16:44 peggyli Exp $
+// $Id: ESMCI_Grid.C,v 1.85 2009/04/13 15:13:36 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.84 2009/03/18 23:16:44 peggyli Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.85 2009/04/13 15:13:36 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -4467,6 +4467,10 @@ Grid::Grid(
 
   destroyDistgrid=false; 
   destroyDELayout=false;
+
+  // FIXME:  this is a temporary fix for AttributeUpdate() to be able to
+  //         recognize that Grids are multiply created after StateReconcile()
+  classID = 42;
 
 }
 //-----------------------------------------------------------------------------
