@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.17 2009/03/28 01:37:53 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.18 2009/04/13 15:12:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -583,6 +583,14 @@ end function
           return
       endif
 
+      ! link the Attribute hierarchies
+      do i=1,fieldCount
+         call c_ESMC_AttributeLink(btypep%base, &
+          fieldList(i)%ftypep%base, status)
+         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+      enddo
+
       ! set the return bundle
       ESMF_FieldBundleCreateNew%btypep => btypep
 
@@ -681,6 +689,12 @@ end function
                                   ESMF_CONTEXT, rc)) return
           btypep%grid = grid
           btypep%gridstatus = ESMF_STATUS_READY
+
+          !  link the Attribute hierarchies
+          call c_ESMC_AttributeLink(btypep%base, grid, status)
+          if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
       endif
 
       ! Set return values.
@@ -1686,6 +1700,11 @@ end function
       btype%grid = grid
       btype%gridstatus = ESMF_STATUS_READY
 
+      !  link the Attribute hierarchies
+      call c_ESMC_AttributeLink(btype%base, grid, status)
+      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldBundleSetGrid
@@ -2406,7 +2425,8 @@ end function
                                  ESMF_CONTEXT, rc)) return
 
       if (bp%gridstatus .eq. ESMF_STATUS_READY) then
-          call ESMF_GridSerialize(bp%grid, buffer, length, offset, rc=localrc)
+          call ESMF_GridSerialize(bp%grid, buffer, length, offset, &
+                                  attreconflag=lattreconflag, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
@@ -2521,10 +2541,20 @@ end function
                                  ESMF_CONTEXT, rc)) return
 
       if (bp%gridstatus .eq. ESMF_STATUS_READY) then
-          bp%grid = ESMF_GridDeserialize(vm, buffer, offset, rc=localrc)
+          bp%grid = ESMF_GridDeserialize(vm, buffer, offset, &
+                                      attreconflag=lattreconflag, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
+
+          !  here we relink the FieldBundle Attribute hierarchies to the
+          !  Grid Attribute hierarchy, as they were before
+          if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
+            call c_ESMC_AttributeLink(bp%base, bp%grid, localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+          endif
       endif
 
       ! TODO: decide if these need to be sent before or after

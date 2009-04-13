@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.11 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.12 2009/04/13 15:12:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.11 2009/01/21 21:37:59 cdeluca Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.12 2009/04/13 15:12:50 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -559,7 +559,6 @@
       write(failMsg, *) "Incorrect count"
       write(name, *) "Verify Attribute count from a FieldBundle "
       call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
-      
       !------------------------------------------------------------------------
 
       !EX_UTest
