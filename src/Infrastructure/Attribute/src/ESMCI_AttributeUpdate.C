@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.7 2009/02/03 17:37:57 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.8 2009/04/13 15:10:23 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.7 2009/02/03 17:37:57 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.8 2009/04/13 15:10:23 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -215,7 +215,21 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
 
   // compare keys
   if (AttributeUpdateKeyCompare(thiskey, distkey) == false) {
-    //printf("DeleteMe!!!\n");
+    printf("DeleteMe!!!\n");
+  //*
+  if (localPet == 4) {
+    printf("%d  %s  %s  %s  %d  -  %d  %s  %s  %s  %d\n", 
+          (*(reinterpret_cast<int*> (thiskey+0))),
+          thiskey+4,
+          (*(reinterpret_cast<bool*> (thiskey+5))) ? "true" : "false",
+          (*(reinterpret_cast<bool*> (thiskey+6))) ? "true" : "false",
+          (*(reinterpret_cast<int*> (thiskey+7))),
+          (*(reinterpret_cast<int*> (distkey+0))),
+          distkey+4,
+          (*(reinterpret_cast<bool*> (distkey+5))) ? "true" : "false",
+          (*(reinterpret_cast<bool*> (distkey+6))) ? "true" : "false",
+          (*(reinterpret_cast<int*> (distkey+7))));
+    }//*/
     return 42;
   }
 
@@ -235,20 +249,6 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
     return localrc;
   }
   
-  /*if (localPet == 4) {
-    printf("%d  %s  %s  %s  %d  -  %d  %s  %s  %s  %d\n", 
-          (*(reinterpret_cast<int*> (thiskey+0))),
-          thiskey+4,
-          (*(reinterpret_cast<bool*> (thiskey+5))) ? "true" : "false",
-          (*(reinterpret_cast<bool*> (thiskey+6))) ? "true" : "false",
-          (*(reinterpret_cast<int*> (thiskey+7))),
-          (*(reinterpret_cast<int*> (distkey+0))),
-          distkey+4,
-          (*(reinterpret_cast<bool*> (distkey+5))) ? "true" : "false",
-          (*(reinterpret_cast<bool*> (distkey+6))) ? "true" : "false",
-          (*(reinterpret_cast<int*> (distkey+7))));
-    }*/
-
   // if struct change, unpack numAttrs into temp and add
   int sChange = sizeof(int)+1+sizeof(bool);
   int vChange = sizeof(int)+1;
@@ -713,7 +713,13 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   int offset = 0;
 
   // copy the baseID
-  *(reinterpret_cast<int*> (key+offset)) = attrBase->ESMC_BaseGetID();
+  // FIXME: this is a temporary fix for the Field to Grid Attribute links
+  if (attrBase->classID == 42) {
+    printf("HIT A GRID!!!\n");
+    int grid = 42;
+    *(reinterpret_cast<int*> (key+offset)) = grid;
+  }
+  else *(reinterpret_cast<int*> (key+offset)) = attrBase->ESMC_BaseGetID();
   offset += sizeof(int);
 
   // xor the name into key

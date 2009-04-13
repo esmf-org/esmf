@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.14 2009/03/30 20:32:36 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.15 2009/04/13 15:10:23 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -69,7 +69,11 @@ class Attribute
     ESMC_Logical valueChange;          // flag for value changes
 
     ESMC_Base *attrBase;        // pointer to a root attr's Base object
+
     int attrCount;              // number of attributes in use in list
+    int packCount;              // number of attpacks in use in list
+    int linkCount;              // number of links in use in list
+
     vector<Attribute*>  attrList;  // attributes - array of pointers
 
     // Attribute values
@@ -156,6 +160,9 @@ class Attribute
     int AttributeGet(const string &name, ESMC_TypeKind *tk, int *itemCount) const;
     int AttributeGet(int num, string *name, ESMC_TypeKind *tk, int *itemCount) const;
     int AttributeGetCount(void) const;
+    int AttributeGetCountPack(void) const;
+    int AttributeGetCountLink(void) const;
+    int AttributeGetCountTotal(void) const;
     int AttributeGetItemCount(const string &name) const;
 
     // query for existence of an attribute
@@ -284,7 +291,7 @@ extern "C" {
   void FTN(c_esmc_attributecopy)(ESMC_Base **source, ESMC_Base **destination, 
                                 ESMC_AttCopyFlag *attcopyflag, ESMC_AttTreeFlag *atttreeflag, int *rc);
   void FTN(c_esmc_attributedestroy)(ESMC_Base **base, char *name, int *rc, int nlen);
-  void FTN(c_esmc_attributegetcount)(ESMC_Base **base, int *count, int *rc);
+  void FTN(c_esmc_attributegetcount)(ESMC_Base **base, int *count, ESMC_AttGetCountFlag *flag, int *rc);
   void FTN(c_esmc_attributegetinfoname)(ESMC_Base **base, char *name, 
                                         ESMC_TypeKind *tk,
                                         int *count, int *rc, int nlen);

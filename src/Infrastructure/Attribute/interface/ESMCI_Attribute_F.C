@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.14 2009/03/30 20:32:36 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.15 2009/04/13 15:10:23 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.14 2009/03/30 20:32:36 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.15 2009/04/13 15:10:23 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -2638,6 +2638,7 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       int *count,               // out - attribute count
+      ESMC_AttGetCountFlag *flag,  // in - attgetcount flag
       int *rc) {                // out - return code
 // 
 // !DESCRIPTION:
@@ -2665,7 +2666,21 @@ extern "C" {
     return;
   }
 
-  *count = (**base).root.AttributeGetCount();
+  if (*flag == ESMC_ATTGETCOUNT_ATTRIBUTE)
+      *count = (**base).root.AttributeGetCount();
+  else if (*flag == ESMC_ATTGETCOUNT_ATTPACK)
+      *count = (**base).root.AttributeGetCountPack();
+  else if (*flag == ESMC_ATTGETCOUNT_ATTLINK)
+      *count = (**base).root.AttributeGetCountLink();
+  else if (*flag == ESMC_ATTGETCOUNT_TOTAL)
+      *count = (**base).root.AttributeGetCountTotal();
+  else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "invalid value for attcountflag", &status);
+    if (rc) *rc = status;
+    return;
+  }
+
   if (count <= 0) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute count", &status);
