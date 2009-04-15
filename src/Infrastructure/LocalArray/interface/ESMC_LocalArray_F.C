@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.23.2.6 2009/01/21 21:25:22 cdeluca Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.23.2.7 2009/04/15 00:31:37 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -319,12 +319,16 @@ char *name = NULL;
 
      // compare actual pointer size computed at run time, vs. the
      // compile-time fixed size specified in ESMC_Conf.h
-     void FTN(c_esmf_f90ptrsizeprint)(char *p1, char *p2, int *rank, int *rc) {
+     void FTN(c_esmf_f90ptrsizeprint)(char *p1, char *p2, int *rank, int *align, int *rc) {
          int rsize = (int)(p2 - p1);
 
          int fixed = ESMF_F90_PTR_BASE_SIZE;
          for (int i=1; i<*rank; i++)
              fixed += ESMF_F90_PTR_PLUS_RANK;
+
+         int alignsize = *align;
+         if (alignsize)
+           fixed = ((fixed + alignsize - 1) / alignsize) * alignsize;
 
          if (rsize != fixed) {
             printf("No Match: rank %d=%d, computed=%d (diff=%d)\n",
