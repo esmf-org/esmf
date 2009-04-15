@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.11.2.5 2009/01/21 21:25:18 cdeluca Exp $"
+"$Id: ESMC_Conf.h,v 1.11.2.6 2009/04/15 00:25:44 w6ws Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -46,7 +46,7 @@ typedef int ESMCI_FortranStrLenArg;
 #if Sia64_64
 #define ESMF_IS_64BIT_MACHINE 1
 #ifndef ESMF_F90_PTR_BASE_SIZE
-#define ESMF_F90_PTR_BASE_SIZE 40
+#define ESMF_F90_PTR_BASE_SIZE 36
 #endif
 #ifndef ESMF_F90_PTR_PLUS_RANK
 #define ESMF_F90_PTR_PLUS_RANK 12
@@ -66,7 +66,7 @@ typedef int ESMCI_FortranStrLenArg;
 #if Sx86_64_small
 #define ESMF_IS_64BIT_MACHINE 1
 #ifndef ESMF_F90_PTR_BASE_SIZE
-#define ESMF_F90_PTR_BASE_SIZE 40
+#define ESMF_F90_PTR_BASE_SIZE 36
 #endif
 #ifndef ESMF_F90_PTR_PLUS_RANK
 #define ESMF_F90_PTR_PLUS_RANK 12
@@ -76,7 +76,7 @@ typedef int ESMCI_FortranStrLenArg;
 #if Sx86_64_medium
 #define ESMF_IS_64BIT_MACHINE 1
 #ifndef ESMF_F90_PTR_BASE_SIZE
-#define ESMF_F90_PTR_BASE_SIZE 40
+#define ESMF_F90_PTR_BASE_SIZE 36
 #endif
 #ifndef ESMF_F90_PTR_PLUS_RANK
 #define ESMF_F90_PTR_PLUS_RANK 12
