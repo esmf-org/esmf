@@ -1,4 +1,4 @@
-% $Id: ESMF.cbib,v 1.9 2007/09/18 21:38:16 cdeluca Exp $
+% $Id: ESMF.cbib,v 1.10 2009/04/15 21:33:03 oehmke Exp $
 
 % abbreviations
 @String{BAMS = {Bull. Amer. Met. Soc.}}
@@ -36,6 +36,7 @@
 #include "../Infrastructure/Grid/doc/Grid.bib"
 #include "../Infrastructure/Regrid/doc/Regrid.bib"
 #include "../Infrastructure/IO/doc/IO.bib"
+#include "../Infrastructure/Mesh/doc/Mesh.bib"
 #include "../Infrastructure/TimeMgr/doc/TimeMgr.bib"
 
 
