@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.h,v 1.14 2009/04/16 04:19:21 theurich Exp $
+// $Id: ESMCI_FTable.h,v 1.15 2009/04/16 04:46:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -205,7 +205,7 @@ class MethodElement{
     int print(void)const;
     int execute(void *object, int *userRc);
     int resolve(void);
-  friend MethodTable;
+  friend class MethodTable;
 };
 
 
