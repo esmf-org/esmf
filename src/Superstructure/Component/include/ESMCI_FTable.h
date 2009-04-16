@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.h,v 1.13 2009/04/10 16:17:02 theurich Exp $
+// $Id: ESMCI_FTable.h,v 1.14 2009/04/16 04:19:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -31,6 +31,8 @@
 //EOPI
 //-----------------------------------------------------------------------------
 
+#include <string>
+
 #include "ESMCI_VM.h"
 #include "ESMCI_Comp.h"
 
@@ -51,6 +53,7 @@ namespace ESMCI {
 enum dtype { DT_VOIDP=1, DT_FORTRAN_UDT_POINTER };
 enum ftype { FT_NULL=1, FT_VOIDP1INTP, FT_VOIDP4INTP };
 
+typedef void (*VoidFunc)(void);
 typedef void (*VoidP1IntPFunc)(void *, int *);
 typedef void (*VoidP4IntPFunc)(void *, void *, void *, void *, int *);
 
@@ -150,6 +153,85 @@ typedef struct{
   int *esmfrc;        // return codes of esmf call back method (all threads)
   int *userrc;        // return codes of registered user method (all threads)
 }cargotype;
+
+
+
+//==============================================================================
+//==============================================================================
+// MethodTable
+//==============================================================================
+//==============================================================================
+
+class MethodTable;
+
+class MethodElement{
+  private:
+    const std::string label;
+    void *pointer;
+    std::string name;
+    std::string shobj;
+    MethodElement *nextElement;
+  public:
+    // native C++ constructors/destructors
+    MethodElement(void):label(""){
+      pointer = NULL;
+      name = std::string("");
+      shobj = std::string("");
+      nextElement = NULL;
+    }
+    MethodElement(std::string labelArg):label(labelArg){
+      pointer = NULL;
+      name = std::string("");
+      shobj = std::string("");
+      nextElement = NULL;
+    }
+    MethodElement(std::string labelArg, void *pointerArg):label(labelArg){
+      pointer = pointerArg;
+      name = std::string("");
+      shobj = std::string("");
+      nextElement = NULL;
+    }
+    MethodElement(std::string labelArg, std::string nameArg,
+      std::string shobjArg):label(labelArg){
+      pointer = NULL;
+      name = nameArg;
+      shobj = shobjArg;
+      nextElement = NULL;
+    }
+    ~MethodElement(void){
+      nextElement = NULL;
+    }
+    // other methods
+    int print(void)const;
+    int execute(void *object, int *userRc);
+    int resolve(void);
+  friend MethodTable;
+};
+
+
+class MethodTable{
+  private:
+    MethodElement *table;
+  public:
+    // native C++ constructors/destructors
+    MethodTable(void){
+      table = NULL;
+    }
+    ~MethodTable(void){
+      while (table){
+        MethodElement *next = table->nextElement;   
+        delete table;
+        table = next;
+      }
+      table = NULL;
+    }
+    // other methods
+    int print(void)const;
+    int add(std::string labelArg, void *pointer);
+    int add(std::string labelArg, std::string name, std::string sharedObj);
+    int remove(std::string labelArg);
+    int execute(std::string labelArg, void *object, int *userRc);
+};
 
 } // namespace ESMCI
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.15 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.16 2009/04/16 04:19:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -10,6 +10,22 @@
 !
 !==============================================================================
 !
+
+!--- Module used to test attachable methods in unit tests below ----------------
+module userMethodMod
+  use ESMF_Mod
+  implicit none
+  public myUserMethod
+contains
+  subroutine myUserMethod(state, rc)
+    type(ESMF_State):: state
+    integer:: rc
+    print *, "Hi from myUserMethod"
+    call ESMF_StatePrint(state, rc=rc)
+  end subroutine
+end module
+!-------------------------------------------------------------------------------
+
       program ESMF_StateCreateUTest
 
 !==============================================================================
@@ -27,12 +43,13 @@
 ! !USES:
       use ESMF_TestMod     ! test methods
       use ESMF_Mod 
+      use userMethodMod
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.15 2009/01/21 21:38:02 cdeluca Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.16 2009/04/16 04:19:21 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -94,6 +111,65 @@
       print *,"testName: ",testName
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+                      
+      !------------------------------------------------------------------------
+      !NEX_UTest      
+      ! Test attaching user method to an Empty State
+      call ESMF_MethodAdd(state1, label="user1", userRoutine=myUserMethod, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Attach user method to an empty State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+                      
+      !------------------------------------------------------------------------
+      !NEX_UTest      
+      ! Test attaching existing user method to an Empty State
+      call ESMF_MethodAdd(state1, label="user1", userRoutine=myUserMethod, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Attach existing user method to an empty State Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+                      
+                      
+      !------------------------------------------------------------------------
+      !NEX_UTest      
+      ! Test attaching user method to an Empty State
+      call ESMF_MethodAdd(state1, label="user2", userRoutine=myUserMethod, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Attach user method to an empty State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+                      
+      !------------------------------------------------------------------------
+      !NEX_UTest      
+      ! Test removing attached user method from Empty State
+      call ESMF_MethodRemove(state1, label="user1", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Removing user method from empty State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+                      
+
+      !------------------------------------------------------------------------
+      !NEX_UTest      
+      ! Test removing non-existing attached user method from Empty State
+      call ESMF_MethodRemove(state1, label="user1", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Removing non-existing user method from empty State Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+                      
+
+      !------------------------------------------------------------------------
+      !NEX_UTest      
+      ! Test executing attached user method in an Empty State
+      call ESMF_MethodExecute(state1, label="user2", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Executing user method in an empty State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+                      
+
       !------------------------------------------------------------------------
       !NEX_UTest      
       ! Test Destruction of an empty import State 
