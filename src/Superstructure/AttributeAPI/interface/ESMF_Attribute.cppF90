@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.29 2009/04/13 15:14:59 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.30 2009/04/17 22:40:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.29 2009/04/13 15:14:59 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.30 2009/04/17 22:40:47 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -132,17 +132,17 @@ module ESMF_AttributeMod
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_ArrayAttAddPackCstm
         module procedure ESMF_ArrayBundleAttAddPackCstm
-        module procedure ESMF_CplCompAttAddPack
+        module procedure ESMF_CplCompAttAddPackStandard
         module procedure ESMF_CplCompAttAddPackCstm
-        module procedure ESMF_GridCompAttAddPack
+        module procedure ESMF_GridCompAttAddPackStandard
         module procedure ESMF_GridCompAttAddPackCstm
         module procedure ESMF_DistGridAttAddPackCstm
-        module procedure ESMF_FieldAttAddPack
+        module procedure ESMF_FieldAttAddPackStandard
         module procedure ESMF_FieldAttAddPackCstm
         module procedure ESMF_FieldBundleAttAddPackCstm
-        module procedure ESMF_GridAttAddPack
+        module procedure ESMF_GridAttAddPackStandard
         module procedure ESMF_GridAttAddPackCstm
-        module procedure ESMF_StateAttAddPack
+        module procedure ESMF_StateAttAddPackStandard
         module procedure ESMF_StateAttAddPackCstm
         
 ! !DESCRIPTION:
@@ -1459,6 +1459,98 @@ contains
 !  Macro versions of the routines
 !-------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
+
+#define AttAddPackStandardMacro(mclass, mthis, mthisfield) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttAddPackStandard" @\
+ @\
+!BOPI @\
+! !IROUTINE: mclass##AttAddPackStandard - Create a mthis standard Attribute package @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeAdd() @\
+      subroutine mclass##AttAddPackStandard(mthis, convention, purpose, & @\
+        nestConvention, nestPurpose, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(mclass), intent(inout) :: mthis @\
+      character (len = *), intent(in) :: convention @\
+      character (len = *), intent(in) :: purpose @\
+      character (len = *), intent(in), optional :: nestConvention @\
+      character (len = *), intent(in), optional :: nestPurpose @\
+      integer, intent(out), optional :: rc    @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Sets up the Attribute package for the {\tt mthis}. @\
+!     The Attribute package defines the convention, purpose, and object type  @\
+!     of the associated Attributes. @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis] @\
+!      An {\tt mclass} object. @\
+!     \item [convention] @\
+!      The convention of the Attribute package. @\
+!     \item [purpose] @\
+!      The purpose of the Attribute package. @\
+!     \item [{[rc]}]  @\
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc                           ! Error status @\
+      type(ESMF_Logical) :: attpacknest @\
+      character (len=*), parameter :: object=#mthis @\
+ @\
+      ! Initialize return code; assume failure until success is certain @\
+      attpacknest = ESMF_FALSE @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      if (convention .ne. "ESMF" .or. purpose .ne. "general") then @\
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "Convention must be ESMF, and purpose must be general for standard attpacks", & @ \
+                     ESMF_CONTEXT, rc) @\
+        return @\
+      endif @\
+ @\
+      if (present(nestConvention).or.present(nestPurpose)) then @\
+        if (present(nestConvention).and..not.present(nestPurpose).or. & @\
+            present(nestPurpose).and..not.present(nestConvention)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "both nestConvention and nestPurpose must be present or not", & @ \
+                     ESMF_CONTEXT, rc) @\
+          return @\
+        else @\
+          attpacknest = ESMF_TRUE; @\
+        endif @\
+      endif @\
+ @\
+      if (attpacknest == ESMF_FALSE) then @\
+        call c_ESMC_AttPackCreateStandard(mthisfield, convention, & @\
+          purpose, object, localrc) @\
+      else @\
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "you cannot nest an ESMF standard Attribute package onto a custom package", & @ \
+                     ESMF_CONTEXT, rc) @\
+        return @\
+      endif @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass##AttAddPackStandard
+
+!------------------------------------------------------------------------------
+
 #define AttAddPackCustomMacro(mclass, mthis, mthisfield) \
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_AttAddPackCstm" @\
@@ -1467,16 +1559,17 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeAdd() @\
-      subroutine mclass##AttAddPackCstm(mthis, attrList, convention, & @\
-      purpose, count, attpacknestflag, rc) @\
+      subroutine mclass##AttAddPackCstm(mthis, convention, purpose, & @\
+      attrList, count, nestConvention, nestPurpose, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
+      character (len = *), intent(in) :: convention @\
+      character (len = *), intent(in) :: purpose @\
       character (len = *), dimension(:), intent(in) :: attrList @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
       integer, intent(in), optional :: count @\
-      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag @\
+      character (len = *), intent(in), optional :: nestConvention @\
+      character (len = *), intent(in), optional :: nestPurpose @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -1506,13 +1599,12 @@ contains
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, i, directional, localCount                          ! Error status @\
-      character(len=*), parameter :: fconvention='N/A' @\
-      character(len=*), parameter :: fpurpose='N/A' @\
-      character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_AttPackNestFlag) :: attpacknest @\
- @\
+      integer :: localrc, i, localCount @\
+      character(len=*), parameter :: object=#mthis @\
+      type(ESMF_Logical) :: attpacknest @\
+@\
       ! Initialize return code; assume failure until success is certain @\
+      attpacknest = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check input variables @\
@@ -1537,83 +1629,34 @@ contains
         return @\
       endif @\
  @\
-      if (present(attpacknestflag)) then @\
-        attpacknest = attpacknestflag @\
+      if (present(nestConvention).or.present(nestPurpose)) then @\
+        if (present(nestConvention).and..not.present(nestPurpose).or. & @\
+            present(nestPurpose).and..not.present(nestConvention)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "both nestConvention and nestPurpose must be present or not", & @ \
+                     ESMF_CONTEXT, rc) @\
+          return @\
+        else @\
+          attpacknest = ESMF_TRUE @\
+        endif @\
+      endif @\
+ @\
+      if (attpacknest == ESMF_FALSE) then @\
+        call c_ESMC_AttPackCreateCustom(mthisfield, convention, & @\
+          purpose, object, ESMF_ATTPACKNEST_OFF, localrc) @\
       else @\
-        attpacknest = ESMF_ATTPACKNEST_OFF @\
+        call c_ESMC_AttPackNest(mthisfield, convention, & @\
+          purpose, object, nestConvention, nestPurpose, localrc) @\
       endif @\
- @\
-      directional = 0 ! neither convention nor purpose @\
- @\
-      if (present(convention)) then @\
-        directional = 1 ! convention only @\
-      endif @\
- @\
-      if (present(purpose)) then @\
-        directional = 2 ! purpose only @\
-      endif @\
- @\
-      if (present(convention) .AND. present(purpose)) then @\
-        directional = 3 ! convention and purpose @\
-      endif @\
- @\
-      select case (directional) @\
-      case (0) @\
-      call c_ESMC_AttPackCreate(mthisfield, fconvention, & @\
-        fpurpose, fobject, attpacknest, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      case (1) @\
-      call c_ESMC_AttPackCreate(mthisfield, convention, & @\
-        fpurpose, fobject, attpacknest, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      case (2) @\
-      call c_ESMC_AttPackCreate(mthisfield, fconvention, & @\
-        purpose, fobject, attpacknest, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      case (3) @\
-      call c_ESMC_AttPackCreate(mthisfield, convention, & @\
-        purpose, fobject, attpacknest, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end select @\
  @\
       do i = 1, localCount @\
-       @\
-        select case (directional) @\
-        case (0) @\
-        call c_ESMC_AttPackAddAttribute(mthisfield, attrList(i), fconvention, & @\
-          fpurpose, fobject, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-        case (1) @\
         call c_ESMC_AttPackAddAttribute(mthisfield, attrList(i), convention, & @\
-          fpurpose, fobject, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-        case (2) @\
-        call c_ESMC_AttPackAddAttribute(mthisfield, attrList(i), fconvention, & @\
-          purpose, fobject, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-        case (3) @\
-        call c_ESMC_AttPackAddAttribute(mthisfield, attrList(i), convention, & @\
-          purpose, fobject, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-        end select @\
+            purpose, object, localrc) @\
       end do @\
-       @\
+ @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
       end subroutine mclass##AttAddPackCstm @\
@@ -1734,132 +1777,70 @@ contains
 ! @\
 !EOPI @\
 @\
-      integer :: localrc, directional @\
-      character(len=*), parameter :: fconvention='N/A' @\
-      character(len=*), parameter :: fpurpose='N/A' @\
+      integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: present_flag @\
+      type(ESMF_Logical) :: present_flag, attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
+      present_flag = ESMF_FALSE @\
+      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      directional = 0 ! neither convention nor purpose @\
- @\
-    if (present(convention) .OR. present(purpose)) then @\
-       @\
-      if (present(convention)) then @\
-        directional = 1 ! convention only @\
-      endif @\
- @\
-      if (present(purpose)) then @\
-        directional = 2 ! purpose only @\
-      endif @\
- @\
-      if (present(convention) .AND. present(purpose)) then @\
-        directional = 3 ! convention and purpose @\
-      endif @\
- @\
-      select case (directional) @\
-      case (0) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, 1, value, & @\
-        fconvention, fpurpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      case (1) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, 1, value, & @\
-        convention, fpurpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      case (2) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, 1, value, & @\
-        fconvention, purpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      case (3) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, 1, value, & @\
-        convention, purpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      end select @\
-      if (present_flag == ESMF_FALSE) then @\
-        if(present(defaultvalue)) then @\
-          value = defaultvalue @\
-        else  @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "Attribute not found, and no default given", & @ \
+                    "both convention and purpose must be present or not", & @ \
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
+        attpack = ESMF_TRUE @\
       endif @\
  @\
-    else @\
-       @\
-      call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
+      if (attpack == ESMF_TRUE) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
+          fobject, present_flag, localrc) @\
+        if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
- @\
-      if (present_flag == ESMF_TRUE) then @\
- @\
-      call c_ESMC_AttributeGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, 1, value, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
+        if (present_flag == ESMF_TRUE) then @\
+          call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+            ESMF_TYPEKIND_##mtypekind, 1, value, & @\
+            convention, purpose, fobject, localrc) @\
+          if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-         @\
+        endif @\
       else @\
+       @\
+        call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
+        if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
  @\
-        if(present(defaultvalue)) then @\
-          value = defaultvalue @\
-        else  @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+        if (present_flag == ESMF_TRUE) then @\
+          call c_ESMC_AttributeGetValue(mthisfield, name, & @\
+            ESMF_TYPEKIND_##mtypekind, 1, value, localrc) @\
+          if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+        endif @\
+      endif @\ 
+ @\
+      if(present_flag .ne. ESMF_TRUE) then @\
+      if(present(defaultvalue)) then @\
+        value = defaultvalue @\
+      else  @\
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
                     "Attribute not found, and no default given", & @ \
                      ESMF_CONTEXT, rc) @\
-          return @\
-        endif @\
+        return @\
       endif @\
- @\
-    endif @\
+      endif @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -1911,20 +1892,18 @@ contains
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, directional, litemCount @\
-      character(len=*), parameter :: fconvention='N/A' @\
-      character(len=*), parameter :: fpurpose='N/A' @\
+      integer :: localrc, litemCount @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: present_flag @\
+      type(ESMF_Logical) :: present_flag, attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
+      present_flag = ESMF_FALSE @\
+      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
- @\
-      directional = 0 ! neither convention nor purpose @\
  @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
@@ -1933,9 +1912,9 @@ contains
                               ESMF_CONTEXT, rc) @\
           return @\
         endif @\
-	litemCount = itemCount @\
+	      litemCount = itemCount @\
       else @\
-	litemCount = size(valueList) @\
+	      litemCount = size(valueList) @\
       end if @\
  @\
       if (litemCount .le. 0) then @\
@@ -1945,120 +1924,61 @@ contains
         return @\
       endif @\
  @\
-    if (present(convention) .OR. present(purpose)) then @\
-       @\
-      if (present(convention)) then @\
-        directional = 1 ! convention only @\
-      endif @\
- @\
-      if (present(purpose)) then @\
-        directional = 2 ! purpose only @\
-      endif @\
- @\
-      if (present(convention) .AND. present(purpose)) then @\
-        directional = 3 ! convention and purpose @\
-      endif @\
- @\
-      select case (directional) @\
-      case (0) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-        fconvention, fpurpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      case (1) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-        convention, fpurpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      case (2) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-        fconvention, purpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      case (3) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-        convention, purpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      end select @\
-      if (present_flag == ESMF_FALSE) then @\
-        if(present(defaultvalueList)) then @\
-          valueList = defaultvalueList @\
-        else  @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "Attribute not found, and no default given", & @ \
+                    "both convention and purpose must be present or not", & @ \
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
+        attpack = ESMF_TRUE @\
       endif @\
  @\
-    else @\
-       @\
-      call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
+      if (attpack == ESMF_TRUE) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
+          fobject, present_flag, localrc) @\
+        if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
- @\
-      if (present_flag == ESMF_TRUE) then @\
- @\
-      call c_ESMC_AttributeGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, litemCount, valueList, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
+        if (present_flag == ESMF_TRUE) then @\
+        call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+          ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
+          convention, purpose, fobject, localrc) @\
+        if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
- @\
+        end if @\
       else @\
-        if(present(defaultvalueList)) then @\
-          valueList = defaultvalueList @\
-        else  @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "Attribute not found, and no default given", & @ \
-                     ESMF_CONTEXT, rc) @\
-          return @\
+ @\
+        call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
+        if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+        if (present_flag == ESMF_TRUE) then @\
+          call c_ESMC_AttributeGetValue(mthisfield, name, & @\
+           ESMF_TYPEKIND_##mtypekind, litemCount, valueList, localrc) @\
+          if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+ @\
         endif @\
       endif @\
  @\
-    endif @\
+      if(present_flag .ne. ESMF_TRUE) then @\
+      if(present(defaultvalueList)) then @\
+        valueList = defaultvalueList @\
+      else  @\
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "Attribute not found, and no default given", & @ \
+                     ESMF_CONTEXT, rc) @\
+        return @\
+      endif @\
+      endif @\
  @\
-    if (present(itemCount)) then @\
-      itemCount = litemCount @\
-    endif @\
+      if (present(itemCount)) then @\
+        itemCount = litemCount @\
+      endif @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -2112,135 +2032,70 @@ contains
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, directional @\
-      character(len=*), parameter :: fconvention='N/A' @\
-      character(len=*), parameter :: fpurpose='N/A' @\
+      integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: localvalue, present_flag @\
+      type(ESMF_Logical) :: localvalue, present_flag, attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
+      present_flag = ESMF_FALSE @\
+      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      directional = 0 ! neither convention nor purpose @\
- @\
-    if (present(convention) .OR. present(purpose)) then @\
- @\
-      if (present(convention)) then @\
-        directional = 1 ! convention only @\
-      endif @\
- @\
-      if (present(purpose)) then @\
-        directional = 2 ! purpose only @\
-      endif @\
- @\
-      if (present(convention) .AND. present(purpose)) then @\
-        directional = 3 ! convention and purpose @\
-      endif @\
- @\
-      select case (directional) @\
-      case (0) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
-        fconvention, fpurpose, fobject, localrc) @\
-      value = localvalue   @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      case (1) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
-        convention, fpurpose, fobject, localrc) @\
-      value = localvalue   @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      case (2) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
-        fconvention, purpose, fobject, localrc) @\
-      value = localvalue   @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      case (3) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
-        convention, purpose, fobject, localrc) @\
-      value = localvalue   @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      end select @\
-      if (present_flag == ESMF_FALSE) then @\
-        if(present(defaultvalue)) then @\
-          value = defaultvalue @\
-        else  @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "Attribute not found, and no default given", & @ \
+                    "both convention and purpose must be present or not", & @ \
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
+        attpack = ESMF_TRUE @\
       endif @\
  @\
-    else @\
-       @\
-      call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
+      if (attpack == ESMF_TRUE) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
+          fobject, present_flag, localrc) @\
+        if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
- @\
-      if (present_flag == ESMF_TRUE) then @\
- @\
-      call c_ESMC_AttributeGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc) @\
-      value = localvalue @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
+        if (present_flag == ESMF_TRUE) then @\
+          call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+            ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
+            convention, purpose, fobject, localrc) @\
+          value = localvalue   @\
+          if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
+        end if @\
       else @\
-        if(present(defaultvalue)) then @\
-          value = defaultvalue @\
-        else  @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "Attribute not found, and no default given", & @ \
-                     ESMF_CONTEXT, rc) @\
-          return @\
+        call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
+        if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+        if (present_flag == ESMF_TRUE) then @\
+          call c_ESMC_AttributeGetValue(mthisfield, name, & @\
+            ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc) @\
+          value = localvalue @\
+          if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
         endif @\
       endif @\
  @\
-    endif @\
+      if(present_flag .ne. ESMF_TRUE) then @\
+      if(present(defaultvalue)) then @\
+        value = defaultvalue @\
+      else  @\
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "Attribute not found, and no default given", & @ \
+                     ESMF_CONTEXT, rc) @\
+        return @\
+      endif @\
+      endif @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -2295,20 +2150,18 @@ contains
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, directional, litemCount @\
-      character(len=*), parameter :: fconvention='N/A' @\
-      character(len=*), parameter :: fpurpose='N/A' @\
+      integer :: localrc, litemCount @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: present_flag @\
+      type(ESMF_Logical) :: present_flag, attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
+      present_flag = ESMF_FALSE @\
+      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
- @\
-      directional = 0 ! neither convention nor purpose @\
  @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
@@ -2317,9 +2170,9 @@ contains
                               ESMF_CONTEXT, rc) @\
           return @\
         endif @\
-	litemCount = itemCount @\
+      	litemCount = itemCount @\
       else @\
-	litemCount = size(valueList) @\
+	      litemCount = size(valueList) @\
       end if @\
  @\
       if (litemCount .le. 0) then @\
@@ -2329,115 +2182,55 @@ contains
         return @\
       endif @\
  @\
-    if (present(convention) .OR. present(purpose)) then @\
- @\
-      if (present(convention)) then @\
-        directional = 1 ! convention only @\
-      endif @\
- @\
-      if (present(purpose)) then @\
-        directional = 2 ! purpose only @\
-      endif @\
- @\
-      if (present(convention) .AND. present(purpose)) then @\
-        directional = 3 ! convention and purpose @\
-      endif @\
- @\
-      select case (directional) @\
-      case (0) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-        fconvention, fpurpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      case (1) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-        convention, fpurpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      case (2) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-        fconvention, purpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      case (3) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-        convention, purpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      end select @\
-      if (present_flag == ESMF_FALSE) then @\
-        if(present(defaultvalueList)) then @\
-          valueList = defaultvalueList @\
-        else  @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "Attribute not found, and no default given", & @ \
+                    "both convention and purpose must be present or not", & @ \
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
+        attpack = ESMF_TRUE @\
       endif @\
  @\
-    else @\
-       @\
-      call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
+      if (attpack == ESMF_TRUE) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
+          fobject, present_flag, localrc) @\
+        if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
- @\
-      if (present_flag == ESMF_TRUE) then @\
- @\
-      call c_ESMC_AttributeGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
+        if (present_flag == ESMF_TRUE) then @\
+          call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+            ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
+            convention, purpose, fobject, localrc) @\
+          if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
+        end if @\
       else @\
-        if(present(defaultvalueList)) then @\
-          valueList = defaultvalueList @\
-        else  @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "Attribute not found, and no default given", & @ \
-                     ESMF_CONTEXT, rc) @\
-          return @\
+        call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
+        if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+        if (present_flag == ESMF_TRUE) then @\
+          call c_ESMC_AttributeGetValue(mthisfield, name, & @\
+            ESMF_TYPEKIND_LOGICAL, litemCount, valueList, localrc) @\
+          if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
         endif @\
       endif @\
  @\
-    endif @\
+      if(present_flag .ne. ESMF_TRUE) then @\
+      if(present(defaultvalueList)) then @\
+        valueList = defaultvalueList @\
+      else  @\
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "Attribute not found, and no default given", & @ \
+                     ESMF_CONTEXT, rc) @\
+        return @\
+      endif @\
+      endif @\
 @\
     if (present(itemCount)) then @\
       itemCount = litemCount @\
@@ -2494,114 +2287,57 @@ contains
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, directional  @\
-      character(len=*), parameter :: fconvention='N/A' @\
-      character(len=*), parameter :: fpurpose='N/A' @\
+      integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: present_flag @\
+      type(ESMF_Logical) :: present_flag, attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
+      present_flag = ESMF_FALSE @\
+      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      directional = 0 ! neither convention nor purpose @\
- @\
-    if (present(convention) .OR. present(purpose)) then @\
- @\
-      if (present(convention)) then @\
-        directional = 1 ! convention only @\
-      endif @\
- @\
-      if (present(purpose)) then @\
-        directional = 2 ! purpose only @\
-      endif @\
- @\
-      if (present(convention) .AND. present(purpose)) then @\
-        directional = 3 ! convention and purpose @\
-      endif @\
- @\
-      select case (directional) @\
-      case (0) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetChar(mthisfield, name, value, & @\
-        fconvention, fpurpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      case (1) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetChar(mthisfield, name, value, & @\
-        convention, fpurpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      case (2) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetChar(mthisfield, name, value, & @\
-        fconvention, purpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      case (3) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetChar(mthisfield, name, value, & @\
-        convention, purpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      end select @\
-      if (present_flag == ESMF_FALSE) then @\
-        if(present(defaultvalue)) then @\
-          value = defaultvalue @\
-        else  @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "Attribute not found, and no default given", & @ \
+                    "both convention and purpose must be present or not", & @ \
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
+        attpack = ESMF_TRUE @\
       endif @\
  @\
-    else @\
-       @\
-      call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
+      if (attpack == ESMF_TRUE) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
+          fobject, present_flag, localrc) @\
+        if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
- @\
-      if (present_flag == ESMF_TRUE) then @\
- @\
-      call c_ESMC_AttributeGetChar(mthisfield, name, value, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
+        if (present_flag == ESMF_TRUE) then @\
+          call c_ESMC_AttPackGetChar(mthisfield, name, value, & @\
+            convention, purpose, fobject, localrc) @\
+          if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
+        end if @\
       else @\
+        call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
+        if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+        if (present_flag == ESMF_TRUE) then @\
+          call c_ESMC_AttributeGetChar(mthisfield, name, value, localrc) @\
+          if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+        endif @\
+      endif @\
+ @\
+      if(present_flag .ne. ESMF_TRUE) then @\
         if(present(defaultvalue)) then @\
           value = defaultvalue @\
         else  @\
@@ -2611,8 +2347,6 @@ contains
           return @\
         endif @\
       endif @\
- @\
-    endif @\
  @\
       if (present(rc)) rc = localrc @\
  @\
@@ -2666,22 +2400,20 @@ contains
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, i, j, directional, litemCount @\
-      character(len=*), parameter :: fconvention='N/A' @\
-      character(len=*), parameter :: fpurpose='N/A' @\
+      integer :: localrc, i, j, litemCount @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: present_flag @\
+      type(ESMF_Logical) :: present_flag, attpack @\
       integer, dimension(size(valueList)) :: lens @\
       character(len=(size(valueList)*len(valueList))) :: valueString @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+      present_flag = ESMF_FALSE @\
+      attpack = ESMF_FALSE @\
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
- @\
-      directional = 0 ! neither convention nor purpose @\
  @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
@@ -2690,9 +2422,9 @@ contains
                               ESMF_CONTEXT, rc) @\
           return @\
         endif @\
-	litemCount = itemCount @\
+      	litemCount = itemCount @\
       else @\
-	litemCount = size(valueList) @\
+	      litemCount = size(valueList) @\
       end if @\
  @\
       if (litemCount .le. 0) then @\
@@ -2706,119 +2438,57 @@ contains
         lens(i) = len (valueList) @\
       enddo @\
        @\
-    if (present(convention) .OR. present(purpose)) then @\
-       @\
-      if (present(convention)) then @\
-        directional = 1 ! convention only @\
-      endif @\
- @\
-      if (present(purpose)) then @\
-        directional = 2 ! purpose only @\
-      endif @\
- @\
-      if (present(convention) .AND. present(purpose)) then @\
-        directional = 3 ! convention and purpose @\
-      endif @\
- @\
-      select case (directional) @\
-      case (0) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-        litemCount, lens, valueString, fconvention, fpurpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      case (1) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-        litemCount, lens, valueString, convention, fpurpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      case (2) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-        litemCount, lens, valueString, fconvention, purpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      case (3) @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-        fobject, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-        litemCount, lens, valueString, convention, purpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      end select @\
-      if (present_flag == ESMF_FALSE) then @\
-        if(present(defaultvalueList)) then @\
-          do i=1,litemCount @\
-            valueList(i) = defaultvalueList(i) @\
-          enddo @\
-          if (present(rc)) rc = ESMF_SUCCESS @\
-          return @\
-        else  @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "Attribute not found, and no default given", & @ \
+                    "both convention and purpose must be present or not", & @ \
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
+        attpack = ESMF_TRUE @\
       endif @\
  @\
-    else @\
-       @\
-      call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
+      if (attpack == ESMF_TRUE) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
+          fobject, present_flag, localrc) @\
+        if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
- @\
-      if (present_flag == ESMF_TRUE) then @\
- @\
-      call c_ESMC_AttributeGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-        litemCount, lens, valueString, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
+        if (present_flag == ESMF_TRUE) then @\
+          call c_ESMC_AttPackGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+            litemCount, lens, valueString, convention, purpose, fobject, localrc) @\
+          if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
+        end if @\
       else @\
-        if(present(defaultvalueList)) then @\
-          do i=1,litemCount @\
-            valueList(i) = defaultvalueList(i) @\
-          enddo @\
-          if (present(rc)) rc = ESMF_SUCCESS @\
-          return @\
-        else  @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "Attribute not found, and no default given", & @ \
-                     ESMF_CONTEXT, rc) @\
-          return @\
+        call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
+        if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+        if (present_flag == ESMF_TRUE) then @\
+          call c_ESMC_AttributeGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+            litemCount, lens, valueString, localrc) @\
+          if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
         endif @\
       endif @\
  @\
-    endif @\
+      if(present_flag .ne. ESMF_TRUE) then @\
+      if(present(defaultvalueList)) then @\
+        do i=1,litemCount @\
+          valueList(i) = defaultvalueList(i) @\
+        enddo @\
+      else  @\
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "Attribute not found, and no default given", & @ \
+                     ESMF_CONTEXT, rc) @\
+        return @\
+      endif @\
+ @\
+      else @\
  @\
       j = 1 @\
       do  i=1,litemCount @\
@@ -2830,6 +2500,9 @@ contains
       itemCount = litemCount @\
     endif @\
  @\
+      endif @\
+ @\
+   print *, "rc = ", rc @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
       end subroutine mclass##AttGetCharList @\
@@ -3331,72 +3004,47 @@ contains
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, directional @\
-      character(len=*), parameter :: fconvention='N/A' @\
-      character(len=*), parameter :: fpurpose='N/A' @\
+      integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
+      type(ESMF_Logical) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
+      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      directional = 0 ! neither convention nor purpose @\
-   @\
-    if (present(convention) .OR. present(purpose)) then @\
-       @\
-      if (present(convention)) then @\
-        directional = 1 ! convention only @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "both convention and purpose must be present or not", & @ \
+                     ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
+        attpack = ESMF_TRUE @\
       endif @\
  @\
-      if (present(purpose)) then @\
-        directional = 2 ! purpose only @\
+      if (attpack == ESMF_TRUE .and. .not.present(name)) then @\
+        call c_ESMC_AttPackRemove(mthisfield, convention, & @\
+          purpose, fobject, localrc) @\
+        if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      else if (attpack == ESMF_TRUE .and. present(name)) then @\
+        call c_ESMC_AttPackRemoveAttribute(mthisfield, name, convention, & @\
+          purpose, fobject, localrc) @\
+        if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      else if (present(name)) then @\
+        call c_ESMC_AttributeRemove(mthisfield, name, localrc) @\
+        if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
       endif @\
- @\
-      if (present(convention) .AND. present(purpose)) then @\
-        directional = 3 ! convention and purpose @\
-      endif @\
- @\
-      if (directional == 3 .AND. .not.(present(name))) then @\
-      call c_ESMC_AttPackRemove(mthisfield, convention, & @\
-        purpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      else if (directional == 0 .AND. present(name)) then @\
-      call c_ESMC_AttPackRemoveAttribute(mthisfield, name, fconvention, & @\
-        fpurpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      else if (directional == 1 .AND. present(name)) then @\
-      call c_ESMC_AttPackRemoveAttribute(mthisfield, name, convention, & @\
-        fpurpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      else if (directional == 2 .AND. present(name)) then @\
-      call c_ESMC_AttPackRemoveAttribute(mthisfield, name, fconvention, & @\
-        purpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      else if (directional == 3 .AND. present(name)) then @\
-      call c_ESMC_AttPackRemoveAttribute(mthisfield, name, convention, & @\
-        purpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-    else if (present(name)) then @\
- @\
-      call c_ESMC_AttributeRemove(mthisfield, name, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-    endif @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3453,72 +3101,43 @@ contains
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, directional  @\
-      character(len=*), parameter :: fconvention='N/A' @\
-      character(len=*), parameter :: fpurpose='N/A' @\
+      integer :: localrc  @\
       character(len=*), parameter :: fobject=#mthis @\
+      type(ESMF_Logical) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
+      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      directional = 0 ! neither convention nor purpose @\
- @\
-    if (present(convention) .OR. present(purpose)) then @\
-       @\
-      if (present(convention)) then @\
-        directional = 1 ! convention only @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "both convention and purpose must be present or not", & @ \
+                     ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
+        attpack = ESMF_TRUE @\
       endif @\
  @\
-      if (present(purpose)) then @\
-        directional = 2 ! purpose only @\
-      endif @\
- @\
-      if (present(convention) .AND. present(purpose)) then @\
-        directional = 3 ! convention and purpose @\
-      endif @\
- @\
-      select case (directional) @\
-      case (0) @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, 1, value, & @\
-        fconvention, fpurpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      if (attpack == ESMF_TRUE) then @\
+        call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+          ESMF_TYPEKIND_##mtypekind, 1, value, & @\
+          convention, purpose, fobject, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      case (1) @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, 1, value, & @\
-        convention, fpurpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      case (2) @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, 1, value, & @\
-        fconvention, purpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      case (3) @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, 1, value, & @\
-        convention, purpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end select @\
-    else @\
-      call c_ESMC_AttributeSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, 1, value, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      else @\
+        call c_ESMC_AttributeSetValue(mthisfield, name, & @\
+          ESMF_TYPEKIND_##mtypekind, 1, value, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
- @\
-    endif @\
+      endif @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3573,13 +3192,13 @@ contains
 ! @\
 !EOPI @\
 @\
-      integer :: localrc, directional, litemCount @\
-      character(len=*), parameter :: fconvention='N/A' @\
-      character(len=*), parameter :: fpurpose='N/A' @\
+      integer :: localrc, litemCount @\
       character(len=*), parameter :: fobject=#mthis @\
+      type(ESMF_Logical) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
+      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -3592,9 +3211,9 @@ contains
                               ESMF_CONTEXT, rc) @\
           return @\
         endif @\
-	litemCount = itemCount @\
+      	litemCount = itemCount @\
       else @\
-	litemCount = size(valueList) @\
+      	litemCount = size(valueList) @\
       end if @\
  @\
       if (litemCount .le. 0) then @\
@@ -3604,61 +3223,31 @@ contains
         return @\
       endif @\
  @\
-      directional = 0 ! neither convention nor purpose @\
- @\
-    if (present(convention) .OR. present(purpose)) then @\
-       @\
-      if (present(convention)) then @\
-        directional = 1 ! convention only @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "both convention and purpose must be present or not", & @ \
+                     ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
+        attpack = ESMF_TRUE @\
       endif @\
  @\
-      if (present(purpose)) then @\
-        directional = 2 ! purpose only @\
-      endif @\
- @\
-      if (present(convention) .AND. present(purpose)) then @\
-        directional = 3 ! convention and purpose @\
-      endif @\
- @\
-      select case (directional) @\
-      case (0) @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-        fconvention, fpurpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      if (attpack == ESMF_TRUE) then @\
+        call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+          ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
+          convention, purpose, fobject, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      case (1) @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-        convention, fpurpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      case (2) @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-        fconvention, purpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      case (3) @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-        convention, purpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end select @\
-    else @\
-       @\
-      call c_ESMC_AttributeSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_##mtypekind, litemCount, valueList, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      else @\
+        call c_ESMC_AttributeSetValue(mthisfield, name, & @\
+          ESMF_TYPEKIND_##mtypekind, litemCount, valueList, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
- @\
-    endif @\
+      endif @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3710,76 +3299,45 @@ contains
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, directional @\
-      character(len=*), parameter :: fconvention='N/A' @\
-      character(len=*), parameter :: fpurpose='N/A' @\
+      integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: localvalue @\
+      type(ESMF_Logical) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
+      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      directional = 0 ! neither convention nor purpose @\
- @\
-    if (present(convention) .OR. present(purpose)) then @\
-       @\
-      if (present(convention)) then @\
-        directional = 1 ! convention only @\
-      endif @\
- @\
-      if (present(purpose)) then @\
-        directional = 2 ! purpose only @\
-      endif @\
- @\
-      if (present(convention) .AND. present(purpose)) then @\
-        directional = 3 ! convention and purpose @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "both convention and purpose must be present or not", & @ \
+                     ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
+        attpack = ESMF_TRUE @\
       endif @\
  @\
       localvalue = value @\
-      select case (directional) @\
-      case (0) @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
-        fconvention, fpurpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      if (attpack == ESMF_TRUE) then @\
+        call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+          ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
+          convention, purpose, fobject, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      case (1) @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
-        convention, fpurpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      case (2) @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
-        fconvention, purpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      case (3) @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
-        convention, purpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end select @\
-    else @\
- @\
-      localvalue = value @\
-      call c_ESMC_AttributeSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      else @\
+        call c_ESMC_AttributeSetValue(mthisfield, name, & @\
+          ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
- @\
-    endif @\
+      endif @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3834,13 +3392,13 @@ contains
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, directional, litemCount @\
-      character(len=*), parameter :: fconvention='N/A' @\
-      character(len=*), parameter :: fpurpose='N/A' @\
+      integer :: localrc, litemCount @\
       character(len=*), parameter :: fobject=#mthis @\
+      type(ESMF_Logical) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
+      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -3853,9 +3411,9 @@ contains
                               ESMF_CONTEXT, rc) @\
           return @\
         endif @\
-	litemCount = itemCount @\
+      	litemCount = itemCount @\
       else @\
-	litemCount = size(valueList) @\
+      	litemCount = size(valueList) @\
       end if @\
  @\
       if (litemCount .le. 0) then @\
@@ -3865,62 +3423,31 @@ contains
         return @\
       endif @\
  @\
-      directional = 0 ! neither convention nor purpose @\
- @\
-    if (present(convention) .OR. present(purpose)) then @\
- @\
-      if (present(convention)) then @\
-        directional = 1 ! convention only @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "both convention and purpose must be present or not", & @ \
+                     ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
+        attpack = ESMF_TRUE @\
       endif @\
  @\
-      if (present(purpose)) then @\
-        directional = 2 ! purpose only @\
-      endif @\
- @\
-      if (present(convention) .AND. present(purpose)) then @\
-        directional = 3 ! convention and purpose @\
-      endif @\
- @\
-      select case (directional) @\
-      case (0) @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-        fconvention, fpurpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      if (attpack == ESMF_TRUE) then @\
+        call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+          ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
+          convention, purpose, fobject, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      case (1) @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-        convention, fpurpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      case (2) @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-        fconvention, purpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      case (3) @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-        convention, purpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end select @\
-    else @\
- @\
-      call c_ESMC_AttributeSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, localrc) @\
- @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      else @\
+        call c_ESMC_AttributeSetValue(mthisfield, name, & @\
+          ESMF_TYPEKIND_LOGICAL, litemCount, valueList, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
- @\
-    endif @\
+      endif @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3972,67 +3499,41 @@ contains
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, directional @\
-      character(len=*), parameter :: fconvention='N/A' @\
-      character(len=*), parameter :: fpurpose='N/A' @\
+      integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
+      type(ESMF_Logical) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
+      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      directional = 0 ! neither convention nor purpose @\
- @\
-    if (present(convention) .OR. present(purpose)) then @\
-       @\
-      if (present(convention)) then @\
-        directional = 1 ! convention only @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "both convention and purpose must be present or not", & @ \
+                     ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
+        attpack = ESMF_TRUE @\
       endif @\
  @\
-      if (present(purpose)) then @\
-        directional = 2 ! purpose only @\
-      endif @\
- @\
-      if (present(convention) .AND. present(purpose)) then @\
-        directional = 3 ! convention and purpose @\
-      endif @\
- @\
-      select case (directional) @\
-      case (0) @\
-      call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
-        ESMF_TYPEKIND_CHARACTER, fconvention, fpurpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      if (attpack == ESMF_TRUE) then @\
+        call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
+          ESMF_TYPEKIND_CHARACTER, convention, purpose, fobject, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      case (1) @\
-      call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
-        ESMF_TYPEKIND_CHARACTER, convention, fpurpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      case (2) @\
-      call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
-        ESMF_TYPEKIND_CHARACTER, fconvention, purpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      case (3) @\
-      call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
-        ESMF_TYPEKIND_CHARACTER, convention, purpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end select @\
-    else @\
- @\
-      call c_ESMC_AttributeSetChar(mthisfield, name, value, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      else @\
+        call c_ESMC_AttributeSetChar(mthisfield, name, value, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
-    endif @\
+      endif @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -4083,15 +3584,15 @@ contains
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, i, j, directional, litemCount @\
-      character(len=*), parameter :: fconvention='N/A' @\
-      character(len=*), parameter :: fpurpose='N/A' @\
+      integer :: localrc, i, j, litemCount @\
       character(len=*), parameter :: fobject=#mthis @\
       integer, dimension(size(valueList)) :: lens @\
       character(len=(size(valueList)*len(valueList))) :: valueString @\
- @\
+      type(ESMF_Logical) :: attpack @\
+@\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
+      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -4104,9 +3605,9 @@ contains
                               ESMF_CONTEXT, rc) @\
           return @\
         endif @\
-	litemCount = itemCount @\
+      	litemCount = itemCount @\
       else @\
-	litemCount = size(valueList) @\
+	      litemCount = size(valueList) @\
       end if @\
  @\
       if (litemCount .le. 0) then @\
@@ -4116,8 +3617,6 @@ contains
         return @\
       endif @\
  @\
-      directional = 0 ! neither convention nor purpose @\
- @\
       j = 1 @\
       do  i=1,litemCount @\
         lens(i) = len_trim(valueList(i)) @\
@@ -4125,54 +3624,30 @@ contains
         j = j + lens(i) @\
       enddo @\
  @\
-    if (present(convention) .OR. present(purpose)) then @\
- @\
-      if (present(convention)) then @\
-        directional = 1 ! convention only @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "both convention and purpose must be present or not", & @ \
+                     ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
+        attpack = ESMF_TRUE @\
       endif @\
  @\
-      if (present(purpose)) then @\
-        directional = 2 ! purpose only @\
-      endif @\
- @\
-      if (present(convention) .AND. present(purpose)) then @\
-        directional = 3 ! convention and purpose @\
-      endif @\
- @\
-      select case (directional) @\
-      case (0) @\
-      call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-        litemCount, valueString, lens, fconvention, fpurpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      if (attpack == ESMF_TRUE) then @\
+        call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+          litemCount, valueString, lens, convention, purpose, fobject, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      case (1) @\
-      call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-        litemCount, valueString, lens, convention, fpurpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      case (2) @\
-      call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-        litemCount, valueString, lens, fconvention, purpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      case (3) @\
-      call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-        litemCount, valueString, lens, convention, purpose, fobject, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end select @\
-    else @\
- @\
-      call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-        litemCount, valueString, lens, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      else @\
+        call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+          litemCount, valueString, lens, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
-    endif @\
+      endif @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -4278,96 +3753,45 @@ contains
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, directional @\
-      character(len=*), parameter :: fconvention='N/A' @\
-      character(len=*), parameter :: fpurpose='N/A' @\
+      integer :: localrc @\
       character(len=*), parameter :: fobject=#mthisobj @\
       character(len=*), parameter :: ftarobj=#mthistar @\
       type(ESMF_AttWriteFlag) :: writeflag @\
+      type(ESMF_Logical) :: attpack @\
  @\
       ! Initialize return code; assume failure until success is certain @\
+      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check input variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      directional = 0 @\
-      if (present(convention)) then @\
-        directional = 1 ! convention only @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "both convention and purpose must be present or not", & @ \
+                     ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
+        attpack = ESMF_TRUE @\
       endif @\
  @\
-      if (present(purpose)) then @\
-        directional = 2 ! purpose only @\
+      if (attpack == ESMF_TRUE) then @\
+        if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
+          call c_ESMC_AttributeWriteTab(mthisfield, convention, & @\
+            purpose, fobject, ftarobj, localrc) @\
+          if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+        else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then @\
+          call c_ESMC_AttributeWriteXML(mthisfield, convention, & @\
+            purpose, fobject, ftarobj, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      	endif @\
       endif @\
- @\
-      if (present(convention) .AND. present(purpose)) then @\
-        directional = 3 ! convention and purpose @\
-      endif @\
- @\
-      if (present(attwriteflag)) then @\
-        writeflag = attwriteflag @\
-      else @\
-        writeflag = ESMF_ATTWRITE_TAB @\
-      endif @\
- @\
-      select case (directional) @\
-      case (0) @\
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
-        call c_ESMC_AttributeWriteTab(mthisfield, fconvention, & @\
-          fpurpose, fobject, ftarobj, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then @\
-        call c_ESMC_AttributeWriteXML(mthisfield, fconvention, & @\
-          fpurpose, fobject, ftarobj, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      endif @\
-      case (1) @\
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
-        call c_ESMC_AttributeWriteTab(mthisfield, convention, & @\
-          fpurpose, fobject, ftarobj, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then @\
-        call c_ESMC_AttributeWriteXML(mthisfield, convention, & @\
-          fpurpose, fobject, ftarobj, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      endif @\
-      case (2) @\
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
-        call c_ESMC_AttributeWriteTab(mthisfield, fconvention, & @\
-          purpose, fobject, ftarobj, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then @\
-        call c_ESMC_AttributeWriteXML(mthisfield, fconvention, & @\
-          purpose, fobject, ftarobj, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      endif @\
-      case (3) @\
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
-        call c_ESMC_AttributeWriteTab(mthisfield, convention, & @\
-          purpose, fobject, ftarobj, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then @\
-        call c_ESMC_AttributeWriteXML(mthisfield, convention, & @\
-          purpose, fobject, ftarobj, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      end if @\
-      end select @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -4376,100 +3800,6 @@ contains
 !-------------------------------------------------------------------------
 !  ARRAY
 !-------------------------------------------------------------------------
-#if 0
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayAttAddPack"
-!BOPI
-! !IROUTINE: ESMF_ArrayAttAddPack - Create an array Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeAdd()
-      subroutine ESMF_ArrayAttAddPack(array, convention, purpose, &
-        attpacknestflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: array  
-      character (len = *), intent(in) :: convention
-      character (len = *), intent(in) :: purpose
-      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Sets up the Attribute package for the {\tt array}.
-!     The Attribute package defines the convention, purpose, and object type 
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [array]
-!      An {\tt ESMF\_Array} object.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!     \item [attpacknestflag]
-!      The flag to tell whether this Attribute package is to be nested or not, possible values
-!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc                           ! Error status
-      character (len=len_trim(convention)) :: fconvention
-      character (len=len_trim(purpose)) :: fpurpose
-      character (len=*), parameter :: fobject='array'
-      character (len=*), parameter :: name1 = 'name'
-      character (len=*), parameter :: name2 = 'standard_name'
-      character (len=*), parameter :: name3 = 'long_name'
-      character (len=*), parameter :: name4 = 'units'
-      character (len=*), parameter :: name5 = 'import'
-      character (len=*), parameter :: name6 = 'export'
-      type(ESMF_AttPackNestFlag) :: attpacknest
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
-
-      fconvention = convention
-      fpurpose = purpose
-
-       if (present(attpacknestflag)) then
-        attpacknest = attpacknestflag
-      else
-        attpacknest = ESMF_ATTPACKNEST_OFF
-      endif
-
-      call c_ESMC_AttPackCreate(array, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackAddAttribute(array, name1, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(array, name2, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(array, name3, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(array, name4, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(array, name5, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(array, name6, fconvention, &
-        fpurpose, fobject, localrc)
-
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_ArrayAttAddPack
-#endif
-!------------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_Array, array, array)
 AttRemoveMacro(ESMF_Array, array, array)
@@ -4484,108 +3814,9 @@ TypeKind3DeclarationMacro(AttSet, ESMF_Array, array, array)
 AttSetLogicalMacro(ESMF_Array, array, array)
 AttSetCharacterMacro(ESMF_Array, array, array)
 
-#if 0
-AttUpdateMacro(ESMF_Array, array, array)
-AttWriteMacro(ESMF_Array, array, array, array, array)
-#endif
-
 !-------------------------------------------------------------------------
 !  ARRAYBUNDLE
 !-------------------------------------------------------------------------
-#if 0
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayBundleAttAddPack"
-!BOPI
-! !IROUTINE: ESMF_ArrayBundleAttAddPack - Create an arraybundle Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeAdd()
-      subroutine ESMF_ArrayBundleAttAddPack(arraybundle, convention, purpose, &
-        attpacknestflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_ArrayBundle), intent(inout) :: arraybundle  
-      character (len = *), intent(in) :: convention
-      character (len = *), intent(in) :: purpose
-      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Sets up the Attribute package for the {\tt arraybundle}.
-!     The Attribute package defines the convention, purpose, and object type 
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [arraybundle]
-!      An {\tt ESMF\_ArrayBundle} object.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!     \item [attpacknestflag]
-!      The flag to tell whether this Attribute package is to be nested or not, possible values
-!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc                           ! Error status
-      character (len=len_trim(convention)) :: fconvention
-      character (len=len_trim(purpose)) :: fpurpose
-      character (len=*), parameter :: fobject='arraybundle'
-      character (len=*), parameter :: name1 = 'name'
-      character (len=*), parameter :: name2 = 'standard_name'
-      character (len=*), parameter :: name3 = 'long_name'
-      character (len=*), parameter :: name4 = 'units'
-      character (len=*), parameter :: name5 = 'import'
-      character (len=*), parameter :: name6 = 'export'
-      type(ESMF_AttPackNestFlag) :: attpacknest
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit,arraybundle,rc)
-
-      fconvention = convention
-      fpurpose = purpose
-
-       if (present(attpacknestflag)) then
-        attpacknest = attpacknestflag
-      else
-        attpacknest = ESMF_ATTPACKNEST_OFF
-      endif
-
-      call c_ESMC_AttPackCreate(arraybundle, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackAddAttribute(arraybundle, name1, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(arraybundle, name2, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(arraybundle, name3, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(arraybundle, name4, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(arraybundle, name5, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(arraybundle, name6, fconvention, &
-        fpurpose, fobject, localrc)
-
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_ArrayBundleAttAddPack
-#endif
-!------------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 AttRemoveMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
@@ -4600,121 +3831,11 @@ TypeKind3DeclarationMacro(AttSet, ESMF_ArrayBundle, arraybundle, arraybundle)
 AttSetLogicalMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 AttSetCharacterMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 
-#if 0
-AttUpdateMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
-AttWriteMacro(ESMF_ArrayBundle, arraybundle, arraybundle, arraybundle, arraybundle)
-#endif
-
 !-------------------------------------------------------------------------
 !  CplComp
 !-------------------------------------------------------------------------
 
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_CplCompAttAddPack"
-!BOPI
-! !IROUTINE: ESMF_CplCompAttAddPack - Create the Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeAdd()
-      subroutine ESMF_CplCompAttAddPack(comp, convention, purpose, &
-        attpacknestflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_CplComp), intent(inout) :: comp  
-      character (len = *), intent(in) :: convention
-      character (len = *), intent(in) :: purpose
-      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Sets up the Attribute package for the {\tt comp}.
-!     The Attribute package defines the convention, purpose, and object type
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [comp]
-!      An {\tt ESMF\_CplComp} object.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!     \item [attpacknestflag]
-!      The flag to tell whether this Attribute package is to be nested or not, possible values
-!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc                           ! Error status
-      character (len=len_trim(convention)) :: fconvention
-      character (len=len_trim(purpose)) :: fpurpose
-      character (len=*), parameter :: fobject='comp'
-      character (len=*), parameter :: name1 = 'name'
-      character (len=*), parameter :: name2 = 'full_name'
-      character (len=*), parameter :: name3 = 'version'
-      character (len=*), parameter :: name4 = 'discipline'
-      character (len=*), parameter :: name5 = 'physical_domain'
-      character (len=*), parameter :: name6 = 'agency'
-      character (len=*), parameter :: name7 = 'institution'
-      character (len=*), parameter :: name8 = 'author'
-      character (len=*), parameter :: name9 = 'coding_language'
-      character (len=*), parameter :: name10 = 'model_component_framework'
-      type(ESMF_AttPackNestFlag) :: attpacknest
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
-
-      fconvention = convention
-      fpurpose = purpose
-
-       if (present(attpacknestflag)) then
-        attpacknest = attpacknestflag
-      else
-        attpacknest = ESMF_ATTPACKNEST_OFF
-      endif
-
-      call c_ESMC_AttPackCreate(comp%compp%base, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name1, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name2, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name3, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name4, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name5, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name6, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name7, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name8, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name9, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name10, fconvention, &
-        fpurpose, fobject, localrc)
-
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_CplCompAttAddPack
-
-!------------------------------------------------------------------------------
-
+AttAddPackStandardMacro(ESMF_CplComp, comp, comp%compp%base)
 AttAddPackCustomMacro(ESMF_CplComp, comp, comp%compp%base)
 AttCopyMacro(ESMF_CplComp, ESMF_CplComp, comp1, comp2, comp1%compp%base, comp2%compp%base)
 
@@ -4752,111 +3873,7 @@ AttWriteMacro(ESMF_CplComp, comp, comp%compp%base, comp, field)
 !  GridComp
 !-------------------------------------------------------------------------
 
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_GridCompAttAddPack"
-!BOPI
-! !IROUTINE: ESMF_GridCompAttAddPack - Create the Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeAdd()
-      subroutine ESMF_GridCompAttAddPack(comp, convention, purpose, &
-        attpacknestflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_GridComp), intent(inout) :: comp  
-      character (len = *), intent(in) :: convention
-      character (len = *), intent(in) :: purpose
-      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Sets up the Attribute package for the {\tt comp}.
-!     The Attribute package defines the convention, purpose, and object type
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [comp]
-!      An {\tt ESMF\_GridComp} object.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!      The flag to tell whether this Attribute package is to be nested or not, possible values
-!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc                           ! Error status
-      character (len=len_trim(convention)) :: fconvention
-      character (len=len_trim(purpose)) :: fpurpose
-      character (len=*), parameter :: fobject='comp'
-      character (len=*), parameter :: name1 = 'name'
-      character (len=*), parameter :: name2 = 'full_name'
-      character (len=*), parameter :: name3 = 'version'
-      character (len=*), parameter :: name4 = 'discipline'
-      character (len=*), parameter :: name5 = 'physical_domain'
-      character (len=*), parameter :: name6 = 'agency'
-      character (len=*), parameter :: name7 = 'institution'
-      character (len=*), parameter :: name8 = 'author'
-      character (len=*), parameter :: name9 = 'coding_language'
-      character (len=*), parameter :: name10 = 'model_component_framework'
-      type(ESMF_AttPackNestFlag) :: attpacknest
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
-
-      fconvention = convention
-      fpurpose = purpose
-
-       if (present(attpacknestflag)) then
-        attpacknest = attpacknestflag
-      else
-        attpacknest = ESMF_ATTPACKNEST_OFF
-      endif
-
-      call c_ESMC_AttPackCreate(comp%compp%base, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name1, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name2, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name3, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name4, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name5, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name6, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name7, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name8, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name9, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(comp%compp%base, name10, fconvention, &
-        fpurpose, fobject, localrc)
-
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridCompAttAddPack
-
-!------------------------------------------------------------------------------
-
+AttAddPackStandardMacro(ESMF_GridComp, comp, comp%compp%base)
 AttAddPackCustomMacro(ESMF_GridComp, comp, comp%compp%base)
 AttCopyMacro(ESMF_GridComp, ESMF_GridComp, comp1, comp2, comp1%compp%base, comp2%compp%base)
 AttRemoveMacro(ESMF_GridComp, comp, comp%compp%base)
@@ -4893,95 +3910,6 @@ AttWriteMacro(ESMF_GridComp, comp, comp%compp%base, comp, field)
 !  DISTGRID
 !-------------------------------------------------------------------------
 
-#if 0
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_DistGridAttAddPack"
-!BOPI
-! !IROUTINE: ESMF_DistGridAttAddPack - Create an distgrid Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeAdd()
-      subroutine ESMF_DistGridAttAddPack(distgrid, convention, purpose, &
-        attpacknestflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_DistGrid), intent(inout) :: distgrid  
-      character (len = *), intent(in) :: convention
-      character (len = *), intent(in) :: purpose
-      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Sets up the Attribute package for the {\tt distgrid}.
-!     The Attribute package defines the convention, purpose, and object type 
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [distgrid]
-!      An {\tt ESMF\_DistGrid} object.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!     \item [attpacknestflag]
-!      The flag to tell whether this Attribute package is to be nested or not, possible values
-!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc                           ! Error status
-      character (len=len_trim(convention)) :: fconvention
-      character (len=len_trim(purpose)) :: fpurpose
-      type(ESMF_AttPackNestFlag) :: attpacknest
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit,distgrid,rc)
-
-      fconvention = convention
-      fpurpose = purpose
-
-       if (present(attpacknestflag)) then
-        attpacknest = attpacknestflag
-      else
-        attpacknest = ESMF_ATTPACKNEST_OFF
-      endif
-
-      ! There is no standard Attribute package for DistGrid at this point
-      call c_ESMC_AttPackCreate(distgrid, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackAddAttribute(distgrid, name1, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(distgrid, name2, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(distgrid, name3, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(distgrid, name4, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(distgrid, name5, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(distgrid, name6, fconvention, &
-        fpurpose, fobject, localrc)
-
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_DistGridAttAddPack
-#endif
-!------------------------------------------------------------------------------
-
 AttAddPackCustomMacro(ESMF_DistGrid, distgrid, distgrid)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_DistGrid, distgrid, distgrid)
@@ -4996,108 +3924,11 @@ TypeKind3DeclarationMacro(AttSet, ESMF_DistGrid, distgrid, distgrid)
 AttSetLogicalMacro(ESMF_DistGrid, distgrid, distgrid)
 AttSetCharacterMacro(ESMF_DistGrid, distgrid, distgrid)
 
-#if 0
-AttWriteMacro(ESMF_DistGrid, distgrid, distgrid, distgrid, distgrid)
-#endif
-
 !-------------------------------------------------------------------------
 !  FIELD
 !-------------------------------------------------------------------------
 
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldAttAddPack"
-!BOPI
-! !IROUTINE: ESMF_FieldAttAddPack - Create the Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeAdd()
-      subroutine ESMF_FieldAttAddPack(field, convention, purpose, &
-        attpacknestflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(inout) :: field  
-      character (len = *), intent(in) :: convention
-      character (len = *), intent(in) :: purpose
-      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Sets up the Attribute package for the {\tt field}.
-!     The Attribute package defines the convention, purpose, and object type
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!      An {\tt ESMF\_Field} object.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!     \item [attpacknestflag]
-!      The flag to tell whether this Attribute package is to be nested or not, possible values
-!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc                           ! Error status
-      character (len=len_trim(convention)) :: fconvention
-      character (len=len_trim(purpose)) :: fpurpose
-      character (len=*), parameter :: fobject='field'
-      character (len=*), parameter :: name1 = 'name'
-      character (len=*), parameter :: name2 = 'standard_name'
-      character (len=*), parameter :: name3 = 'long_name'
-      character (len=*), parameter :: name4 = 'units'
-      character (len=*), parameter :: name5 = 'import'
-      character (len=*), parameter :: name6 = 'export'
-      type(ESMF_AttPackNestFlag) :: attpacknest
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
-
-      fconvention = convention
-      fpurpose = purpose
-
-       if (present(attpacknestflag)) then
-        attpacknest = attpacknestflag
-      else
-        attpacknest = ESMF_ATTPACKNEST_OFF
-      endif
-
-      call c_ESMC_AttPackCreate(field%ftypep%base, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackAddAttribute(field%ftypep%base, name1, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(field%ftypep%base, name2, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(field%ftypep%base, name3, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(field%ftypep%base, name4, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(field%ftypep%base, name5, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(field%ftypep%base, name6, fconvention, &
-        fpurpose, fobject, localrc)
-
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldAttAddPack
-
-!------------------------------------------------------------------------------
-
+AttAddPackStandardMacro(ESMF_Field, field, field%ftypep%base)
 AttAddPackCustomMacro(ESMF_Field, field, field%ftypep%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_Field, field, field%ftypep%base)
@@ -5125,80 +3956,6 @@ AttWriteMacro(ESMF_Field, field, field%ftypep%base, field, field)
 !-------------------------------------------------------------------------
 !  FIELDBUNDLE
 !-------------------------------------------------------------------------
-
-#if 0
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldBundleAttAddPack"
-!BOPI
-! !IROUTINE: ESMF_FielBundleAttAddPack - Create the Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeAdd()
-      subroutine ESMF_FieldBundleAttAddPack(fieldbundle, convention, purpose, &
-        attpacknestflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
-      character (len = *), intent(in) :: convention
-      character (len = *), intent(in) :: purpose
-      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Sets up the Attribute package for the {\tt fieldbundle}.
-!     The Attribute package defines the convention, purpose, and object type
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [fieldbundle]
-!      An {\tt ESMF\_FieldBundle} object.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!     \item [attpacknestflag]
-!      The flag to tell whether this Attribute package is to be nested or not, possible values
-!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc                           ! Error status
-      character (len=len_trim(convention)) :: fconvention
-      character (len=len_trim(purpose)) :: fpurpose
-      character (len=*), parameter :: fobject='fieldbundle'
-      type(ESMF_AttPackNestFlag) :: attpacknest
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
-
-      fconvention = convention
-      fpurpose = purpose
-      
-       if (present(attpacknestflag)) then
-        attpacknest = attpacknestflag
-      else
-        attpacknest = ESMF_ATTPACKNEST_OFF
-      endif
-
-      ! no standard attribute package for FieldBundle at this time
-      localrc = ESMF_SUCCESS
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldBundleAttAddPack
-
-!------------------------------------------------------------------------------
-#endif 
 
 AttAddPackCustomMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 
@@ -5232,124 +3989,7 @@ AttWriteMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base, fieldbundl
 !  GRID
 !-------------------------------------------------------------------------
 
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_GridAttAddPack"
-!BOPI
-! !IROUTINE: ESMF_GridAttAddPack - Create the Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeAdd()
-      subroutine ESMF_GridAttAddPack(grid, convention, purpose, &
-        attpacknestflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(inout) :: grid  
-      character (len = *), intent(in) :: convention
-      character (len = *), intent(in) :: purpose
-      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Sets up the Attribute package for the {\tt grid}.
-!     The Attribute package defines the convention, purpose, and object type
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [grid]
-!      An {\tt ESMF\_Grid} object.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!     \item [attpacknestflag]
-!      The flag to tell whether this Attribute package is to be nested or not, possible values
-!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc                           ! Error status
-      character (len=len_trim(convention)) :: fconvention
-      character (len=len_trim(purpose)) :: fpurpose
-      character (len=*), parameter :: fobject='grid'
-      character (len=*), parameter :: name1 = 'area'
-      character (len=*), parameter :: name2 = 'dimension_order'
-      character (len=*), parameter :: name3 = 'discretization_type'
-      character (len=*), parameter :: name4 = 'geometry_type'
-      character (len=*), parameter :: name5 = 'grid_type'
-      character (len=*), parameter :: name6 = 'horizontal_dimension_value'
-      character (len=*), parameter :: name7 = 'IsConformal'
-      character (len=*), parameter :: name8 = 'IsRegular'
-      character (len=*), parameter :: name9 = 'IsUniform'
-      character (len=*), parameter :: name10 = 'north_pole_location'
-      character (len=*), parameter :: name11 = 'number_of_cells'
-      character (len=*), parameter :: name12 = 'number_of_dimensions'
-      character (len=*), parameter :: name13 = 'pole_covered'
-      character (len=*), parameter :: name14 = 'vertical_dimension_value'
-      type(ESMF_AttPackNestFlag) :: attpacknest
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-
-      fconvention = convention
-      fpurpose = purpose
-
-       if (present(attpacknestflag)) then
-        attpacknest = attpacknestflag
-      else
-        attpacknest = ESMF_ATTPACKNEST_OFF
-      endif
-
-      call c_ESMC_AttPackCreate(grid, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackAddAttribute(grid, name1, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(grid, name2, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(grid, name3, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(grid, name4, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(grid, name5, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(grid, name6, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(grid, name7, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(grid, name8, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(grid, name9, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(grid, name10, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(grid, name11, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(grid, name12, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(grid, name13, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(grid, name14, fconvention, &
-        fpurpose, fobject, localrc)
-
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridAttAddPack
-
-!------------------------------------------------------------------------------
-
+AttAddPackStandardMacro(ESMF_Grid, grid, grid)
 AttAddPackCustomMacro(ESMF_Grid, grid, grid)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_Grid, grid, grid)
@@ -5366,112 +4006,11 @@ TypeKind3DeclarationMacro(AttSet, ESMF_Grid, grid, grid)
 AttSetLogicalMacro(ESMF_Grid, grid, grid)
 AttSetCharacterMacro(ESMF_Grid, grid, grid)
 
-#if 0
-AttUpdateMacro(ESMF_Grid, grid, grid)
-AttWriteMacro(ESMF_Grid, grid, grid, grid, grid)
-#endif
-
 !-------------------------------------------------------------------------
 !  STATE
 !-------------------------------------------------------------------------
 
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_StateAttAddPack"
-!BOPI
-! !IROUTINE: ESMF_StateAttAddPack - Create the Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeAdd()
-      subroutine ESMF_StateAttAddPack(state, convention, purpose, &
-        attpacknestflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state  
-      character (len = *), intent(in) :: convention
-      character (len = *), intent(in) :: purpose
-      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Sets up the Attribute package for the {\tt state}.
-!     The Attribute package defines the convention, purpose, and object type 
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!      An {\tt ESMF\_State} object.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!     \item [attpacknestflag]
-!      The flag to tell whether this Attribute package is to be nested or not, possible values
-!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc                           ! Error status
-      character (len=len_trim(convention)) :: fconvention
-      character (len=len_trim(purpose)) :: fpurpose
-      character (len=*), parameter :: fobject='state'
-      character (len=*), parameter :: name1 = 'import'
-      character (len=*), parameter :: name2 = 'export'
-      type(ESMF_Logical) :: lvalue
-      type(ESMF_AttPackNestFlag) :: attpacknest
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-
-      fconvention = convention
-      fpurpose = purpose
-
-       if (present(attpacknestflag)) then
-        attpacknest = attpacknestflag
-      else
-        attpacknest = ESMF_ATTPACKNEST_OFF
-      endif
-
-      call c_ESMC_AttPackCreate(state%statep%base, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackAddAttribute(state%statep%base, name1, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackAddAttribute(state%statep%base, name2, fconvention, &
-        fpurpose, fobject, localrc)
-
-      lvalue = .true.
-      if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttPackSetValue(state%statep%base, name1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue, &
-          fconvention, fpurpose, fobject, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttPackSetValue(state%statep%base, name2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue, &
-          fconvention, fpurpose, fobject, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateAttAddPack
-
-
-!------------------------------------------------------------------------------
-
+AttAddPackStandardMacro(ESMF_State, state, state%statep%base)
 AttAddPackCustomMacro(ESMF_State, state, state%statep%base)
 AttCopyMacro(ESMF_State, ESMF_State, state1, state2, state1%statep%base, state2%statep%base)
 

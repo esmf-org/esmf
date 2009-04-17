@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeABundleUTest.F90,v 1.8 2009/03/30 20:33:26 rokuingh Exp $
+! $Id: ESMF_AttributeABundleUTest.F90,v 1.9 2009/04/17 22:40:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeABundleUTest.F90,v 1.8 2009/03/30 20:33:26 rokuingh Exp $'
+      '$Id: ESMF_AttributeABundleUTest.F90,v 1.9 2009/04/17 22:40:47 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -50,7 +50,8 @@ program ESMF_AttributeArrayBundleUTest
       type(ESMF_Array), dimension(2) :: array
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_DistGrid) :: distgrid
-      character(ESMF_MAXSTR) :: conv, purp, attrname, attrnameOut, attrvalue
+      character(ESMF_MAXSTR) :: conv, nestconv, purp, nestpurp, attrname, &
+                                attrnameOut, attrvalue
       integer                :: rc, count, items, itemCount
       type(ESMF_TypeKind)    :: attrTK
 
@@ -105,8 +106,6 @@ program ESMF_AttributeArrayBundleUTest
         name="MyArrayBundle", rc=rc)
       arraybundleMove = ESMF_ArrayBundleCreate(arrayList=array, &
         name="MyArrayBundleForMove", rc=rc)
-      conv = "customconvention"
-      purp = "custompurpose"
 
 !-------------------------------------------------------------------------
 !  ARRAYBUNDLE
@@ -793,6 +792,8 @@ program ESMF_AttributeArrayBundleUTest
     !-------------------------------------------------------------------------
     !  Attribute package - custom
     !-------------------------------------------------------------------------
+      conv = "customconvention"
+      purp = "custompurpose"
       attpackList(1) = "Custom1"
       attpackList(2) = "Custom2"
       attpackList(3) = "Custom3"
@@ -846,10 +847,10 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Get a char list Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeGet(arraybundle, name=attrname, &
-        valueList=attpackListOut, convention=conv, purpose=purp, rc=rc)
+        valueList=attpackListOut3, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a char list Attribute in an Attribute package on an ArrayBundle Test"
-      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackList == attpackListOut), &
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackList == attpackListOut3), &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -900,7 +901,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on an ArrayBundle Test
       call ESMF_AttributeAdd(arraybundle, convention=conv, purpose=purp, &
-        attrList=attpackListTNames, attpacknestflag=ESMF_ATTPACKNEST_ON, rc=rc)
+        attrList=attpackListTNames, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a standard Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1015,19 +1016,24 @@ program ESMF_AttributeArrayBundleUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+    !-------------------------------------------------------------------------
+    !  Attribute package - custom nested
+    !-------------------------------------------------------------------------
+      nestconv = "customconvention_top"
+      nestpurp = "custompurpose_top"
       !EX_UTest
-      ! Get a char list attribute in an Attribute package on an ArrayBundle Test
-      call ESMF_AttributeGet(arraybundle, name=attrname, &
-        valueList=attpackListOut3, convention=conv, purpose=purp, rc=rc)
+      ! Add multiple Attributes to an Attribute package on an ArrayBundle Test
+      call ESMF_AttributeAdd(arraybundle, convention=nestconv, purpose=nestpurp, &
+        attrList=attpackListTNames, nestConvention=conv, nestPurpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting a char list Attribute in an Attribute package on an ArrayBundle Test"
-      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackList == attpackListOut), &
-        name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "Adding multiple Attributes to a nested Attribute package on an ArrayBundle Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
       ! Remove an Attribute in an Attribute package on an ArrayBundle Test
-      call ESMF_AttributeRemove(arraybundle, name=attrname, convention=conv, purpose=purp, rc=rc)
+      call ESMF_AttributeRemove(arraybundle, name=attrname, convention=nestconv, &
+        purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Removeing an Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1035,26 +1041,35 @@ program ESMF_AttributeArrayBundleUTest
 
       !EX_UTest
       ! Remove an Attribute in an Attribute package on an ArrayBundle Test, again
-      call ESMF_AttributeRemove(arraybundle, name=attrname, convention=conv, purpose=purp, rc=rc)
+      call ESMF_AttributeRemove(arraybundle, name=attrname, convention=nestconv, &
+        purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Removeing an Attribute in an Attribute package on an ArrayBundle Test, again"
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      attpackDfltList(1) = "Custom4"
-      attpackDfltList(2) = "Custom5"
-      attpackDfltList(3) = "Custom6"
-
       !EX_UTest
       ! Get a char list default Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeGet(arraybundle, name=attrname, &
         valueList=attpackListOut4, defaultvalueList=attpackDfltList2, &
-        convention=conv, purpose=purp, rc=rc)
+        convention=nestconv, purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting a default Attribute character list in an Attribute package on an ArrayBundle test"
-      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackListOut2 == attpackDfltList), &
+      write(name, *) "Getting a default Attribute character list in an Attribute package on an ArrayBundle test2"
+      call ESMF_Test((rc/=ESMF_SUCCESS) .and. all (attpackListOut4 == attpackDfltList2), &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get a char list attribute in an Attribute package on an ArrayBundle Test
+      call ESMF_AttributeGet(arraybundle, name=attrname, &
+        valueList=attpackListOut3, convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting a char list Attribute in an Attribute package on an ArrayBundle Test"
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackList == attpackListOut3), &
+        name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+print *, "rc = ", rc
 
     !-------------------------------------------------------------------------
     !  Attribute move

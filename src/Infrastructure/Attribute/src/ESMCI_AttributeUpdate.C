@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.8 2009/04/13 15:10:23 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.9 2009/04/17 22:40:46 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.8 2009/04/13 15:10:23 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.9 2009/04/17 22:40:46 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -714,11 +714,9 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
 
   // copy the baseID
   // FIXME: this is a temporary fix for the Field to Grid Attribute links
-  if (attrBase->classID == 42) {
-    printf("HIT A GRID!!!\n");
-    int grid = 42;
-    *(reinterpret_cast<int*> (key+offset)) = grid;
-  }
+  if (attrBase->classID == 42)
+    *(reinterpret_cast<int*> (key+offset)) = 42;
+
   else *(reinterpret_cast<int*> (key+offset)) = attrBase->ESMC_BaseGetID();
   offset += sizeof(int);
 

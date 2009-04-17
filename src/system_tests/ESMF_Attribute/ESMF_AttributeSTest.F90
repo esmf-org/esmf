@@ -1,5 +1,5 @@
 !-------------------------------------------------------------------------
-!ESMF_SYSTEM_TEST        String used by test script to count system tests.
+!ESMFdisable_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !BOP

@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.117 2009/02/16 19:14:31 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.118 2009/04/17 22:40:46 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.117 2009/02/16 19:14:31 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.118 2009/04/17 22:40:46 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -667,7 +667,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     root.setBase(this);
 
     // Deserialize the Attribute hierarchy
-    if (attreconflag == ESMF_ATTRECONCILE_ON) {
+    if (attreconflag == ESMC_ATTRECONCILE_ON) {
       localrc = root.ESMC_Deserialize(buffer,offset);
     }
         
@@ -807,7 +807,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     *offset = (cp - buffer);
 
     // Serialize the Attribute hierarchy
-    if (attreconflag == ESMF_ATTRECONCILE_ON) { 
+    if (attreconflag == ESMC_ATTRECONCILE_ON) { 
       rc = root.ESMC_Serialize(buffer,length,offset);
     }
     

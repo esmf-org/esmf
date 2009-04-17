@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.8 2009/04/13 15:14:59 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.9 2009/04/17 22:40:47 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -687,7 +687,7 @@ module ESMF_AttributeUpdateMod
         if (rc/=ESMF_SUCCESS) return
         call ESMF_AttributeAdd(field, attrList=attrList, convention=convCC, &
       purpose=purpGen, &
-          count=2, attpacknestflag=ESMF_ATTPACKNEST_ON, rc=rc)
+          count=2, nestConvention=convESG, nestPurpose=purpGen, rc=rc)
         call ESMF_AttributeSet(field, name='coordinates', value='latlon', &
           convention=convCC, purpose=purpGen, rc=rc)
         call ESMF_AttributeSet(field, name='mask', value='yes', &

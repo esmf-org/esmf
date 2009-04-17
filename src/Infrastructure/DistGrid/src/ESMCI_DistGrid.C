@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.18 2009/02/16 19:14:31 rokuingh Exp $
+// $Id: ESMCI_DistGrid.C,v 1.19 2009/04/17 22:40:47 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.18 2009/02/16 19:14:31 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.19 2009/04/17 22:40:47 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2952,7 +2952,7 @@ int DistGrid::serialize(
   // Serialize the Base class,
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
-  ESMC_AttReconcileFlag attreconflag = ESMF_ATTRECONCILE_OFF;
+  ESMC_AttReconcileFlag attreconflag = ESMC_ATTRECONCILE_OFF;
   localrc = this->ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
@@ -3038,7 +3038,7 @@ DistGrid *DistGrid::deserialize(
   // Deserialize the Base class
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
-  ESMC_AttReconcileFlag attreconflag = ESMF_ATTRECONCILE_OFF;
+  ESMC_AttReconcileFlag attreconflag = ESMC_ATTRECONCILE_OFF;
   localrc = a->ESMC_Base::ESMC_Deserialize(buffer,offset,attreconflag);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return NULL;

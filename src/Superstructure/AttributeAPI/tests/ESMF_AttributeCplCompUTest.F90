@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCplCompUTest.F90,v 1.12 2009/03/30 20:33:26 rokuingh Exp $
+! $Id: ESMF_AttributeCplCompUTest.F90,v 1.13 2009/04/17 22:40:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeCplCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.12 2009/03/30 20:33:26 rokuingh Exp $'
+      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.13 2009/04/17 22:40:47 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -49,7 +49,8 @@ program ESMF_AttributeCplCompUTest
       type(ESMF_CplComp)     :: cplcomp, cfc, cplcompValue, cplcompHybrid, cplcompMove
       type(ESMF_GridComp)    :: gfc
       type(ESMF_State)       :: sfc
-      character(ESMF_MAXSTR) :: conv, purp, attrname, attrnameOut, attrvalue
+      character(ESMF_MAXSTR) :: conv, nestconv, purp, nestpurp, attrname, &
+                                attrnameOut, attrvalue
       integer                :: rc, count, items, itemCount
       type(ESMF_TypeKind)    :: attrTK
 
@@ -109,10 +110,7 @@ program ESMF_AttributeCplCompUTest
       gfc = ESMF_GridCompCreate(name="gridcompforcplcomp", petList=(/0/), rc=rc)
       
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-      conv = "customconvention"
-      purp = "custompurpose"
-
+      
 !-------------------------------------------------------------------------
 !  CPLCOMP
 !-------------------------------------------------------------------------
@@ -798,6 +796,8 @@ program ESMF_AttributeCplCompUTest
     !-------------------------------------------------------------------------
     !  Attribute package - custom
     !-------------------------------------------------------------------------
+      conv = "customconvention"
+      purp = "custompurpose"
       attpackList(1) = "Custom1"
       attpackList(2) = "Custom2"
       attpackList(3) = "Custom3"
@@ -880,13 +880,12 @@ program ESMF_AttributeCplCompUTest
     !-------------------------------------------------------------------------
     !  Attribute package - standard
     !-------------------------------------------------------------------------
-      conv = 'CF'
+      conv = 'ESMF'
       purp = 'general'
       
       !NEX_UTest
       ! Create an Attribute package on a CplComp Test
-      call ESMF_AttributeAdd(cplcomp, convention=conv, purpose=purp, &
-        attpacknestflag=ESMF_ATTPACKNEST_OFF, rc=rc)
+      call ESMF_AttributeAdd(cplcomp, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a standard Attribute package on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -920,6 +919,12 @@ program ESMF_AttributeCplCompUTest
       
 #ifdef ESMF_TESTEXHAUSTIVE
 
+    !-------------------------------------------------------------------------
+    !  Attribute package - custom nested
+    !-------------------------------------------------------------------------
+      nestconv = "customconvention_top"
+      nestpurp = "custompurpose_top"
+      
       attpackListTNames(1) = "ESMF_I4name"
       attpackListTNames(2) = "ESMF_I4namelist"
       attpackListTNames(3) = "ESMF_I8name"
@@ -932,20 +937,20 @@ program ESMF_AttributeCplCompUTest
       attpackListTNames(10) = "Logical_namelist"
       attpackListTNames(11) = "Character_name"
       attpackListTNames(12) = "Character_namelist"
-    
+
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on a CplComp Test
-      call ESMF_AttributeAdd(cplcomp, convention=conv, purpose=purp, &
-        attrList=attpackListTNames, attpacknestflag=ESMF_ATTPACKNEST_ON, rc=rc)
+      call ESMF_AttributeAdd(cplcomp, convention=nestconv, purpose=nestpurp, &
+        attrList=attpackListTNames, nestConvention=conv, nestPurpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Adding multiple Attributes to a standard Attribute package on a CplComp Test"
+      write(name, *) "Adding multiple Attributes to a nested Attribute package on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
       ! Set an ESMF_I4name Attribute in an Attribute package on a CplComp Test
       call ESMF_AttributeSet(cplcomp, name="ESMF_I4name", value=inI4, &
-        convention=conv, purpose=purp, rc=rc)
+        convention=nestconv, purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_I4name Attribute in an Attribute package on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -954,7 +959,7 @@ program ESMF_AttributeCplCompUTest
       !EX_UTest
       ! Set an ESMF_I4namelist Attribute in an Attribute package on a CplComp Test
       call ESMF_AttributeSet(cplcomp, name="ESMF_I4namelist", valueList=inI4l, &
-        convention=conv, purpose=purp, rc=rc)
+        convention=nestconv, purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_I4namelist Attribute in an Attribute package on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -963,7 +968,7 @@ program ESMF_AttributeCplCompUTest
       !EX_UTest
       ! Set an ESMF_I8name Attribute in an Attribute package on a CplComp Test
       call ESMF_AttributeSet(cplcomp, name="ESMF_I8name", value=inI8, &
-        convention=conv, purpose=purp, rc=rc)
+        convention=nestconv, purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_I8name Attribute in an Attribute package on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -972,7 +977,7 @@ program ESMF_AttributeCplCompUTest
       !EX_UTest
       ! Set an ESMF_I8namelist Attribute in an Attribute package on a CplComp Test
       call ESMF_AttributeSet(cplcomp, name="ESMF_I8namelist", valueList=inI8l, &
-        convention=conv, purpose=purp, rc=rc)
+        convention=nestconv, purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_I8namelist Attribute in an Attribute package on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -981,7 +986,7 @@ program ESMF_AttributeCplCompUTest
       !EX_UTest
       ! Set an ESMF_R4name Attribute in an Attribute package on a CplComp Test
       call ESMF_AttributeSet(cplcomp, name="ESMF_R4name", value=inR4, &
-        convention=conv, purpose=purp, rc=rc)
+        convention=nestconv, purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_R4name Attribute in an Attribute package on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -990,7 +995,7 @@ program ESMF_AttributeCplCompUTest
       !EX_UTest
       ! Set an ESMF_R4namelist Attribute in an Attribute package on a CplComp Test
       call ESMF_AttributeSet(cplcomp, name="ESMF_R4namelist", valueList=inR4l, &
-        convention=conv, purpose=purp, rc=rc)
+        convention=nestconv, purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_R4namelist Attribute in an Attribute package on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -999,7 +1004,7 @@ program ESMF_AttributeCplCompUTest
       !EX_UTest
       ! Set an ESMF_R8name Attribute in an Attribute package on a CplComp Test
       call ESMF_AttributeSet(cplcomp, name="ESMF_R8name", value=inR8, &
-        convention=conv, purpose=purp, rc=rc)
+        convention=nestconv, purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_R8name Attribute in an Attribute package on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1008,7 +1013,7 @@ program ESMF_AttributeCplCompUTest
       !EX_UTest
       ! Set an ESMF_R8namelist Attribute in an Attribute package on a CplComp Test
       call ESMF_AttributeSet(cplcomp, name="ESMF_R8namelist", valueList=inR8l, &
-        convention=conv, purpose=purp, rc=rc)
+        convention=nestconv, purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_R8namelist Attribute in an Attribute package on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1017,7 +1022,7 @@ program ESMF_AttributeCplCompUTest
       !EX_UTest
       ! Set a Logical Attribute in an Attribute package on a CplComp Test
       call ESMF_AttributeSet(cplcomp, name="Logical_name", value=inLog, &
-        convention=conv, purpose=purp, rc=rc)
+        convention=nestconv, purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a logical Attribute in an Attribute package on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1026,7 +1031,7 @@ program ESMF_AttributeCplCompUTest
       !EX_UTest
       ! Set a Logical list Attribute in an Attribute package on a CplComp Test
       call ESMF_AttributeSet(cplcomp, name="Logical_namelist", valueList=inLogl, &
-        convention=conv, purpose=purp, rc=rc)
+        convention=nestconv, purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a logical list Attribute in an Attribute package on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1035,7 +1040,7 @@ program ESMF_AttributeCplCompUTest
       !EX_UTest
       ! Set a character Attribute in an Attribute package on a CplComp Test
       call ESMF_AttributeSet(cplcomp, name="Character_name", value=attrvalue, &
-        convention=conv, purpose=purp, rc=rc)
+        convention=nestconv, purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a Character Attribute in an Attribute package on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1045,7 +1050,7 @@ program ESMF_AttributeCplCompUTest
       !EX_UTest
       ! Set a char list Attribute in an Attribute package on a CplComp Test
       call ESMF_AttributeSet(cplcomp, name=attrname, &
-        valueList=attpackList, convention=conv, purpose=purp, rc=rc)
+        valueList=attpackList, convention=nestconv, purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a char list Attribute in an Attribute package on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1054,7 +1059,7 @@ program ESMF_AttributeCplCompUTest
       !EX_UTest
       ! Get a char list attribute in an Attribute package on a CplComp Test
       call ESMF_AttributeGet(cplcomp, name=attrname, &
-        valueList=attpackListOut3, convention=conv, purpose=purp, rc=rc)
+        valueList=attpackListOut3, convention=nestconv, purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a char list Attribute in an Attribute package on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackList == attpackListOut), &
@@ -1063,7 +1068,8 @@ program ESMF_AttributeCplCompUTest
 
       !EX_UTest
       ! Remove an Attribute in an Attribute package on a CplComp Test
-      call ESMF_AttributeRemove(cplcomp, name=attrname, convention=conv, purpose=purp, rc=rc)
+      call ESMF_AttributeRemove(cplcomp, name=attrname, convention=nestconv, &
+        purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Removing an Attribute in an Attribute package on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1071,7 +1077,8 @@ program ESMF_AttributeCplCompUTest
 
       !EX_UTest
       ! Remove an Attribute in an Attribute package on a CplComp Test, again
-      call ESMF_AttributeRemove(cplcomp, name=attrname, convention=conv, purpose=purp, rc=rc)
+      call ESMF_AttributeRemove(cplcomp, name=attrname, convention=nestconv, &
+        purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Removing an Attribute in an Attribute package on a CplComp Test, again"
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1085,7 +1092,7 @@ program ESMF_AttributeCplCompUTest
       ! Get a char list default Attribute in an Attribute package on a CplComp Test
       call ESMF_AttributeGet(cplcomp, name=attrname, &
         valueList=attpackListOut4, defaultvalueList=attpackDfltList2, &
-        convention=conv, purpose=purp, rc=rc)
+        convention=nestconv, purpose=nestpurp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a default Attribute character list in an Attribute package on a CplComp test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackListOut2 == attpackDfltList), &

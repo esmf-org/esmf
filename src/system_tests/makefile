@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.61 2009/03/25 00:24:53 theurich Exp $ 
+# $Id: makefile,v 1.62 2009/04/17 22:40:47 rokuingh Exp $ 
 
 ALL: build_system_tests
 
@@ -9,7 +9,6 @@ include $(ESMF_DIR)/makefile
 # arranged roughly in order of complexity
 DIRS      = ESMF_CompCreate \
             ESMF_CompFortranAndC \
-            ESMF_Attribute \
 	    ESMF_SeqEnsemEx \
 	    ESMF_ConcurrentEnsemble \
 	    ESMF_InternalStateEnsemble \
@@ -29,7 +28,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldRedist \
             ESMF_FieldRedistBlk2Blk \
             ESMF_FieldBundleRedistBlk2Blk
-
+#            ESMF_Attribute \
 
 # Tests not yet ready
 #           ESMF_RowReduce \        gjt: currently the code depends on DELayout comms, but it should be covered/converted to newArray

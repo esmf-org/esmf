@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.5 2009/03/28 01:35:11 rokuingh Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.6 2009/04/17 22:40:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
 program ESMF_AttributePackageEx
 
 !==============================================================================
-!ESMF_EXAMPLE        String used by test script to count examples.
+!ESMFdisable_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
 !BOE
@@ -56,7 +56,7 @@ program ESMF_AttributePackageEx
       character(ESMF_MAXSTR)  :: name1,name2,name3,name4,name5,name6,name7, &
                                  name8, name9, name10, value1,value2,value3, &
                                  value4,value5,value6,value7,value8,value9, &
-                                 value10,convESG,convCC,purpGen
+                                 value10,convESMF,convCC,purpGen
       
       character(ESMF_MAXSTR),dimension(2)   :: attrList         
 
@@ -119,7 +119,7 @@ program ESMF_AttributePackageEx
 !EOE
 
 !BOC 
-      convESG = 'ESG'
+      convESMF = 'ESMF'
       convCC = 'CustomConvention'
       purpGen = 'general'
 
@@ -129,64 +129,54 @@ program ESMF_AttributePackageEx
       ! DPEDT
       call ESMF_AttributeAdd(DPEDT, attrList=attrList, convention=convCC, &
         purpose=purpGen, count=2, rc=rc)
-      call ESMF_AttributeAdd(DPEDT, convention=convESG, purpose=purpGen, &
-        attpacknestflag=ESMF_ATTPACKNEST_ON, rc=rc)
+      call ESMF_AttributeAdd(DPEDT, convention=convESMF, purpose=purpGen, rc=rc)
 
       ! DTDT
       call ESMF_AttributeAdd(DTDT, attrList=attrList, convention=convCC, &
         purpose=purpGen, count=2, rc=rc)
-      call ESMF_AttributeAdd(DTDT, convention=convESG, purpose=purpGen, &
-        attpacknestflag=ESMF_ATTPACKNEST_ON, rc=rc)
+      call ESMF_AttributeAdd(DTDT, convention=convESMF, purpose=purpGen, rc=rc)
 
       ! DUDT
       call ESMF_AttributeAdd(DUDT, attrList=attrList, convention=convCC, &
         purpose=purpGen, count=2, rc=rc)
-      call ESMF_AttributeAdd(DUDT, convention=convESG, purpose=purpGen, &
-        attpacknestflag=ESMF_ATTPACKNEST_ON, rc=rc)
+      call ESMF_AttributeAdd(DUDT, convention=convESMF, purpose=purpGen, rc=rc)
 
       ! DVDT
       call ESMF_AttributeAdd(DVDT, attrList=attrList, convention=convCC, &
         purpose=purpGen, count=2, rc=rc)
-      call ESMF_AttributeAdd(DVDT, convention=convESG, purpose=purpGen, &
-        attpacknestflag=ESMF_ATTPACKNEST_ON, rc=rc)
+      call ESMF_AttributeAdd(DVDT, convention=convESMF, purpose=purpGen, rc=rc)
 
       ! PHIS
       call ESMF_AttributeAdd(PHIS, attrList=attrList, convention=convCC, &
         purpose=purpGen, count=2, rc=rc)
-      call ESMF_AttributeAdd(PHIS, convention=convESG, purpose=purpGen, &
-        attpacknestflag=ESMF_ATTPACKNEST_ON, rc=rc)
+      call ESMF_AttributeAdd(PHIS, convention=convESMF, purpose=purpGen, rc=rc)
 
       ! QTR
       call ESMF_AttributeAdd(QTR, attrList=attrList, convention=convCC, &
         purpose=purpGen, count=2, rc=rc)
-      call ESMF_AttributeAdd(QTR, convention=convESG, purpose=purpGen, &
-        attpacknestflag=ESMF_ATTPACKNEST_ON, rc=rc)
+      call ESMF_AttributeAdd(QTR, convention=convESMF, purpose=purpGen, rc=rc)
 
       ! CNV
       call ESMF_AttributeAdd(CNV, attrList=attrList, convention=convCC, &
         purpose=purpGen, count=2, rc=rc)
-      call ESMF_AttributeAdd(CNV, convention=convESG, purpose=purpGen, &
-        attpacknestflag=ESMF_ATTPACKNEST_ON, rc=rc)
+      call ESMF_AttributeAdd(CNV, convention=convESMF, purpose=purpGen, rc=rc)
 
       ! CONVCPT
       call ESMF_AttributeAdd(CONVCPT, attrList=attrList, convention=convCC, &
         purpose=purpGen, count=2, rc=rc)
-      call ESMF_AttributeAdd(CONVCPT, convention=convESG, purpose=purpGen, &
-        attpacknestflag=ESMF_ATTPACKNEST_ON, rc=rc)
+      call ESMF_AttributeAdd(CONVCPT, convention=convESMF, purpose=purpGen, rc=rc)
 
       ! CONVKE
       call ESMF_AttributeAdd(CONVKE, attrList=attrList, convention=convCC, &
         purpose=purpGen, count=2, rc=rc)
-      call ESMF_AttributeAdd(CONVKE, convention=convESG, purpose=purpGen, &
-        attpacknestflag=ESMF_ATTPACKNEST_ON, rc=rc)
+      call ESMF_AttributeAdd(CONVKE, convention=convESMF, purpose=purpGen, rc=rc)
 
       ! CONVPHI
       call ESMF_AttributeAdd(CONVPHI, attrList=attrList, convention=convCC, &
         purpose=purpGen, count=2, rc=rc)
-      call ESMF_AttributeAdd(CONVPHI, convention=convESG, purpose=purpGen, &
-        attpacknestflag=ESMF_ATTPACKNEST_ON, rc=rc)
+      call ESMF_AttributeAdd(CONVPHI, convention=convESMF, purpose=purpGen, rc=rc)
       
-      call ESMF_AttributeAdd(gridcomp, convention=convESG, &
+      call ESMF_AttributeAdd(gridcomp, convention=convESMF, &
         purpose=purpGen, rc=rc)
 !EOC  
 
@@ -219,13 +209,13 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeSet(DPEDT, name='mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
-      call ESMF_AttributeSet(DPEDT, name1, value1, convention=convESG, &
+      call ESMF_AttributeSet(DPEDT, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(DPEDT, name2, value2, convention=convESG, &
+      call ESMF_AttributeSet(DPEDT, name2, value2, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(DPEDT, name3, value3, convention=convESG, &
+      call ESMF_AttributeSet(DPEDT, name3, value3, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(DPEDT, name4, value4, convention=convESG, &
+      call ESMF_AttributeSet(DPEDT, name4, value4, convention=convESMF, &
         purpose=purpGen, rc=rc)
     
       ! DTDT
@@ -239,13 +229,13 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeSet(DTDT, name='mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
-      call ESMF_AttributeSet(DTDT, name1, value1, convention=convESG, &
+      call ESMF_AttributeSet(DTDT, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(DTDT, name2, value2, convention=convESG, &
+      call ESMF_AttributeSet(DTDT, name2, value2, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(DTDT, name3, value3, convention=convESG, &
+      call ESMF_AttributeSet(DTDT, name3, value3, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(DTDT, name4, value4, convention=convESG, &
+      call ESMF_AttributeSet(DTDT, name4, value4, convention=convESMF, &
         purpose=purpGen, rc=rc)
     
       ! DUDT
@@ -259,13 +249,13 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeSet(DUDT, name='mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
-      call ESMF_AttributeSet(DUDT, name1, value1, convention=convESG, &
+      call ESMF_AttributeSet(DUDT, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(DUDT, name2, value2, convention=convESG, &
+      call ESMF_AttributeSet(DUDT, name2, value2, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(DUDT, name3, value3, convention=convESG, &
+      call ESMF_AttributeSet(DUDT, name3, value3, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(DUDT, name4, value4, convention=convESG, &
+      call ESMF_AttributeSet(DUDT, name4, value4, convention=convESMF, &
         purpose=purpGen, rc=rc)
     
       ! DVDT
@@ -279,13 +269,13 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeSet(DVDT, name='mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
-      call ESMF_AttributeSet(DVDT, name1, value1, convention=convESG, &
+      call ESMF_AttributeSet(DVDT, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(DVDT, name2, value2, convention=convESG, &
+      call ESMF_AttributeSet(DVDT, name2, value2, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(DVDT, name3, value3, convention=convESG, &
+      call ESMF_AttributeSet(DVDT, name3, value3, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(DVDT, name4, value4, convention=convESG, &
+      call ESMF_AttributeSet(DVDT, name4, value4, convention=convESMF, &
         purpose=purpGen, rc=rc)
     
       ! PHIS
@@ -299,13 +289,13 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeSet(PHIS, name='mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
-      call ESMF_AttributeSet(PHIS, name1, value1, convention=convESG, &
+      call ESMF_AttributeSet(PHIS, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(PHIS, name2, value2, convention=convESG, &
+      call ESMF_AttributeSet(PHIS, name2, value2, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(PHIS, name3, value3, convention=convESG, &
+      call ESMF_AttributeSet(PHIS, name3, value3, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(PHIS, name4, value4, convention=convESG, &
+      call ESMF_AttributeSet(PHIS, name4, value4, convention=convESMF, &
         purpose=purpGen, rc=rc)
     
       ! QTR
@@ -319,13 +309,13 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeSet(QTR, name='mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
-      call ESMF_AttributeSet(QTR, name1, value1, convention=convESG, &
+      call ESMF_AttributeSet(QTR, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(QTR, name2, value2, convention=convESG, &
+      call ESMF_AttributeSet(QTR, name2, value2, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(QTR, name3, value3, convention=convESG, &
+      call ESMF_AttributeSet(QTR, name3, value3, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(QTR, name4, value4, convention=convESG, &
+      call ESMF_AttributeSet(QTR, name4, value4, convention=convESMF, &
         purpose=purpGen, rc=rc)
     
       ! CNV
@@ -339,13 +329,13 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeSet(CNV, name='mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
-      call ESMF_AttributeSet(CNV, name1, value1, convention=convESG, &
+      call ESMF_AttributeSet(CNV, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(CNV, name2, value2, convention=convESG, &
+      call ESMF_AttributeSet(CNV, name2, value2, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(CNV, name3, value3, convention=convESG, &
+      call ESMF_AttributeSet(CNV, name3, value3, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(CNV, name4, value4, convention=convESG, &
+      call ESMF_AttributeSet(CNV, name4, value4, convention=convESMF, &
         purpose=purpGen, rc=rc)
     
       ! CONVCPT
@@ -359,13 +349,13 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeSet(CONVCPT, name='mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
-      call ESMF_AttributeSet(CONVCPT, name1, value1, convention=convESG, &
+      call ESMF_AttributeSet(CONVCPT, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(CONVCPT, name2, value2, convention=convESG, &
+      call ESMF_AttributeSet(CONVCPT, name2, value2, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(CONVCPT, name3, value3, convention=convESG, &
+      call ESMF_AttributeSet(CONVCPT, name3, value3, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(CONVCPT, name4, value4, convention=convESG, &
+      call ESMF_AttributeSet(CONVCPT, name4, value4, convention=convESMF, &
         purpose=purpGen, rc=rc)
     
       ! CONVKE
@@ -379,13 +369,13 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeSet(CONVKE, name='mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
-      call ESMF_AttributeSet(CONVKE, name1, value1, convention=convESG, &
+      call ESMF_AttributeSet(CONVKE, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(CONVKE, name2, value2, convention=convESG, &
+      call ESMF_AttributeSet(CONVKE, name2, value2, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(CONVKE, name3, value3, convention=convESG, &
+      call ESMF_AttributeSet(CONVKE, name3, value3, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(CONVKE, name4, value4, convention=convESG, &
+      call ESMF_AttributeSet(CONVKE, name4, value4, convention=convESMF, &
         purpose=purpGen, rc=rc)
     
       ! CONVPHI
@@ -399,13 +389,13 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeSet(CONVPHI, name='mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
-      call ESMF_AttributeSet(CONVPHI, name1, value1, convention=convESG, &
+      call ESMF_AttributeSet(CONVPHI, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(CONVPHI, name2, value2, convention=convESG, &
+      call ESMF_AttributeSet(CONVPHI, name2, value2, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(CONVPHI, name3, value3, convention=convESG, &
+      call ESMF_AttributeSet(CONVPHI, name3, value3, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(CONVPHI, name4, value4, convention=convESG, &
+      call ESMF_AttributeSet(CONVPHI, name4, value4, convention=convESMF, &
         purpose=purpGen, rc=rc)
 !EOC  
 
@@ -437,25 +427,25 @@ program ESMF_AttributePackageEx
       value9 = 'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core'
       value10 = 'GEOSagcm-EROS-beta7p12'
       
-      call ESMF_AttributeSet(gridcomp, name1, value1, convention=convESG, &
+      call ESMF_AttributeSet(gridcomp, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name2, value2, convention=convESG, &
+      call ESMF_AttributeSet(gridcomp, name2, value2, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name3, value3, convention=convESG, &
+      call ESMF_AttributeSet(gridcomp, name3, value3, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name4, value4, convention=convESG, &
+      call ESMF_AttributeSet(gridcomp, name4, value4, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name5, value5, convention=convESG, &
+      call ESMF_AttributeSet(gridcomp, name5, value5, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name6, value6, convention=convESG, &
+      call ESMF_AttributeSet(gridcomp, name6, value6, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name7, value7, convention=convESG, &
+      call ESMF_AttributeSet(gridcomp, name7, value7, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name8, value8, convention=convESG, &
+      call ESMF_AttributeSet(gridcomp, name8, value8, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name9, value9, convention=convESG, &
+      call ESMF_AttributeSet(gridcomp, name9, value9, convention=convESMF, &
         purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name10, value10, convention=convESG, &
+      call ESMF_AttributeSet(gridcomp, name10, value10, convention=convESMF, &
         purpose=purpGen, rc=rc)
 !EOC
 
@@ -510,9 +500,9 @@ program ESMF_AttributePackageEx
 
       if (localPet==0) then
 !BOC
-      call ESMF_AttributeWrite(gridcomp,convESG,purpGen, &
+      call ESMF_AttributeWrite(gridcomp,convESMF,purpGen, &
         attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
-      call ESMF_AttributeWrite(gridcomp,convESG,purpGen,rc=rc)
+      call ESMF_AttributeWrite(gridcomp,convESMF,purpGen,rc=rc)
 !EOC
         if (rc/=ESMF_SUCCESS) goto 10
       endif

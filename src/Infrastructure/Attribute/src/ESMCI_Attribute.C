@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.20 2009/04/13 15:10:23 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.21 2009/04/17 22:40:46 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.20 2009/04/13 15:10:23 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.21 2009/04/17 22:40:46 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -104,7 +104,7 @@ namespace ESMCI {
 //EOPI
 
   int localrc;
-  char msgbuf[ESMF_MAXSTR];
+  char msgbuf[2*ESMF_MAXSTR];
   Attribute *attr, *attpack;
 
   // Initialize local return code; assume routine not implemented
@@ -113,9 +113,9 @@ namespace ESMCI {
   // Search for the attpack, make it if not found
   attpack = AttPackGet(convention, purpose, object);
   if(!attpack) {
-       sprintf(msgbuf, "Cannot find an Attribute package with:\nconvention = '%s'\npurpose = '%s'\nobject = '%s'\n",
+      sprintf(msgbuf, "Cannot find an Attribute package with:\nconvention = '%s'\npurpose = '%s'\nobject = '%s'\n",
                       convention.c_str(), purpose.c_str(), object.c_str());
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                              msgbuf, &localrc);
       return ESMF_FAILURE;
   }
@@ -143,12 +143,12 @@ namespace ESMCI {
 }  // end AttPackAddAttribute()
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "AttPackCreate"
+#define ESMC_METHOD "AttPackCreateCustom"
 //BOPI
-// !IROUTINE:  AttPackCreate() - create an attpack
+// !IROUTINE:  AttPackCreateCustom() - create an attpack
 //
 // !INTERFACE:
-      int Attribute::AttPackCreate(
+      int Attribute::AttPackCreateCustom(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -184,7 +184,7 @@ namespace ESMCI {
       return ESMF_FAILURE;
     }
     
-    if (flag == ESMF_ATTPACKNEST_ON) {
+    if (flag == ESMC_ATTPACKNEST_ON) {
       // look for the lowest down nested attpack to attach this new one to
       nestedpack = AttPackGetNested(stop);
     
@@ -193,7 +193,7 @@ namespace ESMCI {
       // set the attpack on the nestedpack, here or elsewhere
       localrc = nestedpack->AttributeSet(attpack);
     }
-    else if (flag == ESMF_ATTPACKNEST_OFF) {
+    else if (flag == ESMC_ATTPACKNEST_OFF) {
       // set the attpack here
       localrc = AttributeSet(attpack);
     }
@@ -213,7 +213,264 @@ namespace ESMCI {
     
   return ESMF_SUCCESS;
 
-}  // end AttPackCreate()
+}  // end AttPackCreateCustom()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttPackCreateStandard"
+//BOPI
+// !IROUTINE:  AttPackCreateStandard() - create an attpack
+//
+// !INTERFACE:
+      int Attribute::AttPackCreateStandard(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      const string &convention,              // in - Attribute convention
+      const string &purpose,                 // in - Attribute purpose
+      const string &object) {                // in - Attribute object type
+// 
+// !DESCRIPTION:
+//     Setup the name, convention and purpose of an attpack.
+//
+//EOPI
+
+  char msgbuf[ESMF_MAXSTR];
+  int localrc;
+
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  // Grid standard Attribute package
+  if (object.compare("grid")==0) {
+    localrc = AttPackCreateCustom("ESMF", "general", object, ESMC_ATTPACKNEST_OFF);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "failed creating grid standard attpack");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
+    localrc = AttPackCreateCustom("GridSpec", "general", object, ESMC_ATTPACKNEST_ON);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "failed creating grid standard attpack");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
+    localrc = AttPackAddAttribute("area", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("dimension_order", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("discretization_type", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("geometry_type", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("grid_type", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("horizontal_dimension_value", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("IsConformal", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("IsRegular", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("IsUniform", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("north_pole_location", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("number_of_cells", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("number_of_dimensions", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("pole_covered", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("verical_dimension_value", "GridSpec", "general", object);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "failed creating grid standard attpack");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
+
+  } else if (object.compare("field")==0) {
+  // Field standard Attribute package
+    localrc = AttPackCreateCustom("ESMF", "general", object, ESMC_ATTPACKNEST_OFF);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "failed creating field standard attpack");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
+    localrc = AttPackCreateCustom("ESG", "general", object, ESMC_ATTPACKNEST_ON);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "failed creating field standard attpack");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
+    localrc = AttPackCreateCustom("CF", "extended", object, ESMC_ATTPACKNEST_ON);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "failed creating field standard attpack");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
+    localrc = AttPackCreateCustom("CF", "general", object, ESMC_ATTPACKNEST_ON);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "failed creating field standard attpack");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
+    localrc = AttPackAddAttribute("long_name", "CF", "general", object);
+    localrc = AttPackAddAttribute("name", "CF", "general", object);
+    localrc = AttPackAddAttribute("units", "CF", "general", object);
+    localrc = AttPackAddAttribute("standard_name", "CF", "extended", object);
+    localrc = AttPackAddAttribute("export", "ESG", "general", object);
+    localrc = AttPackAddAttribute("import", "ESG", "general", object);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "failed creating grid standard attpack");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
+
+  } else if (object.compare("state")==0) {
+  // State standard Attribute package
+    localrc = AttPackCreateCustom("ESMF", "general", object, ESMC_ATTPACKNEST_OFF);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "failed creating grid standard attpack");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
+    localrc = AttPackAddAttribute("import", "ESMF", "general", object);
+    localrc = AttPackAddAttribute("export", "ESMF", "general", object);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "failed creating state standard attpack");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
+  } else if (object.compare("comp")==0) {
+  // Component standard Attribute package
+    localrc = AttPackCreateCustom("ESMF", "general", object, ESMC_ATTPACKNEST_OFF);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "failed creating component standard attpack");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
+    localrc = AttPackCreateCustom("CF", "general", object, ESMC_ATTPACKNEST_ON);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "failed creating component standard attpack");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
+    localrc = AttPackAddAttribute("references", "CF", "general", object);
+    localrc = AttPackAddAttribute("comment", "CF", "general", object);
+    localrc = AttPackAddAttribute("version", "ESMF", "general", object);
+    localrc = AttPackAddAttribute("physical_domain", "ESMF", "general", object);
+    localrc = AttPackAddAttribute("name", "ESMF", "general", object);
+    localrc = AttPackAddAttribute("model_component_framework", "ESMF", "general", object);
+    localrc = AttPackAddAttribute("full_name", "ESMF", "general", object);
+    localrc = AttPackAddAttribute("discipline", "ESMF", "general", object);
+    localrc = AttPackAddAttribute("coding_language", "ESMF", "general", object);
+    localrc = AttPackAddAttribute("author", "ESMF", "general", object);
+    localrc = AttPackAddAttribute("agency", "ESMF", "general", object);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "failed creating component standard attpack");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }  
+  }
+    
+  return ESMF_SUCCESS;
+
+}  // end AttPackCreateStandard()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttPackNest"
+//BOPI
+// !IROUTINE:  AttPackNest() - nest an attpack
+//
+// !INTERFACE:
+      int Attribute::AttPackNest(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      const string &convention,              // in - Attribute convention
+      const string &purpose,                 // in - Attribute purpose
+      const string &object,                  // in - Attribute object type
+      const string &nestConvention,          // in - Attribute nestConvention
+      const string &nestPurpose) {           // in - Attribute nestPurpose
+// 
+// !DESCRIPTION:
+//     Setup the name, convention and purpose of a nested attpack.
+//
+//EOPI
+
+  char msgbuf[ESMF_MAXSTR];
+  int localrc;
+  Attribute *attpack, *nestpack, *localParent;
+  bool done = false;
+
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  // Search for the pack to nest this one around
+  nestpack = AttPackGet(nestConvention, nestPurpose, object);
+  if(!nestpack) {
+    sprintf(msgbuf, "could not find the attpack");
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+    return ESMF_FAILURE;
+  }
+    
+  // Make the attpack
+  attpack = new Attribute(convention, purpose, object);
+  if(!attpack) {
+    sprintf(msgbuf, "could not make the attpack");
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+    return ESMF_FAILURE;
+  }
+  
+  // Put the attpack onto nestPack's parent
+  localrc = nestpack->parent->AttributeSet(attpack);
+  if (localrc != ESMF_SUCCESS) {
+    sprintf(msgbuf, "failed adding an attpack to an Attribute");
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+    return ESMF_FAILURE;
+  }
+  
+  // Put nestpack onto attpack, save parent first
+  localParent = nestpack->parent;
+  nestpack->attrNested = ESMF_TRUE;
+  localrc = attpack->AttributeSet(nestpack);
+  if (localrc != ESMF_SUCCESS) {
+    sprintf(msgbuf, "failed adding an attpack to an Attribute");
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+    return ESMF_FAILURE;
+  }
+  
+  // Now remove nestpack from it's parent (now localParent)
+  for (int i=0; i<localParent->packCount; i++) {
+    if (nestConvention.compare(localParent->attrList.at(i)->attrConvention) == 0 && 
+      nestPurpose.compare(localParent->attrList.at(i)->attrPurpose) == 0 &&
+      object.compare(localParent->attrList.at(i)->attrObject) == 0) {
+      // found a match, destroy it
+      localParent->attrList.erase(localParent->attrList.begin() + i);
+      (localParent->packCount)--;
+      localParent->structChange = ESMF_TRUE;
+      done = true;
+      break;
+    }
+  }
+  
+  if (!done) {
+    sprintf(msgbuf, "could not locate the Attribute package to clean up, memory corruption!");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  msgbuf, &localrc);
+    return ESMF_FAILURE;
+  }
+    
+  return ESMF_SUCCESS;
+
+}  // end AttPackNest()
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttPackGet"
@@ -236,26 +493,26 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   unsigned int i;
   Attribute *attpack;
   
   attpack = NULL;
-
+  
   // look for the attpack on this Attribute
-  for (i=0; i<attrList.size(); i++) {
+  for (i=0; i<(attrCount+packCount); i++) {
     // if this is the Attpack we're looking for
-    if (convention.compare(attrList.at(i)->attrConvention) == 0 && 
+    if (attrList.at(i)->attrPackHead == ESMF_TRUE &&
+        convention.compare(attrList.at(i)->attrConvention) == 0 && 
         purpose.compare(attrList.at(i)->attrPurpose) == 0 &&
-        object.compare(attrList.at(i)->attrObject) == 0 &&
-        attrList.at(i)->attrPack == ESMF_TRUE) {
+        object.compare(attrList.at(i)->attrObject) ==0) {
           return attrList.at(i);
         }
     // else if this is the head of a nested attpack hierarchy
-    else if (attrList.at(i)->attrPackHead == ESMF_TRUE) {
+    else if (attrList.at(i)->attrPackHead == ESMF_TRUE)
       attpack = attrList.at(i)->AttPackGet(convention, purpose, object);
-    }
   }
-
+  
   return attpack;
 
 }  // end AttPackGet
@@ -272,10 +529,7 @@ namespace ESMCI {
 //    {\tt Attribute} pointer to requested object or NULL on early exit.
 // 
 // !ARGUMENTS:
-      const string &name,                   // in - Attribute name to retrieve
-      const string &convention,             // in - Attribute convention to retrieve
-      const string &purpose,                // in - Attribute purpose to retrieve
-      const string &object) const {         // in - Attribute object type to retrieve)
+      const string &name) const {         // in - Attribute name to retrieve)
 // 
 // !DESCRIPTION:
 //     Get an {\tt Attribute} from an attpack given its name, convention, 
@@ -284,25 +538,25 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
+  Attribute *attr;
   unsigned int i;
-
+  
+  attr = NULL;
+  
   // look for the Attribute on this attpack
-  for (i=0; i<attrList.size(); i++) {
-    if (name.compare(attrList.at(i)->attrName) == 0 && 
-        convention.compare(attrList.at(i)->attrConvention) == 0 &&
-        purpose.compare(attrList.at(i)->attrPurpose) == 0 &&
-        object.compare(attrList.at(i)->attrObject) == 0) {
-
-      // if you get here, you found a match. 
-      return attrList.at(i); 
-    }   
+  for (i=0; i<(attrCount+packCount); i++) {
+    if (name.compare(attrList.at(i)->attrName) == 0)
+      return attrList.at(i);
+    else if (attrList.at(i)->attrPackHead == ESMF_TRUE)
+      attr = attrList.at(i)->AttPackGetAttribute(name);
   }
   
   // you get here if no matches found
-  return NULL;
+  return attr;
 
 }  // end AttPackGetAttribute
-//-----------------------------------------------------------------------------
+/*//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttPackGetIndex"
 //BOPI
@@ -325,10 +579,11 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   unsigned int i;
 
   // look for the attpack on this Attribute
-  for (i=0; i<attrList.size(); i++) {
+  for (i=0; i<(attrCount+packCount); i++) {
     if (convention.compare(attrList.at(i)->attrConvention) == 0 && 
         purpose.compare(attrList.at(i)->attrPurpose) == 0 &&
         object.compare(attrList.at(i)->attrObject) == 0 &&
@@ -341,6 +596,7 @@ namespace ESMCI {
   return -1;
 
 }  // end AttPackGetIndex
+*/
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttPackGetNested"
@@ -360,11 +616,12 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   unsigned int i;
   Attribute *attr;
 
   // look for another attpack, re-curse if found, return when done
-  for (i=0; i<attrList.size(); i++) {
+  for (i=0; i<(attrCount+packCount); i++) {
     if (attrList.at(i)->attrPackHead == ESMF_TRUE) {
           attr = attrList.at(i)->AttPackGetNested(done);
           return attr;
@@ -375,7 +632,7 @@ namespace ESMCI {
   if (done) return attr;
   else {
     done = true;
-    // cast away constness, just this once, to return the attr*
+    // cast away constness, just this once >.<, to return the attr*
     return const_cast<Attribute*> (this);
   }
 
@@ -405,6 +662,7 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   unsigned int i;
   Attribute *attr, *attpack;
 
@@ -415,7 +673,7 @@ namespace ESMCI {
     return ESMF_SUCCESS;
   }
   // get the attr on the attpack
-  attr = attpack->AttPackGetAttribute(name, convention, purpose, object);
+  attr = attpack->AttPackGetAttribute(name);
   if (!attr) *present = ESMF_FALSE;
   else *present = ESMF_TRUE;
   
@@ -494,6 +752,8 @@ namespace ESMCI {
   }
   // else this is it
   else nestedpack = this;
+  
+  /*  FIXME: this doesn't make sense with new nesting stuff
   // then find the index of the attpack we're removing
   int ind = nestedpack->AttPackGetIndex(convention, purpose, object);
   if (ind >= 0) {
@@ -509,6 +769,7 @@ namespace ESMCI {
                   msgbuf, &localrc);
     return ESMF_FAILURE;
   }
+  */
   
   return ESMF_SUCCESS;
 
@@ -560,7 +821,7 @@ namespace ESMCI {
       return ESMF_FAILURE;
   }
   
-  for (i=0; i<attpack->attrList.size(); i++) {
+  for (i=0; i<(attpack->attrCount+attpack->packCount); i++) {
     if (name.compare(attpack->attrList.at(i)->attrName) == 0 &&
       convention.compare(attpack->attrList.at(i)->attrConvention) == 0 && 
       purpose.compare(attpack->attrList.at(i)->attrPurpose) == 0 &&
@@ -568,7 +829,8 @@ namespace ESMCI {
       // found a match, destroy it
       delete (attpack->attrList.at(i));
       attpack->attrList.erase(attpack->attrList.begin() + i);
-      (attpack->attrCount)--;
+      if (i<attpack->attrCount) (attpack->attrCount)--;
+      else (attpack->packCount)--;
       attpack->structChange = ESMF_TRUE;
       done = true;
       break;
@@ -582,6 +844,7 @@ namespace ESMCI {
     return ESMF_FAILURE;
   }
 
+  /*  FIXME: this doesn't make sense with new nesting stuff
   if ((attpack->attrCount+attpack->packCount+attpack->linkCount) == 0) {
     // to get rid of the attpack, we first change the name
     attpack->attrName = "\0";
@@ -603,6 +866,7 @@ namespace ESMCI {
       return ESMF_FAILURE;
     }
   }
+  */
   
   return ESMF_SUCCESS;
 
@@ -652,7 +916,7 @@ namespace ESMCI {
        return localrc;
   }
   
-  attr = attpack->AttPackGetAttribute(name, convention, purpose, object);
+  attr = attpack->AttPackGetAttribute(name);
   if (!attr) {
        sprintf(msgbuf, "This Attribute package does have an Attribute named '%s'\n", name.c_str());
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
@@ -904,7 +1168,7 @@ namespace ESMCI {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeMove"
 //BOPI
-// !IROUTINE:  AttributeSwap - Move {\tt Attributes} between ESMF objects
+// !IROUTINE:  AttributeMove - Move {\tt Attributes} between ESMF objects
 //
 // !INTERFACE:
       int Attribute::AttributeMove(
@@ -917,7 +1181,9 @@ namespace ESMCI {
 //
 // !DESCRIPTION:
 //   Copy all {\tt Attribute} data and copy by reference all {\tt Attributes} in 
-//   this base level and remove everything copied from source.
+//   this base level and remove everything copied from source.  
+//
+//   Note:  this routine is written with the assumption of being called from a Base
 //
 //EOPI
   char msgbuf[ESMF_MAXSTR];
@@ -936,7 +1202,7 @@ namespace ESMCI {
   }
 
   // copy base level Attributes by value
-  for (i=0; i<source->attrCount; i++) {
+  for (i=0; i<(source->attrCount+source->packCount); i++) {
     if(source->attrList.at(i)->attrRoot != ESMF_TRUE) {
       // add each attr to destination
       localrc = AttributeSet(source->attrList.at(i));
@@ -948,7 +1214,8 @@ namespace ESMCI {
       // update of count and flags is handled in AttributeSet()
       // now remove this Attribute from source, this is a swap
       source->attrList.erase(source->attrList.begin() + i);
-      (source->attrCount)--;
+      if (i<source->attrCount) (source->attrCount)--;
+      else (source->packCount)--;
       source->structChange = ESMF_TRUE;
     }
     else {
@@ -1782,7 +2049,7 @@ namespace ESMCI {
   if (!attr) {
     sprintf(msgbuf, "Attribute not found, using default value if present");
     ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
-    return ESMF_FAILURE;
+    return ESMF_SUCCESS;
   }
   else {
     // simple sanity checks
@@ -1933,11 +2200,8 @@ namespace ESMCI {
   int i;
 
   for (i=0; i<attrList.size(); i++) {
-      if (name.compare(attrList.at(i)->attrName))
-          continue;
-
-      // if you get here, you found a match. 
-      return attrList.at(i); 
+      if (name.compare(attrList.at(i)->attrName) == 0)
+          return attrList.at(i);
   }   
 
   // you get here if no matches found
@@ -2189,8 +2453,11 @@ namespace ESMCI {
 
   Attribute *attr;
 
+printf("name = %s\n",name.c_str());
+
   attr = AttributeGet(name);
-  if (!attr) *present = ESMF_FALSE;
+  if (!attr)
+    *present = ESMF_FALSE;
   else *present = ESMF_TRUE;
   
   // return
@@ -2398,12 +2665,14 @@ namespace ESMCI {
       attr->valueChange = ESMF_TRUE;
       // point attr to its new Base
       attr->attrBase = this->attrBase; 
+      attr->parent = this;
       return ESMF_SUCCESS;
     }
   }   
 
   attr->structChange = ESMF_TRUE;
   attr->attrBase = this->attrBase;
+  attr->parent = this;
   
   if (attr->attrPackHead == ESMF_TRUE) {
     attrList.insert(attrList.begin()+packCount, attr);
@@ -2810,11 +3079,15 @@ namespace ESMCI {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
+printf("name = %s\n", name.c_str());
+
   attr = new Attribute(name, ESMC_TYPEKIND_CHARACTER, 1, value);  
   if (!attr)
     return ESMF_FAILURE;
  
   localrc = AttributeSet(attr);
+
+printf("attr->name = %s\n", attr->attrName.c_str());
 
   return localrc;
 
@@ -3689,7 +3962,9 @@ namespace ESMCI {
   structChange = ESMF_TRUE;
   valueChange = ESMF_FALSE;
 
-  attrBase = NULL;
+  attrBase = ESMC_NULL_POINTER;
+  parent = ESMC_NULL_POINTER;
+  
   attrCount = 0;
   packCount = 0;
   linkCount = 0;
@@ -3751,7 +4026,9 @@ namespace ESMCI {
   structChange = ESMF_TRUE;
   valueChange = ESMF_FALSE;
 
-  attrBase = NULL;
+  attrBase = ESMC_NULL_POINTER;
+  parent = ESMC_NULL_POINTER;
+  
   attrCount = 0;
   packCount = 0;
   linkCount = 0;
@@ -3789,15 +4066,15 @@ namespace ESMCI {
 //
 //EOPI
 
-  //attrName = '\0';
+  attrName = "";
   tk = ESMF_NOKIND;
   items = 0;
   slen = 0;
   attrRoot = ESMF_TRUE;
 
-  //attrConvention = '\0';
-  //attrPurpose = '\0';
-  //attrObject = '\0';
+  attrConvention = "doodle";
+  attrPurpose = "doodle";
+  attrObject = "doodle";
   attrPack = ESMF_FALSE;
   attrPackHead = ESMF_FALSE;
   attrNested = ESMF_FALSE;
@@ -3806,7 +4083,9 @@ namespace ESMCI {
   structChange = ESMF_TRUE;
   valueChange = ESMF_FALSE;
 
-  attrBase = NULL;
+  attrBase = ESMC_NULL_POINTER;
+  parent = ESMC_NULL_POINTER;
+  
   attrCount = 0;
   packCount = 0;
   linkCount = 0;
@@ -3844,15 +4123,15 @@ namespace ESMCI {
 //
 //EOPI
 
-  //attrName = '\0';
+  attrName ="";
   tk = ESMF_NOKIND;
   items = 0;
   slen = 0;
   attrRoot = attributeRoot;
 
-  //attrConvention = '\0';
-  //attrPurpose = '\0';
-  //attrObject = '\0';
+  attrConvention = "doodle";
+  attrPurpose = "doodle";
+  attrObject = "doodle";
   attrPack = ESMF_FALSE;
   attrPackHead = ESMF_FALSE;
   attrNested = ESMF_FALSE;
@@ -3861,7 +4140,9 @@ namespace ESMCI {
   structChange = ESMF_TRUE;
   valueChange = ESMF_FALSE;
 
-  attrBase = NULL;
+  attrBase = ESMC_NULL_POINTER;
+  parent = ESMC_NULL_POINTER;
+  
   attrCount = 0;
   packCount = 0;
   linkCount = 0;
@@ -3910,9 +4191,9 @@ namespace ESMCI {
   slen = 0;          // only used for string values
   attrRoot = ESMF_FALSE;
    
-  //attrConvention = '\0';
-  //attrPurpose = '\0';
-  //attrObject = '\0';
+  attrConvention = "doodle";
+  attrPurpose = "doodle";
+  attrObject = "doodle";
   attrPack = ESMF_FALSE;
   attrPackHead = ESMF_FALSE;
   attrNested = ESMF_FALSE;
@@ -3921,7 +4202,9 @@ namespace ESMCI {
   structChange = ESMF_TRUE;
   valueChange = ESMF_FALSE;
 
-  attrBase = NULL;
+  attrBase = ESMC_NULL_POINTER;
+  parent = ESMC_NULL_POINTER;
+  
   attrCount = 0;
   packCount = 0;
   linkCount = 0;
@@ -4140,6 +4423,9 @@ namespace ESMCI {
 //    Delete an {\tt Attribute} hierarchy.
 //
 //EOPI
+
+  attrBase = ESMC_NULL_POINTER;
+  parent = ESMC_NULL_POINTER;
 
   if (items > 1) {
         if (tk == ESMC_TYPEKIND_I4) vip.clear();

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.15 2009/04/13 15:10:23 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.16 2009/04/17 22:40:46 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -69,6 +69,7 @@ class Attribute
     ESMC_Logical valueChange;          // flag for value changes
 
     ESMC_Base *attrBase;        // pointer to a root attr's Base object
+    Attribute *parent;          // pointer to the parent of this Attribute
 
     int attrCount;              // number of attributes in use in list
     int packCount;              // number of attpacks in use in list
@@ -102,18 +103,20 @@ class Attribute
     // attpack methods
     int AttPackAddAttribute(const string &name, const string &convention, 
       const string &purpose, const string &object);
-    int AttPackCreate(const string &convention, 
+    int AttPackCreateCustom(const string &convention, 
       const string &purpose, const string &object, const ESMC_AttPackNestFlag &flag);
+    int AttPackCreateStandard(const string &convention, 
+      const string &purpose, const string &object);
     Attribute *AttPackGet(const string &convention, 
       const string &purpose, const string &object) const;
-    Attribute *AttPackGetAttribute(const string &name, 
-      const string &convention, const string &purpose, 
-      const string &object) const;
-    int AttPackGetIndex(const string &convention, 
-      const string &purpose, const string &object) const;
+    Attribute *AttPackGetAttribute(const string &name) const;
+//    int AttPackGetIndex(const string &convention, 
+//      const string &purpose, const string &object) const;
     Attribute *AttPackGetNested(bool &done) const;
     int AttPackIsPresent(const string &name, const string &convention, 
       const string &purpose, const string &object, ESMC_Logical *present) const;
+    int AttPackNest(const string &convention, const string &purpose, const string &object, 
+      const string &nestConvention, const string &nestPurpose);
     int AttPackRemove(const string &convention, 
       const string &purpose, const string &object);
     int AttPackRemoveAttribute(const string &name, const string &convention, 
@@ -254,9 +257,15 @@ extern "C" {
   void FTN(c_esmc_attpackaddattribute)(ESMC_Base **base, char *name, char *convention, char *purpose, 
                                  char *object, int *rc, int nlen, 
                                  int clen, int plen, int olen);
-  void FTN(c_esmc_attpackcreate)(ESMC_Base **base, char *convention, char *purpose, 
+  void FTN(c_esmc_attpackcreatecustom)(ESMC_Base **base, char *convention, char *purpose, 
                                  char *object, ESMC_AttPackNestFlag *flag, int *rc, 
                                  int clen, int plen, int olen);
+  void FTN(c_esmc_attpackcreatestandard)(ESMC_Base **base, char *convention, char *purpose, 
+                                 char *object, int *rc, 
+                                 int clen, int plen, int olen);
+  void FTN(c_esmc_attpacknest)(ESMC_Base **base, char *convention, char *purpose, 
+                                 char *object, char *nestConvention, char *nestPurpose, 
+                                 int *rc, int clen, int plen, int olen, int nclen, int nplen);
   void FTN(c_esmc_attpackdestroy)(ESMC_Base **base, char *name, char *convention, char *purpose,
                                     char *object, int *rc, int nlen, int clen, int plen, int olen);
   void FTN(c_esmc_attpackgetchar)(ESMC_Base **base, char *name, char *value, 
