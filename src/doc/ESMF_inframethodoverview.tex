@@ -1,4 +1,4 @@
-% $Id: ESMF_inframethodoverview.tex,v 1.22 2009/04/15 21:33:03 oehmke Exp $
+% $Id: ESMF_inframethodoverview.tex,v 1.23 2009/04/20 19:08:31 oehmke Exp $
 
 \section{Overview of Distributed Data Methods}
 
@@ -572,7 +572,7 @@ point with regard to that corner.
 
 
  The patch weight generation tool is located in src/Infrastructure/Mesh/examples directory and is called
-{\tt ESMC\_PatchWghtEx}. The format for using the executable is as follows:
+{\tt ESMC\_PatchWghtEx}. To use this tool ESMF must be compiled with the LAPACK and PNETCDF third party libraries. Please see the ``Third Party Libraries'' section of the ESMF User Guide for more information on this. The format for using the executable is as follows:
 
 \begin{verbatim}
 
