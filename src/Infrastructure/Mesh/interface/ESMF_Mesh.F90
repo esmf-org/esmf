@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.16 2009/01/21 21:38:00 cdeluca Exp $
+! $Id: ESMF_Mesh.F90,v 1.17 2009/04/21 03:44:14 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.16 2009/01/21 21:38:00 cdeluca Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.17 2009/04/21 03:44:14 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -579,12 +579,12 @@ module ESMF_MeshMod
 ! !RETURN VALUE:
 !
 ! !ARGUMENTS:
-    type(ESMF_Mesh), intent(inout)                :: mesh
-    type(ESMF_DistGrid), intent(inout), optional  :: nodal_distgrid
-    type(ESMF_DistGrid), intent(inout), optional  :: element_distgrid
-    integer, intent(inout), optional              :: num_nodes
-    integer, intent(inout), optional              :: num_elements
-    integer,        intent(out), optional :: rc
+    type(ESMF_Mesh), intent(inout)             :: mesh
+    type(ESMF_DistGrid), intent(out), optional :: nodal_distgrid
+    type(ESMF_DistGrid), intent(out), optional :: element_distgrid
+    integer,             intent(out), optional :: num_nodes
+    integer,             intent(out), optional :: num_elements
+    integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Get information from the mesh.
@@ -607,7 +607,7 @@ module ESMF_MeshMod
       if (present(num_nodes)) num_nodes =mesh%num_nodes
       if (present(num_elements)) num_elements =mesh%num_elements 
 
-      rc = localrc
+      if (present(rc)) rc = localrc
 
     end subroutine ESMF_MeshGet
 
