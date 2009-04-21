@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.16 2009/04/21 21:19:18 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.17 2009/04/21 22:51:44 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.16 2009/04/21 21:19:18 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.17 2009/04/21 22:51:44 oehmke Exp $'
 
 !==============================================================================
 !
@@ -196,22 +196,22 @@ contains
 !
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridStore()
-      subroutine ESMF_FieldRegridStore(srcField, dstField, dstMaskValues, routeHandle,&
-                      indicies, weights, &
-                      regridMethod, regridScheme, rc)
+      subroutine ESMF_FieldRegridStore(srcField, dstField, dstMaskValues, &
+                   routeHandle, indicies, weights, regridMethod, &
+                   regridScheme, rc)
 !
 ! !RETURN VALUE:
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(inout)     :: srcField
-      type(ESMF_Field), intent(inout)     :: dstField
-      integer(ESMF_KIND_I4), optional     :: dstMaskValues(:)
+      type(ESMF_Field), intent(inout)                 :: srcField
+      type(ESMF_Field), intent(inout)                 :: dstField
+      integer(ESMF_KIND_I4), intent(inout), optional  :: dstMaskValues(:)
       type(ESMF_RouteHandle), intent(inout), optional :: routeHandle
-      integer(ESMF_KIND_I4), pointer, optional      :: indicies(:,:)
-      real(ESMF_KIND_R8), pointer, optional         :: weights(:)
-      type(ESMF_RegridMethod), intent(in) :: regridMethod
-      integer, intent(in), optional       :: regridScheme
-      integer, intent(out), optional :: rc 
+      integer(ESMF_KIND_I4), pointer, optional        :: indicies(:,:)
+      real(ESMF_KIND_R8), pointer, optional           :: weights(:)
+      type(ESMF_RegridMethod), intent(in)             :: regridMethod
+      integer, intent(in), optional                   :: regridScheme
+      integer, intent(out), optional                  :: rc 
 !
 ! !DESCRIPTION:
 !       Creates a sparse matrix (stored in routehandle) that regrids
@@ -234,12 +234,15 @@ contains
 !     \item [{[weights]}] 
 !           The weights for the sparse matrix.
 !     \item [{[regridMethod]}]
-!           The type of regridding to do. Options are 
-!           {\tt ESMF\_REGRID\_METHOD\_BILINEAR} or {\tt ESMF\_REGRID\_METHOD\_PATCH}. 
-!           If not specified, defaults to {\tt ESMF\_REGRID\_METHOD\_BILINEAR}.
+!           The type of regrid. Options are 
+!           {\tt ESMF\_REGRID\_METHOD\_BILINEAR} or 
+!           {\tt ESMF\_REGRID\_METHOD\_PATCH}. If not specified, defaults 
+!           to {\tt ESMF\_REGRID\_METHOD\_BILINEAR}.
 !     \item [{[regridScheme]}]
-!           Whether to convert to spherical coordinates ({\tt ESMF\_REGRID\_SCHEME\_FULL3D}), 
-!           or to leave in native coordinates ({\tt ESMF\_REGRID\_SCHEME\_NATIVE}). 
+!           Whether to convert to spherical coordinates 
+!           ({\tt ESMF\_REGRID\_SCHEME\_FULL3D}), 
+!           or to leave in native coordinates 
+!           ({\tt ESMF\_REGRID\_SCHEME\_NATIVE}). 
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
