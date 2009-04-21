@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.33 2009/04/21 21:19:18 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.34 2009/04/21 22:32:40 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -119,9 +119,8 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
 /*
     WriteMesh(srcmesh, "src_grid");
-*/
     WriteMesh(dstmesh, "dst_grid");
-
+*/
 
     // Now we have the meshes, so go ahead and calc bilinear weights.
     // Since bilin needs a field, just do coords.
