@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.85 2009/04/13 15:13:36 rokuingh Exp $
+// $Id: ESMCI_Grid.C,v 1.86 2009/04/21 21:19:18 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.85 2009/04/13 15:13:36 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.86 2009/04/21 21:19:18 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -1200,8 +1200,8 @@ int Grid::addItemArray(
   }
 
   // Error check item
-  if ((item < 0) || (item >= ESMC_GRIDITEM_COUNT)) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+   if ((item < 0) || (item >= ESMC_GRIDITEM_COUNT)) {
+     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
 				  "- Invalid item type", &rc);
     return rc;
   } 
@@ -2878,6 +2878,200 @@ template int Grid::getCoord(int staggerloc, int localDE, int *index, ESMC_I4 *da
 //-----------------------------------------------------------------------------
 
 
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::getItemInternal()"
+//BOPI
+// !IROUTINE:  Grid::getItemInternal()"
+//
+// !INTERFACE:
+template <class TYPE>
+void Grid::getItemInternal(
+//
+// !RETURN VALUE:
+//   void
+//
+// !ARGUMENTS:
+//
+                                 int staggerloc, // (in)
+                                 int item,       // (in)
+                                 int localDE,    // (in)
+                                 int *index,     // (in)  needs to be of size Grid dimCount
+                                 TYPE *value     // (out) needs to just be a single value
+                                 ){
+//
+// !DESCRIPTION:
+//  Get item value from an index tuple. For efficiency reasons this version doesn't do error checking
+//  for a public version with error checking see  Grid::getItem().  
+//
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int itemIndex[ESMF_MAXDIM];
+  ESMC_LocalArray *localArray;
+  int index1D;
+  int localrc;
+
+  // TODO: need to make this function more efficient. Use templates? 
+
+  // For arbitrary grid, need to find the index of the 1D distgrid from the original index
+  if (decompType == ESMC_GRID_NONARBITRARY) {
+
+      //// Get LocalArray cooresponding to staggerloc, coord and localDE
+    //      localArray=(itemArrayList[staggerloc][item]->getLocalarrayList())[localDE];
+
+      localArray=(itemArrayList[staggerloc][ESMC_GRIDITEM_MASK]->getLocalarrayList())[localDE];
+      
+      //// Get pointer to LocalArray data
+      localArray->getDataInternal(index, value);
+      
+  } else {
+#if 0 // Talk to PLi and then fix this
+     index1D = convertIndex(index);
+     //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+     //					       &rc)) return rc;
+       
+       //// Get LocalArray cooresponding to staggerloc, coord and localDE
+       localArray=(itemArrayList[staggerloc][item]->getLocalarrayList())[localDE];
+
+    // WHAT TODO HERE???
+       for (int i=1; i<coordDimCount[c]; i++) {
+	 if (coordDimMap[c][i] == ESMC_GRID_ARBDIM) {
+	   itemIndex[i] = index1D;
+	 } else {
+	   itemIndex[i] = index[coordDimMap[c][i]];
+	 }
+       }
+       //// Get pointer to LocalArray data
+       localArray->getDataInternal(itemIndex, value);
+#endif
+  }
+}
+
+// Add more types here if necessary
+template void Grid::getItemInternal(int staggerloc, int item, int localDE, int *index, ESMC_R8 *data);
+template void Grid::getItemInternal(int staggerloc, int item, int localDE, int *index, ESMC_R4 *data);
+template void Grid::getItemInternal(int staggerloc, int item, int localDE, int *index, ESMC_I4 *data);
+
+
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::getItem()"
+//BOPI
+// !IROUTINE:  Grid::getItem()"
+//
+// !INTERFACE:
+template <class TYPE>
+int Grid::getItem(
+//
+// !RETURN VALUE:
+//   return code
+//   
+// !ARGUMENTS:
+//
+                                 int staggerloc, // (in)
+                                 int item,       // (in)
+                                 int localDE,    // (in)
+                                 int *index,     // (in)  needs to be of size Grid dimCount
+                                 TYPE *value     // (out) needs to be only 1 value
+                                 ){
+//
+// !DESCRIPTION:
+//  Get item value from an index tuple. For efficiency reasons this version doesn't do error checking
+//  for a public version with error checking see  Grid::getItem().  
+//
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int itemIndex[ESMF_MAXDIM];
+  ESMC_LocalArray *localArray;
+  int localrc = ESMC_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;
+  int index1D;
+
+  // Check status
+  if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+      "- Grid not fully created", &rc);
+    return rc;
+  }
+
+  // Check item
+  if ((item < 0) || (item >= ESMC_GRIDITEM_COUNT)) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+      "- item out of range", &rc);
+    return rc;
+  }
+
+  // Check staggerloc
+  if ((staggerloc < 0) || (staggerloc >= staggerLocCount)) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+      "- stagger location out of range", &rc);
+    return rc;
+  }
+
+  // Ensure localDE isn't out of range for this PET
+  if ((localDE < 0) || (localDE >=distgrid->getDELayout()->getLocalDeCount())) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+          "- localDE outside range on this processor", &rc);
+        return rc;
+  }
+
+  // Check here for coordinate Array existance
+  if (!hasItemStaggerLoc(staggerloc,item)) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+               "- staggerloc is empty on this Grid", &rc);
+    return rc;
+  }
+
+  // For arbitrary grid, need to find the index of the 1D distgrid from the original index
+  if (decompType == ESMC_GRID_NONARBITRARY) {
+
+      //// Get LocalArray cooresponding to staggerloc, coord and localDE
+      localArray=(itemArrayList[staggerloc][item]->getLocalarrayList())[localDE];
+      
+      //// Get pointer to LocalArray data
+      localArray->getDataInternal(index, value);
+      
+  } else {
+#if 0 // Talk to PLi and then fix this
+     index1D = convertIndex(index);
+     //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+     //					       &rc)) return rc;
+       
+       //// Get LocalArray cooresponding to staggerloc, coord and localDE
+       localArray=(itemArrayList[staggerloc][item]->getLocalarrayList())[localDE];
+
+    // WHAT TODO HERE???
+       for (int i=1; i<coordDimCount[c]; i++) {
+	 if (coordDimMap[c][i] == ESMC_GRID_ARBDIM) {
+	   itemIndex[i] = index1D;
+	 } else {
+	   itemIndex[i] = index[coordDimMap[c][i]];
+	 }
+       }
+       //// Get pointer to LocalArray data
+       localArray->getDataInternal(itemIndex, value);
+     
+#endif
+  }
+
+  // return success
+  return ESMF_SUCCESS;
+}
+
+// Add more types here if necessary
+template int Grid::getItem(int staggerloc, int item, int localDE, int *index, ESMC_R8 *data);
+template int Grid::getItem(int staggerloc, int item, int localDE, int *index, ESMC_R4 *data);
+template int Grid::getItem(int staggerloc, int item, int localDE, int *index, ESMC_I4 *data);
+
+//-----------------------------------------------------------------------------
+
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Grid::convertIndex()"
@@ -4300,7 +4494,6 @@ int Grid::getCoordArrayInternal(
   // get Array pointer from List
   array=coordArrayList[staggerlocArg][coordArg];
 
-  //printf ("coordArrayList %d %d\n", staggerlocArg, coordArg);
   // Check if array has been set
   if (array==ESMC_NULL_POINTER) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -7311,6 +7504,47 @@ template void GridIter::getCoord(ESMC_R4 *data);
 template void GridIter::getCoord(ESMC_I4 *data);
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridIter::getItem()"
+//BOPI
+// !IROUTINE:  getItem
+//
+// !INTERFACE:
+template <class TYPE>
+void GridIter::getItem(
+//
+// !RETURN VALUE:
+//  void
+//
+// !ARGUMENTS:
+//   Value output 
+// 
+ 		       int item,     // item type
+		       TYPE *value // (out) input array needs to be at
+                                       // least of the size of 1 item    
+ ){
+//
+// !DESCRIPTION:
+//  Returns the item value for an iteration location.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+
+  // if done then leave
+  if (done) return;
+
+  // get coordinates
+  grid->getItemInternal(item, staggerloc, curDE, curInd, value);
+
+}
+// Add more types here if necessary
+template void GridIter::getItem(int item, ESMC_R8 *data);
+template void GridIter::getItem(int item, ESMC_R4 *data);
+template void GridIter::getItem(int item, ESMC_I4 *data);
+//-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------

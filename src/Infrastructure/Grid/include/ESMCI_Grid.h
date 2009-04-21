@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.56 2009/02/16 19:14:31 rokuingh Exp $
+// $Id: ESMCI_Grid.h,v 1.57 2009/04/21 21:19:18 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,6 +46,15 @@ enum ESMC_GridStatus {ESMC_GRIDSTATUS_INVALID=-1,
 };
 
 // Eventually move this to ESMCI_Util.h
+#define ESMC_GRIDITEM_INVALID -2
+#define ESMC_GRIDITEM_UNINIT  -1
+#define ESMC_GRIDITEM_MASK     0
+#define ESMC_GRIDITEM_AREA     1
+#define ESMC_GRIDITEM_AREAM    2
+#define ESMC_GRIDITEM_FRAC     3
+#define ESMC_GRIDITEM_COUNT    4
+
+/*
 enum ESMC_GridItem {ESMC_GRIDITEM_INVALID=-2,
                     ESMC_GRIDITEM_UNINIT,
                     ESMC_GRIDITEM_MASK,  // 0
@@ -53,7 +62,8 @@ enum ESMC_GridItem {ESMC_GRIDITEM_INVALID=-2,
                     ESMC_GRIDITEM_AREAM, // 2
                     ESMC_GRIDITEM_FRAC   // 3
 };
-#define ESMC_GRIDITEM_COUNT 4
+
+*/
 
 enum ESMC_GridDecompType {ESMC_GRID_INVALID=1, 
 			ESMC_GRID_NONARBITRARY,
@@ -533,6 +543,26 @@ int getComputationalUBound(
                                  TYPE *coord     // (out) needs to be of size Grid rank
                                  );
  
+ // Get data from a specific coordinate location
+ template <class TYPE> int getItem(  
+                                     int staggerloc, // (in)
+                                     int item,        // (in)
+                                     int localDE,    // (in)
+                                     int *index,     // (in)  needs to be of size Grid rank
+                                     TYPE *value     // (out) only 1 value of type TYPE
+                                     );
+
+ // Get data from a specific coordinate location without error checking 
+ template <class TYPE> void getItemInternal(
+                                 int staggerloc, // (in)
+				 int item,       // (in)
+                                 int localDE,    // (in)
+                                 int *index,     // (in)  needs to be of size Grid rank
+                                 TYPE *value     // (out) only 1 value of type TYPE
+                                 );
+
+
+
  // Convert the index of an arb grid point into the 1D index of the cooresponding distGrid
  int convertIndex(
 		  int *indexArg
@@ -647,6 +677,7 @@ int getComputationalUBound(
   int getDE();
   int getPoleID();
   template <class TYPE> void getCoord(TYPE *coord);
+  template <class TYPE> void getItem(int item, TYPE *value);
   template <class TYPE> void getArrayData(Array *array, TYPE *data);
   }; 
 

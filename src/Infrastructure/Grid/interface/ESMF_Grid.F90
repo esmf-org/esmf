@@ -204,6 +204,8 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 
   public ESMF_GridValidate
 
+!  public ESMF_GridTest ! For debugging 
+
   public ESMF_GridConvertIndex      ! For Arbitrarily distributed grid only
 
   public operator(.eq.), operator(.ne.) 
@@ -221,7 +223,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.111 2009/04/02 17:12:02 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.112 2009/04/21 21:19:18 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -15208,6 +15210,48 @@ endif
                                  GridStatus2%gridstatus)
 
       end function ESMF_GridStatusLessEqual
+
+#if 0
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridTest()"
+!BOPI
+! !IROUTINE: ESMF_GridTest - Test Grid internals
+
+! !INTERFACE:
+  subroutine ESMF_GridTest(grid, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Grid), intent(in)              :: grid
+    integer,         intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!  TEST SUBROUTINE FOR INTERNAL ESMF USE ONLY
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
+    
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_GridTest(grid, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_GridTest
+!------------------------------------------------------------------------------
+#endif
+
 
 #undef  ESMF_METHOD
 

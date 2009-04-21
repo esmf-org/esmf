@@ -2292,6 +2292,8 @@ extern "C" {
         return;
     }
 
+
+
 #if 0
   
    ESMCI::Grid *grid;
@@ -2342,7 +2344,7 @@ extern "C" {
    printf("%d ----------- \n",i);
 #endif
 
-#if 1
+#if 0
    // Grid Cell Iterator
    ESMCI::GridIter *ni=new ESMCI::GridIter(grid,0,true);
 
@@ -2446,6 +2448,145 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
+#if 0 // DEBUG
+  void FTN(c_esmc_gridtest)(ESMCI::Grid **_grid, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridvalidate()"
+
+    //Initialize return code
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
+    // Check status
+   if ((*_grid)->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+          "- grid status below ESMC_GRIDSTATUS_SHAPE_READY ", ESMC_NOT_PRESENT_FILTER(rc));
+        return;
+    }
+
+
+#if 1
+   // Test getItem
+   ESMCI::Grid *grid;
+
+   // Get grid
+   grid=*_grid;
+  
+   int index[2];
+   ESMC_I4 val;
+
+
+
+   ESMCI::GridIter *iter=new ESMCI::GridIter(grid,0,false);
+   int i=0;
+   for(iter->toBeg(); !iter->isDone(); iter->adv()) {
+
+       iter->getItem(ESMC_GRIDITEM_MASK,&val);
+
+       printf("%d :: GID=%d mask=%d \n",i,iter->getGlobalID(),val);
+
+       i++;
+   }
+
+
+#endif
+
+#if 0
+  
+   ESMCI::Grid *grid;
+
+   // Get grid
+   grid=*_grid;
+
+   // turn on sphere
+   grid->setSphere();
+
+#if 0
+   // Grid Node Iterator
+   ESMCI::GridIter *iter=new ESMCI::GridIter(grid,0,true);
+   ESMCI::GridIter *iter2=new ESMCI::GridIter(grid,0,false);
+
+   printf("----------- \n");
+   int i=0;
+   for(iter->toBeg(); !iter->isDone(); iter->adv()) {
+
+#if 0
+     ESMC_R8 coord[2];
+
+       iter->getCoord(coord);
+
+       printf("%d :: GID=%d LID=%d local=%d  shared=%d (%f,%f) \n",i,iter->getGlobalID(),iter->getLocalID(),iter->isLocal(),iter->isShared(),coord[0],coord[1]);
+#endif
+
+       printf("%d :: GID=%d poleID=%d \n",i,iter->getGlobalID(),iter->getPoleID());
+
+
+
+#if 0 
+     int lid;
+
+     lid=iter->getLocalID();
+
+    if (iter2->moveToLocalID(lid)->getLocalID() != lid) {
+       printf("ERROR :: %d \n",lid);      
+     } else {
+        printf("%d :: %d == %d \n",i,lid,iter2->moveToLocalID(lid)->getLocalID());      
+     }
+       printf(">>>> %d :: %d == %d \n",i,lid,iter2->moveToLocalID(lid)->getLocalID());      
+#endif
+
+
+     i++;
+   }
+   printf("%d ----------- \n",i);
+#endif
+
+#if 1
+   // Grid Cell Iterator
+   ESMCI::GridIter *ni=new ESMCI::GridIter(grid,0,true);
+
+   ESMCI::GridCellIter *iter=new ESMCI::GridCellIter(grid,0);
+   ESMCI::GridCellIter *iter2=new ESMCI::GridCellIter(grid,0);
+
+   printf("Grid Cells ----------- \n");
+   int i=0;
+   for(iter->toBeg(); !iter->isDone(); iter->adv()) {
+
+     int num, cnr[4], ngid[4];
+
+     iter->getCornersCellNodeLocalID(&num, cnr);
+     for (int i=0; i<4; i++) {
+       ngid[i]=ni->moveToLocalID(cnr[i])->getGlobalID();
+     }
+   
+
+     printf("%d :: GID=%d >>  %d %d %d %d \n",i,iter->getGlobalID(),ngid[0],ngid[1],ngid[2],ngid[3]);
+
+#if 0
+     int lid;
+
+     lid=iter->getLocalID();
+
+    if (iter2->moveToLocalID(lid)->getLocalID() != lid) {
+       printf("ERROR :: %d \n",lid);      
+     } else {
+        printf("%d :: %d == %d \n",i,lid,iter2->moveToLocalID(lid)->getLocalID());      
+     }
+       printf(">>>> %d :: %d == %d \n",i,lid,iter2->moveToLocalID(lid)->getLocalID());      
+#endif
+
+
+     i++;
+   }
+   printf("%d ----------- \n",i);
+#endif
+#endif
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  } 
+#endif
+
+  ///////////////////////////////////////////////////////////////////////////////////
 
 
   

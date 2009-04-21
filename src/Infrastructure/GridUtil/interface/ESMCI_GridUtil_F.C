@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.20 2009/01/21 21:37:59 cdeluca Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.21 2009/04/21 21:19:18 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@ extern "C" void FTN(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *
 
   try {
 
-    ESMCI::GridToMesh(grid, *staggerLoc, mesh, arrays);
+    ESMCI::GridToMesh(grid, *staggerLoc, mesh, arrays,NULL);
 
     char *meshname = ESMC_F90toCstring(name, nlen);
 
@@ -112,8 +112,8 @@ extern "C" void FTN(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *
 
 }
 
-extern "C" void FTN(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc, int *isSphere, Mesh **meshpp, int *rc) {
-
+extern "C" void FTN(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc, int *isSphere, Mesh **meshpp, 					  ESMCI::InterfaceInt **maskValuesArg, int *rc) {
+ 
 
   ESMCI::Grid &grid = **gridpp;
 
@@ -124,7 +124,7 @@ extern "C" void FTN(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc, in
   try {
 
     std::vector<ESMCI::Array*> arrays;
-    ESMCI::GridToMesh(grid, *staggerLoc, *meshp, arrays);
+    ESMCI::GridToMesh(grid, *staggerLoc, *meshp, arrays, *maskValuesArg);
 //WriteMesh(*meshp, "gridtomesh");
 
     *meshpp = meshp;

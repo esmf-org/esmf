@@ -121,6 +121,10 @@ void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &
   ThrowRequire(dcptr);
   _field &dstcoord_field = *dcptr;
    
+  // Get destination mask field
+  _field *dmptr = dest.Getfield("mask_1");
+  _field &dstmask_field = *dmptr;
+
   //MEField<> &dstcoord_field = *dest.GetCoordField();
 
   if (src.spatial_dim() != dest.spatial_dim()) {
@@ -134,8 +138,7 @@ void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &
 
   // Load the destination objects into a list
   std::vector<const MeshObj*> dest_nlist;
-  {
-
+  if (dmptr == NULL) { // No dest masks
     if (to_investigate == NULL) {
       MeshDB::const_iterator ni = dest.obj_begin(), ne = dest.obj_end();
       for (; ni != ne; ++ni) {
@@ -148,7 +151,34 @@ void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &
       for (; ni != ne; ++ni) dest_nlist.push_back(*ni);
       if (dest_nlist.size() == 0) return;
     }
+  } else { // dest masks exist
+    if (to_investigate == NULL) {
+      MeshDB::const_iterator ni = dest.obj_begin(), ne = dest.obj_end();
+      for (; ni != ne; ++ni) {
+	if (dst_obj_type & ni->get_type()) {
+	  // Get mask value
+	  double *m=dstmask_field.data(*ni);
+	  
+	  // Only put objects in if they're not masked
+	  if (*m < 0.5) {
+	    dest_nlist.push_back(&*ni);
+	  }
+	}
+      }
+    } else {
+      std::vector<const MeshObj*>::const_iterator ni = to_investigate->begin(),
+                       ne = to_investigate->end();
+      for (; ni != ne; ++ni) {
+	// Get mask value
+	double *m=dstmask_field.data(**ni);
 
+	// Only put objects in if they're not masked
+	if (*m < 0.5) {
+          dest_nlist.push_back(*ni);
+	}
+      }
+      if (dest_nlist.size() == 0) return;
+    }
   }
 
   UInt sdim = dest.spatial_dim();

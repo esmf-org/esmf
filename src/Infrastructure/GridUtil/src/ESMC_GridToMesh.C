@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.36 2009/03/09 22:02:35 w6ws Exp $
+// $Id: ESMC_GridToMesh.C,v 1.37 2009/04/21 21:19:18 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ namespace ESMCI {
 // and, maybe, for simple single patch grids with a periodic component,
 // the dual, which is not so bad.  This will put us equivalent with
 // SCRIP.  
-void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std::vector<ESMCI::Array*> &arrays) {
+void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std::vector<ESMCI::Array*> &arrays, ESMCI::InterfaceInt *maskValuesArg) {
   Trace __trace("GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh)");
 
   // Initialize the parallel environment for mesh (if not already done)
@@ -94,7 +94,8 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
  try {
 
    // *** Grid error checking here ***
-
+   if (!grid.hasCoordStaggerLoc(staggerLoc))
+     Throw() << "Grid being used in Regrid call does not contain coordinates at appropriate staggerloc";
 
  
    // *** Set some meta-data ***
@@ -114,6 +115,27 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
 
    mesh.set_spatial_dimension(sdim);
   
+   // see if grid has a mask field
+   bool hasMask=false;
+   int numMaskValues=0;
+   int *ptrMaskValues;
+   if (grid.hasItemStaggerLoc(staggerLoc, ESMC_GRIDITEM_MASK)) {
+     if (maskValuesArg != NULL) {
+       // Error check mask values
+       if (maskValuesArg->dimCount != 1) {
+	 Throw() << " Mask values must be of rank 1.";
+       }
+       
+       // Get mask values
+       numMaskValues=maskValuesArg->extent[0];
+       ptrMaskValues=&(maskValuesArg->array[0]);
+       
+       // Turn on masking
+       hasMask=true;
+     } else {
+       hasMask=false;
+     }
+   }
 
    // We save the nodes in a linear list so that we can access then as such
    // for cell creation.
@@ -326,6 +348,13 @@ Par::Out() << std::endl;
      nfields.back()->set_output_status(true);
    }
 
+   // Setup the mask field if necessary
+   IOField<NodalField> *node_mask;
+   if (hasMask) {
+     node_mask = mesh.RegisterNodalField(mesh, "mask", 1);
+   }
+
+
 #ifdef G2M_DBG
    IOField<NodalField> *de_field = mesh.RegisterNodalField(mesh, "de", 1);
      de_field->set_output_status(true);
@@ -392,6 +421,46 @@ Par::Out() << std::endl;
 
    } // ni
 
+
+   // Loop through Mesh nodes setting up mask
+   if (hasMask) {
+     for (ni = mesh.node_begin(); ni != ne; ++ni) {
+       double *m = node_mask->data(*ni);
+       
+       UInt lid = ngid2lid[ni->get_id()]; // we set this above when creating the node
+       
+       // Move to corresponding grid node
+       gni->moveToLocalID(lid);      
+       
+       // If local fill in coords
+       if (gni->isLocal()) {
+	 ESMC_I4 gm;
+
+	 // Get Mask value from grid
+	 gni->getItem(ESMC_GRIDITEM_MASK, &gm);
+	 
+	 // See if gm matches any mask values
+	 bool mask=false;
+         for (int i=0; i<numMaskValues; i++) {
+	   ESMC_I4 mv=ptrMaskValues[i];
+	   if (mv==gm) {
+	     mask=true;
+	     break;
+	   }
+	 }
+
+	 // Set Mask based on grid mask value
+	 if (mask) {
+	   *m=1.0;
+	 } else {
+	   *m=0.0;
+	 }
+
+       } else { // set to Null value to be ghosted later
+	 *m=0.0;
+       }
+     } // ni
+   }
 
    // Now go back and resolve the ownership for shared nodes.  We create a distdir
    // from the owned, shared nodes, then look up the shared, not owned.
@@ -467,6 +536,16 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
      mesh.HaloFields(1, &cptr);
 */
    }
+
+
+
+#if 0
+     MEField<> *cptr = mesh.GetCoordField();
+
+     MEField<> *mptr = mesh.GetField("mask");
+
+  printf("G2M: c=%d m=%d hm=%d \n",cptr,mptr,hasMask);
+#endif
 
  } // try catch block
   catch (std::exception &x) {

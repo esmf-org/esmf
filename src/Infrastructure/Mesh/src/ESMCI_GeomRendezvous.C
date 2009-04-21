@@ -466,7 +466,15 @@ void GeomRend::prep_meshes() {
     _field *cf = dcoord.GetNodalfield();
     
     dstmesh_rend.Registerfield(cf->name(), cf->GetAttr(), dcoord.FType(), cf->dim());
+
+    // Do masks, if they exist
+    MEField<> *dmptr = dstmesh.GetField("mask");
+
+    if (dmptr != NULL) {
+      _field *mf = dmptr->GetNodalfield();
     
+      dstmesh_rend.Registerfield(mf->name(), mf->GetAttr(), dmptr->FType(), mf->dim());
+    }
   }
   
 }
@@ -500,6 +508,8 @@ void GeomRend::migrate_meshes() {
   
   MEField<> *dc = dstmesh.GetCoordField();
 
+  MEField<> *dm = dstmesh.GetField("mask");
+
   
   dstmesh_rend.Commit();
   
@@ -509,17 +519,36 @@ void GeomRend::migrate_meshes() {
     dstComm.SendFields(1, &dc, &dc_r);
     
   } else {
-    
+    int num_snd=0;
+    _field *snd[2],*rcv[2];
+
     _field *dcf = dc->GetNodalfield();
     _field *dc_rf = dstmesh_rend.Getfield("coordinates_1");
     ThrowRequire(dc_rf);
-    
+
+    // load coordinate fields
+    snd[num_snd]=dcf;
+    rcv[num_snd]=dc_rf;
+    num_snd++;          
+
+    if (dm != NULL) {
+      _field *dmf = dm->GetNodalfield();
+      _field *dm_rf = dstmesh_rend.Getfield("mask_1");
+      ThrowRequire(dm_rf);
+      
+      // load mask fields
+      snd[num_snd]=dmf;
+      rcv[num_snd]=dm_rf;
+      num_snd++;                
+    }
+
     CommRel &dst_node = dstComm.GetCommRel(MeshObj::NODE);
     Trace __trace("dst_node pre send fields->");
-    dst_node.send_fields(1, &dcf, &dc_rf);
+    dst_node.send_fields(num_snd, snd, rcv);
         Trace __trace1("dst_node post send fields->");
-          
+
   }  
+
 }
 
 void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF) {

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.15 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.16 2009/04/21 21:19:18 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.15 2009/01/21 21:37:59 cdeluca Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.16 2009/04/21 21:19:18 oehmke Exp $'
 
 !==============================================================================
 !
@@ -196,7 +196,7 @@ contains
 !
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridStore()
-      subroutine ESMF_FieldRegridStore(srcField, dstField, routeHandle,&
+      subroutine ESMF_FieldRegridStore(srcField, dstField, dstMaskValues, routeHandle,&
                       indicies, weights, &
                       regridMethod, regridScheme, rc)
 !
@@ -205,6 +205,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout)     :: srcField
       type(ESMF_Field), intent(inout)     :: dstField
+      integer(ESMF_KIND_I4), optional     :: dstMaskValues(:)
       type(ESMF_RouteHandle), intent(inout), optional :: routeHandle
       integer(ESMF_KIND_I4), pointer, optional      :: indicies(:,:)
       real(ESMF_KIND_R8), pointer, optional         :: weights(:)
@@ -222,6 +223,23 @@ contains
 !           Source Field.
 !     \item [dstField]
 !           Destination Field.
+!     \item [{[dstMaskValues]}]
+!           List of values that indicate a destination point should be masked out. 
+!           If not specified, no masking will occur. 
+!     \item [{[routeHandle]}]
+!           The handle that implements the regrid and that can be used in later 
+!           {\tt ESMF\_FieldRegrid}.
+!     \item [{[indices]}] 
+!           The indices for the sparse matrix.
+!     \item [{[weights]}] 
+!           The weights for the sparse matrix.
+!     \item [{[regridMethod]}]
+!           The type of regridding to do. Options are 
+!           {\tt ESMF\_REGRID\_METHOD\_BILINEAR} or {\tt ESMF\_REGRID\_METHOD\_PATCH}. 
+!           If not specified, defaults to {\tt ESMF\_REGRID\_METHOD\_BILINEAR}.
+!     \item [{[regridScheme]}]
+!           Whether to convert to spherical coordinates ({\tt ESMF\_REGRID\_SCHEME\_FULL3D}), 
+!           or to leave in native coordinates ({\tt ESMF\_REGRID\_SCHEME\_NATIVE}). 
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -289,7 +307,8 @@ contains
           isSphere = 0
           if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) isSphere = 1
 
-          srcMesh = ESMF_GridToMesh(srcGrid, staggerLoc%staggerloc, isSphere, rc=localrc)
+          srcMesh = ESMF_GridToMesh(srcGrid, staggerLoc%staggerloc, isSphere, &
+                      rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -307,7 +326,8 @@ contains
           isSphere = 0
           if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) isSphere = 1
 
-          dstMesh = ESMF_GridToMesh(dstGrid, staggerLoc%staggerloc, isSphere, rc=localrc)
+          dstMesh = ESMF_GridToMesh(dstGrid, staggerLoc%staggerloc, isSphere, &
+                      dstMaskValues, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
