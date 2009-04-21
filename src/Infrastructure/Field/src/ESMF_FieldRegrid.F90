@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.17 2009/04/21 22:51:44 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.18 2009/04/21 23:15:25 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.17 2009/04/21 22:51:44 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.18 2009/04/21 23:15:25 oehmke Exp $'
 
 !==============================================================================
 !
@@ -205,7 +205,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout)                 :: srcField
       type(ESMF_Field), intent(inout)                 :: dstField
-      integer(ESMF_KIND_I4), intent(inout), optional  :: dstMaskValues(:)
+      integer(ESMF_KIND_I4), intent(in), optional     :: dstMaskValues(:)
       type(ESMF_RouteHandle), intent(inout), optional :: routeHandle
       integer(ESMF_KIND_I4), pointer, optional        :: indicies(:,:)
       real(ESMF_KIND_R8), pointer, optional           :: weights(:)
