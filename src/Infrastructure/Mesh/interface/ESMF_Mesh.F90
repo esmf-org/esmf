@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.17 2009/04/21 03:44:14 w6ws Exp $
+! $Id: ESMF_Mesh.F90,v 1.18 2009/04/22 00:21:45 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.17 2009/04/21 03:44:14 w6ws Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.18 2009/04/22 00:21:45 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -191,8 +191,8 @@ module ESMF_MeshMod
 
     num_elems = size(elementIds)
     call C_ESMC_MeshAddElements(mesh%this, num_elems, &
-                             elementIds(1), elementTypes(1), &
-                             elementConn(1), localrc)
+                             elementIds, elementTypes, &
+                             elementConn, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -206,7 +206,7 @@ module ESMF_MeshMod
     !call ESMF_DistGridPrint(mesh%nodal_distgrid)
     !ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, mesh%nodal_distgrid, rc)
 
-    rc = localrc
+    if (present (rc)) rc = localrc
     
   end subroutine ESMF_MeshAddElements
 !------------------------------------------------------------------------------
@@ -260,12 +260,12 @@ module ESMF_MeshMod
 
     num_nodes = size(nodeIds)
     mesh%num_nodes = num_nodes
-    call C_ESMC_MeshAddNodes(mesh%this, num_nodes, nodeIds(1), nodeCoords(1), &
-                             nodeOwners(1), localrc)
+    call C_ESMC_MeshAddNodes(mesh%this, num_nodes, nodeIds, nodeCoords, &
+                             nodeOwners, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    rc = localrc
+    if (present (rc)) rc = localrc
     
   end subroutine ESMF_MeshAddNodes
 !------------------------------------------------------------------------------
@@ -320,7 +320,7 @@ module ESMF_MeshMod
     ! Check init status of arguments
     ESMF_INIT_SET_CREATED(ESMF_MeshCreate3Part)
 
-    rc = localrc
+    if (present (rc)) rc = localrc
     
   end function ESMF_MeshCreate3Part
 !------------------------------------------------------------------------------
@@ -407,15 +407,15 @@ module ESMF_MeshMod
 
     ! Add the nodes
     num_nodes = size(nodeIds)
-    call C_ESMC_MeshAddNodes(ESMF_MeshCreate1Part%this, num_nodes, nodeIds(1), nodeCoords(1), &
-                             nodeOwners(1), localrc)
+    call C_ESMC_MeshAddNodes(ESMF_MeshCreate1Part%this, num_nodes, nodeIds, nodeCoords, &
+                             nodeOwners, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     num_elems = size(elementTypes)
     call C_ESMC_MeshAddElements(ESMF_MeshCreate1Part%this, num_elems, &
-                             elementIds(1), elementTypes(1), &
-                             elementConn(1), localrc)
+                             elementIds, elementTypes, &
+                             elementConn, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -429,7 +429,7 @@ module ESMF_MeshMod
     !call ESMF_DistGridPrint(ESMF_MeshCreate1Part%nodal_distgrid)
     !ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, ESMF_MeshCreate1Part%nodal_distgrid, rc)
 
-    rc = localrc
+    if (present (rc)) rc = localrc
     
   end function ESMF_MeshCreate1Part
 !------------------------------------------------------------------------------
@@ -513,7 +513,7 @@ module ESMF_MeshMod
 
       ESMF_INIT_SET_DELETED(mesh)
 
-      rc = localrc
+      if (present (rc)) rc = localrc
 
     end subroutine ESMF_MeshDestroy
 
@@ -551,7 +551,7 @@ module ESMF_MeshMod
 
       ! If already free, fine just return
       if (mesh%mesh_freed .eq. 1) then
-        rc = ESMF_SUCCESS
+        if (present (rc)) rc = ESMF_SUCCESS
         return
       endif
 
@@ -560,7 +560,7 @@ module ESMF_MeshMod
 
       mesh%mesh_freed = 1
 
-      rc = localrc
+      if (present (rc)) rc = localrc
 
     end subroutine ESMF_MeshFreeMemory
 
