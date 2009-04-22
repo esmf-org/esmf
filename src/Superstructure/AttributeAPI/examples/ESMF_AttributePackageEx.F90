@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.6 2009/04/17 22:40:47 rokuingh Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.7 2009/04/22 04:12:24 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
 program ESMF_AttributePackageEx
 
 !==============================================================================
-!ESMFdisable_EXAMPLE        String used by test script to count examples.
+!ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
 !BOE
@@ -127,54 +127,54 @@ program ESMF_AttributePackageEx
       attrList(2) = 'mask'
 
       ! DPEDT
-      call ESMF_AttributeAdd(DPEDT, attrList=attrList, convention=convCC, &
-        purpose=purpGen, count=2, rc=rc)
       call ESMF_AttributeAdd(DPEDT, convention=convESMF, purpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(DPEDT, convention=convCC, purpose=purpGen, &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
 
       ! DTDT
-      call ESMF_AttributeAdd(DTDT, attrList=attrList, convention=convCC, &
-        purpose=purpGen, count=2, rc=rc)
       call ESMF_AttributeAdd(DTDT, convention=convESMF, purpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(DTDT, convention=convCC, purpose=purpGen, &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
 
       ! DUDT
-      call ESMF_AttributeAdd(DUDT, attrList=attrList, convention=convCC, &
-        purpose=purpGen, count=2, rc=rc)
       call ESMF_AttributeAdd(DUDT, convention=convESMF, purpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(DUDT, convention=convCC, purpose=purpGen, &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
 
       ! DVDT
-      call ESMF_AttributeAdd(DVDT, attrList=attrList, convention=convCC, &
-        purpose=purpGen, count=2, rc=rc)
       call ESMF_AttributeAdd(DVDT, convention=convESMF, purpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(DVDT, convention=convCC, purpose=purpGen, &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
 
       ! PHIS
-      call ESMF_AttributeAdd(PHIS, attrList=attrList, convention=convCC, &
-        purpose=purpGen, count=2, rc=rc)
       call ESMF_AttributeAdd(PHIS, convention=convESMF, purpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(PHIS, convention=convCC, purpose=purpGen, &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
 
       ! QTR
-      call ESMF_AttributeAdd(QTR, attrList=attrList, convention=convCC, &
-        purpose=purpGen, count=2, rc=rc)
       call ESMF_AttributeAdd(QTR, convention=convESMF, purpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(QTR, convention=convCC, purpose=purpGen, &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
 
       ! CNV
-      call ESMF_AttributeAdd(CNV, attrList=attrList, convention=convCC, &
-        purpose=purpGen, count=2, rc=rc)
       call ESMF_AttributeAdd(CNV, convention=convESMF, purpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(CNV, convention=convCC, purpose=purpGen, &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
 
       ! CONVCPT
-      call ESMF_AttributeAdd(CONVCPT, attrList=attrList, convention=convCC, &
-        purpose=purpGen, count=2, rc=rc)
       call ESMF_AttributeAdd(CONVCPT, convention=convESMF, purpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(CONVCPT, convention=convCC, purpose=purpGen, &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
 
       ! CONVKE
-      call ESMF_AttributeAdd(CONVKE, attrList=attrList, convention=convCC, &
-        purpose=purpGen, count=2, rc=rc)
       call ESMF_AttributeAdd(CONVKE, convention=convESMF, purpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(CONVKE, convention=convCC, purpose=purpGen, &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
 
       ! CONVPHI
-      call ESMF_AttributeAdd(CONVPHI, attrList=attrList, convention=convCC, &
-        purpose=purpGen, count=2, rc=rc)
       call ESMF_AttributeAdd(CONVPHI, convention=convESMF, purpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(CONVPHI, convention=convCC, purpose=purpGen, &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
       
       call ESMF_AttributeAdd(gridcomp, convention=convESMF, &
         purpose=purpGen, rc=rc)
@@ -406,47 +406,26 @@ program ESMF_AttributePackageEx
 !EOE
 
 !BOC
-      name1 = 'discipline'
-      name2 = 'physical_domain'
-      name3 = 'agency'
-      name4 = 'institution'
-      name5 = 'author'
-      name6 = 'coding_language'
-      name7 = 'model_component_framework'
-      name8 = 'name'
-      name9 = 'full_name'
-      name10 = 'version'
-      value1 = 'Atmosphere'
-      value2 = 'Earth system'
-      value3 = 'NASA'
-      value4 = 'Global Modeling and Assimilation Office (GMAO)'
-      value5 = 'Max Suarez'
-      value6 = 'Fortran 90'
-      value7 = 'ESMF (Earth System Modeling Framework)'
-      value8 = 'GEOS-5 FV dynamical core'
-      value9 = 'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core'
-      value10 = 'GEOSagcm-EROS-beta7p12'
-      
-      call ESMF_AttributeSet(gridcomp, name1, value1, convention=convESMF, &
-        purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name2, value2, convention=convESMF, &
-        purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name3, value3, convention=convESMF, &
-        purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name4, value4, convention=convESMF, &
-        purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name5, value5, convention=convESMF, &
-        purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name6, value6, convention=convESMF, &
-        purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name7, value7, convention=convESMF, &
-        purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name8, value8, convention=convESMF, &
-        purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name9, value9, convention=convESMF, &
-        purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name10, value10, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp, 'agency', 'NASA', &
+      convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp, 'author', 'Max Suarez', &
+      convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp, 'coding_language', &
+      'Fortran 90', convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp, 'discipline', &
+      'Atmosphere', convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp, 'full_name', &
+      'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core', &
+        convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp, 'model_component_framework', &
+      'ESMF (Earth System Modeling Framework)', &
+      convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp, 'name', 'GEOS-5 FV dynamical core', &
+      convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp, 'physical_domain', &
+      'Earth system', convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp, 'version', &
+      'GEOSagcm-EROS-beta7p12', convention=convESMF, purpose=purpGen, rc=rc)
 !EOC
 
 !BOE

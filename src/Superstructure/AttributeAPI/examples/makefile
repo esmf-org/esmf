@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2009/04/17 22:40:47 rokuingh Exp $
+# $Id: makefile,v 1.7 2009/04/22 04:12:24 rokuingh Exp $
 
 ALL:      build_examples
 run:      run_examples
@@ -8,17 +8,17 @@ LOCDIR	  = src/Superstructure/AttributeAPI/examples
 
 
 EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_AttributeEx \
-                    $(ESMF_EXDIR)/ESMF_AttributeUpdateEx
-#		    $(ESMF_EXDIR)/ESMF_AttributePackageEx 
+		    $(ESMF_EXDIR)/ESMF_AttributePackageEx 
+#                    $(ESMF_EXDIR)/ESMF_AttributeUpdateEx
 
 ESMF_EXAMPLE_AttributeUpdate_OBJS = ESMF_AttributeUpdateMod.o
 
 EXAMPLES_RUN      = run_ESMF_AttributeEx \
-                    run_ESMF_AttributeUpdateEx
-#		    run_ESMF_AttributePackageEx \
+		    run_ESMF_AttributePackageEx 
+#                    run_ESMF_AttributeUpdateEx
 
-EXAMPLES_RUN_UNI  = run_ESMF_AttributeEx_uni
-#                    run_ESMF_AttributePackageEx_uni
+EXAMPLES_RUN_UNI  = run_ESMF_AttributeEx_uni \
+                    run_ESMF_AttributePackageEx_uni
 
 ESMF_AttributeUpdateEx.o : $(ESMF_EXAMPLE_AttributeUpdate_OBJS)
 

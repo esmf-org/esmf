@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFieldUTest.F90,v 1.13 2009/04/17 22:40:47 rokuingh Exp $
+! $Id: ESMF_AttributeFieldUTest.F90,v 1.14 2009/04/22 04:12:24 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFieldUTest.F90,v 1.13 2009/04/17 22:40:47 rokuingh Exp $'
+      '$Id: ESMF_AttributeFieldUTest.F90,v 1.14 2009/04/22 04:12:24 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -907,9 +907,7 @@ program ESMF_AttributeFieldUTest
       write(name, *) "Setting an Attribute in an Attribute package on a Field Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      
-      call ESMF_FieldPrint(field)
-      
+            
 #ifdef ESMF_TESTEXHAUSTIVE
 
     !-------------------------------------------------------------------------

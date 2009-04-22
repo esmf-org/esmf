@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.9 2009/04/17 22:40:47 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.10 2009/04/22 04:12:24 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -252,7 +252,7 @@ module ESMF_AttributeUpdateMod
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name1,name2,name3,name4,value1,value2, &
-                                   value3,value4,convESG,purpGen,convCC
+                                   value3,value4,convESMF,purpGen,convCC
     type(ESMF_ArraySpec)        :: arrayspec
     type(ESMF_Grid)             :: grid
     type(ESMF_Field)            :: DPEDT,DTDT,DUDT,DVDT,PHIS,QTR,CNV,CONVCPT, &
@@ -287,7 +287,7 @@ module ESMF_AttributeUpdateMod
 ! {\tt ESMF\_AttributeUpdate()} call.  There will be more on this subject when we get
 ! to the coupler Component.
 !EOE
-
+#ifdef doodle
 !BOC
     convCC = 'CustomConvention'
     attrList(1) = 'coordinates'
@@ -299,6 +299,7 @@ module ESMF_AttributeUpdateMod
       convention=convCC, purpose=purpGen, rc=rc)
     call ESMF_AttributeSet(exportState, name='mask', value='yes', &
       convention=convCC, purpose=purpGen, rc=rc)
+#endif
     call ESMF_AttributeSet(exportState, name="TESTESTEST", &
                            value="SUCCESUCCESUCCES", rc=status)
     if (status .ne. ESMF_SUCCESS) return
@@ -311,7 +312,8 @@ module ESMF_AttributeUpdateMod
 !EOE
   
 !BOC
-    convESG = 'ESG'
+    convCC = 'CustomConvention'
+    convESMF = 'ESMF'
     purpGen = 'general'
     name1 = 'name'
     name2 = 'standard_name'
@@ -325,15 +327,15 @@ module ESMF_AttributeUpdateMod
       
     DPEDT = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=status)
-    call ESMF_AttributeAdd(DPEDT, convention=convESG, purpose=purpGen, &
+    call ESMF_AttributeAdd(DPEDT, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(DPEDT, name1, value1, convention=convESG, &
+    call ESMF_AttributeSet(DPEDT, name1, value1, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(DPEDT, name2, value2, convention=convESG, &
+    call ESMF_AttributeSet(DPEDT, name2, value2, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(DPEDT, name3, value3, convention=convESG, &
+    call ESMF_AttributeSet(DPEDT, name3, value3, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(DPEDT, name4, value4, convention=convESG, &
+    call ESMF_AttributeSet(DPEDT, name4, value4, convention=convESMF, &
       purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
@@ -344,15 +346,15 @@ module ESMF_AttributeUpdateMod
 
     DTDT = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=status)
-    call ESMF_AttributeAdd(DTDT, convention=convESG, purpose=purpGen, &
+    call ESMF_AttributeAdd(DTDT, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(DTDT, name1, value1, convention=convESG, &
+    call ESMF_AttributeSet(DTDT, name1, value1, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(DTDT, name2, value2, convention=convESG, &
+    call ESMF_AttributeSet(DTDT, name2, value2, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(DTDT, name3, value3, convention=convESG, &
+    call ESMF_AttributeSet(DTDT, name3, value3, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(DTDT, name4, value4, convention=convESG, &
+    call ESMF_AttributeSet(DTDT, name4, value4, convention=convESMF, &
       purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
@@ -363,15 +365,15 @@ module ESMF_AttributeUpdateMod
       
     DUDT = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=status)
-    call ESMF_AttributeAdd(DUDT, convention=convESG, purpose=purpGen, &
+    call ESMF_AttributeAdd(DUDT, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(DUDT, name1, value1, convention=convESG, &
+    call ESMF_AttributeSet(DUDT, name1, value1, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(DUDT, name2, value2, convention=convESG, &
+    call ESMF_AttributeSet(DUDT, name2, value2, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(DUDT, name3, value3, convention=convESG, &
+    call ESMF_AttributeSet(DUDT, name3, value3, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(DUDT, name4, value4, convention=convESG, &
+    call ESMF_AttributeSet(DUDT, name4, value4, convention=convESMF, &
       purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
     
@@ -382,15 +384,15 @@ module ESMF_AttributeUpdateMod
       
     DVDT = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=status)
-    call ESMF_AttributeAdd(DVDT, convention=convESG, purpose=purpGen, &
+    call ESMF_AttributeAdd(DVDT, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(DVDT, name1, value1, convention=convESG, &
+    call ESMF_AttributeSet(DVDT, name1, value1, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(DVDT, name2, value2, convention=convESG, &
+    call ESMF_AttributeSet(DVDT, name2, value2, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(DVDT, name3, value3, convention=convESG, &
+    call ESMF_AttributeSet(DVDT, name3, value3, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(DVDT, name4, value4, convention=convESG, &
+    call ESMF_AttributeSet(DVDT, name4, value4, convention=convESMF, &
       purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
@@ -401,15 +403,15 @@ module ESMF_AttributeUpdateMod
       
     PHIS = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=status)
-    call ESMF_AttributeAdd(PHIS, convention=convESG, purpose=purpGen, &
+    call ESMF_AttributeAdd(PHIS, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(PHIS, name1, value1, convention=convESG, &
+    call ESMF_AttributeSet(PHIS, name1, value1, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(PHIS, name2, value2, convention=convESG, &
+    call ESMF_AttributeSet(PHIS, name2, value2, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(PHIS, name3, value3, convention=convESG, &
+    call ESMF_AttributeSet(PHIS, name3, value3, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(PHIS, name4, value4, convention=convESG, &
+    call ESMF_AttributeSet(PHIS, name4, value4, convention=convESMF, &
       purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
@@ -420,15 +422,15 @@ module ESMF_AttributeUpdateMod
       
     QTR = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=status)
-    call ESMF_AttributeAdd(QTR, convention=convESG, purpose=purpGen, &
+    call ESMF_AttributeAdd(QTR, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(QTR, name1, value1, convention=convESG, &
+    call ESMF_AttributeSet(QTR, name1, value1, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(QTR, name2, value2, convention=convESG, &
+    call ESMF_AttributeSet(QTR, name2, value2, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(QTR, name3, value3, convention=convESG, &
+    call ESMF_AttributeSet(QTR, name3, value3, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(QTR, name4, value4, convention=convESG, &
+    call ESMF_AttributeSet(QTR, name4, value4, convention=convESMF, &
       purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
@@ -439,15 +441,15 @@ module ESMF_AttributeUpdateMod
       
     CNV = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=status)
-    call ESMF_AttributeAdd(CNV, convention=convESG, purpose=purpGen, &
+    call ESMF_AttributeAdd(CNV, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(CNV, name1, value1, convention=convESG, &
+    call ESMF_AttributeSet(CNV, name1, value1, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(CNV, name2, value2, convention=convESG, &
+    call ESMF_AttributeSet(CNV, name2, value2, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(CNV, name3, value3, convention=convESG, &
+    call ESMF_AttributeSet(CNV, name3, value3, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(CNV, name4, value4, convention=convESG, &
+    call ESMF_AttributeSet(CNV, name4, value4, convention=convESMF, &
       purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
@@ -458,15 +460,15 @@ module ESMF_AttributeUpdateMod
       
     CONVCPT = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=status)
-    call ESMF_AttributeAdd(CONVCPT, convention=convESG, purpose=purpGen, &
+    call ESMF_AttributeAdd(CONVCPT, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(CONVCPT, name1, value1, convention=convESG, &
+    call ESMF_AttributeSet(CONVCPT, name1, value1, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(CONVCPT, name2, value2, convention=convESG, &
+    call ESMF_AttributeSet(CONVCPT, name2, value2, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(CONVCPT, name3, value3, convention=convESG, &
+    call ESMF_AttributeSet(CONVCPT, name3, value3, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(CONVCPT, name4, value4, convention=convESG, &
+    call ESMF_AttributeSet(CONVCPT, name4, value4, convention=convESMF, &
       purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
@@ -477,15 +479,15 @@ module ESMF_AttributeUpdateMod
       
     CONVKE = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=status)
-    call ESMF_AttributeAdd(CONVKE, convention=convESG, purpose=purpGen, &
+    call ESMF_AttributeAdd(CONVKE, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(CONVKE, name1, value1, convention=convESG, &
+    call ESMF_AttributeSet(CONVKE, name1, value1, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(CONVKE, name2, value2, convention=convESG, &
+    call ESMF_AttributeSet(CONVKE, name2, value2, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(CONVKE, name3, value3, convention=convESG, &
+    call ESMF_AttributeSet(CONVKE, name3, value3, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(CONVKE, name4, value4, convention=convESG, &
+    call ESMF_AttributeSet(CONVKE, name4, value4, convention=convESMF, &
       purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
@@ -496,15 +498,15 @@ module ESMF_AttributeUpdateMod
       
     CONVPHI = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=status)
-    call ESMF_AttributeAdd(CONVPHI, convention=convESG, purpose=purpGen, &
+    call ESMF_AttributeAdd(CONVPHI, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(CONVPHI, name1, value1, convention=convESG, &
+    call ESMF_AttributeSet(CONVPHI, name1, value1, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(CONVPHI, name2, value2, convention=convESG, &
+    call ESMF_AttributeSet(CONVPHI, name2, value2, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(CONVPHI, name3, value3, convention=convESG, &
+    call ESMF_AttributeSet(CONVPHI, name3, value3, convention=convESMF, &
       purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(CONVPHI, name4, value4, convention=convESG, &
+    call ESMF_AttributeSet(CONVPHI, name4, value4, convention=convESMF, &
       purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 !EOC
@@ -639,7 +641,7 @@ module ESMF_AttributeUpdateMod
 !BOC
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet, k
-    character(ESMF_MAXSTR)      :: name2,value2,convESG,convCC,purpGen,name3
+    character(ESMF_MAXSTR)      :: name2,value2,convESMF,convCC,purpGen,name3
     character(ESMF_MAXSTR),dimension(2) :: attrList
     type(ESMF_Field)            :: field
     type(ESMF_FieldBundle)      :: fbundle
@@ -647,7 +649,7 @@ module ESMF_AttributeUpdateMod
 
     rc = ESMF_SUCCESS
 
-    convESG = 'ESG'
+    convESMF = 'ESMF'
     convCC = 'CustomConvention'
     purpGen = 'general'
     name2 = 'standard_name'
@@ -682,19 +684,18 @@ module ESMF_AttributeUpdateMod
     do k = 1, 10
         call ESMF_FieldBundleGet(fbundle, fieldIndex=k, field=field, rc=rc)
         if (rc/=ESMF_SUCCESS) return
-        call ESMF_AttributeSet(field, name2, value2, convention=convESG, &
-      purpose=purpGen, rc=status)
+        call ESMF_AttributeSet(field, name2, value2, convention=convESMF, &
+          purpose=purpGen, rc=status)
         if (rc/=ESMF_SUCCESS) return
-        call ESMF_AttributeAdd(field, attrList=attrList, convention=convCC, &
-      purpose=purpGen, &
-          count=2, nestConvention=convESG, nestPurpose=purpGen, rc=rc)
+        call ESMF_AttributeAdd(field, convention=convCC, purpose=purpGen, &
+          attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
         call ESMF_AttributeSet(field, name='coordinates', value='latlon', &
           convention=convCC, purpose=purpGen, rc=rc)
         call ESMF_AttributeSet(field, name='mask', value='yes', &
           convention=convCC, purpose=purpGen, rc=rc)
         if (rc/=ESMF_SUCCESS) return
-        call ESMF_AttributeRemove(field, name=name3, convention=convESG, &
-      purpose=purpGen, rc=status)
+        call ESMF_AttributeRemove(field, name=name3, convention=convESMF, &
+          purpose=purpGen, rc=status)
         if (rc/=ESMF_SUCCESS) return
     enddo
 !EOC
@@ -739,7 +740,6 @@ module ESMF_AttributeUpdateMod
     
     type(ESMF_Array)            :: array
     integer, dimension(2)       :: rootList
-    character(ESMF_MAXSTR)      :: convESG,purpGen
 
     rc = ESMF_SUCCESS
 
@@ -805,7 +805,7 @@ module ESMF_AttributeUpdateMod
 !BOC
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
-    character(ESMF_MAXSTR)      :: convESG,purpGen
+    character(ESMF_MAXSTR)      :: convESMF,purpGen
     
     rc = ESMF_SUCCESS
 
@@ -814,13 +814,13 @@ module ESMF_AttributeUpdateMod
     call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
-    convESG = 'ESG'
+    convESMF = 'ESMF'
     purpGen = 'general'
 
     if (myPet .eq. 0) then
-      call ESMF_AttributeWrite(importState,convESG,purpGen, &
+      call ESMF_AttributeWrite(importState,convESMF,purpGen, &
         attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-      call ESMF_AttributeWrite(importState,convESG,purpGen,rc=rc)
+      call ESMF_AttributeWrite(importState,convESMF,purpGen,rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
     endif
 !EOC

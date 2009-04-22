@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.10 2009/03/28 01:35:11 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.11 2009/04/22 04:12:24 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -12,7 +12,7 @@
 
 
 !==============================================================================
-!ESMF_MULTI_PROC_EXAMPLE        String used by test script to count examples.
+!ESMFdisable_MULTI_PROC_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
 program ESMF_AttributeUpdateEx
@@ -75,7 +75,7 @@ implicit none
       character(ESMF_MAXSTR)  :: name1,name2,name3,name4,name5,name6,name7, &
                                  name8, name9, name10, value1,value2,value3, &
                                  value4,value5,value6,value7,value8,value9, &
-                                 value10,convESG,purpGen
+                                 value10,convESMF,purpGen
 
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, rc=rc)
@@ -145,51 +145,29 @@ implicit none
 !EOE
 
 !BOC
-      convESG = 'ESG'
+      convESMF = 'ESMF'
       purpGen = 'general'
-      name1 = 'discipline'
-      name2 = 'physical_domain'
-      name3 = 'agency'
-      name4 = 'institution'
-      name5 = 'author'
-      name6 = 'coding_language'
-      name7 = 'model_component_framework'
-      name8 = 'name'
-      name9 = 'full_name'
-      name10 = 'version'
-      value1 = 'Atmosphere'
-      value2 = 'Earth system'
-      value3 = 'NASA'
-      value4 = 'Global Modeling and Assimilation Office (GMAO)'
-      value5 = 'Max Suarez'
-      value6 = 'Fortran 90'
-      value7 = 'ESMF (Earth System Modeling Framework)'
-      value8 = 'GEOS-5 FV dynamical core'
-      value9 = 'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core'
-      value10 = 'GEOSagcm-EROS-beta7p12'
-  
-      call ESMF_AttributeAdd(gridcomp1, convention=convESG, &
-        purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp1, name1, value1, &
-        convention=convESG, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp1, name2, value2, &
-        convention=convESG, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp1, name3, value3, &
-        convention=convESG, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp1, name4, value4, &
-        convention=convESG, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp1, name5, value5, &
-        convention=convESG, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp1, name6, value6, &
-        convention=convESG, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp1, name7, value7, &
-        convention=convESG, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp1, name8, value8, &
-        convention=convESG, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp1, name9, value9, &
-        convention=convESG, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(gridcomp1, name10, value10, &
-        convention=convESG, purpose=purpGen, rc=rc)
+    call ESMF_AttributeAdd(gridcomp1, convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp1, 'agency', 'NASA', &
+      convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp1, 'author', 'Max Suarez', &
+      convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp1, 'coding_language', &
+      'Fortran 90', convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp1, 'discipline', &
+      'Atmosphere', convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp1, 'full_name', &
+      'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core', &
+        convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp1, 'model_component_framework', &
+      'ESMF (Earth System Modeling Framework)', &
+      convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp1, 'name', 'GEOS-5 FV dynamical core', &
+      convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp1, 'physical_domain', &
+      'Earth system', convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp1, 'version', &
+      'GEOSagcm-EROS-beta7p12', convention=convESMF, purpose=purpGen, rc=rc)
       
       call ESMF_AttributeLink(gridcomp1, c1exp, rc=rc) 
 !EOC
