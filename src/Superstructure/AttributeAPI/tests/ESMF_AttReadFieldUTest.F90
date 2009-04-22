@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadFieldUTest.F90,v 1.1 2009/04/01 05:45:12 eschwab Exp $
+! $Id: ESMF_AttReadFieldUTest.F90,v 1.2 2009/04/22 05:49:16 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_AttReadFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttReadFieldUTest.F90,v 1.1 2009/04/01 05:45:12 eschwab Exp $'
+      '$Id: ESMF_AttReadFieldUTest.F90,v 1.2 2009/04/22 05:49:16 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -49,7 +49,7 @@ program ESMF_AttReadFieldUTest
       ! local variables
       type(ESMF_Field)       :: field
       character(ESMF_MAXSTR) :: attrname, attrvalue, outChar
-!      character(ESMF_MAXSTR) :: conv, purp
+      character(ESMF_MAXSTR) :: conv, purp
       logical                :: xercesNotPresent
       integer                :: rc
 
@@ -111,9 +111,10 @@ print *, 'rc = ', rc
       ! Get CF "name" Attribute from a Field Test
       attrname = 'name'
       attrvalue = 'DPEDT'
-      call ESMF_AttributeGet(field, name=attrname, value=outChar, rc=rc)
-!      call ESMF_AttributeGet(field, name=attrname, value=outChar, &
-!                             convention=conv, purpose=purp, rc=rc)
+      conv = 'CF'
+      purp = 'general'
+      call ESMF_AttributeGet(field, name=attrname, value=outChar, &
+                             convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting CF 'name' Attribute from a Field Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -122,16 +123,17 @@ print *, 'rc = ', rc
 print *, 'rc = ', rc
 print *, 'attrname = ', attrname
 print *, 'attrvalue = ', attrvalue
-print *, 'outChar = ', outChar
+print *, 'outChar = ', trim(outChar)
 
       !------------------------------------------------------------------------
       !EX_UTest
       ! Get CF "standard_name" Attribute from a Field Test
       attrname = 'standard_name'
       attrvalue = 'tendency_of_air_pressure'
-      call ESMF_AttributeGet(field, name=attrname, value=outChar, rc=rc)
-!      call ESMF_AttributeGet(field, name=attrname, value=outChar, &
-!                             convention=conv, purpose=purp, rc=rc)
+      conv = 'CF'
+      purp = 'extended'
+      call ESMF_AttributeGet(field, name=attrname, value=outChar, &
+                             convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting CF 'standard_name' Attribute from a Field Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -147,9 +149,10 @@ print *, 'outChar = ', outChar
       ! Get CF "long_name" Attribute from a Field Test
       attrname = 'long_name'
       attrvalue = 'Edge pressure tendency'
-      call ESMF_AttributeGet(field, name=attrname, value=outChar, rc=rc)
-!      call ESMF_AttributeGet(field, name=attrname, value=outChar, &
-!                             convention=conv, purpose=purp, rc=rc)
+      conv = 'CF'
+      purp = 'general'
+      call ESMF_AttributeGet(field, name=attrname, value=outChar, &
+                             convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting CF 'long_name' Attribute from a Field Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -165,9 +168,10 @@ print *, 'outChar = ', outChar
       ! Get CF "units" Attribute from a Field Test
       attrname = 'units'
       attrvalue = 'Pa s-1'
-      call ESMF_AttributeGet(field, name=attrname, value=outChar, rc=rc)
-!      call ESMF_AttributeGet(field, name=attrname, value=outChar, &
-!                             convention=conv, purpose=purp, rc=rc)
+      conv = 'CF'
+      purp = 'general'
+      call ESMF_AttributeGet(field, name=attrname, value=outChar, &
+                             convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting CF 'units' Attribute from a Field Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
