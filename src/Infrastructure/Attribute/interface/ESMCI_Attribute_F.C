@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.17 2009/04/22 04:16:38 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.18 2009/04/22 05:42:03 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.17 2009/04/22 04:16:38 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.18 2009/04/22 05:42:03 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -905,7 +905,7 @@ extern "C" {
     return;
   }
 
-  status = ESMC_CtoF90string(const_cast<char*> (cvalue.c_str()), value, cvalue.size());
+  status = ESMC_CtoF90string(const_cast<char*> (cvalue.c_str()), value, vlen);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
