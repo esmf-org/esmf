@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.41 2009/04/17 22:40:47 rokuingh Exp $
+! $Id: user_model1.F90,v 1.42 2009/04/22 04:18:18 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -123,6 +123,7 @@ module user_model1
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
+#ifdef doodle
     convCC = 'CustomConvention'
     purpGen = 'general'
 
@@ -139,9 +140,9 @@ module user_model1
     call ESMF_AttributeSet(exportState, name="TESTESTEST", &
                            value="SUCCESUCCESUCCES", rc=status)
     if (status .ne. ESMF_SUCCESS) return
-
+#endif
     ! Initialize variables
-    conv = 'CF'
+    conv = 'ESMF'
     purp = 'general'
     name1 = 'name'
     name2 = 'standard_name'
@@ -320,42 +321,28 @@ module user_model1
     call ESMF_StateAdd(exportState, fieldbundle=fieldbundle, rc=status)
     if (status .ne. ESMF_SUCCESS) return
     
-    ! add Attribute packages to the Gridded Components and link the States
-    conv = 'CF'
-    purp = 'general'
-    name1 = 'discipline'
-    name2 = 'physical_domain'
-    name3 = 'agency'
-    name4 = 'institution'
-    name5 = 'author'
-    name6 = 'coding_language'
-    name7 = 'model_component_framework'
-    name8 = 'name'
-    name9 = 'full_name'
-    name10 = 'version'
-    value1 = 'Atmosphere'
-    value2 = 'Earth system'
-    value3 = 'NASA'
-    value4 = 'Global Modeling and Assimilation Office (GMAO)'
-    value5 = 'Max Suarez'
-    value6 = 'Fortran 90'
-    value7 = 'ESMF (Earth System Modeling Framework)'
-    value8 = 'GEOS-5 FV dynamical core'
-    value9 = 'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core'
-    value10 = 'GEOSagcm-EROS-beta7p12'
-  
     ! Add the Attribute package to comp
     call ESMF_AttributeAdd(comp, convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, name1, value1, convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, name2, value2, convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, name3, value3, convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, name4, value4, convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, name5, value5, convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, name6, value6, convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, name7, value7, convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, name8, value8, convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, name9, value9, convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, name10, value10, convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(comp, 'agency', 'NASA', &
+      convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(comp, 'author', 'Max Suarez', &
+      convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(comp, 'coding_language', &
+      'Fortran 90', convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(comp, 'discipline', &
+      'Atmosphere', convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(comp, 'full_name', &
+      'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core', &
+        convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(comp, 'model_component_framework', &
+      'ESMF (Earth System Modeling Framework)', &
+      convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(comp, 'name', 'GEOS-5 FV dynamical core', &
+      convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(comp, 'physical_domain', &
+      'Earth system', convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(comp, 'version', &
+      'GEOSagcm-EROS-beta7p12', convention=conv, purpose=purp, rc=rc)
     if (status .ne. ESMF_SUCCESS) return
     
   end subroutine user_init
@@ -382,7 +369,7 @@ module user_model1
     ! Initialize return code
     rc = ESMF_SUCCESS
 
-    conv = 'CF'
+    conv = 'ESMF'
     purp = 'general'
     name2 = 'standard_name'
     value2 = 'default_standard_name'

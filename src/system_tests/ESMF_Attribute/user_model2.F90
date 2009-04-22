@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.22 2009/03/26 03:28:20 theurich Exp $
+! $Id: user_model2.F90,v 1.23 2009/04/22 04:18:18 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -125,7 +125,7 @@ module user_model2
     if (status .ne. ESMF_SUCCESS) return
 
     ! Initialize variables
-    conv = 'CF'
+    conv = 'ESMF'
     purp = 'general'
 
     ! Write the Attribute info to esmf/test/testg/<platform>/ESMF_AttributeSTest.stdout
