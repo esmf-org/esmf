@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2009/04/01 05:45:58 eschwab Exp $ 
+# $Id: makefile,v 1.6 2009/04/22 05:50:37 eschwab Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -15,6 +15,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeGridCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeGridUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeStateUTest \
+		$(ESMF_TESTDIR)/ESMF_AttReadCplCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttReadGridCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttReadFieldUTest
 
@@ -27,6 +28,7 @@ TESTS_RUN     = RUN_ESMF_AttributeArrayUTest \
 		RUN_ESMF_AttributeGridCompUTest \
 		RUN_ESMF_AttributeGridUTest \
 		RUN_ESMF_AttributeStateUTest \
+		RUN_ESMF_AttReadCplCompUTest \
 		RUN_ESMF_AttReadGridCompUTest \
 		RUN_ESMF_AttReadFieldUTest
 
@@ -39,6 +41,7 @@ TESTS_RUN_UNI = RUN_ESMF_AttributeArrayUTestUNI \
 		RUN_ESMF_AttributeGridCompUTestUNI \
 		RUN_ESMF_AttributeGridUTestUNI \
 		RUN_ESMF_AttributeStateUTestUNI \
+		RUN_ESMF_AttReadCplCompUTestUNI \
 		RUN_ESMF_AttReadGridCompUTestUNI \
 		RUN_ESMF_AttReadFieldUTestUNI
 
@@ -79,6 +82,14 @@ RUN_ESMF_AttributeCplCompUTest:
 
 RUN_ESMF_AttributeCplCompUTestUNI:
 	$(MAKE) TNAME=AttributeCplComp NP=1 ftest
+
+RUN_ESMF_AttReadCplCompUTest:
+	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_cplcomp.xml $(ESMF_TESTDIR)
+	$(MAKE) TNAME=AttReadCplComp NP=4 ftest
+
+RUN_ESMF_AttReadCplCompUTestUNI:
+	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_cplcomp.xml $(ESMF_TESTDIR)
+	$(MAKE) TNAME=AttReadCplComp NP=1 ftest
 
 # --- DistGrid
 
