@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.C,v 1.4 2009/04/01 05:41:03 eschwab Exp $
+// $Id: ESMCI_IO.C,v 1.5 2009/04/22 05:36:54 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO.C,v 1.4 2009/04/01 05:41:03 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO.C,v 1.5 2009/04/22 05:36:54 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 #ifdef ESMF_XERCES
@@ -62,22 +62,28 @@ MySAX2Handler::MySAX2Handler(ESMCI::Attribute *attr) : DefaultHandler()
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MySAX2Handler::startElement()"
 
-void MySAX2Handler::startElement(const   XMLCh* const    uri,
-                            const   XMLCh* const    localname,
-                            const   XMLCh* const    qname,
-                            const   Attributes&     attrs)
+void MySAX2Handler::startElement(const XMLCh* const uri,
+                                 const XMLCh* const localname,
+                                 const XMLCh* const qname,
+                                 const Attributes&  attrs)
 {
     int status;
     char* msg1 = XMLString::transcode(uri);
     char* msg2 = XMLString::transcode(localname);
     char* msg3 = XMLString::transcode(qname);
-    cout << "I saw element: "<< msg1 << ", " << msg2 << ", "
-                             << msg3 << ", " << endl;
+    cout << "Start of element: "<< msg1 << ", " << msg2 << ", "
+                                << msg3 << ", " << endl;
     // remember this name to associate with the subsequent value callback
     //   to MySAX2Handler::characters()
     // TODO:  qname better than localname?
-    // TODO:  check length, use C++ string
-    strcpy(this->qname, msg3);
+    string cqname(msg3, strlen(msg3));
+    cqname.resize(cqname.find_last_not_of(" ")+1);
+    if (cqname == "model_component") {
+      this->object = "comp";
+    } else if (cqname == "variable") {
+      this->object = "field";
+    // TODO:  state, grid, others
+    } else this->qname = cqname;
 
     char* Qname=NULL;
     char* URI=NULL;
@@ -87,9 +93,9 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
 
     for (XMLSize_t i = 0; i < attrs.getLength(); i++) {
       Qname = XMLString::transcode(attrs.getQName(i));
-      URI = XMLString::transcode(attrs.getURI(i));
+      URI   = XMLString::transcode(attrs.getURI(i));
       local = XMLString::transcode(attrs.getLocalName(i));
-      type = XMLString::transcode(attrs.getType(i));
+      type  = XMLString::transcode(attrs.getType(i));
       value = XMLString::transcode(attrs.getValue(i));
       cout << "  Attributes: " << Qname << ", " << URI << ", " << local << ", "
                                << type << ", " << value << endl;
@@ -112,32 +118,55 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
           cvalue = '\0';
       }
 
-      // Set the attribute on the object.
-      status = this->attr->AttributeSet(cname, &cvalue);
+      if (cname == "convention") {
+        this->convention = value;
+      }
+      if (cname == "purpose") {
+        this->purpose = value;
+      }
+      
+      // Set the attribute on the object, if neither convention nor purpose
+      if (cname != "convention" && cname != "purpose") {
+        if (!this->convention.empty() && !this->purpose.empty()) {
+          status = this->attr->AttPackSet(cname, ESMC_TYPEKIND_CHARACTER, 1,
+                                          &cvalue, this->convention,
+                                                   this->purpose, 
+                                                   this->object);
+        } else {
+          // TODO:  handle one or the other (xor) of conv, purp (error) ?
+          status = this->attr->AttributeSet(cname, &cvalue);
+        }
+        if (status != ESMF_SUCCESS) {
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                               "failed setting attribute value", &status);
+        }
+      }
+    }
 
-      // TODO: the following is based on F90->C->C++ glue code call for F90
-      //    ESMF_AttributeSet(gridcomp, ...), which appears not to work;
-      //    produces garbage chars appended after good chars when retrieved
-      //    from F90 via ESMF_AttributeGet().
-     // status = this->attr->AttPackSet(cname, ESMC_TYPEKIND_CHARACTER, 1, 
-     //                                      &cvalue, "ESG", "general", "comp");
-
+    // Create attribute package, if just now specified
+    if (cqname == "attribute_package" && 
+        !convention.empty() && !purpose.empty()) {
+      cout << "creating attribute package, " << convention << ", "
+                                             << purpose << endl;
+      status = attr->AttPackCreateStandard(convention, purpose, object);
+      cout << "AttPackCreateStandard() status = " << status << endl;
       if (status != ESMF_SUCCESS) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                             "failed setting attribute value", &status);
+                             "failed creating attribute package", &status);
       }
     }
 
     if (value != NULL) XMLString::release(&value);
-    if (type != NULL) XMLString::release(&type);
+    if (type  != NULL) XMLString::release(&type);
     if (local != NULL) XMLString::release(&local);
-    if (URI != NULL) XMLString::release(&URI);
+    if (URI   != NULL) XMLString::release(&URI);
     if (Qname != NULL) XMLString::release(&Qname);
 
     XMLString::release(&msg3);
     XMLString::release(&msg2);
     XMLString::release(&msg1);
-}
+
+} // MySAX2Handler::startElement()
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MySAX2Handler::characters()"
@@ -152,41 +181,69 @@ void MySAX2Handler::characters(const XMLCh *const chars,
       cout << "      characters: "<< msg << endl;
       cout << "      length: "<< length << " characters" << endl;
 
-    string cname(this->qname, strlen(this->qname));
-    string cvalue(msg, length);
-    cname.resize(cname.find_last_not_of(" ")+1);
-    cvalue.resize(cvalue.find_last_not_of(" ")+1);
+      string cvalue(msg, length);
+      cvalue.resize(cvalue.find_last_not_of(" ")+1);
 
-    if (cname.empty()) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                           "bad attribute name conversion", &status);
-        //if (rc) *rc = status;  TODO
-        return;
-    }
+      if (this->qname.empty()) {
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "no attribute name to associate value to", &status);
+          //if (rc) *rc = status;  TODO
+          return;
+      }
  
-    if (cvalue.empty()) {
-        ESMC_LogDefault.Write("Attribute has an empty value argument",
-                                ESMC_LOG_INFO);
-        cvalue = '\0';
-    }
+      if (cvalue.empty()) {
+          ESMC_LogDefault.Write("Attribute has an empty value argument",
+                                 ESMC_LOG_INFO);
+          cvalue = '\0';
+      }
 
-      // Set the attribute on the object.
-      status = this->attr->AttributeSet(cname, &cvalue);
-
-      // TODO: the following is based on F90->C->C++ glue code call for F90
-      //    ESMF_AttributeSet(gridcomp, ...), which appears not to work;
-      //    produces garbage chars appended after good chars when retrieved
-      //    from F90 via ESMF_AttributeGet().
-     // status = this->attr->AttPackSet(cname, ESMC_TYPEKIND_CHARACTER, 1, 
-     //                                      &cvalue, "ESG", "general", "comp");
-
+      // Set the attribute on the object
+      if (!this->convention.empty() && !this->purpose.empty()) {
+        status = this->attr->AttPackSet(this->qname, ESMC_TYPEKIND_CHARACTER, 1,
+                                        &cvalue, this->convention,
+                                                 this->purpose, 
+                                                 this->object);
+      } else {
+        // TODO:  handle one or the other (xor) of conv, purp (error) ?
+        status = this->attr->AttributeSet(this->qname, &cvalue);
+      }
       if (status != ESMF_SUCCESS) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                              "failed setting attribute value", &status);
       }
     }
     XMLString::release(&msg);
-}
+
+} // MySAX2Handler::characters
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MySAX2Handler::endElement()"
+
+void MySAX2Handler::endElement(const XMLCh* const uri,
+                               const XMLCh* const localname,
+                               const XMLCh* const qname)
+{
+    int status;
+    char* msg1 = XMLString::transcode(uri);
+    char* msg2 = XMLString::transcode(localname);
+    char* msg3 = XMLString::transcode(qname);
+    cout << "End of element: "<< msg1 << ", " << msg2 << ", "
+                              << msg3 << ", " << endl;
+    // TODO:  qname better than localname?
+    this->qname.clear();
+
+    // if end of attribute package, clear convention, purpose and object type
+    if (strncmp(msg3, "attribute_package", 17) == 0) {
+      convention.clear();
+      purpose.clear();
+      object.clear();
+    }
+
+    XMLString::release(&msg3);
+    XMLString::release(&msg2);
+    XMLString::release(&msg1);
+
+} // MySAX2Handler::endElement()
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MySAX2Handler::fatalError()"
@@ -194,12 +251,13 @@ void MySAX2Handler::characters(const XMLCh *const chars,
 void MySAX2Handler::fatalError(const SAXParseException& exception)
 {
     char* message = XMLString::transcode(exception.getMessage());
-    cout << "Fatal Error: " << message
+    cout << "SAX XML Fatal Error: " << message
          << " at line: " << exception.getLineNumber()
          << endl;
     // TODO:  proper ESMC_Log* call
     XMLString::release(&message);
-}
+
+} // MySAX2Handler::fatalError()
 
 #endif
 
@@ -395,8 +453,8 @@ int IO::count=0;
 
     try {
         // Xerces C++ SAX2 API reads the XML file, producing callbacks to
-        //   MySAX2Handler::startElement() and MySAX2Handler::characters()
-        //   for each XML element
+        //   MySAX2Handler::startElement(), MySAX2Handler::characters(), and
+        //   MySAX2Handler::endElement() for each XML element
         parser->parse(this->fileName); 
     }
     catch (const XMLException& toCatch) {
@@ -485,6 +543,7 @@ int IO::count=0;
  #define ESMC_METHOD "ESMCI::IO() native constructor"
 
     attr = attribute;
+    attr->ESMC_Print(); // TODO: for debug, comment out
     // create default name "IONNN"
     id = ++count;  // TODO: inherit from ESMC_Base class
     sprintf(name, "IO%3.3d\0", id);

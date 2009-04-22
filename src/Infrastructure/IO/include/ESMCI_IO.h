@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.h,v 1.3 2009/03/25 05:57:28 eschwab Exp $
+// $Id: ESMCI_IO.h,v 1.4 2009/04/22 05:36:54 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -46,17 +46,34 @@
  class MySAX2Handler : public DefaultHandler {
  private:
     ESMCI::Attribute* attr;
-    char qname[ESMF_MAXSTR];
+    string qname;
+    string convention;
+    string purpose;
+    string object;
 
  public:
      void startElement(
-         const   XMLCh* const    uri,
-         const   XMLCh* const    localname,
-         const   XMLCh* const    qname,
-         const   Attributes&     attrs
+         const XMLCh* const uri,
+         const XMLCh* const localname,
+         const XMLCh* const qname,
+         const Attributes&  attrs
      );
-     void characters(const XMLCh *const chars, const XMLSize_t length);
-     void fatalError(const SAXParseException&);
+
+     void characters(
+         const XMLCh *const chars,
+         const XMLSize_t    length
+     );
+
+     void endElement(
+         const XMLCh *const uri,
+         const XMLCh *const localname,
+         const XMLCh *const qname	 
+     ); 
+
+     void fatalError(
+         const SAXParseException&
+     );
+
      MySAX2Handler(ESMCI::Attribute *attr);
  };
 #endif
@@ -145,7 +162,7 @@
     int ESMCI_IODestroy(IO **io);
 
     // friend to restore state  TODO ?
-    //Clock *ESMCI_IOReadRestart(int nameLen,
+    //IO *ESMCI_IOReadRestart(int nameLen,
                                    //const char*  name=0,
                                    //ESMC_IOSpec* iospec=0,
                                    //int*         rc=0);
