@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.16 2009/04/17 22:40:46 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.17 2009/04/22 04:16:38 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.16 2009/04/17 22:40:46 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.17 2009/04/22 04:16:38 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -191,7 +191,6 @@ extern "C" {
       char *convention,          // in - convention
       char *purpose,             // in - purpose
       char *object,              // in - object type
-      ESMC_AttPackNestFlag *flag, // in - attpack nesting flag
       int *rc,                   // in - return code
       int clen,                  // hidden/in - strlen count for convention
       int plen,                  // hidden/in - strlen count for purpose           
@@ -267,7 +266,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackCreateCustom(cconv, cpurp, cobj, *flag);
+  status = (**base).root.AttPackCreateCustom(cconv, cpurp, cobj);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed c_esmc_attpackcreatecustom", &status);

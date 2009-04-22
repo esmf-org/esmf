@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.16 2009/04/17 22:40:46 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.17 2009/04/22 04:16:38 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -104,15 +104,12 @@ class Attribute
     int AttPackAddAttribute(const string &name, const string &convention, 
       const string &purpose, const string &object);
     int AttPackCreateCustom(const string &convention, 
-      const string &purpose, const string &object, const ESMC_AttPackNestFlag &flag);
+      const string &purpose, const string &object);
     int AttPackCreateStandard(const string &convention, 
       const string &purpose, const string &object);
     Attribute *AttPackGet(const string &convention, 
       const string &purpose, const string &object) const;
     Attribute *AttPackGetAttribute(const string &name) const;
-//    int AttPackGetIndex(const string &convention, 
-//      const string &purpose, const string &object) const;
-    Attribute *AttPackGetNested(bool &done) const;
     int AttPackIsPresent(const string &name, const string &convention, 
       const string &purpose, const string &object, ESMC_Logical *present) const;
     int AttPackNest(const string &convention, const string &purpose, const string &object, 
@@ -258,7 +255,7 @@ extern "C" {
                                  char *object, int *rc, int nlen, 
                                  int clen, int plen, int olen);
   void FTN(c_esmc_attpackcreatecustom)(ESMC_Base **base, char *convention, char *purpose, 
-                                 char *object, ESMC_AttPackNestFlag *flag, int *rc, 
+                                 char *object, int *rc, 
                                  int clen, int plen, int olen);
   void FTN(c_esmc_attpackcreatestandard)(ESMC_Base **base, char *convention, char *purpose, 
                                  char *object, int *rc, 

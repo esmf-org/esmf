@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.9 2009/04/17 22:40:46 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.10 2009/04/22 04:16:38 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.9 2009/04/17 22:40:46 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.10 2009/04/22 04:16:38 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -301,8 +301,8 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   }
       
   // recurse through the Attribute hierarchy
-  for (i=0; i<attrCount; ++i) {
-    localrc = attrList[i]->AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
+  for (i=0; i<attrList.size(); ++i) {
+    localrc = attrList.at(i)->AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
     if (localrc == 42) {
       localrc = AttributeUpdateRemove(i);
       if (localrc != ESMF_SUCCESS) {
@@ -404,7 +404,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
     
   // if struct changes
   if (structChange == ESMF_TRUE) {
-    for (i=0; i<attrCount; ++i) {
+    for (i=0; i<attrList.size(); ++i) {
       if (attrList.at(i)->structChange == ESMF_TRUE) {
         localrc = attrList.at(i)->AttributeUpdateReset();
         if (localrc != ESMF_SUCCESS) {
@@ -439,7 +439,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   if (nbytes!=0) *offset += 8-nbytes;
   
   // recurse through the Attribute hierarchy
-  for (i=0; i<attrCount; i++) {
+  for (i=0; i<attrList.size(); i++) {
     localrc = attrList.at(i)->AttributeUpdateBufSend(sendBuf,localPet,offset,length);
     if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -500,8 +500,8 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
     if (attrRoot == ESMF_FALSE && attrPackHead == ESMF_FALSE) ++(*structChanges); }
   if (valueChange == ESMF_TRUE) ++(*valueChanges);
 
-  for(i=0; i<attrCount; ++i) {
-    localrc = attrList[i]->AttributeUpdateChanges(linkChanges,
+  for(i=0; i<attrList.size(); ++i) {
+    localrc = attrList.at(i)->AttributeUpdateChanges(linkChanges,
       structChanges,valueChanges,numKeys);
   }
   
@@ -755,8 +755,8 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   // now the number of struct changes on this attribute
   int numChanges = 0;
   if (structChange == ESMF_TRUE) {
-    for (i=0; i<attrCount; ++i) {
-      if (attrList[i]->structChange == ESMF_TRUE) {
+    for (i=0; i<attrList.size(); ++i) {
+      if (attrList.at(i)->structChange == ESMF_TRUE) {
         ++numChanges;}
     }
   }
@@ -968,11 +968,12 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   localrc = ESMC_RC_NOT_IMPL;
 
   Attribute *attr;
-  attr = attrList[attrNum];
+  attr = attrList.at(attrNum);
   
   attr->~Attribute();
   attrList.erase(attrList.begin() + attrNum);
-  attrCount--;
+  if (attrNum<attrCount) attrCount--;
+  else packCount--;
   structChange = ESMF_TRUE;
 
   return ESMF_SUCCESS;
@@ -1010,8 +1011,8 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   structChange = ESMF_FALSE;
   valueChange = ESMF_FALSE;
 
-  for(i=0; i<attrCount; ++i) {
-    localrc = attrList[i]->AttributeUpdateReset();
+  for(i=0; i<attrList.size(); ++i) {
+    localrc = attrList.at(i)->AttributeUpdateReset();
   }
 
   return ESMF_SUCCESS;
