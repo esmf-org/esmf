@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.22 2009/04/22 04:16:38 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.23 2009/04/22 05:39:46 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.22 2009/04/22 04:16:38 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.23 2009/04/22 05:39:46 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -341,6 +341,7 @@ namespace ESMCI {
     localrc = AttPackAddAttribute("physical_domain", "ESMF", "general", object);
     localrc = AttPackAddAttribute("name", "ESMF", "general", object);
     localrc = AttPackAddAttribute("model_component_framework", "ESMF", "general", object);
+    localrc = AttPackAddAttribute("institution", "ESMF", "general", object);
     localrc = AttPackAddAttribute("full_name", "ESMF", "general", object);
     localrc = AttPackAddAttribute("discipline", "ESMF", "general", object);
     localrc = AttPackAddAttribute("coding_language", "ESMF", "general", object);
