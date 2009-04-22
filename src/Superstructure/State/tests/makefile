@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 2008/09/26 21:11:39 cdeluca Exp $ 
+# $Id: makefile,v 1.26 2009/04/22 05:26:25 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -7,22 +7,23 @@ run_uni: run_unit_tests_uni
 LOCDIR	  = src/Superstructure/State/tests
 
 TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMC_StateUTest \
-                $(ESMF_TESTDIR)/ESMF_StateCreateUTest
+                $(ESMF_TESTDIR)/ESMF_StateCreateUTest \
+                $(ESMF_TESTDIR)/ESMF_StateReconcileUTest
 # TODO:FIELDINTEGRATION Restore State reconcile and other tests.
 #		$(ESMF_TESTDIR)/ESMF_StateUTest
 #		$(ESMF_TESTDIR)/ESMF_StateReconcileUTest \
 #		$(ESMF_TESTDIR)/ESMF_StateLimitUTest \
 
 TESTS_RUN     =	RUN_ESMC_StateUTest \
-         	RUN_ESMF_StateCreateUTest
+         	RUN_ESMF_StateCreateUTest \
+                RUN_ESMF_StateReconcileUTest
 #		RUN_ESMF_StateUTest
-#		RUN_ESMF_StateReconcileUTest \
 #		RUN_ESMF_StateLimitUTest \
 
 TESTS_RUN_UNI =	RUN_ESMC_StateUTestUNI \
-                RUN_ESMF_StateCreateUTestUNI
+                RUN_ESMF_StateCreateUTestUNI \
+                RUN_ESMF_StateReconcileUTestUNI
 #		RUN_ESMF_StateUTestUNI
-#		RUN_ESMF_StateReconcileUTestUNI \
 #		RUN_ESMF_StateLimitUTestUNI \
 
 

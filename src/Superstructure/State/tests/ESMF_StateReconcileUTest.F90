@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.20 2009/02/13 01:36:09 theurich Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.21 2009/04/22 05:26:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -14,8 +14,17 @@
 
 module ESMF_StateReconcileUTest_Mod
 use ESMF_Mod
+implicit none
 
 contains
+
+subroutine comp_dummy(gcomp, rc)
+   type(ESMF_GridComp), intent(inout) :: gcomp
+   integer, intent(out) :: rc
+
+   rc = ESMF_SUCCESS
+end subroutine comp_dummy
+    
 
 ! Initialize routine which creates "field1" on PETs 0 and 1
 subroutine comp1_init(gcomp, istate, ostate, clock, rc)
@@ -25,15 +34,21 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
     integer, intent(out) :: rc
 
     type(ESMF_Field) :: field1
-    integer :: localrc
+    type(ESMF_State) :: neststate
 
     print *, "i am comp1_init"
 
-    field1 = ESMF_FieldCreateNoData(name="Comp1 Field", rc=localrc)
+    field1 = ESMF_FieldCreateEmpty(name="Comp1 Field", rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
   
-    call ESMF_StateAdd(istate, field1, rc=localrc)
+    call ESMF_StateAdd(istate, field1, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
+!attrbug    neststate = ESMF_StateCreate("Nested State", rc=rc)
+!attrbug    if (rc .ne. ESMF_SUCCESS) return
     
-    rc = localrc
+!attrbug    call ESMF_StateAdd(istate, neststate, rc=rc)
+!attrbug    if (rc .ne. ESMF_SUCCESS) return
 
 end subroutine comp1_init
 
@@ -45,55 +60,62 @@ subroutine comp2_init(gcomp, istate, ostate, clock, rc)
     integer, intent(out) :: rc
 
     type(ESMF_Field) :: field2
-    integer :: localrc
 
     print *, "i am comp2_init"
 
-    field2 = ESMF_FieldCreateNoData(name="Comp2 Field", rc=localrc)
+    field2 = ESMF_FieldCreateEmpty(name="Comp2 Field", rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
     
-    call ESMF_StateAdd(istate, field2, rc=localrc)
-
-    rc = localrc
+    call ESMF_StateAdd(istate, field2, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
 
 end subroutine comp2_init
 
-subroutine comp_dummy(gcomp, rc)
-   type(ESMF_GridComp), intent(inout) :: gcomp
-   integer, intent(out) :: rc
+! Finalize routine which destroys "field1" on PETs 0 and 1
+subroutine comp1_final(gcomp, istate, ostate, clock, rc)
+    type(ESMF_GridComp), intent(inout) :: gcomp
+    type(ESMF_State), intent(inout) :: istate, ostate
+    type(ESMF_Clock), intent(in) :: clock
+    integer, intent(out) :: rc
 
-   rc = ESMF_SUCCESS
-end subroutine comp_dummy
-    
-subroutine StateDestroyAll(state, rc)
-   type(ESMF_State), intent(inout) :: state
-   integer, intent(out) :: rc
+    type(ESMF_Field) :: field1
+    type(ESMF_State) :: neststate
+    integer :: localrc
 
-   type(ESMF_Field) :: field(100)
-   integer :: i, itemCount
-   character(len=ESMF_MAXSTR) :: nameList(100)
+    print *, "i am comp1_final"
 
-   ! assumes all items are empty fields.  if that changes, this code has
-   ! to get the igrid and delete that as well (after deleting the field) and
-   ! get and delete the array after, too.
-   call ESMF_StateGet(state, itemCount=itemCount, itemNameList=nameList, rc=rc)
-   if (rc .ne. ESMF_SUCCESS) return
+    call ESMF_StateGet(istate, "Comp1 Field", field1,  rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
 
-   do i=1, itemCount
-       call ESMF_StateGet(state, nameList(i), field(i),  rc=rc)
-       if (rc .ne. ESMF_SUCCESS) return
-   enddo
+    call ESMF_FieldDestroy(field1, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
 
-   call ESMF_StateDestroy(state, rc=rc)
-   if (rc .ne. ESMF_SUCCESS) return
-  
-   do i=1, itemCount
-       call ESMF_FieldDestroy(field(i),  rc=rc)
-       if (rc .ne. ESMF_SUCCESS) return
-   enddo
+!attrbug    call ESMF_StateGet(istate, "Nested State", neststate,  rc=rc)
+!attrbug    if (rc .ne. ESMF_SUCCESS) return
 
-   rc = ESMF_SUCCESS
-   return
-end subroutine StateDestroyAll
+!attrbug    call ESMF_StateDestroy(neststate, rc=rc)
+!attrbug    if (rc .ne. ESMF_SUCCESS) return
+
+end subroutine comp1_final
+
+! Finalize routine which destroys "field2" on PETs 2 and 3
+subroutine comp2_final(gcomp, istate, ostate, clock, rc)
+    type(ESMF_GridComp), intent(inout) :: gcomp
+    type(ESMF_State), intent(inout) :: istate, ostate
+    type(ESMF_Clock), intent(in) :: clock
+    integer, intent(out) :: rc
+
+    type(ESMF_Field) :: field2
+
+    print *, "i am comp2_final"
+
+    call ESMF_StateGet(istate, "Comp2 Field", field2,  rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
+    call ESMF_FieldDestroy(field2, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
+end subroutine comp2_final
 
 end module ESMF_StateReconcileUTest_Mod
 
@@ -150,7 +172,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     comp1name = "Atmosphere"
     comp1 = ESMF_GridCompCreate(name=comp1name, petList=(/ 0, 1 /), rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -159,7 +181,7 @@ program ESMF_StateReconcileUTest
 
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     comp2name = "Ocean"
     comp2 = ESMF_GridCompCreate(name=comp2name, petList=(/ 2, 3 /), rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -167,7 +189,7 @@ program ESMF_StateReconcileUTest
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     statename = "Ocn2Atm"
     state1 = ESMF_StateCreate(statename, rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -180,87 +202,117 @@ program ESMF_StateReconcileUTest
     ! but to make this test very short, they are called inline below.
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
-    call ESMF_GridCompSetServices(comp1, routine=comp_dummy, rc=rc)
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompSetServices(comp1, userRoutine=comp_dummy, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetServices"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
-    call ESMF_GridCompSetServices(comp2, routine=comp_dummy, rc=rc)
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompSetServices(comp2, userRoutine=comp_dummy, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetServices"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETINIT, &
-      routine=comp1_init, rc=rc)
+      userRoutine=comp1_init, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETINIT, &
-      routine=comp2_init, rc=rc)
+      userRoutine=comp2_init, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETFINAL, &
+      userRoutine=comp1_final, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompSetEntryPoint"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETFINAL, &
+      userRoutine=comp2_final, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompSetEntryPoint"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompInitialize(comp1, state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompInitialize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompInitialize(comp2, state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompInitialize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_StateValidate(state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateValidate"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_StateReconcile(state1, vm, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateReconcile in concurrent mode"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_StateValidate(state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateValidate"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompFinalize(comp1, state1, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompFinalize"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompFinalize(comp2, state1, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompFinalize"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompDestroy(comp1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompDestroy(comp2, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
-    call StateDestroyAll(state1, rc)
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_StateDestroy(state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -274,7 +326,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     comp1name = "Atmosphere"
     comp1 = ESMF_GridCompCreate(name=comp1name, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -282,7 +334,7 @@ program ESMF_StateReconcileUTest
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     comp2name = "Ocean"
     comp2 = ESMF_GridCompCreate(name=comp2name, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -290,7 +342,7 @@ program ESMF_StateReconcileUTest
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     statename = "Ocn2Atm"
     state1 = ESMF_StateCreate(statename, rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -303,88 +355,117 @@ program ESMF_StateReconcileUTest
     ! but to make this test very short, they are called inline below.
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
-    call ESMF_GridCompSetServices(comp1, routine=comp_dummy, rc=rc)
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompSetServices(comp1, userRoutine=comp_dummy, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetServices"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
-    call ESMF_GridCompSetServices(comp2, routine=comp_dummy, rc=rc)
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompSetServices(comp2, userRoutine=comp_dummy, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetServices"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETINIT, &
-      routine=comp1_init, rc=rc)
+      userRoutine=comp1_init, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETINIT, &
-      routine=comp2_init, rc=rc)
+      userRoutine=comp2_init, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETFINAL, &
+      userRoutine=comp1_final, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompSetEntryPoint"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETFINAL, &
+      userRoutine=comp2_final, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompSetEntryPoint"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompInitialize(comp1, state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompInitialize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompInitialize(comp2, state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompInitialize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_StateValidate(state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateValidate"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_StateReconcile(state1, vm, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateReconcile in concurrent mode"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_StateValidate(state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateValidate"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompFinalize(comp1, state1, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompFinalize"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompFinalize(comp2, state1, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompFinalize"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompDestroy(comp1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompDestroy(comp2, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
-    call StateDestroyAll(state1, rc)
+    !NEX_UTest_Multi_Proc_Only
+!attrbug    call ESMF_StateDestroy(state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -399,25 +480,25 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     comp1name = "Atmosphere"
-    ! TODO: add the parent VM flag here
-    comp1 = ESMF_GridCompCreate(name=comp1name, rc=rc)
+    comp1 = ESMF_GridCompCreate(name=comp1name, &
+      contextflag=ESMF_CHILD_IN_PARENT_VM, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     comp2name = "Ocean"
-    ! TODO: add the parent VM flag here
-    comp2 = ESMF_GridCompCreate(name=comp2name, rc=rc)
+    comp2 = ESMF_GridCompCreate(name=comp2name, &
+      contextflag=ESMF_CHILD_IN_PARENT_VM, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     statename = "Ocn2Atm"
     state1 = ESMF_StateCreate(statename, rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -430,88 +511,117 @@ program ESMF_StateReconcileUTest
     ! but to make this test very short, they are called inline below.
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
-    call ESMF_GridCompSetServices(comp1, routine=comp_dummy, rc=rc)
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompSetServices(comp1, userRoutine=comp_dummy, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetServices"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
-    call ESMF_GridCompSetServices(comp2, routine=comp_dummy, rc=rc)
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompSetServices(comp2, userRoutine=comp_dummy, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetServices"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETINIT, &
-      routine=comp1_init, rc=rc)
+      userRoutine=comp1_init, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETINIT, &
-      routine=comp2_init, rc=rc)
+      userRoutine=comp2_init, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETFINAL, &
+      userRoutine=comp1_final, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompSetEntryPoint"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETFINAL, &
+      userRoutine=comp2_final, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompSetEntryPoint"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompInitialize(comp1, state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompInitialize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompInitialize(comp2, state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompInitialize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_StateValidate(state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateValidate"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_StateReconcile(state1, vm, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateReconcile in concurrent mode"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_StateValidate(state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateValidate"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompFinalize(comp1, state1, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompFinalize"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompFinalize(comp2, state1, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompFinalize"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompDestroy(comp1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompDestroy(comp2, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
     !-------------------------------------------------------------------------
-    !NEX_removeUTest_Multi_Proc_Only
-    call StateDestroyAll(state1, rc)
+    !NEX_UTest_Multi_Proc_Only
+!attrbug    call ESMF_StateDestroy(state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
