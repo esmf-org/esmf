@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.19 2009/01/12 18:23:05 theurich Exp $
+# $Id: build_rules.mk,v 1.20 2009/04/22 00:58:22 w6ws Exp $
 #
 # Linux.g95.default
 #
@@ -178,4 +178,6 @@ ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a) 
 ############################################################
 # Shared library options
 #
+ESMF_CXXCOMPILEOPTS       += -fPIC
+ESMF_F90COMPILEOPTS       += -fPIC
 ESMF_SL_LIBOPTS  += -shared
