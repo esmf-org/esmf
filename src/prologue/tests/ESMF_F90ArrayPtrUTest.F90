@@ -232,6 +232,8 @@
 #if defined (__G95__) && defined (ESMF_IS_64BIT_MACHINE)
     ! g95 rounds pointer sizes up to a multiple of 8 bytes
     integer, parameter :: ALIGN_SIZE = 8
+#else
+    integer, parameter :: ALIGN_SIZE = 0
 #endif
 
     result = 0
