@@ -1480,7 +1480,7 @@
                 libflag = 1  ! 
                 call ESMF_FieldRegridStore(srcField, dstField, routeHandle=routeHandle,    &
                         regridMethod=ESMF_REGRID_METHOD_PATCH, rc=localrc)
-                if (ESMF_LogMsgFoundError(localrc,"Field Patch Regrid " //
+                if (ESMF_LogMsgFoundError(localrc,"Field Patch Regrid " // &
                         "store failed", rcToReturn=rc)) return
 #endif
 
