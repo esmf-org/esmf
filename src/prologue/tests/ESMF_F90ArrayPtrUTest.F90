@@ -232,8 +232,6 @@
 #if defined (__G95__) && defined (ESMF_IS_64BIT_MACHINE)
     ! g95 rounds pointer sizes up to a multiple of 8 bytes
     integer, parameter :: ALIGN_SIZE = 8
-#else
-    integer, parameter :: ALIGN_SIZE = 0
 #endif
 
     result = 0
@@ -587,8 +585,10 @@
 
         get_compiled_size = ESMF_F90_PTR_BASE_SIZE + ESMF_F90_PTR_PLUS_RANK * (rank-1)
 
+#if defined (__G95__) && defined (ESMF_IS_64BIT_MACHINE)
         if (ALIGN_SIZE /= 0)  &
           get_compiled_size = ((get_compiled_size + ALIGN_SIZE-1)/ALIGN_SIZE) * ALIGN_SIZE
+#endif
 
       end function get_compiled_size
 
