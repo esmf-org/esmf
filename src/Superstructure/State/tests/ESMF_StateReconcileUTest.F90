@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.21 2009/04/22 05:26:25 theurich Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.22 2009/04/24 20:05:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -44,11 +44,11 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
     call ESMF_StateAdd(istate, field1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-!attrbug    neststate = ESMF_StateCreate("Nested State", rc=rc)
-!attrbug    if (rc .ne. ESMF_SUCCESS) return
+!nestbug    neststate = ESMF_StateCreate("Nested State", rc=rc)
+!nestbug    if (rc .ne. ESMF_SUCCESS) return
     
-!attrbug    call ESMF_StateAdd(istate, neststate, rc=rc)
-!attrbug    if (rc .ne. ESMF_SUCCESS) return
+!nestbug    call ESMF_StateAdd(istate, neststate, rc=rc)
+!nestbug    if (rc .ne. ESMF_SUCCESS) return
 
 end subroutine comp1_init
 
@@ -90,11 +90,11 @@ subroutine comp1_final(gcomp, istate, ostate, clock, rc)
     call ESMF_FieldDestroy(field1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-!attrbug    call ESMF_StateGet(istate, "Nested State", neststate,  rc=rc)
-!attrbug    if (rc .ne. ESMF_SUCCESS) return
+!nestbug    call ESMF_StateGet(istate, "Nested State", neststate,  rc=rc)
+!nestbug    if (rc .ne. ESMF_SUCCESS) return
 
-!attrbug    call ESMF_StateDestroy(neststate, rc=rc)
-!attrbug    if (rc .ne. ESMF_SUCCESS) return
+!nestbug    call ESMF_StateDestroy(neststate, rc=rc)
+!nestbug    if (rc .ne. ESMF_SUCCESS) return
 
 end subroutine comp1_final
 
@@ -465,7 +465,7 @@ program ESMF_StateReconcileUTest
   
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-!attrbug    call ESMF_StateDestroy(state1, rc=rc)
+    call ESMF_StateDestroy(state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -621,7 +621,7 @@ program ESMF_StateReconcileUTest
   
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-!attrbug    call ESMF_StateDestroy(state1, rc=rc)
+    call ESMF_StateDestroy(state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
