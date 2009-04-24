@@ -1,0 +1,28 @@
+% $Id: AttachMethods_desc.tex,v 1.1 2009/04/24 05:20:17 theurich Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2009, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+%\subsection{Description}
+
+ESMF data types, such as Fields, FieldBundles, Arrays and ArrayBundles, are used
+to exchange data between Components through States. In the simplest
+scenario the producer Component or Coupler can compute the full data set
+required by the consumer Component. However, memory constraints or otherwise
+the nature of the algorithm, may require that the final calculation be
+performed right before the data is consumed. 
+
+ESMF provides the concept of Attachable Methods that allows a producer 
+component to associate user defined methods with the data objects it provides.
+The final calculation, while defined by the producer Component, is deferred
+until the consumer Component requires its execution.
+
+The current implementation of Attachable Methods is limited to the ESMF State
+class. States are a general container class for Fields, FieldBundles, Arrays
+and ArrayBundles. States provide the most general interface to Attachable
+Methods.
