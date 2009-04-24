@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.29 2009/04/16 04:19:21 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.30 2009/04/24 05:18:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.29 2009/04/16 04:19:21 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.30 2009/04/24 05:18:40 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1759,11 +1759,11 @@ extern "C" {
       return;
     }
 
-    // debugging---------    
-    localrc = (*ptr)->print();
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
-      return;
-    // debugging---------    
+    // debugging---------
+//    localrc = (*ptr)->print();
+//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+//      return;
+    // debugging---------
     
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
@@ -1793,11 +1793,11 @@ extern "C" {
       return;
     }
 
-    // debugging---------    
-    localrc = (*ptr)->print();
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
-      return;
-    // debugging---------    
+    // debugging---------
+//    localrc = (*ptr)->print();
+//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+//      return;
+    // debugging---------
     
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
@@ -1821,11 +1821,11 @@ extern "C" {
       return;
     }
 
-    // debugging---------    
-    localrc = (*ptr)->print();
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
-      return;
-    // debugging---------    
+    // debugging---------
+//    localrc = (*ptr)->print();
+//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+//     return;
+    // debugging---------
     
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
@@ -1850,11 +1850,11 @@ extern "C" {
       return;
     }
 
-    // debugging---------    
-    localrc = (*ptr)->print();
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
-      return;
-    // debugging---------    
+    // debugging---------
+//    localrc = (*ptr)->print();
+//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+//      return;
+    // debugging---------
     
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
