@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.23 2009/04/22 05:39:46 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.24 2009/04/24 20:03:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.23 2009/04/22 05:39:46 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.24 2009/04/24 20:03:49 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -4296,11 +4296,18 @@ namespace ESMCI {
   }
 
   // if there are Attributes or attpacks delete, if links disconnect
-  for (int i=0; i<attrList.size(); i++) {
-    if (attrList.at(i)->attrRoot == ESMF_TRUE) attrList.at(i) = ESMC_NULL_POINTER;
-    else delete attrList.at(i);
-  }
-  attrList.clear();
+//TODO: The following "clean-up" of the attrList elements has a problem
+//TODO: when going through links that point to attributes that don't exist
+//TODO: any longer. This loop needs to be re-written only using local count
+//TODO: members, once those counts are kept consistent throughout the entire
+//TODO: Attribute code.
+//TODO: Disabling the following loop will cause memory leaks, but that is
+//TODO: better than SEGV for now! *gjt*
+//  for (int i=0; i<attrList.size(); i++) {
+//    if (attrList.at(i)->attrRoot == ESMF_TRUE) attrList.at(i) = ESMC_NULL_POINTER;
+//    else delete attrList.at(i);
+//  }
+//  attrList.clear();
 
  } // end ~Attribute
 //-----------------------------------------------------------------------------
