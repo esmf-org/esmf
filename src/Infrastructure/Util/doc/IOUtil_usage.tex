@@ -1,0 +1,79 @@
+% $Id: IOUtil_usage.tex,v 1.1 2009/04/25 04:37:03 w6ws Exp $
+
+%\subsection{Usage and Examples}
+
+\subsubsection{Fortran unit number management} \label{fio:unitnumbers}
+The {\tt ESMF\_IOUnitGet()} method is provided so that applications
+using ESMF can remain free of unit number conflicts --- both when combined
+with other third party code, or with ESMF itself.  This call is typically
+used just prior to an {\tt OPEN} statement:
+
+\begin{verbatim}
+  call ESMF_IOUnitGet (unit=grid_unit, rc=rc)
+  open (unit=grid_unit, file='grid_data.dat', status='old', action='read')
+\end{verbatim}
+
+By default, unit numbers between 50 and 99 are scanned to find an unopened
+unit number.
+
+Internally, ESMF also uses {\tt ESMF\_IOUnitGet()} when it needs to open
+Fortran unit numbers for file I/O.  By using the same API for both user and
+ESMF code, unit number collisions can be avoided.
+
+When integrating ESMF into an application where there are conflicts with
+other uses of the same unit number range, such as when hard-coded unit number
+values are used, an alternative unit number range can be specified.
+The {\tt ESMF\_Initialize()} optional arguments {\tt IOUnitLower} and {\tt IOUnitUpper}
+may be set as needed.  Note that {\tt IOUnitUpper} must be set to a value higher than
+{\tt IOUnitLower}, and that both must be non-negative.  Otherwise {\tt ESMF\_Initialize}
+will return a return code of {\tt ESMF\_FAILURE}.  ESMF itself does not typically need more
+than about five units for internal use.
+
+\begin{verbatim}
+  call ESMF_Initialize (..., IOUnitLower=120, IOUnitUpper=140)
+\end{verbatim}
+
+All current Fortran environments have preconnected unit numbers, such as
+units 5 and 6 for standard input and output, in the single digit range.
+So it is recommended that the unit number range is chosen to begin at unit 10
+or higher to avoid these preconnected units.
+
+\subsubsection{Flushing output}
+
+Fortran run-time libraries generally use buffering techniques to improve I/O
+performance.  However output buffering can be problematic when output is needed,
+but is ``trapped'' in the buffer because it is not full.  This is a common problem
+This is a common occurance when debugging a program, and inserting {\tt WRITE} statements
+to track down the bad area of code.  If the program crashes before the output
+buffer has been flushed, the desired debugging output may never be seen --- giving
+a misleading indication of where the problem occurred.  It would be desirable
+to ensure that the output buffer is flushed at predicatable
+points in the program in order to get the needed results.
+Likewise, in parallel code, predictable flushing of output buffers is a common
+requirement, often in conjunction with {\tt ESMF\_VMBarrier()} calls.  
+
+The {\tt ESMF\_IOUnitFlush()} API is provided to flush a unit as desired.  Here is
+an example of code which prints debug values, and serializes the output to a
+terminal in PET order:
+
+\begin{verbatim}
+  type(ESMF_VM) :: vm
+
+  integer :: tty_unit
+  integer :: me, npets
+
+  call ESMF_Initialize (vm=vm, rc=rc)
+  call ESMF_VMGet (vm, localPet=me, petCount=npes)
+
+  call ESMF_IOUnitGet (unit=tty_unit)
+  open (unit=tty_unit, file='/dev/tty', status='old', action='write')
+  ...
+  call ESMF_VMBarrier (vm=vm)
+  do, i=0, npets-1
+    if (i == me) then
+      write (tty_unit, *) 'PET: ', i, ', values are: ', a, b, c
+      call ESMF_IOUnitFlush (unit=tty_unit)
+    end if
+    call ESMF_VMBarrier (vm=vm)
+  end do
+\end{verbatim}
