@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.63 2009/04/22 04:18:17 rokuingh Exp $ 
+# $Id: makefile,v 1.64 2009/04/27 14:47:03 rokuingh Exp $ 
 
 ALL: build_system_tests
 
@@ -14,6 +14,7 @@ DIRS      = ESMF_CompCreate \
 	    ESMF_InternalStateEnsemble \
             ESMF_RecursiveComponent \
             ESMF_ArrayScatterGather \
+            ESMF_Attribute \
             ESMF_ArraySparseMatMul \
             ESMF_ArrayRedist \
             ESMF_ArrayRedistMPMD \
@@ -29,7 +30,6 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldRedistBlk2Blk \
             ESMF_FieldBundleRedistBlk2Blk
 
-#            ESMF_Attribute \
 # Tests not yet ready
 #           ESMF_RowReduce \        gjt: currently the code depends on DELayout comms, but it should be covered/converted to newArray
 #           ESMF_MergeCoupling \
