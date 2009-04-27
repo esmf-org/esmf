@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.25 2009/04/27 01:20:54 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.26 2009/04/27 05:48:09 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.25 2009/04/27 01:20:54 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.26 2009/04/27 05:48:09 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -327,30 +327,37 @@ namespace ESMCI {
   // Component standard Attribute package
     localrc = AttPackCreateCustom("CF", "general", object);
     if (localrc != ESMF_SUCCESS) {
-      sprintf(msgbuf, "failed creating component standard attpack");
+      sprintf(msgbuf, "failed creating component standard attpack1");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                msgbuf, &localrc);
       return ESMF_FAILURE;
     }
-    localrc = AttPackNest("ESMF", "general", object, "CF", "general");
+    localrc = AttPackNest("ESG", "general", object, "CF", "general");
     if (localrc != ESMF_SUCCESS) {
-      sprintf(msgbuf, "failed creating component standard attpack");
+      sprintf(msgbuf, "failed creating component standard attpack2");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
+    localrc = AttPackNest("ESMF", "general", object, "ESG", "general");
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "failed creating component standard attpack3");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                msgbuf, &localrc);
       return ESMF_FAILURE;
     }
     localrc = AttPackAddAttribute("references", "CF", "general", object);
     localrc = AttPackAddAttribute("comment", "CF", "general", object);
-    localrc = AttPackAddAttribute("version", "ESMF", "general", object);
-    localrc = AttPackAddAttribute("physical_domain", "ESMF", "general", object);
-    localrc = AttPackAddAttribute("name", "ESMF", "general", object);
-    localrc = AttPackAddAttribute("model_component_framework", "ESMF", "general", object);
-    localrc = AttPackAddAttribute("institution", "ESMF", "general", object);
-    localrc = AttPackAddAttribute("full_name", "ESMF", "general", object);
-    localrc = AttPackAddAttribute("discipline", "ESMF", "general", object);
-    localrc = AttPackAddAttribute("coding_language", "ESMF", "general", object);
-    localrc = AttPackAddAttribute("author", "ESMF", "general", object);
-    localrc = AttPackAddAttribute("agency", "ESMF", "general", object);
+    localrc = AttPackAddAttribute("version", "ESG", "general", object);
+    localrc = AttPackAddAttribute("physical_domain", "ESG", "general", object);
+    localrc = AttPackAddAttribute("name", "ESG", "general", object);
+    localrc = AttPackAddAttribute("model_component_framework", "ESG", "general", object);
+    localrc = AttPackAddAttribute("institution", "ESG", "general", object);
+    localrc = AttPackAddAttribute("full_name", "ESG", "general", object);
+    localrc = AttPackAddAttribute("discipline", "ESG", "general", object);
+    localrc = AttPackAddAttribute("coding_language", "ESG", "general", object);
+    localrc = AttPackAddAttribute("author", "ESG", "general", object);
+    localrc = AttPackAddAttribute("agency", "ESG", "general", object);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed creating component standard attpack");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
