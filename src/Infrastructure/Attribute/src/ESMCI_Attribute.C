@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.26 2009/04/27 05:48:09 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.27 2009/04/27 14:44:59 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.26 2009/04/27 05:48:09 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.27 2009/04/27 14:44:59 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -886,6 +886,7 @@ namespace ESMCI {
   // add the Attribute
   packList.push_back(attr);
   structChange = ESMF_TRUE;
+  attrPack = ESMF_TRUE;
   
   return ESMF_SUCCESS;
 
@@ -4553,11 +4554,11 @@ namespace ESMCI {
     
     DESERIALIZE_VAR(buffer,loffset,attrCount,int);
     DESERIALIZE_VAR(buffer,loffset,packCount,int);
-    DESERIALIZE_VAR(buffer,loffset,linkCount,int);
+///    DESERIALIZE_VAR(buffer,loffset,linkCount,int);
         
     attrList.reserve(attrCount);
     packList.reserve(packCount);
-    linkList.reserve(linkCount);
+//    linkList.reserve(linkCount);
 
     if (items == 1) {
       if (tk == ESMC_TYPEKIND_I4) {
@@ -4666,13 +4667,13 @@ namespace ESMCI {
       }
       localrc = AttPackSet(attr);
       if (localrc != ESMF_SUCCESS) {
-        sprintf(msgbuf, "AttributeDeserialize failed adding attribute");
+        sprintf(msgbuf, "AttributeDeserialize failed adding attribute package");
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
         return ESMF_FAILURE;
       }
     }
       
-    for (i=0; i<linkCount; i++) {
+/*    for (i=0; i<linkCount; i++) {
       attr = new Attribute(ESMF_FALSE);
       if (!attr)
         return ESMF_FAILURE;
@@ -4686,11 +4687,11 @@ namespace ESMCI {
       }
       localrc = AttributeLink(attr);
       if (localrc != ESMF_SUCCESS) {
-        sprintf(msgbuf, "AttributeDeserialize failed adding attribute");
+        sprintf(msgbuf, "AttributeDeserialize failed adding attribute link");
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
         return ESMF_FAILURE;
       }
-    }
+    }*/
       
     // make sure loffset is aligned correctly
     nbytes=loffset%8;
@@ -4804,7 +4805,7 @@ namespace ESMCI {
           
       SERIALIZE_VAR(cc,buffer,offset,attrList.size(),int);
       SERIALIZE_VAR(cc,buffer,offset,packList.size(),int);
-      SERIALIZE_VAR(cc,buffer,offset,linkList.size(),int);
+//      SERIALIZE_VAR(cc,buffer,offset,linkList.size(),int);
 
       if (items == 1) {
         if (tk == ESMC_TYPEKIND_I4) {
@@ -4862,8 +4863,8 @@ namespace ESMCI {
       for (i=0; i<packList.size(); i++)
           packList.at(i)->ESMC_SerializeCC(buffer,length,offset,cc);
   
-      for (i=0; i<linkList.size(); i++)
-          linkList.at(i)->ESMC_SerializeCC(buffer,length,offset,cc);
+/*      for (i=0; i<linkList.size(); i++)
+          linkList.at(i)->ESMC_SerializeCC(buffer,length,offset,cc); */
   
       // make sure offset is aligned correctly
       nbytes=offset%8;
