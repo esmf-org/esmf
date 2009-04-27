@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadCplCompUTest.F90,v 1.1 2009/04/22 05:50:11 eschwab Exp $
+! $Id: ESMF_AttReadCplCompUTest.F90,v 1.2 2009/04/27 05:55:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_AttReadCplCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttReadCplCompUTest.F90,v 1.1 2009/04/22 05:50:11 eschwab Exp $'
+      '$Id: ESMF_AttReadCplCompUTest.F90,v 1.2 2009/04/27 05:55:47 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -110,7 +110,7 @@ print *, 'rc = ', rc
     !  Check read-in Attributes
     !-------------------------------------------------------------------------
 
-      conv = 'ESMF'
+      conv = 'ESG'
       purp = 'general'
 
       !------------------------------------------------------------------------
@@ -292,7 +292,7 @@ print *, 'outChar = ', outChar
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting ESG 'comment' Attribute from a CplComp Test"
+      write(name, *) "Getting CF 'comment' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
                       .or. xercesNotPresent), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -310,7 +310,7 @@ print *, 'outChar = ', outChar
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting ESG 'references' Attribute from a CplComp Test"
+      write(name, *) "Getting CF 'references' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
                       .or. xercesNotPresent), &
                       name, failMsg, result, ESMF_SRCLINE)
