@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.10 2009/04/22 04:12:24 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.11 2009/04/27 14:45:36 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -752,11 +752,11 @@ module ESMF_AttributeUpdateMod
     if (rc/=ESMF_SUCCESS) return
     call ESMF_StateGet(exportState, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    
+
     rootList = (/0,1/)
     call ESMF_AttributeUpdate(importState, vm, rootList=rootList, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    
+   
     call ESMF_AttributeCopy(importState, exportState, &
       ESMF_ATTCOPY_HYBRID, ESMF_ATTTREE_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return
