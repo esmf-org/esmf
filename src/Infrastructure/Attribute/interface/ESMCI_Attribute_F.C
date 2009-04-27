@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.18 2009/04/22 05:42:03 eschwab Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.19 2009/04/27 01:20:54 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.18 2009/04/22 05:42:03 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.19 2009/04/27 01:20:54 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -2317,7 +2317,7 @@ extern "C" {
   int status;
   char msgbuf[ESMF_MAXSTR];
   ESMC_TypeKind attrTypeKind;
-  int slen;              // actual attribute string length
+  int slen;
   int *llens;
 
   // Initialize return code; assume routine not implemented
@@ -3054,7 +3054,7 @@ extern "C" {
   }
 
   // Set the attribute link on the object.
-  status = (**source).root.AttributeLink(*destination);
+  status = (**source).root.AttributeLink(&(**destination).root);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed setting attribute link", &status);
@@ -3108,7 +3108,7 @@ extern "C" {
   }
 
   // Set the attribute link on the object.
-  status = (**source).root.AttributeLinkRemove(*destination);
+  status = (**source).root.AttributeLinkRemove(&(**destination).root);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed removing an attribute link", &status);

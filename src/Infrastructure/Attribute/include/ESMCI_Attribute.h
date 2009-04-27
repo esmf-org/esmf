@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.17 2009/04/22 04:16:38 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.18 2009/04/27 01:20:54 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -71,11 +71,9 @@ class Attribute
     ESMC_Base *attrBase;        // pointer to a root attr's Base object
     Attribute *parent;          // pointer to the parent of this Attribute
 
-    int attrCount;              // number of attributes in use in list
-    int packCount;              // number of attpacks in use in list
-    int linkCount;              // number of links in use in list
-
     vector<Attribute*>  attrList;  // attributes - array of pointers
+    vector<Attribute*>  packList;  // attributes - array of pointers
+    vector<Attribute*>  linkList;  // attributes - array of pointers
 
     // Attribute values
     ESMC_I4               vi;       // integer, or
@@ -121,6 +119,7 @@ class Attribute
     int AttPackSet(const string &name, const ESMC_TypeKind &tk, 
       int count, void *value, const string &convention, 
       const string &purpose, const string &object);
+    int AttPackSet(Attribute *attr);
     
     // copy and swap an attribute hierarchy
     int  AttributeCopy(const Attribute &source);
@@ -169,8 +168,8 @@ class Attribute
     int AttributeIsPresent(const string &name, ESMC_Logical *present) const;
 
     // link/unlink an attribute hierarchy
-    int AttributeLink(ESMC_Base *destination);
-    int AttributeLinkRemove(ESMC_Base *destination);
+    int AttributeLink(Attribute *destination);
+    int AttributeLinkRemove(Attribute *destination);
 
     // destroy an attribute or attpack
     int AttributeRemove(const string &name);

@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.10 2009/04/22 04:16:38 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.11 2009/04/27 01:20:54 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.10 2009/04/22 04:16:38 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.11 2009/04/27 01:20:54 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -258,8 +258,12 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
     for (i=0; i<numChanges; ++i) {
       attr = new Attribute(ESMF_FALSE);
       attr->setBase(attrBase);
+      attr->parent = this;
       attr->ESMC_Deserialize(recvBuf,offset);
-      localrc = AttributeSet(attr);
+      if (attr->attrPackHead == ESMF_TRUE)
+        localrc = AttPackSet(attr);
+      else 
+        localrc = AttributeSet(attr);
       if (localrc != ESMF_SUCCESS) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufRecv failed adding attribute", &localrc);
@@ -322,6 +326,48 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
         return ESMF_FAILURE;
     }
   }
+  for (i=0; i<packList.size(); ++i) {
+    localrc = packList.at(i)->AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
+    if (localrc == 42) {
+      localrc = AttributeUpdateRemove(i);
+      if (localrc != ESMF_SUCCESS) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "AttributeUpdateBufRecv failed removing attr", &localrc);
+        delete [] thiskey;
+        delete [] distkey;
+        return ESMF_FAILURE;
+      }
+      --i;
+    }
+    else if (localrc != ESMF_SUCCESS) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "AttributeUpdateBufRecv failed in recursion", &localrc);
+        delete [] thiskey;
+        delete [] distkey;
+        return ESMF_FAILURE;
+    }
+  }
+  for (i=0; i<linkList.size(); ++i) {
+    localrc = linkList.at(i)->AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
+    if (localrc == 42) {
+      localrc = AttributeUpdateRemove(i);
+      if (localrc != ESMF_SUCCESS) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "AttributeUpdateBufRecv failed removing attr", &localrc);
+        delete [] thiskey;
+        delete [] distkey;
+        return ESMF_FAILURE;
+      }
+      --i;
+    }
+    else if (localrc != ESMF_SUCCESS) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "AttributeUpdateBufRecv failed in recursion", &localrc);
+        delete [] thiskey;
+        delete [] distkey;
+        return ESMF_FAILURE;
+    }
+  }
     
   // check if buffer has been overwritten
   if (length < *offset){
@@ -364,7 +410,8 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
 
   char msgbuf[ESMF_MAXSTR];
   int localrc, nbytes;
-  unsigned int i;
+  unsigned int i, j;
+  Attribute *attr;
     
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
@@ -403,17 +450,19 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
 }*/
     
   // if struct changes
-  if (structChange == ESMF_TRUE) {
-    for (i=0; i<attrList.size(); ++i) {
-      if (attrList.at(i)->structChange == ESMF_TRUE) {
-        localrc = attrList.at(i)->AttributeUpdateReset();
+  for (j=0; j<packList.size(); j++) {
+  attr = packList.at(j);
+  if (attr->structChange == ESMF_TRUE) {
+    for (i=0; i<attr->attrList.size(); ++i) {
+      if (attr->attrList.at(i)->structChange == ESMF_TRUE) {
+        localrc = attr->attrList.at(i)->AttributeUpdateReset();
         if (localrc != ESMF_SUCCESS) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufSend failed resetting", &localrc);
           delete [] key;
           return ESMF_FAILURE;
         }
-        localrc = attrList.at(i)->ESMC_Serialize(sendBuf,length,offset);
+        localrc = attr->attrList.at(i)->ESMC_Serialize(sendBuf,length,offset);
         if (localrc != ESMF_SUCCESS) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufSend failed Serialize", &localrc);
@@ -424,8 +473,8 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
     }
   }
   // if value changes 
-  else if (valueChange == ESMF_TRUE) {
-    localrc = ESMC_Serialize(sendBuf,length,offset);
+  else if (attr->valueChange == ESMF_TRUE) {
+    localrc = attr->ESMC_Serialize(sendBuf,length,offset);
     if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufSend failed Serialize", &localrc);
@@ -433,14 +482,15 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
       return ESMF_FAILURE;
     }
   }
+  }
     
   // make sure offset is aligned correctly
   nbytes=(*offset)%8;
   if (nbytes!=0) *offset += 8-nbytes;
   
   // recurse through the Attribute hierarchy
-  for (i=0; i<attrList.size(); i++) {
-    localrc = attrList.at(i)->AttributeUpdateBufSend(sendBuf,localPet,offset,length);
+  for (i=0; i<linkList.size(); i++) {
+    localrc = linkList.at(i)->AttributeUpdateBufSend(sendBuf,localPet,offset,length);
     if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufSend failed", &localrc);
@@ -488,20 +538,29 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
 
   char msgbuf[ESMF_MAXSTR];
   int localrc;
-  unsigned int i;
+  unsigned int i,j;
+  Attribute *attr;
+  
+  attr = NULL;
     
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
   
   ++(*numKeys);
   
-  if (linkChange == ESMF_TRUE) ++(*linkChanges);
-  if (structChange == ESMF_TRUE) {
-    if (attrRoot == ESMF_FALSE && attrPackHead == ESMF_FALSE) ++(*structChanges); }
-  if (valueChange == ESMF_TRUE) ++(*valueChanges);
+  for (j=0; j<packList.size(); j++) {
+    attr = packList.at(j);
+    for (i=0; i<attr->attrList.size(); i++) {
+      if (attr->attrList.at(i)->linkChange == ESMF_TRUE) ++(*linkChanges);
+      if (attr->attrList.at(i)->structChange == ESMF_TRUE) {
+        if (attr->attrList.at(i)->attrRoot == ESMF_FALSE && 
+          attr->attrList.at(i)->attrPackHead == ESMF_FALSE) ++(*structChanges); }
+      if (attr->attrList.at(i)->valueChange == ESMF_TRUE) ++(*valueChanges);
+    }
+  }
 
-  for(i=0; i<attrList.size(); ++i) {
-    localrc = attrList.at(i)->AttributeUpdateChanges(linkChanges,
+  for(i=0; i<linkList.size(); ++i) {
+    localrc = linkList.at(i)->AttributeUpdateChanges(linkChanges,
       structChanges,valueChanges,numKeys);
   }
   
@@ -759,6 +818,10 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
       if (attrList.at(i)->structChange == ESMF_TRUE) {
         ++numChanges;}
     }
+    for (i=0; i<packList.size(); ++i) {
+      if (packList.at(i)->structChange == ESMF_TRUE) {
+        ++numChanges;}
+    }
   }
   *(reinterpret_cast<int*> (key+offset)) = numChanges;
   offset += sizeof(int);
@@ -967,13 +1030,8 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  Attribute *attr;
-  attr = attrList.at(attrNum);
-  
-  attr->~Attribute();
+  delete attrList.at(attrNum);
   attrList.erase(attrList.begin() + attrNum);
-  if (attrNum<attrCount) attrCount--;
-  else packCount--;
   structChange = ESMF_TRUE;
 
   return ESMF_SUCCESS;
@@ -1013,6 +1071,14 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
 
   for(i=0; i<attrList.size(); ++i) {
     localrc = attrList.at(i)->AttributeUpdateReset();
+  }
+
+  for(i=0; i<packList.size(); ++i) {
+    localrc = packList.at(i)->AttributeUpdateReset();
+  }
+
+  for(i=0; i<linkList.size(); ++i) {
+    localrc = linkList.at(i)->AttributeUpdateReset();
   }
 
   return ESMF_SUCCESS;
