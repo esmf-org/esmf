@@ -443,6 +443,11 @@ void GeomRend::prep_meshes() {
   srcmesh_rend.RegisterField("coordinates", scoord.GetMEFamily(),
                    MeshObj::ELEMENT, scoord.GetContext(), scoord.dim());
   
+  MEField<> *smask = srcmesh.GetField("mask");
+  if (smask != NULL) {
+    srcmesh_rend.RegisterField("mask", smask->GetMEFamily(),
+		 MeshObj::ELEMENT, smask->GetContext(), smask->dim());
+  }
   
   // Destination Mesh //
   
@@ -487,14 +492,36 @@ void GeomRend::migrate_meshes() {
   srcComm.GetCommRel(MeshObj::EDGE).build_range();
   srcComm.GetCommRel(MeshObj::FACE).build_range();
   srcComm.GetCommRel(MeshObj::ELEMENT).build_range();
+
+
+  {  
+    int num_snd=0;
+    MEField<> *snd[2],*rcv[2];
+
+    MEField<> *sc = srcmesh.GetCoordField();
+    MEField<> *sc_r = srcmesh_rend.GetCoordField();
+
+    // load coordinate fields
+    snd[num_snd]=sc;
+    rcv[num_snd]=sc_r;
+    num_snd++;            
+
+    // Do masks if necessary
+    MEField<> *sm = srcmesh.GetField("mask");
+    if (sm != NULL) {
+      MEField<> *sm_r = srcmesh_rend.GetField("mask");
+
+      // load mask fields
+      snd[num_snd]=sm;
+      rcv[num_snd]=sm_r;
+      num_snd++;            
+    }
+
+     srcmesh_rend.Commit();
   
-  MEField<> *sc = srcmesh.GetCoordField();
-  MEField<> *sc_r = srcmesh_rend.GetCoordField();
-  
-  srcmesh_rend.Commit();
-  
-  srcComm.SendFields(1, &sc, &sc_r);
-  
+     srcComm.SendFields(num_snd, snd, rcv);
+  }
+
   
   // And now the destination
   dstComm.GetCommRel(MeshObj::NODE).build_range();

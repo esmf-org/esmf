@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.34 2009/04/21 22:32:40 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.35 2009/04/27 23:04:54 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -68,7 +68,7 @@ extern "C" void FTN(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
 extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                    Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, int *srcstaggerLoc,
                    Mesh **meshdstpp, ESMCI::Array **arraydstpp, int *dststaggerLoc,
-                   int *regridMethod, int *regridScheme,
+		   int *regridMethod, int *regridScheme, int *unmappedaction,
                    ESMC_RouteHandle **rh, int *has_rh, int *has_iw,
                    int *nentries, ESMCI::TempWeights **tweights,
                              int*rc) {
@@ -141,7 +141,7 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
         Throw() << "Regrid method:" << *regridMethod << " is not implemented";
     }
 
-    Interp interp(srcmesh, dstmesh, fpairs);
+    Interp interp(srcmesh, dstmesh, fpairs, *unmappedaction);
 
     IWeights wts;
  

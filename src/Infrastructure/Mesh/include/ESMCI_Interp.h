@@ -145,7 +145,7 @@ public:
    * Build the interpolation object.  The MEFields must be compatible in the
    * sense that they are all element based, or node based, etc...
    */
-  Interp(Mesh &src, Mesh &dest, const std::vector<FieldPair> &Fields);
+  Interp(Mesh &src, Mesh &dest, const std::vector<FieldPair> &Fields, int unmappedaction=ESMC_UNMAPPEDACTION_ERROR);
   
   ~Interp();
   

@@ -25,6 +25,10 @@ namespace ESMCI {
 
 class Mesh;
 
+// What to do if dest points aren't found
+#define ESMC_UNMAPPEDACTION_ERROR  0
+#define ESMC_UNMAPPEDACTION_IGNORE 1
+
 // The return type from search.  A list of source grid node to
 // destination grid element pairs
 struct Search_node_result {
@@ -47,7 +51,7 @@ struct Search_result {
 typedef std::vector<Search_result*> SearchResult;
 
 
-void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &result,
+void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, int unmappedaction, SearchResult &result,
             double stol = 1e-8, std::vector<const MeshObj*> *to_investigate = NULL);
 
 void OctSearch(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &result,

@@ -724,7 +724,7 @@ static GeomRend::DstConfig get_dst_config(Mesh &dest, const std::vector<Interp::
   return GeomRend::DstConfig(repF.ObjType(), otype, repF.GetContext(), nbor);
 }
   
-Interp::Interp(Mesh &src, Mesh &dest, const std::vector<FieldPair> &_fpairs) :
+Interp::Interp(Mesh &src, Mesh &dest, const std::vector<FieldPair> &_fpairs, int unmappedaction) :
 sres(),
 grend(src, dest, get_dst_config(dest, _fpairs)),
 fpairs(_fpairs),
@@ -760,7 +760,7 @@ dstmesh(dest)
 #define MYSEARCH
 #ifdef MYSEARCH
 //    if (Par::Rank() == 0) std::cout << "Start search" << std::endl;
-    Search(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), sres);
+    Search(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), unmappedaction, sres, 1e-8);
 //    if (Par::Rank() == 0) std::cout << "end search" << std::endl;
 #else
 /*
@@ -781,7 +781,7 @@ dstmesh(dest)
     // the subset of the mesh for interpolating??)
 #ifdef MYSEARCH
 //    if (Par::Rank() == 0) std::cout << "Start search" << std::endl;
-    Search(src, dest, search_obj_type, sres);
+    Search(src, dest, search_obj_type, unmappedaction, sres, 1e-8);
 //    if (Par::Rank() == 0) std::cout << "end search" << std::endl;
 #else
 /*

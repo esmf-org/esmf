@@ -1468,7 +1468,7 @@
           !---------------------------------------------------------------------
           select case( PDS%process%tag )
              case( Harness_BilinearRegrid )
-                call ESMF_FieldRegridStore(srcField, dstField, routeHandle=routeHandle,    &
+                call ESMF_FieldRegridStore(srcField, dstField=dstField, routeHandle=routeHandle,    &
                         regridMethod=ESMF_REGRID_METHOD_BILINEAR, rc=localrc)
                 if (ESMF_LogMsgFoundError(localrc,"Field Bilinear Regrid " //  &
                         "store failed", rcToReturn=rc)) return
@@ -1478,7 +1478,7 @@
 
 #ifdef ESMF_LAPACK
                 libflag = 1  ! 
-                call ESMF_FieldRegridStore(srcField, dstField, routeHandle=routeHandle,    &
+                call ESMF_FieldRegridStore(srcField, dstField=dstField, routeHandle=routeHandle,    &
                         regridMethod=ESMF_REGRID_METHOD_PATCH, rc=localrc)
                 if (ESMF_LogMsgFoundError(localrc,"Field Patch Regrid " // &
                         "store failed", rcToReturn=rc)) return

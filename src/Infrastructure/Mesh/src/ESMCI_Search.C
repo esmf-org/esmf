@@ -108,13 +108,16 @@ public:
 };
 
 // The main routine
-void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &result, double stol,
+void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, int unmappedaction, SearchResult &result, double stol,
      std::vector<const MeshObj*> *to_investigate) {
   Trace __trace("Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &result, double stol, std::vector<const MeshObj*> *to_investigate");
 
 
   MEField<> &coord_field = *src.GetCoordField();
-  
+
+  MEField<> *src_mask_field_ptr = src.GetField("mask");
+
+
   // Destination coordinate is only a _field, not an MEField, since there
   // are no master elements.
   _field *dcptr = dest.Getfield("coordinates_1");
@@ -226,12 +229,36 @@ void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &
     Kernel::obj_const_iterator ei = ker.obj_begin(), ee = ker.obj_end();
     
     MasterElement<> &cme = *GetME(coord_field, ker)(METraits<>());
-    
+
     std::vector<double> node_coord(cme.num_functions()*src.spatial_dim());
+
+    // Setup for source masks, if used
+    std::vector<double> src_node_mask;
+    MasterElement<> *mme;
+    if (src_mask_field_ptr != NULL) {
+      mme=GetME(*src_mask_field_ptr, ker)(METraits<>());
+      src_node_mask.reserve(mme->num_functions());
+    }
     
     for (; ei != ee; ++ei) {
       const MeshObj &elem = *ei;
    
+      // Check mask
+      if (src_mask_field_ptr != NULL) {
+	GatherElemData<>(*mme, *src_mask_field_ptr, elem, &src_node_mask[0]);
+
+	bool masked=false;
+	for (int i=0; i< mme->num_functions(); i++) {
+	  if (src_node_mask[i] > 0.5) {
+	    masked=true;
+	    break;
+	  }
+	}
+
+	// if masked go to next element
+	if (masked) continue;
+      }
+
      BBox bounding_box(coord_field, elem, 0.15);
   
      // First check to see if the box even intersects the dest mesh bounding
@@ -334,18 +361,29 @@ void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &
   
     // Sort search result for lookup
   std::sort(result.begin(), result.end(), Search_Res_Less());
+  
 
   // Let us see if any pointers are left to erase
   UInt nres = 0;
   UInt nbad = 0;
-  const bool try_again = true;
+  const bool try_again = true; 
   std::vector<const MeshObj*> iagain;
   std::vector<Search_index*>::iterator si = sidx[0].begin(), se = sidx[0].end();
   for (; si != se; ++si) {
     nbad++;
     if ((*si)->best_elem == NULL) {
-      std::cout << "Could not locate:" << **si << ", with found_flag=" << (*si)->found_flag << std::endl;
-      if (try_again) iagain.push_back(dest_nlist[(*si)->index]);
+      // std::cout << "Could not locate:" << **si << ", with found_flag=" << (*si)->found_flag << std::endl;
+      if (try_again) {
+	iagain.push_back(dest_nlist[(*si)->index]);
+      } else {
+	if (unmappedaction == ESMC_UNMAPPEDACTION_ERROR) {
+	  Throw() << " Some destination points cannot be mapped to source grid";
+	} else if (unmappedaction == ESMC_UNMAPPEDACTION_IGNORE) {
+	  // don't do anything
+	} else {
+	  Throw() << " Unknown unmappedaction option";
+	}
+      }
     } else {
       Search_result *srtmp = new Search_result;
       srtmp->elem = (*si)->best_elem;
@@ -368,15 +406,21 @@ void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &
   // Remove storage for dest_nlist.
   std::vector<const MeshObj*>().swap(dest_nlist);
 
-  if (try_again && iagain.size() != 0) {
-     if (stol > 1e-6) {
-       std::cout << "Bailing, since stol=" << stol << " which is above limit" << std::endl;
-     } else {
-       std::cout << "Going again to resolve " << iagain.size() << " items, with stol=" << stol*1e-2 << std::endl;
-       Search(src, dest, dst_obj_type, result, stol*1e+2, &iagain);
-     }
-  }
-    
+  if (try_again && iagain.size() !=0) {
+    if (stol > 1e-6) {
+      if (unmappedaction == ESMC_UNMAPPEDACTION_ERROR) {
+	Throw() << " Some destination points cannot be mapped to source grid";
+      } else if (unmappedaction == ESMC_UNMAPPEDACTION_IGNORE) {
+	// don't do anything
+      } else {
+	Throw() << " Unknown unmappedaction option";
+      }
+      //       std::cout << "Bailing, since stol=" << stol << " which is above limit" << std::endl;
+    } else {
+      //       std::cout << "Going again to resolve " << iagain.size() << " items, with stol=" << stol*1e-2 << std::endl;
+      Search(src, dest, dst_obj_type, unmappedaction, result, stol*1e+2, &iagain);
+    }
+  }     
 }
 
 

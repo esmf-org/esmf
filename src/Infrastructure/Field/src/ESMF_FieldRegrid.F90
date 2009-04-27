@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.18 2009/04/21 23:15:25 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.19 2009/04/27 23:04:54 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.18 2009/04/21 23:15:25 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.19 2009/04/27 23:04:54 oehmke Exp $'
 
 !==============================================================================
 !
@@ -196,16 +196,18 @@ contains
 !
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridStore()
-      subroutine ESMF_FieldRegridStore(srcField, dstField, dstMaskValues, &
-                   routeHandle, indicies, weights, regridMethod, &
+      subroutine ESMF_FieldRegridStore(srcField, srcMaskValues, dstField, dstMaskValues, &
+                   unmappedDstAction, routeHandle, indicies, weights, regridMethod, &
                    regridScheme, rc)
 !
 ! !RETURN VALUE:
-!
+!      
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout)                 :: srcField
+      integer(ESMF_KIND_I4), intent(in), optional     :: srcMaskValues(:)
       type(ESMF_Field), intent(inout)                 :: dstField
       integer(ESMF_KIND_I4), intent(in), optional     :: dstMaskValues(:)
+      type(ESMF_UnmappedAction), intent(in), optional :: unmappedDstAction
       type(ESMF_RouteHandle), intent(inout), optional :: routeHandle
       integer(ESMF_KIND_I4), pointer, optional        :: indicies(:,:)
       real(ESMF_KIND_R8), pointer, optional           :: weights(:)
@@ -221,11 +223,20 @@ contains
 !     \begin{description}
 !     \item [srcField]
 !           Source Field.
+!     \item [{[srcMaskValues]}]
+!           List of values that indicate a source point should be masked out. 
+!           If not specified, no masking will occur. 
 !     \item [dstField]
 !           Destination Field.
 !     \item [{[dstMaskValues]}]
 !           List of values that indicate a destination point should be masked out. 
-!           If not specified, no masking will occur. 
+!           If not specified, no masking will occur.
+!     \item [{[unmappedDstAction]}]
+!           Specifies what should happen if there are destination points that
+!           can't be mapped to a source cell. Options are 
+!           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
+!           {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
+!           to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
 !     \item [{[routeHandle]}]
 !           The handle that implements the regrid and that can be used in later 
 !           {\tt ESMF\_FieldRegrid}.
@@ -311,7 +322,7 @@ contains
           if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) isSphere = 1
 
           srcMesh = ESMF_GridToMesh(srcGrid, staggerLoc%staggerloc, isSphere, &
-                      rc=localrc)
+                      srcMaskValues, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -342,10 +353,9 @@ contains
         ! At this point, we have the meshes, so we are ready to call
         ! the 'mesh only' interface of the regrid.
 
-
         ! call into the Regrid mesh interface
         call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
-              regridMethod, lregridScheme, routeHandle, &
+              regridMethod, lregridScheme, unmappedDstAction, routeHandle, &
               indicies, weights, localrc)
 
         if (ESMF_LogMsgFoundError(localrc, &

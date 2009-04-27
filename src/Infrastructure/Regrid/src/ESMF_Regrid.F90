@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.135 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_Regrid.F90,v 1.136 2009/04/27 23:04:54 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -72,6 +72,17 @@
            ESMF_REGRID_METHOD_PATCH       = ESMF_RegridMethod(1), &
            ESMF_REGRID_METHOD_CONSERV1    = ESMF_RegridMethod(2)
 
+
+      type ESMF_UnmappedAction
+      sequence
+!  private
+         integer :: unmappedaction
+      end type
+
+      type(ESMF_UnmappedAction), parameter :: &
+           ESMF_UNMAPPEDACTION_ERROR    = ESMF_UnmappedAction(0), &
+           ESMF_UNMAPPEDACTION_IGNORE   = ESMF_UnmappedAction(1)
+
       integer, parameter :: ESMF_REGRID_SCHEME_FULL3D = 0, &
                             ESMF_REGRID_SCHEME_NATIVE = 1                            
 
@@ -89,6 +100,9 @@
        public ESMF_RegridMethod,  ESMF_REGRID_METHOD_BILINEAR, &
                                   ESMF_REGRID_METHOD_PATCH, &
                                   ESMF_REGRID_METHOD_CONSERV1
+
+       public ESMF_UnmappedAction, ESMF_UNMAPPEDACTION_ERROR, &
+                                   ESMF_UNMAPPEDACTION_IGNORE
 
        public ESMF_REGRID_SCHEME_FULL3D, &
               ESMF_REGRID_SCHEME_NATIVE
@@ -114,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.135 2009/01/21 21:38:01 cdeluca Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.136 2009/04/27 23:04:54 oehmke Exp $'
 
 !==============================================================================
 !
@@ -266,7 +280,7 @@ end function my_xor
       subroutine ESMF_RegridStore(srcMesh, srcArray, &
                  dstMesh, dstArray, &
                  regridMethod, regridScheme, &
-                 routehandle, &
+                 unmappedDstAction, routehandle, &
                  indicies, weights, rc)
 !
 ! !ARGUMENTS:
@@ -276,6 +290,7 @@ end function my_xor
       type(ESMF_Array), intent(inout)        :: dstArray
       type(ESMF_RegridMethod), intent(in)    :: regridMethod
       integer, intent(in)                    :: regridScheme
+      type(ESMF_UnmappedAction), intent(in), optional :: unmappedDstAction
       type(ESMF_RouteHandle),  intent(inout), optional :: routehandle
       integer(ESMF_KIND_I4), pointer, optional         :: indicies(:,:)
       real(ESMF_KIND_R8), pointer, optional            :: weights(:)
@@ -296,6 +311,12 @@ end function my_xor
 !          The interpolation method to use.
 !     \item[regridScheme]
 !          Whether to use 3d or native coordinates
+!     \item [{[unmappedDstAction]}]
+!           Specifies what should happen if there are destination points that
+!           can't be mapped to a source cell. Options are 
+!           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
+!           {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
+!           to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
 !     \item[routeHandle]
 !          Handle to store the resulting sparseMatrix
 !     \item[{rc}]
@@ -307,6 +328,7 @@ end function my_xor
        type(ESMF_VM)        :: vm
        integer :: has_rh, has_iw, nentries
        type(ESMF_TempWeights) :: tweights
+       type(ESMF_UnmappedAction) :: localunmappedDstAction
 
        ! Logic to determine if valid optional args are passed.  
 
@@ -351,10 +373,16 @@ end function my_xor
        if (present(routehandle)) has_rh = 1
        if (present(indicies)) has_iw = 1
 
+       if (present(unmappedDstAction)) then
+          localunmappedDstAction=unmappedDstAction
+       else	
+          localunmappedDstAction=ESMF_UNMAPPEDACTION_ERROR
+       endif
+
        ! Call through to the C++ object that does the work
        call c_ESMC_regrid_create(vm, srcMesh%this, srcArray, staggerLoc,  &
                    dstMesh%this, dstArray, staggerLoc%staggerloc, &
-                   regridMethod, regridScheme, &
+                   regridMethod, regridScheme, localunmappedDstAction%unmappedaction, &
                    routehandle, has_rh, has_iw, &
                    nentries, tweights, &
                    localrc)
