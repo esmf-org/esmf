@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.24 2009/04/21 21:19:18 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.25 2009/04/28 15:54:17 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.24 2009/04/21 21:19:18 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.25 2009/04/28 15:54:17 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -261,7 +261,8 @@ program ESMF_FieldRegridEx
 !EOE
 
 !BOC
-  call ESMF_FieldRegridStore(srcField, dstField, routeHandle=routeHandle, &
+  call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                  routeHandle=routeHandle, &
                   indicies=indicies, weights=weights, &
                   regridMethod=ESMF_REGRID_METHOD_BILINEAR, rc=localrc)
 !EOC

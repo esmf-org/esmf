@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSphereRegridEx.F90,v 1.18 2009/04/21 21:19:18 oehmke Exp $
+! $Id: ESMF_FieldSphereRegridEx.F90,v 1.19 2009/04/28 15:54:17 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@ program ESMF_FieldSphereRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.18 2009/04/21 21:19:18 oehmke Exp $'
+    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.19 2009/04/28 15:54:17 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -312,7 +312,7 @@ program ESMF_FieldSphereRegridEx
 !EOE
 
 !BOC
-  call ESMF_FieldRegridStore(srcField, dstField, &
+  call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
           routeHandle=routeHandle, &
           regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
@@ -320,8 +320,8 @@ program ESMF_FieldSphereRegridEx
 
   ! The patch recovery interpolant
 #ifdef ESMF_LAPACK
-  call ESMF_FieldRegridStore(srcField, dstField1, &
-          routeHandle1, &
+  call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField1, &
+          routeHandle=routeHandle1, &
           regridMethod=ESMF_REGRID_METHOD_PATCH, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
 !EOC
