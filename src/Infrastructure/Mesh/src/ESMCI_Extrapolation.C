@@ -433,23 +433,50 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
     pole_coord[0] = new_coords[0];
     pole_coord[1] = new_coords[1];
     pole_coord[2] = new_coords[2];
+
+    // Get mask field
+    MEField<> *mask_ptr = mesh.GetField("mask");
       
+    //  MEField<> &coords = *mesh.GetCoordField();
+
+    // Count number of valid points around pole
+    int points_around_pole=0;
+    if (mask_ptr!=NULL) {
+      for (bf_i = nodes.begin(); bf_i != nodes.end(); ++bf_i) {
+	double *m = mask_ptr->data(**bf_i);
+	if (*m < 0.5) points_around_pole++;
+      }
+    } else {
+      points_around_pole=nfound;
+    }
+
     // Put together the constraint
-    double val = 1.0 / nfound;
-      
+    double val;
+    if (points_around_pole != 0) val = 1.0 / points_around_pole;
+    else val = 0.0;  // if all nodes around pole are masked, the constraint
+                     // shouldn't be used anyways. 
         
-    IWeights::Entry row(pnode->get_id(), 0);
-        
+
+    // Construct constraint row d
+    IWeights::Entry row(pnode->get_id(), 0); 
     std::vector<IWeights::Entry> col;
         
-    bf_i = nodes.begin();
+    if (mask_ptr != NULL) {        
+      for (bf_i = nodes.begin(); bf_i != nodes.end(); ++bf_i) {
+	MeshObj &node = **bf_i;
+	double *m = mask_ptr->data(node);
+	
+	if (*m < 0.5) col.push_back(IWeights::Entry(node.get_id(), 0, val));
+      }
+      
+    } else {
+      for (bf_i = nodes.begin(); bf_i != nodes.end(); ++bf_i) {
         
-    for (; bf_i != nodes.end(); ++bf_i) {
-        
-      MeshObj &node = **bf_i;
-          
-      col.push_back(IWeights::Entry(node.get_id(), 0, val));
-          
+	MeshObj &node = **bf_i;
+	
+	col.push_back(IWeights::Entry(node.get_id(), 0, val));
+	
+      }
     }
         
     cweights.InsertRow(row, col);
