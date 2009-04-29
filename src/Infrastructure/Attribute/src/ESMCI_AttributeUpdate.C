@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.12 2009/04/27 14:44:59 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.13 2009/04/29 23:32:55 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.12 2009/04/27 14:44:59 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.13 2009/04/29 23:32:55 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -563,21 +563,22 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
   
   ++(*numKeys);
   
-  for (j=0; j<packList.size(); j++) {
-    attr = packList.at(j);
-    for (i=0; i<attr->attrList.size(); i++) {
-      if (attr->attrList.at(i)->linkChange == ESMF_TRUE) ++(*linkChanges);
-      if (attr->attrList.at(i)->structChange == ESMF_TRUE) {
-        if (attr->attrList.at(i)->attrRoot == ESMF_FALSE && 
-          attr->attrList.at(i)->attrPackHead == ESMF_FALSE) ++(*structChanges); }
-      if (attr->attrList.at(i)->valueChange == ESMF_TRUE) ++(*valueChanges);
-    }
+  for (i=0; i<attrList.size(); ++i) {
+    ++(*numKeys);
+    if (attrList.at(i)->linkChange == ESMF_TRUE) ++(*linkChanges);
+    if (attrList.at(i)->structChange == ESMF_TRUE) {
+      if (attrList.at(i)->attrRoot == ESMF_FALSE && 
+        attrList.at(i)->attrPackHead == ESMF_FALSE) ++(*structChanges); }
+    if (attrList.at(i)->valueChange == ESMF_TRUE) ++(*valueChanges);
   }
 
-  for(i=0; i<linkList.size(); ++i) {
+  for (i=0; i<packList.size(); ++i)
+    localrc = packList.at(i)->AttributeUpdateChanges(linkChanges,
+      structChanges, valueChanges, numKeys);
+  
+  for(i=0; i<linkList.size(); ++i)
     localrc = linkList.at(i)->AttributeUpdateChanges(linkChanges,
       structChanges,valueChanges,numKeys);
-  }
   
   return ESMF_SUCCESS;
   
