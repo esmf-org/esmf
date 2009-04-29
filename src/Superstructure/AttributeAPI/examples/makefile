@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2009/04/27 14:45:36 rokuingh Exp $
+# $Id: makefile,v 1.9 2009/04/29 05:57:35 eschwab Exp $
 
 ALL:      build_examples
 run:      run_examples
@@ -9,16 +9,22 @@ LOCDIR	  = src/Superstructure/AttributeAPI/examples
 
 EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_AttributeEx \
 		    $(ESMF_EXDIR)/ESMF_AttributePackageEx \
-                    $(ESMF_EXDIR)/ESMF_AttributeUpdateEx
+		    $(ESMF_EXDIR)/ESMF_AttributeUpdateEx \
+		    $(ESMF_EXDIR)/ESMF_AttReadGridCompEx \
+                    $(ESMF_EXDIR)/ESMF_AttReadFieldEx
 
 ESMF_EXAMPLE_AttributeUpdate_OBJS = ESMF_AttributeUpdateMod.o
 
 EXAMPLES_RUN      = run_ESMF_AttributeEx \
 		    run_ESMF_AttributePackageEx \
-                    run_ESMF_AttributeUpdateEx
+		    run_ESMF_AttributeUpdateEx \
+		    run_ESMF_AttReadGridCompEx \
+                    run_ESMF_AttReadFieldEx
 
 EXAMPLES_RUN_UNI  = run_ESMF_AttributeEx_uni \
-                    run_ESMF_AttributePackageEx_uni
+		    run_ESMF_AttributePackageEx_uni \
+		    run_ESMF_AttReadGridCompEx_uni \
+                    run_ESMF_AttReadFieldEx_uni
 
 ESMF_AttributeUpdateEx.o : $(ESMF_EXAMPLE_AttributeUpdate_OBJS)
 
@@ -55,4 +61,23 @@ run_ESMF_AttributePackageEx_uni:
 run_ESMF_AttributeUpdateEx:
 	$(MAKE) EXNAME=AttributeUpdate NP=4 exfrun
 
+# --- ESMF_AttReadGridCompEx
+
+run_ESMF_AttReadGridCompEx:
+	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_EXDIR)
+	$(MAKE) EXNAME=AttReadGridComp NP=4 exfrun
+
+run_ESMF_AttReadGridCompEx_uni:
+	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_EXDIR)
+	$(MAKE) EXNAME=AttReadGridComp NP=1 exfrun
+
+# --- ESMF_AttReadFieldEx
+
+run_ESMF_AttReadFieldEx:
+	cp -f $(ESMF_DIR)/src/Infrastructure/Field/etc/esmf_field.xml $(ESMF_EXDIR)
+	$(MAKE) EXNAME=AttReadField NP=4 exfrun
+
+run_ESMF_AttReadFieldEx_uni:
+	cp -f $(ESMF_DIR)/src/Infrastructure/Field/etc/esmf_field.xml $(ESMF_EXDIR)
+	$(MAKE) EXNAME=AttReadField NP=1 exfrun
 
