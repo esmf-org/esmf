@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.28 2009/04/29 22:14:10 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.29 2009/04/29 23:06:25 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.28 2009/04/29 22:14:10 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.29 2009/04/29 23:06:25 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -242,20 +242,29 @@ namespace ESMCI {
                                msgbuf, &localrc);
       return ESMF_FAILURE;
     }
-    localrc = AttPackAddAttribute("area", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("dimension_order", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("discretization_type", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("geometry_type", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("grid_type", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("horizontal_dimension_value", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("IsConformal", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("IsRegular", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("IsUniform", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("north_pole_location", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("number_of_cells", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("number_of_dimensions", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("pole_covered", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("verical_dimension_value", "GridSpec", "general", object);
+    // TODO: congruenttiles & gridtype will be at the mosaic level,
+    //       others at the tile level
+    localrc = AttPackAddAttribute("congruenttiles", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("gridtype", "GridSpec", "general", object);
+
+    // TODO: area & coordinatepoles await further spec from Sylvia Murphy & Co.
+    //localrc = AttPackAddAttribute("area", "GridSpec", "general", object);
+    //localrc = AttPackAddAttribute("coordinatepoles", "GridSpec", "general", object);
+
+    localrc = AttPackAddAttribute("dimorder", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("discretizationtype", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("geometrytype", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("isconformal", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("ispolecovered", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("isregular", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("isuniform", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("northpolelocation", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("numberofcells", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("numdims", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("nx", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("ny", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("nz", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("resolution", "GridSpec", "general", object);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed creating grid standard attpack");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
