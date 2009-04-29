@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.18 2009/04/27 01:20:54 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.19 2009/04/29 22:14:10 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -132,9 +132,12 @@ class Attribute
     
     // count the number of objects in an attribute hierarchy
     int AttributeCountTree(const string &convention, const string &purpose,  
-      const string &object, int &objCount, int &objmaxattrCount) const;
+      const string &object, int &objcount, int &numattrs) const;
+    int AttributeCountTreeAttpack(int &objcount, int& numattrs) const;
     int AttributeCountTreeLens(const string &convention, const string &purpose,  
       const string &object, int *attrLens, vector<string> &attrNames) const;
+    int AttributeCountTreeLensAttpack(int &index, int *attrLens, 
+      vector<string> &attrNames) const;
     
     // attribute methods - get
     int AttributeGet(const string &name, ESMC_I4 *value) const;
@@ -195,7 +198,7 @@ class Attribute
     
     // recursive call to set all attributes with attrObject = object
     int AttributeSetObjsInTree(const string &name, const string &object, 
-      const ESMC_TypeKind &tk, int count, void *value);
+      const ESMC_TypeKind &tk, const int &count, void *value);
 
     // attribute update
     int AttributeUpdate(VM *vm, const vector<ESMC_I4> &rootList);
@@ -219,14 +222,21 @@ class Attribute
     // attribute write methods
     int AttributeWriteTab(const string &convention, const string &purpose, 
       const string &object, const string &varobj, const string &basename) const;
-    int AttributeWriteTabrecurse(FILE *tab, const string &convention, 
-      const string &purpose, const string &obj, int *attrLens, 
-      const vector<string> &attrNames, const int &maxattrs, int &count) const;
+    int AttributeWriteTabTraverse(FILE *tab, const string &convention, const string &purpose,
+      int &index, const int &columns, int *attrLens, const vector<string> &attrNames) const;
+    int AttributeWriteTabBuffer(FILE *tab, int &index, const int &columns, 
+      int *attrLens, const vector<string> &attrNames) const;
+
     int AttributeWriteXML(const string &convention, const string &purpose, 
       const string &object, const string &varobj, const string &basename) const;
-    int AttributeWriteXMLrecurse(FILE *xml, const string &convention, 
-      const string &purpose, const string &object, const string &varobj, 
-      const int &stop, int &fldcount) const;
+    int AttributeWriteXMLtraverse(FILE *xml, const string &convention,const string &purpose,
+      const int &columns,bool &fielddone,bool &griddone,bool &compdone) const;
+    int AttributeWriteXMLbuffer(FILE *xml) const;
+    int AttributeWriteXMLbufferfield(FILE *xml, const string &convention, const string &purpose, 
+      int &index, const int &columns) const;
+    int AttributeWriteXMLbufferfieldT(FILE *xml, int &index, const int &columns) const;
+
+    // Print
     int ESMC_Print(void) const;
 
     // Modifiers, Constructors, Destructors, Serializers, Operators

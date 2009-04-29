@@ -196,14 +196,21 @@ program ESMF_AttributeSTest
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     
   ! link the Component Attribute hierarchy to State
-  call ESMF_AttributeLink(comp2, c2imp, rc=rc)
+  call ESMF_AttributeLink(comp1, c1exp, rc=rc)
+  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  
+  ! don't have to link, because we are doing the hybrid copy later on
+  ! link the Component Attribute hierarchy to State
+!  call ESMF_AttributeLink(comp2, c2imp, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   
   ! now call AttributeUpdate to get a VM wide view of the
   ! metadata set on comp1 in comp1initialize
-  call ESMF_AttributeUpdate(comp1, vm, rootList=(/0,1,2/), rc=rc)
+!  call ESMF_AttributeUpdate(comp1, vm, rootList=(/0,1,2/), rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -243,6 +250,7 @@ program ESMF_AttributeSTest
   ! The XML format will also send the output to an .xml in this directory
   conv = 'ESMF'
   purp = 'general'
+  ! AttributeUpdate is not called so we are only printing from PET0 for now
   if (localPet .eq. 0) then
     call ESMF_AttributeWrite(comp1,conv,purp,rc=rc)
     call ESMF_AttributeWrite(comp2,conv,purp,rc=rc)

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.27 2009/04/27 14:44:59 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.28 2009/04/29 22:14:10 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.27 2009/04/27 14:44:59 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.28 2009/04/29 22:14:10 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -431,17 +431,9 @@ namespace ESMCI {
     return ESMF_FAILURE;
   }
   
-  // Put nestpack onto attpack, save parent first
   localParent = nestpack->parent;
-  localrc = attpack->AttPackSet(nestpack);
-  if (localrc != ESMF_SUCCESS) {
-    sprintf(msgbuf, "failed adding an attpack to an Attribute");
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               msgbuf, &localrc);
-    return ESMF_FAILURE;
-  }
-  
-  // Now remove nestpack from it's parent (now localParent)
+
+  // Now remove nestpack from it's parent
   for (i=0; i<localParent->packList.size(); i++) {
     if (nestConvention.compare(localParent->packList.at(i)->attrConvention)==0 && 
         nestPurpose.compare(localParent->packList.at(i)->attrPurpose)==0 &&
@@ -451,6 +443,15 @@ namespace ESMCI {
       done = true;
       break;
     }
+  }
+  
+  // Put nestpack onto attpack
+  localrc = attpack->AttPackSet(nestpack);
+  if (localrc != ESMF_SUCCESS) {
+    sprintf(msgbuf, "failed adding an attpack to an Attribute");
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
+    return ESMF_FAILURE;
   }
   
   if (!done) {
@@ -1259,8 +1260,59 @@ namespace ESMCI {
       const string &convention,                 // in - convention
       const string &purpose,                    // in - purpose
       const string &object,                     // in - object type to look for
-      int &objCount,                    // inout - count of objects in tree
-      int &objmaxattrCount ) const{     // inout - max count of attrs on objects in tree
+      int &objcount,             // inout - object count
+      int &numattrs ) const{     // inout - count of attrs on objects in tree
+// 
+// !DESCRIPTION:
+//     Count the number of objects in the {\tt Attribute} hierarchy 
+
+//EOPI
+
+  int localrc;
+  char msgbuf[ESMF_MAXSTR];
+  unsigned int i;
+  Attribute *attpack;
+
+  attpack = NULL;
+
+  // Initialize local return code
+  localrc = ESMC_RC_NOT_IMPL;
+ 
+  attpack = AttPackGet(convention, purpose, object);
+  if (attpack) {
+    numattrs = 0;
+    objcount++;
+    localrc = attpack->AttributeCountTreeAttpack(objcount, numattrs);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "AttributeCountTree() bailed in AttributeCountTreeAttpack()");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
+  }
+
+  // Recurse the hierarchy
+  for (i=0; i<linkList.size(); i++)
+    localrc = linkList.at(i)->AttributeCountTree(convention, purpose, object, 
+      objcount, numattrs);
+
+  return ESMF_SUCCESS;
+
+}  // end AttributeCountTree
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeCountTreeAttpack"
+//BOPI
+// !IROUTINE:  AttributeCountTreeAttpack - count objects in {\tt Attribute} hierarchy 
+//
+// !INTERFACE:
+      int Attribute::AttributeCountTreeAttpack(
+// 
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      int &objcount,             // inout - count of objects to write
+      int &numattrs ) const{     // inout - count of attrs on objects in tree
 // 
 // !DESCRIPTION:
 //     Count the number of objects in the {\tt Attribute} hierarchy 
@@ -1272,34 +1324,16 @@ namespace ESMCI {
 
   // Initialize local return code
   localrc = ESMC_RC_NOT_IMPL;
-  
-  // look at this Attribute
-  for (i=0; i<attrList.size(); i++) {
-  // If this is object matches, count it
-  if (convention.compare(attrList.at(i)->attrConvention) == 0 && 
-      purpose.compare(attrList.at(i)->attrPurpose) == 0 &&
-      object.compare(attrList.at(i)->attrObject) == 0) {
-    objCount++;
-    if (objmaxattrCount < attrList.size())
-      objmaxattrCount = attrList.size();
-  }
-  }
-  
-  // recurese through the Attribute packages
-  for (i=0; i<packList.size(); i++) {
-    localrc = packList.at(i)->AttributeCountTree(convention, purpose, object, 
-      objCount, objmaxattrCount);
-  }
-  
+
+  numattrs += attrList.size(); 
+
   // Recurse the hierarchy
-  for (i=0; i<linkList.size(); i++) {
-    localrc = linkList.at(i)->AttributeCountTree(convention, purpose, object, 
-      objCount, objmaxattrCount);
-  }
-  
+  for (i=0; i<packList.size(); i++)
+    localrc = packList.at(i)->AttributeCountTreeAttpack(objcount,numattrs);
+
   return ESMF_SUCCESS;
 
-}  // end AttributeCountTree
+}  // end AttributeCountTreeAttpack
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeCountTreeLens"
@@ -1313,84 +1347,118 @@ namespace ESMCI {
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      const string &convention,                 // in - convention
-      const string &purpose,                    // in - purpose
-      const string &object,                     // in - object type to look for
-      int *attrLens,                    // inout - lengths of values
-      vector<string> &attrNames ) const{         // inout - names to match values
+      const string &convention,           // in - convention
+      const string &purpose,              // in - purpose
+      const string &object,               // in - object type to look for
+      int *attrLens,                      // inout - lengths of column names
+      vector<string> &attrNames ) const{  // inout - names of columns
 // 
 // !DESCRIPTION:
-//     Find the length of {\tt Attribute} values and names to go with them.
+//     Count the number of objects in the Attribute hierarchy
 
 //EOPI
 
   char msgbuf[ESMF_MAXSTR];
-  int localrc, len;
-  unsigned int i,j;
-  Attribute *attr;
+  int localrc;
+  unsigned int i;
+  int index;
+  Attribute *attpack;
   
-  attr = NULL;
+  attpack = NULL;
 
   // Initialize local return code
   localrc = ESMC_RC_NOT_IMPL;
   
-  for (i=0; i<packList.size(); i++) {
-  // If this is object matches
-  if (convention.compare(packList.at(i)->attrConvention) == 0 && 
-      purpose.compare(packList.at(i)->attrPurpose) == 0 &&
-      object.compare(packList.at(i)->attrObject) == 0) {
-    attr = packList.at(i);
-    for(j=0; j<attr->attrList.size(); j++) {
-      // add name
-      if (attrLens[j] == 0) {
-        attrNames.push_back(attr->attrList.at(j)->attrName);
-      }
-      // check name
-      else if (attrLens[j] > 0) {
-        if (attrNames[j].compare(attr->attrList.at(j)->attrName) != 0) {
-          sprintf(msgbuf, "Attribute package name out of order");
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-          return ESMF_FAILURE;
-        }
-      }
-      else {
-        sprintf(msgbuf, "length < 0 = no good.");
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-          return ESMF_FAILURE;
-      }
-      // add length
-      if (attr->attrList.at(j)->items > 1) {
-        sprintf(msgbuf, "Write items > 1 - Not yet implemented\n");
-        ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
-        attrLens[j] = 0;
-      }
-      else if (attr->attrList.at(j)->items == 1) {
-        if (attr->attrList.at(j)->tk == ESMC_TYPEKIND_LOGICAL) {
-          attrLens[j] = 8;
-        }
-        else if (attr->attrList.at(j)->tk == ESMC_TYPEKIND_CHARACTER) {
-          if ((attr->attrList.at(j)->vcp.size())+3 > attrLens[j])
-            attrLens[j] = (attr->attrList.at(j)->vcp.size())+3;
-        }
-        else {
-          sprintf(msgbuf, "working on counting digits");
-          ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
-          //***FIXME*** here we do log10(number) + 4
-          attrLens[j] = 10;
-        }
-      }
+  attpack = AttPackGet(convention, purpose, object);
+  if (attpack) {
+    index = 0;
+    localrc = attpack->AttributeCountTreeLensAttpack(index, attrLens, attrNames);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "AttributeCountTreeLens() bailed in AttributeCountTreeLensAttpack()");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      return ESMF_FAILURE;
     }
-  }}
-  
-  // Recurse the hierarchy
-  for (i=0; i<linkList.size(); i++) {
-    localrc = linkList.at(i)->AttributeCountTreeLens(convention, purpose, object, 
-      attrLens, attrNames);
   }
+
+  // Recurse the hierarchy
+  for (i=0; i<linkList.size(); ++i)
+    localrc = linkList.at(i)->AttributeCountTreeLens(convention, purpose, object, attrLens, attrNames);
   
   return ESMF_SUCCESS;
 
 }  // end AttributeCountTreeLens
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeCountTreeLensAttpack"
+//BOPI
+// !IROUTINE:  AttributeCountTreeLensAttpack - get lengths and names of columns
+//
+// !INTERFACE:
+      int Attribute::AttributeCountTreeLensAttpack(
+// 
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      int &index,               // in - index counter
+      int *attrLens,                      // inout - lengths of column names
+      vector<string> &attrNames ) const{  // inout - names of columns
+// 
+// !DESCRIPTION:
+//     Get the lengths and names of the columns in the table
+
+//EOPI
+
+  int localrc;
+  char msgbuf[ESMF_MAXSTR];
+  unsigned int i;
+  
+  // Initialize local return code
+  localrc = ESMC_RC_NOT_IMPL;
+  
+  for (i=0; i<attrList.size(); ++i) {
+    if (attrLens[index] == 0)
+      attrNames.push_back(attrList.at(i)->attrName);
+    else if (attrLens[index] > 0) {
+      // this should fail
+      if (attrNames[index].compare(attrList.at(i)->attrName)) {
+        sprintf(msgbuf, "Attribute package name out of order");
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        return ESMF_FAILURE;
+      }
+    } else {
+      sprintf(msgbuf, "length < 0 = no good.");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
+    // add length
+    if (attrList.at(i)->items > 1) {
+      sprintf(msgbuf, "Write items > 1 - Not yet implemented\n");
+      ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+      attrLens[index] = 0;
+    } else if (attrList.at(i)->items == 1) {
+        if (attrList.at(i)->tk == ESMC_TYPEKIND_LOGICAL)
+          attrLens[index] = 8;
+        else if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER) {
+          if ((attrList.at(i)->vcp.size()+3) > attrLens[index])
+            attrLens[index] = (attrList.at(i)->vcp.size()+3);
+        } else {
+          sprintf(msgbuf, "working on counting digits");
+          ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+          //***FIXME*** here we do log10(number) + 4
+          attrLens[index] = 10;
+        }
+    }
+    ++index;
+  }
+  
+  // Recurse the hierarchy
+  for (i=0; i<packList.size(); i++)
+    localrc = packList.at(i)->AttributeCountTreeLensAttpack(index, attrLens, attrNames);
+
+  return ESMF_SUCCESS;
+
+}  // end AttributeCountTreeLensAttpack
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeGet"
@@ -2277,8 +2345,7 @@ namespace ESMCI {
 
   // simple sanity check
   if ((number < 0) || (number >= attrList.size())) {
-      sprintf(msgbuf, "Number = %d, attribute number must be  1 < N < %d\n", 
-        number, attrList.size());
+      sprintf(msgbuf, "Invalid index for AttributeGet(index)");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, NULL);
       return NULL;
   }
@@ -3201,7 +3268,7 @@ namespace ESMCI {
       const string &name,                    // in - name
       const string &object,                  // in - object
       const ESMC_TypeKind &tk,              // in - typekind
-      int count,                     // in - count
+      const int &count,                     // in - count
       void *value) {                 // in - value
 // 
 // !DESCRIPTION:
@@ -3292,7 +3359,6 @@ namespace ESMCI {
 //
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeWriteTab"
 //BOPI
@@ -3320,14 +3386,12 @@ namespace ESMCI {
   FILE* tab;
   char msgbuf[ESMF_MAXSTR];
   int localrc;
+  int rows, columns, index;
   unsigned int i;
-  int na,maxobjs,count;
   int *attrLens;
   vector<string> attrNames;
   
-  maxobjs = 0;
-  count = 0;
-  na = 0;
+  rows = 0; columns = 0; index = 0;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
@@ -3343,24 +3407,24 @@ namespace ESMCI {
   } 
 
   // determine the number of fields to write
-  localrc = AttributeCountTree(convention, purpose, varobj, na, maxobjs);
+  localrc = AttributeCountTree(convention, purpose, varobj, rows, columns);
   if (localrc != ESMF_SUCCESS) {
-    sprintf(msgbuf, "AttributeWriteTab failed counting max objs");
+    sprintf(msgbuf, "AttributeWriteTab failed counting objects");
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     fclose(tab);
     return ESMF_FAILURE;
   }
   
   // allocate the integer array of length maxobjs
-  attrLens = new int[maxobjs];
+  attrLens = new int[columns];
   if (!attrLens) {
     sprintf(msgbuf, "AttributeWriteTab failed allocating attrLens");
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf,  &localrc);
     fclose(tab);
     return ESMF_FAILURE;
   }
-  for (i=0; i<maxobjs; i++) attrLens[i] = 0;
-  attrNames.reserve(maxobjs);
+  for (i=0; i<columns; i++) attrLens[i] = 0;
+  attrNames.reserve(columns);
     
   // make a function to recurse the tree, find the max lengths, and compare names
   localrc = AttributeCountTreeLens(convention, purpose, varobj, attrLens,
@@ -3378,16 +3442,15 @@ namespace ESMCI {
   sprintf(msgbuf, "Name: %s\t  Convention: %s\t  Purpose: %s\t\r\n\n",
     basename.c_str(),convention.c_str(),purpose.c_str());
   fprintf(tab,msgbuf);
-  for (i=0; i<maxobjs; i++) {
-    sprintf(msgbuf, "%-*s\t",attrLens[i],attrNames[i].c_str());
+  for (i=0; i<columns; i++) {
+    sprintf(msgbuf, "%-*s\t",attrLens[i],attrNames.at(i).c_str());
     fprintf(tab,msgbuf);
   }
   sprintf(msgbuf, "\r\n");
   fprintf(tab,msgbuf);
     
- // recurse the Attribute hierarchy
-  localrc = AttributeWriteTabrecurse(tab,convention,purpose,varobj,attrLens,
-    attrNames,maxobjs,count);
+  localrc = AttributeWriteTabTraverse(tab,convention,purpose,index,columns,
+    attrLens,attrNames);
   if (localrc != ESMF_SUCCESS) {
     sprintf(msgbuf, "Attribute failed recursing in WriteTab");
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -3407,26 +3470,81 @@ namespace ESMCI {
  } // end AttributeWriteTab
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeWriteTabrecurse"
+#define ESMC_METHOD "AttributeWriteTabTraverse"
 //BOPI
-// !IROUTINE:  AttributeWriteTabrecurse - write Attributes in Tab delimited format
+// !IROUTINE:  AttributeWriteTabTraverse - write Attributes in Tab delimited format
 //                                             recursive function
 //
 // !INTERFACE:
-      int Attribute::AttributeWriteTabrecurse(
+      int Attribute::AttributeWriteTabTraverse(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
-      FILE *tab,                    //  in - file to write
-      const string &convention,             //  in - convention
-      const string &purpose,                //  in - purpose
-      const string &varobj,                    //  in - variable object
-      int *attrLens,                //  in - integer array of attribute lengths
-      const vector<string> &attrNames,
-      const int &maxattrs,                 //  in - max number of attributes in a package
-      int &count) const{            //  inout - current count
+      FILE *tab,                                //  in - file to write
+      const string &convention,                 //  in - convention
+      const string &purpose,                    //  in - purpose
+      int &index,                               //  in - counter
+      const int &columns,                       //  in - columns
+      int *attrLens,                            //  in - column widths
+      const vector<string> &attrNames) const{   //  inout - column headings
+//
+// !DESCRIPTION:
+//    Write the contents on an {\tt Attribute} hierarchy in Tab delimited format.  
+//
+//EOPI
+
+  char msgbuf[ESMF_MAXSTR];
+  int localrc;
+  unsigned int i;
+  Attribute *attpack;
+
+  attpack = NULL;
+
+  // Initialize local return code
+  localrc = ESMC_RC_NOT_IMPL;
+  
+  attpack = AttPackGet(convention, purpose, "field");
+  if (attpack) {
+    localrc = attpack->AttributeWriteTabBuffer(tab,index,columns,attrLens,attrNames);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "AttributeWriteTabTraverse failed AttributeWriteTabBuffer");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      fclose(tab);
+      return ESMF_FAILURE;
+    }
+  }
+
+  // Recurse the hierarchy
+  for (i=0; i<linkList.size(); i++) {
+    index = 0;
+    localrc = linkList.at(i)->AttributeWriteTabTraverse(tab, convention, 
+      purpose, index, columns, attrLens, attrNames);
+  }
+  
+  return ESMF_SUCCESS;
+
+ } // end AttributeWriteTabTraverse
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeWriteTabBuffer"
+//BOPI
+// !IROUTINE:  AttributeWriteTabBuffer - write Attributes in Tab delimited format
+//                                             recursive function
+//
+// !INTERFACE:
+      int Attribute::AttributeWriteTabBuffer(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      FILE *tab,                               //  in - file to write
+      int &index,                              //  in - index counter
+      const int &columns,                      //  in - columns
+      int *attrLens,                           //  in - integer array of attribute lengths
+      const vector<string> &attrNames) const{  //  in - attribute names
 //
 // !DESCRIPTION:
 //    Write the contents on an {\tt Attribute} hierarchy in Tab delimited format.  
@@ -3442,15 +3560,14 @@ namespace ESMCI {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
   
-  for(i=0;  i<attrList.size(); i++) {
-  if (convention.compare(attrList.at(i)->attrConvention) == 0 && 
-      purpose.compare(attrList.at(i)->attrPurpose) == 0 &&
-      varobj.compare(attrList.at(i)->attrObject) == 0) {
-      for (i=0; i<maxattrs; i++) {
-        if(attrList.at(i)->attrName.compare(attrNames[i]) == 0)
-          tlen = attrLens[i];
-      }
-      if (attrList.at(i)->items == 1) {
+  for (i=0; i<attrList.size(); i++) {
+    if(attrList.at(i)->attrName.compare(attrNames.at(index)) == 0 &&
+       attrList.at(i)->attrObject.compare("field") == 0) {
+      tlen = attrLens[index];
+      if (attrList.at(i)->items == 0) {
+        sprintf(msgbuf, "%-* \t",tlen);
+        fprintf(tab,msgbuf);
+      } else if (attrList.at(i)->items == 1) {
         if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
           sprintf(msgbuf, "%-*d\t",tlen,attrList.at(i)->vi);
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) 
@@ -3467,33 +3584,31 @@ namespace ESMCI {
         }
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER)
           sprintf(msgbuf, "%-*s\t",tlen,attrList.at(i)->vcp.c_str());
-        else {
+        else
           sprintf(msgbuf, "%-*s\t",tlen,"N/A");
-        }
         fprintf(tab,msgbuf);
       }
       else if (attrList.at(i)->items > 1) { 
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        sprintf(msgbuf,"ITEMS>1");
         fprintf(tab,msgbuf);
       }
-      if (attrList.at(i)->attrName.compare(attrNames[maxattrs-1]) == 0) {
+     ++index;
+      if (index == columns) {
         sprintf(msgbuf, "\r\n");
         fprintf(tab,msgbuf);
       }
+    }
   }
-  }
-  for(i=0; i<packList.size(); i++) {
-    packList.at(i)->AttributeWriteTabrecurse(tab,convention,purpose,varobj,
-      attrLens,attrNames,maxattrs,count);
-  }
-  for(i=0; i<linkList.size(); i++) {
-    linkList.at(i)->AttributeWriteTabrecurse(tab,convention,purpose,varobj,
-      attrLens,attrNames,maxattrs,count);
-  }
+
+  for(i=0; i<packList.size(); ++i)
+    localrc = packList.at(i)->AttributeWriteTabBuffer(tab,index,columns,
+      attrLens,attrNames);
 
   return ESMF_SUCCESS;
 
- } // end AttributeWriteTabrecurse
+ } // end AttributeWriteTabBuffer
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeWriteXML"
@@ -3523,10 +3638,12 @@ namespace ESMCI {
   char msgbuf[ESMF_MAXSTR];
   string modelcompname, fullname, version;
   Attribute *attr, *attpack;
-  int localrc, stop, fldcount, na;
+  int localrc, rows, columns, fldcount;
+  bool fielddone, griddone, compdone;
   ESMC_Logical presentflag;
 
-  stop = 0; fldcount = 0; na = 0;
+  fielddone = false; griddone = false; compdone = false;
+  rows = 0; fldcount = 0; columns = 0;
   attr = NULL; attpack = NULL;
   
   // Initialize local return code; assume routine not implemented
@@ -3648,17 +3765,21 @@ namespace ESMCI {
 // *** HACK ***
    
   // determine the number of fields to write
-  localrc = AttributeCountTree(convention, purpose, varobj, stop, na);
+  localrc = AttributeCountTree(convention, purpose, varobj, rows, columns);
   if (localrc != ESMF_SUCCESS) {
     sprintf(msgbuf, "Attribute failed counting fields");
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     fclose(xml);
     return ESMF_FAILURE;
   }
-
+ 
+  // if not called from component, won't need to print that stuff
+  if (object.compare("comp"))
+    compdone = true;
+ 
   // recurse the Attribute hierarchy
-  localrc = AttributeWriteXMLrecurse(xml,convention,purpose,object,
-    varobj,stop,fldcount);
+  localrc = AttributeWriteXMLtraverse(xml,convention,purpose,columns,
+    fielddone,griddone,compdone);
   if (localrc != ESMF_SUCCESS) {
     sprintf(msgbuf, "Attribute failed recursing in WriteTab");
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -3666,6 +3787,10 @@ namespace ESMCI {
     return ESMF_FAILURE;
   }
 
+  // write the footer
+  sprintf(msgbuf,"\n</model_component>\n");
+  fprintf(xml,msgbuf);
+  
   // close the file
   fclose(xml);
 
@@ -3674,12 +3799,12 @@ namespace ESMCI {
  } // end AttributeWriteXML
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeWriteXMLrecurse"
+#define ESMC_METHOD "AttributeWriteXMLtraverse"
 //BOPI
-// !IROUTINE:  AttributeWriteXMLrecurse - {\tt Attribute} hierarchy recurse write
+// !IROUTINE:  AttributeWriteXMLtraverse - {\tt Attribute} hierarchy traversal write
 //
 // !INTERFACE:
-      int Attribute::AttributeWriteXMLrecurse(
+      int Attribute::AttributeWriteXMLtraverse(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -3688,10 +3813,10 @@ namespace ESMCI {
       FILE *xml,               //  in - file pointer to write
       const string &convention,        //  in - convention
       const string &purpose,           //  in - purpose
-      const string &object,            //  in - object
-      const string &varobj,            //  in - variable object
-      const int &stop,                //  in - stop case            
-      int &fldcount) const{    //  in - field count
+      const int &columns,              //  in - columns
+      bool &fielddone,                 //  in - bool for field
+      bool &griddone,                  //  in - bool for grid
+      bool &compdone) const{           //  in - bool for comp
 //
 // !DESCRIPTION:
 //    Write the contents of an {\tt Attribute}.  Expected to be
@@ -3701,142 +3826,291 @@ namespace ESMCI {
 
   char msgbuf[ESMF_MAXSTR];
   int localrc;
-  unsigned int i, j;
-  Attribute *attr;
+  int index;
+  unsigned int i;
+  Attribute *attpack;
   
-  attr = NULL;
+  index = 0;
+  attpack = NULL;
   
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  // write the component level information
-  for (j=0; j<packList.size(); j++) {
-  attr = packList.at(j);
-  if (convention.compare(attr->attrConvention) == 0 && 
-      purpose.compare(attr->attrPurpose) == 0 &&
-      object.compare(attr->attrObject) == 0) {
-    for (i=3;  i<attr->attrList.size(); i++) { 
-      sprintf(msgbuf,"<%s_set>\n",(attr->attrList.at(i)->attrName).c_str());
-      //printf(msgbuf);
-      fprintf(xml,msgbuf);
-      if (attr->attrList.at(i)->items == 1) {
-        if (attr->attrList.at(i)->tk == ESMC_TYPEKIND_I4)
-          sprintf(msgbuf, "  <%s name=\"%d\" />\n",(attr->attrList.at(i)->attrName).c_str(),attr->attrList.at(i)->vi);
-        else if (attr->attrList.at(i)->tk == ESMC_TYPEKIND_I8) 
-          sprintf(msgbuf, "  <%s name=\"%ld\" />\n",(attr->attrList.at(i)->attrName).c_str(),attr->attrList.at(i)->vtl); 
-        else if (attr->attrList.at(i)->tk == ESMC_TYPEKIND_R4) 
-          sprintf(msgbuf, "  <%s name=\"%f\" />\n",(attr->attrList.at(i)->attrName).c_str(),attr->attrList.at(i)->vf);  
-        else if (attr->attrList.at(i)->tk == ESMC_TYPEKIND_R8) 
-          sprintf(msgbuf, "  <%s name=\"%g\" />\n",(attr->attrList.at(i)->attrName).c_str(),attr->attrList.at(i)->vd);  
-        else if (attr->attrList.at(i)->tk == ESMC_TYPEKIND_LOGICAL) {
-          if (attr->attrList.at(i)->vb == ESMF_TRUE) 
-            sprintf(msgbuf, "  <%s name=\"%s\" />\n",(attr->attrList.at(i)->attrName).c_str(),"true");
-          else if (attr->attrList.at(i)->vb == ESMF_FALSE)
-            sprintf(msgbuf, "  <%s name=\"%s\" />\n",(attr->attrList.at(i)->attrName).c_str(),"false");
-        }
-        else if (attr->attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER)
-          sprintf(msgbuf, "  <%s name=\"%s\" />\n",(attr->attrList.at(i)->attrName).c_str(),
-            (attr->attrList.at(i)->vcp).c_str());
-        else {
-          sprintf(msgbuf, "  <%s name=\"%s\" />\n",(attr->attrList.at(i)->attrName).c_str(),"N/A");
-        }
-      }
-      else { 
-        sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
-        ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
-      }
-      //printf(msgbuf);
-      fprintf(xml,msgbuf);
-      sprintf(msgbuf,"</%s_set>\n\n",(attr->attrList.at(i)->attrName).c_str());
-      //printf(msgbuf);
-      fprintf(xml,msgbuf);
+  // do component write
+  if (!compdone) {
+  attpack = AttPackGet(convention, purpose, "comp");
+  if (attpack) {
+    localrc = attpack->AttributeWriteXMLbuffer(xml);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "AttributeWriteXMLtraverse failed AttributeWriteXMLbuffer");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      fclose(xml);
+      return ESMF_FAILURE;
     }
   }
+    compdone = true;
   }
-  
-  // write the field level information
-  for (j=0; j<packList.size(); j++) {
-  attr = packList.at(j);
-  if (convention.compare(attr->attrConvention) == 0 && 
-      purpose.compare(attr->attrPurpose) == 0 &&
-      varobj.compare(attr->attrObject) == 0) {
-    if (fldcount == 0) {
-      sprintf(msgbuf,"<variable_set>\n");
-      //printf(msgbuf);
-      fprintf(xml,msgbuf);
-    }
-    for (i=0; i<attr->attrList.size(); i++) { 
-      if (attr->attrList.at(i)->items == 1) {
-        if (i == 0) {
-          sprintf(msgbuf,"  <variable ");
-          //printf(msgbuf);
-          fprintf(xml,msgbuf);
-        }
-        if (attr->attrList.at(i)->tk == ESMC_TYPEKIND_I4)
-          sprintf(msgbuf, "%s=\"%d\" ",(attr->attrList.at(i)->attrName).c_str(),attr->attrList.at(i)->vi);
-        else if (attr->attrList.at(i)->tk == ESMC_TYPEKIND_I8) 
-          sprintf(msgbuf, "%s=\"%ld\" ",(attr->attrList.at(i)->attrName).c_str(),attr->attrList.at(i)->vtl); 
-        else if (attr->attrList.at(i)->tk == ESMC_TYPEKIND_R4) 
-          sprintf(msgbuf, "%s=\"%f\" ",(attr->attrList.at(i)->attrName).c_str(),attr->attrList.at(i)->vf);  
-        else if (attr->attrList.at(i)->tk == ESMC_TYPEKIND_R8) 
-          sprintf(msgbuf, "%s=\"%g\" ",(attr->attrList.at(i)->attrName).c_str(),attr->attrList.at(i)->vd);  
-        else if (attr->attrList.at(i)->tk == ESMC_TYPEKIND_LOGICAL) {
-          if (attr->attrList.at(i)->vb == ESMF_TRUE) 
-            sprintf(msgbuf, "%s=\"%s\" ",(attr->attrList.at(i)->attrName).c_str(),"true");
-          else if (attr->attrList.at(i)->vb == ESMF_FALSE)
-            sprintf(msgbuf, "%s=\"%s\" ",(attr->attrList.at(i)->attrName).c_str(),"false");
-        }
-        else if (attr->attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER)
-          sprintf(msgbuf, "%s=\"%s\" ",(attr->attrList.at(i)->attrName).c_str(),
-            (attr->attrList.at(i)->vcp).c_str());
-        else {
-          sprintf(msgbuf, "%s=\"%s\" ",(attr->attrList.at(i)->attrName).c_str(),"N/A");
-        }
-        //printf(msgbuf);
-        fprintf(xml,msgbuf);
-        if (i != attr->attrList.size()-1) {
-          sprintf(msgbuf,"\n            ");
-          //printf(msgbuf);
-          fprintf(xml,msgbuf);
-        }
-      }
-      else if (attr->attrList.at(i)->items == 1) { 
-        sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
-        ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
-      }
-    }
-    if (!attr->attrList.empty()) {
-      sprintf(msgbuf," />\n");
-      //printf(msgbuf);
-      fprintf(xml,msgbuf);
-    }  
-    fldcount++;
-    if (fldcount == stop) {
-      sprintf(msgbuf,"</variable_set>\n");
-      //printf(msgbuf);
-      fprintf(xml,msgbuf);
-      fldcount++;
-    }
-  }
-  }
-  
-  // write the footer (using the fldcount+1 for now to show all fields written)
-  if (fldcount == stop+1) {
-    sprintf(msgbuf,"\n</model_component>\n");
-    //printf(msgbuf);
+
+  // do field write
+  if (!fielddone) {
+    // write the field header
+    sprintf(msgbuf,"<variable_set>\n");
     fprintf(xml,msgbuf);
-    fldcount++;
+    // call the field write buffer method
+    localrc = AttributeWriteXMLbufferfield(xml, convention, purpose, index, columns);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "AttributeWriteXMLtraverse failed AttributeWriteXMLbufferfield");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      fclose(xml);
+      return ESMF_FAILURE;
+    }
+    // write the field footer
+    sprintf(msgbuf,"</variable_set>\n\n");
+    fprintf(xml,msgbuf);
+    // done with field
+    fielddone = true;
   }
   
-  // recurse through the Attribute hierarchy
+  // do grid write
+  if (!griddone) {
+  attpack = AttPackGet(convention, purpose, "grid");
+  if (attpack) {
+    localrc = attpack->AttributeWriteXMLbuffer(xml);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "AttributeWriteXMLtraverse failed AttributeWriteXMLbuffer");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      fclose(xml);
+      return ESMF_FAILURE;
+    }
+    griddone = true;
+    return ESMF_SUCCESS;
+  }
+  }
+  
+  for(i=0; i<linkList.size(); i++)
+    localrc = linkList.at(i)->AttributeWriteXMLtraverse(xml,convention,purpose,columns,
+      fielddone,griddone,compdone);
+
+  return ESMF_SUCCESS;
+
+ } // end AttributeWriteXMLtraverse
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeWriteXMLbuffer"
+//BOPI
+// !IROUTINE:  AttributeWriteXMLbuffer - Write contents of an {\tt Attribute} package
+//
+// !INTERFACE:
+      int Attribute::AttributeWriteXMLbuffer(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      FILE *xml) const{             //  in - file pointer to write
+//
+// !DESCRIPTION:
+//    Print the contents of an {\tt Attribute}.  Expected to be
+//    called internally.
+//
+//EOPI
+
+  char msgbuf[ESMF_MAXSTR];
+  int localrc;
+  unsigned int i;
+
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+    for (i=0;  i<attrList.size(); ++i) { 
+      sprintf(msgbuf,"<%s_set>\n",attrList.at(i)->attrName.c_str());
+      fprintf(xml,msgbuf);
+      if (attrList.at(i)->items == 0) {
+        sprintf(msgbuf, "  <%s name=\"\" />\n",attrList.at(i)->attrName.c_str());
+      } else if (attrList.at(i)->items == 1) {
+        if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
+          sprintf(msgbuf, "  <%s name=\"%d\" />\n",attrList.at(i)->attrName.c_str(),attrList.at(i)->vi);
+        else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) 
+          sprintf(msgbuf, "  <%s name=\"%ld\" />\n",attrList.at(i)->attrName.c_str(),attrList.at(i)->vtl); 
+        else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4) 
+          sprintf(msgbuf, "  <%s name=\"%f\" />\n",attrList.at(i)->attrName.c_str(),attrList.at(i)->vf);  
+        else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8) 
+          sprintf(msgbuf, "  <%s name=\"%g\" />\n",attrList.at(i)->attrName.c_str(),attrList.at(i)->vd);  
+        else if (attrList.at(i)->tk == ESMC_TYPEKIND_LOGICAL) {
+          if (attrList.at(i)->vb == ESMF_TRUE) 
+            sprintf(msgbuf, "  <%s name=\"%s\" />\n",attrList.at(i)->attrName.c_str(),"true");
+          else if (attrList.at(i)->vb == ESMF_FALSE)
+            sprintf(msgbuf, "  <%s name=\"%s\" />\n",attrList.at(i)->attrName.c_str(),"false");
+        }
+        else if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER)
+          sprintf(msgbuf, "  <%s name=\"%s\" />\n",attrList.at(i)->attrName.c_str(),
+            attrList.at(i)->vcp.c_str());
+        else
+          sprintf(msgbuf, "  <%s name=\"%s\" />\n",attrList.at(i)->attrName.c_str(),"N/A");
+      }
+      else if (attrList.at(i)->items >1) { 
+        sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
+        ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+      } else {
+        sprintf(msgbuf,"Items < 1, problem.");
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        return ESMF_FAILURE;
+      }
+      fprintf(xml,msgbuf);
+      sprintf(msgbuf,"</%s_set>\n\n",attrList.at(i)->attrName.c_str());
+      fprintf(xml,msgbuf);
+    }
+
+  for(i=0; i<packList.size(); i++)
+    localrc = packList.at(i)->AttributeWriteXMLbuffer(xml);
+
+  return ESMF_SUCCESS;
+
+ } // end AttributeWriteXMLbuffer
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeWriteXMLbufferfield"
+//BOPI
+// !IROUTINE:  AttributeWriteXMLbufferfield - Write contents of an {\tt Attribute} package for field
+//
+// !INTERFACE:
+      int Attribute::AttributeWriteXMLbufferfield(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      FILE *xml,                     //  in - file pointer to write
+      const string &convention,      //  in - convention
+      const string &purpose,         //  in - purpose
+      int &index,                    //  in - counter            
+      const int &columns) const{     //  in - columns
+//
+// !DESCRIPTION:
+//    Print the contents of an {\tt Attribute}.  Expected to be
+//    called internally.
+//
+//EOPI
+
+  char msgbuf[ESMF_MAXSTR];
+  int localrc;
+  unsigned int i;
+  Attribute *attpack;
+
+  attpack = NULL;
+
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  attpack = AttPackGet(convention, purpose, "field");
+  if (attpack) {
+    localrc = attpack->AttributeWriteXMLbufferfieldT(xml, index, columns);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "AttributeWriteXMLbufferfield failed AttributeWriteXMLbufferfieldT");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      fclose(xml);
+      return ESMF_FAILURE;
+    }
+  }
+
   for(i=0; i<linkList.size(); i++) {
-      linkList.at(i)->AttributeWriteXMLrecurse(xml,convention,purpose,object,
-        varobj,stop,fldcount);
+    index = 0;
+    localrc = linkList.at(i)->AttributeWriteXMLbufferfield(xml,
+      convention,purpose,index,columns);
   }
 
   return ESMF_SUCCESS;
 
- } // end AttributeWriteXMLrecurse
+ } // end AttributeWriteXMLbufferfield
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeWriteXMLbufferfieldT"
+//BOPI
+// !IROUTINE:  AttributeWriteXMLbufferfieldT - Write contents of an {\tt Attribute} package for field
+//
+// !INTERFACE:
+      int Attribute::AttributeWriteXMLbufferfieldT(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      FILE *xml,                     //  in - file pointer to write
+      int &index,                    //  in - counter            
+      const int &columns) const{     //  in - columns
+//
+// !DESCRIPTION:
+//    Print the contents of an {\tt Attribute}.  Expected to be
+//    called internally.
+//
+//EOPI
+
+  char msgbuf[ESMF_MAXSTR];
+  int localrc;
+  unsigned int i;
+  Attribute *attpack;
+
+  attpack = NULL;
+
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+    for (i=0; i<attrList.size(); i++) { 
+      if (index == 0) {
+        sprintf(msgbuf, "  <variable ");
+      	fprintf(xml,msgbuf);
+      } else {
+        sprintf(msgbuf, "            ");
+        fprintf(xml,msgbuf);
+      }
+      if (attrList.at(i)->items == 0) {
+        sprintf(msgbuf, "  %s=\"\" ",attrList.at(i)->attrName.c_str());
+        fprintf(xml,msgbuf);
+      } else if (attrList.at(i)->items == 1) {
+        if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
+          sprintf(msgbuf, "  %s=\"%d\" ",attrList.at(i)->attrName.c_str(),attrList.at(i)->vi);
+        else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) 
+          sprintf(msgbuf, "  %s=\"%ld\" ",attrList.at(i)->attrName.c_str(),attrList.at(i)->vtl); 
+        else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4) 
+          sprintf(msgbuf, "  %s=\"%f\" ",attrList.at(i)->attrName.c_str(),attrList.at(i)->vf);  
+        else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8) 
+          sprintf(msgbuf, "  %s=\"%g\" ",attrList.at(i)->attrName.c_str(),attrList.at(i)->vd);  
+        else if (attrList.at(i)->tk == ESMC_TYPEKIND_LOGICAL) {
+          if (attrList.at(i)->vb == ESMF_TRUE)
+            sprintf(msgbuf, "  %s=\"%s\" ",attrList.at(i)->attrName.c_str(),"true");
+          else if (attrList.at(i)->vb == ESMF_FALSE)
+            sprintf(msgbuf, "  %s=\"%s\" ",attrList.at(i)->attrName.c_str(),"false");
+        }
+        else if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER)
+          sprintf(msgbuf, "  %s=\"%s\" ",attrList.at(i)->attrName.c_str(),
+            (attrList.at(i)->vcp).c_str());
+        else
+          sprintf(msgbuf, "  %s=\"%s\" ",attrList.at(i)->attrName.c_str(),"N/A");
+        fprintf(xml,msgbuf);
+      } else if (attrList.at(i)->items > 1) { 
+          sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
+          ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+          sprintf(msgbuf,"  %s= ITEMS>1", attrList.at(i)->attrName.c_str());
+          fprintf(xml,msgbuf);
+      } else {
+        sprintf(msgbuf,"Items < 1, problem.");
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        return ESMF_FAILURE;
+      }
+    ++index;
+      if (index == columns)
+        sprintf(msgbuf," />\n");
+      else 
+        sprintf(msgbuf,"\n");
+      fprintf(xml,msgbuf);
+    }  
+
+  for(i=0; i<packList.size(); i++)
+    localrc = packList.at(i)->AttributeWriteXMLbufferfieldT(xml,index,columns);
+
+  return ESMF_SUCCESS;
+
+ } // end AttributeWriteXMLbufferfieldT
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_Print"

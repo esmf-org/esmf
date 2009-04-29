@@ -1,4 +1,3 @@
-! $Id: user_model2.F90,v 1.23 2009/04/22 04:18:18 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -130,10 +129,10 @@ module user_model2
 
     ! Write the Attribute info to esmf/test/testg/<platform>/ESMF_AttributeSTest.stdout
     if (myPet .eq. 0) then
-      call ESMF_AttributeWrite(importState,conv,purp,rc=rc)
-      call ESMF_AttributeWrite(importState,conv,purp, &
-                               attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-      !call ESMF_StatePrint(importState, rc=rc)
+!      call ESMF_AttributeWrite(importState,conv,purp,rc=rc)
+!      call ESMF_AttributeWrite(importState,conv,purp, &
+!                               attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
+!      call ESMF_StatePrint(importState, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
     endif
     

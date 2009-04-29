@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.42 2009/04/22 04:18:18 rokuingh Exp $
+! $Id: user_model1.F90,v 1.43 2009/04/29 22:14:31 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -299,6 +299,10 @@ module user_model1
     call ESMF_AttributeSet(CONVPHI, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
       
+    ! Create the Grid Attribute Package
+    call ESMF_AttributeAdd(grid,convention=conv, purpose=purp, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+
     ! Create a FieldBundle for Fields
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
     call ESMF_FieldBundleSetGrid(fieldbundle, grid=grid, rc=status)
