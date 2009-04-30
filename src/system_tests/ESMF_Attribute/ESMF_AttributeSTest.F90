@@ -201,13 +201,6 @@ program ESMF_AttributeSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   
-  ! don't have to link, because we are doing the hybrid copy later on
-  ! link the Component Attribute hierarchy to State
-!  call ESMF_AttributeLink(comp2, c2imp, rc=rc)
-  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  
   ! now call AttributeUpdate to get a VM wide view of the
   ! metadata set on comp1 in comp1initialize
 !  call ESMF_AttributeUpdate(comp1, vm, rootList=(/0,1,2/), rc=rc)
@@ -216,6 +209,9 @@ program ESMF_AttributeSTest
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     
   ! now call AttributeCopy to get info from comp1 to comp2
+  ! careful, though, this data only exists on PETs 0,1,2
+  ! you must call AttributeUpdate to make this data 
+  ! available VM wide (above)
   call ESMF_AttributeCopy(comp1, comp2, &
       ESMF_ATTCOPY_HYBRID, ESMF_ATTTREE_ON, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
