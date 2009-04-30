@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.19 2009/04/29 22:14:10 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.20 2009/04/30 02:39:29 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -232,6 +232,7 @@ class Attribute
     int AttributeWriteXMLtraverse(FILE *xml, const string &convention,const string &purpose,
       const int &columns,bool &fielddone,bool &griddone,bool &compdone) const;
     int AttributeWriteXMLbuffer(FILE *xml) const;
+    int AttributeWriteXMLbuffergrid(FILE *xml) const;
     int AttributeWriteXMLbufferfield(FILE *xml, const string &convention, const string &purpose, 
       int &index, const int &columns) const;
     int AttributeWriteXMLbufferfieldT(FILE *xml, int &index, const int &columns) const;

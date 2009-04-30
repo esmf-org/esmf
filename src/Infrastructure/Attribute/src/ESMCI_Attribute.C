@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.29 2009/04/29 23:06:25 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.30 2009/04/30 02:39:29 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.29 2009/04/29 23:06:25 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.30 2009/04/30 02:39:29 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1159,7 +1159,7 @@ namespace ESMCI {
           return ESMF_FAILURE;
     }
     // add newly initialized attr to destination
-    localrc = AttributeSet(attr);
+    localrc = AttPackSet(attr);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "AttributeCopyValue() bailed in AttributeSet()");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -3572,9 +3572,12 @@ namespace ESMCI {
   for (i=0; i<attrList.size(); i++) {
     if(attrList.at(i)->attrName.compare(attrNames.at(index)) == 0 &&
        attrList.at(i)->attrObject.compare("field") == 0) {
-      tlen = attrLens[index];
+      if (tlen < attrNames.at(index).size())
+        tlen = attrNames.at(index).size()+2;
+      else
+        tlen = attrLens[index];
       if (attrList.at(i)->items == 0) {
-        sprintf(msgbuf, "%-* \t",tlen);
+        sprintf(msgbuf, "%-*\t",tlen);
         fprintf(tab,msgbuf);
       } else if (attrList.at(i)->items == 1) {
         if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
@@ -3884,13 +3887,22 @@ namespace ESMCI {
   if (!griddone) {
   attpack = AttPackGet(convention, purpose, "grid");
   if (attpack) {
-    localrc = attpack->AttributeWriteXMLbuffer(xml);
+    // write the field header
+    sprintf(msgbuf,"<GridSpec name=\"%s\">\n", attpack->attrBase->ESMC_BaseGetName());
+    fprintf(xml,msgbuf);
+    sprintf(msgbuf,"  <Mosaic name=\"%s\">\n", attpack->attrBase->ESMC_BaseGetName());
+    fprintf(xml,msgbuf);
+    localrc = attpack->AttributeWriteXMLbuffergrid(xml);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "AttributeWriteXMLtraverse failed AttributeWriteXMLbuffer");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       fclose(xml);
       return ESMF_FAILURE;
     }
+    sprintf(msgbuf,"  </mosaic>\n");
+    fprintf(xml,msgbuf);
+    sprintf(msgbuf,"</gridspec>\n");
+    fprintf(xml,msgbuf);
     griddone = true;
     return ESMF_SUCCESS;
   }
@@ -3903,6 +3915,82 @@ namespace ESMCI {
   return ESMF_SUCCESS;
 
  } // end AttributeWriteXMLtraverse
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeWriteXMLbuffergrid"
+//BOPI
+// !IROUTINE:  AttributeWriteXMLbuffergrid - Write contents of an {\tt Attribute} package
+//
+// !INTERFACE:
+      int Attribute::AttributeWriteXMLbuffergrid(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      FILE *xml) const{             //  in - file pointer to write
+//
+// !DESCRIPTION:
+//    Print the contents of an {\tt Attribute}.  Expected to be
+//    called internally.
+//
+//EOPI
+
+  char msgbuf[ESMF_MAXSTR];
+  int localrc;
+  unsigned int i;
+
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+    for (i=0;  i<attrList.size(); ++i) { 
+      if (attrList.at(i)->items == 0) {
+        sprintf(msgbuf, "    <%s></%s>\n",attrList.at(i)->attrName.c_str(),attrList.at(i)->attrName.c_str());
+      } else if (attrList.at(i)->items == 1) {
+        if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
+          sprintf(msgbuf, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
+            attrList.at(i)->vi,attrList.at(i)->attrName.c_str());
+        else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) 
+          sprintf(msgbuf, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
+            attrList.at(i)->vtl,attrList.at(i)->attrName.c_str());
+        else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4) 
+          sprintf(msgbuf, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
+            attrList.at(i)->vf,attrList.at(i)->attrName.c_str());
+        else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8) 
+          sprintf(msgbuf, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
+            attrList.at(i)->vd,attrList.at(i)->attrName.c_str());
+        else if (attrList.at(i)->tk == ESMC_TYPEKIND_LOGICAL) {
+          if (attrList.at(i)->vb == ESMF_TRUE) 
+            sprintf(msgbuf, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
+              "true",attrList.at(i)->attrName.c_str());
+          else if (attrList.at(i)->vb == ESMF_FALSE)
+            sprintf(msgbuf, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
+              "false",attrList.at(i)->attrName.c_str());
+        }
+        else if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER)
+          sprintf(msgbuf, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
+            attrList.at(i)->vcp.c_str(),attrList.at(i)->attrName.c_str());
+        else
+          sprintf(msgbuf, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
+            "N/A",attrList.at(i)->attrName.c_str());
+      }
+      else if (attrList.at(i)->items >1) { 
+        sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
+        ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+      } else {
+        sprintf(msgbuf,"Items < 1, problem.");
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        return ESMF_FAILURE;
+      }
+      fprintf(xml,msgbuf);
+    }
+
+  for(i=0; i<packList.size(); i++)
+    localrc = packList.at(i)->AttributeWriteXMLbuffergrid(xml);
+
+  return ESMF_SUCCESS;
+
+ } // end AttributeWriteXMLbuffergrid
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeWriteXMLbuffer"
