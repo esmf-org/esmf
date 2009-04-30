@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.33 2009/04/30 18:02:38 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.34 2009/04/30 20:50:59 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.33 2009/04/30 18:02:38 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.34 2009/04/30 20:50:59 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3647,7 +3647,7 @@ namespace ESMCI {
 //EOPI
 
   FILE* xml;
-  char msgbuf[2*ESMF_MAXSTR];
+  char msgbuf[3*ESMF_MAXSTR];
   string modelcompname, fullname, version;
   Attribute *attr, *attpack;
   int localrc, rows, columns, fldcount;
@@ -3673,7 +3673,7 @@ namespace ESMCI {
 
   if (object.compare("comp")==0) {
   // get value of attribute 0 or set to N/A if not present
-  localrc = AttPackIsPresent("name",convention,purpose,object,&presentflag);
+  localrc = AttPackIsPresent("Name",convention,purpose,object,&presentflag);
   if (localrc != ESMF_SUCCESS) {
     sprintf(msgbuf, "failed finding an attribute");
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -3681,7 +3681,7 @@ namespace ESMCI {
     return ESMF_FAILURE;
   }
   if (presentflag == ESMF_TRUE) {
-    attr = (AttPackGet(convention, purpose, object)->AttPackGetAttribute("name"));
+    attr = (AttPackGet(convention, purpose, object)->AttPackGetAttribute("Name"));
     modelcompname = attr->vcp;
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed getting attribute value");
@@ -3695,7 +3695,7 @@ namespace ESMCI {
   }
   
   // get value of attribute 1 or set to N/A if not present
-  localrc = AttPackIsPresent("full_name",convention,purpose,object,&presentflag);
+  localrc = AttPackIsPresent("FullName",convention,purpose,object,&presentflag);
   if (localrc != ESMF_SUCCESS) {
     sprintf(msgbuf, "failed finding an attribute");
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -3703,7 +3703,7 @@ namespace ESMCI {
     return ESMF_FAILURE;
   }
   if (presentflag == ESMF_TRUE) {
-    attr = (AttPackGet(convention,purpose,object)->AttPackGetAttribute("full_name"));
+    attr = (AttPackGet(convention,purpose,object)->AttPackGetAttribute("FullName"));
     fullname = attr->vcp;
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed getting attribute value");
@@ -3717,7 +3717,7 @@ namespace ESMCI {
   }
   
   // get value of attribute 2 or set to N/A if not present
-  localrc = AttPackIsPresent("version",convention,purpose,object,&presentflag);
+  localrc = AttPackIsPresent("Version",convention,purpose,object,&presentflag);
   if (localrc != ESMF_SUCCESS) {
     sprintf(msgbuf, "failed finding an attribute");
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -3725,7 +3725,7 @@ namespace ESMCI {
     return ESMF_FAILURE;
   }
   if (presentflag == ESMF_TRUE) {
-    attr = (AttPackGet(convention,purpose,object)->AttPackGetAttribute("version"));
+    attr = (AttPackGet(convention,purpose,object)->AttPackGetAttribute("Version"));
     version = attr->vcp;
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed getting attribute value");
@@ -3930,9 +3930,7 @@ namespace ESMCI {
   localrc = ESMC_RC_NOT_IMPL;
 
     for (i=0;  i<attrList.size(); ++i) { 
-      if (attrList.at(i)->items == 0) {
-        sprintf(msgbuf, "    <%s></%s>\n",attrList.at(i)->attrName.c_str(),attrList.at(i)->attrName.c_str());
-      } else if (attrList.at(i)->items == 1) {
+      if (attrList.at(i)->items == 1) {
         if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
           sprintf(msgbuf, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
             attrList.at(i)->vi,attrList.at(i)->attrName.c_str());
@@ -3959,16 +3957,17 @@ namespace ESMCI {
         else
           sprintf(msgbuf, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
             "N/A",attrList.at(i)->attrName.c_str());
-      }
-      else if (attrList.at(i)->items >1) { 
+      fprintf(xml,msgbuf);
+      } else if (attrList.at(i)->items >1) { 
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
         ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+      } else if (attrList.at(i)->items == 0) {
+        // do nothing
       } else {
         sprintf(msgbuf,"Items < 1, problem.");
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
         return ESMF_FAILURE;
       }
-      fprintf(xml,msgbuf);
     }
 
   for(i=0; i<packList.size(); i++)
@@ -4006,11 +4005,9 @@ namespace ESMCI {
   localrc = ESMC_RC_NOT_IMPL;
 
     for (i=0;  i<attrList.size(); ++i) { 
+      if (attrList.at(i)->items == 1) {
       sprintf(msgbuf,"<%s_set>\n",attrList.at(i)->attrName.c_str());
       fprintf(xml,msgbuf);
-      if (attrList.at(i)->items == 0) {
-        sprintf(msgbuf, "  <%s name=\"\" />\n",attrList.at(i)->attrName.c_str());
-      } else if (attrList.at(i)->items == 1) {
         if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
           sprintf(msgbuf, "  <%s name=\"%d\" />\n",attrList.at(i)->attrName.c_str(),attrList.at(i)->vi);
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) 
@@ -4030,18 +4027,19 @@ namespace ESMCI {
             attrList.at(i)->vcp.c_str());
         else
           sprintf(msgbuf, "  <%s name=\"%s\" />\n",attrList.at(i)->attrName.c_str(),"N/A");
-      }
-      else if (attrList.at(i)->items >1) { 
+      fprintf(xml,msgbuf);
+      sprintf(msgbuf,"</%s_set>\n\n",attrList.at(i)->attrName.c_str());
+      fprintf(xml,msgbuf);
+      } else if (attrList.at(i)->items >1) { 
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
         ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+      } else if (attrList.at(i)->items == 0) {
+        //do nothing
       } else {
         sprintf(msgbuf,"Items < 1, problem.");
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
         return ESMF_FAILURE;
       }
-      fprintf(xml,msgbuf);
-      sprintf(msgbuf,"</%s_set>\n\n",attrList.at(i)->attrName.c_str());
-      fprintf(xml,msgbuf);
     }
 
   for(i=0; i<packList.size(); i++)

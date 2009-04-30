@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.161 2009/04/24 05:20:17 theurich Exp $
+! $Id: ESMF_State.F90,v 1.162 2009/04/30 20:51:18 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.161 2009/04/24 05:20:17 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.162 2009/04/30 20:51:18 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -562,8 +562,8 @@ module ESMF_StateMod
       lobject = 'field'
       lvalue1 = .true.
       lvalue2 = .false.
-      lname1 = 'import'
-      lname2 = 'export'
+      lname1 = 'Import'
+      lname2 = 'Export'
       if (state%statep%st == ESMF_STATE_IMPORT) then
         call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
@@ -661,8 +661,8 @@ module ESMF_StateMod
       lobject = 'field'
       lvalue1 = .true.
       lvalue2 = .false.
-      lname1 = 'import'
-      lname2 = 'export'
+      lname1 = 'Import'
+      lname2 = 'Export'
       if (state%statep%st == ESMF_STATE_IMPORT) then
         call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
@@ -759,8 +759,8 @@ module ESMF_StateMod
       lobject = 'field'
       lvalue1 = .true.
       lvalue2 = .false.
-      lname1 = 'import'
-      lname2 = 'export'
+      lname1 = 'Import'
+      lname2 = 'Export'
       if (state%statep%st == ESMF_STATE_IMPORT) then
         call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
@@ -860,8 +860,8 @@ module ESMF_StateMod
       lobject = 'field'
       lvalue1 = .true.
       lvalue2 = .false.
-      lname1 = 'import'
-      lname2 = 'export'
+      lname1 = 'Import'
+      lname2 = 'Export'
       if (state%statep%st == ESMF_STATE_IMPORT) then
         call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
@@ -1083,8 +1083,8 @@ module ESMF_StateMod
       lobject = 'field'
       lvalue1 = .true.
       lvalue2 = .false.
-      lname1 = 'import'
-      lname2 = 'export'
+      lname1 = 'Import'
+      lname2 = 'Export'
       if (state%statep%st == ESMF_STATE_IMPORT) then
         call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
@@ -1184,8 +1184,8 @@ module ESMF_StateMod
       lobject = 'field'
       lvalue1 = .true.
       lvalue2 = .false.
-      lname1 = 'import'
-      lname2 = 'export'
+      lname1 = 'Import'
+      lname2 = 'Export'
       if (state%statep%st == ESMF_STATE_IMPORT) then
         call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
@@ -1500,8 +1500,8 @@ module ESMF_StateMod
       lobject = 'field'
       lvalue1 = .true.
       lvalue2 = .false.
-      lname1 = 'import'
-      lname2 = 'export'
+      lname1 = 'Import'
+      lname2 = 'Export'
       if (state%statep%st == ESMF_STATE_IMPORT) then
         call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
@@ -1599,8 +1599,8 @@ module ESMF_StateMod
       lobject = 'field'
       lvalue1 = .true.
       lvalue2 = .false.
-      lname1 = 'import'
-      lname2 = 'export'
+      lname1 = 'Import'
+      lname2 = 'Export'
       if (state%statep%st == ESMF_STATE_IMPORT) then
         call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
@@ -1834,8 +1834,8 @@ module ESMF_StateMod
       lobject = 'field'
       lvalue1 = .true.
       lvalue2 = .false.
-      lname1 = 'import'
-      lname2 = 'export'
+      lname1 = 'Import'
+      lname2 = 'Export'
       if (state%statep%st == ESMF_STATE_IMPORT) then
         call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
