@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.31 2009/04/30 04:28:28 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.32 2009/04/30 05:12:59 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.31 2009/04/30 04:28:28 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.32 2009/04/30 05:12:59 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3647,7 +3647,7 @@ namespace ESMCI {
 //EOPI
 
   FILE* xml;
-  char msgbuf[ESMF_MAXSTR];
+  char msgbuf[2*ESMF_MAXSTR];
   string modelcompname, fullname, version;
   Attribute *attr, *attpack;
   int localrc, rows, columns, fldcount;
@@ -3671,25 +3671,17 @@ namespace ESMCI {
     return ESMF_FAILURE;
   } 
 
-//  *** THIS IS A HACK, DON'T LIKE IT, TEMPORARY UNTIL WRITE CLASS AVAILABLE ***
   if (object.compare("comp")==0) {
-  attpack = AttPackGet(convention, purpose, object);
-  if (!attpack) {
-    sprintf(msgbuf, "failed getting attpack in WriteXML");
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-    return ESMF_FAILURE;
-  }
-
   // get value of attribute 0 or set to N/A if not present
-  localrc = attpack->AttributeIsPresent("name", &presentflag);
+  localrc = AttPackIsPresent("name",convention,purpose,object,&presentflag);
   if (localrc != ESMF_SUCCESS) {
     sprintf(msgbuf, "failed finding an attribute");
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     fclose(xml);
     return ESMF_FAILURE;
   }
-  if (presentflag == ESMF_SUCCESS) {
-    attr = attpack->AttributeGet(0);
+  if (presentflag == ESMF_TRUE) {
+    attr = (AttPackGet(convention, purpose, object)->AttPackGetAttribute("name"));
     modelcompname = attr->vcp;
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed getting attribute value");
@@ -3703,15 +3695,15 @@ namespace ESMCI {
   }
   
   // get value of attribute 1 or set to N/A if not present
-  localrc = attpack->AttributeIsPresent("full_name", &presentflag);
+  localrc = AttPackIsPresent("full_name",convention,purpose,object,&presentflag);
   if (localrc != ESMF_SUCCESS) {
     sprintf(msgbuf, "failed finding an attribute");
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     fclose(xml);
     return ESMF_FAILURE;
   }
-  if (presentflag == ESMF_SUCCESS) {
-    attr = attpack->AttributeGet(1);
+  if (presentflag == ESMF_TRUE) {
+    attr = (AttPackGet(convention,purpose,object)->AttPackGetAttribute("full_name"));
     fullname = attr->vcp;
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed getting attribute value");
@@ -3725,15 +3717,15 @@ namespace ESMCI {
   }
   
   // get value of attribute 2 or set to N/A if not present
-  localrc = attpack->AttributeIsPresent("version", &presentflag);
+  localrc = AttPackIsPresent("version",convention,purpose,object,&presentflag);
   if (localrc != ESMF_SUCCESS) {
     sprintf(msgbuf, "failed finding an attribute");
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     fclose(xml);
     return ESMF_FAILURE;
   }
-  if (presentflag == ESMF_SUCCESS) {
-    attr = attpack->AttributeGet(2);
+  if (presentflag == ESMF_TRUE) {
+    attr = (AttPackGet(convention,purpose,object)->AttPackGetAttribute("version"));
     version = attr->vcp;
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed getting attribute value");
@@ -3761,21 +3753,15 @@ namespace ESMCI {
   
   // Write the XML file header
   sprintf(msgbuf,"<model_component name=\"%s\" full_name=\"%s\" version=\"%s\"\n",
-  modelcompname.c_str(),fullname.c_str(),version.c_str());
-  //printf(msgbuf);
+    modelcompname.c_str(),fullname.c_str(),version.c_str());
   fprintf(xml,msgbuf);
   sprintf(msgbuf,"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
-  //printf(msgbuf);
   fprintf(xml,msgbuf);
   sprintf(msgbuf,"xsi:schemaLocation=\"http://www.esmf.ucar.edu file:/esmf_model_component.xsd\"\n");
-  //printf(msgbuf);
   fprintf(xml,msgbuf);
   sprintf(msgbuf,"xmlns=\"http://www.esmf.ucar.edu\">\n\n");
-  //printf(msgbuf);
   fprintf(xml,msgbuf);
 
-// *** HACK ***
-   
   // determine the number of fields to write
   localrc = AttributeCountTree(convention, purpose, varobj, rows, columns);
   if (localrc != ESMF_SUCCESS) {
@@ -3806,7 +3792,7 @@ namespace ESMCI {
   // close the file
   fclose(xml);
 
-  return ESMF_SUCCESS;
+  return localrc;
 
  } // end AttributeWriteXML
 //-----------------------------------------------------------------------------
