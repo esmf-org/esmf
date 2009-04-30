@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.30 2009/04/30 02:39:29 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.31 2009/04/30 04:28:28 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.30 2009/04/30 02:39:29 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.31 2009/04/30 04:28:28 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3296,7 +3296,7 @@ namespace ESMCI {
   // If this is object matches, count it
   if (object.compare(attrList.at(i)->attrObject) == 0 && 
       name.compare(attrList.at(i)->attrName) == 0) {
-    localrc = AttrModifyValue(tk, count, value);
+    localrc = attrList.at(i)->AttrModifyValue(tk, count, value);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "AttributeSetObjsInTree failed to set an Attribute");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -3572,7 +3572,7 @@ namespace ESMCI {
   for (i=0; i<attrList.size(); i++) {
     if(attrList.at(i)->attrName.compare(attrNames.at(index)) == 0 &&
        attrList.at(i)->attrObject.compare("field") == 0) {
-      if (tlen < attrNames.at(index).size())
+      if (attrLens[index] < attrNames.at(index).size())
         tlen = attrNames.at(index).size()+2;
       else
         tlen = attrLens[index];
