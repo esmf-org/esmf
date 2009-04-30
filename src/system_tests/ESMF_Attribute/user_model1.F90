@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.44 2009/04/30 02:40:53 rokuingh Exp $
+! $Id: user_model1.F90,v 1.45 2009/04/30 18:02:53 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -123,31 +123,13 @@ module user_model1
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-#ifdef doodle
-    convCC = 'CustomConvention'
-    purpGen = 'general'
-
-    attrList(1) = 'coordinates'
-    attrList(2) = 'mask'
-
-    ! Add an Attribute to the top level State (test Reconcile)
-    call ESMF_AttributeAdd(exportState, attrList=attrList, convention=convCC, &
-      purpose=purpGen, count=2, rc=rc)
-    call ESMF_AttributeSet(exportState, name='coordinates', value='latlon', &
-      convention=convCC, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(exportState, name='mask', value='yes', &
-      convention=convCC, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(exportState, name="TESTESTEST", &
-                           value="SUCCESUCCESUCCES", rc=status)
-    if (status .ne. ESMF_SUCCESS) return
-#endif
     ! Initialize variables
     conv = 'ESMF'
-    purp = 'general'
-    name1 = 'name'
-    name2 = 'standard_name'
-    name3 = 'long_name'
-    name4 = 'units'
+    purp = 'General'
+    name1 = 'Name'
+    name2 = 'StandardName'
+    name3 = 'LongName'
+    name4 = 'Units'
  
     ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'DPEDT'
@@ -301,20 +283,22 @@ module user_model1
       
     ! Create the Grid Attribute Package
     call ESMF_AttributeAdd(grid,convention=conv, purpose=purp, rc=status)
-    call ESMF_AttributeSet(grid,'dimorder','YX',convention=conv, purpose=purp, rc=status)
-    call ESMF_AttributeSet(grid,'northpolelocation','long: 0.0 lat: 90.0',convention=conv, purpose=purp, rc=status)
-    call ESMF_AttributeSet(grid,'numberofcells','53457',convention=conv, purpose=purp, rc=status)
-    call ESMF_AttributeSet(grid,'numdims','2',convention=conv, purpose=purp, rc=status)
-    call ESMF_AttributeSet(grid,'nx','96',convention=conv, purpose=purp, rc=status)
-    call ESMF_AttributeSet(grid,'ny','96',convention=conv, purpose=purp, rc=status)
-    call ESMF_AttributeSet(grid,'nz','15',convention=conv, purpose=purp, rc=status)
-    call ESMF_AttributeSet(grid,'resolution','C48',convention=conv, purpose=purp, rc=status)
-    call ESMF_AttributeSet(grid,'isconformal',.false.,convention=conv, purpose=purp, rc=status)
-    call ESMF_AttributeSet(grid,'isregular',.false.,convention=conv, purpose=purp, rc=status)
-    call ESMF_AttributeSet(grid,'isuniform',.false.,convention=conv, purpose=purp, rc=status)
-    call ESMF_AttributeSet(grid,'ispolecovered',.true.,convention=conv, purpose=purp, rc=status)
-    call ESMF_AttributeSet(grid,'discretizationtype','logically_rectangular',convention=conv, purpose=purp, rc=status)
-    call ESMF_AttributeSet(grid,'geometrytype','sphere',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'DimOrder','YX',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'GridType','Cubed sphere',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'CongruentTiles',.true.,convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'NorthPoleLocation','long: 0.0 lat: 90.0',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'NumberOfCells','53457',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'NumDims','2',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'NX','96',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'NY','96',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'NZ','15',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'Resolution','C48',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'IsConformal',.false.,convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'IsRegular',.false.,convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'IsUniform',.false.,convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'IsPoleCovered',.true.,convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'DiscretizationType','Logically rectangular',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'GeometryType','Sphere',convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     ! Create a FieldBundle for Fields
@@ -341,25 +325,25 @@ module user_model1
     
     ! Add the Attribute package to comp
     call ESMF_AttributeAdd(comp, convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, 'agency', 'NASA', &
+    call ESMF_AttributeSet(comp, 'Agency', 'NASA', &
       convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, 'author', 'Max Suarez', &
+    call ESMF_AttributeSet(comp, 'Author', 'Max Suarez', &
       convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, 'coding_language', &
+    call ESMF_AttributeSet(comp, 'CodingLanguage', &
       'Fortran 90', convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, 'discipline', &
+    call ESMF_AttributeSet(comp, 'Discipline', &
       'Atmosphere', convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, 'full_name', &
+    call ESMF_AttributeSet(comp, 'FullName', &
       'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core', &
         convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, 'model_component_framework', &
-      'ESMF (Earth System Modeling Framework)', &
+    call ESMF_AttributeSet(comp, 'ModelComponentFramework', &
+      'ESMF', &
       convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, 'name', 'GEOS-5 FV dynamical core', &
+    call ESMF_AttributeSet(comp, 'Name', 'GEOS-5 FV dynamical core', &
       convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, 'physical_domain', &
+    call ESMF_AttributeSet(comp, 'PhysicalDomain', &
       'Earth system', convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, 'version', &
+    call ESMF_AttributeSet(comp, 'Version', &
       'GEOSagcm-EROS-beta7p12', convention=conv, purpose=purp, rc=rc)
     if (status .ne. ESMF_SUCCESS) return
     
@@ -388,14 +372,14 @@ module user_model1
     rc = ESMF_SUCCESS
 
     conv = 'ESMF'
-    purp = 'general'
-    name2 = 'standard_name'
-    value2 = 'default_standard_name'
-    name3 = 'long_name'
+    purp = 'General'
+    name2 = 'StandardName'
+    value2 = 'DefaultStandardName'
+    name3 = 'LongName'
     
-    purp2 = 'extended'
-    attrList(1) = 'coordinates'
-    attrList(2) = 'mask'
+    purp2 = 'Extended'
+    attrList(1) = 'Coordinates'
+    attrList(2) = 'Mask'
     
     ! Determine petCount
     call ESMF_GridCompGet(comp, vm=vm, rc=status)
@@ -428,9 +412,9 @@ module user_model1
         if (rc/=ESMF_SUCCESS) return ! bail out
         call ESMF_AttributeAdd(field, convention=conv, purpose=purp2, attrList=attrList, &
           count=2, nestConvention=conv, nestPurpose=purp, rc=rc)
-        call ESMF_AttributeSet(field, name='coordinates', value='latlon', &
+        call ESMF_AttributeSet(field, name='Coordinates', value='Latlon', &
           convention=conv, purpose=purp2, rc=rc)
-        call ESMF_AttributeSet(field, name='mask', value='yes', &
+        call ESMF_AttributeSet(field, name='Mask', value='Yes', &
           convention=conv, purpose=purp2, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
         call ESMF_AttributeRemove(field, name=name3, convention=conv, purpose=purp, rc=status)

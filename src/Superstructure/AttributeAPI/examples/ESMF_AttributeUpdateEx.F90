@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.12 2009/04/27 14:45:36 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.13 2009/04/30 18:03:05 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -146,27 +146,27 @@ implicit none
 
 !BOC
       convESMF = 'ESMF'
-      purpGen = 'general'
+      purpGen = 'General'
     call ESMF_AttributeAdd(gridcomp1, convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp1, 'agency', 'NASA', &
+    call ESMF_AttributeSet(gridcomp1, 'Agency', 'NASA', &
       convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp1, 'author', 'Max Suarez', &
+    call ESMF_AttributeSet(gridcomp1, 'Author', 'Max Suarez', &
       convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp1, 'coding_language', &
+    call ESMF_AttributeSet(gridcomp1, 'CodingLanguage', &
       'Fortran 90', convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp1, 'discipline', &
+    call ESMF_AttributeSet(gridcomp1, 'Discipline', &
       'Atmosphere', convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp1, 'full_name', &
+    call ESMF_AttributeSet(gridcomp1, 'FullName', &
       'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core', &
         convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp1, 'model_component_framework', &
-      'ESMF (Earth System Modeling Framework)', &
+    call ESMF_AttributeSet(gridcomp1, 'ModelComponentFramework', &
+      'ESMF', &
       convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp1, 'name', 'GEOS-5 FV dynamical core', &
+    call ESMF_AttributeSet(gridcomp1, 'Name', 'GEOS-5 FV dynamical core', &
       convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp1, 'physical_domain', &
+    call ESMF_AttributeSet(gridcomp1, 'PhysicalDomain', &
       'Earth system', convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp1, 'version', &
+    call ESMF_AttributeSet(gridcomp1, 'Version', &
       'GEOSagcm-EROS-beta7p12', convention=convESMF, purpose=purpGen, rc=rc)
       
       call ESMF_AttributeLink(gridcomp1, c1exp, rc=rc) 

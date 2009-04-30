@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.12 2009/04/30 02:40:17 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.13 2009/04/30 18:03:05 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -287,19 +287,6 @@ module ESMF_AttributeUpdateMod
 ! {\tt ESMF\_AttributeUpdate()} call.  There will be more on this subject when we get
 ! to the coupler Component.
 !EOE
-#ifdef doodle
-!BOC
-    convCC = 'CustomConvention'
-    attrList(1) = 'coordinates'
-    attrList(2) = 'mask'
-
-    call ESMF_AttributeAdd(exportState, attrList=attrList, convention=convCC, &
-      purpose=purpGen, count=2, rc=rc)
-    call ESMF_AttributeSet(exportState, name='coordinates', value='latlon', &
-      convention=convCC, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(exportState, name='mask', value='yes', &
-      convention=convCC, purpose=purpGen, rc=rc)
-#endif
     call ESMF_AttributeSet(exportState, name="TESTESTEST", &
                            value="SUCCESUCCESUCCES", rc=status)
     if (status .ne. ESMF_SUCCESS) return
@@ -314,11 +301,11 @@ module ESMF_AttributeUpdateMod
 !BOC
     convCC = 'CustomConvention'
     convESMF = 'ESMF'
-    purpGen = 'general'
-    name1 = 'name'
-    name2 = 'standard_name'
-    name3 = 'long_name'
-    name4 = 'units'
+    purpGen = 'General'
+    name1 = 'Name'
+    name2 = 'StandardName'
+    name3 = 'LongName'
+    name4 = 'Units'
  
     value1 = 'DPEDT'
     value2 = 'tendency_of_air_pressure'
@@ -512,20 +499,22 @@ module ESMF_AttributeUpdateMod
 
     ! Create the Grid Attribute Package
     call ESMF_AttributeAdd(grid,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'dimorder','YX',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'northpolelocation','long: 0.0 lat: 90.0',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'numberofcells','53457',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'numdims','2',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'nx','96',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'ny','96',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'nz','15',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'resolution','C48',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'isconformal',.false.,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'isregular',.false.,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'isuniform',.false.,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'ispolecovered',.true.,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'discretizationtype','logically_rectangular',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'geometrytype','sphere',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'DimOrder','YX',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'GridType','Cubed sphere',convention=convESMF, purpose=purpGen, rc=status)    
+    call ESMF_AttributeSet(grid,'CongruentTiles',.true.,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'NorthPoleLocation','long: 0.0 lat: 90.0',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'NumberOfCells','53457',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'NumDims','2',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'NX','96',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'NY','96',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'NZ','15',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'Resolution','C48',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'IsConformal',.false.,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'IsRegular',.false.,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'IsUniform',.false.,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'IsPoleCovered',.true.,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'DiscretizationType','Logically Rectangular',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'GeometryType','Sphere',convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
 !EOC
@@ -670,10 +659,10 @@ module ESMF_AttributeUpdateMod
 
     convESMF = 'ESMF'
     convCC = 'CustomConvention'
-    purpGen = 'general'
-    name2 = 'standard_name'
+    purpGen = 'General'
+    name2 = 'StandardName'
     value2 = 'default_standard_name'
-    name3 = 'long_name'
+    name3 = 'LongName'
     
     attrList(1) = 'coordinates'
     attrList(2) = 'mask'
@@ -708,9 +697,9 @@ module ESMF_AttributeUpdateMod
         if (rc/=ESMF_SUCCESS) return
         call ESMF_AttributeAdd(field, convention=convCC, purpose=purpGen, &
           attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
-        call ESMF_AttributeSet(field, name='coordinates', value='latlon', &
+        call ESMF_AttributeSet(field, name='Coordinates', value='Latlon', &
           convention=convCC, purpose=purpGen, rc=rc)
-        call ESMF_AttributeSet(field, name='mask', value='yes', &
+        call ESMF_AttributeSet(field, name='Mask', value='Yes', &
           convention=convCC, purpose=purpGen, rc=rc)
         if (rc/=ESMF_SUCCESS) return
         call ESMF_AttributeRemove(field, name=name3, convention=convESMF, &
@@ -834,9 +823,9 @@ module ESMF_AttributeUpdateMod
     if (status .ne. ESMF_SUCCESS) return
 
     convESMF = 'ESMF'
-    purpGen = 'general'
+    purpGen = 'General'
 
-    if (myPet .eq. 0) then
+    if (myPet .eq. 2) then
       call ESMF_AttributeWrite(importState,convESMF,purpGen, &
         attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
       call ESMF_AttributeWrite(importState,convESMF,purpGen,rc=rc)

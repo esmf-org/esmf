@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.32 2009/04/30 05:12:59 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.33 2009/04/30 18:02:38 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.32 2009/04/30 05:12:59 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.33 2009/04/30 18:02:38 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -228,14 +228,14 @@ namespace ESMCI {
 
   // Grid standard Attribute package
   if (object.compare("grid")==0) {
-    localrc = AttPackCreateCustom("GridSpec", "general", object);
+    localrc = AttPackCreateCustom("GridSpec", "General", object);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed creating grid standard attpack");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                msgbuf, &localrc);
       return ESMF_FAILURE;
     }
-    localrc = AttPackNest("ESMF", "general", object, "GridSpec", "general");
+    localrc = AttPackNest("ESMF", "General", object, "GridSpec", "General");
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed creating grid standard attpack");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -244,27 +244,27 @@ namespace ESMCI {
     }
     // TODO: congruenttiles & gridtype will be at the mosaic level,
     //       others at the tile level
-    localrc = AttPackAddAttribute("congruenttiles", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("gridtype", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("CongruentTiles", "GridSpec", "General", object);
+    localrc = AttPackAddAttribute("GridType", "GridSpec", "General", object);
 
     // TODO: area & coordinatepoles await further spec from Sylvia Murphy & Co.
-    //localrc = AttPackAddAttribute("area", "GridSpec", "general", object);
-    //localrc = AttPackAddAttribute("coordinatepoles", "GridSpec", "general", object);
+    //localrc = AttPackAddAttribute("Area", "GridSpec", "General", object);
+    //localrc = AttPackAddAttribute("CoordinatePoles", "GridSpec", "General", object);
 
-    localrc = AttPackAddAttribute("dimorder", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("discretizationtype", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("geometrytype", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("isconformal", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("ispolecovered", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("isregular", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("isuniform", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("northpolelocation", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("numberofcells", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("numdims", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("nx", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("ny", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("nz", "GridSpec", "general", object);
-    localrc = AttPackAddAttribute("resolution", "GridSpec", "general", object);
+    localrc = AttPackAddAttribute("DimOrder", "GridSpec", "General", object);
+    localrc = AttPackAddAttribute("DiscretizationType", "GridSpec", "General", object);
+    localrc = AttPackAddAttribute("GeometryType", "GridSpec", "General", object);
+    localrc = AttPackAddAttribute("IsConformal", "GridSpec", "General", object);
+    localrc = AttPackAddAttribute("IsPoleCovered", "GridSpec", "General", object);
+    localrc = AttPackAddAttribute("IsRegular", "GridSpec", "General", object);
+    localrc = AttPackAddAttribute("IsUniform", "GridSpec", "General", object);
+    localrc = AttPackAddAttribute("NorthPoleLocation", "GridSpec", "General", object);
+    localrc = AttPackAddAttribute("NumberOfCells", "GridSpec", "General", object);
+    localrc = AttPackAddAttribute("NumDims", "GridSpec", "General", object);
+    localrc = AttPackAddAttribute("NX", "GridSpec", "General", object);
+    localrc = AttPackAddAttribute("NY", "GridSpec", "General", object);
+    localrc = AttPackAddAttribute("NZ", "GridSpec", "General", object);
+    localrc = AttPackAddAttribute("Resolution", "GridSpec", "General", object);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed creating grid standard attpack");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -274,40 +274,40 @@ namespace ESMCI {
 
   } else if (object.compare("field")==0) {
   // Field standard Attribute package
-    localrc = AttPackCreateCustom("CF", "general", object);
+    localrc = AttPackCreateCustom("CF", "General", object);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed creating field standard attpack1");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                msgbuf, &localrc);
       return ESMF_FAILURE;
     }
-    localrc = AttPackNest("CF", "extended", object, "CF", "general");
+    localrc = AttPackNest("CF", "Extended", object, "CF", "General");
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed creating field standard attpack2");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                msgbuf, &localrc);
       return ESMF_FAILURE;
     }
-    localrc = AttPackNest("ESG", "general", object, "CF", "extended");
+    localrc = AttPackNest("ESG", "General", object, "CF", "Extended");
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed creating field standard attpack3");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                msgbuf, &localrc);
       return ESMF_FAILURE;
     }
-    localrc = AttPackNest("ESMF", "general", object, "ESG", "general");
+    localrc = AttPackNest("ESMF", "General", object, "ESG", "General");
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed creating field standard attpack4");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                msgbuf, &localrc);
       return ESMF_FAILURE;
     }
-    localrc = AttPackAddAttribute("long_name", "CF", "general", object);
-    localrc = AttPackAddAttribute("name", "CF", "general", object);
-    localrc = AttPackAddAttribute("units", "CF", "general", object);
-    localrc = AttPackAddAttribute("standard_name", "CF", "extended", object);
-    localrc = AttPackAddAttribute("export", "ESG", "general", object);
-    localrc = AttPackAddAttribute("import", "ESG", "general", object);
+    localrc = AttPackAddAttribute("LongName", "CF", "General", object);
+    localrc = AttPackAddAttribute("Name", "CF", "General", object);
+    localrc = AttPackAddAttribute("Units", "CF", "General", object);
+    localrc = AttPackAddAttribute("StandardName", "CF", "Extended", object);
+    localrc = AttPackAddAttribute("Export", "ESG", "General", object);
+    localrc = AttPackAddAttribute("Import", "ESG", "General", object);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed creating field standard attpack");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -317,15 +317,15 @@ namespace ESMCI {
 
   } else if (object.compare("state")==0) {
   // State standard Attribute package
-    localrc = AttPackCreateCustom("ESMF", "general", object);
+    localrc = AttPackCreateCustom("ESMF", "General", object);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed creating state standard attpack");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                msgbuf, &localrc);
       return ESMF_FAILURE;
     }
-    localrc = AttPackAddAttribute("import", "ESMF", "general", object);
-    localrc = AttPackAddAttribute("export", "ESMF", "general", object);
+    localrc = AttPackAddAttribute("Export", "ESMF", "General", object);
+    localrc = AttPackAddAttribute("Import", "ESMF", "General", object);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed creating state standard attpack");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -334,39 +334,39 @@ namespace ESMCI {
     }
   } else if (object.compare("comp")==0) {
   // Component standard Attribute package
-    localrc = AttPackCreateCustom("CF", "general", object);
+    localrc = AttPackCreateCustom("CF", "General", object);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed creating component standard attpack1");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                msgbuf, &localrc);
       return ESMF_FAILURE;
     }
-    localrc = AttPackNest("ESG", "general", object, "CF", "general");
+    localrc = AttPackNest("ESG", "General", object, "CF", "General");
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed creating component standard attpack2");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                msgbuf, &localrc);
       return ESMF_FAILURE;
     }
-    localrc = AttPackNest("ESMF", "general", object, "ESG", "general");
+    localrc = AttPackNest("ESMF", "General", object, "ESG", "General");
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed creating component standard attpack3");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                msgbuf, &localrc);
       return ESMF_FAILURE;
     }
-    localrc = AttPackAddAttribute("references", "CF", "general", object);
-    localrc = AttPackAddAttribute("comment", "CF", "general", object);
-    localrc = AttPackAddAttribute("version", "ESG", "general", object);
-    localrc = AttPackAddAttribute("physical_domain", "ESG", "general", object);
-    localrc = AttPackAddAttribute("name", "ESG", "general", object);
-    localrc = AttPackAddAttribute("model_component_framework", "ESG", "general", object);
-    localrc = AttPackAddAttribute("institution", "ESG", "general", object);
-    localrc = AttPackAddAttribute("full_name", "ESG", "general", object);
-    localrc = AttPackAddAttribute("discipline", "ESG", "general", object);
-    localrc = AttPackAddAttribute("coding_language", "ESG", "general", object);
-    localrc = AttPackAddAttribute("author", "ESG", "general", object);
-    localrc = AttPackAddAttribute("agency", "ESG", "general", object);
+    localrc = AttPackAddAttribute("References", "CF", "General", object);
+    localrc = AttPackAddAttribute("Comment", "CF", "General", object);
+    localrc = AttPackAddAttribute("Version", "ESG", "General", object);
+    localrc = AttPackAddAttribute("PhysicalDomain", "ESG", "General", object);
+    localrc = AttPackAddAttribute("Name", "ESG", "General", object);
+    localrc = AttPackAddAttribute("ModelComponentFramework", "ESG", "General", object);
+    localrc = AttPackAddAttribute("Institution", "ESG", "General", object);
+    localrc = AttPackAddAttribute("FullName", "ESG", "General", object);
+    localrc = AttPackAddAttribute("Discipline", "ESG", "General", object);
+    localrc = AttPackAddAttribute("CodingLanguage", "ESG", "General", object);
+    localrc = AttPackAddAttribute("Author", "ESG", "General", object);
+    localrc = AttPackAddAttribute("Agency", "ESG", "General", object);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed creating component standard attpack");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -3885,9 +3885,9 @@ namespace ESMCI {
       fclose(xml);
       return ESMF_FAILURE;
     }
-    sprintf(msgbuf,"  </mosaic>\n");
+    sprintf(msgbuf,"  </Mosaic>\n");
     fprintf(xml,msgbuf);
-    sprintf(msgbuf,"</gridspec>\n");
+    sprintf(msgbuf,"</GridSpec>\n");
     fprintf(xml,msgbuf);
     griddone = true;
     return ESMF_SUCCESS;

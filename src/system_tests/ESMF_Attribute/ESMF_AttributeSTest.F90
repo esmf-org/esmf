@@ -245,7 +245,7 @@ program ESMF_AttributeSTest
   ! Write the Attribute info in tab-delimited and .xml format for both Components
   ! The XML format will also send the output to an .xml in this directory
   conv = 'ESMF'
-  purp = 'general'
+  purp = 'General'
   ! AttributeUpdate is not called so we are only printing from PET0 for now
   if (localPet .eq. 0) then
     call ESMF_AttributeWrite(comp1,conv,purp,rc=rc)

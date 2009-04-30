@@ -125,7 +125,7 @@ module user_model2
 
     ! Initialize variables
     conv = 'ESMF'
-    purp = 'general'
+    purp = 'General'
 
     ! Write the Attribute info to esmf/test/testg/<platform>/ESMF_AttributeSTest.stdout
     if (myPet .eq. 0) then
