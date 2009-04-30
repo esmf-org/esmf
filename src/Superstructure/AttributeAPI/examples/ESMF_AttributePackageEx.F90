@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.7 2009/04/22 04:12:24 rokuingh Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.8 2009/04/30 18:57:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -121,10 +121,10 @@ program ESMF_AttributePackageEx
 !BOC 
       convESMF = 'ESMF'
       convCC = 'CustomConvention'
-      purpGen = 'general'
+      purpGen = 'General'
 
-      attrList(1) = 'coordinates'
-      attrList(2) = 'mask'
+      attrList(1) = 'Coordinates'
+      attrList(2) = 'Mask'
 
       ! DPEDT
       call ESMF_AttributeAdd(DPEDT, convention=convESMF, purpose=purpGen, rc=rc)
@@ -193,10 +193,10 @@ program ESMF_AttributePackageEx
 !EOE
 
 !BOC
-      name1 = 'name'
-      name2 = 'standard_name'
-      name3 = 'long_name'
-      name4 = 'units'
+      name1 = 'Name'
+      name2 = 'StandardName'
+      name3 = 'LongName'
+      name4 = 'Units'
       
       ! DPEDT
       value1 = 'DPEDT'
@@ -204,9 +204,9 @@ program ESMF_AttributePackageEx
       value3 = 'Edge pressure tendency'
       value4 = 'Pa s-1'
       ! ESG Attributes
-      call ESMF_AttributeSet(DPEDT, name='coordinates', value='latlon', &
+      call ESMF_AttributeSet(DPEDT, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(DPEDT, name='mask', value='yes', &
+      call ESMF_AttributeSet(DPEDT, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
       call ESMF_AttributeSet(DPEDT, name1, value1, convention=convESMF, &
@@ -224,9 +224,9 @@ program ESMF_AttributePackageEx
       value3 = 'Delta-p weighted temperature tendency'
       value4 = 'Pa K s-1'
       ! ESG Attributes
-      call ESMF_AttributeSet(DTDT, name='coordinates', value='latlon', &
+      call ESMF_AttributeSet(DTDT, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(DTDT, name='mask', value='yes', &
+      call ESMF_AttributeSet(DTDT, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
       call ESMF_AttributeSet(DTDT, name1, value1, convention=convESMF, &
@@ -244,9 +244,9 @@ program ESMF_AttributePackageEx
       value3 = 'Eastward wind tendency'
       value4 = 'm s-2'
       ! ESG Attributes
-      call ESMF_AttributeSet(DUDT, name='coordinates', value='latlon', &
+      call ESMF_AttributeSet(DUDT, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(DUDT, name='mask', value='yes', &
+      call ESMF_AttributeSet(DUDT, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
       call ESMF_AttributeSet(DUDT, name1, value1, convention=convESMF, &
@@ -264,9 +264,9 @@ program ESMF_AttributePackageEx
       value3 = 'Northward wind tendency'
       value4 = 'm s-2'
       ! ESG Attributes
-      call ESMF_AttributeSet(DVDT, name='coordinates', value='latlon', &
+      call ESMF_AttributeSet(DVDT, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(DVDT, name='mask', value='yes', &
+      call ESMF_AttributeSet(DVDT, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
       call ESMF_AttributeSet(DVDT, name1, value1, convention=convESMF, &
@@ -284,9 +284,9 @@ program ESMF_AttributePackageEx
       value3 = 'Surface geopotential height'
       value4 = 'm2 s-2'
       ! ESG Attributes
-      call ESMF_AttributeSet(PHIS, name='coordinates', value='latlon', &
+      call ESMF_AttributeSet(PHIS, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(PHIS, name='mask', value='yes', &
+      call ESMF_AttributeSet(PHIS, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
       call ESMF_AttributeSet(PHIS, name1, value1, convention=convESMF, &
@@ -304,9 +304,9 @@ program ESMF_AttributePackageEx
       value3 = 'Advected quantities'
       value4 = 'unknown'
       ! ESG Attributes
-      call ESMF_AttributeSet(QTR, name='coordinates', value='latlon', &
+      call ESMF_AttributeSet(QTR, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(QTR, name='mask', value='yes', &
+      call ESMF_AttributeSet(QTR, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
       call ESMF_AttributeSet(QTR, name1, value1, convention=convESMF, &
@@ -324,9 +324,9 @@ program ESMF_AttributePackageEx
       value3 = 'Generation of atmosphere kinetic energy content'
       value4 = 'W m-2'
       ! ESG Attributes
-      call ESMF_AttributeSet(CNV, name='coordinates', value='latlon', &
+      call ESMF_AttributeSet(CNV, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(CNV, name='mask', value='yes', &
+      call ESMF_AttributeSet(CNV, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
       call ESMF_AttributeSet(CNV, name1, value1, convention=convESMF, &
@@ -344,9 +344,9 @@ program ESMF_AttributePackageEx
       value3 = 'Vertically integrated enthalpy convergence'
       value4 = 'W m-2'
       ! ESG Attributes
-      call ESMF_AttributeSet(CONVCPT, name='coordinates', value='latlon', &
+      call ESMF_AttributeSet(CONVCPT, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(CONVCPT, name='mask', value='yes', &
+      call ESMF_AttributeSet(CONVCPT, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
       call ESMF_AttributeSet(CONVCPT, name1, value1, convention=convESMF, &
@@ -364,9 +364,9 @@ program ESMF_AttributePackageEx
       value3 = 'Vertically integrated kinetic energy convergence'
       value4 = 'W m-2'
       ! ESG Attributes
-      call ESMF_AttributeSet(CONVKE, name='coordinates', value='latlon', &
+      call ESMF_AttributeSet(CONVKE, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(CONVKE, name='mask', value='yes', &
+      call ESMF_AttributeSet(CONVKE, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
       call ESMF_AttributeSet(CONVKE, name1, value1, convention=convESMF, &
@@ -384,9 +384,9 @@ program ESMF_AttributePackageEx
       value3 = 'Vertically integrated geopotential convergence'
       value4 = 'W m-2'
       ! ESG Attributes
-      call ESMF_AttributeSet(CONVPHI, name='coordinates', value='latlon', &
+      call ESMF_AttributeSet(CONVPHI, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
-      call ESMF_AttributeSet(CONVPHI, name='mask', value='yes', &
+      call ESMF_AttributeSet(CONVPHI, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
       ! CF Attributes
       call ESMF_AttributeSet(CONVPHI, name1, value1, convention=convESMF, &
@@ -406,25 +406,24 @@ program ESMF_AttributePackageEx
 !EOE
 
 !BOC
-    call ESMF_AttributeSet(gridcomp, 'agency', 'NASA', &
+    call ESMF_AttributeSet(gridcomp, 'Agency', 'NASA', &
       convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp, 'author', 'Max Suarez', &
+    call ESMF_AttributeSet(gridcomp, 'Author', 'Max Suarez', &
       convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp, 'coding_language', &
+    call ESMF_AttributeSet(gridcomp, 'CodingLanguage', &
       'Fortran 90', convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp, 'discipline', &
+    call ESMF_AttributeSet(gridcomp, 'Discipline', &
       'Atmosphere', convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp, 'full_name', &
+    call ESMF_AttributeSet(gridcomp, 'FullName', &
       'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core', &
         convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp, 'model_component_framework', &
-      'ESMF (Earth System Modeling Framework)', &
+    call ESMF_AttributeSet(gridcomp, 'ModelComponentFramework', &
+      'ESMF', convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp, 'Name', 'GEOS-5 FV dynamical core', &
       convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp, 'name', 'GEOS-5 FV dynamical core', &
-      convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp, 'physical_domain', &
+    call ESMF_AttributeSet(gridcomp, 'PhysicalDomain', &
       'Earth system', convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp, 'version', &
+    call ESMF_AttributeSet(gridcomp, 'Version', &
       'GEOSagcm-EROS-beta7p12', convention=convESMF, purpose=purpGen, rc=rc)
 !EOC
 
