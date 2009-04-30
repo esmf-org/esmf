@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.43 2009/04/29 22:14:31 rokuingh Exp $
+! $Id: user_model1.F90,v 1.44 2009/04/30 02:40:53 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -301,6 +301,20 @@ module user_model1
       
     ! Create the Grid Attribute Package
     call ESMF_AttributeAdd(grid,convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'dimorder','YX',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'northpolelocation','long: 0.0 lat: 90.0',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'numberofcells','53457',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'numdims','2',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'nx','96',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'ny','96',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'nz','15',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'resolution','C48',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'isconformal',.false.,convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'isregular',.false.,convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'isuniform',.false.,convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'ispolecovered',.true.,convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'discretizationtype','logically_rectangular',convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(grid,'geometrytype','sphere',convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     ! Create a FieldBundle for Fields
