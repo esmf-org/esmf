@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeStateUTest.F90,v 1.13 2009/04/17 22:40:47 rokuingh Exp $
+! $Id: ESMF_AttributeStateUTest.F90,v 1.14 2009/04/30 19:35:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeStateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeStateUTest.F90,v 1.13 2009/04/17 22:40:47 rokuingh Exp $'
+      '$Id: ESMF_AttributeStateUTest.F90,v 1.14 2009/04/30 19:35:46 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -895,7 +895,7 @@ program ESMF_AttributeStateUTest
     !  Attribute package - standard
     !-------------------------------------------------------------------------
       conv = 'ESMF'
-      purp = 'general'
+      purp = 'General'
       
       !NEX_UTest
       ! Create an Attribute package on a State Test

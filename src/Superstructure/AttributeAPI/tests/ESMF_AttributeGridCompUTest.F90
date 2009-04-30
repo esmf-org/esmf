@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridCompUTest.F90,v 1.12 2009/04/17 22:40:47 rokuingh Exp $
+! $Id: ESMF_AttributeGridCompUTest.F90,v 1.13 2009/04/30 19:35:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.12 2009/04/17 22:40:47 rokuingh Exp $'
+      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.13 2009/04/30 19:35:46 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -893,7 +893,7 @@ program ESMF_AttributeGridCompUTest
     !  Attribute package - standard
     !-------------------------------------------------------------------------
       conv = 'ESMF'
-      purp = 'general'
+      purp = 'General'
       
       !EX_UTest
       ! Create an Attribute package on a GridComp Test
@@ -1080,7 +1080,7 @@ program ESMF_AttributeGridCompUTest
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      attrname = "discipline"
+      attrname = "Discipline"
       attrvalue = "atmosphere"
       
       !EX_UTest
