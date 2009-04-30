@@ -587,9 +587,10 @@
 
         get_compiled_size = ESMF_F90_PTR_BASE_SIZE + ESMF_F90_PTR_PLUS_RANK * (rank-1)
 
-        if (ALIGN_SIZE /= 0) then
+#if defined (__G95__) && defined (ESMF_IS_64BIT_MACHINE)
+        if (ALIGN_SIZE /= 0)  &
           get_compiled_size = ((get_compiled_size + ALIGN_SIZE-1)/ALIGN_SIZE) * ALIGN_SIZE
-        end if
+#endif
 
       end function get_compiled_size
 
