@@ -162,7 +162,7 @@ int main(int argc, char *argv[]) {
 
 
      // Remove non-locally owned weights (assuming destination mesh decomposition)
-     MEField<> *mask = dstmesh.GetField("mask");
+     MEField<> *mask = dstmesh.GetField("MASK_IO");
      ThrowRequire(mask);
      wts.Prune(dstmesh, mask);
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.35 2009/04/27 23:04:54 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.36 2009/04/30 03:54:27 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -112,9 +112,25 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     // Create a layer of ghost elements since the patch method needs
     // a larger stencil.
     if (*regridMethod == ESMF_REGRID_METHOD_PATCH) {
+      int num_snd=0;
+      MEField<> *snd[2],*rcv[2];
+
+      // Load coord field
       MEField<> *psc = &scoord;
+      snd[num_snd]=psc;
+      rcv[num_snd]=psc;
+      num_snd++;
+
+      // Load mask field
+      MEField<> *psm = srcmesh.GetField("mask");
+      if (psm != NULL) {
+	snd[num_snd]=psm;
+	rcv[num_snd]=psm;
+	num_snd++;
+      }
+
       srcmesh.CreateGhost();
-      srcmesh.GhostComm().SendFields(1, &psc, &psc);
+      srcmesh.GhostComm().SendFields(num_snd, snd, rcv);
     }
 
 /*

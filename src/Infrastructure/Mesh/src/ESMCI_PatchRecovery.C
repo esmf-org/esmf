@@ -633,7 +633,8 @@ void PatchRecov<NFIELD,Real>::CreatePatch(
            NFIELD **rfield,
            UInt threshold,           
            const MEField<> &coord,
-           const MCoord *_mc
+           const MCoord *_mc,
+           MEField<> *src_mask_ptr
            ) 
 {
   patch_ok = true; // used below
@@ -656,15 +657,43 @@ void PatchRecov<NFIELD,Real>::CreatePatch(
   std::vector<double> mat;
   std::vector<Real> rhs;
 
+  // Get elements to use for generating patch
+
   std::set<const MeshObj*> elems;
   MeshObjRelationList::const_iterator el = MeshObjConn::find_relation(node, MeshObj::ELEMENT);
 
-  
-  while (el != node.Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
-        elems.insert(el->obj);
-        ++el;
- }
-  
+  // If there's a mask then use mask to avoid bad elements
+  if (src_mask_ptr != NULL) {
+    while (el != node.Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
+      MeshObj &elem=*(el->obj);
+
+      // See if masked out
+      //      printf(" %d  :: ",elem.get_id());
+      bool masked=false;
+      MeshObjRelationList::const_iterator nl = MeshObjConn::find_relation(elem, MeshObj::NODE);
+      while (nl != elem.Relations.end() && nl->obj->get_type() == MeshObj::NODE){
+	MeshObj &node = *(nl->obj);
+	double *m = src_mask_ptr->data(node);
+	// printf(" %f ",*m);
+	if (*m > 0.5) {
+	  masked=true;
+	  break;
+	}
+	++nl;
+      }
+      //      printf(" :: %d \n",masked);
+      // If not masked out then add to list
+      if (!masked) elems.insert(el->obj);
+
+      ++el;
+    }
+
+  } else { // Otherwise jsut put all elements in
+    while (el != node.Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
+      elems.insert(el->obj);
+      ++el;
+    }
+  }
   
   // Stack elements in
   // Use integration rule for field 0
@@ -1284,6 +1313,7 @@ void ElemPatch<NFIELD,Real>::CreateElemPatch(UInt _pdeg,
            UInt ptype,
            const MeshObj &elem,  // the elem in question
            const MEField<> &cfield, 
+	   MEField<> *src_mask_ptr,
            UInt numfields,
            NFIELD **rfield,
            UInt threshold, bool boundary_ok)       // How far from num dofs to invalidate.  If the
@@ -1343,15 +1373,15 @@ void ElemPatch<NFIELD,Real>::CreateElemPatch(UInt _pdeg,
       //patches[n].CreateConstantPatch(node, numfields, rfield);
       patches[n]->MarkPatchBad();
       
-      
+
     } else
       patches[n]->CreatePatch(pdeg, *pmesh, node, &elem, numfields, rfield,
-                     700000, *pcfield, use_mc ? &mcs[n] : NULL);
+                     700000, *pcfield, use_mc ? &mcs[n] : NULL, src_mask_ptr);
     }
 
     if (boundary_ok && !patches[n]->PatchOk()) {
       patches[n]->CreatePatch(pdeg, *pmesh, node, &elem, numfields, rfield,
-                     700000, *pcfield, use_mc ? &mcs[n] : NULL);
+                     700000, *pcfield, use_mc ? &mcs[n] : NULL, src_mask_ptr);
     }
     
   } // for nv
@@ -1372,6 +1402,7 @@ void ElemPatch<NFIELD,Real>::CreateElemPatch(UInt _pdeg,
            ptype,
            elem,  // the elem in question
            cfield, 
+           src_mask_ptr,
            numfields,
            rfield,
            threshold,true);       // How far from num dofs to invalidate.  If the

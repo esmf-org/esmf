@@ -264,7 +264,7 @@ void LoadNCMesh(Mesh &mesh, const std::string name) {
             // Build a triangle
             MeshObj *elem = new MeshObj(MeshObj::ELEMENT, cnt+1);
             //elem->add_data("block", blk2);
-            //elem->add_data("mask", mask[j*ni+i]);
+            //elem->add_data("MASK_IO", mask[j*ni+i]);
             emap[elem->get_id()] = mask[cnt];
             mesh.add_element(elem, nconnect, blk2, tri_topo);
             //std::cout << "add element tri:" << (cnt+1) << std::endl;
@@ -308,13 +308,13 @@ void LoadNCMesh(Mesh &mesh, const std::string name) {
   }
 
   // apply mask
-  IOField<ElementField> *elem_mask = mesh.RegisterElementField(mesh, "mask");
+  IOField<ElementField> *elem_mask = mesh.RegisterElementField(mesh, "MASK_IO");
   elem_mask->set_output_status(true);
   MeshDB::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
 //std::cout << "ei=" << (*ei)->get_id() << ", ee=" << (*ee)->get_id() << std::endl;
 //std::cout << "num elem:" << mesh.num_elems() << std::endl;
   for (; ei != ee; ++ei) {
-    //int mask = ei->get_int("mask");
+    //int mask = ei->get_int("MASK_IO");
     int mask = emap[ei->get_id()];
     *((double*)elem_mask->data(*ei)) = mask;
     //*((double*) elem_mask->data(*ei)) = ei->get_id();
@@ -563,7 +563,7 @@ void LoadNCDualMesh(Mesh &mesh, const std::string fname, bool use_quad) {
    
   IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", mesh.spatial_dim());
   
-  IOField<NodalField> *mask_f = mesh.RegisterNodalField(mesh, "mask");
+  IOField<NodalField> *mask_f = mesh.RegisterNodalField(mesh, "MASK_IO");
   
   MeshDB::const_iterator Ni = mesh.node_begin(), Ne = mesh.node_end();
   {

@@ -437,6 +437,11 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
     // Get mask field
     MEField<> *mask_ptr = mesh.GetField("mask");
       
+    if (mask_ptr != NULL) {
+      double *pole_mask = mask_ptr->data(*pnode);
+      *pole_mask=0.0; 
+    }
+
     //  MEField<> &coords = *mesh.GetCoordField();
 
     // Count number of valid points around pole
@@ -503,6 +508,8 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
   typedef std::map<UInt, EEdge> EEdge_Map;
 
 
+  // TODO: MeshAddPoleNPnts needs to be modified to use mask data, before
+  //       being hooked into the on-line regridding 
   void MeshAddPoleNPnts(Mesh &mesh, int num_avg_pnts, UInt node_id, 
                   UInt constraint_id, IWeights &cweights)
 {

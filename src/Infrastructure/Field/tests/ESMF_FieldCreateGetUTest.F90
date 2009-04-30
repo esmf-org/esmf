@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.39 2009/04/28 18:31:57 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.40 2009/04/30 03:54:27 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -8307,16 +8307,20 @@ contains
   type(ESMF_Grid) :: gridB
   type(ESMF_Field) :: srcFieldA
   type(ESMF_Field) :: fieldB
+  type(ESMF_Field) :: fieldBPatch
   type(ESMF_Array) :: arrayB
+  type(ESMF_Array) :: arrayBPAtch
   type(ESMF_Array) :: lonArrayA
   type(ESMF_Array) :: srcArrayA
   type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_RouteHandle) :: routeHandlePatch
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_VM) :: vm
   integer(ESMF_KIND_I4), pointer :: maskB(:,:), maskA(:,:)
   real(ESMF_KIND_R8), pointer :: fptrXC(:,:)
   real(ESMF_KIND_R8), pointer :: fptrYC(:,:)
   real(ESMF_KIND_R8), pointer :: fptr(:,:),fptr2(:,:)
+  real(ESMF_KIND_R8), pointer :: fptrPatch(:,:)
   integer :: clbnd(2),cubnd(2)
   integer :: fclbnd(2),fcubnd(2)
   integer :: i1,i2,i3, index(2)
@@ -8360,8 +8364,8 @@ contains
   B_nx = 20
   B_ny = 20
 
-  A_nx = 10
-  A_ny = 10
+  A_nx = 11
+  A_ny = 11
 
 
   ! Establish the coordinates of the grids
@@ -8416,6 +8420,13 @@ contains
     return
   endif
 
+   fieldBPatch = ESMF_FieldCreate(gridB, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
 
   ! Allocate coordinates
   call ESMF_GridAddCoord(gridA, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
@@ -8457,6 +8468,13 @@ contains
   ! Get arrays
   ! arrayB
   call ESMF_FieldGet(fieldB, array=arrayB, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! arrayBPatch
+  call ESMF_FieldGet(fieldBPatch, array=arrayBPatch, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -8566,6 +8584,12 @@ contains
         return
      endif
 
+     call ESMF_FieldGet(fieldBPatch, lDE, fptrPatch,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
 
      !! set coords
      do i1=clbnd(1),cubnd(1)
@@ -8575,8 +8599,9 @@ contains
         fptrXC(i1,i2) = ((B_maxx-B_minx)*REAL(i1-1)/REAL(B_nx-1))+B_minx
         fptrYC(i1,i2) = ((B_maxy-B_miny)*REAL(i2-1)/REAL(B_ny-1))+B_miny
 
-        ! initialize destination field
+        ! initialize destination fields
         fptr(i1,i2)=0.0
+        fptrPatch(i1,i2)=0.0
 
      enddo
      enddo
@@ -8598,6 +8623,7 @@ contains
       return
    endif
 
+
   ! Do regrid
   call ESMF_FieldRegrid(srcFieldA, fieldB, routeHandle, localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -8611,11 +8637,47 @@ contains
       return
    endif
 
+#ifdef ESMF_LAPACK
+  ! Regrid store
+  call ESMF_FieldRegridStore( &
+	  srcFieldA, srcMaskValues=(/1,2/), &
+          dstField=fieldBPatch, &
+	  unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+          routeHandle=routeHandlePatch, &
+          regridMethod=ESMF_REGRID_METHOD_PATCH, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! Do regrid
+  call ESMF_FieldRegrid(srcFieldA, fieldBPatch, routeHandlePatch, localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandlePatch, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+#endif
+
+
   ! Check if we're using any of the bad source points
   do lDE=0,localDECount-1
 
      call ESMF_FieldGet(fieldB, lDE, fptr, computationalLBound=clbnd, &
                              computationalUBound=cubnd,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_FieldGet(fieldBPatch, lDE, fptrPatch,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -8628,6 +8690,14 @@ contains
         if (fptr(i1,i2) < 0.0) then
            correct=.false.
         endif
+
+#ifdef ESMF_LAPACK
+        ! if working should always be >= 0.0 
+        if (fptrPatch(i1,i2) < 0.0) then
+           correct=.false.
+        endif
+#endif
+
      enddo
      enddo
 
@@ -8639,9 +8709,19 @@ contains
   call ESMF_MeshIO(vm, gridA, ESMF_STAGGERLOC_CENTER, &
                "srcmesh", srcArrayA, rc=localrc, &
                spherical=spherical_grid)
+
+#ifdef ESMF_LAPACK
+  call ESMF_MeshIO(vm, gridB, ESMF_STAGGERLOC_CENTER, &
+               "dstmesh", arrayB, arrayBPatch, rc=localrc, &
+               spherical=spherical_grid)
+#else
   call ESMF_MeshIO(vm, gridB, ESMF_STAGGERLOC_CENTER, &
                "dstmesh", arrayB, rc=localrc, &
                spherical=spherical_grid)
+#endif
+
+
+
 #endif
 
   ! Destroy the Fields
@@ -8652,6 +8732,12 @@ contains
    endif
 
    call ESMF_FieldDestroy(fieldB, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(fieldBPatch, rc=localrc)
    if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return
@@ -8690,16 +8776,20 @@ contains
   type(ESMF_Grid) :: gridB
   type(ESMF_Field) :: srcFieldA
   type(ESMF_Field) :: fieldB
+  type(ESMF_Field) :: fieldBPatch
   type(ESMF_Array) :: arrayB
+  type(ESMF_Array) :: arrayBPAtch
   type(ESMF_Array) :: lonArrayA
   type(ESMF_Array) :: srcArrayA
   type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_RouteHandle) :: routeHandlePatch
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_VM) :: vm
   integer(ESMF_KIND_I4), pointer :: maskB(:,:), maskA(:,:)
   real(ESMF_KIND_R8), pointer :: fptrXC(:,:)
   real(ESMF_KIND_R8), pointer :: fptrYC(:,:)
   real(ESMF_KIND_R8), pointer :: fptr(:,:),fptr2(:,:)
+  real(ESMF_KIND_R8), pointer :: fptrPatch(:,:)
   integer :: clbnd(2),cubnd(2)
   integer :: fclbnd(2),fcubnd(2)
   integer :: i1,i2,i3, index(2)
@@ -8790,6 +8880,13 @@ contains
     return
   endif
 
+   fieldBPatch = ESMF_FieldCreate(gridB, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
 
   ! Allocate coordinates
   call ESMF_GridAddCoord(gridA, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
@@ -8813,13 +8910,6 @@ contains
     return
   endif
 
-  call ESMF_GridAddItem(gridB, staggerloc=ESMF_STAGGERLOC_CENTER, &
-         item=ESMF_GRIDITEM_MASK, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
-
 
   ! Get number of local DEs
   call ESMF_GridGet(gridA, localDECount=localDECount, rc=localrc)
@@ -8831,6 +8921,13 @@ contains
   ! Get arrays
   ! arrayB
   call ESMF_FieldGet(fieldB, array=arrayB, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! arrayBPatch
+  call ESMF_FieldGet(fieldBPatch, array=arrayBPatch, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -8939,6 +9036,12 @@ contains
         return
      endif
 
+     call ESMF_FieldGet(fieldBPatch, lDE, fptrPatch,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
 
      !! set coords
      do i1=clbnd(1),cubnd(1)
@@ -8950,6 +9053,7 @@ contains
   
         ! initialize destination field
         fptr(i1,i2)=0.0
+        fptrPatch(i1,i2)=0.0
 
      enddo
      enddo
@@ -8985,6 +9089,37 @@ contains
       return
    endif
 
+#ifdef ESMF_LAPACK
+  ! Regrid store
+  call ESMF_FieldRegridStore( &
+	  srcFieldA, srcMaskValues=(/1,2/), &
+          dstField=fieldBPatch, &
+	  unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+          routeHandle=routeHandlePatch, &
+          regridMethod=ESMF_REGRID_METHOD_PATCH, &
+          regridScheme=ESMF_REGRID_SCHEME_FULL3D, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! Do regrid
+  call ESMF_FieldRegrid(srcFieldA, fieldBPatch, routeHandlePatch, localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandlePatch, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+#endif
+
+
   ! Check if we're using any of the bad source points
   do lDE=0,localDECount-1
 
@@ -8995,6 +9130,13 @@ contains
         return
      endif
 
+     call ESMF_FieldGet(fieldBPatch, lDE, fptrPatch,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
      !! make sure we're not using any bad points
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
@@ -9002,6 +9144,15 @@ contains
         if (fptr(i1,i2) < 0.0) then
            correct=.false.
         endif
+
+#ifdef ESMF_LAPACK
+        ! if working should always be >= 0.0 
+        if (fptrPatch(i1,i2) < 0.0) then
+           correct=.false.
+        endif
+#endif
+
+
      enddo
      enddo
 
@@ -9013,9 +9164,19 @@ contains
   call ESMF_MeshIO(vm, gridA, ESMF_STAGGERLOC_CENTER, &
                "srcmesh", srcArrayA, rc=localrc, &
                spherical=spherical_grid)
+
+#ifdef ESMF_LAPACK
+  call ESMF_MeshIO(vm, gridB, ESMF_STAGGERLOC_CENTER, &
+               "dstmesh", arrayB, arrayBPatch, rc=localrc, &
+               spherical=spherical_grid)
+#else
   call ESMF_MeshIO(vm, gridB, ESMF_STAGGERLOC_CENTER, &
                "dstmesh", arrayB, rc=localrc, &
                spherical=spherical_grid)
+#endif
+
+
+
 #endif
 
   ! Destroy the Fields
@@ -9026,6 +9187,13 @@ contains
    endif
 
    call ESMF_FieldDestroy(fieldB, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+   call ESMF_FieldDestroy(fieldBPatch, rc=localrc)
    if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return

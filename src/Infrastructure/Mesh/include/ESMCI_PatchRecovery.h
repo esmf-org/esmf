@@ -54,7 +54,8 @@ void CreatePatch(UInt pdeg,
            UInt threshold,       // How far from num dofs to invalidate.  If the
                                  // patch becomes invalid, we reduce it to a first order patch.
            const MEField<> &coord, // node coords (if pdim<sdim, then the object can
-           const MCoord *_mc = NULL
+		 const MCoord *_mc = NULL,
+           MEField<> *src_mask_ptr=NULL
            );
 
 // field = linearized field index
@@ -99,6 +100,7 @@ void CreateElemPatch(UInt pdeg,
            UInt ptype,  // Use nodal or gaussian??
            const MeshObj &elem,  // the elem in question
            const MEField<> &cfield,
+	   MEField<> *src_mask_ptr,
            UInt numfields,
            NFIELD **rfield,
            UInt threshold,       // How far from num dofs to invalidate.  If the

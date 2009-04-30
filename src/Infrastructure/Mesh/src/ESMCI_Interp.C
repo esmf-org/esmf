@@ -237,13 +237,18 @@ void IWeights::Prune(const Mesh &mesh, const MEField<> *mask) {
 /*
  * Patch interpolation, where destination and source fields are nodal.
  */
-void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>* const* _sfields, _field* const *_dfields, const std::vector<Interp::FieldPair> &fpairs, SearchResult &sres) {
+void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>* const* _sfields, _field* const *_dfields, const std::vector<Interp::FieldPair> &fpairs, SearchResult &sres, Mesh &srcmesh) {
    Trace __trace("patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>* const* _sfields, _field* const *_dfields, int *iflag, SearchResult &sres)");
+
 
    std::set<int> pdeg_set;
    std::map<int, ElemPatch<>*> patch_map;
    
   if (_nfields == 0) return;
+
+  // Get mask field pointer
+  MEField<> *src_mask_ptr = srcmesh.GetField("mask");
+
 
   std::vector<MEField<>* > fields;
   std::vector<_field* > dfields;
@@ -286,6 +291,7 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
         epatch->CreateElemPatch(*pi, ElemPatch<>::GAUSS_PATCH,
                                elem,
                                src_coord_field,
+				src_mask_ptr,
                                fields.size(),
                                &fields[0],
                                700000
@@ -464,10 +470,13 @@ UInt fdim;
 };
  
 /** Matrix patch transfer **/
-void mat_patch_serial_transfer(MEField<> &src_coord_field, MEField<> &_sfield, _field &_dfield, SearchResult &sres, IWeights &iw) {
+void mat_patch_serial_transfer(MEField<> &src_coord_field, MEField<> &_sfield, _field &_dfield, SearchResult &sres,  Mesh &srcmesh, IWeights &iw) {
   Trace __trace("mat_patch_serial_transfer(MEField<> &sfield, _field &dfield, SearchResult &sres, IWeights &iw)");
     
   const int pdeg = 2; // TODO: deduce this.  For instance, deg source + 1 is reasonable
+
+  // Get mask field pointer
+  MEField<> *src_mask_ptr = srcmesh.GetField("mask");
     
   MEField<>* field = &_sfield;
   MEField<> &sfield = _sfield;
@@ -511,6 +520,7 @@ void mat_patch_serial_transfer(MEField<> &src_coord_field, MEField<> &_sfield, _
     epatch.CreateElemPatch(pdeg, ElemPatch<>::GAUSS_PATCH,
                            elem,
                            src_coord_field,
+			   src_mask_ptr,
                            1,
                            &sFp,
                            700000
@@ -539,6 +549,9 @@ void mat_patch_serial_transfer(MEField<> &src_coord_field, MEField<> &_sfield, _
     
       const MeshObj &snode = *sres.nodes[n].node;
     
+      // DEBUG printf(">>>> snode=%d# elem=%d \n",snode.get_id(),elem.get_id());
+
+
         if (dfield->OnObj(snode)) {
           
      //     UInt fdim = dfield->dim();
@@ -851,7 +864,7 @@ void Interp::transfer_serial() {
   // Patch interpolation
   if (has_patch) {
     
-    patch_serial_transfer(*srcmesh.GetCoordField(), srcF.size(), &(*srcF.begin()), &(*dstf.begin()), fpairs, sres);
+    patch_serial_transfer(*srcmesh.GetCoordField(), srcF.size(), &(*srcF.begin()), &(*dstf.begin()), fpairs, sres,srcmesh);
   
   } else {
   
@@ -876,7 +889,7 @@ void Interp::transfer_parallel() {
   ThrowRequire(dst_rend_fields.size() == src_rend_Fields.size());
   
   if (has_std) point_serial_transfer(dst_rend_fields.size(), &(*src_rend_Fields.begin()), &(*dst_rend_fields.begin()), &iflag[0], sres);
-  if (has_patch) patch_serial_transfer(*grend.GetSrcRend().GetCoordField(), src_rend_Fields.size(), &(*src_rend_Fields.begin()), &(*dst_rend_fields.begin()), fpairs, sres);
+  if (has_patch) patch_serial_transfer(*grend.GetSrcRend().GetCoordField(), src_rend_Fields.size(), &(*src_rend_Fields.begin()), &(*dst_rend_fields.begin()), fpairs, sres,srcmesh);
   
   // Retrieve the interpolated data
   CommRel &dst_node_rel = grend.GetDstComm().GetCommRel(MeshObj::NODE);
@@ -900,7 +913,7 @@ void Interp::mat_transfer_serial(int fpair_num, IWeights &iw) {
   ThrowRequire(fpair.first->is_nodal() && fpair.second->is_nodal());
   
   if (fpair.idata == INTERP_STD) mat_point_serial_transfer(*fpair.first, *fpair.second->GetNodalfield(), sres, iw);
-  else if (fpair.idata == INTERP_PATCH) mat_patch_serial_transfer(*srcmesh.GetCoordField(), *fpair.first, *fpair.second->GetNodalfield(), sres, iw);
+  else if (fpair.idata == INTERP_PATCH) mat_patch_serial_transfer(*srcmesh.GetCoordField(), *fpair.first, *fpair.second->GetNodalfield(), sres, srcmesh, iw);
     
 }
 
@@ -924,7 +937,7 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw) {
   if (fpairs[fpair_num].idata == INTERP_STD)
      mat_point_serial_transfer(*sFR, *dfR, sres, iw);
   else if (fpairs[fpair_num].idata == INTERP_PATCH)
-     mat_patch_serial_transfer(*grend.GetSrcRend().GetCoordField(), *sFR, *dfR, sres, iw);
+     mat_patch_serial_transfer(*grend.GetSrcRend().GetCoordField(), *sFR, *dfR, sres, srcmesh, iw);
   
   // Retrieve the interpolated data
   CommRel &dst_node_rel = grend.GetDstComm().GetCommRel(MeshObj::NODE);
