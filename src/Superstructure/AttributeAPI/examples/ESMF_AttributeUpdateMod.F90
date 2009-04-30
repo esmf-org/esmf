@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.11 2009/04/27 14:45:36 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.12 2009/04/30 02:40:17 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -509,6 +509,25 @@ module ESMF_AttributeUpdateMod
     call ESMF_AttributeSet(CONVPHI, name4, value4, convention=convESMF, &
       purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
+
+    ! Create the Grid Attribute Package
+    call ESMF_AttributeAdd(grid,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'dimorder','YX',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'northpolelocation','long: 0.0 lat: 90.0',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'numberofcells','53457',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'numdims','2',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'nx','96',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'ny','96',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'nz','15',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'resolution','C48',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'isconformal',.false.,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'isregular',.false.,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'isuniform',.false.,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'ispolecovered',.true.,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'discretizationtype','logically_rectangular',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'geometrytype','sphere',convention=convESMF, purpose=purpGen, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+
 !EOC
 
 !BOE
