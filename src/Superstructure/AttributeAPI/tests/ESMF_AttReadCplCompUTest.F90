@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadCplCompUTest.F90,v 1.2 2009/04/27 05:55:47 eschwab Exp $
+! $Id: ESMF_AttReadCplCompUTest.F90,v 1.3 2009/05/01 04:43:55 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_AttReadCplCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttReadCplCompUTest.F90,v 1.2 2009/04/27 05:55:47 eschwab Exp $'
+      '$Id: ESMF_AttReadCplCompUTest.F90,v 1.3 2009/05/01 04:43:55 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -111,17 +111,17 @@ print *, 'rc = ', rc
     !-------------------------------------------------------------------------
 
       conv = 'ESG'
-      purp = 'general'
+      purp = 'General'
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Get ESG "name" Attribute from a CplComp Test
-      attrname = 'name'
+      ! Get ESG "Name" Attribute from a CplComp Test
+      attrname = 'Name'
       attrvalue = 'ESMF Example Coupler'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting ESG 'name' Attribute from a CplComp Test"
+      write(name, *) "Getting ESG 'Name' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
                       .or. xercesNotPresent), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -132,13 +132,13 @@ print *, 'outChar = ', trim(adjustL(outChar))
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Get ESG "full_name" Attribute from a CplComp Test
-      attrname = 'full_name'
+      ! Get ESG "FullName" Attribute from a CplComp Test
+      attrname = 'FullName'
       attrvalue = 'Earth System Modeling Framework Example Coupler'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting ESG 'full_name' Attribute from a CplComp Test"
+      write(name, *) "Getting ESG 'FullName' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
                       .or. xercesNotPresent), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -149,13 +149,13 @@ print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Get ESG "agency" Attribute from a CplComp Test
-      attrname = 'agency'
+      ! Get ESG "Agency" Attribute from a CplComp Test
+      attrname = 'Agency'
       attrvalue = 'UCAR'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting ESG 'agency' Attribute from a CplComp Test"
+      write(name, *) "Getting ESG 'Agency' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
                       .or. xercesNotPresent), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -166,13 +166,13 @@ print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Get ESG "institution" Attribute from a CplComp Test
-      attrname = 'institution'
+      ! Get ESG "Institution" Attribute from a CplComp Test
+      attrname = 'Institution'
       attrvalue = 'National Center for Atmospheric Research (NCAR)'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting ESG 'institution' Attribute from a CplComp Test"
+      write(name, *) "Getting ESG 'Institution' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
                       .or. xercesNotPresent), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -183,13 +183,13 @@ print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Get ESG "version" Attribute from a CplComp Test
-      attrname = 'version'
+      ! Get ESG "Version" Attribute from a CplComp Test
+      attrname = 'Version'
       attrvalue = '4'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting ESG 'version' Attribute from a CplComp Test"
+      write(name, *) "Getting ESG 'Version' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
                       .or. xercesNotPresent), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -200,13 +200,13 @@ print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Get ESG "author" Attribute from a CplComp Test
-      attrname = 'author'
+      ! Get ESG "Author" Attribute from a CplComp Test
+      attrname = 'Author'
       attrvalue = 'Cecelia Deluca, et al.'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting ESG 'author' Attribute from a CplComp Test"
+      write(name, *) "Getting ESG 'Author' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
                       .or. xercesNotPresent), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -217,13 +217,13 @@ print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Get ESG "discipline" Attribute from a CplComp Test
-      attrname = 'discipline'
+      ! Get ESG "Discipline" Attribute from a CplComp Test
+      attrname = 'Discipline'
       attrvalue = 'Atmosphere, Ocean, and Land'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting ESG 'discipline' Attribute from a CplComp Test"
+      write(name, *) "Getting ESG 'Discipline' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
                       .or. xercesNotPresent), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -234,13 +234,13 @@ print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Get ESG "physical_domain" Attribute from a CplComp Test
-      attrname = 'physical_domain'
+      ! Get ESG "PhysicalDomain" Attribute from a CplComp Test
+      attrname = 'PhysicalDomain'
       attrvalue = 'Earth System'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting ESG 'physical_domain' Attribute from a CplComp Test"
+      write(name, *) "Getting ESG 'PhysicalDomain' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
                       .or. xercesNotPresent), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -251,13 +251,13 @@ print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Get ESG "coding_language" Attribute from a CplComp Test
-      attrname = 'coding_language'
+      ! Get ESG "CodingLanguage" Attribute from a CplComp Test
+      attrname = 'CodingLanguage'
       attrvalue = 'Fortran 90'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting ESG 'coding_language' Attribute from a CplComp Test"
+      write(name, *) "Getting ESG 'CodingLanguage' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
                       .or. xercesNotPresent), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -268,13 +268,13 @@ print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Get ESG "model_component_framework" Attribute from a CplComp Test
-      attrname = 'model_component_framework'
+      ! Get ESG "ModelComponentFramework" Attribute from a CplComp Test
+      attrname = 'ModelComponentFramework'
       attrvalue = 'ESMF (Earth System Modeling Framework)'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting ESG 'model_component_framework' Attribute from a CplComp Test"
+      write(name, *) "Getting ESG 'ModelComponentFramework' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
                       .or. xercesNotPresent), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -285,14 +285,14 @@ print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Get ESG "comment" Attribute from a CplComp Test
-      attrname = 'comment'
+      ! Get CF "Comment" Attribute from a CplComp Test
+      attrname = 'Comment'
       attrvalue = 'ESMF CplComp Attribute IO Test'
       conv = 'CF'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting CF 'comment' Attribute from a CplComp Test"
+      write(name, *) "Getting CF 'Comment' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
                       .or. xercesNotPresent), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -303,14 +303,14 @@ print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Get ESG "references" Attribute from a CplComp Test
-      attrname = 'references'
+      ! Get CF "References" Attribute from a CplComp Test
+      attrname = 'References'
       attrvalue = 'http://www.esmf.ucar.edu'
       conv = 'CF'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting CF 'references' Attribute from a CplComp Test"
+      write(name, *) "Getting CF 'References' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
                       .or. xercesNotPresent), &
                       name, failMsg, result, ESMF_SRCLINE)

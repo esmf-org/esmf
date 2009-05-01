@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridCompEx.F90,v 1.1 2009/04/29 05:57:35 eschwab Exp $
+! $Id: ESMF_AttReadGridCompEx.F90,v 1.2 2009/05/01 04:43:55 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -100,9 +100,9 @@ program ESMF_AttReadGridCompEx
 print *, 'rc = ', rc
 
 !BOC
-      ! Get ESG "name" Attribute from a GridComp
-      call ESMF_AttributeGet(gridcomp, name='name', value=attrValue, &
-                             convention='ESG', purpose='general', rc=rc)
+      ! Get ESG "Name" Attribute from a GridComp
+      call ESMF_AttributeGet(gridcomp, name='Name', value=attrValue, &
+                             convention='ESG', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='GEOS') &
@@ -111,9 +111,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get ESG "full_name" Attribute from a GridComp
-      call ESMF_AttributeGet(gridcomp, name='full_name', value=attrValue, &
-                             convention='ESG', purpose='general', rc=rc)
+      ! Get ESG "FullName" Attribute from a GridComp
+      call ESMF_AttributeGet(gridcomp, name='FullName', value=attrValue, &
+                             convention='ESG', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. &
@@ -123,9 +123,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get ESG "agency" Attribute from a GridComp
-      call ESMF_AttributeGet(gridcomp, name='agency', value=attrValue, &
-                             convention='ESG', purpose='general', rc=rc)
+      ! Get ESG "Agency" Attribute from a GridComp
+      call ESMF_AttributeGet(gridcomp, name='Agency', value=attrValue, &
+                             convention='ESG', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='NASA') &
@@ -134,9 +134,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get ESG "institution" Attribute from a GridComp
-      call ESMF_AttributeGet(gridcomp, name='institution', value=attrValue, &
-                             convention='ESG', purpose='general', rc=rc)
+      ! Get ESG "Institution" Attribute from a GridComp
+      call ESMF_AttributeGet(gridcomp, name='Institution', value=attrValue, &
+                             convention='ESG', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. &
@@ -146,9 +146,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get ESG "version" Attribute from a GridComp
-      call ESMF_AttributeGet(gridcomp, name='version', value=attrValue, &
-                             convention='ESG', purpose='general', rc=rc)
+      ! Get ESG "Version" Attribute from a GridComp
+      call ESMF_AttributeGet(gridcomp, name='Version', value=attrValue, &
+                             convention='ESG', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='5') &
@@ -157,9 +157,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get ESG "author" Attribute from a GridComp
-      call ESMF_AttributeGet(gridcomp, name='author', value=attrValue, &
-                             convention='ESG', purpose='general', rc=rc)
+      ! Get ESG "Author" Attribute from a GridComp
+      call ESMF_AttributeGet(gridcomp, name='Author', value=attrValue, &
+                             convention='ESG', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Max Suarez') &
@@ -168,9 +168,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get ESG "discipline" Attribute from a GridComp
-      call ESMF_AttributeGet(gridcomp, name='discipline', value=attrValue, &
-                             convention='ESG', purpose='general', rc=rc)
+      ! Get ESG "Discipline" Attribute from a GridComp
+      call ESMF_AttributeGet(gridcomp, name='Discipline', value=attrValue, &
+                             convention='ESG', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Atmosphere') &
@@ -179,10 +179,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get ESG "physical_domain" Attribute from a GridComp
-      call ESMF_AttributeGet(gridcomp, name='physical_domain', &
-                             value=attrValue, &
-                             convention='ESG', purpose='general', rc=rc)
+      ! Get ESG "PhysicalDomain" Attribute from a GridComp
+      call ESMF_AttributeGet(gridcomp, name='PhysicalDomain', value=attrValue, &
+                             convention='ESG', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Earth System') &
@@ -191,10 +190,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get ESG "coding_language" Attribute from a GridComp Test
-      call ESMF_AttributeGet(gridcomp, name='coding_language', &
-                             value=attrValue, &
-                             convention='ESG', purpose='general', rc=rc)
+      ! Get ESG "CodingLanguage" Attribute from a GridComp Test
+      call ESMF_AttributeGet(gridcomp, name='CodingLanguage', value=attrValue, &
+                             convention='ESG', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Fortran 90') &
@@ -203,10 +201,10 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get ESG "model_component_framework" Attribute from a GridComp
-      call ESMF_AttributeGet(gridcomp, name='model_component_framework', &
+      ! Get ESG "ModelComponentFramework" Attribute from a GridComp
+      call ESMF_AttributeGet(gridcomp, name='ModelComponentFramework', &
                              value=attrValue, &
-                             convention='ESG', purpose='general', rc=rc)
+                             convention='ESG', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. &
@@ -216,9 +214,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get CF "comment" Attribute from a GridComp
-      call ESMF_AttributeGet(gridcomp, name='comment', value=attrValue, &
-                             convention='CF', purpose='general', rc=rc)
+      ! Get CF "Comment" Attribute from a GridComp
+      call ESMF_AttributeGet(gridcomp, name='Comment', value=attrValue, &
+                             convention='CF', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. &
@@ -228,9 +226,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get CF "references" Attribute from a GridComp
-      call ESMF_AttributeGet(gridcomp, name='references', value=attrValue, &
-                             convention='CF', purpose='general', rc=rc)
+      ! Get CF "References" Attribute from a GridComp
+      call ESMF_AttributeGet(gridcomp, name='References', value=attrValue, &
+                             convention='CF', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. &

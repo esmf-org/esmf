@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadFieldEx.F90,v 1.1 2009/04/29 05:57:35 eschwab Exp $
+! $Id: ESMF_AttReadFieldEx.F90,v 1.2 2009/05/01 04:43:55 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -81,9 +81,9 @@ program ESMF_AttReadFieldEx
 print *, 'rc = ', rc
 
 !BOC
-      ! Get CF "name" Attribute from a Field
-      call ESMF_AttributeGet(field, name='name', value=attrValue, &
-                             convention='CF', purpose='general', rc=rc)
+      ! Get CF "Name" Attribute from a Field
+      call ESMF_AttributeGet(field, name='Name', value=attrValue, &
+                             convention='CF', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='DPEDT') &
@@ -92,9 +92,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get CF "standard_name" Attribute from a Field
-      call ESMF_AttributeGet(field, name='standard_name', value=attrValue, &
-                             convention='CF', purpose='extended', rc=rc)
+      ! Get CF "StandardName" Attribute from a Field
+      call ESMF_AttributeGet(field, name='StandardName', value=attrValue, &
+                             convention='CF', purpose='Extended', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. &
@@ -104,9 +104,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get CF "long_name" Attribute from a Field
-      call ESMF_AttributeGet(field, name='long_name', value=attrValue, &
-                             convention='CF', purpose='general', rc=rc)
+      ! Get CF "LongName" Attribute from a Field
+      call ESMF_AttributeGet(field, name='LongName', value=attrValue, &
+                             convention='CF', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Edge pressure tendency') &
@@ -115,13 +115,12 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get CF "units" Attribute from a Field
-      call ESMF_AttributeGet(field, name='units', value=attrValue, &
-                             convention='CF', purpose='general', rc=rc)
+      ! Get CF "Units" Attribute from a Field
+      call ESMF_AttributeGet(field, name='Units', value=attrValue, &
+                             convention='CF', purpose='General', rc=rc)
 !EOC
 
-      if (.not.((rc==ESMF_SUCCESS .and. &
-                 attrvalue=='Pa s-1') &
+      if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Pa s-1') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
 print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridEx.F90,v 1.1 2009/04/30 05:01:01 eschwab Exp $
+! $Id: ESMF_AttReadGridEx.F90,v 1.2 2009/05/01 04:43:55 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -81,9 +81,9 @@ program ESMF_AttReadGridEx
 print *, 'rc = ', rc
 
 !BOC
-      ! Get GridSpec "congruenttiles" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='congruenttiles', value=attrValue, &
-                             convention='GridSpec', purpose='general', rc=rc)
+      ! Get GridSpec "CongruentTiles" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='CongruentTiles', value=attrValue, &
+                             convention='GridSpec', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='true') &
@@ -92,9 +92,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "gridtype" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='gridtype', value=attrValue, &
-                             convention='GridSpec', purpose='general', rc=rc)
+      ! Get GridSpec "GridType" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='GridType', value=attrValue, &
+                             convention='GridSpec', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='cubed sphere') &
@@ -103,9 +103,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "dimorder" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='dimorder', value=attrValue, &
-                             convention='GridSpec', purpose='general', rc=rc)
+      ! Get GridSpec "DimOrder" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='DimOrder', value=attrValue, &
+                             convention='GridSpec', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='YX') &
@@ -114,10 +114,10 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "discretizationtype" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='discretizationtype', &
+      ! Get GridSpec "DiscretizationType" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='DiscretizationType', &
                              value=attrValue, &
-                             convention='GridSpec', purpose='general', rc=rc)
+                             convention='GridSpec', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='logically_rectangular') &
@@ -126,9 +126,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "geometrytype" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='geometrytype', value=attrValue, &
-                             convention='GridSpec', purpose='general', rc=rc)
+      ! Get GridSpec "GeometryType" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='GeometryType', value=attrValue, &
+                             convention='GridSpec', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='sphere') &
@@ -137,9 +137,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "isconformal" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='isconformal', value=attrValue, &
-                             convention='GridSpec', purpose='general', rc=rc)
+      ! Get GridSpec "IsConformal" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='IsConformal', value=attrValue, &
+                             convention='GridSpec', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='false') &
@@ -148,9 +148,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "ispolecovered" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='ispolecovered', value=attrValue, &
-                             convention='GridSpec', purpose='general', rc=rc)
+      ! Get GridSpec "IsPoleCovered" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='IsPoleCovered', value=attrValue, &
+                             convention='GridSpec', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='true') &
@@ -159,9 +159,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "isregular" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='isregular', value=attrValue, &
-                             convention='GridSpec', purpose='general', rc=rc)
+      ! Get GridSpec "IsRegular" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='IsRegular', value=attrValue, &
+                             convention='GridSpec', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='false') &
@@ -170,9 +170,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "isuniform" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='isuniform', value=attrValue, &
-                             convention='GridSpec', purpose='general', rc=rc)
+      ! Get GridSpec "IsUniform" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='IsUniform', value=attrValue, &
+                             convention='GridSpec', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='false') &
@@ -181,10 +181,10 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "northpolelocation" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='northpolelocation', &
+      ! Get GridSpec "NorthPoleLocation" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='NorthPoleLocation', &
                              value=attrValue, &
-                             convention='GridSpec', purpose='general', rc=rc)
+                             convention='GridSpec', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='long: 0.0 lat: 90.0') &
@@ -193,9 +193,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "numberofcells" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='numberofcells', value=attrValue, &
-                             convention='GridSpec', purpose='general', rc=rc)
+      ! Get GridSpec "NumberOfCells" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='NumberOfCells', value=attrValue, &
+                             convention='GridSpec', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='53457') &
@@ -204,10 +204,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "numdims" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='numdims', &
-                             value=attrValue, &
-                             convention='GridSpec', purpose='general', rc=rc)
+      ! Get GridSpec "NumDims" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='NumDims', value=attrValue, &
+                             convention='GridSpec', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='2') &
@@ -216,9 +215,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "nx" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='nx', value=attrValue, &
-                             convention='GridSpec', purpose='general', rc=rc)
+      ! Get GridSpec "NX" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='NX', value=attrValue, &
+                             convention='GridSpec', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='96') &
@@ -227,9 +226,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "ny" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='ny', value=attrValue, &
-                             convention='GridSpec', purpose='general', rc=rc)
+      ! Get GridSpec "NY" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='NY', value=attrValue, &
+                             convention='GridSpec', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='96') &
@@ -238,9 +237,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "nz" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='nz', value=attrValue, &
-                             convention='GridSpec', purpose='general', rc=rc)
+      ! Get GridSpec "NZ" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='NZ', value=attrValue, &
+                             convention='GridSpec', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='15') &
@@ -249,9 +248,9 @@ print *, 'rc = ', rc
 print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "resolution" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='resolution', value=attrValue, &
-                             convention='GridSpec', purpose='general', rc=rc)
+      ! Get GridSpec "Resolution" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='Resolution', value=attrValue, &
+                             convention='GridSpec', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='C48') &
