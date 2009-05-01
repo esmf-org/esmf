@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.34 2009/04/30 20:50:59 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.35 2009/05/01 04:36:29 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.34 2009/04/30 20:50:59 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.35 2009/05/01 04:36:29 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -242,12 +242,12 @@ namespace ESMCI {
                                msgbuf, &localrc);
       return ESMF_FAILURE;
     }
-    // TODO: congruenttiles & gridtype will be at the mosaic level,
+    // TODO: CongruentTiles & GridType will be at the mosaic level,
     //       others at the tile level
     localrc = AttPackAddAttribute("CongruentTiles", "GridSpec", "General", object);
     localrc = AttPackAddAttribute("GridType", "GridSpec", "General", object);
 
-    // TODO: area & coordinatepoles await further spec from Sylvia Murphy & Co.
+    // TODO: Area & Coordinatepoles await further spec from Sylvia Murphy & Co.
     //localrc = AttPackAddAttribute("Area", "GridSpec", "General", object);
     //localrc = AttPackAddAttribute("CoordinatePoles", "GridSpec", "General", object);
 
@@ -3932,16 +3932,16 @@ namespace ESMCI {
     for (i=0;  i<attrList.size(); ++i) { 
       if (attrList.at(i)->items == 1) {
         if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
-          sprintf(msgbuf, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
+          sprintf(msgbuf, "    <%s>%d</%s>\n",attrList.at(i)->attrName.c_str(),
             attrList.at(i)->vi,attrList.at(i)->attrName.c_str());
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) 
-          sprintf(msgbuf, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
+          sprintf(msgbuf, "    <%s>%ld</%s>\n",attrList.at(i)->attrName.c_str(),
             attrList.at(i)->vtl,attrList.at(i)->attrName.c_str());
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4) 
-          sprintf(msgbuf, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
+          sprintf(msgbuf, "    <%s>%f</%s>\n",attrList.at(i)->attrName.c_str(),
             attrList.at(i)->vf,attrList.at(i)->attrName.c_str());
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8) 
-          sprintf(msgbuf, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
+          sprintf(msgbuf, "    <%s>%g</%s>\n",attrList.at(i)->attrName.c_str(),
             attrList.at(i)->vd,attrList.at(i)->attrName.c_str());
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_LOGICAL) {
           if (attrList.at(i)->vb == ESMF_TRUE) 
