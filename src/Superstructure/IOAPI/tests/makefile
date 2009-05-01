@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2009/03/18 05:50:32 eschwab Exp $
+# $Id: makefile,v 1.2 2009/05/01 04:49:50 eschwab Exp $
 
 ALL:     build_unit_tests
 run:     run_unit_tests
@@ -24,9 +24,9 @@ CLOBBERDIRS =
 # --- GridComp
 
 RUN_ESMF_IOGridCompUTest:
-	cp -f esmf_gridcomp.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_TESTDIR)
 	$(MAKE) TNAME=IOGridComp NP=4 ftest
 
 RUN_ESMF_IOGridCompUTestUNI:
-	cp -f esmf_gridcomp.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_TESTDIR)
 	$(MAKE) TNAME=IOGridComp NP=1 ftest
