@@ -1,23 +1,23 @@
 <?xml version="1.0"?>
-<gridspec name="gfdl_fv_cubed_sphere_atmos_am3">
-  <mosaic name="gfdl_fv_cubed_sphere_atmos_am3_mosaic">
-    <attribute_package convention="GridSpec" purpose="general">
-      <congruenttiles>true</congruenttiles>
-      <gridtype>cubed sphere</gridtype>
-      <dimorder>YX</dimorder>
-      <discretizationtype>logically_rectangular</discretizationtype>
-      <geometrytype>sphere</geometrytype>
-      <isconformal>false</isconformal>
-      <ispolecovered>true</ispolecovered>
-      <isregular>false</isregular>
-      <isuniform>false</isuniform>
-      <northpolelocation>long: 0.0 lat: 90.0</northpolelocation>
-      <numberofcells>53457</numberofcells>
-      <numdims>2</numdims>
-      <nx>96</nx>
-      <ny>96</ny>
-      <nz>15</nz>
-      <resolution>C48</resolution>
+<GridSpec name="gfdl_fv_cubed_sphere_atmos_am3">
+  <Mosaic name="gfdl_fv_cubed_sphere_atmos_am3_mosaic">
+    <attribute_package convention="GridSpec" purpose="General">
+      <CongruentTiles>true</CongruentTiles>
+      <GridType>cubed sphere</GridType>
+      <DimOrder>YX</DimOrder>
+      <DiscretizationType>logically_rectangular</DiscretizationType>
+      <GeometryType>sphere</GeometryType>
+      <IsConformal>false</IsConformal>
+      <IsPoleCovered>true</IsPoleCovered>
+      <IsRegular>false</IsRegular>
+      <IsUniform>false</IsUniform>
+      <NorthPoleLocation>long: 0.0 lat: 90.0</NorthPoleLocation>
+      <NumberOfCells>53457</NumberOfCells>
+      <NumDims>2</NumDims>
+      <NX>96</NX>
+      <NY>96</NY>
+      <NZ>15</NZ>
+      <Resolution>C48</Resolution>
     </attribute_package>
-  </mosaic>
-</gridspec>
+  </Mosaic>
+</GridSpec>

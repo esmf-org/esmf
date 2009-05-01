@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <variable>
-  <attribute_package convention="ESMF" purpose="general">
-    <name>DPEDT</name> 
-    <standard_name>tendency_of_air_pressure</standard_name>
-    <long_name>Edge pressure tendency</long_name>
-    <units>Pa s-1</units>
+  <attribute_package convention="CF" purpose="Extended">
+    <Name>DPEDT</Name> 
+    <StandardName>tendency_of_air_pressure</StandardName>
+    <LongName>Edge pressure tendency</LongName>
+    <Units>Pa s-1</Units>
   </attribute_package>
 </variable>
