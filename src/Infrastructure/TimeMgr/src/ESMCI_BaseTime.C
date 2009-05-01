@@ -1,4 +1,4 @@
-// $Id: ESMCI_BaseTime.C,v 1.8 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMCI_BaseTime.C,v 1.9 2009/05/01 05:01:17 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_BaseTime.C,v 1.8 2009/01/21 21:38:01 cdeluca Exp $";
+ static const char *const version = "$Id: ESMCI_BaseTime.C,v 1.9 2009/05/01 05:01:17 eschwab Exp $";
 //-------------------------------------------------------------------------
 
   namespace ESMCI{
@@ -346,7 +346,7 @@
       if (remainingSeconds < INT_MIN || remainingSeconds > INT_MAX) {
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "s=%lld out-of-range with respect to "
-                        "machine limits (INT_MIN=%d to INT_MAX=%d), ",
+                        "machine limits (INT_MIN=%d to INT_MAX=%d), "
                         "use s_i8.", remainingSeconds, INT_MIN, INT_MAX);
         ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
         return (ESMF_FAILURE);
