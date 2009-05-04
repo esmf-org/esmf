@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.40 2009/04/30 03:54:27 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.41 2009/05/04 23:04:17 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -8704,7 +8704,7 @@ contains
   enddo    ! lDE
 
   ! Uncomment these calls to see some actual regrid results
-#if 0
+#if 1
   spherical_grid = 0
   call ESMF_MeshIO(vm, gridA, ESMF_STAGGERLOC_CENTER, &
                "srcmesh", srcArrayA, rc=localrc, &

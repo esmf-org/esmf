@@ -44,6 +44,8 @@ struct Search_index {
     best_dist = std::numeric_limits<double>::max();
     best_elem = NULL;
     investigated = false;
+    is_in=false;
+    elem_masked=false;
   }
   Search_index(UInt _index, double _sort_val) :
      index(_index), found_flag(false) {
@@ -51,6 +53,8 @@ struct Search_index {
      best_dist = std::numeric_limits<double>::max();
      best_elem = NULL;
     investigated = false;
+    is_in=false;
+    elem_masked=false;
    }
   UInt index;
   double sort_val[3];  // coordinate
@@ -59,6 +63,9 @@ struct Search_index {
   Search_node_result best_snr;
   double best_dist;
   bool investigated;
+  bool is_in;
+  bool elem_masked;
+
 /*
   bool operator<(const Search_index &rhs) const
     { return sort_val < rhs.sort_val; }
@@ -239,25 +246,22 @@ void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, int unmappedac
       mme=GetME(*src_mask_field_ptr, ker)(METraits<>());
       src_node_mask.reserve(mme->num_functions());
     }
-    
+
     for (; ei != ee; ++ei) {
       const MeshObj &elem = *ei;
    
-      // Check mask
+      // Set src mask status
+      bool elem_masked=false;    
       if (src_mask_field_ptr != NULL) {
 	GatherElemData<>(*mme, *src_mask_field_ptr, elem, &src_node_mask[0]);
-
-	bool masked=false;
 	for (int i=0; i< mme->num_functions(); i++) {
 	  if (src_node_mask[i] > 0.5) {
-	    masked=true;
+	    elem_masked=true;
 	    break;
 	  }
 	}
-
-	// if masked go to next element
-	if (masked) continue;
       }
+
 
      BBox bounding_box(coord_field, elem, 0.15);
   
@@ -329,14 +333,26 @@ void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, int unmappedac
        Search_node_result snr;
        snr.node = dest_nlist[si.index];
        std::copy(pcoord, pcoord+sdim, &snr.pcoord[0]);
+       // printf(" n%d# c%d# masked=%d \n",dest_nlist[si.index]->get_id(),elem.get_id(),elem_masked);
        if (in) {
-         si.found_flag = true;
-         sr->nodes.push_back(snr);
-       } else if(dist < si.best_dist) {
+	 if (elem_masked) {
+	   si.best_dist = 0.0;
+	   si.best_elem = &elem;
+	   si.best_snr = snr;
+	   si.is_in=true;
+	   si.elem_masked=true;
+	 } else { 
+	   si.found_flag = true;
+	   si.is_in=true;
+	   si.elem_masked=false;
+	   sr->nodes.push_back(snr);
+	 }
+       } else if (!si.is_in && (dist < si.best_dist)) {
          // Set up fallback candidate.
          si.best_dist = dist;
          si.best_elem = &elem;
          si.best_snr = snr;
+	 si.elem_masked=elem_masked;
        }
      } // final candidates
      if (sr->nodes.size() > 0) {
@@ -377,35 +393,48 @@ void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, int unmappedac
 	iagain.push_back(dest_nlist[(*si)->index]);
       } else {
 	if (unmappedaction == ESMC_UNMAPPEDACTION_ERROR) {
-	  Throw() << " Some destination points cannot be mapped to source grid";
-	} else if (unmappedaction == ESMC_UNMAPPEDACTION_IGNORE) {
+	  Throw() << " Some destination points cannot be mapped to source grid";	} else if (unmappedaction == ESMC_UNMAPPEDACTION_IGNORE) {
 	  // don't do anything
 	} else {
 	  Throw() << " Unknown unmappedaction option";
 	}
       }
     } else {
-      Search_result *srtmp = new Search_result;
-      srtmp->elem = (*si)->best_elem;
-      SearchResult::iterator sri = std::lower_bound(result.begin(), result.end(), srtmp, Search_Res_Less());
-      if (sri == result.end() || (*sri)->elem != srtmp->elem) {
-      // didn't finnd element in list, must add
-        srtmp->nodes.push_back((*si)->best_snr);
-        result.insert(sri, srtmp);
-      } else {
-        // Just push back
-        (*sri)->nodes.push_back((*si)->best_snr);
+      // If elem is masked then don't add the nodes to the list
+      if ((*si)->elem_masked) { 
+	if (unmappedaction == ESMC_UNMAPPEDACTION_ERROR) {
+	  Throw() << " Some destination points cannot be mapped to source grid";	
+        } else if (unmappedaction == ESMC_UNMAPPEDACTION_IGNORE) {
+	  // don't do anything
+	} else {
+	  Throw() << " Unknown unmappedaction option";
+	}
+      } else { // Stick the nodes in the search list
+	Search_result *srtmp = new Search_result;
+	srtmp->elem = (*si)->best_elem;
+	
+	SearchResult::iterator sri = std::lower_bound(result.begin(), result.end(), srtmp, Search_Res_Less());
+	if (sri == result.end() || (*sri)->elem != srtmp->elem) {
+	  // didn't finnd element in list, must add
+	  srtmp->nodes.push_back((*si)->best_snr);
+	  result.insert(sri, srtmp);
+	} else {
+	  // Just push back
+	  (*sri)->nodes.push_back((*si)->best_snr);
+	}
+	//std::cout << "Resolved:Could not locate:" << **si << ", dist=" << (*si)->best_dist << std::endl;
+	nres++;
       }
-      //std::cout << "Resolved:Could not locate:" << **si << ", dist=" << (*si)->best_dist << std::endl;
-      nres++;
     }
+
+    // Now that we've processes these get rid of them
     delete *si;
   }
   //std::cout << "Search, found " << nbad << " bad cases, but resolved " << nres << " of these." << std::endl;
-
+  
   // Remove storage for dest_nlist.
   std::vector<const MeshObj*>().swap(dest_nlist);
-
+  
   if (try_again && iagain.size() !=0) {
     if (stol > 1e-6) {
       if (unmappedaction == ESMC_UNMAPPEDACTION_ERROR) {
