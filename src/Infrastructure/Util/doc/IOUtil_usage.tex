@@ -1,4 +1,4 @@
-% $Id: IOUtil_usage.tex,v 1.1 2009/04/25 04:37:03 w6ws Exp $
+% $Id: IOUtil_usage.tex,v 1.2 2009/05/04 20:44:32 w6ws Exp $
 
 %\subsection{Usage and Examples}
 
@@ -42,7 +42,7 @@ or higher to avoid these preconnected units.
 
 Fortran run-time libraries generally use buffering techniques to improve I/O
 performance.  However output buffering can be problematic when output is needed,
-but is ``trapped'' in the buffer because it is not full.  This is a common problem
+but is ``trapped'' in the buffer because it is not full.
 This is a common occurance when debugging a program, and inserting {\tt WRITE} statements
 to track down the bad area of code.  If the program crashes before the output
 buffer has been flushed, the desired debugging output may never be seen --- giving
