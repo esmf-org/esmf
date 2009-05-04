@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.54 2009/03/25 19:59:12 w6ws Exp $
+! $Id: ESMF_Init.F90,v 1.55 2009/05/04 20:51:13 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -169,7 +169,7 @@
 !     \item [{[mpiCommunicator]}]
 !           MPI communicator defining the group of processes on which the
 !           ESMF application is running.
-!           If not specified, defaults to {\tt MPI\_COMM\_WORLD}
+!           If not specified, defaults to {\tt MPI\_COMM\_WORLD}.
 !     \item [{[IOUnitLower]}]
 !           Lower bound for Fortran unit numbers used within the ESMF library.
 !           Fortran units are primarily used for log files.  Legal unit numbers
@@ -177,12 +177,12 @@
 !           in order to avoid the compiler-specific
 !           reservations which are typically found on the first few units.
 !           If not specified, defaults to {\tt ESMF\_LOG\_FORT\_UNIT\_NUMBER},
-!           which is distributed with a value of 50
+!           which is distributed with a value of 50.
 !     \item [{[IOUnitUpper]}]
 !           Upper bound for Fortran unit numbers used within the ESMF library.
-!           Must be set to a value higher than {\tt IOUnitLower}.
+!           Must be set to a value at least 5 units higher than {\tt IOUnitLower}.
 !           If not specified, defaults to {\tt ESMF\_LOG\_UPPER}, which is
-!           distributed with a value of 99
+!           distributed with a value of 99.
 !     \item [{[vm]}]
 !           Returns the global {\tt ESMF\_VM} that was created 
 !           during initialization.
