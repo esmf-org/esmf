@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.17 2009/02/10 18:52:25 rokuingh Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.18 2009/05/04 05:57:52 eschwab Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -67,12 +67,18 @@
 \input{AttributePackageEx_fapi}
 \input{AttributeUpdateEx_fapi}
 \input{AttributeUpdateMod_fapi}
+\input{AttReadGridCompEx_fapi}
+\input{AttReadFieldEx_fapi}
+\input{AttReadGridEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Attribute/doc/Attribute_usage} 
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributeEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributePackageEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributeUpdateEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributeUpdateMod_fapi}
+\input{../Superstructure/AttributeAPI/doc/ESMF_AttReadGridCompEx_fapi}
+\input{../Superstructure/AttributeAPI/doc/ESMF_AttReadFieldEx_fapi}
+\input{../Superstructure/AttributeAPI/doc/ESMF_AttReadGridEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
@@ -99,14 +105,3 @@
 #ifdef STANDALONE
 \end{document}
 #endif
-
-
-
-
-
-
-
-
-
-
-
