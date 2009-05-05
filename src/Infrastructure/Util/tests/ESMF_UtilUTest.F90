@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.13 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.14 2009/05/05 05:11:07 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -28,13 +28,13 @@
 ! !USES:
       use ESMF_TestMod     ! test methods
       use ESMF_Mod         ! the ESMF Framework
-      use ESMF_IOUtilMod  ! Internal Fortran I/O routines
+      use ESMF_IOUtilMod   ! Internal Fortran I/O routines
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.13 2009/01/21 21:38:01 cdeluca Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.14 2009/05/05 05:11:07 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -49,6 +49,10 @@
       ! individual test failure messages
       character(ESMF_MAXSTR*2) :: failMsg
 
+      ! VM variables
+      type(ESMF_VM) :: vm
+      integer :: localPet
+
       ! local variables needed to pass into function/subroutine calls
       !character(ESMF_MAXSTR) :: validate_options
       !character(ESMF_MAXSTR) :: print_options
@@ -59,6 +63,7 @@
       ! misc local variables
       character(2) :: major_version, minor_version, revision
       character(len (ESMF_VERSION_STRING)) :: evs
+      character(16) :: filename
       integer :: evs_dotpos
       integer :: i
       integer :: funits(5), funit_low, funit_high
@@ -75,6 +80,8 @@
 
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
+      call ESMF_VMGetGlobal (vm, rc=rc)
+      call ESMF_VMGet (vm, localPet=localPet, rc=rc)
 
       ! add tests here
 
@@ -139,7 +146,8 @@
       call ESMF_IOUnitGet (funits(i), rc)
       ioerr = 0
       if (rc == ESMF_SUCCESS) then
-        open (funits(i), status='scratch', iostat=ioerr)
+        write (filename,'(a,2i2.2)') 'IOtempfile', localPet, i
+        open (funits(i), file=filename, iostat=ioerr)
       end if
       if (rc /= ESMF_SUCCESS .or. ioerr /= 0) exit
     end do
@@ -154,7 +162,7 @@
 
     do, i=1, size (funits)
       if (funits(i) /= -1) then
-        close (funits(i), iostat=ioerr)
+        close (funits(i), status='delete', iostat=ioerr)
       end if
     end do
 
@@ -172,9 +180,10 @@
     !
     !NEX_UTest
     ! Open it
-    write (name, *) "ESMF_IOUnitFlush, open scratch file"
+    write (filename,'(a,i2.2)') 'IOtempfile_', localPet
+    write (name, *) "ESMF_IOUnitFlush, open scratch file: ", trim (filename)
     write (failMsg, *) "Opening scratch unit"
-    open (funits(1), status='scratch', form='formatted', iostat=ioerr)
+    open (funits(1), file=filename, form='formatted', iostat=ioerr)
     call ESMF_Test (ioerr == 0, name, failMsg, result, ESMF_SRCLINE)
 
     !
@@ -186,7 +195,7 @@
     call ESMF_IOUnitFlush (funits(1), rc)
     call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
-    close (funits(1), iostat=ioerr)
+    close (funits(1), status='delete', iostat=ioerr)
 
 
 #ifdef ESMF_TESTEXHAUSTIVE
