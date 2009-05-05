@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridCompEx.F90,v 1.5 2009/05/05 05:43:45 eschwab Exp $
+! $Id: ESMF_AttReadGridCompEx.F90,v 1.6 2009/05/05 15:50:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -19,29 +19,9 @@ program ESMF_AttReadGridCompEx
 !BOE
 ! \subsubsection{Example: Reading an XML file-based ESG Attribute Package for a Gridded Component}
 ! This example shows how to read an ESG Attribute Package for a Gridded
-! Component from the following XML file, which also resides at
-! ESMF\_DIR/src/Superstructure/Component/etc/esmf\_gridcomp.xml:
-!
+! Component from an XML file; see
+! ESMF\_DIR/src/Superstructure/Component/etc/esmf\_gridcomp.xml.
 !EOE
-!BOC
-<?xml version="1.0"?>
-<model_component>
-  <attribute_package convention="ESG" purpose="General">
-    <Name>GEOS</Name>
-    <FullName>Goddard Earth Observing System Model</FullName>
-    <Agency>NASA</Agency>
-    <Institution>Global Modeling and Assimilation Office (GMAO)</Institution>
-    <Version>5</Version>
-    <Author>Max Suarez</Author>
-    <Discipline>Atmosphere</Discipline>
-    <PhysicalDomain>Earth System</PhysicalDomain>
-    <CodingLanguage>Fortran 90</CodingLanguage>
-    <ModelComponentFramework>ESMF (Earth System Modeling Framework)</ModelComponentFramework>
-    <Comment>ESMF GridComp Attribute IO Test</Comment>
-    <References>http://gmao.gsfc.nasa.gov/systems/geos5</References>
-  </attribute_package>
-</model_component>
-!EOC
 
 #include "ESMF.h"
 

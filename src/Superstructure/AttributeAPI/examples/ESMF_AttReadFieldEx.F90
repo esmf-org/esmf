@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadFieldEx.F90,v 1.5 2009/05/05 05:43:45 eschwab Exp $
+! $Id: ESMF_AttReadFieldEx.F90,v 1.6 2009/05/05 15:50:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -18,22 +18,10 @@ program ESMF_AttReadFieldEx
 
 !BOE
 ! \subsubsection{Example: Reading an XML file-based CF Attribute Package for a Field}
-! This example shows how to read a CF Attribute Package for a Field from the
-! following file, which also resides at
-! ESMF\_DIR/src/Infrastructure/Field/etc/esmf\_field.xml:
-!
+! This example shows how to read a CF Attribute Package for a Field from an
+! XML file; see
+! ESMF\_DIR/src/Infrastructure/Field/etc/esmf\_field.xml.
 !EOE
-!BOC
-<?xml version="1.0"?>
-<variable>
-  <attribute_package convention="CF" purpose="Extended">
-    <Name>DPEDT</Name>
-    <StandardName>tendency_of_air_pressure</StandardName>
-    <LongName>Edge pressure tendency</LongName>
-    <Units>Pa s-1</Units>
-  </attribute_package>
-</variable>
-!EOC
 
 #include "ESMF.h"
 

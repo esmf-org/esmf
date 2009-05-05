@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridEx.F90,v 1.5 2009/05/05 05:43:45 eschwab Exp $
+! $Id: ESMF_AttReadGridEx.F90,v 1.6 2009/05/05 15:50:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -18,36 +18,10 @@ program ESMF_AttReadGridEx
 
 !BOE
 ! \subsubsection{Example: Reading an XML file-based GridSpec Attribute Package for a Grid}
-! This example shows how to read a GridSpec Attribute Package from the
-! following XML file, which also resides at
-! ESMF\_DIR/src/Infrastructure/grid/etc/esmf\_grid.xml:
-!
+! This example shows how to read a GridSpec Attribute Package from an
+! XML file; see
+! ESMF\_DIR/src/Infrastructure/Grid/etc/esmf\_grid.xml.
 !EOE
-!BOC
-<?xml version="1.0"?>
-<GridSpec name="gfdl_fv_cubed_sphere_atmos_am3">
-  <Mosaic name="gfdl_fv_cubed_sphere_atmos_am3_mosaic">
-    <attribute_package convention="GridSpec" purpose="General">
-      <CongruentTiles>true</CongruentTiles>
-      <GridType>cubed sphere</GridType>
-      <DimOrder>YX</DimOrder>
-      <DiscretizationType>logically_rectangular</DiscretizationType>
-      <GeometryType>sphere</GeometryType>
-      <IsConformal>false</IsConformal>
-      <IsPoleCovered>true</IsPoleCovered>
-      <IsRegular>false</IsRegular>
-      <IsUniform>false</IsUniform>
-      <NorthPoleLocation>long: 0.0 lat: 90.0</NorthPoleLocation>
-      <NumberOfCells>53457</NumberOfCells>
-      <NumDims>2</NumDims>
-      <NX>96</NX>
-      <NY>96</NY>
-      <NZ>15</NZ>
-      <Resolution>C48</Resolution>
-    </attribute_package>
-  </Mosaic>
-</GridSpec>
-!EOC
 
 #include "ESMF.h"
 
