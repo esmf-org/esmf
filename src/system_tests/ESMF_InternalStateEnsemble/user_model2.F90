@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.9 2009/04/03 18:52:11 svasquez Exp $
+! $Id: user_model2.F90,v 1.10 2009/05/05 20:46:35 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -26,9 +26,9 @@ module user_model2
   ! Internal State Variables
   type testData
   sequence
-      type(ESMF_ArraySpec), allocatable  :: arrayspec(:)
-      type(ESMF_DistGrid), allocatable   :: distgrid(:)
-      type(ESMF_Array), allocatable      :: array(:)
+      type(ESMF_ArraySpec), pointer, dimension(:)  :: arrayspec
+      type(ESMF_DistGrid),  pointer, dimension(:)  :: distgrid
+      type(ESMF_Array),     pointer, dimension(:)  :: array
   end type
 
    type dataWrapper
@@ -212,12 +212,8 @@ module user_model2
     integer, intent(out) :: rc
 
     ! Local variables
-    type(ESMF_Array)      :: array1, array2, array3
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
     integer               :: i, j
-    character(len=ESMF_MAXSTR) :: stateName
-    type(ESMF_Time) :: startTime, currTime
-    type(ESMF_Calendar) :: gregorianCalendar
     type(ESMF_Array)    :: array
 
     

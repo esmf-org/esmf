@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.6 2009/04/02 20:15:40 svasquez Exp $
+! $Id: user_coupler.F90,v 1.7 2009/05/05 20:46:32 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -187,7 +187,6 @@ module user_coupler
 
     ! Local variables
     type(ESMF_Array) :: srcArray, dstArray
-    character(len=ESMF_MAXSTR) :: stateName
 
     ! Initialize return code
     rc = ESMF_SUCCESS
