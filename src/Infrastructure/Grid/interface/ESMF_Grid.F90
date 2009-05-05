@@ -223,7 +223,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.112 2009/04/21 21:19:18 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.113 2009/05/05 18:42:13 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2350,6 +2350,7 @@ end subroutine ESMF_GridConvertIndex
         call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
                    "- distgrid should not contain arbitrary sequence indices", & 
                           ESMF_CONTEXT, rc) 
+        return
     endif
 
     !! coordTypeKind
@@ -2705,10 +2706,11 @@ end subroutine ESMF_GridConvertIndex
       deallocate(collocationPDim)
     endif
 
-    if (arbDim .ne. -1) then
+    if (arbDim .eq. -1) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
                    "- distgrid should contain arbitrary sequence indices", & 
                           ESMF_CONTEXT, rc) 
+	return
     endif
 
     if (undistDimCount .ne. 0) then
