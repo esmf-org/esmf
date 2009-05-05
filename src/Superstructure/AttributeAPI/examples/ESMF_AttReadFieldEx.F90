@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadFieldEx.F90,v 1.4 2009/05/04 06:39:11 eschwab Exp $
+! $Id: ESMF_AttReadFieldEx.F90,v 1.5 2009/05/05 05:43:45 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -19,8 +19,21 @@ program ESMF_AttReadFieldEx
 !BOE
 ! \subsubsection{Example: Reading an XML file-based CF Attribute Package for a Field}
 ! This example shows how to read a CF Attribute Package for a Field from the
-! example XML file residing at ESMF_DIR/src/Infrastructure/Field/etc/esmf_field.xml.
+! following file, which also resides at
+! ESMF\_DIR/src/Infrastructure/Field/etc/esmf\_field.xml:
+!
 !EOE
+!BOC
+<?xml version="1.0"?>
+<variable>
+  <attribute_package convention="CF" purpose="Extended">
+    <Name>DPEDT</Name>
+    <StandardName>tendency_of_air_pressure</StandardName>
+    <LongName>Edge pressure tendency</LongName>
+    <Units>Pa s-1</Units>
+  </attribute_package>
+</variable>
+!EOC
 
 #include "ESMF.h"
 
@@ -79,7 +92,7 @@ program ESMF_AttReadFieldEx
 
       if (rc .ne. ESMF_SUCCESS .and. xercesPresent) finalrc = ESMF_FAILURE
 
-print *, 'rc = ', rc
+!print *, 'rc = ', rc
 
 !BOC
       ! Get CF "Name" Attribute from a Field
@@ -89,8 +102,8 @@ print *, 'rc = ', rc
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='DPEDT') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get CF "StandardName" Attribute from a Field
@@ -101,8 +114,8 @@ print *, 'attrvalue = ', attrvalue
       if (.not.((rc==ESMF_SUCCESS .and. &
                  attrvalue=='tendency_of_air_pressure') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get CF "LongName" Attribute from a Field
@@ -112,8 +125,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Edge pressure tendency') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get CF "Units" Attribute from a Field
@@ -123,8 +136,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Pa s-1') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       call ESMF_FieldDestroy(field, rc=rc)

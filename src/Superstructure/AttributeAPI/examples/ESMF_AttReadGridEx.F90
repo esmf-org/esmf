@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridEx.F90,v 1.4 2009/05/04 06:39:11 eschwab Exp $
+! $Id: ESMF_AttReadGridEx.F90,v 1.5 2009/05/05 05:43:45 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -19,8 +19,35 @@ program ESMF_AttReadGridEx
 !BOE
 ! \subsubsection{Example: Reading an XML file-based GridSpec Attribute Package for a Grid}
 ! This example shows how to read a GridSpec Attribute Package from the
-! example XML file residing at ESMF_DIR/src/Infrastructure/grid/etc/esmf_grid.xml.
+! following XML file, which also resides at
+! ESMF\_DIR/src/Infrastructure/grid/etc/esmf\_grid.xml:
+!
 !EOE
+!BOC
+<?xml version="1.0"?>
+<GridSpec name="gfdl_fv_cubed_sphere_atmos_am3">
+  <Mosaic name="gfdl_fv_cubed_sphere_atmos_am3_mosaic">
+    <attribute_package convention="GridSpec" purpose="General">
+      <CongruentTiles>true</CongruentTiles>
+      <GridType>cubed sphere</GridType>
+      <DimOrder>YX</DimOrder>
+      <DiscretizationType>logically_rectangular</DiscretizationType>
+      <GeometryType>sphere</GeometryType>
+      <IsConformal>false</IsConformal>
+      <IsPoleCovered>true</IsPoleCovered>
+      <IsRegular>false</IsRegular>
+      <IsUniform>false</IsUniform>
+      <NorthPoleLocation>long: 0.0 lat: 90.0</NorthPoleLocation>
+      <NumberOfCells>53457</NumberOfCells>
+      <NumDims>2</NumDims>
+      <NX>96</NX>
+      <NY>96</NY>
+      <NZ>15</NZ>
+      <Resolution>C48</Resolution>
+    </attribute_package>
+  </Mosaic>
+</GridSpec>
+!EOC
 
 #include "ESMF.h"
 
@@ -79,7 +106,7 @@ program ESMF_AttReadGridEx
 
       if (rc .ne. ESMF_SUCCESS .and. xercesPresent) finalrc = ESMF_FAILURE
 
-print *, 'rc = ', rc
+!print *, 'rc = ', rc
 
 !BOC
       ! Get GridSpec "CongruentTiles" Attribute from a Grid
@@ -89,8 +116,8 @@ print *, 'rc = ', rc
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='true') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get GridSpec "GridType" Attribute from a Grid
@@ -100,8 +127,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='cubed sphere') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get GridSpec "DimOrder" Attribute from a Grid
@@ -111,8 +138,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='YX') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get GridSpec "DiscretizationType" Attribute from a Grid
@@ -123,8 +150,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='logically_rectangular') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get GridSpec "GeometryType" Attribute from a Grid
@@ -134,8 +161,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='sphere') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get GridSpec "IsConformal" Attribute from a Grid
@@ -145,8 +172,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='false') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get GridSpec "IsPoleCovered" Attribute from a Grid
@@ -156,8 +183,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='true') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get GridSpec "IsRegular" Attribute from a Grid
@@ -167,8 +194,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='false') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get GridSpec "IsUniform" Attribute from a Grid
@@ -178,8 +205,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='false') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get GridSpec "NorthPoleLocation" Attribute from a Grid
@@ -190,8 +217,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='long: 0.0 lat: 90.0') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get GridSpec "NumberOfCells" Attribute from a Grid
@@ -201,8 +228,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='53457') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get GridSpec "NumDims" Attribute from a Grid
@@ -212,8 +239,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='2') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get GridSpec "NX" Attribute from a Grid
@@ -223,8 +250,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='96') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get GridSpec "NY" Attribute from a Grid
@@ -234,8 +261,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='96') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get GridSpec "NZ" Attribute from a Grid
@@ -245,8 +272,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='15') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get GridSpec "Resolution" Attribute from a Grid
@@ -256,8 +283,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='C48') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       call ESMF_GridDestroy(grid, rc=rc)

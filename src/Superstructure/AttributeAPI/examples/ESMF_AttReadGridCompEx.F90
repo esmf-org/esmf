@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridCompEx.F90,v 1.4 2009/05/04 06:39:11 eschwab Exp $
+! $Id: ESMF_AttReadGridCompEx.F90,v 1.5 2009/05/05 05:43:45 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -18,8 +18,30 @@ program ESMF_AttReadGridCompEx
 
 !BOE
 ! \subsubsection{Example: Reading an XML file-based ESG Attribute Package for a Gridded Component}
-! This example shows how to read an ESG Attribute Package for a Gridded Component from the XML file residing at ESMF_DIR/src/Superstructure/Component/etc/esmf_gridcomp.xml.
+! This example shows how to read an ESG Attribute Package for a Gridded
+! Component from the following XML file, which also resides at
+! ESMF\_DIR/src/Superstructure/Component/etc/esmf\_gridcomp.xml:
+!
 !EOE
+!BOC
+<?xml version="1.0"?>
+<model_component>
+  <attribute_package convention="ESG" purpose="General">
+    <Name>GEOS</Name>
+    <FullName>Goddard Earth Observing System Model</FullName>
+    <Agency>NASA</Agency>
+    <Institution>Global Modeling and Assimilation Office (GMAO)</Institution>
+    <Version>5</Version>
+    <Author>Max Suarez</Author>
+    <Discipline>Atmosphere</Discipline>
+    <PhysicalDomain>Earth System</PhysicalDomain>
+    <CodingLanguage>Fortran 90</CodingLanguage>
+    <ModelComponentFramework>ESMF (Earth System Modeling Framework)</ModelComponentFramework>
+    <Comment>ESMF GridComp Attribute IO Test</Comment>
+    <References>http://gmao.gsfc.nasa.gov/systems/geos5</References>
+  </attribute_package>
+</model_component>
+!EOC
 
 #include "ESMF.h"
 
@@ -97,7 +119,7 @@ program ESMF_AttReadGridCompEx
 
       if (rc .ne. ESMF_SUCCESS .and. xercesPresent) finalrc = ESMF_FAILURE
 
-print *, 'rc = ', rc
+!print *, 'rc = ', rc
 
 !BOC
       ! Get ESG "Name" Attribute from a GridComp
@@ -107,8 +129,8 @@ print *, 'rc = ', rc
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='GEOS') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get ESG "FullName" Attribute from a GridComp
@@ -119,8 +141,8 @@ print *, 'attrvalue = ', attrvalue
       if (.not.((rc==ESMF_SUCCESS .and. &
                  attrvalue=='Goddard Earth Observing System Model') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get ESG "Agency" Attribute from a GridComp
@@ -130,8 +152,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='NASA') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get ESG "Institution" Attribute from a GridComp
@@ -142,8 +164,8 @@ print *, 'attrvalue = ', attrvalue
       if (.not.((rc==ESMF_SUCCESS .and. &
                  attrvalue=='Global Modeling and Assimilation Office (GMAO)') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get ESG "Version" Attribute from a GridComp
@@ -153,8 +175,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='5') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get ESG "Author" Attribute from a GridComp
@@ -164,8 +186,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Max Suarez') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get ESG "Discipline" Attribute from a GridComp
@@ -175,8 +197,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Atmosphere') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get ESG "PhysicalDomain" Attribute from a GridComp
@@ -186,8 +208,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Earth System') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get ESG "CodingLanguage" Attribute from a GridComp Test
@@ -197,8 +219,8 @@ print *, 'attrvalue = ', attrvalue
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Fortran 90') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get ESG "ModelComponentFramework" Attribute from a GridComp
@@ -210,8 +232,8 @@ print *, 'attrvalue = ', attrvalue
       if (.not.((rc==ESMF_SUCCESS .and. &
                  attrvalue=='ESMF (Earth System Modeling Framework)') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get CF "Comment" Attribute from a GridComp
@@ -222,8 +244,8 @@ print *, 'attrvalue = ', attrvalue
       if (.not.((rc==ESMF_SUCCESS .and. &
                  attrvalue=='ESMF GridComp Attribute IO Test') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       ! Get CF "References" Attribute from a GridComp
@@ -234,8 +256,8 @@ print *, 'attrvalue = ', attrvalue
       if (.not.((rc==ESMF_SUCCESS .and. &
                  attrvalue=='http://gmao.gsfc.nasa.gov/systems/geos5') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-print *, 'rc = ', rc
-print *, 'attrvalue = ', attrvalue
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
 
 !BOC
       call ESMF_GridCompDestroy(gridcomp, rc=rc)
