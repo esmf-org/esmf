@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.13 2009/04/30 18:03:05 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.14 2009/05/05 04:06:28 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -57,11 +57,6 @@ module ESMF_AttributeUpdateMod
     type(ESMF_GridComp)  :: comp
     integer, intent(out) :: rc
 
-#ifdef ESMF_TESTWITHTHREADS
-    type(ESMF_VM) :: vm
-    logical :: supportPthreads
-#endif
-
     ! Initialize return code
     rc = ESMF_SUCCESS
 
@@ -74,21 +69,6 @@ module ESMF_AttributeUpdateMod
     call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userm1_final, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-#ifdef ESMF_TESTWITHTHREADS
-    ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
-    ! threading features.
-    
-    ! First test whether ESMF-threading is supported on this machine
-    call ESMF_VMGetGlobal(vm, rc=rc)
-    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
-    if (supportPthreads) then
-      call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
-    endif
-#endif
-    
   end subroutine userm1_register
   
 !-------------------------------------------------------------------------
@@ -127,11 +107,6 @@ module ESMF_AttributeUpdateMod
     type(ESMF_GridComp)  :: comp
     integer, intent(out) :: rc
 
-#ifdef ESMF_TESTWITHTHREADS
-    type(ESMF_VM) :: vm
-    logical :: supportPthreads
-#endif
-
     ! Initialize return code
     rc = ESMF_SUCCESS
 
@@ -143,21 +118,6 @@ module ESMF_AttributeUpdateMod
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userm2_final, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-
-#ifdef ESMF_TESTWITHTHREADS
-    ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
-    ! threading features.
-
-    ! First test whether ESMF-threading is supported on this machine
-    call ESMF_VMGetGlobal(vm, rc=rc)
-    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
-    if (supportPthreads) then
-      call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
-    endif
-#endif
     
   end subroutine userm2_register
 
@@ -197,11 +157,6 @@ module ESMF_AttributeUpdateMod
     type(ESMF_CplComp) :: comp
     integer, intent(out) :: rc
 
-#ifdef ESMF_TESTWITHTHREADS
-    type(ESMF_VM) :: vm
-    logical :: supportPthreads
-#endif
-
     ! Initialize return code
     rc = ESMF_SUCCESS
     
@@ -212,21 +167,6 @@ module ESMF_AttributeUpdateMod
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, usercpl_final, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-
-#ifdef ESMF_TESTWITHTHREADS
-    ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
-    ! threading features.
-    
-    ! First test whether ESMF-threading is supported on this machine
-    call ESMF_VMGetGlobal(vm, rc=rc)
-    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
-    if (supportPthreads) then
-      call ESMF_CplCompSetVMMinThreads(comp, rc=rc)
-    endif
-#endif
 
   end subroutine usercpl_register
   
