@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.33 2009/03/05 00:08:58 theurich Exp $
+# $Id: build_rules.mk,v 1.34 2009/05/06 03:14:51 w6ws Exp $
 #
 # Linux.absoft.default
 #
@@ -170,3 +170,14 @@ ESMF_CXXLINKLIBS += -lU77 -lrt -ldl $(shell $(ESMF_DIR)/scripts/libs.absoft $(ES
 # Shared library options
 #
 ESMF_SL_LIBOPTS  += -shared
+
+############################################################
+# Shared object options
+#
+ESMF_SO_F90COMPILEOPTS  = -fPIC
+ESMF_SO_F90LINKOPTS     = -shared
+ESMF_SO_F90LINKOPTSEXE  = -Wl,-export-dynamic
+ESMF_SO_CXXCOMPILEOPTS  = -fPIC
+ESMF_SO_CXXLINKOPTS     = -shared
+ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
+
