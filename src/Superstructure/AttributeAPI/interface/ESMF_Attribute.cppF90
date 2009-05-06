@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.37 2009/05/06 18:59:34 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.38 2009/05/06 23:33:36 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.37 2009/05/06 18:59:34 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.38 2009/05/06 23:33:36 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -574,8 +574,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package or modify an \\
-!                                 existing Attribute package
+! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package or modify an existing Attribute package
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd() 
@@ -999,8 +998,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLink - Link a Component Attribute hierarchy to that of \\
-!                                 a Component or State
+! !IROUTINE: ESMF_AttributeLink - Link a Component Attribute hierarchy to that of a Component or State
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLink()
@@ -1041,8 +1039,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLink - Link a State Attribute hierarchy with the \\
-!                                 hierarchy of a FieldBundle, Field, or State
+! !IROUTINE: ESMF_AttributeLink - Link a State Attribute hierarchy with the hierarchy of a FieldBundle, Field, or State
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLink()
@@ -1138,8 +1135,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a Component Attribute hierarchy \\
-!                                       from that of a Component or State
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a Component Attribute hierarchy from that of a Component or State
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLinkRemove()
@@ -1180,8 +1176,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a State Attribute hierarchy with the \\
-!                                       hierarchy of a FieldBundle, Field, or State
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a State Attribute hierarchy with the hierarchy of a FieldBundle, Field, or State
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLinkRemove()
