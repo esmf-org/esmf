@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.23 2009/05/04 05:58:48 eschwab Exp $
+% $Id: Attribute_desc.tex,v 1.24 2009/05/06 18:57:59 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -26,7 +26,7 @@ Attributes are meant to be used as a tool for the user to help internally docume
 \item State
 \end{itemize}
 
-Each Attribute contains a name value pair in which the value can be any of several numeric, character, and logical types.  See Figure \ref{fig:AttributeClassUML} for the available Attribute value types.  All Attributes also contain character strings specifying the convention, type, and object of the Attribute for identification purposes.  All Attributes contain a list of pointers to other Attributes, which is empty until specified otherwise.  This list of Attribute pointers is what allows Attribute hierarchies to be built.  Using this feature an Attribute for one ESMF class can be linked to an Attribute in another ESMF class.
+Each Attribute contains a name value pair in which the value can be any of several numeric, character, and logical types.  See Figure \ref{fig:AttributeClassUML} for the available Attribute value types.  All Attributes also contain character strings specifying the convention, type, and object of the Attribute for identification purposes.  All Attributes contain a list of pointers to other Attributes, which is empty until specified otherwise.  This list of Attribute pointers is what allows Attribute hierarchies to be built.  By using this feature an Attribute for one ESMF class can be linked to an Attribute in another ESMF class.
 
 \subsubsection{Attribute Hierarchies}
 
@@ -40,9 +40,9 @@ Of the ESMF objects with Attributes, only some can link their Attributes togethe
 \item State
 \end{itemize}
 
-The most common use for this capability is for linking the Attributes of a Field to the FieldBundle which holds it, which is then linked to the State that is used to transport all of the data for a Component.  All of these links, with the exception of the link between the Component and the State, are automatically handled by ESMF.  
+The most common use for this capability is for linking the Attributes of a Field to the FieldBundle which holds it, which is then linked to the State that is used to transport all of the data for a Component.  All of these links, with the exception of the link between the Component and the State, are automatically handled by ESMF.  In addition, the State will automatically set the {\it import} and {\tt export} boolean valued Attributes that are part of the ESMF supplied standard Attribute package for Field when that Field is added to the State. 
 
-Attribute hierarchies are linked in a "shallow" manner, meaning that the Attributes belonging to an external object are not copied, they are merely referenced by a pointer.  This allows for the certainty that the Attribute hierarchy has a one-to-one correspondence with the object hierarchy.  
+Attribute hierarchies are linked in a "shallow" manner, meaning that the Attributes belonging to an external object are not copied, they are merely referenced by a pointer.  This is important to ensure that the Attribute hierarchy has a one-to-one correspondence with the object hierarchy.  
 
 \subsubsection{Attribute Packages}
 
@@ -53,11 +53,12 @@ The standard Attribute packages supplied by ESMF exist for the following ESMF ob
 \begin{itemize}
 \item CplComp
 \item GridComp
+\item State
 \item Field
 \item Grid
 \end{itemize}
 
-The ESMF standard Attribute packages are based on the Climate and Forecast (CF) convention.  When additional Attributes beyond the ESMF supplied Attribute packages are desired, these can be generated with the Attribute package nesting capabilities.  User supplied Attribute packages will also be an option in future releases.  An example of some more standardized user supplied Attribute packages are in Tables \ref{ComponentAttributePackages} - \ref{GridAttributePackages}, which summarize the Attribute packages available at this point in time.
+The ESMF standard Attribute packages are based on a blend of the Climate and Forecast (CF) and Earth System Grid (ESG) conventions.  When additional Attributes beyond the ESMF supplied Attribute packages are desired, these can be generated with the Attribute package nesting capabilities.  User supplied Attribute packages will also be an option in future releases.  An example of some more standardized user supplied Attribute packages are in Tables \ref{ComponentAttributePackages} - \ref{GridAttributePackages}, which summarize the Attribute packages available at this point in time.
 
 \vspace{18pt}
 
@@ -67,6 +68,7 @@ The ESMF standard Attribute packages are based on the Climate and Forecast (CF) 
 \hline\hline
 {\bf Convention} & {\bf Purpose} & {\bf Name} \\
 \hline\hline
+{\tt ESMF} & {\tt General} & {\bf Component ESG General +} \\
 {\tt ESG} & {\tt General} & {\bf Component CF General +} \\
      & & \\
      & & {\tt Agency} \\
@@ -108,6 +110,7 @@ The ESMF standard Attribute packages are based on the Climate and Forecast (CF) 
 \hline\hline
 {\bf Convention} & {\bf Purpose} & {\bf Name} \\
 \hline\hline
+{\tt ESMF} & {\tt General} & {\bf Field ESG General +} \\
 {\tt ESG} & {\tt General} & {\bf Field CF Extended +} \\
 & & \\
 & & {\tt Export}  \\
@@ -130,6 +133,7 @@ The ESMF standard Attribute packages are based on the Climate and Forecast (CF) 
 \hline\hline
 {\bf Convention} & {\bf Purpose} & {\bf Name} \\
 \hline\hline
+{\tt ESMF} & {\tt General} & {\tt Grid GridSpec General +} \\
 {\tt GridSpec} & {\tt General} & {\tt CongruentTiles} \\
  & & {\tt GridType} \\ 
  & & {\tt DimOrder} \\ 
@@ -154,9 +158,9 @@ The ESMF standard Attribute packages are based on the Climate and Forecast (CF) 
 
 \vspace{18pt}
 
-ESMF also allows nesting of Attribute packages.  This capability is meant to be used to organize different metadata compliance levels, such as CF and ESG.  The nesting of Attribute packages is also very helpful when adding customized Attributes to a package.  The main use of the nesting capabilities of Attribute packages is geared towards organizing different metadata compliance levels.  For instance, the CF metadata standard for Fields requires that there be Attributes to track the {\it name}, {\it long\_name}, {\it standard\_name}, and {\it units} of the Field.  The ESG standard, on the other hand, requires two additional Attributes called {\it import} and {\it export}.  In this case the ESMF representation of the ESG compliant Attribute package for a Field would involve a nested Attribute package structure.  This would involve the ESG-specific Attribute package, containing the Attributes {\it import} and {\it export} containing a nested version of the CF-specific Attribute package, with the Attributes {\it name}, {\it long\_name}, {\it standard\_name}, and {\it units}.  An Attribute package can be nested by passing in a value of {\bf ESMF\_ATTPACKNEST\_ON} for the {\it attpacknestflag} argument of the {\tt ESMF\_AttributeAdd()} interface call.  The default value of the optional {\it attpacknestflag} argument is {\bf ESMF\_ATTPACKNEST\_OFF}.
+ESMF also allows nesting of Attribute packages.  This capability is intended to help organize different metadata compliance levels, such as CF and ESG.  The nesting of Attribute packages is also very helpful when adding customized Attributes to a package.  The main use of the nesting capabilities of Attribute packages is geared towards organizing different metadata compliance levels.  For instance, the CF metadata standard for Fields requires that there be Attributes to track the {\it name}, {\it long\_name}, {\it standard\_name}, and {\it units} of the Field.  The ESG standard, on the other hand, requires two additional Attributes called {\it import} and {\it export}.  In this case the ESMF representation of the ESG compliant Attribute package for a Field would involve a nested Attribute package structure.  This would involve the ESG-specific Attribute package, containing the Attributes {\it import} and {\it export} containing a nested version of the CF-specific Attribute package, with the Attributes {\it name}, {\it long\_name}, {\it standard\_name}, and {\it units}.  An Attribute package can be nested by including the specifiers of the both packages in the {\tt ESMF\_AttributeAdd()} interface call.  
 
-The nesting capabilities of Attribute packages are also very useful for organizing the customized metadata supplied by a user.  For example, if a user was not satisfied with the metadata support required in the ESG convention for Field they could supply a list of Attributes they would like to support.  This new Attribute package would then be used as an additional layer, inside which the Attribute package of ESG would be nested, inside which the CF Attribute package would be nested.  This capability of nesting Attribute packages allows for a multitude of metadata organization strategies, and will also aid in the enforcement of metadata compliance when it is implemented in a future ESMF release.
+The nesting capabilities of Attribute packages are also very useful for organizing the customized metadata supplied by a user.  For example, if a user was not satisfied with the metadata support required in the ESG convention for Field they could supply a list of Attributes they would like to support.  This new Attribute package would then be used as an additional layer, inside which the Attribute package of ESG would be nested, inside which the CF Attribute package would be nested.  This capability of nesting Attribute packages allows for a multitude of metadata organization strategies.
 
 
 
