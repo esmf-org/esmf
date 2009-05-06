@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.22 2009/04/24 20:05:06 theurich Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.23 2009/05/06 03:12:48 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -38,6 +38,7 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
 
     print *, "i am comp1_init"
 
+    rc = ESMF_FAILURE
     field1 = ESMF_FieldCreateEmpty(name="Comp1 Field", rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
   
@@ -63,6 +64,7 @@ subroutine comp2_init(gcomp, istate, ostate, clock, rc)
 
     print *, "i am comp2_init"
 
+    rc = ESMF_FAILURE
     field2 = ESMF_FieldCreateEmpty(name="Comp2 Field", rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
     
