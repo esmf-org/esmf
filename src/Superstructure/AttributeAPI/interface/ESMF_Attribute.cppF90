@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.36 2009/05/05 18:55:29 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.37 2009/05/06 18:59:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.36 2009/05/05 18:55:29 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.37 2009/05/06 18:59:34 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -530,7 +530,7 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd() 
-!     subroutine ESMF_AttAddPack(<object>, convention, purpose, nestConvention, &
+!     subroutine ESMF_AttAddPackStandard(<object>, convention, purpose, nestConvention, &
 !                                nestPurpose, rc)
 !
 ! !ARGUMENTS:
@@ -542,7 +542,7 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Add an ESMF standard Attribute package
+!     Add an ESMF standard Attribute package.  
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
@@ -555,26 +555,26 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object.
+!           An {\tt ESMF} object
 !     \item [convention]
-!           The convention of the new Attribute package.
+!           The convention of the new Attribute package
 !     \item [purpose]
-!           The purpose of the new Attribute package.
-!     \item [nestConvention]
+!           The purpose of the new Attribute package
+!     \item [{[nestConvention]}]
 !           The convention of the Attribute package around which to nest the
-!           new Attribute package.
-!     \item [nestPurpose]
+!           new Attribute package
+!     \item [{[nestPurpose]}]
 !           The purpose of the Attribute package around which to nest the
-!           new Attribute package.
+!           new Attribute package
 !     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package or modify an
+! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package or modify an \\
 !                                 existing Attribute package
 !
 ! !INTERFACE:
@@ -593,7 +593,7 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Add a custom Attribute package to <object>.
+!     Add a custom Attribute package to <object>.  
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -610,23 +610,23 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object.
+!           An {\tt ESMF} object
 !     \item [convention]
-!           The convention of the Attribute package.
+!           The convention of the Attribute package
 !     \item [purpose]
-!           The purpose of the Attribute package.
+!           The purpose of the Attribute package
 !     \item [attrList]
-!           The list of Attribute names to specify the custom Attribute package.
-!     \item [count]
-!           The number of Attributes to add to the custom Attribute package.
-!     \item [nestConvention]
+!           The list of Attribute names to specify the custom Attribute package
+!     \item [{[count]}]
+!           The number of Attributes to add to the custom Attribute package
+!     \item [{[nestConvention]}]
 !           The convention of the Attribute package around which to nest the
-!           new Attribute package.
-!     \item [nestPurpose]
+!           new Attribute package
+!     \item [{[nestPurpose]}]
 !           The purpose of the Attribute package around which to nest the
-!           new Attribute package.
+!           new Attribute package
 !     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !
@@ -647,7 +647,7 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Copies an Attribute hierarchy from <object1> to <object2>.
+!     Copy an Attribute hierarchy from <object1> to <object2>.  
 !     Supported values for <object1> are:
 !     \begin{description}
 !     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
@@ -661,14 +661,14 @@ contains
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !
-!     NOTE: Copies between like ESMF objects are recommended
+!     NOTE: Copies between different ESMF objects are not recommended.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [<object1>]
-!           An {\tt ESMF} object.
+!           An {\tt ESMF} object
 !     \item [<object2>]
-!           An {\tt ESMF} object.
+!           An {\tt ESMF} object
 !     \item [attcopyflag]
 !           A flag to determine if the copy is to be by reference, value,
 !           or both
@@ -676,7 +676,7 @@ contains
 !           A flag to determine if the copy is supposed to descend the 
 !           Attribute hierarchy
 !     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !     NOTE:  Not all combinations of copy flags are enabled at this time.  See
@@ -715,10 +715,10 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Returns an Attribute value from the <object>, or from the Attribute package
+!     Return an Attribute value from the <object>, or from the Attribute package
 !     specified by {\tt convention} and {\tt purpose}.  A default value 
 !     argument may be given if a return code is not desired when the 
-!     Attribute is not found.
+!     Attribute is not found.  
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -742,30 +742,30 @@ contains
 !     \end{description}
 !     Supported values for <defaultvalue argument> are:
 !     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(out) :: defaultvalue
-!     \item integer(ESMF\_KIND\_I8), intent(out) :: defaultvalue
-!     \item real (ESMF\_KIND\_R4), intent(out) :: defaultvalue
-!     \item real (ESMF\_KIND\_R8), intent(out) :: defaultvalue
-!     \item logical, intent(out) :: defaultvalue
-!     \item character (len = *), intent(out), defaultvalue
+!     \item integer(ESMF\_KIND\_I4), intent(out), optional :: defaultvalue
+!     \item integer(ESMF\_KIND\_I8), intent(out), optional :: defaultvalue
+!     \item real (ESMF\_KIND\_R4), intent(out), optional :: defaultvalue
+!     \item real (ESMF\_KIND\_R8), intent(out), optional :: defaultvalue
+!     \item logical, intent(out), optional :: defaultvalue
+!     \item character (len = *), intent(out), optional :: defaultvalue
 !     \end{description}
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object.
+!           An {\tt ESMF} object
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the Attribute to retrieve
 !     \item [<value argument>]
-!           The value of the named Attribute.
-!     \item [<defaultvalue argument>]
-!           The default value of the named Attribute.
-!     \item [convention]
-!           The convention of the Attribute package.
-!     \item [purpose]
-!           The purpose of the Attribute package.
+!           The value of the named Attribute
+!     \item [{[<defaultvalue argument>]}]
+!           The default value of the named Attribute
+!     \item [{[convention]}]
+!           The convention of the Attribute package
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package
 !     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !
@@ -790,10 +790,10 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Returns an Attribute value from the <object>, or from the Attribute package
+!     Return an Attribute value from the <object>, or from the Attribute package
 !     specified by {\tt convention} and {\tt purpose}.  A default value 
 !     argument may be given if a return code is not desired when the 
-!     Attribute is not found.
+!     Attribute is not found.  
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -813,36 +813,36 @@ contains
 !     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
 !     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
 !     \item logical, dimension(:), intent(out) :: valueList
-!     \item character (len = *), dimension(count), intent(out), valueList
+!     \item character (len = *), dimension(count), intent(out) :: valueList
 !     \end{description}
 !     Supported values for <defaultvalue argument> are:
 !     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: defaultvalueList
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: defaultvalueList
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: defaultvalueList
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: defaultvalueList
-!     \item logical, dimension(:), intent(out) :: defaultvalueList
-!     \item character (len = *), dimension(:), intent(out), defaultvalueList
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out), optional :: defaultvalueList
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out), optional :: defaultvalueList
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out), optional :: defaultvalueList
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out), optional :: defaultvalueList
+!     \item logical, dimension(:), intent(out), optional :: defaultvalueList
+!     \item character (len = *), dimension(:), intent(out), optional :: defaultvalueList
 !     \end{description}
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object.
+!           An {\tt ESMF} object
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the Attribute to retrieve
 !     \item [<valueList argument>]
-!           The valueList of the named Attribute.
-!     \item [<defaultvalueList argument>]
-!           The default value list of the named Attribute.
-!     \item [convention]
-!           The convention of the Attribute package.
-!     \item [purpose]
-!           The purpose of the Attribute package.
-!     \item [itemCount]
-!           The number of items in a multi-valued Attribute.
+!           The valueList of the named Attribute
+!     \item [{[<defaultvalueList argument>]}]
+!           The default value list of the named Attribute
+!     \item [{[convention]}]
+!           The convention of the Attribute package
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package
+!     \item [{[itemCount]}]
+!           The number of items in a multi-valued Attribute
 !     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !
@@ -862,7 +862,7 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Returns the Attribute count for <object>
+!     Return the Attribute count for <object>.  
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -879,14 +879,14 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object.
+!           An {\tt ESMF} object
 !     \item [count] 
-!           The Attribute count for <object>.
-!     \item [attcountflag]
+!           The Attribute count for <object>
+!     \item [{[attcountflag]}]
 !           The flag to specify which attribute count to return, the 
-!           default is ESMF\_ATTGETCOUNT\_ATTRIBUTE (see below).
+!           default is ESMF\_ATTGETCOUNT\_ATTRIBUTE (see below)
 !     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !     NOTE:  The options for {\tt attcountflag} include:
@@ -915,8 +915,8 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Returns information associated with the named Attribute, 
-!     including {\tt typekind} and {\tt itemCount}.
+!     Return information associated with the named Attribute, 
+!     including {\tt typekind} and {\tt itemCount}.  
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -933,15 +933,15 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object.
+!           An {\tt ESMF} object
 !     \item [name]
-!           The name of the Attribute to query.
-!     \item [typekind]
-!           The typekind of the Attribute.
-!     \item [itemCount]
-!           The number of items in this Attribute.
+!           The name of the Attribute to query
+!     \item [{[typekind}]]
+!           The typekind of the Attribute
+!     \item [{[itemCount]}]
+!           The number of items in this Attribute
 !     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !
@@ -966,7 +966,7 @@ contains
 ! !DESCRIPTION:
 !     Returns information associated with the indexed Attribute, 
 !     including {\tt name}, {\tt typekind} and {\tt itemCount}.
-!     Supported values for <object> are:
+!     Supported values for <object> are:  
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
@@ -982,25 +982,25 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object.
+!           An {\tt ESMF} object
 !     \item [attributeIndex]
-!           The index number of the Attribute to query.
+!           The index number of the Attribute to query
 !     \item [name]
-!           Returns the name of the Attribute.
-!     \item [typekind]
-!           The typekind of the Attribute.
-!     \item [itemCount]
-!           Returns the number of items in this Attribute.
+!           The name of the Attribute
+!     \item [{[typekind]}]
+!           The typekind of the Attribute
+!     \item [{[itemCount]}]
+!           The number of items in this Attribute
 !     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLink - Link a Component Attribute hierarchy to that of
-!                                {\bf a Component or State}
+! !IROUTINE: ESMF_AttributeLink - Link a Component Attribute hierarchy to that of \\
+!                                 a Component or State
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLink()
@@ -1013,9 +1013,8 @@ contains
 !
 !
 ! !DESCRIPTION:
-!     Attaches a {\tt CplComp} or {\tt GridComp} Attribute hierarchy to the 
-!     hierarchy of a {\tt CplComp}, {\tt GridComp}, or {\tt State}.
-!      
+!     Attach a {\tt CplComp} or {\tt GridComp} Attribute hierarchy to the 
+!     hierarchy of a {\tt CplComp}, {\tt GridComp}, or {\tt State}.  
 !     Supported values for the <object1> are:
 !     \begin{description}
 !     \item type(ESMF\_CplComp), intent(inout) :: cplcomp1
@@ -1031,19 +1030,19 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object1>]
-!       The ``parent'' object in the Attribute hierarchy link.
+!       The ``parent'' object in the Attribute hierarchy link
 !     \item [<object2>]
-!       The ``child'' object in the Attribute hierarchy link.
+!       The ``child'' object in the Attribute hierarchy link
 !     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLink - Link a State Attribute hierarchy with the
-!                               {\bf hierarchy of a FieldBundle, Field, or State}
+! !IROUTINE: ESMF_AttributeLink - Link a State Attribute hierarchy with the \\
+!                                 hierarchy of a FieldBundle, Field, or State
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLink()
@@ -1056,8 +1055,8 @@ contains
 !
 !
 ! !DESCRIPTION:
-!     Attaches a {\tt State} Attribute hierarchy to the hierarchy of
-!     a {\tt Fieldbundle}, {\tt Field}, or another {\tt State}. 
+!     Attach a {\tt State} Attribute hierarchy to the hierarchy of
+!     a {\tt Fieldbundle}, {\tt Field}, or another {\tt State}.  
 !     Supported values for the <object> are:
 !     \begin{description}
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
@@ -1068,11 +1067,11 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
-!       An {\tt ESMF\_State} object.
+!       An {\tt ESMF\_State} object
 !     \item [<object>]
-!       The object with which to link hierarchies.
+!       The object with which to link hierarchies
 !     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !
@@ -1092,17 +1091,17 @@ contains
 !
 !
 ! !DESCRIPTION:
-!     Attaches a {\tt FieldBundle} Attribute hierarchy to the hierarchy of
-!     a {\tt Field}. 
-! 
+!     Attach a {\tt FieldBundle} Attribute hierarchy to the hierarchy of
+!     a {\tt Field}.  
+!
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
-!       An {\tt ESMF\_FieldBundle} object.
+!       An {\tt ESMF\_FieldBundle} object
 !     \item [field]
-!       An {\tt ESMF\_Field} object.
+!       An {\tt ESMF\_Field} object
 !     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !
@@ -1122,25 +1121,25 @@ contains
 !
 !
 ! !DESCRIPTION:
-!     Attaches a {\tt Field} Attribute hierarchy to the hierarchy of
+!     Attach a {\tt Field} Attribute hierarchy to the hierarchy of
 !     a {\tt Grid}. 
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!       An {\tt ESMF\_Field} object.
+!       An {\tt ESMF\_Field} object
 !     \item [grid]
-!       An {\tt ESMF\_Grid} object.
+!       An {\tt ESMF\_Grid} object
 !     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a Component Attribute hierarchy
-!                                {\bf from that of a Component or State}
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a Component Attribute hierarchy \\
+!                                       from that of a Component or State
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLinkRemove()
@@ -1153,9 +1152,8 @@ contains
 !
 !
 ! !DESCRIPTION:
-!     Unattaches a {\tt CplComp} or {\tt GridComp} Attribute hierarchy from the 
-!     hierarchy of a {\tt CplComp}, {\tt GridComp}, or {\tt State}.
-!      
+!     Unattach a {\tt CplComp} or {\tt GridComp} Attribute hierarchy from the 
+!     hierarchy of a {\tt CplComp}, {\tt GridComp}, or {\tt State}.  
 !     Supported values for the <object1> are:
 !     \begin{description}
 !     \item type(ESMF\_CplComp), intent(inout) :: cplcomp1
@@ -1171,19 +1169,19 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object1>]
-!       The ``parent'' object in the Attribute hierarchy link.
+!       The ``parent'' object in the Attribute hierarchy link
 !     \item [<object2>]
-!       The ``child'' object in the Attribute hierarchy link.
+!       The ``child'' object in the Attribute hierarchy link
 !     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a State Attribute hierarchy with the
-!                               {\bf hierarchy of a FieldBundle, Field, or State}
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a State Attribute hierarchy with the \\
+!                                       hierarchy of a FieldBundle, Field, or State
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLinkRemove()
@@ -1196,8 +1194,8 @@ contains
 !
 !
 ! !DESCRIPTION:
-!     Unattaches a {\tt State} Attribute hierarchy from the hierarchy of
-!     a {\tt Fieldbundle}, {\tt Field}, or another {\tt State}. 
+!     Unattach a {\tt State} Attribute hierarchy from the hierarchy of
+!     a {\tt Fieldbundle}, {\tt Field}, or another {\tt State}.  
 !     Supported values for the <object> are:
 !     \begin{description}
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
@@ -1208,11 +1206,11 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
-!       An {\tt ESMF\_State} object.
+!       An {\tt ESMF\_State} object
 !     \item [<object>]
-!       The object with which to unlink hierarchies.
+!       The object with which to unlink hierarchies
 !     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !
@@ -1232,17 +1230,17 @@ contains
 !
 !
 ! !DESCRIPTION:
-!     Unattaches a {\tt FieldBundle} Attribute hierarchy from the hierarchy of
-!     a {\tt Field}. 
+!     Unattach a {\tt FieldBundle} Attribute hierarchy from the hierarchy of
+!     a {\tt Field}.  
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
-!       An {\tt ESMF\_FieldBundle} object.
+!       An {\tt ESMF\_FieldBundle} object
 !     \item [field]
-!       An {\tt ESMF\_Field} object.
+!       An {\tt ESMF\_Field} object
 !     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !
@@ -1262,24 +1260,24 @@ contains
 !
 !
 ! !DESCRIPTION:
-!     Unattaches a {\tt Field} Attribute hierarchy from the hierarchy of
+!     Unattach a {\tt Field} Attribute hierarchy from the hierarchy of
 !     a {\tt Grid}. 
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!       An {\tt ESMF\_Field} object.
+!       An {\tt ESMF\_Field} object
 !     \item [grid]
-!       An {\tt ESMF\_Grid} object.
+!       An {\tt ESMF\_Grid} object
 !     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeRead  - Read Attributes from XML file
+! !IROUTINE: ESMF_AttributeRead  - Read Attributes from an XML file
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeRead(<object>, fileName, convention, purpose, rc)
@@ -1311,15 +1309,15 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           The {\tt ESMF} object onto which the read Attributes will be placed.
+!           The {\tt ESMF} object onto which the read Attributes will be placed
 !     \item[{[fileName]}]
-!           The name of the XML file to read.
-!     \item [convention]
-!           The convention of the Attribute package to read.
-!     \item [purpose]
-!           The purpose of the Attribute package to read.
+!           The name of the XML file to read
+!     \item [{[convention]}]
+!           The convention of the Attribute package to read
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package to read
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !EOP
@@ -1338,7 +1336,7 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Removes an Attribute on <object>.
+!     Remove an Attribute, or Attribute package on <object>.  
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -1355,15 +1353,15 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object.
-!     \item [name]
-!           The name of the Attribute to remove.
-!     \item [convention]
-!           The convention of the Attribute package.
-!     \item [purpose]
-!           The purpose of the Attribute package.
+!           An {\tt ESMF} object
+!     \item [{[name]}]
+!           The name of the Attribute to remove
+!     \item [{[convention]}]
+!           The convention of the Attribute package
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package
 !     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !     NOTE:  An entire Attribute package can be removed by specifying 
@@ -1392,10 +1390,9 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Attaches an Attribute to <object>, or sets an Attribute on an 
-!     Attribute package.
-!     The Attribute has a {\tt name} and either a {\tt value}, and a 
-!     {\tt convention} and {\tt purpose}.
+!     Attach an Attribute to <object>, or set an Attribute in an 
+!     Attribute package.  The Attribute has a {\tt name} and either 
+!     a {\tt value}, and a {\tt convention} and {\tt purpose}.  
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -1421,17 +1418,17 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object.
+!           An {\tt ESMF} object
 !     \item [name]
-!           The name of the Attribute to set.
+!           The name of the Attribute to set
 !     \item [<value argument>]
-!           The value of the Attribute to set.
-!     \item [convention]
-!           The convention of the Attribute package.
-!     \item [purpose]
-!           The purpose of the Attribute package.
+!           The value of the Attribute to set
+!     \item [{[convention]}]
+!           The convention of the Attribute package
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package
 !     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !
@@ -1454,10 +1451,10 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Attaches an Attribute to <object>, or sets an Attribute on an 
-!     Attribute package.
-!     The Attribute has a {\tt name} and a 
-!     {\tt valueList}, with an {\tt itemCount}, and a {\tt convention} and {\tt purpose}.
+!     Attach an Attribute to <object>, or set an Attribute in an 
+!     Attribute package.  The Attribute has a {\tt name} and a 
+!     {\tt valueList}, with an {\tt itemCount}, and a {\tt convention}
+!     and {\tt purpose}.  
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -1483,19 +1480,19 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object.
+!           An {\tt ESMF} object
 !     \item [name]
-!           The name of the Attribute to set.
+!           The name of the Attribute to set
 !     \item [<valueList argument>]
-!           The valueList of the Attribute to set.
-!     \item [convention]
-!           The convention of the Attribute package.
-!     \item [purpose]
-!           The purpose of the Attribute package.
-!     \item [itemCount]
-!           The number of items in a multi-valued Attribute.
+!           The valueList of the Attribute to set
+!     \item [{[convention]}]
+!           The convention of the Attribute package
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package
+!     \item [{[itemCount]}]
+!           The number of items in a multi-valued Attribute
 !     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !
@@ -1514,7 +1511,7 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Update an Attribute hierarchy during runtime.
+!     Update an Attribute hierarchy during runtime.  
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
@@ -1527,14 +1524,14 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object.
+!           An {\tt ESMF} object
 !     \item [vm]
 !           The virtural machine over which this Attribute hierarchy 
-!           should be updated.
+!           should be updated
 !     \item [rootList]
-!           The list of "root" PETs that are to be used to update.
+!           The list of "root" PETs that are to be used to update
 !     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !
@@ -1556,7 +1553,7 @@ contains
 ! !DESCRIPTION:
 !     Write the Attribute package for <object>.  The Attribute package defines 
 !     the convention, purpose, and object type of the associated Attributes.  Either
-!     tab-delimited or xml format is acheived by using {\tt attwriteflag}.
+!     tab-delimited or xml format is acheived by using {\tt attwriteflag}.  
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
@@ -1569,16 +1566,16 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object.
-!     \item [convention]
-!           The convention of the Attribute package.
-!     \item [purpose]
-!           The purpose of the Attribute package.
-!     \item [attwriteflag]
+!           An {\tt ESMF} object
+!     \item [{[convention]}]
+!           The convention of the Attribute package
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package
+!     \item [{[attwriteflag]}]
 !           The flag to specify which format is desired for the write, the 
-!           default is tab-delimited.
+!           default is tab-delimited
 !     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !     NOTE:  The options for {\tt attwriteflag} include:
