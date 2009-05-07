@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.54 2009/03/03 17:22:19 theurich Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.55 2009/05/07 22:46:23 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -38,6 +38,7 @@ program ESMF_GridCreateEx
       real(ESMF_KIND_R8), pointer :: cornerX(:), cornerY(:), cornerZ(:)
       real(ESMF_KIND_R8), pointer :: coordX2D(:,:), coordY2D(:,:)
       real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:)
+      integer(ESMF_KIND_I4), pointer :: mask2D(:,:)
 
       integer :: elbnd(3),eubnd(3)
       integer :: clbnd(3),cubnd(3)
@@ -50,7 +51,7 @@ program ESMF_GridCreateEx
       integer :: lbnd1D(1), ubnd1D(1)
 
       type(ESMF_Grid) :: grid2D, grid3D, grid4D
-      type(ESMF_Array) :: arrayCoordX, arrayCoordY,array
+      type(ESMF_Array) :: arrayCoordX, arrayCoordY,array,arrayMask
 
       type(ESMF_distGrid) :: distgrid2D,distgrid4D,distgrid
       type(ESMF_StaggerLoc) :: staggerloc
@@ -1032,22 +1033,6 @@ endif
 
 
 
-#ifdef LOCAL_NOT_IMPL
-!BOEI
-!
-!\subsubsection{Specifying Coordinate Type and Kind}
-!
-! The default type and kind for Grid coordinates is ESMF\_R8. 
-!  To control the data type and kind more precisely the optional 
-!  {\tt coordTypeKind} parameter may be used. The following illustrates
-! the creation of a Grid with 4 byte integer coordinates. 
-!EOEI
-
-!BOCI
-   grid=ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_I4, &
-          countsPerDEDim1=(/5,5/), countsPerDEDim2=(/7,7,6/), rc=rc)   
-!EOCI
-#endif
 
 !BOE
 !\subsubsection{Associating Coordinates with Stagger Locations}
@@ -1085,9 +1070,7 @@ endif
 ! array on a particular DE. 
 !
 ! The user can allocate coordinate arrays without setting coordinates 
-! using the {\tt ESMF\_AddCoord()} call, or allocate and 
-! set coordinates in a single call with {\tt ESMF\_SetCoord()}.    
-! When adding or accessing
+! using the {\tt ESMF\_GridAddCoord()} call. When adding or accessing
 ! coordinate data, the stagger location is specified to tell the Grid method 
 ! where in the cell to get the data. There are predefined stagger locations
 ! (see Section~\ref{sec:opt:staggerloc}), or,
@@ -1126,6 +1109,10 @@ endif
 ! Note only the center stagger location {\tt ESMF\_STAGGERLOC\_CENTER} is supported 
 ! in the arbitrarily distributed grid.
 !EOE
+
+
+
+
 
 #ifdef LOCAL_NOT_IMPL
 !BOEI
@@ -1272,7 +1259,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
-!\subsubsection{Accessing Grid Coordinates}
+!\subsubsection{Accessing Coordinates}
 !
 ! Once a Grid has been created, the user has several options to access
 ! the Grid coordinate data. The first of these, {\tt ESMF\_GridSetCoord()}, 
@@ -1381,6 +1368,189 @@ call ESMF_GridDestroy(grid3D,rc=rc)
    call ESMF_GridGetCoord(grid2D, coordDim=2, localDE=0, &
           staggerloc=ESMF_STAGGERLOC_CORNER, fptr=coordY2D, rc=rc)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  endif
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Cleanup after Example
+!!!!!!!!!!!!!!!!!!!!!!
+   call ESMF_GridDestroy(grid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(distgrid2D, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+!BOE
+!\subsubsection{Associating Items with Stagger Locations}
+!\label{sec:usage:items}
+!
+! The ESMF Grids contain the ability to store other kinds of 
+! data beyond coordinates. These kinds of data are referred to 
+! as "items". Although the user is free to use this
+! data as they see fit, the user should be aware that
+! this data may also be used by other parts of ESMF (e.g. the 
+! ESMF\_GRIDITEM\_MASK item is used in regridding). 
+!
+! The following table gives information about the Grid items currently
+! available:
+!
+!\medskip
+!\begin{tabular}{|l|c|c|c|c||}
+!\hline
+!Item Label & {\bf Type Restriction}  & {\bf Type Default} & {\bf ESMF Uses} & {\bf Controls} \\
+!\hline
+!{\bf ESMF\_GRIDITEM\_MASK}  & ESMF\_TYPEKIND\_I4 & ESMF\_TYPEKIND\_I4 & YES & Masking in Regrid \\
+!{\bf ESMF\_GRIDITEM\_AREA} & NONE & ESMF\_TYPEKIND\_R8 & NO & N/A \\
+!{\bf ESMF\_GRIDITEM\_AREAM} & NONE & ESMF\_TYPEKIND\_R8 & NO & N/A \\
+!{\bf ESMF\_GRIDITEM\_FRAC} & NONE & ESMF\_TYPEKIND\_R8 & NO & N/A \\
+!\hline
+!\hline
+!\end{tabular}
+!\medskip
+!
+! Like coordinates, items are created on stagger locations.
+! When adding or accessing item data, the stagger location is specified to tell the Grid method 
+! where in the cell to get the data. The different stagger locations may also have slightly different
+! index ranges and sizes.  Please see Section~\ref{sec:usage:staggerloc} for a discussion of 
+! how this applies for coordinates, the items behave in the same manner.  The user can 
+! allocate item arrays without setting item values using the {\tt ESMF\_GridAddItem()} call. 
+!
+! The following example adds mask item storage to the corner stagger location in a grid.
+!EOE
+
+
+!!!!!!!!!!!!!!!!!!!!!!
+! Setup For Example
+!!!!!!!!!!!!!!!!!!!!!!
+   distgrid2D=ESMF_DistGridCreate(minIndex=(/1,1/),maxIndex=(/10,10/), rc=rc)
+   grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
+
+
+!BOC 
+   call ESMF_GridAddItem(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER, &
+          item=ESMF_GRIDITEM_MASK, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Cleanup after Example
+!!!!!!!!!!!!!!!!!!!!!!
+   call ESMF_GridDestroy(grid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+   call ESMF_DistGridDestroy(distgrid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+!BOE
+!\subsubsection{Accessing Items}
+!\label{sec:usage:items:accessing}
+! Once an item has been added to a Grid, the user has several options to access
+! the data. The first of these, {\tt ESMF\_GridSetItem()}, 
+! enables the user to use ESMF Arrays to set data for one stagger location across the whole Grid. 
+! For example, the following sets the mask item in the corner stagger location to 
+! those in the ESMF Array {\tt arrayMask}.
+!EOE
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Setup For Example
+!!!!!!!!!!!!!!!!!!!!!!
+   distgrid2D=ESMF_DistGridCreate(minIndex=(/1,1/),maxIndex=(/10,10/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   call ESMF_ArraySpecSet(arrayspec2D,rank=2,typekind=ESMF_TYPEKIND_I4)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   arrayMask=ESMF_ArrayCreate(arrayspec=arrayspec2D, distgrid=distgrid2D, &
+              rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOC
+   call ESMF_GridSetItem(grid2D,             &
+          staggerLoc=ESMF_STAGGERLOC_CORNER, &
+          item=ESMF_GRIDITEM_MASK, array=arrayMask, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Cleanup after Example
+!!!!!!!!!!!!!!!!!!!!!!
+   call ESMF_GridDestroy(grid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   call ESMF_ArrayDestroy(arrayMask, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   call ESMF_DistGridDestroy(distgrid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+!BOE
+! The method {\tt ESMF\_GridGetItem()} allows the user
+! to get a reference to the Array which
+! contains item data for a stagger location on a Grid. The user
+! can then employ any of the standard {\tt ESMF\_Array} tools to operate
+! on the data. The following gets the mask data from the corner 
+! and puts it into the ESMF Array {\tt arrayMask}. 
+!EOE
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Setup For Example
+!!!!!!!!!!!!!!!!!!!!!!
+   distgrid2D=ESMF_DistGridCreate(minIndex=(/1,1/),maxIndex=(/10,10/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   call ESMF_GridAddItem(grid2D,&
+          staggerLoc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_MASK, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+!BOC
+   call ESMF_GridGetItem(grid2D,             &
+          staggerLoc=ESMF_STAGGERLOC_CORNER, &
+          item=ESMF_GRIDITEM_MASK,           &
+          array=arrayMask, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Cleanup after Example
+!!!!!!!!!!!!!!!!!!!!!!
+   call ESMF_GridDestroy(grid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   call ESMF_DistGridDestroy(distgrid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+
+!BOE
+! Alternatively, the call {\tt ESMF\_GridGetItem()} gets a Fortran pointer to 
+! the item data. The user can then operate on this array in the usual
+! manner. The following call gets a reference to the
+! Fortran array which holds the data for the mask data. 
+!EOE
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Setup For Example
+!!!!!!!!!!!!!!!!!!!!!!
+   distgrid2D=ESMF_DistGridCreate(minIndex=(/1,1/),maxIndex=(/10,10/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   call ESMF_GridAddCoord(grid2D,&
+          staggerLoc=ESMF_STAGGERLOC_CORNER, &
+          item=ESMF_GRIDITEM_MASK, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+! Don't run without correct number of DEs
+  call ESMF_GridGet(grid2D, localDECount=localDECount, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localDECount .gt. 0) then
+!BOC
+   call ESMF_GridGetItem(grid2D, localDE=0,   &
+          staggerloc=ESMF_STAGGERLOC_CORNER,  &
+          item=ESMF_GRIDITEM_MASK, fptr=mask2D, rc=rc)
+!EOC 
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   endif
 

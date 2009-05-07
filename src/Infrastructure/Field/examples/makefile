@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.47 2009/03/04 00:02:00 theurich Exp $ 
+# $Id: makefile,v 1.48 2009/05/07 22:46:23 oehmke Exp $ 
 
 ALL:      build_examples
 run:      run_examples
@@ -9,6 +9,7 @@ LOCDIR	  = src/Infrastructure/Field/examples
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldCreateEx \
                  $(ESMF_EXDIR)/ESMF_FieldEx \
                  $(ESMF_EXDIR)/ESMF_FieldRegridEx \
+                 $(ESMF_EXDIR)/ESMF_FieldRegridMaskEx \
                  $(ESMF_EXDIR)/ESMF_FieldSphereRegridEx \
                  $(ESMF_EXDIR)/ESMF_FieldMeshRegridEx \
                  $(ESMF_EXDIR)/ESMF_FieldRepDimEx \
@@ -22,6 +23,7 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldCreateEx \
 EXAMPLES_RUN = run_ESMF_FieldCreateEx \
                run_ESMF_FieldEx \
                run_ESMF_FieldRegridEx \
+               run_ESMF_FieldRegridMaskEx \
                run_ESMF_FieldSphereRegridEx \
                run_ESMF_FieldMeshRegridEx \
                run_ESMF_FieldRepDimEx \
@@ -55,6 +57,12 @@ run_ESMF_FieldCreateEx:
 #
 run_ESMF_FieldRegridEx:
 	$(MAKE) EXNAME=FieldRegrid NP=4 exfrun
+
+#
+# ESMF_FieldRegridMaskEx
+#
+run_ESMF_FieldRegridMaskEx:
+	$(MAKE) EXNAME=FieldRegridMask NP=4 exfrun
 
 
 #
