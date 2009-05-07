@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.262 2009/03/27 18:29:40 theurich Exp $
+#  $Id: common.mk,v 1.263 2009/05/07 03:09:26 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -729,8 +729,6 @@ endif
 # platforms are specified by NO_OCFLAG_LIST defined below.  In those cases
 # the object files are moved after the compile.
 NO_OCFLAG_LIST := \
-	$(ESMF_OS).absoft \
-	$(ESMF_OS).absoftintel \
 	IRIX64.default \
 	Cygwin.intelgcc \
 	Cygwin.intel \
