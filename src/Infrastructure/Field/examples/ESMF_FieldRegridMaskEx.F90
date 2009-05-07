@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMaskEx.F90,v 1.1 2009/05/07 22:46:23 oehmke Exp $
+! $Id: ESMF_FieldRegridMaskEx.F90,v 1.2 2009/05/07 23:14:38 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.1 2009/05/07 22:46:23 oehmke Exp $'
+    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.2 2009/05/07 23:14:38 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -204,7 +204,7 @@ program ESMF_FieldRegridEx
         y = fptrYC(i1,i2)
      
         ! Set src mask as a circle of radius 0.5 around origin
-        if (sqrt(x*x+y*y) < 0.5)) then
+        if (sqrt(x*x+y*y) < 0.5) then
            maskSrc(i1,i2)=1
         else
            maskSrc(i1,i2)=0     
@@ -260,7 +260,7 @@ program ESMF_FieldRegridEx
         fptrYC(i1,i2) = y-0.03*cos(y*3.145/0.5)*cos(x*2*3.145/0.5)-0.25
 
         !! Set dst mask as anything .25 from y-axis 
-        if (abs(x) < 0.25)) then
+        if (abs(x) < 0.25) then
            maskDst(i1,i2)=1
         else
            maskDst(i1,i2)=0     
@@ -350,10 +350,10 @@ program ESMF_FieldRegridEx
   endif
 #endif
 
-  call ESMF_FieldDestroy(fieldSrc, rc=localrc)
+  call ESMF_FieldDestroy(srcField, rc=localrc)
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldDestroy(fieldDst, rc=localrc)
+  call ESMF_FieldDestroy(dstField, rc=localrc)
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_GridDestroy(gridSrc, rc=localrc)
