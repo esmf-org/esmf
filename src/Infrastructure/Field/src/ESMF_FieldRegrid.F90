@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.19 2009/04/27 23:04:54 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.20 2009/05/07 18:55:48 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.19 2009/04/27 23:04:54 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.20 2009/05/07 18:55:48 oehmke Exp $'
 
 !==============================================================================
 !
@@ -272,7 +272,7 @@ contains
         type(ESMF_VM)        :: vm
         type(ESMF_Mesh)      :: srcMesh
         type(ESMF_Mesh)      :: dstMesh
-        type(ESMF_StaggerLoc) :: staggerLoc
+        type(ESMF_StaggerLoc) :: srcStaggerLoc,dstStaggerLoc
 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -294,15 +294,6 @@ contains
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-        ! Determine the stagger as function of method (may change in future)
-        if (regridMethod .eq. ESMF_REGRID_METHOD_BILINEAR) then
-            staggerLoc = ESMF_STAGGERLOC_CENTER
-          elseif (regridMethod .eq. ESMF_REGRID_METHOD_PATCH) then
-            staggerLoc = ESMF_STAGGERLOC_CENTER
-          else
-            staggerLoc = ESMF_STAGGERLOC_CENTER
-        endif
-
         ! Will eventually determine scheme either as a parameter or from properties
         ! of the source grid
         if (present(regridScheme)) then
@@ -314,14 +305,15 @@ contains
 
         ! If grids, then convert to a mesh to do the regridding
         if (srcgeomtype .eq. ESMF_GEOMTYPE_GRID) then
-          call ESMF_FieldGet(srcField, grid=srcGrid, rc=localrc)
+          call ESMF_FieldGet(srcField, grid=srcGrid, &
+                 staggerloc=srcStaggerloc, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
           isSphere = 0
           if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) isSphere = 1
 
-          srcMesh = ESMF_GridToMesh(srcGrid, staggerLoc%staggerloc, isSphere, &
+          srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLoc%staggerloc, isSphere, &
                       srcMaskValues, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -333,14 +325,15 @@ contains
         endif
 
         if (dstgeomtype .eq. ESMF_GEOMTYPE_GRID) then
-          call ESMF_FieldGet(dstField, grid=dstGrid, rc=localrc)
+          call ESMF_FieldGet(dstField, grid=dstGrid, &
+                 staggerloc=dstStaggerloc, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
           isSphere = 0
           if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) isSphere = 1
 
-          dstMesh = ESMF_GridToMesh(dstGrid, staggerLoc%staggerloc, isSphere, &
+          dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLoc%staggerloc, isSphere, &
                       dstMaskValues, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
