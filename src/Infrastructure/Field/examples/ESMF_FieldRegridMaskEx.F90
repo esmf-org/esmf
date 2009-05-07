@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMaskEx.F90,v 1.2 2009/05/07 23:14:38 oehmke Exp $
+! $Id: ESMF_FieldRegridMaskEx.F90,v 1.3 2009/05/07 23:16:02 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.2 2009/05/07 23:14:38 oehmke Exp $'
+    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.3 2009/05/07 23:16:02 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -298,7 +298,7 @@ program ESMF_FieldRegridEx
 ! masking shouldn't occur). The {\tt unmappedDstAction} flag may be
 ! used with or without masking and indicates what should occur
 ! if destination points can not be mapped to a source cell. 
-! Here the {\tt ESMF\_UNMAPPEDACTION\_IGNORE} option indicates that unmapped
+! Here the {\tt ESMF\_UNMAPPEDACTION\_IGNORE} value indicates that unmapped
 ! destination points are to be ignored and no sparse matrix entries should be
 !  generated for them. 
 !EOE
