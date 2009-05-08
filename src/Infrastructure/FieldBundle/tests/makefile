@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2008/09/26 04:16:50 cdeluca Exp $ 
+# $Id: makefile,v 1.9 2009/05/08 05:17:23 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -13,9 +13,7 @@ TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldBundleUTest \
 TESTS_RUN     = RUN_ESMF_FieldBundleUTest \
                 RUN_ESMF_FieldBundleCrGetUTest \
                 RUN_ESMF_FieldBundleRedistUTest \
-                RUN_ESMF_FieldBundleSMMUTest \
-                RUN_ESMF_FieldBundleHarness2UTest \
-                RUN_ESMF_FieldBundleHarness4UTest
+                RUN_ESMF_FieldBundleSMMUTest
 
 TESTS_RUN_UNI = RUN_ESMF_FieldBundleUTestUNI 
 
@@ -46,13 +44,3 @@ RUN_ESMF_FieldBundleRedistUTest:
 
 RUN_ESMF_FieldBundleSMMUTest:
 	$(MAKE) TNAME=FieldBundleSMM NP=4 ftest
-
-RUN_ESMF_FieldBundleHarness2UTest:
-	cp -f test_harness.rc $(ESMF_TESTDIR)
-	cp -f harness_config/*.rc $(ESMF_TESTDIR)
-	$(MAKE) TNAME=TestHarness HNAME=FieldBundleHarness2 NP=2 htest
-
-RUN_ESMF_FieldBundleHarness4UTest:
-	cp -f test_harness.rc $(ESMF_TESTDIR)
-	cp -f harness_config/*.rc $(ESMF_TESTDIR)
-	$(MAKE) TNAME=TestHarness HNAME=FieldBundleHarness4 NP=4 htest
