@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.23 2009/05/06 03:12:48 w6ws Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.24 2009/05/08 01:44:05 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -19,7 +19,7 @@ implicit none
 contains
 
 subroutine comp_dummy(gcomp, rc)
-   type(ESMF_GridComp), intent(inout) :: gcomp
+   type(ESMF_GridComp) :: gcomp
    integer, intent(out) :: rc
 
    rc = ESMF_SUCCESS
@@ -28,9 +28,9 @@ end subroutine comp_dummy
 
 ! Initialize routine which creates "field1" on PETs 0 and 1
 subroutine comp1_init(gcomp, istate, ostate, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: gcomp
-    type(ESMF_State), intent(inout) :: istate, ostate
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp)  :: gcomp
+    type(ESMF_State)     :: istate, ostate
+    type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
     type(ESMF_Field) :: field1
@@ -55,9 +55,9 @@ end subroutine comp1_init
 
 ! Initialize routine which creates "field2" on PETs 2 and 3
 subroutine comp2_init(gcomp, istate, ostate, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: gcomp
-    type(ESMF_State), intent(inout) :: istate, ostate
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp)  :: gcomp
+    type(ESMF_State)     :: istate, ostate
+    type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
     type(ESMF_Field) :: field2
@@ -75,9 +75,9 @@ end subroutine comp2_init
 
 ! Finalize routine which destroys "field1" on PETs 0 and 1
 subroutine comp1_final(gcomp, istate, ostate, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: gcomp
-    type(ESMF_State), intent(inout) :: istate, ostate
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp)  :: gcomp
+    type(ESMF_State)     :: istate, ostate
+    type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
     type(ESMF_Field) :: field1
@@ -102,9 +102,9 @@ end subroutine comp1_final
 
 ! Finalize routine which destroys "field2" on PETs 2 and 3
 subroutine comp2_final(gcomp, istate, ostate, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: gcomp
-    type(ESMF_State), intent(inout) :: istate, ostate
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp)  :: gcomp
+    type(ESMF_State)     :: istate, ostate
+    type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
     type(ESMF_Field) :: field2
