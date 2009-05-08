@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.16 2009/04/16 04:19:21 theurich Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.17 2009/05/08 01:41:57 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -18,8 +18,8 @@ module userMethodMod
   public myUserMethod
 contains
   subroutine myUserMethod(state, rc)
-    type(ESMF_State):: state
-    integer:: rc
+    type(ESMF_State)     :: state
+    integer, intent(out) :: rc
     print *, "Hi from myUserMethod"
     call ESMF_StatePrint(state, rc=rc)
   end subroutine
@@ -49,7 +49,7 @@ end module
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.16 2009/04/16 04:19:21 theurich Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.17 2009/05/08 01:41:57 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
