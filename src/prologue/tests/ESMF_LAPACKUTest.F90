@@ -19,6 +19,11 @@ program ESMF_LAPACKUTest
   use ESMF_TestMod
   implicit none
 
+  character(ESMF_MAXSTR) :: name, failMsg
+  integer :: info, rc, result
+
+#if defined (ESMF_LAPACK)
+
   integer, parameter :: dp_k = kind (1.0d0)
 
   integer, parameter :: n = 1234, nrhs = 12
@@ -27,9 +32,6 @@ program ESMF_LAPACKUTest
 
   real(dp_k) :: cond
   integer :: rank
-
-  character(ESMF_MAXSTR) :: name, failMsg
-  integer :: info, rc, result
 
   real(dp_k) :: work1(1)
   real(dp_k), allocatable :: work(:)
@@ -53,6 +55,8 @@ program ESMF_LAPACKUTest
       integer, intent(inout) :: info
     end subroutine
   end interface
+
+#endif
 
 ! Basic test of calling an LAPACK routine
 
