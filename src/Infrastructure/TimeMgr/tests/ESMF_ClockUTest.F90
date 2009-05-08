@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.111 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.112 2009/05/08 01:46:30 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.111 2009/01/21 21:38:01 cdeluca Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.112 2009/05/08 01:46:30 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -65,7 +65,8 @@
 
       ! Random number
       real :: ranNum
-      integer :: seed(32)
+      integer, allocatable :: seed(:)
+      integer :: seed_size
       integer :: timevals(8)
 
       ! instantiate a calendar
@@ -1298,6 +1299,8 @@
 
       if (rc.eq.ESMF_SUCCESS) then
       	call date_and_time(values=timevals)
+        call random_seed (size=seed_size)
+        allocate (seed(seed_size))
       	seed=timevals(8)
       	call random_seed(put=seed)
       	testResults = 0
