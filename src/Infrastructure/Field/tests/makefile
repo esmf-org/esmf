@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.60 2009/02/25 15:17:33 feiliu Exp $ 
+# $Id: makefile,v 1.61 2009/05/08 05:27:22 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -70,9 +70,9 @@ RUN_ESMF_FieldStressUTestUNI:
 
 RUN_ESMF_FieldHarness1UTest:        
 	@if [ -f $(ESMF_TESTDIR)/test_harness.list ] ; then \
-	if ! grep FieldHarness1UTest $(ESMF_TESTDIR)/test_harness.list ; then \
-		echo "ESMF_FieldHarness1UTest" > $(ESMF_TESTDIR)/test_harness.list ; \
-	fi ; \
+	  if ! grep FieldHarness1UTest $(ESMF_TESTDIR)/test_harness.list ; then \
+	    echo "ESMF_FieldHarness1UTest" >> $(ESMF_TESTDIR)/test_harness.list ; \
+	  fi ; \
 	else \
 	  echo "ESMF_FieldHarness1UTest" > $(ESMF_TESTDIR)/test_harness.list ; \
 	fi
@@ -86,9 +86,9 @@ RUN_ESMF_FieldHarness1UTest:
 
 RUN_ESMF_FieldHarness2UTest:        
 	@if [ -f $(ESMF_TESTDIR)/test_harness.list ] ; then \
-	if ! grep FieldHarness2UTest $(ESMF_TESTDIR)/test_harness.list ; then \
-	  echo "ESMF_FieldHarness2UTest" > $(ESMF_TESTDIR)/test_harness.list ; \
-	fi ; \
+	  if ! grep FieldHarness2UTest $(ESMF_TESTDIR)/test_harness.list ; then \
+	    echo "ESMF_FieldHarness2UTest" >> $(ESMF_TESTDIR)/test_harness.list ; \
+	  fi ; \
 	else \
 	  echo "ESMF_FieldHarness2UTest" > $(ESMF_TESTDIR)/test_harness.list ; \
 	fi
@@ -102,9 +102,9 @@ RUN_ESMF_FieldHarness2UTest:
 
 RUN_ESMF_FieldHarness4UTest:        
 	@if [ -f $(ESMF_TESTDIR)/test_harness.list ] ; then \
-	if ! grep FieldHarness4UTest $(ESMF_TESTDIR)/test_harness.list ; then \
-	  echo "ESMF_FieldHarness4UTest" > $(ESMF_TESTDIR)/test_harness.list ; \
-	fi ; \
+	  if ! grep FieldHarness4UTest $(ESMF_TESTDIR)/test_harness.list ; then \
+	    echo "ESMF_FieldHarness4UTest" >> $(ESMF_TESTDIR)/test_harness.list ; \
+	  fi ; \
 	else \
 	  echo "ESMF_FieldHarness4UTest" > $(ESMF_TESTDIR)/test_harness.list ; \
 	fi
