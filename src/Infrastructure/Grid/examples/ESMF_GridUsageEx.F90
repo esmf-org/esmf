@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.55 2009/05/07 22:46:23 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.56 2009/05/08 04:35:10 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -1536,7 +1536,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-   call ESMF_GridAddCoord(grid2D,&
+   call ESMF_GridAddItem(grid2D,&
           staggerLoc=ESMF_STAGGERLOC_CORNER, &
           item=ESMF_GRIDITEM_MASK, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
