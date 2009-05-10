@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.16 2009/05/07 20:31:06 theurich Exp $
+# $Id: build_rules.mk,v 1.17 2009/05/10 04:16:56 theurich Exp $
 #
 # Linux.pgigcc.default
 #
@@ -141,14 +141,14 @@ ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.pgf90 $(ESMF_F90COMPIL
 ############################################################
 # Shared library options
 #
-ESMF_SL_LIBOPTS  += -shared
+#ESMF_SL_LIBOPTS  += -shared
 
 ############################################################
 # Shared object options
 #
-ESMF_SO_F90COMPILEOPTS  = -fPIC
-ESMF_SO_F90LINKOPTS     = -shared
-ESMF_SO_F90LINKOPTSEXE  = -Wl,-export-dynamic
-ESMF_SO_CXXCOMPILEOPTS  = -fPIC
-ESMF_SO_CXXLINKOPTS     = -shared
-ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
+#ESMF_SO_F90COMPILEOPTS  = -fPIC
+#ESMF_SO_F90LINKOPTS     = -shared
+#ESMF_SO_F90LINKOPTSEXE  = -Wl,-export-dynamic
+#ESMF_SO_CXXCOMPILEOPTS  = -fPIC
+#ESMF_SO_CXXLINKOPTS     = -shared
+#ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
