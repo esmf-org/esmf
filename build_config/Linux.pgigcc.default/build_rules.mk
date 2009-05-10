@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.17 2009/05/10 04:16:56 theurich Exp $
+# $Id: build_rules.mk,v 1.18 2009/05/10 05:44:56 theurich Exp $
 #
 # Linux.pgigcc.default
 #
@@ -137,6 +137,11 @@ ESMF_F90LINKLIBS += -lrt -lC -lc -ldl
 # Link against libesmf.a using the C++ linker front-end
 #
 ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.pgf90 $(ESMF_F90COMPILER)) -ldl
+
+############################################################
+# Blank out shared library options
+#
+ESMF_SL_LIBS_TO_MAKE  =
 
 ############################################################
 # Shared library options
