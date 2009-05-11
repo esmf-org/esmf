@@ -223,7 +223,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.114 2009/05/06 16:06:22 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.115 2009/05/11 17:26:44 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5582,7 +5582,7 @@ end subroutine ESMF_GridGetDefault
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD  
 #define ESMF_METHOD "ESMF_GridGetIndex"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGet - Get information about the min and max index of the grid dimension
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
@@ -5614,7 +5614,7 @@ end subroutine ESMF_GridGetDefault
 
 !\end{description}
 !
-!EOP
+!EOPI
 
     integer :: localrc ! local error status
     type(ESMF_InterfaceInt) :: minIndexArg ! helper variable
