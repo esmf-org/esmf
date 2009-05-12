@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.12 2009/02/16 19:14:31 rokuingh Exp $
+! $Id: ESMF_LocStream.F90,v 1.13 2009/05/12 04:23:18 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.12 2009/02/16 19:14:31 rokuingh Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.13 2009/05/12 04:23:18 oehmke Exp $'
 
 !==============================================================================
 !
@@ -1376,7 +1376,8 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGet()
-  subroutine ESMF_LocStreamGetDefault(locstream, distgrid, keyCount, keyNames, localDECount, indexflag, name, rc)
+  subroutine ESMF_LocStreamGetDefault(locstream, distgrid, keyCount, &
+               keyNames, localDECount, indexflag, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Locstream), intent(in)             :: locstream
@@ -1592,7 +1593,7 @@ contains
 !     \item[{locstream}]
 !          LocStream to get the information from.
 !     \item[{localDE}]
-!          The local DE to get the information for  (localDE starts at 0).
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !     \item[{[exclusiveUBound]}]
@@ -1804,7 +1805,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
 !     \item[{locstream}]
 !          LocStream to get the information from.
 !     \item[{localDE}]
-!          The local DE to get the information for  (localDE starts at 0).
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{keyName}]
 !          The key to get the information from.
 !     \item[{[exclusiveLBound]}]
@@ -1970,7 +1971,7 @@ end subroutine ESMF_LocStreamGetKeyI4
 !     \item[{locstream}]
 !          LocStream to get the information from.
 !     \item[{localDE}]
-!          The local DE to get the information for  (localDE starts at 0).
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{keyName}]
 !          The key to get the information from.
 !     \item[{[exclusiveLBound]}]
@@ -2137,7 +2138,7 @@ end subroutine ESMF_LocStreamGetKeyR4
 !     \item[{locstream}]
 !          LocStream to get the information from.
 !     \item[{localDE}]
-!          The local DE to get the information for  (localDE starts at 0).
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{keyName}]
 !          The key to get the information from.
 !     \item[{[exclusiveLBound]}]
@@ -2293,7 +2294,7 @@ end subroutine ESMF_LocStreamGetKeyR8
 !     \item[{locstream}]
 !          LocStream to get the information from.
 !     \item[{localDE}]
-!          The local DE to get the information for  (localDE starts at 0).
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !     \item[{[exclusiveUBound]}]
