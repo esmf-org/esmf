@@ -1,4 +1,4 @@
-% $Id: Grid_options.tex,v 1.30 2009/01/05 18:38:19 murphysj Exp $
+% $Id: Grid_options.tex,v 1.31 2009/05/12 20:09:30 oehmke Exp $
 
 \subsubsection{ESMF\_GridConn}
 \label{sec:opt:gridconn}
@@ -49,6 +49,30 @@ are the valid values of ESMF\_GRIDSTATUS.
 \item [ESMF\_GRIDSTATUS\_REGRID\_READY:] The grid contains valid coordinate
       values and is ready to be used in regrid. 
 \end{description}
+
+\subsubsection{ESMF\_GridItem}
+\label{sec:opt:griditem}
+
+{\sf DESCRIPTION:\\}
+The ESMF Grid can contain other kinds of data besides coordinates. 
+This data is referred to as Grid ``items''. Some items may be used
+by ESMF for calculations involving the Grid. The following
+are the valid values of ESMF\_GRIDITEM.
+
+\medskip
+\begin{tabular}{|l|c|c|c|c||}
+\hline
+\hline
+Item Label & {\bf Type Restriction}  & {\bf Type Default} & {\bf ESMF Uses} & {\bf Controls} \\
+\hline
+{\bf ESMF\_GRIDITEM\_MASK}  & ESMF\_TYPEKIND\_I4 & ESMF\_TYPEKIND\_I4 & YES & Masking in Regrid \\
+{\bf ESMF\_GRIDITEM\_AREA} & NONE & ESMF\_TYPEKIND\_R8 & NO & N/A \\
+{\bf ESMF\_GRIDITEM\_AREAM} & NONE & ESMF\_TYPEKIND\_R8 & NO & N/A \\
+{\bf ESMF\_GRIDITEM\_FRAC} & NONE & ESMF\_TYPEKIND\_R8 & NO & N/A \\
+\hline
+\hline
+\end{tabular}
+
 
 
 \subsubsection{ESMF\_StaggerLoc}\label{sec:opt:staggerloc}

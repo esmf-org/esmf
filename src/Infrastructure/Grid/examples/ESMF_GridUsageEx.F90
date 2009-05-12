@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.57 2009/05/12 04:22:40 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.58 2009/05/12 20:09:31 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -1401,24 +1401,8 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 ! data as they see fit, the user should be aware that
 ! this data may also be used by other parts of ESMF (e.g. the 
 ! ESMF\_GRIDITEM\_MASK item is used in regridding). 
-!
-! The following table gives information about the Grid items currently
-! available:
-!
-!\medskip
-!\begin{tabular}{|l|c|c|c|c||}
-!\hline
-!\hline
-!Item Label & {\bf Type Restriction}  & {\bf Type Default} & {\bf ESMF Uses} & {\bf Controls} \\
-!\hline
-!{\bf ESMF\_GRIDITEM\_MASK}  & ESMF\_TYPEKIND\_I4 & ESMF\_TYPEKIND\_I4 & YES & Masking in Regrid \\
-!{\bf ESMF\_GRIDITEM\_AREA} & NONE & ESMF\_TYPEKIND\_R8 & NO & N/A \\
-!{\bf ESMF\_GRIDITEM\_AREAM} & NONE & ESMF\_TYPEKIND\_R8 & NO & N/A \\
-!{\bf ESMF\_GRIDITEM\_FRAC} & NONE & ESMF\_TYPEKIND\_R8 & NO & N/A \\
-!\hline
-!\hline
-!\end{tabular}
-!\medskip
+! Please see Section~\ref{sec:opt:griditem} for a list of valid
+! items.
 !
 ! Like coordinates items are also created on stagger locations.
 ! When adding or accessing item data, the stagger location is specified to tell the Grid method 

@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.116 2009/05/12 04:22:41 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.117 2009/05/12 20:09:31 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1022,7 +1022,7 @@ end interface
 !      The stagger location to add. Please see Section~\ref{sec:opt:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 ! \item[{item}]
-!      The grid item to add. 
+!      The grid item to add. Please see Section~\ref{sec:opt:griditem} for a list of valid items. 
 ! \item[{itemTypeKind}]
 !      The typekind of the  item to add. 
 ! \item[{[staggerEdgeLWidth]}] 
@@ -8535,7 +8535,8 @@ endif
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{item}]
-!          The item to get the information for. 
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.  
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the grid dimCount.
@@ -8641,7 +8642,8 @@ endif
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{item}]
-!          The item to get the information for. 
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.  
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -8925,7 +8927,8 @@ endif
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{item}]
-!          The item to get the information for. 
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.  
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -9212,7 +9215,8 @@ endif
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{item}]
-!          The item to get the information for. 
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.  
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -9500,7 +9504,8 @@ endif
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{item}]
-!          The item to get the information for. 
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.   
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -9784,7 +9789,8 @@ endif
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{item}]
-!          The item to get the information for. 
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.   
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -10071,7 +10077,8 @@ endif
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{item}]
-!          The item to get the information for. 
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.   
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -10360,7 +10367,8 @@ endif
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{item}]
-!          The item to get the information for. 
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.   
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -10644,7 +10652,8 @@ endif
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{item}]
-!          The item to get the information for. 
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.   
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -10931,7 +10940,8 @@ endif
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{item}]
-!          The item to get the information for. 
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.   
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -11222,7 +11232,8 @@ endif
 !     of predefined stagger locations. If not present, defaults to
 !     ESMF\_STAGGERLOC\_CENTER.
 !\item[{item}]
-!     The item to get the information for. 
+!     The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.   
 !\item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
 !     {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -11408,7 +11419,8 @@ endif
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{item}]
-!          The item from which to get the arrays. 
+!          The item from which to get the arrays. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.  
 !     \item[{array}]
 !          An array into which to put the item infomation. 
 !     \item[{[doCopy]}]
@@ -14594,7 +14606,8 @@ endif
 !    of predefined stagger locations. If not present, defaults to
 !    ESMF\_STAGGERLOC\_CENTER.
 !\item[{item}]
-!    The item into which to copy the arrays. 
+!    The item into which to copy the arrays. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.   
 !\item[{array}]
 !    An array to set the grid item information from.
 !\item[{[doCopy]}]
