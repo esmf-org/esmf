@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.56 2009/05/08 04:35:10 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.57 2009/05/12 04:22:40 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -1035,7 +1035,7 @@ endif
 
 
 !BOE
-!\subsubsection{Associating Coordinates with Stagger Locations}
+!\subsubsection{Grid Stagger Locations}
 !\label{sec:usage:staggerloc}
 !
 ! A useful finite difference technique is to place different physical 
@@ -1048,39 +1048,49 @@ endif
 ! To support the staggering of variables, the Grid provides
 ! the idea of {\em stagger locations}. 
 ! Stagger locations refer to the places in a Grid cell that 
-! contain coordinates and, once a Grid is associated with a 
-! Field object, field data. Typically data can be located
+! can contain coordinates or other data and once a Grid is associated with a 
+! Field object, field data. Typically Grid data can be located
 ! at the cell center, at the cell corners, or at the cell faces, in 2D, 3D, and
 ! higher dimensions. (Note that any Arakawa stagger can be constructed
-! of a set of Grid stagger locations.) Users can put coordinates, 
-! which are necessary
-! for operations such as regrid, at multiple stagger
-! locations in a Grid. In addition, the user can put Field data
-! at any of the stagger locations in a Grid.  
+! of a set of Grid stagger locations.)  There are predefined stagger locations
+! (see Section~\ref{sec:opt:staggerloc}), or,
+! should the user wish to specify their own, there
+! is also a set of methods for generating custom locations 
+! (See Section~\ref{sec:usage:staggerloc:adv}).
+! Users can put Grid data (e.g. coordinates) 
+! at multiple stagger locations in a Grid. In addition, the user can create a Field
+! at any of the stagger locations in a Grid. 
 !
-! By default the coordinate array at the center stagger location
+! By default the Grid data array at the center stagger location
 ! starts at the bottom index of the Grid (default (1,1..,1)) and extends
 ! up to the maximum cell index in the Grid (e.g. given by the {\tt maxIndex} argument).
 ! Other stagger locations also start at the bottom index of the Grid, however, 
 ! they can extend to +1 element beyond the center in some dimensions to allow
 ! for the extra space to surround the center elements. See Section~\ref{sec:usage:staggerloc:adv}
 ! for a description of this extra space and how to adjust if it necessary. 
-! The subroutine {\tt ESMF\_GridGetCoord} can be used
-! to retrieve the stagger bounds for the piece of a coordinate
-! array on a particular DE. 
+! There are {\tt ESMF\_GridGet} subroutines (e.g. {\tt ESMF\_GridGetCoord()} or {ESMF\_GridGetItem()})
+! which can be used to retrieve the stagger bounds for the piece of Grid data 
+! on a particular DE. 
+!EOE
+
+
+!BOE
+!\subsubsection{Associating Coordinates with Stagger Locations}
 !
-! The user can allocate coordinate arrays without setting coordinates 
-! using the {\tt ESMF\_GridAddCoord()} call. When adding or accessing
+! The primary type of data the Grid is resposible for storing is coordinates. 
+! The coordinate values in a Grid can be employed by the user in calculations or
+! to describe the geometry of a Field. The Grid coordinate values are also used by 
+! {\tt ESMF\_FieldRegridStore()} when calculating the interpolation
+! matrix between two Fields. The user can allocate coordinate arrays without setting coordinate values 
+! using the {\tt ESMF\_GridAddCoord()} call. (See Section~\ref{sec:usage:coords:accessing} for a discussion of
+! setting/getting coordinate values.) When adding or accessing
 ! coordinate data, the stagger location is specified to tell the Grid method 
-! where in the cell to get the data. There are predefined stagger locations
-! (see Section~\ref{sec:opt:staggerloc}), or,
-! should the user wish to specify their own, there
-! is also a set of methods for generating custom locations 
-! (See Section~\ref{sec:usage:staggerloc:adv}).
+! where in the cell to get the data. The different stagger locations may also have slightly different
+! index ranges and sizes.  Please see Section~\ref{sec:usage:staggerloc} for a discussion of 
+! Grid stagger locations. 
 !
-! The following example
-! adds coordinate storage to the corner stagger location in a grid using 
-! one of the predefined stagger locations.
+! The following example adds coordinate storage to the corner stagger location in a Grid using one 
+! of the predefined stagger locations.
 !EOE
 
 
@@ -1107,7 +1117,7 @@ endif
 
 !BOE
 ! Note only the center stagger location {\tt ESMF\_STAGGERLOC\_CENTER} is supported 
-! in the arbitrarily distributed grid.
+! in an arbitrarily distributed Grid.
 !EOE
 
 
@@ -1260,11 +1270,12 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 
 !BOE
 !\subsubsection{Accessing Coordinates}
+!\label{sec:usage:coords:accessing}
 !
 ! Once a Grid has been created, the user has several options to access
 ! the Grid coordinate data. The first of these, {\tt ESMF\_GridSetCoord()}, 
-! enables the user to set data 
-! for one stagger location across the whole Grid, using ESMF Arrays. 
+! enables the user to use ESMF Arrays to set data 
+! for one stagger location across the whole Grid. 
 ! For example, the following sets the coordinates in the first dimension 
 ! (e.g. x) for the corner stagger location to 
 ! those in the ESMF Array {\tt arrayCoordX}.
@@ -1304,8 +1315,8 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 
 !BOE
 ! The method {\tt ESMF\_GridGetCoord()} allows the user
-! to access the Array, as a direct reference, which
-! contains the coordinate data for a stagger location on a Grid. The user
+! to obtain a reference to an ESMF Array which
+! contains the coordinate data for a stagger location in a Grid. The user
 ! can then employ any of the standard {\tt ESMF\_Array} tools to operate
 ! on the data. The following copies the coordinates from the second 
 ! component of the corner and puts it into the ESMF Array {\tt arrayCoordY}. 
@@ -1397,6 +1408,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 !\medskip
 !\begin{tabular}{|l|c|c|c|c||}
 !\hline
+!\hline
 !Item Label & {\bf Type Restriction}  & {\bf Type Default} & {\bf ESMF Uses} & {\bf Controls} \\
 !\hline
 !{\bf ESMF\_GRIDITEM\_MASK}  & ESMF\_TYPEKIND\_I4 & ESMF\_TYPEKIND\_I4 & YES & Masking in Regrid \\
@@ -1408,12 +1420,13 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 !\end{tabular}
 !\medskip
 !
-! Like coordinates, items are created on stagger locations.
+! Like coordinates items are also created on stagger locations.
 ! When adding or accessing item data, the stagger location is specified to tell the Grid method 
 ! where in the cell to get the data. The different stagger locations may also have slightly different
 ! index ranges and sizes.  Please see Section~\ref{sec:usage:staggerloc} for a discussion of 
-! how this applies for coordinates, the items behave in the same manner.  The user can 
+! Grid stagger locations.  The user can 
 ! allocate item arrays without setting item values using the {\tt ESMF\_GridAddItem()} call. 
+! (See Section~\ref{sec:usage:items:accessing} for a discussion of setting/getting item values.) 
 !
 ! The following example adds mask item storage to the corner stagger location in a grid.
 !EOE

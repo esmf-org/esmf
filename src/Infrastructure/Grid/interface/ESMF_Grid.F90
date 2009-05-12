@@ -1,4 +1,3 @@
-
 ! $Id.F90,v 1.22 2007/09/05 18:31:55 oehmke Exp $
 !
 ! Earth System Modeling Framework
@@ -223,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.115 2009/05/11 17:26:44 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.116 2009/05/12 04:22:41 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5722,7 +5721,7 @@ end subroutine ESMF_GridGetDefault
 !\item[{grid}]
 !    Grid to get the information from.
 !\item[{[localDe]}]
-!     The local DE from which to get the information.  
+!     The local DE from which to get the information. {\tt [0,..,localDeCount-1]} 
 !\item[{staggerloc}]
 !     The stagger location to get the information for. 
 !     Please see Section~\ref{sec:opt:staggerloc} for a list 
@@ -5994,10 +5993,10 @@ end subroutine ESMF_GridGetDefault
 !         <pointer argument>, doCopy, rc)
 ! 
 ! !ARGUMENTS:
-!     type(ESMF_Grid),        intent(in) :: grid
-!     integer,                intent(in), optional :: localDE
-!     integer,                intent(in) :: coordDim
-!     type (ESMF_StaggerLoc), intent(in), optional :: staggerloc
+!     type(ESMF_Grid),        intent(in)            :: grid
+!     integer,                intent(in)            :: localDE
+!     integer,                intent(in)            :: coordDim
+!     type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
 !     integer,                intent(out), optional :: exclusiveLBound(:)
 !     integer,                intent(out), optional :: exclusiveUBound(:)
 !     integer,                intent(out), optional :: exclusiveCount(:)
@@ -6008,7 +6007,7 @@ end subroutine ESMF_GridGetDefault
 !     integer,                intent(out), optional :: totalUBound(:)
 !     integer,                intent(out), optional :: totalCount(:)
 !     <pointer argument>, see below for supported values
-!     type(ESMF_CopyFlag),    intent(in), optional :: docopy
+!     type(ESMF_CopyFlag),    intent(in), optional  :: docopy
 !     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -6038,8 +6037,7 @@ end subroutine ESMF_GridGetDefault
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. If not set, defaults to 
-!          the first DE on this processor. (localDE starts at 0)
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -6146,7 +6144,7 @@ end subroutine ESMF_GridGetDefault
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{[localDE]}]
-!          The local DE to get the information for.(localDE starts at 0)
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -6459,7 +6457,7 @@ end subroutine ESMF_GridGetDefault
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. (localDE starts at 0)
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -6775,7 +6773,7 @@ end subroutine ESMF_GridGetDefault
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. (localDE starts at 0)
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -7101,7 +7099,7 @@ endif
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. (localDE starts at 0)
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -7421,7 +7419,7 @@ endif
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{[localDE]}]
-!          The local DE to get the information for.(localDE starts at 0)
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -7739,7 +7737,7 @@ endif
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. (localDE starts at 0)
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -8056,7 +8054,7 @@ endif
 !\item[{grid}]
 !    Grid to get the information from.
 !\item[{[localDE]}]
-!     The local DE from which to get the information (localDE starts at 0).
+!     The local DE from which to get the information. {\tt [0,..,localDeCount-1]}
 !\item[{coordDim}]
 !     The coordinate dimension to get the information for (e.g. 1=x). 
 !\item[{staggerloc}]
@@ -8340,7 +8338,7 @@ endif
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. (localDE starts at 0)
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
@@ -8420,7 +8418,7 @@ endif
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. (localDE starts at 0)
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
@@ -8531,7 +8529,7 @@ endif
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{localDE}]
-!          The local DE to get the information for (localDE starts at 0).
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
@@ -8637,7 +8635,7 @@ endif
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{localDE}]
-!          The local DE to get the information for (localDE starts at 0).
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
@@ -8920,7 +8918,7 @@ endif
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{localDE}]
-!          The local DE to get the information for (localDE starts at 0).
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
@@ -9207,7 +9205,7 @@ endif
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{localDE}]
-!          The local DE to get the information for (localDE starts at 0).
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
@@ -9496,7 +9494,7 @@ endif
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{localDE}]
-!          The local DE to get the information for (localDE starts at 0).
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
@@ -9779,7 +9777,7 @@ endif
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{localDE}]
-!          The local DE to get the information for (localDE starts at 0).
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
@@ -10066,7 +10064,7 @@ endif
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{localDE}]
-!          The local DE to get the information for (localDE starts at 0).
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
@@ -10356,7 +10354,7 @@ endif
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{localDE}]
-!          The local DE to get the information for (localDE starts at 0).
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
@@ -10639,7 +10637,7 @@ endif
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{localDE}]
-!          The local DE to get the information for (localDE starts at 0).
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
@@ -10926,7 +10924,7 @@ endif
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{localDE}]
-!          The local DE to get the information for (localDE starts at 0).
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
@@ -11217,7 +11215,7 @@ endif
 !\item[{grid}]
 !    Grid to get the information from.
 !\item[{localDE}]
-!     The local DE from which to get the information (localDE starts at 0).
+!     The local DE from which to get the information. {\tt [0,..,localDeCount-1]}
 !\item[{staggerloc}]
 !     The stagger location to get the information for. 
 !     Please see Section~\ref{sec:opt:staggerloc} for a list 
