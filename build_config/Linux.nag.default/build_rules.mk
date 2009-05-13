@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.33 2009/01/12 18:23:05 theurich Exp $
+# $Id: build_rules.mk,v 1.34 2009/05/13 05:37:05 theurich Exp $
 #
 # Linux.nag.default
 #
@@ -6,7 +6,7 @@
 ############################################################
 # Default compiler setting.
 #
-ESMF_F90DEFAULT         = f95
+ESMF_F90DEFAULT         = nagfor
 ESMF_CXXDEFAULT         = g++
 
 ############################################################
@@ -111,6 +111,7 @@ ESMF_F90LINKLIBS += -lrt -lstdc++ -ldl
 ESMF_CXXLINKLIBS += -lrt -ldl $(shell $(ESMF_DIR)/scripts/libs.nag $(ESMF_F90COMPILER))
 
 ############################################################
-# Shared library options
+# Blank out shared library options
 #
-ESMF_SL_LIBOPTS  += -shared
+ESMF_SL_LIBS_TO_MAKE  =
+
