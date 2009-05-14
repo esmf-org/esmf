@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.38 2009/05/06 23:33:36 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.39 2009/05/14 19:13:36 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.38 2009/05/06 23:33:36 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.39 2009/05/14 19:13:36 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -545,8 +545,8 @@ contains
 !     Add an ESMF standard Attribute package.  
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
+!     \item type(ESMF\_CplComp), intent(inout) :: comp  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp  
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_State), intent(inout) :: state
@@ -597,9 +597,9 @@ contains
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
-!     \item type(ESMF\_DistGrid), intent(inout) :: grid
+!     \item type(ESMF\_CplComp), intent(inout) :: comp  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: distgrid
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
@@ -649,18 +649,18 @@ contains
 !     Copy an Attribute hierarchy from <object1> to <object2>.  
 !     Supported values for <object1> are:
 !     \begin{description}
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp 
+!     \item type(ESMF\_CplComp), intent(inout) :: comp1  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp1 
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !     Supported values for <object2> are:
 !     \begin{description}
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp 
+!     \item type(ESMF\_CplComp), intent(inout) :: comp2  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp2 
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !
-!     NOTE: Copies between different ESMF objects are not recommended.
+!     NOTE: Copies between different ESMF objects are not possible at this time.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -722,9 +722,9 @@ contains
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
-!     \item type(ESMF\_DistGrid), intent(inout) :: grid
+!     \item type(ESMF\_CplComp), intent(inout) :: comp  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: distgrid
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
@@ -797,9 +797,9 @@ contains
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
-!     \item type(ESMF\_DistGrid), intent(inout) :: grid
+!     \item type(ESMF\_CplComp), intent(inout) :: comp  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: distgrid
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
@@ -866,9 +866,9 @@ contains
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
-!     \item type(ESMF\_DistGrid), intent(inout) :: grid
+!     \item type(ESMF\_CplComp), intent(inout) :: comp  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: distgrid
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
@@ -920,9 +920,9 @@ contains
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
-!     \item type(ESMF\_DistGrid), intent(inout) :: grid
+!     \item type(ESMF\_CplComp), intent(inout) :: comp  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: distgrid
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
@@ -969,9 +969,9 @@ contains
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
-!     \item type(ESMF\_DistGrid), intent(inout) :: grid
+!     \item type(ESMF\_CplComp), intent(inout) :: comp  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: distgrid
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
@@ -1015,13 +1015,13 @@ contains
 !     hierarchy of a {\tt CplComp}, {\tt GridComp}, or {\tt State}.  
 !     Supported values for the <object1> are:
 !     \begin{description}
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp1
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp1
+!     \item type(ESMF\_CplComp), intent(inout) :: comp1
+!     \item type(ESMF\_GridComp), intent(inout) :: comp1
 !     \end{description}
 !     Supported values for the <object2> are:
 !     \begin{description}
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp2
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp2
+!     \item type(ESMF\_CplComp), intent(inout) :: comp2
+!     \item type(ESMF\_GridComp), intent(inout) :: comp2
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 ! 
@@ -1152,13 +1152,13 @@ contains
 !     hierarchy of a {\tt CplComp}, {\tt GridComp}, or {\tt State}.  
 !     Supported values for the <object1> are:
 !     \begin{description}
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp1
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp1
+!     \item type(ESMF\_CplComp), intent(inout) :: comp1
+!     \item type(ESMF\_GridComp), intent(inout) :: comp1
 !     \end{description}
 !     Supported values for the <object2> are:
 !     \begin{description}
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp2
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp2
+!     \item type(ESMF\_CplComp), intent(inout) :: comp2
+!     \item type(ESMF\_GridComp), intent(inout) :: comp2
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 ! 
@@ -1336,9 +1336,9 @@ contains
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
-!     \item type(ESMF\_DistGrid), intent(inout) :: grid
+!     \item type(ESMF\_CplComp), intent(inout) :: comp  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: distgrid
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
@@ -1392,9 +1392,9 @@ contains
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
-!     \item type(ESMF\_DistGrid), intent(inout) :: grid
+!     \item type(ESMF\_CplComp), intent(inout) :: comp  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: distgrid
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
@@ -1454,9 +1454,9 @@ contains
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
-!     \item type(ESMF\_DistGrid), intent(inout) :: grid
+!     \item type(ESMF\_CplComp), intent(inout) :: comp  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: distgrid
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
@@ -1509,8 +1509,8 @@ contains
 !     Update an Attribute hierarchy during runtime.  
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
+!     \item type(ESMF\_CplComp), intent(inout) :: comp  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp  
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
 !     \item type(ESMF\_State), intent(inout) :: state
@@ -1551,8 +1551,8 @@ contains
 !     tab-delimited or xml format is acheived by using {\tt attwriteflag}.  
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
+!     \item type(ESMF\_CplComp), intent(inout) :: comp  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp  
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
 !     \item type(ESMF\_State), intent(inout) :: state
