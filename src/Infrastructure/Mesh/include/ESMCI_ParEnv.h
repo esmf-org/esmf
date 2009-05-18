@@ -53,6 +53,11 @@ typedef basic_onullstream<wchar_t> wonullstream;
 
 #else
 
+/// PGI DOESN'T SEEM TO LIKE TEMPLATE OVERLOADING
+/// STREAMS ABOVE. THE MESH LOGGING ISN'T USED IN ESMF
+/// SO TAKE IT OUT BY DEFAULT, USER CAN PUT BACK IN
+/// BY DEFINING ESMF_PARLOG ABOVE. 
+
 class MeshNullStream {
 
  public:
