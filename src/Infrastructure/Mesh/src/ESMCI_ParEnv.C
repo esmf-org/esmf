@@ -31,8 +31,12 @@ ParLog *ParLog::instance(const std::string &fstem, UInt rank, bool use_log) {
 ParLog::ParLog(const std::string &fname, bool _use_log) :
  use_log(_use_log)
 {
+
+#if ESMF_PARLOG
   if (use_log)
     of.open(fname.c_str(), std::ios::out);
+#endif
+
 }
 
 // ******* Env ********
@@ -50,9 +54,17 @@ void Par::Init(const std::string &logfile, bool use_log, MPI_Comm _comm) {
     char **argv = 0;
     MPI_Init(&argc, &argv);
   }
+
+  // Get info from MPI
   comm = _comm;
   MPI_Comm_size(comm, &psize);
   MPI_Comm_rank(comm, &rank);
+
+  // Set Serial Flag
+  if (psize==1) serial=true;
+  else serial=false;
+
+  // Setup log
   log = ParLog::instance(logfile, rank, use_log);
 }
 

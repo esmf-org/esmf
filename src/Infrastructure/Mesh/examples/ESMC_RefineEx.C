@@ -279,8 +279,8 @@ int main(int argc, char *argv[]) {
     Rebalance(srcmesh);
   
   
-    std::cout << "********* Mesh Print: *********" << std::endl;
-    srcmesh.Print(Par::Out());
+    //    std::cout << "********* Mesh Print: *********" << std::endl;
+    //srcmesh.Print(Par::Out());
   
   
     // Run the adaptivity test.

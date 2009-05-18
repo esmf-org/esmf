@@ -982,7 +982,9 @@ Par::Out() << "ptopo->num_nodes=" << ptopo->num_nodes << std::endl;
    }
 
    map->forward(nip, &cmdata[0], ipoints, &child_ipoints[0]);
+#ifdef ESMF_PARLOG
 std::copy(child_ipoints.begin(), child_ipoints.end(), std::ostream_iterator<double>(Par::Out(), " "));
+#endif
 Par::Out() << "\n end child ipoints" << std::endl;
 
    // Now do an interpolation from parent to these points.  Record sensitivities.

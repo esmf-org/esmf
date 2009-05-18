@@ -23,7 +23,7 @@
 
 namespace ESMCI {
 
-
+#ifdef ESMF_PARLOG
 // Implement a null ostream for ESMF users when we don't want mesh
 // writing to its own logfile.
 template <class cT, class traits = std::char_traits<cT> >
@@ -51,19 +51,65 @@ basic_nullbuf<cT, traits> m_sbuf;
 typedef basic_onullstream<char> onullstream;
 typedef basic_onullstream<wchar_t> wonullstream;
 
+#else
+
+class MeshNullStream {
+
+ public:
+
+ template <typename T>
+  MeshNullStream& operator<<(const T &t) {return *this; }
+
+  MeshNullStream& operator<<(std::ostream &(*f)(std::ostream &t)) { return *this; }
+
+
+
+ private:
+
+  int t;
+};
+
+
+
+
+#endif
+
+
 class ParLog {
 public:
 // If called (first time) with a fstem, it opens a file
 // fstem.rank, otherwise this arg is ignored.
 static ParLog *instance(const std::string &fstem="PARALOG", UInt rank = 0, bool use_log = false);
+
+#ifdef ESMF_PARLOG
 static std::ostream &stream() { return ParLog::instance()->use_log ? static_cast<std::ostream&>(ParLog::instance()->of) :
                                                            static_cast<std::ostream&>(ParLog::instance()->nl); }
 static void flush() { ParLog::instance()->of.flush(); }
+
+#else
+
+static MeshNullStream &stream() { return ParLog::instance()->nl; }
+static void flush() { }
+
+#endif
+
+
+
 private:
-static ParLog *classInstance;
-ParLog(const std::string &fname, bool _use_log);
+
+#ifdef ESMF_PARLOG
 std::ofstream of;
 onullstream nl;
+#else
+
+MeshNullStream nl;
+
+#endif
+
+
+
+static ParLog *classInstance;
+ParLog(const std::string &fname, bool _use_log);
 ParLog(const ParLog&);
 ParLog &operator=(const ParLog&);
 bool use_log;
@@ -85,8 +131,15 @@ static UInt Rank() { if (psize == 0) Init(); return rank; }
 static UInt Size() { if (psize == 0) Init(); return psize; }
 static bool Serial() { if (psize == 0) Init(); return serial; }
 
+#if ESMF_PARLOG
 static std::ostream &Out() { if (psize == 0) Init(); return log->stream(); }
-static ParLog *Log() { if (psize == 0) Init(); return log;}
+#else
+static MeshNullStream &Out() { if (psize == 0) Init(); return log->stream(); }
+#endif
+
+
+
+//static ParLog *Log() { if (psize == 0) Init(); return log;}
 
 private:
 static bool serial;

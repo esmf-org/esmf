@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
   fill_src(srcmesh, s, T);
 
 
-srcmesh.Print(Par::Out());
+  //srcmesh.Print(Par::Out());
   WriteMesh(srcmesh, "src_mesh");
   WriteMesh(dstmesh, "dst_mesh");
 

@@ -139,7 +139,10 @@ int MeshCXX::addElements(int *numElems, int *elemId,
     mesh.build_sym_comm_rel(MeshObj::NODE);
     
     mesh.Commit();
+
+#ifdef ESMF_PARLOG
   mesh.Print(Par::Out());
+#endif
 
     localrc = ESMF_SUCCESS;
    } catch(...) {
