@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.36 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.37 2009/05/19 23:20:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.36 2009/01/21 21:37:58 cdeluca Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.37 2009/05/19 23:20:25 theurich Exp $'
 
 !==============================================================================
 
@@ -208,7 +208,7 @@ module ESMF_ArraySpecMod
     ! check status
     if (arrayspec%status .ne. ESMF_ARRAYSPEC_STATUS_SET) then
        ! Use LogErr to handle return code (to record other info for logfile)
-       if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_UNINIT, "ArraySpec hasn't been set", &
+       if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_INIT, "ArraySpec hasn't been set", &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
@@ -342,7 +342,7 @@ module ESMF_ArraySpecMod
     ! check status
     if (arrayspec%status .ne. ESMF_ARRAYSPEC_STATUS_SET) then
        ! Use LogErr to handle return code (to record other info for logfile)
-       if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_UNINIT, "ArraySpec hasn't been set", &
+       if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_INIT, "ArraySpec hasn't been set", &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
