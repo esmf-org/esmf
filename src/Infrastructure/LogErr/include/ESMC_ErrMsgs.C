@@ -1,4 +1,4 @@
-//$Id: ESMC_ErrMsgs.C,v 1.14 2009/03/18 05:57:33 eschwab Exp $
+//$Id: ESMC_ErrMsgs.C,v 1.15 2009/05/19 23:18:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -52,40 +52,42 @@ static const char *errMsg[] = {
   "Invalid pointer ",                                 //   27 = ESMF_RC_PTR_BAD
   "Pointer must already be allocated ",               //   28 = ESMF_RC_PTR_NOTALLOC
   "Pointer must not already be allocated ",           //   29 = ESMF_RC_PTR_ISALLOC
-  "Unable to allocate requested memory ",             //   30 = ESMF_RC_MEM
-  "Memory corrupted ",                                //   31 = ESMF_RC_MEMC
+  "Unspecified memory error ",                        //   30 = ESMF_RC_MEM
+  "Unable to allocate memory ",                       //   31 = ESMF_RC_MEM_ALLOCATE
+  "Unable to deallocate memory ",                     //   32 = ESMF_RC_MEM_DEALLOCATE
+  "Memory corrupted ",                                //   33 = ESMF_RC_MEMC
 
-  "Name already exists ",                             //   32 = ESMF_RC_DUP_NAME
-  "Name too long, must be less than ESMF_MAXSTR ",    //   33 = ESMF_RC_LONG_NAME
-  "String too long, must be less than ESMF_MAXSTR ",  //   34 = ESMF_RC_LONG_STR
-  "Cannot copy non-existent object ",                 //   35 = ESMF_RC_COPY_FAIL
-  "Cannot divide by zero ",                           //   36 = ESMF_RC_DIV_ZERO
-  "Cannot get value ",                                //   37 = ESMF_RC_CANNOT_GET
-  "Cannot set value ",                                //   38 = ESMF_RC_CANNOT_SET
-  "Not found ",                                       //   39 = ESMF_RC_NOT_FOUND
-  "Not valid " ,                                      //   40 = ESMF_RC_NOT_VALID
+  "Name already exists ",                             //   34 = ESMF_RC_DUP_NAME
+  "Name too long, must be less than ESMF_MAXSTR ",    //   35 = ESMF_RC_LONG_NAME
+  "String too long, must be less than ESMF_MAXSTR ",  //   36 = ESMF_RC_LONG_STR
+  "Cannot copy non-existent object ",                 //   37 = ESMF_RC_COPY_FAIL
+  "Cannot divide by zero ",                           //   38 = ESMF_RC_DIV_ZERO
+  "Cannot get value ",                                //   39 = ESMF_RC_CANNOT_GET
+  "Cannot set value ",                                //   40 = ESMF_RC_CANNOT_SET
+  "Not found ",                                       //   41 = ESMF_RC_NOT_FOUND
+  "Not valid " ,                                      //   42 = ESMF_RC_NOT_VALID
 
-  "Internal error: List overflow ",                   //   41 = ESMF_RC_INTNRL_LIST
-  "Internal error: Inconsistent data ",               //   42 = ESMF_RC_INTNRL_INCONS
-  "Internal error: Unknown error ",                   //   43 = ESMF_RC_INTNRL_BAD
+  "Internal error: List overflow ",                   //   43 = ESMF_RC_INTNRL_LIST
+  "Internal error: Inconsistent data ",               //   44 = ESMF_RC_INTNRL_INCONS
+  "Internal error: Unknown error ",                   //   45 = ESMF_RC_INTNRL_BAD
 
-  "System call error ",                               //   44 = ESMF_RC_SYS
-  "Resource is busy ",                                //   45 = ESMF_RC_BUSY
-  "Error in library called by ESMF ",                 //   46 = ESMF_RC_LIB
-  "Library needed by ESMF not present ",              //   47 = ESMF_RC_LIB_NOT_PRESENT
+  "System call error ",                               //   46 = ESMF_RC_SYS
+  "Resource is busy ",                                //   47 = ESMF_RC_BUSY
+  "Error in library called by ESMF ",                 //   48 = ESMF_RC_LIB
+  "Library needed by ESMF not present ",              //   49 = ESMF_RC_LIB_NOT_PRESENT
 
-  "Attribute unused ",                                //   48 = ESMF_RC_ATTR_UNUSED
-  "Object being used before creation ",               //   49 = ESMF_RC_OBJ_NOT_CREATED 
-  "Object being used after deletion ",                //   50 = ESMF_RC_OBJ_DELETED     
-  "Return code not set ",                             //   51 = ESMF_RC_NOT_SET
+  "Attribute unused ",                                //   50 = ESMF_RC_ATTR_UNUSED
+  "Object being used before creation ",               //   51 = ESMF_RC_OBJ_NOT_CREATED 
+  "Object being used after deletion ",                //   52 = ESMF_RC_OBJ_DELETED     
+  "Return code not set ",                             //   53 = ESMF_RC_NOT_SET
 
-  "Wrong data value ",                                //   52 = ESMF_RC_VAL_WRONG
-  "Value inconsistent with error bound ",             //   53 = ESMF_RC_VAL_ERRBOUND
-  "Value out of range ",                              //   54 = ESMF_RC_VAL_OUTOFRANGE
+  "Wrong data value ",                                //   54 = ESMF_RC_VAL_WRONG
+  "Value inconsistent with error bound ",             //   55 = ESMF_RC_VAL_ERRBOUND
+  "Value out of range ",                              //   56 = ESMF_RC_VAL_OUTOFRANGE
 
-// 55-500 reserved for future F90 symmetric return code definitions
+// 57-499 reserved for future F90 symmetric return code definitions
                                                                           
-              "","","","","","","","","","","","","","","","","","","","","",
+                       "","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
@@ -103,7 +105,9 @@ static const char *errMsg[] = {
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
-
+  
+// non-symmetric error code 500 is empty for now!
+  "",  
 
 // C++ Error message                                     Return Code (501-1000)
 // -----------------------------------------------       -----------------------
@@ -140,40 +144,42 @@ static const char *errMsg[] = {
   "Invalid pointer ",                                 //  527 = ESMC_RC_PTR_BAD
   "Pointer must already be allocated ",               //  528 = ESMC_RC_PTR_NOTALLOC
   "Pointer must not already be allocated ",           //  529 = ESMC_RC_PTR_ISALLOC
-  "Unable to allocate requested memory ",             //  530 = ESMC_RC_MEM
-  "Memory corrupted ",                                //  531 = ESMC_RC_MEMC
+  "Unspecified memory error ",                        //  530 = ESMC_RC_MEM
+  "Unable to allocate memory ",                       //  531 = ESMF_RC_MEM_ALLOCATE
+  "Unable to deallocate memory ",                     //  532 = ESMF_RC_MEM_DEALLOCATE
+  "Memory corrupted ",                                //  533 = ESMC_RC_MEMC
 
-  "Name already exists ",                             //  532 = ESMC_RC_DUP_NAME
-  "Name too long, must be less than ESMF_MAXSTR ",    //  533 = ESMC_RC_LONG_NAME
-  "String too long, must be less than ESMF_MAXSTR ",  //  534 = ESMC_RC_LONG_STR
-  "Cannot copy non-existent object ",                 //  535 = ESMC_RC_COPY_FAIL
-  "Cannot divide by zero ",                           //  536 = ESMC_RC_DIV_ZERO
-  "Cannot get value ",                                //  537 = ESMC_RC_CANNOT_GET
-  "Cannot set value ",                                //  538 = ESMC_RC_CANNOT_SET
-  "Not found ",                                       //  539 = ESMC_RC_NOT_FOUND
-  "Not valid " ,                                      //  540 = ESMC_RC_NOT_VALID
+  "Name already exists ",                             //  534 = ESMC_RC_DUP_NAME
+  "Name too long, must be less than ESMF_MAXSTR ",    //  535 = ESMC_RC_LONG_NAME
+  "String too long, must be less than ESMF_MAXSTR ",  //  536 = ESMC_RC_LONG_STR
+  "Cannot copy non-existent object ",                 //  537 = ESMC_RC_COPY_FAIL
+  "Cannot divide by zero ",                           //  538 = ESMC_RC_DIV_ZERO
+  "Cannot get value ",                                //  539 = ESMC_RC_CANNOT_GET
+  "Cannot set value ",                                //  540 = ESMC_RC_CANNOT_SET
+  "Not found ",                                       //  541 = ESMC_RC_NOT_FOUND
+  "Not valid " ,                                      //  542 = ESMC_RC_NOT_VALID
 
-  "Internal error: List overflow ",                   //  541 = ESMC_RC_INTNRL_LIST
-  "Internal error: Inconsistent data ",               //  542 = ESMC_RC_INTNRL_INCONS
-  "Internal error: Unknown error ",                   //  543 = ESMC_RC_INTNRL_BAD
+  "Internal error: List overflow ",                   //  543 = ESMC_RC_INTNRL_LIST
+  "Internal error: Inconsistent data ",               //  544 = ESMC_RC_INTNRL_INCONS
+  "Internal error: Unknown error ",                   //  545 = ESMC_RC_INTNRL_BAD
 
-  "System call error ",                               //  544 = ESMC_RC_SYS
-  "Resource is busy ",                                //  545 = ESMC_RC_BUSY
-  "Error in library called by ESMF ",                 //  546 = ESMC_RC_LIB
-  "Library needed by ESMF not present ",              //  547 = ESMC_RC_LIB_NOT_PRESENT
+  "System call error ",                               //  546 = ESMC_RC_SYS
+  "Resource is busy ",                                //  547 = ESMC_RC_BUSY
+  "Error in library called by ESMF ",                 //  548 = ESMC_RC_LIB
+  "Library needed by ESMF not present ",              //  549 = ESMC_RC_LIB_NOT_PRESENT
 
-  "Attribute unused ",                                //  548 = ESMC_RC_ATTR_UNUSED
-  "Object being used before creation ",               //  549 = ESMC_RC_OBJ_NOT_CREATED 
-  "Object being used after deletion ",                //  550 = ESMC_RC_OBJ_DELETED     
-  "Return code not set ",                             //  551 = ESMC_RC_NOT_SET
+  "Attribute unused ",                                //  550 = ESMC_RC_ATTR_UNUSED
+  "Object being used before creation ",               //  551 = ESMC_RC_OBJ_NOT_CREATED 
+  "Object being used after deletion ",                //  552 = ESMC_RC_OBJ_DELETED     
+  "Return code not set ",                             //  553 = ESMC_RC_NOT_SET
 
-  "Wrong data value ",                                //  552 = ESMC_RC_VAL_WRONG  
-  "Value inconsistent with error bound ",             //  553 = ESMC_RC_VAL_ERRBOUND
-  "Value out of range ",                              //  554 = ESMC_RC_VAL_OUTOFRANGE
+  "Wrong data value ",                                //  554 = ESMC_RC_VAL_WRONG  
+  "Value inconsistent with error bound ",             //  555 = ESMC_RC_VAL_ERRBOUND
+  "Value out of range ",                              //  556 = ESMC_RC_VAL_OUTOFRANGE
 
 // 555-999 reserved for future C++ symmetric return code definitions
                                                                          
-              "","","","","","","","","","","","","","","","","","","","","",
+                       "","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
@@ -190,7 +196,7 @@ static const char *errMsg[] = {
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
-  "","","","","","","","","","","","","","","","","","","","","","","","",
+  "","","","","","","","","","","","","","","","","","","","","","","","","",
 
 // 1000 used for C++ non-symmetric return code definitions
 

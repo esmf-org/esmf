@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_ErrReturnCodes.inc,v 1.13 2009/03/18 05:56:19 eschwab Exp $
+$Id: ESMF_ErrReturnCodes.inc,v 1.14 2009/05/19 23:18:00 theurich Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -79,34 +79,35 @@ Fortran Symmetric Return Codes 1-500
 #define  ESMF_RC_PTR_NOTALLOC      28
 #define  ESMF_RC_PTR_ISALLOC       29
 #define  ESMF_RC_MEM               30
-#define  ESMF_RC_MEMC              31
-#define  ESMF_RC_DUP_NAME          32
-#define  ESMF_RC_LONG_NAME         33
-#define  ESMF_RC_LONG_STR          34
-#define  ESMF_RC_COPY_FAIL         35
-#define  ESMF_RC_DIV_ZERO          36
-#define  ESMF_RC_CANNOT_GET        37
-#define  ESMF_RC_CANNOT_SET        38
-#define  ESMF_RC_NOT_FOUND         39
-#define  ESMF_RC_NOT_VALID         40
-#define  ESMF_RC_INTNRL_LIST       41
-#define  ESMF_RC_INTNRL_INCONS     42
-#define  ESMF_RC_INTNRL_BAD        43
-#define  ESMF_RC_SYS               44
-#define  ESMF_RC_BUSY              45
-#define  ESMF_RC_LIB               46
-#define  ESMF_RC_LIB_NOT_PRESENT   47
-#define  ESMF_RC_ATTR_UNUSED       48
-#define  ESMF_RC_OBJ_NOT_CREATED   49
-#define  ESMF_RC_OBJ_DELETED       50
-#define  ESMF_RC_NOT_SET           51
-#define  ESMF_RC_VAL_WRONG         52
-#define  ESMF_RC_VAL_ERRBOUND      53  
-#define  ESMF_RC_VAL_OUTOFRANGE    54
-#define  ESMF_RC_OBJ_UNINIT        55
+#define  ESMF_RC_MEM_ALLOCATE      31
+#define  ESMF_RC_MEM_DEALLOCATE    32
+#define  ESMF_RC_MEMC              33
+#define  ESMF_RC_DUP_NAME          34
+#define  ESMF_RC_LONG_NAME         35
+#define  ESMF_RC_LONG_STR          36
+#define  ESMF_RC_COPY_FAIL         37
+#define  ESMF_RC_DIV_ZERO          38
+#define  ESMF_RC_CANNOT_GET        39
+#define  ESMF_RC_CANNOT_SET        40
+#define  ESMF_RC_NOT_FOUND         41
+#define  ESMF_RC_NOT_VALID         42
+#define  ESMF_RC_INTNRL_LIST       43
+#define  ESMF_RC_INTNRL_INCONS     44
+#define  ESMF_RC_INTNRL_BAD        45
+#define  ESMF_RC_SYS               46
+#define  ESMF_RC_BUSY              47
+#define  ESMF_RC_LIB               48
+#define  ESMF_RC_LIB_NOT_PRESENT   49
+#define  ESMF_RC_ATTR_UNUSED       50
+#define  ESMF_RC_OBJ_NOT_CREATED   51
+#define  ESMF_RC_OBJ_DELETED       52
+#define  ESMF_RC_NOT_SET           53
+#define  ESMF_RC_VAL_WRONG         54
+#define  ESMF_RC_VAL_ERRBOUND      55  
+#define  ESMF_RC_VAL_OUTOFRANGE    56
 
 #if 0
-56-500 reserved for future Fortran symmetric return code definitions
+57-499 reserved for future Fortran symmetric return code definitions
 #endif
 
 #if 0
@@ -145,34 +146,35 @@ C++ Symmetric Return Codes 501-999
 #define  ESMC_RC_PTR_NOTALLOC     528
 #define  ESMC_RC_PTR_ISALLOC      529
 #define  ESMC_RC_MEM              530
-#define  ESMC_RC_MEMC             531
-#define  ESMC_RC_DUP_NAME         532
-#define  ESMC_RC_LONG_NAME        533
-#define  ESMC_RC_LONG_STR         534
-#define  ESMC_RC_COPY_FAIL        535
-#define  ESMC_RC_DIV_ZERO         536
-#define  ESMC_RC_CANNOT_GET       537
-#define  ESMC_RC_CANNOT_SET       538
-#define  ESMC_RC_NOT_FOUND        539
-#define  ESMC_RC_NOT_VALID        540
-#define  ESMC_RC_INTNRL_LIST      541
-#define  ESMC_RC_INTNRL_INCONS    542
-#define  ESMC_RC_INTNRL_BAD       543
-#define  ESMC_RC_SYS              544
-#define  ESMC_RC_BUSY             545
-#define  ESMC_RC_LIB              546
-#define  ESMC_RC_LIB_NOT_PRESENT  547
-#define  ESMC_RC_ATTR_UNUSED      548
-#define  ESMC_RC_OBJ_NOT_CREATED  549
-#define  ESMC_RC_OBJ_DELETED      550
-#define  ESMC_RC_NOT_SET          551
-#define  ESMC_RC_VAL_WRONG        552
-#define  ESMC_RC_VAL_ERRBOUND     553
-#define  ESMC_RC_VAL_OUTOFRANGE   554
-#define  ESMC_RC_OBJ_UNINIT       555
+#define  ESMC_RC_MEM_ALLOCATE     531
+#define  ESMC_RC_MEM_DEALLOCATE   532
+#define  ESMC_RC_MEMC             533
+#define  ESMC_RC_DUP_NAME         534
+#define  ESMC_RC_LONG_NAME        535
+#define  ESMC_RC_LONG_STR         536
+#define  ESMC_RC_COPY_FAIL        537
+#define  ESMC_RC_DIV_ZERO         538
+#define  ESMC_RC_CANNOT_GET       539
+#define  ESMC_RC_CANNOT_SET       540
+#define  ESMC_RC_NOT_FOUND        541
+#define  ESMC_RC_NOT_VALID        542
+#define  ESMC_RC_INTNRL_LIST      543
+#define  ESMC_RC_INTNRL_INCONS    544
+#define  ESMC_RC_INTNRL_BAD       545
+#define  ESMC_RC_SYS              546
+#define  ESMC_RC_BUSY             547
+#define  ESMC_RC_LIB              548
+#define  ESMC_RC_LIB_NOT_PRESENT  549
+#define  ESMC_RC_ATTR_UNUSED      550
+#define  ESMC_RC_OBJ_NOT_CREATED  551
+#define  ESMC_RC_OBJ_DELETED      552
+#define  ESMC_RC_NOT_SET          553
+#define  ESMC_RC_VAL_WRONG        554
+#define  ESMC_RC_VAL_ERRBOUND     555
+#define  ESMC_RC_VAL_OUTOFRANGE   556
 
 #if 0
-556-999 reserved for future C++ symmetric return code definitions
+557-999 reserved for future C++ symmetric return code definitions
 #endif
 
 #if 0
