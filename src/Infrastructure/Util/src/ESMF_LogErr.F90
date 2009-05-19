@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.52 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_LogErr.F90,v 1.53 2009/05/19 23:27:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -175,10 +175,12 @@ end type ESMF_LogPrivate
    public ESMF_LogFinalize
    public ESMF_LogFlush
    public ESMF_LogFoundAllocError
+   public ESMF_LogFoundDeallocError
    public ESMF_LogFoundError
    public ESMF_LogGet
    public ESMF_LogInitialize
    public ESMF_LogMsgFoundAllocError
+   public ESMF_LogMsgFoundDeallocError
    public ESMF_LogMsgFoundError
    public ESMF_LogMsgSetError
    public ESMF_LogOpen
@@ -780,6 +782,7 @@ end subroutine ESMF_LogFinalize
     endif
 
 end subroutine ESMF_LogFlush
+
 !--------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:  ESMF_LogFoundAllocError - Check Fortran status for allocation error
@@ -838,9 +841,9 @@ end subroutine ESMF_LogFlush
     ESMF_LogFoundAllocError=.FALSE.
     if (statusToCheck .NE. 0) then
         if (present(rcToReturn)) then
-            rcToReturn=ESMF_RC_MEM
+            rcToReturn=ESMF_RC_MEM_ALLOCATE
         endif
-        call c_esmc_loggeterrormsg(ESMF_RC_MEM,tempmsg,msglen)
+        call c_esmc_loggeterrormsg(ESMF_RC_MEM_ALLOCATE,tempmsg,msglen)
         allocmsg=tempmsg(1:msglen)
 	call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,method,log)
 	ESMF_LogFoundAllocError=.TRUE.
@@ -851,6 +854,78 @@ end subroutine ESMF_LogFlush
     endif	
        
 end function ESMF_LogFoundAllocError
+
+!--------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_LogFoundDeallocError - Check Fortran status for deallocation error
+
+! !INTERFACE: 
+	function ESMF_LogFoundDeallocError(statusToCheck, line, file, & 
+                                         method, rcToReturn,log)
+!
+! !RETURN VALUE:
+	logical                                     ::ESMF_LogFoundDeallocError
+! !ARGUMENTS:
+!	
+	integer, intent(in)                         :: statusToCheck
+	integer, intent(in), optional               :: line
+	character(len=*), intent(in), optional      :: file
+	character(len=*), intent(in), optional      :: method
+	integer, intent(out),optional               :: rcToReturn
+	type(ESMF_Log),intent(inout),optional	    :: log
+
+! !DESCRIPTION:
+!      This function returns a logical true when a Fortran status code
+!      returned from a memory allocation indicates an allocation error.  
+!      An ESMF predefined memory allocation error 
+!      message will be added to the {\tt ESMF\_Log} along with {\tt line}, 
+!      {\tt file} and {\tt method}.  Additionally, the 
+!      {\tt statusToCheck} will be converted to a {\tt rcToReturn}.
+!
+!      The arguments are:
+!      \begin{description}
+! 	
+!      \item [statusToCheck]
+!            Fortran allocation status to check.
+!      \item [{[line]}]
+!            Integer source line number.  Expected to be set by
+!            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
+!      \item [{[file]}]
+!            User-provided source file name. 
+!      \item [{[method]}]
+!            User-provided method string.
+!      \item [{[rcToReturn]}]
+!            If specified, set the {\tt rcToReturn} value to 
+!            {\tt ESMF\_RC\_MEM} which is the error code for a memory 
+!            allocation eror.
+!      \item [{[log]}]
+!            An optional {\tt ESMF\_Log} object that can be used instead
+!	     of the default Log.
+!      
+!      \end{description}
+! 
+!EOP
+    character(len=ESMF_MAXSTR)::tempmsg
+    character(len=ESMF_MAXSTR)::allocmsg
+	integer::msglen=0
+	
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+    ESMF_LogFoundDeallocError=.FALSE.
+    if (statusToCheck .NE. 0) then
+        if (present(rcToReturn)) then
+            rcToReturn=ESMF_RC_MEM_DEALLOCATE
+        endif
+        call c_esmc_loggeterrormsg(ESMF_RC_MEM_DEALLOCATE,tempmsg,msglen)
+        allocmsg=tempmsg(1:msglen)
+	call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,method,log)
+	ESMF_LogFoundDeallocError=.TRUE.
+    else
+        if (present(rcToReturn)) then
+            rcToReturn=ESMF_SUCCESS
+        endif
+    endif	
+       
+end function ESMF_LogFoundDeallocError
 
 !--------------------------------------------------------------------------
 !BOP
@@ -1157,9 +1232,9 @@ end subroutine ESMF_LogInitialize
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     ESMF_LogMsgFoundAllocError=.FALSE.
     if (statusToCheck .NE. 0) then
-        call c_esmc_loggeterrormsg(ESMF_RC_MEM,tempmsg,msglen)
+        call c_esmc_loggeterrormsg(ESMF_RC_MEM_ALLOCATE,tempmsg,msglen)
 	if (present(rcToReturn)) then
-            rcToReturn=ESMF_RC_MEM
+            rcToReturn=ESMF_RC_MEM_ALLOCATE
         endif
         allocmsg=tempmsg(1:msglen)
 	call ESMF_LogWrite(trim(allocmsg)//" "//msg,ESMF_LOG_ERROR,line,file,method,log)	
@@ -1173,6 +1248,85 @@ end subroutine ESMF_LogInitialize
     endif	
        
 end function ESMF_LogMsgFoundAllocError
+
+!--------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogMsgFoundDeallocError - Check Fortran status for allocation 
+!            error and write message
+
+! !INTERFACE: 
+	function ESMF_LogMsgFoundDeallocError(statusToCheck,msg,line,file, &
+                                            method,rcToReturn,log)
+!
+! !RETURN VALUE:
+	logical                                     ::ESMF_LogMsgFoundDeallocError
+! !ARGUMENTS:
+!	
+	integer, intent(in)                         :: statusToCheck
+	character(len=*), intent(in)                :: msg
+	integer, intent(in), optional               :: line
+	character(len=*), intent(in), optional      :: file
+	character(len=*), intent(in), optional	    :: method
+        integer, intent(out),optional               :: rcToReturn	
+        type(ESMF_Log), intent(inout), optional	    :: log
+
+! !DESCRIPTION:
+!      This function returns a logical true when a Fortran status code
+!      returned from a memory allocation indicates an allocation error.
+!      An ESMF predefined memory allocation error message 
+!      will be added to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
+!      {\tt line}, {\tt file} and 
+!      {\tt method}.  Additionally, statusToCheck will be converted to 
+!      {\tt rcToReturn}.
+!
+!      The arguments are:
+!      \begin{description}
+! 	
+!      \item [statusToCheck]
+!            Fortran allocation status to check.
+!      \item [msg]
+!            User-provided message string.
+!      \item [{[line]}]
+!            Integer source line number.  Expected to be set by
+!            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
+!      \item [{[file]}]
+!            User-provided source file name. 
+!      \item [{[method]}]
+!            User-provided method string.
+!      \item [{[rcToReturn]}]
+!            If specified, set the {\tt rcToReturn} value to 
+!            {\tt ESMF\_RC\_MEM} which is the error code for a memory 
+!            allocation eror.
+!      \item [{[log]}]
+!            An optional {\tt ESMF\_Log} object that can be used instead
+!	     of the default Log.
+!      
+!      \end{description}
+! 
+!EOP
+    character(len=ESMF_MAXSTR)::tempmsg
+    character(len=ESMF_MAXSTR)::allocmsg
+    integer::msglen=0
+    
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+    ESMF_LogMsgFoundDeallocError=.FALSE.
+    if (statusToCheck .NE. 0) then
+        call c_esmc_loggeterrormsg(ESMF_RC_MEM_DEALLOCATE,tempmsg,msglen)
+	if (present(rcToReturn)) then
+            rcToReturn=ESMF_RC_MEM_DEALLOCATE
+        endif
+        allocmsg=tempmsg(1:msglen)
+	call ESMF_LogWrite(trim(allocmsg)//" "//msg,ESMF_LOG_ERROR,line,file,method,log)	
+	ESMF_LogMsgFoundDeallocError=.TRUE.
+#ifdef ESMF_SUCCESS_DEFAULT_ON
+    else
+        if (present(rcToReturn)) then
+            rcToReturn=ESMF_SUCCESS
+        endif
+#endif
+    endif	
+       
+end function ESMF_LogMsgFoundDeallocError
 
 !--------------------------------------------------------------------------
 !BOP

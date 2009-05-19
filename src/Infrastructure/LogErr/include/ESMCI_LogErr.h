@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr.h,v 1.6 2009/01/21 21:38:00 cdeluca Exp $
+// $Id: ESMCI_LogErr.h,v 1.7 2009/05/19 23:27:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -72,12 +72,17 @@ private:
     
     bool AllocError(int *rcToReturn);
     bool AllocError(int LINE,char FILE[],char method[],int *rcToReturn);
+    bool DeallocError(int *rcToReturn);
+    bool DeallocError(int LINE,char FILE[],char method[],int *rcToReturn);
     void Close();
     bool FoundError(int rcToCheck,int *rcToReturn);
     bool FoundError(int rcToCheck,int LINE,char FILE[],char method[],
          int *rcToReturn);
     bool MsgAllocError(char msg[],int *rcToReturn);
     bool MsgAllocError(char msg[],int LINE,char FILE[],char method[],
+      int *rcToReturn);
+    bool MsgDeallocError(char msg[],int *rcToReturn);
+    bool MsgDeallocError(char msg[],int LINE,char FILE[],char method[],
       int *rcToReturn);
     bool MsgFoundError(int rcToCheck,char msg[],int *rcToReturn);
     bool MsgFoundError(int rcToCheck,char msg[],int LINE,char FILE[],

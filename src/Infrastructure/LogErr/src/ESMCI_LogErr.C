@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr.C,v 1.5 2009/01/21 21:38:00 cdeluca Exp $
+// $Id: ESMCI_LogErr.C,v 1.6 2009/05/19 23:27:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -53,7 +53,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_LogErr.C,v 1.5 2009/01/21 21:38:00 cdeluca Exp $";
+ static const char *const version = "$Id: ESMCI_LogErr.C,v 1.6 2009/05/19 23:27:11 theurich Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -81,8 +81,8 @@ bool LogErr::AllocError(
 //EOP
 {
     bool result=false;
-    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
-    Write(ESMC_LogGetErrMsg(ESMC_RC_MEM),ESMC_LOG_ERROR);
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
+    Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE),ESMC_LOG_ERROR);
     result=true;
     return result;
 }
@@ -110,8 +110,8 @@ bool LogErr::AllocError(
 //EOP
 {
 	bool result=false;
-	if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
-	Write(ESMC_LogGetErrMsg(ESMC_RC_MEM),ESMC_LOG_ERROR,LINE,FILE,
+	if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
+	Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE),ESMC_LOG_ERROR,LINE,FILE,
 	method);
 	result=true;
 	return result;
@@ -139,8 +139,8 @@ bool LogErr::MsgAllocError(
 {
     bool result=false;
     char logMsg[ESMF_MAXSTR];
-    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
-    strcpy(logMsg, ESMC_LogGetErrMsg(ESMC_RC_MEM));
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
+    strcpy(logMsg, ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE));
     Write(strcat(logMsg,msg),ESMC_LOG_ERROR);
     result=true;
     return result;
@@ -171,12 +171,127 @@ bool LogErr::MsgAllocError(
 {
     bool result=false;
     char logMsg[ESMF_MAXSTR];
-    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
-    strcpy(logMsg, ESMC_LogGetErrMsg(ESMC_RC_MEM));
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
+    strcpy(logMsg, ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE));
     Write(strcat(logMsg,msg),ESMC_LOG_ERROR,LINE,FILE,method);
     result=true;
     return result;
 }
+
+
+//----------------------------------------------------------------------------
+bool LogErr::DeallocError(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+    int *rcToReturn
+      
+    )
+// !DESCRIPTION:
+// Allocation error with no message and no cpp macros
+//EOP
+{
+    bool result=false;
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
+    Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE),ESMC_LOG_ERROR);
+    result=true;
+    return result;
+}
+
+//----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: AllocErr - LogAllocErr
+//
+// !INTERFACE:
+
+
+bool LogErr::DeallocError(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+    int LINE,
+    char FILE[],
+    char method[],
+    int *rcToReturn      
+    )
+// !DESCRIPTION:
+// Allocation error with no message but with cpp macros
+//EOP
+{
+	bool result=false;
+	if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
+	Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE),ESMC_LOG_ERROR,LINE,FILE,
+	method);
+	result=true;
+	return result;
+}
+
+//----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: MsgAllocErr - LogAllocErr
+//
+// !INTERFACE:
+
+bool LogErr::MsgDeallocError(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+    char msg[],
+    int *rcToReturn
+      
+    )
+// !DESCRIPTION:
+// Allocation error with message and no cpp macros
+//EOP
+{
+    bool result=false;
+    char logMsg[ESMF_MAXSTR];
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
+    strcpy(logMsg, ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE));
+    Write(strcat(logMsg,msg),ESMC_LOG_ERROR);
+    result=true;
+    return result;
+}
+
+//----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: MsgAllocErr - LogAllocErr
+//
+// !INTERFACE:
+
+
+bool LogErr::MsgDeallocError(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+    char msg[],
+    int LINE,
+    char FILE[],
+    char method[],
+    int *rcToReturn      
+    )
+// !DESCRIPTION:
+// Allocation error with message and cpp macros
+//EOP
+{
+    bool result=false;
+    char logMsg[ESMF_MAXSTR];
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
+    strcpy(logMsg, ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE));
+    Write(strcat(logMsg,msg),ESMC_LOG_ERROR,LINE,FILE,method);
+    result=true;
+    return result;
+}
+
+
 //----------------------------------------------------------------------------
 //
 //
