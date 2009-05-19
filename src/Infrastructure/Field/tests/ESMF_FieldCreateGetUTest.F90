@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.43 2009/05/07 18:55:49 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.44 2009/05/19 18:25:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -4004,9 +4004,21 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldDestroy(f8)
-        call ESMF_GridDestroy(grid)
-        call ESMF_DistGridDestroy(distgrid)
+        call ESMF_FieldDestroy(f8, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        
         deallocate(farray)
     end subroutine test7d1
 
@@ -4055,9 +4067,21 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldDestroy(f8)
-        call ESMF_GridDestroy(grid)
-        call ESMF_DistGridDestroy(distgrid)
+        call ESMF_FieldDestroy(f8, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+            
         deallocate(farray)
     end subroutine test7d2
 
@@ -4216,9 +4240,21 @@ contains
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
-        call ESMF_FieldDestroy(field)
-        call ESMF_GridDestroy(grid)
-        call ESMF_DistGridDestroy(distgrid)
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
         deallocate(farray)
     end subroutine test7d_generic
 !------------------------------------------------------------------------
@@ -4434,9 +4470,21 @@ contains
             deallocate(farray)
         endif
 
-        call ESMF_FieldDestroy(field)
-        call ESMF_GridDestroy(grid)
-        call ESMF_DistGridDestroy(distgrid)
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
     end subroutine test7d2_generic_fptr
 !------------------------------------------------------------------------
     ! create a 7d Field from 5d grid and 2d ungridded bounds using ESMF_FieldGetAllocBounds
@@ -4656,9 +4704,21 @@ contains
             deallocate(farray)
         endif
 
-        call ESMF_FieldDestroy(field)
-        call ESMF_GridDestroy(grid)
-        call ESMF_DistGridDestroy(distgrid)
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
     end subroutine test7d3_generic_fptr
 
     ! create a 7d Field from 5d grid and 2d ungridded bounds using ESMF_FieldGetAllocBounds
@@ -4813,9 +4873,21 @@ contains
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
-        call ESMF_FieldDestroy(field)
-        call ESMF_GridDestroy(grid)
-        call ESMF_DistGridDestroy(distgrid)
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
         deallocate(farray)
     end subroutine test7d2_generic
 
@@ -5035,9 +5107,21 @@ contains
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
-        call ESMF_FieldDestroy(field)
-        call ESMF_GridDestroy(grid)
-        call ESMF_DistGridDestroy(distgrid)
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
     end subroutine test7d3_generic
 
 !------------------------------------------------------------------------
@@ -5264,9 +5348,21 @@ contains
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
-        call ESMF_FieldDestroy(field)
-        call ESMF_GridDestroy(grid)
-        call ESMF_DistGridDestroy(distgrid)
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
     end subroutine test7d3_generic_repdim
 
 !------------------------------------------------------------------------
@@ -5477,9 +5573,21 @@ contains
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
-        call ESMF_FieldDestroy(field)
-        call ESMF_GridDestroy(grid)
-        call ESMF_DistGridDestroy(distgrid)
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
     end subroutine test3d_generic_repdim
 
 !------------------------------------------------------------------------
@@ -5714,9 +5822,21 @@ contains
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
-        call ESMF_FieldDestroy(field)
-        call ESMF_GridDestroy(grid)
-        call ESMF_DistGridDestroy(distgrid)
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
         deallocate(farray_cr)
     end subroutine test7d3_generic_repdim_sct
 
@@ -5935,9 +6055,21 @@ contains
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
-        call ESMF_FieldDestroy(field)
-        call ESMF_GridDestroy(grid)
-        call ESMF_DistGridDestroy(distgrid)
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
         deallocate(farray_cr)
     end subroutine test3d_generic_repdim_sct
 
@@ -6152,9 +6284,21 @@ contains
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
-        call ESMF_FieldDestroy(field)
-        call ESMF_GridDestroy(grid)
-        call ESMF_DistGridDestroy(distgrid)
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
         deallocate(farray_cr)
     end subroutine test3d_generic_sctptr
 
@@ -6358,9 +6502,21 @@ contains
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
-        call ESMF_FieldDestroy(field)
-        call ESMF_GridDestroy(grid)
-        call ESMF_DistGridDestroy(distgrid)
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
         deallocate(farray_cr)
     end subroutine test2d_generic_sctptr
 
@@ -6759,9 +6915,21 @@ contains
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
-        call ESMF_FieldDestroy(field)
-        call ESMF_GridDestroy(grid)
-        call ESMF_DistGridDestroy(distgrid)
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
         deallocate(farray)
         deallocate(buffer)
     end subroutine test7d4_generic
