@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.C,v 1.38 2009/02/16 19:14:31 rokuingh Exp $
+// $Id: ESMC_LocalArray.C,v 1.39 2009/05/20 02:34:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_LocalArray.C,v 1.38 2009/02/16 19:14:31 rokuingh Exp $";
+static const char *const version = "$Id: ESMC_LocalArray.C,v 1.39 2009/05/20 02:34:17 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // prototypes for Fortran calls
@@ -303,15 +303,17 @@ int ESMC_LocalArray::ESMC_LocalArrayDestroy(
 //
 //EOP
  
-     int rc;
+    // Initialize return code; assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;         // local return code
+    int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-     // Initialize return code; assume routine not implemented
-     rc = ESMC_RC_NOT_IMPL;
-
-    array->ESMC_LocalArrayDestruct();
+    localrc = array->ESMC_LocalArrayDestruct();
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
 
     delete array;
 
+    // return successfully
     rc = ESMF_SUCCESS;
     return rc;
 
@@ -588,8 +590,9 @@ int ESMC_LocalArray::ESMC_LocalArrayConstruct(
 //
 //EOP
 
-   // Initialize return code; assume routine not implemented
-    int rc = ESMC_RC_NOT_IMPL;
+    // initialize return code; assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;         // local return code
+    int rc = ESMC_RC_NOT_IMPL;              // final return code
     ESMC_LocalArray *aptr = this;
 
     // check origin and alloc flag, and call dealloc routine if needed 
@@ -601,8 +604,12 @@ int ESMC_LocalArray::ESMC_LocalArrayConstruct(
     // then this code needs to be calling malloc/free or new/delete and
     // needs conditional code to pick the fortran or C++ mem mgt system.
 
-    FTN(f_esmf_localarrayf90deallocate)(&aptr, &rank, &kind, &rc);
+    FTN(f_esmf_localarrayf90deallocate)(&aptr, &rank, &kind, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
 
+    // return successfully
+    rc = ESMF_SUCCESS;
     return rc;
 
  } // end ESMC_LocalArrayDestruct
