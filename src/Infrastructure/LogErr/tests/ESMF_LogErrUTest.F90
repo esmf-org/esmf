@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.51 2009/02/12 00:28:55 w6ws Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.52 2009/05/20 02:26:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.51 2009/02/12 00:28:55 w6ws Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.52 2009/05/20 02:26:21 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -194,7 +194,6 @@
       is_error=ESMF_LogMsgFoundError(ESMF_FAILURE,"hello",rcToReturn=rc2)
       write(name, *) "Error Msg Found Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -211,7 +210,46 @@
       is_error=ESMF_LogMsgFoundError(ESMF_SUCCESS,"hello",rcToReturn=rc2)
       write(name, *) "Error Msg Found Error Test"
       call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Log Found Alloc Error
+      write(failMsg, *) "Did not return .TRUE."
+      is_error=ESMF_LogFoundAllocError(ESMF_FAILURE,rcToReturn=rc2)
+      write(name, *) "Log Found Alloc Error Test"
+      call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Value of rcToReturn
+      write(failMsg, *) "Did not return ESMF_RC_MEM_ALLOCATE"
+      write(name, *) " Verify rcToReturn Value Test"
+      call ESMF_Test((rc2.eq.ESMF_RC_MEM_ALLOCATE), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc2 = ", rc2
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Error Msg Found Alloc Error
+      write(failMsg, *) "Did not return .TRUE."
+      is_error=ESMF_LogMsgFoundAllocError(ESMF_FAILURE,"hello",rcToReturn=rc2)
+      write(name, *) "Error Msg Found Alloc Error Test"
+      call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Value of rcToReturn
+      write(failMsg, *) "Did not return ESMF_RC_MEM_ALLOCATE"
+      write(name, *) " Verify rcToReturn Value Test"
+      call ESMF_Test((rc2.eq.ESMF_RC_MEM_ALLOCATE), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc2 = ", rc2
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Error Msg Found Error
+      write(failMsg, *) "Did not return .FALSE."
+      is_error=ESMF_LogMsgFoundAllocError(ESMF_SUCCESS,"hello",rcToReturn=rc2)
+      write(name, *) "Error Msg Found Error Test"
+      call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -220,57 +258,14 @@
       is_error=ESMF_LogFoundAllocError(ESMF_FAILURE,rcToReturn=rc2)
       write(name, *) "Log Found Alloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Test Value of rcToReturn
-      write(failMsg, *) "Did not return ESMF_RC_MEM"
-      write(name, *) " Verify rcToReturn Value Test"
-      call ESMF_Test((rc2.eq.ESMF_RC_MEM), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc2 = ", rc2
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test Error Msg Found Alloc Error
-      write(failMsg, *) "Did not return ESMF_FAILURE"
-      is_error=ESMF_LogMsgFoundAllocError(ESMF_FAILURE,"hello",rcToReturn=rc2)
-      write(name, *) "Error Msg Found Alloc Error Test"
-      call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
-
-      !------------------------------------------------------------------------
-      !EX_UTest
       ! Test Value of rcToReturn
-      write(failMsg, *) "Did not return ESMF_FAILURE"
+      write(failMsg, *) "Did not return ESMF_RC_MEM_ALLOCATE"
       write(name, *) " Verify rcToReturn Value Test"
-      call ESMF_Test((rc2.eq.ESMF_RC_MEM), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc2 = ", rc2
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Test Error Msg Found Error
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      is_error=ESMF_LogMsgFoundAllocError(ESMF_SUCCESS,"hello",rcToReturn=rc2)
-      write(name, *) "Error Msg Found Error Test"
-      call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
-
-!      !------------------------------------------------------------------------
-      !EX_UTest
-!      ! Test Log Found Alloc Error
-      write(failMsg, *) "Did not return ESMF_FAILURE"
-      is_error=ESMF_LogFoundAllocError(ESMF_FAILURE,rcToReturn=rc2)
-      write(name, *) "Log Found Alloc Error Test"
-      call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Test Value of rcToReturn
-      write(failMsg, *) "Did not return ESMF_RC_MEM"
-      write(name, *) " Verify rcToReturn Value Test"
-      call ESMF_Test((rc2.eq.ESMF_RC_MEM), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc2.eq.ESMF_RC_MEM_ALLOCATE), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc2 = ", rc2
 
       !------------------------------------------------------------------------
