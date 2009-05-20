@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.86 2009/04/21 21:19:18 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.87 2009/05/20 18:13:02 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.86 2009/04/21 21:19:18 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.87 2009/05/20 18:13:02 peggyli Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -86,7 +86,7 @@ int construct(Grid *_grid, int _nameLen, char *_name, ESMC_TypeKind *_typekind,
 int construct(Grid *_grid, int _nameLen, char *_name, ESMC_TypeKind *_typekind,
               DistGrid *_distgrid, 
               InterfaceInt *_minIndex, InterfaceInt *_maxIndex,
-	      InterfaceInt *_localIndices, int localCount,
+	      InterfaceInt *_localArbIndex, int localArbIndexCount,
               InterfaceInt *_distDim, int arbDim, 
               InterfaceInt *_undistLBound, InterfaceInt *_undistUBound, 
               InterfaceInt *_coordDimCount, InterfaceInt *_coordDimMap,
@@ -1721,11 +1721,11 @@ int Grid::commit(
   }
 
   // setup the grid's internal structures 
-  // if localCount != 0, it is an arbitrary grid
-  if (proto->localCount != 0 && proto->coordLocalIndices != ESMC_NULL_POINTER) {
+  // if localArbIndexCount != 0, it is an arbitrary grid
+  if (proto->localArbIndexCount != 0 && proto->localArbIndex != ESMC_NULL_POINTER) {
     localrc = construct(this, proto->nameLen, proto->name, proto->typekind, 
 			proto->distgrid, proto->minIndex, proto->maxIndex,
-			proto->coordLocalIndices, proto->localCount,
+			proto->localArbIndex, proto->localArbIndexCount,
 			proto->distDim, 
 			proto->arbDim,
 			proto->undistLBound,
@@ -1850,8 +1850,8 @@ Grid *Grid::create(
   DistGrid *distgridArg,                    // (in) optional
   InterfaceInt *minIndexArg,                // (in) optional
   InterfaceInt *maxIndexArg,                // (in)
-  InterfaceInt *localIndicesArg,            // (in)
-  int  localCount,                          // (in)
+  InterfaceInt *localArbIndexArg,            // (in)
+  int  localArbIndexCount,                          // (in)
   InterfaceInt *distDimArg,                 // (in) 
   int  arbDim,                              // (in)
   InterfaceInt *coordDimCountArg,               // (in) optional
@@ -1888,7 +1888,7 @@ Grid *Grid::create(
 
   // setup the grids internal structure using the passed in paramters. 
   localrc=construct(grid, nameLenArg, nameArg, typekindArg, distgridArg, 
-                    minIndexArg, maxIndexArg, localIndicesArg, localCount,
+                    minIndexArg, maxIndexArg, localArbIndexArg, localArbIndexCount,
 		    distDimArg, arbDim, 
                     (InterfaceInt *)ESMC_NULL_POINTER,
                     (InterfaceInt *)ESMC_NULL_POINTER,
@@ -3117,9 +3117,9 @@ int Grid::convertIndex(
   // The local index array is not sorted, so can't search it fast.  
   // If we sort the index array, the search will be faster -- TODO
   found = false;
-  for (i=0; i<localCount; i++) {
+  for (i=0; i<localArbIndexCount; i++) {
     for (j=0; j<distDimCount; j++) {
-      if (coordLocalIndices[i][j] != distIndex[j]) break;
+      if (localArbIndex[i][j] != distIndex[j]) break;
     }
     if (j==distDimCount) {
       found = true;
@@ -3390,8 +3390,8 @@ int Grid::set(
   InterfaceInt *distDimArg,          // (in) optional
   InterfaceInt *minIndexArg,           // (int) optional
   InterfaceInt *maxIndexArg,           // (int) optional
-  InterfaceInt *localIndicesArg,           // (int) optional
-  int  *localCountArg,                    // (int) optional
+  InterfaceInt *localArbIndexArg,           // (int) optional
+  int  *localArbIndexCountArg,                    // (int) optional
   InterfaceInt *coordDimCountArg,    // (in) optional
   InterfaceInt *coordDimMapArg,  // (in) optional
   InterfaceInt *gridMemLBoundArg,          // (in)
@@ -3518,18 +3518,18 @@ int Grid::set(
     proto->maxIndex = _copyInterfaceInt(maxIndexArg);
   }
 
-  // if passed in, set localIndices
-  if (localIndicesArg != ESMC_NULL_POINTER) {
+  // if passed in, set localArbIndex
+  if (localArbIndexArg != ESMC_NULL_POINTER) {
     // if present get rid of the old data
-    if (proto->coordLocalIndices != ESMC_NULL_POINTER) _freeInterfaceInt(&proto->coordLocalIndices);
+    if (proto->localArbIndex != ESMC_NULL_POINTER) _freeInterfaceInt(&proto->localArbIndex);
 
     // record the new data
-    proto->coordLocalIndices = _copyInterfaceInt(localIndicesArg);
+    proto->localArbIndex = _copyInterfaceInt(localArbIndexArg);
   }
 
-  // if passed in, set localCount
-  if (localCountArg != ESMC_NULL_POINTER) {
-    proto->localCount = *localCountArg;
+  // if passed in, set localArbIndexCount
+  if (localArbIndexCountArg != ESMC_NULL_POINTER) {
+    proto->localArbIndexCount = *localArbIndexCountArg;
   }
 
   // if passed in, set coordDimCount
@@ -4126,8 +4126,8 @@ int Grid::constructInternal(
   ESMC_IndexFlag indexflagArg,            // (in)
   int *minIndexArg,                       // (in)
   int *maxIndexArg,                       // (in)
-  int **localIndicesArg,                  // (in)
-  int localCountArg,                      // (in)
+  int **localArbIndexArg,                  // (in)
+  int localArbIndexCountArg,                      // (in)
   int arbDimArg,                          // (in)
   bool destroyDistgridArg, 
   bool destroyDELayoutArg 
@@ -4378,12 +4378,12 @@ int Grid::constructInternal(
   memcpy(maxIndex, maxIndexArg, sizeof(int)*dimCount);
 
   // allocate and fill local index array
-  localCount = localCountArg;
-  if (localCount > 0) {
-    coordLocalIndices = _allocate2D<int>(localCount, distDimCount);
-    for (int i=0; i < localCount; i++) {
+  localArbIndexCount = localArbIndexCountArg;
+  if (localArbIndexCount > 0) {
+    localArbIndex = _allocate2D<int>(localArbIndexCount, distDimCount);
+    for (int i=0; i < localArbIndexCount; i++) {
       for (int j=0; j < distDimCount; j++) {
-	coordLocalIndices[i][j]=localIndicesArg[i][j];
+	localArbIndex[i][j]=localArbIndexArg[i][j];
       }
     }
   }
@@ -4655,8 +4655,8 @@ Grid::Grid(
 
   minIndex = ESMC_NULL_POINTER;
   maxIndex = ESMC_NULL_POINTER;
-  coordLocalIndices = ESMC_NULL_POINTER;
-  localCount = 0;  
+  localArbIndex = ESMC_NULL_POINTER;
+  localArbIndexCount = 0;  
 
   destroyDistgrid=false; 
   destroyDELayout=false;
@@ -4779,8 +4779,8 @@ Grid::Grid(
 
 
   // delete local indices for arbitrary grid
-  if (localCount) {
-    _free2D<int>(&coordLocalIndices);
+  if (localArbIndexCount) {
+    _free2D<int>(&localArbIndex);
   }
 }
 
@@ -4824,9 +4824,9 @@ ProtoGrid::ProtoGrid(
   indexflag=ESMC_NULL_POINTER; 
   minIndex=ESMC_NULL_POINTER;
   maxIndex=ESMC_NULL_POINTER;
-  localCount=0;
+  localArbIndexCount=0;
   arbDim = 1;
-  coordLocalIndices=ESMC_NULL_POINTER;
+  localArbIndex=ESMC_NULL_POINTER;
   destroyDistgrid=ESMC_NULL_POINTER; 
   destroyDELayout=ESMC_NULL_POINTER; 
 }
@@ -4870,7 +4870,7 @@ ProtoGrid::ProtoGrid(
   if (indexflag != ESMC_NULL_POINTER) delete indexflag; 
   if (minIndex != ESMC_NULL_POINTER) _freeInterfaceInt(&minIndex); 
   if (maxIndex != ESMC_NULL_POINTER) _freeInterfaceInt(&maxIndex); 
-  if (coordLocalIndices != ESMC_NULL_POINTER) _freeInterfaceInt(&coordLocalIndices);
+  if (localArbIndex != ESMC_NULL_POINTER) _freeInterfaceInt(&localArbIndex);
   if (destroyDistgrid != ESMC_NULL_POINTER) delete destroyDistgrid; 
   if (destroyDELayout != ESMC_NULL_POINTER) delete destroyDELayout; 
 }
@@ -5210,8 +5210,8 @@ int Grid::serialize(
 
     SERIALIZE_VAR2D(cp, buffer,loffset,coordDimMap,dimCount,dimCount,int);
 
-    SERIALIZE_VAR(cp, buffer,loffset,localCount,int);
-    SERIALIZE_VAR2D(cp, buffer,loffset,coordLocalIndices,localCount,distDimCount,int);
+    SERIALIZE_VAR(cp, buffer,loffset,localArbIndexCount,int);
+    SERIALIZE_VAR2D(cp, buffer,loffset,localArbIndex,localArbIndexCount,distDimCount,int);
 
     SERIALIZE_VAR(cp, buffer,loffset,staggerLocCount,int);
 
@@ -5412,8 +5412,8 @@ int Grid::deserialize(
   DESERIALIZE_VAR1D( buffer,loffset,coordDimCount,dimCount,int);
   DESERIALIZE_VAR2D( buffer,loffset,coordDimMap,dimCount,dimCount,int);
 
-  DESERIALIZE_VAR( buffer,loffset,localCount,int);
-  DESERIALIZE_VAR2D( buffer,loffset,coordLocalIndices,localCount, distDimCount,int);
+  DESERIALIZE_VAR( buffer,loffset,localArbIndexCount,int);
+  DESERIALIZE_VAR2D( buffer,loffset,localArbIndex,localArbIndexCount, distDimCount,int);
     
   DESERIALIZE_VAR( buffer,loffset,staggerLocCount,int);
 
@@ -6280,8 +6280,8 @@ int construct(
   DistGrid *distgridArg,                    // (in) 
   InterfaceInt *minIndexArg,               // (in) optional
   InterfaceInt *maxIndexArg,                // (in)  
-  InterfaceInt *localIndicesArg,            // (in)  
-  int localCountArg,                           // (in)  
+  InterfaceInt *localArbIndexArg,            // (in)  
+  int localArbIndexCountArg,                           // (in)  
   InterfaceInt *distDimArg,                // (in) 
   int arbDimArg,                           // (in)
   InterfaceInt *undistLBoundArg,            // (in) optional
@@ -6315,9 +6315,9 @@ int construct(
   int *undistLBound;
   int *minIndex;
   int *maxIndex;
-  int **localIndices;
+  int **localArbIndex;
   int *distDim;
-  int localCount;
+  int localArbIndexCount;
   ESMC_IndexFlag indexflag;
   int ind;
   char *name;  
@@ -6543,13 +6543,13 @@ int construct(
     maxIndex[i] = maxIndexArg->array[i];  // copy maxIndex
   }
   
-  localCount = localCountArg;
-  if (localCount > 0) {
-    localIndices = _allocate2D<int>(localCount, distDimCount);
-    for (int i=0, k=0; i < localCount; i++)
+  localArbIndexCount = localArbIndexCountArg;
+  if (localArbIndexCount > 0) {
+    localArbIndex = _allocate2D<int>(localArbIndexCount, distDimCount);
+    for (int i=0, k=0; i < localArbIndexCount; i++)
       for (int j=0; j < distDimCount; j++) {
-        k=j*localCount+i;
-	localIndices[i][j]=localIndicesArg->array[k];
+        k=j*localArbIndexCount+i;
+	localArbIndex[i][j]=localArbIndexArg->array[k];
       }
   }
 
@@ -6586,8 +6586,8 @@ int construct(
              undistDimCount, undistLBound, undistUBound,
              dimCount, gridEdgeLWidth, gridEdgeUWidth, gridAlign, 
 	     coordDimCount, coordDimMap, gridMemLBound, 
-             indexflag, minIndex, maxIndex, localIndices, 
-	     localCount, arbDimArg, destroyDistgrid, destroyDELayout);
+             indexflag, minIndex, maxIndex, localArbIndex, 
+	     localArbIndexCount, arbDimArg, destroyDistgrid, destroyDELayout);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, &rc)) return rc;
 
@@ -6614,7 +6614,7 @@ int construct(
 
   _free2D<int> (&coordDimMap);
 
-  _free2D<int> (&localIndices);
+  _free2D<int> (&localArbIndex);
 
   return ESMF_SUCCESS;
 }
