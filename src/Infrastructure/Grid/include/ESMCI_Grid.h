@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.57 2009/04/21 21:19:18 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.58 2009/05/20 17:13:23 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -125,8 +125,8 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   int **coordDimMap; // size of coordDimMap = dimCountxdimCount  [coord][dim of coord array], 0-based
 
   // Index array for arbitrarily distributed grid
-  int localCount;   // number of local cells
-  int **coordLocalIndices;  // 2D array holding the local indices [localCount, distRank]
+  int localArbIndexCount;   // number of local cells
+  int **localArbIndex;  // 2D array holding the local indices [localArbIndexCount, distRank]
   int arbDim;       // the distgrid dimension that represents the arbitrary dimensions of the grid
 
   int staggerLocCount;
@@ -226,8 +226,8 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
        ESMC_IndexFlag indexflagArg,             // (in)
        int *minIndexArg,                       // (in)
        int *maxIndexArg,                       // (in)
-       int **localIndicesArg,                       // (in)
-       int localCount,                       // (in)
+       int **localArbIndexArg,                       // (in)
+       int localArbIndexCount,                       // (in)
        int arbDim,                           // (in)
        bool destroyDistgrid,
        bool destroyDELayout
@@ -268,7 +268,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   const int *getGridEdgeLWidth(void) const {return gridEdgeLWidth;}
   const int *getGridEdgeUWidth(void)  const {return gridEdgeUWidth;}
   const int *getGridAlign(void) const {return gridAlign;}
-        int getLocalIndexCount(void) const {return localCount;}
+        int getLocalIndexCount(void) const {return localArbIndexCount;}
         int **getCoordDimMap(void) const {return coordDimMap;}
   const char *getName(void)  const {return ESMC_BaseGetName();}
         bool *getGridIsDist(void) const {return gridIsDist;} 
@@ -280,7 +280,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   const int   *getStaggerMemLBound(int staggerloc) const {return staggerMemLBoundList[staggerloc];}
   const int   *getMinIndex(int tileno) const { return minIndex; }
   const int   *getMaxIndex(int tileno) const { return maxIndex; }
-        int  **getLocalIndices(void) const { return coordLocalIndices;}
+        int  **getLocalIndices(void) const { return localArbIndex;}
         int   getArbDim(void) const { return arbDim;}
 
   bool isEmptyCoordArray(int staggerloc, int coord) {return (coordArrayList[staggerloc][coord]==ESMC_NULL_POINTER);}
@@ -323,8 +323,8 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 	  InterfaceInt *_distDim,                  // (in)
           InterfaceInt *_minIndex,          // (in)
           InterfaceInt *_maxIndex,          // (in)
-          InterfaceInt *_localIndices,          // (in)
-          int *localCount,          // (in)
+          InterfaceInt *_localArbIndex,          // (in)
+          int *localArbIndexCount,          // (in)
 	  InterfaceInt *_coordDimCount,              // (in)
 	  InterfaceInt *_coordDimMap,             // (in)
 	  InterfaceInt *gridMemLBound,          // (in)
@@ -370,8 +370,8 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 	       DistGrid *distgrid,                  // (in)
 	       InterfaceInt *minIndex,              // (in)
 	       InterfaceInt *maxIndex,              // (in)
-	       InterfaceInt *localIndices,          // (in)
-               int localCount,				  // (in)
+	       InterfaceInt *localArbIndex,          // (in)
+               int localArbIndexCount,				  // (in)
 	       InterfaceInt *distDimMap,                  // (in)
 	       int arbDim, 	     
   	       InterfaceInt *coordDimCount,       // (in) optional
@@ -597,8 +597,8 @@ int getComputationalUBound(
 		      DistGrid *_distgrid,     
 		      InterfaceInt *minIndex,   
 		      InterfaceInt *maxIndex,   
-		      InterfaceInt *_localIndices,
-		      int localCount,			
+		      InterfaceInt *_localArbIndex,
+		      int localArbIndexCount,			
 		      InterfaceInt *_distDim, 
 		      int arbDim,
 		      InterfaceInt *_undistLBound,  
@@ -751,8 +751,8 @@ class ProtoGrid {
   ESMC_IndexFlag *indexflag; 
   InterfaceInt *minIndex;
   InterfaceInt *maxIndex;
-  InterfaceInt *coordLocalIndices;
-  int localCount;
+  InterfaceInt *localArbIndex;
+  int localArbIndexCount;
   int arbDim;
   bool *destroyDistgrid;
   bool *destroyDELayout;
