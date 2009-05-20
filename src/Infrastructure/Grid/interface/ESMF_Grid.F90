@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.117 2009/05/12 20:09:31 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.118 2009/05/20 17:11:41 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1307,7 +1307,7 @@ end interface
     integer ::  DimCount, distDimCount, undistDimCount
     integer, pointer ::  minIndex(:)   
     integer, pointer ::  maxIndex(:)
-    integer ::  localCount
+    integer ::  localArbIndexCount
     integer, pointer ::  distgridToGridMap(:)
     integer          :: i,j,k
     integer ::  index1D    ! the return value
@@ -2534,13 +2534,13 @@ end subroutine ESMF_GridConvertIndex
     integer :: nameLen 
     type(ESMF_InterfaceInt) :: minIndexArg     ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: maxIndexArg     ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: localIndicesArg ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: localArbIndexArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: distDimArg      ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimCountArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
     integer :: intDestroyDistgrid,intDestroyDELayout
     integer :: dimCount, distDimCount, undistDimCount, dimCount1
-    integer, pointer :: local1DIndices(:), localIndices(:,:), distSize(:)
+    integer, pointer :: local1DIndices(:), localArbIndex(:,:), distSize(:)
     integer, pointer :: undistMinIndex(:), undistMaxIndex(:)
     integer, pointer :: minIndexPPatch(:,:), maxIndexPPatch(:,:)
     integer :: patchCount, localCounts
@@ -2642,36 +2642,36 @@ end subroutine ESMF_GridConvertIndex
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    !! reconstruct the localIndices from local1DIndices
+    !! reconstruct the localArbIndex from local1DIndices
     allocate(local1DIndices(localCounts))
     call ESMF_DistGridGet(distgrid,localDe=0, seqIndexList=local1DIndices, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     !! find out the dimension 
-    allocate(localIndices(localCounts,distDimCount))
+    allocate(localArbIndex(localCounts,distDimCount))
     
     !! I hope this is correct....
     !! This is kind of redundant.  Because if we create the grid using shapetile API, the local1DIndices
-    !! were calculated by the input localIndices and we should not need to re-calculate the localIndices.
+    !! were calculated by the input localArbIndex and we should not need to re-calculate the localArbIndex.
     !! We only need this when user creates an arbitrary grid from a distgrid.  The question is (1) do we need
-    !! to store the localIndices in the Grid data structure or not?  (2) shall we allow user to pass localIndices
+    !! to store the localArbIndex in the Grid data structure or not?  (2) shall we allow user to pass localArbIndex
     !! to the ESMF_CreateGridFromDistGrid()?  If we do, we have to check if the distgrid indices matches with
-    !! the input localIndices
+    !! the input localArbIndex
     do i=1,localCounts
       !! make it 0-based first before calculations
       local1DIndices(i)=local1DIndices(i)-1
       if (distDimCount .ge. 2) then
         do j=distDimCount,2	
           !! add 1 to make the result 1-based
-	  localIndices(i,j) = mod(local1DIndices(i),distSize(j))+1
+	  localArbIndex(i,j) = mod(local1DIndices(i),distSize(j))+1
           local1DIndices(i)=local1DIndices(i)/distSize(j)
         enddo
       endif    
-      localIndices(i,1) = local1DIndices(i)+1
+      localArbIndex(i,1) = local1DIndices(i)+1
     enddo
 
-    localIndicesArg = ESMF_InterfaceIntCreate(farray2D=localIndices, rc=localrc)
+    localArbIndexArg = ESMF_InterfaceIntCreate(farray2D=localArbIndex, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2780,7 +2780,7 @@ end subroutine ESMF_GridConvertIndex
     call c_ESMC_gridcreatedistgridarb(grid%this, nameLen, name, &
       coordTypeKind, distgrid, distDimArg, arbDim, &
       coordDimCountArg, coordDimMapArg, &
-      minIndexArg, maxIndexArg, localIndicesArg, localCounts, &
+      minIndexArg, maxIndexArg, localArbIndexArg, localCounts, &
       intDestroyDistGrid, intDestroyDELayout, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2791,7 +2791,7 @@ end subroutine ESMF_GridConvertIndex
     deallocate(maxIndexLocal)
     deallocate(distSize)
     deallocate(local1DIndices)
-    deallocate(localIndices)
+    deallocate(localArbIndex)
     if (undistDimCount .ne. 0) then
       deallocate(minIndexPPatch)
       deallocate(maxIndexPPatch)
@@ -2808,7 +2808,7 @@ end subroutine ESMF_GridConvertIndex
     call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(localIndicesArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(localArbIndexArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordDimCountArg, rc=localrc)
@@ -4742,7 +4742,7 @@ end subroutine ESMF_GridConvertIndex
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreateShapeTile()
       function ESMF_GridCreateShapeTileArb(name,coordTypeKind, minIndex,  &
-			maxIndex, localIndices, localCount, &
+			maxIndex, localArbIndex, localArbIndexCount, &
                         connDim1, connDim2, connDim3, &
                         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
                         bipolePos1, bipolePos2, bipolePos3, &
@@ -4757,8 +4757,8 @@ end subroutine ESMF_GridConvertIndex
        type(ESMF_TypeKind),  intent(in),    optional  :: coordTypeKind
        integer,               intent(in),   optional  :: minIndex(:)
        integer,               intent(in)              :: maxIndex(:)
-       integer,               intent(in)              :: localIndices(:,:)
-       integer,               intent(in)   	      :: localCount
+       integer,               intent(in)              :: localArbIndex(:,:)
+       integer,               intent(in)   	      :: localArbIndexCount
        type(ESMF_GridConn),   intent(in),   optional  :: connDim1(:)        ! N. IMP.
        type(ESMF_GridConn),   intent(in),   optional  :: connDim2(:)        ! N. IMP.
        type(ESMF_GridConn),   intent(in),   optional  :: connDim3(:)        ! N. IMP.
@@ -4780,12 +4780,12 @@ end subroutine ESMF_GridConvertIndex
 ! (see Figure \ref{fig:GridDecomps}).
 ! To specify the arbitrary distribution, the user passes in an 2D array 
 ! of local indices, where the first dimension is the number of local grid cells
-! specified by {\tt localCount} and the second dimension is the number of distributed
+! specified by {\tt localArbIndexCount} and the second dimension is the number of distributed
 ! dimensions.
 !
 ! {\tt distDim} specifies which grid dimensions are arbitrarily distributed. The 
 ! size of {\tt distDim} has to agree with the size of the second dimension of 
-! {\tt localIndices}. 
+! {\tt localArbIndex}. 
 !
 ! The arguments are:
 ! \begin{description}
@@ -4799,11 +4799,11 @@ end subroutine ESMF_GridConvertIndex
 !      to /1,1,1,.../.
 ! \item[{[maxIndex]}] 
 !      The upper extend of the grid index ranges.
-! \item[{[localIndices]}] 
+! \item[{[localArbIndex]}] 
 !      This 2D array specifies the indices of the local grid cells.  The 
-!      dimensions should be localCount * number of Distributed grid dimensions
-!      where localCount is the input argument specified below
-! \item[{localCount}] 
+!      dimensions should be localArbIndexCount * number of Distributed grid dimensions
+!      where localArbIndexCount is the input argument specified below
+! \item[{localArbIndexCount}] 
 !      number of grid cells in the local DE
 ! \item[{[connDim1]}] 
 !      Fortran array describing the index dimension 1 connections.
@@ -4912,7 +4912,7 @@ end subroutine ESMF_GridConvertIndex
 !       The size of the array specifies the total distributed dimensions.
 !       if not specified, defaults is all dimensions will be arbitrarily
 !       distributed.  The size has to agree with the size of the second
-!       dimension of {\tt localIndices}.
+!       dimension of {\tt localArbIndex}.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -4958,11 +4958,11 @@ end subroutine ESMF_GridConvertIndex
     endif
     
     ! number of distributed dimension, distDimCount, is determined by the second dim of 
-    ! localIndices
-    distDimCount = size(localIndices,2)
+    ! localArbIndex
+    distDimCount = size(localArbIndex,2)
     if (distDimCount > dimCount) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- the second dim of localIndices must be equal or less than grid dimension", & 
+               "- the second dim of localArbIndex must be equal or less than grid dimension", & 
                ESMF_CONTEXT, rc) 
          return 
     endif
@@ -4977,7 +4977,7 @@ end subroutine ESMF_GridConvertIndex
     if (present(distDim)) then
        if (size(distDim) .ne. distDimCount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                 "- distDim must match with the second dimension of localIndices", & 
+                 "- distDim must match with the second dimension of localArbIndex", & 
                  ESMF_CONTEXT, rc) 
             return 
        endif
@@ -5061,26 +5061,26 @@ end subroutine ESMF_GridConvertIndex
        return 
     endif
 
-    ! Check localIndices dimension matched with localCount and diskDimCount
-    if (size(localIndices, 1) .ne. localCount) then
+    ! Check localArbIndex dimension matched with localArbIndexCount and diskDimCount
+    if (size(localArbIndex, 1) .ne. localArbIndexCount) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- localIndices 1st dimension has to match with localCount", & 
+                 "- localArbIndex 1st dimension has to match with localArbIndexCount", & 
                  ESMF_CONTEXT, rc) 
        return
     endif
 
-    ! convert localIndices into 1D index array for DistGrid
-    if (localCount .gt. 0) then
-       allocate(local1DIndices(localCount), stat=localrc)
+    ! convert localArbIndex into 1D index array for DistGrid
+    if (localArbIndexCount .gt. 0) then
+       allocate(local1DIndices(localArbIndexCount), stat=localrc)
        if (ESMF_LogMsgFoundAllocError(localrc, "Allocating local1DIndices", &
                                      ESMF_CONTEXT, rc)) return
       
        ! use 0-based index to calculate the 1D index and add 1 back at the end
-       do i = 1, localCount
-          local1DIndices(i) = localIndices(i,1)-1
+       do i = 1, localArbIndexCount
+          local1DIndices(i) = localArbIndex(i,1)-1
 	  if (distDimCount .ge. 2) then 
 	     do j = 2,distDimCount
-	        local1DIndices(i) = local1DIndices(i)*distSize(j) + localIndices(i,j)-1
+	        local1DIndices(i) = local1DIndices(i)*distSize(j) + localArbIndex(i,j)-1
 	     enddo
 	  endif
           local1DIndices(i) = local1DIndices(i)+1
@@ -5380,7 +5380,8 @@ end subroutine ESMF_GridConvertIndex
       subroutine ESMF_GridGetDefault(grid, name, coordTypeKind, &
           dimCount, tileCount, staggerlocsCount, localDECount, distgrid, &
           distgridToGridMap, coordDimCount, coordDimMap, &
-          localCount, localIndices, arbDim, &
+          localArbIndexCount, localArbIndex, arbDim, &
+          memDimCount, arbDimCount, &
           gridEdgeLWidth, gridEdgeUWidth, gridAlign,  &
           indexFlag, rc)
 !
@@ -5396,9 +5397,11 @@ end subroutine ESMF_GridConvertIndex
       integer,               intent(out), optional :: distgridToGridMap(:)
       integer,               intent(out), optional :: coordDimCount(:)
       integer,               intent(out), optional :: coordDimMap(:,:)
-      integer,               intent(out), optional :: localCount
-      integer,               intent(out), optional :: localIndices(:,:)
+      integer,               intent(out), optional :: localArbIndexCount
+      integer,               intent(out), optional :: localArbIndex(:,:)
       integer,               intent(out), optional :: arbDim
+      integer,               intent(out), optional :: memDimCount
+      integer,               intent(out), optional :: arbDimCount
       integer,               intent(out), optional :: gridEdgeLWidth(:)
       integer,               intent(out), optional :: gridEdgeUWidth(:)
       integer,               intent(out), optional :: gridAlign(:)
@@ -5439,12 +5442,18 @@ end subroutine ESMF_GridConvertIndex
 !   2D list of size grid dimCount x grid dimCount. This array describes the
 !   map of each component array's dimensions onto the grids
 !   dimensions.
-! \item[{[localCount]}] 
+! \item[{[localArbIndexCount]}] 
 !   The number of local cells for an arbitrarily distributed grid
-! \item[{[localIndices]}] 
-!   The 2D array storing the local cell indices for an arbitrarily distributed grid. 
+! \item[{[localArbIndex]}] 
+!   The 2D array storing the local cell indices for an arbitrarily distributed grid. The size of the array 
+!   is localArbIndexCount * arbDimCount 
 ! \item[{[arbDim]}] 
 !   The distgrid dimension that is mapped by the arbitrarily distributed grid dimensions.
+! \item[{[memDimCount]}] 
+!   The count of the memory dimensions, it is the same as dimCount for a non-arbitrarily distributed grid,
+!   and equal or less for a arbitrarily distributed grid.
+! \item[{[arbDimCount]}] 
+!   The number of dimensions distributed arbitrarily for an arbitrary grid, 0 if the grid is non-arbitrary.
 ! \item[{[gridEdgeLWidth]}] 
 !   The padding around the lower edges of the grid. The array should
 !   be of size greater or equal to the Grid dimCount.
@@ -5470,7 +5479,7 @@ end subroutine ESMF_GridConvertIndex
     type(ESMF_InterfaceInt) :: gridEdgeLWidthArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: gridEdgeUWidthArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: gridAlignArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: localIndicesArg ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: localArbIndexArg ! Language Interface Helper Var
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -5485,9 +5494,9 @@ end subroutine ESMF_GridConvertIndex
       ESMF_CONTEXT, rcToReturn=rc)) return
 	  
     if (decompType .eq. ESMF_Grid_NONARBITRARY) then
-	if (present(localCount) .or. present(localIndices) .or. present(arbDim)) then
+	if (present(localArbIndexCount) .or. present(localArbIndex) .or. present(arbDim)) then
          call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
-                 "- localCount, localIndices or arbDim does not exist for a non-arbitrarily distributed grid", & 
+                 "- localArbIndexCount, localArbIndex or arbDim does not exist for a non-arbitrarily distributed grid", & 
                  ESMF_CONTEXT, rc)
          return 
 	endif
@@ -5528,7 +5537,7 @@ end subroutine ESMF_GridConvertIndex
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Arbitrarily distributed grid local indices
-    localIndicesArg = ESMF_InterfaceIntCreate(farray2D=localIndices, rc=localrc)
+    localArbIndexArg = ESMF_InterfaceIntCreate(farray2D=localArbIndex, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -5536,7 +5545,8 @@ end subroutine ESMF_GridConvertIndex
     call c_ESMC_gridget(grid%this, &
       coordTypeKind, dimCount, tileCount, distgrid,  staggerlocsCount, &
       distgridToGridMapArg, coordDimCountArg, &
-      localCount, localIndicesArg, arbDim, coordDimMapArg, &
+      localArbIndexCount, localArbIndexArg, arbDim, &
+      memDimCount, arbDimCount, coordDimMapArg, &
       gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
       indexflag, localDECount, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5552,7 +5562,7 @@ end subroutine ESMF_GridConvertIndex
     call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(localIndicesArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(localArbIndexArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(gridEdgeLWidthArg, rc=localrc)
@@ -11739,7 +11749,7 @@ endif
     subroutine ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, distgrid, & 
                  distgridToGridMap, distDim,			             &
                  coordDimCount, coordDimMap, minIndex, maxIndex,             &
-                 localCount, localIndices,                                   &
+                 localArbIndexCount, localArbIndex,                                   &
                  gridEdgeLWidth, gridEdgeUWidth, gridAlign, gridMemLBound,   &
                  indexflag, destroyDistgrid, destroyDELayout, rc)
 !
@@ -11757,8 +11767,8 @@ endif
        integer,               intent(in),   optional  :: coordDimMap(:,:)
        integer,               intent(in),   optional  :: minIndex(:)
        integer,               intent(in),   optional  :: maxIndex(:)
-       integer,               intent(in),   optional  :: localCount
-       integer,               intent(in),   optional  :: localIndices(:,:)
+       integer,               intent(in),   optional  :: localArbIndexCount
+       integer,               intent(in),   optional  :: localArbIndex(:,:)
        integer,               intent(in),   optional  :: gridEdgeLWidth(:)
        integer,               intent(in),   optional  :: gridEdgeUWidth(:)
        integer,               intent(in),   optional  :: gridAlign(:)
@@ -11799,11 +11809,11 @@ endif
 !      to /1,1,1,.../.
 ! \item[{[maxIndex]}] 
 !      The upper extend of the grid index ranges.
-! \item[{[localIndices]}] 
+! \item[{[localArbIndex]}] 
 !      This 2D array specifies the indices of the local grid cells.  The 
-!      dimensions should be localCount * number of Distributed grid dimensions
-!      where localCount is the input argument specified below
-! \item[{localCount}] 
+!      dimensions should be localArbIndexCount * number of Distributed grid dimensions
+!      where localArbIndexCount is the input argument specified below
+! \item[{localArbIndexCount}] 
 !      number of grid cells in the local DE
 ! \item[{[gridEdgeLWidth]}] 
 !      The padding around the lower edges of the grid. This padding is between
@@ -11853,7 +11863,7 @@ endif
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: minIndexArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: maxIndexArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: localIndicesArg ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: localArbIndexArg ! Language Interface Helper Var
     integer :: intDestroyDistgrid,intDestroyDELayout
 
 
@@ -11907,14 +11917,14 @@ endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    !! Index bound and localIndices array
+    !! Index bound and localArbIndex array
     minIndexArg = ESMF_InterfaceIntCreate(minIndex, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     maxIndexArg = ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    localIndicesArg = ESMF_InterfaceIntCreate(farray2D=localIndices, rc=localrc)
+    localArbIndexArg = ESMF_InterfaceIntCreate(farray2D=localArbIndex, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -11945,7 +11955,7 @@ endif
       coordTypeKind, distgrid, &
       distgridToGridMapArg, distDimArg, &
       coordDimCountArg, coordDimMapArg, &
-      minIndexArg, maxIndexArg, localIndicesArg, localCount,  &
+      minIndexArg, maxIndexArg, localArbIndexArg, localArbIndexCount,  &
       gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
       gridMemLBoundArg, indexflag,  intDestroyDistGrid, intDestroyDELayout, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -11982,7 +11992,7 @@ endif
     call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(localIndicesArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(localArbIndexArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -13977,7 +13987,7 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSetCommitShapeTile()
       subroutine ESMF_GridSetCmmitShapeTileArb(grid, name,coordTypeKind, &
-			      minIndex, maxIndex, localIndices, localCount, &
+			      minIndex, maxIndex, localArbIndex, localArbIndexCount, &
                         connDim1, connDim2, connDim3, &
                         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
                         bipolePos1, bipolePos2, bipolePos3, &
@@ -13991,8 +14001,8 @@ endif
        type(ESMF_TypeKind),   intent(in),   optional  :: coordTypeKind
        integer,               intent(in),   optional  :: minIndex(:)
        integer,               intent(in)              :: maxIndex(:)
-       integer,               intent(in)              :: localIndices(:,:)
-       integer,               intent(in)   	      :: localCount
+       integer,               intent(in)              :: localArbIndex(:,:)
+       integer,               intent(in)   	      :: localArbIndexCount
        type(ESMF_GridConn),   intent(in),   optional  :: connDim1(:)        ! N. IMP.
        type(ESMF_GridConn),   intent(in),   optional  :: connDim2(:)        ! N. IMP.
        type(ESMF_GridConn),   intent(in),   optional  :: connDim3(:)        ! N. IMP.
@@ -14014,12 +14024,12 @@ endif
 ! (see Figure \ref{fig:GridDecomps}).
 ! To specify the arbitrary distribution, the user passes in an 2D array 
 ! of local indices, where the first dimension is the number of local grid cells
-! specified by localCount and the second dimension is the number of distributed
+! specified by localArbIndexCount and the second dimension is the number of distributed
 ! dimensions.
 !
 ! {\tt distDim} specifies which grid dimensions are arbitrarily distributed. The 
 ! size of {\tt distDim} has to agree with the size of the second dimension of 
-! {\tt localIndices}. 
+! {\tt localArbIndex}. 
 !
 ! For consistency's sake the {\tt ESMF\_GridSetCommitShapeTile()} call
 ! should be executed in the same set or a subset of the PETs in which the
@@ -14041,11 +14051,11 @@ endif
 !      to /1,1,1,.../.
 ! \item[{[maxIndex]}] 
 !      The upper extend of the grid index ranges.
-! \item[{[localIndices]}] 
+! \item[{[localArbIndex]}] 
 !      This 2D array specifies the indices of the local grid cells.  The 
-!      dimensions should be localCount * number of Distributed grid dimensions
-!      where localCount is the input argument specified below
-! \item[{localCount}] 
+!      dimensions should be localArbIndexCount * number of Distributed grid dimensions
+!      where localArbIndexCount is the input argument specified below
+! \item[{localArbIndexCount}] 
 !      number of grid cells in the local DE
 ! \item[{[connDim1]}] 
 !      Fortran array describing the index dimension 1 connections.
@@ -14154,7 +14164,7 @@ endif
 !       The size of the array specifies the total distributed dimensions.
 !       if not specified, defaults is all dimensions will be arbitrarily
 !       distributed.  The size has to agree with the size of the second
-!       dimension of {\tt localIndices}.
+!       dimension of {\tt localArbIndex}.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -14199,11 +14209,11 @@ endif
     endif
 
     ! number of distributed dimension, distDimCount, is determined by the second dim of 
-    ! localIndices
-    distDimCount = size(localIndices,2)
+    ! localArbIndex
+    distDimCount = size(localArbIndex,2)
     if (distDimCount > dimCount) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- the second dim of localIndices must be equal or less than grid dimension", & 
+               "- the second dim of localArbIndex must be equal or less than grid dimension", & 
                ESMF_CONTEXT, rc) 
          return 
     endif
@@ -14218,7 +14228,7 @@ endif
     if (present(distDim)) then
        if (size(distDim) .ne. distDimCount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                 "- distDim must match with the second dimension of localIndices", & 
+                 "- distDim must match with the second dimension of localArbIndex", & 
                  ESMF_CONTEXT, rc) 
             return 
        endif
@@ -14308,24 +14318,24 @@ endif
        return 
     endif
 
-    ! Check localIndices dimension matched with localCount and diskDimCount
-    if (size(localIndices, 1) .ne. localCount) then
+    ! Check localArbIndex dimension matched with localArbIndexCount and diskDimCount
+    if (size(localArbIndex, 1) .ne. localArbIndexCount) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- localIndices 1st dimension has to match with localCount", & 
+                 "- localArbIndex 1st dimension has to match with localArbIndexCount", & 
                  ESMF_CONTEXT, rc) 
        return
     endif
 
-    ! convert localIndices into 1D index array for DistGrid
-    if (localCount .gt. 0) then
-       allocate(local1DIndices(localCount), stat=localrc)
+    ! convert localArbIndex into 1D index array for DistGrid
+    if (localArbIndexCount .gt. 0) then
+       allocate(local1DIndices(localArbIndexCount), stat=localrc)
        if (ESMF_LogMsgFoundAllocError(localrc, "Allocating local1DIndices", &
                                      ESMF_CONTEXT, rc)) return
-       do i = 1, localCount
-          local1DIndices(i) = localIndices(i,1)-1
+       do i = 1, localArbIndexCount
+          local1DIndices(i) = localArbIndex(i,1)-1
 	  if (distDimCount .ge. 2) then 
 	     do j = 2, distDimCount
-	        local1DIndices(i) = local1DIndices(i)*distSize(j) + localIndices(i,j)-1
+	        local1DIndices(i) = local1DIndices(i)*distSize(j) + localArbIndex(i,j)-1
 	     enddo
 	  endif
           local1DIndices(i) = local1DIndices(i)+1
@@ -14541,7 +14551,7 @@ endif
                                distgrid, distDim=distDimLocal, &
 			       coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                minIndex=minIndexLocal, maxIndex=maxIndexLocal, &
- 	    		       localCount=localCount, localIndices=localIndices, &
+ 	    		       localArbIndexCount=localArbIndexCount, localArbIndex=localArbIndex, &
                                destroyDistGrid=.true., &
                                destroyDELayout=.false., &
 			       rc=localrc)
