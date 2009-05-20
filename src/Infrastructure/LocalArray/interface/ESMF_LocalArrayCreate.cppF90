@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.10 2009/01/21 21:38:00 cdeluca Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.11 2009/05/20 02:30:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -161,7 +161,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.10 2009/01/21 21:38:00 cdeluca Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.11 2009/05/20 02:30:38 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1500,9 +1500,14 @@ AllocAllocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
         end select
 
 
-        if (present(rc)) rc = localrc 
+     if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+     ! return successfully
+     if (present(rc)) rc = ESMF_SUCCESS
  
-        end subroutine ESMF_LocalArrayF90Allocate
+     end subroutine ESMF_LocalArrayF90Allocate
  
 
 !------------------------------------------------------------------------------ 
@@ -1701,9 +1706,11 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
         end select
 
 
-     if (ESMF_LogMsgFoundAllocError(localrc, "LocalArray Deallocation", &
-                                    ESMF_CONTEXT, rc)) return
+     if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
+     ! return successfully
      if (present(rc)) rc = ESMF_SUCCESS
  
      end subroutine ESMF_LocalArrayF90Deallocate
