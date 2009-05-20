@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridUTest.F90,v 1.6 2009/05/19 18:25:53 theurich Exp $
+! $Id: ESMF_FieldArbGridUTest.F90,v 1.7 2009/05/20 17:16:21 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -142,7 +142,7 @@
   rc=ESMF_SUCCESS
   grid2d = ESMF_GridCreateShapeTile("arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
     minIndex=(/1,1/), maxIndex=(/xdim, ydim/), &
-    localIndices=localIndices,localCount=localCount,rc=rc)
+    localArbIndex=localIndices,localArbIndexCount=localCount,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_ArraySpecSet(arrayspec1D, rank=1, typekind=ESMF_TYPEKIND_R4, &
@@ -319,7 +319,7 @@
   rc=ESMF_SUCCESS
   grid3d = ESMF_GridCreateShapeTile("arb3dgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
     minIndex=(/1,1,1/), maxIndex=(/xdim, ydim,zdim/), &
-    localIndices=localIndices,localCount=localCount,rc=rc)
+    localArbIndex=localIndices,localArbIndexCount=localCount,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_ArraySpecSet(arrayspec1D, rank=1, typekind=ESMF_TYPEKIND_R4, &
