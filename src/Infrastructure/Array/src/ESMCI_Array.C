@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.37 2009/02/16 19:14:31 rokuingh Exp $
+// $Id: ESMCI_Array.C,v 1.38 2009/05/20 02:36:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.37 2009/02/16 19:14:31 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.38 2009/05/20 02:36:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -232,6 +232,10 @@ Array::Array(
   // invalidate the name for this Array object in the Base class
   ESMC_BaseSetName(NULL, "Array");
    
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    return;
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", rc);
@@ -260,8 +264,11 @@ Array::~Array(){
 //-----------------------------------------------------------------------------
   // garbage collection
   int localDeCount = delayout->getLocalDeCount();
-  for (int i=0; i<localDeCount; i++)
-    ESMC_LocalArray::ESMC_LocalArrayDestroy(larrayList[i]);
+  for (int i=0; i<localDeCount; i++){
+    int localrc = ESMC_LocalArray::ESMC_LocalArrayDestroy(larrayList[i]);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+      throw localrc;  // bail out with exception
+  }
   if (larrayList != NULL)
     delete [] larrayList;
   if (larrayBaseAddrList != NULL)
@@ -1005,10 +1012,14 @@ Array *Array::create(
       distgridToPackedArrayMap, indexflag, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    return NULL;
   }catch(...){
     // allocation error
     ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::Array.", rc);  
-    return ESMC_NULL_POINTER;
+    return NULL;
   }
   
   // garbage collection
@@ -1027,10 +1038,14 @@ Array *Array::create(
   if (undistLBoundArrayAllocFlag) delete [] undistLBoundArray;
   if (undistUBoundArrayAllocFlag) delete [] undistUBoundArray;
   
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    return NULL;
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", rc);
-    return ESMC_NULL_POINTER;
+    return NULL;
   }
   
   // return successfully
@@ -1583,10 +1598,14 @@ Array *Array::create(
       distgridToPackedArrayMap, indexflag, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    return NULL;
   }catch(...){
     // allocation error
     ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::Array.", rc);  
-    return ESMC_NULL_POINTER;
+    return NULL;
   }
   
   // garbage collection
@@ -1603,10 +1622,14 @@ Array *Array::create(
   delete [] staggerLoc;
   delete [] vectorDim;
   
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    return NULL;
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", rc);
-    return ESMC_NULL_POINTER;
+    return NULL;
   }
   
   // return successfully
@@ -1649,10 +1672,14 @@ Array *Array::create(
     // get an allocation for the new Array object
     try{
       arrayOut = new Array();
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+      return NULL;
     }catch(...){
       // allocation error
       ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::Array.", rc);  
-      return ESMC_NULL_POINTER;
+      return NULL;
     }
     // copy all scalar members and reference members
     arrayOut->typekind = arrayIn->typekind;
@@ -1743,10 +1770,14 @@ Array *Array::create(
       arrayIn->totalElementCountPLocalDe, localDeCount * sizeof(int));
     // invalidate the name for this Array object in the Base class
     arrayOut->ESMC_BaseSetName(NULL, "Array");
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    return NULL;
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", rc);
-    return ESMC_NULL_POINTER;
+    return NULL;
   }
   
   // return successfully
@@ -1792,6 +1823,10 @@ int Array::destroy(
   delete *array;
   *array = ESMC_NULL_POINTER;
   
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
+    return rc;
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
@@ -7611,6 +7646,10 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     t15-t0);
 #endif
   
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
+    return rc;
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
@@ -8447,6 +8486,10 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   VMK::wtime(t14);   //gjt - profile
 #endif
 
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
+    return rc;
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
@@ -8694,6 +8737,10 @@ int sparseMatMulStoreEncodeXXEStream(
     ESMF_ERR_PASSTHRU, &rc)) return rc;
 #endif
     
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
+    return rc;
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
@@ -8859,6 +8906,10 @@ int Array::sparseMatMul(
     localPet, t1-t0, t2-t0, t3-t0, t4-t0, t5-t0, t6-t0);
 #endif
   
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
+    return rc;
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
@@ -8929,6 +8980,10 @@ int Array::sparseMatMulRelease(
   // mark storage pointer in RouteHandle as invalid  
   routehandle->ESMC_RouteHandleSetStorage(NULL);
   
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
+    return rc;
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
