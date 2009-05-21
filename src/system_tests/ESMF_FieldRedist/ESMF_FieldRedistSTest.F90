@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.44 2008/11/14 04:39:16 theurich Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.45 2009/05/21 16:02:16 feiliu Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -15,9 +15,9 @@
 ! This system test checks the functionality of the FieldRedist routine by
 ! redistributing data from one Field to another and then back again.  The
 ! original data should exactly match the final data, which serves as the
-! test for SUCCESS.  This program creates two identical IGrids on different
-! layouts.  The first IGrid has two Fields created from it, the first as the
-! source for the test and the second for the final results.  The second IGrid
+! test for SUCCESS.  This program creates two identical Grids on different
+! layouts.  The first Grid has two Fields created from it, the first as the
+! source for the test and the second for the final results.  The second Grid
 ! has a single Field that serves as an intermediate result between the
 ! two redistributions.
 !
@@ -106,8 +106,8 @@
 !-------------------------------------------------------------------------
 !
 
-    !  Create the igrids and corresponding Fields
-    !  note that the IGrids are the same but decomposed differently
+    !  Create the grids and corresponding Fields
+    !  note that the Grids are the same but decomposed differently
     pi              = 3.14159
     counts(1)       = 60
     counts(2)       = 50

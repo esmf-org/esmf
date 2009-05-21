@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.65 2009/05/01 17:09:19 theurich Exp $ 
+# $Id: makefile,v 1.66 2009/05/21 16:02:16 feiliu Exp $ 
 
 ALL: build_system_tests
 
@@ -27,7 +27,11 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldBundleSMM \
             ESMF_FieldRedist \
             ESMF_FieldRedistBlk2Blk \
+            ESMF_FieldRedistBlk2Arb \
+            ESMF_FieldRedistArb2Arb \
             ESMF_FieldBundleRedistBlk2Blk \
+            ESMF_FieldBundleRedistBlk2Arb \
+            ESMF_FieldBundleRedistArb2Arb \
 	    ESMF_InternalStateEnsemble
 
 # Tests not yet ready
@@ -45,10 +49,6 @@ DIRS      = ESMF_CompCreate \
 #           ESMF_FlowComp \
 #           ESMF_FieldHalo \
 #           ESMF_FieldHaloPer \
-#           ESMF_FieldBundleRedistArb2Arb \
-#           ESMF_FieldBundleRedistBlk2Arb \
-#           ESMF_FieldRedistArb2Arb \
-#           ESMF_FieldRedistBlk2Arb \
 
 
 CLEANDIRS   =

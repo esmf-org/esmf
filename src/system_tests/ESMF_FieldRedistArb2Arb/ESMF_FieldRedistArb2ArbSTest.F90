@@ -1,10 +1,10 @@
-! $Id: ESMF_FieldRedistArb2ArbSTest.F90,v 1.13 2008/11/14 04:39:16 theurich Exp $
+! $Id: ESMF_FieldRedistArb2ArbSTest.F90,v 1.14 2009/05/21 16:02:16 feiliu Exp $
 !
 ! System test FieldRedistArb2Arb
 !  Description on Sourceforge under System Test #XXXXX
 
 !-------------------------------------------------------------------------
-!ESMF_SYSTEM_removeTEST        String used by test script to count system tests.
+!ESMF_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !BOP
@@ -12,15 +12,15 @@
 ! !DESCRIPTION:
 ! System test FieldRedistArb2Arb.
 !
-! This system test checks the functionality of the igrid distribution
+! This system test checks the functionality of the grid distribution
 ! routines by redistributing data from one Field arbitrarily distributed 
 ! structure to another Field that has been distributed arbitrarily
 ! and then back again.  The original data should exactly match the final
 ! data, which serves as the test for SUCCESS.  This program creates two
-! identical IGrids with different distributions, both with the semi-random
-! arbitrary distribution.  The first IGrid has two Fields created from it,
+! identical grids with different distributions, both with the semi-random
+! arbitrary distribution.  The first grid has two Fields created from it,
 ! the first as the source for the test and the second for the final results.
-! The second IGrid has a single Field that serves as an intermediate 
+! The second grid has a single Field that serves as an intermediate 
 ! result between the two redistributions.
 !
 !\begin{verbatim}
@@ -38,8 +38,8 @@
      ! Local variables
      integer :: status
      integer :: i, j, j1, i1, add
-     integer :: counts(2), localCounts(2), miscount
-     integer :: npets, myDE, myPet
+     integer :: counts(2), localCounts(2), miscount, localCount
+     integer :: npets, myDE
      integer, dimension(:,:), allocatable :: myIndices1, myIndices2
      logical :: match
      real(ESMF_KIND_R8) :: min(2), max(2), compval
@@ -47,10 +47,8 @@
      real(ESMF_KIND_R8), dimension(:), pointer :: coordX, coordY
      real(ESMF_KIND_R8), dimension(:), pointer :: srcdata, resdata
      type(ESMF_ArraySpec) :: arrayspec1, arrayspec2
-     type(ESMF_DELayout) :: delayout1, delayout2
      type(ESMF_Field) :: humidity1, humidity2, humidity3
-     type(ESMF_IGrid) :: igrid1, igrid2
-     type(ESMF_IGridHorzStagger) :: horz_stagger
+     type(ESMF_grid) :: grid1, grid2
      type(ESMF_RouteHandle) :: rh12, rh23
      type(ESMF_VM) :: vm
 
@@ -79,7 +77,7 @@
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Get the PET count and our PET number
-     call ESMF_VMGet(vm, localPet=myPet, petCount=npets, rc=status)
+     call ESMF_VMGet(vm, localPet=myDE, petCount=npets, rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
      miscount = 0
@@ -92,40 +90,23 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-     ! create two layouts, both are 1D layout 
-     ! for arbitrary distribution
-     delayout1 = ESMF_DELayoutCreate(vm, (/ 1, npets /), rc=status)
-     if (status .ne. ESMF_SUCCESS) goto 20
-     delayout2 = ESMF_DELayoutCreate(vm, (/ npets, 1 /), rc=status)
-     if (status .ne. ESMF_SUCCESS) goto 20
 
-     ! and get our local DE number on the first layout
-     call ESMF_DELayoutGetDeprecated(delayout1, localDE=myDE, rc=status)
-     if (status .ne. ESMF_SUCCESS) goto 20
-
-     ! Create the igrids and corresponding Fields
+     ! Create the grids and corresponding Fields
      counts(1) = 60
      counts(2) = 40
      min(1) = 0.0
      max(1) = 60.0
      min(2) = 0.0
      max(2) = 50.0
-     horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
 
-     ! make two identical igrids, both are distributed arbitrarily
+     ! make two identical grids, both are distributed arbitrarily
      ! but with different styles
-     igrid1 = ESMF_IGridCreateHorzXYUni(counts=counts, &
-                             minGlobalCoordPerDim=min, &
-                             maxGlobalCoordPerDim=max, &
-                             horzStagger=horz_stagger, &
-                             name="source igrid", rc=status)
-     if (status .ne. ESMF_SUCCESS) goto 20
      !
      ! Arbitrary case
      ! allocate myIndices to maximum number of points on any DE in the first
      ! dimension and 2 in the second dimension.
-     j = int((counts(1)*counts(2) + npets -1)/npets)
-     allocate (myIndices1(j,2))
+     localCount = int((counts(1)*counts(2) + npets -1)/npets)
+     allocate (myIndices1(localCount,2))
      ! calculate myIndices based on DE number
      ! for now, start at point (1,1+myDE) and go up in the j-direction first
      ! to create a semi-regular distribution of points
@@ -140,22 +121,17 @@
        i1 = i - counts(1)
      enddo
 
-     ! the distribute call is similar to the block distribute but with
-     ! a couple of different arguments
-     call ESMF_IGridDistribute(igrid1, delayout=delayout1, myCount=add, &
-                              myIndices=myIndices1, rc=status)
+     grid1 = ESMF_GridCreateShapeTile("source grid", coordTypeKind=ESMF_TYPEKIND_R8, &
+       minIndex=(/1,1/), maxIndex=counts, &
+       localArbIndex=myIndices1,localArbIndexCount=localCount,rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
+     call ESMF_GridAddCoord(grid1, rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
-     igrid2 = ESMF_IGridCreateHorzXYUni(counts=counts, &
-                             minGlobalCoordPerDim=min, &
-                             maxGlobalCoordPerDim=max, &
-                             horzStagger=horz_stagger, &
-                             name="source igrid", rc=status)
-     if (status .ne. ESMF_SUCCESS) goto 20
      ! allocate myIndices to maximum number of points on any DE in the first
      ! dimension and 2 in the second dimension.
-     i = int((counts(1)*counts(2) + npets -1)/npets)
-     allocate (myIndices2(i,2))
+     localCount = int((counts(1)*counts(2) + npets -1)/npets)
+     allocate (myIndices2(localCount,2))
      ! calculate myIndices based on DE number
      ! for now, start at point (1,1+myDE) and go up in the j-direction first
      ! to create a semi-regular distribution of points
@@ -169,10 +145,10 @@
        enddo
        j1 = j - counts(2)
      enddo
-     ! the distribute call is similar to the block distribute but with
-     ! a couple of different arguments
-     call ESMF_IGridDistribute(igrid2, delayout=delayout2, myCount=add, &
-                              myIndices=myIndices2, rc=status)
+
+     grid2 = ESMF_GridCreateShapeTile("dest grid", coordTypeKind=ESMF_TYPEKIND_R8, &
+       minIndex=(/1,1/), maxIndex=counts, &
+       localArbIndex=myIndices2,localArbIndexCount=localCount,rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Set up a 1D (for the arbitrarily distributed Field) and a 2D real array
@@ -183,41 +159,38 @@
                             typekind=ESMF_TYPEKIND_R8)
      if (status .ne. ESMF_SUCCESS) goto 20
 
-     ! Create the field and have it create the array internally for each igrid
-     humidity1 = ESMF_FieldCreate(igrid1, arrayspec1, &
-                                  horzRelloc=ESMF_CELL_CENTER, &
-                                  haloWidth=0, name="humidity1", rc=status)
+     ! Create the field and have it create the array internally for each grid
+     humidity1 = ESMF_FieldCreate(grid1, arrayspec1, &
+                                  name="humidity1", rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
-     humidity2 = ESMF_FieldCreate(igrid2, arrayspec2, &
-                                  horzRelloc=ESMF_CELL_CENTER, &
-                                  haloWidth=0, name="humidity2", rc=status)
+     humidity2 = ESMF_FieldCreate(grid2, arrayspec2, &
+                                  name="humidity2", rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
-     humidity3 = ESMF_FieldCreate(igrid1, arrayspec1, &
-                                  horzRelloc=ESMF_CELL_CENTER, &
-                                  haloWidth=0, name="humidity3", rc=status)
+     humidity3 = ESMF_FieldCreate(grid1, arrayspec1, &
+                                  name="humidity3", rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! precompute communication patterns, the first from the 1st arbitrarily
      ! distributed Field to the 2nd arbitrarily distributed Field; and 
      ! the second from the 2nd arbitrarily distributed Field back to
      ! the 1st distributed Field
-     call ESMF_FieldRedistStore(humidity1, humidity2, vm, &
+     call ESMF_FieldRedistStore(humidity1, humidity2, &
                                 routehandle=rh12, rc=status)
-     call ESMF_FieldRedistStore(humidity2, humidity3, vm, &
+     call ESMF_FieldRedistStore(humidity2, humidity3, &
                                 routehandle=rh23, rc=status)
 
     ! get coordinate arrays available for setting the source data array
-    call ESMF_IGridGetCoord(igrid1, dim=1, horzRelloc=ESMF_CELL_CENTER, &
-      centerCoord=coordX, localCounts=localCounts, rc=status)
+    call ESMF_GridGetCoord(grid1, localDE=0, coordDim=1, &
+      fptr=coordX, totalCount=localCounts, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_IGridGetCoord(igrid1, dim=2, horzRelloc=ESMF_CELL_CENTER, &
-      centerCoord=coordY, rc=status)
+    call ESMF_GridGetCoord(grid1, localDE=0, coordDim=2, &
+      fptr=coordY, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
 
     ! Get pointers to the data and set it up
-    call ESMF_FieldGetDataPointer(humidity1, srcdata, ESMF_DATA_REF, rc=status)
+    call ESMF_FieldGet(humidity1, farray=srcdata, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldGetDataPointer(humidity3, resdata, ESMF_DATA_REF, rc=status)
+    call ESMF_FieldGet(humidity3, farray=resdata, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
 
     ! initialize data arrays
@@ -227,6 +200,8 @@
     ! set data array to a function of coordinates (in the computational part
     ! of the array only, not the halo region)
     do i = 1,localCounts(1)
+      coordX(i) = ((max(1)-min(1))*i)/localCounts(1) 
+      coordY(i) = ((max(2)-min(2))*i)/localCounts(1)
       srcdata(i) = 10.0 + 5.0*sin(coordX(i)/60.0*pi) &
                         + 2.0*sin(coordY(i)/50.0*pi)
     enddo
@@ -267,8 +242,6 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !   Print result
-
-    call ESMF_DELayoutGetDeprecated(delayout1, localDE=myDE, rc=status)
 
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
@@ -321,13 +294,9 @@
     if (status .ne. ESMF_SUCCESS) goto 20
     call ESMF_FieldDestroy(humidity3, status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_IGridDestroy(igrid1, status)
+    call ESMF_GridDestroy(grid1, status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_IGridDestroy(igrid2, status)
-    if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_DELayoutDestroy(delayout1, status)
-    if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_DELayoutDestroy(delayout2, status)
+    call ESMF_GridDestroy(grid2, status)
     if (status .ne. ESMF_SUCCESS) goto 20
     print *, "All Destroy routines done"
 
@@ -341,7 +310,7 @@
     call ESMF_TestGlobal(((miscount.eq.0).and.(status.eq.ESMF_SUCCESS)), &
       testname, failMsg, testresult, ESMF_SRCLINE)
 
-    if ((myPet .eq. 0) .or. (status .ne. ESMF_SUCCESS)) then
+    if ((myDE .eq. 0) .or. (status .ne. ESMF_SUCCESS)) then
       ! Separate message to console, for quick confirmation of success/failure
       if ((miscount.eq.0) .and. (status .eq. ESMF_SUCCESS)) then
         write(finalMsg, *) "SUCCESS: Data redistributed twice same as original."
