@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.58 2009/05/12 20:09:31 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.59 2009/05/21 16:09:23 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@ program ESMF_GridCreateEx
       integer :: tlbnd(3),tubnd(3)
       integer :: i,j,k
       integer :: lbnd(3), ubnd(3), lbnd_corner(3), ubnd_corner(3)
-      integer, allocatable :: petMap(:,:,:), localIndices(:,:)
+      integer, allocatable :: petMap(:,:,:), localArbIndex(:,:)
       integer :: distgridToGridMap(2)
       integer :: lbnd1D(1), ubnd1D(1)
 
@@ -58,7 +58,7 @@ program ESMF_GridCreateEx
       integer :: localPet, petCount
       integer :: lDE,localDECount
       integer :: xdim, ydim, zdim
-      integer :: ind, localCount, remain
+      integer :: ind, localArbIndexCount, remain
 
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
@@ -248,8 +248,8 @@ endif
 ! To create an grid with arbitrary distribution, the user specifies the global minimum and maximum
 ! ranges of the index space with the
 ! arguments {\tt minIndex} and {\tt maxIndex}, the total number of cells and their index space locations 
-! residing on the local PET through a {\tt localCount} and a {\tt localIndices}
-! argument. {\tt localIndices} is a 2D array with size {\tt (localCount, n)} where n is the total number
+! residing on the local PET through a {\tt localArbIndexCount} and a {\tt localArbIndex}
+! argument. {\tt localArbIndex} is a 2D array with size {\tt (localArbIndexCount, n)} where n is the total number
 ! dimensions distributed arbitrarily.    
 ! Again, if {\tt minIndex} is  not specified, then the bottom of the 
 ! index range is assumed to be (1,1,...). 
@@ -265,18 +265,18 @@ endif
 !EOE
 
 !BOC
-   ! allocate memory for localIndices
-   allocate( localIndices(5,2) )
+   ! allocate memory for localArbIndex
+   allocate( localArbIndex(5,2) )
    ! Set local indices
-   localIndices(1,:)=(/1,1/)
-   localIndices(2,:)=(/2,2/)
-   localIndices(3,:)=(/3,3/)
-   localIndices(4,:)=(/4,4/)
-   localIndices(5,:)=(/5,5/)
+   localArbIndex(1,:)=(/1,1/)
+   localArbIndex(2,:)=(/2,2/)
+   localArbIndex(3,:)=(/3,3/)
+   localArbIndex(4,:)=(/4,4/)
+   localArbIndex(5,:)=(/5,5/)
 
    ! Create a 2D Arbitrarily distributed Grid
    grid2D=ESMF_GridCreateShapeTile(maxIndex=(/5,5/), & 
-         localIndices=localIndices, localCount=5, rc=rc)   
+         localArbIndex=localArbIndex, localArbIndexCount=5, rc=rc)   
 !EOC
 
 !BOE
@@ -288,7 +288,7 @@ endif
 !BOC
    ! Create a 3D Grid with the 1st and 3rd dimension arbitrarily distributed
    grid3D=ESMF_GridCreateShapeTile(maxIndex=(/5,6,5/), & 
-         localIndices=localIndices, localCount=5, distDim=(/1,3/), rc=rc)   
+         localArbIndex=localArbIndex, localArbIndexCount=5, distDim=(/1,3/), rc=rc)   
 !EOC
 
    !-------------------------------------------------------------------
@@ -296,7 +296,7 @@ endif
    !-------------------------------------------------------------------
    call ESMF_GridDestroy(grid2D, rc=rc)
    call ESMF_GridDestroy(grid3D, rc=rc)
-   deallocate(localIndices)
+   deallocate(localArbIndex)
 
 #ifdef LOCAL_NOT_IMPL
 !BOEI
@@ -862,7 +862,7 @@ endif
 !BOC
    !-------------------------------------------------------------------
    ! Set up the local index array:  Assuming the grid is 360x180x10.  First
-   ! calculate the localCount and localIndices array for each PET based on
+   ! calculate the localArbIndexCount and localArbIndex array for each PET based on
    ! the total number of PETS. The cells are evenly distributed in all the
    ! PETs. If the total number of cells are not divisible by the total PETs, 
    ! the remaining cells are assigned to the last PET.  The cells are card 
@@ -872,22 +872,22 @@ endif
    xdim = 360
    ydim = 180
    zdim = 10
-   localCount = (xdim*ydim)/petCount
-   remain = (xdim*ydim)-localCount*petCount
-   if (localPet == petCount-1) localCount = localCount+remain
+   localArbIndexCount = (xdim*ydim)/petCount
+   remain = (xdim*ydim)-localArbIndexCount*petCount
+   if (localPet == petCount-1) localArbIndexCount = localArbIndexCount+remain
 
-   allocate(localIndices(localCount,2))
+   allocate(localArbIndex(localArbIndexCount,2))
    ind = localPet
-   do i=1, localCount
-      localIndices(i,1)=mod(ind,ydim)+1
-      localIndices(i,2)=ind/ydim + 1
+   do i=1, localArbIndexCount
+      localArbIndex(i,1)=mod(ind,ydim)+1
+      localArbIndex(i,2)=ind/ydim + 1
       ind = ind + petCount
    enddo
    if (localPet == petCount-1) then
       ind = xdim*ydim-remain+1
-      do i=localCount-remain+1,localCount
-         localIndices(i,1)=mod(ind,ydim)+1
-         localIndices(i,2)=ind/ydim+1
+      do i=localArbIndexCount-remain+1,localArbIndexCount
+         localArbIndex(i,1)=mod(ind,ydim)+1
+         localArbIndex(i,2)=ind/ydim+1
          ind = ind + 1
       enddo
    endif
@@ -904,8 +904,8 @@ endif
    !-------------------------------------------------------------------
    grid3D=ESMF_GridCreateShapeTile( &
 	    maxIndex = (/xdim, ydim, zdim/), &
-            localIndices = localIndices, &
-            localCount = localCount, &
+            localArbIndex = localArbIndex, &
+            localArbIndexCount = localArbIndexCount, &
             rc=rc)
 
    !-------------------------------------------------------------------
@@ -930,7 +930,7 @@ endif
    ! Calculate and set coordinates in the first dimension.
    !----------------------------------------------------------------
    do i=lbnd(1),ubnd(1)
-      centerX(i) = (localIndices(i,1)-0.5)*(360.0/xdim)
+      centerX(i) = (localArbIndex(i,1)-0.5)*(360.0/xdim)
    enddo
 
 
@@ -947,7 +947,7 @@ endif
    ! Calculate and set coordinates in the second dimension.
    !----------------------------------------------------------------
    do j=lbnd(1),ubnd(1)
-      centerY(j) = (localIndices(j,2)-0.5)*(180.0/ydim)-90.0 
+      centerY(j) = (localArbIndex(j,2)-0.5)*(180.0/ydim)-90.0 
    enddo
 
    !----------------------------------------------------------------
@@ -1231,8 +1231,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !BOC
    grid3D=ESMF_GridCreateShapeTile( &
 	    maxIndex = (/xdim, ydim, zdim/), &
-            localIndices = localIndices, &
-            localCount = localCount,	 &
+            localArbIndex = localArbIndex, &
+            localArbIndexCount = localArbIndexCount,	 &
  	    coordDep1 = (/ESMF_GRID_ARBDIM/), &
 	    coordDep2 = (/ESMF_GRID_ARBDIM/), &
 	    coordDep3 = (/3/), &
@@ -1254,8 +1254,8 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 !BOC
    grid3D=ESMF_GridCreateShapeTile( &
 	    maxIndex = (/xdim, ydim, zdim/), &
-            localIndices = localIndices, &
-            localCount = localCount,	 &
+            localArbIndex = localArbIndex, &
+            localArbIndexCount = localArbIndexCount,	 &
  	    coordDep1 = (/ESMF_GRID_ARBDIM, 3/), &
 	    coordDep2 = (/ESMF_GRID_ARBDIM, 3/), &
 	    coordDep3 = (/ESMF_GRID_ARBDIM, 3/), &
@@ -2092,8 +2092,8 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!
     grid3D=ESMF_GridCreateShapeTile( &
 	    maxIndex = (/xdim, ydim, zdim/), &
-            localIndices = localIndices, &
-            localCount = localCount, &
+            localArbIndex = localArbIndex, &
+            localArbIndexCount = localArbIndexCount, &
             rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
  
