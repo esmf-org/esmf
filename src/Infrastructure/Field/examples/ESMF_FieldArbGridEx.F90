@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridEx.F90,v 1.2 2009/02/24 15:31:23 feiliu Exp $
+! $Id: ESMF_FieldArbGridEx.F90,v 1.3 2009/05/21 18:14:03 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -33,8 +33,8 @@
     integer :: ind1d, xdim, ydim, zdim, total, x, y
     integer :: i, remain
     integer :: myPet, petCount, halfPets
-    integer :: localCount
-    integer, allocatable :: localIndices(:,:)
+    integer :: localArbIndexCount
+    integer, allocatable :: localArbIndex(:,:)
     integer                 :: finalrc, rc
     type(ESMF_Field)        :: field
     logical :: correct
@@ -46,7 +46,7 @@
     call ESMF_Initialize(vm=vm, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-    ! Calculate localIndices and localCount for a 100x200 2D arbitrary grid with 
+    ! Calculate localArbIndex and localArbIndexCount for a 100x200 2D arbitrary grid with 
     ! an optional undistributed 3rd dimenison of size 4
     ! get global VM
     call ESMF_VMGetGlobal(vm, rc=rc)
@@ -63,47 +63,47 @@
     total = xdim*ydim
     halfPets = petCount/2
     ! let's make the first half pet twice of the cells of the second half
-    localCount = total/(petCount+halfPets)
-    remain = total-localCount*(petCount+halfPets)
-    if (myPet < halfPets) localCount = localCount*2
-    if (myPet == petCount-1) localCount = localCount+remain
+    localArbIndexCount = total/(petCount+halfPets)
+    remain = total-localArbIndexCount*(petCount+halfPets)
+    if (myPet < halfPets) localArbIndexCount = localArbIndexCount*2
+    if (myPet == petCount-1) localArbIndexCount = localArbIndexCount+remain
     ! car deal the cells with the first half of the Pets gets two each time
     ! the remaining cells are given to the last Pet
-    allocate(localIndices(localCount,2))
+    allocate(localArbIndex(localArbIndexCount,2))
   
     if (myPet < halfPets) then
        ind1d = myPet*2
-       do i=1,localCount,2
+       do i=1,localArbIndexCount,2
          y = mod(ind1d,ydim)+1
          x = ind1d/ydim+1
-         localIndices(i,1)=y
-         localIndices(i,2)=x
+         localArbIndex(i,1)=y
+         localArbIndex(i,2)=x
          if (y<ydim) then
-           localIndices(i+1,1)=y+1
-           localIndices(i+1,2)=x
+           localArbIndex(i+1,1)=y+1
+           localArbIndex(i+1,2)=x
          else
-           localIndices(i+1,1)=1
-           localIndices(i+1,2)=x+1
+           localArbIndex(i+1,1)=1
+           localArbIndex(i+1,2)=x+1
          endif
          ind1d = ind1d+petCount+halfPets
        enddo 
     else
        ind1d=myPet+halfPets
-       do i=1,localCount
+       do i=1,localArbIndexCount
          y = mod(ind1d,ydim)+1
          x = ind1d/ydim+1
-         localIndices(i,1)=y
-         localIndices(i,2)=x
+         localArbIndex(i,1)=y
+         localArbIndex(i,2)=x
          ind1d = ind1d+petCount+halfPets
        enddo
     endif
     if (myPet == petCount-1) then
       ind1d = total-remain+1
-      do i=localCount-remain+1,localCount
+      do i=localArbIndexCount-remain+1,localArbIndexCount
          y = mod(ind1d,ydim)+1
          x = ind1d/ydim+1
-         localIndices(i,1)=y
-         localIndices(i,2)=x
+         localArbIndex(i,1)=y
+         localArbIndex(i,2)=x
          ind1d = ind1d+1
       enddo
     endif
@@ -152,7 +152,7 @@
     ! create a 3D grid with the first 2 dimensions collapsed and arbitrarily distributed
     grid3d = ESMF_GridCreateShapeTile("arb3dgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
       minIndex=(/1,1,1/), maxIndex=(/xdim, ydim,zdim/), &
-      localIndices=localIndices,localCount=localCount,rc=rc)
+      localArbIndex=localArbIndex,localArbIndexCount=localArbIndexCount,rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! create a 2D arrayspec
