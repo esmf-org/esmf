@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.103 2009/03/25 00:24:53 theurich Exp $
+# $Id: makefile,v 1.104 2009/05/22 17:32:26 feiliu Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -352,15 +352,16 @@ ranlib:
 deletelibs: chkopts_basic
 	-$(ESMF_RM) $(wildcard $(ESMF_LIBDIR)/lib*.*)
 
+# This demo is disabled until halo is implemented.
 # ESMF_COUPLED_FLOW/demo target.
-ESMF_COUPLED_FLOW: chkopts build_libs chkdir_tests
-	cd src/demos/coupled_flow ;\
-	$(MAKE) BOPT=$(BOPT) demos
-
-# ESMF_COUPLED_FLOW_uni/demo target.
-ESMF_COUPLED_FLOW_uni: chkopts build_libs chkdir_tests
-	cd src/demos/coupled_flow ;\
-	$(MAKE) BOPT=$(BOPT) demos_uni
+#ESMF_COUPLED_FLOW: chkopts build_libs chkdir_tests
+#	cd src/demos/coupled_flow ;\
+#	$(MAKE) BOPT=$(BOPT) demos
+#
+## ESMF_COUPLED_FLOW_uni/demo target.
+#ESMF_COUPLED_FLOW_uni: chkopts build_libs chkdir_tests
+#	cd src/demos/coupled_flow ;\
+#	$(MAKE) BOPT=$(BOPT) demos_uni
 
 
 # ------------------------------------------------------------------
