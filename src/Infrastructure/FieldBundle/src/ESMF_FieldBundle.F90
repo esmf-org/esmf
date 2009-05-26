@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.18 2009/04/13 15:12:50 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.19 2009/05/26 20:23:40 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -1915,7 +1915,7 @@ end function
       type(ESMF_Field), dimension(:), pointer :: temp_flist  
                                                   ! list of fields
       type(ESMF_Grid) :: testgrid, matchgrid
-      logical :: wasempty
+      logical :: wasempty, isCommitted
 
       ! Initialize return code.  Assume routine not implemented.
       status = ESMF_RC_NOT_IMPL
@@ -1956,9 +1956,16 @@ end function
       matchgrid%this = ESMF_NULL_POINTER
       if (btype%gridstatus .eq. ESMF_STATUS_UNINIT) then
           do i=1, fieldCount
-            ! an error here is not fatal; just means field has no grid yet.
+            ! determine if a Field is committed and has a Grid associated with it
+            call ESMF_FieldGet(fields(i), isCommitted=isCommitted, rc=status)
+            if (ESMF_LogMsgFoundError(status, &
+                        "Invalid Field found when trying to access Field", &
+                        ESMF_CONTEXT, rc)) return
+            if(.not.isCommitted) cycle
             call ESMF_FieldGet(fields(i), grid=testgrid, rc=status)
-            if (status .ne. ESMF_SUCCESS) cycle
+            if (ESMF_LogMsgFoundError(status, &
+                        "Invalid Field found when trying to access Field", &
+                        ESMF_CONTEXT, rc)) return
 
             ! use grid from first field in add list which contains one
             matchgrid = testgrid
