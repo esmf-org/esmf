@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.38 2009/02/23 22:15:06 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.39 2009/05/26 20:22:01 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.38 2009/02/23 22:15:06 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.39 2009/05/26 20:22:01 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -109,13 +109,14 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-  subroutine ESMF_FieldGetDefault(field, geomtype, grid, mesh, locstream, &
+  subroutine ESMF_FieldGetDefault(field, isCommitted, geomtype, grid, mesh, locstream, &
     array, typekind, dimCount, memDimCount, &
     staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     maxHaloLWidth, maxHaloUWidth, localDeCount, name, iospec, rc) 
 !
 ! !ARGUMENTS:
     type(ESMF_Field), intent(inout) :: field    
+    logical, intent(out), optional  :: isCommitted
     type(ESMF_GeomType), intent(out), optional :: geomtype     
     type(ESMF_Grid), intent(out), optional :: grid     
     type(ESMF_Mesh), intent(out), optional :: mesh     
@@ -147,6 +148,8 @@ contains
 ! \begin{description}
 ! \item [field]
 !       {\tt ESMF\_Field} object to query.
+! \item [{[isCommitted]}]
+!       Indicates if the Field is fully committed and ready.
 ! \item [{[geomtype]}]
 !       Specifies what type of geometry the field is built on. {\tt ESMF\_GEOMTYPE\_GRID}={\tt ESMF\_Grid}.
 !       {\tt ESMF\_GEOMTYPE\_MESH}={\tt ESMF\_Mesh}. {\tt ESMF\_GEOMTYPE\_LOCSTREAM}={\tt ESMF\_LocStream}.
@@ -254,6 +257,15 @@ contains
 
     ! Get Field pointer
     ftype => field%ftypep
+
+    if(present(isCommitted)) then
+        if(ftype%fieldstatus .eq. ESMF_STATUS_READY.and.ftype%gridstatus.eq.ESMF_STATUS_READY.and.&
+           ftype%datastatus.eq.ESMF_STATUS_READY) then
+            isCommitted = .true.
+        else 
+            isCommitted = .false.
+        endif
+    endif
  
     ! set default decomp type to non-arb.
     decompType = ESMF_GRID_NONARBITRARY

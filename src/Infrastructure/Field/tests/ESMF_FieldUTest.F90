@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.135 2009/02/04 23:14:15 theurich Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.136 2009/05/26 20:22:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.135 2009/02/04 23:14:15 theurich Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.136 2009/05/26 20:22:07 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -78,7 +78,7 @@
       type(ESMF_ArraySpec)                        :: arrayspec8
       type(ESMF_DistGrid)                         :: distgrid
       type(ESMF_StaggerLoc)                       :: staggerloc8
-      logical :: correct
+      logical :: correct, isCommitted
 
       integer :: im, jm, km, ldecount
       real(ESMF_KIND_R8) :: xmin,xmax,ymin,ymax
@@ -118,6 +118,13 @@
       write(name, *) "Creating a Field with no data"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      !NEX_UTest_Multi_Proc_Only
+      ! Test isCommitted in FieldGet api
+      call ESMF_FieldGet(f1, isCommitted=isCommitted, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Query isCommitted flag from an empty Field"
+      call ESMF_Test((isCommitted.eq..false..and.rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
       ! Verifying that a Field with no data can be destroyed
@@ -150,6 +157,8 @@
             ungriddedLBound=(/1/), ungriddedUBound=(/4/), rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
 
+      call ESMF_FieldGet(fls, isCommitted=isCommitted, rc=rc)
+
       ! check bounds
       call ESMF_FieldGet(fls, localDE=0, computationalCount=cc, &
              computationalLBound=cl, computationalUBound=cu, &
@@ -174,6 +183,12 @@
 
       call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      ! Test isCommitted in FieldGet api
+      write(failMsg, *) ""
+      write(name, *) "Query isCommitted flag from a commmitted Field on locstream"
+      call ESMF_Test((isCommitted.eq..true..and.rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
@@ -441,6 +456,14 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a Field with a Grid and ArraySpec Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      ! Test isCommitted in FieldGet api
+      call ESMF_FieldGet(f2, isCommitted=isCommitted, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Query isCommitted flag from a commmitted Field"
+      call ESMF_Test((isCommitted.eq..true..and.rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
