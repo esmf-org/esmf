@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.87 2009/05/20 18:13:02 peggyli Exp $
+// $Id: ESMCI_Grid.C,v 1.88 2009/05/27 21:10:54 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.87 2009/05/20 18:13:02 peggyli Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.88 2009/05/27 21:10:54 peggyli Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -6614,8 +6614,9 @@ int construct(
 
   _free2D<int> (&coordDimMap);
 
-  _free2D<int> (&localArbIndex);
-
+  if (localArbIndexCount > 0) {
+     _free2D<int> (&localArbIndex);
+  }
   return ESMF_SUCCESS;
 }
 
