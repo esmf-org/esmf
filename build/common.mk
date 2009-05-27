@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.265 2009/05/27 22:38:24 svasquez Exp $
+#  $Id: common.mk,v 1.266 2009/05/27 22:57:50 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1681,9 +1681,9 @@ tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
 config_sys_tests:
 	@echo "# This file used by test scripts, please do not delete." > $(SYS_TESTS_CONFIG)
 ifeq ($(MULTI),)
-	@echo "Last run Nontestmpmd Nontestsharedobj ;  Noprocessor" >> $(SYS_TESTS_CONFIG)
+	@echo "Last run Nontestmpmd Nontestsharedobj Nontestopenmp ;  Noprocessor" >> $(SYS_TESTS_CONFIG)
 else
-	@echo "Last run Nontestmpmd Nontestsharedobj ;" $(MULTI) >> $(SYS_TESTS_CONFIG)
+	@echo "Last run Nontestmpmd Nontestsharedobj Nontestopenmp ;" $(MULTI) >> $(SYS_TESTS_CONFIG)
 endif
 
 
