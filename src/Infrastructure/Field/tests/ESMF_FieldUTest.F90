@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.136 2009/05/26 20:22:07 feiliu Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.137 2009/05/27 15:38:40 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.136 2009/05/26 20:22:07 feiliu Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.137 2009/05/27 15:38:40 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -123,7 +123,7 @@
       call ESMF_FieldGet(f1, isCommitted=isCommitted, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Query isCommitted flag from an empty Field"
-      call ESMF_Test((isCommitted.eq..false..and.rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(((.not.isCommitted).and.(rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
@@ -188,7 +188,7 @@
       ! Test isCommitted in FieldGet api
       write(failMsg, *) ""
       write(name, *) "Query isCommitted flag from a commmitted Field on locstream"
-      call ESMF_Test((isCommitted.eq..true..and.rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((isCommitted.and.(rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
@@ -463,7 +463,7 @@
       call ESMF_FieldGet(f2, isCommitted=isCommitted, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Query isCommitted flag from a commmitted Field"
-      call ESMF_Test((isCommitted.eq..true..and.rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((isCommitted.and.(rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
