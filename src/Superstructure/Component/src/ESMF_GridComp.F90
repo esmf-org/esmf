@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.124 2009/04/13 22:15:20 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.125 2009/05/27 20:31:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.124 2009/04/13 22:15:20 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.125 2009/05/27 20:31:20 theurich Exp $'
 
 !==============================================================================
 !
@@ -124,7 +124,7 @@ contains
 !
 ! !INTERFACE:
   recursive function ESMF_GridCompCreate(name, gridcomptype, grid, config, &
-    configFile, clock, petList, contextflag, parentVm, rc)
+    configFile, clock, petList, contextflag, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_GridComp) :: ESMF_GridCompCreate
@@ -138,7 +138,6 @@ contains
     type(ESMF_Clock),        intent(inout), optional :: clock
     integer,                 intent(in),    optional :: petList(:)
     type(ESMF_ContextFlag),  intent(in),    optional :: contextflag
-    type(ESMF_VM),           intent(inout), optional :: parentVm
     integer,                 intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
@@ -200,10 +199,6 @@ contains
 !   Specify the component's VM context. The default context is
 !   {\tt ESMF\_CHILD\_IN\_NEW\_VM}. See section \ref{opt:contextflag} for a
 !   complete list of valid flags.
-! \item[{[parentVm]}]
-!   {\tt ESMF\_VM} object for the current component. This will become the
-!   parent {\tt ESMF\_VM} for the newly created {\tt ESMF\_GridComp} object.
-!   By default the current VM is determined automatically.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -216,7 +211,6 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVm,rc)
 
     ! Initialize the pointer to null.
     nullify(ESMF_GridCompCreate%compp)
@@ -234,8 +228,8 @@ contains
     ! call Comp method
     call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
       gridcomptype=gridcomptype, configFile=configFile, config=config, &
-      grid=grid, clock=clock, vm=parentVm, petList=petList, &
-      contextflag=contextflag, rc=localrc)
+      grid=grid, clock=clock, petList=petList, contextflag=contextflag, &
+      rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return

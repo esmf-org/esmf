@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.187 2009/04/13 22:15:20 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.188 2009/05/27 20:31:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -134,57 +134,41 @@ module ESMF_CompMod
     sequence
 #endif
     !private
-    type(ESMF_Pointer) :: this       ! C++ ftable pointer - MUST BE FIRST
-    type(ESMF_Base) :: base                  ! base class
-    type(ESMF_Status) :: compstatus          ! valid object or not?
-    type(ESMF_CompType) :: ctype             ! component type
-    type(ESMF_Config) :: config              ! configuration object
-    type(ESMF_Clock) :: clock                ! private component clock
+    type(ESMF_Pointer)  :: this             ! C++ ftable pointer - MUST BE FIRST
+    type(ESMF_Base)     :: base             ! base class
+    type(ESMF_Status)   :: compstatus       ! valid object or not?
+    type(ESMF_CompType) :: ctype            ! component type
+    type(ESMF_Config)   :: config           ! configuration object
+    type(ESMF_Clock)    :: clock            ! private component clock
+    type(ESMF_Grid)     :: grid             ! default grid, gcomp only
+    type(ESMF_GridCompType) :: gridcomptype ! model type, gcomp only
 
-    character(len=ESMF_MAXSTR) :: configFile ! resource filename
-    character(len=ESMF_MAXSTR) :: dirPath    ! relative dirname, app only
-    type(ESMF_Grid) :: grid                  ! default grid, gcomp only
+    character(len=ESMF_MAXSTR) :: configFile! resource filename
+    character(len=ESMF_MAXSTR) :: dirPath   ! relative dirname, app only
 
-#ifdef ESMF_IS_64BIT_MACHINE
-    integer            :: npetlist           ! number of PETs in petlist
-#endif
+    type(ESMF_CWrap)    :: compw            ! to satisfy the C interface
+    type(ESMF_VM)       :: vm               ! component VM
+    type(ESMF_VM)       :: vm_parent        ! reference to the parent VM
 
-    type(ESMF_GridCompType) :: gridcomptype  ! model type, gcomp only
-
-    type(ESMF_CompClass), pointer :: parent  ! pointer to parent comp
-    type(ESMF_CWrap)   :: compw              ! to satisfy the C interface
-    type(ESMF_VM)      :: vm                 ! component VM
-    type(ESMF_VM)      :: vm_parent          ! reference to the parent VM
-
-    integer, pointer   :: petlist(:)         ! list of usable parent PETs 
+    integer             :: npetlist         ! number of PETs in petlist
+    integer, pointer    :: petlist(:)       ! list of usable parent PETs 
     
-    type(ESMF_VMPlan)  :: vmplan             ! reference to VMPlan
-    type(ESMF_Pointer) :: vm_info            ! holding pointer to info
-    type(ESMF_Pointer) :: vm_cargo           ! holding pointer to cargo
+    type(ESMF_VMPlan)   :: vmplan           ! reference to VMPlan
+    type(ESMF_Pointer)  :: vm_info          ! holding pointer to info
+    type(ESMF_Pointer)  :: vm_cargo         ! holding pointer to cargo
 
-    type(ESMF_State)   :: is, es   ! hold state args refs for thread-safety
-    type(ESMF_Clock)   :: argclock ! hold clock arg ref for thread-safety
+    type(ESMF_State)    :: is, es   ! hold state args refs for thread-safety
+    type(ESMF_Clock)    :: argclock ! hold clock arg ref for thread-safety
     
-#ifdef ESMF_IS_32BIT_MACHINE
-    integer            :: npetlist           ! number of PETs in petlist
-#endif
-
     logical  :: iAmParticipant     ! .false. : PET does not participate
                                    ! .true.  : PET participates in comp
 
-    logical :: multiphaseinit                ! multiple init, run, final
-    integer :: initphasecount                ! max inits, for error check
-    logical :: multiphaserun                 ! multiple init, run, final
-    integer :: runphasecount                 ! max runs, for error check
-    logical :: multiphasefinal               ! multiple init, run, final
-    integer :: finalphasecount               ! max finals, for error check
-    logical            :: vm_released        ! flag whether vm is running
+    logical             :: vm_released      ! flag whether vm is running
 
-    integer            :: status
-    type(ESMF_ContextFlag) :: contextflag    ! contextflag
+    type(ESMF_ContextFlag) :: contextflag   ! contextflag
     
-    type(ESMF_Method) :: currentMethod      ! current method component is in
-    integer           :: currentPhase       ! current phase of method
+    type(ESMF_Method)   :: currentMethod    ! current method component is in
+    integer             :: currentPhase     ! current phase of method
     
     ESMF_INIT_DECLARE
   end type
@@ -225,7 +209,7 @@ module ESMF_CompMod
   public ESMF_SETWRITERESTART, ESMF_SETREADRESTART
   public ESMF_SETVM, ESMF_SETSERVICES
   
-  public ESMF_SINGLEPHASE
+  public ESMF_SINGLEPHASE     ! deprecated!!!!
       
   ! These have to be public so other component types can use them, but 
   ! are not intended to be used outside the Framework code.
@@ -265,7 +249,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.187 2009/04/13 22:15:20 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.188 2009/05/27 20:31:19 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -402,7 +386,7 @@ contains
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
-    ! Assume failure until success
+    ! Assume not implemented until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
     
@@ -490,8 +474,7 @@ contains
 
 ! !INTERFACE:
   recursive subroutine ESMF_CompConstruct(compp, ctype, name, gridcomptype, &
-    dirPath, configFile, config, grid, clock, parent, vm, petlist, &
-    contextflag, rc)
+    dirPath, configFile, config, grid, clock, petlist, contextflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),    pointer               :: compp
@@ -503,8 +486,6 @@ contains
     type(ESMF_Config),       intent(in),  optional :: config
     type(ESMF_Grid),         intent(in),  optional :: grid
     type(ESMF_Clock),        intent(in),  optional :: clock
-    type(ESMF_CompClass),    pointer,     optional :: parent
-    type(ESMF_VM),           intent(in),  optional :: vm
     integer,                 intent(in),  optional :: petlist(:)
     type(ESMF_ContextFlag),  intent(in),  optional :: contextflag
     integer,                 intent(out), optional :: rc 
@@ -535,10 +516,6 @@ contains
 !    Default {\tt grid} for a Gridded {\tt Component}.
 !   \item[{[clock]}]
 !    Private {\tt clock} for this {\tt Component}.
-!   \item[{[parent]}]
-!    Parent component - if specified, inherit from here.
-!   \item[{[vm]}]
-!    Parent virtual machine.
 !   \item[{[petlist]}]
 !    List of {\tt PET}s for this component. The default is to use all PETs.
 !   \item[{[contextflag]}]
@@ -551,248 +528,202 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-        integer :: status                            ! local error status
-        integer :: allocstatus                       ! alloc/dealloc status
-        logical :: rcpresent                         ! did user specify rc?
-        character(len=ESMF_MAXSTR) :: fullpath       ! config file + dirPath
-        character(len=ESMF_MAXSTR) :: msgbuf
-        integer, pointer :: petlist_loc(:)
-        integer :: npets, mypet, i
+    integer :: localrc                        ! local return code
+    integer :: npets, mypet, i
+    integer, pointer :: petlist_loc(:)
+    character(len=ESMF_MAXSTR) :: fullpath    ! config file + dirPath
+    character(len=ESMF_MAXSTR) :: msgbuf
 
-        ! Initialize return code; assume failure until success is certain
-        status = ESMF_RC_NOT_IMPL
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_RC_NOT_IMPL
+    ! Assume not implemented until success
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! Test incoming compp object
+    if (.not.associated(compp)) then
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        "Not a valid pointer to ESMF Component object", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
+
+    ! Set values for the derived type members
+    compp%this = ESMF_NULL_POINTER
+    compp%base%this = ESMF_NULL_POINTER
+    compp%compstatus = ESMF_STATUS_INVALID 
+    compp%ctype = ctype
+    compp%configFile = "uninitialized"
+    compp%dirPath = "uninitialized"
+    compp%grid%this = ESMF_NULL_POINTER        
+    compp%npetlist = 0
+    nullify(compp%compw%compp)
+    nullify(compp%petlist)
+    compp%vm_info = ESMF_NULL_POINTER
+    compp%vm_cargo = ESMF_NULL_POINTER
+    nullify(compp%is%statep)
+    nullify(compp%es%statep)
+    compp%vm_released = .FALSE.
+    compp%contextflag = ESMF_CHILD_IN_NEW_VM
+
+    ! initialize base class, including component name
+    call ESMF_BaseCreate(compp%base, "Component", name, 0, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
+
+    ! parent VM
+    call ESMF_VMGetCurrent(vm=compp%vm_parent, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
+ 
+    ! for Gridded Components, the model type it represents
+    if (present(gridcomptype)) then
+      compp%gridcomptype = gridcomptype
+    else
+      compp%gridcomptype = ESMF_OTHER
+    endif
+
+    ! for config files, store a directory path and subsequent opens can
+    ! be relative to this or absolute.
+    if (present(dirPath)) then
+      compp%dirPath = dirPath
+    else
+      compp%dirPath = "."
+    endif
+
+    ! sort out what happens if both a already created config object and
+    ! a config filename are given.  the current rules are:  
+    if (present(configFile) .and. present(config)) then
+      ! a config object gets priority over a name if both are specified.
+      call ESMF_LogWrite("Warning: only 1 of Config object or filename should be given.", &
+        ESMF_LOG_WARNING)
+      call ESMF_LogWrite("Using Config object; ignoring Config filename.", &
+        ESMF_LOG_WARNING)
+      compp%config = config
+    else if (present(configFile)) then
+      ! name of a specific config file.  open it and store the config object.
+      compp%configFile = configFile
+      compp%config = ESMF_ConfigCreate(rc=localrc)
+      call ESMF_ConfigLoadFile(compp%config, configFile, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) then
+        ! try again with the dirPath concatinated on front
+        fullpath = trim(dirPath) // '/' // trim(configFile)
+        call ESMF_ConfigLoadFile(compp%config, fullpath, rc=localrc)
+        ! TODO: construct a msg string and then call something here.
+        ! if (ESMF_LogMsgFoundError(status, msgstr, rc)) return
+        if (localrc .ne. ESMF_SUCCESS) then
+          call ESMF_BaseDestroy(compp%base)
+          write(msgbuf, *) &
+            "ERROR: loading config file, unable to open either", &
+            " name = ", trim(configFile), " or name = ", trim(fullpath)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+            msgbuf, &
+            ESMF_CONTEXT, rc)
+          return
         endif
+      endif
+    else if (present(config)) then
+      ! store already opened config object
+      compp%config = config
+    else
+      ! need a way to set config to 0/invalid
+      ! compp%config = ?
+    endif
 
+    ! default grid for a Gridded Component
+    if (present(grid)) then
+      compp%grid = grid
+    else
+      ! TODO: do we need an "empty grid" object?
+    endif
 
-        ! Fill in values
-        if (.not.associated(compp)) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                    "Uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc)
-            return
+    ! default clock
+    if (present(clock)) then
+      compp%clock = clock
+    else
+      !! TODO: Fix this to work
+      !!compp%clock = ESMF_NULL_POINTER
+    endif
+
+    ! petlist
+    if (present(petlist)) then
+      compp%npetlist = size(petlist)
+      allocate(petlist_loc(compp%npetlist), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "local petlist", &
+        ESMF_CONTEXT, rc)) return 
+      compp%petlist => petlist_loc
+      compp%petlist = petlist     ! copy contents of petlist
+    else
+      compp%npetlist = 0
+      allocate(compp%petlist(0), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "local petlist", &
+        ESMF_CONTEXT, rc)) return 
+    endif
+
+    ! check for consistency between contextflag and petlist
+    call ESMF_VMGet(vm=compp%vm_parent, localPet=mypet, petCount=npets, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
+    if (present(contextflag)) then
+      if (contextflag==ESMF_CHILD_IN_PARENT_VM) then
+        if ((compp%npetlist .gt. 0) .and. (compp%npetlist .lt. npets)) then
+          ! conflict between contextflag and petlist -> bail out
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+            "Conflict between contextflag and petlist arguments", &
+            ESMF_CONTEXT, rc) 
+          return
         endif
+      endif
+      compp%contextflag = contextflag
+    else
+      compp%contextflag = ESMF_CHILD_IN_NEW_VM    ! default
+    endif
+    
+    ! set the participation flag
+    compp%iAmParticipant = .false.  ! reset
+    if (compp%npetlist .gt. 0) then
+      ! see if mypet is in the petlist
+      do i=1, compp%npetlist
+        if (compp%petlist(i) == mypet) compp%iAmParticipant = .true.  ! set
+      enddo
+    else
+      ! no petlist -> all PETs participate
+      compp%iAmParticipant = .true. ! set
+    endif
 
+    ! instantiate a default VMPlan
+    call ESMF_VMPlanConstruct(vmplan=compp%vmplan, vm=compp%vm_parent, &
+      npetlist=compp%npetlist, petlist=compp%petlist, &
+      contextflag=compp%contextflag, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
+                              
+    ! initialize the remaining VM members in compp
+    compp%vm_info = ESMF_NULL_POINTER
+    compp%vm_cargo = ESMF_NULL_POINTER
+    compp%vm_released = .false.
+                              
+    ! Create an empty subroutine/internal state table.
+    call c_ESMC_FTableCreate(compp%this, localrc) 
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
 
-        ! Check init status of arguments
-        ! (a non-present pointer argument seems to cause an error on some systems)
-!!        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, parent, rc)
+    ! current method/phase
+    compp%currentMethod = ESMF_SETNONE
+    compp%currentPhase  = 0
 
+    ! ready   
+    compp%compstatus = ESMF_STATUS_READY
 
-        ! component type
-        compp%ctype = ctype
+    ! Set init code
+    ESMF_INIT_SET_CREATED(compp)
 
-        ! set initial values for the derived type members, so if they
-        ! do not get set later they have known initial values.
-        compp%this = ESMF_NULL_POINTER
-        compp%base%this = ESMF_NULL_POINTER
-        compp%compstatus = ESMF_STATUS_INVALID 
-        compp%ctype = ESMF_COMPTYPE_GRID
-        ! type(ESMF_Config) compp%config              ! configuration object
-        ! type(ESMF_Clock) compp%clock                ! private component clock
-        compp%configFile = "uninitialized"
-        compp%dirPath = "uninitialized"
-	compp%grid%this = ESMF_NULL_POINTER        
-	compp%npetlist = 0
-        ! type(ESMF_GridCompType) compp%gridcomptype
-        nullify(compp%parent)
-        nullify(compp%compw%compp)
-        ! type(ESMF_VM)      compp%vm
-        ! type(ESMF_VM)      compp%vm_parent
-        nullify(compp%petlist)
-        ! type(ESMF_VMPlan)  compp%vmplan
-        compp%vm_info = ESMF_NULL_POINTER
-        compp%vm_cargo = ESMF_NULL_POINTER
-        nullify(compp%is%statep)
-        nullify(compp%es%statep)
-        compp%multiphaseinit = .FALSE.
-        compp%initphasecount = 0
-        compp%multiphaserun = .FALSE.
-        compp%runphasecount = 0 
-        compp%multiphasefinal = .FALSE.
-        compp%finalphasecount = 0 
-        compp%vm_released = .FALSE.
-
-        compp%status = 0
-
-        compp%contextflag = ESMF_CHILD_IN_NEW_VM
-
-        ! now continue with rest of normal initialization.
-
-        ! initialize base class, including component name
-        call ESMF_BaseCreate(compp%base, "Component", name, 0, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        ! parent VM
-        if (present(vm)) then
-          compp%vm_parent = vm
-        else
-          ! if parent comp was specified then use its VM, else use current VM.
-          if (present(parent)) then
-            compp%vm_parent = parent%vm
-          else
-            call ESMF_VMGetCurrent(vm=compp%vm_parent, rc=status)
-            if (ESMF_LogMsgFoundError(status, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rc)) return
-          endif
-        endif
-
-        ! for Gridded Components, the model type it represents
-        if (present(gridcomptype)) then
-          compp%gridcomptype = gridcomptype
-        else
-          compp%gridcomptype = ESMF_OTHER
-        endif
-
-        ! for config files, store a directory path and subsequent opens can
-        !  be relative to this or absolute.
-        if (present(dirPath)) then
-          compp%dirPath = dirPath
-        else
-          compp%dirPath = "."
-        endif
-
-        ! sort out what happens if both a already created config object and
-        ! a config filename are given.  the current rules are:  a config object
-        ! gets priority over a name if both are specified.
-        if (present(configFile) .and. present(config)) then
-            call ESMF_LogWrite("Warning: only 1 of Config object or filename should be given.", &
-                 ESMF_LOG_WARNING)
-
-            call ESMF_LogWrite("Using Config object; ignoring Config filename.", &
-                 ESMF_LOG_WARNING)
-            compp%config = config
-
-        ! name of a specific config file.  open it and store the config object.
-        else if (present(configFile)) then
-          compp%configFile = configFile
-          compp%config = ESMF_ConfigCreate(status)
-          call ESMF_ConfigLoadFile(compp%config, configFile, rc=status)
-          if (status .ne. ESMF_SUCCESS) then
-              ! try again with the dirPath concatinated on front
-              fullpath = trim(dirPath) // '/' // trim(configFile)
-              call ESMF_ConfigLoadFile(compp%config, fullpath, rc=status)
-              ! TODO: construct a msg string and then call something here.
-              ! if (ESMF_LogMsgFoundError(status, msgstr, rc)) return
-              if (status .ne. ESMF_SUCCESS) then
-                call ESMF_BaseDestroy(compp%base)
-                write(msgbuf, *) &
-                  "ERROR: loading config file, unable to open either", &
-                  " name = ", trim(configFile), " or name = ", trim(fullpath)
-                call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-                                         msgbuf, &
-                                         ESMF_CONTEXT, rc)
-                return
-              endif
-          endif
-        else if (present(config)) then
-          ! store already opened config object
-          compp%config = config
-        else
-          ! need a way to set config to 0/invalid
-          ! compp%config = ?
-        endif
-
-        ! default grid for a Gridded Component
-        if (present(grid)) then
-          compp%grid = grid
-        else
-          ! TODO: do we need an "empty grid" object?
-        endif
-
-        ! default clock
-        if (present(clock)) then
-          compp%clock = clock
-        else
-          !! TODO: Fix this to work
-          !!compp%clock = ESMF_NULL_POINTER
-        endif
-
-        ! petlist
-        if (present(petlist)) then
-          compp%npetlist = size(petlist)
-          allocate(petlist_loc(compp%npetlist), stat=allocstatus)
-          if (ESMF_LogMsgFoundAllocError(allocstatus, "local petlist", &
-            ESMF_CONTEXT, rc)) return 
-          compp%petlist => petlist_loc
-          compp%petlist = petlist     ! copy contents of petlist
-        else
-          compp%npetlist = 0
-          allocate(compp%petlist(0), stat=allocstatus)
-          if (ESMF_LogMsgFoundAllocError(allocstatus, "local petlist", &
-            ESMF_CONTEXT, rc)) return 
-        endif
-
-        ! check for consistency between contextflag and petlist
-        call ESMF_VMGet(vm=compp%vm_parent, localPet=mypet, petCount=npets, &
-          rc=status)
-        if (ESMF_LogMsgFoundError(status, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rc)) return
-        if (present(contextflag)) then
-          if (contextflag==ESMF_CHILD_IN_PARENT_VM) then
-            if ((compp%npetlist .gt. 0) .and. (compp%npetlist .lt. npets)) then
-              ! conflict between contextflag and petlist -> bail out
-              call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-                      "Conflict between contextflag and petlist arguments", &
-                                       ESMF_CONTEXT, rc) 
-              return
-            endif
-          endif
-          compp%contextflag = contextflag
-        else
-          compp%contextflag = ESMF_CHILD_IN_NEW_VM    ! default
-        endif
-        
-        ! set the participation flag
-        compp%iAmParticipant = .false.  ! reset
-        if (compp%npetlist .gt. 0) then
-          ! see if mypet is in the petlist
-          do i=1, compp%npetlist
-            if (compp%petlist(i) == mypet) compp%iAmParticipant = .true.  ! set
-          enddo
-        else
-          ! no petlist -> all PETs participate
-          compp%iAmParticipant = .true. ! set
-        endif
-
-        ! instantiate a default VMPlan
-        call ESMF_VMPlanConstruct(vmplan=compp%vmplan, vm=compp%vm_parent, &
-          npetlist=compp%npetlist, petlist=compp%petlist, &
-          contextflag=compp%contextflag, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rc)) return
-                                  
-        ! initialize the remaining VM members in compp
-        compp%vm_info = ESMF_NULL_POINTER
-        compp%vm_cargo = ESMF_NULL_POINTER
-        compp%vm_released = .false.
-                                  
-        ! Create an empty subroutine/internal state table.
-        call c_ESMC_FTableCreate(compp%this, status) 
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        ! current method/phase
-        compp%currentMethod = ESMF_SETNONE
-        compp%currentPhase  = 0
-
-        ! ready   
-        compp%compstatus = ESMF_STATUS_READY
-
-        ! Set init code
-        ESMF_INIT_SET_CREATED(compp)
-
-        ! Set return values
-        if (rcpresent) rc = ESMF_SUCCESS
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_CompConstruct
 !------------------------------------------------------------------------------
@@ -824,79 +755,71 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-        integer :: status                       ! local error status
-        integer :: allocstatus                  ! alloc/dealloc status
-        logical :: rcpresent                    ! did user specify rc?
+    integer :: localrc                        ! local return code
 
-        ! Initialize return code; assume failure until success is certain
-        status = ESMF_RC_NOT_IMPL
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_RC_NOT_IMPL
-        endif
+    ! Assume not implemented until success
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
+    ! Test incoming compp object
+    if (.not.associated(compp)) then
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        "Not a valid pointer to ESMF Component object", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
 
-        if (.not.associated(compp)) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                    "Uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc)
-            return
-        endif
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
+    if (compp%vm_info /= ESMF_NULL_POINTER) then
+      ! shut down this component's VM
+      call ESMF_VMShutdown(vm=compp%vm_parent, vmplan=compp%vmplan, &
+        vm_info=compp%vm_info, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+    endif
 
-        ! Check init status of arguments
-        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+    ! destruct the VMPlan
+    call ESMF_VMPlanDestruct(vmplan=compp%vmplan, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
 
+    ! deallocate space held for petlist
+    deallocate(compp%petlist, stat=localrc)
+    if (ESMF_LogMsgFoundDeallocError(localrc, "local petlist", &
+      ESMF_CONTEXT, rc)) return 
 
-        if (compp%vm_info /= ESMF_NULL_POINTER) then
-          ! shut down this component's VM
-          call ESMF_VMShutdown(vm=compp%vm_parent, vmplan=compp%vmplan, &
-            vm_info=compp%vm_info, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
-        endif
+    ! mark obj invalid
+    compp%compstatus = ESMF_STATUS_INVALID
 
-        ! destruct the VMPlan
-        call ESMF_VMPlanDestruct(vmplan=compp%vmplan, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rc)) return
+    ! call C++ to release function and data pointer tables.
+    call c_ESMC_FTableDestroy(compp%this, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
 
-        ! deallocate space held for petlist
-        deallocate(compp%petlist, stat=allocstatus)
-        if (ESMF_LogMsgFoundAllocError(allocstatus, "local petlist", &
-          ESMF_CONTEXT, rc)) return 
+    ! Release attributes and other things on base class
+    call ESMF_BaseDestroy(compp%base, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
+    
+    ! Release attributes on config
+    if(compp%configFile .ne. "uninitialized" ) then
+      call ESMF_ConfigDestroy(compp%config, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+    endif
 
-        ! mark obj invalid
-        compp%compstatus = ESMF_STATUS_INVALID
+    ! Set init code
+    ESMF_INIT_SET_DELETED(compp)
 
-        ! call C++ to release function and data pointer tables.
-        call c_ESMC_FTableDestroy(compp%this, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        ! Release attributes and other things on base class
-        call ESMF_BaseDestroy(compp%base, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-        
-        ! Release attributes on config
-        if(compp%configFile .ne. "uninitialized" ) then
-        call ESMF_ConfigDestroy(compp%config, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-        endif
-
-        ! Set init code
-        ESMF_INIT_SET_DELETED(compp)
-
-        ! Set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_CompDestruct
 !------------------------------------------------------------------------------
@@ -928,7 +851,9 @@ contains
 ! Component Execute method used by GridComp and CplComp for:
 !   * Initialize,
 !   * Run,
-!   * Finalize.
+!   * Finalize,
+!   * ReadRestart,
+!   * WriteRestart.
 !
 ! Call into the associated user code for a component's method.
 !
@@ -971,15 +896,15 @@ contains
     type(ESMF_State)        :: dummyis, dummyes
     type(ESMF_Clock)        :: dummyclock
 
-    ! Initialize return code; assume failure until success is certain
+    ! Initialize return code; assume not implemented until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
         
-    ! Check input
+    ! Test incoming compp object
     if (.not.associated(compp)) then
       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-        "Uninitialized or destroyed component", &
-        ESMF_CONTEXT, rc) 
+        "Not a valid pointer to ESMF Component object", &
+        ESMF_CONTEXT, rc)
       return
     endif
 
@@ -1088,7 +1013,7 @@ contains
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
-    ! return successfully
+    ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_CompExecute
@@ -1134,98 +1059,95 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-        integer :: status                       ! local error status
-        logical :: rcpresent                    ! did user specify rc?
+    integer                 :: localrc      ! local return code
 
-        ! Initialize return code; assume failure until success is certain
-        status = ESMF_RC_NOT_IMPL
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_RC_NOT_IMPL
-        endif
+    ! Initialize return code; assume not implemented until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        
+    ! Test incoming compp object
+    if (.not.associated(compp)) then
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        "Not a valid pointer to ESMF Component object", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
-        if (.not.associated(compp)) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                     "Uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc)
-            return
-        endif
+    if (compp%compstatus .ne. ESMF_STATUS_READY) then
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        "uninitialized or destroyed component", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
 
-        ! Check init status of arguments
-        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+    if (present(name)) then
+      call ESMF_GetName(compp%base, name, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+    endif
 
+    if (present(ctype)) then
+      ctype = compp%ctype
+    endif
 
-        if (compp%compstatus .ne. ESMF_STATUS_READY) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                     "uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc)
-            return
-        endif
+    if (present(vm)) then
+      vm = compp%vm
+    endif
 
-        if (present(name)) then
-          call ESMF_GetName(compp%base, name, status)
-        endif
+    if (present(vm_parent)) then
+      vm_parent = compp%vm_parent
+    endif
 
-        if (present(ctype)) then
-          ctype = compp%ctype
-        endif
+    if (present(vmplan)) then
+      vmplan = compp%vmplan
+    endif
 
-        if (present(vm)) then
-          vm = compp%vm
-        endif
+    if (present(vm_info)) then
+      vm_info = compp%vm_info
+    endif
 
-        if (present(vm_parent)) then
-          vm_parent = compp%vm_parent
-        endif
+    if (present(contextflag)) then
+      contextflag = compp%contextflag
+    endif
 
-        if (present(vmplan)) then
-          vmplan = compp%vmplan
-        endif
+    if (present(gridcomptype)) then
+      gridcomptype = compp%gridcomptype
+    endif
 
-        if (present(vm_info)) then
-          vm_info = compp%vm_info
-        endif
+    if (present(grid)) then
+      grid = compp%grid
+    endif
 
-        if (present(contextflag)) then
-          contextflag = compp%contextflag
-        endif
+    if (present(clock)) then
+      clock = compp%clock
+    endif
 
-        if (present(gridcomptype)) then
-          gridcomptype = compp%gridcomptype
-        endif
+    if (present(dirPath)) then
+      dirPath = compp%dirPath
+    endif
 
-        if (present(grid)) then
-          grid = compp%grid
-        endif
+    if (present(configFile)) then
+      configFile = compp%configFile
+    endif
 
-        if (present(clock)) then
-          clock = compp%clock
-        endif
+    if (present(config)) then
+      config = compp%config
+    endif
 
-        if (present(dirPath)) then
-          dirPath = compp%dirPath
-        endif
+    if (present(currentMethod)) then
+      currentMethod = compp%currentMethod
+    endif
 
-        if (present(configFile)) then
-          configFile = compp%configFile
-        endif
+    if (present(currentPhase)) then
+      currentPhase = compp%currentPhase
+    endif
 
-        if (present(config)) then
-          config = compp%config
-        endif
-
-        if (present(currentMethod)) then
-          currentMethod = compp%currentMethod
-        endif
-
-        if (present(currentPhase)) then
-          currentPhase = compp%currentPhase
-        endif
-
-        ! Set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_CompGet
 !------------------------------------------------------------------------------
@@ -1257,43 +1179,37 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-        integer :: status                       ! local error status
-        logical :: rcpresent                    ! did user specify rc?
+    integer                 :: localrc      ! local return code
 
-        ! Initialize return code; assume failure until success is certain
-        status = ESMF_RC_NOT_IMPL
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_RC_NOT_IMPL
-        endif
-
-        ! Initialize output in case of error
-        ESMF_CompIsPetLocal = .false.
-
-        if (.not.associated(compp)) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                     "Uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc)
-            return
-        endif
-
-        ! Check init status of arguments
-        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
-
-
-        if (compp%compstatus .ne. ESMF_STATUS_READY) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                     "Unini/destroyed comp", &
-                                     ESMF_CONTEXT, rc)
-            return
-        endif
+    ! Initialize return code; assume not implemented until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
         
-        ESMF_CompIsPetLocal = compp%iAmParticipant
+    ! Initialize output in case of error
+    ESMF_CompIsPetLocal = .false.
 
+    ! Test incoming compp object
+    if (.not.associated(compp)) then
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        "Not a valid pointer to ESMF Component object", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+
+    if (compp%compstatus .ne. ESMF_STATUS_READY) then
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        "uninitialized or destroyed component", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
+    
+    ESMF_CompIsPetLocal = compp%iAmParticipant
  
-        ! Set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_CompIsPetLocal
 !------------------------------------------------------------------------------
@@ -1326,56 +1242,49 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-       integer :: status                       ! local error status
-       logical :: rcpresent                    ! did user specify rc?
-       character (len=6) :: defaultopts
-       character (len=ESMF_MAXSTR) :: cname
-       !character (len=ESMF_MAXSTR) :: msgbuf
+    integer                 :: localrc      ! local return code
+    character(len=6)        :: defaultopts
+    character(len=ESMF_MAXSTR) :: cname
 
-       ! Initialize return code; assume failure until success is certain
-       status = ESMF_RC_NOT_IMPL
-       rcpresent = .FALSE.
-       if (present(rc)) then
-         rcpresent = .TRUE.
-         rc = ESMF_RC_NOT_IMPL
-       endif
+    ! Initialize return code; assume not implemented until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-       defaultopts = "brief"
+    defaultopts = "brief"
 
-       ! Parse options and decide what to print
-       if(present(options)) then
-           ! TODO:  decide what to print
-       endif
+    ! Parse options and decide what to print
+    if(present(options)) then
+      ! TODO:  decide what to print
+    endif
 
-       if (.not.associated(compp)) then
-          !nsc  call ESMF_LogWrite("Invalid or uninitialized Component",  &
-          !nsc                      ESMF_LOG_INFO)
-          write (*,*)  "Invalid or uninitialized Component"
-          return
-       endif
+    if (.not.associated(compp)) then
+      !nsc  call ESMF_LogWrite("Invalid or uninitialized Component",  &
+      !nsc                      ESMF_LOG_INFO)
+      write (*,*)  "Invalid or uninitialized Component"
+      return
+    endif
 
 
-        ! Check init status of arguments
-        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
-       if (compp%compstatus .ne. ESMF_STATUS_READY) then
-          !nsc  call ESMF_LogWrite("Invalid or uninitialized Component",  &
-          !nsc                      ESMF_LOG_INFO)
-          write (*,*)  "Invalid or uninitialized Component"
-          return
-       endif
+    if (compp%compstatus .ne. ESMF_STATUS_READY) then
+      !nsc  call ESMF_LogWrite("Invalid or uninitialized Component",  &
+      !nsc                      ESMF_LOG_INFO)
+      write (*,*)  "Invalid or uninitialized Component"
+      return
+    endif
 
-       call ESMF_GetName(compp%base, cname, status)
-       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-     !jw  write (msgbuf,*) " Component name = ", trim(cname)
-     !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-       write (*,*) " Component name = ", trim(cname)
+    call ESMF_GetName(compp%base, cname, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
        
-       ! TODO: add more info here
+    write (*,*) " Component name = ", trim(cname)
+    
+    ! TODO: add more info here
 
-       ! Set return values
-       if (rcpresent) rc = ESMF_SUCCESS
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_CompPrint
 !------------------------------------------------------------------------------
@@ -1413,75 +1322,70 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-        integer :: status                       ! local error status
-        logical :: rcpresent                    ! did user specify rc?
+    integer                 :: localrc      ! local return code
 
-        ! Initialize return code; assume failure until success is certain
-        status = ESMF_RC_NOT_IMPL
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_RC_NOT_IMPL
-        endif
+    ! Initialize return code; assume not implemented until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! Test incoming compp object
+    if (.not.associated(compp)) then
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        "Not a valid pointer to ESMF Component object", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
 
-        if (.not.associated(compp)) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                     "Uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc)
-            return
-        endif
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
-        ! Check init status of arguments
-        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+    if (compp%compstatus .ne. ESMF_STATUS_READY) then
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        "uninitialized or destroyed component", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
 
+    if (present(name)) then
+      call ESMF_SetName(compp%base, name, "Component", rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
-        if (compp%compstatus .ne. ESMF_STATUS_READY) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                     "uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc)
-            return
-        endif
+    if (present(vm)) then
+      compp%vm = vm
+    endif
 
-        if (present(name)) then
-          call ESMF_SetName(compp%base, name, "Component", status)
-        endif
+    if (present(vm_info)) then
+      compp%vm_info = vm_info
+    endif
 
-        if (present(vm)) then
-          compp%vm = vm
-        endif
+    if (present(gridcomptype)) then
+      compp%gridcomptype = gridcomptype
+    endif
 
-        if (present(vm_info)) then
-          compp%vm_info = vm_info
-        endif
+    if (present(grid)) then
+      compp%grid = grid
+    endif
 
-        if (present(gridcomptype)) then
-          compp%gridcomptype = gridcomptype
-        endif
+    if (present(clock)) then
+      compp%clock = clock
+    endif
 
-        if (present(grid)) then
-          compp%grid = grid
-        endif
+    if (present(dirPath)) then
+      compp%dirPath = dirPath
+    endif
 
-        if (present(clock)) then
-          compp%clock = clock
-        endif
+    if (present(configFile)) then
+      compp%configFile = configFile
+    endif
 
-        if (present(dirPath)) then
-          compp%dirPath = dirPath
-        endif
+    if (present(config)) then
+      compp%config = config
+    endif
 
-        if (present(configFile)) then
-          compp%configFile = configFile
-        endif
-
-        if (present(config)) then
-          compp%config = config
-        endif
-
-
-        ! Set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_CompSet
 !------------------------------------------------------------------------------
@@ -1526,46 +1430,41 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer :: status                     ! local error status
-    logical :: rcpresent
+    integer                 :: localrc      ! local return code
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_RC_NOT_IMPL
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_RC_NOT_IMPL
+    ! Initialize return code; assume not implemented until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Test incoming compp object
+    if (.not.associated(compp)) then
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        "Not a valid pointer to ESMF Component object", &
+        ESMF_CONTEXT, rc)
+      return
     endif
 
-
-        if (.not.associated(compp)) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                     "Uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc)
-            return
-        endif
-
-        ! Check init status of arguments
-        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
     ! ensure that this is not a child_in_parent_vm plan
     if (compp%contextflag == ESMF_CHILD_IN_PARENT_VM) then
       call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-      "CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
-                               ESMF_CONTEXT, rc)
-            return
+        "CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
+        ESMF_CONTEXT, rc)
+      return
     endif
 
     ! call CompClass method
     call ESMF_VMPlanMaxPEs(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      compp%npetlist, compp%petlist, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      compp%npetlist, compp%petlist, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
 
-    ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_CompSetVMMaxPEs
 !------------------------------------------------------------------------------
@@ -1610,46 +1509,41 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer :: status                     ! local error status
-    logical :: rcpresent
+    integer                 :: localrc      ! local return code
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_RC_NOT_IMPL
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_RC_NOT_IMPL
+    ! Initialize return code; assume not implemented until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Test incoming compp object
+    if (.not.associated(compp)) then
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        "Not a valid pointer to ESMF Component object", &
+        ESMF_CONTEXT, rc)
+      return
     endif
 
-        if (.not.associated(compp)) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                     "Uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc)
-            return
-        endif
-
-
-        ! Check init status of arguments
-        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
     ! ensure that this is not a child_in_parent_vm plan
     if (compp%contextflag == ESMF_CHILD_IN_PARENT_VM) then
       call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-      "CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
-                               ESMF_CONTEXT, rc)
-            return
+        "CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
+        ESMF_CONTEXT, rc)
+      return
     endif
 
     ! call CompClass method
     call ESMF_VMPlanMaxThreads(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      compp%npetlist, compp%petlist, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      compp%npetlist, compp%petlist, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
 
-    ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_CompSetVMMaxThreads
 !------------------------------------------------------------------------------
@@ -1694,46 +1588,41 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer :: status                     ! local error status
-    logical :: rcpresent
+    integer                 :: localrc      ! local return code
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_RC_NOT_IMPL
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_RC_NOT_IMPL
+    ! Initialize return code; assume not implemented until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Test incoming compp object
+    if (.not.associated(compp)) then
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        "Not a valid pointer to ESMF Component object", &
+        ESMF_CONTEXT, rc)
+      return
     endif
 
-
-        if (.not.associated(compp)) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                     "Uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc)
-            return
-        endif
-
-        ! Check init status of arguments
-        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
     ! ensure that this is not a child_in_parent_vm plan
     if (compp%contextflag == ESMF_CHILD_IN_PARENT_VM) then
       call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-      "CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
-                               ESMF_CONTEXT, rc)
-            return
+        "CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
+        ESMF_CONTEXT, rc)
+      return
     endif
 
     ! call CompClass method
     call ESMF_VMPlanMinThreads(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      compp%npetlist, compp%petlist, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      compp%npetlist, compp%petlist, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
 
-    ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_CompSetVMMinThreads
 !------------------------------------------------------------------------------
@@ -1758,53 +1647,34 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-       character (len=6) :: defaultopts
-       integer :: status                       ! local error status
-       logical :: rcpresent                    ! did user specify rc?
+    integer                 :: localrc      ! local return code
 
-       ! Initialize return code; assume failure until success is certain
-       status = ESMF_RC_NOT_IMPL
-       rcpresent = .FALSE.
-       if (present(rc)) then
-         rcpresent = .TRUE.
-         rc = ESMF_RC_NOT_IMPL
-       endif
+    ! Initialize return code; assume not implemented until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-        if (.not.associated(compp)) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                     "Uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc)
-            return
-        endif
+    ! Test incoming compp object
+    if (.not.associated(compp)) then
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        "Not a valid pointer to ESMF Component object", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
-        ! Check init status of arguments
-        ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+    if (compp%compstatus .ne. ESMF_STATUS_READY) then
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        "Unini/destroyed comp", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
 
-       if (compp%compstatus .ne. ESMF_STATUS_READY) then
-           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                    "Unini/destroyed comp", &
-                                    ESMF_CONTEXT, rc)
-            return
-       endif
+    ! TODO: add code here
 
-       defaultopts = "brief"
-
-       ! Make sure object is internally consistent
-       if(present(options)) then
-           ! validate object at the requested level
-       else
-           ! do default validation
-       endif
-
-       ! TODO: add code here
-
-       ! Use LogErr to handle return code (ESMF_SUCCESS for *Validate)
-       ! if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-       !    ESMF_CONTEXT, rcToReturn=rc)) return
-
-       ! set return values
-       if (rcpresent) rc = ESMF_SUCCESS
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_CompValidate
 !------------------------------------------------------------------------------
