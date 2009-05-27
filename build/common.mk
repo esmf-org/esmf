@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.264 2009/05/07 16:06:11 theurich Exp $
+#  $Id: common.mk,v 1.265 2009/05/27 22:38:24 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -194,6 +194,10 @@ endif
 
 ifndef ESMF_TESTSHAREDOBJ
 export ESMF_TESTSHAREDOBJ = default
+endif
+
+ifndef ESMF_TESTOPENMP
+export ESMF_TESTOPENMP = default
 endif
 
 ifndef ESMF_TESTHARNESS
@@ -1687,8 +1691,10 @@ endif
 #
 # verify that either there is no SYS_TESTS_CONFIG file, or if one exists that
 # the string Testmpmd or Nontestmpmd matches the current setting of the
-# ESMF_TESTMPMD environment variable and that the string Testsharedobj or Nontestsharedobj 
-# matches the current setting of the  ESMF_TESTSHAREDOBJ environment variable.  
+# ESMF_TESTMPMD environment variable, that the string Testsharedobj or Nontestsharedobj 
+# matches the current setting of the  ESMF_TESTSHAREDOBJ environment variable and that
+# that the string Testopenmp or Nontestopenmp matches the current setting of the
+# ESMF_TESTOPENMP environment variable.
 #
 update_sys_tests_flags:
 ifeq ($(ESMF_TESTMPMD),ON)
@@ -1703,6 +1709,13 @@ ifeq ($(ESMF_TESTSHAREDOBJ),ON)
 	$(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG);
 else
 	$(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*estsharedobj/ Nontestsharedobj/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
+	$(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG);
+endif
+ifeq ($(ESMF_TESTOPENMP),ON)
+	$(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*estopenmp/ Testopenmp/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
+	$(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG);
+else
+	$(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*estopenmp/ Nontestopenmp/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
 	$(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG);
 endif
 
