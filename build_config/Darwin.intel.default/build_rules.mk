@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.11 2008/11/14 01:26:34 theurich Exp $
+# $Id: build_rules.mk,v 1.12 2009/05/28 16:29:25 svasquez Exp $
 #
 # Darwin.intel.default
 #
@@ -118,14 +118,14 @@ endif
 ifeq ($(ESMF_ABISTRING),x86_64_small)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
-ESMF_F90COMPILEOPTS       += -m64 -mcmodel=small
-ESMF_F90LINKOPTS          += -m64 -mcmodel=small
+ESMF_F90COMPILEOPTS       += -m64 -mcmodel=small -openmp
+ESMF_F90LINKOPTS          += -m64 -mcmodel=small -openmp
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_medium)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
-ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
-ESMF_F90LINKOPTS          += -m64 -mcmodel=medium
+ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium -openmp
+ESMF_F90LINKOPTS          += -m64 -mcmodel=medium -openmp
 endif
 ifeq ($(ESMF_ABISTRING),ia64_64)
 ESMF_CXXCOMPILEOPTS       += -size_lp64
