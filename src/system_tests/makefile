@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.68 2009/05/27 23:11:32 svasquez Exp $ 
+# $Id: makefile,v 1.69 2009/05/28 17:35:34 svasquez Exp $ 
 
 ALL: build_system_tests
 
@@ -18,6 +18,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_ArrayRedist \
             ESMF_ArrayRedistMPMD \
             ESMF_ArrayRedistSharedObj \
+	    ESMF_ArrayRedistOpenMP \
             ESMF_ArrayRedist3D \
             ESMF_DirectCoupling \
             ESMF_ArrayBundleSparseMatMul \
@@ -38,7 +39,6 @@ DIRS      = ESMF_CompCreate \
 #           ESMF_RowReduce \        gjt: currently the code depends on DELayout comms, but it should be covered/converted to newArray
 #           ESMF_MergeCoupling \
 #           ESMF_CplOnExclDEs \
-#i	    ESMF_ArrayRedistOpenMP \
 # Removed for new Regrid construction. cmd 8/07.
 #           ESMF_FieldRegrid \
 #           ESMF_FieldRegridConserv \
