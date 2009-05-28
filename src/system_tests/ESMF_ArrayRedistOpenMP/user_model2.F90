@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.1 2009/05/27 22:35:55 svasquez Exp $
+! $Id: user_model2.F90,v 1.2 2009/05/28 18:34:06 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -168,11 +168,11 @@ module user_model2
           + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
           + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi))) > 1.d-8) then
           rc=ESMF_FAILURE
-          return ! bail out
         endif
       enddo
     enddo
 !$omp end parallel do
+    if (rc/=ESMF_SUCCESS) return ! bail out
  
     print *, "User Comp2 Run returning"
 
