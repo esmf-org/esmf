@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.104 2009/05/22 17:32:26 feiliu Exp $
+# $Id: makefile,v 1.105 2009/05/28 16:22:51 svasquez Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -98,6 +98,7 @@ script_info:
 	-@echo "ESMF_TESTWITHTHREADS:   $(ESMF_TESTWITHTHREADS)"
 	-@echo "ESMF_TESTMPMD:          $(ESMF_TESTMPMD)"
 	-@echo "ESMF_TESTSHAREDOBJ:     $(ESMF_TESTSHAREDOBJ)"
+	-@echo "ESMF_TESTOPENMP:	$(ESMF_TESTOPENMP)"
 	-@echo "ESMF_TESTHARNESS:    	$(ESMF_TESTHARNESS)"
 	-@echo "ESMF_MPIRUN:            $(ESMF_MPIRUN)"
 	-@if [ -n "$(ESMF_MPISCRIPTOPTIONS)" ] ; then \
