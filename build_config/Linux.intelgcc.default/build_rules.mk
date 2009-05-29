@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.16 2009/01/12 18:23:05 theurich Exp $
+# $Id: build_rules.mk,v 1.17 2009/05/29 19:32:26 theurich Exp $
 #
 # Linux.intelgcc.default
 #
@@ -142,11 +142,19 @@ endif
 # Conditionally add pthread compiler and linker flags
 #
 ifeq ($(ESMF_PTHREADS),ON)
-ESMF_F90COMPILEOPTS +=  -threads
-ESMF_CXXCOMPILEOPTS +=  -pthread
+ESMF_F90COMPILEOPTS += -threads
+ESMF_CXXCOMPILEOPTS += -pthread
 ESMF_F90LINKOPTS    += -threads
 ESMF_CXXLINKOPTS    += -pthread
 endif
+
+############################################################
+# OpenMP compiler and linker flags
+#
+ESMF_OPENMP_F90COMPILEOPTS += -openmp
+ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
+ESMF_OPENMP_F90LINKOPTS    += -openmp
+ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)

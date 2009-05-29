@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.12 2009/05/28 16:29:25 svasquez Exp $
+# $Id: build_rules.mk,v 1.13 2009/05/29 19:32:25 theurich Exp $
 #
 # Darwin.intel.default
 #
@@ -118,14 +118,14 @@ endif
 ifeq ($(ESMF_ABISTRING),x86_64_small)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
-ESMF_F90COMPILEOPTS       += -m64 -mcmodel=small -openmp
-ESMF_F90LINKOPTS          += -m64 -mcmodel=small -openmp
+ESMF_F90COMPILEOPTS       += -m64 -mcmodel=small
+ESMF_F90LINKOPTS          += -m64 -mcmodel=small
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_medium)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
-ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium -openmp
-ESMF_F90LINKOPTS          += -m64 -mcmodel=medium -openmp
+ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
+ESMF_F90LINKOPTS          += -m64 -mcmodel=medium
 endif
 ifeq ($(ESMF_ABISTRING),ia64_64)
 ESMF_CXXCOMPILEOPTS       += -size_lp64
@@ -138,11 +138,19 @@ endif
 # Conditionally add pthread compiler and linker flags
 #
 ifeq ($(ESMF_PTHREADS),ON)
-ESMF_F90COMPILEOPTS +=  -threads
-ESMF_CXXCOMPILEOPTS +=  -pthread
+ESMF_F90COMPILEOPTS += -threads
+ESMF_CXXCOMPILEOPTS += -pthread
 ESMF_F90LINKOPTS    += -threads
 ESMF_CXXLINKOPTS    += -pthread
 endif
+
+############################################################
+# OpenMP compiler and linker flags
+#
+ESMF_OPENMP_F90COMPILEOPTS += -openmp
+ESMF_OPENMP_CXXCOMPILEOPTS += -openmp
+ESMF_OPENMP_F90LINKOPTS    += -openmp
+ESMF_OPENMP_CXXLINKOPTS    += -openmp
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)

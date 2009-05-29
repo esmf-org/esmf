@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.82 2009/03/30 20:24:38 w6ws Exp $
+# $Id: build_rules.mk,v 1.83 2009/05/29 19:32:26 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -148,11 +148,19 @@ endif
 # Conditionally add pthread compiler and linker flags
 #
 ifeq ($(ESMF_PTHREADS),ON)
-ESMF_F90COMPILEOPTS +=  -threads
-ESMF_CXXCOMPILEOPTS +=  -pthread
+ESMF_F90COMPILEOPTS += -threads
+ESMF_CXXCOMPILEOPTS += -pthread
 ESMF_F90LINKOPTS    += -threads
 ESMF_CXXLINKOPTS    += -pthread
 endif
+
+############################################################
+# OpenMP compiler and linker flags
+#
+ESMF_OPENMP_F90COMPILEOPTS += -openmp
+ESMF_OPENMP_CXXCOMPILEOPTS += -openmp
+ESMF_OPENMP_F90LINKOPTS    += -openmp
+ESMF_OPENMP_CXXLINKOPTS    += -openmp
 
 ############################################################
 # Determine where ifort's libraries are located
