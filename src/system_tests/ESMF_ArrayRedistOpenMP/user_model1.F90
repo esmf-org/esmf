@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1 2009/05/27 22:35:55 svasquez Exp $
+! $Id: user_model1.F90,v 1.2 2009/05/29 19:52:05 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -31,29 +31,25 @@ module user_model1
   subroutine userm1_setvm(comp, rc)
     type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
-#ifdef ESMF_TESTWITHTHREADS
     type(ESMF_VM) :: vm
-    logical :: supportPthreads
-#endif
+    logical :: pthreadsEnabled
 
     ! Initialize return code
     rc = ESMF_SUCCESS
 
-#ifdef ESMF_TESTWITHTHREADS
-    ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for
-    ! your own code development you probably don't want to include the
-    ! following call unless you are interested in exploring ESMF's
-    ! threading features.
+    ! The following call will give each PET up to 2 PEs. This allows 
+    ! OpenMP user-level threading within the component methods.
 
-    ! First test whether ESMF-threading is supported on this machine
+    ! First test whether ESMF-threading is supported.
     call ESMF_VMGetGlobal(vm, rc=rc)
-    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
-    if (supportPthreads) then
-      call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    if (pthreadsEnabled) then
+      call ESMF_GridCompSetVMMaxPEs(comp, max=2, rc=rc)
+      if (rc/=ESMF_SUCCESS) return ! bail out
     endif
-#endif
-
+    
   end subroutine
 
   subroutine userm1_register(comp, rc)
@@ -111,10 +107,13 @@ module user_model1
     call ESMF_VMGet(vm, petCount=petCount, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
+    call ESMF_VMPrint(vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     ! Create the source Array and add it to the export State
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/1000,1500/), &
+    distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,1500/), &
       regDecomp=(/petCount,1/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
@@ -144,7 +143,10 @@ module user_model1
     real(ESMF_KIND_R8)    :: pi
     type(ESMF_Array)      :: array
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
-    integer               :: i, j
+    type(ESMF_VM)         :: vm
+    integer               :: i, j, tid, localPet, peCOunt
+    
+!$  integer :: omp_get_thread_num
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -160,14 +162,27 @@ module user_model1
     ! Gain access to actual data via F90 array pointer
     call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    ! Query the VM of the Component for the number of PEs this PET has access to
+    ! -> Set the number of OpenMP threads accordingly
+    call ESMF_GridCompGet(comp, vm=vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_VMGet(vm, localPet=localPet, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_VMGetPETLocalInfo(vm, pet=localPet, peCount=peCount, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+!$  call omp_set_num_threads(peCount)
 
     ! Fill source Array with data
+    tid = 0
 !$omp parallel do
     do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
+!$    tid = omp_get_thread_num()
+      print *, "user_model1.run(): tid = ", tid, " is working on column j = ", j
       do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
         farrayPtr(i,j) = 10.0d0 &
           + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
-          + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi)
+          + 2.0d0 * sin(real(j,ESMF_KIND_R8)/1500.d0*pi)
       enddo
     enddo
 !$omp end parallel do

@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.2 2009/05/28 18:34:06 svasquez Exp $
+! $Id: user_model2.F90,v 1.3 2009/05/29 19:52:05 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -33,7 +33,7 @@ module user_model2
     integer, intent(out) :: rc
 #ifdef ESMF_TESTWITHTHREADS
     type(ESMF_VM) :: vm
-    logical :: supportPthreads
+    logical :: pthreadsEnabled
 #endif
 
     ! Initialize return code
@@ -48,8 +48,8 @@ module user_model2
 
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetGlobal(vm, rc=rc)
-    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
-    if (supportPthreads) then
+    call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (pthreadsEnabled) then
       call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
     endif
 #endif
@@ -113,7 +113,7 @@ module user_model2
     ! Create the destination Array and add it to the import State
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/1000,1500/), &
+    distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,1500/), &
       regDecomp=(/1,petCount/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
@@ -161,18 +161,16 @@ module user_model2
     if (rc/=ESMF_SUCCESS) return ! bail out
       
     ! Test Array in import state against exact solution
-!$omp parallel do
     do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
       do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
         if (abs(farrayPtr(i,j) - (10.0d0 &
           + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
-          + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi))) > 1.d-8) then
+          + 2.0d0 * sin(real(j,ESMF_KIND_R8)/1500.d0*pi))) > 1.d-8) then
           rc=ESMF_FAILURE
+          return ! bail out
         endif
       enddo
     enddo
-!$omp end parallel do
-    if (rc/=ESMF_SUCCESS) return ! bail out
  
     print *, "User Comp2 Run returning"
 
