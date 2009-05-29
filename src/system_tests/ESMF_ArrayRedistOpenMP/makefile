@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2009/05/29 19:52:05 theurich Exp $ 
+# $Id: makefile,v 1.4 2009/05/29 21:16:12 theurich Exp $ 
 
 ifeq ($(ESMF_TESTOPENMP),ON)
 ifeq ($(ESMF_OPENMP),OFF)
@@ -14,11 +14,7 @@ run: tree_run_system_tests
 
 LOCDIR	  = src/system_tests/ESMF_ArrayRedistOpenMP
 
-ifeq ($(ESMF_TESTOPENMP),ON)
 SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_ArrayRedistOpenMPSTest
-else
-SYSTEM_TESTS_BUILD    = 
-endif
 
 # Object files other than SysTest%.o that the
 # system tests executable will depend on.
@@ -26,12 +22,7 @@ endif
 # are to be compiled/created.
 SYSTEM_TESTS_OBJ      = user_model1.o user_model2.o user_coupler.o
 
-ifeq ($(ESMF_TESTOPENMP),ON)
 SYSTEM_TESTS_RUN      = RUN_ArrayRedistOpenMP
-else
-SYSTEM_TESTS_RUN      = 
-endif
-SYSTEM_TESTS_RUN_UNI  =
 
 ESMF_ArrayRedistOpenMPSTest.o : $(SYSTEM_TESTS_OBJ)
 
