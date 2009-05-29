@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.104 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_VM.F90,v 1.105 2009/05/29 19:18:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.104 2009/01/21 21:38:02 cdeluca Exp $"
+      "$Id: ESMF_VM.F90,v 1.105 2009/05/29 19:18:02 theurich Exp $"
 
 !==============================================================================
 
@@ -2721,7 +2721,7 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   subroutine ESMF_VMGet(vm, localPet, petCount, peCount, mpiCommunicator, &
-    supportPthreadsFlag, supportOpenMPFlag, rc)
+    pthreadsEnabledFlag, openMPEnabledFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)              :: vm
@@ -2729,8 +2729,8 @@ module ESMF_VMMod
     integer,            intent(out),  optional  :: petCount
     integer,            intent(out),  optional  :: peCount
     integer,            intent(out),  optional  :: mpiCommunicator
-    logical,            intent(out),  optional  :: supportPthreadsFlag
-    logical,            intent(out),  optional  :: supportOpenMPFlag
+    logical,            intent(out),  optional  :: pthreadsEnabledFlag
+    logical,            intent(out),  optional  :: openMPEnabledFlag
     integer,            intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -2754,23 +2754,19 @@ module ESMF_VMMod
 !        user-level MPI communications. It is recommended that the user
 !        duplicates the communicator via {\tt MPI\_Comm\_Dup()} in order to
 !        prevent any interference with ESMF communications.
-!   \item[{[supportPthreadsFlag]}]
-!        Upon return this holds a flag indicating whether Pthreads are
-!        supported by the specified {\tt ESMF\_VM} object.
+!   \item[{[pthreadsEnabledFlag]}]
 !        \begin{description}
 !        \item[{\tt .TRUE.}]
-!             Pthreads are supported.
+!             ESMF has been compiled with Pthreads.
 !        \item[{\tt .FALSE.}]
-!             Pthreads are not supported.
+!             ESMF has not been compiled with Pthreads.
 !        \end{description}
-!   \item[{[supportOpenMPFlag]}]
-!        Upon return this holds a flag indicating whether user-level OpenMP
-!        threading is supported by the specified {\tt ESMF\_VM} object.
+!   \item[{[openMPEnabledFlag]}]
 !        \begin{description}
 !        \item[{\tt .TRUE.}]
-!             User-level OpenMP threading is supported.
+!             ESMF has been compiled with OpenMP.
 !        \item[{\tt .FALSE.}]
-!             User-level OpenMP threading is not supported.
+!             ESMF has not been compiled with OpenMP.
 !        \end{description}
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2778,8 +2774,8 @@ module ESMF_VMMod
 !
 !EOP
 !------------------------------------------------------------------------------
-    type(ESMF_Logical)      :: supportPthreadsFlagArg ! helper variable
-    type(ESMF_Logical)      :: supportOpenMPFlagArg   ! helper variable
+    type(ESMF_Logical)      :: pthreadsEnabledFlagArg ! helper variable
+    type(ESMF_Logical)      :: openMPEnabledFlagArg   ! helper variable
     integer                 :: localrc                ! local return code
 
     ! initialize return code; assume routine not implemented
@@ -2791,11 +2787,11 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMGet(vm, localPet, petCount, peCount, mpiCommunicator, &
-      supportPthreadsFlagArg, supportOpenMPFlagArg, localrc)
-    if (present (supportPthreadsFlag))  &
-      supportPthreadsFlag = supportPthreadsFlagArg
-    if (present (supportOpenMPFlag))  &
-      supportOpenMPFlag = supportOpenMPFlagArg
+      pthreadsEnabledFlagArg, openMPEnabledFlagArg, localrc)
+    if (present (pthreadsEnabledFlag))  &
+      pthreadsEnabledFlag = pthreadsEnabledFlagArg
+    if (present (openMPEnabledFlag))  &
+      openMPEnabledFlag = openMPEnabledFlagArg
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

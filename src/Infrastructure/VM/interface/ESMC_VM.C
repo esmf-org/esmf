@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.6 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMC_VM.C,v 1.7 2009/05/29 19:18:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.6 2009/01/21 21:38:02 cdeluca Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.7 2009/05/29 19:18:02 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -109,7 +109,7 @@ ESMC_VM ESMC_VMGetCurrent(int *rc){
 
 
 int ESMC_VMGet(ESMC_VM vm, int *localPet, int *petCount, int *peCount,
-  MPI_Comm *mpiCommunicator, int *supportPthreadsFlag, int *supportOpenMPFlag){
+  MPI_Comm *mpiCommunicator, int *pthreadsEnabledFlag, int *openMPEnabledFlag){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMGet()"
 
@@ -128,8 +128,8 @@ int ESMC_VMGet(ESMC_VM vm, int *localPet, int *petCount, int *peCount,
     *peCount += vmp->getNcpet(i);
 
   *mpiCommunicator = vmp->getMpi_c();
-  *supportPthreadsFlag = vmp->getSupportPthreads();
-  *supportOpenMPFlag = vmp->getSupportOpenMP();
+  *pthreadsEnabledFlag = vmp->isPthreadsEnabled();
+  *openMPEnabledFlag = vmp->isOpenMPEnabled();
 
   // return successfully
   rc = ESMF_SUCCESS;

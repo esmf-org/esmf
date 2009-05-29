@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.51 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMC_VM.h,v 1.52 2009/05/29 19:18:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ int ESMC_VMPrint(ESMC_VM vm);
 ESMC_VM ESMC_VMGetGlobal(int *rc);
 ESMC_VM ESMC_VMGetCurrent(int *rc);
 int ESMC_VMGet(ESMC_VM vm, int *localPet, int *petCount, int *peCount,
-  MPI_Comm *mpiCommunicator, int *supportPthreadsFlag, int *supportOpenMPFlag);
+  MPI_Comm *mpiCommunicator, int *pthreadsEnabledFlag, int *openMPEnabledFlag);
 
 #ifdef __cplusplus
 } // extern "C"

@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.h,v 1.6 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMCI_VMKernel.h,v 1.7 2009/05/29 19:18:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -277,15 +277,23 @@ class VMK{
     int getLocalPet() const {return mypet;}
     int getPetCount() const {return npets;}
     esmf_pthread_t getLocalPthreadId() const {return mypthid;}
-    bool getSupportPthreads() const{
+    bool isPthreadsEnabled() const{
 #ifdef ESMF_NO_PTHREADS
       return false;
 #else
       return true;
 #endif
     }
-    bool getSupportOpenMP() const{
-      return true;  //TODO: determine this during compile time
+    bool isOpenMPEnabled() const{
+#ifdef ESMF_NO_OPENMP      
+      return false;
+#else
+#ifndef _OPENMP
+#error - Compiler flags do not support OpenMP.
+#else
+      return true;
+#endif
+#endif
     }
 
     // p2p communication calls

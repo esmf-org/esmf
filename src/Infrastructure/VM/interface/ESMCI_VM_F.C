@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM_F.C,v 1.3 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMCI_VM_F.C,v 1.4 2009/05/29 19:18:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -375,8 +375,8 @@ extern "C" {
   }
   
   void FTN(c_esmc_vmget)(ESMCI::VM **ptr, int *localPet, int *petCount, 
-    int *peCount, int *mpiCommunicator, ESMC_Logical *supportPthreadsFlag,
-    ESMC_Logical *supportOpenMPFlag, int *rc){
+    int *peCount, int *mpiCommunicator, ESMC_Logical *pthreadsEnabledFlag,
+    ESMC_Logical *openMPEnabledFlag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmget()"
     // Initialize return code; assume routine not implemented
@@ -401,17 +401,17 @@ extern "C" {
       *mpiCommunicator = (int)MPI_Comm_c2f(mpiCommTemp);
 #endif
     }        
-    if (ESMC_NOT_PRESENT_FILTER(supportPthreadsFlag) != ESMC_NULL_POINTER){
-      if ((*ptr)->getSupportPthreads())
-        *supportPthreadsFlag = ESMF_TRUE;
+    if (ESMC_NOT_PRESENT_FILTER(pthreadsEnabledFlag) != ESMC_NULL_POINTER){
+      if ((*ptr)->isPthreadsEnabled())
+        *pthreadsEnabledFlag = ESMF_TRUE;
       else
-        *supportPthreadsFlag = ESMF_FALSE;
+        *pthreadsEnabledFlag = ESMF_FALSE;
     }
-    if (ESMC_NOT_PRESENT_FILTER(supportOpenMPFlag) != ESMC_NULL_POINTER){
-      if ((*ptr)->getSupportOpenMP())
-        *supportOpenMPFlag = ESMF_TRUE;
+    if (ESMC_NOT_PRESENT_FILTER(openMPEnabledFlag) != ESMC_NULL_POINTER){
+      if ((*ptr)->isOpenMPEnabled())
+        *openMPEnabledFlag = ESMF_TRUE;
       else
-        *supportOpenMPFlag = ESMF_FALSE;
+        *openMPEnabledFlag = ESMF_FALSE;
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
