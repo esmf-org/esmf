@@ -1,4 +1,4 @@
-// $Id: ESMCI_State.h,v 1.15 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMCI_State.h,v 1.16 2009/05/29 23:51:00 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,6 +44,22 @@
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 namespace ESMCI{
+
+  typedef enum  ESMC_StateItemType
+  {
+    ESMC_STATEITEM_FIELD = 101,
+    ESMC_STATEITEM_FIELDBUNDLE,
+    ESMC_STATEITEM_ARRAY,
+    ESMC_STATEITEM_ARRAYBUNDLE,
+    ESMC_STATEITEM_ROUTEHANDLE,
+    ESMC_STATEITEM_STATE,
+    ESMC_STATEITEM_NAME,
+    ESMC_STATEITEM_INDIRECT,
+    ESMC_STATEITEM_UNKNOWN,
+    ESMC_STATEITEM_NOTFOUND
+  } ESMC_StateItemType;
+
+
   class State{
     // pointer to fortran derived type
     F90ClassHolder fortranclass;
@@ -54,6 +70,16 @@ namespace ESMCI{
     int print();
     int getArray(char* name, Array **array);
     static int destroy(State *state);
+
+    int getNumItems(int* numItems);
+    vector<string>  getItemNames();
+
+    int getNumItems(int* numItems, ESMC_StateItemType  itemType);
+    vector<string>  getItemNames(ESMC_StateItemType  itemType);
+
+    int getNumArrays(int* numArrays);
+    vector<string>  getArrayNames();
+
   }; // class State
 };// namespace ESMCI
 
