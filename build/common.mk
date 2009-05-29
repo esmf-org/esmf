@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.269 2009/05/29 21:36:36 svasquez Exp $
+#  $Id: common.mk,v 1.270 2009/05/29 21:47:51 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -200,6 +200,10 @@ ifndef ESMF_TESTSHAREDOBJ
 export ESMF_TESTSHAREDOBJ = default
 endif
 
+ifndef ESMF_TESTOPENMP
+export ESMF_TESTOPENMP = default
+endif
+
 ifndef ESMF_TESTHARNESS
 export ESMF_TESTHARNESS = default
 endif
@@ -356,6 +360,10 @@ endif
 
 ifneq ($(ESMF_TESTSHAREDOBJ),ON)
 export ESMF_TESTSHAREDOBJ = OFF
+endif
+
+ifneq ($(ESMF_TESTOPENMP),ON)
+export ESMF_TESTOPENMP = OFF
 endif
 
 ifeq ($(ESMF_TESTHARNESS),default)
