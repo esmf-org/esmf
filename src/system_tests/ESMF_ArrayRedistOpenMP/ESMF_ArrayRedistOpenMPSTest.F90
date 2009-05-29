@@ -1,7 +1,7 @@
-! $Id: ESMF_ArrayRedistOpenMPSTest.F90,v 1.2 2009/05/29 19:52:05 theurich Exp $
+! $Id: ESMF_ArrayRedistOpenMPSTest.F90,v 1.3 2009/05/29 21:54:55 theurich Exp $
 !
 !-------------------------------------------------------------------------
-!ESMF_OPENMP_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_MULTI_PROC_SYSTEM_TEST   String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
