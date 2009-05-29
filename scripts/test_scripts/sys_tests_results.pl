@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.13 2009/05/27 22:39:17 svasquez Exp $
+# $Id: sys_tests_results.pl,v 1.14 2009/05/29 21:26:23 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -46,8 +46,6 @@ use File::Find
         # testmpmd = 1 for ESMF_TESTMPMD=ON
         # testsharedobj = 0 for ESMF_TESTSHAREDOBJ=OFF
         # testsharedobj = 1 for ESMF_TESTSHAREDOBJ=ON
-        # testopenmp = 0 for ESMF_TESTOPENMP=OFF
-        # testopenmp = 1 for ESMF_TESTOPENMP=ON
         # processor = 0 for uni_processor
         # processor = 1 for multi_processor
         foreach $line (<F>){
@@ -68,14 +66,6 @@ use File::Find
                         if ($count == 1) {
                                 $testsharedobj=1;
                         }
-                        $count=grep(/Nontestopenmp/, @file_lines);
-                        if ($count == 1) {
-                                $testopenmp=0;
-                        }
-                        $count=grep(/Testopenmp/, @file_lines);
-                        if ($count == 1) {
-                                $testopenmp=1;
-			}
                         $count=grep(/Uniprocessor/, @file_lines);
                         if ($count == 1) {
                                 $processor=0;
@@ -137,14 +127,6 @@ use File::Find
                         if ( ($testsharedobj == 1) &  ( $processor == 1)) {
 			  # Include Sharedobj system tests only if running multi processor
                           $count=grep ( /ESMF_SHAREDOBJ_SYSTEM_TEST/, @file_lines);
-                          if ($count != 0) {
-                                push (act_st_files, $file);
-                                        $st_count=$st_count + 1;
-                                }
-                        }
-                        if ( ($testopenmp == 1) &  ( $processor == 1)) {
-			  # Include OpenMP system tests only if running multi processor
-                          $count=grep ( /ESMF_OPENMP_SYSTEM_TEST/, @file_lines);
                           if ($count != 0) {
                                 push (act_st_files, $file);
                                         $st_count=$st_count + 1;
