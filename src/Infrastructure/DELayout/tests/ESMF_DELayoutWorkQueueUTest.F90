@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.18 2009/03/26 03:28:20 theurich Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.19 2009/05/29 19:23:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -171,7 +171,7 @@ program ESMF_DELayoutWQUTest
   type(ESMF_GridComp):: gcomp
   real(ESMF_KIND_R8):: timeStart, timeEnd
   type(ESMF_VM):: vm
-  logical:: supportPthreads
+  logical:: pthreadsEnabled
   integer:: localPet
   ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
@@ -185,7 +185,7 @@ program ESMF_DELayoutWQUTest
   call ESMF_VMGetGlobal(vm, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
-  call ESMF_VMGet(vm, localPet=localPet, supportPthreadsFlag=supportPthreads, &
+  call ESMF_VMGet(vm, localPet=localPet, pthreadsEnabledFlag=pthreadsEnabled, &
     rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -232,7 +232,7 @@ program ESMF_DELayoutWQUTest
   !NEX_UTest
   write(name, *) "GridCompSetServices() - round 2"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  if (supportPthreads) then
+  if (pthreadsEnabled) then
     call ESMF_GridCompSetVM(gcomp, userRoutine=mygcomp_setvm_withthreads, rc=rc)
   endif
   call ESMF_GridCompSetServices(gcomp, userRoutine=mygcomp_register, rc=rc)

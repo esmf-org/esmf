@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.8 2009/03/26 03:28:20 theurich Exp $
+! $Id: user_model2.F90,v 1.9 2009/05/29 19:24:42 theurich Exp $
 !
 ! System test for Concurrent Components, user-written component 2.
 
@@ -38,7 +38,7 @@
     integer, intent(out) :: rc
 #ifdef ESMF_TESTWITHTHREADS
     type(ESMF_VM) :: vm
-    logical :: supportPthreads
+    logical :: pthreadsEnabled
 #endif
 
     ! Initialize return code
@@ -53,8 +53,8 @@
 
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetGlobal(vm, rc=rc)
-    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
-    if (supportPthreads) then
+    call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (pthreadsEnabled) then
       call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
     endif
 #endif

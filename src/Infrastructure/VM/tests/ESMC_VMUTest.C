@@ -1,4 +1,4 @@
-// $Id: ESMC_VMUTest.C,v 1.6 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMC_VMUTest.C,v 1.7 2009/05/29 19:20:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@ int main(void){
   ESMC_VM vm;
   ESMC_VM vmCurrent;
   int localPet, petCount, peCount;
-  int supportPthreadsFlag, supportOpenMPFlag;
+  int pthreadsEnabledFlag, openMPEnabledFlag;
   MPI_Comm mpiCommunicator;
 
   //----------------------------------------------------------------------------
@@ -83,11 +83,11 @@ int main(void){
   strcpy(name, "VMGet");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_VMGet(vm, &localPet, &petCount, &peCount, &mpiCommunicator,
-    &supportPthreadsFlag, &supportOpenMPFlag);
+    &pthreadsEnabledFlag, &openMPEnabledFlag);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  printf("localPet= %d , petCount= %d, peCount= %d, supportPthreadsFlag= %d, "
-    "supportOpenMPFlag= %d \n", localPet, petCount, peCount,
-    supportPthreadsFlag, supportOpenMPFlag);
+  printf("localPet= %d , petCount= %d, peCount= %d, pthreadsEnabledFlag= %d, "
+    "openMPEnabledFlag= %d \n", localPet, petCount, peCount,
+    pthreadsEnabledFlag, openMPEnabledFlag);
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------

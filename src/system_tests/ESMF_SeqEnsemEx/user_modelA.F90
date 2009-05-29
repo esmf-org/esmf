@@ -1,4 +1,4 @@
-! $Id: user_modelA.F90,v 1.8 2009/03/31 17:39:30 theurich Exp $
+! $Id: user_modelA.F90,v 1.9 2009/05/29 19:24:43 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -34,7 +34,7 @@ module user_modelA
 
 #ifdef ESMF_TESTWITHTHREADS
     type(ESMF_VM) :: vm
-    logical :: supportPthreads
+    logical :: pthreadsEnabled
     ! The following call will turn on ESMF-threading (single threaded)
     ! for this component. If you are using this file as a template for 
     ! your own code development you probably don't want to include the 
@@ -43,8 +43,8 @@ module user_modelA
 
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetGlobal(vm, rc=rc)
-    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
-    if (supportPthreads) then
+    call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (pthreadsEnabled) then
       call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
     endif
 #endif

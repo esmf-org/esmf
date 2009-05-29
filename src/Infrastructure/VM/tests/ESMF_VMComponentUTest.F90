@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentUTest.F90,v 1.23 2009/03/26 03:28:20 theurich Exp $
+! $Id: ESMF_VMComponentUTest.F90,v 1.24 2009/05/29 19:20:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@ module ESMF_VMComponentUTest_gcomp_mod
     integer, intent(out):: rc
 #ifdef ESMF_TESTWITHTHREADS
     type(ESMF_VM) :: vm
-    logical :: supportPthreads
+    logical :: pthreadsEnabled
 #endif
     
     ! Initialize
@@ -45,8 +45,8 @@ module ESMF_VMComponentUTest_gcomp_mod
 
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetGlobal(vm, rc=rc)
-    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
-    if (supportPthreads) then
+    call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (pthreadsEnabled) then
       call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
     endif
 #endif
@@ -169,7 +169,7 @@ program ESMF_VMComponentUTest
 !------------------------------------------------------------------------------
   ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMComponentUTest.F90,v 1.23 2009/03/26 03:28:20 theurich Exp $'
+    '$Id: ESMF_VMComponentUTest.F90,v 1.24 2009/05/29 19:20:54 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0

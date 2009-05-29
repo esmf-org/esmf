@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.23 2009/04/07 05:34:49 theurich Exp $
+! $Id: user_model.F90,v 1.24 2009/05/29 19:24:42 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -44,7 +44,7 @@
     integer, intent(out) :: rc
 #ifdef ESMF_TESTWITHTHREADS
     type(ESMF_VM) :: vm
-    logical :: supportPthreads
+    logical :: pthreadsEnabled
 #endif
 
     ! Initialize return code
@@ -59,8 +59,8 @@
 
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetGlobal(vm, rc=rc)
-    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
-    if (supportPthreads) then
+    call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (pthreadsEnabled) then
       call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
     endif
 #endif

@@ -1,4 +1,4 @@
-! $Id: ESMF_SetServCode.F90,v 1.15 2009/04/10 05:24:57 theurich Exp $
+! $Id: ESMF_SetServCode.F90,v 1.16 2009/05/29 19:23:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@ contains
        integer, intent(out) :: rc
 #ifdef ESMF_TESTWITHTHREADS
        type(ESMF_VM) :: vm
-       logical :: supportPthreads
+       logical :: pthreadsEnabled
 #endif
        ! Initialize return code
        rc = ESMF_SUCCESS
@@ -54,8 +54,8 @@ contains
 
        ! First test whether ESMF-threading is supported on this machine
        call ESMF_VMGetGlobal(vm, rc=rc)
-       call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
-       if (supportPthreads) then
+       call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+       if (pthreadsEnabled) then
          call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
        endif
 #endif
