@@ -1,4 +1,4 @@
-! $Id: ESMF_State_C.F90,v 1.18 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_State_C.F90,v 1.19 2009/05/29 23:54:04 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.18 2009/01/21 21:38:02 cdeluca Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.19 2009/05/29 23:54:04 w6ws Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -44,6 +44,7 @@
        use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
+       implicit none
 
        type(ESMF_State) :: state
       character(len=*), intent(in) :: stateName
@@ -65,6 +66,7 @@
       !use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
        use ESMF_ArrayCreateMod
+       implicit none
 
        type(ESMF_State) :: state        !inout
        type(ESMF_Array) :: array        !in
@@ -97,6 +99,7 @@
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
        use ESMF_ArrayCreateMod
+       implicit none
 
        type(ESMF_State) :: state        !in
        character(len=*) :: arrayName    !in
@@ -126,6 +129,7 @@
        use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
+       implicit none
 
        type(ESMF_State) :: state
        integer :: rc
@@ -143,6 +147,7 @@
        use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
+       implicit none
 
        type(ESMF_State) :: state
        integer :: rc              
@@ -161,6 +166,7 @@
  !     use ESMF_UtilTypesMod
  !     use ESMF_BaseMod    ! ESMF base class
  !     use ESMF_ArrayCreateMod
+ !     implicit none
 
   ! Very important: the pointers passed from C and used as references for
   ! arrayInArg and arrayOutArg are simple pointers to pointers from the C side.
@@ -191,10 +197,12 @@
        use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
+       implicit none
 
-       character(*) :: name
-       integer :: func
-       integer :: rc              
+       type(ESMF_State), pointer :: statep
+       character(*)              :: name
+       integer                   :: func
+       integer, intent(out)      :: rc              
 
        ! Initialize return code; assume routine not implemented
        rc = ESMF_RC_NOT_IMPL
@@ -207,10 +215,11 @@
        use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
+       implicit none
 
        type(ESMF_State), pointer :: statep      
-       character(*) :: name
-       integer :: rc     
+       character(*)              :: name
+       integer, intent(out)      :: rc     
 
        ! Initialize return code; assume routine not implemented
        rc = ESMF_RC_NOT_IMPL
@@ -223,10 +232,11 @@
        use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
+       implicit none
 
        type(ESMF_State), pointer :: statep      
-       character(*) :: name
-       integer :: rc     
+       character(*)              :: name
+       integer, intent(out)      :: rc     
 
        ! Initialize return code; assume routine not implemented
        rc = ESMF_RC_NOT_IMPL
@@ -238,3 +248,70 @@
 
    ! TODO: add rest of state entry points
 
+!------------------------------------------------------------------------------
+
+   subroutine f_esmf_stategetnumitems(state, itemCount, rc)
+
+       use ESMF_UtilTypesMod
+       use ESMF_StateTypesMod
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_StateMod
+       use ESMF_ArrayCreateMod
+       implicit none
+
+       type(ESMF_State), intent(in) :: state        !in
+       integer, intent(out)         :: itemCount    !out
+       integer, intent(out)         :: rc           !out
+
+       ! local variable
+
+       ! Initialize return code; assume routine not implemented
+       rc = ESMF_RC_NOT_IMPL
+
+!       call ESMF_StateGetInfo(state=state, itemCount=itemCount, rc=rc)
+       call ESMF_StateGet(state=state, itemCount=itemCount, rc=rc)
+
+   end subroutine f_esmf_stategetnumitems
+
+
+!------------------------------------------------------------------------------
+
+   subroutine f_esmf_stategetitemnames(state, numItems, itemNameList, &
+                                       itemTypeList, rc)
+
+       use ESMF_UtilTypesMod
+       use ESMF_StateTypesMod
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_StateMod
+       use ESMF_ArrayCreateMod
+       implicit none
+
+       type(ESMF_State), intent(in)              :: state                  !in
+       integer, intent(in)                       :: numItems               !in
+       character(len=*), intent(inout)           :: itemNameList(numItems) !out
+       type(ESMF_StateItemType), intent(inout)   :: itemTypeList(numItems) !out
+       integer, intent(out)                      :: rc                     !out
+
+       ! local variable
+       integer                    :: itemCount
+       character(len=ESMF_MAXSTR) :: localNameList(numItems)
+       type(ESMF_StateItemType)   :: localTypeList(numItems)
+
+       integer                    :: i
+
+       ! Initialize return code; assume routine not implemented
+       rc = ESMF_RC_NOT_IMPL
+
+!       call ESMF_StateGetInfo(state=state, itemCount=itemCount, &
+!                              itemNameList=localNameList, &
+!                              stateitemtypeList=localTypeList, rc=rc)
+       call ESMF_StateGet(state=state, itemCount=itemCount, &
+                          itemNameList=localNameList, &
+                          stateitemtypeList=localTypeList, rc=rc)
+
+       do i = 1, itemCount
+          itemTypeList(i) = localTypeList(i)
+          itemNameList(i) = localNameList(i)
+       enddo
+
+   end subroutine f_esmf_stategetitemnames
