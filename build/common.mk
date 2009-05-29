@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.267 2009/05/28 16:21:56 svasquez Exp $
+#  $Id: common.mk,v 1.268 2009/05/29 19:29:54 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -158,6 +158,10 @@ endif
 
 ifndef ESMF_PTHREADS
 export ESMF_PTHREADS = $(ESMF_PTHREADSDEFAULT)
+endif
+
+ifndef ESMF_OPENMP
+export ESMF_OPENMP = $(ESMF_OPENMPDEFAULT)
 endif
 
 ifndef ESMF_ARRAY_LITE
@@ -542,6 +546,7 @@ endif
 # user's environment.
 #-------------------------------------------------------------------------------
 ESMF_PTHREADSDEFAULT        = ON
+ESMF_OPENMPDEFAULT          = ON
 
 ESMF_ARDEFAULT              = ar
 ESMF_ARCREATEFLAGSDEFAULT   = cr
@@ -721,6 +726,12 @@ ESMF_SO_F90LINKOPTSEXE  +=
 ESMF_SO_CXXCOMPILEOPTS  +=
 ESMF_SO_CXXLINKOPTS     +=
 ESMF_SO_CXXLINKOPTSEXE  +=
+
+# - OpenMP compiler and linker flags
+ESMF_OPENMP_F90COMPILEOPTS  +=
+ESMF_OPENMP_F90LINKOPTS     +=
+ESMF_OPENMP_CXXCOMPILEOPTS  +=
+ESMF_OPENMP_CXXLINKOPTS     +=
 
 # - MPIRUN
 ifneq ($(origin ESMF_MPIRUN), environment)
@@ -971,6 +982,21 @@ CPPFLAGS       += -DESMF_NO_PTHREADS
 endif
 # even when compiling with ESMF_PTHREADS=ON we need to find common header
 ESMF_CXXCOMPILEPATHSLOCAL += -I$(ESMF_DIR)/src/Infrastructure/stubs/pthread
+
+#-------------------------------------------------------------------------------
+# ESMF_OPENMP is passed (by CPP) into the library compilation to control the
+# dependency of the ESMF library on OpenMP.
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_OPENMP),OFF)
+CPPFLAGS       += -DESMF_NO_OPENMP
+endif
+
+ifeq ($(ESMF_OPENMP),ON)
+ESMF_F90COMPILEOPTS += $(ESMF_OPENMP_F90COMPILEOPTS)
+ESMF_F90LINKOPTS    += $(ESMF_OPENMP_F90LINKOPTS)
+ESMF_CXXCOMPILEOPTS += $(ESMF_OPENMP_CXXCOMPILEOPTS)
+ESMF_CXXLINKOPTS    += $(ESMF_OPENMP_CXXLINKOPTS)
+endif
 
 #-------------------------------------------------------------------------------
 # ESMF_TESTEXHAUSTIVE is passed (by CPP) into test programs to control the
@@ -1695,10 +1721,10 @@ endif
 #
 # verify that either there is no SYS_TESTS_CONFIG file, or if one exists that
 # the string Testmpmd or Nontestmpmd matches the current setting of the
-# ESMF_TESTMPMD environment variable, that the string Testsharedobj or Nontestsharedobj 
-# matches the current setting of the  ESMF_TESTSHAREDOBJ environment variable and that
-# that the string Testopenmp or Nontestopenmp matches the current setting of the
-# ESMF_TESTOPENMP environment variable.
+# ESMF_TESTMPMD environment variable, that the string Testsharedobj or
+# Nontestsharedobj matches the current setting of the ESMF_TESTSHAREDOBJ
+# environment variable and that the string Testopenmp or Nontestopenmp matches
+# the current setting of the ESMF_TESTOPENMP environment variable.
 #
 update_sys_tests_flags:
 ifeq ($(ESMF_TESTMPMD),ON)

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.105 2009/05/28 16:22:51 svasquez Exp $
+# $Id: makefile,v 1.106 2009/05/29 19:29:54 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -89,6 +89,7 @@ script_info:
 	-@echo "ESMF_COMM:              $(ESMF_COMM)"
 	-@echo "ESMF_SITE:              $(ESMF_SITE)"
 	-@echo "ESMF_PTHREADS:          $(ESMF_PTHREADS)"
+	-@echo "ESMF_OPENMP:            $(ESMF_OPENMP)"
 	-@echo "ESMF_ARRAY_LITE:        $(ESMF_ARRAY_LITE)"
 	-@echo "ESMF_NO_INTEGER_1_BYTE: $(ESMF_NO_INTEGER_1_BYTE)"
 	-@echo "ESMF_NO_INTEGER_2_BYTE: $(ESMF_NO_INTEGER_2_BYTE)"
@@ -98,8 +99,8 @@ script_info:
 	-@echo "ESMF_TESTWITHTHREADS:   $(ESMF_TESTWITHTHREADS)"
 	-@echo "ESMF_TESTMPMD:          $(ESMF_TESTMPMD)"
 	-@echo "ESMF_TESTSHAREDOBJ:     $(ESMF_TESTSHAREDOBJ)"
-	-@echo "ESMF_TESTOPENMP:	$(ESMF_TESTOPENMP)"
-	-@echo "ESMF_TESTHARNESS:    	$(ESMF_TESTHARNESS)"
+	-@echo "ESMF_TESTOPENMP:        $(ESMF_TESTOPENMP)"
+	-@echo "ESMF_TESTHARNESS:       $(ESMF_TESTHARNESS)"
 	-@echo "ESMF_MPIRUN:            $(ESMF_MPIRUN)"
 	-@if [ -n "$(ESMF_MPISCRIPTOPTIONS)" ] ; then \
 	  echo "ESMF_MPISCRIPTOPTIONS:  $(ESMF_MPISCRIPTOPTIONS)" ; fi
@@ -284,6 +285,7 @@ info_mk: chkdir_lib
 	-@echo "# ESMF_COMM: $(ESMF_COMM)" >> $(MKINFO)
 	-@echo "# ESMF_SITE: $(ESMF_SITE)" >> $(MKINFO)
 	-@echo "# ESMF_PTHREADS: $(ESMF_PTHREADS)" >> $(MKINFO)
+	-@echo "# ESMF_OPENMP: $(ESMF_OPENMP)" >> $(MKINFO)
 	-@echo "# ESMF_ARRAY_LITE: $(ESMF_ARRAY_LITE)" >> $(MKINFO)
 	-@echo "# ESMF_NO_INTEGER_1_BYTE: $(ESMF_NO_INTEGER_1_BYTE)" >> $(MKINFO)
 	-@echo "# ESMF_NO_INTEGER_2_BYTE: $(ESMF_NO_INTEGER_2_BYTE)" >> $(MKINFO)
@@ -293,6 +295,7 @@ info_mk: chkdir_lib
 	-@echo "# ESMF_TESTWITHTHREADS: $(ESMF_TESTWITHTHREADS)" >> $(MKINFO)
 	-@echo "# ESMF_TESTMPMD: $(ESMF_TESTMPMD)" >> $(MKINFO)
 	-@echo "# ESMF_TESTSHAREDOBJ: $(ESMF_TESTSHAREDOBJ)" >> $(MKINFO)
+	-@echo "# ESMF_TESTOPENMP: $(ESMF_TESTOPENMP)" >> $(MKINFO)
 	-@echo "# ESMF_TESTHARNESS: $(ESMF_TESTHARNESS)" >> $(MKINFO)
 	-@echo "# " >> $(MKINFO)
 	-@echo "# ESMF environment variables pointing to 3rd party software:" >> $(MKINFO)
