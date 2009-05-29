@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.5 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMCI_VMKernel.C,v 1.6 2009/05/29 19:14:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -2366,7 +2366,8 @@ void VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist,
   for (int i=0; i<npets; i++)
     issiid[i]=-1;
   // loop over pets and set spawnflag
-  for(int i=0; i<npets; i++){
+  for(int ii=0; ii<npets; ii++){
+    int i = petlist[ii];  // consider petlist mapping
     if (nplist != 0){
       int j;
       for (j=0; j<nplist; j++)
