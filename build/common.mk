@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.268 2009/05/29 19:29:54 theurich Exp $
+#  $Id: common.mk,v 1.269 2009/05/29 21:36:36 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -200,10 +200,6 @@ ifndef ESMF_TESTSHAREDOBJ
 export ESMF_TESTSHAREDOBJ = default
 endif
 
-ifndef ESMF_TESTOPENMP
-export ESMF_TESTOPENMP = default
-endif
-
 ifndef ESMF_TESTHARNESS
 export ESMF_TESTHARNESS = default
 endif
@@ -360,10 +356,6 @@ endif
 
 ifneq ($(ESMF_TESTSHAREDOBJ),ON)
 export ESMF_TESTSHAREDOBJ = OFF
-endif
-
-ifneq ($(ESMF_TESTOPENMP),ON)
-export ESMF_TESTOPENMP = OFF
 endif
 
 ifeq ($(ESMF_TESTHARNESS),default)
@@ -1711,9 +1703,9 @@ tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
 config_sys_tests:
 	@echo "# This file used by test scripts, please do not delete." > $(SYS_TESTS_CONFIG)
 ifeq ($(MULTI),)
-	@echo "Last run Nontestmpmd Nontestsharedobj Nontestopenmp ;  Noprocessor" >> $(SYS_TESTS_CONFIG)
+	@echo "Last run Nontestmpmd Nontestsharedobj ;  Noprocessor" >> $(SYS_TESTS_CONFIG)
 else
-	@echo "Last run Nontestmpmd Nontestsharedobj Nontestopenmp ;" $(MULTI) >> $(SYS_TESTS_CONFIG)
+	@echo "Last run Nontestmpmd Nontestsharedobj ;" $(MULTI) >> $(SYS_TESTS_CONFIG)
 endif
 
 
@@ -1721,10 +1713,9 @@ endif
 #
 # verify that either there is no SYS_TESTS_CONFIG file, or if one exists that
 # the string Testmpmd or Nontestmpmd matches the current setting of the
-# ESMF_TESTMPMD environment variable, that the string Testsharedobj or
+# ESMF_TESTMPMD environment variable and that the string Testsharedobj or
 # Nontestsharedobj matches the current setting of the ESMF_TESTSHAREDOBJ
-# environment variable and that the string Testopenmp or Nontestopenmp matches
-# the current setting of the ESMF_TESTOPENMP environment variable.
+# environment variable.
 #
 update_sys_tests_flags:
 ifeq ($(ESMF_TESTMPMD),ON)
@@ -1739,13 +1730,6 @@ ifeq ($(ESMF_TESTSHAREDOBJ),ON)
 	$(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG);
 else
 	$(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*estsharedobj/ Nontestsharedobj/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
-	$(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG);
-endif
-ifeq ($(ESMF_TESTOPENMP),ON)
-	$(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*estopenmp/ Testopenmp/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
-	$(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG);
-else
-	$(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*estopenmp/ Nontestopenmp/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
 	$(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG);
 endif
 
