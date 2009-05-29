@@ -1,4 +1,12 @@
-# $Id: makefile,v 1.36 2008/09/26 04:17:35 cdeluca Exp $ 
+# $Id: makefile,v 1.37 2009/05/29 19:22:38 theurich Exp $ 
+
+ifeq ($(ESMF_TESTOPENMP),ON)
+ifeq ($(ESMF_OPENMP),OFF)
+ESMF_F90COMPILEOPTS = $(ESMF_OPENMP_F90COMPILEOPTS)
+ESMF_F90LINKOPTS = $(ESMF_OPENMP_F90LINKOPTS)
+endif
+endif
+
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -8,6 +16,7 @@ LOCDIR	  = src/Infrastructure/VM/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_VMUTest \
 		$(ESMF_TESTDIR)/ESMF_VMUTest \
+		$(ESMF_TESTDIR)/ESMF_VMOpenMPUTest \
 		$(ESMF_TESTDIR)/ESMF_VMUserMpiInitUTest \
 		$(ESMF_TESTDIR)/ESMF_VMSendVMRecvUTest \
 		$(ESMF_TESTDIR)/ESMF_VMSendNbVMRecvNbUTest \
@@ -24,6 +33,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_VMUTest \
 
 TESTS_RUN     = RUN_ESMC_VMUTest \
 		RUN_ESMF_VMUTest \
+                RUN_ESMF_VMOpenMPUTest \
                 RUN_ESMF_VMUserMpiInitUTest \
                 RUN_ESMF_VMSendVMRecvUTest \
                 RUN_ESMF_VMSendNbVMRecvNbUTest \
@@ -40,6 +50,7 @@ TESTS_RUN     = RUN_ESMC_VMUTest \
 
 TESTS_RUN_UNI = RUN_ESMC_VMUTestUNI \
 		RUN_ESMF_VMUTestUNI \
+                RUN_ESMF_VMOpenMPUTestUNI \
                 RUN_ESMF_VMUserMpiInitUTestUNI \
                 RUN_ESMF_VMSendNbVMRecvNbUTestUNI \
                 RUN_ESMF_VMSendRecvUTestUNI \
@@ -79,6 +90,14 @@ RUN_ESMC_VMUTest:
 RUN_ESMC_VMUTestUNI:
 	$(MAKE) TNAME=VM NP=1 ctest
 
+#
+# VM
+#
+RUN_ESMF_VMOpenMPUTest:
+	$(MAKE) TNAME=VMOpenMP NP=4 ftest
+
+RUN_ESMF_VMOpenMPUTestUNI:
+	$(MAKE) TNAME=VMOpenMP NP=1 ftest
 
 #
 # VM user mpi init
