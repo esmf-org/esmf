@@ -47,7 +47,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_State.C,v 1.11 2009/01/21 21:38:02 cdeluca Exp $";
+static const char *const version = "$Id: ESMCI_State.C,v 1.12 2009/05/30 00:03:12 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -74,6 +74,16 @@ extern "C" {
 
   void FTN(f_esmf_statedestroy)(ESMCI::State* state, int* rc);
 
+  void FTN(f_esmf_stategetnumitems)(ESMCI::State* state, 
+                                    int*          itemCount, 
+                                    int*          rc);
+
+  void FTN(f_esmf_stategetitemnames)(ESMCI::State*              state, 
+                                     int*                       numItems, 
+                                     char*                      itemNameList, 
+                                     ESMCI::ESMC_StateItemType* itemTypeList, 
+                                     int*                       rc,
+                                     ESMCI_FortranStrLenArg     itemNameLen);
 };
 
 //
@@ -517,6 +527,359 @@ namespace ESMCI {
     //return rc;
 
 // } // end ESMC_StatePrint
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::State::getNumItems()"
+//BOP
+// !IROUTINE:  ESMCI::State::getNumItems - Get the number of items contained
+//             in this state
+//
+// !INTERFACE:
+      int State::getNumItems(
+//
+// !RETURN VALUE:
+//     return code rc.
+//
+// !ARGUMENTS:
+      int*   numItems){             // out - number of items in the state
+//
+// !DESCRIPTION:
+//      Get the number of items contained in an existing state
+//
+//EOP
+      //local variables
+      int rc;
+      int localrc;
+
+      //Initialize return code
+      rc = ESMF_RC_NOT_IMPL;
+      localrc = ESMF_RC_NOT_IMPL;
+
+      *numItems = 0;
+
+      FTN(f_esmf_stategetnumitems)(this, numItems, &localrc);
+
+      rc = localrc;
+      return rc;
+
+   } // end ESMC_StateGetNumItems
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::State::getItemNames()"
+//BOP
+// !IROUTINE:  ESMCI::State::getItemNames - Get the names of the items 
+//             contained in this state
+//
+// !INTERFACE:
+      vector<string> State::getItemNames(
+//
+// !RETURN VALUE:
+//     return code rc.
+//
+// !ARGUMENTS:
+      ){  
+//
+// !DESCRIPTION:
+//      Get the number of items contained in an existing state
+//
+//EOP
+      //local variables
+      int rc;
+      int localrc;
+      int nlen;
+      char* fName;
+
+      //Initialize return code
+      rc = ESMF_RC_NOT_IMPL;
+      localrc = ESMF_RC_NOT_IMPL;
+
+      vector<string>  itemNames;
+
+      //***
+      // First, get the number of items in the list.  We need to do this
+      // first because we have to allocate the space for the item names
+      // before making the call to get the names.
+      //***
+      int	numItems = 0;
+      getNumItems(&numItems);
+
+      //***
+      // Allocate the space for the list of names... I'm allocating the
+      // maximum amount of space needed.  I'm also creating the array
+      // for the item types list.
+      //***
+      char*	itemNameList = new char[numItems * ESMF_MAXSTR];
+      memset(itemNameList, '\0', numItems * ESMF_MAXSTR);
+
+      ESMC_StateItemType   itemTypeList[numItems];
+ 
+      //***
+      // Make the fortran call to get the information from the state
+      //***
+      //printf("In ESMC_StateGetItemNames, before  calling the glue \n");
+      FTN(f_esmf_stategetitemnames)(this, &numItems, 
+                                    itemNameList, itemTypeList, 
+                                    &localrc, ESMF_MAXSTR);
+      //printf("In ESMC_StateGetItemNames, after  calling the glue \n");
+
+      //***
+      // Go through the list and add the item names to the vector to be
+      // returned.
+      //***
+      for (int i = 0; i < numItems; ++i)
+      {
+         char *string_p = itemNameList + i*ESMF_MAXSTR;
+         int lastchar;
+
+         // Ignore trailing blanks
+         for (lastchar = ESMF_MAXSTR; lastchar == 0; lastchar--)
+           if (string_p[lastchar] != ' ') break;
+
+         string thisName(string_p, lastchar);
+
+         //***
+         // Add the name to the vector of item names
+         //***
+         itemNames.push_back(thisName);
+      }
+
+      //***
+      // Clean up the allocated space
+      //***
+      delete itemNameList;
+
+      rc = localrc;
+      return itemNames;
+
+   } // end ESMC_StateGetItemNames
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::State::getNumItems()"
+//BOP
+// !IROUTINE:  ESMCI::State::getNumItems - Get the number of items of the 
+//             specified type contained in this state
+//
+// !INTERFACE:
+      int State::getNumItems(
+//
+// !RETURN VALUE:
+//     return code rc.
+//
+// !ARGUMENTS:
+      int*                numItems,   // out - number of items in the state
+      ESMC_StateItemType  itemType){  // in - the item type
+//
+// !DESCRIPTION:
+//      Get the number of items of the specified type contained in an 
+//      existing state
+//
+//EOP
+      //local variables
+      int rc;
+      int localrc;
+      int nlen;
+      char* fName;
+
+      //Initialize return code
+      rc = ESMF_RC_NOT_IMPL;
+      localrc = ESMF_RC_NOT_IMPL;
+
+      *numItems = 0;
+
+      //***
+      // First, get the number of items in the list.  We need to do this
+      // first because we have to allocate the space for the item names
+      // before making the call to get the names.
+      //***
+      int	maxItems = 0;
+      getNumItems(&maxItems);
+
+      //***
+      // Create the array for the item types list... we need this array so
+      // so that we can count only those items of a specified type.
+      //***
+      char*	itemNameList = new char[maxItems * ESMF_MAXSTR];
+      memset(itemNameList, '\0', maxItems * ESMF_MAXSTR);
+
+      ESMC_StateItemType   itemTypeList[maxItems];
+ 
+      //***
+      // Make the fortran call to get the information from the state
+      //***
+      FTN(f_esmf_stategetitemnames)(this, &maxItems, 
+                                    itemNameList, itemTypeList, 
+                                    &localrc, ESMF_MAXSTR);
+
+      //***
+      // Go through the list and update the item count if the item type
+      // matches the specified item type.
+      //***
+      for (int i = 0; i < maxItems; ++i)
+      {
+         //printf("Item Type[%d]: %d\n", i, itemTypeList[i]);
+         if (itemTypeList[i] == itemType)
+         {
+            ++(*numItems);
+         }
+      }
+
+      //***
+      // Clean up the allocated space
+      //***
+      delete itemNameList;
+
+      rc = localrc;
+      return rc;
+
+   } // end ESMC_StateGetNumItems
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::State::getItemNames()"
+//BOP
+// !IROUTINE:  ESMCI::State::getItemNames - Get the names of the items 
+//             of the specified type contained in this state
+//
+// !INTERFACE:
+      vector<string> State::getItemNames(
+//
+// !RETURN VALUE:
+//     return code rc.
+//
+// !ARGUMENTS:
+      ESMC_StateItemType  itemType){     // in - the item type
+//
+// !DESCRIPTION:
+//      Get the names of the items of the specified type contained in 
+//      an existing state
+//
+//EOP
+      //local variables
+      int rc;
+      int localrc;
+      int nlen;
+      char* fName;
+
+      //Initialize return code
+      rc = ESMF_RC_NOT_IMPL;
+      localrc = ESMF_RC_NOT_IMPL;
+
+      vector<string>  itemNames;
+
+      //***
+      // First, get the number of items in the list.  We need to do this
+      // first because we have to allocate the space for the item names
+      // before making the call to get the names.
+      //***
+      int	numItems = 0;
+      getNumItems(&numItems);
+
+      //***
+      // Allocate the space for the list of names... I'm allocating the
+      // maximum amount of space needed.  I'm also creating the array
+      // for the item types list.
+      //***
+      char*	itemNameList = new char[numItems * ESMF_MAXSTR];
+      memset(itemNameList, '\0', numItems * ESMF_MAXSTR);
+
+      ESMC_StateItemType   itemTypeList[numItems];
+ 
+      //***
+      // Make the fortran call to get the information from the state
+      //***
+      //printf("In ESMC_StateGetItemNames, before  calling the glue \n");
+      FTN(f_esmf_stategetitemnames)(this, &numItems, 
+                                    itemNameList, itemTypeList, 
+                                    &localrc, ESMF_MAXSTR);
+      //printf("In ESMC_StateGetItemNames, after  calling the glue \n");
+
+      //***
+      // Go through the list and add the item names to the vector to be
+      // returned.
+      //***
+      for (int i = 0; i < numItems; ++i)
+      {
+         //printf("Item Type[%d]: %d\n", i, itemTypeList[i]);
+         if (itemTypeList[i] == itemType)
+         {
+           char *string_p = itemNameList + i*ESMF_MAXSTR;
+           int lastchar;
+
+           // Ignore trailing blanks
+           for (lastchar = ESMF_MAXSTR; lastchar == 0; lastchar--)
+             if (string_p[lastchar] != ' ') break;
+
+           string thisName(string_p, lastchar);
+
+           //***
+           // Add the name to the vector of item names
+           //***
+           itemNames.push_back(thisName);
+         }
+      }
+
+      //***
+      // Clean up the allocated space
+      //***
+      delete itemNameList;
+
+      rc = localrc;
+      return itemNames;
+
+   } // end ESMC_StateGetItemNames
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::State::getNumArrays()"
+//BOP
+// !IROUTINE:  ESMCI::State::getNumArrays - Get the number of arrays contained
+//             in this state
+//
+// !INTERFACE:
+      int State::getNumArrays(
+//
+// !RETURN VALUE:
+//     return code rc.
+//
+// !ARGUMENTS:
+      int* numArrays){      // out - number of arrays in the state
+//
+// !DESCRIPTION:
+//      Get the number of arrays contained in an existing state
+//
+//EOP
+
+      return getNumItems(numArrays, ESMC_STATEITEM_ARRAY);
+
+   } // end ESMC_StateGetNumArrays
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::State::getArrayNames()"
+//BOP
+// !IROUTINE:  ESMCI::State::getArrayNames - Get the names of the arrays 
+//             contained in this state
+//
+// !INTERFACE:
+      vector<string> State::getArrayNames(
+//
+// !RETURN VALUE:
+//     return code rc.
+//
+// !ARGUMENTS:
+      ){      // out - list of names of arrays in the state
+//
+// !DESCRIPTION:
+//      Get the number of arrays contained in an existing state
+//
+//EOP
+
+      return getItemNames(ESMC_STATEITEM_ARRAY);
+
+   } // end ESMC_StateGetArrayNames
 
 //-----------------------------------------------------------------------------
 } // namespace ESMCI
