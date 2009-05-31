@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.32 2009/04/07 18:47:55 svasquez Exp $
+# $Id: build_rules.mk,v 1.33 2009/05/31 22:09:58 theurich Exp $
 #
 # AIX.default.default
 #
@@ -78,6 +78,14 @@ ESMF_FPPPREFIX           = -WF,
 #
 ESMF_F90OPTFLAG_G       += -qcheck -qfullpath
 ESMF_CXXOPTFLAG_G       += -qcheck -qfullpath
+
+############################################################
+# OpenMP compiler and linker flags
+#
+ESMF_OPENMP_F90COMPILEOPTS += -qsmp=omp
+ESMF_OPENMP_CXXCOMPILEOPTS += -qsmp=omp
+ESMF_OPENMP_F90LINKOPTS    += -qsmp=omp
+ESMF_OPENMP_CXXLINKOPTS    += -qsmp=omp
 
 ############################################################
 # Blank out variables to prevent rpath encoding
