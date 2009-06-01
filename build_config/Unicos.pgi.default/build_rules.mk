@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.6 2009/01/13 18:48:14 theurich Exp $
+# $Id: build_rules.mk,v 1.7 2009/06/01 04:45:00 theurich Exp $
 #
 # Unicos.pgi.default
 #
@@ -71,6 +71,11 @@ ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SYSTEMCALL
 # XT3 compute nodes do not have support for Pthreads
 #
 ESMF_PTHREADS := OFF
+
+############################################################
+# XT3 compute nodes do not have support for OpenMP
+#
+ESMF_OPENMP := OFF
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
