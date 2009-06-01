@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeABundleUTest.F90,v 1.10 2009/04/22 04:12:24 rokuingh Exp $
+! $Id: ESMF_AttributeABundleUTest.F90,v 1.11 2009/06/01 21:37:08 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeABundleUTest.F90,v 1.10 2009/04/22 04:12:24 rokuingh Exp $'
+      '$Id: ESMF_AttributeABundleUTest.F90,v 1.11 2009/06/01 21:37:08 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -716,7 +716,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Too Long Get an ESMF_R8 list Attribute from an ArrayBundle Test
       call ESMF_AttributeGet(arraybundle, name="AttrR8l", &
-        valueList=outR8lLong(4:8), itemCount=itemCount, rc=rc)
+        valueList=outR8lLong(4:8), rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an ESMF_R8l Attribute from an ArrayBundle Test with long valueList"
       call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR8l==outR8lLong(4:6) .and. &
@@ -749,7 +749,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Too Long Get a char list Attribute from an ArrayBundle Test
       call ESMF_AttributeGet(arraybundle, name="Charl", &
-        valueList=outCharlLong(4:8), itemCount=itemCount, rc=rc)
+        valueList=outCharlLong(4:8), rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a default Attribute char list from an ArrayBundle test with long valueList"
       call ESMF_Test((rc==ESMF_SUCCESS).and. all (inCharl==outCharlLong(4:6) .and. &
@@ -782,7 +782,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Too Long Get an ESMF_R8 list Attribute from an ArrayBundle Test
       call ESMF_AttributeGet(arraybundle, name=attrname, &
-        valueList=outLoglLong(4:8), itemCount=itemCount, rc=rc)
+        valueList=outLoglLong(4:8), rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting an logical list Attribute from an ArrayBundle Test with long valueList"
       call ESMF_Test((rc == ESMF_SUCCESS).and. all (inLogl .eqv. outLoglLong(4:6)) .and. &
