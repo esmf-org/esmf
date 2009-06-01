@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.27 2009/01/12 18:23:05 theurich Exp $
+# $Id: build_rules.mk,v 1.28 2009/06/01 01:13:57 theurich Exp $
 #
 # Linux.lahey.default
 #
@@ -79,9 +79,20 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} --version
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
 
 ############################################################
-# Compiler flag to produce position independent code for shared object
+# Conditionally add pthread compiler and linker flags
 #
-ESMF_CXXCOMPILEOPTS       += -fPIC
+ifeq ($(ESMF_PTHREADS),ON)
+ESMF_CXXCOMPILEOPTS += -pthread
+ESMF_CXXLINKOPTS    += -pthread
+endif
+
+############################################################
+# OpenMP compiler and linker flags
+#
+ESMF_OPENMP_F90COMPILEOPTS += -openmp
+ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
+ESMF_OPENMP_F90LINKOPTS    += -openmp
+ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
@@ -117,5 +128,14 @@ ESMF_F90LINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.lf95 $(ESMF_F90COMPILE
 # Shared library options
 #
 ESMF_SL_LIBOPTS  += -shared
-ESMF_SL_LIBLIBS  += $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
+
+############################################################
+# Shared object options
+#
+ESMF_SO_F90COMPILEOPTS  = 
+ESMF_SO_F90LINKOPTS     = -shared
+ESMF_SO_F90LINKOPTSEXE  = -Wl,-export-dynamic
+ESMF_SO_CXXCOMPILEOPTS  = -fPIC
+ESMF_SO_CXXLINKOPTS     = -shared
+ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
 
