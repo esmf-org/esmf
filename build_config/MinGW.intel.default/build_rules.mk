@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.8 2009/03/19 20:59:46 theurich Exp $
+# $Id: build_rules.mk,v 1.9 2009/06/01 22:13:04 w6ws Exp $
 #
 # MinGW.intel.default
 #
@@ -193,6 +193,14 @@ ESMF_RANLIBDEFAULT          = true
 #
 ESMF_F90LINKRPATHS      =
 ESMF_CXXLINKRPATHS      =
+
+###########################################################
+# OpenMP compiler and linker flags
+#
+ESMF_OPENMP_F90COMPILEOPTS += -Qopenmp
+ESMF_OPENMP_CXXCOMPILEOPTS += -Qopenmp
+ESMF_OPENMP_F90LINKOPTS    += -Qopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -Qopenmp
 
 ###########################################################
 # Determine where libraries are located
