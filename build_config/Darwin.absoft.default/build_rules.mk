@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.32 2009/03/04 22:46:40 theurich Exp $
+# $Id: build_rules.mk,v 1.33 2009/06/01 04:53:21 theurich Exp $
 #
 # Darwin.absoft.default
 #
@@ -67,6 +67,11 @@ endif
 endif
 endif
 endif
+
+############################################################
+# currently does not support OpenMP
+#
+ESMF_OPENMP := OFF
 
 ############################################################
 # Print compiler version string

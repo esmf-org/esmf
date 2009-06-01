@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.17 2009/05/06 03:14:52 w6ws Exp $
+# $Id: build_rules.mk,v 1.18 2009/06/01 04:53:21 theurich Exp $
 #
 # Linux.absoftintel.default
 #
@@ -66,6 +66,11 @@ endif
 endif
 endif
 endif
+
+############################################################
+# currently does not support OpenMP
+#
+ESMF_OPENMP := OFF
 
 ############################################################
 # Print compiler version string
