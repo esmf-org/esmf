@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.11 2009/01/12 18:23:05 theurich Exp $
+# $Id: build_rules.mk,v 1.12 2009/06/01 04:38:02 theurich Exp $
 #
 # Linux.pathscale.default
 #
@@ -95,6 +95,14 @@ ESMF_F90LINKOPTS        += -mcmodel=medium
 ESMF_CXXCOMPILEOPTS     += -mcmodel=medium
 ESMF_CXXLINKOPTS        += -mcmodel=medium
 endif
+
+############################################################
+# OpenMP compiler and linker flags
+#
+ESMF_OPENMP_F90COMPILEOPTS += -mp
+ESMF_OPENMP_CXXCOMPILEOPTS += -mp
+ESMF_OPENMP_F90LINKOPTS    += -mp
+ESMF_OPENMP_CXXLINKOPTS    += -mp
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)

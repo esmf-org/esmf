@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.16 2009/01/12 18:21:08 theurich Exp $
+# $Id: build_rules.mk,v 1.17 2009/06/01 04:41:27 theurich Exp $
 #
 # Linux.xlf.default
 #
@@ -76,6 +76,14 @@ ESMF_FPPPREFIX           = -WF,
 #
 ESMF_F90OPTFLAG_G       += -qcheck -qfullpath
 ESMF_CXXOPTFLAG_G       += -qcheck -qfullpath
+
+############################################################
+# OpenMP compiler and linker flags
+#
+ESMF_OPENMP_F90COMPILEOPTS += -qsmp=omp
+ESMF_OPENMP_CXXCOMPILEOPTS += -qsmp=omp
+ESMF_OPENMP_F90LINKOPTS    += -qsmp=omp
+ESMF_OPENMP_CXXLINKOPTS    += -qsmp=omp
 
 ############################################################
 # Blank out variables to prevent rpath encoding

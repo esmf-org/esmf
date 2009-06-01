@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.7 2008/07/23 04:51:54 theurich Exp $
+# $Id: build_rules.mk,v 1.8 2009/06/01 04:40:27 theurich Exp $
 #
 # Darwin.xlfgcc.default
 #
@@ -83,6 +83,14 @@ ESMF_FPPPREFIX           = -WF,
 # Special debug flags
 #
 ESMF_F90OPTFLAG_G       += -qcheck -qfullpath
+
+############################################################
+# OpenMP compiler and linker flags
+#
+ESMF_OPENMP_F90COMPILEOPTS += -qsmp=omp
+ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
+ESMF_OPENMP_F90LINKOPTS    += -qsmp=omp
+ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################
 # Blank out variables to prevent rpath encoding

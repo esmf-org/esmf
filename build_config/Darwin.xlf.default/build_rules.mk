@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.23 2008/07/29 01:34:47 rosalind Exp $
+# $Id: build_rules.mk,v 1.24 2009/06/01 04:40:27 theurich Exp $
 #
 # Darwin.xlf.default
 #
@@ -78,6 +78,14 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -qversion
 # xlf90 needs flag to indicate FPP options
 #
 ESMF_FPPPREFIX           = -WF,
+
+############################################################
+# OpenMP compiler and linker flags
+#
+ESMF_OPENMP_F90COMPILEOPTS += -qsmp=omp
+ESMF_OPENMP_CXXCOMPILEOPTS += -qsmp=omp
+ESMF_OPENMP_F90LINKOPTS    += -qsmp=omp
+ESMF_OPENMP_CXXLINKOPTS    += -qsmp=omp
 
 ############################################################
 # Special debug flags

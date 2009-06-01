@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.18 2009/05/10 05:44:56 theurich Exp $
+# $Id: build_rules.mk,v 1.19 2009/06/01 04:43:43 theurich Exp $
 #
 # Linux.pgigcc.default
 #
@@ -109,6 +109,14 @@ ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
 ESMF_F90COMPILEOPTS       += -mcmodel=medium
 ESMF_F90LINKOPTS          += -mcmodel=medium
 endif
+
+############################################################
+# OpenMP compiler and linker flags
+#
+ESMF_OPENMP_F90COMPILEOPTS += -mp
+ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
+ESMF_OPENMP_F90LINKOPTS    += -mp
+ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################
 # Link against GCC's stdc++ library (because g++ is used)

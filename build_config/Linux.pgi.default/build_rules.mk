@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.46 2009/05/10 05:44:56 theurich Exp $
+# $Id: build_rules.mk,v 1.47 2009/06/01 04:43:43 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -116,6 +116,14 @@ ESMF_CXXLINKOPTS          += -mcmodel=medium
 ESMF_F90COMPILEOPTS       += -mcmodel=medium
 ESMF_F90LINKOPTS          += -mcmodel=medium
 endif
+
+############################################################
+# OpenMP compiler and linker flags
+#
+ESMF_OPENMP_F90COMPILEOPTS += -mp
+ESMF_OPENMP_CXXCOMPILEOPTS += -mp
+ESMF_OPENMP_F90LINKOPTS    += -mp
+ESMF_OPENMP_CXXLINKOPTS    += -mp
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
