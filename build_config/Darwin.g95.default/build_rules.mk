@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.15 2008/11/14 01:26:34 theurich Exp $
+# $Id: build_rules.mk,v 1.16 2009/06/01 04:19:43 theurich Exp $
 #
 # Dawin.g95.default
 #
@@ -81,6 +81,11 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 ESMF_PTHREADS := OFF
 
 ############################################################
+# g95 currently does not support OpenMP
+#
+ESMF_OPENMP := OFF
+
+############################################################
 # Fortran symbol convention
 #
 ifeq ($(ESMF_FORTRANSYMBOLS),default)
@@ -143,6 +148,24 @@ ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
 ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
 ESMF_F90LINKOPTS          += -m64 -mcmodel=medium
 endif
+
+############################################################
+# Conditionally add pthread compiler and linker flags
+#
+ifeq ($(ESMF_PTHREADS),ON)
+ESMF_F90COMPILEOPTS += -pthread
+ESMF_CXXCOMPILEOPTS += -pthread
+ESMF_F90LINKOPTS    += -pthread
+ESMF_CXXLINKOPTS    += -pthread
+endif
+
+############################################################
+# OpenMP compiler and linker flags
+#
+ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
+ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
+ESMF_OPENMP_F90LINKOPTS    += -fopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
