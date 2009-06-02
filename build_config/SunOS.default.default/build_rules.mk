@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.17 2008/07/23 04:51:55 theurich Exp $
+# $Id: build_rules.mk,v 1.18 2009/06/02 20:53:07 theurich Exp $
 # 
 # SunOS.default.default
 #
@@ -82,6 +82,14 @@ ESMF_CXXLINKOPTS          += -mt
 ESMF_F90COMPILEOPTS       += -mt
 ESMF_F90LINKOPTS          += -mt
 endif
+
+############################################################
+# OpenMP compiler and linker flags
+#
+ESMF_OPENMP_F90COMPILEOPTS += -xopenmp
+ESMF_OPENMP_F90LINKOPTS    += -xopenmp
+ESMF_OPENMP_CXXCOMPILEOPTS += -xopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -xopenmp
 
 ############################################################
 # Blank out variables to prevent rpath encoding
