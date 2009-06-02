@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.106 2009/05/29 19:29:54 theurich Exp $
+# $Id: makefile,v 1.107 2009/06/02 23:06:21 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -268,6 +268,11 @@ info_mk: chkdir_lib
 	-@echo "ESMF_SO_CXXCOMPILEOPTS=$(ESMF_SO_CXXCOMPILEOPTS)" >> $(MKINFO)
 	-@echo "ESMF_SO_CXXLINKOPTS=$(ESMF_SO_CXXLINKOPTS)" >> $(MKINFO)
 	-@echo "ESMF_SO_CXXLINKOPTSEXE=$(ESMF_SO_CXXLINKOPTSEXE)" >> $(MKINFO)
+	-@echo "" >> $(MKINFO)
+	-@echo "ESMF_OPENMP_F90COMPILEOPTS=$(ESMF_OPENMP_F90COMPILEOPTS)" >> $(MKINFO)
+	-@echo "ESMF_OPENMP_F90LINKOPTS=$(ESMF_OPENMP_F90LINKOPTS)" >> $(MKINFO)
+	-@echo "ESMF_OPENMP_CXXCOMPILEOPTS=$(ESMF_OPENMP_CXXCOMPILEOPTS)" >> $(MKINFO)
+	-@echo "ESMF_OPENMP_CXXLINKOPTS=$(ESMF_OPENMP_CXXLINKOPTS)" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "#" >> $(MKINFO)
 	-@echo "# !!! The following options were used on this ESMF build !!!" >> $(MKINFO)
