@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.C,v 1.39 2009/05/20 02:34:17 theurich Exp $
+// $Id: ESMC_LocalArray.C,v 1.40 2009/06/03 23:43:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_LocalArray.C,v 1.39 2009/05/20 02:34:17 theurich Exp $";
+static const char *const version = "$Id: ESMC_LocalArray.C,v 1.40 2009/06/03 23:43:23 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // prototypes for Fortran calls
@@ -558,6 +558,16 @@ int ESMC_LocalArray::ESMC_LocalArrayConstruct(
     
   // TODO: memcpy from base to base_addr, proper number of bytes?
   //  if docopy flag is set.
+//***
+// KDS - Begin change
+//***
+  if (docopy == ESMC_DATA_COPY)
+  {
+    memcpy(base_addr, base, totalcount);
+  }
+//***
+// KDS - End change
+//***
 
   // return successfully
   rc = ESMF_SUCCESS;
