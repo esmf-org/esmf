@@ -47,7 +47,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_State.C,v 1.12 2009/05/30 00:03:12 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_State.C,v 1.13 2009/06/03 00:34:54 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -613,7 +613,7 @@ namespace ESMCI {
       char*	itemNameList = new char[numItems * ESMF_MAXSTR];
       memset(itemNameList, '\0', numItems * ESMF_MAXSTR);
 
-      ESMC_StateItemType   itemTypeList[numItems];
+      ESMC_StateItemType   *itemTypeList = new ESMC_StateItemType[numItems];
  
       //***
       // Make the fortran call to get the information from the state
@@ -648,6 +648,7 @@ namespace ESMCI {
       //***
       // Clean up the allocated space
       //***
+      delete itemTypeList;
       delete itemNameList;
 
       rc = localrc;
@@ -704,7 +705,7 @@ namespace ESMCI {
       char*	itemNameList = new char[maxItems * ESMF_MAXSTR];
       memset(itemNameList, '\0', maxItems * ESMF_MAXSTR);
 
-      ESMC_StateItemType   itemTypeList[maxItems];
+      ESMC_StateItemType   *itemTypeList = new ESMC_StateItemType[maxItems];
  
       //***
       // Make the fortran call to get the information from the state
@@ -729,6 +730,7 @@ namespace ESMCI {
       //***
       // Clean up the allocated space
       //***
+      delete itemTypeList;
       delete itemNameList;
 
       rc = localrc;
@@ -785,7 +787,7 @@ namespace ESMCI {
       char*	itemNameList = new char[numItems * ESMF_MAXSTR];
       memset(itemNameList, '\0', numItems * ESMF_MAXSTR);
 
-      ESMC_StateItemType   itemTypeList[numItems];
+      ESMC_StateItemType   *itemTypeList = new ESMC_StateItemType[numItems];
  
       //***
       // Make the fortran call to get the information from the state
@@ -824,6 +826,7 @@ namespace ESMCI {
       //***
       // Clean up the allocated space
       //***
+      delete itemTypeList;
       delete itemNameList;
 
       rc = localrc;
