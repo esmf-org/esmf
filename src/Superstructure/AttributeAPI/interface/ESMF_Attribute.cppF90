@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.39 2009/05/14 19:13:36 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.40 2009/06/03 17:21:36 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.39 2009/05/14 19:13:36 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.40 2009/06/03 17:21:36 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -774,18 +774,18 @@ contains
 ! !IROUTINE: ESMF_AttributeGet  - Get an Attribute
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeGet(<object>, name, <value argument>, &
-!                            <defaultvalue argument>, convention, purpose, &
+!     subroutine ESMF_AttributeGet(<object>, name, <valueList argument>, &
+!                            <defaultvalueList argument>, convention, purpose, &
 !                            itemCount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
 !     character (len = *), intent(in) :: name
-!     <value argument>, see below for supported values
-!     <defaultvalue argument>, see below for supported values   
+!     <valueList argument>, see below for supported values
+!     <defaultvalueList argument>, see below for supported values   
 !     character (len = *), intent(in), optional :: convention
 !     character (len = *), intent(in), optional :: purpose
-!     integer, intent(out), optional :: itemCount
+!     integer, intent(inout), optional :: itemCount
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -1433,13 +1433,13 @@ contains
 ! !IROUTINE: ESMF_AttributeSet - Set an Attribute
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeSet(<object>, name, <value argument>, &
+!     subroutine ESMF_AttributeSet(<object>, name, <valueList argument>, &
 !                                 convention, purpose, itemCount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
 !     character (len = *), intent(in) :: name
-!     <value argument>, see below for supported values
+!     <valueList argument>, see below for supported values
 !     character (len = *), intent(in), optional :: convention
 !     character (len = *), intent(in), optional :: purpose
 !     integer, intent(in), optional :: itemCount
@@ -1999,7 +1999,7 @@ contains
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(inout), optional :: defaultvalueList @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
-      integer, intent(out), optional :: itemCount    @\
+      integer, intent(inout), optional :: itemCount    @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -2255,7 +2255,7 @@ contains
       logical, dimension(:), intent(inout), optional :: defaultvalueList @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
-      integer, intent(out), optional :: itemCount    @\
+      integer, intent(inout), optional :: itemCount    @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -2505,7 +2505,7 @@ contains
       character (len=*), dimension(:), intent(in), optional :: defaultvalueList @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
-      integer, intent(out), optional :: itemCount @\
+      integer, intent(inout), optional :: itemCount @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
