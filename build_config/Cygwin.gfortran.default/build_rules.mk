@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.8 2008/11/07 18:23:40 w6ws Exp $
+# $Id: build_rules.mk,v 1.9 2009/06/03 23:52:00 theurich Exp $
 #
 # Cygwin.gfortran.default
 #
@@ -126,6 +126,24 @@ ESMF_CXXLINKOPTS          += -march=k8 -m64 -mcmodel=medium
 ESMF_F90COMPILEOPTS       += -march=k8 -m64 -mcmodel=medium
 ESMF_F90LINKOPTS          += -march=k8 -m64 -mcmodel=medium
 endif
+
+############################################################
+# Conditionally add pthread compiler and linker flags
+#
+ifeq ($(ESMF_PTHREADS),ON)
+ESMF_F90COMPILEOPTS += -pthread
+ESMF_CXXCOMPILEOPTS += -pthread
+ESMF_F90LINKOPTS    += -pthread
+ESMF_CXXLINKOPTS    += -pthread
+endif
+
+############################################################
+# OpenMP compiler and linker flags
+#
+ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
+ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
+ESMF_OPENMP_F90LINKOPTS    += -fopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
