@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.9 2009/05/13 05:37:05 theurich Exp $
+# $Id: build_rules.mk,v 1.10 2009/06/04 00:11:20 theurich Exp $
 #
 # Linux.nagintel.default
 #
@@ -72,6 +72,11 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v -V -dryrun
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
+
+############################################################
+# nag currently does not support OpenMP
+#
+ESMF_OPENMP := OFF
 
 ############################################################
 # Some ESMF tests fail for NAG with -O -> turn optimization off by default

@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.23 2008/07/23 04:51:54 theurich Exp $
+# $Id: build_rules.mk,v 1.24 2009/06/04 00:11:20 theurich Exp $
 #
 # Darwin.nag.default
 #
@@ -73,6 +73,11 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v -V -dryrun
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
+
+############################################################
+# nag currently does not support OpenMP
+#
+ESMF_OPENMP := OFF
 
 ############################################################
 # Some ESMF tests fail for NAG with -O -> turn optimization off by default
