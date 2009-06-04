@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.8 2009/04/30 18:57:50 rokuingh Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.9 2009/06/04 20:52:12 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -79,7 +79,7 @@ program ESMF_AttributePackageEx
 !    We must construct the ESMF objects that will be responsible for the
 !    Attributes we will be manipulating.  These objects include the 
 !    gridded Component, two States, a FieldBundle, and 10 Fields.  In this trivial 
-!    example we are constructing empty fields with no underlying Grid.
+!    example we are constructing empty Fields with no underlying Grid.
 !EOE
 !BOC
       if (petCount<4) then
@@ -109,13 +109,11 @@ program ESMF_AttributePackageEx
 !BOE
 !    Now we can add Attribute packages to all of the appropriate objects.
 !    We will use the ESMF supplied Attribute packages for the Fields and 
-!    the Component with the ESG convention.  On the Fields, we will first use 
-!    {\tt ESMF\_AttributeAdd()} to create customized Attribute packages, then
-!    we will nest the ESG convention Attribute packages inside our customized
-!    packages.  For the
-!    Component we will simply use the ESMF supplied (ESG) Attribute package.
-!    In this simple example the purpose for the Attribute packages will
-!    be specified as "general" in all cases.
+!    the Component.  On the Fields, we will first use 
+!    {\tt ESMF\_AttributeAdd()} to create standard Attribute packages, then
+!    we will nest customized Attribute packages around the ESMF standard
+!    Attribute packages.  In this simple example the purpose for the Attribute packages will
+!    be specified as "General" in all cases.
 !EOE
 
 !BOC 
@@ -184,12 +182,9 @@ program ESMF_AttributePackageEx
 !     The standard Attribute package currently supplied by ESMF for 
 !     Field contains 6 Attributes, 2 of which are set automatically.  
 !     The remaining 4 Attributes in the standard Field Attribute
-!     package must be set manually by the user.  The names of the 4 
-!     Attributes that the user must set are currently in accordance 
-!     with the CF convention, which is a subset of the ESG convention,
-!     and also nested inside the ESG package in ESMF.  We must also
+!     package must be set manually by the user.   We must also
 !     set the Attributes of our own custom Attribute package, which
-!     is built around both the ESG and CF Attribute packages at this point.
+!     is built around the ESMF standard Attribute package.
 !EOE
 
 !BOC
@@ -203,12 +198,12 @@ program ESMF_AttributePackageEx
       value2 = 'tendency_of_air_pressure'
       value3 = 'Edge pressure tendency'
       value4 = 'Pa s-1'
-      ! ESG Attributes
+      ! Custom Attributes
       call ESMF_AttributeSet(DPEDT, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(DPEDT, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
-      ! CF Attributes
+      ! ESMF Attributes
       call ESMF_AttributeSet(DPEDT, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(DPEDT, name2, value2, convention=convESMF, &
@@ -223,12 +218,12 @@ program ESMF_AttributePackageEx
       value2 = 'tendency_of_air_temperature'
       value3 = 'Delta-p weighted temperature tendency'
       value4 = 'Pa K s-1'
-      ! ESG Attributes
+      ! Custom Attributes
       call ESMF_AttributeSet(DTDT, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(DTDT, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
-      ! CF Attributes
+      ! ESMF Attributes
       call ESMF_AttributeSet(DTDT, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(DTDT, name2, value2, convention=convESMF, &
@@ -243,12 +238,12 @@ program ESMF_AttributePackageEx
       value2 = 'tendency_of_eastward_wind'
       value3 = 'Eastward wind tendency'
       value4 = 'm s-2'
-      ! ESG Attributes
+      ! Custom Attributes
       call ESMF_AttributeSet(DUDT, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(DUDT, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
-      ! CF Attributes
+      ! ESMF Attributes
       call ESMF_AttributeSet(DUDT, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(DUDT, name2, value2, convention=convESMF, &
@@ -263,12 +258,12 @@ program ESMF_AttributePackageEx
       value2 = 'tendency_of_northward_wind'
       value3 = 'Northward wind tendency'
       value4 = 'm s-2'
-      ! ESG Attributes
+      ! Custom Attributes
       call ESMF_AttributeSet(DVDT, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(DVDT, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
-      ! CF Attributes
+      ! ESMF Attributes
       call ESMF_AttributeSet(DVDT, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(DVDT, name2, value2, convention=convESMF, &
@@ -283,12 +278,12 @@ program ESMF_AttributePackageEx
       value2 = 'surface_geopotential'
       value3 = 'Surface geopotential height'
       value4 = 'm2 s-2'
-      ! ESG Attributes
+      ! Custom Attributes
       call ESMF_AttributeSet(PHIS, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(PHIS, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
-      ! CF Attributes
+      ! ESMF Attributes
       call ESMF_AttributeSet(PHIS, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(PHIS, name2, value2, convention=convESMF, &
@@ -303,12 +298,12 @@ program ESMF_AttributePackageEx
       value2 = ''
       value3 = 'Advected quantities'
       value4 = 'unknown'
-      ! ESG Attributes
+      ! Custom Attributes
       call ESMF_AttributeSet(QTR, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(QTR, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
-      ! CF Attributes
+      ! ESMF Attributes
       call ESMF_AttributeSet(QTR, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(QTR, name2, value2, convention=convESMF, &
@@ -323,12 +318,12 @@ program ESMF_AttributePackageEx
       value2 = 'atmosphere_kinetic_energy_content'
       value3 = 'Generation of atmosphere kinetic energy content'
       value4 = 'W m-2'
-      ! ESG Attributes
+      ! Custom Attributes
       call ESMF_AttributeSet(CNV, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(CNV, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
-      ! CF Attributes
+      ! ESMF Attributes
       call ESMF_AttributeSet(CNV, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(CNV, name2, value2, convention=convESMF, &
@@ -343,12 +338,12 @@ program ESMF_AttributePackageEx
       value2 = ''
       value3 = 'Vertically integrated enthalpy convergence'
       value4 = 'W m-2'
-      ! ESG Attributes
+      ! Custom Attributes
       call ESMF_AttributeSet(CONVCPT, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(CONVCPT, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
-      ! CF Attributes
+      ! ESMF Attributes
       call ESMF_AttributeSet(CONVCPT, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(CONVCPT, name2, value2, convention=convESMF, &
@@ -363,12 +358,12 @@ program ESMF_AttributePackageEx
       value2 = ''
       value3 = 'Vertically integrated kinetic energy convergence'
       value4 = 'W m-2'
-      ! ESG Attributes
+      ! Custom Attributes
       call ESMF_AttributeSet(CONVKE, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(CONVKE, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
-      ! CF Attributes
+      ! ESMF Attributes
       call ESMF_AttributeSet(CONVKE, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(CONVKE, name2, value2, convention=convESMF, &
@@ -383,12 +378,12 @@ program ESMF_AttributePackageEx
       value2 = ''
       value3 = 'Vertically integrated geopotential convergence'
       value4 = 'W m-2'
-      ! ESG Attributes
+      ! Custom Attributes
       call ESMF_AttributeSet(CONVPHI, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(CONVPHI, name='Mask', value='yes', &
         convention=convCC, purpose=purpGen, rc=rc)
-      ! CF Attributes
+      ! ESMF Attributes
       call ESMF_AttributeSet(CONVPHI, name1, value1, convention=convESMF, &
         purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(CONVPHI, name2, value2, convention=convESMF, &
@@ -464,15 +459,13 @@ program ESMF_AttributePackageEx
 !     execution directory with the contents of the write.  There is also
 !     a tab-delimited write which writes to standard out, a file generated
 !     in the execution directory with the extension .stdout.  Either of 
-!     the {\tt ESMF\_AttributeWrite} formats can be called on any of the objects which
+!     the {\tt ESMF\_AttributeWrite()} formats can be called on any of the objects which
 !     are capable of manipulating Attributes, but only from objects in an 
-!     Attribute hierarchy which contains Attribute packages will any 
-!     relevant information be written.  In the the tab-delimited case 
-!     relevant information will only be written if the Attribute hierarchy
-!     contains ESMF supplied Attribute packages.  The {\tt ESMF\_AttributeWrite()}
+!     Attribute hierarchy which contain ESMF standard Attribute packages can it be confirmed that any 
+!     relevant information be written.  The {\tt ESMF\_AttributeWrite()}
 !     capability is only functional for single-item Attributes at this point, it
 !     will be more robust in future releases.  A flag is used to 
-!     specify which format to write, and the default is tab-delimited.
+!     specify which format to write, the default is tab-delimited.
 !EOE
 
 

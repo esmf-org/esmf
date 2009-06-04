@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeABundleUTest.F90,v 1.12 2009/06/03 17:21:37 rokuingh Exp $
+! $Id: ESMF_AttributeABundleUTest.F90,v 1.13 2009/06/04 20:52:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeABundleUTest.F90,v 1.12 2009/06/03 17:21:37 rokuingh Exp $'
+      '$Id: ESMF_AttributeABundleUTest.F90,v 1.13 2009/06/04 20:52:13 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -163,7 +163,7 @@ program ESMF_AttributeArrayBundleUTest
       call ESMF_AttributeGet(arraybundle, name="NotHere", value=outI4, rc=rc)
       write(failMsg, *) "Did not return ESMF_FAILURE or wrong value"
       write(name, *) "Getting a nonexistent Attribute from an ArrayBundle Test"
-      call ESMF_Test((rc/=ESMF_SUCCESS), &
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       

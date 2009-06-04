@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeEx.F90,v 1.8 2009/02/20 05:42:13 rokuingh Exp $
+! $Id: ESMF_AttributeEx.F90,v 1.9 2009/06/04 20:52:12 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -58,8 +58,9 @@ program ESMF_AttributeEx
       real(kind=8)                          :: inR8
       real(kind=8), dimension(3)            :: inR8l
       character(ESMF_MAXSTR)                :: inChar
-      character(ESMF_MAXSTR), dimension(3)  :: inCharl, outCharl, &
+      character(ESMF_MAXSTR), dimension(3)  :: inCharl, &
                                                defaultCharl, dfltoutCharl
+      character(ESMF_MAXSTR), dimension(8)  :: outCharl
       logical                               :: inLog
       logical, dimension(3)                 :: inLogl, value
       
@@ -153,8 +154,9 @@ program ESMF_AttributeEx
                         "Character string 5", &
                         "Character string 6" /)
       
+      itemCount=3
       call ESMF_AttributeGet(gridcomp, name="Character_namelist", &
-        valueList=outCharl, rc=rc) 
+        valueList=outCharl(1:5), itemCount=itemCount, rc=rc) 
                     
       call ESMF_AttributeRemove(gridcomp, name="Character_namelist", rc=rc)
       
