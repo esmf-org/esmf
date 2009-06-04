@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.40 2009/06/03 17:21:36 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.41 2009/06/04 17:30:25 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.40 2009/06/03 17:21:36 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.41 2009/06/04 17:30:25 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -839,7 +839,10 @@ contains
 !     \item [{[purpose]}]
 !           The purpose of the Attribute package
 !     \item [{[itemCount]}]
-!           The number of items in a multi-valued Attribute
+!           The number of items in a multi-valued Attribute.  If the itemCount is passed in, only itemCount
+!           items of the desired Attribute will be returned, as long as there is enough space and there are 
+!           itemCount items to return.  Regardless of whether itemCount is passed in, it will be returned as the
+!           number of items that was {\it actually} returned.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
