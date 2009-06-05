@@ -22,7 +22,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LocalAlloc_C.F90,v 1.16 2009/01/21 21:38:00 cdeluca Exp $'
+!      '$Id: ESMF_LocalArray_C.F90,v 1.1 2009/06/05 23:46:37 theurich Exp $'
 !==============================================================================
 subroutine f_esmf_localarrayf90allocate(array, rank, kind, counts, &
   lbounds, ubounds, rc)

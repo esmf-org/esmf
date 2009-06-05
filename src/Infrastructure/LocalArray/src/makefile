@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.6 2008/09/26 05:53:54 cdeluca Exp $
+# $Id: makefile,v 1.7 2009/06/05 23:46:37 theurich Exp $
 
 ALL: build_here 
 
-SOURCEC	  =  ESMC_LocalArray.C 
+SOURCEC	  =  ESMCI_LocalArray.C 
 SOURCEF	  =  
 
 # if you have .h include files in this dir, list them all on the line below.
-STOREH	  = ESMC_LocalArray.h
+STOREH	  = ESMCI_LocalArray.h
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))

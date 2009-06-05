@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.13 2009/06/05 23:02:18 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.14 2009/06/05 23:46:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_LocalArrayCreateMod
 
   ! Indicates whether a data array should be copied or referenced. 
   !  This matches an enum on the C++ side and the values must match.
-  !  Update ../include/ESMC_LocalArray.h if you change these values.
+  !  Update ../include/ESMCI_LocalArray.h if you change these values.
 
   type ESMF_CopyFlag
   sequence
@@ -83,7 +83,7 @@ module ESMF_LocalArrayCreateMod
 
   ! Private flag which indicates the create was initiated on the F90 side.
   !  This matches an enum on the C++ side and the values must match.
-  !  Update ../include/ESMC_LocalArray.h if you change these values.
+  !  Update ../include/ESMCI_LocalArray.h if you change these values.
 
   type ESMF_LocalArrayOrigin
   sequence
@@ -151,7 +151,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.13 2009/06/05 23:02:18 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.14 2009/06/05 23:46:37 theurich Exp $'
 
 !==============================================================================
 ! 

@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.44 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMC_XPacket.h,v 1.45 2009/06/05 23:46:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
- #include <ESMC_LocalArray.h>
+ #include <ESMCI_LocalArray.h>
 
 //-----------------------------------------------------------------------------
 //BOP

@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.18 2009/06/05 22:41:22 theurich Exp $
+# $Id: makefile,v 1.19 2009/06/05 23:46:37 theurich Exp $
 
 ALL: build_here 
 
 AUTOGEN   = ESMF_LocalArrayWrapperType.F90 ESMF_LocalArrayCreate.F90 ESMF_LocalArrayGet.F90
-SOURCEC	  = ESMC_LocalArray_F.C 
-SOURCEF	  = $(AUTOGEN) ESMF_LocalArray.F90 ESMF_LocalAlloc_C.F90
+SOURCEC	  = ESMCI_LocalArray_F.C 
+SOURCEF	  = $(AUTOGEN) ESMF_LocalArray.F90 ESMF_LocalArray_C.F90
 SOURCEH	  = 
 
 # List all .h files which should be copied to a common include dir

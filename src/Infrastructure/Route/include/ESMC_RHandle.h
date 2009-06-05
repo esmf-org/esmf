@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.h,v 1.14 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMC_RHandle.h,v 1.15 2009/06/05 23:46:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 // 
 // !USES:
  #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
- #include <ESMC_LocalArray.h>
+ #include <ESMCI_LocalArray.h>
  #include <ESMC_XPacket.h> 
  #include <ESMC_Route.h>
  #include "ESMC_TValues.h"

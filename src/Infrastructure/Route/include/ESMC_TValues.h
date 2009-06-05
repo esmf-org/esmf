@@ -1,4 +1,4 @@
-// $Id: ESMC_TValues.h,v 1.8 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMC_TValues.h,v 1.9 2009/06/05 23:46:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 // 
 // !USES:
  #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
- #include <ESMC_LocalArray.h>
+ #include <ESMCI_LocalArray.h>
 
 // !PUBLIC TYPES:
  class ESMC_TransformValues;

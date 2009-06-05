@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.27 2009/02/16 19:14:31 rokuingh Exp $
+// $Id: ESMCI_LocalArray.h,v 1.1 2009/06/05 23:46:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,12 +15,12 @@
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
 
-#ifndef ESMC_LocalArray_H
-#define ESMC_LocalArray_H
+#ifndef ESMCI_LocalArray_H
+#define ESMCI_LocalArray_H
 
 //-----------------------------------------------------------------------------
 //BOPI
-// !CLASS:  ESMC_LocalArray - uniform access to arrays from F90 and C++
+// !CLASS:  ESMCI_LocalArray - uniform access to arrays from F90 and C++
 //
 // !DESCRIPTION:
 //
@@ -286,4 +286,4 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
   
 };  // class ESMC_LocalArray
 
-#endif  // ESMC_LocalArray_H
+#endif  // ESMCI_LocalArray_H

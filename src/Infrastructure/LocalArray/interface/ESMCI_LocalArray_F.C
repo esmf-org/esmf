@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.32 2009/04/20 19:02:12 w6ws Exp $
+// $Id: ESMCI_LocalArray_F.C,v 1.1 2009/06/05 23:46:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -20,7 +20,7 @@
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMCI_LogErr.h"
-#include "ESMC_LocalArray.h"
+#include "ESMCI_LocalArray.h"
 #include <stdio.h>
 #include <string.h>
 //------------------------------------------------------------------------------

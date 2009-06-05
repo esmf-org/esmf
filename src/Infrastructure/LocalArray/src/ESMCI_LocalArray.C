@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.C,v 1.40 2009/06/03 23:43:23 theurich Exp $
+// $Id: ESMCI_LocalArray.C,v 1.1 2009/06/05 23:46:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMC_LocalArray.C"
+#define ESMC_FILENAME "ESMCI_LocalArray.C"
 //==============================================================================
 //
 // ESMC LocalArray method implementation (body) file
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
 
 // associated header file
-#include "ESMC_LocalArray.h"
+#include "ESMCI_LocalArray.h"
 
 // higher level, 3rd party or system headers
 #include <stdio.h>
@@ -45,7 +45,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_LocalArray.C,v 1.40 2009/06/03 23:43:23 theurich Exp $";
+static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.1 2009/06/05 23:46:37 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // prototypes for Fortran calls
