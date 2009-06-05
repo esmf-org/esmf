@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayWrapperType.cppF90,v 1.1 2009/06/05 22:41:22 theurich Exp $
+! $Id: ESMF_LocalArrayWrapperType.cppF90,v 1.2 2009/06/05 23:02:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -35,11 +35,11 @@ module ESMF_LocalArrayWrapperTypeMod
 ! !PUBLIC TYPES:
   public
 
-#define LocalArrayTypeMacro(mname, mtypekind, mrank, mdim) \
+#define LocalArrayWrapperTypeMacro(mname, mtypekind, mrank, mdim) \
 ! <Created by macro - do not edit directly > @\
-      type ESMF_ArrWrap##mrank##D##mtypekind @\
+      type ESMF_LAWrap##mrank##D##mtypekind @\
         mname (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: ptr##mrank##D##mtypekind @\
-      end type ESMF_ArrWrap##mrank##D##mtypekind @\
+      end type ESMF_LAWrap##mrank##D##mtypekind @\
 
 !------------------------------------------------------------------------------
   ! Internal wrapper structures for passing f90 pointers to C++ and
@@ -47,6 +47,6 @@ module ESMF_LocalArrayWrapperTypeMod
   ! platforms.  These are never seen outside this module.
 
   ! < these expand into defined type declarations >
-AllTypesMacro(LocalArrayType)
+AllTypesMacro(LocalArrayWrapperType)
 
 end module ESMF_LocalArrayWrapperTypeMod

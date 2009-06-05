@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.8 2009/06/05 22:41:22 theurich Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.9 2009/06/05 23:02:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_LocalArrayGetMod
       integer :: rank @\
       type(ESMF_TypeKind) :: typekind @\
  @\
-      type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrap     ! for passing f90 ptr to C++ @\
+      type (ESMF_LAWrap##mrank##D##mtypekind) :: wrap     ! for passing f90 ptr to C++ @\
       integer :: lb(mrank), ub(mrank)  ! size info for the array @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: lp ! local copy @\
  @\
@@ -203,7 +203,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.8 2009/06/05 22:41:22 theurich Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.9 2009/06/05 23:02:19 theurich Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
