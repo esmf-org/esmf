@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.7 2009/01/21 21:38:00 cdeluca Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.8 2009/06/05 22:41:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -26,8 +26,145 @@ module ESMF_LocalArrayGetMod
 !   define various macros. >
 ^include "ESMF.h"
 #include "ESMF_TypeKindRankMacros.hcppF90"
-#include "ESMF_LocalArrayMacros.hcppF90"
-#include "ESMF_LocalAllocMacros.hcppF90"
+
+#define LocalArrayGetDataDoc() \
+!------------------------------------------------------------------------------ @\
+!BOP @\
+! !IROUTINE: ESMF_LocalArrayGet - Get access to data in LocalArray object @\
+! @\
+! !INTERFACE: @\
+! ! Private name; call using ESMF_LocalArrayGet() @\
+! subroutine ESMF_LocalArrayGetData<rank><type><kind>(larray, fptr, docopy, rc) @\
+! @\
+! !ARGUMENTS: @\
+!   type(ESMF_LocalArray) :: larray @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: fptr @\
+!   type(ESMF_CopyFlag), intent(in), optional :: docopy @\
+!   integer, intent(out), optional :: rc @\
+! @\
+! !DESCRIPTION: @\
+! Return a Fortran pointer to the data buffer, or return a Fortran pointer @\
+! to a new copy of the data. @\
+! @\
+! The arguments are: @\
+! \begin{description} @\
+! \item[larray] @\
+!   The {\tt ESMF\_LocalArray} to get the value from. @\
+! \item[fptr] @\
+!   An unassociated or associated Fortran pointer correctly allocated.@\
+! \item[{[docopy]}] @\
+!   An optional copy flag which can be specified. @\
+!   Can either make a new copy of the data or reference existing data. @\
+!   See section \ref{opt:copyflag} for a list of possible values. @\
+! \item[{[rc]}] @\
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+! \end{description} @\
+! @\
+!EOP @\
+!------------------------------------------------------------------------------ @\
+
+#define LocalArrayGetDataMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+!------------------------------------------------------------------------------ @\
+! <Created by macro - do not edit directly >  @\
+^undef  ESMF_METHOD @\
+!define ESMF_METHOD "ESMF_LocalArrayGetData##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_LocalArrayGetData" @\
+    subroutine ESMF_LocalArrayGetData##mrank##D##mtypekind(larray, fptr, docopy, rc) @\
+ @\
+      type(ESMF_LocalArray) :: larray @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr @\
+      type(ESMF_CopyFlag), intent(in), optional :: docopy @\
+      integer, intent(out), optional :: rc @\
+ @\
+      ! Local variables @\
+      integer :: localrc                   ! local return code @\
+      logical :: copyreq                  ! did user specify copy? @\
+      integer :: rank @\
+      type(ESMF_TypeKind) :: typekind @\
+ @\
+      type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrap     ! for passing f90 ptr to C++ @\
+      integer :: lb(mrank), ub(mrank)  ! size info for the array @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: lp ! local copy @\
+ @\
+      ! Initialize return code; assume routine not implemented @\
+      localrc = ESMF_RC_NOT_IMPL @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! Check docopy argument and set copyreq @\
+      copyreq = .FALSE. ! default do not copy but return by reference @\
+      if (present(docopy)) then @\
+        if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. @\
+      endif @\
+ @\
+      ! Check tkr matching between larray and fptr @\
+      call ESMF_LocalArrayGet(larray, typekind=typekind, rank=rank, rc=localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+      ! check typekind match @\
+      if (typekind /= ESMF_TYPEKIND_##mtypekind) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+          "- fptr typekind does not match LocalArray typekind", & @\
+          ESMF_CONTEXT, rc) @\
+        return @\
+      endif @\
+      ! check rank match @\
+      if (rank /= mrank) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+          "- fptr rank does not match LocalArray rank", & @\
+          ESMF_CONTEXT, rc) @\
+        return @\
+      endif @\
+ @\
+      ! Gain access to the F90 array pointer stored in larray @\
+      call c_ESMC_LocalArrayGetF90Ptr(larray, wrap, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+ @\
+      ! Allocate a new buffer if requested and return a copy @\
+      if (copyreq) then @\
+        call c_ESMC_LocalArrayGetLbounds(larray, mrank, lb, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+          ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rc)) return @\
+        call c_ESMC_LocalArrayGetUbounds(larray, mrank, ub, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+          ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rc)) return @\
+        ! mrng is a macro that has correct construction of lb and ub elements @\
+        allocate(lp(mrng), stat=localrc) @\
+        if (ESMF_LogMsgFoundAllocError(localrc, & @\
+          "local data space", & @\
+          ESMF_CONTEXT, rc)) return @\
+        ! test if incoming pointer was associated @\
+        if (associated(fptr)) then @\
+          if (size(fptr) .ne. size(lp)) then @\
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+              "- fptr was associated but of incorrect size", & @\
+              ESMF_CONTEXT, rc) @\
+            return @\
+          endif @\
+          ! this must do a contents assignment to perform a copy operation @\
+          fptr = wrap%ptr##mrank##D##mtypekind @\
+          deallocate(lp) @\
+        else @\
+          ! this must do a contents assignment to perform a copy operation @\
+          lp = wrap%ptr##mrank##D##mtypekind @\
+          fptr => lp  @\
+        endif @\
+      else @\
+        fptr => wrap%ptr##mrank##D##mtypekind ! return a reference @\
+      endif @\
+ @\
+      ! return successfully @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+    end subroutine ESMF_LocalArrayGetData##mrank##D##mtypekind @\
+ @\
+! < end macro - do not edit directly >  @\
+!------------------------------------------------------------------------------ @\
+
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -55,7 +192,8 @@ module ESMF_LocalArrayGetMod
   use ESMF_ArraySpecMod
       
   ! class sub modules
-  use ESMF_LocalArrayCreateMod  ! contains the ESMF_LocalArray derived type
+  use ESMF_LocalArrayWrapperTypeMod ! contains the LAWrapper derived type
+  use ESMF_LocalArrayCreateMod      ! contains the ESMF_LocalArray derived type
       
   implicit none
 
@@ -65,16 +203,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.7 2009/01/21 21:38:00 cdeluca Exp $'
-
-!------------------------------------------------------------------------------
-!     ! Internal wrapper structures for passing f90 pointers to C++ and
-!     ! guaranteeing they are passed by reference on all compilers and all
-!     ! platforms.  These are never seen outside this module.
-!
-      ! < these expand into defined type declarations >
-AllTypesMacro(LocalArrayType)
-
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.8 2009/06/05 22:41:22 theurich Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:

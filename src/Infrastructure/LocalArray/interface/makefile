@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.17 2008/09/26 05:18:07 cdeluca Exp $
+# $Id: makefile,v 1.18 2009/06/05 22:41:22 theurich Exp $
 
 ALL: build_here 
 
-AUTOGEN   = ESMF_LocalArrayCreate.F90 ESMF_LocalArrayGet.F90
+AUTOGEN   = ESMF_LocalArrayWrapperType.F90 ESMF_LocalArrayCreate.F90 ESMF_LocalArrayGet.F90
 SOURCEC	  = ESMC_LocalArray_F.C 
 SOURCEF	  = $(AUTOGEN) ESMF_LocalArray.F90 ESMF_LocalAlloc_C.F90
 SOURCEH	  = 

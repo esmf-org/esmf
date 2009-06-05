@@ -1,0 +1,52 @@
+! $Id: ESMF_LocalArrayWrapperType.cppF90,v 1.1 2009/06/05 22:41:22 theurich Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2009, University Corporation for Atmospheric Research, 
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+! Laboratory, University of Michigan, National Centers for Environmental 
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+^define ESMF_FILENAME "ESMF_LocalArrayWrapperType.F90"
+!==============================================================================
+!
+! ESMF LocalArrayWrapperType module
+module ESMF_LocalArrayWrapperTypeMod
+!
+!==============================================================================
+!
+! This file contains the LocalArrayWrapper type
+!
+!------------------------------------------------------------------------------
+! INCLUDES
+! < ignore blank lines below.  they are created by the files which
+!   define various macros. >
+^include "ESMF.h"
+#include "ESMF_TypeKindRankMacros.hcppF90"
+
+! !USES:
+  use ESMF_UtilTypesMod     ! ESMF utility types
+
+  implicit none
+
+!------------------------------------------------------------------------------
+! !PUBLIC TYPES:
+  public
+
+#define LocalArrayTypeMacro(mname, mtypekind, mrank, mdim) \
+! <Created by macro - do not edit directly > @\
+      type ESMF_ArrWrap##mrank##D##mtypekind @\
+        mname (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: ptr##mrank##D##mtypekind @\
+      end type ESMF_ArrWrap##mrank##D##mtypekind @\
+
+!------------------------------------------------------------------------------
+  ! Internal wrapper structures for passing f90 pointers to C++ and
+  ! guaranteeing they are passed by reference on all compilers and all
+  ! platforms.  These are never seen outside this module.
+
+  ! < these expand into defined type declarations >
+AllTypesMacro(LocalArrayType)
+
+end module ESMF_LocalArrayWrapperTypeMod
