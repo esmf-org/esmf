@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.5 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_FieldPr.F90,v 1.6 2009/06/06 00:46:53 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -96,9 +96,8 @@ contains
 !     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
 !     On some platforms/compilers there is a potential issue with interleaving
 !     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
-!     the expected order.  If this occurs, it is recommended to use the
-!     standard Fortran call {\tt flush(6)} as a workaround until this issue
-!     is fixed in a future release. \\
+!     the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
+!     may be used on unit 6 to get coherent output.  \\
 !
 !     The arguments are:
 !     \begin{description}
