@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.52 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_DistGrid.F90,v 1.53 2009/06/08 18:24:15 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.52 2009/01/21 21:37:58 cdeluca Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.53 2009/06/08 18:24:15 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2606,9 +2606,8 @@ contains
 !     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
 !     On some platforms/compilers there is a potential issue with interleaving
 !     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
-!     the expected order.  If this occurs, it is recommended to use the
-!     standard Fortran call {\tt flush(6)} as a workaround until this issue
-!     is fixed in a future release. \\
+!     the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
+!     may be used on unit 6 to get coherent output.  \\
 !
 !     The arguments are:
 !     \begin{description}
