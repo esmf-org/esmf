@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.40 2009/03/23 20:40:48 theurich Exp $
+! $Id: user_model1.F90,v 1.41 2009/06/08 18:47:13 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -88,26 +88,18 @@
        ! Local variables
         type(ESMF_Field) :: humidity
         type(ESMF_VM) :: vm
-        type(ESMF_DELayout) :: delayout
-        type(ESMF_IGrid) :: igrid1
+        type(ESMF_Grid) :: grid1
         type(ESMF_ArraySpec) :: arrayspec
         real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
         real(ESMF_KIND_R8) :: min(2), max(2)
-        integer :: counts(ESMF_MAXIGRIDDIM)
+        integer :: counts(ESMF_MAXgridDIM)
         integer :: npets, de_id
-        type(ESMF_IGridHorzStagger) :: horz_stagger
         integer :: status
 
         ! Query component for VM and create a layout with the right breakdown
         call ESMF_GridCompGet(comp, vm=vm, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_VMGet(vm, petCount=npets, rc=status)
-        if (status .ne. ESMF_SUCCESS) goto 10
-        delayout = ESMF_DELayoutCreate(vm, (/ 2, npets/2 /), rc=status)
-        if (status .ne. ESMF_SUCCESS) goto 10
-
-        ! and get our local de number
-        call ESMF_DELayoutGetDeprecated(delayout, localDE=de_id, rc=status)
+        call ESMF_VMGet(vm, localPet=de_id, petCount=npets, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         print *, de_id, "User Comp 1 Init starting"
@@ -119,15 +111,9 @@
         max(1) = 60.0
         min(2) = 0.0
         max(2) = 50.0
-        horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
 
-        igrid1 = ESMF_IGridCreateHorzXYUni(counts=counts, &
-                                minGlobalCoordPerDim=min, &
-                                maxGlobalCoordPerDim=max, &
-                                horzStagger=horz_stagger, &
-                                name="source igrid", rc=status)
-        if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_IGridDistribute(igrid1, delayout=delayout, rc=status)
+        grid1 = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=counts, &
+            regDecomp=(/2, npets/2 /), name="source grid", rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set up a 2D real array
@@ -136,19 +122,19 @@
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Create the field and have it create the array internally
-        humidity = ESMF_FieldCreate(igrid1, arrayspec, &
-                                    horzRelloc=ESMF_CELL_CENTER, &
-                                    haloWidth=4, name="humidity", rc=status)
+        humidity = ESMF_FieldCreate(grid1, arrayspec, &
+                                    maxHaloLWidth=(/0,0/), maxHaloUWidth=(/4,4/), &
+                                    name="humidity", rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Get the allocated array back and get an F90 array pointer
-        call ESMF_FieldGetDataPointer(humidity, idata, rc=status)
+        call ESMF_FieldGet(humidity, farray=idata, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set initial data values over whole array to our de id
         idata = real(de_id,ESMF_KIND_R8)
 
-        call ESMF_StateAddField(exportState, humidity, rc=status)
+        call ESMF_StateAdd(exportState, humidity, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
      !   call ESMF_StatePrint(exportState, rc=rc)
 
@@ -176,11 +162,10 @@
 
        ! Local variables
         type(ESMF_Field) :: humidity
-        type(ESMF_RelLoc) :: relloc
-        type(ESMF_IGrid) :: igrid
+        type(ESMF_grid) :: grid
         real(ESMF_KIND_R8) :: pi
         real(ESMF_KIND_R8), dimension(:,:), pointer :: idata, coordX, coordY
-        integer :: status, i, j, i1, j1, haloWidth, counts(2)
+        integer :: status, i, j, i1, j1, haloWidth, haloUWidth(2), counts(2)
         type(mylocaldata), pointer :: mydatablock
         type(wrapper) :: wrap
 
@@ -204,28 +189,29 @@
         print *, "run, scale_factor = ", mydatablock%scale_factor
 
         ! Get the Field and FieldBundle data from the State
-        call ESMF_StateGetField(exportState, "humidity", humidity, rc=status)
+        call ESMF_StateGet(exportState, "humidity", humidity, rc=status)
       
-        ! get the igrid and coordinates
-        call ESMF_FieldGet(humidity, igrid=igrid, horzRelLoc=relloc, &
-                           haloWidth=haloWidth, rc=status)
-        call ESMF_IGridGetDELocalInfo(igrid, localCellCountPerDim=counts, &
-                                     horzRelLoc=relloc, rc=status)
-        call ESMF_IGridGetCoord(igrid, dim=1, horzRelloc=relloc, &
-                           centerCoord=coordX, rc=rc)
-        call ESMF_IGridGetCoord(igrid, dim=2, horzRelloc=relloc, &
-                           centerCoord=coordY, rc=rc)
+        ! get the grid and coordinates
+        call ESMF_FieldGet(humidity, grid=grid, &
+                           maxHaloUWidth=haloUWidth, rc=status)
+        haloWidth = haloUWidth(1)
+        call ESMF_GridGetCoord(grid, localDE=0, coordDim=1, &
+                           fptr=coordX, totalCount=counts, rc=rc)
+        call ESMF_GridGetCoord(grid, localDE=0, coordDim=2, &
+                           fptr=coordY, rc=rc)
                                      
         ! update field values here
         ! call ESMF_StateGetDataPointer(exportState, "humidity", idata, rc=rc)
         ! Get a pointer to the start of the data
-        call ESMF_FieldGetDataPointer(humidity, idata, ESMF_DATA_REF, rc=rc)
+        call ESMF_FieldGet(humidity, farray=idata, rc=rc)
 
         ! increment data values in place
         do j   = 1,counts(2)
           j1   = j + haloWidth
           do i = 1,counts(1)
             i1 = i + haloWidth
+            coordX(i,j) = ((counts(1)-i)*60.0)/counts(1)
+            coordY(i,j) = ((counts(2)-j)*50.0)/counts(2)
             idata(i1,j1) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
                                 + 2.0*sin(coordY(i,j)/50.0*pi)
           enddo

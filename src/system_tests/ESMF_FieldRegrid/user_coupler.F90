@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.16 2009/03/23 20:40:48 theurich Exp $
+! $Id: user_coupler.F90,v 1.17 2009/06/08 18:47:13 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -71,11 +71,11 @@
       print *, "Import State contains ", itemcount, " items."
        
       ! Get input data
-      call ESMF_StateGetField(importState, "humidity", humidity1, rc=rc)
+      call ESMF_StateGet(importState, "humidity", humidity1, rc=rc)
       ! call ESMF_FieldPrint(humidity1, rc=rc)
 
       ! Get location of output data
-      call ESMF_StateGetField(exportState, "humidity", humidity2, rc=rc)
+      call ESMF_StateGet(exportState, "humidity", humidity2, rc=rc)
       ! call ESMF_FieldPrint(humidity2, rc=rc)
 
       ! Get VM from coupler component to send down to Regrid Store routine
@@ -84,9 +84,9 @@
       ! These are fields on different IGrids - call RegridStore to set
       ! up the Regrid structure
 
-      call ESMF_FieldRegridStore(humidity1, humidity2, vm, &
-                                 routehandle, &
-                                 regridmethod=ESMF_REGRID_METHOD_BILINEAR, &
+      call ESMF_FieldRegridStore(srcField=humidity1, dstField=humidity2, &
+                                 routeHandle=routehandle, &
+                                 regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
                                  rc=rc)
 
 
@@ -114,11 +114,11 @@
       print *, "User Coupler Run starting"
 
       ! Get input data
-      call ESMF_StateGetField(importState, "humidity", humidity1, rc=rc)
+      call ESMF_StateGet(importState, "humidity", humidity1, rc=rc)
       ! call ESMF_FieldPrint(humidity1, rc=rc)
 
       ! Get location of output data
-      call ESMF_StateGetField(exportState, "humidity", humidity2, rc=rc)
+      call ESMF_StateGet(exportState, "humidity", humidity2, rc=rc)
       ! call ESMF_FieldPrint(humidity2, rc=rc)
 
       ! These are fields on different IGrids - call Regrid to rearrange

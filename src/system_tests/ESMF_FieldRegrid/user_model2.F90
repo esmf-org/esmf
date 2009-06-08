@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.46 2009/03/23 20:40:48 theurich Exp $
+! $Id: user_model2.F90,v 1.47 2009/06/08 18:47:13 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -81,29 +81,21 @@
 !   ! Local variables
       type(ESMF_Field) :: humidity
       type(ESMF_VM) :: vm
-      type(ESMF_DELayout) :: delayout
-      type(ESMF_IGrid) :: igrid1
+      type(ESMF_grid) :: grid1
       type(ESMF_ArraySpec) :: arrayspec
       real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
       real(ESMF_KIND_R8) :: min(2), max(2)
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
       integer :: countsPerDE1(3), countsPerDE2(2), counts(2)
       integer :: npets, de_id
-      type(ESMF_IGridHorzStagger) :: horz_stagger
       integer :: status
 
-      ! Initially import state contains a field with a igrid but no data.
+      ! Initially import state contains a field with a grid but no data.
 
       ! Query component for VM and create a layout with the right breakdown
       call ESMF_GridCompGet(comp, vm=vm, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_VMGet(vm, petCount=npets, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 10
-      delayout = ESMF_DELayoutCreate(vm, (/ npets/2, 2 /), rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 10
-
-      ! and get our local de number
-      call ESMF_DELayoutGetDeprecated(delayout, localDE=de_id, rc=status)
+      call ESMF_VMGet(vm, localPet=de_id, petCount=npets, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
       print *, de_id, "User Comp 2 Init starting"
@@ -128,15 +120,9 @@
       max(1) = 60.0
       min(2) = 0.0
       max(2) = 50.0
-      horz_stagger = ESMF_IGRID_HORZ_STAGGER_D_NE
 
-      igrid1 = ESMF_IGridCreateHorzXYUni(counts=counts, &
-                              minGlobalCoordPerDim=min, &
-                              maxGlobalCoordPerDim=max, &
-                              horzStagger=horz_stagger, &
-                              name="source igrid", rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_IGridDistribute(igrid1, delayout=delayout, rc=status)
+      grid1 = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=counts, &
+                              regDecomp=(/ npets/2, 2/), name="source grid", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Set up a 2D real array
@@ -145,16 +131,16 @@
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Create the field and have it create the array internally
-      humidity = ESMF_FieldCreate(igrid1, arrayspec, &
-                                  horzRelloc=ESMF_CELL_NFACE, &
-                                  haloWidth=3, name="humidity", rc=status)
+      humidity = ESMF_FieldCreate(grid1, arrayspec, &
+                                  maxHaloLWidth=(/0,0/), maxHaloUWidth=(/3,3/), &
+                                  name="humidity", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
   
       ! Get the allocated array back and get an F90 array pointer
-      call ESMF_FieldGetDataPointer(humidity, idata, rc=status)
+      call ESMF_FieldGet(humidity, farray=idata, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
   
-      call ESMF_StateAddField(importState, humidity, status)
+      call ESMF_StateAdd(importState, humidity, status)
       if (status .ne. ESMF_SUCCESS) goto 10
       !   call ESMF_StatePrint(importState, rc=status)
   
@@ -188,7 +174,7 @@
 
       ! Get information from the component.
   !    call ESMF_StatePrint(importState, rc=status)
-      call ESMF_StateGetField(importState, "humidity", humidity, rc=status)
+      call ESMF_StateGet(importState, "humidity", humidity, rc=status)
   !    call ESMF_FieldPrint(humidity, "", rc=status)
     
       ! This is where the model specific computation goes.
@@ -237,7 +223,7 @@
 
       ! check validity of results
       ! Get Fields from import state
-      call ESMF_StateGetField(importState, "humidity", field, rc=status)
+      call ESMF_StateGet(importState, "humidity", field, rc=status)
       if (status .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         goto 30
@@ -269,9 +255,8 @@
       integer, intent(out) :: rc
 
       ! Local variables
-      integer :: status, i, j, i1, j1, haloWidth, myDE, counts(2)
-      type(ESMF_RelLoc) :: relloc
-      type(ESMF_IGrid) :: igrid
+      integer :: status, i, j, i1, j1, haloWidth, myDE, counts(2), haloUWidth(2)
+      type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8) :: pi, error, maxError, maxPerError
       real(ESMF_KIND_R8) :: minCValue, maxCValue, minDValue, maxDValue
       real(ESMF_KIND_R8), dimension(:,:), pointer :: calc, data, coordX, coordY
@@ -280,20 +265,18 @@
 
       pi = 3.14159
 
-      ! get the igrid and coordinates
-      call ESMF_FieldGet(humidity, igrid=igrid, horzRelloc=relloc, &
-                         haloWidth=haloWidth, rc=status)
-      call ESMF_IGridGetDELocalInfo(igrid, myDE=myDE, &
-                                   localCellCountPerDim=counts, &
-                                   horzRelLoc=relloc, rc=status)
-      call ESMF_IGridGetCoord(igrid, dim=1, horzRelloc=relloc, &
-                           centerCoord=coordX, rc=rc)
-      call ESMF_IGridGetCoord(igrid, dim=2, horzRelloc=relloc, &
-                           centerCoord=coordY, rc=rc)
+      ! get the grid and coordinates
+      call ESMF_FieldGet(humidity, grid=grid, &
+                         maxHaloUWidth=haloUWidth, rc=status)
+      haloWidth=haloUWidth(1)
+      call ESMF_GridGetCoord(grid, localDE=0, coordDim=1, &
+                           fptr=coordX, rc=rc)
+      call ESMF_GridGetCoord(grid, localDE=0, coordDim=2, &
+                           fptr=coordY, rc=rc)
 
       ! update field values here
       ! Get a pointer to the start of the data
-      call ESMF_FieldGetDataPointer(humidity, data, ESMF_DATA_REF, rc=status)
+      call ESMF_FieldGet(humidity, farray=data, rc=status)
       print *, "rc from array get data = ", status
       !if (associated(data)) print *, "pointer is associated"
       !if (.not.associated(data)) print *, "pointer is *NOT* associated"
@@ -304,6 +287,8 @@
       allocate(calc(counts(1), counts(2)))
       do j   = 1,counts(2)
         do i = 1,counts(1)
+          coordX(i,j) = ((counts(1)-i)*60.0)/counts(1)
+          coordY(i,j) = ((counts(2)-j)*50.0)/counts(2)
           calc(i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
                            + 2.0*sin(coordY(i,j)/50.0*pi)
         enddo
