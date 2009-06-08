@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeDistGridUTest.F90,v 1.14 2009/06/04 20:52:14 rokuingh Exp $
+! $Id: ESMF_AttributeDistGridUTest.F90,v 1.15 2009/06/08 15:52:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeDistGridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeDistGridUTest.F90,v 1.14 2009/06/04 20:52:14 rokuingh Exp $'
+      '$Id: ESMF_AttributeDistGridUTest.F90,v 1.15 2009/06/08 15:52:13 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -154,7 +154,7 @@ program ESMF_AttributeDistGridUTest
       !EX_UTest
       ! Get an ESMF_I4 Attribute from a DistGrid Test
       call ESMF_AttributeGet(distgrid, name="NotHere", value=outI4, rc=rc)
-      write(failMsg, *) "Did not return ESMF_FAILURE or wrong value"
+      write(failMsg, *) "Did not return ESMF_RC_ATTR_NOTSET"
       write(name, *) "Getting a nonexistent Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET), &
                       name, failMsg, result, ESMF_SRCLINE)

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeStateUTest.F90,v 1.17 2009/06/04 20:52:15 rokuingh Exp $
+! $Id: ESMF_AttributeStateUTest.F90,v 1.18 2009/06/08 15:52:14 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeStateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeStateUTest.F90,v 1.17 2009/06/04 20:52:15 rokuingh Exp $'
+      '$Id: ESMF_AttributeStateUTest.F90,v 1.18 2009/06/08 15:52:14 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -165,7 +165,7 @@ program ESMF_AttributeStateUTest
       !EX_UTest
       ! Get an ESMF_I4 Attribute from a State Test
       call ESMF_AttributeGet(state, name="NotHere", value=outI4, rc=rc)
-      write(failMsg, *) "Did not return ESMF_FAILURE or wrong value"
+      write(failMsg, *) "Did not return ESMF_RC_ATTR_NOTSET"
       write(name, *) "Getting a nonexistent Attribute from a State Test"
       call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET), &
                       name, failMsg, result, ESMF_SRCLINE)
