@@ -1,4 +1,4 @@
-! $Id: ESMF_IOSpec.F90,v 1.16 2007/05/05 03:05:47 rosalind Exp $
+! $Id: ESMF_IOSpec.F90,v 1.17 2009/06/08 23:46:56 w6ws Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IOSpec module
@@ -114,9 +114,6 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
-!     Temporary for putting system dependent I/O code in a single place.
-      public ESMF_IOFlush
-!
 !     ! shallow class, only needs Get and Set
       public ESMF_IOSpecSet
       public ESMF_IOSpecGet
@@ -199,54 +196,6 @@ function ESMF_iorwne(iorw1, iorw2)
 
  ESMF_iorwne = (iorw1%iorwtype .ne. iorw2%iorwtype)
 end function
-
-!-------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_IOFlush"
-!BOPI
-! !IROUTINE: ESMF_IOFlush - flush output on a unit number
-!
-! !INTERFACE:
-      subroutine ESMF_IOFlush(unitNumber, rc)
-!
-! !PARAMETERS:
-      integer, intent(in) :: unitNumber
-      integer, intent(out), optional :: rc               ! return code
-
-!
-! !DESCRIPTION:
-!   Call the system-dependent routine to force output.
-
-!
-! !REQUIREMENTS: 
-
-!EOPI
-      integer :: status
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-
-#if   defined(PARCH_linux)
-      print *, "need to call flush() here"
-#elif defined(PARCH_IRIX64)
-      call flush(unitNumber, status)
-#elif defined(PARCH_aix)
-      call flush_(unitNumber, status)
-#elif defined(PARCH_darwin)
-      print *, "need to call flush() here"
-#elif defined(PARCH_sunos)
-      print *, "need to call flush() here"
-#elif defined(PARCH_osf1)
-      call flush(unitNumber, status)
-#else
-      print *, "unknown architecture in ESMF_IOFlush()"
-#endif
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_IOFlush
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
