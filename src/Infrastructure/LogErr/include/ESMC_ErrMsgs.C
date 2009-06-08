@@ -1,4 +1,4 @@
-//$Id: ESMC_ErrMsgs.C,v 1.15 2009/05/19 23:18:00 theurich Exp $
+//$Id: ESMC_ErrMsgs.C,v 1.16 2009/06/08 15:52:52 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -84,10 +84,11 @@ static const char *errMsg[] = {
   "Wrong data value ",                                //   54 = ESMF_RC_VAL_WRONG
   "Value inconsistent with error bound ",             //   55 = ESMF_RC_VAL_ERRBOUND
   "Value out of range ",                              //   56 = ESMF_RC_VAL_OUTOFRANGE
+  "Attribute not set ",                               //   57 = ESMF_RC_ATTR_NOTSET
 
-// 57-499 reserved for future F90 symmetric return code definitions
+// 58-499 reserved for future F90 symmetric return code definitions
                                                                           
-                       "","","","","","","","","","","","","","","","","","",
+                          "","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
@@ -176,10 +177,11 @@ static const char *errMsg[] = {
   "Wrong data value ",                                //  554 = ESMC_RC_VAL_WRONG  
   "Value inconsistent with error bound ",             //  555 = ESMC_RC_VAL_ERRBOUND
   "Value out of range ",                              //  556 = ESMC_RC_VAL_OUTOFRANGE
+  "Attribute not set ",                               //  557 = ESMC_RC_ATTR_NOTSET
 
-// 555-999 reserved for future C++ symmetric return code definitions
+// 558-999 reserved for future C++ symmetric return code definitions
                                                                          
-                       "","","","","","","","","","","","","","","","","","",
+                          "","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
