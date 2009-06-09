@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.52 2009/06/05 23:46:37 theurich Exp $
+// $Id: ESMC_Route_F.C,v 1.53 2009/06/09 04:52:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -88,8 +88,8 @@ extern "C" {
        }
 
 #define ESMC_METHOD "c_ESMC_RouteRunLA"
-       void FTN(c_esmc_routerunla)(ESMC_Route **ptr, ESMC_LocalArray **src,
-                                   ESMC_LocalArray **dst, int *status) {
+       void FTN(c_esmc_routerunla)(ESMC_Route **ptr, ESMCI::LocalArray **src,
+                                   ESMCI::LocalArray **dst, int *status) {
            void *src_base_addr = NULL;
            void *dst_base_addr = NULL;
            ESMC_TypeKind sdk, ddk;
@@ -99,8 +99,8 @@ extern "C" {
 
 	   if (((ESMC_I8)src != 0) && ((ESMC_I8)src != -1) &&
 	       ((ESMC_I8)*src != 0) && ((ESMC_I8)*src != -1)) {
-               (*src)->ESMC_LocalArrayGetBaseAddr(&src_base_addr);
-               sdk = (*src)->ESMC_LocalArrayGetTypeKind();
+               src_base_addr = (*src)->getBaseAddr();
+               sdk = (*src)->getTypeKind();
                // allow destination to be optional; if not specified, use the
                // src as both src and dst.
                dst_base_addr = src_base_addr;
@@ -109,8 +109,8 @@ extern "C" {
 
 	   if (((ESMC_I8)dst != 0) && ((ESMC_I8)dst != -1) &&
 	       ((ESMC_I8)*dst != 0) && ((ESMC_I8)*dst != -1)) {
-               (*dst)->ESMC_LocalArrayGetBaseAddr(&dst_base_addr);
-               ddk = (*dst)->ESMC_LocalArrayGetTypeKind();
+               dst_base_addr = (*dst)->getBaseAddr();
+               ddk = (*dst)->getTypeKind();
            }
 
            if (sdk != ddk) {
@@ -123,8 +123,8 @@ extern "C" {
 #undef ESMC_METHOD
 
 #define ESMC_METHOD "c_ESMC_RouteRunLAL"
-       void FTN(c_esmc_routerunlal)(ESMC_Route **ptr, ESMC_LocalArray **src,
-                                   ESMC_LocalArray **dst, 
+       void FTN(c_esmc_routerunlal)(ESMC_Route **ptr, ESMCI::LocalArray **src,
+                                   ESMCI::LocalArray **dst, 
                                    int *srcCount, int *dstCount, int *status) {
 
            void **src_base_addr = NULL;
@@ -150,7 +150,7 @@ extern "C" {
                && (*srcCount > 0)) {
                for (n=0; n<*srcCount; n++) {
                    // get the data start address for each array in the list   
-                   (src[n])->ESMC_LocalArrayGetBaseAddr(src_base_addr+n);
+                   *(src_base_addr+n) = (src[n])->getBaseAddr();
 
                    // TODO: for now, only support list which have identical 
                    // data types.  in the future sdk and ddk should turn
@@ -158,9 +158,9 @@ extern "C" {
                    // identical, then in routerun the outer loop must be
                    // by block, and no packing is allowed between blocks.
                    if (n==0)
-                       sdk = (src[n])->ESMC_LocalArrayGetTypeKind();
+                       sdk = (src[n])->getTypeKind();
                    else {
-                       if (sdk != (src[n])->ESMC_LocalArrayGetTypeKind()) {
+                       if (sdk != (src[n])->getTypeKind()) {
                            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SAMETYPE,
                            "; all source datatypes must be the same", status);
                            return;
@@ -183,12 +183,12 @@ extern "C" {
            if (hasdst) {
                for (n=0; n<*dstCount; n++) {
                    // get the data start address for each array in the list   
-                   (dst[n])->ESMC_LocalArrayGetBaseAddr(dst_base_addr+n);
+                   *(dst_base_addr+n) = (dst[n])->getBaseAddr();
                    // TODO: ditto comment above about lists of ddks
                    if (n==0)
-                       ddk = (dst[n])->ESMC_LocalArrayGetTypeKind();
+                       ddk = (dst[n])->getTypeKind();
                    else {
-                       if (ddk != (dst[n])->ESMC_LocalArrayGetTypeKind()) {
+                       if (ddk != (dst[n])->getTypeKind()) {
                            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SAMETYPE,
                         "; all destination datatypes must be the same", status);
                            return;

@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray_F.C,v 1.1 2009/06/05 23:46:37 theurich Exp $
+// $Id: ESMCI_LocalArray_F.C,v 1.2 2009/06/09 04:52:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-//
+#define ESMC_FILENAME "ESMCI_LocalArray_F.C"
 //==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.
@@ -17,12 +17,16 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include "ESMC_Start.h"
-#include "ESMC_Base.h"
-#include "ESMCI_LogErr.h"
-#include "ESMCI_LocalArray.h"
 #include <stdio.h>
 #include <string.h>
+
+#include "ESMC_Start.h"
+#include "ESMC_Base.h"
+
+#include "ESMCI_LocalArray.h"
+
+#include "ESMCI_LogErr.h"
+#include "ESMC_LogMacros.inc"             // for LogErr
 //------------------------------------------------------------------------------
 //BOPI
 // !DESCRIPTION:
@@ -43,38 +47,39 @@ extern "C" {
 
 char *name = NULL;
 
-     void FTN(c_esmc_localarraycreateall)(ESMC_LocalArray **ptr, int *rank, 
+     void FTN(c_esmc_localarraycreateall)(ESMCI::LocalArray **ptr, int *rank, 
                                      ESMC_TypeKind *dk,
                                      int *counts, int *lbounds, int *ubounds,
                                      int *localrc)  {
-         (*ptr) = ESMC_LocalArray::ESMC_LocalArrayCreate_F(*rank, *dk, counts, 
-                                    NULL, NULL, ESMC_DATA_NONE, name,
+         (*ptr) = ESMCI::LocalArray::create_F(*rank, *dk, counts,
+                                    NULL, NULL, ESMCI::DATA_NONE, name,
                                     lbounds, ubounds, NULL, localrc);
 
              (*localrc) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
 
-     void FTN(c_esmc_localarraycreatenodata)(ESMC_LocalArray **ptr, int *rank, 
+     void FTN(c_esmc_localarraycreatenodata)(ESMCI::LocalArray **ptr, int *rank,
                                         ESMC_TypeKind *dk, 
-                                        ESMC_ArrayOrigin *oflag, int *localrc) {
+                                        ESMCI::LocalArrayOrigin *oflag, 
+         int *localrc) {
              
-             (*ptr) = ESMC_LocalArray::ESMC_LocalArrayCreateNoData(*rank, *dk,
+             (*ptr) = ESMCI::LocalArray::createNoData(*rank, *dk,
                   *oflag, name, localrc);
 
              (*localrc) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
  
-     void FTN(c_esmc_localarraycreatecopy)(ESMC_LocalArray **ptr, 
-       ESMC_LocalArray **larrayOut, int *localrc) {
+     void FTN(c_esmc_localarraycreatecopy)(ESMCI::LocalArray **ptr, 
+       ESMCI::LocalArray **larrayOut, int *localrc) {
              
              *larrayOut =
-               ESMC_LocalArray::ESMC_LocalArrayCreate(*ptr, localrc);
+               ESMCI::LocalArray::create(*ptr, localrc);
 
              (*localrc) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
  
-     void FTN(c_esmc_localarraysetinternal)(ESMC_LocalArray **ptr, 
-                               struct c_F90ptr *fptr,
+     void FTN(c_esmc_localarraysetinternal)(ESMCI::LocalArray **ptr, 
+                               struct ESMCI::c_F90ptr *fptr,
                                void XD *base, 
                                int *counts,
                                int *lbounds, int *ubounds, int *offsets,
@@ -90,7 +95,7 @@ char *name = NULL;
                                                   contig, dealloc);
      }
 
-     void FTN(c_esmc_localarraysetinfo)(ESMC_LocalArray **ptr, 
+     void FTN(c_esmc_localarraysetinfo)(ESMCI::LocalArray **ptr, 
                                         int *counts, int *lbounds, 
                                         int *ubounds, int *offsets,
                                         int *localrc) {
@@ -104,7 +109,7 @@ char *name = NULL;
                                                   NULL, NULL);
      }
 
-     void FTN(c_esmc_localarraygetinfo)(ESMC_LocalArray **ptr, 
+     void FTN(c_esmc_localarraygetinfo)(ESMCI::LocalArray **ptr, 
                                void **base, int *counts,
                                int *lbounds, int *ubounds, int *offsets,
                                int *localrc) {
@@ -117,7 +122,8 @@ char *name = NULL;
                                                   lbounds, ubounds, offsets);
      }
 
-     void FTN(c_esmc_localarraysetlengths)(ESMC_LocalArray **ptr, int *rank, int *lengths, int *localrc) {
+     void FTN(c_esmc_localarraysetlengths)(ESMCI::LocalArray **ptr, int *rank,
+          int *lengths, int *localrc) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
@@ -126,7 +132,8 @@ char *name = NULL;
          *localrc = (*ptr)->ESMC_LocalArraySetLengths(*rank, lengths);
      }
 
-     void FTN(c_esmc_localarraygetlengths)(ESMC_LocalArray **ptr, int *rank, int *lengths, int *localrc) {
+     void FTN(c_esmc_localarraygetlengths)(ESMCI::LocalArray **ptr, int *rank,
+          int *lengths, int *localrc) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
@@ -135,7 +142,8 @@ char *name = NULL;
          *localrc = (*ptr)->ESMC_LocalArrayGetLengths(*rank, lengths);
      }
 
-     void FTN(c_esmc_localarraygetlbounds)(ESMC_LocalArray **ptr, int *rank, int *lbounds, int *localrc) {
+     void FTN(c_esmc_localarraygetlbounds)(ESMCI::LocalArray **ptr, int *rank,
+          int *lbounds, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
               return;
@@ -143,7 +151,8 @@ char *name = NULL;
          *localrc = (*ptr)->ESMC_LocalArrayGetLbounds(*rank, lbounds);
      }
 
-     void FTN(c_esmc_localarraygetubounds)(ESMC_LocalArray **ptr, int *rank, int *ubounds, int *localrc) {
+     void FTN(c_esmc_localarraygetubounds)(ESMCI::LocalArray **ptr, int *rank,
+          int *ubounds, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
               return;
@@ -152,26 +161,27 @@ char *name = NULL;
      }
 
 
-     void FTN(c_esmc_localarraygetrank)(ESMC_LocalArray **ptr, int *rank, int *localrc) {
+     void FTN(c_esmc_localarraygetrank)(ESMCI::LocalArray **ptr, int *rank,
+         int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
               return;
           }
-         *rank = (*ptr)->ESMC_LocalArrayGetRank();
+         *rank = (*ptr)->getRank();
          *localrc = ESMF_SUCCESS;
      }
 
-     void FTN(c_esmc_localarraygettypekind)(ESMC_LocalArray **ptr, int *kind, int *localrc) {
+     void FTN(c_esmc_localarraygettypekind)(ESMCI::LocalArray **ptr, int *kind, int *localrc) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
               return;
           }
-         *kind = (*ptr)->ESMC_LocalArrayGetTypeKind();
+         *kind = (*ptr)->getTypeKind();
          *localrc = ESMF_SUCCESS;
      }
 
-     void FTN(c_esmc_localarraygetname)(ESMC_LocalArray **ptr, 
+     void FTN(c_esmc_localarraygetname)(ESMCI::LocalArray **ptr, 
                                         char *name, int *localrc, int nlen) {
          if ((nlen <= 0) || (name == NULL)) {
              if (localrc) *localrc = ESMF_FAILURE;
@@ -185,31 +195,35 @@ char *name = NULL;
      }
 
 
-     void FTN(c_esmc_localarraydestroy)(ESMC_LocalArray **ptr, int *localrc) {
+     void FTN(c_esmc_localarraydestroy)(ESMCI::LocalArray **ptr, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
               return;
           }
-         *localrc = ESMC_LocalArray::ESMC_LocalArrayDestroy(*ptr);
+         *localrc = ESMCI::LocalArray::destroy(*ptr);
      }
 
-     void FTN(c_esmc_localarraysetbaseaddr)(ESMC_LocalArray **ptr, void XD *base, int *localrc) {
+     void FTN(c_esmc_localarraysetbaseaddr)(ESMCI::LocalArray **ptr, void XD *base, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
               return;
           }
-          *localrc = (*ptr)->ESMC_LocalArraySetBaseAddr(XD base);
+          (*ptr)->setBaseAddr(XD base);
+          *localrc = ESMF_SUCCESS;
      }
 
-     void FTN(c_esmc_localarraygetbaseaddr)(ESMC_LocalArray **ptr, float **base, int *localrc) {
+     void FTN(c_esmc_localarraygetbaseaddr)(ESMCI::LocalArray **ptr,
+         float **base, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
               return;
           }
-          *localrc = (*ptr)->ESMC_LocalArrayGetBaseAddr((void **)base);
+          *base = (float *)(*ptr)->getBaseAddr();
+          *localrc = ESMF_SUCCESS;
      }
 
-     void FTN(c_esmc_localarraysetf90ptr)(ESMC_LocalArray **ptr, struct c_F90ptr *p, int *localrc) {
+     void FTN(c_esmc_localarraysetf90ptr)(ESMCI::LocalArray **ptr,
+         struct ESMCI::c_F90ptr *p, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
               return;
@@ -219,7 +233,8 @@ char *name = NULL;
           *localrc = (*ptr)->ESMC_LocalArraySetF90Ptr(p);
      }
 
-     void FTN(c_esmc_localarraygetf90ptr)(ESMC_LocalArray **ptr, struct c_F90ptr *p, int *localrc) {
+     void FTN(c_esmc_localarraygetf90ptr)(ESMCI::LocalArray **ptr,
+         struct ESMCI::c_F90ptr *p, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
               return;
@@ -229,7 +244,7 @@ char *name = NULL;
           *localrc = (*ptr)->ESMC_LocalArrayGetF90Ptr(p);
      }
 
-     void FTN(c_esmc_localarrayforcef90ptr)(ESMC_LocalArray **ptr, 
+     void FTN(c_esmc_localarrayforcef90ptr)(ESMCI::LocalArray **ptr, 
         void XD *base, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
@@ -238,33 +253,39 @@ char *name = NULL;
           *localrc = (*ptr)->ESMC_LocalArrayForceF90Ptr(XD base);
      }
 
-     void FTN(c_esmc_localarraysetdealloc)(ESMC_LocalArray **ptr, int *localrc) {
+     void FTN(c_esmc_localarraysetdealloc)(ESMCI::LocalArray **ptr,
+          int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
               return;
           }
-          *localrc = (*ptr)->ESMC_LocalArraySetDealloc();
-     }
-
-     void FTN(c_esmc_localarraysetnodealloc)(ESMC_LocalArray **ptr, int *localrc) {
-          if ((ptr == NULL) || (*ptr == NULL)) {
-              *localrc = ESMF_FAILURE;
-              return;
-          }
-          *localrc = (*ptr)->ESMC_LocalArraySetNoDealloc();
-     }
-
-     void FTN(c_esmc_localarrayneedsdealloc)(ESMC_LocalArray **ptr, int flag, int *localrc) {
-          if ((ptr == NULL) || (*ptr == NULL)) {
-              flag = ESMC_ARRAY_NO_ALLOCATE;
-              *localrc = ESMF_FAILURE;
-              return;
-          }
-          flag = (*ptr)->ESMC_LocalArrayNeedsDealloc();
+          (*ptr)->setDealloc();
           *localrc = ESMF_SUCCESS;
      }
 
-     void FTN(c_esmc_localarrayprint)(ESMC_LocalArray **ptr, char *opts, int *localrc, 
+     void FTN(c_esmc_localarraysetnodealloc)(ESMCI::LocalArray **ptr, int *localrc) {
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *localrc = ESMF_FAILURE;
+              return;
+          }
+          (*ptr)->setNoDealloc();
+          *localrc = ESMF_SUCCESS;
+     }
+
+     void FTN(c_esmc_localarrayneedsdealloc)(ESMCI::LocalArray **ptr, int flag, int *localrc) {
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              flag = ESMCI::NO_ALLOCATE;
+              *localrc = ESMF_FAILURE;
+              return;
+          }
+          if ((*ptr)->needsDealloc())
+            flag = 1;
+          else
+            flag = 0;
+          *localrc = ESMF_SUCCESS;
+     }
+
+     void FTN(c_esmc_localarrayprint)(ESMCI::LocalArray **ptr, char *opts, int *localrc, 
                                                                  int clen) {
          char *temp = NULL;
 
@@ -280,13 +301,14 @@ char *name = NULL;
              temp[clen] = '\0';
          }
 
-         *localrc = (*ptr)->ESMC_LocalArrayPrint(temp);
+         *localrc = (*ptr)->print(temp);
 
          if (temp)
              delete[] temp;
      }
 
-     void FTN(c_esmc_localarraywrite)(ESMC_LocalArray **ptr, char *opts, char *fname,
+     void FTN(c_esmc_localarraywrite)(ESMCI::LocalArray **ptr, char *opts,
+         char *fname,
                                     int *localrc, int optlen, int flen) {
          char *opttemp = NULL;
          char *filetemp = NULL;
@@ -309,7 +331,7 @@ char *name = NULL;
              filetemp[flen] = '\0';
          }
 
-         *localrc = (*ptr)->ESMC_LocalArrayWrite(opttemp, filetemp);
+         *localrc = (*ptr)->write(opttemp, filetemp);
 
          if (opttemp)
              delete[] opttemp;
@@ -373,7 +395,7 @@ char *name = NULL;
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_LocalArray **localarray,       // in - localarray object
+      ESMCI::LocalArray **localarray,       // in - localarray object
       char *buf,                // in/out - a byte stream buffer
       int *length,              // in/out - number of allocated bytes
       int *offset,              // in/out - current offset in the stream
@@ -393,7 +415,7 @@ char *name = NULL;
     return;
   }
 
-  *rc = (*localarray)->ESMC_LocalArraySerialize(buf, length, offset, *attreconflag);
+  *rc = (*localarray)->serialize(buf, length, offset, *attreconflag);
 
   return;
 
@@ -413,7 +435,7 @@ char *name = NULL;
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_LocalArray **localarray,       // in/out - empty localarray object to fill in
+      ESMCI::LocalArray **localarray,       // in/out - empty localarray object to fill in
       char *buf,                // in - byte stream buffer
       int *offset,              // in/out - current offset in the stream
       ESMC_AttReconcileFlag *attreconflag, // in - attreconcile flag
@@ -428,9 +450,9 @@ char *name = NULL;
   if (rc) *rc = ESMC_RC_NOT_IMPL;       
 
   // create a new localarray object to deserialize into
-  *localarray = new ESMC_LocalArray;
+  *localarray = new ESMCI::LocalArray;
 
-  (*localarray)->ESMC_LocalArrayDeserialize(buf, offset, *attreconflag);
+  (*localarray)->deserialize(buf, offset, *attreconflag);
 
   if (rc) *rc = ESMF_SUCCESS;
 
@@ -452,7 +474,7 @@ char *name = NULL;
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_LocalArray **localarray,       // in - localarray object
+      ESMCI::LocalArray **localarray,       // in - localarray object
       char *buf,                // in/out - a byte stream buffer
       int *length,              // in/out - number of allocated bytes
       int *offset,              // in/out - current offset in the stream
@@ -475,7 +497,7 @@ char *name = NULL;
     return;
   }
 
-  *rc = (*localarray)->ESMC_LocalArraySerializeNoData(buf, length, offset, *attreconflag);
+  *rc = (*localarray)->serializeNoData(buf, length, offset, *attreconflag);
 
   return;
 
@@ -495,7 +517,7 @@ char *name = NULL;
 //    none.  return code is passed thru the parameter list.
 // 
 // !ARGUMENTS:
-      ESMC_LocalArray **localarray,       // in/out - empty localarray object to fill in
+      ESMCI::LocalArray **localarray,       // in/out - empty localarray object to fill in
       char *buf,                // in - byte stream buffer
       int *offset,              // in/out - current offset in the stream
       ESMC_AttReconcileFlag *attreconflag, // in - attreconcile flag
@@ -511,9 +533,9 @@ char *name = NULL;
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   // create a new localarray object to deserialize into
-  *localarray = new ESMC_LocalArray;
+  *localarray = new ESMCI::LocalArray;
 
-  (*localarray)->ESMC_LocalArrayDeserializeNoData(buf, offset, *attreconflag);
+  (*localarray)->deserializeNoData(buf, offset, *attreconflag);
 
   if (rc) *rc = ESMF_SUCCESS;
 

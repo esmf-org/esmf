@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.19 2009/06/05 23:46:37 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.20 2009/06/09 04:52:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ namespace ESMCI {
     //todo: in order to allow one-sided access to their data...
     // for now only keep PET-local LocalArray pointers here
     // PET-local information
-    ESMC_LocalArray **larrayList;     // [localDeCount]
+    LocalArray **larrayList;          // [localDeCount]
     void **larrayBaseAddrList;        // [localDeCount]
     int *exclusiveLBound;             // [redDimCount*localDeCount]
     int *exclusiveUBound;             // [redDimCount*localDeCount]
@@ -130,7 +130,7 @@ namespace ESMCI {
       totalElementCountPLocalDe = NULL;
     }
    private:
-    Array(ESMC_TypeKind typekind, int rank, ESMC_LocalArray **larrayList,
+    Array(ESMC_TypeKind typekind, int rank, LocalArray **larrayList,
       DistGrid *distgrid, bool distgridCreator, int *exclusiveLBound,
       int *exclusiveUBound, int *computationalLBound, int *computationalUBound,
       int *totalLBound, int *totalUBound, int tensorCount,
@@ -141,8 +141,8 @@ namespace ESMCI {
    public:
     ~Array();
     // create() and destroy()
-    static Array *create(ESMC_LocalArray **larrayList, int larrayCount,
-      DistGrid *distgrid, ESMC_DataCopy copyflag,
+    static Array *create(LocalArray **larrayList, int larrayCount,
+      DistGrid *distgrid, CopyFlag copyflag,
       InterfaceInt *distgridToArrayMap,
       InterfaceInt *computationalEdgeLWidthArg,
       InterfaceInt *computationalEdgeUWidthArg,
@@ -166,7 +166,7 @@ namespace ESMCI {
     ESMC_TypeKind getTypekind()             const {return typekind;}
     int getRank()                           const {return rank;}
     ESMC_IndexFlag getIndexflag()           const {return indexflag;}
-    ESMC_LocalArray **getLocalarrayList()   const {return larrayList;}
+    LocalArray **getLocalarrayList()        const {return larrayList;}
     void **getLarrayBaseAddrList()          const {return larrayBaseAddrList;}
     const int *getExclusiveLBound()         const {return exclusiveLBound;}
     const int *getExclusiveUBound()         const {return exclusiveUBound;}
@@ -302,7 +302,7 @@ class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
     int **globalFullUBound;   // fullBox (data + halo) for this DE [de][dim]
     int **dataOffset;         // offset dataBox vs. fullBox for DE [de][dim]
     ESMCI::DELayout *delayout;// DELayout on which newArray is defined
-    ESMC_LocalArray **localArrays;  // array of LocalArray pointers [localDe]
+    LocalArray **localArrays; // array of LocalArray pointers [localDe]
     ESMC_newArrayCommHandle *commhArray;  // array of commhandles [localDe]
     ESMC_newArrayThreadArg *thargArray;   // array of thread args [localDe]
     ESMC_newArrayThreadArg thargRoot;     // root's thread args
@@ -319,7 +319,7 @@ class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
   public:
     // Construct and Destruct
     int ESMC_newArrayConstruct(  
-      ESMC_LocalArray *larray,  // pointer to ESMC_LocalArray object
+      LocalArray *larray,  // pointer to LocalArray object
       int *haloWidth,           // halo width
       ESMCI::DELayout *delayout,  // DELayout
       int rootPET,              // root
@@ -329,7 +329,7 @@ class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
 
     // Get info
     int ESMC_newArrayGet(int *rank, ESMCI::DELayout **delayout, 
-      ESMC_LocalArray **localArrays, int len_localArrays,
+      LocalArray **localArrays, int len_localArrays,
       int *globalFullLBound, int *len_globalFullLBound,
       int *globalFullUBound, int *len_globalFullUBound,
       int *globalDataLBound, int *len_globalDataLBound,
@@ -342,18 +342,18 @@ class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
     
     // Communication
     int ESMC_newArrayScatter(
-      ESMC_LocalArray *larray,  // pointer to ESMC_LocalArray object
+      LocalArray *larray,  // pointer to LocalArray object
       int rootPET,              // root
       ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
     
     int ESMC_newArrayScatter(
-      ESMC_LocalArray *larray,  // pointer to ESMC_LocalArray object
+      LocalArray *larray,  // pointer to LocalArray object
       int rootPET,              // root
       ESMC_newArrayCommHandle *commh, // commu handle for non-blocking mode
       ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
 
     int ESMC_newArrayScatter(
-      ESMC_LocalArray *larray,  // pointer to ESMC_LocalArray object
+      LocalArray *larray,  // pointer to LocalArray object
       int rootPET,              // root
       int de,                   // DE for DE-based non-blocking scatter
       ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
@@ -398,7 +398,7 @@ class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
 
 // external methods:  
 
-ESMC_newArray *ESMC_newArrayCreate(ESMC_LocalArray *larray, int *haloWidth, 
+ESMC_newArray *ESMC_newArrayCreate(LocalArray *larray, int *haloWidth, 
   int deCount, int rootPET, int *rc);
 
 int ESMC_newArrayDestroy(ESMC_newArray **array);

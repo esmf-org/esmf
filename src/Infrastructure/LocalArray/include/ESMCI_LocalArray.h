@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.h,v 1.1 2009/06/05 23:46:37 theurich Exp $
+// $Id: ESMCI_LocalArray.h,v 1.2 2009/06/09 04:52:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -20,69 +20,73 @@
 
 //-----------------------------------------------------------------------------
 //BOPI
-// !CLASS:  ESMCI_LocalArray - uniform access to arrays from F90 and C++
+// !CLASS:  ESMCI::LocalArray - uniform access to arrays from F90 and C++
 //
 // !DESCRIPTION:
 //
 // The code in this file defines the C++ LocalArray class and declares method
-// signatures (prototypes).  The companion file ESMC\_LocalArray.C contains
-// the definitions (full code bodies) for the LocalArray methods.
+// signatures (prototypes).  The companion file {\tt ESMCI\_LocalArray.C}
+// contains the full code (bodies) for the {\tt LocalArray} methods.
 //
 //EOPI
 //-------------------------------------------------------------------------
 
-#include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
+#include "ESMC_Base.h"  // Base is superclass to LocalArray
 
 //-------------------------------------------------------------------------
 
-// classes and structs
+namespace ESMCI {
 
-class ESMC_LocalArray;
+  // classes and structs
+
+  class LocalArray;
 
 #define MAX_F90_RANK_POSSIBLE 7
-struct c_F90ptr {
-  // Dummy structure which is at least as big as an F90 pointer on
-  // each architcture. ESMF_F90_PTR_xxx are defined in conf.h in
-  // the build_config directories for each architecture.
-  // On most platforms, there is a bump in size for each additional rank.
-  // So far no platform we found has a data-type dependency.
-   unsigned char basepad[ESMF_F90_PTR_BASE_SIZE];
+  struct c_F90ptr {
+    // Dummy structure which is at least as big as an F90 pointer on
+    // each architcture. ESMF_F90_PTR_xxx are defined in conf.h in
+    // the build_config directories for each architecture.
+    // On most platforms, there is a bump in size for each additional rank.
+    // So far no platform we found has a data-type dependency.
+    unsigned char basepad[ESMF_F90_PTR_BASE_SIZE];
 #if ESMF_F90_PTR_PLUS_RANK 
-   // plus extra space needed per rank
-   unsigned char extrapad[MAX_F90_RANK_POSSIBLE*ESMF_F90_PTR_PLUS_RANK];
+    // plus extra space needed per rank
+    unsigned char extrapad[MAX_F90_RANK_POSSIBLE*ESMF_F90_PTR_PLUS_RANK];
 #endif
-};
+  };
 
-// these must stay in sync with the F90 versions
-typedef enum{ 
-  ESMC_FROM_FORTRAN = 1, 
-  ESMC_FROM_CPLUSPLUS 
-}ESMC_ArrayOrigin; 
+  // this must stay in sync with the Fortran counter-part
+  typedef enum{ 
+    FROM_FORTRAN = 1, 
+    FROM_CPLUSPLUS 
+  }LocalArrayOrigin; 
 
-typedef enum{ 
-  ESMC_DATA_COPY = 1, 
-  ESMC_DATA_REF,
-  ESMC_DATA_DEFER,
-  ESMC_DATA_SPACE,
-  ESMC_DATA_NONE
-}ESMC_DataCopy;
+  // this must stay in sync with the Fortran counter-part
+  typedef enum{ 
+    DATA_COPY = 1, 
+    DATA_REF,
+    DATA_DEFER,
+    DATA_SPACE,
+    DATA_NONE
+  }CopyFlag;
 
-typedef enum{ 
-  ESMC_ARRAY_NO_ALLOCATE = 0, 
-  ESMC_ARRAY_DO_ALLOCATE,
-  ESMC_ARRAY_ALLOC_IF_BASE_NULL,
-  ESMF_ARRAY_ALLOC_DEFERRED
-}ESMC_ArrayDoAllocate;
+  // this does _not_ have a Fortran counter-part
+  typedef enum{ 
+    NO_ALLOCATE = 0, 
+    DO_ALLOCATE,
+    ALLOC_IF_BASE_NULL,
+    ALLOC_DEFERRED
+  }LocalArrayDoAllocate;
 
 
-// class declaration
-class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
+  // class definition
+  class LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
 
-  protected:
+   protected:
     int rank;                      // dimensionality (1, 2, ..., 7)
-    ESMC_TypeKind kind;            // short, long (*4, *8)
-    ESMC_ArrayOrigin origin;       // was the create called from F90 or C++?
-    ESMC_Logical needs_dealloc;    // is array responsible for deallocation?
+    ESMC_TypeKind typekind;        // short, long (*4, *8)
+    LocalArrayOrigin origin;       // was the create called from F90 or C++?
+    ESMC_Logical needs_dealloc;    // localarray responsible for deallocation?
     ESMC_Logical iscontig;         // optimization possible if all contig
     void *base_addr;               // real start of memory
     int byte_count;                // size (in bytes) of data region
@@ -97,68 +101,73 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
                                    // this is memcpy'd to save and restore 
                                    // contents are not interpreted by esmf
 
-  public:
+   public:
     // create() and destroy()
-    static ESMC_LocalArray *ESMC_LocalArrayCreate(int rank,
-      ESMC_TypeKind dk, int *counts = NULL, void *base = NULL, 
-      ESMC_DataCopy docopy = ESMC_DATA_REF, char *name = NULL, int *rc = NULL);
-    static ESMC_LocalArray *ESMC_LocalArrayCreate(int rank,     
-      ESMC_TypeKind dk, int *counts, int *lbounds, int *ubounds,
-      void *base = NULL, ESMC_DataCopy docopy = ESMC_DATA_REF,
+    static LocalArray *create(int rank, ESMC_TypeKind dk, int *counts = NULL,
+      void *base = NULL, CopyFlag docopy = DATA_REF, char *name = NULL,
+      int *rc = NULL);
+    static LocalArray *create(int rank, ESMC_TypeKind dk, int *counts,
+      int *lbounds, int *ubounds, void *base = NULL, CopyFlag docopy = DATA_REF,
       char *name = NULL, int *rc = NULL);
-    static ESMC_LocalArray *ESMC_LocalArrayCreate(ESMC_LocalArray *larrayIn,
-      int *rc = NULL);
-    static int ESMC_LocalArrayDestroy(ESMC_LocalArray *array);
+    static LocalArray *create(LocalArray *larrayIn, int *rc = NULL);
+    static int destroy(LocalArray *array);
 
-    static ESMC_LocalArray *ESMC_LocalArrayCreateNoData(int rank,  
-      ESMC_TypeKind dk, ESMC_ArrayOrigin oflag, char *name = NULL,
-      int *rc = NULL);
-    static ESMC_LocalArray *ESMC_LocalArrayCreate_F(int rank, ESMC_TypeKind dk,
-      int *icounts = NULL, struct c_F90ptr *f90ptr = NULL, void *base = NULL, 
-      ESMC_DataCopy docopy = ESMC_DATA_REF, char *name = NULL,
-      int *lbounds = NULL, int *ubounds = NULL, int *offsets = NULL,
-      int *rc = NULL);
-    
-  public:
+    static LocalArray *createNoData(int rank, ESMC_TypeKind dk,
+      LocalArrayOrigin oflag, char *name = NULL, int *rc = NULL);
+    static LocalArray *create_F(int rank, ESMC_TypeKind dk, int *icounts = NULL,
+      struct c_F90ptr *f90ptr = NULL, void *base = NULL,
+      CopyFlag docopy = DATA_REF, char *name = NULL, int *lbounds = NULL,
+      int *ubounds = NULL, int *offsets = NULL, int *rc = NULL);
+
+   public:
     // construct() and destruct()
-    int ESMC_LocalArrayConstruct(int irank, ESMC_TypeKind dk, int *counts,
-      void *base, ESMC_ArrayOrigin oflag, struct c_F90ptr *f90ptr,
-      ESMC_ArrayDoAllocate aflag, ESMC_DataCopy docopy, ESMC_Logical dflag,
+    int construct(int irank, ESMC_TypeKind dk, int *counts, void *base,
+      LocalArrayOrigin oflag, struct c_F90ptr *f90ptr,
+      LocalArrayDoAllocate aflag, CopyFlag docopy, ESMC_Logical dflag,
       char *name, int *lbounds, int *ubounds, int *offsets);
-    int ESMC_LocalArrayDestruct();
+    int destruct();
 
     // adjust()
-    ESMC_LocalArray *ESMC_LocalArrayAdjust(ESMC_DataCopy copyflag,
-      int *lbounds, int *ubounds, int *rc);
+    LocalArray *adjust(CopyFlag copyflag, int *lbounds, int *ubounds, int *rc);
 
     // required methods inherited and overridden from the ESMC_Base class
-    int ESMC_LocalArrayDeserialize(char *buffer, int *boffset, 
+    int deserialize(char *buffer, int *boffset, 
       const ESMC_AttReconcileFlag &attreconflag);
-    int ESMC_LocalArrayDeserializeNoData(char *buffer, int *boffset, 
+    int deserializeNoData(char *buffer, int *boffset, 
       const ESMC_AttReconcileFlag &attreconflag);
-    int ESMC_LocalArrayPrint(const char *options = NULL) const;
-    int ESMC_LocalArraySerialize(char *buffer, int *length, int *boffset,
+    int print(const char *options = NULL) const;
+    int serialize(char *buffer, int *length, int *boffset,
       const ESMC_AttReconcileFlag &attreconflag) const;
-    int ESMC_LocalArraySerializeNoData(char *buffer, int *length, int *boffset,
+    int serializeNoData(char *buffer, int *length, int *boffset,
       const ESMC_AttReconcileFlag &attreconflag) const;
-    int ESMC_LocalArrayWrite(const char *options, const char *filename) const;
-    int ESMC_LocalArrayValidate(const char *options) const;
+    int write(const char *options, const char *filename) const;
+    int validate(const char *options) const;
 
     // native C++ constructors/destructors
-    ESMC_LocalArray();
-    ~ESMC_LocalArray();
-  
-    // get/set methods for internal data
-    int ESMC_LocalArraySetRank(int rank){
-      this->rank = rank; 
-      return ESMF_SUCCESS;
+    LocalArray();
+    ~LocalArray();
+    
+    
+    // simple set/get methods
+    void setRank(int rank){ this->rank = rank; }
+    int getRank()const{ return this->rank; }
+    void setTypeKind(ESMC_TypeKind typekind){ this->typekind = typekind; }
+    ESMC_TypeKind getTypeKind()const{ return this->typekind; }
+    void setBaseAddr(void *base_addr){ this->base_addr = base_addr; }
+    void *getBaseAddr()const{ return this->base_addr; } 
+    void setOrigin(LocalArrayOrigin origin){ this->origin = origin; } 
+    LocalArrayOrigin getOrigin()const{ return this->origin; }
+    void setByteCount(int byte_count){ this->byte_count = byte_count; }
+    int getByteCount()const{ return this->byte_count; }
+    int setName(char *name){ return ESMC_BaseSetName(name, "LocalArray"); }
+    const char *getName()const{ return ESMC_BaseGetName(); }
+    void setNoDealloc(){ this->needs_dealloc = ESMF_FALSE; }
+    void setDealloc(){ this->needs_dealloc = ESMF_TRUE; }
+    bool needsDealloc()const{
+      return this->needs_dealloc == ESMF_TRUE ? true : false;
     }
-    int ESMC_LocalArrayGetRank()const{return this->rank;}
-    int ESMC_LocalArraySetTypeKind(ESMC_TypeKind kind){
-      this->kind = kind;
-      return ESMF_SUCCESS;
-    }
-    ESMC_TypeKind ESMC_LocalArrayGetTypeKind()const{return this->kind;}
+      
+    // multi-dim get/set methods
     int ESMC_LocalArraySetLengths(int n, int *l){
       for (int i = 0; i < n; i++)
         this->counts[i] = l[i]; 
@@ -184,23 +193,6 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
       if (nm) *nm = this->counts[4];
       return ESMF_SUCCESS;
     }
-    int ESMC_LocalArraySetBaseAddr(void *base_addr){
-      this->base_addr = base_addr; 
-      return ESMF_SUCCESS;
-    }
-    int ESMC_LocalArrayGetBaseAddr(void **base)const{
-      *base = this->base_addr; 
-      return ESMF_SUCCESS;
-    }
-    int ESMC_LocalArrayGetByteCount(int *count)const{
-      *count = this->byte_count; 
-      return ESMF_SUCCESS;
-    }
-    int ESMC_LocalArraySetOrigin(ESMC_ArrayOrigin o){
-      this->origin = o; 
-      return ESMF_SUCCESS;
-    }
-    ESMC_ArrayOrigin ESMC_LocalArrayGetOrigin()const{return this->origin;}
     int ESMC_LocalArrayGetLbounds(int n, int *l)const{
       for (int i = 0; i < n; i++)
         l[i] = this->lbound[i];
@@ -215,21 +207,6 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
       for (int i = 0; i < n; i++)
         c[i] = this->counts[i];
       return ESMF_SUCCESS;
-    }
-    int ESMC_LocalArraySetName(char *name){
-      return ESMC_BaseSetName(name, "LocalArray");
-    }
-    char *ESMC_LocalArrayGetName()const{return ESMC_BaseGetName();}
-    int ESMC_LocalArraySetNoDealloc(){
-      this->needs_dealloc = ESMF_FALSE; 
-      return ESMF_SUCCESS;
-    }
-    int ESMC_LocalArraySetDealloc(){
-      this->needs_dealloc = ESMF_TRUE; 
-      return ESMF_SUCCESS;
-    }
-    int ESMC_LocalArrayNeedsDealloc()const{
-      return this->needs_dealloc == ESMF_TRUE ? 1 : 0;
     }
     int ESMC_LocalArraySetInfo(struct c_F90ptr *fptr, void *base, int *counts, 
       int *lbounds, int *ubounds, int *offsets, ESMC_Logical *contig,
@@ -269,21 +246,14 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
       return ESMF_SUCCESS;
     }
 
-    // create a new LocalArray from an old one, decreasing the rank by one.
-    ESMC_LocalArray *ESMC_LocalArraySlice(int slicedim, int sliceloc, int *rc)
-      const;
- 
-    // point to the same data but create a different F90 pointer with
-    // different rank/sizes - the number of items must match.
-    ESMC_LocalArray *ESMC_LocalArrayReshape(int rank, int *newcounts, int *rc)
-      const;
-
     // Get Data from a position in the LocalArray
-   template <class TYPE> int getData(int *index, TYPE *data);
+    template <class TYPE> int getData(int *index, TYPE *data);
 
-    // Get Data from a position in the LocalArray without internal error checking
-   template <class TYPE> void getDataInternal(int *index, TYPE *data);
+    // Get Data from a position in the LocalArray w/o internal error checking
+    template <class TYPE> void getDataInternal(int *index, TYPE *data);
   
-};  // class ESMC_LocalArray
+  };  // class ESMC_LocalArray
+
+} // namespace ESMCI
 
 #endif  // ESMCI_LocalArray_H

@@ -594,7 +594,7 @@ extern "C" {
                                          int *staggerloc, 
                                          int *coord, 
                                          ESMCI::Array **array,
-                                         ESMC_DataCopy *docopy, 
+                                         ESMCI::CopyFlag *docopy, 
                                          int *rc) {
     int localrc;
 #undef  ESMC_METHOD
@@ -616,7 +616,7 @@ extern "C" {
                                          int *staggerloc, 
                                          int *item, 
                                          ESMCI::Array **array,
-                                         ESMC_DataCopy *docopy, 
+                                         ESMCI::CopyFlag *docopy, 
                                          int *rc) {
     int localrc;
 #undef  ESMC_METHOD
@@ -683,7 +683,7 @@ extern "C" {
                                          int *staggerloc, 
                                          int *arrayCount, 
                                          ESMCI::Array **arrayList,
-                                         ESMC_DataCopy *docopy, 
+                                         ESMCI::CopyFlag *docopy, 
                                          ESMCI::InterfaceInt **staggerEdgeLWidthArg, 
                                          ESMCI::InterfaceInt **staggerEdgeUWidthArg, 
                                          ESMCI::InterfaceInt **staggerAlignArg, 
@@ -761,7 +761,7 @@ extern "C" {
                                          int *staggerloc, 
                                          int *coord, 
                                          ESMCI::Array **array,
-                                         ESMC_DataCopy *docopy, 
+                                         ESMCI::CopyFlag *docopy, 
                                          int *rc) {
     int localrc;
 #undef  ESMC_METHOD
@@ -854,7 +854,7 @@ extern "C" {
 					int *staggerloc, 
 					int *item, 
                                         ESMCI::Array **array,
-					ESMC_DataCopy *docopy, 
+					ESMCI::CopyFlag *docopy, 
                                         int *rc) {
     int localrc;
 #undef  ESMC_METHOD
@@ -907,7 +907,7 @@ extern "C" {
     int gridExLBnd[ESMF_MAXDIM];
     int gridExUBnd[ESMF_MAXDIM];
     int userIndexOffset[ESMF_MAXDIM];
-    ESMC_DataCopy docopy;
+    ESMCI::CopyFlag docopy;
     ESMC_GridDecompType decompType;
  
     // Get Grid pointer
@@ -996,7 +996,7 @@ extern "C" {
      } 
    } else { 
      // Get Array    
-     docopy=ESMC_DATA_REF;
+     docopy=ESMCI::DATA_REF;
      array=grid->getCoordArray(&staggerloc, coord+1, &docopy, &localrc);
      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
  					    ESMC_NOT_PRESENT_FILTER(_rc))) return;
@@ -1338,7 +1338,7 @@ extern "C" {
     ESMCI::Array *array;
     int lBnd[ESMF_MAXDIM];
     int uBnd[ESMF_MAXDIM];
-    ESMC_DataCopy docopy;
+    ESMCI::CopyFlag docopy;
 
     // Get Grid pointer
     grid=*_grid;
@@ -1408,7 +1408,7 @@ extern "C" {
     // Get Array From Grid (only needed for total bounds)
    if ((*_totalLBound != NULL) ||
        (*_totalUBound != NULL)) { 
-     docopy=ESMC_DATA_REF;
+     docopy=ESMCI::DATA_REF;
      array=grid->getItemArray(&staggerloc, &item, &docopy, &localrc);
      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                               ESMC_NOT_PRESENT_FILTER(_rc))) return;

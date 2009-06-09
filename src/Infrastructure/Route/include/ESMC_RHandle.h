@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.h,v 1.15 2009/06/05 23:46:37 theurich Exp $
+// $Id: ESMC_RHandle.h,v 1.16 2009/06/09 04:52:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -200,17 +200,17 @@ extern "C" {
  void FTN(c_esmc_transformvaluesdestroy)(ESMC_TransformValues **ptr, int *status);
 
  void FTN(c_esmc_transformvaluesget)(ESMC_TransformValues **ptr, 
-          int *numlist, ESMC_LocalArray **src, ESMC_LocalArray **dst, 
-          ESMC_LocalArray **w, int *status);
+          int *numlist, ESMCI::LocalArray **src, ESMCI::LocalArray **dst, 
+          ESMCI::LocalArray **w, int *status);
 
  // the int needs to be an enum, the label needs to be added and handled
  void FTN(c_esmc_transformvaluesgetf90ptr)(ESMC_TransformValues **ptr, 
-          int *numlist, struct c_F90ptr *src, struct c_F90ptr *dst, 
-          struct c_F90ptr *w, int *status);
+    int *numlist, struct ESMCI::c_F90ptr *src, struct ESMCI::c_F90ptr *dst, 
+    struct ESMCI::c_F90ptr *w, int *status);
 
  void FTN(c_esmc_transformvaluesset)(ESMC_TransformValues **ptr, 
-          int *numlist, ESMC_LocalArray **src, ESMC_LocalArray **dst, 
-          ESMC_LocalArray **w, int *status);
+          int *numlist, ESMCI::LocalArray **src, ESMCI::LocalArray **dst, 
+          ESMCI::LocalArray **w, int *status);
 
  void FTN(c_esmc_transformvaluesvalidate)(ESMC_TransformValues **ptr, 
                                           char *opts, int *status);

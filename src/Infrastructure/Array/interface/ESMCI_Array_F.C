@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.19 2009/02/16 19:14:31 rokuingh Exp $
+// $Id: ESMCI_Array_F.C,v 1.20 2009/06/09 04:52:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,8 +46,9 @@ extern "C" {
   // - ESMF-public methods:
         
   void FTN(c_esmc_arraycreatelocalarray)(ESMCI::Array **ptr, 
-    ESMC_LocalArray **larrayList, int *larrayCount, ESMCI::DistGrid **distgrid,
-    ESMC_DataCopy *copyflag,
+    ESMCI::LocalArray **larrayList, int *larrayCount,
+    ESMCI::DistGrid **distgrid,
+    ESMCI::CopyFlag *copyflag,
     ESMCI::InterfaceInt **distgridToArrayMap,
     ESMCI::InterfaceInt **computationalEdgeLWidthArg,
     ESMCI::InterfaceInt **computationalEdgeUWidthArg,
@@ -148,7 +149,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_arrayget)(ESMCI::Array **ptr, ESMC_TypeKind *typekind, 
-    int *rank, ESMC_LocalArray **opt_localArrayList,
+    int *rank, ESMCI::LocalArray **opt_localArrayList,
     int *len_localArrayList, ESMCI::DistGrid **distgrid,
     ESMCI::DELayout **delayout,
     ESMC_IndexFlag *indexflag, 

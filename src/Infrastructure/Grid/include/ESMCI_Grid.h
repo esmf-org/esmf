@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.58 2009/05/20 17:13:23 peggyli Exp $
+// $Id: ESMCI_Grid.h,v 1.59 2009/06/09 04:52:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -451,7 +451,7 @@ int getComputationalUBound(
                    int *_staggerloc,
 		   int *item,    
                    Array *_array,
-                   ESMC_DataCopy *_docopy
+                   CopyFlag *_docopy
                    );
 
 
@@ -459,7 +459,7 @@ int getComputationalUBound(
  Array *getItemArray(
                       int *_staggerloc,
                       int *item, 
-                      ESMC_DataCopy *_docopy,
+                      CopyFlag *_docopy,
                       int *rcArg
                       );
 
@@ -488,7 +488,7 @@ int getComputationalUBound(
                    int *_staggerloc,
                    int *_coord,
                    Array *_array,
-                   ESMC_DataCopy *_docopy
+                   CopyFlag *_docopy
                    );
 
 
@@ -497,7 +497,7 @@ int getComputationalUBound(
                        int *staggerlocArg,        // (in) optional
                        int arrayCount,             // (in) 
                        Array **arrayList,           // (in)
-                       ESMC_DataCopy *docopyArg,   // (in) optional
+                       CopyFlag *docopyArg,   // (in) optional
                        InterfaceInt *_staggerEdgeLWidthArg,
                        InterfaceInt *_staggerEdgeUWidthArg,
                        InterfaceInt *_staggerAlign
@@ -522,7 +522,7 @@ int getComputationalUBound(
  Array *getCoordArray(
                       int *_staggerloc,
                       int _coord,
-                      ESMC_DataCopy *_docopy,
+                      CopyFlag *_docopy,
                       int *rcArg
                       );
 

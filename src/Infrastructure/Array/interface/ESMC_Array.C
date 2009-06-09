@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.16 2009/01/21 21:37:58 cdeluca Exp $
+// $Id: ESMC_Array.C,v 1.17 2009/06/09 04:52:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.16 2009/01/21 21:37:58 cdeluca Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.17 2009/06/09 04:52:01 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -174,10 +174,8 @@ void *ESMC_ArrayGetPtr(ESMC_Array array, int localDe, int *rc){
   }
 
   // call into ESMCI method 
-  ESMC_LocalArray **localarrayList = ap->getLocalarrayList();
-  void *ptr;
-  localarrayList[localDe]->ESMC_LocalArrayGetBaseAddr(
-    (void **)&(ptr));
+  ESMCI::LocalArray **localarrayList = ap->getLocalarrayList();
+  void *ptr = localarrayList[localDe]->getBaseAddr();
 
   // return successfully
   *rc = ESMF_SUCCESS;

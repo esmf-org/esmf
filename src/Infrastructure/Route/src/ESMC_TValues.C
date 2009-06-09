@@ -1,4 +1,4 @@
-// $Id: ESMC_TValues.C,v 1.25 2009/06/05 23:46:37 theurich Exp $
+// $Id: ESMC_TValues.C,v 1.26 2009/06/09 04:52:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TValues.C,v 1.25 2009/06/05 23:46:37 theurich Exp $";
+ static const char *const version = "$Id: ESMC_TValues.C,v 1.26 2009/06/09 04:52:01 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -188,16 +188,16 @@
 
     numlist = 0;
     if (count > 0) {
-        srcindex = ESMC_LocalArray::ESMC_LocalArrayCreate(1, ESMC_TYPEKIND_I4, 
-                                         &count, NULL, ESMC_DATA_COPY, 
+        srcindex = ESMCI::LocalArray::create(1, ESMC_TYPEKIND_I4,
+                                         &count, NULL, ESMCI::DATA_COPY, 
                                          NULL, &rc);
 
-        dstindex = ESMC_LocalArray::ESMC_LocalArrayCreate(1, ESMC_TYPEKIND_I4, 
-                                         &count2, NULL, ESMC_DATA_COPY,
+        dstindex = ESMCI::LocalArray::create(1, ESMC_TYPEKIND_I4,
+                                         &count2, NULL, ESMCI::DATA_COPY,
                                          NULL, &rc);
 
-        weights = ESMC_LocalArray::ESMC_LocalArrayCreate(1, ESMC_TYPEKIND_R8, 
-                                        &count, NULL, ESMC_DATA_COPY,
+        weights = ESMCI::LocalArray::create(1, ESMC_TYPEKIND_R8, 
+                                        &count, NULL, ESMCI::DATA_COPY,
                                         NULL, &rc);
     } else {
         srcindex = NULL;
@@ -236,9 +236,9 @@
 
     // TODO:  do we own the things we are pointing to?  should we destroy
     // them here??
-    if (srcindex) ESMC_LocalArray::ESMC_LocalArrayDestroy(srcindex);
-    if (dstindex) ESMC_LocalArray::ESMC_LocalArrayDestroy(dstindex);
-    if (weights)  ESMC_LocalArray::ESMC_LocalArrayDestroy(weights);
+    if (srcindex) ESMCI::LocalArray::destroy(srcindex);
+    if (dstindex) ESMCI::LocalArray::destroy(dstindex);
+    if (weights)  ESMCI::LocalArray::destroy(weights);
 
     return ESMF_SUCCESS;
 
@@ -259,9 +259,9 @@
 //
 // !ARGUMENTS:
       int *numlist,                  // out - number of domains in list
-      ESMC_LocalArray **si,          // out - source index list
-      ESMC_LocalArray **di,          // out - destination index list
-      ESMC_LocalArray **w) const {   // out - weights
+      ESMCI::LocalArray **si,          // out - source index list
+      ESMCI::LocalArray **di,          // out - destination index list
+      ESMCI::LocalArray **w) const {   // out - weights
 
 //
 // !DESCRIPTION:
@@ -293,9 +293,9 @@
 //
 // !ARGUMENTS:
       int *numlist,                 // out - number of domains in list
-      struct c_F90ptr *si,          // out - data for source index list
-      struct c_F90ptr *di,          // out - data for destination index list
-      struct c_F90ptr *w) const {   // out - data for weights
+      struct ESMCI::c_F90ptr *si,   // out - data for source index list
+      struct ESMCI::c_F90ptr *di,   // out - data for destination index list
+      struct ESMCI::c_F90ptr *w) const {   // out - data for weights
 
 //
 // !DESCRIPTION:
@@ -327,9 +327,9 @@
 //
 // !ARGUMENTS:
       int numlist,                  // in - number of domains in list
-      ESMC_LocalArray *si,          // in - source index list
-      ESMC_LocalArray *di,          // in - destination index list
-      ESMC_LocalArray *w) {         // in - weights
+      ESMCI::LocalArray *si,          // in - source index list
+      ESMCI::LocalArray *di,          // in - destination index list
+      ESMCI::LocalArray *w) {         // in - weights
 
 //
 // !DESCRIPTION:
@@ -406,15 +406,15 @@
     sprintf(msgbuf,"  source index:\n");
     //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO,ESMC_CONTEXT);
     printf(msgbuf);
-    srcindex->ESMC_LocalArrayPrint();
+    srcindex->print();
     sprintf(msgbuf,"  destination index:\n");
     //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO,ESMC_CONTEXT);
     printf(msgbuf);
-    dstindex->ESMC_LocalArrayPrint();
+    dstindex->print();
     sprintf(msgbuf,"  weights:\n");
     //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO,ESMC_CONTEXT);
     printf(msgbuf);
-    weights->ESMC_LocalArrayPrint();
+    weights->print();
 
     return ESMF_SUCCESS;
 

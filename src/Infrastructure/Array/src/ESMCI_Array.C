@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.38 2009/05/20 02:36:53 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.39 2009/06/09 04:52:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.38 2009/05/20 02:36:53 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.39 2009/06/09 04:52:01 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -77,7 +77,7 @@ Array::Array(
 //
   ESMC_TypeKind typekindArg,              // (in)
   int rankArg,                            // (in)
-  ESMC_LocalArray **larrayListArg,        // (in)
+  LocalArray **larrayListArg,             // (in)
   DistGrid *distgridArg,                  // (in)
   bool distgridCreatorArg,                // (in)
   int *exclusiveLBoundArg,                // (in)
@@ -121,12 +121,12 @@ Array::Array(
   delayout = distgrid->getDELayout();
   // copy the PET-local LocalArray pointers
   int localDeCount = delayout->getLocalDeCount();
-  larrayList = new ESMC_LocalArray*[localDeCount];
-  memcpy(larrayList, larrayListArg, localDeCount*sizeof(ESMC_LocalArray *));
+  larrayList = new LocalArray*[localDeCount];
+  memcpy(larrayList, larrayListArg, localDeCount*sizeof(LocalArray *));
   // determine the base addresses of the local arrays:
   larrayBaseAddrList = new void*[localDeCount];
   for (int i=0; i<localDeCount; i++)
-    larrayList[i]->ESMC_LocalArrayGetBaseAddr((void **)&larrayBaseAddrList[i]);
+    larrayBaseAddrList[i] = larrayList[i]->getBaseAddr();
   // copy the PET-local bound arrays
   int redDimCount = rank - tensorCountArg; // reduced dimCount w/o repl. dims
   exclusiveLBound = new int[redDimCount*localDeCount];
@@ -265,7 +265,7 @@ Array::~Array(){
   // garbage collection
   int localDeCount = delayout->getLocalDeCount();
   for (int i=0; i<localDeCount; i++){
-    int localrc = ESMC_LocalArray::ESMC_LocalArrayDestroy(larrayList[i]);
+    int localrc = LocalArray::destroy(larrayList[i]);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
       throw localrc;  // bail out with exception
   }
@@ -331,10 +331,10 @@ Array *Array::create(
 //
 // !ARGUMENTS:
 //
-  ESMC_LocalArray **larrayListArg,            // (in)
+  LocalArray **larrayListArg,                 // (in)
   int larrayCount,                            // (in)
   DistGrid *distgrid,                         // (in)
-  ESMC_DataCopy copyflag,                     // (in)
+  CopyFlag copyflag,                          // (in)
   InterfaceInt *distgridToArrayMap,           // (in)
   InterfaceInt *computationalEdgeLWidthArg,   // (in)
   InterfaceInt *computationalEdgeUWidthArg,   // (in)
@@ -374,15 +374,15 @@ Array *Array::create(
       rc);
     return ESMC_NULL_POINTER;
   }
-  ESMC_TypeKind typekind = larrayListArg[0]->ESMC_LocalArrayGetTypeKind();
-  int rank = larrayListArg[0]->ESMC_LocalArrayGetRank();
+  ESMC_TypeKind typekind = larrayListArg[0]->getTypeKind();
+  int rank = larrayListArg[0]->getRank();
   for (int i=1; i<larrayCount; i++){
-    if (larrayListArg[0]->ESMC_LocalArrayGetTypeKind() != typekind){
+    if (larrayListArg[0]->getTypeKind() != typekind){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
         "- TypeKind mismatch in the elements of larrayList argument", rc);
       return ESMC_NULL_POINTER;
     }
-    if (larrayListArg[0]->ESMC_LocalArrayGetRank() != rank){
+    if (larrayListArg[0]->getRank() != rank){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
         "- Rank mismatch in the elements of larrayList argument", rc);
       return ESMC_NULL_POINTER;
@@ -819,7 +819,7 @@ Array *Array::create(
   }
 
   // allocate LocalArray list that holds all PET-local DEs and adjust elements
-  ESMC_LocalArray **larrayList = new ESMC_LocalArray*[localDeCount];
+  LocalArray **larrayList = new LocalArray*[localDeCount];
   int *temp_counts = new int[rank];
   int *temp_larrayLBound = new int[rank];
   int *temp_larrayUBound = new int[rank];
@@ -992,8 +992,7 @@ Array *Array::create(
       // Depending on copyflag the original memory used for data storage will be
       // referenced or a copy of the data will be made.
       larrayList[i] = larrayListArg[i]->
-        ESMC_LocalArrayAdjust(copyflag, temp_larrayLBound, temp_larrayUBound,
-          &localrc);
+        adjust(copyflag, temp_larrayLBound, temp_larrayUBound, &localrc);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return ESMC_NULL_POINTER;
     }        
@@ -1554,7 +1553,7 @@ Array *Array::create(
   }
   
   // allocate LocalArray list that holds all PET-local DEs
-  ESMC_LocalArray **larrayList = new ESMC_LocalArray*[localDeCount];
+  LocalArray **larrayList = new LocalArray*[localDeCount];
   int *temp_counts = new int[rank];
   int *temp_larrayLBound = new int[rank];
   int *temp_larrayUBound = new int[rank];
@@ -1578,9 +1577,8 @@ Array *Array::create(
       }
     }
     // allocate LocalArray object with specific undistLBound and undistUBound
-    larrayList[i] = ESMC_LocalArray::ESMC_LocalArrayCreate(rank, typekind,
-      temp_counts, temp_larrayLBound, temp_larrayUBound, NULL, ESMC_DATA_REF,
-      NULL, &localrc);
+    larrayList[i] = LocalArray::create(rank, typekind, temp_counts,
+      temp_larrayLBound, temp_larrayUBound, NULL, DATA_REF, NULL, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }
@@ -1696,20 +1694,17 @@ Array *Array::create(
     // deep copy of members with allocations
     // copy the PET-local LocalArray pointers
     int localDeCount = arrayIn->delayout->getLocalDeCount();
-    arrayOut->larrayList = new ESMC_LocalArray*[localDeCount];
+    arrayOut->larrayList = new LocalArray*[localDeCount];
     for (int i=0; i<localDeCount; i++){
       arrayOut->larrayList[i] =
-        ESMC_LocalArray::ESMC_LocalArrayCreate(arrayIn->larrayList[i],
-        &localrc);
+        LocalArray::create(arrayIn->larrayList[i], &localrc);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return ESMC_NULL_POINTER;
     }
     // determine the base addresses of the local arrays:
     arrayOut->larrayBaseAddrList = new void*[localDeCount];
     for (int i=0; i<localDeCount; i++)
-      arrayOut->larrayList[i]
-        ->ESMC_LocalArrayGetBaseAddr((void **)
-        &(arrayOut->larrayBaseAddrList[i]));
+      arrayOut->larrayBaseAddrList[i] = arrayOut->larrayList[i]->getBaseAddr();
     // copy the PET-local bound arrays
     int redDimCount = rank - tensorCount;
     arrayOut->exclusiveLBound = new int[redDimCount*localDeCount];
@@ -2365,7 +2360,7 @@ int Array::print()const{
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
     printf("~ local data in LocalArray for DE %d ~\n", de);
-    larrayList[i]->ESMC_LocalArrayPrint();
+    larrayList[i]->print();
     if (exclusiveElementCountPDe[de]){
       // associated DE
       int j=0;    // reset
@@ -2613,7 +2608,7 @@ int Array::deserialize(
   *offset = (cp - buffer);
   
   // set values with local dependency
-  larrayList = new ESMC_LocalArray*[0];     // no DE on proxy object
+  larrayList = new LocalArray*[0];     // no DE on proxy object
   larrayBaseAddrList = new void*[0];        // no DE on proxy object
   totalElementCountPLocalDe = NULL;         // no De on proxy object
 

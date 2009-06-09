@@ -1,4 +1,4 @@
-// $Id: ESMC_TValues.h,v 1.9 2009/06/05 23:46:37 theurich Exp $
+// $Id: ESMC_TValues.h,v 1.10 2009/06/09 04:52:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -62,21 +62,21 @@
         // TODO:  needs option for single large sparse matrix, etc.
 
         int numlist;
-        ESMC_LocalArray *srcindex;
-        ESMC_LocalArray *dstindex;
-        ESMC_LocalArray *weights;
+        ESMCI::LocalArray *srcindex;
+        ESMCI::LocalArray *dstindex;
+        ESMCI::LocalArray *weights;
 
    public:
     int ESMC_TransformValuesConstruct(int count);
     int ESMC_TransformValuesDestruct(void);
 
  // accessor methods for class members
-    int ESMC_TransformValuesGet(int *numlist, ESMC_LocalArray **si,
-                              ESMC_LocalArray **di, ESMC_LocalArray **w) const;
-    int ESMC_TransformValuesGet(int *numlist, struct c_F90ptr *si,
-                              struct c_F90ptr *di, struct c_F90ptr *w) const;
-    int ESMC_TransformValuesSet(int numlist, ESMC_LocalArray *si,
-                               ESMC_LocalArray *di, ESMC_LocalArray *w);
+    int ESMC_TransformValuesGet(int *numlist, ESMCI::LocalArray **si,
+      ESMCI::LocalArray **di, ESMCI::LocalArray **w) const;
+    int ESMC_TransformValuesGet(int *numlist, struct ESMCI::c_F90ptr *si,
+      struct ESMCI::c_F90ptr *di, struct ESMCI::c_F90ptr *w) const;
+    int ESMC_TransformValuesSet(int numlist, ESMCI::LocalArray *si,
+      ESMCI::LocalArray *di, ESMCI::LocalArray *w);
 
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_TransformValuesValidate(const char *options) const;
