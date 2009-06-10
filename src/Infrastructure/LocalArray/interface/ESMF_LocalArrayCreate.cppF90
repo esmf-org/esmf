@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.14 2009/06/05 23:46:37 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.15 2009/06/10 20:21:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -151,7 +151,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.14 2009/06/05 23:46:37 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.15 2009/06/10 20:21:18 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1695,11 +1695,11 @@ TypeKindRankDeclarationMacro(LocalArrayAdjust)
         ESMF_CONTEXT, rc)) return @\
  @\
       ! Allocate a new buffer and return a copy @\
-      call c_ESMC_LocalArrayGetLbounds(arrayIn, mrank, lb, localrc) @\
+      call c_ESMC_LocalArrayGetLbounds(arrayOut, mrank, lb, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
-      call c_ESMC_LocalArrayGetUbounds(arrayIn, mrank, ub, localrc) @\
+      call c_ESMC_LocalArrayGetUbounds(arrayOut, mrank, ub, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
