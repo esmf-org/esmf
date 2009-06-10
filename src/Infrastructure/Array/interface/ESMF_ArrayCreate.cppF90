@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.37 2009/02/04 23:14:15 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.38 2009/06/10 20:55:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.37 2009/02/04 23:14:15 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.38 2009/06/10 20:55:38 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -339,7 +339,12 @@ contains
     copyflag_opt = ESMF_DATA_REF  ! default @\
     if (present(copyflag)) copyflag_opt = copyflag @\
 @\
-    ! Prepare the LocalArray list to be used in the ArrayCreate() call @\
+    ! Prepare the LocalArray list to be used in the ArrayCreate() call. @\
+    ! Must pass the copyflag_opt flag into LocalArrayCreate() to ensure @\
+    ! that the LocalArray object contained in the larrayList, passed to @\
+    ! ArrayCreate() below, is suitable to be placed inside of the Array @\
+    ! object directly. ArrayCreate() does _not_ create LocalArray objects @\
+    ! internally for ESMF_INDEX_USER. @\
     allocate(larrayList(1)) @\
     larrayList(1) = ESMF_LocalArrayCreate(farrayPtr, copyflag_opt, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
@@ -353,7 +358,10 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
-    ! Garbage collection @\
+    ! Garbage collection. The ArrayCreate() call will have placed the @\
+    ! LocalArray object created above into the Array object. It will be @\
+    ! destroyed when the Array object is destroyed. Only the larrayList @\
+    ! must be cleaned up here. @\
     deallocate(larrayList) @\
 @\
     ! Set return value @\
@@ -590,10 +598,14 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
       return @\
     endif @\
 @\
-    ! Prepare the LocalArray list to be used in the ArrayCreate() call @\
+    ! Prepare the LocalArray list to be used in the ArrayCreate() call. @\
+    ! Do not pass the copyflag_opt flag into LocalArrayCreate() to prevent @\
+    ! unncessary data movements at this point. The ArrayCreate() below will @\
+    ! create a new LocalArray internally (to be used inside of the Array @\
+    ! object), and that is where the copyflag_opt will need to be considered. @\
     allocate(larrayList(1)) @\
     fptr => farray @\
-    larrayList(1) = ESMF_LocalArrayCreate(fptr, copyflag_opt, rc=localrc) @\
+    larrayList(1) = ESMF_LocalArrayCreate(fptr, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
@@ -605,7 +617,9 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
-    ! Garbage collection @\
+    ! Garbage collection. The ArrayCreate() call will have created a new @\
+    ! LocalArray object internally, so the temporary object created above @\
+    ! must be deleted. @\
     call ESMF_LocalArrayDestroy(larrayList(1), rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
