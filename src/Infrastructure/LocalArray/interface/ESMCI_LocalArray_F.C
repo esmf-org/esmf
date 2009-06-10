@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray_F.C,v 1.2 2009/06/09 04:52:01 theurich Exp $
+// $Id: ESMCI_LocalArray_F.C,v 1.3 2009/06/10 20:23:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ char *name = NULL;
        ESMCI::LocalArray **larrayOut, int *localrc) {
              
              *larrayOut =
-               ESMCI::LocalArray::create(*ptr, localrc);
+               ESMCI::LocalArray::create(*ptr, NULL, NULL, localrc);
 
              (*localrc) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }

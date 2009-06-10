@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.h,v 1.2 2009/06/09 04:52:01 theurich Exp $
+// $Id: ESMCI_LocalArray.h,v 1.3 2009/06/10 20:23:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -109,7 +109,8 @@ namespace ESMCI {
     static LocalArray *create(int rank, ESMC_TypeKind dk, int *counts,
       int *lbounds, int *ubounds, void *base = NULL, CopyFlag docopy = DATA_REF,
       char *name = NULL, int *rc = NULL);
-    static LocalArray *create(LocalArray *larrayIn, int *rc = NULL);
+    static LocalArray *create(LocalArray *larrayIn, int *lbounds=NULL, 
+      int *ubounds=NULL, int *rc = NULL);
     static int destroy(LocalArray *array);
 
     static LocalArray *createNoData(int rank, ESMC_TypeKind dk,
