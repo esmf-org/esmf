@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.35 2009/05/01 04:36:29 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.36 2009/06/10 16:04:07 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.35 2009/05/01 04:36:29 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.36 2009/06/10 16:04:07 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -932,7 +932,7 @@ namespace ESMCI {
   // first clear destinations value arguments
   vi = 0;
   vip.clear();
-  vtl = 0;
+  vl = 0;
   vlp.clear();
   vf = 0;
   vfp.clear();
@@ -947,7 +947,6 @@ namespace ESMCI {
   attrName = source.attrName;
   tk = source.tk;
   items = source.items;
-  slen = source.slen;
   attrRoot = source.attrRoot;
   
   attrConvention = source.attrConvention;
@@ -963,7 +962,7 @@ namespace ESMCI {
         if (source.tk == ESMC_TYPEKIND_I4)
             vi = source.vi;  
         else if (source.tk == ESMC_TYPEKIND_I8)
-            vtl = source.vtl;  
+            vl = source.vl;  
         else if (source.tk == ESMC_TYPEKIND_R4)
             vf = source.vf;  
         else if (source.tk == ESMC_TYPEKIND_R8)
@@ -1452,10 +1451,27 @@ namespace ESMCI {
           if ((attrList.at(i)->vcp.size()+3) > attrLens[index])
             attrLens[index] = (attrList.at(i)->vcp.size()+3);
         } else {
-          sprintf(msgbuf, "working on counting digits");
-          ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
-          //***FIXME*** here we do log10(number) + 4
-          attrLens[index] = 10;
+            if (attrList.at(i)->tk == ESMC_TYPEKIND_I4) {
+              if (vi < -1) attrLens[index] = 3 + ceil(log10(-1*vi));
+              else if (vi >= -1 && vi <=1) attrLens[index] = 4;
+              else attrLens[index] = 3 + ceil(log10(vi));
+            } else if (tk == ESMC_TYPEKIND_I8) {
+              if (vl < -1) attrLens[index] = 3 + ceil(log10(-1*vl));
+              else if (vl >= -1 && vl <=1) attrLens[index] = 4;
+              else attrLens[index] = 3 + ceil(log10(vl));
+            } else if (tk == ESMC_TYPEKIND_R4) {
+              if (vf < -1) attrLens[index] = 3 + ceil(log10(-1*vf));
+              else if (vf >= -1 && vf <=1) attrLens[index] = 4;
+              else attrLens[index] = 3 + ceil(log10(vf));
+            } else if (tk == ESMC_TYPEKIND_R8) {
+              if (vd < -1) attrLens[index] = 3 + ceil(log10(-1*vd));
+              else if (vd >= -1 && vd <=1) attrLens[index] = 4;
+              else attrLens[index] = 3 + ceil(log10(vd));
+            } else {
+              sprintf(msgbuf, "Couldn't find data type, using generic string length\n");
+              ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+              attrLens[index] = 10;
+            }
         }
     }
     ++index;
@@ -1641,7 +1657,7 @@ namespace ESMCI {
        return ESMF_FAILURE;
     }
 
-    *value = attr->vtl;
+    *value = attr->vl;
   }
   
   return ESMF_SUCCESS;
@@ -3583,7 +3599,7 @@ namespace ESMCI {
         if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
           sprintf(msgbuf, "%-*d\t",tlen,attrList.at(i)->vi);
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) 
-          sprintf(msgbuf, "%-*ld\t",tlen,attrList.at(i)->vtl); 
+          sprintf(msgbuf, "%-*ld\t",tlen,attrList.at(i)->vl); 
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4) 
           sprintf(msgbuf, "%-*f\t",tlen,attrList.at(i)->vf);  
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8) 
@@ -3936,7 +3952,7 @@ namespace ESMCI {
             attrList.at(i)->vi,attrList.at(i)->attrName.c_str());
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) 
           sprintf(msgbuf, "    <%s>%ld</%s>\n",attrList.at(i)->attrName.c_str(),
-            attrList.at(i)->vtl,attrList.at(i)->attrName.c_str());
+            attrList.at(i)->vl,attrList.at(i)->attrName.c_str());
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4) 
           sprintf(msgbuf, "    <%s>%f</%s>\n",attrList.at(i)->attrName.c_str(),
             attrList.at(i)->vf,attrList.at(i)->attrName.c_str());
@@ -4011,7 +4027,7 @@ namespace ESMCI {
         if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
           sprintf(msgbuf, "  <%s name=\"%d\" />\n",attrList.at(i)->attrName.c_str(),attrList.at(i)->vi);
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) 
-          sprintf(msgbuf, "  <%s name=\"%ld\" />\n",attrList.at(i)->attrName.c_str(),attrList.at(i)->vtl); 
+          sprintf(msgbuf, "  <%s name=\"%ld\" />\n",attrList.at(i)->attrName.c_str(),attrList.at(i)->vl); 
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4) 
           sprintf(msgbuf, "  <%s name=\"%f\" />\n",attrList.at(i)->attrName.c_str(),attrList.at(i)->vf);  
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8) 
@@ -4151,7 +4167,7 @@ namespace ESMCI {
         if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
           sprintf(msgbuf, "  %s=\"%d\" ",attrList.at(i)->attrName.c_str(),attrList.at(i)->vi);
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) 
-          sprintf(msgbuf, "  %s=\"%ld\" ",attrList.at(i)->attrName.c_str(),attrList.at(i)->vtl); 
+          sprintf(msgbuf, "  %s=\"%ld\" ",attrList.at(i)->attrName.c_str(),attrList.at(i)->vl); 
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4) 
           sprintf(msgbuf, "  %s=\"%f\" ",attrList.at(i)->attrName.c_str(),attrList.at(i)->vf);  
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8) 
@@ -4241,7 +4257,7 @@ namespace ESMCI {
              if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
                  sprintf(msgbuf, "%d\n", attrList.at(i)->vi); 
              else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8)
-                 sprintf(msgbuf, "%ld\n", attrList.at(i)->vtl); 
+                 sprintf(msgbuf, "%ld\n", attrList.at(i)->vl); 
              else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4)
                  sprintf(msgbuf, "%f\n", attrList.at(i)->vf); 
              else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8)
@@ -4349,7 +4365,6 @@ namespace ESMCI {
   
   tk = ESMF_NOKIND;
   items = 0;
-  slen = 0;
   attrRoot = ESMF_FALSE;
 
   attrConvention = conv;
@@ -4376,7 +4391,7 @@ namespace ESMCI {
 
   vi = 0;
   vip.reserve(0);
-  vtl = 0;
+  vl = 0;
   vlp.reserve(0);
   vf = 0;
   vfp.reserve(0);
@@ -4412,7 +4427,6 @@ namespace ESMCI {
   attrName = name;
   tk = ESMF_NOKIND;
   items = 0;
-  slen = 0;
   attrRoot = ESMF_FALSE;
 
   attrConvention = conv;
@@ -4435,7 +4449,7 @@ namespace ESMCI {
 
   vi = 0;
   vip.reserve(0);
-  vtl = 0;
+  vl = 0;
   vlp.reserve(0);
   vf = 0;
   vfp.reserve(0);
@@ -4468,7 +4482,6 @@ namespace ESMCI {
   attrName = "";
   tk = ESMF_NOKIND;
   items = 0;
-  slen = 0;
   attrRoot = ESMF_TRUE;
 
   attrConvention = "";
@@ -4491,7 +4504,7 @@ namespace ESMCI {
 
   vi = 0;
   vip.reserve(0);
-  vtl = 0;
+  vl = 0;
   vlp.reserve(0);
   vf = 0;
   vfp.reserve(0);
@@ -4524,7 +4537,6 @@ namespace ESMCI {
   attrName ="";
   tk = ESMF_NOKIND;
   items = 0;
-  slen = 0;
   attrRoot = attributeRoot;
 
   attrConvention = "";
@@ -4547,7 +4559,7 @@ namespace ESMCI {
 
   vi = 0;
   vip.reserve(0);
-  vtl = 0;
+  vl = 0;
   vlp.reserve(0);
   vf = 0;
   vfp.reserve(0);
@@ -4585,7 +4597,6 @@ namespace ESMCI {
   attrName = name;
   tk = typekind;
   items = numitems;
-  slen = 0;          // only used for string values
   attrRoot = ESMF_FALSE;
    
   attrConvention = "";
@@ -4608,7 +4619,7 @@ namespace ESMCI {
   
   vi = 0;
   vip.reserve(0);
-  vtl = 0;
+  vl = 0;
   vlp.reserve(0);
   vf = 0;
   vfp.reserve(0);
@@ -4622,7 +4633,7 @@ namespace ESMCI {
             if (tk == ESMC_TYPEKIND_I4)
                 vi = *(static_cast<ESMC_I4*> (datap));  
             else if (tk == ESMC_TYPEKIND_I8)
-                vtl = *(static_cast<ESMC_I8*> (datap));  
+                vl = *(static_cast<ESMC_I8*> (datap));  
             else if (tk == ESMC_TYPEKIND_R4)
                 vf = *(static_cast<ESMC_R4*> (datap));  
             else if (tk == ESMC_TYPEKIND_R8)
@@ -4702,7 +4713,7 @@ namespace ESMCI {
             if (typekind == ESMC_TYPEKIND_I4)
                 vi = *(static_cast<ESMC_I4*> (datap));  
             else if (typekind == ESMC_TYPEKIND_I8)
-                vtl = *(static_cast<ESMC_I8*> (datap));  
+                vl = *(static_cast<ESMC_I8*> (datap));  
             else if (typekind == ESMC_TYPEKIND_R4)
                 vf = *(static_cast<ESMC_R4*> (datap));  
             else if (typekind == ESMC_TYPEKIND_R8)
@@ -4758,7 +4769,6 @@ namespace ESMCI {
   if (numitems >= 1) {
     tk = typekind;
     items = numitems;
-    slen = 0;
     valueChange = ESMF_TRUE;
   }
 
@@ -4893,7 +4903,6 @@ namespace ESMCI {
 
     DESERIALIZE_VAR(buffer,loffset,tk,ESMC_TypeKind);
     DESERIALIZE_VAR(buffer,loffset,items,int);
-    DESERIALIZE_VAR(buffer,loffset,slen,int);
     DESERIALIZE_VAR(buffer,loffset,attrRoot,ESMC_Logical);
     
     DESERIALIZE_VAR(buffer,loffset,chars,int);
@@ -4919,7 +4928,7 @@ namespace ESMCI {
       if (tk == ESMC_TYPEKIND_I4) {
         DESERIALIZE_VAR(buffer,loffset,vi,ESMC_I4); }
       else if (tk == ESMC_TYPEKIND_I8) {
-        DESERIALIZE_VAR(buffer,loffset,vtl,ESMC_I8); }
+        DESERIALIZE_VAR(buffer,loffset,vl,ESMC_I8); }
       else if (tk == ESMC_TYPEKIND_R4) {
         DESERIALIZE_VAR(buffer,loffset,vf,ESMC_R4); }
       else if (tk == ESMC_TYPEKIND_R8) {
@@ -5144,7 +5153,6 @@ namespace ESMCI {
       SERIALIZE_VAR(cc,buffer,offset,tk,ESMC_TypeKind);
       
       SERIALIZE_VAR(cc,buffer,offset,items,int);
-      SERIALIZE_VAR(cc,buffer,offset,slen,int);
       SERIALIZE_VAR(cc,buffer,offset,attrRoot,ESMC_Logical);
       
       SERIALIZE_VAR(cc,buffer,offset,(attrConvention.size()),int);
@@ -5166,7 +5174,7 @@ namespace ESMCI {
         if (tk == ESMC_TYPEKIND_I4) {
           SERIALIZE_VAR(cc,buffer,offset,vi,ESMC_I4); }
         else if (tk == ESMC_TYPEKIND_I8) {
-          SERIALIZE_VAR(cc,buffer,offset,vtl,ESMC_I8); }
+          SERIALIZE_VAR(cc,buffer,offset,vl,ESMC_I8); }
         else if (tk == ESMC_TYPEKIND_R4) {
           SERIALIZE_VAR(cc,buffer,offset,vf,ESMC_R4); }
         else if (tk == ESMC_TYPEKIND_R8) {

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.20 2009/04/30 02:39:29 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.21 2009/06/10 16:04:06 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -54,7 +54,6 @@ class Attribute
     string attrName; // inline to reduce memory thrashing
     ESMC_TypeKind tk;           // typekind indicator
     int items;                  // number of items (NOT byte count) for lists
-    int slen;                   // for string, length, inc trailing NULL.
     ESMC_Logical attrRoot;
   
     string attrConvention;             // Convention of Attpack
@@ -78,7 +77,7 @@ class Attribute
     // Attribute values
     ESMC_I4               vi;       // integer, or
     vector<ESMC_I4>       vip;       // pointer to integer list, or
-    ESMC_I8               vtl;       // long, or
+    ESMC_I8               vl;       // long, or
                             //  ^  TODO: change back to vl when Cray X1 compiler fixed
     vector<ESMC_I8>       vlp;       // pointer to long list, or
     ESMC_R4               vf;       // float (real*4), or
