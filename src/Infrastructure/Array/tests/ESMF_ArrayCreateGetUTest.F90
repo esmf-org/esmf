@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.20 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.21 2009/06/10 20:02:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.20 2009/01/21 21:37:58 cdeluca Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.21 2009/06/10 20:02:54 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -102,7 +102,7 @@ program ESMF_ArrayCreateGetUTest
   !------------------------------------------------------------------------
   ! this unit test requires to be run on exactly 4 PETs
   if (petCount /= 4) goto 10
-  
+
   !------------------------------------------------------------------------
   ! preparations
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
@@ -110,7 +110,7 @@ program ESMF_ArrayCreateGetUTest
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/15,23/), &
     regDecomp=(/2,2/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate Allocate 2D ESMF_TYPEKIND_R8 Test"
@@ -239,7 +239,43 @@ program ESMF_ArrayCreateGetUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayCreate with 3D farray on 2D DistGrid Test"
+  write(name, *) "ArrayCreate with 3D farray on 2D DistGrid w/ ESMF_DATA_COPY Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(farrayPtr3D(8,12,10))
+  array = ESMF_ArrayCreate(farray=farrayPtr3D, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_GLOBAL, name="MyArray", copyflag=ESMF_DATA_COPY, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayDestroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate(farrayPtr3D)
+  nullify(farrayPtr3D)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayCreate with 3D farrayPtr on 2D DistGrid w/ ESMF_DATA_COPY Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(farrayPtr3D(8,12,10))
+  array = ESMF_ArrayCreate(farrayPtr=farrayPtr3D, distgrid=distgrid, &
+    name="MyArray", copyflag=ESMF_DATA_COPY, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayDestroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate(farrayPtr3D)
+  nullify(farrayPtr3D)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayCreate with 3D farray on 2D DistGrid w/ distgridToArrayMap Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   allocate(farrayPtr3D(12,13,10))
   array = ESMF_ArrayCreate(farray=farrayPtr3D, distgrid=distgrid, &
@@ -578,7 +614,7 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   ! cleanup  
   call ESMF_DistGridDestroy(distgrid, rc=rc)
