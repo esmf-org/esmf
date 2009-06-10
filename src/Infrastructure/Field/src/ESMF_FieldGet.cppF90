@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.39 2009/05/26 20:22:01 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.40 2009/06/10 18:54:58 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.39 2009/05/26 20:22:01 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.40 2009/06/10 18:54:58 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -344,7 +344,7 @@ contains
         maxHaloLWidth = ftype%maxHaloLWidth
     endif
 
-    if (present(ungriddedUBound)) then
+    if (present(maxHaloUWidth)) then
         maxHaloUWidth = ftype%maxHaloUWidth
     endif
 
