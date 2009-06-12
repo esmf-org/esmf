@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.37 2009/06/11 00:24:03 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.38 2009/06/12 22:25:23 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.37 2009/06/11 00:24:03 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.38 2009/06/12 22:25:23 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1454,21 +1454,25 @@ namespace ESMCI {
         } else {
             attr = attrList.at(i);
             if (attr->tk == ESMC_TYPEKIND_I4) {
-              if (attr->vi < -1) attrLens[index] = 3 + ceil(log10(-1*attr->vi));
+              /*if (attr->vi < -1) attrLens[index] = 3 + ceil(log10(-1*attr->vi));
               else if (attr->vi >= -1 && attr->vi <=1) attrLens[index] = 4;
               else attrLens[index] = 3 + ceil(log10(attr->vi));
+              */ attrLens[index] = 10;
             } else if (attr->tk == ESMC_TYPEKIND_I8) {
-              if (attr->vl < -1) attrLens[index] = 3 + ceil(log10(-1*attr->vl));
+              /*if (attr->vl < -1) attrLens[index] = 3 + ceil(log10(-1*attr->vl));
               else if (attr->vl >= -1 && attr->vl <=1) attrLens[index] = 4;
               else attrLens[index] = 3 + ceil(log10(attr->vl));
+              */ attrLens[index] = 10;
             } else if (attr->tk == ESMC_TYPEKIND_R4) {
-              if (attr->vf < -1) attrLens[index] = 3 + ceil(log10(-1*attr->vf));
+              /*if (attr->vf < -1) attrLens[index] = 3 + ceil(log10(-1*attr->vf));
               else if (attr->vf >= -1 && attr->vf <=1) attrLens[index] = 4;
               else attrLens[index] = 3 + ceil(log10(attr->vf));
+              */ attrLens[index] = 10;
             } else if (attr->tk == ESMC_TYPEKIND_R8) {
-              if (attr->vd < -1) attrLens[index] = 3 + ceil(log10(-1*attr->vd));
+              /*if (attr->vd < -1) attrLens[index] = 3 + ceil(log10(-1*attr->vd));
               else if (attr->vd >= -1 && attr->vd <=1) attrLens[index] = 4;
               else attrLens[index] = 3 + ceil(log10(attr->vd));
+              */ attrLens[index] = 10;
             } else {
               sprintf(msgbuf, "Couldn't find data type, using generic string length\n");
               ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
