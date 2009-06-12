@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.17 2009/06/08 18:47:13 feiliu Exp $
+! $Id: user_coupler.F90,v 1.18 2009/06/12 16:04:36 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -36,16 +36,18 @@
       type(ESMF_CplComp) :: comp
       integer :: rc
 
+      rc = ESMF_SUCCESS
       print *, "in user setservices routine"
 
       ! Register the callback routines.
       call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, user_init, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
       call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, user_run, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
       call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
 
       print *, "Registered Initialize, Run, and Finalize routines"
-
-      rc = ESMF_SUCCESS
 
     end subroutine
 
@@ -65,21 +67,26 @@
       type(ESMF_Field) :: humidity1, humidity2
       type(ESMF_VM) :: vm
 
+      rc = ESMF_SUCCESS
       print *, "User Coupler Init starting"
 
       call ESMF_StateGet(importState, itemcount=itemcount, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
       print *, "Import State contains ", itemcount, " items."
        
       ! Get input data
       call ESMF_StateGet(importState, "humidity", humidity1, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
       ! call ESMF_FieldPrint(humidity1, rc=rc)
 
       ! Get location of output data
       call ESMF_StateGet(exportState, "humidity", humidity2, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
       ! call ESMF_FieldPrint(humidity2, rc=rc)
 
       ! Get VM from coupler component to send down to Regrid Store routine
       call ESMF_CplCompGet(comp, vm=vm, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
 
       ! These are fields on different IGrids - call RegridStore to set
       ! up the Regrid structure
@@ -88,12 +95,10 @@
                                  routeHandle=routehandle, &
                                  regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
                                  rc=rc)
-
+      if(rc/=ESMF_SUCCESS) return
 
       print *, "User Coupler Init returning"
    
-      rc = ESMF_SUCCESS
-
     end subroutine user_init
 
 
@@ -111,14 +116,17 @@
       type(ESMF_Field) :: humidity1, humidity2
       integer :: status
 
+      rc = ESMF_SUCCESS
       print *, "User Coupler Run starting"
 
       ! Get input data
       call ESMF_StateGet(importState, "humidity", humidity1, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
       ! call ESMF_FieldPrint(humidity1, rc=rc)
 
       ! Get location of output data
       call ESMF_StateGet(exportState, "humidity", humidity2, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
       ! call ESMF_FieldPrint(humidity2, rc=rc)
 
       ! These are fields on different IGrids - call Regrid to rearrange
@@ -126,13 +134,12 @@
       !  this simply has to execute the send and receive equivalents.
 
       call ESMF_FieldRegrid(humidity1, humidity2, routehandle, rc=status)
+      if(rc/=ESMF_SUCCESS) return
 
       ! Data is moved directly to the field in the output state, so no
       ! "put" is needed here.
  
       print *, "User Coupler Run returning"
-
-      rc = status
 
     end subroutine user_run
 
@@ -149,14 +156,14 @@
 
       ! Local variables
 
+      rc = ESMF_SUCCESS
       print *, "User Coupler Final starting"
    
       ! Release resources stored for the Regridding.
       call ESMF_FieldRegridRelease(routehandle, rc)
+      if(rc/=ESMF_SUCCESS) return
 
       print *, "User Coupler Final returning"
-   
-      rc = ESMF_SUCCESS
 
     end subroutine user_final
 

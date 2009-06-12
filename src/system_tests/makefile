@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.69 2009/05/28 17:35:34 svasquez Exp $ 
+# $Id: makefile,v 1.70 2009/06/12 16:04:35 feiliu Exp $ 
 
 ALL: build_system_tests
 
@@ -33,6 +33,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldBundleRedistBlk2Blk \
             ESMF_FieldBundleRedistBlk2Arb \
             ESMF_FieldBundleRedistArb2Arb \
+            ESMF_FieldRegrid \
 	    ESMF_InternalStateEnsemble
 
 # Tests not yet ready
@@ -40,7 +41,6 @@ DIRS      = ESMF_CompCreate \
 #           ESMF_MergeCoupling \
 #           ESMF_CplOnExclDEs \
 # Removed for new Regrid construction. cmd 8/07.
-#           ESMF_FieldRegrid \
 #           ESMF_FieldRegridConserv \
 #           ESMF_FieldRegridMulti \
 #           ESMF_FieldRegridOrder \

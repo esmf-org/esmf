@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.47 2009/06/08 18:47:13 feiliu Exp $
+! $Id: user_model2.F90,v 1.48 2009/06/12 16:04:36 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -45,13 +45,17 @@
         type(mylocaldata), pointer :: mydatablock
         type(wrapper) :: wrap
 
+        rc = ESMF_SUCCESS
         print *, "In user register routine"
 
         ! Register the callback routines.
 
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, user_init, rc=rc)
+        if(rc/=ESMF_SUCCESS) return
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, user_run, rc=rc)
+        if(rc/=ESMF_SUCCESS) return
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, rc=rc)
+        if(rc/=ESMF_SUCCESS) return
 
         print *, "Registered Initialize, Run, and Finalize routines"
 
@@ -61,10 +65,9 @@
 
         wrap%ptr => mydatablock
         call ESMF_GridCompSetInternalState(comp, wrap, rc)
+        if(rc/=ESMF_SUCCESS) return
 
         print *, "Registered Private Data block for Internal State"
-
-        rc = ESMF_SUCCESS
 
     end subroutine
 
@@ -84,36 +87,25 @@
       type(ESMF_grid) :: grid1
       type(ESMF_ArraySpec) :: arrayspec
       real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
-      real(ESMF_KIND_R8) :: min(2), max(2)
-      real(ESMF_KIND_R8) :: delta1(40), delta2(50)
-      integer :: countsPerDE1(3), countsPerDE2(2), counts(2)
-      integer :: npets, de_id
-      integer :: status
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: coordX, coordY
+      real(ESMF_KIND_R8) :: min(2), max(2), dx, dy
+      integer :: counts(2)
+      integer :: npets, de_id, i, j, tlb(2), tub(2)
 
+      rc = ESMF_SUCCESS
       ! Initially import state contains a field with a grid but no data.
 
       ! Query component for VM and create a layout with the right breakdown
-      call ESMF_GridCompGet(comp, vm=vm, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_VMGet(vm, localPet=de_id, petCount=npets, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 10
+      call ESMF_GridCompGet(comp, vm=vm, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
+      call ESMF_VMGet(vm, localPet=de_id, petCount=npets, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
 
       print *, de_id, "User Comp 2 Init starting"
 
       ! Add a "humidity" field to the import state.
-      countsPerDE1 = (/ 10, 18, 12 /)
-      countsPerDE2 = (/ 22, 28 /)
       min(1) = 0.0
-      delta1 = (/ 1.0, 1.0, 1.0, 1.1, 1.1, 1.1, 1.2, 1.2, 1.3, 1.4, &
-                  1.4, 1.5, 1.6, 1.6, 1.6, 1.8, 1.8, 1.7, 1.7, 1.6, &
-                  1.6, 1.6, 1.8, 1.8, 2.0, 2.0, 2.2, 2.2, 2.2, 2.2, &
-                  2.0, 1.7, 1.5, 1.3, 1.2, 1.1, 1.0, 1.0, 1.0, 0.9 /)
       min(2) = 0.0
-      delta2 = (/ 0.8, 0.8, 0.8, 0.8, 0.8, 0.7, 0.7, 0.6, 0.7, 0.8, &
-                  0.9, 0.9, 0.9, 0.9, 1.0, 1.0, 1.0, 1.0, 0.9, 1.0, &
-                  1.0, 1.0, 1.0, 1.1, 1.2, 1.3, 1.3, 1.3, 1.4, 1.4, &
-                  1.4, 1.4, 1.4, 1.4, 1.4, 1.3, 1.3, 1.3, 1.2, 1.2, &
-                  1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
       counts(1) = 200
       counts(2) = 100
       min(1) = 0.0
@@ -121,38 +113,50 @@
       min(2) = 0.0
       max(2) = 50.0
 
+      dx = (max(1)-min(1))/(counts(1)-1)
+      dy = (max(2)-min(2))/(counts(2)-1)
+
       grid1 = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=counts, &
-                              regDecomp=(/ npets/2, 2/), name="source grid", rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 10
+            gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+            indexflag=ESMF_INDEX_GLOBAL, &
+            regDecomp=(/ npets/2, 2/), name="dest grid", rc=rc)
+      if(rc/=ESMF_SUCCESS) return
+      call ESMF_GridAddCoord(grid1, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
+      call ESMF_GridGetCoord(grid1, localDE=0, coordDim=1, &
+                         fptr=coordX, computationalLBound=tlb, computationalUBound=tub, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
+      call ESMF_GridGetCoord(grid1, localDE=0, coordDim=2, &
+                         fptr=coordY, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
+      do j   = tlb(2), tub(2)
+        do i = tlb(1), tub(1)
+          coordX(i,j) = (i-1)*dx
+          coordY(i,j) = (j-1)*dy
+        enddo
+      enddo
 
       ! Set up a 2D real array
       call ESMF_ArraySpecSet(arrayspec, rank=2, &
-                             typekind=ESMF_TYPEKIND_R8)
-      if (status .ne. ESMF_SUCCESS) goto 10
+                             typekind=ESMF_TYPEKIND_R8, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
 
       ! Create the field and have it create the array internally
       humidity = ESMF_FieldCreate(grid1, arrayspec, &
-                                  maxHaloLWidth=(/0,0/), maxHaloUWidth=(/3,3/), &
-                                  name="humidity", rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 10
+                                  maxHaloLWidth=(/0,0/), maxHaloUWidth=(/0,0/), &
+                                  name="humidity", rc=rc)
+      if(rc/=ESMF_SUCCESS) return
   
       ! Get the allocated array back and get an F90 array pointer
-      call ESMF_FieldGet(humidity, farray=idata, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 10
+      call ESMF_FieldGet(humidity, farray=idata, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
   
-      call ESMF_StateAdd(importState, humidity, status)
-      if (status .ne. ESMF_SUCCESS) goto 10
-      !   call ESMF_StatePrint(importState, rc=status)
+      call ESMF_StateAdd(importState, humidity, rc)
+      if(rc/=ESMF_SUCCESS) return
+      !   call ESMF_StatePrint(importState, rc=rc)
   
       print *, de_id, "User Comp 2 Init returning"
    
-      rc = ESMF_SUCCESS
-      return
-
-      ! get here only on error exit
-10  continue
-      rc = status
-  
     end subroutine user_init
 
 
@@ -168,22 +172,16 @@
 
 !   ! Local variables
       type(ESMF_Field) :: humidity
-      integer :: status
 
+      rc = ESMF_SUCCESS
       print *, "User Comp Run starting"
 
       ! Get information from the component.
-  !    call ESMF_StatePrint(importState, rc=status)
-      call ESMF_StateGet(importState, "humidity", humidity, rc=status)
-  !    call ESMF_FieldPrint(humidity, "", rc=status)
-    
-      ! This is where the model specific computation goes.
-  !    print *, "Imported Array in user model 2:"
-  !    call ESMF_ArrayPrint(array1, "", rc)
+      call ESMF_StateGet(importState, "humidity", humidity, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
+  !    call ESMF_FieldPrint(humidity, "", rc=rc)
 
       print *, "User Comp Run returning"
-
-      rc = status
 
     end subroutine user_run
 
@@ -199,50 +197,52 @@
       integer, intent(out) :: rc
 
       ! Local variables
-      integer :: status
       type(ESMF_Field) :: field
-      integer :: localrc, finalrc
       type(mylocaldata), pointer :: mydatablock
       type(wrapper) :: wrap
+      type(ESMF_VM) :: vm
+      integer       :: de_id
 
+      rc = ESMF_SUCCESS
       print *, "User Comp Final starting"  
+
+      call ESMF_GridCompGet(comp, vm=vm, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
+      call ESMF_VMGet(vm, localPet=de_id, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
 
       ! set this up to run the validate code on all fields
       ! so we can see and compare the output.  but if any of
       ! the verify routines return error, return error at the end.
-      finalrc = ESMF_SUCCESS
 
       ! Get our local info
       nullify(wrap%ptr)
       mydatablock => wrap%ptr
         
-      call ESMF_GridCompGetInternalState(comp, wrap, status)
+      call ESMF_GridCompGetInternalState(comp, wrap, rc)
+      if(rc/=ESMF_SUCCESS) return
 
       mydatablock => wrap%ptr
       print *, "before deallocate, dataoffset = ", mydatablock%dataoffset
 
       ! check validity of results
       ! Get Fields from import state
-      call ESMF_StateGet(importState, "humidity", field, rc=status)
-      if (status .ne. ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-        goto 30
-      endif
-      call verifyResults(field, localrc)
-      if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      call ESMF_StateGet(importState, "humidity", field, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
+      call verifyResults(field, de_id, rc)
+      if(rc/=ESMF_SUCCESS) return
 
-      deallocate(mydatablock, stat=status)
-      print *, "deallocate returned ", status
+      deallocate(mydatablock, stat=rc)
+      if(rc/=ESMF_SUCCESS) return
+      print *, "deallocate returned ", rc
       nullify(wrap%ptr)
 
-30 continue
       ! come straight here if you cannot get the data from the state.
       ! otherwise error codes are accumulated but ignored until the
       ! end so we can see the output from all the cases to help track
       ! down errors.
 
       print *, "User Comp Final returning"
-      rc = finalrc
    
     end subroutine user_final
 
@@ -250,45 +250,50 @@
 !   !  The routine where results are validated.
 !   !
  
-    subroutine verifyResults(humidity, rc)
+    subroutine verifyResults(humidity, myDE, rc)
       type(ESMF_Field), intent(inout) :: humidity
+      integer, intent(in)  :: myDE
       integer, intent(out) :: rc
 
       ! Local variables
-      integer :: status, i, j, i1, j1, haloWidth, myDE, counts(2), haloUWidth(2)
+      integer :: i, j, i1, j1, haloWidth, counts(2), haloUWidth(2), tlb(2), tub(2)
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8) :: pi, error, maxError, maxPerError
       real(ESMF_KIND_R8) :: minCValue, maxCValue, minDValue, maxDValue
       real(ESMF_KIND_R8), dimension(:,:), pointer :: calc, data, coordX, coordY
 
+      rc = ESMF_SUCCESS
       print *, "User verifyResults starting"  
 
       pi = 3.14159
 
       ! get the grid and coordinates
       call ESMF_FieldGet(humidity, grid=grid, &
-                         maxHaloUWidth=haloUWidth, rc=status)
+                         maxHaloUWidth=haloUWidth, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
       haloWidth=haloUWidth(1)
       call ESMF_GridGetCoord(grid, localDE=0, coordDim=1, &
+                            computationalLBound=tlb, computationalUBound=tub, &
                            fptr=coordX, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
       call ESMF_GridGetCoord(grid, localDE=0, coordDim=2, &
                            fptr=coordY, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
 
       ! update field values here
       ! Get a pointer to the start of the data
-      call ESMF_FieldGet(humidity, farray=data, rc=status)
-      print *, "rc from array get data = ", status
+      call ESMF_FieldGet(humidity, farray=data, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
+      print *, "rc from array get data = ", rc
       !if (associated(data)) print *, "pointer is associated"
       !if (.not.associated(data)) print *, "pointer is *NOT* associated"
       ! call ESMF_ArrayPrint(array)
       !print *, "data in validate: ", data(1,1), data(1, 2), data(2, 1)
 
       ! allocate array for computed results and fill it
-      allocate(calc(counts(1), counts(2)))
-      do j   = 1,counts(2)
-        do i = 1,counts(1)
-          coordX(i,j) = ((counts(1)-i)*60.0)/counts(1)
-          coordY(i,j) = ((counts(2)-j)*50.0)/counts(2)
+      allocate(calc(tlb(1):tub(1), tlb(2):tub(2)))
+      do j   = tlb(2), tub(2)
+        do i = tlb(1), tub(1)
           calc(i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
                            + 2.0*sin(coordY(i,j)/50.0*pi)
         enddo
@@ -301,9 +306,9 @@
       minCValue   = 1000.0
       maxDValue   = 0.0
       minDValue   = 1000.0
-      do j   = 1,counts(2)
+      do j   = tlb(2), tub(2)
         j1   = j + haloWidth
-        do i = 1,counts(1)
+        do i = tlb(1), tub(1)
           i1 = i + haloWidth
           error       = abs(data(i1,j1)) - abs(calc(i,j))
           minCValue   = min(minCValue, abs(calc(i,j)))
@@ -329,8 +334,6 @@
       if (maxPerError .gt. 2.0) then
           write(*,*) "Test Failing because percentage error too large"
           rc = ESMF_FAILURE 
-      else
-          rc = status
       endif
 
     end subroutine verifyResults
