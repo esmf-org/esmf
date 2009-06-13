@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.18 2009/06/12 16:04:36 feiliu Exp $
+! $Id: user_coupler.F90,v 1.19 2009/06/13 04:40:34 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -60,7 +60,7 @@
       type(ESMF_CplComp) :: comp
       type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
-      integer :: rc
+      integer, intent(out) :: rc
 
       ! Local variables
       integer :: itemcount
@@ -110,7 +110,7 @@
       type(ESMF_CplComp) :: comp
       type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
-      integer :: rc
+      integer, intent(out) :: rc
 
       ! Local variables
       type(ESMF_Field) :: humidity1, humidity2
@@ -152,7 +152,7 @@
       type(ESMF_CplComp) :: comp
       type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
-      integer :: rc
+      integer, intent(out) :: rc
 
       ! Local variables
 
