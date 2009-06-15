@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.15 2009/06/10 20:21:18 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.16 2009/06/15 19:27:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@ module ESMF_LocalArrayCreateMod
 
 !------------------------------------------------------------------------------
 !BOPI
-! !MODULE: ESMF_LocalArrayCreateMod - Manage data uniformly between F90 and C++
+! !MODULE: ESMF_LocalArrayCreateMod - Manage data uniformly between Fortran and C++
 !
 ! !DESCRIPTION:
 !
@@ -81,7 +81,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
   ! ESMF_LocalArrayOrigin
 
-  ! Private flag which indicates the create was initiated on the F90 side.
+  ! Private flag which indicates the create was initiated on the Fortran side.
   !  This matches an enum on the C++ side and the values must match.
   !  Update ../include/ESMCI_LocalArray.h if you change these values.
 
@@ -127,14 +127,11 @@ module ESMF_LocalArrayCreateMod
   public ESMF_LocalArrConstrF90Ptr    ! needed for C++ callback only
 
   public ESMF_LocalArraySlice
-  !public ESMF_LocalArrayReshape
 
   public ESMF_LocalArrayWriteRestart
   public ESMF_LocalArrayReadRestart
   public ESMF_LocalArrayWrite
   public ESMF_LocalArrayRead
-  !public ESMF_LocalArraySerialize, ESMF_LocalArraySerializeNoData
-  !public ESMF_LocalArrayDeserialize, ESMF_LocalArrayDeserializeNoData
  
   public ESMF_LocalArrayValidate
   public ESMF_LocalArrayPrint
@@ -151,7 +148,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.15 2009/06/10 20:21:18 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.16 2009/06/15 19:27:32 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1577,7 +1574,7 @@ TypeKindRankDeclarationMacro(LocalArrConstrF90Ptr)
 !print *, "Second recursion: ", lbound(fshape), ubound(fshape) @\
 !call c_esmc_vmpointerprint(fshape) @\
         wrap%ptr##mrank##D##mtypekind => fshape @\
-        call c_ESMC_LocalArraySetF90Ptr(array, wrap, localrc) @\
+        call c_ESMC_LocalArraySetFortranPtr(array, wrap, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
@@ -1586,14 +1583,14 @@ TypeKindRankDeclarationMacro(LocalArrConstrF90Ptr)
         ! dope vector to point to the actual memory allocation *if* a mismatch @\
         ! on the first data element location is detected, i.e. we are dealing @\
         ! with a temporary copy of the actual array. @\
-        call c_ESMC_LocalArrayForceF90Ptr(array, & @\
+        call c_ESMC_LocalArrayForceFortranPtr(array, & @\
           ESMF_DATA_ADDRESS(fshape(mloc)), localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
       else @\
         ! first recursion -> get F90ptr member and call subr. recursively @\
-        call c_ESMC_LocalArrayGetF90Ptr(array, wrap, localrc) @\
+        call c_ESMC_LocalArrayGetFortranPtr(array, wrap, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
@@ -1689,7 +1686,7 @@ TypeKindRankDeclarationMacro(LocalArrayAdjust)
         rc = ESMF_RC_NOT_IMPL @\
       endif @\
  @\
-      call c_ESMC_LocalArrayGetF90Ptr(arrayIn, wrapIn, localrc) @\
+      call c_ESMC_LocalArrayGetFortranPtr(arrayIn, wrapIn, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -1712,7 +1709,7 @@ TypeKindRankDeclarationMacro(LocalArrayAdjust)
       lp = wrapIn%ptr##mrank##D##mtypekind @\
       ! point to this memory allocation in the arrayOut @\
       wrapOut%ptr##mrank##D##mtypekind => lp  @\
-      call c_ESMC_LocalArraySetF90Ptr(arrayOut, wrapOut, localrc) @\
+      call c_ESMC_LocalArraySetFortranPtr(arrayOut, wrapOut, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -1791,7 +1788,7 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
         if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
         localrc = ESMF_RC_NOT_IMPL  @\
  @\
-        call c_ESMC_LocalArrayGetF90Ptr(array, wrap, localrc) @\
+        call c_ESMC_LocalArrayGetFortranPtr(array, wrap, localrc) @\
         deallocate(wrap%ptr##mrank##D##mtypekind) @\
  @\
         if (present(rc)) rc = localrc @\
@@ -2263,7 +2260,7 @@ AllocAllocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 #endif
 #define AllocDeallocateMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 ! <Created by macro - do not edit directly >  @\
-        call c_ESMC_LocalArrayGetF90Ptr(array, l##mrank##D##mtypekind, localrc) @\
+        call c_ESMC_LocalArrayGetFortranPtr(array, l##mrank##D##mtypekind, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
@@ -2579,10 +2576,10 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
         ! does not contain data from the old array.  Now we have a T/K/R prob.
 
         ! put old F90 ptr into wrap
-        ! call c_ESMC_LocalArrayGetF90Ptr(array, wrap, localrc)
+        ! call c_ESMC_LocalArrayGetFortranPtr(array, wrap, localrc)
 
         ! put new F90 ptr into wrap
-        ! call c_ESMC_LocalArrayGetF90Ptr(newarray, wrap, localrc)
+        ! call c_ESMC_LocalArrayGetFortranPtr(newarray, wrap, localrc)
 
         ! there must be something like this we can do here...
         ! newarray = RESHAPE(array(sliceloc, :, :), counts)
@@ -2890,7 +2887,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_LocalArrayAdjust"
 !BOPI
-! !IROUTINE: ESMF_LocalArrayAdjust - Adjust bounds of F90 array member
+! !IROUTINE: ESMF_LocalArrayAdjust - Adjust bounds of Fortran array member
 !
 ! !INTERFACE:
       subroutine ESMF_LocalArrayAdjust(array, counts, rank, kind, &
@@ -2907,7 +2904,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
 !
 ! !DESCRIPTION:
-!      Adjust bounds of F90 array member in {\tt ESMF\_LocalArray} object.
+!      Adjust bounds of Fortran array member in {\tt ESMF\_LocalArray} object.
 !
 !EOPI
 

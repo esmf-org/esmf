@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray_F.C,v 1.3 2009/06/10 20:23:31 theurich Exp $
+// $Id: ESMCI_LocalArray_F.C,v 1.4 2009/06/15 19:27:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@ char *name = NULL;
               *localrc = ESMF_FAILURE;
               return;
           }
-         *localrc = (*ptr)->ESMC_LocalArraySetInfo(fptr, XD base, counts, 
+         *localrc = (*ptr)->setInfo(fptr, XD base, counts, 
                                                   lbounds, ubounds, offsets, 
                                                   contig, dealloc);
      }
@@ -104,7 +104,7 @@ char *name = NULL;
               *localrc = ESMF_FAILURE;
               return;
           }
-         *localrc = (*ptr)->ESMC_LocalArraySetInfo(NULL, NULL, counts, 
+         *localrc = (*ptr)->setInfo(NULL, NULL, counts, 
                                                   lbounds, ubounds, offsets, 
                                                   NULL, NULL);
      }
@@ -118,7 +118,7 @@ char *name = NULL;
               *localrc = ESMF_FAILURE;
               return;
           }
-         *localrc = (*ptr)->ESMC_LocalArrayGetInfo(NULL, base, counts, 
+         *localrc = (*ptr)->getInfo(NULL, base, counts, 
                                                   lbounds, ubounds, offsets);
      }
 
@@ -222,7 +222,7 @@ char *name = NULL;
           *localrc = ESMF_SUCCESS;
      }
 
-     void FTN(c_esmc_localarraysetf90ptr)(ESMCI::LocalArray **ptr,
+     void FTN(c_esmc_localarraysetfortranptr)(ESMCI::LocalArray **ptr,
          struct ESMCI::c_F90ptr *p, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
@@ -230,10 +230,10 @@ char *name = NULL;
           }
         //fprintf(stderr, "interface code, setting f90 ptr to %lx, this = %lx, &this = %lx\n", 
         //                                (ESMC_I8)p, (ESMC_I8)(*ptr), (ESMC_I8)ptr);
-          *localrc = (*ptr)->ESMC_LocalArraySetF90Ptr(p);
+          *localrc = (*ptr)->setFortranPtr(p);
      }
 
-     void FTN(c_esmc_localarraygetf90ptr)(ESMCI::LocalArray **ptr,
+     void FTN(c_esmc_localarraygetfortranptr)(ESMCI::LocalArray **ptr,
          struct ESMCI::c_F90ptr *p, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
@@ -241,16 +241,16 @@ char *name = NULL;
           }
         //fprintf(stderr, "interface code, getting f90 ptr into %lx, this = %lx, &this = %lx\n", 
         //                                (ESMC_I8)p, (ESMC_I8)(*ptr), (ESMC_I8)ptr);
-          *localrc = (*ptr)->ESMC_LocalArrayGetF90Ptr(p);
+          *localrc = (*ptr)->getFortranPtr(p);
      }
 
-     void FTN(c_esmc_localarrayforcef90ptr)(ESMCI::LocalArray **ptr, 
+     void FTN(c_esmc_localarrayforcefortranptr)(ESMCI::LocalArray **ptr, 
         void XD *base, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
               return;
           }
-          *localrc = (*ptr)->ESMC_LocalArrayForceF90Ptr(XD base);
+          *localrc = (*ptr)->forceFortranPtr(XD base);
      }
 
      void FTN(c_esmc_localarraysetdealloc)(ESMCI::LocalArray **ptr,
@@ -380,169 +380,6 @@ char *name = NULL;
          if (rc)
              *rc = ESMF_SUCCESS;
      }
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_localarrayserialize"
-//BOP
-// !IROUTINE:  c_ESMC_LocalArraySerialize - Serialize LocalArray object 
-//
-// !INTERFACE:
-      void FTN(c_esmc_localarrayserialize)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMCI::LocalArray **localarray,       // in - localarray object
-      char *buf,                // in/out - a byte stream buffer
-      int *length,              // in/out - number of allocated bytes
-      int *offset,              // in/out - current offset in the stream
-      ESMC_AttReconcileFlag *attreconflag, // in - attreconcile flag
-      int *rc) {                // out - return code
-// 
-// !DESCRIPTION:
-//     Serialize the contents of a localarray object.
-//     Warning!!  Not completely implemented yet.
-//
-//EOP
-
-  if (!localarray) {
-    //printf("uninitialized LocalArray object\n");
-    ESMC_LogDefault.Write("LocalArray object uninitialized", ESMC_LOG_INFO);
-    if (rc) *rc = ESMF_SUCCESS;
-    return;
-  }
-
-  *rc = (*localarray)->serialize(buf, length, offset, *attreconflag);
-
-  return;
-
-}  // end c_ESMC_LocalArraySerialize
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_localarraydeserialize"
-//BOP
-// !IROUTINE:  c_ESMC_LocalArrayDeserialize - Deserialize LocalArray object 
-//
-// !INTERFACE:
-      void FTN(c_esmc_localarraydeserialize)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMCI::LocalArray **localarray,       // in/out - empty localarray object to fill in
-      char *buf,                // in - byte stream buffer
-      int *offset,              // in/out - current offset in the stream
-      ESMC_AttReconcileFlag *attreconflag, // in - attreconcile flag
-      int *rc) {                // out - return code
-// 
-// !DESCRIPTION:
-//     Deserialize the contents of a localarray object.
-//
-//EOP
-
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;       
-
-  // create a new localarray object to deserialize into
-  *localarray = new ESMCI::LocalArray;
-
-  (*localarray)->deserialize(buf, offset, *attreconflag);
-
-  if (rc) *rc = ESMF_SUCCESS;
-
-  return;
-
-}  // end c_ESMC_LocalArrayDeserialize
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_localarrayserializenodata"
-//BOP
-// !IROUTINE:  c_ESMC_LocalArraySerializeNoData - Serialize LocalArray object 
-//
-// !INTERFACE:
-      void FTN(c_esmc_localarrayserializenodata)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMCI::LocalArray **localarray,       // in - localarray object
-      char *buf,                // in/out - a byte stream buffer
-      int *length,              // in/out - number of allocated bytes
-      int *offset,              // in/out - current offset in the stream
-      ESMC_AttReconcileFlag *attreconflag, // in - attreconcile flag
-      int *rc) {                // out - return code
-// 
-// !DESCRIPTION:
-//     Serialize the contents of a localarray object, without preserving
-//     the data values.
-//
-//EOP
-
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;       
-
-  if (!localarray) {
-    //printf("uninitialized LocalArray object\n");
-    ESMC_LogDefault.Write("LocalArray object uninitialized", ESMC_LOG_INFO);
-    if (rc) *rc = ESMF_SUCCESS;
-    return;
-  }
-
-  *rc = (*localarray)->serializeNoData(buf, length, offset, *attreconflag);
-
-  return;
-
-}  // end c_ESMC_LocalArraySerializeNoData
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_localarraydeserializenodata"
-//BOP
-// !IROUTINE:  c_ESMC_LocalArrayDeserializeNoData - Deserialize LocalArray object 
-//
-// !INTERFACE:
-      void FTN(c_esmc_localarraydeserializenodata)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list.
-// 
-// !ARGUMENTS:
-      ESMCI::LocalArray **localarray,       // in/out - empty localarray object to fill in
-      char *buf,                // in - byte stream buffer
-      int *offset,              // in/out - current offset in the stream
-      ESMC_AttReconcileFlag *attreconflag, // in - attreconcile flag
-      int *rc) {                // out - return code
-// 
-// !DESCRIPTION:
-//     Deserialize the contents of a localarray object, without preserving
-//     any of the data (counts explicitly set to 0).
-//
-//EOP
-
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-  // create a new localarray object to deserialize into
-  *localarray = new ESMCI::LocalArray;
-
-  (*localarray)->deserializeNoData(buf, offset, *attreconflag);
-
-  if (rc) *rc = ESMF_SUCCESS;
-
-  return;
-
-}  // end c_ESMC_LocalArrayDeserializeNoData
-
 
 #undef  ESMC_METHOD
 

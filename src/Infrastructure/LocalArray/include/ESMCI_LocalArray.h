@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.h,v 1.3 2009/06/10 20:23:31 theurich Exp $
+// $Id: ESMCI_LocalArray.h,v 1.4 2009/06/15 19:27:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -132,15 +132,7 @@ namespace ESMCI {
     LocalArray *adjust(CopyFlag copyflag, int *lbounds, int *ubounds, int *rc);
 
     // required methods inherited and overridden from the ESMC_Base class
-    int deserialize(char *buffer, int *boffset, 
-      const ESMC_AttReconcileFlag &attreconflag);
-    int deserializeNoData(char *buffer, int *boffset, 
-      const ESMC_AttReconcileFlag &attreconflag);
     int print(const char *options = NULL) const;
-    int serialize(char *buffer, int *length, int *boffset,
-      const ESMC_AttReconcileFlag &attreconflag) const;
-    int serializeNoData(char *buffer, int *length, int *boffset,
-      const ESMC_AttReconcileFlag &attreconflag) const;
     int write(const char *options, const char *filename) const;
     int validate(const char *options) const;
 
@@ -209,18 +201,18 @@ namespace ESMCI {
         c[i] = this->counts[i];
       return ESMF_SUCCESS;
     }
-    int ESMC_LocalArraySetInfo(struct c_F90ptr *fptr, void *base, int *counts, 
+    int setInfo(struct c_F90ptr *fptr, void *base, int *counts, 
       int *lbounds, int *ubounds, int *offsets, ESMC_Logical *contig,
       ESMC_Logical *dealloc);
-    int ESMC_LocalArrayGetInfo(struct c_F90ptr *fptr, void *base, int *counts, 
+    int getInfo(struct c_F90ptr *fptr, void *base, int *counts, 
       int *lbounds, int *ubounds, int *offsets)const;
 
-    // copy the contents of an f90 ptr
-    int ESMC_LocalArraySetF90Ptr(const struct c_F90ptr *p);
-    int ESMC_LocalArrayGetF90Ptr(struct c_F90ptr *p) const;
+    // copy the contents of Fortran ptr
+    int setFortranPtr(const struct c_F90ptr *p);
+    int getFortranPtr(struct c_F90ptr *p) const;
     
-    // force the base address in f90 ptr dope vector *if* mismatch detected
-    int ESMC_LocalArrayForceF90Ptr(void *base){
+    // force the base address in Fortran ptr dope vector *if* mismatch detected
+    int forceFortranPtr(void *base){
       void **f90dopev_cast = (void **)(&f90dopev);
       // The rationale for this call is as follows:
       // - some Fortran compilers will make temporary copies of the actual
