@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.42 2009/06/12 16:04:36 feiliu Exp $
+! $Id: user_model1.F90,v 1.43 2009/06/15 20:07:45 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -180,7 +180,7 @@
         type(ESMF_grid) :: grid
         real(ESMF_KIND_R8) :: pi
         real(ESMF_KIND_R8), dimension(:,:), pointer :: idata, coordX, coordY
-        integer :: i, j, i1, j1, haloWidth, haloUWidth(2), counts(2), tlb(2), tub(2)
+        integer :: i, j, i1, j1, haloWidth, haloUWidth(ESMF_MAXDIM), counts(2), tlb(2), tub(2)
         type(mylocaldata), pointer :: mydatablock
         type(wrapper) :: wrap
 
