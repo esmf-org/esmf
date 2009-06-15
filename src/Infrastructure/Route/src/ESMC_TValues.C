@@ -1,4 +1,4 @@
-// $Id: ESMC_TValues.C,v 1.26 2009/06/09 04:52:01 theurich Exp $
+// $Id: ESMC_TValues.C,v 1.27 2009/06/15 19:27:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TValues.C,v 1.26 2009/06/09 04:52:01 theurich Exp $";
+ static const char *const version = "$Id: ESMC_TValues.C,v 1.27 2009/06/15 19:27:55 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -305,9 +305,9 @@
 //EOP
 
     if (numlist) *numlist = this->numlist;
-    if (si) srcindex->ESMC_LocalArrayGetF90Ptr(si);
-    if (di) dstindex->ESMC_LocalArrayGetF90Ptr(di);
-    if (w) weights->ESMC_LocalArrayGetF90Ptr(w);
+    if (si) srcindex->getFortranPtr(si);
+    if (di) dstindex->getFortranPtr(di);
+    if (w) weights->getFortranPtr(w);
 
     return ESMF_SUCCESS;
 
