@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray_F.C,v 1.4 2009/06/15 19:27:32 theurich Exp $
+// $Id: ESMCI_LocalArray_F.C,v 1.5 2009/06/16 16:06:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -222,7 +222,7 @@ char *name = NULL;
           *localrc = ESMF_SUCCESS;
      }
 
-     void FTN(c_esmc_localarraysetfortranptr)(ESMCI::LocalArray **ptr,
+     void FTN(c_esmc_localarraysetfptr)(ESMCI::LocalArray **ptr,
          struct ESMCI::c_F90ptr *p, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
@@ -233,7 +233,7 @@ char *name = NULL;
           *localrc = (*ptr)->setFortranPtr(p);
      }
 
-     void FTN(c_esmc_localarraygetfortranptr)(ESMCI::LocalArray **ptr,
+     void FTN(c_esmc_localarraygetfptr)(ESMCI::LocalArray **ptr,
          struct ESMCI::c_F90ptr *p, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
@@ -244,7 +244,7 @@ char *name = NULL;
           *localrc = (*ptr)->getFortranPtr(p);
      }
 
-     void FTN(c_esmc_localarrayforcefortranptr)(ESMCI::LocalArray **ptr, 
+     void FTN(c_esmc_localarrayforcefptr)(ESMCI::LocalArray **ptr, 
         void XD *base, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *localrc = ESMF_FAILURE;
