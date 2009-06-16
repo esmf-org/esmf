@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.31 2009/01/23 03:12:53 w6ws Exp $
+// $Id: ESMC_Util.h,v 1.32 2009/06/16 23:31:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -39,7 +39,8 @@ enum ESMC_TypeKind { ESMC_TYPEKIND_I1=1,
                      ESMF_NOKIND=99 };
 
 // ESMF platform-dependent data types
-#ifdef ESMF_IS_32BIT_MACHINE
+#if (ESMC_POINTER_SIZE == 4)
+  // 32-bit machine
   typedef long long ESMC_I8;
   typedef int       ESMC_I4;
   typedef short     ESMC_I2;
@@ -47,7 +48,8 @@ enum ESMC_TypeKind { ESMC_TYPEKIND_I1=1,
   typedef double    ESMC_R8;
   typedef float     ESMC_R4;
   typedef unsigned long      ESMC_POINTER;
-#else // 64-bit or larger machine
+#else
+  // 64-bit machine
 #if defined (PARCH_mingw)
   typedef long long ESMC_I8;
 #else

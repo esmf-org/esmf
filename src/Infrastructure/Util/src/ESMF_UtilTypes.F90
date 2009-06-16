@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.78 2009/05/18 16:14:32 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.79 2009/06/16 23:31:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@
       type ESMF_Pointer
       sequence
       !private
-#ifdef ESMF_IS_32BIT_MACHINE
+#if (ESMC_POINTER_SIZE == 4)
           integer*4 :: ptr
 #else
           integer*8 :: ptr

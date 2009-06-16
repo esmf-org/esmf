@@ -1,4 +1,4 @@
-% $Id: TimeMgr_param.tex,v 1.5 2007/02/16 03:25:33 rosalind Exp $
+% $Id: TimeMgr_param.tex,v 1.6 2009/06/16 23:31:58 theurich Exp $
 
 Platform-independent specification of 64-bit integers are done via
 compile-time constants in the F90 and C++ {\tt ESMF\_Base} classes as follows:
@@ -21,11 +21,12 @@ from ESMF_Base.F90:
 
 C++:
 \begin{verbatim}
-from ESMC_Base.h:
+from ESMC_Util.h:
 .
 .
 .
-#ifdef ESMF_IS_32BIT_MACHINE
+#if (ESMC_POINTER_SIZE == 4)
+// 32-bit machine
 .
 .
 .
@@ -33,7 +34,8 @@ from ESMC_Base.h:
 .
 .
 .
-#else // 64-bit or larger machine
+#else
+// 64-bit machine
 .
 .
 .
