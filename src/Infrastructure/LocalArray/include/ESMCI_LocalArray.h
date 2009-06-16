@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.h,v 1.4 2009/06/15 19:27:32 theurich Exp $
+// $Id: ESMCI_LocalArray.h,v 1.5 2009/06/16 02:53:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -244,6 +244,10 @@ namespace ESMCI {
 
     // Get Data from a position in the LocalArray w/o internal error checking
     template <class TYPE> void getDataInternal(int *index, TYPE *data);
+    
+    // portably copy Fortran dope vector
+    static int tkrPtrCopy(void *dst, void *src, ESMC_TypeKind typekind,
+      int rank);
   
   };  // class ESMC_LocalArray
 
