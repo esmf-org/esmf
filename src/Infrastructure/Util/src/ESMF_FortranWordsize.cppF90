@@ -1,4 +1,4 @@
-! $Id: ESMF_FortranWordsize.cppF90,v 1.6 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_FortranWordsize.cppF90,v 1.7 2009/06/16 02:46:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -24,6 +24,7 @@ module ESMF_FortranWordsizeMod
 ! < ignore blank lines below.  they are created by the files which
 ! define various macros. >
 #include "ESMF_TypeKindMacros.hcppF90"
+#include "ESMF_TypeKindRankMacros.hcppF90"
 ^include "ESMF.h"
 !------------------------------------------------------------------------------
 ! !USES:
@@ -54,6 +55,7 @@ module ESMF_FortranWordsizeMod
 
 !EOPI
   end interface
+  
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -100,7 +102,7 @@ contains
 !------------------------------------------------------------------------------
 
 
-!==============================================================================
+!------------------------------------------------------------------------------
 #define ESMF_FortranWordsizeDoc() \
 !BOP @\
 ! !IROUTINE: ESMF_FortranWordsize - Return the size in byte units of a scalar @\
@@ -170,7 +172,6 @@ contains
 
 TypeKindDeclarationMacro(ESMF_FortranWordsize)
 
-!------------------------------------------------------------------------------
 
 end module ESMF_FortranWordsizeMod
 
@@ -178,6 +179,7 @@ end module ESMF_FortranWordsizeMod
 subroutine f_esmf_fortranudtpointersize(size)
   ! C callable interface to ESMF_FortranUDTPointerSize()
   use ESMF_FortranWordsizeMod
+  implicit none
   integer::size
   call ESMF_FortranUDTPointerSize(size)
 end subroutine
@@ -202,6 +204,7 @@ subroutine f_esmf_fortranudtpointercopy(dst, src)
   ! The associated unit test src/prologue/tests/ESMF_F95PtrUTest.F90 verifies
   ! that the above assumption holds. If this test starts failing on a platform
   ! we will need to reconsider the entire approach!
+  implicit none
   type simple_udt
     sequence
     real :: a, b, c
@@ -214,5 +217,50 @@ subroutine f_esmf_fortranudtpointercopy(dst, src)
   
   type (wrapper):: dst
   type (wrapper):: src
-  dst%udt => src%udt
+  dst%udt => src%udt      ! pointer association copies the dope vector
 end subroutine
+
+
+
+
+#define FortranTKRPtrCopyDoc() \
+!---------------------------------------------------------------------------- @\
+!BOPI @\
+! !IROUTINE: f_esmf_fortrantkrptrcopy - portably copy Fortran TKR array pointer @\
+! @\
+! !INTERFACE: @\
+! ! Private name; call using f_esmf_fortrantkrptrcopy() @\
+! function f_esmf_fortrantkrptrcopy<rank><type><kind>(dst, src) @\
+! @\
+! !DESCRIPTION: @\
+! C callable routine that makes a copy of the Fortran array pointer contained @\
+! in {\tt src} and returns it in {\tt dst}. @\
+! @\
+!EOPI @\
+!---------------------------------------------------------------------------- @\
+
+#define FortranTKRPtrCopyMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+!---------------------------------------------------------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "f_esmf_fortrantkrptrcopy" @\
+ @\
+    subroutine f_esmf_fortrantkrptrcopy##mrank##d##mtypekind(dst, src) @\
+ @\
+      use ESMF_UtilTypesMod @\
+      implicit none @\
+ @\
+      type wrapper @\
+        sequence @\
+        mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: ptr @\
+      end type @\
+ @\
+      type (wrapper):: dst @\
+      type (wrapper):: src @\
+ @\
+      dst%ptr => src%ptr    ! pointer association copies the dope vector @\
+ @\
+    end subroutine f_esmf_fortrantkrptrcopy##mrank##d##mtypekind @\
+ @\
+!---------------------------------------------------------------------------- @\
+
+TypeKindRankDeclarationMacro(FortranTKRPtrCopy)
