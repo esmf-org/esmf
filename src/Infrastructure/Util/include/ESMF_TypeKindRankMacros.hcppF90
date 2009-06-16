@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_TypeKindRankMacros.hcppF90,v 1.6 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_TypeKindRankMacros.hcppF90,v 1.7 2009/06/16 02:36:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -184,56 +184,56 @@
  @\
 funcname##Doc() @\
 ^ifndef ESMF_NO_INTEGER_1_BYTE @\
-funcname##Macro(integer, I1, 1, COL1, LEN1, RNG1, LOC1) @\
-funcname##Macro(integer, I1, 2, COL2, LEN2, RNG2, LOC2) @\
-funcname##Macro(integer, I1, 3, COL3, LEN3, RNG3, LOC3) @\
-funcname##Macro(integer, I1, 4, COL4, LEN4, RNG4, LOC4) @\
+funcname##Macro(integer, i1, 1, COL1, LEN1, RNG1, LOC1) @\
+funcname##Macro(integer, i1, 2, COL2, LEN2, RNG2, LOC2) @\
+funcname##Macro(integer, i1, 3, COL3, LEN3, RNG3, LOC3) @\
+funcname##Macro(integer, i1, 4, COL4, LEN4, RNG4, LOC4) @\
 ^ifndef ESMF_NO_GREATER_THAN_4D @\
-funcname##Macro(integer, I1, 5, COL5, LEN5, RNG5, LOC5) @\
-funcname##Macro(integer, I1, 6, COL6, LEN6, RNG6, LOC6) @\
-funcname##Macro(integer, I1, 7, COL7, LEN7, RNG7, LOC7) @\
+funcname##Macro(integer, i1, 5, COL5, LEN5, RNG5, LOC5) @\
+funcname##Macro(integer, i1, 6, COL6, LEN6, RNG6, LOC6) @\
+funcname##Macro(integer, i1, 7, COL7, LEN7, RNG7, LOC7) @\
 ^endif @\
 ^endif @\
 ^ifndef ESMF_NO_INTEGER_2_BYTE @\
-funcname##Macro(integer, I2, 1, COL1, LEN1, RNG1, LOC1) @\
-funcname##Macro(integer, I2, 2, COL2, LEN2, RNG2, LOC2) @\
-funcname##Macro(integer, I2, 3, COL3, LEN3, RNG3, LOC3) @\
-funcname##Macro(integer, I2, 4, COL4, LEN4, RNG4, LOC4) @\
+funcname##Macro(integer, i2, 1, COL1, LEN1, RNG1, LOC1) @\
+funcname##Macro(integer, i2, 2, COL2, LEN2, RNG2, LOC2) @\
+funcname##Macro(integer, i2, 3, COL3, LEN3, RNG3, LOC3) @\
+funcname##Macro(integer, i2, 4, COL4, LEN4, RNG4, LOC4) @\
 ^ifndef ESMF_NO_GREATER_THAN_4D @\
-funcname##Macro(integer, I2, 5, COL5, LEN5, RNG5, LOC5) @\
-funcname##Macro(integer, I2, 6, COL6, LEN6, RNG6, LOC6) @\
-funcname##Macro(integer, I2, 7, COL7, LEN7, RNG7, LOC7) @\
+funcname##Macro(integer, i2, 5, COL5, LEN5, RNG5, LOC5) @\
+funcname##Macro(integer, i2, 6, COL6, LEN6, RNG6, LOC6) @\
+funcname##Macro(integer, i2, 7, COL7, LEN7, RNG7, LOC7) @\
 ^endif @\
 ^endif @\
-funcname##Macro(integer, I4, 1, COL1, LEN1, RNG1, LOC1) @\
-funcname##Macro(integer, I8, 1, COL1, LEN1, RNG1, LOC1) @\
-funcname##Macro(real,    R4, 1, COL1, LEN1, RNG1, LOC1) @\
-funcname##Macro(real,    R8, 1, COL1, LEN1, RNG1, LOC1) @\
-funcname##Macro(integer, I4, 2, COL2, LEN2, RNG2, LOC2) @\
-funcname##Macro(integer, I8, 2, COL2, LEN2, RNG2, LOC2) @\
-funcname##Macro(real,    R4, 2, COL2, LEN2, RNG2, LOC2) @\
-funcname##Macro(real,    R8, 2, COL2, LEN2, RNG2, LOC2) @\
-funcname##Macro(integer, I4, 3, COL3, LEN3, RNG3, LOC3) @\
-funcname##Macro(integer, I8, 3, COL3, LEN3, RNG3, LOC3) @\
-funcname##Macro(real,    R4, 3, COL3, LEN3, RNG3, LOC3) @\
-funcname##Macro(real,    R8, 3, COL3, LEN3, RNG3, LOC3) @\
-funcname##Macro(integer, I4, 4, COL4, LEN4, RNG4, LOC4) @\
-funcname##Macro(integer, I8, 4, COL4, LEN4, RNG4, LOC4) @\
-funcname##Macro(real,    R4, 4, COL4, LEN4, RNG4, LOC4) @\
-funcname##Macro(real,    R8, 4, COL4, LEN4, RNG4, LOC4) @\
+funcname##Macro(integer, i4, 1, COL1, LEN1, RNG1, LOC1) @\
+funcname##Macro(integer, i8, 1, COL1, LEN1, RNG1, LOC1) @\
+funcname##Macro(real,    r4, 1, COL1, LEN1, RNG1, LOC1) @\
+funcname##Macro(real,    r8, 1, COL1, LEN1, RNG1, LOC1) @\
+funcname##Macro(integer, i4, 2, COL2, LEN2, RNG2, LOC2) @\
+funcname##Macro(integer, i8, 2, COL2, LEN2, RNG2, LOC2) @\
+funcname##Macro(real,    r4, 2, COL2, LEN2, RNG2, LOC2) @\
+funcname##Macro(real,    r8, 2, COL2, LEN2, RNG2, LOC2) @\
+funcname##Macro(integer, i4, 3, COL3, LEN3, RNG3, LOC3) @\
+funcname##Macro(integer, i8, 3, COL3, LEN3, RNG3, LOC3) @\
+funcname##Macro(real,    r4, 3, COL3, LEN3, RNG3, LOC3) @\
+funcname##Macro(real,    r8, 3, COL3, LEN3, RNG3, LOC3) @\
+funcname##Macro(integer, i4, 4, COL4, LEN4, RNG4, LOC4) @\
+funcname##Macro(integer, i8, 4, COL4, LEN4, RNG4, LOC4) @\
+funcname##Macro(real,    r4, 4, COL4, LEN4, RNG4, LOC4) @\
+funcname##Macro(real,    r8, 4, COL4, LEN4, RNG4, LOC4) @\
 ^ifndef ESMF_NO_GREATER_THAN_4D @\
-funcname##Macro(integer, I4, 5, COL5, LEN5, RNG5, LOC5) @\
-funcname##Macro(integer, I8, 5, COL5, LEN5, RNG5, LOC5) @\
-funcname##Macro(real,    R4, 5, COL5, LEN5, RNG5, LOC5) @\
-funcname##Macro(real,    R8, 5, COL5, LEN5, RNG5, LOC5) @\
-funcname##Macro(integer, I4, 6, COL6, LEN6, RNG6, LOC6) @\
-funcname##Macro(integer, I8, 6, COL6, LEN6, RNG6, LOC6) @\
-funcname##Macro(real,    R4, 6, COL6, LEN6, RNG6, LOC6) @\
-funcname##Macro(real,    R8, 6, COL6, LEN6, RNG6, LOC6) @\
-funcname##Macro(integer, I4, 7, COL7, LEN7, RNG7, LOC7) @\
-funcname##Macro(integer, I8, 7, COL7, LEN7, RNG7, LOC7) @\
-funcname##Macro(real,    R4, 7, COL7, LEN7, RNG7, LOC7) @\
-funcname##Macro(real,    R8, 7, COL7, LEN7, RNG7, LOC7) @\
+funcname##Macro(integer, i4, 5, COL5, LEN5, RNG5, LOC5) @\
+funcname##Macro(integer, i8, 5, COL5, LEN5, RNG5, LOC5) @\
+funcname##Macro(real,    r4, 5, COL5, LEN5, RNG5, LOC5) @\
+funcname##Macro(real,    r8, 5, COL5, LEN5, RNG5, LOC5) @\
+funcname##Macro(integer, i4, 6, COL6, LEN6, RNG6, LOC6) @\
+funcname##Macro(integer, i8, 6, COL6, LEN6, RNG6, LOC6) @\
+funcname##Macro(real,    r4, 6, COL6, LEN6, RNG6, LOC6) @\
+funcname##Macro(real,    r8, 6, COL6, LEN6, RNG6, LOC6) @\
+funcname##Macro(integer, i4, 7, COL7, LEN7, RNG7, LOC7) @\
+funcname##Macro(integer, i8, 7, COL7, LEN7, RNG7, LOC7) @\
+funcname##Macro(real,    r4, 7, COL7, LEN7, RNG7, LOC7) @\
+funcname##Macro(real,    r8, 7, COL7, LEN7, RNG7, LOC7) @\
 ^endif @\
  @\
 ! < end macro - do not edit directly >  @\
