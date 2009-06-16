@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.271 2009/06/03 23:00:27 theurich Exp $
+#  $Id: common.mk,v 1.272 2009/06/16 17:11:10 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -527,15 +527,15 @@ ESMC_TESTDIR    = $(ESMF_TESTDIR)
 ESMC_DOCDIR	= $(ESMF_DOCDIR)
 
 #-------------------------------------------------------------------------------
-# Add to Fortran preprocessing flags according to environment variables
+# Add preprocessing flags according to environment variables
 ifeq ($(ESMF_ARRAY_LITE),TRUE)
-FPPDEFS += -DESMF_NO_GREATER_THAN_4D
+CPPFLAGS += -DESMF_NO_GREATER_THAN_4D
 endif           
 ifeq ($(ESMF_NO_INTEGER_1_BYTE),TRUE)
-FPPDEFS += -DESMF_NO_INTEGER_1_BYTE
+CPPFLAGS += -DESMF_NO_INTEGER_1_BYTE
 endif           
 ifeq ($(ESMF_NO_INTEGER_2_BYTE),TRUE)
-FPPDEFS += -DESMF_NO_INTEGER_2_BYTE
+CPPFLAGS += -DESMF_NO_INTEGER_2_BYTE
 endif           
 #-------------------------------------------------------------------------------
 
@@ -1030,7 +1030,6 @@ CPPFLAGS        +=-DESMF_OS_$(ESMF_OS)=1
 # construct precompiler flags to be used on Fortran sources
 #-------------------------------------------------------------------------------
 
-FPPFLAGS        += $(addprefix $(ESMF_FPPPREFIX), $(FPPDEFS))
 FPPFLAGS        += $(addprefix $(ESMF_FPPPREFIX), $(CPPFLAGS))
 
 
