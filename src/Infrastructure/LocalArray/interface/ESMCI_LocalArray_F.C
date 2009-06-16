@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray_F.C,v 1.5 2009/06/16 16:06:09 theurich Exp $
+// $Id: ESMCI_LocalArray_F.C,v 1.6 2009/06/16 20:54:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -339,36 +339,25 @@ char *name = NULL;
              delete[] filetemp;
      }
 
-     // compare actual pointer size computed at run time, vs. the
-     // compile-time fixed size specified in ESMC_Conf.h
-     void FTN(c_esmf_f90ptrsizeprint)(char *p1, char *p2, int *rank, int *align, int *rc) {
+     // compare actual size of Fortran dope vector computed at run time,
+     // vs. the compile-time memory allocation in the LocalArray object.
+     void FTN(c_esmf_f90ptrsizeprint)(char *p1, char *p2, int *rank, int *rc){
          int rsize = (int)(p2 - p1);
-
-         int fixed = ESMF_F90_PTR_BASE_SIZE;
-         for (int i=1; i<*rank; i++)
-             fixed += ESMF_F90_PTR_PLUS_RANK;
-         int alignsize = *align;
-         if (alignsize)
-             fixed = ((fixed + alignsize - 1) / alignsize) * alignsize;
-
-         if (rsize != fixed) {
-            printf("No Match: rank %d=%d, computed=%d (diff=%d)\n",
-                             *rank, fixed, rsize, rsize-fixed);
+         int fixed = ESMF_F90_PTR_BASE_SIZE
+           + ESMF_F90_MAXRANK_POSSIBLE*ESMF_F90_PTR_PLUS_RANK;
+         
+         if (rsize > fixed) {
+            printf("dope vector allocation too small: rank %d\n", *rank);
             printf(" full details: \n");
-            printf("  rank %d: compiled-in size is %d bytes, run-time computed size is %d bytes (diff=%d)\n", 
-                             *rank, fixed, rsize, rsize-fixed);
-            printf("  in platform specific conf.h file, ESMF_F90_PTR_BASE_SIZE = %d\n",
-                             ESMF_F90_PTR_BASE_SIZE);
-            printf("  increment per rank ESMF_F90_PTR_PLUS_RANK = %d\n",
-                             ESMF_F90_PTR_PLUS_RANK);
-
+            printf("  rank %d: compiled-in size is %d bytes, run-time computed"
+              " size is %d bytes (diff=%d)\n", *rank, fixed, rsize,
+              rsize-fixed);
             *rc = ESMF_FAILURE;
-;
          } else {
-            printf("Match: rank %d Fortran 90 pointer is %d bytes, matches computed size ok\n", 
-                          *rank, fixed);
+            printf("dope vector allocation is sufficient: rank %d %d bytes <= "
+              "%d bytes\n", *rank, rsize, fixed);
             *rc = ESMF_SUCCESS;
-         } 
+         }
      }
 
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.C,v 1.6 2009/06/16 16:45:01 theurich Exp $
+// $Id: ESMCI_LocalArray.C,v 1.7 2009/06/16 20:54:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.6 2009/06/16 16:45:01 theurich Exp $";
+static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.7 2009/06/16 20:54:47 theurich Exp $";
 //-----------------------------------------------------------------------------
 
   
@@ -808,31 +808,18 @@ int LocalArray::construct(
 //
 //EOP
 
-    int i, rank = this->rank;
-    int totalcount;
-    int bytes = ESMF_F90_PTR_BASE_SIZE;
-    int rc;
-
     // Initialize return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;  
+    int rc = ESMC_RC_NOT_IMPL;  
 
-    if (fptr) {
-#ifdef MEMCPYMETHOD
-      // note - starts at 1; base includes rank 1 size
-      for (i=1; i<rank; i++)
-    	bytes += ESMF_F90_PTR_PLUS_RANK;
-      memcpy((void *)(&this->f90dopev), (void *)fptr, bytes);
-#else
-      tkrPtrCopy((void *)(&this->f90dopev), (void *)fptr, typekind, rank);
-#endif
-    }
+    if (fptr)
+      tkrPtrCopy((void *)(&f90dopev), (void *)fptr, typekind, rank);
 
     if (base)
         base_addr = base;
 
     // valid values
-    totalcount = 1;
-    for (i=0; i<rank; i++) {
+    int totalcount = 1;
+    for (int i=0; i<rank; i++) {
         counts[i]     = icounts ? icounts[i] : 0;
         offset[i]     = offsets ? offsets[i] : 0;
         bytestride[i] = 0;
@@ -841,7 +828,7 @@ int LocalArray::construct(
         totalcount *= counts[i];
     }
     // filler for unused ranks
-    for (i=rank; i<ESMF_MAXDIM; i++) {
+    for (int i=rank; i<ESMF_MAXDIM; i++) {
         counts[i]     = 0;
         offset[i]     = 0;
         bytestride[i] = 1;
@@ -897,39 +884,26 @@ int LocalArray::construct(
 //
 //EOP
 
-    int i, rank = this->rank;
-    int bytes = ESMF_F90_PTR_BASE_SIZE;
-    int rc;
- 
-     // Initialize return code; assume routine not implemented
-     rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
-    if (fptr) {
-#ifdef MEMCPYMETHOD
-      // note - starts at 1; base includes rank 1 size
-      for (i=1; i<rank; i++)
-        bytes += ESMF_F90_PTR_PLUS_RANK;
-      memcpy((void *)fptr, (void *)(&this->f90dopev), bytes);
-#else
-      tkrPtrCopy((void *)fptr, (void *)(&this->f90dopev), typekind, rank);
-#endif
-
-    }
+    if (fptr)
+      tkrPtrCopy((void *)fptr, (void *)(&f90dopev), typekind, rank);
 
     if (base)
         base = base_addr;
 
     if (icounts) 
-        for (i=0; i<rank; i++) 
+        for (int i=0; i<rank; i++) 
             icounts[i] = counts[i];
     if (lbounds)
-        for (i=0; i<rank; i++)  
+        for (int i=0; i<rank; i++)  
             lbounds[i] = lbound[i];
     if (ubounds) 
-        for (i=0; i<rank; i++) 
+        for (int i=0; i<rank; i++) 
             ubounds[i] = ubound[i];
     if (offsets) 
-        for (i=0; i<rank; i++) 
+        for (int i=0; i<rank; i++) 
             offsets[i] = offset[i];
     
 
@@ -958,21 +932,10 @@ int LocalArray::construct(
 //
 //EOP
 
-    int i, rank = this->rank;
-    int bytes = ESMF_F90_PTR_BASE_SIZE;
-    int rc;
-    
     // Initialize return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
 
-#ifdef MEMCPYMETHOD
-    // note - starts at 1; base includes rank 1 size
-    for (i=1; i<rank; i++)
-      bytes += ESMF_F90_PTR_PLUS_RANK;
-    memcpy((void *)p, (void *)(&this->f90dopev), bytes);
-#else
-    tkrPtrCopy((void *)p, (void *)(&this->f90dopev), typekind, rank);
-#endif
+    tkrPtrCopy((void *)p, (void *)(&f90dopev), typekind, rank);
 
     rc = ESMF_SUCCESS;
     return rc; 
@@ -1000,20 +963,10 @@ int LocalArray::construct(
 //
 //EOP
 
-    int i, rank = this->rank;
-    int bytes = ESMF_F90_PTR_BASE_SIZE;
-    int rc;
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
-     // Initialize return code; assume routine not implemented
-     rc = ESMC_RC_NOT_IMPL;
-
-#ifdef MEMCPYMETHOD
-    for (i=1; i<rank; i++)
-      bytes += ESMF_F90_PTR_PLUS_RANK;
-    memcpy((void *)(&this->f90dopev), (void *)p, bytes);
-#else
-    tkrPtrCopy((void *)(&this->f90dopev), (void *)p, typekind, rank);
-#endif
+    tkrPtrCopy((void *)(&f90dopev), (void *)p, typekind, rank);
       
     return ESMF_SUCCESS; 
 
@@ -1201,14 +1154,11 @@ template int LocalArray::getData(int *index, ESMC_I4 *data);
       printf("f90dopev: \n");
       int bytes = 0;
       unsigned char *dopev = (unsigned char *)&f90dopev;
-      if (base_addr){
-        bytes = ESMF_F90_PTR_BASE_SIZE;
-        for (i=1; i<rank; i++)
-    	  bytes += ESMF_F90_PTR_PLUS_RANK;
-      }
+      if (base_addr)
+        bytes = ESMF_F90_PTR_BASE_SIZE
+          + ESMF_F90_MAXRANK_POSSIBLE*ESMF_F90_PTR_PLUS_RANK;
       for (i=0; i<bytes; i++)
         printf(" [%03d]\t0x%02x\n", i, (int)dopev[i]);
-      
       
     }else{
     

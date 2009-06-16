@@ -229,13 +229,6 @@
     type(PtrSWrap7) :: sizetest7S(2)
 #endif
 
-#if defined (__G95__) && defined (ESMF_IS_64BIT_MACHINE)
-    ! g95 rounds pointer sizes up to a multiple of 8 bytes
-    integer, parameter :: ALIGN_SIZE = 8
-#else
-    integer, parameter :: ALIGN_SIZE = 0
-#endif
-
     result = 0
 
 !------------------------------------------------------------------------
@@ -252,80 +245,52 @@
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
     !NEX_UTest
-    compiled_size = get_compiled_size (rank=1)
-    call c_ESMF_F90PtrSizeGet(sizetest1I(1), sizetest1I(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest1I(1), sizetest1I(2), 1, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "1D Integer array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest1I(1), sizetest1I(2), 1, ALIGN_SIZE, rc)
-
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
+ 
     !------------------------------------------------------------------------
     !NEX_UTest
-    compiled_size = get_compiled_size (rank=2)
-    call c_ESMF_F90PtrSizeGet(sizetest2I(1), sizetest2I(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest2I(1), sizetest2I(2), 2, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "2D Integer array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest2I(1), sizetest2I(2), 2, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    compiled_size = get_compiled_size (rank=3)
-    call c_ESMF_F90PtrSizeGet(sizetest3I(1), sizetest3I(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest3I(1), sizetest3I(2), 3, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "3D Integer array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest3I(1), sizetest3I(2), 3, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    compiled_size = get_compiled_size (rank=4)
-    call c_ESMF_F90PtrSizeGet(sizetest4I(1), sizetest4I(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest4I(1), sizetest4I(2), 4, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "4D Integer array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest4I(1), sizetest4I(2), 4, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    compiled_size = get_compiled_size (rank=5)
-    call c_ESMF_F90PtrSizeGet(sizetest5I(1), sizetest5I(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest5I(1), sizetest5I(2), 5, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "5D Integer array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest5I(1), sizetest5I(2), 5, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    compiled_size = get_compiled_size (rank=6)
-    call c_ESMF_F90PtrSizeGet(sizetest6I(1), sizetest6I(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest6I(1), sizetest6I(2), 6, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "6D Integer array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest6I(1), sizetest6I(2), 6, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    compiled_size = get_compiled_size (rank=7)
-    call c_ESMF_F90PtrSizeGet(sizetest7I(1), sizetest7I(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest7I(1), sizetest7I(2), 7, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "7D Integer array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest7I(1), sizetest7I(2), 7, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
 
@@ -334,80 +299,52 @@
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=1)
-    call c_ESMF_F90PtrSizeGet(sizetest1R(1), sizetest1R(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest1R(1), sizetest1R(2), 1, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "1D Real*4 array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest1R(1), sizetest1R(2), 1, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=2)
-    call c_ESMF_F90PtrSizeGet(sizetest2R(1), sizetest2R(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest2R(1), sizetest2R(2), 2, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "2D Real*4 array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest2R(1), sizetest2R(2), 2, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=3)
-    call c_ESMF_F90PtrSizeGet(sizetest3R(1), sizetest3R(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest3R(1), sizetest3R(2), 3, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "3D Real*4 array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest3R(1), sizetest3R(2), 3, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=4)
-    call c_ESMF_F90PtrSizeGet(sizetest4R(1), sizetest4R(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest4R(1), sizetest4R(2), 4, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "4D Real*4 array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest4R(1), sizetest4R(2), 4, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=5)
-    call c_ESMF_F90PtrSizeGet(sizetest5R(1), sizetest5R(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest5R(1), sizetest5R(2), 5, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "5D Real*4 array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest5R(1), sizetest5R(2), 5, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=6)
-    call c_ESMF_F90PtrSizeGet(sizetest6R(1), sizetest6R(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest6R(1), sizetest6R(2), 6, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "6D Real*4 array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest6R(1), sizetest6R(2), 6, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=7)
-    call c_ESMF_F90PtrSizeGet(sizetest7R(1), sizetest7R(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest7R(1), sizetest7R(2), 7, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "7D Real*4 array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest7R(1), sizetest7R(2), 7, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
 
@@ -415,160 +352,104 @@
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=1)
-    call c_ESMF_F90PtrSizeGet(sizetest1R8(1), sizetest1R8(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest1R8(1), sizetest1R8(2), 1, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "1D Real*8 array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest1R8(1), sizetest1R8(2), 1, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=2)
-    call c_ESMF_F90PtrSizeGet(sizetest2R8(1), sizetest2R8(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest2R8(1), sizetest2R8(2), 2, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "2D Real*8 array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest2R8(1), sizetest2R8(2), 2, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=3)
-    call c_ESMF_F90PtrSizeGet(sizetest3R8(1), sizetest3R8(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest3R8(1), sizetest3R8(2), 3, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "3D Real*8 array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest3R8(1), sizetest3R8(2), 3, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=4)
-    call c_ESMF_F90PtrSizeGet(sizetest4R8(1), sizetest4R8(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest4R8(1), sizetest4R8(2), 4, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "4D Real*8 array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest4R8(1), sizetest4R8(2), 4, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=5)
-    call c_ESMF_F90PtrSizeGet(sizetest5R8(1), sizetest5R8(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest5R8(1), sizetest5R8(2), 5, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "5D Real*8 array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest5R8(1), sizetest5R8(2), 5, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=6)
-    call c_ESMF_F90PtrSizeGet(sizetest6R8(1), sizetest6R8(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest6R8(1), sizetest6R8(2), 6, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "6D Real*8 array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest6R8(1), sizetest6R8(2), 6, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=7)
-    call c_ESMF_F90PtrSizeGet(sizetest7R8(1), sizetest7R8(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest7R8(1), sizetest7R8(2), 7, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "7D Real*8 array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest7R8(1), sizetest7R8(2), 7, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=1)
-    call c_ESMF_F90PtrSizeGet(sizetest1S(1), sizetest1S(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest1S(1), sizetest1S(2), 1, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "1D Derived type array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest1S(1), sizetest1S(2), 1, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=2)
-    call c_ESMF_F90PtrSizeGet(sizetest2S(1), sizetest2S(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest2S(1), sizetest2S(2), 2, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "2D Derived type array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest2S(1), sizetest2S(2), 2, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=3)
-    call c_ESMF_F90PtrSizeGet(sizetest3S(1), sizetest3S(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest3S(1), sizetest3S(2), 3, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "3D Derived type array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest3S(1), sizetest3S(2), 3, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=4)
-    call c_ESMF_F90PtrSizeGet(sizetest4S(1), sizetest4S(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest4S(1), sizetest4S(2), 4, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "4D Derived type array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest4S(1), sizetest4S(2), 4, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=5)
-    call c_ESMF_F90PtrSizeGet(sizetest5S(1), sizetest5S(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest5S(1), sizetest5S(2), 5, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "5D Derived type array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest5S(1), sizetest5S(2), 5, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=6)
-    call c_ESMF_F90PtrSizeGet(sizetest6S(1), sizetest6S(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest6S(1), sizetest6S(2), 6, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "6D Derived type array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest6S(1), sizetest6S(2), 6, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !EX_UTest
-    compiled_size = get_compiled_size (rank=7)
-    call c_ESMF_F90PtrSizeGet(sizetest7S(1), sizetest7S(2), computed_size, rc)
-    write(failMsg,*) "Compile-time size of ", compiled_size, &
-                     "not equal Run-time size of ", computed_size
+    call c_ESMF_F90PtrSizePrint(sizetest7S(1), sizetest7S(2), 7, rc)
+    write(failMsg,*) "Too small dope vector allocation in LocalArray detected"
     write(name, *) "7D Derived type array pointer size test"
-    call ESMF_Test((computed_size .eq. compiled_size), name, failMsg, result, ESMF_SRCLINE) 
-    ! this writes a more detailed message on standard output.
-    call c_ESMF_F90PtrSizePrint(sizetest7S(1), sizetest7S(2), 7, ALIGN_SIZE, rc)
+    call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
 
@@ -576,23 +457,6 @@
 #endif
 
     call ESMF_TestEnd(result, ESMF_SRCLINE)
-
-    contains
-
-      function get_compiled_size (rank)
-        integer, intent(in) :: rank
-        integer :: get_compiled_size
-
-        integer :: i
-
-        get_compiled_size = ESMF_F90_PTR_BASE_SIZE + ESMF_F90_PTR_PLUS_RANK * (rank-1)
-
-#if defined (__G95__) && defined (ESMF_IS_64BIT_MACHINE)
-        if (ALIGN_SIZE /= 0)  &
-          get_compiled_size = ((get_compiled_size + ALIGN_SIZE-1)/ALIGN_SIZE) * ALIGN_SIZE
-#endif
-
-      end function get_compiled_size
 
     end program test
     
