@@ -436,17 +436,7 @@ Adding a New Platform
    Since ESMF contains both F90 and C++ code, generally the linkers are
    not able to simply link without being given additional libraries.
 
-4. Edit the ESMC_Conf.h file and look over the values.  (In reality, most
-   of these variables are not actually used.)  However, see the ESMF_F90_PTR
-   settings at the end of the file.  These *must* match the size of the 
-   "dope vector" that the Fortran compiler uses on this machine to store
-   information about Fortran arrays (rank, lower bounds, upper bounds, etc).  
-   Put in a good guess (or leave them as-is) and build and run the unit tests.
-
-   Ignore the output of all other unit tests until the ESMF_ArrayF90PtrUTest
-   passes cleanly without complaining about byte count mismatches.  Adjust the
-   sizes in the ESMC_Conf.h file until it passes, and then "make clean" and
-   rebuild the entire library and test suite.
+4. Edit the ESMC_Conf.h file and look over the macro definitions.
 
 5. Once it is working, post it back on the esmfcontrib sourceforge site and
    email esmf_support@ucar.edu so we can include it in our next release.
@@ -524,4 +514,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.101 2009/05/18 16:14:32 theurich Exp $
+ $Id: README,v 1.102 2009/06/17 19:00:32 theurich Exp $

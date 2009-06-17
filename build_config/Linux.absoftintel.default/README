@@ -4,10 +4,3 @@ commercial Intel C++ compiler (icpc).
 Requires the following environment settings:
 
 ESMF_COMPILER absoftintel
-
-The correct value of ESMF_F90_PTR_BASE_SIZE in x86_64_small mode appears to be
-compiler version dependent:
-
-Absoft  8.x -> ESMF_F90_PTR_BASE_SIZE=48
-Absoft  9.x -> ESMF_F90_PTR_BASE_SIZE=64
-Absoft 10.x -> ESMF_F90_PTR_BASE_SIZE=72

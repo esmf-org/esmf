@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2008/09/26 21:11:40 cdeluca Exp $ 
+# $Id: makefile,v 1.17 2009/06/17 19:00:34 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -49,10 +49,8 @@ RUN_ESMF_StringUTestUNI:
 
 #
 #  Fortran 90 array pointer size test.  This must pass before any of the
-#  ESMF LocalArray code can be assumed to be correct. If this test does not pass
-#  adjust the #define values in $ESMF_DIR/build_config/your_arch/ESMC_Conf.h
-#  The values ESMF_F90_PTR_BASE_SIZE and ESMF_F90_PTR_PLUS_RANK are the
-#  ones to change.
+#  ESMF LocalArray code can be assumed safe. If this test does not pass
+#  please report it to esmf_support@ucar.edu.
 #
 
 RUN_ESMF_F90ArrayPtrUTest:

@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.h,v 1.6 2009/06/16 20:54:47 theurich Exp $
+// $Id: ESMCI_LocalArray.h,v 1.7 2009/06/17 19:00:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -48,19 +48,16 @@ namespace ESMCI {
   // The Fortran dope vector is copied via a portable implementation
   // that passes pointers to the dope vectors to the Fortran side 
   // to do the actual copy.
-#define ESMF_F90_PTR_BASE_SIZE      160
-#define ESMF_F90_PTR_PLUS_RANK      64
-#define ESMF_F90_MAXRANK_POSSIBLE   7
+#define ESMF_FPTR_BASE_SIZE         160
+#define ESMF_FPTR_PLUS_RANK         64
+#define ESMF_FPTR_MAXRANK_POSSIBLE  7
   
   struct c_F90ptr {
-    // Dummy structure which is at least as big as an F90 pointer on
-    // each architcture. ESMF_F90_PTR_xxx are defined in conf.h in
-    // the build_config directories for each architecture.
-    // On most platforms, there is a bump in size for each additional rank.
-    // So far no platform we found has a data-type dependency.
-    unsigned char basepad[ESMF_F90_PTR_BASE_SIZE];
+    // Dummy structure which is at least as big as an Fortran pointer 
+    // dope vector on any platform.
+    unsigned char basepad[ESMF_FPTR_BASE_SIZE];
     // plus extra space needed per rank
-    unsigned char extrapad[ESMF_F90_MAXRANK_POSSIBLE*ESMF_F90_PTR_PLUS_RANK];
+    unsigned char extrapad[ESMF_FPTR_MAXRANK_POSSIBLE*ESMF_FPTR_PLUS_RANK];
   };
 
   // this must stay in sync with the Fortran counter-part

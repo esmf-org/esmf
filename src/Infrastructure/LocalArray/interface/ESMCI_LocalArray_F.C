@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray_F.C,v 1.6 2009/06/16 20:54:47 theurich Exp $
+// $Id: ESMCI_LocalArray_F.C,v 1.7 2009/06/17 19:00:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -343,8 +343,8 @@ char *name = NULL;
      // vs. the compile-time memory allocation in the LocalArray object.
      void FTN(c_esmf_f90ptrsizeprint)(char *p1, char *p2, int *rank, int *rc){
          int rsize = (int)(p2 - p1);
-         int fixed = ESMF_F90_PTR_BASE_SIZE
-           + ESMF_F90_MAXRANK_POSSIBLE*ESMF_F90_PTR_PLUS_RANK;
+         int fixed = ESMF_FPTR_BASE_SIZE
+           + ESMF_FPTR_MAXRANK_POSSIBLE*ESMF_FPTR_PLUS_RANK;
          
          if (rsize > fixed) {
             printf("dope vector allocation too small: rank %d\n", *rank);

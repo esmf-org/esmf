@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.C,v 1.7 2009/06/16 20:54:47 theurich Exp $
+// $Id: ESMCI_LocalArray.C,v 1.8 2009/06/17 19:00:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.7 2009/06/16 20:54:47 theurich Exp $";
+static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.8 2009/06/17 19:00:33 theurich Exp $";
 //-----------------------------------------------------------------------------
 
   
@@ -1155,8 +1155,8 @@ template int LocalArray::getData(int *index, ESMC_I4 *data);
       int bytes = 0;
       unsigned char *dopev = (unsigned char *)&f90dopev;
       if (base_addr)
-        bytes = ESMF_F90_PTR_BASE_SIZE
-          + ESMF_F90_MAXRANK_POSSIBLE*ESMF_F90_PTR_PLUS_RANK;
+        bytes = ESMF_FPTR_BASE_SIZE
+          + ESMF_FPTR_MAXRANK_POSSIBLE*ESMF_FPTR_PLUS_RANK;
       for (i=0; i<bytes; i++)
         printf(" [%03d]\t0x%02x\n", i, (int)dopev[i]);
       

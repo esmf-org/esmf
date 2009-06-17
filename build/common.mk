@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.272 2009/06/16 17:11:10 theurich Exp $
+#  $Id: common.mk,v 1.273 2009/06/17 19:00:32 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -961,16 +961,6 @@ endif
 ESMF_MPIRUNCOMMAND  = $(shell $(ESMF_DIR)/scripts/mpirun.command $(ESMF_DIR)/scripts $(ESMF_MPIRUN))
 ifeq ($(ESMF_MPIRUNCOMMAND),esmfscript)
 ESMF_MPIRUN := $(ESMF_DIR)/scripts/$(ESMF_MPIRUN) $(ESMF_MPISCRIPTOPTIONS)
-endif
-
-#-------------------------------------------------------------------------------
-# Override default pointer size macros if specified in the user environment
-#-------------------------------------------------------------------------------
-ifeq ($(origin ESMF_F90_PTR_BASE_SIZE), environment)
-CPPFLAGS       += -DESMF_F90_PTR_BASE_SIZE=$(ESMF_F90_PTR_BASE_SIZE)
-endif
-ifeq ($(origin ESMF_F90_PTR_PLUS_RANK), environment)
-CPPFLAGS       += -DESMF_F90_PTR_PLUS_RANK=$(ESMF_F90_PTR_PLUS_RANK)
 endif
 
 #-------------------------------------------------------------------------------
