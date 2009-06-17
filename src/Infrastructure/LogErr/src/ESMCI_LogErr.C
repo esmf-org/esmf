@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr.C,v 1.6 2009/05/19 23:27:11 theurich Exp $
+// $Id: ESMCI_LogErr.C,v 1.7 2009/06/17 21:37:18 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -53,7 +53,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_LogErr.C,v 1.6 2009/05/19 23:27:11 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_LogErr.C,v 1.7 2009/06/17 21:37:18 w6ws Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -101,8 +101,8 @@ bool LogErr::AllocError(
 //
 // !ARGUMENTS:
     int LINE,
-    char FILE[],
-    char method[],
+    const char FILE[],
+    const char method[],
     int *rcToReturn      
     )
 // !DESCRIPTION:
@@ -129,7 +129,7 @@ bool LogErr::MsgAllocError(
 //  none
 //
 // !ARGUMENTS:
-    char msg[],
+    const char msg[],
     int *rcToReturn
       
     )
@@ -159,10 +159,10 @@ bool LogErr::MsgAllocError(
 //  none
 //
 // !ARGUMENTS:
-    char msg[],
+    const char msg[],
     int LINE,
-    char FILE[],
-    char method[],
+    const char FILE[],
+    const char method[],
     int *rcToReturn      
     )
 // !DESCRIPTION:
@@ -214,8 +214,8 @@ bool LogErr::DeallocError(
 //
 // !ARGUMENTS:
     int LINE,
-    char FILE[],
-    char method[],
+    const char FILE[],
+    const char method[],
     int *rcToReturn      
     )
 // !DESCRIPTION:
@@ -242,7 +242,7 @@ bool LogErr::MsgDeallocError(
 //  none
 //
 // !ARGUMENTS:
-    char msg[],
+    const char msg[],
     int *rcToReturn
       
     )
@@ -272,10 +272,10 @@ bool LogErr::MsgDeallocError(
 //  none
 //
 // !ARGUMENTS:
-    char msg[],
+    const char msg[],
     int LINE,
-    char FILE[],
-    char method[],
+    const char FILE[],
+    const char method[],
     int *rcToReturn      
     )
 // !DESCRIPTION:
@@ -307,7 +307,7 @@ void LogErr::Open(
 //
 // !ARGUMENTS:
 
-     char filename[]     //string to form name of log file (input)
+     const char filename[]     //string to form name of log file (input)
 
    )
 //
@@ -336,7 +336,7 @@ int ESMC_LogSetFilename(
 //
 // !ARGUMENTS:
 
-     char filename[]     //string to form name of log file (input)
+     const char filename[]     //string to form name of log file (input)
 
    )
 //
@@ -419,7 +419,7 @@ bool LogErr::Write(
 //  bool
 //
 // !ARGUMENTS:
-	char msg[],   // Log Entry
+	const char msg[],   // Log Entry
     	int msgtype   // Msg Type   
       )
 // !DESCRIPTION:
@@ -451,11 +451,11 @@ bool LogErr::Write(
 //  bool
 //
 // !ARGUMENTS:
-    char msg[],	// Log Entry
-    int msgtype,// Msg Type   
+    const char msg[],	// Log Entry
+    int msgtype,        // Msg Type   
     int LINE,
-    char FILE[],
-    char method[]
+    const char FILE[],
+    const char method[]
     )
 // !DESCRIPTION:
 // Prints log message and returns true if successful.  It takes two arguments -
@@ -527,8 +527,8 @@ bool LogErr::FoundError(
 // !ARGUMENTS:
     int rcToCheck,
     int LINE,
-    char FILE[],
-    char method[],
+    const char FILE[],
+    const char method[],
     int *rcToReturn
     )
 // !DESCRIPTION:
@@ -567,7 +567,7 @@ bool LogErr::MsgFoundError(
 //
 // !ARGUMENTS:
     int rcToCheck,
-    char msg[],
+    const char msg[],
     int *rcToReturn
     )
 // !DESCRIPTION:
@@ -609,10 +609,10 @@ bool LogErr::MsgFoundError(
 //
 // !ARGUMENTS:
     int rcToCheck,
-    char msg[],
+    const char msg[],
     int LINE,
-    char FILE[],
-    char method[],
+    const char FILE[],
+    const char method[],
     int *rcToReturn
     )
 // !DESCRIPTION:

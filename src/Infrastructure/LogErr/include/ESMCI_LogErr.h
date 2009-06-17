@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr.h,v 1.7 2009/05/19 23:27:11 theurich Exp $
+// $Id: ESMCI_LogErr.h,v 1.8 2009/06/17 21:37:18 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -71,26 +71,26 @@ private:
 // (see ESMC\_LogErr.C for a description of these methods)
     
     bool AllocError(int *rcToReturn);
-    bool AllocError(int LINE,char FILE[],char method[],int *rcToReturn);
+    bool AllocError(int LINE,const char FILE[],const char method[],int *rcToReturn);
     bool DeallocError(int *rcToReturn);
-    bool DeallocError(int LINE,char FILE[],char method[],int *rcToReturn);
+    bool DeallocError(int LINE,const char FILE[],const char method[],int *rcToReturn);
     void Close();
     bool FoundError(int rcToCheck,int *rcToReturn);
-    bool FoundError(int rcToCheck,int LINE,char FILE[],char method[],
+    bool FoundError(int rcToCheck,int LINE,const char FILE[],const char method[],
          int *rcToReturn);
-    bool MsgAllocError(char msg[],int *rcToReturn);
-    bool MsgAllocError(char msg[],int LINE,char FILE[],char method[],
+    bool MsgAllocError(const char msg[],int *rcToReturn);
+    bool MsgAllocError(const char msg[],int LINE,const char FILE[],const char method[],
       int *rcToReturn);
-    bool MsgDeallocError(char msg[],int *rcToReturn);
-    bool MsgDeallocError(char msg[],int LINE,char FILE[],char method[],
+    bool MsgDeallocError(const char msg[],int *rcToReturn);
+    bool MsgDeallocError(const char msg[],int LINE,const char FILE[],const char method[],
       int *rcToReturn);
-    bool MsgFoundError(int rcToCheck,char msg[],int *rcToReturn);
-    bool MsgFoundError(int rcToCheck,char msg[],int LINE,char FILE[],
-         char method[],int *rcToReturn);
-    void Open(char filename[]);
-    bool Write(char msg[],int msgtype);
-    bool Write(char msg[],int msgtype,int LINE,char FILE[],
-         char method[]);       
+    bool MsgFoundError(int rcToCheck,const char msg[],int *rcToReturn);
+    bool MsgFoundError(int rcToCheck,const char msg[],int LINE,const char FILE[],
+         const char method[],int *rcToReturn);
+    void Open(const char filename[]);
+    bool Write(const char msg[],int msgtype);
+    bool Write(const char msg[],int msgtype,int LINE,const char FILE[],
+         const char method[]);       
 // !PUBLIC Variables:          
     FILE *ESMC_LogFile;
     char nameLogErrFile[32];
@@ -110,9 +110,9 @@ private:
 // the default global log object
 extern ESMCI::LogErr ESMC_LogDefault;
 extern "C" {
- void FTN(f_esmf_logwrite0)(char *msg, int *msgtype, int *rc, ESMCI_FortranStrLenArg mlen);
- void FTN(f_esmf_logwrite1)(char *msg, int *msgtype,
-                            int *line, char *file, char *method, int *rc,
+ void FTN(f_esmf_logwrite0)(const char *msg, int *msgtype, int *rc, ESMCI_FortranStrLenArg mlen);
+ void FTN(f_esmf_logwrite1)(const char *msg, int *msgtype,
+                            int *line, const char *file, const char *method, int *rc,
                             ESMCI_FortranStrLenArg mlen, ESMCI_FortranStrLenArg flen,
 			    ESMCI_FortranStrLenArg mdlen);
 }

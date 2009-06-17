@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.69 2009/01/21 21:38:00 cdeluca Exp $
+// $Id: ESMC_LogErr.h,v 1.70 2009/06/17 21:37:18 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@ void *ptr;
 }ESMC_LogErr;
 
 // Class API
-int ESMC_LogWrite(char msg[], int msgtype);
+int ESMC_LogWrite(const char msg[], int msgtype);
 
 #ifdef __cplusplus
 } // extern "C"
