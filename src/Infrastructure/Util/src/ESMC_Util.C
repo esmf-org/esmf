@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.36 2009/02/25 06:36:08 theurich Exp $
+// $Id: ESMC_Util.C,v 1.37 2009/06/17 21:30:13 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.36 2009/02/25 06:36:08 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.37 2009/06/17 21:30:13 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -629,7 +629,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_F90toCstring"
 //BOPI
-// !IROUTINE:  ESMC_F90toCstring - Convert an F90 string into a C++ string
+// !IROUTINE:  ESMC_F90toCstring - Convert an F90 string into a C string
 //
 // !INTERFACE:
     char *ESMC_F90toCstring(
@@ -639,12 +639,12 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 //  must be deleted by the caller when finished!
 // 
 // !ARGUMENTS:
-    char *src,                // in - F90 character source buffer
-    int slen) {               // in - length of the F90 source buffer
+    const char *src,                // in - F90 character source buffer
+    ESMCI_FortranStrLenArg slen) {   // in - length of the F90 source buffer
 //EOPI
 
     char *cp, *ctmp;
-    int clen;
+    ESMCI_FortranStrLenArg clen;
 
     if (slen == 0) return NULL; // nothing to do, but not an error
     
@@ -656,7 +656,8 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
     }
 
     // count back from end of string to last non-blank character.
-    for (clen=slen, cp = &src[slen-1];(*cp == ' ') && (clen > 0); cp--, clen--);
+    for (clen=slen; clen > 0; clen--)
+      if (src[clen-1] != ' ') break;
 
     // make new space and leave room for a null terminator
     ctmp = new char[clen+1];
@@ -671,7 +672,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_F90toCstring"
 //BOPI
-// !IROUTINE:  ESMC_F90toCstring - Convert an F90 string into a C++ string
+// !IROUTINE:  ESMC_F90toCstring - Convert an F90 string into a C string
 //
 // !INTERFACE:
     int ESMC_F90toCstring(
@@ -681,14 +682,15 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 //  returns ESMF_SUCCESS or ESMF_FAILURE.
 // 
 // !ARGUMENTS:
-    char *src,                // in - F90 character source buffer
-    int slen,                 // in - length of the F90 source buffer
-    char *dst,                // inout - pointer to a buffer to hold C string
-    int dlen) {               // in - max len of C dst buffer, inc term NULL
+    const char *src,               // in - F90 character source buffer
+    ESMCI_FortranStrLenArg slen,   // in - length of the F90 source buffer
+    char *dst,                     // inout - pointer to a buffer to hold C string
+    ESMCI_FortranStrLenArg dlen) { // in - max len of C dst buffer, inc term NULL
 //EOPI
 
     char *cp;
-    int clen, rc;
+    ESMCI_FortranStrLenArg clen;
+    int rc;
     char msgbuf[ESMF_MAXSTR];
 
     // Initialize return code; assume routine not implemented
@@ -703,13 +705,14 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
     }
 
     // count back from end of string to last non-blank character.
-    for (clen=slen, cp = &src[slen-1];(*cp == ' ') && (clen > 0); cp--, clen--);
+    for (clen=slen; clen > 0; clen--)
+      if (src[clen-1] != ' ') break;
 
     // make sure dst space is long enough 
     if (clen >= dlen) {
        sprintf(msgbuf, 
-             "dest buffer size of %d bytes too small, must be >= %d bytes\n", 
-             dlen, clen+1);
+             "dest buffer size of %ld bytes too small, must be >= %ld bytes\n", 
+             (long) dlen, (long) clen+1);
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
        return rc;
     }
@@ -727,7 +730,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_CtoF90string"
 //BOPI
-// !IROUTINE:  ESMC_CtoF90string - Convert a C++ string into an F90 string
+// !IROUTINE:  ESMC_CtoF90string - Convert a C string into an F90 string
 //
 // !INTERFACE:
     int ESMC_CtoF90string(
@@ -737,13 +740,15 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 //  returns ESMF_SUCCESS or ESMF_FAILURE.
 // 
 // !ARGUMENTS:
-    char *src,                // in - C++ null term string source buffer
-    char *dst,                // inout - pointer to a buffer holding F90 string
-    int dlen) {               // in - length of dst buffer, space padded
+    const char *src,               // in - C++ null term string source buffer
+    char *dst,                     // inout - pointer to a buffer holding F90 string
+    
+    ESMCI_FortranStrLenArg dlen) {  // in - length of dst buffer, space padded
 //EOPI
 
     char *cp;
-    int clen, rc;
+    int rc;
+    ESMCI_FortranStrLenArg clen;
     char msgbuf[ESMF_MAXSTR];
 
     // Initialize return code; assume routine not implemented
@@ -760,8 +765,8 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
     clen = strlen(src);
     if (clen > dlen) {
        sprintf(msgbuf, 
-             "dest buffer size of %d bytes too small, must be >= %d bytes\n", 
-             dlen, clen);
+             "dest buffer size of %ld bytes too small, must be >= %ld bytes\n", 
+             (long) dlen, (long) clen);
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
        return rc;
     }
@@ -794,37 +799,37 @@ extern "C" {
 //  and should not appear in the fortran argument list
 // 
 // !ARGUMENTS:
-    char *src,          // in - F90 character source buffer
-    char *dst,          // inout - pointer to a buffer to hold C string
-    int *rc,            // out - return code
-    int *slen,          // *hidden* in - length of the F90 source buffer
-    int *dlen) {        // *hidden* in - max len of C dst buffer, inc term NULL
+    const char *src,               // in - F90 character source buffer
+    char *dst,                     // inout - pointer to a buffer to hold C string
+    int *rc,                       // out - return code
+    ESMCI_FortranStrLenArg slen,   // *hidden* in - length of the F90 source buffer
+    ESMCI_FortranStrLenArg dlen) { // *hidden* in - max len of C dst buffer, inc term NULL
 //EOPI
 
     char *cp;
-    int clen;
+    ESMCI_FortranStrLenArg clen;
     char msgbuf[ESMF_MAXSTR];
 
     // Initialize return code; assume routine not implemented
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     // minor idiotproofing
-    if ((src == NULL) || (src[0] == '\0') || (*slen <= 0) ||
-        (dst == NULL) || (*dlen <= 0)) {
+    if ((src == NULL) || (src[0] == '\0') || (slen < 0) ||
+        (dst == NULL) || (dlen <= 0)) {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad count or NULL pointer", rc);
        return;
     }
 
     // count back from end of string to last non-blank character.
-    for (clen= *slen, cp = &src[*slen-1]; (*cp == ' ') && (clen > 0); cp--, clen--)
-        ;
+    for (clen=slen; clen > 0; clen--)
+      if (src[clen-1] != ' ') break;
 
     // make sure dst space is long enough 
-    if (clen >= *dlen) {
+    if (clen >= dlen) {
        sprintf(msgbuf, 
-             "dest buffer size of %d bytes too small, must be >= %d bytes\n", 
-             *dlen, clen+1);
+             "dest buffer size of %ld bytes too small, must be >= %ld bytes\n", 
+             (long) dlen, (long) clen+1);
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, rc);
        return;
     }
@@ -856,23 +861,23 @@ extern "C" {
 //  and should not appear in the fortran argument list
 // 
 // !ARGUMENTS:
-    char *src,         // in - F90 character source buffer
-    char *dst,         // inout - pointer to a buffer to hold C string
-    int *rc,           // out - return code
-    int *slen,         // *hidden* in - length of the F90 source buffer
-    int *dlen) {       // *hidden* in - max len of C dst buffer, inc term NULL
+    const char *src,               // in - F90 character source buffer
+    char *dst,                     // inout - pointer to a buffer to hold C string
+    int *rc,                       // out - return code
+    ESMCI_FortranStrLenArg slen,   // *hidden* in - length of the F90 source buffer
+    ESMCI_FortranStrLenArg dlen) { // *hidden* in - max len of C dst buffer, inc term NULL
 //EOPI
 
     char *cp;
-    int clen;
+    ESMCI_FortranStrLenArg clen;
     char msgbuf[ESMF_MAXSTR];
 
     // Initialize return code; assume routine not implemented
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     // minor idiotproofing
-    if ((src == NULL) || (src[0] == '\0') || (*slen <= 0) ||
-        (dst == NULL) || (*dlen <= 0)) {
+    if ((src == NULL) || (src[0] == '\0') || (slen < 0) ||
+        (dst == NULL) || (dlen <= 0)) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad count or NULL pointer", rc);
             return;
@@ -880,10 +885,10 @@ extern "C" {
 
     // fortran doesn't need trailing null, so len can be up to == maxlen
     clen = strlen(src);
-    if (clen > *dlen) {
+    if (clen > dlen) {
        sprintf(msgbuf, 
-             "dest buffer size of %d bytes too small, must be >= %d bytes\n", 
-             *dlen, clen);
+             "dest buffer size of %ld bytes too small, must be >= %ld bytes\n", 
+             (long) dlen, (long) clen);
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, rc);
        return;
     }
@@ -891,7 +896,7 @@ extern "C" {
     // move bytes, then pad rest of string to spaces
     strncpy(dst, src, clen);
     
-    for (cp=&dst[clen]; cp < &dst[*dlen-1]; cp++)
+    for (cp=&dst[clen]; cp < &dst[dlen-1]; cp++)
         *cp = ' ';
 
     // return ok.  caller has passed us in dst buffer so it is up to them

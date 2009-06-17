@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.16 2009/04/17 22:40:47 rokuingh Exp $
+// $Id: ESMCI_Util.h,v 1.17 2009/06/17 21:30:12 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -222,14 +222,14 @@ ESMC_Logical ESMC_AxisIndexEqual(ESMC_AxisIndex *ai1, ESMC_AxisIndex *ai2);
 //  and copies the contents of the src to the dst, padding the remainder
 //  with spaces and no null terminator.
 //
-char *ESMC_F90toCstring(char *src, int slen);
-int  ESMC_F90toCstring(char *src, int slen, char *dst, int dlen);
-int  ESMC_CtoF90string(char *src, char *dst, int dlen);
+char *ESMC_F90toCstring(const char *src, ESMCI_FortranStrLenArg slen);
+int  ESMC_F90toCstring(const char *src, ESMCI_FortranStrLenArg slen, char *dst, ESMCI_FortranStrLenArg dlen);
+int  ESMC_CtoF90string(const char *src, char *dst, ESMCI_FortranStrLenArg dlen);
 extern "C" {
-void  FTN(esmf_f90tocstring)(char *src, char *dst, int *rc, 
-                             /* hidden */ int *slen, int *dlen);
-void  FTN(esmf_ctof90string)(char *src, char *dst, int *rc, 
-                             /* hidden */ int *slen, int *dlen);
+void  FTN(esmf_f90tocstring)(const char *src, char *dst, int *rc, 
+                             /* hidden */ ESMCI_FortranStrLenArg slen, ESMCI_FortranStrLenArg dlen);
+void  FTN(esmf_ctof90string)(const char *src, char *dst, int *rc, 
+                             /* hidden */ ESMCI_FortranStrLenArg slen, ESMCI_FortranStrLenArg dlen);
 }
 
 // return byte counts for TypeKinds
