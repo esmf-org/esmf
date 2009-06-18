@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.17 2009/06/16 16:06:09 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.18 2009/06/18 04:40:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -120,13 +120,10 @@ module ESMF_LocalArrayCreateMod
   public ESMF_LocalArrayDestroy
 
   public ESMF_LocalArraySetData
-  public ESMF_LocalArraySetInfo
  
   public ESMF_LocalArrayF90Allocate
   public ESMF_LocalArrayF90Deallocate
   public ESMF_LocalArrConstrF90Ptr    ! needed for C++ callback only
-
-  public ESMF_LocalArraySlice
 
   public ESMF_LocalArrayWriteRestart
   public ESMF_LocalArrayReadRestart
@@ -148,7 +145,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.17 2009/06/16 16:06:09 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.18 2009/06/18 04:40:58 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1470,12 +1467,12 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
  @\
         wrap%ptr##mrank##D##mtypekind => newp @\
         if (size(newp) .ne. 0) then @\
-          call c_ESMC_LocalArraySetInternal(array, wrap, & @\
+          call c_ESMC_LocalArraySetInfo(array, wrap, & @\
                                  ESMF_DATA_ADDRESS(newp(mloc)), counts, & @\
                                  lb, ub, offsets, & @\
                                  ESMF_TRUE, do_dealloc, localrc) @\
         else @\
-          call c_ESMC_LocalArraySetInternal(array, wrap, & @\
+          call c_ESMC_LocalArraySetInfo(array, wrap, & @\
                                  ESMF_NULL_POINTER, counts, & @\
                                  lb, ub, offsets, & @\
                                  ESMF_TRUE, do_dealloc, localrc) @\
@@ -1692,11 +1689,11 @@ TypeKindRankDeclarationMacro(LocalArrayAdjust)
         ESMF_CONTEXT, rc)) return @\
  @\
       ! Allocate a new buffer and return a copy @\
-      call c_ESMC_LocalArrayGetLbounds(arrayOut, mrank, lb, localrc) @\
+      call c_ESMC_LocalArrayGetLbounds(arrayOut, lb, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
-      call c_ESMC_LocalArrayGetUbounds(arrayOut, mrank, ub, localrc) @\
+      call c_ESMC_LocalArrayGetUbounds(arrayOut, ub, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -1837,9 +1834,9 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
 !------------------------------------------------------------------------------
     ! Local vars
     integer :: localrc                  ! local return code
-    logical :: needsdealloc             ! do we need to free space?
+    type(ESMF_Logical) :: dealloc       ! do we need to free space?
+    type(ESMF_TypeKind) :: typekind
     integer :: rank
-    type(ESMF_TypeKind) :: kind
 
 !  To reduce the depth of crossings of the F90/C++ boundary we first
 !   query to see if we are responsible for deleting the data space.  If so,
@@ -1855,32 +1852,29 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, larray, rc)
 
-    needsdealloc = .FALSE.
-
     ! TODO: document the current rule - if we do the allocate in
     !   the case of ESMF_DATA_COPY at create time then we delete the
     !   space.  otherwise, the user needs to destroy the array 
     !   (we will ignore the data) and call deallocate themselves.
 
-    ! Call Destruct first, then free this memory
-    call c_ESMC_LocalArrayNeedsDealloc(larray, needsdealloc, localrc)
+    call c_ESMC_LocalArrayGetDealloc(larray, dealloc, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
-    if (needsdealloc) then
+    if (dealloc.eq.ESMF_TRUE) then
       call c_ESMC_LocalArrayGetRank(larray, rank, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
-      call c_ESMC_LocalArrayGetTypeKind(larray, kind, localrc)
+      call c_ESMC_LocalArrayGetTypeKind(larray, typekind, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
-      call ESMF_LocalArrayF90Deallocate(larray, rank, kind, localrc)
+      call ESMF_LocalArrayF90Deallocate(larray, rank, typekind, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
-      call c_ESMC_LocalArraySetNoDealloc(larray, localrc)
+      call c_ESMC_LocalArraySetDealloc(larray, ESMF_FALSE, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
@@ -1900,53 +1894,6 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_LocalArrayDestroy
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_LocalArraySetInfo"
-!BOPI
-! !IROUTINE: ESMF_LocalArraySetInfo
-!
-! !INTERFACE:
-  subroutine ESMF_LocalArraySetInfo(array, counts, lbounds, ubounds, &
-                                        offsets, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_LocalArray), intent(inout) :: array 
-    integer, dimension(:), intent(in), optional :: counts
-    integer, dimension(:), intent(in), optional :: lbounds
-    integer, dimension(:), intent(in), optional :: ubounds
-    integer, dimension(:), intent(in), optional :: offsets
-    integer, intent(out), optional :: rc     
-!
-! !DESCRIPTION:
-!      Must be used with care - if you set the values on an already created
-!      array object to be inconsistent with the F90 pointer, then bad things
-!      will happen.
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer :: localrc
-
-    ! Initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
-
-    call c_ESMC_LocalArraySetInfo(array, counts, lbounds, ubounds, offsets, &
-      localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_LocalArraySetInfo
 !------------------------------------------------------------------------------
 
 
@@ -2014,7 +1961,7 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
         ! Set offsets for now to 0, since this is apparently unused. @\
         offsets = 0 @\
  @\
-        call c_ESMC_LocalArraySetInternal(array, l##mrank##D##mtypekind, & @\
+        call c_ESMC_LocalArraySetInfo(array, l##mrank##D##mtypekind, & @\
                         ESMF_DATA_ADDRESS(l##mrank##D##mtypekind%ptr##mrank##D##mtypekind ( mloc )), & @\
                         counts, lbounds, ubounds, offsets, & @\
                         ESMF_TRUE, ESMF_TRUE, localrc) @\
@@ -2480,117 +2427,6 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 !------------------------------------------------------------------------------ 
 
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!
-! This section is for higher level LocalArray funcs
-!
-!------------------------------------------------------------------------------ 
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_LocalArraySlice"
-!BOPI
-! !IROUTINE: ESMF_LocalArraySlice - extract a subset from a LocalArray
-!
-! !INTERFACE:
-      function ESMF_LocalArraySlice(array, slicedim, sliceloc, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_LocalArray) :: ESMF_LocalArraySlice
-!
-! !ARGUMENTS:
-      type(ESMF_LocalArray), intent(in) :: array 
-      integer, intent(in) :: slicedim
-      integer, intent(in) :: sliceloc
-      integer, intent(out), optional :: rc            
-!
-! !DESCRIPTION:
-!      Extract an (N-1)D array from an N-D array.  The dimension to be
-!      dropped is the {\tt slicedim} argument, and the location along
-!      the dropped dimension is the {\tt sliceloc} argument.  This routine
-!      allocates new space and copies the data, leaving the original array
-!      unchanged.
-!
-!EOPI
-        ! BOPI/EOPI because the actual function is not working yet
-
-        ! Local vars
-        type (ESMF_LocalArray) :: newarray  ! new C++ LocalArray
-        integer :: localrc                   ! local return code
-        logical :: rcpresent                ! did user specify rc?
-        integer :: rank
-        type (ESMF_TypeKind) :: kind
-        integer :: i, counts(ESMF_MAXDIM), lb(ESMF_MAXDIM), ub(ESMF_MAXDIM)
-
-        localrc = ESMF_RC_NOT_IMPL
-        rcpresent = .FALSE.
-        newarray%this = ESMF_NULL_POINTER
-
-        ! Initialize return code; assume routine not implemented
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_RC_NOT_IMPL
-        endif
-
-        ! Check init status of arguments
-        ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
-    
-        ! Get info from the existing array
-        call c_ESMC_LocalArrayGetRank(array, rank, localrc)
-        call c_ESMC_LocalArrayGetTypeKind(array, kind, localrc)    
-        call c_ESMC_LocalArrayGetLengths(array, rank, counts, localrc)  
-
-        ! Basic sanity checks - slice dim is ok, sliced location exists, etc.
-        if ((slicedim .lt. 1) .or. (slicedim .gt. rank)) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Bad value for slicedim", &
-                                 ESMF_CONTEXT, rc)) return
-
-            ! "ESMF_LocalArraySlice: slicedim value ", slicedim, &
-            ! " must be between 1 and ", rank
-        endif
-        if ((sliceloc .lt. 1) .or. (sliceloc .gt. counts(rank))) then
-           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Bad value for sliceloc", &
-                                 ESMF_CONTEXT, rc)) return
-            !"ESMF_LocalArraySlice: sliceloc value ", sliceloc, &
-            ! " must be between 1 and ", counts(rank)
-        endif
-
-        ! This slice will be rank < 1.  Remove the counts corresponding
-        ! to the sliced dim (save for later error checking).
-        ! TODO: add error checks
-        do i=sliceloc, rank-1
-           counts(i) = counts(i+1)
-        enddo
-        rank = rank - 1
-
-        call c_ESMC_LocalArrayCreateNoData(newarray, rank, kind, &
-                                           ESMF_FROM_FORTRAN, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        call ESMF_LocalArrConstrF90Ptr(newarray, counts, rank, kind, &
-                                          lb, ub, localrc)
-
-        ! At this point the new array exists, and has space allocated, but it
-        ! does not contain data from the old array.  Now we have a T/K/R prob.
-
-        ! put old F90 ptr into wrap
-        ! call c_ESMC_LocalArrayGetFPtr(array, wrap, localrc)
-
-        ! put new F90 ptr into wrap
-        ! call c_ESMC_LocalArrayGetFPtr(newarray, wrap, localrc)
-
-        ! there must be something like this we can do here...
-        ! newarray = RESHAPE(array(sliceloc, :, :), counts)
-
-
-        ! Set return values
-        ESMF_LocalArraySlice = newarray
-        if (rcpresent) rc = localrc
-
-        end function ESMF_LocalArraySlice
-
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------

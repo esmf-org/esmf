@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.h,v 1.7 2009/06/17 19:00:32 theurich Exp $
+// $Id: ESMCI_LocalArray.h,v 1.8 2009/06/18 04:40:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -50,14 +50,11 @@ namespace ESMCI {
   // to do the actual copy.
 #define ESMF_FPTR_BASE_SIZE         160
 #define ESMF_FPTR_PLUS_RANK         64
-#define ESMF_FPTR_MAXRANK_POSSIBLE  7
   
   struct c_F90ptr {
-    // Dummy structure which is at least as big as an Fortran pointer 
+    // Dummy structure which is at least as big as the Fortran pointer 
     // dope vector on any platform.
-    unsigned char basepad[ESMF_FPTR_BASE_SIZE];
-    // plus extra space needed per rank
-    unsigned char extrapad[ESMF_FPTR_MAXRANK_POSSIBLE*ESMF_FPTR_PLUS_RANK];
+    unsigned char pad[ESMF_FPTR_BASE_SIZE + ESMF_MAXDIM * ESMF_FPTR_PLUS_RANK];
   };
 
   // this must stay in sync with the Fortran counter-part
@@ -88,23 +85,23 @@ namespace ESMCI {
   class LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
 
    protected:
-    int rank;                      // dimensionality (1, 2, ..., 7)
-    ESMC_TypeKind typekind;        // short, long (*4, *8)
-    LocalArrayOrigin origin;       // was the create called from F90 or C++?
-    ESMC_Logical needs_dealloc;    // localarray responsible for deallocation?
-    ESMC_Logical iscontig;         // optimization possible if all contig
-    void *base_addr;               // real start of memory
-    int byte_count;                // size (in bytes) of data region
-    int offset[ESMF_MAXDIM];       // byte offset from base to 1st element/dim
-    int lbound[ESMF_MAXDIM];       // used for fortran indexing
-    int ubound[ESMF_MAXDIM];       // used for fortran indexing
-    int counts[ESMF_MAXDIM];       // number of elements/dim
-    int dimOff[ESMF_MAXDIM];       // Offset size per dim for computing pos.
-    int lOff;                      // Offset due to lower bounds for pos. 
-    int bytestride[ESMF_MAXDIM];   // byte spacing between elements/dim
-    struct c_F90ptr f90dopev;      // opaque object which is real f90 ptr
-                                   // this is memcpy'd to save and restore 
-                                   // contents are not interpreted by esmf
+    ESMC_TypeKind typekind;         // I1, I2, I4, I8, R4, R8
+    int rank;                       // 1, 2, ..., ESMF_MAXDIM
+    LocalArrayOrigin origin;        // create called from Fortran or C++?
+    bool dealloc;                   // responsible for deallocation?
+    bool contig;                    // optimization possible if all contiguous
+    int offset[ESMF_MAXDIM];        // byte offset from base to 1st element/dim
+    int lbound[ESMF_MAXDIM];        // used for fortran indexing
+    int ubound[ESMF_MAXDIM];        // used for fortran indexing
+    int counts[ESMF_MAXDIM];        // number of elements/dim
+    int dimOff[ESMF_MAXDIM];        // Offset size per dim for computing pos.
+    int lOff;                       // Offset due to lower bounds for pos. 
+    int bytestride[ESMF_MAXDIM];    // byte spacing between elements/dim
+    int byte_count;                 // size (in bytes) of data region
+    void *base_addr;                // start of data allocation
+    struct c_F90ptr f90dopev;       // opaque object which is real f90 ptr
+                                    // this is memcpy'd to save and restore 
+                                    // contents are not interpreted by esmf
 
    public:
     // create() and destroy()
@@ -129,7 +126,7 @@ namespace ESMCI {
     // construct() and destruct()
     int construct(int irank, ESMC_TypeKind dk, int *counts, void *base,
       LocalArrayOrigin oflag, struct c_F90ptr *f90ptr,
-      LocalArrayDoAllocate aflag, CopyFlag docopy, ESMC_Logical dflag,
+      LocalArrayDoAllocate aflag, CopyFlag docopy, bool dflag,
       char *name, int *lbounds, int *ubounds, int *offsets);
     int destruct();
 
@@ -145,74 +142,30 @@ namespace ESMCI {
     LocalArray();
     ~LocalArray();
     
-    
     // simple set/get methods
     void setRank(int rank){ this->rank = rank; }
-    int getRank()const{ return this->rank; }
+    int getRank()const{ return rank; }
     void setTypeKind(ESMC_TypeKind typekind){ this->typekind = typekind; }
-    ESMC_TypeKind getTypeKind()const{ return this->typekind; }
+    ESMC_TypeKind getTypeKind()const{ return typekind; }
     void setBaseAddr(void *base_addr){ this->base_addr = base_addr; }
-    void *getBaseAddr()const{ return this->base_addr; } 
+    void *getBaseAddr()const{ return base_addr; } 
     void setOrigin(LocalArrayOrigin origin){ this->origin = origin; } 
-    LocalArrayOrigin getOrigin()const{ return this->origin; }
+    LocalArrayOrigin getOrigin()const{ return origin; }
     void setByteCount(int byte_count){ this->byte_count = byte_count; }
-    int getByteCount()const{ return this->byte_count; }
+    int getByteCount()const{ return byte_count; }
     int setName(char *name){ return ESMC_BaseSetName(name, "LocalArray"); }
     const char *getName()const{ return ESMC_BaseGetName(); }
-    void setNoDealloc(){ this->needs_dealloc = ESMF_FALSE; }
-    void setDealloc(){ this->needs_dealloc = ESMF_TRUE; }
-    bool needsDealloc()const{
-      return this->needs_dealloc == ESMF_TRUE ? true : false;
-    }
-      
-    // multi-dim get/set methods
-    int ESMC_LocalArraySetLengths(int n, int *l){
-      for (int i = 0; i < n; i++)
-        this->counts[i] = l[i]; 
-      return ESMF_SUCCESS;
-    }
-    int ESMC_LocalArraySetLengths(int ni,int nj=0,int nk=0,int nl=0,int nm=0){ 
-      this->counts[0] = ni; this->counts[1] = nj; 
-      this->counts[2] = nk; this->counts[3] = nl; 
-      this->counts[4] = nm;
-      return ESMF_SUCCESS;
-    }
-    int ESMC_LocalArrayGetLengths(int n, int *l)const{
-      for (int i = 0; i < n; i++)
-        l[i] = this->counts[i]; 
-      return ESMF_SUCCESS;
-    }
-    int ESMC_LocalArrayGetLengths(int *ni, int *nj=NULL, int *nk=NULL, 
-      int *nl=NULL, int *nm=NULL)const{ 
-      *ni = this->counts[0];
-      if (nj) *nj = this->counts[1]; 
-      if (nk) *nk = this->counts[2];
-      if (nl) *nl = this->counts[3]; 
-      if (nm) *nm = this->counts[4];
-      return ESMF_SUCCESS;
-    }
-    int ESMC_LocalArrayGetLbounds(int n, int *l)const{
-      for (int i = 0; i < n; i++)
-        l[i] = this->lbound[i];
-       return ESMF_SUCCESS;
-    }
-    int ESMC_LocalArrayGetUbounds(int n, int *u)const{
-      for (int i = 0; i < n; i++)
-        u[i] = this->ubound[i];
-      return ESMF_SUCCESS;
-    }
-    int ESMC_LocalArrayGetCounts(int n, int *c)const{
-      for (int i = 0; i < n; i++)
-        c[i] = this->counts[i];
-      return ESMF_SUCCESS;
-    }
+    void setDealloc(bool dealloc){ this->dealloc = dealloc; }
+    bool getDealloc()const{ return dealloc; }
+    const int *getCounts()const{ return counts; }
+    const int *getLbounds()const{ return lbound; }
+    const int *getUbounds()const{ return ubound; }
+    
+    // universal set method
     int setInfo(struct c_F90ptr *fptr, void *base, int *counts, 
-      int *lbounds, int *ubounds, int *offsets, ESMC_Logical *contig,
-      ESMC_Logical *dealloc);
-    int getInfo(struct c_F90ptr *fptr, void *base, int *counts, 
-      int *lbounds, int *ubounds, int *offsets)const;
+      int *lbounds, int *ubounds, int *offsets, bool *cflag, bool *dflag);
 
-    // copy the contents of Fortran ptr
+    // set/get the Fortran dope vector
     int setFortranPtr(const struct c_F90ptr *p);
     int getFortranPtr(struct c_F90ptr *p) const;
     
@@ -254,7 +207,7 @@ namespace ESMCI {
     static int tkrPtrCopy(void *dst, void *src, ESMC_TypeKind typekind,
       int rank);
   
-  };  // class ESMC_LocalArray
+  };  // class LocalArray
 
 } // namespace ESMCI
 

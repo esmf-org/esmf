@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.11 2009/06/16 16:06:10 theurich Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.12 2009/06/18 04:40:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -124,11 +124,11 @@ module ESMF_LocalArrayGetMod
  @\
       ! Allocate a new buffer if requested and return a copy @\
       if (copyreq) then @\
-        call c_ESMC_LocalArrayGetLbounds(larray, mrank, lb, localrc) @\
+        call c_ESMC_LocalArrayGetLbounds(larray, lb, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
-        call c_ESMC_LocalArrayGetUbounds(larray, mrank, ub, localrc) @\
+        call c_ESMC_LocalArrayGetUbounds(larray, ub, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
@@ -203,7 +203,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.11 2009/06/16 16:06:10 theurich Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.12 2009/06/18 04:40:58 theurich Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -312,11 +312,13 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, larray, rc)
 
+    call c_ESMC_LocalArrayGetRank(larray, lrank, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     if (present(rank)) then
-      call c_ESMC_LocalArrayGetRank(larray, rank, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      rank = lrank
     endif
 
     if (present(typekind)) then
@@ -327,33 +329,39 @@ contains
     endif
 
     if (present(counts)) then
-      call c_ESMC_LocalArrayGetRank(larray, lrank, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      call c_ESMC_LocalArrayGetLengths(larray, lrank, counts, localrc)
+      if (size(counts) < lrank) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+          "- size of counts argument is smaller than rank", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+      call c_esmc_localarraygetcounts(larray, counts, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(lbounds)) then
-      call c_ESMC_LocalArrayGetRank(larray, lrank, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      call c_ESMC_LocalArrayGetLbounds(larray, lrank, lbounds, localrc)
+      if (size(lbounds) < lrank) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+          "- size of lbounds argument is smaller than rank", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+      call c_ESMC_LocalArrayGetLbounds(larray, lbounds, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(ubounds)) then
-      call c_ESMC_LocalArrayGetRank(larray, lrank, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      call c_ESMC_LocalArrayGetUbounds(larray, lrank, ubounds, localrc)
+      if (size(ubounds) < lrank) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+          "- size of ubounds argument is smaller than rank", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+      call c_ESMC_LocalArrayGetUbounds(larray, ubounds, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

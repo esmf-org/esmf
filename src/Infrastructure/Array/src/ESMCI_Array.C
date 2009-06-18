@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.40 2009/06/10 20:23:31 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.41 2009/06/18 04:40:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.40 2009/06/10 20:23:31 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.41 2009/06/18 04:40:58 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -488,10 +488,7 @@ Array *Array::create(
   }else if (tensorCount > 0){
     // tensor dimensions are present, but no explicit bounds provided'
     // -> set to bounds of incoming array at DE 0 (should be same across DEs!)
-    int *undistLBound = new int[rank];
-    localrc = larrayListArg[0]->ESMC_LocalArrayGetLbounds(rank, undistLBound);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
-      return ESMC_NULL_POINTER;
+    const int *undistLBound = larrayListArg[0]->getLbounds();
     undistLBoundArrayAllocFlag = 1;  // set
     undistLBoundArray = new int[tensorCount];
     int tensorIndex = 0;  // reset
@@ -500,7 +497,6 @@ Array *Array::create(
         undistLBoundArray[tensorIndex] = undistLBound[i];
         ++tensorIndex;
       }
-    delete [] undistLBound;
   }
   int undistUBoundArrayAllocFlag = 0;  // reset
   int *undistUBoundArray = NULL; // reset
@@ -520,10 +516,7 @@ Array *Array::create(
     // tensor dimensions are present, but no explicit bounds provided
     // -> set to bounds of incoming array at DE 0
     // -> set to bounds of incoming array at DE 0 (should be same across DEs!)
-    int *undistUBound = new int[rank];
-    localrc = larrayListArg[0]->ESMC_LocalArrayGetUbounds(rank, undistUBound);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
-      return ESMC_NULL_POINTER;
+    const int *undistUBound = larrayListArg[0]->getUbounds();
     undistUBoundArrayAllocFlag = 1;  // set
     undistUBoundArray = new int[tensorCount];
     int tensorIndex = 0;  // reset
@@ -532,7 +525,6 @@ Array *Array::create(
         undistUBoundArray[tensorIndex] = undistUBound[i];
         ++tensorIndex;
       }
-    delete [] undistUBound;
   }
   // tensorElementCount
   int tensorElementCount = 1;  // prime tensorElementCount
@@ -820,13 +812,12 @@ Array *Array::create(
 
   // allocate LocalArray list that holds all PET-local DEs and adjust elements
   LocalArray **larrayList = new LocalArray*[localDeCount];
-  int *temp_counts = new int[rank];
   int *temp_larrayLBound = new int[rank];
   int *temp_larrayUBound = new int[rank];
   for (int i=0; i<localDeCount; i++){
     if (indexflag == ESMF_INDEX_USER){
       // don't adjust dope vector, use F90 pointers directly and their bounds
-      larrayListArg[i]->ESMC_LocalArrayGetCounts(rank, temp_counts);
+      const int *temp_counts = larrayListArg[i]->getCounts();
       int j=0;    // reset distributed index
       int jjj=0;  // reset undistributed index
       for (int jj=0; jj<rank; jj++){
@@ -896,10 +887,7 @@ Array *Array::create(
         }
       }
       // adjust all of the bounds to match absolute bounds of F90 pointers
-      int *larrayLBound = new int[rank];
-      localrc = larrayListArg[i]->ESMC_LocalArrayGetLbounds(rank, larrayLBound);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
-        return ESMC_NULL_POINTER;
+      const int *larrayLBound = larrayListArg[i]->getLbounds();
       j=0;    // reset distributed index
       for (int jj=0; jj<rank; jj++){
         if (arrayToDistGridMapArray[jj]){
@@ -914,12 +902,11 @@ Array *Array::create(
           ++j;
         }
       }      
-      delete [] larrayLBound;
       // use F90 pointers directly
       larrayList[i] = larrayListArg[i];
     }else{
       // prepare to adjust dope vector
-      larrayListArg[i]->ESMC_LocalArrayGetCounts(rank, temp_counts);
+      const int *temp_counts = larrayListArg[i]->getCounts();
       int j=0;    // reset distributed index
       int jjj=0;  // reset undistributed index
       for (int jj=0; jj<rank; jj++){
@@ -997,7 +984,6 @@ Array *Array::create(
         return ESMC_NULL_POINTER;
     }        
   }
-  delete [] temp_counts;
   delete [] temp_larrayLBound;
   delete [] temp_larrayUBound;
   

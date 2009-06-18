@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.C,v 1.8 2009/06/17 19:00:33 theurich Exp $
+// $Id: ESMCI_LocalArray.C,v 1.9 2009/06/18 04:40:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.8 2009/06/17 19:00:33 theurich Exp $";
+static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.9 2009/06/18 04:40:58 theurich Exp $";
 //-----------------------------------------------------------------------------
 
   
@@ -334,7 +334,7 @@ LocalArray *LocalArray::create(
       larrayOut->ubound[i] = ubounds[i];
   
   // mark this copy to be responsible for deallocation of its data area alloc
-  larrayOut->needs_dealloc = ESMF_TRUE;
+  larrayOut->dealloc = true;
 
   // call into F90 copy method, which will use larrayOut's lbound and ubound
   FTN(f_esmf_localarraycopyf90ptr)(&larrayIn, &larrayOut, &localrc);
@@ -539,19 +539,19 @@ int LocalArray::construct(
 //    int error return code
 //
 // !ARGUMENTS:
-  int irank,                 // dimensionality
-  ESMC_TypeKind dk,          // short/long, etc  (*2, *4, *8)
-  int *icounts,              // number of items in each dim
-  void *base,                // base memory address of data block
-  LocalArrayOrigin oflag,    // create called from F90 or C++?
-  struct c_F90ptr *f90ptr,   // opaque type which fortran understands (dopev)
+  int irank,                  // dimensionality
+  ESMC_TypeKind dk,           // short/long, etc  (*2, *4, *8)
+  int *icounts,               // number of items in each dim
+  void *base,                 // base memory address of data block
+  LocalArrayOrigin oflag,     // create called from F90 or C++?
+  struct c_F90ptr *f90ptr,    // opaque type which fortran understands (dopev)
   LocalArrayDoAllocate aflag, // do we allocate space or not?
-  CopyFlag docopy,      // do we make a copy of the data?
-  ESMC_Logical dflag,        // do we deallocate space or not?
-  char *name,                // array name, default created if NULL
-  int *lbounds,              // lower index number per dim
-  int *ubounds,              // upper index number per dim
-  int *offsets) {            // offset in bytes to start of each dim
+  CopyFlag docopy,            // do we make a copy of the data?
+  bool dflag,                 // do we deallocate space or not?
+  char *name,                 // array name, default created if NULL
+  int *lbounds,               // lower index number per dim
+  int *ubounds,               // upper index number per dim
+  int *offsets) {             // offset in bytes to start of each dim
 //
 // !DESCRIPTION:
 //  ESMF routine which fills in the contents of an already allocated
@@ -587,7 +587,7 @@ int LocalArray::construct(
     offset[i] = 0;
   }
   origin = oflag;
-  needs_dealloc = dflag;
+  dealloc = dflag;
   byte_count = ESMC_TypeKindSize(typekind) * totalcount; 
 
   // set Fortran dope vector if provided for existing allocation
@@ -667,8 +667,8 @@ int LocalArray::construct(
     LocalArray *aptr = this;
 
     // check origin and alloc flag, and call dealloc routine if needed 
-    if (needs_dealloc != ESMF_TRUE)
-    return ESMF_SUCCESS;
+    if (dealloc == false)
+      return ESMF_SUCCESS;
 
     // if there is an F90 dope vector, we have to call back into fortran
     // to deallocate this.   if we want to support a C++ only library,
@@ -742,7 +742,7 @@ int LocalArray::construct(
     // copy the LocalArray members, including the _reference_ to its data alloc.
     *larray = *this;
     // mark this copy not to be responsible for deallocation
-    larray->needs_dealloc = ESMF_FALSE;
+    larray->dealloc = false;
     // adjust the lbound and ubound members in larray copy
     for (int i=0; i<rank; i++){
       larray->lbound[i] = lbounds[i];
@@ -798,8 +798,8 @@ int LocalArray::construct(
     int *lbounds,             // in - lowest valid index
     int *ubounds,             // in - highest valid index
     int *offsets,             // in - numbytes from base to 1st item/dim
-    ESMC_Logical *contig,     // in - is memory chunk contiguous?
-    ESMC_Logical *dealloc) {  // in - do we need to deallocate at delete?
+    bool *cflag,              // in - is memory chunk contiguous?
+    bool *dflag) {            // in - do we need to deallocate at delete?
 //
 // !DESCRIPTION:
 //     Sets a list of values associated with an already created pointer.
@@ -835,10 +835,10 @@ int LocalArray::construct(
         lbound[i] = 1;
         ubound[i] = 1;
     }
-    if (contig)
-        iscontig = *contig;
-    if (dealloc)
-        needs_dealloc = *dealloc;
+    if (cflag)
+        contig = *cflag;
+    if (dflag)
+        dealloc = *dflag;
 
     byte_count = ESMC_TypeKindSize(typekind) * totalcount;
 
@@ -858,59 +858,6 @@ int LocalArray::construct(
 
 
   }
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::LocalArray::getInfo()"
-//BOP
-// !IROUTINE:  ESMCI::LocalArray::getInfo - Get the most common Fortran needs
-//
-// !INTERFACE:
-      int LocalArray::getInfo(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-    struct c_F90ptr *fptr,    // out - f90 pointer
-    void *base,               // out - base memory address
-    int *icounts,             // out - counts along each dim
-    int *lbounds,             // out - lowest valid index
-    int *ubounds,             // out - highest valid index
-    int *offsets)const{       // out - numbytes from base to 1st item/dim
-//
-// !DESCRIPTION:
-//     Gets a list of values associated with a LocalArray object.
-//
-//EOP
-
-    // Initialize return code; assume routine not implemented
-    int rc = ESMC_RC_NOT_IMPL;
-
-    if (fptr)
-      tkrPtrCopy((void *)fptr, (void *)(&f90dopev), typekind, rank);
-
-    if (base)
-        base = base_addr;
-
-    if (icounts) 
-        for (int i=0; i<rank; i++) 
-            icounts[i] = counts[i];
-    if (lbounds)
-        for (int i=0; i<rank; i++)  
-            lbounds[i] = lbound[i];
-    if (ubounds) 
-        for (int i=0; i<rank; i++) 
-            ubounds[i] = ubound[i];
-    if (offsets) 
-        for (int i=0; i<rank; i++) 
-            offsets[i] = offset[i];
-    
-
-    rc = ESMF_SUCCESS;
-    return rc;
-
- }
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -1155,8 +1102,7 @@ template int LocalArray::getData(int *index, ESMC_I4 *data);
       int bytes = 0;
       unsigned char *dopev = (unsigned char *)&f90dopev;
       if (base_addr)
-        bytes = ESMF_FPTR_BASE_SIZE
-          + ESMF_FPTR_MAXRANK_POSSIBLE*ESMF_FPTR_PLUS_RANK;
+        bytes = ESMF_FPTR_BASE_SIZE + ESMF_MAXDIM * ESMF_FPTR_PLUS_RANK;
       for (i=0; i<bytes; i++)
         printf(" [%03d]\t0x%02x\n", i, (int)dopev[i]);
       
