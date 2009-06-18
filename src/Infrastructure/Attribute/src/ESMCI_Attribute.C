@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.38 2009/06/12 22:25:23 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.39 2009/06/18 17:36:34 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.38 2009/06/12 22:25:23 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.39 2009/06/18 17:36:34 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3472,13 +3472,13 @@ namespace ESMCI {
   // write the header
   sprintf(msgbuf, "Name: %s\t  Convention: %s\t  Purpose: %s\t\r\n\n",
     basename.c_str(),convention.c_str(),purpose.c_str());
-  fprintf(tab,msgbuf);
+  fprintf(tab,"%s",msgbuf);
   for (i=0; i<columns; i++) {
     sprintf(msgbuf, "%-*s\t",attrLens[i],attrNames.at(i).c_str());
-    fprintf(tab,msgbuf);
+    fprintf(tab,"%s",msgbuf);
   }
   sprintf(msgbuf, "\r\n");
-  fprintf(tab,msgbuf);
+  fprintf(tab,"%s",msgbuf);
     
   localrc = AttributeWriteTabTraverse(tab,convention,purpose,index,columns,
     attrLens,attrNames);
@@ -3600,12 +3600,12 @@ namespace ESMCI {
         tlen = attrLens[index];
       if (attrList.at(i)->items == 0) {
         sprintf(msgbuf, "%-*\t",tlen);
-        fprintf(tab,msgbuf);
+        fprintf(tab,"%s",msgbuf);
       } else if (attrList.at(i)->items == 1) {
         if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
           sprintf(msgbuf, "%-*d\t",tlen,attrList.at(i)->vi);
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) 
-          sprintf(msgbuf, "%-*ld\t",tlen,attrList.at(i)->vl); 
+          sprintf(msgbuf, "%-*lld\t",tlen,attrList.at(i)->vl); 
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4) 
           sprintf(msgbuf, "%-*f\t",tlen,attrList.at(i)->vf);  
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8) 
@@ -3620,18 +3620,18 @@ namespace ESMCI {
           sprintf(msgbuf, "%-*s\t",tlen,attrList.at(i)->vcp.c_str());
         else
           sprintf(msgbuf, "%-*s\t",tlen,"N/A");
-        fprintf(tab,msgbuf);
+        fprintf(tab,"%s",msgbuf);
       }
       else if (attrList.at(i)->items > 1) { 
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
         sprintf(msgbuf,"ITEMS>1");
-        fprintf(tab,msgbuf);
+        fprintf(tab,"%s",msgbuf);
       }
      ++index;
       if (index == columns) {
         sprintf(msgbuf, "\r\n");
-        fprintf(tab,msgbuf);
+        fprintf(tab,"%s",msgbuf);
       }
     }
   }
@@ -3776,13 +3776,13 @@ namespace ESMCI {
   // Write the XML file header
   sprintf(msgbuf,"<model_component name=\"%s\" full_name=\"%s\" version=\"%s\"\n",
     modelcompname.c_str(),fullname.c_str(),version.c_str());
-  fprintf(xml,msgbuf);
+  fprintf(xml,"%s",msgbuf);
   sprintf(msgbuf,"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
-  fprintf(xml,msgbuf);
+  fprintf(xml,"%s",msgbuf);
   sprintf(msgbuf,"xsi:schemaLocation=\"http://www.esmf.ucar.edu file:/esmf_model_component.xsd\"\n");
-  fprintf(xml,msgbuf);
+  fprintf(xml,"%s",msgbuf);
   sprintf(msgbuf,"xmlns=\"http://www.esmf.ucar.edu\">\n\n");
-  fprintf(xml,msgbuf);
+  fprintf(xml,"%s",msgbuf);
 
   // determine the number of fields to write
   localrc = AttributeCountTree(convention, purpose, varobj, rows, columns);
@@ -3809,7 +3809,7 @@ namespace ESMCI {
 
   // write the footer
   sprintf(msgbuf,"\n</model_component>\n");
-  fprintf(xml,msgbuf);
+  fprintf(xml,"%s",msgbuf);
   
   // close the file
   fclose(xml);
@@ -3875,7 +3875,7 @@ namespace ESMCI {
   if (!fielddone) {
     // write the field header
     sprintf(msgbuf,"<variable_set>\n");
-    fprintf(xml,msgbuf);
+    fprintf(xml,"%s",msgbuf);
     // call the field write buffer method
     localrc = AttributeWriteXMLbufferfield(xml, convention, purpose, index, columns);
     if (localrc != ESMF_SUCCESS) {
@@ -3886,7 +3886,7 @@ namespace ESMCI {
     }
     // write the field footer
     sprintf(msgbuf,"</variable_set>\n\n");
-    fprintf(xml,msgbuf);
+    fprintf(xml,"%s",msgbuf);
     // done with field
     fielddone = true;
   }
@@ -3897,9 +3897,9 @@ namespace ESMCI {
   if (attpack) {
     // write the field header
     sprintf(msgbuf,"<GridSpec name=\"%s\">\n", attpack->attrBase->ESMC_BaseGetName());
-    fprintf(xml,msgbuf);
+    fprintf(xml,"%s",msgbuf);
     sprintf(msgbuf,"  <Mosaic name=\"%s\">\n", attpack->attrBase->ESMC_BaseGetName());
-    fprintf(xml,msgbuf);
+    fprintf(xml,"%s",msgbuf);
     localrc = attpack->AttributeWriteXMLbuffergrid(xml);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "AttributeWriteXMLtraverse failed AttributeWriteXMLbuffer");
@@ -3908,9 +3908,9 @@ namespace ESMCI {
       return ESMF_FAILURE;
     }
     sprintf(msgbuf,"  </Mosaic>\n");
-    fprintf(xml,msgbuf);
+    fprintf(xml,"%s",msgbuf);
     sprintf(msgbuf,"</GridSpec>\n");
-    fprintf(xml,msgbuf);
+    fprintf(xml,"%s",msgbuf);
     griddone = true;
     return ESMF_SUCCESS;
   }
@@ -3957,7 +3957,7 @@ namespace ESMCI {
           sprintf(msgbuf, "    <%s>%d</%s>\n",attrList.at(i)->attrName.c_str(),
             attrList.at(i)->vi,attrList.at(i)->attrName.c_str());
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) 
-          sprintf(msgbuf, "    <%s>%ld</%s>\n",attrList.at(i)->attrName.c_str(),
+          sprintf(msgbuf, "    <%s>%lld</%s>\n",attrList.at(i)->attrName.c_str(),
             attrList.at(i)->vl,attrList.at(i)->attrName.c_str());
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4) 
           sprintf(msgbuf, "    <%s>%f</%s>\n",attrList.at(i)->attrName.c_str(),
@@ -3979,7 +3979,7 @@ namespace ESMCI {
         else
           sprintf(msgbuf, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
             "N/A",attrList.at(i)->attrName.c_str());
-      fprintf(xml,msgbuf);
+      fprintf(xml,"%s",msgbuf);
       } else if (attrList.at(i)->items >1) { 
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
         ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
@@ -4029,11 +4029,11 @@ namespace ESMCI {
     for (i=0;  i<attrList.size(); ++i) { 
       if (attrList.at(i)->items == 1) {
       sprintf(msgbuf,"<%s_set>\n",attrList.at(i)->attrName.c_str());
-      fprintf(xml,msgbuf);
+      fprintf(xml,"%s",msgbuf);
         if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
           sprintf(msgbuf, "  <%s name=\"%d\" />\n",attrList.at(i)->attrName.c_str(),attrList.at(i)->vi);
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) 
-          sprintf(msgbuf, "  <%s name=\"%ld\" />\n",attrList.at(i)->attrName.c_str(),attrList.at(i)->vl); 
+          sprintf(msgbuf, "  <%s name=\"%lld\" />\n",attrList.at(i)->attrName.c_str(),attrList.at(i)->vl); 
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4) 
           sprintf(msgbuf, "  <%s name=\"%f\" />\n",attrList.at(i)->attrName.c_str(),attrList.at(i)->vf);  
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8) 
@@ -4049,9 +4049,9 @@ namespace ESMCI {
             attrList.at(i)->vcp.c_str());
         else
           sprintf(msgbuf, "  <%s name=\"%s\" />\n",attrList.at(i)->attrName.c_str(),"N/A");
-      fprintf(xml,msgbuf);
+      fprintf(xml,"%s",msgbuf);
       sprintf(msgbuf,"</%s_set>\n\n",attrList.at(i)->attrName.c_str());
-      fprintf(xml,msgbuf);
+      fprintf(xml,"%s",msgbuf);
       } else if (attrList.at(i)->items >1) { 
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
         ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
@@ -4161,19 +4161,19 @@ namespace ESMCI {
     for (i=0; i<attrList.size(); i++) { 
       if (index == 0) {
         sprintf(msgbuf, "  <variable ");
-      	fprintf(xml,msgbuf);
+      	fprintf(xml,"%s",msgbuf);
       } else {
         sprintf(msgbuf, "            ");
-        fprintf(xml,msgbuf);
+        fprintf(xml,"%s",msgbuf);
       }
       if (attrList.at(i)->items == 0) {
         sprintf(msgbuf, "  %s=\"\" ",attrList.at(i)->attrName.c_str());
-        fprintf(xml,msgbuf);
+        fprintf(xml,"%s",msgbuf);
       } else if (attrList.at(i)->items == 1) {
         if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
           sprintf(msgbuf, "  %s=\"%d\" ",attrList.at(i)->attrName.c_str(),attrList.at(i)->vi);
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) 
-          sprintf(msgbuf, "  %s=\"%ld\" ",attrList.at(i)->attrName.c_str(),attrList.at(i)->vl); 
+          sprintf(msgbuf, "  %s=\"%lld\" ",attrList.at(i)->attrName.c_str(),attrList.at(i)->vl); 
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4) 
           sprintf(msgbuf, "  %s=\"%f\" ",attrList.at(i)->attrName.c_str(),attrList.at(i)->vf);  
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8) 
@@ -4189,12 +4189,12 @@ namespace ESMCI {
             (attrList.at(i)->vcp).c_str());
         else
           sprintf(msgbuf, "  %s=\"%s\" ",attrList.at(i)->attrName.c_str(),"N/A");
-        fprintf(xml,msgbuf);
+        fprintf(xml,"%s",msgbuf);
       } else if (attrList.at(i)->items > 1) { 
           sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
           ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
           sprintf(msgbuf,"  %s= ITEMS>1", attrList.at(i)->attrName.c_str());
-          fprintf(xml,msgbuf);
+          fprintf(xml,"%s",msgbuf);
       } else {
         sprintf(msgbuf,"Items < 1, problem.");
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -4205,7 +4205,7 @@ namespace ESMCI {
         sprintf(msgbuf," />\n");
       else 
         sprintf(msgbuf,"\n");
-      fprintf(xml,msgbuf);
+      fprintf(xml,"%s",msgbuf);
     }  
 
   for(i=0; i<packList.size(); i++)
@@ -4242,28 +4242,28 @@ namespace ESMCI {
 
   for (i=0; i<attrList.size(); i++) {
     sprintf(msgbuf, "   Attr %d:\n", i);
-    printf(msgbuf);
+    printf("%s",msgbuf);
     ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   // print name
   sprintf(msgbuf, "        name: %s\n",  attrList.at(i)->attrName.c_str());
-  printf(msgbuf);
+  printf("%s",msgbuf);
   ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   
   // print items if there are any
   if (attrList.at(i)->items <= 0) {
       sprintf(msgbuf, "        value: \n");
-      printf(msgbuf);
+      printf("%s",msgbuf);
       ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   }
 
   if (attrList.at(i)->items == 1) {
       sprintf(msgbuf, "        value: ");
-      printf(msgbuf);
+      printf("%s",msgbuf);
       ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
              if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
                  sprintf(msgbuf, "%d\n", attrList.at(i)->vi); 
              else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8)
-                 sprintf(msgbuf, "%ld\n", attrList.at(i)->vl); 
+                 sprintf(msgbuf, "%lld\n", attrList.at(i)->vl); 
              else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4)
                  sprintf(msgbuf, "%f\n", attrList.at(i)->vf); 
              else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8)
@@ -4277,19 +4277,19 @@ namespace ESMCI {
                  ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
                  return localrc;
              }
-      printf(msgbuf);
+      printf("%s",msgbuf);
       ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   }
 
   if (attrList.at(i)->items > 1) { 
       sprintf(msgbuf, "        %d items, values:\n", attrList.at(i)->items);
-      printf(msgbuf);
+      printf("%s",msgbuf);
       ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
       for (unsigned int j=0; j<attrList.at(i)->items; j++) {
                 if (attrList.at(i)->tk == ESMC_TYPEKIND_I4) {
                     sprintf(msgbuf, "          \t item %d: %d\n", j, attrList.at(i)->vip[j]); 
                 } else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) {
-                    sprintf(msgbuf, "          \t item %d: %ld\n", j, attrList.at(i)->vlp[j]); 
+                    sprintf(msgbuf, "          \t item %d: %lld\n", j, attrList.at(i)->vlp[j]); 
                 } else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4) {
                     sprintf(msgbuf, "          \t item %d: %f\n", j, attrList.at(i)->vfp[j]); 
                 } else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8) {
@@ -4304,28 +4304,28 @@ namespace ESMCI {
                     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
                     return localrc;
                 }
-      printf(msgbuf);
+      printf("%s",msgbuf);
       }
       ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   }
 
   // print convention
   sprintf(msgbuf, "        convention: %s\n",  attrList.at(i)->attrConvention.c_str());
-  printf(msgbuf);
+  printf("%s",msgbuf);
   ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   
   // print purpose
   sprintf(msgbuf, "        purpose: %s\n",  attrList.at(i)->attrPurpose.c_str());
-  printf(msgbuf);
+  printf("%s",msgbuf);
   ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   
   // print object
   sprintf(msgbuf, "        object: %s\n",  attrList.at(i)->attrObject.c_str());
-  printf(msgbuf);
+  printf("%s",msgbuf);
   ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
 
   sprintf(msgbuf, "        attrCount: %d\n", attrList.at(i)->AttributeGetCountTotal());
-  printf(msgbuf);
+  printf("%s",msgbuf);
   ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   }
   
