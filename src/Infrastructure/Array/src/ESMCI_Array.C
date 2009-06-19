@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.41 2009/06/18 04:40:58 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.42 2009/06/19 04:06:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.41 2009/06/18 04:40:58 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.42 2009/06/19 04:06:56 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -317,7 +317,7 @@ Array::~Array(){
 //
 //-----------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
+;//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::create()"
 //BOPI
@@ -902,7 +902,9 @@ Array *Array::create(
           ++j;
         }
       }      
-      // use F90 pointers directly
+      // Use the incoming LocalArray objects directly. No need for a create
+      // from copy here because the bounds and Fortran dope vector will stay
+      // unchanged.
       larrayList[i] = larrayListArg[i];
     }else{
       // prepare to adjust dope vector
@@ -974,12 +976,13 @@ Array *Array::create(
           ++jjj;
         }
       }
-      // Adjust LocalArray object for specific undistLBound and undistUBound.
-      // This will alloc. memory for a _new_ LocalArray object for each element.
-      // Depending on copyflag the original memory used for data storage will be
-      // referenced or a copy of the data will be made.
-      larrayList[i] = larrayListArg[i]->
-        adjust(copyflag, temp_larrayLBound, temp_larrayUBound, &localrc);
+      // Make a copy of the LocalArray object with adjusted undistLBound and
+      // undistUBound values. The returned LocalArray object will contain a
+      // correctly adjusted Fortran dope vector.
+      // Depending on copyflag the original memory used for data storage will
+      // either be referenced, or a copy of the data will have been made.
+      larrayList[i] = LocalArray::create(larrayListArg[i], copyflag,
+        temp_larrayLBound, temp_larrayUBound, &localrc);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return ESMC_NULL_POINTER;
     }        
@@ -1563,8 +1566,8 @@ Array *Array::create(
       }
     }
     // allocate LocalArray object with specific undistLBound and undistUBound
-    larrayList[i] = LocalArray::create(rank, typekind, temp_counts,
-      temp_larrayLBound, temp_larrayUBound, NULL, DATA_REF, NULL, &localrc);
+    larrayList[i] = LocalArray::create(typekind, rank, temp_counts,
+      temp_larrayLBound, temp_larrayUBound, NULL, NULL, DATA_REF, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }
@@ -1683,7 +1686,7 @@ Array *Array::create(
     arrayOut->larrayList = new LocalArray*[localDeCount];
     for (int i=0; i<localDeCount; i++){
       arrayOut->larrayList[i] =
-        LocalArray::create(arrayIn->larrayList[i], NULL, NULL, &localrc);
+        LocalArray::create(arrayIn->larrayList[i], NULL, NULL, NULL, &localrc);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return ESMC_NULL_POINTER;
     }
