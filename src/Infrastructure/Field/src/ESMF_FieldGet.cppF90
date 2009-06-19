@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.40 2009/06/10 18:54:58 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.41 2009/06/19 17:42:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.40 2009/06/10 18:54:58 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.41 2009/06/19 17:42:23 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -329,23 +329,23 @@ contains
     endif
 
     if (present(gridToFieldMap)) then
-        gridToFieldMap = ftype%gridToFieldMap
+        gridToFieldMap = ftype%gridToFieldMap(1:size(gridToFieldMap))
     endif
 
     if (present(ungriddedLBound)) then
-        ungriddedLBound = ftype%ungriddedLBound
+        ungriddedLBound = ftype%ungriddedLBound(1:size(ungriddedLBound))
     endif
 
     if (present(ungriddedUBound)) then
-        ungriddedUBound = ftype%ungriddedUBound
+        ungriddedUBound = ftype%ungriddedUBound(1:size(ungriddedUBound))
     endif
 
     if (present(maxHaloLWidth)) then
-        maxHaloLWidth = ftype%maxHaloLWidth
+        maxHaloLWidth = ftype%maxHaloLWidth(1:size(maxHaloLWidth))
     endif
 
     if (present(maxHaloUWidth)) then
-        maxHaloUWidth = ftype%maxHaloUWidth
+        maxHaloUWidth = ftype%maxHaloUWidth(1:size(maxHaloUWidth))
     endif
 
     if (present(typekind)) then
@@ -380,7 +380,7 @@ contains
              "Cannot return dimCount because no data attached to Field", &
                              ESMF_CONTEXT, rc)) return
         endif
-	dimCount = ftype%dimCount
+        dimCount = ftype%dimCount
     endif
 
     if (present(localDeCount)) then

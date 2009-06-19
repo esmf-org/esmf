@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.49 2009/06/15 20:07:45 feiliu Exp $
+! $Id: user_model2.F90,v 1.50 2009/06/19 17:46:13 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -256,7 +256,7 @@
       integer, intent(out) :: rc
 
       ! Local variables
-      integer :: i, j, i1, j1, haloWidth, counts(2), haloUWidth(ESMF_MAXDIM), tlb(2), tub(2)
+      integer :: i, j, i1, j1, haloWidth, counts(2), haloUWidth(2), tlb(2), tub(2)
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8) :: pi, error, maxError, maxPerError
       real(ESMF_KIND_R8) :: minCValue, maxCValue, minDValue, maxDValue

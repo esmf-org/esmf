@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetEx.F90,v 1.10 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_FieldGetEx.F90,v 1.11 2009/06/19 17:42:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -48,11 +48,11 @@
     type(ESMF_TypeKind)        :: typekind
     integer                    :: rank
     type(ESMF_StaggerLoc)      :: staggerloc 
-    integer                    :: gridToFieldMap(ESMF_MAXDIM)    
-    integer                    :: ungriddedLBound(ESMF_MAXDIM)
-    integer                    :: ungriddedUBound(ESMF_MAXDIM)
-    integer                    :: maxHaloLWidth(ESMF_MAXDIM)
-    integer                    :: maxHaloUWidth(ESMF_MAXDIM)
+    integer                    :: gridToFieldMap(3)    
+    integer                    :: ungriddedLBound(3)
+    integer                    :: ungriddedUBound(3)
+    integer                    :: maxHaloLWidth(3)
+    integer                    :: maxHaloUWidth(3)
     integer                    :: fa_shape(3)
     character(len=32)          :: name
 

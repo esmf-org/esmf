@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.44 2009/05/19 18:25:53 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.45 2009/06/19 17:42:24 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -2102,11 +2102,11 @@ contains
         type(ESMF_TypeKind)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: staggerloc
-        integer, dimension(ESMF_MAXDIM) :: gridToFieldMap
-        integer, dimension(ESMF_MAXDIM) :: ungriddedLBound 
-        integer, dimension(ESMF_MAXDIM) :: ungriddedUBound 
-        integer, dimension(ESMF_MAXDIM) :: maxHaloLWidth
-        integer, dimension(ESMF_MAXDIM) :: maxHaloUWidth
+        integer, dimension(1) :: gridToFieldMap
+        integer, dimension(2) :: ungriddedLBound 
+        integer, dimension(3) :: ungriddedUBound 
+        integer, dimension(4) :: maxHaloLWidth
+        integer, dimension(5) :: maxHaloUWidth
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -2137,8 +2137,8 @@ contains
 
         type(ESMF_VM)                               :: vm
         integer                                     :: lpe
-        integer, dimension(ESMF_MAXDIM)             :: ec, cc
-        integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
+        integer, dimension(2)             :: ec, cc
+        integer, dimension(2)             :: gelb, geub, gclb, gcub
         type(ESMF_StaggerLoc)                       :: sloc
 
         rc = ESMF_SUCCESS
@@ -2199,8 +2199,8 @@ contains
 
         type(ESMF_VM)                               :: vm
         integer                                     :: lpe
-        integer, dimension(ESMF_MAXDIM)             :: ec, cc
-        integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
+        integer, dimension(2)             :: ec, cc
+        integer, dimension(2)             :: gelb, geub, gclb, gcub
         type(ESMF_StaggerLoc)                       :: sloc
 
         integer                                     :: totalCount(1:1)
@@ -2496,19 +2496,19 @@ contains
         type(ESMF_TypeKind)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
-        integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
-        integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
-        integer, dimension(ESMF_MAXDIM) :: lungriddedUBound 
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+        integer, dimension(2) :: lgridToFieldMap
+        integer, dimension(2) :: lungriddedLBound 
+        integer, dimension(2) :: lungriddedUBound 
+        integer, dimension(2) :: lmaxHaloLWidth
+        integer, dimension(2) :: lmaxHaloUWidth
 
         integer, dimension(:,:), pointer  :: farray
         integer, dimension(:,:), pointer  :: farray1
         type(ESMF_VM)                               :: vm
         integer                                     :: lpe
 
-        integer, dimension(ESMF_MAXDIM)             :: ec, cc, g2fm, mhlw, mhuw
-        integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
+        integer, dimension(2)             :: ec, cc, g2fm, mhlw, mhuw
+        integer, dimension(2)             :: gelb, geub, gclb, gcub
         integer, dimension(2)                       :: fsize
         integer, dimension(2)                       :: felb, feub, fclb, fcub, ftlb, ftub
         integer, dimension(2)                       :: fec, fcc, ftc
@@ -2538,7 +2538,7 @@ contains
         if(present(gridToFieldMap)) then
             g2fm(1:size(gridToFieldMap)) = gridToFieldMap
         else
-            do i = 1, ESMF_MAXDIM
+            do i = 1, 2
                 g2fm(i) = i
             enddo
         endif
@@ -2650,8 +2650,8 @@ contains
 
         type(ESMF_VM)                               :: vm
         integer                                     :: lpe
-        integer, dimension(ESMF_MAXDIM)             :: ec, cc
-        integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
+        integer, dimension(2)             :: ec, cc
+        integer, dimension(2)             :: gelb, geub, gclb, gcub
         type(ESMF_StaggerLoc)                       :: sloc
 
         rc = ESMF_SUCCESS
@@ -2705,8 +2705,8 @@ contains
 
         type(ESMF_VM)                               :: vm
         integer                                     :: lpe
-        integer, dimension(ESMF_MAXDIM)             :: ec, cc
-        integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
+        integer, dimension(2)             :: ec, cc
+        integer, dimension(2)             :: gelb, geub, gclb, gcub
         type(ESMF_StaggerLoc)                       :: sloc
 
         rc = ESMF_SUCCESS
@@ -2894,19 +2894,19 @@ contains
         type(ESMF_TypeKind)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
-        integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
-        integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
-        integer, dimension(ESMF_MAXDIM) :: lungriddedUBound 
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+        integer, dimension(3) :: lgridToFieldMap
+        integer, dimension(3) :: lungriddedLBound 
+        integer, dimension(3) :: lungriddedUBound 
+        integer, dimension(3) :: lmaxHaloLWidth
+        integer, dimension(3) :: lmaxHaloUWidth
 
         real, dimension(:,:,:), allocatable    :: farray
         type(ESMF_VM)                          :: vm
         integer                                :: lpe
 
-        integer, dimension(ESMF_MAXDIM)        :: ec, cc, g2fm, mhlw, mhuw, dg2fm, f2dgm, dg2gm
-        integer, dimension(ESMF_MAXDIM)        :: gelb, geub, gclb, gcub
-        integer, dimension(ESMF_MAXDIM)        :: fsize
+        integer, dimension(3)        :: ec, cc, g2fm, mhlw, mhuw, dg2fm, f2dgm, dg2gm
+        integer, dimension(3)        :: gelb, geub, gclb, gcub
+        integer, dimension(3)        :: fsize
         integer                                :: gridDimCount, forderIndex
 
         rc = ESMF_SUCCESS
@@ -2941,7 +2941,7 @@ contains
         if(present(gridToFieldMap)) then
             g2fm(1:size(gridToFieldMap)) = gridToFieldMap
         else
-            do i = 1, ESMF_MAXDIM
+            do i = 1, 3
                 g2fm(i) = i
             enddo
         endif
@@ -3048,11 +3048,11 @@ contains
         type(ESMF_TypeKind)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
-        integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
-        integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
-        integer, dimension(ESMF_MAXDIM) :: lungriddedUBound 
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+        integer, dimension(3) :: lgridToFieldMap
+        integer, dimension(3) :: lungriddedLBound 
+        integer, dimension(3) :: lungriddedUBound 
+        integer, dimension(3) :: lmaxHaloLWidth
+        integer, dimension(3) :: lmaxHaloUWidth
 
         real, dimension(:,:,:), allocatable    :: farray
         type(ESMF_VM)                          :: vm
@@ -3132,8 +3132,8 @@ contains
 
         type(ESMF_VM)                               :: vm
         integer                                     :: lpe
-        integer, dimension(ESMF_MAXDIM)             :: ec, cc
-        integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
+        integer, dimension(2)             :: ec, cc
+        integer, dimension(2)             :: gelb, geub, gclb, gcub
         type(ESMF_StaggerLoc)                       :: sloc
 
         rc = ESMF_SUCCESS
@@ -3389,8 +3389,8 @@ contains
         real, dimension(:,:), allocatable  :: farray
         type(ESMF_VM)                               :: vm
         integer                                     :: lpe
-        integer, dimension(ESMF_MAXDIM)             :: ec, cc
-        integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
+        integer, dimension(2)             :: ec, cc
+        integer, dimension(2)             :: gelb, geub, gclb, gcub
         type(ESMF_StaggerLoc)                       :: sloc
 
         rc = ESMF_SUCCESS
@@ -3474,8 +3474,8 @@ contains
         real, dimension(:,:), allocatable  :: farray
         type(ESMF_VM)                               :: vm
         integer                                     :: lpe
-        integer, dimension(ESMF_MAXDIM)             :: ec, cc
-        integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
+        integer, dimension(2)             :: ec, cc
+        integer, dimension(2)             :: gelb, geub, gclb, gcub
         type(ESMF_StaggerLoc)                       :: sloc
 
         rc = ESMF_SUCCESS
@@ -3535,8 +3535,8 @@ contains
         real, dimension(:,:, :), allocatable  :: farray
         type(ESMF_VM)                               :: vm
         integer                                     :: lpe
-        integer, dimension(ESMF_MAXDIM)             :: ec, cc
-        integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
+        integer, dimension(2)             :: ec, cc
+        integer, dimension(2)             :: gelb, geub, gclb, gcub
         type(ESMF_StaggerLoc)                       :: sloc
 
         rc = ESMF_SUCCESS
@@ -3595,8 +3595,8 @@ contains
         real, dimension(:,:, :), allocatable  :: farray
         type(ESMF_VM)                               :: vm
         integer                                     :: lpe
-        integer, dimension(ESMF_MAXDIM)             :: ec, cc
-        integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
+        integer, dimension(2)             :: ec, cc
+        integer, dimension(2)             :: gelb, geub, gclb, gcub
         type(ESMF_StaggerLoc)                       :: sloc
 
         rc = ESMF_SUCCESS
@@ -3657,8 +3657,8 @@ contains
         real, dimension(:,:, :), allocatable  :: farray
         type(ESMF_VM)                               :: vm
         integer                                     :: lpe
-        integer, dimension(ESMF_MAXDIM)             :: ec, cc
-        integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
+        integer, dimension(2)             :: ec, cc
+        integer, dimension(2)             :: gelb, geub, gclb, gcub
         type(ESMF_StaggerLoc)                       :: sloc
 
         rc = ESMF_SUCCESS
@@ -3720,8 +3720,8 @@ contains
         real, dimension(:,:, :), pointer  :: farray1
         type(ESMF_VM)                               :: vm
         integer                                     :: lpe
-        integer, dimension(ESMF_MAXDIM)             :: ec, cc
-        integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
+        integer, dimension(2)             :: ec, cc
+        integer, dimension(2)             :: gelb, geub, gclb, gcub
         type(ESMF_StaggerLoc)                       :: sloc
 
         integer, dimension(3)                       :: felb, feub, fclb, fcub, ftlb, ftub
@@ -3818,20 +3818,20 @@ contains
         type(ESMF_TypeKind)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
-        integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
-        integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
-        integer, dimension(ESMF_MAXDIM) :: lungriddedUBound 
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+        integer, dimension(3) :: lgridToFieldMap
+        integer, dimension(3) :: lungriddedLBound 
+        integer, dimension(3) :: lungriddedUBound 
+        integer, dimension(3) :: lmaxHaloLWidth
+        integer, dimension(3) :: lmaxHaloUWidth
 
         integer, dimension(:,:,:), pointer  :: farray
         integer, dimension(:,:,:), pointer  :: farray1
         type(ESMF_VM)                               :: vm
         integer                                     :: lpe
 
-        integer, dimension(ESMF_MAXDIM)             :: ec, cc, g2fm, mhlw, mhuw
-        integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
-        integer, dimension(ESMF_MAXDIM)             :: fsize
+        integer, dimension(3)             :: ec, cc, g2fm, mhlw, mhuw
+        integer, dimension(3)             :: gelb, geub, gclb, gcub
+        integer, dimension(3)             :: fsize
         integer, dimension(3)                       :: felb, feub, fclb, fcub, ftlb, ftub
         integer, dimension(3)                       :: fec, fcc, ftc
         integer                                     :: gridDimCount
@@ -3860,7 +3860,7 @@ contains
         if(present(gridToFieldMap)) then
             g2fm(1:size(gridToFieldMap)) = gridToFieldMap
         else
-            do i = 1, ESMF_MAXDIM
+            do i = 1, 3
                 g2fm(i) = i
             enddo
         endif
@@ -4121,11 +4121,11 @@ contains
         type(ESMF_TypeKind)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
-        integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
-        integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
-        integer, dimension(ESMF_MAXDIM) :: lungriddedUBound 
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+        integer, dimension(7) :: lgridToFieldMap
+        integer, dimension(7) :: lungriddedLBound 
+        integer, dimension(7) :: lungriddedUBound 
+        integer, dimension(7) :: lmaxHaloLWidth
+        integer, dimension(7) :: lmaxHaloUWidth
 
         integer                                     :: ii, ij, ik, il, im, io, ip
         integer, dimension(7)                       :: felb, feub, fclb, fcub, ftlb, ftub
@@ -4293,9 +4293,9 @@ contains
         type(ESMF_TypeKind)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
-        integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+        integer, dimension(7) :: lgridToFieldMap
+        integer, dimension(7) :: lmaxHaloLWidth
+        integer, dimension(7) :: lmaxHaloUWidth
 
         integer                                     :: i, ii, ij, ik, il, im, io, ip
         integer, dimension(7)                       :: felb, feub, fclb, fcub, ftlb, ftub
@@ -4522,9 +4522,9 @@ contains
         type(ESMF_TypeKind)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
-        integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+        integer, dimension(7) :: lgridToFieldMap
+        integer, dimension(7) :: lmaxHaloLWidth
+        integer, dimension(7) :: lmaxHaloUWidth
 
         integer                                     :: i, ii, ij, ik, il, im, io, ip
         integer, dimension(7)                       :: felb, feub, fclb, fcub, ftlb, ftub
@@ -4758,11 +4758,11 @@ contains
         type(ESMF_TypeKind)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
-        integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
-        integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
-        integer, dimension(ESMF_MAXDIM) :: lungriddedUBound 
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+        integer, dimension(7) :: lgridToFieldMap
+        integer, dimension(7) :: lungriddedLBound 
+        integer, dimension(7) :: lungriddedUBound 
+        integer, dimension(7) :: lmaxHaloLWidth
+        integer, dimension(7) :: lmaxHaloUWidth
 
         integer                                     :: ii, ij, ik, il, im, io, ip
         integer, dimension(7)                       :: felb, feub, fclb, fcub, ftlb, ftub
@@ -4930,11 +4930,11 @@ contains
         type(ESMF_TypeKind)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
-        integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
-        integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
-        integer, dimension(ESMF_MAXDIM) :: lungriddedUBound 
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+        integer, dimension(7) :: lgridToFieldMap
+        integer, dimension(7) :: lungriddedLBound 
+        integer, dimension(7) :: lungriddedUBound 
+        integer, dimension(7) :: lmaxHaloLWidth
+        integer, dimension(7) :: lmaxHaloUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik, il, im, io, ip
@@ -5164,11 +5164,11 @@ contains
         type(ESMF_TypeKind)     :: typekind
         integer                 :: dimCount, gridrank_repdim
         type(ESMF_StaggerLoc)   :: lstaggerloc
-        integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
-        integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
-        integer, dimension(ESMF_MAXDIM) :: lungriddedUBound 
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+        integer, dimension(7) :: lgridToFieldMap
+        integer, dimension(7) :: lungriddedLBound 
+        integer, dimension(7) :: lungriddedUBound 
+        integer, dimension(7) :: lmaxHaloLWidth
+        integer, dimension(7) :: lmaxHaloUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik, il, im, io, ip
@@ -5405,11 +5405,11 @@ contains
         type(ESMF_TypeKind)     :: typekind
         integer                 :: dimCount, gridrank_repdim
         type(ESMF_StaggerLoc)   :: lstaggerloc
-        integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
-        integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
-        integer, dimension(ESMF_MAXDIM) :: lungriddedUBound 
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+        integer, dimension(7) :: lgridToFieldMap
+        integer, dimension(7) :: lungriddedLBound 
+        integer, dimension(7) :: lungriddedUBound 
+        integer, dimension(7) :: lmaxHaloLWidth
+        integer, dimension(7) :: lmaxHaloUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik
@@ -5630,11 +5630,11 @@ contains
         type(ESMF_TypeKind)     :: typekind
         integer                 :: dimCount, gridrank_repdim
         type(ESMF_StaggerLoc)   :: lstaggerloc
-        integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
-        integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
-        integer, dimension(ESMF_MAXDIM) :: lungriddedUBound 
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+        integer, dimension(7) :: lgridToFieldMap
+        integer, dimension(7) :: lungriddedLBound 
+        integer, dimension(7) :: lungriddedUBound 
+        integer, dimension(7) :: lmaxHaloLWidth
+        integer, dimension(7) :: lmaxHaloUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik, il, im, io, ip
@@ -5880,11 +5880,11 @@ contains
         type(ESMF_TypeKind)     :: typekind
         integer                 :: dimCount, gridrank_repdim
         type(ESMF_StaggerLoc)   :: lstaggerloc
-        integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
-        integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
-        integer, dimension(ESMF_MAXDIM) :: lungriddedUBound 
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+        integer, dimension(7) :: lgridToFieldMap
+        integer, dimension(7) :: lungriddedLBound 
+        integer, dimension(7) :: lungriddedUBound 
+        integer, dimension(7) :: lmaxHaloLWidth
+        integer, dimension(7) :: lmaxHaloUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik
@@ -6111,11 +6111,11 @@ contains
         type(ESMF_TypeKind)     :: typekind
         integer                 :: dimCount, gridrank_repdim
         type(ESMF_StaggerLoc)   :: lstaggerloc
-        integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
-        integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
-        integer, dimension(ESMF_MAXDIM) :: lungriddedUBound 
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+        integer, dimension(3) :: lgridToFieldMap
+        integer, dimension(3) :: lungriddedLBound 
+        integer, dimension(3) :: lungriddedUBound 
+        integer, dimension(3) :: lmaxHaloLWidth
+        integer, dimension(3) :: lmaxHaloUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik
@@ -6339,11 +6339,11 @@ contains
         type(ESMF_TypeKind)     :: typekind
         integer                 :: dimCount, gridrank_repdim
         type(ESMF_StaggerLoc)   :: lstaggerloc
-        integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
-        integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
-        integer, dimension(ESMF_MAXDIM) :: lungriddedUBound 
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+        integer, dimension(2) :: lgridToFieldMap
+        integer, dimension(2) :: lungriddedLBound 
+        integer, dimension(2) :: lungriddedUBound 
+        integer, dimension(2) :: lmaxHaloLWidth
+        integer, dimension(2) :: lmaxHaloUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij
@@ -6562,11 +6562,11 @@ contains
         type(ESMF_TypeKind)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
-        integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
-        integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
-        integer, dimension(ESMF_MAXDIM) :: lungriddedUBound 
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
-        integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+        integer, dimension(7) :: lgridToFieldMap
+        integer, dimension(7) :: lungriddedLBound 
+        integer, dimension(7) :: lungriddedUBound 
+        integer, dimension(7) :: lmaxHaloLWidth
+        integer, dimension(7) :: lmaxHaloUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik, il, im, io, ip

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.79 2009/02/27 22:50:59 svasquez Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.80 2009/06/19 17:42:22 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 
     real(ESMF_KIND_R8), dimension(:,:), allocatable     :: farray
     real(ESMF_KIND_R8), dimension(:,:,:), allocatable   :: farray3d
-    integer, dimension(ESMF_MAXDIM)                     :: gcc, gec, fa_shape
+    integer, dimension(3)                     :: gcc, gec, fa_shape
 
     integer, dimension(2)           :: gridToFieldMap2d
     integer, dimension(2)           :: maxHaloLWidth2d, maxHaloUWidth2d

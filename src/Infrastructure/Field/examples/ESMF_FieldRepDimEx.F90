@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRepDimEx.F90,v 1.3 2009/02/27 22:50:59 svasquez Exp $
+! $Id: ESMF_FieldRepDimEx.F90,v 1.4 2009/06/19 17:42:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -40,11 +40,11 @@
     type(ESMF_TypeKind)     :: typekind
     integer                 :: dimCount, gridrank_repdim
     type(ESMF_StaggerLoc)   :: lstaggerloc
-    integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
-    integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
-    integer, dimension(ESMF_MAXDIM) :: lungriddedUBound 
-    integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
-    integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+    integer, dimension(4) :: lgridToFieldMap
+    integer, dimension(1) :: lungriddedLBound 
+    integer, dimension(1) :: lungriddedUBound 
+    integer, dimension(2) :: lmaxHaloLWidth
+    integer, dimension(2) :: lmaxHaloUWidth
 
     ! local arguments used to verify field get
     integer                                     :: i, ii, ij, ik
