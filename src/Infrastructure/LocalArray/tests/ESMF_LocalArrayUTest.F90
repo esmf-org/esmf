@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.53 2008/11/14 05:06:45 theurich Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.54 2009/06/19 06:33:55 theurich Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -903,9 +903,6 @@
     array1 = ESMF_LocalArrayCreate(int2Dptr, ESMF_DATA_REF, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1f create returned"
-
-    call ESMF_LocalArrayWrite(array1, filename="./TestArrayData", rc=rc)
-    print *, "array 1f write returned"
 
     call ESMF_LocalArrayDestroy(array1, rc=rc)
     print *, "array 1f destroy returned"
