@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.118 2009/04/17 22:40:46 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.119 2009/06/19 04:02:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.118 2009/04/17 22:40:46 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.119 2009/06/19 04:02:56 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -464,8 +464,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      char *name,           // in - base name to set
-      char *classname) {    // in - context in which name should be unique
+      const char *name,           // in - base name to set
+      const char *classname) {    // in - context in which name should be unique
 // 
 // !DESCRIPTION:
 //     Accessor method for base class name.

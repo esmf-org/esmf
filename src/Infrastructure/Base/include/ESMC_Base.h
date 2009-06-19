@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.102 2009/04/13 15:25:29 rokuingh Exp $
+// $Id: ESMC_Base.h,v 1.103 2009/06/19 04:02:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -90,7 +90,7 @@ class ESMC_Base
     ESMC_Status ESMC_BaseGetStatus(void) const;
  
     // accessors to base name
-    int   ESMC_BaseSetName(char *name, char *classname);
+    int   ESMC_BaseSetName(const char *name, const char *classname);
     char *ESMC_BaseGetName(void) const;
     int   ESMC_BaseSetF90Name(char *name, int nlen);
     char *ESMC_BaseGetF90Name(void) const;
