@@ -1,4 +1,4 @@
-// $Id: ESMC_TValues.C,v 1.27 2009/06/15 19:27:55 theurich Exp $
+// $Id: ESMC_TValues.C,v 1.28 2009/06/19 04:05:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TValues.C,v 1.27 2009/06/15 19:27:55 theurich Exp $";
+ static const char *const version = "$Id: ESMC_TValues.C,v 1.28 2009/06/19 04:05:03 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -188,17 +188,14 @@
 
     numlist = 0;
     if (count > 0) {
-        srcindex = ESMCI::LocalArray::create(1, ESMC_TYPEKIND_I4,
-                                         &count, NULL, ESMCI::DATA_COPY, 
-                                         NULL, &rc);
+        srcindex = ESMCI::LocalArray::create(ESMC_TYPEKIND_I4, 1, 
+          &count, NULL,  NULL, ESMCI::DATA_COPY, &rc);
 
-        dstindex = ESMCI::LocalArray::create(1, ESMC_TYPEKIND_I4,
-                                         &count2, NULL, ESMCI::DATA_COPY,
-                                         NULL, &rc);
+        dstindex = ESMCI::LocalArray::create(ESMC_TYPEKIND_I4, 1, 
+          &count2, NULL, NULL, ESMCI::DATA_COPY, &rc);
 
-        weights = ESMCI::LocalArray::create(1, ESMC_TYPEKIND_R8, 
-                                        &count, NULL, ESMCI::DATA_COPY,
-                                        NULL, &rc);
+        weights = ESMCI::LocalArray::create(ESMC_TYPEKIND_R8, 1, 
+          &count, NULL, NULL, ESMCI::DATA_COPY, &rc);
     } else {
         srcindex = NULL;
         dstindex = NULL;
@@ -305,9 +302,9 @@
 //EOP
 
     if (numlist) *numlist = this->numlist;
-    if (si) srcindex->getFortranPtr(si);
-    if (di) dstindex->getFortranPtr(di);
-    if (w) weights->getFortranPtr(w);
+    if (si) srcindex->getFortranDopev(si);
+    if (di) dstindex->getFortranDopev(di);
+    if (w) weights->getFortranDopev(w);
 
     return ESMF_SUCCESS;
 
