@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.h,v 1.8 2009/06/18 04:40:58 theurich Exp $
+// $Id: ESMCI_LocalArray.h,v 1.9 2009/06/19 04:04:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -72,14 +72,6 @@ namespace ESMCI {
     DATA_NONE
   }CopyFlag;
 
-  // this does _not_ have a Fortran counter-part
-  typedef enum{ 
-    NO_ALLOCATE = 0, 
-    DO_ALLOCATE,
-    ALLOC_IF_BASE_NULL,
-    ALLOC_DEFERRED
-  }LocalArrayDoAllocate;
-
 
   // class definition
   class LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
@@ -102,46 +94,38 @@ namespace ESMCI {
     struct c_F90ptr f90dopev;       // opaque object which is real f90 ptr
                                     // this is memcpy'd to save and restore 
                                     // contents are not interpreted by esmf
+    
+   private:
+    // construct() and destruct()
+    int construct(bool aflag, CopyFlag docopy,
+      ESMC_TypeKind tk, int irank, LocalArrayOrigin oflag, bool dflag,
+      const int *offsets, const int *lbounds, const int *ubounds,
+      const int *icounts, void *ibase_addr, struct c_F90ptr *f90ptr,
+      const char *name);
+    int destruct();
 
    public:
     // create() and destroy()
-    static LocalArray *create(int rank, ESMC_TypeKind dk, int *counts = NULL,
-      void *base = NULL, CopyFlag docopy = DATA_REF, char *name = NULL,
-      int *rc = NULL);
-    static LocalArray *create(int rank, ESMC_TypeKind dk, int *counts,
-      int *lbounds, int *ubounds, void *base = NULL, CopyFlag docopy = DATA_REF,
-      char *name = NULL, int *rc = NULL);
-    static LocalArray *create(LocalArray *larrayIn, int *lbounds=NULL, 
-      int *ubounds=NULL, int *rc = NULL);
+    static LocalArray *create(ESMC_TypeKind tk, int rank,
+      LocalArrayOrigin oflag, const char *name = NULL, int *rc = NULL);
+    static LocalArray *create(ESMC_TypeKind tk, int rank, const int *counts,
+      void *base_addr = NULL, const char *name = NULL,
+      CopyFlag docopy = DATA_REF, int *rc = NULL);
+    static LocalArray *create(ESMC_TypeKind dk, int rank, const int *counts,
+      const int *lbounds, const int *ubounds, void *base_addr = NULL, 
+      const char *name = NULL, CopyFlag docopy = DATA_REF, int *rc = NULL);
+    static LocalArray *create(const LocalArray *larrayIn,
+      const int *lbounds = NULL, const int *ubounds = NULL,
+      const char *name = NULL, int *rc = NULL);
+    static LocalArray *create(const LocalArray *larrayIn, CopyFlag copyflag,
+      const int *lbounds, const int *ubounds, int *rc);
     static int destroy(LocalArray *array);
 
-    static LocalArray *createNoData(int rank, ESMC_TypeKind dk,
-      LocalArrayOrigin oflag, char *name = NULL, int *rc = NULL);
-    static LocalArray *create_F(int rank, ESMC_TypeKind dk, int *icounts = NULL,
-      struct c_F90ptr *f90ptr = NULL, void *base = NULL,
-      CopyFlag docopy = DATA_REF, char *name = NULL, int *lbounds = NULL,
-      int *ubounds = NULL, int *offsets = NULL, int *rc = NULL);
+    // standard methods inherited and overridden from the ESMC_Base class
+    int print(const char *options = NULL)const;
+    int write(const char *options, const char *filename)const;
+    int validate(const char *options)const;
 
-   public:
-    // construct() and destruct()
-    int construct(int irank, ESMC_TypeKind dk, int *counts, void *base,
-      LocalArrayOrigin oflag, struct c_F90ptr *f90ptr,
-      LocalArrayDoAllocate aflag, CopyFlag docopy, bool dflag,
-      char *name, int *lbounds, int *ubounds, int *offsets);
-    int destruct();
-
-    // adjust()
-    LocalArray *adjust(CopyFlag copyflag, int *lbounds, int *ubounds, int *rc);
-
-    // required methods inherited and overridden from the ESMC_Base class
-    int print(const char *options = NULL) const;
-    int write(const char *options, const char *filename) const;
-    int validate(const char *options) const;
-
-    // native C++ constructors/destructors
-    LocalArray();
-    ~LocalArray();
-    
     // simple set/get methods
     void setRank(int rank){ this->rank = rank; }
     int getRank()const{ return rank; }
@@ -161,13 +145,14 @@ namespace ESMCI {
     const int *getLbounds()const{ return lbound; }
     const int *getUbounds()const{ return ubound; }
     
-    // universal set method
-    int setInfo(struct c_F90ptr *fptr, void *base, int *counts, 
-      int *lbounds, int *ubounds, int *offsets, bool *cflag, bool *dflag);
+    // combo set method
+    int setInfo(struct c_F90ptr *fptr, void *base, const int *counts, 
+      const int *lbounds, const int *ubounds, const int *offsets,
+      const bool *cflag, const bool *dflag);
 
     // set/get the Fortran dope vector
-    int setFortranPtr(const struct c_F90ptr *p);
-    int getFortranPtr(struct c_F90ptr *p) const;
+    int setFortranDopev(struct c_F90ptr *p);
+    int getFortranDopev(struct c_F90ptr *p)const;
     
     // force the base address in Fortran ptr dope vector *if* mismatch detected
     int forceFortranPtr(void *base){

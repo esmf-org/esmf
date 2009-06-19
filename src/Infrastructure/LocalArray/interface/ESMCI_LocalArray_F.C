@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray_F.C,v 1.8 2009/06/18 04:40:58 theurich Exp $
+// $Id: ESMCI_LocalArray_F.C,v 1.9 2009/06/19 04:04:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     // call into C++
-    *ptr = ESMCI::LocalArray::createNoData(*rank, *tk, *oflag, NULL, &localrc);
+    *ptr = ESMCI::LocalArray::create(*tk, *rank, *oflag, NULL, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
@@ -77,7 +77,7 @@ extern "C" {
       return;
     }
     // call into C++
-    *larrayOut = ESMCI::LocalArray::create(*ptr, NULL, NULL, &localrc);
+    *larrayOut = ESMCI::LocalArray::create(*ptr, NULL, NULL, NULL, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
@@ -282,7 +282,7 @@ extern "C" {
         "- Not a valid pointer to LocalArray object", rc);
       return;
     }
-    localrc = (*ptr)->setFortranPtr(fptr);
+    localrc = (*ptr)->setFortranDopev(fptr);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
@@ -302,7 +302,7 @@ extern "C" {
         "- Not a valid pointer to LocalArray object", rc);
       return;
     }
-    localrc = (*ptr)->getFortranPtr(fptr);
+    localrc = (*ptr)->getFortranDopev(fptr);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
