@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.38 2009/06/10 20:55:38 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.39 2009/06/19 04:11:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.38 2009/06/10 20:55:38 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.39 2009/06/19 04:11:22 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -619,7 +619,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 @\
     ! Garbage collection. The ArrayCreate() call will have created a new @\
     ! LocalArray object internally, so the temporary object created above @\
-    ! must be deleted. @\
+    ! must be deleted here. @\
     call ESMF_LocalArrayDestroy(larrayList(1), rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -903,6 +903,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
         totalUWidthArg, indexflag, staggerLoc, vectorDim, &
         undistLBoundArg, undistUBoundArg, name, len_name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     else
       len_name = 0
       call c_ESMC_ArrayCreateLocalArray(array, larrayPointerList, larrayCount, &
@@ -911,9 +913,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
         totalUWidthArg, indexflag, staggerLoc, vectorDim, &
         undistLBoundArg, undistUBoundArg, "", len_name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif    
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Garbage collection
     deallocate(larrayPointerList)
@@ -1168,6 +1170,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
         totalUWidthArg, indexflag, staggerLoc, vectorDim, &
         undistLBoundArg, undistUBoundArg, name, len_name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     else
       len_name = 0
       call c_ESMC_ArrayCreateAllocate(array, arrayspec, distgrid, &
@@ -1176,9 +1180,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
         totalUWidthArg, indexflag, staggerLoc, vectorDim, &
         undistLBoundArg, undistUBoundArg, "", len_name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Garbage collection
     call ESMF_InterfaceIntDestroy(distgridToArrayMapArg, rc=localrc)
