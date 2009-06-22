@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.13 2009/04/29 23:32:55 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.14 2009/06/22 22:45:38 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.13 2009/04/29 23:32:55 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.14 2009/06/22 22:45:38 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -113,8 +113,19 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
   it = find(nonroots.begin(), nonroots.end(), localPet);
   
   // allocate buffers
+  recvBuf = NULL; sendBuf = NULL;
   recvBuf = new char[length];
   sendBuf = new char[length];
+  if (!recvBuf) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                  "Failed allocating buffer", &localrc);
+    return localrc;
+  }
+  if (!sendBuf) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                  "Failed allocating buffer", &localrc);
+    return localrc;
+  }
  
   // I am a root, create buffer
   if (it == nonroots.end()) {
@@ -195,12 +206,24 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
   Attribute *attr;
   unsigned int i;
   char *thiskey, *distkey;
-  thiskey = new char[keySize];
-  distkey = new char[keySize];
-    
+
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
+  thiskey = NULL; distkey = NULL;
+  thiskey = new char[keySize];
+  distkey = new char[keySize];
+  if (!thiskey) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                  "Failed allocating key", &localrc);
+    return localrc;
+  }
+  if (!distkey) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                  "Failed allocating key", &localrc);
+    return localrc;
+  }
+    
   // make key
   localrc = AttributeUpdateKeyCreate(thiskey);
   if (localrc != ESMF_SUCCESS) {
@@ -263,7 +286,13 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
   // if value change, unpack into temp and set
   if (valueChange) {
     for (i=0; i<attrChange; ++i) {
+      attr = NULL;
       attr = new Attribute(ESMF_FALSE);
+      if (!attr) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                      "Failed allocating Attribute", &localrc);
+        return localrc;
+      }
       attr->setBase(attrBase);
       attr->parent = this;
       attr->ESMC_Deserialize(recvBuf,offset);
@@ -276,14 +305,26 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
   // if struct change, traverse and build
   if (strctChange) {
     for (i=0; i<attrChange; ++i) {
+      attr = NULL;
       attr = new Attribute(ESMF_FALSE);
+      if (!attr) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                      "Failed allocating Attribute", &localrc);
+        return localrc;
+      }
       attr->setBase(attrBase);
       attr->parent = this;
       attr->ESMC_Deserialize(recvBuf,offset);
       localrc = AttributeSet(attr);
     }
     for (i=0; i<packChange; ++i) {
+      attr = NULL;
       attr = new Attribute("42","42","42","42");
+      if (!attr) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                      "Failed allocating Attribute", &localrc);
+        return localrc;
+      }
       attr->setBase(attrBase);
       attr->parent = this;
       attr->ESMC_Deserialize(recvBuf,offset);
@@ -418,7 +459,13 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
     
   // make key
   char *key;
+  key = NULL;
   key = new char[keySize];
+  if (!key) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                  "Failed allocating key", &localrc);
+    return localrc;
+  }
   localrc = AttributeUpdateKeyCreate(key);
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -884,8 +931,6 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
   vector<ESMC_I4>::const_iterator it;
   char *recvBuf, *sendBuf;
   length = 3*sizeof(int);
-  recvBuf = new char[length];
-  sendBuf = new char[length];
   
   offset = 0;
   recvlength = 0;
@@ -893,6 +938,20 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
   realChangesOut = 0;
   numKeysOut = 0;
   
+  recvBuf = NULL; sendBuf = NULL;
+  recvBuf = new char[length];
+  sendBuf = new char[length];
+  if (!recvBuf) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                  "Failed allocating buffer", &localrc);
+    return localrc;
+  }
+  if (!sendBuf) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                  "Failed allocating buffer", &localrc);
+    return localrc;
+  }
+
   // query the VM for localPet and petCount
   int localPet = vm->getLocalPet();
 

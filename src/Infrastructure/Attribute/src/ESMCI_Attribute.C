@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.39 2009/06/18 17:36:34 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.40 2009/06/22 22:45:37 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.39 2009/06/18 17:36:34 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.40 2009/06/22 22:45:37 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1037,7 +1037,13 @@ namespace ESMCI {
 
   // copy Attributes and Attribute packages by reference
   for (i=0; i<source.attrList.size(); i++) {
+    attr = NULL;
     attr = new Attribute(ESMF_FALSE);
+    if (!attr) {
+      sprintf(msgbuf, "Failed allocating an Attribute");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
     // set new attr to point to its intented destination and recurse
     (attr->attrBase) = (this->attrBase); 
     (attr->parent) = this;
@@ -1056,7 +1062,13 @@ namespace ESMCI {
   }
   // copy Attribute packages by reference
   for (i=0; i<source.packList.size(); i++) {
+    attr = NULL;
     attr = new Attribute(ESMF_FALSE);
+    if (!attr) {
+      sprintf(msgbuf, "Failed allocating an Attribute");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
     // set new attr to point to its intented destination and recurse
     (attr->attrBase) = (this->attrBase);
     (attr->parent) = this;
@@ -1127,7 +1139,13 @@ namespace ESMCI {
 
   // copy base level Attributes by value
   for (i=0; i<source.attrList.size(); i++) {
+    attr = NULL;
     attr = new Attribute(ESMF_FALSE);
+    if (!attr) {
+      sprintf(msgbuf, "Failed allocating an Attribute");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
     // set new attr to point to its intented destination and recurse
     (attr->attrBase) = (this->attrBase);
     (attr->parent) = this;
@@ -1147,7 +1165,13 @@ namespace ESMCI {
   }
   // copy base level Attributes by value
   for (i=0; i<source.packList.size(); i++) {
+    attr = NULL;
     attr = new Attribute(ESMF_FALSE);
+    if (!attr) {
+      sprintf(msgbuf, "Failed allocating an Attribute");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      return ESMF_FAILURE;
+    }
     // set new attr to point to its intented destination and recurse
     (attr->attrBase) = (this->attrBase);
     (attr->parent) = this;
@@ -5004,6 +5028,7 @@ namespace ESMCI {
 
     // Deserialize the {\tt Attribute} hierarchy
     for (i=0; i<attrCount; i++) {
+      attr = NULL;
       attr = new Attribute(ESMF_FALSE);
       if (!attr)
         return ESMF_FAILURE;
@@ -5024,6 +5049,7 @@ namespace ESMCI {
     }
       
     for (i=0; i<packCount; i++) {
+      attr = NULL;
       attr = new Attribute(ESMF_FALSE);
       if (!attr)
         return ESMF_FAILURE;
@@ -5042,26 +5068,6 @@ namespace ESMCI {
         return ESMF_FAILURE;
       }
     }
-      
-/*    for (i=0; i<linkCount; i++) {
-      attr = new Attribute(ESMF_FALSE);
-      if (!attr)
-        return ESMF_FAILURE;
-      attr->setBase(attrBase);
-      attr->parent = this;
-      localrc = attr->ESMC_Deserialize(buffer,&loffset);
-      if (localrc != ESMF_SUCCESS) {
-        sprintf(msgbuf, "AttributeDeserialize failed deserializing next attr");
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-        return ESMF_FAILURE;
-      }
-      localrc = AttributeLink(attr);
-      if (localrc != ESMF_SUCCESS) {
-        sprintf(msgbuf, "AttributeDeserialize failed adding attribute link");
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-        return ESMF_FAILURE;
-      }
-    }*/
       
     // make sure loffset is aligned correctly
     nbytes=loffset%8;
