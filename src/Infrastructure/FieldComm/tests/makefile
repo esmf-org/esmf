@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2008/09/26 21:11:37 cdeluca Exp $ 
+# $Id: makefile,v 1.22 2009/06/23 22:07:58 feiliu Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -8,10 +8,12 @@ LOCDIR	  = src/Infrastructure/FieldComm/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldGatherUTest \
 	$(ESMF_TESTDIR)/ESMF_FieldRedistUTest \
+	$(ESMF_TESTDIR)/ESMF_FieldLSSMMUTest \
 	$(ESMF_TESTDIR)/ESMF_FieldSMMUTest
                
 TESTS_RUN     = RUN_ESMF_FieldGatherUTest \
 	RUN_ESMF_FieldRedistUTest \
+	RUN_ESMF_FieldLSSMMUTest \
 	RUN_ESMF_FieldSMMUTest
                 
 TESTS_RUN_UNI = 
@@ -33,6 +35,9 @@ RUN_ESMF_FieldGatherUTest:
 
 RUN_ESMF_FieldRedistUTest:
 	$(MAKE) TNAME=FieldRedist NP=4 ftest
+
+RUN_ESMF_FieldLSSMMUTest:
+	$(MAKE) TNAME=FieldLSSMM NP=4 ftest
 
 RUN_ESMF_FieldSMMUTest:
 	$(MAKE) TNAME=FieldSMM NP=4 ftest
