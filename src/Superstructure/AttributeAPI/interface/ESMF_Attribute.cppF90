@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.42 2009/06/04 20:52:12 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.43 2009/06/23 20:06:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.42 2009/06/04 20:52:12 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.43 2009/06/23 20:06:02 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -2105,6 +2105,13 @@ contains
  @\
       if(present_flag .ne. ESMF_TRUE) then @\
       if(present(defaultvalueList)) then @\
+        if (litemCount > size(defaultvalueList)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                              "itemCount cannot be larger than size(defaultvalueList)", & @\
+                              ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
+        if (.not. present(itemCount))  litemCount = size(defaultvalueList) @\
         valueList = defaultvalueList @\
       else  @\
         call ESMF_LogMsgSetError(ESMF_RC_ATTR_NOTSET, & @\
@@ -2361,6 +2368,13 @@ contains
  @\
       if(present_flag .ne. ESMF_TRUE) then @\
       if(present(defaultvalueList)) then @\
+        if (litemCount > size(defaultvalueList)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                              "itemCount cannot be larger than size(defaultvalueList)", & @\
+                              ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
+        if (.not. present(itemCount))  litemCount = size(defaultvalueList) @\
         valueList = defaultvalueList @\
       else  @\
         call ESMF_LogMsgSetError(ESMF_RC_ATTR_NOTSET, & @\
@@ -2369,7 +2383,7 @@ contains
         return @\
       endif @\
       endif @\
-@\
+ @\
     if (present(itemCount)) then @\
       itemCount = litemCount @\
     endif @\
@@ -2616,6 +2630,13 @@ contains
  @\
       if(present_flag .ne. ESMF_TRUE) then @\
       if(present(defaultvalueList)) then @\
+        if (litemCount > size(defaultvalueList)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                              "itemCount cannot be larger than size(defaultvalueList)", & @\
+                              ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
+        if (.not. present(itemCount))  litemCount = size(defaultvalueList) @\
         do i=1,litemCount @\
           valueList(i) = defaultvalueList(i) @\
         enddo @\
