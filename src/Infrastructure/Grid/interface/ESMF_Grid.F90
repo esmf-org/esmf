@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.118 2009/05/20 17:11:41 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.119 2009/06/23 18:42:39 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5331,7 +5331,7 @@ end subroutine ESMF_GridConvertIndex
 !
 ! !DESCRIPTION:
 !     Destroys an {\tt ESMF\_Grid} object and related internal structures. This call
-!    does not destroy the internal coordinate Arrays, or the internally generated DistGrid. 
+!    does destroy the internally created DistGrid, DELayout, and coordinate/item Arrays. 
 !
 !     The arguments are:
 !     \begin{description}
