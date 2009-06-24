@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.13 2009/05/12 04:23:18 oehmke Exp $
+! $Id: ESMF_LocStream.F90,v 1.14 2009/06/24 19:14:16 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.13 2009/05/12 04:23:18 oehmke Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.14 2009/06/24 19:14:16 oehmke Exp $'
 
 !==============================================================================
 !
@@ -1046,8 +1046,6 @@ contains
 !EOP
 
     integer                                               :: localrc  ! Error status
-    type (ESMF_LocStreamType), pointer :: lstypep
-    type(ESMF_LocStream)                       :: locstream 
     type(ESMF_VM)                                   :: vm       ! Virtual machine used
     integer, allocatable  :: countsPerPet(:)
     logical                             :: dummy
@@ -1120,9 +1118,6 @@ contains
       ! cleanup local allocations
       deallocate(countsPerPet)
       deallocate(deBlockList)
-
-      ! Set pointer to internal locstream type
-      locstream%lstypep=>lstypep
 
       ! Create LocStream using CreateFromDistGrid version
       ESMF_LocStreamCreateFromLocal=ESMF_LocStreamCreateFromDG(name=name, &
