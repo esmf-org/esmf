@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.36 2009/04/30 03:54:27 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.37 2009/06/25 21:04:09 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -72,6 +72,8 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                    ESMC_RouteHandle **rh, int *has_rh, int *has_iw,
                    int *nentries, ESMCI::TempWeights **tweights,
                              int*rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_regrid_create()" 
   Trace __trace(" FTN(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, int *srcstaggerLoc, ESMCI::Grid **griddstcpp, int *dststaggerLoc, int*rc");
   ESMCI::VM *vm = *vmpp;
   ESMCI::Array &srcarray = **arraysrcpp;
@@ -235,9 +237,8 @@ wts.Print(Par::Out());
       enum ESMC_TypeKind tk = ESMC_TYPEKIND_R8;
       FTN(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
                  &num_entries, &iiptr, &localrc);
-
-      if (localrc != ESMF_SUCCESS) Throw() << "arraysparsematmulstore failed";
-
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+	throw localrc;  // bail out with exception
     }
 
     *nentries = num_entries;
@@ -257,19 +258,29 @@ wts.Print(Par::Out());
       (*tweights)->iientries = iientries;
     }
     
-  }
-  catch(std::exception &x) {
-    std::cout << "Error!!! Exception, P:" << localPet << ", <" << x.what() << ">" << std::endl;
-    *rc = ESMF_FAILURE;
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), rc);
+    } else {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", rc);
+    }
+
     return;
-  }
-  catch(...) {
-    std::cout << "Error, unknown exception" << std::endl;
-    *rc = ESMF_FAILURE;
+  } catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", rc);
     return;
   }
 
-  *rc = ESMF_SUCCESS;
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
 
@@ -422,8 +433,8 @@ wts.Print(Par::Out());
       enum ESMC_TypeKind tk = ESMC_TYPEKIND_R8;
       FTN(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
                  &num_entries, &iiptr, &localrc);
-
-      if (localrc != ESMF_SUCCESS) Throw() << "arraysparsematmulstore failed";
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+	throw localrc;  // bail out with exception
 
     }
 
@@ -482,3 +493,5 @@ extern "C" void FTN(c_esmc_copy_tempweights)(ESMCI::TempWeights **_tw, int *ii, 
   delete *_tw;
 
 }
+
+#undef  ESMC_METHOD

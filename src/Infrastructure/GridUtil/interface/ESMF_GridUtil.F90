@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.9 2009/04/21 21:19:18 oehmke Exp $
+! $Id: ESMF_GridUtil.F90,v 1.10 2009/06/25 21:04:09 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.9 2009/04/21 21:19:18 oehmke Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.10 2009/06/25 21:04:09 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -187,7 +187,7 @@ module ESMF_GridUtilMod
 ! !IROUTINE: ESMF_GridToMesh -- return a mesh with same topo as mesh
 !
 ! !INTERFACE:
-    function ESMF_GridToMesh(grid, staggerLoc, isSphere, maskValues, rc)
+   function ESMF_GridToMesh(grid, staggerLoc, isSphere, maskValues, rc)
 !
 !
 ! !RETURN VALUE:
@@ -195,10 +195,10 @@ module ESMF_GridUtilMod
 !
 ! !ARGUMENTS:
     type(ESMF_Grid), intent(inout)                :: grid
-    integer,                intent(inout)         :: staggerLoc
-    integer,                intent(inout)         :: isSphere
+    type(ESMF_StaggerLoc),  intent(in)            :: staggerLoc
+    integer,                intent(in)            :: isSphere
     integer(ESMF_KIND_I4), optional               :: maskValues(:)
-    integer,                intent(out), optional :: rc
+    integer, intent(out) , optional               :: rc
 !
 ! !DESCRIPTION:
 !   Create a mesh object with the same topology as the grid.
@@ -227,14 +227,15 @@ module ESMF_GridUtilMod
     	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	  ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call c_esmc_gridtomesh(grid, staggerLoc, isSphere, theMesh, maskValuesArg, localrc)
-
-    ESMF_GridToMesh = ESMF_MeshCreate(theMesh)
+    call c_esmc_gridtomesh(grid, staggerLoc%staggerloc, isSphere, theMesh, maskValuesArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      	    ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_InterfaceIntDestroy(maskValuesArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	    ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ESMF_GridToMesh = ESMF_MeshCreate(theMesh)
 
     if (present(rc)) rc = ESMF_SUCCESS
 

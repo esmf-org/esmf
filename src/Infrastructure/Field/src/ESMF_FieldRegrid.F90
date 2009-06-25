@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.21 2009/05/07 22:46:23 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.22 2009/06/25 21:04:09 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.21 2009/05/07 22:46:23 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.22 2009/06/25 21:04:09 oehmke Exp $'
 
 !==============================================================================
 !
@@ -315,7 +315,7 @@ contains
           isSphere = 0
           if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) isSphere = 1
 
-          srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLoc%staggerloc, isSphere, &
+          srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLoc, isSphere, &
                       srcMaskValues, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -335,7 +335,7 @@ contains
           isSphere = 0
           if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) isSphere = 1
 
-          dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLoc%staggerloc, isSphere, &
+          dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLoc, isSphere, &
                       dstMaskValues, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -352,10 +352,24 @@ contains
         call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
               regridMethod, lregridScheme, unmappedDstAction, routeHandle, &
               indicies, weights, localrc)
-
         if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
+
+	! destroy Meshes, if they were created here
+        if (srcgeomtype .ne. ESMF_GEOMTYPE_MESH) then
+	  call ESMF_MeshDestroy(srcMesh,rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+	endif
+
+        if (dstgeomtype .ne. ESMF_GEOMTYPE_MESH) then
+	  call ESMF_MeshDestroy(dstMesh,rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+	endif
 
 
         if(present(rc)) rc = ESMF_SUCCESS

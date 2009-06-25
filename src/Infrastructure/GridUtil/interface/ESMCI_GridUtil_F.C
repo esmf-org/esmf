@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.21 2009/04/21 21:19:18 oehmke Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.22 2009/06/25 21:04:09 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMCI_Regrid_F.C"
+#define ESMC_FILENAME "ESMCI_GridUtil_F.C"
 //==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.
@@ -49,7 +49,9 @@
 using namespace ESMCI;
 
 
-extern "C" void FTN(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
+extern "C" {
+
+void FTN(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
                     char*name, int *rc,
                              ESMCI::Array **arraypp1,
                              ESMCI::Array **arraypp2,
@@ -60,6 +62,8 @@ extern "C" void FTN(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *
                              int *spherical,
                              int nlen
                              ) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshio()" 
   ESMCI::VM *vm = *vmpp;
   ESMCI::Grid &grid = **gridpp;
 
@@ -112,8 +116,11 @@ extern "C" void FTN(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *
 
 }
 
-extern "C" void FTN(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc, int *isSphere, Mesh **meshpp, 					  ESMCI::InterfaceInt **maskValuesArg, int *rc) {
- 
+
+
+void FTN(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc, int *isSphere, Mesh **meshpp, 					  ESMCI::InterfaceInt **maskValuesArg, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridtomesh()" 
 
   ESMCI::Grid &grid = **gridpp;
 
@@ -129,11 +136,31 @@ extern "C" void FTN(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc, in
 
     *meshpp = meshp;
 
+
   } catch(std::exception &x) {
-    std::cout << "Error!!! " << " <" << x.what() << ">" << std::endl;
-    *rc = ESMF_FAILURE;
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), rc);
+    } else {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", rc);
+    return;
   }
 
-  *rc = ESMF_SUCCESS;
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
 
+#undef  ESMC_METHOD
 }

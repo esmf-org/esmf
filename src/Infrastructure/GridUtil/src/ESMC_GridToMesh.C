@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.37 2009/04/21 21:19:18 oehmke Exp $
+// $Id: ESMC_GridToMesh.C,v 1.38 2009/06/25 21:04:09 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -80,7 +80,10 @@ namespace ESMCI {
 // and, maybe, for simple single patch grids with a periodic component,
 // the dual, which is not so bad.  This will put us equivalent with
 // SCRIP.  
+
 void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std::vector<ESMCI::Array*> &arrays, ESMCI::InterfaceInt *maskValuesArg) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "GridToMesh()" 
   Trace __trace("GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh)");
 
   // Initialize the parallel environment for mesh (if not already done)
@@ -91,67 +94,65 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
 
  bool is_sphere = grid.isSphere();
 
- try {
-
-   // *** Grid error checking here ***
-   if (!grid.hasCoordStaggerLoc(staggerLoc))
-     Throw() << "Grid being used in Regrid call does not contain coordinates at appropriate staggerloc";
-
+ // *** Grid error checking here ***
+ if (!grid.hasCoordStaggerLoc(staggerLoc))
+   Throw() << "Grid being used in Regrid call does not contain coordinates at appropriate staggerloc";
  
-   // *** Set some meta-data ***
-     // We set the topological dimension of the mesh (quad = 2, hex = 3, etc...)
-   UInt pdim = grid.getDimCount();
-   mesh.set_parametric_dimension(pdim);
-  
-     // In what dimension is the grid embedded?? (sphere = 3, simple rectangle = 2, etc...)
-   // At this point the topological and spatial dim of the Grid is the same this should change soon
-   UInt sdim = grid.getDimCount();
+ 
+ // *** Set some meta-data ***
+ // We set the topological dimension of the mesh (quad = 2, hex = 3, etc...)
+ UInt pdim = grid.getDimCount();
+ mesh.set_parametric_dimension(pdim);
+ 
+ // In what dimension is the grid embedded?? (sphere = 3, simple rectangle = 2, etc...)
+ // At this point the topological and spatial dim of the Grid is the same this should change soon
+ UInt sdim = grid.getDimCount();
+ 
+ 
+ if (is_sphere) {
+   //std::cout << "g2m, is sphere=1" << std::endl;
+   sdim = 3;
+ }
 
-
-   if (is_sphere) {
-     //std::cout << "g2m, is sphere=1" << std::endl;
-     sdim = 3;
-   }
-
-   mesh.set_spatial_dimension(sdim);
-  
-   // see if grid has a mask field
-   bool hasMask=false;
-   int numMaskValues=0;
-   int *ptrMaskValues;
-   if (grid.hasItemStaggerLoc(staggerLoc, ESMC_GRIDITEM_MASK)) {
-     if (maskValuesArg != NULL) {
-       // Error check mask values
-       if (maskValuesArg->dimCount != 1) {
-	 Throw() << " Mask values must be of rank 1.";
-       }
-       
-       // Get mask values
-       numMaskValues=maskValuesArg->extent[0];
-       ptrMaskValues=&(maskValuesArg->array[0]);
-       
-       // Turn on masking
-       hasMask=true;
-     } else {
-       hasMask=false;
+ mesh.set_spatial_dimension(sdim);
+ 
+ // see if grid has a mask field
+ bool hasMask=false;
+ int numMaskValues=0;
+ int *ptrMaskValues;
+ if (grid.hasItemStaggerLoc(staggerLoc, ESMC_GRIDITEM_MASK)) {
+   if (maskValuesArg != NULL) {
+     // Error check mask values
+     if (maskValuesArg->dimCount != 1) {
+       Throw() << " Mask values must be of rank 1.";
      }
+     
+     // Get mask values
+     numMaskValues=maskValuesArg->extent[0];
+     ptrMaskValues=&(maskValuesArg->array[0]);
+     
+     // Turn on masking
+     hasMask=true;
+   } else {
+     hasMask=false;
    }
-
-   // We save the nodes in a linear list so that we can access then as such
-   // for cell creation.
-   //TODO: NEED MAX LID METHOD SOON ->Bob
-   std::vector<MeshObj*> nodevect(100000);
-   std::map<UInt,UInt> ngid2lid;
-
-   UInt local_node_num = 0, local_elem_num = 0;
-
-
-   // Set the id of this processor here (me)
-   int localrc;
-   int rc;
-   int me = VM::getCurrent(&localrc)->getLocalPet();
-//   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) // How should I handle ESMF LogError?
-//      return;
+ }
+ 
+ // We save the nodes in a linear list so that we can access then as such
+ // for cell creation.
+ //TODO: NEED MAX LID METHOD SOON ->Bob
+ std::vector<MeshObj*> nodevect(100000);
+ std::map<UInt,UInt> ngid2lid;
+ 
+ UInt local_node_num = 0, local_elem_num = 0;
+ 
+ 
+ // Set the id of this processor here (me)
+ int localrc;
+ int rc;
+ int me = VM::getCurrent(&localrc)->getLocalPet();
+ if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+   throw localrc;  // bail out with exception
 
    // Keep track of locally owned, shared and shared, not-locally-owned
    std::vector<UInt> owned_shared;
@@ -537,30 +538,8 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
 */
    }
 
-
-
-#if 0
-     MEField<> *cptr = mesh.GetCoordField();
-
-     MEField<> *mptr = mesh.GetField("mask");
-
-  printf("G2M: c=%d m=%d hm=%d \n",cptr,mptr,hasMask);
-#endif
-
- } // try catch block
-  catch (std::exception &x) {
-
-  // Set any ESMF error codes/messages
-
- } // catch
-  catch(...) {
-
-  // Set any ESMF error codes/messages
-
- }
-
 }
-
+#undef  ESMC_METHOD
 
 } // namespace
 
