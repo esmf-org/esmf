@@ -47,7 +47,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_State.C,v 1.13 2009/06/03 00:34:54 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_State.C,v 1.14 2009/06/26 00:48:16 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -219,15 +219,15 @@ namespace ESMCI {
 //      Get an array from an existing state
 //
 //EOP
-      //local variables
-      int rc;
-      int localrc;
-      int nlen;
-      char* fName;
+    //local variables
+    int rc;
+    int localrc;
+    int nlen;
+    char* fName;
 
-      //Initialize return code
-      rc = ESMF_RC_NOT_IMPL;
-      localrc = ESMF_RC_NOT_IMPL;
+    //Initialize return code
+    rc = ESMF_RC_NOT_IMPL;
+    localrc = ESMF_RC_NOT_IMPL;
 
     // convert file name to fortran string
     nlen = strlen(name);
@@ -246,10 +246,11 @@ namespace ESMCI {
     }
 
 
-      printf("In ESMC_StateGetArray, after  calling the glue \n");
+    //  printf("In ESMC_StateGetArray, after  calling the glue \n");
 
-      rc = localrc;
-      return rc;
+    delete[] fName;
+    rc = localrc;
+    return rc;
 
    } // end ESMC_StateGetArray
 
