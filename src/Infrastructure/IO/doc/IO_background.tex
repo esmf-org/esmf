@@ -1,4 +1,4 @@
-% $Id: IO_background.tex,v 1.20 2009/02/18 06:51:00 eschwab Exp $
+% $Id: IO_background.tex,v 1.21 2009/06/26 17:00:19 eschwab Exp $
 
 %\subsection{Background}
 
@@ -57,7 +57,7 @@ broad categories:
 \begin{description}
 
 \item[\bf Structured Gridded Data.] A {\em structured grid} is one on 
-on which the relationship between gridpoints can be derived from their
+which the relationship between gridpoints can be derived from their
 indices, without the need for an explicit map.  A simple example is fields
 defined on a rectangular lat/lon grid.
 
@@ -192,7 +192,7 @@ HDF Scientific Data Sets API allows efficient operating with
 multi-dimensional arrays. Although HDF SDS itself does not provide a way
 to represent high-level abstractions for data on unstructured grids
 and observational data sets, HDF-based applications, such as HDF-EOS
-do so in HDF-EOS Point Point Structure.
+do so in HDF-EOS Point Structure.
 
 
 %%Because of hierarchical nature of data representation, the HDF
@@ -249,7 +249,7 @@ communinity (http://grads.iges.org/grads/). GrADS can read COARDS
 compliant NetCDF and HDF files, as well as IEEE binary and GRIB files
 provided an appropriate companion metadadata file is provided (in
 GrADS parlance these are refered to as {\em control files}). Files
-produced by the ESMF are intended to be GrADS redable, and the ESMF
+produced by the ESMF are intended to be GrADS readable, and the ESMF
 shall produce GrADS control files upon request.
 
 \item[\bf BUFR] Binary Universal Form of Representation of the meteorological 
@@ -304,7 +304,7 @@ There are several possibilities to perform IO in parallel (\cite{MPI-2}):
 \begin{description}
 \item {\bf Single-threaded IO:} A single process acquires all the data and
 writes them out. The features of hardware and OS are used to distribute the 
-data over multiple chanels and, possibly, to muliple disks.
+data over multiple channels and, possibly, to muliple disks.
 
 \item {\bf Multithreaded, multi-fileset IO:} Many processes write to
 multiple independent files. These files may be assembled later. Since each of 
@@ -316,7 +316,7 @@ multiple disks.
 single file. Although this approach is the most desirable one, its 
 implementation is the most complicated. Since it requires concurrent access 
 to the file by multiple processes, it can be implemented within the ESMF I/O 
-only when such functionality is provided by underlying I/O library. 
+only when such functionality is provided by an underlying I/O library. 
 \end{description}
 
 Multithreaded IO offers a simple way to stripe the data accross as many
