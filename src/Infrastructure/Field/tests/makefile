@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.61 2009/05/08 05:27:22 theurich Exp $ 
+# $Id: makefile,v 1.62 2009/06/26 16:29:02 oehmke Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -8,11 +8,13 @@ LOCDIR	  = src/Infrastructure/Field/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldCreateGetUTest \
+		$(ESMF_TESTDIR)/ESMF_FieldRegridUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldArbGridUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldStressUTest
                
 TESTS_RUN     = RUN_ESMF_FieldUTest \
 		RUN_ESMF_FieldCreateGetUTest \
+		RUN_ESMF_FieldRegridUTest \
 		RUN_ESMF_FieldArbGridUTest \
 		RUN_ESMF_FieldStressUTest
  
@@ -28,6 +30,7 @@ endif
 endif
                
 TESTS_RUN_UNI = RUN_ESMF_FieldStressUTestUNI \
+	RUN_ESMF_FieldRegridUTestUNI \
 	RUN_ESMF_FieldArbGridUTestUNI
 
 include ${ESMF_DIR}/makefile
@@ -48,6 +51,12 @@ RUN_ESMF_FieldUTest:
 
 RUN_ESMF_FieldCreateGetUTest:
 	$(MAKE) TNAME=FieldCreateGet NP=4 ftest
+
+RUN_ESMF_FieldRegridUTest:
+	$(MAKE) TNAME=FieldRegrid NP=4 ftest
+
+RUN_ESMF_FieldRegridUTestUNI:
+	$(MAKE) TNAME=FieldRegrid NP=1 ftest
 
 RUN_ESMF_FieldArbGridUTest:
 	$(MAKE) TNAME=FieldArbGrid NP=4 ftest
