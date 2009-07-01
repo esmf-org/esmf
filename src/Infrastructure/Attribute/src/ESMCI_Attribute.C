@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.40 2009/06/22 22:45:37 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.41 2009/07/01 17:28:48 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.40 2009/06/22 22:45:37 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.41 2009/07/01 17:28:48 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -272,32 +272,32 @@ namespace ESMCI {
       return ESMF_FAILURE;
     }
 
-  } else if (object.compare("field")==0) {
+  } else if (object.compare("field")==0 || object.compare("array")==0) {
   // Field standard Attribute package
     localrc = AttPackCreateCustom("CF", "General", object);
     if (localrc != ESMF_SUCCESS) {
-      sprintf(msgbuf, "failed creating field standard attpack1");
+      sprintf(msgbuf, "failed creating field or array standard attpack1");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                msgbuf, &localrc);
       return ESMF_FAILURE;
     }
     localrc = AttPackNest("CF", "Extended", object, "CF", "General");
     if (localrc != ESMF_SUCCESS) {
-      sprintf(msgbuf, "failed creating field standard attpack2");
+      sprintf(msgbuf, "failed creating field or array standard attpack2");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                msgbuf, &localrc);
       return ESMF_FAILURE;
     }
     localrc = AttPackNest("ESG", "General", object, "CF", "Extended");
     if (localrc != ESMF_SUCCESS) {
-      sprintf(msgbuf, "failed creating field standard attpack3");
+      sprintf(msgbuf, "failed creating field or array standard attpack3");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                msgbuf, &localrc);
       return ESMF_FAILURE;
     }
     localrc = AttPackNest("ESMF", "General", object, "ESG", "General");
     if (localrc != ESMF_SUCCESS) {
-      sprintf(msgbuf, "failed creating field standard attpack4");
+      sprintf(msgbuf, "failed creating field or array standard attpack4");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                msgbuf, &localrc);
       return ESMF_FAILURE;
@@ -309,7 +309,7 @@ namespace ESMCI {
     localrc = AttPackAddAttribute("Export", "ESG", "General", object);
     localrc = AttPackAddAttribute("Import", "ESG", "General", object);
     if (localrc != ESMF_SUCCESS) {
-      sprintf(msgbuf, "failed creating field standard attpack");
+      sprintf(msgbuf, "failed creating field or array standard attpack");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                msgbuf, &localrc);
       return ESMF_FAILURE;
@@ -1255,6 +1255,7 @@ namespace ESMCI {
     // now remove this Attribute from source, this is a swap
     source->packList.erase(source->packList.begin());
   }
+/*
   // copy the Attribute links by value
   for (i=0; i<source->linkList.size(); i++) {
     // set the links
@@ -1272,6 +1273,7 @@ namespace ESMCI {
       return ESMF_FAILURE;
     }
   }
+*/
 
   return ESMF_SUCCESS;
 
@@ -3786,7 +3788,9 @@ namespace ESMCI {
   
   } else if (object.compare("state")==0 ||
              object.compare("fieldbundle")==0 ||
-             object.compare("field")==0) { 
+             object.compare("field")==0 || 
+             object.compare("arraybundle")==0 ||
+             object.compare("array")==0) { 
     modelcompname="N/A";
     fullname="N/A";
     version="N/A";
