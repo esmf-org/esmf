@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.43 2009/06/23 20:06:02 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.44 2009/07/01 17:26:48 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.43 2009/06/23 20:06:02 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.44 2009/07/01 17:26:48 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -131,7 +131,9 @@ module ESMF_AttributeMod
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_ArrayAttAddPackCstm
+        module procedure ESMF_ArrayAttAddPackStandard
         module procedure ESMF_ArrayBundleAttAddPackCstm
+        module procedure ESMF_ArrayBundleAttAddPackStandard
         module procedure ESMF_CplCompAttAddPackStandard
         module procedure ESMF_CplCompAttAddPackCstm
         module procedure ESMF_GridCompAttAddPackStandard
@@ -315,6 +317,7 @@ module ESMF_AttributeMod
    
 ! !PRIVATE MEMBER FUNCTIONS:
 ! TODO
+        module procedure ESMF_ArrayBundleAttLinkArray
         module procedure ESMF_CplCompAttLinkCplComp
         module procedure ESMF_CplCompAttLinkGridComp
         module procedure ESMF_CplCompAttLinkState
@@ -324,6 +327,8 @@ module ESMF_AttributeMod
         module procedure ESMF_GridCompAttLinkCplComp
         module procedure ESMF_GridCompAttLinkGridComp
         module procedure ESMF_GridCompAttLinkState
+        module procedure ESMF_StateAttLinkArrayBundle
+        module procedure ESMF_StateAttLinkArray
         module procedure ESMF_StateAttLinkFieldBundle
         module procedure ESMF_StateAttLinkField
         module procedure ESMF_StateAttLinkState
@@ -344,6 +349,7 @@ module ESMF_AttributeMod
    
 ! !PRIVATE MEMBER FUNCTIONS:
 ! TODO
+        module procedure ESMF_ArrayBundleAttLinkRmArray
         module procedure ESMF_CplCompAttLinkRmCplComp
         module procedure ESMF_CplCompAttLinkRmGridComp
         module procedure ESMF_CplCompAttLinkRmState
@@ -353,6 +359,8 @@ module ESMF_AttributeMod
         module procedure ESMF_GridCompAttLinkRmCplComp
         module procedure ESMF_GridCompAttLinkRmGridComp
         module procedure ESMF_GridCompAttLinkRmState
+        module procedure ESMF_StateAttLinkRmArrayBundle
+        module procedure ESMF_StateAttLinkRmArray
         module procedure ESMF_StateAttLinkRmFieldBundle
         module procedure ESMF_StateAttLinkRmField
         module procedure ESMF_StateAttLinkRmState
@@ -476,8 +484,8 @@ module ESMF_AttributeMod
       interface ESMF_AttributeWrite
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        !module procedure ESMF_ArrayAttWrite
-        !module procedure ESMF_ArrayBundleAttWrite
+        module procedure ESMF_ArrayAttWrite
+        module procedure ESMF_ArrayBundleAttWrite
         module procedure ESMF_CplCompAttWrite
         module procedure ESMF_GridCompAttWrite
         !module procedure ESMF_DistGridAttWrite
@@ -545,6 +553,7 @@ contains
 !     Add an ESMF standard Attribute package.  
 !     Supported values for <object> are:
 !     \begin{description}
+!     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_CplComp), intent(inout) :: comp  
 !     \item type(ESMF\_GridComp), intent(inout) :: comp  
 !     \item type(ESMF\_Field), intent(inout) :: field  
@@ -1042,8 +1051,8 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLink - Link a State Attribute hierarchy with the hierarchy of a FieldBundle, Field, or State
-!
+! !IROUTINE: ESMF_AttributeLink - Link a State Attribute hierarchy with the hierarchy of a an Array, ArrayBundle, Field, FieldBundle, or State
+! 
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLink()
 !      subroutine ESMF_StateAttLink(state, <object>, rc)
@@ -1059,8 +1068,10 @@ contains
 !     a {\tt Fieldbundle}, {\tt Field}, or another {\tt State}.  
 !     Supported values for the <object> are:
 !     \begin{description}
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
 !     \item type(ESMF\_Field), intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 ! 
@@ -1138,6 +1149,36 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_AttributeLink - Link an ArrayBundle and Array Attribute hierarchy
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLink()
+!      subroutine ESMF_ArrayBundleAttLink(arraybundle, array, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!      type(ESMF\_Array), intent(inout) :: array
+!      integer, intent(out), optional :: rc   
+!
+!
+! !DESCRIPTION:
+!     Attach an {\tt ArrayBundle} Attribute hierarchy to the hierarchy of
+!     an {\tt Array}.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [arraybundle]
+!       An {\tt ESMF\_ArrayBundle} object
+!     \item [array]
+!       An {\tt ESMF\_Array} object
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a Component Attribute hierarchy from that of a Component or State
 !
 ! !INTERFACE:
@@ -1179,7 +1220,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a State Attribute hierarchy with the hierarchy of a FieldBundle, Field, or State
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a State Attribute hierarchy with the hierarchy of an Array, ArrayBundle, Field, FieldBundle, or State
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLinkRemove()
@@ -1196,8 +1237,10 @@ contains
 !     a {\tt Fieldbundle}, {\tt Field}, or another {\tt State}.  
 !     Supported values for the <object> are:
 !     \begin{description}
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
 !     \item type(ESMF\_Field), intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 ! 
@@ -1219,7 +1262,7 @@ contains
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLinkRemove()
-!      subroutine ESMF_FieldBundleAttLinkRemove(fieldbundle, <object>, rc)
+!      subroutine ESMF_FieldBundleAttLinkRemove(fieldbundle, field, rc)
 !
 ! !ARGUMENTS:
 !      type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
@@ -1249,7 +1292,7 @@ contains
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLinkRemove()
-!      subroutine ESMF_FieldAttLinkRemove(field, <object>, rc)
+!      subroutine ESMF_FieldAttLinkRemove(field, grid, rc)
 !
 ! !ARGUMENTS:
 !      type(ESMF\_Field), intent(inout) :: field
@@ -1267,6 +1310,36 @@ contains
 !       An {\tt ESMF\_Field} object
 !     \item [grid]
 !       An {\tt ESMF\_Grid} object
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink an ArrayBundle and Array Attribute hierarchy
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLinkRemove()
+!      subroutine ESMF_ArrayBundleAttLinkRemove(arraybundle, array, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!      type(ESMF\_Array), intent(inout) :: array
+!      integer, intent(out), optional :: rc   
+!
+!
+! !DESCRIPTION:
+!     Unattach an {\tt ArrayBundle} Attribute hierarchy from the hierarchy of
+!     an {\tt Array}.  
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [arraybundle]
+!       An {\tt ESMF\_ArrayBundle} object
+!     \item [array]
+!       An {\tt ESMF\_Array} object
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -1512,6 +1585,8 @@ contains
 !     Update an Attribute hierarchy during runtime.  
 !     Supported values for <object> are:
 !     \begin{description}
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
 !     \item type(ESMF\_CplComp), intent(inout) :: comp  
 !     \item type(ESMF\_GridComp), intent(inout) :: comp  
 !     \item type(ESMF\_Field), intent(inout) :: field  
@@ -1527,7 +1602,7 @@ contains
 !           The virtural machine over which this Attribute hierarchy 
 !           should be updated
 !     \item [rootList]
-!           The list of "root" PETs that are to be used to update
+!           The list of ``root" PETs that are to be used to update
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -1554,6 +1629,8 @@ contains
 !     tab-delimited or xml format is acheived by using {\tt attwriteflag}.  
 !     Supported values for <object> are:
 !     \begin{description}
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
 !     \item type(ESMF\_CplComp), intent(inout) :: comp  
 !     \item type(ESMF\_GridComp), intent(inout) :: comp  
 !     \item type(ESMF\_Field), intent(inout) :: field  
@@ -2105,13 +2182,6 @@ contains
  @\
       if(present_flag .ne. ESMF_TRUE) then @\
       if(present(defaultvalueList)) then @\
-        if (litemCount > size(defaultvalueList)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                              "itemCount cannot be larger than size(defaultvalueList)", & @\
-                              ESMF_CONTEXT, rc) @\
-          return @\
-        endif @\
-        if (.not. present(itemCount))  litemCount = size(defaultvalueList) @\
         valueList = defaultvalueList @\
       else  @\
         call ESMF_LogMsgSetError(ESMF_RC_ATTR_NOTSET, & @\
@@ -2368,13 +2438,6 @@ contains
  @\
       if(present_flag .ne. ESMF_TRUE) then @\
       if(present(defaultvalueList)) then @\
-        if (litemCount > size(defaultvalueList)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                              "itemCount cannot be larger than size(defaultvalueList)", & @\
-                              ESMF_CONTEXT, rc) @\
-          return @\
-        endif @\
-        if (.not. present(itemCount))  litemCount = size(defaultvalueList) @\
         valueList = defaultvalueList @\
       else  @\
         call ESMF_LogMsgSetError(ESMF_RC_ATTR_NOTSET, & @\
@@ -2383,7 +2446,7 @@ contains
         return @\
       endif @\
       endif @\
- @\
+@\
     if (present(itemCount)) then @\
       itemCount = litemCount @\
     endif @\
@@ -2630,13 +2693,6 @@ contains
  @\
       if(present_flag .ne. ESMF_TRUE) then @\
       if(present(defaultvalueList)) then @\
-        if (litemCount > size(defaultvalueList)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                              "itemCount cannot be larger than size(defaultvalueList)", & @\
-                              ESMF_CONTEXT, rc) @\
-          return @\
-        endif @\
-        if (.not. present(itemCount))  litemCount = size(defaultvalueList) @\
         do i=1,litemCount @\
           valueList(i) = defaultvalueList(i) @\
         enddo @\
@@ -3966,6 +4022,7 @@ contains
 !-------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_Array, array, array)
+AttAddPackStandardMacro(ESMF_Array, array, array)
 AttRemoveMacro(ESMF_Array, array, array)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_Array, array, array)
@@ -3978,11 +4035,15 @@ TypeKind3DeclarationMacro(AttSet, ESMF_Array, array, array)
 AttSetLogicalMacro(ESMF_Array, array, array)
 AttSetCharacterMacro(ESMF_Array, array, array)
 
+AttUpdateMacro(ESMF_Array, array, array)
+AttWriteMacro(ESMF_Array, array, array, array, array)
+
 !-------------------------------------------------------------------------
 !  ARRAYBUNDLE
 !-------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+AttAddPackStandardMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 AttRemoveMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_ArrayBundle, arraybundle, arraybundle)
@@ -3991,9 +4052,17 @@ AttGetCharacterMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 
 GetCountNameNumberMacro(ESMF_ArrayBundle, arraybundle, arraybundle)      
 
+AttLinkMacro(ESMF_ArrayBundle, ESMF_Array, Array, arraybundle, array, & @\
+                arraybundle, array)
+AttLinkRemoveMacro(ESMF_ArrayBundle, ESMF_Array, Array, arraybundle, array, & @\
+                arraybundle, array)
+
 TypeKind3DeclarationMacro(AttSet, ESMF_ArrayBundle, arraybundle, arraybundle)
 AttSetLogicalMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 AttSetCharacterMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+
+AttUpdateMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+AttWriteMacro(ESMF_ArrayBundle, arraybundle, arraybundle, arraybundle, array)
 
 !-------------------------------------------------------------------------
 !  CplComp
@@ -4184,12 +4253,20 @@ AttGetCharacterMacro(ESMF_State, state, state%statep%base)
 
 GetCountNameNumberMacro(ESMF_State, state, state%statep%base)
 
+ESMF_StateAttLinkMacro(ESMF_Array, Array, state, array, state%statep%base, & @\
+                          array, statep%st, array)
+ESMF_StateAttLinkMacro(ESMF_ArrayBundle, ArrayBundle, state, arraybundle, state%statep%base, & @\
+                          arraybundle, statep%st, array)
 ESMF_StateAttLinkMacro(ESMF_Field, Field, state, field, state%statep%base, & @\
                           field%ftypep%base, statep%st, field)
 ESMF_StateAttLinkMacro(ESMF_FieldBundle, FieldBundle, state, fieldbundle, state%statep%base, & @\
                           fieldbundle%btypep%base, statep%st, field)
 ESMF_StateAttLinkMacro(ESMF_State, State, state1, state2, state1%statep%base, & @\
                           state2%statep%base, statep%st, field)
+AttLinkRemoveMacro(ESMF_State, ESMF_Array, Array, state, array, & @\
+                state%statep%base, array)
+AttLinkRemoveMacro(ESMF_State, ESMF_ArrayBundle, ArrayBundle, state, arraybundle, & @\
+                state%statep%base, arraybundle)
 AttLinkRemoveMacro(ESMF_State, ESMF_Field, Field, state, field, & @\
                 state%statep%base, field%ftypep%base)
 AttLinkRemoveMacro(ESMF_State, ESMF_FieldBundle, FieldBundle, state, fieldbundle, & @\
