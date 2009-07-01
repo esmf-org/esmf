@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshUTest.F90,v 1.9 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_MeshUTest.F90,v 1.10 2009/07/01 18:47:06 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -38,21 +38,28 @@ program ESMF_MeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshUTest.F90,v 1.9 2009/01/21 21:38:01 cdeluca Exp $'
+    '$Id: ESMF_MeshUTest.F90,v 1.10 2009/07/01 18:47:06 oehmke Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
 
   ! individual test result code
-  integer :: rc
+  integer :: localrc, rc, petCount,localPet
 
   ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
   character(ESMF_MAXSTR) :: name
 
   !LOCAL VARIABLES:
-  type(ESMF_Mesh) :: meshSrc
+  type(ESMF_Mesh) :: mesh
+  type(ESMF_VM) :: vm
+  logical :: correct
+  integer, pointer :: nodeIds(:),nodeOwners(:)
+  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  integer :: numNodes
+  integer :: numElems
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -67,12 +74,95 @@ program ESMF_MeshUTest
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
   !------------------------------------------------------------------------
 
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "MeshCreate Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  meshSrc = ESMF_MeshCreate(2,3,rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  write(name, *) "Test creating a small 2x2 2D QUAD Mesh in 3 steps on 1 proc"
+  write(failMsg, *) "Incorrect result"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! Only do this if we have 1 processor
+  if (petCount .eq. 1) then
+
+  ! Create Mesh structure
+  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Fill in node data
+  numNodes=9
+
+  !! node ids
+  allocate(nodeIds(numNodes))
+  nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+  !! node Coords
+  allocate(nodeCoords(numNodes*2))
+  nodeCoords=(/0.0,0.0, &
+               1.0,0.0, &
+               2.0,0.0, &
+               0.0,1.0, &
+               1.0,1.0, &
+               2.0,1.0, &
+               0.0,2.0, &
+               1.0,2.0, &
+               2.0,2.0/)
+
+  !! node owners
+  allocate(nodeOwners(numNodes))
+  nodeOwners=0 ! everything on proc 0
+
+  ! Add nodes
+  call ESMF_MeshAddNodes(mesh,nodeIds,nodeCoords,nodeOwners,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! deallocate node data
+  deallocate(nodeIds)
+  deallocate(nodeCoords)
+  deallocate(nodeOwners)
+
+  ! Fill in elem data
+  numElems=4
+
+  !! elem ids
+  allocate(elemIds(numElems))
+  elemIds=(/1,2,3,4/) 
+
+  !! elem types
+  allocate(elemTypes(numElems))
+  elemTypes=ESMF_MESHELEMENT_QUAD
+
+  !! elem conn
+  allocate(elemConn(numElems*4))
+  elemConn=(/1,2,5,4, & 
+             2,3,6,5, & 
+             4,5,8,7, & 
+             5,6,9,8/)
+
+  ! Add Elements
+  call ESMF_MeshAddElements(mesh,elemIds,elemTypes,elemConn,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! deallocate elem data
+  deallocate(elemIds)
+  deallocate(elemTypes)
+  deallocate(elemConn)
+
+  !! Write mesh for debugging
+  ! call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
+  !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! endif for skip for >1 proc
+  endif 
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   ! TODO: "Activate once the mesh is fully created. ESMF_MeshWrite is not meant
@@ -80,7 +170,7 @@ program ESMF_MeshUTest
   !UTest
   !write(name, *) "MeshWrite Test"
   !write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_MeshWrite(meshSrc, filename="mesh_out", rc=rc)
+  !  call ESMF_MeshWrite(meshSrc, filename="mesh_out", rc=rc)
   !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------

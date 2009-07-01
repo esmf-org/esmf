@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.18 2009/04/22 00:21:45 w6ws Exp $
+! $Id: ESMF_Mesh.F90,v 1.19 2009/07/01 18:47:06 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,11 +73,20 @@ module ESMF_MeshMod
     integer :: meshelement
   end type
 
-  type(ESMF_MeshElement), parameter :: &
-        ESMF_MESHELEMENT_QUAD = ESMF_MeshElement(0), &
-        ESMF_MESHELEMENT_TRI = ESMF_MeshElement(1), &
-        ESMF_MESHELEMENT_HEX = ESMF_MeshElement(2), &
-        ESMF_MESHELEMENT_TET = ESMF_MeshElement(3)
+!!!!
+!! Use integers instead of type, to be compatible with reading in from VTK and other files
+!!  type(ESMF_MeshElement), parameter :: &
+!!        ESMF_MESHELEMENT_QUAD = ESMF_MeshElement(0), &
+!!        ESMF_MESHELEMENT_TRI = ESMF_MeshElement(1), &
+!!        ESMF_MESHELEMENT_HEX = ESMF_MeshElement(2), &
+!!        ESMF_MESHELEMENT_TET = ESMF_MeshElement(3)
+!!!!
+
+  integer, parameter :: &
+        ESMF_MESHELEMENT_TRI    = 5,  &  ! Triangle
+        ESMF_MESHELEMENT_QUAD   = 9,  &  ! Quadralateral
+        ESMF_MESHELEMENT_TETRA  = 10, &  ! Tetrahedron
+        ESMF_MESHELEMENT_HEX    = 12     ! Hexahedron
 
   type ESMF_MeshPartitionType
   sequence
@@ -97,8 +106,8 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_Mesh               
-  public ESMF_MeshElement, ESMF_MESHELEMENT_QUAD, ESMF_MESHELEMENT_TRI, &
-                           ESMF_MESHELEMENT_HEX, ESMF_MESHELEMENT_TET
+  public ESMF_MESHELEMENT_QUAD, ESMF_MESHELEMENT_TRI, &
+         ESMF_MESHELEMENT_HEX, ESMF_MESHELEMENT_TETRA
       
 !------------------------------------------------------------------------------
 
@@ -122,7 +131,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.18 2009/04/22 00:21:45 w6ws Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.19 2009/07/01 18:47:06 oehmke Exp $'
 
 !==============================================================================
 ! 
