@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.164 2009/06/05 20:56:44 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.165 2009/07/01 17:27:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.164 2009/06/05 20:56:44 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.165 2009/07/01 17:27:50 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -267,6 +267,8 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
       type(ESMF_Array) :: temp_list(1)
+      character(ESMF_MAXSTR) :: lobject, lname1, lname2
+      type(ESMF_Logical) :: lvalue1, lvalue2
       integer :: localrc
 
       ! check input variables
@@ -289,6 +291,35 @@ module ESMF_StateMod
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
+      !  link the Attribute hierarchies
+      call c_ESMC_AttributeLink(state%statep%base, array, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+      ! set the import and export Attributes on any Field connected to this State
+      lobject = 'array'
+      lvalue1 = .true.
+      lvalue2 = .false.
+      lname1 = 'Import'
+      lname2 = 'Export'
+      if (state%statep%st == ESMF_STATE_IMPORT) then
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else if (state%statep%st == ESMF_STATE_EXPORT) then
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
+      
       if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_StateAddOneArray
 
@@ -333,6 +364,8 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
       type(ESMF_Array) :: temp_list(1)
+      character(ESMF_MAXSTR) :: lobject, lname1, lname2
+      type(ESMF_Logical) :: lvalue1, lvalue2
       integer :: localrc
 
       ! check input variables
@@ -356,6 +389,35 @@ module ESMF_StateMod
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
+      !  link the Attribute hierarchies
+      call c_ESMC_AttributeLink(state%statep%base, array, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+      ! set the import and export Attributes on any Field connected to this State
+      lobject = 'array'
+      lvalue1 = .true.
+      lvalue2 = .false.
+      lname1 = 'Import'
+      lname2 = 'Export'
+      if (state%statep%st == ESMF_STATE_IMPORT) then
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else if (state%statep%st == ESMF_STATE_EXPORT) then
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
+      
       if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_StateAddOneArrayX
 
@@ -397,6 +459,8 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
       type(ESMF_ArrayBundle) :: temp_list(1)
+      character(ESMF_MAXSTR) :: lobject, lname1, lname2
+      type(ESMF_Logical) :: lvalue1, lvalue2
       integer :: localrc
 
       ! check input variables
@@ -420,6 +484,35 @@ module ESMF_StateMod
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
+      !  link the Attribute hierarchies
+      call c_ESMC_AttributeLink(state%statep%base, arraybundle, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+      ! set the import and export Attributes on any Array connected to this State
+      lobject = 'array'
+      lvalue1 = .true.
+      lvalue2 = .false.
+      lname1 = 'Import'
+      lname2 = 'Export'
+      if (state%statep%st == ESMF_STATE_IMPORT) then
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else if (state%statep%st == ESMF_STATE_EXPORT) then
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
+      
       if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_StateAddOneArrayBundle
 
@@ -464,6 +557,8 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
       type(ESMF_ArrayBundle) :: temp_list(1)
+      character(ESMF_MAXSTR) :: lobject, lname1, lname2
+      type(ESMF_Logical) :: lvalue1, lvalue2
       integer :: localrc
 
       ! check input variables
@@ -487,6 +582,35 @@ module ESMF_StateMod
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
+      !  link the Attribute hierarchies
+      call c_ESMC_AttributeLink(state%statep%base, arraybundle, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+      ! set the import and export Attributes on any Array connected to this State
+      lobject = 'array'
+      lvalue1 = .true.
+      lvalue2 = .false.
+      lname1 = 'Import'
+      lname2 = 'Export'
+      if (state%statep%st == ESMF_STATE_IMPORT) then
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else if (state%statep%st == ESMF_STATE_EXPORT) then
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
+      
       if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_StateAddOneArrayBundleX
 
@@ -1296,6 +1420,8 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
       integer :: localrc, i
       integer :: countOpt
+      character(ESMF_MAXSTR) :: lobject, lname1, lname2
+      type(ESMF_Logical) :: lvalue1, lvalue2
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1336,6 +1462,38 @@ module ESMF_StateMod
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc))  return
 
+      ! link the Attribute hierarchies
+      do i=1,count
+         call c_ESMC_AttributeLink(state%statep%base, &
+          arrayList(i), localrc)
+         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+      enddo
+
+      ! set the import and export Attributes on any Field connected to this State
+      lobject = 'array'
+      lvalue1 = .true.
+      lvalue2 = .false.
+      lname1 = 'Import'
+      lname2 = 'Export'
+      if (state%statep%st == ESMF_STATE_IMPORT) then
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else if (state%statep%st == ESMF_STATE_EXPORT) then
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
+      
       if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_StateAddArrayList
 
@@ -1382,6 +1540,8 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
       integer :: localrc, i
       integer :: countOpt
+      character(ESMF_MAXSTR) :: lobject, lname1, lname2
+      type(ESMF_Logical) :: lvalue1, lvalue2
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1422,6 +1582,38 @@ module ESMF_StateMod
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc))  return
 
+      ! link the Attribute hierarchies
+      do i=1,count
+         call c_ESMC_AttributeLink(state%statep%base, &
+          arraybundleList(i), localrc)
+         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+      enddo
+
+      ! set the import and export Attributes on any Field connected to this State
+      lobject = 'array'
+      lvalue1 = .true.
+      lvalue2 = .false.
+      lname1 = 'Import'
+      lname2 = 'Export'
+      if (state%statep%st == ESMF_STATE_IMPORT) then
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else if (state%statep%st == ESMF_STATE_EXPORT) then
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
+      
       if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_StateAddArrayBundleList
 
