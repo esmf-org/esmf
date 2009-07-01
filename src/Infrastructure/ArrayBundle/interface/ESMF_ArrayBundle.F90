@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.8 2009/06/06 01:05:11 w6ws Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.9 2009/07/01 17:28:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.8 2009/06/06 01:05:11 w6ws Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.9 2009/07/01 17:28:17 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -259,6 +259,13 @@ contains
 
     ! Garbage collection
     deallocate(arrayPointerList)
+
+    ! link the Attribute hierarchies
+    do i=1,arrayCount_opt
+      call c_ESMC_AttributeLink(arraybundle, arrayList(i), localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc))  return
+    enddo
 
     ! Set return value
     ESMF_ArrayBundleCreate = arraybundle
