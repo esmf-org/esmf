@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.36 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.37 2009/07/01 19:21:10 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.36 2009/01/21 21:37:59 cdeluca Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.37 2009/07/01 19:21:10 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -62,7 +62,7 @@ program ESMF_GridCoordUTest
   integer :: compELWidth(3),compEUWidth(3)
   integer :: lbnds(1),ubnds(1),rank,clbnd(3),cubnd(3)
   integer :: i,i1,i2,i3, index(3)
-  integer :: lDE, localDECount
+  integer :: lDE, localDECount,t
   real(ESMF_KIND_R8) :: coord(3)
   character(len=ESMF_MAXSTR) :: string
 
@@ -2611,16 +2611,21 @@ program ESMF_GridCoordUTest
 
      ! check coord   
      do i1=clbnd(1),cubnd(1)
-     do i2=clbnd(2),cubnd(2)
-     do i3=clbnd(3),cubnd(3)
         index(1)=i1
+     do i2=clbnd(2),cubnd(2)
         index(2)=i2
+     do i3=clbnd(3),cubnd(3)
         index(3)=i3
 
+        ! Do this to force absoft to not mess-up optimization of loops and index()  
+        t=index(1)+index(2)+index(3)
+
+        ! get coords for index location
         call ESMF_GridGetIndCoord(grid2D, localDE=lDE, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
                               index=index, coord=coord, rc=localrc)
         if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
 
+        ! check results
         if ((coord(1) .ne. REAL(i1,ESMF_KIND_R8)) .or. &
             (coord(2) .ne. REAL(i2,ESMF_KIND_R8)) .or. &
             (coord(3) .ne. REAL(i3,ESMF_KIND_R8))) then
@@ -2629,7 +2634,8 @@ program ESMF_GridCoordUTest
         endif
      enddo
      enddo
-     enddo    
+     enddo
+     
   enddo
 
 
