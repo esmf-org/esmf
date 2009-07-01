@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeArrayUTest.F90,v 1.19 2009/06/08 15:52:13 rokuingh Exp $
+! $Id: ESMF_AttributeArrayUTest.F90,v 1.20 2009/07/01 17:29:32 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeArrayUTest.F90,v 1.19 2009/06/08 15:52:13 rokuingh Exp $'
+      '$Id: ESMF_AttributeArrayUTest.F90,v 1.20 2009/07/01 17:29:32 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1081,6 +1081,28 @@ program ESMF_AttributeArrayUTest
       write(name, *) "Getting a char list Attribute in an Attribute package on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackList == attpackListOut3), &
         name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  AttributeWrite
+    !-------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Write the Attribute package to .xml from an Array Test
+      call ESMF_AttributeWrite(array, convention=conv, purpose=purp, &
+        attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Writing an Attribute package to .xml from an Array Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Write the Attribute package to .stdout from an Array Test
+      call ESMF_AttributeWrite(array, convention=conv, purpose=purp, &
+        attwriteflag=ESMF_ATTWRITE_TAB, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Writing an Attribute package to .stdout from an Array Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------

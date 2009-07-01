@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeABundleUTest.F90,v 1.14 2009/06/08 15:52:12 rokuingh Exp $
+! $Id: ESMF_AttributeABundleUTest.F90,v 1.15 2009/07/01 17:29:32 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeABundleUTest.F90,v 1.14 2009/06/08 15:52:12 rokuingh Exp $'
+      '$Id: ESMF_AttributeABundleUTest.F90,v 1.15 2009/07/01 17:29:32 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -48,6 +48,7 @@ program ESMF_AttributeArrayBundleUTest
       ! local variables
       type(ESMF_ArrayBundle)    :: arraybundle, arraybundleMove
       type(ESMF_Array), dimension(2) :: array
+      type(ESMF_Array)               :: afb
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_DistGrid) :: distgrid
       character(ESMF_MAXSTR) :: conv, nestconv, purp, nestpurp, attrname, &
@@ -102,6 +103,7 @@ program ESMF_AttributeArrayBundleUTest
         regDecomp=(/2,3/), rc=rc)
       array(1) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
       array(2) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
+      afb = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
       arraybundle = ESMF_ArrayBundleCreate(arrayList=array, &
         name="MyArrayBundle", rc=rc)
       arraybundleMove = ESMF_ArrayBundleCreate(arrayList=array, &
@@ -198,7 +200,7 @@ program ESMF_AttributeArrayBundleUTest
       
       defaultI4 = 7
       !EX_UTest
-      ! Get an ESMF_I4 Attribute from a Field Test
+      ! Get an ESMF_I4 Attribute from a Array Test
       call ESMF_AttributeGet(arraybundle, name="AttrI4", value=dfltoutI4, &
         defaultvalue=defaultI4, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -240,7 +242,7 @@ program ESMF_AttributeArrayBundleUTest
       
       defaultI4l = (/4,2,7/)
       !EX_UTest
-      ! Get an ESMF_I4 list Attribute from a Field Test
+      ! Get an ESMF_I4 list Attribute from a Array Test
       call ESMF_AttributeGet(arraybundle, name="AttrI4l", &
         valueList=dfltoutI4l, defaultvalueList=defaultI4l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -280,7 +282,7 @@ program ESMF_AttributeArrayBundleUTest
       
       defaultI8 = 7
       !EX_UTest
-      ! Get an ESMF_I8 Attribute from a Field Test
+      ! Get an ESMF_I8 Attribute from a Array Test
       call ESMF_AttributeGet(arraybundle, name="AttrI8", value=dfltoutI8, &
         defaultvalue=defaultI8, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -322,7 +324,7 @@ program ESMF_AttributeArrayBundleUTest
       
       defaultI8l = (/4,2,7/)
       !EX_UTest
-      ! Get an ESMF_I8 list Attribute from a Field Test
+      ! Get an ESMF_I8 list Attribute from a Array Test
       call ESMF_AttributeGet(arraybundle, name="AttrI8l", &
         valueList=dfltoutI8l, defaultvalueList=defaultI8l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -362,7 +364,7 @@ program ESMF_AttributeArrayBundleUTest
       
       defaultR4 = 7
       !EX_UTest
-      ! Get an ESMF_R4 Attribute from a Field Test
+      ! Get an ESMF_R4 Attribute from a Array Test
       call ESMF_AttributeGet(arraybundle, name="AttrR4", value=dfltoutR4, &
         defaultvalue=defaultR4, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -404,7 +406,7 @@ program ESMF_AttributeArrayBundleUTest
       
       defaultR4l = (/7,8,9/)
       !EX_UTest
-      ! Get an ESMF_R4 list Attribute from a Field Test
+      ! Get an ESMF_R4 list Attribute from a Array Test
       call ESMF_AttributeGet(arraybundle, name="AttrR4l", &
         valueList=dfltoutR4l, defaultvalueList=defaultR4l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -446,7 +448,7 @@ program ESMF_AttributeArrayBundleUTest
       
       defaultR8 = 7
       !NEX_UTest
-      ! Get an ESMF_R8 Attribute from a Field Test
+      ! Get an ESMF_R8 Attribute from a Array Test
       call ESMF_AttributeGet(arraybundle, name="AttrR8", value=dfltoutR8, &
         defaultvalue=defaultR8, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -488,7 +490,7 @@ program ESMF_AttributeArrayBundleUTest
       
       defaultR8l = (/7,8,9/)
       !NEX_UTest
-      ! Get an ESMF_R8 list Attribute from a Field Test
+      ! Get an ESMF_R8 list Attribute from a Array Test
       call ESMF_AttributeGet(arraybundle, name="AttrR8l", &
         valueList=dfltoutR8l, defaultvalueList=defaultR8l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -529,7 +531,7 @@ program ESMF_AttributeArrayBundleUTest
       
       defaultChar = "charAttributeDefault"
       !NEX_UTest
-      ! Get a default char Attribute from a Field Test
+      ! Get a default char Attribute from a Array Test
       call ESMF_AttributeGet(arraybundle, name=attrname, value=dfltoutChar, &
         defaultvalue=defaultChar, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -551,7 +553,7 @@ program ESMF_AttributeArrayBundleUTest
       defaultCharl(3) = "Character String 7"
 
       !EX_UTest
-      ! Set a char list Attribute on a ArrayBundle Test
+      ! Set a char list Attribute on an ArrayBundle Test
       call ESMF_AttributeSet(arraybundle, name="Charl", &
         valueList=InCharl, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -560,7 +562,7 @@ program ESMF_AttributeArrayBundleUTest
       !------------------------------------------------------------------------
   
       !EX_UTest
-      ! Get a char list Attribute on a ArrayBundle Test
+      ! Get a char list Attribute on an ArrayBundle Test
       call ESMF_AttributeGet(arraybundle, name="Charl", &
         valueList=OutCharl,rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -586,11 +588,11 @@ program ESMF_AttributeArrayBundleUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Get a char list default Attribute on a ArrayBundle Test
+      ! Get a char list default Attribute on an ArrayBundle Test
       call ESMF_AttributeGet(arraybundle, name="Charl", &
         valueList=DfltOutCharl, defaultvalueList=defaultCharl, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting a default Attribute char list from a ArrayBundle test"
+      write(name, *) "Getting a default Attribute char list from an ArrayBundle test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (DfltOutCharl == defaultCharl), &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -1086,6 +1088,28 @@ program ESMF_AttributeArrayBundleUTest
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
+    !  AttributeWrite
+    !-------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Write the Attribute package to .xml from an ArrayBundle Test
+      call ESMF_AttributeWrite(arraybundle, convention=conv, purpose=purp, &
+        attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Writing an Attribute package to .xml from an ArrayBundle Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Write the Attribute package to .stdout from an ArrayBundle Test
+      call ESMF_AttributeWrite(arraybundle, convention=conv, purpose=purp, &
+        attwriteflag=ESMF_ATTWRITE_TAB, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Writing an Attribute package to .stdout from an ArrayBundle Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
     !  Attribute move
     !-------------------------------------------------------------------------
 
@@ -1110,6 +1134,38 @@ program ESMF_AttributeArrayBundleUTest
       call c_ESMC_AttributeMove(arraybundle, array(1), rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Move an ArrayBundle and an Array Attribute hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+#endif
+
+    !-------------------------------------------------------------------------
+    !  Attribute hierarchy linking
+    !-------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Link an ArrayBundle Attribute hierarchy to a Array Attribute hierarchy ArrayBundle Test
+      call ESMF_AttributeLink(arraybundle, afb, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking an ArrayBundle hierarchy to a Array hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+#ifdef ESMF_TESTEXHAUSTIVE
+
+      !EX_UTest
+      ! Link an ArrayBundle Attribute hierarchy to a Array Attribute hierarchy ArrayBundle Test, again
+      call ESMF_AttributeLink(arraybundle, afb, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking an ArrayBundle hierarchy to a Array hierarchy Test, again"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink an ArrayBundle Attribute hierarchy from a Array Attribute hierarchy ArrayBundle Test
+      call ESMF_AttributeLinkRemove(arraybundle, afb, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking an ArrayBundle hierarchy from a Array hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
