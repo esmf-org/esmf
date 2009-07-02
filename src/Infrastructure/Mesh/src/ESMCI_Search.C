@@ -244,7 +244,7 @@ void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, int unmappedac
     MasterElement<> *mme;
     if (src_mask_field_ptr != NULL) {
       mme=GetME(*src_mask_field_ptr, ker)(METraits<>());
-      src_node_mask.reserve(mme->num_functions());
+      src_node_mask.resize(mme->num_functions(),0.0);
     }
 
     for (; ei != ee; ++ei) {
