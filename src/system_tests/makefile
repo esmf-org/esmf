@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.70 2009/06/12 16:04:35 feiliu Exp $ 
+# $Id: makefile,v 1.71 2009/07/02 19:33:53 feiliu Exp $ 
 
 ALL: build_system_tests
 
@@ -34,6 +34,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldBundleRedistBlk2Arb \
             ESMF_FieldBundleRedistArb2Arb \
             ESMF_FieldRegrid \
+            ESMF_FieldLSSMM \
 	    ESMF_InternalStateEnsemble
 
 # Tests not yet ready
