@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldLSSMMUTest.F90,v 1.2 2009/06/30 15:44:29 feiliu Exp $
+! $Id: ESMF_FieldLSSMMUTest.F90,v 1.3 2009/07/02 19:35:49 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldLSSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldLSSMMUTest.F90,v 1.2 2009/06/30 15:44:29 feiliu Exp $'
+    '$Id: ESMF_FieldLSSMMUTest.F90,v 1.3 2009/07/02 19:35:49 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -118,6 +118,9 @@ contains
             ESMF_CONTEXT, rc)) return
 
         locs = ESMF_LocStreamCreate(distgrid=distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
 
         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
