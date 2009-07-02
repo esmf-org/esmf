@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.44 2009/07/01 17:26:48 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.45 2009/07/02 14:29:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.44 2009/07/01 17:26:48 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.45 2009/07/02 14:29:38 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -131,20 +131,20 @@ module ESMF_AttributeMod
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_ArrayAttAddPackCstm
-        module procedure ESMF_ArrayAttAddPackStandard
+        module procedure ESMF_ArrayAttAddPackStd
         module procedure ESMF_ArrayBundleAttAddPackCstm
-        module procedure ESMF_ArrayBundleAttAddPackStandard
-        module procedure ESMF_CplCompAttAddPackStandard
+        module procedure ESMF_ArrayBundleAttAddPackStd
+        module procedure ESMF_CplCompAttAddPackStd
         module procedure ESMF_CplCompAttAddPackCstm
-        module procedure ESMF_GridCompAttAddPackStandard
+        module procedure ESMF_GridCompAttAddPackStd
         module procedure ESMF_GridCompAttAddPackCstm
         module procedure ESMF_DistGridAttAddPackCstm
-        module procedure ESMF_FieldAttAddPackStandard
+        module procedure ESMF_FieldAttAddPackStd
         module procedure ESMF_FieldAttAddPackCstm
         module procedure ESMF_FieldBundleAttAddPackCstm
-        module procedure ESMF_GridAttAddPackStandard
+        module procedure ESMF_GridAttAddPackStd
         module procedure ESMF_GridAttAddPackCstm
-        module procedure ESMF_StateAttAddPackStandard
+        module procedure ESMF_StateAttAddPackStd
         module procedure ESMF_StateAttAddPackCstm
         
 ! !DESCRIPTION:
@@ -1678,7 +1678,7 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeAdd() @\
-      subroutine mclass##AttAddPackStandard(mthis, convention, purpose, & @\
+      subroutine mclass##AttAddPackStd(mthis, convention, purpose, & @\
         nestConvention, nestPurpose, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -1759,7 +1759,7 @@ contains
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
-      end subroutine mclass##AttAddPackStandard
+      end subroutine mclass##AttAddPackStd
 
 !------------------------------------------------------------------------------
 
