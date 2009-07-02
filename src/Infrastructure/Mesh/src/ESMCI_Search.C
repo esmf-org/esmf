@@ -252,7 +252,7 @@ void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, int unmappedac
    
       // Set src mask status
       bool elem_masked=false;    
-      if (src_mask_field_ptr != NULL) {
+      if (src_mask_field_ptr != NULL && !src_node_mask.empty()) {
 	GatherElemData<>(*mme, *src_mask_field_ptr, elem, &src_node_mask[0]);
 	for (int i=0; i< mme->num_functions(); i++) {
 	  if (src_node_mask[i] > 0.5) {
