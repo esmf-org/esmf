@@ -93,12 +93,12 @@ module user_coupler
     rc = ESMF_SUCCESS
 
     ! Need to reconcile import and export states
-    call ESMF_CplCompGet(comp, vm=vm, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateReconcile(importState, vm, ESMF_ATTRECONCILE_ON, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateReconcile(exportState, vm, ESMF_ATTRECONCILE_ON, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+ !   call ESMF_CplCompGet(comp, vm=vm, rc=rc)
+  !  if (rc/=ESMF_SUCCESS) return ! bail out
+   ! call ESMF_StateReconcile(importState, vm, ESMF_ATTRECONCILE_ON, rc=rc)
+   ! if (rc/=ESMF_SUCCESS) return ! bail out
+   ! call ESMF_StateReconcile(exportState, vm, ESMF_ATTRECONCILE_ON, rc=rc)
+  !  if (rc/=ESMF_SUCCESS) return ! bail out
                                   
   end subroutine user_init
 
@@ -137,14 +137,14 @@ module user_coupler
     call ESMF_StateGet(exportState, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    rootList = (/0,1,2/)
-    call ESMF_AttributeUpdate(importState, vm, rootList=rootList, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+ !   rootList = (/0,1,2/)
+  !  call ESMF_AttributeUpdate(importState, vm, rootList=rootList, rc=rc)
+   ! if (rc/=ESMF_SUCCESS) return ! bail out
                           
     ! copy all Attribute information into export State
-    call ESMF_AttributeCopy(importState, exportState, &
-      ESMF_ATTCOPY_HYBRID, ESMF_ATTTREE_ON, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+   ! call ESMF_AttributeCopy(importState, exportState, &
+    !  ESMF_ATTCOPY_HYBRID, ESMF_ATTTREE_ON, rc=rc)
+   ! if (rc/=ESMF_SUCCESS) return ! bail out
   
   end subroutine user_run
 
