@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.48 2009/07/06 16:14:55 eatfastnoodle Exp $
+! $Id: user_model1.F90,v 1.49 2009/07/06 23:45:26 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -101,12 +101,10 @@ module user_model1
                                    conv,purp, convCC, purpGen, waterml, watermlcon
     type(ESMF_ArraySpec)        :: arrayspec
     type(ESMF_Grid)             :: grid
-    type(ESMF_Field)            :: DPEDT, timeSeries
+    type(ESMF_Field)            :: DPEDT
     type(ESMF_FieldBundle)      :: fieldbundle
     character(ESMF_MAXSTR),dimension(2)   :: attrList
     character(ESMF_MAXSTR),dimension(8)   :: watermlattrList
-	character(ESMF_MAXSTR),dimension(10)  :: timeseriesattrList
-	character(ESMF_MAXSTR),dimension(3)   :: compattriList
          
     
     ! Initialize return code
@@ -140,38 +138,14 @@ module user_model1
 	watermlattrList(6)='units'
 	watermlattrList(7)='NoDataValue'
 	watermlattrList(8)='timeSupport'
-	timeseriesattrList(1)='siteName'
-	timeseriesattrList(2)='siteCode'
-	timeseriesattrList(3)='latitude'
-	timeseriesattrList(4)='longitude'
-	timeseriesattrList(5)='x'
-	timeseriesattrList(6)='y'
-	timeseriesattrList(7)='verticalDatum'
-	timeseriesattrList(8)='County'
-	timeseriesattrList(9)='State'
-	timeseriesattrList(10)='Site Comments'
-    compattriList(1)='Organization'
-	compattriList(2)='SourceDescription'
-	compattriList(3)='SourceLink'
+    name1 = 'Name'
+
  
     ! Create a Field, add an Attribute package, and set Attributes in the package
-  
-	timeSeries = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
-              staggerloc=ESMF_STAGGERLOC_CENTER, name='timeSeries', rc=status)  
+    value1 = 'variable'
+      
     DPEDT = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
-              staggerloc=ESMF_STAGGERLOC_CENTER, name='variable', rc=status)
-
-   call ESMF_AttributeAdd(timeSeries, convention=waterml, purpose=watermlcon, attrList=timeseriesattrList, rc=status)
-    call ESMF_AttributeSet(timeSeries, name='siteName', value='Little Bear River at cMurdy Hollow Near Paradise, Utah', convention=waterml, purpose=watermlcon, rc=status) 
-    call ESMF_AttributeSet(timeSeries, name='siteCode', value='USU-LBR_Paradise', convention=waterml, purpose=watermlcon, rc=status)
-	call ESMF_AttributeSet(timeSeries, name='latitude', value='41.575552', convention=waterml, purpose=watermlcon, rc=status) 
-	call ESMF_AttributeSet(timeSeries, name='longitude', value='111.855217', convention=waterml, purpose=watermlcon, rc=status) 
-	call ESMF_AttributeSet(timeSeries, name='x', value='429703.917', convention=waterml, purpose=watermlcon, rc=status) 
-    call ESMF_AttributeSet(timeSeries, name='y', value='4603005.09', convention=waterml, purpose=watermlcon, rc=status) 
-	call ESMF_AttributeSet(timeSeries, name='verticalDatum', value='NGVD29', convention=waterml, purpose=watermlcon, rc=status) 
-	call ESMF_AttributeSet(timeSeries, name='County', value='Cache', convention=waterml, purpose=watermlcon, rc=status) 
-	call ESMF_AttributeSet(timeSeries, name='State', value='Utah', convention=waterml, purpose=watermlcon, rc=status)
-	call ESMF_AttributeSet(timeSeries, name='Site Comments', value='Located below bridge at 8700 South (McMurdy Hollow)', convention=waterml, purpose=watermlcon, rc=status)  
+              staggerloc=ESMF_STAGGERLOC_CENTER, rc=status)
 
     call ESMF_AttributeAdd(DPEDT, convention=waterml, purpose=watermlcon, attrList=watermlattrList, rc=status)
     call ESMF_AttributeSet(DPEDT, name='variableCode', value='USU39', convention=waterml, purpose=watermlcon, rc=status) 
@@ -182,13 +156,11 @@ module user_model1
     call ESMF_AttributeSet(DPEDT, name='units', value='milligrams per liter', convention=waterml, purpose=watermlcon, rc=status) 
 	call ESMF_AttributeSet(DPEDT, name='NoDataValue', value='-9999', convention=waterml, purpose=watermlcon, rc=status) 
 	call ESMF_AttributeSet(DPEDT, name='timeSupport', value='false', convention=waterml, purpose=watermlcon, rc=status) 
-	
-			if (status .ne. ESMF_SUCCESS) return
+    if (status .ne. ESMF_SUCCESS) return
 
        
     ! Create the Grid Attribute Package
-	call ESMF_AttributeAdd(grid,convention=conv, purpose=purp, rc=status)
-    !call ESMF_AttributeAdd(grid,convention=waterml, purpose=watermlcon, rc=status)
+    call ESMF_AttributeAdd(grid,convention=conv, purpose=purp, rc=status)
 
     if (status .ne. ESMF_SUCCESS) return
 
@@ -199,7 +171,6 @@ module user_model1
       
     ! Add the Fields to the FieldBundle (this will connect the Attribute hierarchies)
     call ESMF_FieldBundleAdd(fieldbundle, DPEDT, rc=status)
-	call ESMF_FieldBundleAdd(fieldbundle, timeSeries, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     ! Connect the Attributes from the FieldBundle to the export State
@@ -207,10 +178,7 @@ module user_model1
     if (status .ne. ESMF_SUCCESS) return
     
     ! Add the Attribute package to comp
-    call ESMF_AttributeAdd(comp, convention=waterml, purpose=watermlcon, attrList=compattriList, rc=rc)
-	call ESMF_AttributeSet(comp, 'SourceDescription', 'Water chemistry monitoring data collected by Utah State University as part of a National Science Foundation funded test be project', convention=waterml, purpose=watermlcon, rc=rc)
-	call ESMF_AttributeSet(comp, 'Organization', 'Utah State University Utah Water Research Laboratory', convention=waterml, purpose=watermlcon, rc=rc)
-	call ESMF_AttributeSet(comp, 'SourceLink', 'http://water.usu.edu/littlebearriver/', convention=waterml, purpose=watermlcon, rc=rc)  
+    call ESMF_AttributeAdd(comp, convention=waterml, purpose=watermlcon, rc=rc)
     if (status .ne. ESMF_SUCCESS) return
     
   end subroutine user_init
