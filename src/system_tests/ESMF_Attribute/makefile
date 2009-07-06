@@ -1,45 +1,38 @@
+# $Id: makefile,v 1.8 2009/07/06 23:43:41 rokuingh Exp $ 
 
-ALL:  tree_build_use_test_cases
-run:  tree_run_use_test_cases
+ALL: tree_build_system_tests
 
-FFLAGS    =
-CFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
+run: tree_run_system_tests
 
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
-LOCDIR	  = src/use_test_cases/ESMF_WaterML
+LOCDIR	  = src/system_tests/ESMF_Attribute
 
-USE_TEST_CASES_BUILD       = $(ESMF_TESTDIR)/ESMF_WaterMLUseTestCase
 
-USE_TEST_CASES_OBJ         = user_model1.o user_model2.o user_coupler.o
+SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_AttributeSTest
 
-USE_TEST_CASES_RUN     = RUN_WaterML
-USE_TEST_CASES_RUN_UNI = RUN_WaterMLUNI
+# Object files other than SysTest%.o that the
+# system tests executable will depend on.
+# List objects files in the order that they
+# are to be compiled/created.
+SYSTEM_TESTS_OBJ      = user_model1.o user_model2.o user_coupler.o
 
-include ${ESMF_DIR}/makefile
+SYSTEM_TESTS_RUN      = RUN_Attribute
+
+SYSTEM_TESTS_RUN_UNI  = RUN_AttributeUNI
+
+
+ESMF_AttributeSTest.o : $(SYSTEM_TESTS_OBJ)
+
+include $(ESMF_DIR)/makefile
 
 DIRS = 
 
 CLEANDIRS   =
-CLEANFILES  = $(TESTS_BUILD) *.stdout *.xml
+CLEANFILES  = $(SYSTEM_TESTS_BUILD) *.xml *.stdout
 CLOBBERDIRS =
 
-ESMF_WaterMLUseTestCase.o : $(USE_TEST_CASES_OBJ)
 
-RUN_WaterML:
-	@if [ $(ESMF_MAX_PROCS)foo = foo ] || [ "$(ESMF_MAX_PROCS)" -ge "6" ] ; then \
-		$(MAKE) TNAME=WaterML  NP=6 uctest ; \
-		mv $(ESMF_TESTDIR)/ESMF_WaterMLUseTestCase.stdout $(ESMF_TESTDIR)/ESMF_WaterMLUseTestCase.stdout6 ; \
-		echo "ESMF_WaterMLUseTestCase:6:"  > $(ESMF_TESTDIR)/ESMF_WaterMLUseTestCase.testlist ; \
-	else \
-		rm -f $(ESMF_TESTDIR)/ESMF_WaterMLUseTestCase.testlist ; \
-	fi; \
+RUN_Attribute:
+	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=Attribute NP=6 stest
 
-
-RUN_WaterMLUNI:
-	$(MAKE) TNAME=WaterML NP=1 uctest
+RUN_AttributeUNI:
+	$(MAKE) TNAME=Attribute NP=1 stest
