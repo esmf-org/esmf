@@ -123,18 +123,18 @@ module user_model2
     call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
- !   ! Initialize variables
-  !   conv = 'ESMF'
-  !  purp = 'General'
+    ! Initialize variables
+    conv = 'ESMF'
+    purp = 'General'
 
-  !  ! Write the Attribute info to esmf/test/testg/<platform>/ESMF_AttributeSTest.stdout
-  !  if (myPet .eq. 0) then
-  !    call ESMF_AttributeWrite(importState,conv,purp,rc=rc)
-  !   call ESMF_AttributeWrite(importState,conv,purp, &
-  !                             attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
+    ! Write the Attribute info to esmf/test/testg/<platform>/ESMF_AttributeSTest.stdout
+    if (myPet .eq. 0) then
+      call ESMF_AttributeWrite(importState,conv,purp,rc=rc)
+     call ESMF_AttributeWrite(importState,conv,purp, &
+                               attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
 !      call ESMF_StatePrint(importState, rc=rc)
-  !    if (rc .ne. ESMF_SUCCESS) return
- !   endif
+      if (rc .ne. ESMF_SUCCESS) return
+    endif
     
 
   end subroutine user_run
