@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.h,v 1.4 2009/04/22 05:36:54 eschwab Exp $
+// $Id: ESMCI_IO.h,v 1.5 2009/07/07 05:49:12 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -43,6 +43,7 @@
 
  using namespace xercesc;
 
+ // define class to handle sax2 parse events
  class MySAX2Handler : public DefaultHandler {
  private:
     ESMCI::Attribute* attr;
@@ -60,14 +61,14 @@
      );
 
      void characters(
-         const XMLCh *const chars,
+         const XMLCh* const chars,
          const XMLSize_t    length
      );
 
      void endElement(
-         const XMLCh *const uri,
-         const XMLCh *const localname,
-         const XMLCh *const qname	 
+         const XMLCh* const uri,
+         const XMLCh* const localname,
+         const XMLCh* const qname	 
      ); 
 
      void fatalError(
@@ -158,7 +159,7 @@
     // friend function to copy an io  TODO ?
     //IO *ESMCI_IOCreate(IO *io, int *rc=0);
 
-    // friend function to de-allocate clock
+    // friend function to de-allocate io
     int ESMCI_IODestroy(IO **io);
 
     // friend to restore state  TODO ?

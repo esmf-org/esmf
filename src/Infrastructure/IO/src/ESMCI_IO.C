@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.C,v 1.7 2009/05/01 04:37:49 eschwab Exp $
+// $Id: ESMCI_IO.C,v 1.8 2009/07/07 05:49:12 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -8,14 +8,14 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
-// ESMC Clock method code (body) file
+// ESMC IO method code (body) file
 //
 //-------------------------------------------------------------------------
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt ESMC\_Clock} methods declared
-// in the companion file {\tt ESMCI\_Clock.h}
+// The code in this file implements the C++ {\tt ESMC\_IO} methods declared
+// in the companion file {\tt ESMCI\_IO.h}
 //
 //-------------------------------------------------------------------------
 //
@@ -46,7 +46,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO.C,v 1.7 2009/05/01 04:37:49 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO.C,v 1.8 2009/07/07 05:49:12 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 #ifdef ESMF_XERCES
@@ -54,6 +54,7 @@
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MySAX2Handler::MySAX2Handler()"
 
+// constructor
 MySAX2Handler::MySAX2Handler(ESMCI::Attribute *attr) : DefaultHandler()
 {
   this->attr = attr;
@@ -62,6 +63,7 @@ MySAX2Handler::MySAX2Handler(ESMCI::Attribute *attr) : DefaultHandler()
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MySAX2Handler::startElement()"
 
+// startElement parse-event handler
 void MySAX2Handler::startElement(const XMLCh* const uri,
                                  const XMLCh* const localname,
                                  const XMLCh* const qname,
