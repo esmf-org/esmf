@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.20 2009/03/18 05:42:20 eschwab Exp $
+# $Id: makefile,v 1.21 2009/07/07 06:00:17 eschwab Exp $
 
 ALL: build_here
 
-SOURCEC   = ESMCI_IO.C
+SOURCEC   = ESMCI_IO.C ESMCI_IO_NetCDF.C
 SOURCEF   =
-STOREH    = ESMCI_IO.h
+STOREH    = ESMCI_IO.h ESMCI_IO_NetCDF.h
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
