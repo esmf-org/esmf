@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.1 2009/07/02 19:33:10 feiliu Exp $
+! $Id: user_model2.F90,v 1.2 2009/07/07 14:02:35 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -87,7 +87,7 @@
           rc=rc)
       if(rc/=ESMF_SUCCESS) return
 
-      locs = ESMF_LocStreamCreate(distgrid=distgrid, rc=rc)
+      locs = ESMF_LocStreamCreate(distgrid=distgrid, destroyDistgrid=.true., rc=rc)
       if(rc/=ESMF_SUCCESS) return
       call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
       if(rc/=ESMF_SUCCESS) return
@@ -161,6 +161,7 @@
 
       ! Local variables
       type(ESMF_Field) :: field
+      type(ESMF_LocStream) :: locs
       type(ESMF_VM) :: vm
       integer       :: de_id
 
@@ -177,6 +178,13 @@
       call ESMF_StateGet(importState, "humidity", field, rc=rc)
       if(rc/=ESMF_SUCCESS) return
 
+      call ESMF_FieldGet(field, locstream=locs, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
+
+      call ESMF_FieldDestroy(field, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
+      call ESMF_LocStreamDestroy(locs, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
       print *, "User Comp Final returning"
    
     end subroutine user_final
