@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.46 2009/07/07 17:14:22 eschwab Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.47 2009/07/07 18:20:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.46 2009/07/07 17:14:22 eschwab Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.47 2009/07/07 18:20:31 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -1727,7 +1727,7 @@ contains
  @\
       if (convention .ne. "ESMF" .or. purpose .ne. "General") then @\
         call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "Convention must be ESMF, and purpose must be general for standard attpacks", & @ \
+                    "Convention must be ESMF, and purpose must be general for standard attpacks", & @\
                      ESMF_CONTEXT, rc) @\
         return @\
       endif @\
@@ -1736,7 +1736,7 @@ contains
         if (present(nestConvention).and..not.present(nestPurpose).or. & @\
             present(nestPurpose).and..not.present(nestConvention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both nestConvention and nestPurpose must be present or not", & @ \
+                    "both nestConvention and nestPurpose must be present or not", & @\
                      ESMF_CONTEXT, rc) @\
           return @\
         else @\
@@ -1749,7 +1749,7 @@ contains
           purpose, object, localrc) @\
       else @\
         call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "you cannot nest an ESMF standard Attribute package onto a custom package", & @ \
+                    "you cannot nest an ESMF standard Attribute package onto a custom package", & @\
                      ESMF_CONTEXT, rc) @\
         return @\
       endif @\
@@ -1848,7 +1848,7 @@ contains
         if (present(nestConvention).and..not.present(nestPurpose).or. & @\
             present(nestPurpose).and..not.present(nestConvention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both nestConvention and nestPurpose must be present or not", & @ \
+                    "both nestConvention and nestPurpose must be present or not", & @\
                      ESMF_CONTEXT, rc) @\
           return @\
         else @\
@@ -2009,7 +2009,7 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @ \
+                    "both convention and purpose must be present or not", & @\
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
@@ -2051,7 +2051,7 @@ contains
         value = defaultvalue @\
       else  @\
         call ESMF_LogMsgSetError(ESMF_RC_ATTR_NOTSET, & @\
-                    "Attribute not found, and no default given", & @ \
+                    "Attribute not found, and no default given", & @\
                      ESMF_CONTEXT, rc) @\
         return @\
       endif @\
@@ -2143,7 +2143,7 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @ \
+                    "both convention and purpose must be present or not", & @\
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
@@ -2185,7 +2185,7 @@ contains
         valueList = defaultvalueList @\
       else  @\
         call ESMF_LogMsgSetError(ESMF_RC_ATTR_NOTSET, & @\
-                    "Attribute not found, and no default given", & @ \
+                    "Attribute not found, and no default given", & @\
                      ESMF_CONTEXT, rc) @\
         return @\
       endif @\
@@ -2264,7 +2264,7 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @ \
+                    "both convention and purpose must be present or not", & @\
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
@@ -2306,7 +2306,7 @@ contains
         value = defaultvalue @\
       else  @\
         call ESMF_LogMsgSetError(ESMF_RC_ATTR_NOTSET, & @\
-                    "Attribute not found, and no default given", & @ \
+                    "Attribute not found, and no default given", & @\
                      ESMF_CONTEXT, rc) @\
         return @\
       endif @\
@@ -2401,7 +2401,7 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @ \
+                    "both convention and purpose must be present or not", & @\
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
@@ -2441,7 +2441,7 @@ contains
         valueList = defaultvalueList @\
       else  @\
         call ESMF_LogMsgSetError(ESMF_RC_ATTR_NOTSET, & @\
-                    "Attribute not found, and no default given", & @ \
+                    "Attribute not found, and no default given", & @\
                      ESMF_CONTEXT, rc) @\
         return @\
       endif @\
@@ -2519,7 +2519,7 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @ \
+                    "both convention and purpose must be present or not", & @\
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
@@ -2657,7 +2657,7 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @ \
+                    "both convention and purpose must be present or not", & @\
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
@@ -2698,7 +2698,7 @@ contains
         enddo @\
       else  @\
         call ESMF_LogMsgSetError(ESMF_RC_ATTR_NOTSET, & @\
-                    "Attribute not found, and no default given", & @ \
+                    "Attribute not found, and no default given", & @\
                      ESMF_CONTEXT, rc) @\
         return @\
       endif @\
@@ -3234,7 +3234,7 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @ \
+                    "both convention and purpose must be present or not", & @\
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
@@ -3331,7 +3331,7 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @ \
+                    "both convention and purpose must be present or not", & @\
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
@@ -3441,7 +3441,7 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @ \
+                    "both convention and purpose must be present or not", & @\
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
@@ -3530,7 +3530,7 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @ \
+                    "both convention and purpose must be present or not", & @\
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
@@ -3641,7 +3641,7 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @ \
+                    "both convention and purpose must be present or not", & @\
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
@@ -3729,7 +3729,7 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @ \
+                    "both convention and purpose must be present or not", & @\
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
@@ -3842,7 +3842,7 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @ \
+                    "both convention and purpose must be present or not", & @\
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
@@ -3984,7 +3984,7 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @ \
+                    "both convention and purpose must be present or not", & @\
                      ESMF_CONTEXT, rc) @\
           return @\
         endif @\
