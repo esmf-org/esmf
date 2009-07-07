@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.9 2009/06/03 23:52:00 theurich Exp $
+# $Id: build_rules.mk,v 1.10 2009/07/07 20:32:11 w6ws Exp $
 #
 # Cygwin.gfortran.default
 #
@@ -125,16 +125,6 @@ ESMF_CXXCOMPILEOPTS       += -march=k8 -m64 -mcmodel=medium
 ESMF_CXXLINKOPTS          += -march=k8 -m64 -mcmodel=medium
 ESMF_F90COMPILEOPTS       += -march=k8 -m64 -mcmodel=medium
 ESMF_F90LINKOPTS          += -march=k8 -m64 -mcmodel=medium
-endif
-
-############################################################
-# Conditionally add pthread compiler and linker flags
-#
-ifeq ($(ESMF_PTHREADS),ON)
-ESMF_F90COMPILEOPTS += -pthread
-ESMF_CXXCOMPILEOPTS += -pthread
-ESMF_F90LINKOPTS    += -pthread
-ESMF_CXXLINKOPTS    += -pthread
 endif
 
 ############################################################
