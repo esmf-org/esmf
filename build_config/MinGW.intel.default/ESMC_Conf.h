@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.7 2009/06/17 18:12:54 theurich Exp $"
+"$Id: ESMC_Conf.h,v 1.8 2009/07/07 18:18:00 w6ws Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -29,7 +29,7 @@ Licensed under the University of Illinois-NCSA License.
 typedef int ESMCI_FortranStrLenArg;
 #elif defined (Sx86_64_32)
 typedef int ESMCI_FortranStrLenArg;
-#elif defined (Sx86_64_small)
+#elif (defined (Sx86_64_small) || defined (S64))
 typedef long long ESMCI_FortranStrLenArg;
 #elif defined (Sx86_64_medium)
 typedef long long ESMCI_FortranStrLenArg;
@@ -46,7 +46,7 @@ typedef long long ESMCI_FortranStrLenArg;
 #ifdef Sx86_64_32
 #define ESMC_POINTER_SIZE 4
 #endif
-#ifdef Sx86_64_small
+#if (defined (Sx86_64_small) || defined (S64))
 #define ESMC_POINTER_SIZE 8
 #endif
 #ifdef Sx86_64_medium
