@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.18 2009/06/02 20:53:07 theurich Exp $
+# $Id: build_rules.mk,v 1.19 2009/07/08 22:03:38 svasquez Exp $
 # 
 # SunOS.default.default
 #
@@ -61,16 +61,16 @@ ESMF_F90COMPILEOPTS += -xpp=cpp
 # 32- vs. 64-bit ABI
 #
 ifeq ($(ESMF_ABI),32)
-ESMF_CXXCOMPILEOPTS       += -m32
-ESMF_CXXLINKOPTS          += -m32
+ESMF_CXXCOMPILEOPTS       += -m32 -library=stlport4
+ESMF_CXXLINKOPTS          += -m32 -library=stlport4
 ESMF_F90COMPILEOPTS       += -m32
-ESMF_F90LINKOPTS          += -m32
+ESMF_F90LINKOPTS          += -m32 -library=stlport4
 endif
 ifeq ($(ESMF_ABI),64)
-ESMF_CXXCOMPILEOPTS       += -m64
-ESMF_CXXLINKOPTS          += -m64
+ESMF_CXXCOMPILEOPTS       += -m64 -library=stlport4
+ESMF_CXXLINKOPTS          += -m64 -library=stlport4
 ESMF_F90COMPILEOPTS       += -m64
-ESMF_F90LINKOPTS          += -m64
+ESMF_F90LINKOPTS          += -m64 -library=stlport4
 endif
 
 ############################################################
