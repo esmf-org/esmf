@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshUTest.F90,v 1.11 2009/07/09 22:33:32 oehmke Exp $
+! $Id: ESMF_MeshUTest.F90,v 1.12 2009/07/09 23:15:20 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_MeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshUTest.F90,v 1.11 2009/07/09 22:33:32 oehmke Exp $'
+    '$Id: ESMF_MeshUTest.F90,v 1.12 2009/07/09 23:15:20 oehmke Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -396,8 +396,8 @@ program ESMF_MeshUTest
   deallocate(elemConn)
 
   !! Write mesh for debugging
-  call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  !! call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
+  !! if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=localrc)
