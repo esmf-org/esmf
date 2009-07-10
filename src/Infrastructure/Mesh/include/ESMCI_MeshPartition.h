@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMCI_MeshPartition.h
-#define ESMCI_MeshPartition.h
+#ifndef ESMCI_MESHPARTITION_H
+#define ESMCI_MESHPARTITION_H
 
 #include <Mesh/include/ESMCI_Mesh.h>
 #include <Mesh/include/ESMCI_MeshTypes.h>
