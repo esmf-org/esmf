@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.14 2009/06/22 22:45:38 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.15 2009/07/10 23:41:55 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.14 2009/06/22 22:45:38 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.15 2009/07/10 23:41:55 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -689,6 +689,7 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
     if (itNR == nonroots.end()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       " - AttributeUpdate - PET not in nonroots vector", &localrc);
+      delete commh;
       return ESMF_FAILURE;
     }
 
@@ -721,6 +722,7 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
     if (itR == roots.end()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       " - AttributeUpdate - PET not in roots vector", &localrc);
+      delete commh;
       return ESMF_FAILURE;
     }
     
@@ -744,9 +746,11 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
   else {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
     " - AttributeUpdate - PET unidentified", &localrc);
+    delete commh;
     return ESMF_FAILURE;
   }
-  
+    
+  delete commh;
   return ESMF_SUCCESS;
   
   } // end AttributeUpdateComm
