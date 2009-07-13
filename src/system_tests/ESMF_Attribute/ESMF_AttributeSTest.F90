@@ -196,7 +196,7 @@ program ESMF_AttributeSTest
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     
   ! link the Component Attribute hierarchy to State
-  call ESMF_AttributeLink(comp1, c1exp, rc=rc)
+!  call ESMF_AttributeLink(comp1, c1exp, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -212,8 +212,8 @@ program ESMF_AttributeSTest
   ! careful, though, this data only exists on PETs 0,1,2
   ! you must call AttributeUpdate to make this data 
   ! available VM wide (above)
-  call ESMF_AttributeCopy(comp1, comp2, &
-      ESMF_ATTCOPY_HYBRID, ESMF_ATTTREE_ON, rc=rc)
+!  call ESMF_AttributeCopy(comp1, comp2, &
+!      ESMF_ATTCOPY_HYBRID, ESMF_ATTTREE_ON, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -248,10 +248,10 @@ program ESMF_AttributeSTest
   purp = 'General'
   ! AttributeUpdate is not called so we are only printing from PET0 for now
   if (localPet .eq. 0) then
-    call ESMF_AttributeWrite(comp1,conv,purp,rc=rc)
-    call ESMF_AttributeWrite(comp2,conv,purp,rc=rc)
-    call ESMF_AttributeWrite(comp1,conv,purp,attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
-    call ESMF_AttributeWrite(comp2,conv,purp,attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
+!    call ESMF_AttributeWrite(comp1,conv,purp,rc=rc)
+!    call ESMF_AttributeWrite(comp2,conv,purp,rc=rc)
+!    call ESMF_AttributeWrite(comp1,conv,purp,attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
+!    call ESMF_AttributeWrite(comp2,conv,purp,attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)  
