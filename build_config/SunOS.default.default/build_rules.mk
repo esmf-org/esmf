@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.20 2009/07/13 19:52:38 svasquez Exp $
+# $Id: build_rules.mk,v 1.21 2009/07/15 15:35:41 theurich Exp $
 # 
 # SunOS.default.default
 #
@@ -61,17 +61,24 @@ ESMF_F90COMPILEOPTS += -xpp=cpp
 # 32- vs. 64-bit ABI
 #
 ifeq ($(ESMF_ABI),32)
-ESMF_CXXCOMPILEOPTS       += -m32 -library=stlport4 -template=no%extdef
-ESMF_CXXLINKOPTS          += -m32 -library=stlport4 -template=no%extdef
+ESMF_CXXCOMPILEOPTS       += -m32
+ESMF_CXXLINKOPTS          += -m32
 ESMF_F90COMPILEOPTS       += -m32
-ESMF_F90LINKOPTS          += -m32 -library=stlport4
+ESMF_F90LINKOPTS          += -m32
 endif
 ifeq ($(ESMF_ABI),64)
-ESMF_CXXCOMPILEOPTS       += -m64 -library=stlport4 -template=no%extdef
-ESMF_CXXLINKOPTS          += -m64 -library=stlport4 -template=no%extdef
+ESMF_CXXCOMPILEOPTS       += -m64
+ESMF_CXXLINKOPTS          += -m64
 ESMF_F90COMPILEOPTS       += -m64
-ESMF_F90LINKOPTS          += -m64 -library=stlport4
+ESMF_F90LINKOPTS          += -m64
 endif
+
+############################################################
+# On SunOS the default C++ library is _not_ standard STL compliant
+#
+ESMF_CXXCOMPILEOPTS       += -library=stlport4 -template=no%extdef
+ESMF_CXXLINKOPTS          += -library=stlport4 -template=no%extdef
+ESMF_F90LINKOPTS          += -library=stlport4
 
 ############################################################
 # Conditionally add pthread compiler and linker flags
