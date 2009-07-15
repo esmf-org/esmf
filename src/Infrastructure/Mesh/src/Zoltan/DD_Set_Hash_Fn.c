@@ -7,8 +7,8 @@
 /*****************************************************************************
  * CVS File Information :
  *    $RCSfile: DD_Set_Hash_Fn.c,v $
- *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:42 $
+ *    $Author: theurich $
+ *    $Date: 2009/07/15 15:34:20 $
  *    Revision: 1.8 $
  ****************************************************************************/
 
@@ -37,7 +37,7 @@ extern "C" {
 
 int Zoltan_DD_Set_Hash_Fn (
  Zoltan_DD_Directory *dd,              /* directory state information */
- unsigned int (*hash) (ZOLTAN_ID_PTR, int, unsigned int))
+ ZOLTAN_HASH_FN *hash)
      {
      char *yo = "Zoltan_DD_Set_Hash_Fn" ;
 

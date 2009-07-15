@@ -6,8 +6,8 @@
 /*****************************************************************************
  * CVS File Information :
  *    $RCSfile: zoltan.h,v $
- *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:54 $
+ *    $Author: theurich $
+ *    $Date: 2009/07/15 15:34:21 $
  *    Revision: 1.47.2.5 $
  ****************************************************************************/
 
@@ -25,12 +25,15 @@
  * Define this prior to #ifdef __cplusplus to avoid a 
  * compiler warning when compiling C++ on Solaris
  */
-typedef void ZOLTAN_VOID_FN(void);
+/* typedef void ZOLTAN_VOID_FN(void);
+*/
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
 #endif
+
+typedef void ZOLTAN_VOID_FN(void);
 
 #define ZOLTAN_VERSION_NUMBER   2.1
 

@@ -6,8 +6,8 @@
 /*****************************************************************************
  * CVS File Information :
  *    $RCSfile: zz_set_fn.c,v $
- *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:54 $
+ *    $Author: theurich $
+ *    $Date: 2009/07/15 15:34:21 $
  *    Revision: 1.17.2.1 $
  ****************************************************************************/
 
@@ -37,7 +37,8 @@ extern "C" {
 /****************************************************************************/
 /****************************************************************************/
 
-int Zoltan_Set_Fn(ZZ *zz, ZOLTAN_FN_TYPE fn_type, void (*fn)(void), void *data)
+int Zoltan_Set_Fn(ZZ *zz, ZOLTAN_FN_TYPE fn_type, ZOLTAN_VOID_FN *fn,
+  void *data)
 {
 /*
  *  Function to initialize a given LB interface function.

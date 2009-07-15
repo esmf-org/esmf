@@ -7,8 +7,8 @@
 /*****************************************************************************
  * CVS File Information :
  *    $RCSfile: zoltan_dd.h,v $
- *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:54 $
+ *    $Author: theurich $
+ *    $Date: 2009/07/15 15:34:21 $
  *    Revision: 1.6 $
  ****************************************************************************/
 
@@ -22,12 +22,15 @@
 ** Must define this function prototype before #ifdef __cplusplus
 ** to avoid warning when compiling with C++ on solaris
 */
-typedef unsigned int ZOLTAN_HASH_FN(ZOLTAN_ID_PTR, int, unsigned int);
-
+/* typedef unsigned int ZOLTAN_HASH_FN(ZOLTAN_ID_PTR, int, unsigned int);
+*/
+    
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
 #endif
+
+typedef unsigned int ZOLTAN_HASH_FN(ZOLTAN_ID_PTR, int, unsigned int);
 
 struct Zoltan_DD_Struct;
 typedef struct Zoltan_DD_Struct Zoltan_DD_Directory;
