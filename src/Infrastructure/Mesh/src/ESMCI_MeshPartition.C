@@ -27,6 +27,8 @@
 #include <sstream>
 #include <set>
 
+#include <cstdio>
+
 // Easier than tracking down prototype
 extern "C" {
 typedef int idxtype;
@@ -172,7 +174,7 @@ WriteMesh(mesh, "partition");
     std::ostringstream newname_str;
     UInt ndec = numDecimal(npart);
     char buf[512];
-    sprintf(buf, "%s", mesh.filename().c_str());
+    std::sprintf(buf, "%s", mesh.filename().c_str());
 /*
     cptr = std::strstr(buf, ".g");
     if (!cptr)

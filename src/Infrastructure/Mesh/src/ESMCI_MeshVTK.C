@@ -18,7 +18,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
-#include <cstdio>
+#include <stdio.h>
 
 namespace ESMCI {
 
