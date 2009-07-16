@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.165 2009/07/01 17:27:50 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.166 2009/07/16 22:05:57 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.165 2009/07/01 17:27:50 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.166 2009/07/16 22:05:57 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -3307,14 +3307,16 @@ module ESMF_StateMod
 !     On some platforms/compilers there is a potential issue with interleaving
 !     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
 !     the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-!     may be used on unit 6 to get coherent output.  \\
+!     may be used on unit {\tt ESMF\_IOstdout} to get coherent output.  \\
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
 !       The {\tt ESMF\_State} to print.
 !     \item[{[options]}]
-!       Print options are not yet supported.
+!       Print options:
+!         " ", or "brief" - print names and types of the objects within the state
+!         "deep" - print contents of each object within the state
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -3348,18 +3350,18 @@ module ESMF_StateMod
 
        !nsc write(msgbuf,*) "StatePrint: "  
        !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-       print *, "StatePrint: "  
+       write (ESMF_IOstdout,*) "StatePrint: "  
        if (.not.associated(state%statep)) then 
            !nsc call ESMF_LogWrite("Uninitialized or already destroyed State", &
            !nsc                   ESMF_LOG_INFO)
-           print *, "Uninitialized or already destroyed State"
+           write (ESMF_IOstdout,*) "Uninitialized or already destroyed State"
            rc = ESMF_SUCCESS
            return
        endif
        if (state%statep%st .eq. ESMF_STATE_INVALID) then
            !nsc call ESMF_LogWrite("Uninitialized or already destroyed State", &
            !nsc                   ESMF_LOG_INFO)
-           print *, "Uninitialized or already destroyed State"
+           write (ESMF_IOstdout,*) "Uninitialized or already destroyed State"
            rc = ESMF_SUCCESS
            return
        endif
@@ -3371,18 +3373,25 @@ module ESMF_StateMod
        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-       print *, "  State name = ", trim(name)
-       if (sp%st .eq. ESMF_STATE_IMPORT) write(msgbuf, *) " Import State"
-       if (sp%st .eq. ESMF_STATE_EXPORT) write(msgbuf, *) " Export State"
-       if (sp%st .eq. ESMF_STATE_UNSPECIFIED) write(msgbuf, *) " State Type Unspecified"
-       if (sp%st .eq. ESMF_STATE_INVALID) then
-           call ESMF_LogWrite("Uninitialized or already destroyed State", &
+       write (ESMF_IOstdout,*) "  State name = ", trim(name)
+       if (sp%st == ESMF_STATE_IMPORT) then
+         msgbuf = " Import State"
+       else if (sp%st == ESMF_STATE_EXPORT) then
+         msgbuf = " Export State"
+       else if (sp%st == ESMF_STATE_UNSPECIFIED) then
+         msgbuf = " State Type Unspecified"
+       else if (sp%st == ESMF_STATE_INVALID) then
+         call ESMF_LogWrite("Uninitialized or already destroyed State", &
                                 ESMF_LOG_INFO)
-           rc = ESMF_SUCCESS
-           return
-       endif
+         rc = ESMF_SUCCESS
+         return
+       else
+         call ESMF_LogWrite ("error: unknown state",  &
+                                ESMF_LOG_INFO)
+       end if
+
        !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-       print *, trim(msgbuf)
+       write (ESMF_IOstdout,*) trim(msgbuf)
 
        !pli print attribute name/value pairs using c_esmc_baseprint() 
        call c_ESMC_BasePrint(sp%base, defaultopts, localrc)
@@ -3392,34 +3401,33 @@ module ESMF_StateMod
        
        !nsc write(msgbuf, *) "  Number of members: ", sp%datacount
        !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-       print *, "  Number of members: ", sp%datacount
+       write (ESMF_IOstdout,*) "  Number of members: ", sp%datacount
       
        do i=1, sp%datacount
          dp => sp%datalist(i)
 
          !nsc write(msgbuf, *) "  Item ", i, ":"
          !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-         print *, "  Item ", i, ":"
+         write (ESMF_IOstdout,*) "  Item ", i, ":"
          outbuf = "    Name= " // trim(dp%namep) // ", "
 
-         select case (dp%otype%ot)
-           case (ESMF_STATEITEM_FIELDBUNDLE%ot)
+         if      (dp%otype%ot == ESMF_STATEITEM_FIELDBUNDLE%ot) then
              outbuf = trim(outbuf) //  " type FieldBundle,"
-           case (ESMF_STATEITEM_FIELD%ot)
+         else if (dp%otype%ot == ESMF_STATEITEM_FIELD%ot) then
              outbuf = trim(outbuf) //  " type Field,"
-           case (ESMF_STATEITEM_ARRAY%ot)
+         else if (dp%otype%ot == ESMF_STATEITEM_ARRAY%ot) then
              outbuf = trim(outbuf) //  " type Array,"
-           case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
+         else if (dp%otype%ot == ESMF_STATEITEM_ARRAYBUNDLE%ot) then
              outbuf = trim(outbuf) //  " type ArrayBundle,"
-           case (ESMF_STATEITEM_STATE%ot)
+         else if (dp%otype%ot == ESMF_STATEITEM_STATE%ot) then
              outbuf = trim(outbuf) //  " type State,"
-           case (ESMF_STATEITEM_NAME%ot)
+         else if (dp%otype%ot == ESMF_STATEITEM_NAME%ot) then
              outbuf = trim(outbuf) //  " placeholder name,"
-           case (ESMF_STATEITEM_INDIRECT%ot)
+         else if (dp%otype%ot == ESMF_STATEITEM_INDIRECT%ot) then
              outbuf = trim(outbuf) //  " field inside a bundle,"
-           case (ESMF_STATEITEM_UNKNOWN%ot)
+         else
              outbuf = trim(outbuf) //  " unknown type,"
-         end select
+         end if
 
          select case (dp%needed%needed)
            case (ESMF_NEEDED%needed)
@@ -3429,9 +3437,10 @@ module ESMF_StateMod
          end select
 
         !nsc call ESMF_LogWrite(outbuf, ESMF_LOG_INFO)
-        print *, trim(outbuf)
+        write (ESMF_IOstdout,*) trim(outbuf)
 
         ! TODO: finish printing more info here
+        write (ESMF_IOstdout,*) "ready flag = ", ", valid flag = " 
         !type(ESMF_ReadyFlag) :: ready
         !type(ESMF_ValidFlag) :: valid
 
