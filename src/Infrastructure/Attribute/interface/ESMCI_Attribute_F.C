@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.21 2009/06/18 16:59:05 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.22 2009/07/16 21:25:43 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.21 2009/06/18 16:59:05 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.22 2009/07/16 21:25:43 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -784,7 +784,6 @@ extern "C" {
 //EOP
 
   int status;
-  char msgbuf[ESMF_MAXSTR];
   ESMC_TypeKind attrTypeKind;
   int slen;              // actual attribute string length
   int *llens;
@@ -885,10 +884,8 @@ extern "C" {
 
   // make sure destination will be long enough
   if (slen > vlen) {
-    sprintf(msgbuf,"attribute %s is %d bytes long, buffer length %d is too short",
-      name, slen, vlen);
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         msgbuf, &status);
+                         "Attribute is too long for buffer", &status);
     delete [] llens;
     if (rc) *rc = status;
     return; 
@@ -955,7 +952,6 @@ extern "C" {
 
   int status, j;
   unsigned int i,k;
-  char msgbuf[ESMF_MAXSTR];
   ESMC_TypeKind attrTypeKind;
   int* llens;
   int lcount;
@@ -1087,10 +1083,8 @@ extern "C" {
   for (i=0; i<lcount; i++) {
     // make sure destination will be long enough
     if (lens[i] < llens[i]) {
-      sprintf(msgbuf,"attribute %s item #%d is %d bytes long, buffer length %d is too short",
-        cname.c_str(), i+1, lens[i], llens[i]);
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         msgbuf, &status);
+                         "Attribute is too long for buffer", &status);
       delete [] llens;
       if (rc) *rc = status;
       return;
@@ -2315,7 +2309,6 @@ extern "C" {
 //EOP
 
   int status;
-  char msgbuf[ESMF_MAXSTR];
   ESMC_TypeKind attrTypeKind;
   int slen;
   int *llens;
@@ -2364,10 +2357,8 @@ extern "C" {
 
   // make sure destination will be long enough
   if (slen > vlen) {
-    sprintf(msgbuf,"attribute %s is %d bytes long, buffer length %d is too short",
-      name, slen, vlen);
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         msgbuf, &status);
+                         "Attribute is too long for buffer", &status);
     delete [] llens;
     if (rc) *rc = status;
     return; 
@@ -2426,7 +2417,6 @@ extern "C" {
 
   int status, j;
   unsigned int i,k;
-  char msgbuf[ESMF_MAXSTR];
   ESMC_TypeKind attrTypeKind;
   int *llens;
   int lcount;
@@ -2498,10 +2488,8 @@ extern "C" {
   for (i=0; i<lcount; i++) {
     // make sure destination will be long enough
     if (lens[i] < llens[i]) {
-      sprintf(msgbuf,"attribute %s item #%d is %d bytes long, buffer length %d is too short",
-        cname.c_str(), i+1, lens[i], llens[i]);
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         msgbuf, &status);
+                         "Attribute is too long for buffer", &status);
       delete [] llens;
       if (rc) *rc = status;
       return;
