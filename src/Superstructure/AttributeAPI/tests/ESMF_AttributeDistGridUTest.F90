@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeDistGridUTest.F90,v 1.15 2009/06/08 15:52:13 rokuingh Exp $
+! $Id: ESMF_AttributeDistGridUTest.F90,v 1.16 2009/07/16 21:26:41 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeDistGridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeDistGridUTest.F90,v 1.15 2009/06/08 15:52:13 rokuingh Exp $'
+      '$Id: ESMF_AttributeDistGridUTest.F90,v 1.16 2009/07/16 21:26:41 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -145,6 +145,23 @@ program ESMF_AttributeDistGridUTest
       write(name, *) "Getting an empty value character Attribute from a DistGrid Test 2"
       call ESMF_Test((rc==ESMF_SUCCESS).and.(inEmpty==outEmpty), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  Long value
+    !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Add a long value character to a DistGrid Test
+      call ESMF_AttributeSet(distgrid, name="LongValue", value= &
+        "This is a really long line " // & 
+        "that's broken into multiple lines " // & 
+        "to compile, and it is also a runon " // & 
+        "sentence, which is bad grammar but a good" // & 
+        " test of how the Attributes behave with long" // & 
+        " values, yada yada yada!!!", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding a long value character Attribute to a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
@@ -683,7 +700,7 @@ program ESMF_AttributeDistGridUTest
     !-------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
-    !  ESMF_R8 list  -  wrong size array
+    !  ESMF_R8 list  -  wrong size distgrid
     !-------------------------------------------------------------------------
 
       !EX_UTest
@@ -717,7 +734,7 @@ program ESMF_AttributeDistGridUTest
       !------------------------------------------------------------------------
 
       !-------------------------------------------------------------------------
-      !  Character list wrong size array
+      !  Character list wrong size distgrid
       !-------------------------------------------------------------------------
       !EX_UTest
       ! Set a char list Attribute on a DistGrid Test
@@ -750,7 +767,7 @@ program ESMF_AttributeDistGridUTest
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
-    !  Logical wrong size array
+    !  Logical wrong size distgrid
     !-------------------------------------------------------------------------
       !EX_UTest
       ! Set a logical attribute - distgrid version

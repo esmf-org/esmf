@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeArrayUTest.F90,v 1.20 2009/07/01 17:29:32 rokuingh Exp $
+! $Id: ESMF_AttributeArrayUTest.F90,v 1.21 2009/07/16 21:26:41 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeArrayUTest.F90,v 1.20 2009/07/01 17:29:32 rokuingh Exp $'
+      '$Id: ESMF_AttributeArrayUTest.F90,v 1.21 2009/07/16 21:26:41 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -149,6 +149,23 @@ program ESMF_AttributeArrayUTest
       write(name, *) "Getting an empty value character Attribute from an Array Test 2"
       call ESMF_Test((rc==ESMF_SUCCESS).and.(inEmpty==outEmpty), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  Long value
+    !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Add a long value character to an Array Test
+      call ESMF_AttributeSet(array, name="LongValue", value= &
+        "This is a really long line " // &
+        "that's broken into multiple lines " // &
+        "to compile, and it is also a runon " // &
+        "sentence, which is bad grammar but a good" // &
+        " test of how the Attributes behave with long" // &
+        " values, yada yada yada!!!", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding a long value character Attribute to an Array Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
