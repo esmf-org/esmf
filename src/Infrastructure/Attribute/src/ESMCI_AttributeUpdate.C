@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.15 2009/07/10 23:41:55 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.16 2009/07/16 21:22:24 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.15 2009/07/10 23:41:55 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.16 2009/07/16 21:22:24 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -71,7 +71,6 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
 //
 //EOPI
 
-  char msgbuf[ESMF_MAXSTR];
   int localrc;
   unsigned int i;
   char *recvBuf, *sendBuf;
@@ -201,7 +200,6 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
 //
 //EOPI
 
-  char msgbuf[ESMF_MAXSTR];
   int localrc, nbytes, loffset;
   Attribute *attr;
   unsigned int i;
@@ -447,7 +445,6 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
 //
 //EOPI
 
-  char msgbuf[ESMF_MAXSTR];
   int localrc, nbytes;
   unsigned int i, j;
   Attribute *attr;
@@ -598,7 +595,6 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
 //
 //EOPI
 
-  char msgbuf[ESMF_MAXSTR];
   int localrc;
   unsigned int i,j;
   Attribute *attr;
@@ -657,7 +653,6 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
 //
 //EOPI
 
-  char msgbuf[ESMF_MAXSTR];
   int localrc;
   unsigned int i;
   int handshake = 42;
@@ -818,7 +813,6 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
 //
 //EOPI
 
-  char msgbuf[ESMF_MAXSTR];
   int localrc;
   unsigned int i;
   char *xorkey;
@@ -922,7 +916,6 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
 //
 //EOPI
 
-  char msgbuf[ESMF_MAXSTR];
   int localrc;
   unsigned int i;
     
@@ -1097,7 +1090,6 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
 //
 //EOPI
 
-  char msgbuf[ESMF_MAXSTR];
   int localrc;
   unsigned int i;
     
@@ -1132,7 +1124,6 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
 //
 //EOPI
 
-  char msgbuf[ESMF_MAXSTR];
   int localrc;
   unsigned int i;
     
