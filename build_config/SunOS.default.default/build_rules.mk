@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.21 2009/07/15 15:35:41 theurich Exp $
+# $Id: build_rules.mk,v 1.22 2009/07/16 17:31:46 theurich Exp $
 # 
 # SunOS.default.default
 #
@@ -8,6 +8,7 @@
 #
 ESMF_F90DEFAULT         = f90
 ESMF_CXXDEFAULT         = CC
+ESMF_F90LINKERDEFAULT   = CC
 
 ############################################################
 # Default MPI setting.
@@ -30,7 +31,7 @@ ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpiCC
-ESMF_CXXLINKERDEFAULT   = mpif90
+ESMF_F90LINKERDEFAULT   = mpiCC
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),user)
@@ -107,12 +108,12 @@ ESMF_CXXLINKRPATHS      =
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lCrun -lrt -lCstd
+ESMF_F90LINKLIBS += -lfsu -lfui
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lCrun -lrt -lCstd
+ESMF_CXXLINKLIBS += -lfsu -lfui
 
 ############################################################
 # Blank out shared library options
