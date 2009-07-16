@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.120 2009/06/23 19:46:31 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.121 2009/07/16 23:13:41 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2215,7 +2215,7 @@ end subroutine ESMF_GridConvertIndex
 ! !DESCRIPTION:
 ! This is the most general form of creation for an {\tt ESMF\_Grid}
 ! object. It allows the user to fully specify the topology and index space
-! (of the distributed dimensions) using the DistGrid methods and then build a grid out
+! using the DistGrid methods and then build a grid out
 ! of the resulting {\tt distgrid}. The {\tt distgridToGridMap} argument
 ! specifies how the Grid dimensions are mapped to the {\tt distgrid}. 
 ! The {\tt coordDimCount} and {\tt coordDimMap} arguments
@@ -2233,14 +2233,12 @@ end subroutine ESMF_GridConvertIndex
 !     If not specified then the type/kind will be 8 byte reals.  
 ! \item[distgrid]
 !      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and
-!      distributed over DEs. The dimCount of distgrid must be smaller or equal
-!      to the grid dimCount, otherwise a runtime ESMF error will be
-!      raised.
+!      distributed over DEs. 
 ! \item[{[distgridToGridMap]}] 
 !      List that has as many elements as indicated by distgrid's dimCount value.
 !      The elements map each dimension of distgrid to a dimension in the grid.
 !       (i.e. the values should range from 1 to griddimCount). If not specified, the default
-!       is to map all of distgrid's dimensions against the lower dimensions of the
+!       is to map all of distgrid's dimensions against the dimensions of the
 !       grid in sequence. 
 ! \item[{[coordDimCount]}]
 !      List that has as many elements as the grid dimCount .
@@ -2491,17 +2489,14 @@ end subroutine ESMF_GridConvertIndex
 !     If not specified then the type/kind will be 8 byte reals.  
 ! \item[distgrid]
 !      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and
-!      distributed over DEs. The dimCount of distgrid must be smaller or equal
-!      to the grid DimCount, otherwise a runtime ESMF error will be
-!      raised.  The difference of the distgrid dimension and the grid dimension 
-!      decides how many grid dimensions are arbitrarily distributed.
+!      distributed over DEs. 
 ! \item[{[indexArray]}] 
 !      The minIndex and maxIndex array of size {\tt 2} x {\tt dimCount}
 !      {\tt indexArray(1,:)} is the minIndex and {\tt indexArray(2,:)} is the maxIndex
 ! \item[{[distDim]}]
 !       This array specifies which dimensions are arbitrarily distributed.
 !       The size of the array specifies the total distributed dimensions.
-!       if not specified, defaults is all dimensions will be arbitrarily
+!       if not specified, the default is that all dimensions will be arbitrarily
 !       distributed.  
 ! \item[{[coordDimCount]}]
 !      List that has as many elements as the grid dimCount.
@@ -2509,7 +2504,6 @@ end subroutine ESMF_GridConvertIndex
 !      to allow factorization of the coordinate arrays. If not specified
 !      each component is assumed to be size 1. Note, the default value is different
 !      from the same argument for a non-arbitrarily distributed grid. 
-!      [NOTE FACTORIZATION HAS NOT CURRENTLY BEEN IMPLEMENTED].
 ! \item[{[coordDimMap]}]
 !      2D list of size grid dimCount x grid dimCount. This array describes the
 !      map of each coordinate array's dimensions onto the grids
@@ -11799,14 +11793,13 @@ endif
 !     If not specified then the type/kind will be 8 byte reals.  
 ! \item[distgrid]
 !      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and
-!      distributed over DEs. The dimCount of distgrid must be smaller or equal
-!      to the grid dimCount, otherwise a runtime ESMF error will be
+!      distributed over DEs. 
 !      raised.
 ! \item[{[distgridToGridMap]}] 
 !      List that has as many elements as indicated by distgrid's dimCount value.
 !      The elements map each dimension of distgrid to a dimension in the grid.
 !       (i.e. the values should range from 1 to griddimCount). If not specified, the default
-!       is to map all of distgrid's dimensions against the lower dimensions of the
+!       is to map all of distgrid's dimensions against the dimensions of the
 !       grid in sequence. 
 ! \item[{[minIndex]}] 
 !      Tuple to start the index ranges at. If not present, defaults
@@ -11815,7 +11808,7 @@ endif
 !      The upper extend of the grid index ranges.
 ! \item[{[localArbIndex]}] 
 !      This 2D array specifies the indices of the local grid cells.  The 
-!      dimensions should be localArbIndexCount * number of Distributed grid dimensions
+!      dimensions should be localArbIndexCount * number of grid dimensions
 !      where localArbIndexCount is the input argument specified below
 ! \item[{localArbIndexCount}] 
 !      number of grid cells in the local DE
