@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2009/07/07 14:04:23 feiliu Exp $ 
+# $Id: makefile,v 1.2 2009/07/16 20:57:32 feiliu Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -17,7 +17,7 @@ SYSTEM_TESTS_OBJ      = user_model1.o user_model2.o user_coupler.o
 
 SYSTEM_TESTS_RUN      = RUN_FieldMeshSMM  
 
-SYSTEM_TESTS_RUN_UNI  = RUN_FieldMeshSMMUNI
+SYSTEM_TESTS_RUN_UNI  = 
 
 
 ESMF_FieldMeshSMMSTest.o : $(SYSTEM_TESTS_OBJ)
@@ -33,9 +33,3 @@ CLOBBERDIRS =
 
 RUN_FieldMeshSMM:
 	$(MAKE) TNAME=FieldMeshSMM NP=3 stest
-
-RUN_FieldMeshSMMUNI:
-	$(MAKE) TNAME=FieldMeshSMM NP=1 stest
-
-
-

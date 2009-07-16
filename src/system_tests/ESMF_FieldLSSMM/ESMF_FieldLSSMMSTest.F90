@@ -1,10 +1,10 @@
-! $Id: ESMF_FieldLSSMMSTest.F90,v 1.1 2009/07/02 19:33:09 feiliu Exp $
+! $Id: ESMF_FieldLSSMMSTest.F90,v 1.2 2009/07/16 20:57:37 feiliu Exp $
 !
 ! System test code FieldLSSMM
 !  Description on Sourceforge under System Test #79497
 
 !-------------------------------------------------------------------------
-!ESMF_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !BOP

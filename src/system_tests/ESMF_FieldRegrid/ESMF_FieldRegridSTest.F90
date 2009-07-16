@@ -1,10 +1,10 @@
-! $Id: ESMF_FieldRegridSTest.F90,v 1.36 2009/06/30 20:11:09 feiliu Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.37 2009/07/16 20:57:23 feiliu Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
 
 !-------------------------------------------------------------------------
-!ESMF_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !BOP

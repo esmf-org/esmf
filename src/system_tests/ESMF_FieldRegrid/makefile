@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2008/09/26 04:05:34 cdeluca Exp $ 
+# $Id: makefile,v 1.11 2009/07/16 20:57:24 feiliu Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -17,8 +17,7 @@ SYSTEM_TESTS_OBJ      = user_model1.o user_model2.o user_coupler.o
 
 SYSTEM_TESTS_RUN      = RUN_FieldRegrid  
 
-SYSTEM_TESTS_RUN_UNI  = RUN_FieldRegridUNI
-
+SYSTEM_TESTS_RUN_UNI  =
 
 ESMF_FieldRegridSTest.o : $(SYSTEM_TESTS_OBJ)
 
@@ -33,9 +32,3 @@ CLOBBERDIRS =
 
 RUN_FieldRegrid:
 	$(MAKE) TNAME=FieldRegrid NP=6 stest
-
-RUN_FieldRegridUNI:
-	$(MAKE) TNAME=FieldRegrid NP=1 stest
-
-
-
