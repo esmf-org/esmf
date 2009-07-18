@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.53 2009/05/19 23:27:11 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.54 2009/07/18 00:22:01 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -707,7 +707,6 @@ end subroutine ESMF_LogFinalize
         print *, "ESMF_Log not open -- cannot ESMF_LogFlush()."
         return
       endif
-      
       if ((alog%FileIsOpen .eq. ESMF_TRUE) .AND. &
         (alog%flushed .eq. ESMF_FALSE) .AND. &
 	(alog%dirty .eq. ESMF_TRUE))  then	
@@ -771,13 +770,15 @@ end subroutine ESMF_LogFinalize
       123  FORMAT(a8,a,3i2.2,a,i6.6,7a,i0,2a)
       132  FORMAT(a8,a,3i2.2,a,i6.6,8a)
       133  FORMAT(a8,a,3i2.2,a,i6.6,6a)
-  
+
       call ESMF_IOUnitFlush (alog%unitNumber, localrc)
  
       alog%flushed = ESMF_TRUE
       alog%dirty = ESMF_FALSE
-          
-      rc=merge (ESMF_SUCCESS, ESMF_FAILURE, localrc == 0)
+
+      if (present (rc)) then    
+        rc=merge (ESMF_SUCCESS, ESMF_FAILURE, localrc == 0)
+      end if
       
     endif
 
