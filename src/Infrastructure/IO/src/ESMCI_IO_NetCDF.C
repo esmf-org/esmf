@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.C,v 1.1 2009/07/07 06:00:17 eschwab Exp $
+// $Id: ESMCI_IO_NetCDF.C,v 1.2 2009/07/21 05:54:01 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -8,14 +8,14 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
-// ESMC Clock method code (body) file
+// ESMC IO_NetCDF method code (body) file
 //
 //-------------------------------------------------------------------------
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt ESMC\_Clock} methods declared
-// in the companion file {\tt ESMCI\_Clock.h}
+// The code in this file implements the C++ {\tt ESMC\_IO\_NetCDF} methods declared
+// in the companion file {\tt ESMCI\_IO\_NetCDF.h}
 //
 //-------------------------------------------------------------------------
 //
@@ -42,13 +42,13 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.1 2009/07/07 06:00:17 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.2 2009/07/21 05:54:01 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
 {
 
-// initialize static io instance counter
+// initialize static io_netcdf instance counter
 // TODO: inherit from ESMC_Base class
 int IO_NetCDF::count=0;
 
@@ -56,13 +56,13 @@ int IO_NetCDF::count=0;
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
 //
-// This section includes all the IO routines
+// This section includes all the IO_NetCDF routines
 //
 //
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI_IO_NetCDFCreate - Allocates and Initializes an IO object
+// !IROUTINE:  ESMCI_IO_NetCDFCreate - Allocates and Initializes an IO_NetCDF object
 //
 // !INTERFACE:
       IO_NetCDF *ESMCI_IO_NetCDFCreate(
@@ -88,7 +88,6 @@ int IO_NetCDF::count=0;
     int returnCode;
     IO_NetCDF *io;
 
-cout << "Creating IO_NetCDF" << endl;
     // default return code
     if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
 
@@ -133,10 +132,8 @@ cout << "Creating IO_NetCDF" << endl;
 
     if (base != ESMC_NULL_POINTER) io->base = base;
 
-// TODO 
-cout << "Finished creating IO_NetCDF" << endl;
-
     // TODO returnCode = io->validate();
+    returnCode = ESMF_SUCCESS;
     ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
     return(io);
 
@@ -144,7 +141,7 @@ cout << "Finished creating IO_NetCDF" << endl;
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI_IO_NetCDFDestroy - free an IO created with Create
+// !IROUTINE:  ESMCI_IO_NetCDFDestroy - free an IO_NetCDF created with Create
 //
 // !INTERFACE:
       int ESMCI_IO_NetCDFDestroy(
@@ -153,11 +150,11 @@ cout << "Finished creating IO_NetCDF" << endl;
 //    int error return code
 //
 // !ARGUMENTS:
-      IO_NetCDF **io) {  // in - IO to destroy
+      IO_NetCDF **io) {  // in - IO_NetCDF to destroy
 //
 // !DESCRIPTION:
-//      ESMF routine which destroys an IO object previously allocated
-//      via an {\tt ESMCI\_IOCreate} routine.  Define for deep classes only.
+//      ESMF routine which destroys an IO_NetCDF object previously allocated
+//      via an {\tt ESMCI\_IO\_NetCDFCreate} routine.  Define for deep classes only.
 //
 //EOP
 
@@ -171,7 +168,7 @@ cout << "Finished creating IO_NetCDF" << endl;
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  IO_NetCDF::read - Performs a read on an IO object
+// !IROUTINE:  IO_NetCDF::read - Performs a read on an IO_NetCDF object
 //
 // !INTERFACE:
       int IO_NetCDF::read(
@@ -184,13 +181,13 @@ cout << "Finished creating IO_NetCDF" << endl;
       const char        *fileName) {          // in
 
 // !DESCRIPTION:
-//      Reads an {\tt ESMC\_IO} object from file
+//      Reads an {\tt ESMC\_IO\_NetCDF} object from file
 //
 //EOP
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMCI::IO::read()"
+ #define ESMC_METHOD "ESMCI::IO_NetCDF::read()"
 
     int rc = ESMF_SUCCESS;
 
@@ -205,84 +202,11 @@ cout << "Finished creating IO_NetCDF" << endl;
     if (fileName != ESMC_NULL_POINTER) 
     {
       // TODO: only use local of fileName this one time;
-      //   don't change set IO member fileName
+      //   don't change set IO_NetCDF member fileName
       if (fileNameLen < ESMF_MAXSTR) 
       {
         strncpy(this->fileName, fileName, fileNameLen);
         this->fileName[fileNameLen] = '\0';  // null terminate
-printf("Filename: %s\n", this->fileName);
-
-#ifdef ESMF_NETCDF
-        NcFile*	netCdfFile = new NcFile(this->fileName, NcFile::ReadOnly);
-
-        if (!(netCdfFile->is_valid()))
-        {
-          // TODO: throw error, or return
-          return ESMF_FAILURE;
-        }
-
-        //***
-        // Create the State object that we'll be filling with Arrays
-        //***
-        int   stateRc = 0;
-        theState = State::create(this->fileName, &stateRc);
-        //printf("*** State RC: %d\n", stateRc);
-
-        /*
-        ** Dimensions
-        */
-        int	numDims = netCdfFile->num_dims();
-        //printf("\nNum Dimensions: %d\n", numDims);
-
-        for (int i = 0; i < numDims; ++i)
-        {
-          NcDim*	thisDim = netCdfFile->get_dim(i);
-
-          if (thisDim->is_valid())
-          {
-            //printf("Dimension Name: %s\n", thisDim->name());
-            //printf("          Size: %d\n", thisDim->size());
-          }
-        }
-
-        /*
-        ** Variables
-        */
-        int	numVars = netCdfFile->num_vars();
-        //printf("\nNum Variables: %d\n", numVars);
-
-        for (int i = 0; i < numVars; ++i)
-        {
-          Array*  thisArray = readArray(netCdfFile, i);
-          if (thisArray != NULL)
-          {
-            //thisArray->print();
-            //printf("Array Name: %s\n", thisArray->getName());
-            theState->addArray(thisArray);
-          }
-        }
-
-        /*
-        ** Attributes
-        */
-        int	numAtts = netCdfFile->num_atts();
-        //printf("\nNum Attributes: %d\n", numAtts);
-
-        for (int i = 0; i < numAtts; ++i)
-        {
-          NcAtt*  thisAtt = netCdfFile->get_att(i);
-
-          if (thisAtt->is_valid())
-          {
-            //printf("Attribute Name: %s\n", thisAtt->name());
-            //printf("          Type: %d\n", thisAtt->type());
-            //printf("          Vals: %d\n", thisAtt->num_vals());
-          }
-        }
-
-        delete netCdfFile;
-#endif ESMF_NETCDF
-
       } 
       else 
       {
@@ -300,8 +224,98 @@ printf("Filename: %s\n", this->fileName);
     } 
     else 
     {
-      // TODO use existing IO fileName member
+      // TODO use existing IO_NetCDF fileName member
     }
+
+#ifdef ESMF_NETCDF
+    NcFile* netCdfFile = new NcFile(this->fileName, NcFile::ReadOnly);
+
+    if (!(netCdfFile->is_valid()))
+    {
+      // TODO: throw error, or return
+      return ESMF_FAILURE;
+    }
+
+    //***
+    // Create the State object that we'll be filling with Arrays
+    //***
+    int stateRc = 0;
+    theState = State::create(this->fileName, &stateRc);
+    //printf("*** State RC: %d\n", stateRc);
+    if (stateRc != ESMF_SUCCESS)
+    {
+      return stateRc; 
+    }
+
+    /*
+    ** Dimensions
+    */
+    int	numDims = netCdfFile->num_dims();
+    //printf("\nNum Dimensions: %d\n", numDims);
+
+    for (int i = 0; i < numDims; ++i)
+    {
+      NcDim*	thisDim = netCdfFile->get_dim(i);
+
+      if (thisDim->is_valid())
+      {
+        //printf("Dimension Name: %s\n", thisDim->name());
+        //printf("          Size: %d\n", thisDim->size());
+      }
+      else
+      {
+        // TODO:  return ESMF error?
+      }
+    }
+
+    /*
+    ** Variables
+    */
+    int	numVars = netCdfFile->num_vars();
+    //printf("\nNum Variables: %d\n", numVars);
+
+    for (int i = 0; i < numVars; ++i)
+    {
+      Array*  thisArray = readArray(netCdfFile, i);
+      if (thisArray != NULL)
+      {
+        //thisArray->print();
+        //printf("Array Name: %s\n", thisArray->getName());
+        theState->addArray(thisArray);
+      }
+      else
+      {
+        // TODO:  return ESMF error?
+      }
+    }
+
+    /*
+    ** Attributes
+    */
+    int	numAtts = netCdfFile->num_atts();
+    //printf("\nNum Attributes: %d\n", numAtts);
+
+    for (int i = 0; i < numAtts; ++i)
+    {
+      NcAtt*  thisAtt = netCdfFile->get_att(i);
+
+      if (thisAtt->is_valid())
+      {
+        //printf("Attribute Name: %s\n", thisAtt->name());
+        //printf("          Type: %d\n", thisAtt->type());
+        //printf("          Vals: %d\n", thisAtt->num_vals());
+      }
+      else
+      {
+        // TODO:  return ESMF error?
+      }
+    }
+
+    delete netCdfFile;
+#else
+    // netcdf library not present
+    rc = ESMF_RC_LIB_NOT_PRESENT;
+#endif // ESMF_NETCDF
 
     return (rc);
 
@@ -309,7 +323,7 @@ printf("Filename: %s\n", this->fileName);
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  IO_NetCDF::write - Performs a write on an IO object
+// !IROUTINE:  IO_NetCDF::write - Performs a write on an IO_NetCDF object
 //
 // !INTERFACE:
       int IO_NetCDF::write(
@@ -339,23 +353,44 @@ printf("Filename: %s\n", this->fileName);
       return(ESMF_FAILURE);
     }
 
+#ifdef ESMF_NETCDF
+    // check only when netCDF present
     if (theState == ESMC_NULL_POINTER) 
     {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'theState' pointer is NULL.", &rc);
       return(ESMF_FAILURE);
     }
+#endif
 
     // TODO: use inherited methods from ESMC_Base
     if (fileName != ESMC_NULL_POINTER) 
     {
       // TODO: only use local of fileName this one time;
-      //   don't change set IO member fileName
+      //   don't change set IO_NetCDF member fileName
       if (fileNameLen < ESMF_MAXSTR) 
       {
         strncpy(this->fileName, fileName, fileNameLen);
         this->fileName[fileNameLen] = '\0';  // null terminate
-printf("Filename: %s\n", this->fileName);
+      } 
+      else 
+      {
+        // truncate
+        strncpy(this->fileName, fileName, ESMF_MAXSTR-1);
+        this->fileName[ESMF_MAXSTR-1] = '\0';  // null terminate
+
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "io fileName %s, length >= ESMF_MAXSTR; truncated.",
+                name);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
+        // TODO: return ESMF_WARNING when defined
+        // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
+      }
+    } 
+    else 
+    {
+      // TODO use existing IO_NetCDF fileName member
+    }
 
 #ifdef ESMF_NETCDF
         NcFile*	netCdfFile = new NcFile(this->fileName, NcFile::Replace);
@@ -363,6 +398,7 @@ printf("Filename: %s\n", this->fileName);
         if (!(netCdfFile->is_valid()))
         {
           // TODO: throw error, or return
+          return ESMF_FAILURE;
         }
 
         netCdfFile->set_fill(NcFile::Fill);
@@ -399,30 +435,14 @@ printf("Filename: %s\n", this->fileName);
         }
 
         delete netCdfFile;
-#endif ESMF_NETCDF
-      } 
-      else 
-      {
-        // truncate
-        strncpy(this->fileName, fileName, ESMF_MAXSTR-1);
-        this->fileName[ESMF_MAXSTR-1] = '\0';  // null terminate
-
-        char logMsg[ESMF_MAXSTR];
-        sprintf(logMsg, "io fileName %s, length >= ESMF_MAXSTR; truncated.",
-                name);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
-        // TODO: return ESMF_WARNING when defined
-        // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
-      }
-    } 
-    else 
-    {
-      // TODO use existing IO fileName member
-    }
+#else
+    // netcdf library not present
+    rc = ESMF_RC_LIB_NOT_PRESENT;
+#endif // ESMF_NETCDF
 
     return (rc);
 
-}  // end IO_NetCDF::read
+}  // end IO_NetCDF::write
 
 //-------------------------------------------------------------------------
 //BOP
@@ -438,14 +458,14 @@ printf("Filename: %s\n", this->fileName);
 //    none
 //
 // !DESCRIPTION:
-//      Initializes for either C++ or F90, since {\tt ESMC\_IO} is a deep,
+//      Initializes for either C++ or F90, since {\tt ESMC\_IO\_NetCDF} is a deep,
 //      dynamically allocated class.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMCI::IO() native constructor"
+ #define ESMC_METHOD "ESMCI::IO_NetCDF() native constructor"
 
     name[0] = '\0';
     theState = ESMC_NULL_POINTER; 
@@ -494,8 +514,7 @@ printf("Filename: %s\n", this->fileName);
       esmcTypeVal = ESMC_TYPEKIND_I1;
       break;
     case NC_CHAR:
-      //esmcTypeVal = ESMC_TYPEKIND_CHARACTER;
-      esmcTypeVal = ESMF_C8;
+      esmcTypeVal = ESMC_TYPEKIND_CHARACTER;
       break;
     case NC_SHORT:
       esmcTypeVal = ESMC_TYPEKIND_I2;
@@ -503,9 +522,9 @@ printf("Filename: %s\n", this->fileName);
     case NC_INT:
       esmcTypeVal = ESMC_TYPEKIND_I4;
       break;
-    //case NC_LONG:
-    //  esmcTypeVal = ESMC_TYPEKIND_I8;
-    //  break;
+    //case NC_LONG:  // TODO?: deprecated in netCDF - same as NC_INT
+    // esmcTypeVal = ESMC_TYPEKIND_I8;
+    //break;
     case NC_FLOAT:
       esmcTypeVal = ESMC_TYPEKIND_R4;
       break;
@@ -538,7 +557,7 @@ printf("Filename: %s\n", this->fileName);
       ncTypeVal = ncInt;
       break;
     case ESMC_TYPEKIND_I8:
-      ncTypeVal = ncLong;
+      ncTypeVal = ncLong;  // TODO?: deprecated in netCDF - same ncInt
       break;
     case ESMC_TYPEKIND_R4:
       ncTypeVal = ncFloat;
@@ -547,10 +566,12 @@ printf("Filename: %s\n", this->fileName);
       ncTypeVal = ncDouble;
       break;
     case ESMF_C8:
-      ncTypeVal = ncChar;
+      ncTypeVal = ncNoType;
+      // TODO:  ncTypeVal = netCDF 8 byte complex type?
       break;
     case ESMF_C16:
       ncTypeVal = ncNoType;
+      // TODO:  ncTypeVal = netCDF 16 byte complex type?
       break;
     case ESMC_TYPEKIND_LOGICAL:
       ncTypeVal = ncByte;
@@ -666,28 +687,60 @@ printf("Filename: %s\n", this->fileName);
     for (int j = 0; j < thisVar->num_atts(); ++j)
     {
       NcAtt*	thisAtt = thisVar->get_att(j);
-      //printf("      att name[%d]: %s\n", j, thisAtt->name());
-      //printf("      att type[%d]: %d\n", j, thisAtt->type());
+      printf("      nc att name[%d]: %s\n", j, thisAtt->name());
+      printf("      nc att type[%d]: %d ", j, thisAtt->type());
 
-      if (thisAtt->type() == NC_CHAR)
+      void* valueBase;
+      string attValString;
+      int attValInt;
+      float attValFloat;
+      double attValDouble;
+
+      switch (thisAtt->type())
       {
-         //printf("         value[%d]: %s\n", 
-         //       j, (char*)thisAtt->values()->base());
+      case NC_CHAR:
+         attValString = string(thisAtt->values()->as_string(0));
+         valueBase = (void*) (&attValString);
+         printf("(ncChar)\n");
+         printf("     nc att value[%d]: %s\n", j, attValString.c_str());
+         
+        break;
+
+      case NC_INT:
+         attValInt = thisAtt->values()->as_int(0);
+         valueBase = (void*) (&attValInt);
+         printf("(ncInt)\n");
+         printf("     nc att value[%d]: %d\n", j, attValInt);
+        break;
+
+      case NC_FLOAT:
+         attValFloat = thisAtt->values()->as_float(0);
+         valueBase = (void*) (&attValFloat);
+         printf("(ncFloat)\n");
+         printf("     nc att value[%d]: %f\n", j, attValFloat);
+        break;
+
+      case NC_DOUBLE:
+         attValDouble = thisAtt->values()->as_double(0);
+         valueBase = (void*) (&attValDouble);
+         printf("(ncDouble)\n");
+         printf("     nc att value[%d]: %g\n", j, attValDouble);
+        break;
+
+      default:
+        break;
       }
 
       ESMC_TypeKind	attType = ncToEsmcType(thisAtt->type());
-      //printf("          type[%d]: %d\n", j, attType);
-      void*	   dataBase = thisAtt->values()->base();
-      string	attValue = (char*)dataBase;
+      printf("   ESMC type[%d]: %d (%s)\n", j, attType, 
+                                            ESMC_TypeKindString(attType));
 
-      Attribute*	esmfAtt = new Attribute(
-                                     thisAtt->name(),
-                                     ESMC_TYPEKIND_CHARACTER,
-                                     1,
-                                     &attValue);
-
+      Attribute* esmfAtt = new Attribute(thisAtt->name(),
+                                         attType,
+                                         1,
+                                         valueBase);
       thisArray->root.AttributeSet(esmfAtt);
-      //thisArray->root.ESMC_Print();
+      thisArray->root.ESMC_Print();
     }
 
     return thisArray;
@@ -773,6 +826,8 @@ printf("Filename: %s\n", this->fileName);
           string  attVal;
           thisArray->root.AttributeGet(attName, &attVal);
           thisVar->add_att(attName.c_str(), attVal.c_str());
+          printf("      att name[%d]: %s\n", i, attName.c_str());
+          printf("      att val[%d]: %s\n", i, attVal.c_str());
         }
         break;
 
@@ -781,6 +836,8 @@ printf("Filename: %s\n", this->fileName);
           int  attVal;
           thisArray->root.AttributeGet(attName, &attVal);
           thisVar->add_att(attName.c_str(), attVal);
+          printf("      att name[%d]: %s\n", i, attName.c_str());
+          printf("      att val[%d]: %d\n", i, attVal);
         }
         break;
 
@@ -789,6 +846,8 @@ printf("Filename: %s\n", this->fileName);
           float  attVal;
           thisArray->root.AttributeGet(attName, &attVal);
           thisVar->add_att(attName.c_str(), attVal);
+          printf("      att name[%d]: %s\n", i, attName.c_str());
+          printf("      att val[%d]: %f\n", i, attVal);
         }
         break;
 
@@ -797,6 +856,8 @@ printf("Filename: %s\n", this->fileName);
           double  attVal;
           thisArray->root.AttributeGet(attName, &attVal);
           thisVar->add_att(attName.c_str(), attVal);
+          printf("      att name[%d]: %s\n", i, attName.c_str());
+          printf("      att val[%d]: %g\n", i, attVal);
         }
         break;
 
@@ -807,6 +868,6 @@ printf("Filename: %s\n", this->fileName);
 
     return rc;
   }
-#endif ESMF_NETCDF
+#endif // ESMF_NETCDF
 
 }  // end namespace ESMCI
