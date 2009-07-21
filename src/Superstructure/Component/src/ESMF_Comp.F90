@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.189 2009/06/05 21:32:39 w6ws Exp $
+! $Id: ESMF_Comp.F90,v 1.190 2009/07/21 18:35:33 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -249,7 +249,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.189 2009/06/05 21:32:39 w6ws Exp $'
+    '$Id: ESMF_Comp.F90,v 1.190 2009/07/21 18:35:33 peggyli Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -607,7 +607,7 @@ contains
       call ESMF_ConfigLoadFile(compp%config, configFile, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) then
         ! try again with the dirPath concatinated on front
-        fullpath = trim(dirPath) // '/' // trim(configFile)
+        fullpath = trim(compp%dirPath) // '/' // trim(configFile)
         call ESMF_ConfigLoadFile(compp%config, fullpath, rc=localrc)
         ! TODO: construct a msg string and then call something here.
         ! if (ESMF_LogMsgFoundError(status, msgstr, rc)) return
