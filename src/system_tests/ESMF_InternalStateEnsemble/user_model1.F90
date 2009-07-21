@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.11 2009/05/29 19:24:43 theurich Exp $
+! $Id: user_model1.F90,v 1.12 2009/07/21 21:37:35 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -351,6 +351,21 @@ module user_model1
     call ESMF_GridCompGetInternalState(comp, wrap, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     data => wrap%p
+    
+    ! Destroy DistGrid and Array objects
+    call ESMF_ArrayDestroy(data%array(1), rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayDestroy(data%array(2), rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayDestroy(data%array(3), rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_DistGridDestroy(data%distgrid(1), rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_DistGridDestroy(data%distgrid(2), rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_DistGridDestroy(data%distgrid(3), rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    
     deallocate(data%arrayspec)
     deallocate(data%distgrid)
     deallocate(data%array)
