@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.53 2009/04/13 15:11:25 rokuingh Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.54 2009/07/21 23:31:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.53 2009/04/13 15:11:25 rokuingh Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.54 2009/07/21 23:31:30 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1279,6 +1279,8 @@ end subroutine ESMF_FieldConstructNoDataPtr
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc
+    type(ESMF_GeomType) :: geomType
+    type(ESMF_Grid)     :: grid
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -1302,6 +1304,25 @@ end subroutine ESMF_FieldConstructNoDataPtr
     endif
 
     if (ftype%gridstatus .eq. ESMF_STATUS_READY) then
+    
+        if (ftype%is_proxy) then
+          call ESMF_GeomBaseGet(ftype%geombase, geomType=geomType, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+          if (geomType.eq.ESMF_GEOMTYPE_GRID) then
+            call ESMF_GeomBaseGet(ftype%geombase, grid=grid, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
+            call ESMF_GridDestroy(grid, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
+          endif
+          ! TODO: also implement proxy cleanup for other GEOMTYPEs
+        endif
+    
         call ESMF_GeomBaseDestroy(ftype%geombase, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
