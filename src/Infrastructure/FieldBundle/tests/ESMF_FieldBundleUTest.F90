@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.12 2009/04/13 15:12:50 rokuingh Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.13 2009/07/22 23:29:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.12 2009/04/13 15:12:50 rokuingh Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.13 2009/07/22 23:29:06 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -385,6 +385,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       !  Verify that recreating a created FieldBundle is handled properly
+      bundle3 = bundle2 ! get copy to prevent memory leak
       bundle2 = ESMF_FieldBundleCreate(name="time step 1", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a FieldBundle that has already been created Test"
@@ -433,6 +434,8 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldBundleDestroy(bundle2)
       !------------------------------------------------------------------------
+
+      call ESMF_FieldBundleDestroy(bundle3)
 
       ! Create an empty FieldBundle and then add multiple fields to it.
       bundle3 = ESMF_FieldBundleCreate(name="southern hemisphere", rc=rc)
