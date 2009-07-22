@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.24 2009/05/29 19:24:42 theurich Exp $
+! $Id: user_model.F90,v 1.25 2009/07/22 20:48:33 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -237,6 +237,7 @@
 !     ! Local variables
         type(mydata), pointer :: mydatablock
         type(wrapper) :: mywrapper
+        type(ESMF_Field) :: humidity
 
         print *, "User Comp Final starting"
     
@@ -249,7 +250,12 @@
    
         print *, "final, local data =", mydatablock%index, &
                         mydatablock%scale_factor, mydatablock%flag
- 
+
+        ! garbage collection 
+        deallocate(mydatablock)
+        call ESMF_StateGet(importState, "humidity", humidity, rc=rc)
+        call ESMF_FieldDestroy(humidity, rc=rc)
+        
         print *, "User Comp Final returning"
    
         rc = ESMF_SUCCESS
