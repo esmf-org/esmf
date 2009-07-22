@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.138 2009/06/10 22:31:09 theurich Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.139 2009/07/22 20:33:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.138 2009/06/10 22:31:09 theurich Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.139 2009/07/22 20:33:53 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -102,7 +102,6 @@
       ! several calls to field need a valid grid.  these will be used in
       ! the grid create calls.
       call ESMF_VMGetGlobal(vm, rc=rc)
-      delayout = ESMF_DELayoutCreate(vm, rc=rc)
       minCoord(:) = (/ 0.0, 0.0 /)
 
 
@@ -352,6 +351,7 @@
       write(name, *) "Getting a Field name Test"
       call ESMF_Test((fname.eq."pressure"), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldPrint(f2)
+      call ESMF_FieldDestroy(f2)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
@@ -636,6 +636,7 @@
        deallocate( delta )
 
       ! distribute first two dimensions of the igrid
+       delayout = ESMF_DELayoutCreate(vm, rc=rc)
        call ESMF_IGridDistribute(igrid, delayout=delayout,             &
                                 decompIds=(/1,2,0/), rc=rc)
 
@@ -674,6 +675,8 @@
        call ESMF_FieldDestroy(f1, rc)
 
 #endif
+
+
 
 #endif
 
