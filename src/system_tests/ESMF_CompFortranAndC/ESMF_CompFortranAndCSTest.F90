@@ -1,4 +1,4 @@
-! $Id: ESMF_CompFortranAndCSTest.F90,v 1.12 2009/04/07 05:34:49 theurich Exp $
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.13 2009/07/22 04:18:11 theurich Exp $
 !
 ! System test CompFortranAndC
 !  Description on Sourceforge under System Test #63029
@@ -239,6 +239,11 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_StateDestroy(exp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
+
+      call ESMF_ClockDestroy(clock, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) &
+            call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
       print *, "All Destroy routines done"
 

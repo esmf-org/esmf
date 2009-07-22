@@ -1,4 +1,4 @@
-! $Id: user_FortranComponent.F90,v 1.11 2009/05/29 19:24:42 theurich Exp $
+! $Id: user_FortranComponent.F90,v 1.12 2009/07/22 04:18:11 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -218,7 +218,8 @@
         integer, intent(out) :: rc
 
         ! Internal data
-        type(ESMF_Array) :: array
+        type(ESMF_Array)    :: array
+        type(ESMF_DistGrid) :: distgrid
 
         ! Initialize return code
         rc = ESMF_SUCCESS
@@ -229,6 +230,10 @@
         call ESMF_StateGet(exportState,"array1", array=array, rc=rc)
 
         ! Free up memory
+        call ESMF_ArrayGet(array, distgrid=distgrid, rc=rc)
+        if (rc/=ESMF_SUCCESS) return ! bail out
+        call ESMF_DistGridDestroy(distgrid, rc=rc)
+        if (rc/=ESMF_SUCCESS) return ! bail out
         call ESMF_ArrayDestroy(array, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
         deallocate (farray)    
