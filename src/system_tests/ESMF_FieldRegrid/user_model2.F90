@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.50 2009/06/19 17:46:13 feiliu Exp $
+! $Id: user_model2.F90,v 1.51 2009/07/22 04:58:07 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -198,6 +198,7 @@
 
       ! Local variables
       type(ESMF_Field) :: field
+      type(ESMF_Grid) :: grid
       type(mylocaldata), pointer :: mydatablock
       type(wrapper) :: wrap
       type(ESMF_VM) :: vm
@@ -241,6 +242,14 @@
       ! otherwise error codes are accumulated but ignored until the
       ! end so we can see the output from all the cases to help track
       ! down errors.
+
+      ! garbage collection
+      call ESMF_FieldGet(field, grid=grid, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) return
+      call ESMF_FieldDestroy(field, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) return
+      call ESMF_GridDestroy(grid, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) return
 
       print *, "User Comp Final returning"
    
