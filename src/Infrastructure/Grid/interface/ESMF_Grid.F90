@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.121 2009/07/16 23:13:41 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.122 2009/07/23 00:11:22 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -4798,7 +4798,8 @@ end subroutine ESMF_GridConvertIndex
 !      dimensions should be localArbIndexCount * number of Distributed grid dimensions
 !      where localArbIndexCount is the input argument specified below
 ! \item[{localArbIndexCount}] 
-!      number of grid cells in the local DE
+!      number of grid cells in the local DE. It is okay to have 0
+!      grid cell in a local DE.  
 ! \item[{[connDim1]}] 
 !      Fortran array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
@@ -5055,20 +5056,20 @@ end subroutine ESMF_GridConvertIndex
        return 
     endif
 
+    ! convert localArbIndex into 1D index array for DistGrid
     ! Check localArbIndex dimension matched with localArbIndexCount and diskDimCount
     if (size(localArbIndex, 1) .ne. localArbIndexCount) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       	  call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
                  "- localArbIndex 1st dimension has to match with localArbIndexCount", & 
                  ESMF_CONTEXT, rc) 
-       return
+          return
     endif
 
-    ! convert localArbIndex into 1D index array for DistGrid
-    if (localArbIndexCount .gt. 0) then
-       allocate(local1DIndices(localArbIndexCount), stat=localrc)
-       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating local1DIndices", &
+    allocate(local1DIndices(localArbIndexCount), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating local1DIndices", &
                                      ESMF_CONTEXT, rc)) return
       
+    if (localArbIndexCount .gt. 0) then
        ! use 0-based index to calculate the 1D index and add 1 back at the end
        do i = 1, localArbIndexCount
           local1DIndices(i) = localArbIndex(i,1)-1
@@ -14323,11 +14324,12 @@ endif
        return
     endif
 
+    allocate(local1DIndices(localArbIndexCount), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating local1DIndices", &
+                                  ESMF_CONTEXT, rc)) return
+
     ! convert localArbIndex into 1D index array for DistGrid
     if (localArbIndexCount .gt. 0) then
-       allocate(local1DIndices(localArbIndexCount), stat=localrc)
-       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating local1DIndices", &
-                                     ESMF_CONTEXT, rc)) return
        do i = 1, localArbIndexCount
           local1DIndices(i) = localArbIndex(i,1)-1
 	  if (distDimCount .ge. 2) then 
