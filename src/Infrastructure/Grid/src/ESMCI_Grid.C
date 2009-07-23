@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.89 2009/06/09 04:52:01 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.90 2009/07/23 00:10:32 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.89 2009/06/09 04:52:01 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.90 2009/07/23 00:10:32 peggyli Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -1722,7 +1722,7 @@ int Grid::commit(
 
   // setup the grid's internal structures 
   // if localArbIndexCount != 0, it is an arbitrary grid
-  if (proto->localArbIndexCount != 0 && proto->localArbIndex != ESMC_NULL_POINTER) {
+  if (proto->localArbIndexCount >= 0) {
     localrc = construct(this, proto->nameLen, proto->name, proto->typekind, 
 			proto->distgrid, proto->minIndex, proto->maxIndex,
 			proto->localArbIndex, proto->localArbIndexCount,
@@ -4656,7 +4656,7 @@ Grid::Grid(
   minIndex = ESMC_NULL_POINTER;
   maxIndex = ESMC_NULL_POINTER;
   localArbIndex = ESMC_NULL_POINTER;
-  localArbIndexCount = 0;  
+  localArbIndexCount = -1;  
 
   destroyDistgrid=false; 
   destroyDELayout=false;
@@ -4824,7 +4824,7 @@ ProtoGrid::ProtoGrid(
   indexflag=ESMC_NULL_POINTER; 
   minIndex=ESMC_NULL_POINTER;
   maxIndex=ESMC_NULL_POINTER;
-  localArbIndexCount=0;
+  localArbIndexCount=-1;
   arbDim = 1;
   localArbIndex=ESMC_NULL_POINTER;
   destroyDistgrid=ESMC_NULL_POINTER; 
