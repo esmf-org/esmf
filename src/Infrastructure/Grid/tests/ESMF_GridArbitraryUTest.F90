@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.5 2009/05/20 17:14:36 peggyli Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.6 2009/07/23 00:09:33 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.5 2009/05/20 17:14:36 peggyli Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.6 2009/07/23 00:09:33 peggyli Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -653,6 +653,8 @@ program ESMF_GridArbitraryUTest
   if ((maxIndex1(1) .ne. xdim) .and. (maxIndex1(2) .ne. ydim) .and. &
 	(maxIndex1(3) .ne. zdim)) correct = .false. 
 
+  deallocate(minIndex1, maxIndex1)
+
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
@@ -1216,7 +1218,73 @@ program ESMF_GridArbitraryUTest
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !----------------------------------------------------------------------------=
+  ! Test Set 8:  2D Arbitrary Grid with one PET localArbIndexCount = 0
+  !-----------------------------------------------------------------------------
+  if (myPet .eq. petCount-1) then
+	localCount = 0
+	deallocate(localIndices)
+	allocate(localIndices(localCount,2))
+  endif		
+  grid = ESMF_GridCreateShapeTile("arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+	minIndex=(/1,1/), maxIndex=(/xdim, ydim/), &
+	localArbIndex=localIndices,localArbIndexCount=localCount,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "2D Arb Grid: Testing Grid Validate"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  !! Check that validate returns true
+  call ESMF_GridValidate(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+
+  !! Destroy grid
+  call ESMF_GridDestroy(grid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  
+
+  !-----------------------------------------------------------------------------
+  ! Test set 9: Use GridCreateEmpty() and GridSetCommitShapeTile() to create grid with undistributed dimension
+  ! with one PET with 0 elements
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Create an empty grid then set the values with undistributed dimension and non-default distdim"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  grid = ESMF_GridCreateEmpty(rc=localrc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_GridSetCommitShapeTile(grid, name="arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+	minIndex=(/1,1,1/), maxIndex=(/xdim, zdim, ydim/), &
+	localArbIndex=localIndices,localArbIndexCount=localCount, &
+	distDim=(/1,3/), coordDep2=(/ESMF_GRID_ARBDIM, 2/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, distgrid=distgrid, &
+	distgridToGridMap = distgridToGridMap, rc=localrc)
+
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  ! check that output is as expected
+  if ((distgridToGridMap(1) .ne. 1) .or. (distgridToGridMap(2) .ne. 3)) correct = .false.
+
+  !! Destroy grid
+  call ESMF_GridDestroy(grid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate(localIndices)
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
