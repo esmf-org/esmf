@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.73 2009/07/08 21:16:53 svasquez Exp $ 
+# $Id: makefile,v 1.74 2009/07/24 19:40:54 feiliu Exp $ 
 
 ALL: build_system_tests
 
@@ -34,10 +34,10 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldBundleRedistArb2Arb \
             ESMF_FieldRegrid \
             ESMF_FieldLSSMM \
-            ESMF_FieldMeshSMM \
 	    ESMF_InternalStateEnsemble \
 	    ESMF_ArrayRedistOpenMP
-
+# Tests temporarily disabled
+#            ESMF_FieldMeshSMM \
 # Tests not yet ready
 #           ESMF_RowReduce \        gjt: currently the code depends on DELayout comms, but it should be covered/converted to newArray
 #           ESMF_MergeCoupling \
