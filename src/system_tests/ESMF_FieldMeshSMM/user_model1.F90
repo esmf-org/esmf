@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1 2009/07/07 14:04:23 feiliu Exp $
+! $Id: user_model1.F90,v 1.2 2009/07/24 18:46:16 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -127,11 +127,6 @@
         if (rc .ne. ESMF_SUCCESS) return
 
         srcfptr = 1
-
-        ! Set up a 2D real array
-        call ESMF_ArraySpecSet(arrayspec, rank=2, &
-                               typekind=ESMF_TYPEKIND_R8)
-        if (rc .ne. ESMF_SUCCESS) return
 
         call ESMF_StateAdd(exportState, humidity, rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
