@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.119 2009/06/19 04:02:56 theurich Exp $
+// $Id: ESMC_Base.C,v 1.120 2009/07/24 00:15:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.119 2009/06/19 04:02:56 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.120 2009/07/24 00:15:13 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -224,6 +224,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   this->vmID = new ESMCI::VMId;             // allocate space for this VMId
   *(this->vmID) = ESMCI::VMIdCreate(&localrc);// allocate internal VMId memory
   ESMCI::VMIdCopy(this->vmID, vmID);  // copy content of vmID to this->vmID.
+  vmIDCreator = true;  // Base object is responsible for vmID deallocation
 
 } // end ESMC_BaseSetVMId
 
@@ -895,6 +896,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   
   vmID = ESMCI::VM::getCurrentID(&rc);  // get vmID of current VM context
 //  ESMCI::VMIdPrint(vmID);
+  vmIDCreator = false;  // vmID points into global table
   ID = ++globalCount;
   refCount = 1;
   strcpy(className, "global");
@@ -932,6 +934,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   
   vmID = ESMCI::VM::getCurrentID(&rc);  // get vmID of current VM context
 //  ESMCI::VMIdPrint(vmID);
+  vmIDCreator = false;  // vmID points into global table
   ID = ++globalCount;
   refCount = 1;
   strcpy(className, superclass ? superclass : "global");
@@ -968,7 +971,13 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !DESCRIPTION:
 //
 //EOPI
-  int i;
+  int i, rc;
+  
+  if (vmIDCreator){
+    // Base object is responsible for vmID deallocation
+    ESMCI::VMIdDestroy(vmID, &rc);
+    delete vmID;
+  }
 
   baseStatus = ESMF_STATUS_INVALID;
   

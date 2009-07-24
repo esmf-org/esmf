@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.103 2009/06/19 04:02:56 theurich Exp $
+// $Id: ESMC_Base.h,v 1.104 2009/07/24 00:15:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -50,6 +50,7 @@ class ESMC_Base
   protected:
     int           ID;           // unique ID for any object in this VM context
     ESMCI::VMId   *vmID;        // unique vmID for any VM in the system
+    bool          vmIDCreator;  // Base object is responsible for deleting vmID
     int           refCount;     // number of references to this instance
     ESMC_Status   baseStatus;   // status of an instance of Base derived class
     char          baseName[ESMF_MAXSTR];    // object name, unique over class 
