@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.9 2009/02/16 19:14:31 rokuingh Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.10 2009/07/24 04:28:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.9 2009/02/16 19:14:31 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.10 2009/07/24 04:28:25 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -449,16 +449,16 @@ int ArrayBundle::redistStore(
       Array *dstArray = dstArraybundle->getArrayList()[i];
       if (matchList[i] < i){
         // src/dst Array pair matches previous pair in ArrayBundle
-        printf("localPet=%d, src/dst pair #%d does not require precompute\n",
-          localPet, i);
+//        printf("localPet=%d, src/dst pair #%d does not require precompute\n",
+//          localPet, i);
         // append the xxeSub to the xxe object with RRA offset info
         localrc = xxe->appendXxeSub(0x0, xxeSub[matchList[i]], rraShift);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
       }else{
-        // src/dst Array pair require separate precompute
-        printf("localPet=%d, src/dst pair #%d requires precompute\n",
-          localPet, i);
+        // src/dst Array pair does _not_ match any previous pair in ArrayBundle
+//        printf("localPet=%d, src/dst pair #%d requires precompute\n",
+//          localPet, i);
         ESMC_RouteHandle *rh;
         localrc = Array::redistStore(srcArray, dstArray, &rh,
           srcToDstTransposeMap, typekindFactor, factor);
@@ -470,7 +470,7 @@ int ArrayBundle::redistStore(
         localrc = rh->ESMC_RouteHandleSetType(ESMC_UNINITIALIZEDHANDLE);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
-        localrc = rh->ESMC_RouteHandleDestruct();
+        localrc = ESMC_RouteHandleDestroy(rh);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         // append the xxeSub to the xxe object with RRA offset info
@@ -736,7 +736,7 @@ int ArrayBundle::sparseMatMulStore(
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
       }else{
-        // src/dst Array pair require separate precompute
+        // src/dst Array pair does _not_ match any previous pair in ArrayBundle
 //        printf("localPet=%d, src/dst pair #%d requires precompute\n",
 //          localPet, i);
         ESMC_RouteHandle *rh;
@@ -750,7 +750,7 @@ int ArrayBundle::sparseMatMulStore(
         localrc = rh->ESMC_RouteHandleSetType(ESMC_UNINITIALIZEDHANDLE);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
-        localrc = rh->ESMC_RouteHandleDestruct();
+        localrc = ESMC_RouteHandleDestroy(rh);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         // append the xxeSub to the xxe object with RRA offset info
