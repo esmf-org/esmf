@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.3 2009/07/24 18:31:54 theurich Exp $
+! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.4 2009/07/24 18:35:45 theurich Exp $
 !
 ! System test code FieldMeshSMM
 !  Description on Sourceforge under System Test #79497
@@ -126,22 +126,22 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
     call ESMF_GridCompSetServices(comp1, userm1_register, rc=localrc)
+    print *, "Comp SetServices finished, rc= ", localrc
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
-    print *, "Comp SetServices finished, rc= ", rc
 
     call ESMF_GridCompSetServices(comp2, userm2_register, rc=localrc)
+    print *, "Comp SetServices finished, rc= ", localrc
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
-    print *, "Comp SetServices finished, rc= ", rc
 
     call ESMF_CplCompSetServices(cpl, usercpl_register, rc=localrc)
+    print *, "Comp SetServices finished, rc= ", localrc
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
-    print *, "Comp SetServices finished, rc= ", rc
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
