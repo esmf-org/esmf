@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.2 2009/07/16 20:57:32 feiliu Exp $
+! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.3 2009/07/24 18:31:54 theurich Exp $
 !
 ! System test code FieldMeshSMM
 !  Description on Sourceforge under System Test #79497
@@ -96,26 +96,26 @@
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
     comp1 = ESMF_GridCompCreate(name=cname1, rc=localrc)
+    print *, "Created component ", trim(cname1), " rc =", localrc
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
-    print *, "Created component ", trim(cname1), "rc =", rc
     !  call ESMF_GridCompPrint(comp1, "", rc)
 
     cname2 = "user model 2"
     comp2 = ESMF_GridCompCreate(name=cname2, rc=localrc)
+    print *, "Created component ", trim(cname2), " rc =", localrc
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
-    print *, "Created component ", trim(cname2), "rc =", rc
     !  call ESMF_GridCompPrint(comp2, "", rc)
 
     cplname = "user one-way coupler"
     cpl = ESMF_CplCompCreate(name=cplname, rc=localrc)
+    print *, "Created component ", trim(cplname), " rc =", localrc
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
-    print *, "Created component ", trim(cplname), ", rc =", rc
     !  call ESMF_CplCompPrint(cpl, "", rc)
 
     print *, "Comp Creates finished"
@@ -193,7 +193,7 @@
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
     call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, &
       userRc=userrc, rc=localrc)
-    print *, "Comp 1 Initialize finished, rc =", rc
+    print *, "Comp 1 Initialize finished, rc =", localrc
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -207,7 +207,7 @@
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
     call ESMF_GridCompInitialize(comp2, importState=c2imp, clock=clock, &
       userRc=userrc, rc=localrc)
-    print *, "Comp 2 Initialize finished, rc =", rc
+    print *, "Comp 2 Initialize finished, rc =", localrc
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -218,7 +218,7 @@
     ! note that the coupler's import is comp1's export
     call ESMF_CplCompInitialize(cpl, c1exp, c2imp, clock=clock, &
       userRc=userrc, rc=localrc)
-    print *, "Coupler Initialize finished, rc =", rc
+    print *, "Coupler Initialize finished, rc =", localrc
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -236,7 +236,7 @@
 
       call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, &
         userRc=userrc, rc=localrc)
-      print *, "Comp 1 Run returned, rc =", rc
+      print *, "Comp 1 Run returned, rc =", localrc
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -246,7 +246,7 @@
 
       call ESMF_CplCompRun(cpl, c1exp, c2imp, clock=clock, &
         userRc=userrc, rc=localrc)
-      print *, "Coupler Run returned, rc =", rc
+      print *, "Coupler Run returned, rc =", localrc
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -256,7 +256,7 @@
 
       call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, &
         userRc=userrc, rc=localrc)
-      print *, "Comp 2 Run returned, rc =", rc
+      print *, "Comp 2 Run returned, rc =", localrc
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -281,7 +281,7 @@
 
     call ESMF_GridCompFinalize(comp1, exportState=c1exp, clock=clock, &
       userRc=userrc, rc=localrc)
-    print *, "Comp 1 Finalize finished, rc =", rc
+    print *, "Comp 1 Finalize finished, rc =", localrc
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -291,7 +291,7 @@
 
     call ESMF_GridCompFinalize(comp2, importState=c2imp, clock=clock, &
       userRc=userrc, rc=localrc)
-    print *, "Comp 2 Finalize finished, rc =", rc
+    print *, "Comp 2 Finalize finished, rc =", localrc
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -301,7 +301,7 @@
 
     call ESMF_CplCompFinalize(cpl, c1exp, c2imp, clock=clock, &
       userRc=userrc, rc=localrc)
-    print *, "Coupler Finalize finished, rc =", rc
+    print *, "Coupler Finalize finished, rc =", localrc
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
