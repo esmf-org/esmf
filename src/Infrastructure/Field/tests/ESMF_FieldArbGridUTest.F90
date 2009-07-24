@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridUTest.F90,v 1.7 2009/05/20 17:16:21 peggyli Exp $
+! $Id: ESMF_FieldArbGridUTest.F90,v 1.8 2009/07/24 18:58:09 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -1199,7 +1199,66 @@
   call ESMF_FieldDestroy(field4, rc=localrc)
   call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
+  call ESMF_GridDestroy(grid2d, rc=localrc);
+  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! set the grid such that one PET has no localindices
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  if (myPet .eq. petCount-1) then
+	localCount = 0
+	deallocate(localIndices)
+	allocate(localIndices(localCount,2))
+  endif		
+
+  !NEX_UTest
+  write(name, *) "Create a Field using a 2D arb. grid with one PET without any grid points"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  correct=.true.
+  rc=ESMF_SUCCESS
+  grid2d = ESMF_GridCreateShapeTile("arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+    minIndex=(/1,1/), maxIndex=(/xdim, ydim/), &
+    localArbIndex=localIndices,localArbIndexCount=localCount,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_ArraySpecSet(arrayspec1D, rank=1, typekind=ESMF_TYPEKIND_R4, &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  field = ESMF_FieldCreate(grid2d, arrayspec1D, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_FieldGet(field, farray=fptr1d, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  field2 = ESMF_FieldCreateEmpty(rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_FieldSetCommit(field2, grid2d, farray=fptr1d, &
+      indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) correct = .false.
+
+  if (memDimCount .ne. 1) correct = .false.
+  if (dimCount .ne. 2) correct = .false.  
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
+  call ESMF_FieldDestroy(field, rc=localrc)
+  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rc)
+  call ESMF_FieldDestroy(field2, rc=localrc)
+  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rc)
+  call ESMF_GridDestroy(grid2d, rc=localrc)
+  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rc)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE)
