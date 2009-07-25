@@ -11,6 +11,8 @@
 #include <math.h>
 
 
+extern "C" {
+
 /*****************************************************************
  *   NAME: Create_BOX3D
  *
@@ -406,3 +408,5 @@ int Destroy_BOX3D(BOX3D **iotree)
 
   return 1;
 }
+
+} // extern "C"
