@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.22 2009/07/16 17:31:46 theurich Exp $
+# $Id: build_rules.mk,v 1.23 2009/07/25 04:08:14 theurich Exp $
 # 
 # SunOS.default.default
 #
@@ -106,14 +106,24 @@ ESMF_F90LINKRPATHS      =
 ESMF_CXXLINKRPATHS      =
 
 ############################################################
+# Determine where required libraries are located
+#
+ESMF_F90LINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.sunf90 "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)"))
+
+############################################################
+# Determine where required libraries are located
+#
+ESMF_CXXLINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.sunf90 "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)"))
+
+############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lfsu -lfui
+ESMF_F90LINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.sunf90 "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)")`
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lfsu -lfui
+ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.sunf90 "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)")`
 
 ############################################################
 # Blank out shared library options

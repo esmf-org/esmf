@@ -1,0 +1,5 @@
+#!/bin/sh
+# this script expects the Sun Pro f90 command (or a wrapper to f90, e.g. mpif90)
+# and returns the path of the system libraries
+$1 -dryrun $ESMF_DIR/scripts/hello.f90 2>&1 | grep "\-L" | nawk 'BEGIN { RS=" "}; /^-L/ ' | sed 's/-L//g' | sort -u | xargs
+rm -f a.out
