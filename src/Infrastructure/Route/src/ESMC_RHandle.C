@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.C,v 1.24 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMC_RHandle.C,v 1.25 2009/07/27 23:23:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-       "$Id: ESMC_RHandle.C,v 1.24 2009/01/21 21:38:01 cdeluca Exp $";
+       "$Id: ESMC_RHandle.C,v 1.25 2009/07/27 23:23:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -137,15 +137,7 @@
 //EOP
 
     htype = ESMC_UNINITIALIZEDHANDLE;
-    nroutes = 0;
-    rmapping = ESMC_UNKNOWNHANDLEMAP;
-    routes = NULL;
-    rmap = NULL;
-    ntvalues = 0;
-    tvmapping = ESMC_UNKNOWNHANDLEMAP;
-    tvalues = NULL;
-    tvmap = NULL;
-    label = NULL;
+    storage = NULL;
 
     return ESMF_SUCCESS;
 
@@ -181,216 +173,18 @@
     switch (htype){
       case ESMC_ARRAYXXE:
         ESMCI::Array::sparseMatMulRelease(this);
-        if (routes != NULL) delete [] routes;
         break;
       case ESMC_ARRAYBUNDLEXXE:
         ESMCI::ArrayBundle::sparseMatMulRelease(this);
-        if (routes != NULL) delete [] routes;
         break;
       default:
-        for (i=0; i<nroutes; i++) {
-          routes[i].ESMC_RouteDestruct();
-        }
-        if (routes != NULL) delete [] routes;
         break;
     }
 
-    for (i=0; i<ntvalues; i++) {
-       tvalues[i].ESMC_TransformValuesDestruct();
-    }
-    if (tvalues != NULL) delete [] tvalues;
-
-    if (rmap != NULL) delete [] rmap;
-    if (label != NULL) delete [] label;
-    if (tvmap != NULL) delete [] tvmap;
-    
     return ESMF_SUCCESS;
 
  } // end ESMC_RouteHandleDestruct
 
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_RouteHandleGet"
-//BOP
-// !IROUTINE:  ESMC_RouteHandleGet - Get multiple values in one call.
-//
-// !INTERFACE:
-    int ESMC_RouteHandle::ESMC_RouteHandleGet(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_HandleType *h,            // out - handle type
-      int *rt_count,                 // out - count of route tables
-      ESMC_HandleMapping *rmaptype,  // out - type of route map
-      int which_rt,                  // in - which route table to return
-      ESMC_Route **rh,               // out - route table
-      int *tv_count,                 // out - count of trans vals
-      ESMC_HandleMapping *tvmaptype, // out - type of trans vals map
-      int which_tv,                  // in - which transform values to return
-      ESMC_TransformValues **td,     // out - regrid weight info
-      char **l) const {              // out - additional name/label
-
-//
-// !DESCRIPTION:
-//    Query for multiple values in a single call.  (Inline calls exist
-//    to return individual items.)
-//
-//EOP
-
-    if (h) *h = htype;
-    if (rt_count) *rt_count = nroutes;
-    if (rmaptype) *rmaptype = rmapping;
-    if (rh) {
-        if (which_rt >= nroutes) *rh = NULL;
-        else *rh = &routes[which_rt];
-    }
-    if (tv_count) *tv_count = ntvalues;
-    if (tvmaptype) *tvmaptype = tvmapping;
-    if (td) {
-        if (which_tv >= ntvalues) *td = NULL;
-        else *td = &tvalues[which_tv];
-    }
-    if (l) *l = label;
-
-    return ESMF_SUCCESS;
-
-} // end ESMC_RouteHandleGet
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_RouteHandleSet"
-//BOP
-// !IROUTINE:  ESMC_RouteHandleSet - Set multiple values in one call.
-//
-// !INTERFACE:
-    int ESMC_RouteHandle::ESMC_RouteHandleSet(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_HandleType h,            // in - handle type
-      int rt_count,                 // in - how many rtables to allocate
-      ESMC_HandleMapping rmaptype,  // in - kind of route map
-      int which_rt,                 // in - which route to set
-      ESMC_Route *rh,               // in - route table list
-      int tv_count,                 // in - how many tvs to allocate
-      ESMC_HandleMapping tvmaptype, // in - kind of tv map
-      int which_tv,                 // in - which tv to set
-      ESMC_TransformValues *td,     // in - weights, whatever
-      char *l) {                    // in - additional name/label
-
-//
-// !DESCRIPTION:
-//    Set multiple values in a single call.  (Inline calls exist
-//    to set individual items.)   For this version of the call, all
-//    values must be set except for the route and td values themselves.
-//
-//EOP
-    int i, len;
-
-    htype = h;
-    nroutes = rt_count;
-    rmapping = rmaptype;
-    if (rt_count > 0) {
-        if (routes) delete [] routes;
-        routes = new ESMC_Route[rt_count];
-        if (rh) 
-            for (i=0; i<rt_count; i++)
-                routes[i] = rh[i];
-    }
-    ntvalues = tv_count;
-    tvmapping = tvmaptype;
-    if (tv_count > 0) {
-	if (tvalues) delete [] tvalues;
-        tvalues = new ESMC_TransformValues[tv_count]; 
-        if (td)
-            for (i=0; i<tv_count; i++)
-                tvalues[i] = td[i];
-    }
-    if (l) {
-        len = strlen(l) + 1; 
-        if (label) delete [] label;
-        label = new char[len];
-        strcpy(label, l);
-    }
-
-    return ESMF_SUCCESS;
-
-} // end ESMC_RouteHandleSet
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_RouteHandleSetRouteCount"
-//BOP
-// !IROUTINE:  ESMC_RouteHandleSetRouteCount - Set number of routes
-//
-// !INTERFACE:
-    int ESMC_RouteHandle::ESMC_RouteHandleSetRouteCount(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int rtcount) {                // in - how many rtables to allocate
-
-//
-// !DESCRIPTION:
-//    Set number of routes to allocate.
-//
-//EOP
-    int i;
-
-    nroutes = rtcount;
-    if (nroutes > 0) {
-        if (routes) delete [] routes;
-        routes = new ESMC_Route[nroutes];
-    } else {
-        if (routes) delete [] routes;
-        routes = NULL;
-    }
-
-    return ESMF_SUCCESS;
-
-} // end ESMC_RouteHandleSetRouteCount
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_RouteHandleSetTVCount"
-//BOP
-// !IROUTINE:  ESMC_RouteHandleSetTVCount - Set number of transform vals
-//
-// !INTERFACE:
-    int ESMC_RouteHandle::ESMC_RouteHandleSetTVCount(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int tvcount) {                // in - how many TVs to allocate
-
-//
-// !DESCRIPTION:
-//    Set number of transform value tables to allocate.
-//
-//EOP
-    int i;
-
-    ntvalues = tvcount;
-    if (ntvalues > 0) {
-	if (tvalues) delete [] tvalues;
-        tvalues = new ESMC_TransformValues[ntvalues]; 
-    } else {
-	if (tvalues) delete [] tvalues;
-        tvalues = NULL;
-    }
-
-    return ESMF_SUCCESS;
-
-} // end ESMC_RouteHandleSetTVCount
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -439,19 +233,6 @@
 //
 //EOP
     int i;
-    char msgbuf[ESMF_MAXSTR];
-  
-    sprintf(msgbuf, "RouteHandle: '%s'\n", label ? label : "(no name)");
-    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO,ESMC_CONTEXT);
-    printf(msgbuf);
-    printf(" number of routes = %d\n", nroutes);
-    for (i=0; i<nroutes; i++)
-	routes[i].ESMC_RoutePrint(options);
-    printf(" number of transform values = %d\n", ntvalues);
-    for (i=0; i<ntvalues; i++)
-        ; // tvalues[i].ESMC_TransformValuesPrint(options);
-    // TODO: this is commented out because TVPrint does not seem to be
-    // working.
 
     return ESMF_SUCCESS;
 
@@ -505,12 +286,3 @@
  
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-
- int ESMC_RouteHandle::ESMC_RouteHandleSetLabel(char *l) {
-        int len = strlen(l) + 1;
-        if (label != NULL) delete [] label;
-        label = new char[len]; 
-        strcpy(label, l);
-        return ESMF_SUCCESS;
-}
-

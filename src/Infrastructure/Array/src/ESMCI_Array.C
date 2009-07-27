@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.43 2009/07/21 21:48:47 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.44 2009/07/27 23:23:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.43 2009/07/21 21:48:47 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.44 2009/07/27 23:23:33 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -7710,23 +7710,7 @@ int sparseMatMulStoreEncodeXXE(
   *routehandle = ESMC_RouteHandleCreate(&localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
-  // todo: I have no idea what some of these settings do, just copied it for now
-  // todo: from what I saw being set in ESMF_IArrayHaloStoreIndex()
-  // todo: All I need here is a valid RouteHandle so I can attach an XXE object.
-  localrc =
-    (*routehandle)->ESMC_RouteHandleSetType(ESMC_ARRAYXXE);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-  localrc = (*routehandle)->ESMC_RouteHandleSetRouteCount(0);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-  localrc = (*routehandle)->ESMC_RouteHandleSetRMapType(ESMC_1TO1HANDLEMAP);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-  localrc = (*routehandle)->ESMC_RouteHandleSetTVCount(0);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-  localrc = (*routehandle)->ESMC_RouteHandleSetTVMapType(ESMC_NOHANDLEMAP);
+  localrc = (*routehandle)->ESMC_RouteHandleSetType(ESMC_ARRAYXXE);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 

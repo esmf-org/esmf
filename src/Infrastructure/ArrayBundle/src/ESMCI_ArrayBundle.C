@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.10 2009/07/24 04:28:25 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.11 2009/07/27 23:23:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.10 2009/07/24 04:28:25 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.11 2009/07/27 23:23:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -414,20 +414,7 @@ int ArrayBundle::redistStore(
     *routehandle = ESMC_RouteHandleCreate(&localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       &rc)) return rc;
-    // todo: I have no idea what some of these settings do
     localrc = (*routehandle)->ESMC_RouteHandleSetType(ESMC_ARRAYBUNDLEXXE);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      &rc)) return rc;
-    localrc = (*routehandle)->ESMC_RouteHandleSetRouteCount(0);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      &rc)) return rc;
-    localrc = (*routehandle)->ESMC_RouteHandleSetRMapType(ESMC_1TO1HANDLEMAP);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      &rc)) return rc;
-    localrc = (*routehandle)->ESMC_RouteHandleSetTVCount(0);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      &rc)) return rc;
-    localrc = (*routehandle)->ESMC_RouteHandleSetTVMapType(ESMC_NOHANDLEMAP);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       &rc)) return rc;
     // allocate XXE and attach to RouteHandle
@@ -694,20 +681,7 @@ int ArrayBundle::sparseMatMulStore(
     *routehandle = ESMC_RouteHandleCreate(&localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       &rc)) return rc;
-    // todo: I have no idea what some of these settings do
     localrc = (*routehandle)->ESMC_RouteHandleSetType(ESMC_ARRAYBUNDLEXXE);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      &rc)) return rc;
-    localrc = (*routehandle)->ESMC_RouteHandleSetRouteCount(0);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      &rc)) return rc;
-    localrc = (*routehandle)->ESMC_RouteHandleSetRMapType(ESMC_1TO1HANDLEMAP);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      &rc)) return rc;
-    localrc = (*routehandle)->ESMC_RouteHandleSetTVCount(0);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      &rc)) return rc;
-    localrc = (*routehandle)->ESMC_RouteHandleSetTVMapType(ESMC_NOHANDLEMAP);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       &rc)) return rc;
     // allocate XXE and attach to RouteHandle
