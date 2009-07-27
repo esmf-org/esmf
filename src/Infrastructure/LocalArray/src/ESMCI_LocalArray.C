@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.C,v 1.10 2009/06/19 04:04:15 theurich Exp $
+// $Id: ESMCI_LocalArray.C,v 1.11 2009/07/27 17:22:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.10 2009/06/19 04:04:15 theurich Exp $";
+static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.11 2009/07/27 17:22:28 theurich Exp $";
 //-----------------------------------------------------------------------------
 
   
@@ -1340,10 +1340,10 @@ int LocalArray::print(
           printf(msgbuf);
           for (i=0; i<imax; i++) {
               if (!opt_byline)
-                  sprintf(msgbuf,"(%2d) =  %ld\n", lbound[0]+i, 
+                  sprintf(msgbuf,"(%2d) =  %lld\n", lbound[0]+i, 
                          *((ESMC_I8 *)(this->base_addr) + i));
               else
-                  sprintf(msgbuf,"%ld ",
+                  sprintf(msgbuf,"%lld ",
                          *((ESMC_I8 *)(this->base_addr) + i));
               printf(msgbuf);
               if (!opt_all && (tcount > 22) && ((i+1)==10)) {
@@ -1371,11 +1371,11 @@ int LocalArray::print(
               }
               for (i=0; i<imax; i++) {
                   if (!opt_byline)
-                      sprintf(msgbuf,"(%2d,%2d) =  %ld\n", 
+                      sprintf(msgbuf,"(%2d,%2d) =  %lld\n", 
                         lbound[0]+i, lbound[1]+j, 
                         *((ESMC_I8 *)(this->base_addr) + i + j*imax) );
                   else
-                      sprintf(msgbuf,"%ld ", 
+                      sprintf(msgbuf,"%lld ", 
                            *((ESMC_I8 *)(this->base_addr) + i + j*imax) );
                   printf(msgbuf);
                   rcount++;
@@ -1409,12 +1409,12 @@ int LocalArray::print(
               }
               for (i=0; i<imax; i++) {
                   if (!opt_byline)
-                      sprintf(msgbuf,"(%2d,%2d,%2d) =  %ld\n", 
+                      sprintf(msgbuf,"(%2d,%2d,%2d) =  %lld\n", 
                              lbound[0]+i, lbound[1]+j, lbound[2]+k,
                              *((ESMC_I8 *)(this->base_addr) + 
                              i + j*imax + k*jmax*imax));
                   else
-                      sprintf(msgbuf,"%ld ", 
+                      sprintf(msgbuf,"%lld ", 
                              *((ESMC_I8 *)(this->base_addr) + 
                              i + j*imax + k*jmax*imax));
                   printf(msgbuf);
@@ -1641,7 +1641,7 @@ int LocalArray::write(
           imax = this->counts[0];
           tcount = imax;
           for (i=0; i<imax; i++) {
-              fprintf(ffile, "%ld\n", *((ESMC_I8 *)(this->base_addr) + i));
+              fprintf(ffile, "%lld\n", *((ESMC_I8 *)(this->base_addr) + i));
           }
           break;
         case 2:
@@ -1651,7 +1651,7 @@ int LocalArray::write(
           rcount = 0; 
           for (j=0; j<jmax; j++) {
               for (i=0; i<imax; i++) {
-                  fprintf(ffile, "%ld ",
+                  fprintf(ffile, "%lld ",
                               *((ESMC_I8 *)(this->base_addr) + i + j*imax) );
               }
               fprintf(ffile, "\n");
@@ -1666,7 +1666,7 @@ int LocalArray::write(
           for (k=0; k<kmax; k++) {
             for (j=0; j<jmax; j++) {
               for (i=0; i<imax; i++) {
-                  fprintf(ffile, "%ld ", 
+                  fprintf(ffile, "%lld ", 
                     *((ESMC_I8 *)(this->base_addr) + i + j*imax + k*jmax*imax));
               }
               fprintf(ffile, "\n");
