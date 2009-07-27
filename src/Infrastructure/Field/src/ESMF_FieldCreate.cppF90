@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.55 2009/07/22 12:22:20 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.56 2009/07/27 20:50:05 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.55 2009/07/22 12:22:20 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.56 2009/07/27 20:50:05 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -3368,7 +3368,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 ! Create an {\tt ESMF\_Field} and allocate space internally for an
 ! {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}. For an example and
 ! associated documentation using this method see Section 
-! \ref{sec:field:usage:create_grid_arrayspec}.
+! \ref{sec:field:usage:create_locs_arrayspec}.
 ! 
 ! The arguments are:
 ! \begin{description}
