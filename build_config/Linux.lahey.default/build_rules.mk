@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.28 2009/06/01 01:13:57 theurich Exp $
+# $Id: build_rules.mk,v 1.29 2009/07/27 21:11:10 theurich Exp $
 #
 # Linux.lahey.default
 #
@@ -84,14 +84,15 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
 ifeq ($(ESMF_PTHREADS),ON)
 ESMF_CXXCOMPILEOPTS += -pthread
 ESMF_CXXLINKOPTS    += -pthread
+ESMF_F90LINKOPTS    += -pthread
 endif
 
 ############################################################
 # OpenMP compiler and linker flags
 #
-ESMF_OPENMP_F90COMPILEOPTS += -openmp
+ESMF_OPENMP_F90COMPILEOPTS += --openmp
 ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
-ESMF_OPENMP_F90LINKOPTS    += -openmp
+ESMF_OPENMP_F90LINKOPTS    += -fopenmp
 ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################
@@ -103,26 +104,26 @@ ESMF_F90COMPILEFIXCPP    = --fix -Cpp
 ############################################################
 # Determine where lf95's libraries are located
 #
-ESMF_CXXLINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.lf95 $(ESMF_F90COMPILER)))
+ESMF_CXXLINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.lf95 "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)"))
 ESMF_RPATHPREFIXFIXED := $(ESMF_RPATHPREFIX)
-ESMF_CXXLINKRPATHS += $(addprefix $(ESMF_RPATHPREFIXFIXED), $(shell $(ESMF_DIR)/scripts/libpath.lf95 $(ESMF_F90COMPILER)))
+ESMF_CXXLINKRPATHS += $(addprefix $(ESMF_RPATHPREFIXFIXED), $(shell $(ESMF_DIR)/scripts/libpath.lf95 "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)"))
 
 ############################################################
 # Determine where lf95's libraries are located as to find it during runtime
 #
-ESMF_F90LINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.lf95 $(ESMF_F90COMPILER)))
+ESMF_F90LINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.lf95 "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)"))
 ESMF_RPATHPREFIXFIXED := $(ESMF_RPATHPREFIX)
-ESMF_F90LINKRPATHS += $(addprefix $(ESMF_RPATHPREFIXFIXED), $(shell $(ESMF_DIR)/scripts/libpath.lf95 $(ESMF_F90COMPILER)))
+ESMF_F90LINKRPATHS += $(addprefix $(ESMF_RPATHPREFIXFIXED), $(shell $(ESMF_DIR)/scripts/libpath.lf95 "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)"))
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.lf95 $(ESMF_F90COMPILER)) -ldl
+ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.lf95 "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)") -ldl $(ESMF_DIR)/scripts/MAIN__.C
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.lf95 $(ESMF_F90COMPILER)) $(shell $(ESMF_DIR)/scripts/f90rtobjects.lf95 $(ESMF_F90COMPILER)) -ldl
+ESMF_F90LINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.lf95 "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)") $(shell $(ESMF_DIR)/scripts/f90rtobjects.lf95 "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)") -ldl
 
 ############################################################
 # Shared library options
