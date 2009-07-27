@@ -1,10 +1,10 @@
-! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.4 2009/07/24 18:35:45 theurich Exp $
+! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.5 2009/07/27 15:03:33 feiliu Exp $
 !
 ! System test code FieldMeshSMM
 !  Description on Sourceforge under System Test #79497
 
 !-------------------------------------------------------------------------
-!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
+!EremoveSMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !BOP
