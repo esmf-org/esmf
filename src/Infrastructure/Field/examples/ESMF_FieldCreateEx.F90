@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.80 2009/06/19 17:42:22 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.81 2009/07/27 20:49:08 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -38,7 +38,21 @@
     type(ESMF_VM)                   :: vm
     type(ESMF_Field)                :: field
     type(ESMF_Grid)                 :: grid
-    integer                         :: i, k
+    type(ESMF_DistGrid)             :: distgrid
+    type(ESMF_LocStream)            :: locs
+    type(ESMF_Mesh)                 :: mesh
+    type(ESMF_Arrayspec)            :: arrayspec
+    integer                         :: i, j, k
+    integer                                     :: n_node, n_elem, l
+    integer, allocatable :: nodeId(:)
+    real(ESMF_KIND_R8), allocatable :: nodeCoord(:)
+    integer, allocatable :: nodeOwner(:)
+
+    integer, allocatable :: elemId(:)
+    integer, allocatable :: elemType(:)
+    integer, allocatable :: elemConn(:)
+    integer              :: conn(16) = (/1,2,5,4,2,3,6,5,4,5,8,7,5,6,9,8/)
+
     integer                         :: finalrc, rc
 
 !   !Set finalrc to success
@@ -451,6 +465,100 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray3d)
 
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Create a Field from a LocStream}
+!\label{sec:field:usage:create_locs_arrayspec}
+! 
+! In this example, an {\tt ESMF\_Field} is created from an {\tt ESMF\_LocStream} 
+! and an {\tt ESMF\_Arrayspec}.
+! The location stream object is created from a distgrid uniformly distributed
+! in a 1 dimensional space on 4 DEs. The arrayspec is 1 dimensional. 
+!
+!EOE  
+!BOC
+    distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/16/), &
+        regDecomp=(/4/), &
+        rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    locs = ESMF_LocStreamCreate(distgrid=distgrid, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    field = ESMF_FieldCreate(locs, arrayspec, &
+        rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!EOC
+    print *, "Field Create from a LocStream and an Arrayspec returned"
+    call ESMF_FieldDestroy(field,rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_LocStreamDestroy(locs,rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_DistGridDestroy(distgrid,rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+! TODO:
+!  enable this example when mesh mpi code is reworked
+!!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!!-------------------------------- Example -----------------------------
+!!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!!B-OE
+!!\subsubsection{Create a Field from a Mesh}
+!!\label{sec:field:usage:create_mesh_arrayspec}
+!! 
+!! In this example, an {\tt ESMF\_Field} is created from an {\tt ESMF\_Mesh} 
+!! and an {\tt ESMF\_Arrayspec}.
+!! The mesh object is on a Euclidean surface that maps to a 2x2 rectangular
+!! grid with 4 elements and 9 vertices. The nodal space is represented by
+!! a distgrid with 16 indices and the element space is represented by a
+!! distgrid with 9 indices internally.
+!!
+!!E-OE  
+!!B-OC
+!        ! create 2x2 mesh on a Euclidean surface and Fields
+!    n_node = 9
+!    n_elem = 4
+!    
+!    allocate(nodeId(n_node), nodeCoord(2*n_node), nodeOwner(n_node))
+!    allocate(elemId(n_elem), elemType(n_elem), elemConn(n_elem*4))
+!
+!    do i = 1, n_node
+!        nodeId(i) = i
+!    enddo
+!    do i = 1, 3
+!        do j = 1, 3
+!            l = (i-1)*3+j
+!            nodeCoord(2*l-1) = i
+!            nodeCoord(2*l) = j
+!        enddo
+!    enddo
+!    nodeOwner = 0
+!    do i = 1, n_elem
+!        elemId(i) = i
+!        elemType(i) = 9             ! Quard
+!    enddo
+!    elemConn = conn
+!
+!    mesh = ESMF_MeshCreate(2,2,nodeId, nodeCoord, nodeOwner, elemId, elemType,elemConn,rc)
+!    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!
+!    call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
+!    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!
+!    field = ESMF_FieldCreate(mesh, arrayspec, &
+!        rc=rc)
+!    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!!E-OC
+!    print *, "Field Create from a Mesh and an Arrayspec returned"
+!    call ESMF_FieldDestroy(field,rc=rc)
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!    call ESMF_MeshDestroy(mesh,rc=rc)
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !-------------------------------------------------------------------------
 ! Destroy objects
     call ESMF_GridDestroy(grid, rc=rc)
