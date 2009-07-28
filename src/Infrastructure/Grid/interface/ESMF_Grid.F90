@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.123 2009/07/27 19:35:00 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.124 2009/07/28 19:54:35 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2216,9 +2216,8 @@ end subroutine ESMF_GridConvertIndex
 ! This is the most general form of creation for an {\tt ESMF\_Grid}
 ! object. It allows the user to fully specify the topology and index space
 ! using the DistGrid methods and then build a grid out
-! of the resulting DistGrid. Note that as the Grid created by this call uses the 
-! {\tt distgrid} as a description of its index space, the resulting Grid will have exactly the same 
-! dimCount as {\tt distgrid}. The {\tt distgridToGridMap} argument
+! of the resulting DistGrid. Note that since the Grid created by this call uses {\tt distgrid} as a description of its index space, the resulting Grid will have exactly the same 
+! number of dimensions (i.e. the same dimCount) as {\tt distgrid}. The {\tt distgridToGridMap} argument
 ! specifies how the Grid dimensions are mapped to the {\tt distgrid}. 
 ! The {\tt coordDimCount} and {\tt coordDimMap} arguments
 ! allow the user to specify how the coordinate arrays should map to the grid
