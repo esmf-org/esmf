@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.21 2009/07/28 17:34:41 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.22 2009/07/28 23:08:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -608,7 +608,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_arrayrediststore)(ESMCI::Array **srcArray,
-    ESMCI::Array **dstArray, ESMC_RouteHandle **routehandle, 
+    ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
     ESMCI::InterfaceInt **srcToDstTransposeMap, ESMC_TypeKind *typekind,
     void *factor, int *rc){
 #undef  ESMC_METHOD
@@ -624,7 +624,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_arrayrediststorenf)(ESMCI::Array **srcArray,
-    ESMCI::Array **dstArray, ESMC_RouteHandle **routehandle, 
+    ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
     ESMCI::InterfaceInt **srcToDstTransposeMap, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayrediststorenf()"
@@ -638,7 +638,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_arrayredist)(ESMCI::Array **srcArray, ESMCI::Array **dstArray,
-    ESMC_RouteHandle **routehandle, ESMC_Logical *checkflag, int *rc){
+    ESMCI::RouteHandle **routehandle, ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayredist()"
     // Initialize return code; assume routine not implemented
@@ -651,7 +651,7 @@ extern "C" {
   }
   
   void FTN(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
-    ESMCI::Array **dstArray, ESMC_RouteHandle **routehandle, 
+    ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
     ESMC_TypeKind *typekind, void *factorList, int *factorListCount,
     ESMCI::InterfaceInt **factorIndexList, int *rc){
 #undef  ESMC_METHOD
@@ -667,7 +667,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_arraysmmstorenf)(ESMCI::Array **srcArray,
-    ESMCI::Array **dstArray, ESMC_RouteHandle **routehandle, int *rc){
+    ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysmmstorenf()"
     // Initialize return code; assume routine not implemented
@@ -680,7 +680,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_arraysmm)(ESMCI::Array **srcArray,
-    ESMCI::Array **dstArray, ESMC_RouteHandle **routehandle,
+    ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
     ESMC_RegionFlag *zeroflag, ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysmm()"

@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.45 2009/07/27 23:23:34 theurich Exp $
+! $Id: ESMF_RHandle.F90,v 1.46 2009/07/28 23:08:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -10,103 +10,100 @@
 !
 !==============================================================================
 #define ESMF_FILENAME "ESMF_RHandle.F90"
+!==============================================================================
 !
-!     ESMF RHandle Module
-      module ESMF_RHandleMod
+! ESMF RHandle Module
+module ESMF_RHandleMod
 !
 !==============================================================================
 !
-! This file contains the F90 wrapper code for the C++ implementation of
+! This file contains the Fortran wrapper code for the C++ implementation of
 !  the RouteHandle class.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include "ESMF.h"
+
 !==============================================================================
 !BOPI
-! !MODULE: ESMF_RHandleMod - Manage RouteHandles which describe Routes
+! !MODULE: ESMF_RHandleMod
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the F90 wrapper code for the C++
-!  implementation of the {\tt ESMF\_RouteHandle} class.  This class
-!  contains the handle information for precomputed information needed to
-!  execute an {\tt ESMF\_Route} operation.
+!   Fortran API wrapper of C++ implementation of RouteHandle
 !
 !------------------------------------------------------------------------------
+
 ! !USES:
-      use ESMF_UtilTypesMod
-      use ESMF_InitMacrosMod
-      use ESMF_LogErrMod
-      use ESMF_BaseMod
-      use ESMF_LocalArrayMod
-      implicit none
+  use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_InitMacrosMod    ! ESMF initializer macros
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error handling
+  
+  implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-      private
+  private
 
 !------------------------------------------------------------------------------
-!     !  ESMF_RouteHandleType
-!     !  MUST STAY IN SYNC WITH C++ header file
+! !  ESMF_RouteHandleType
+! !  MUST STAY IN SYNC WITH C++ header file
 !
-      integer, parameter :: ESMF_UNINITIALIZEDHANDLE=1, &
-                            ESMF_ARRAYSPARSEMATMULHANDLE=2
+  integer, parameter :: ESMF_UNINITIALIZEDHANDLE=1, &
+                        ESMF_ARRAYSPARSEMATMULHANDLE=2
 
 !------------------------------------------------------------------------------
-!     !  ESMF_RouteHandle
+! !  ESMF_RouteHandle
 !
-!     ! Defined on the C++ side, this structure holds one or more routes and
-!     ! the required transform values to perform a regrid.
-
-      type ESMF_RouteHandle
-      sequence
-      private
-        type(ESMF_Pointer) :: this    ! opaque pointer to C++ class data
-	ESMF_INIT_DECLARE
-      end type
+  type ESMF_RouteHandle
+    sequence
+    private
+    type(ESMF_Pointer) :: this    ! opaque pointer to C++ class data
+    ESMF_INIT_DECLARE
+  end type
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_RouteHandle
-      public ESMF_UNINITIALIZEDHANDLE, ESMF_ARRAYSPARSEMATMULHANDLE
+  public ESMF_RouteHandle
+  public ESMF_UNINITIALIZEDHANDLE, ESMF_ARRAYSPARSEMATMULHANDLE
 
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
+  public ESMF_RouteHandleGetInit
+  public ESMF_RouteHandleSetInitCreated
 
-      public ESMF_RouteHandleGetInit
-      public ESMF_RouteHandleSetInitCreated
+  public ESMF_RouteHandleCreate
+  public ESMF_RouteHandleDestroy
+  
+  public ESMF_RouteHandleRelease
 
-      public ESMF_RouteHandleCreate
-      public ESMF_RouteHandleDestroy
-      
-      public ESMF_RouteHandleRelease
-
-      public ESMF_RouteHandleGet
-      public ESMF_RouteHandleSet
+  public ESMF_RouteHandleGet
+  public ESMF_RouteHandleSet
  
-      public ESMF_RouteHandleValidate
-      public ESMF_RouteHandlePrint
+  public ESMF_RouteHandleValidate
+  public ESMF_RouteHandlePrint
  
 !EOPI
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.45 2009/07/27 23:23:34 theurich Exp $'
+  character(*), parameter, private :: version = &
+    '$Id: ESMF_RHandle.F90,v 1.46 2009/07/28 23:08:08 theurich Exp $'
 
-!==============================================================================
 
-      contains
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!------------------------------------------------------------------------------
-!==============================================================================
-!
-! RouteHandle GetInit function
-!
-!------------------------------------------------------------------------------
+contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RouteHandleGetInit"
@@ -114,34 +111,35 @@
 ! !IROUTINE: ESMF_RouteHandleGetInit - Get the Init status 
 
 ! !INTERFACE:
-      function ESMF_RouteHandleGetInit(d)
+  function ESMF_RouteHandleGetInit(d)
 !
 ! !RETURN VALUE:
-      ESMF_INIT_TYPE :: ESMF_RouteHandleGetInit
+    ESMF_INIT_TYPE :: ESMF_RouteHandleGetInit
 !
 ! !ARGUMENTS:
-      type(ESMF_RouteHandle), intent(in),optional :: d
+    type(ESMF_RouteHandle), intent(in),optional :: d
 !
 ! !DESCRIPTION:
-!     Get the init status
+!   Get the init status
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[d] 
-!          The class to be queried 
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[d] 
+!     The class to be queried 
+!   \end{description}
 !
 !EOPI
- 
-  if (present(d)) then
-     ESMF_RouteHandleGetInit=ESMF_INIT_GET(d)
-  else
-     ESMF_RouteHandleGetInit=ESMF_INIT_CREATED
-  endif 
-end function ESMF_RouteHandleGetInit
+!------------------------------------------------------------------------------
+    if (present(d)) then
+      ESMF_RouteHandleGetInit=ESMF_INIT_GET(d)
+    else
+      ESMF_RouteHandleGetInit=ESMF_INIT_CREATED
+    endif 
+  end function ESMF_RouteHandleGetInit
+!------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-public method -------------------------------
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RouteHandleSetInitCreated()"
 !BOPI
@@ -156,35 +154,31 @@ end function ESMF_RouteHandleGetInit
 !         
 !
 ! !DESCRIPTION:
-!      Set init code in RouteHandle object to "CREATED".
+!   Set init code in RouteHandle object to "CREATED".
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[rh] 
-!          Specified {\tt ESMF\_RouteHandle} object.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[rh] 
+!     Specified {\tt ESMF\_RouteHandle} object.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
-
-    ! Assume failure until success
+    ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Set init code
     ESMF_INIT_SET_CREATED(rh)
 
-    ! Return success
+    ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_RouteHandleSetInitCreated
 !------------------------------------------------------------------------------
 
-!==============================================================================
-!
-! This section includes the RouteHandle methods.
-!
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RouteHandleCreate"
@@ -192,51 +186,51 @@ end function ESMF_RouteHandleGetInit
 ! !IROUTINE: ESMF_RouteHandleCreate - Create a new RouteHandle
 
 ! !INTERFACE:
-      function ESMF_RouteHandleCreate(rc)
+  function ESMF_RouteHandleCreate(rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_RouteHandle) :: ESMF_RouteHandleCreate
+    type(ESMF_RouteHandle) :: ESMF_RouteHandleCreate
 !
 ! !ARGUMENTS:
-      integer, intent(out), optional :: rc               
+    integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt ESMF\_RouteHandle} object and 
-!     constructs its internals.
+!   Allocates memory for a new {\tt ESMF\_RouteHandle} object and 
+!   constructs its internals.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_RouteHandle)  :: rhandle
 
-        ! local variables
-        type (ESMF_RouteHandle) :: rhandle     ! new C++ RouteHandle
-        integer :: status                  ! local error status
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    rhandle%this = ESMF_NULL_POINTER
 
-        ! Set initial values
-        status = ESMF_RC_NOT_IMPL
-        rhandle%this = ESMF_NULL_POINTER
+    ! Call C++ create code
+    call c_ESMC_RouteHandleCreate(rhandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
 
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    ! Set return values
+    ESMF_RouteHandleCreate = rhandle
 
-        ! Call C++ create code
-        call c_ESMC_RouteHandleCreate(rhandle, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+    ESMF_INIT_SET_CREATED(ESMF_RouteHandleCreate)
 
-        ! Set return values
-        ESMF_RouteHandleCreate = rhandle
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
-        if (present(rc)) rc = ESMF_SUCCESS
+  end function ESMF_RouteHandleCreate
+!------------------------------------------------------------------------------
 
-	ESMF_INIT_SET_CREATED(ESMF_RouteHandleCreate)
-
-        end function ESMF_RouteHandleCreate
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -245,58 +239,56 @@ end function ESMF_RouteHandleGetInit
 ! !IROUTINE: ESMF_RouteHandleDestroy - Free all resources associated with a RouteHandle 
 
 ! !INTERFACE:
-      subroutine ESMF_RouteHandleDestroy(rhandle, rc)
+  subroutine ESMF_RouteHandleDestroy(rhandle, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_RouteHandle), intent(inout) :: rhandle   
-      integer, intent(out), optional :: rc        
+    type(ESMF_RouteHandle), intent(inout) :: rhandle   
+    integer, intent(out), optional :: rc        
 !
 ! !DESCRIPTION:
-!     Destroys an {\tt ESMF\_RouteHandle} object previously allocated
-!     via an {\tt ESMF_RouteHandleCreate()} routine.
+!   Destroys an {\tt ESMF\_RouteHandle} object previously allocated
+!   via an {\tt ESMF_RouteHandleCreate()} routine.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[rhandle] 
-!          The {\tt ESMF\_RouteHandle} to be destroyed.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[rhandle] 
+!     The {\tt ESMF\_RouteHandle} to be destroyed.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
 
-        ! local variables
-        integer :: status                  ! local error status
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-        ! Set initial values
-        status = ESMF_RC_NOT_IMPL
+    ! check input variable
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
 
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    ! was handle already destroyed?
+    if (rhandle%this .eq. ESMF_NULL_POINTER) then
+      if (present(rc)) rc = ESMF_SUCCESS
+      return
+    endif 
 
-        ! check input variable
-        ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+    ! Call C++ destroy code
+    call c_ESMC_RouteHandleDestroy(rhandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
 
-        ! was handle already destroyed?
-        if (rhandle%this .eq. ESMF_NULL_POINTER) then
-            if (present(rc)) rc = ESMF_SUCCESS
-            return
-        endif 
+    ! nullify pointer
+    rhandle%this = ESMF_NULL_POINTER
+    ESMF_INIT_SET_DELETED(rhandle)
+    
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
-        ! Call C++ destroy code
-        call c_ESMC_RouteHandleDestroy(rhandle, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        ! nullify pointer
-        rhandle%this = ESMF_NULL_POINTER
-
-        if (present(rc)) rc = ESMF_SUCCESS
-
-	ESMF_INIT_SET_DELETED(rhandle)
-
-        end subroutine ESMF_RouteHandleDestroy
+  end subroutine ESMF_RouteHandleDestroy
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
@@ -306,41 +298,44 @@ end function ESMF_RouteHandleGetInit
 ! !IROUTINE: ESMF_RouteHandleRelease - Release all RouteHandle resources
 
 ! !INTERFACE:
-      subroutine ESMF_RouteHandleRelease(routehandle, rc)
+  subroutine ESMF_RouteHandleRelease(routehandle, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_RouteHandle), intent(inout) :: routehandle   
-      integer, intent(out), optional :: rc        
+    type(ESMF_RouteHandle), intent(inout) :: routehandle   
+    integer, intent(out), optional :: rc        
 !
 ! !DESCRIPTION:
-!     Same as {\tt ESMF\_RouteHandleDestroy}.
+!   Same as {\tt ESMF\_RouteHandleDestroy}.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[routehandle] 
-!          The {\tt ESMF\_RouteHandle} to be released.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[routehandle] 
+!     The {\tt ESMF\_RouteHandle} to be released.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOPI
-        ! local variables
-        integer :: status                  ! local error status
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
 
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-        status = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! check input variable
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
-        ! check input variable
-        ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
+    call ESMF_RouteHandleDestroy(routehandle, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc))  return
 
-        call ESMF_RouteHandleDestroy(routehandle, rc=status)
-        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-        if (present(rc)) rc = ESMF_SUCCESS
-        end subroutine ESMF_RouteHandleRelease
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_RouteHandleRelease
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
@@ -350,13 +345,13 @@ end function ESMF_RouteHandleGetInit
 ! !IROUTINE: ESMF_RouteHandleGet - Get values from a RouteHandle
 
 ! !INTERFACE:
-      subroutine ESMF_RouteHandleGet(rhandle, htype, name, rc)
+  subroutine ESMF_RouteHandleGet(rhandle, htype, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_RouteHandle), intent(in) :: rhandle
-      integer, intent(out), optional :: htype
-      character(len=*), intent(out), optional :: name
-      integer, intent(out), optional :: rc             
+    type(ESMF_RouteHandle), intent(in) :: rhandle
+    integer, intent(out), optional :: htype
+    character(len=*), intent(out), optional :: name
+    integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -367,9 +362,7 @@ end function ESMF_RouteHandleGetInit
 !     \item[rhandle] 
 !          {\tt ESMF\_RouteHandle} to be queried.
 !     \item[{[htype]}]
-!          Route type, e.g. halo, data redistribution, regrid.  Valid return
-!          values are {\tt ESMF\_HALOHANDLE}, {\tt ESMF\_REDISTHANDLE},
-!          {\tt ESMF\_REGRIDHANDLE}, or {\tt ESMF\_UNINITIALISEDHANDLE}.
+!          Route type.
 !     \item [{[name]}]
 !          Name of the RouteHandle object.
 !     \item[{[rc]}] 
@@ -377,40 +370,35 @@ end function ESMF_RouteHandleGetInit
 !     \end{description}
 !
 !EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
 
-        ! local variables
-        integer :: status                  ! local error status
-        integer :: myhtype
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-        ! Set initial values
-        status = ESMF_RC_NOT_IMPL
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
 
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    if (present(htype)) then
+      call c_ESMC_RouteHandleGetType(rhandle, htype, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+    endif
 
-        ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
-
-        ! Call C++  code
-        call c_ESMC_RouteHandleGetInfo(rhandle, myhtype, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        ! query for route type
-        if (present(htype)) then
-            htype = myhtype    
-        endif
-
-        ! Special call to get name out of Base class
-        if (present(name)) then
-          call c_ESMC_GetName(rhandle, name, status)
-          if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
+    if (present(name)) then
+      call c_ESMC_GetName(rhandle, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
     
-        if (present(rc)) rc = ESMF_SUCCESS
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_RouteHandleGet
+  end subroutine ESMF_RouteHandleGet
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -419,61 +407,60 @@ end function ESMF_RouteHandleGetInit
 ! !IROUTINE: ESMF_RouteHandleSet - Set values in a RouteHandle
 
 ! !INTERFACE:
-      subroutine ESMF_RouteHandleSet(rhandle, htype, name, rc)
+  subroutine ESMF_RouteHandleSet(rhandle, htype, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_RouteHandle), intent(in) :: rhandle
-      integer, intent(in), optional :: htype
-      character(len = *), intent(in),   optional  :: name    
-      integer, intent(out), optional :: rc            
+    type(ESMF_RouteHandle), intent(in) :: rhandle
+    integer, intent(in), optional :: htype
+    character(len = *), intent(in),   optional  :: name    
+    integer, intent(out), optional :: rc            
 
 !
 ! !DESCRIPTION:
-!     Set an {\tt ESMF\_RouteHandle} attribute with the given value.
+!   Set an {\tt ESMF\_RouteHandle} attribute with the given value.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[rhandle] 
-!          {\tt ESMF\_RouteHandle} to be modified.
-!     \item[{[htype]}]
-!          Route type, e.g. halo, data redistribution, regrid.  Valid 
-!          values are {\tt ESMF\_HALOHANDLE}, {\tt ESMF\_REDISTHANDLE},
-!          {\tt ESMF\_REGRIDHANDLE}, or {\tt ESMF\_UNINITIALISEDHANDLE}.
-!     \item [{[name]}]
-!          The RouteHandle name.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[rhandle] 
+!     {\tt ESMF\_RouteHandle} to be modified.
+!   \item[{[htype]}]
+!     Route type.
+!   \item [{[name]}]
+!     The RouteHandle name.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
 
-        ! local variables
-        integer :: status                  ! local error status
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-        ! Set initial values
-        status = ESMF_RC_NOT_IMPL
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+    
+    if (present(htype)) then
+      call c_ESMC_RouteHandleSetType(rhandle, htype, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+    endif
 
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    if (present(name)) then
+      call c_ESMC_SetName(rhandle, "RouteHandle", name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
-        ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
-        if (present(htype)) then
-            call c_ESMC_RouteHandleSetType(rhandle, htype, status)
-            if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-        endif
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
-        ! Set the name in Base object
-        if (present(name)) then
-          call c_ESMC_SetName(rhandle, "RouteHandle", name, status)
-          if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
+  end subroutine ESMF_RouteHandleSet
+!------------------------------------------------------------------------------
 
-        if (present(rc)) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_RouteHandleSet
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -482,61 +469,60 @@ end function ESMF_RouteHandleGetInit
 ! !IROUTINE: ESMF_RouteHandleValidate - Check internal consistency of a RouteHandle
 
 ! !INTERFACE:
-      subroutine ESMF_RouteHandleValidate(rhandle, options, rc)
+  subroutine ESMF_RouteHandleValidate(rhandle, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_RouteHandle), intent(in) :: rhandle       
-      character (len=*), intent(in), optional :: options    
-      integer, intent(out), optional :: rc            
+    type(ESMF_RouteHandle), intent(in) :: rhandle       
+    character (len=*), intent(in), optional :: options    
+    integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
-!     Validates that an {\tt ESMF\_RouteHandle} is internally consistent.
+!   Validates that an {\tt ESMF\_RouteHandle} is internally consistent.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[rhandle] 
-!          {\tt ESMF\_RouteHandle} to be queried.
-!     \item[{[options]}]
-!          Validation options.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[rhandle] 
+!     {\tt ESMF\_RouteHandle} to be queried.
+!   \item[{[options]}]
+!     Validation options.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
 
-       character (len=6) :: defaultopts      ! default validate options
-       integer :: status                     ! local error status
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-       ! Initialize return code; assume failure until success is certain       
-       status = ESMF_RC_NOT_IMPL
-       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
 
-       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+    ! See if this has been created yet or not.
+    if ((rhandle%this).eq.ESMF_NULL_POINTER) then
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      return
+    endif
 
-       defaultopts = "quick"
+    ! TODO: the following code is commented out because the C-side
+    !       validate routine is empty
+    !if(present(options)) then
+    !    call c_ESMC_RouteHandleValidate(rhandle, options, localrc)   
+    !else
+    !    call c_ESMC_RouteHandleValidate(rhandle, defaultopts, localrc)
+    !endif
 
-       ! See if this has been created yet or not.
-       if ((rhandle%this).eq.ESMF_NULL_POINTER) then
-         if (present(rc)) rc = ESMF_RC_NOT_IMPL
-         return
-       endif
+    !if (ESMF_LogMsgFoundError(localrc, &
+    !                           ESMF_ERR_PASSTHRU, &
+    !                           ESMF_CONTEXT, rc)) return
 
-       ! TODO: the following code is commented out because the C-side
-       !       validate routine is empty
-       !if(present(options)) then
-       !    call c_ESMC_RouteHandleValidate(rhandle, options, status)   
-       !else
-       !    call c_ESMC_RouteHandleValidate(rhandle, defaultopts, status)
-       !endif
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
-       !if (ESMF_LogMsgFoundError(status, &
-       !                           ESMF_ERR_PASSTHRU, &
-       !                           ESMF_CONTEXT, rc)) return
+  end subroutine ESMF_RouteHandleValidate
+!------------------------------------------------------------------------------
 
-       ! Set return values
-       if (present(rc)) rc = ESMF_SUCCESS
-
-       end subroutine ESMF_RouteHandleValidate
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -573,33 +559,32 @@ end function ESMF_RouteHandleGetInit
 !     \end{description}
 !
 !EOPI
+!------------------------------------------------------------------------------
+    character (len=6) :: defaultopts      ! default print options
+    integer                 :: localrc      ! local return code
 
-       character (len=6) :: defaultopts      ! default print options
-       integer :: status                     ! local error status
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-       ! Initialize return code; assume failure until success is certain       
-       status = ESMF_RC_NOT_IMPL
-       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
 
-       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+    defaultopts = "brief"
 
-       defaultopts = "brief"
+    if(present(options)) then
+      call c_ESMC_RouteHandlePrint(rhandle, options, localrc)   
+    else
+      call c_ESMC_RouteHandlePrint(rhandle, defaultopts, localrc)
+    endif
 
-       if(present(options)) then
-           call c_ESMC_RouteHandlePrint(rhandle, options, status)   
-       else
-           call c_ESMC_RouteHandlePrint(rhandle, defaultopts, status)
-       endif
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
 
-       if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-       ! Set return values
-       if (present(rc)) rc = ESMF_SUCCESS
+    ! Set return values
+    if (present(rc)) rc = ESMF_SUCCESS
  
-       end subroutine ESMF_RouteHandlePrint
-
+  end subroutine ESMF_RouteHandlePrint
 !------------------------------------------------------------------------------
 
-       end module ESMF_RHandleMod
+end module ESMF_RHandleMod

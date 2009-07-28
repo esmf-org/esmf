@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.8 2009/07/28 17:34:42 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.9 2009/07/28 23:08:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -116,7 +116,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_arraybundlerediststore)(ESMCI::ArrayBundle **srcArraybundle,
-    ESMCI::ArrayBundle **dstArraybundle, ESMC_RouteHandle **routehandle, 
+    ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle, 
     ESMCI::InterfaceInt **srcToDstTransposeMap, ESMC_TypeKind *typekind,
     void *factor, int *rc){
 #undef  ESMC_METHOD
@@ -132,7 +132,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_arraybundlerediststorenf)(ESMCI::ArrayBundle **srcArraybundle,
-    ESMCI::ArrayBundle **dstArraybundle, ESMC_RouteHandle **routehandle,
+    ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
     ESMCI::InterfaceInt **srcToDstTransposeMap, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlerediststorenf()"
@@ -146,7 +146,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_arraybundleredist)(ESMCI::ArrayBundle **srcArraybundle,
-    ESMCI::ArrayBundle **dstArraybundle, ESMC_RouteHandle **routehandle,
+    ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
     ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundleredist()"
@@ -160,7 +160,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_arraybundlesmmstore)(ESMCI::ArrayBundle **srcArraybundle,
-    ESMCI::ArrayBundle **dstArraybundle, ESMC_RouteHandle **routehandle, 
+    ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle, 
     ESMC_TypeKind *typekind, void *factorList, int *factorListCount,
     ESMCI::InterfaceInt **factorIndexList, int *rc){
 #undef  ESMC_METHOD
@@ -176,7 +176,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_arraybundlesmmstorenf)(ESMCI::ArrayBundle **srcArraybundle,
-    ESMCI::ArrayBundle **dstArraybundle, ESMC_RouteHandle **routehandle,
+    ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmmstorenf()"
@@ -190,7 +190,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_arraybundlesmm)(ESMCI::ArrayBundle **srcArraybundle,
-    ESMCI::ArrayBundle **dstArraybundle, ESMC_RouteHandle **routehandle,
+    ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
     ESMC_RegionFlag *zeroflag, ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmm()"

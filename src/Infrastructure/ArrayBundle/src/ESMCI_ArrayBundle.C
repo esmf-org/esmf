@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.11 2009/07/27 23:23:34 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.12 2009/07/28 23:08:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.11 2009/07/27 23:23:34 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.12 2009/07/28 23:08:06 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -319,7 +319,7 @@ int ArrayBundle::redistStore(
 //
   ArrayBundle *srcArraybundle,          // in    - source ArrayBundle
   ArrayBundle *dstArraybundle,          // in    - destination ArrayBundle
-  ESMC_RouteHandle **routehandle,       // inout - handle to precomputed comm
+  RouteHandle **routehandle,            // inout - handle to precomputed comm
   InterfaceInt *srcToDstTransposeMap,   // in    - mapping src -> dst dims
   ESMC_TypeKind typekindFactor,         // in    - typekind of factor
   void *factor                          // in    - redist factor
@@ -411,10 +411,10 @@ int ArrayBundle::redistStore(
         matchList[i] = i;
     }
     // create and initialize the RouteHandle
-    *routehandle = ESMC_RouteHandleCreate(&localrc);
+    *routehandle = RouteHandle::create(&localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       &rc)) return rc;
-    localrc = (*routehandle)->ESMC_RouteHandleSetType(ESMC_ARRAYBUNDLEXXE);
+    localrc = (*routehandle)->setType(ESMC_ARRAYBUNDLEXXE);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       &rc)) return rc;
     // allocate XXE and attach to RouteHandle
@@ -425,7 +425,7 @@ int ArrayBundle::redistStore(
       ESMC_LogDefault.ESMC_LogAllocError(&rc);
       return rc;
     }
-    localrc = (*routehandle)->ESMC_RouteHandleSetStorage(xxe);
+    localrc = (*routehandle)->setStorage(xxe);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       &rc)) return rc;
     // use Array::redistStore() to determine the required XXE streams
@@ -446,18 +446,18 @@ int ArrayBundle::redistStore(
         // src/dst Array pair does _not_ match any previous pair in ArrayBundle
 //        printf("localPet=%d, src/dst pair #%d requires precompute\n",
 //          localPet, i);
-        ESMC_RouteHandle *rh;
+        RouteHandle *rh;
         localrc = Array::redistStore(srcArray, dstArray, &rh,
           srcToDstTransposeMap, typekindFactor, factor);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         // get a handle on the XXE stored in rh
-        xxeSub[i] = (XXE *)rh->ESMC_RouteHandleGetStorage();
+        xxeSub[i] = (XXE *)rh->getStorage();
         // delete the temporary routehandle w/o deleting the xxeSub
-        localrc = rh->ESMC_RouteHandleSetType(ESMC_UNINITIALIZEDHANDLE);
+        localrc = rh->setType(ESMC_UNINITIALIZEDHANDLE);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
-        localrc = ESMC_RouteHandleDestroy(rh);
+        localrc = RouteHandle::destroy(rh);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         // append the xxeSub to the xxe object with RRA offset info
@@ -504,7 +504,7 @@ int ArrayBundle::redist(
 //
   ArrayBundle *srcArraybundle,          // in    - source Array
   ArrayBundle *dstArraybundle,          // inout - destination Array
-  ESMC_RouteHandle **routehandle,       // inout - handle to precomputed comm
+  RouteHandle **routehandle,            // inout - handle to precomputed comm
   ESMC_Logical checkflag                // in    - ESMF_FALSE: (def.) bas. chcks
                                         //         ESMF_TRUE: full input check
   ){    
@@ -545,7 +545,7 @@ int ArrayBundle::redistRelease(
 //
 // !ARGUMENTS:
 //
-  ESMC_RouteHandle *routehandle        // inout -
+  RouteHandle *routehandle        // inout -
   ){    
 //
 // !DESCRIPTION:
@@ -585,7 +585,7 @@ int ArrayBundle::sparseMatMulStore(
 //
   ArrayBundle *srcArraybundle,          // in    - source ArrayBundle
   ArrayBundle *dstArraybundle,          // in    - destination ArrayBundle
-  ESMC_RouteHandle **routehandle,       // inout - handle to precomputed comm
+  RouteHandle **routehandle,            // inout - handle to precomputed comm
   ESMC_TypeKind typekindFactors,        // in    - typekind of factors
   void *factorList,                     // in    - sparse matrix factors
   int factorListCount,                  // in    - number of sparse mat. indices
@@ -678,10 +678,10 @@ int ArrayBundle::sparseMatMulStore(
         matchList[i] = i;
     }
     // create and initialize the RouteHandle
-    *routehandle = ESMC_RouteHandleCreate(&localrc);
+    *routehandle = RouteHandle::create(&localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       &rc)) return rc;
-    localrc = (*routehandle)->ESMC_RouteHandleSetType(ESMC_ARRAYBUNDLEXXE);
+    localrc = (*routehandle)->setType(ESMC_ARRAYBUNDLEXXE);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       &rc)) return rc;
     // allocate XXE and attach to RouteHandle
@@ -692,7 +692,7 @@ int ArrayBundle::sparseMatMulStore(
       ESMC_LogDefault.ESMC_LogAllocError(&rc);
       return rc;
     }
-    localrc = (*routehandle)->ESMC_RouteHandleSetStorage(xxe);
+    localrc = (*routehandle)->setStorage(xxe);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       &rc)) return rc;
     // use Array::sparseMatMulStore() to determine the required XXE streams
@@ -713,18 +713,18 @@ int ArrayBundle::sparseMatMulStore(
         // src/dst Array pair does _not_ match any previous pair in ArrayBundle
 //        printf("localPet=%d, src/dst pair #%d requires precompute\n",
 //          localPet, i);
-        ESMC_RouteHandle *rh;
+        RouteHandle *rh;
         localrc = Array::sparseMatMulStore(srcArray, dstArray, &rh,
           typekindFactors, factorList, factorListCount, factorIndexList);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         // get a handle on the XXE stored in rh
-        xxeSub[i] = (XXE *)rh->ESMC_RouteHandleGetStorage();
+        xxeSub[i] = (XXE *)rh->getStorage();
         // delete the temporary routehandle w/o deleting the xxeSub
-        localrc = rh->ESMC_RouteHandleSetType(ESMC_UNINITIALIZEDHANDLE);
+        localrc = rh->setType(ESMC_UNINITIALIZEDHANDLE);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
-        localrc = ESMC_RouteHandleDestroy(rh);
+        localrc = RouteHandle::destroy(rh);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         // append the xxeSub to the xxe object with RRA offset info
@@ -771,7 +771,7 @@ int ArrayBundle::sparseMatMul(
 //
   ArrayBundle *srcArraybundle,          // in    - source Array
   ArrayBundle *dstArraybundle,          // inout - destination Array
-  ESMC_RouteHandle **routehandle,       // inout - handle to precomputed comm
+  RouteHandle **routehandle,            // inout - handle to precomputed comm
   ESMC_RegionFlag zeroflag,             // in    - ESMF_REGION_TOTAL:
                                         //          -> zero out total region
                                         //         ESMF_REGION_SELECT:
@@ -795,7 +795,7 @@ int ArrayBundle::sparseMatMul(
     // in the most trivial implementation call Array::sparseMatMul() for each
     // Array pair
     
-    ESMC_HandleType rhType = (*routehandle)->ESMC_RouteHandleGetType();
+    RouteHandleType rhType = (*routehandle)->getType();
     
     Array *srcArray = NULL;
     Array *dstArray = NULL;
@@ -892,7 +892,7 @@ int ArrayBundle::sparseMatMul(
       if (zeroflag!=ESMF_REGION_SELECT)
         filterBitField |= 2;  // filter the region_select zero operations
       // get a handle on the XXE stored in routehandle
-      XXE *xxe = (XXE *)(*routehandle)->ESMC_RouteHandleGetStorage();
+      XXE *xxe = (XXE *)(*routehandle)->getStorage();
       // execute XXE stream
       localrc = xxe->exec(rraCount, &(rraList[0]), filterBitField);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
@@ -932,7 +932,7 @@ int ArrayBundle::sparseMatMulRelease(
 //
 // !ARGUMENTS:
 //
-  ESMC_RouteHandle *routehandle        // inout -
+  RouteHandle *routehandle        // inout -
   ){    
 //
 // !DESCRIPTION:
@@ -948,7 +948,7 @@ int ArrayBundle::sparseMatMulRelease(
   try{
   
   // get XXE from routehandle
-  XXE *xxe = (XXE *)routehandle->ESMC_RouteHandleGetStorage();
+  XXE *xxe = (XXE *)routehandle->getStorage();
   
 #define XXEPROFILEPRINT
 #ifdef XXEPROFILEPRINT
@@ -973,7 +973,7 @@ int ArrayBundle::sparseMatMulRelease(
   delete xxe;
 
   // mark storage pointer in RouteHandle as invalid  
-  routehandle->ESMC_RouteHandleSetStorage(NULL);
+  routehandle->setStorage(NULL);
   
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,

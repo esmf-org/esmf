@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.44 2009/07/27 23:23:33 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.45 2009/07/28 23:08:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.44 2009/07/27 23:23:33 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.45 2009/07/28 23:08:03 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3520,7 +3520,7 @@ int Array::redistStore(
 //
   Array *srcArray,                      // in    - source Array
   Array *dstArray,                      // in    - destination Array
-  ESMC_RouteHandle **routehandle,       // inout - handle to precomputed comm
+  RouteHandle **routehandle,            // inout - handle to precomputed comm
   InterfaceInt *srcToDstTransposeMap,   // in    - mapping src -> dst dims
   ESMC_TypeKind typekindFactor,         // in    - typekind of factor
   void *factor                          // in    - redist factor
@@ -4031,7 +4031,7 @@ int Array::redist(
 //
   Array *srcArray,                      // in    - source Array
   Array *dstArray,                      // inout - destination Array
-  ESMC_RouteHandle **routehandle,       // inout - handle to precomputed comm
+  RouteHandle **routehandle,            // inout - handle to precomputed comm
   ESMC_Logical checkflag                // in    - ESMF_FALSE: (def.) bas. chcks
                                         //         ESMF_TRUE: full input check
   ){    
@@ -4072,7 +4072,7 @@ int Array::redistRelease(
 //
 // !ARGUMENTS:
 //
-  ESMC_RouteHandle *routehandle        // inout -
+  RouteHandle *routehandle        // inout -
   ){    
 //
 // !DESCRIPTION:
@@ -5449,7 +5449,7 @@ int sparseMatMulStoreEncodeXXE(VM *vm, DELayout *srcDelayout,
   DD::AssociationElement **srcLinSeqList,
   DD::AssociationElement **dstLinSeqList,
   const int *dstLocalDeTotalElementCount,
-  char **rraList, int rraCount, ESMC_RouteHandle **routehandle
+  char **rraList, int rraCount, RouteHandle **routehandle
 #ifdef ASMMSTORETIMING
   , double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
   double *t14
@@ -5472,7 +5472,7 @@ int Array::sparseMatMulStore(
 //
   Array *srcArray,                      // in    - source Array
   Array *dstArray,                      // in    - destination Array
-  ESMC_RouteHandle **routehandle,       // inout - handle to precomputed comm
+  RouteHandle **routehandle,            // inout - handle to precomputed comm
   ESMC_TypeKind typekindFactors,        // in    - typekind of factors
   void *factorList,                     // in    - sparse matrix factors
   int factorListCount,                  // in    - number of sparse mat. indices
@@ -7688,7 +7688,7 @@ int sparseMatMulStoreEncodeXXE(
   const int *dstLocalDeTotalElementCount, // in
   char **rraList,                         // in
   int rraCount,                           // in
-  ESMC_RouteHandle **routehandle          // inout - handle to precomputed comm
+  RouteHandle **routehandle               // inout - handle to precomputed comm
 #ifdef ASMMSTORETIMING
   , double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
   double *t14
@@ -7707,10 +7707,10 @@ int sparseMatMulStoreEncodeXXE(
   
   try{
   // create and initialize the RouteHandle
-  *routehandle = ESMC_RouteHandleCreate(&localrc);
+  *routehandle = RouteHandle::create(&localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
-  localrc = (*routehandle)->ESMC_RouteHandleSetType(ESMC_ARRAYXXE);
+  localrc = (*routehandle)->setType(ESMC_ARRAYXXE);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
@@ -7722,7 +7722,7 @@ int sparseMatMulStoreEncodeXXE(
     ESMC_LogDefault.ESMC_LogAllocError(&rc);
     return rc;
   }
-  localrc = (*routehandle)->ESMC_RouteHandleSetStorage(xxe);
+  localrc = (*routehandle)->setStorage(xxe);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // set typekind in xxe which is used to check Arrays before ASMM execution 
@@ -8740,7 +8740,7 @@ int Array::sparseMatMul(
 //
   Array *srcArray,                      // in    - source Array
   Array *dstArray,                      // inout - destination Array
-  ESMC_RouteHandle **routehandle,       // inout - handle to precomputed comm
+  RouteHandle **routehandle,            // inout - handle to precomputed comm
   ESMC_RegionFlag zeroflag,             // in    - ESMF_REGION_TOTAL:
                                         //          -> zero out total region
                                         //         ESMF_REGION_SELECT:
@@ -8789,7 +8789,7 @@ int Array::sparseMatMul(
 #endif
   
   // get a handle on the XXE stored in routehandle
-  XXE *xxe = (XXE *)(*routehandle)->ESMC_RouteHandleGetStorage();
+  XXE *xxe = (XXE *)(*routehandle)->getStorage();
 
   // conditionally perform full input checks
   if (checkflag==ESMF_TRUE){
@@ -8907,7 +8907,7 @@ int Array::sparseMatMulRelease(
 //
 // !ARGUMENTS:
 //
-  ESMC_RouteHandle *routehandle        // inout -
+  RouteHandle *routehandle        // inout -
   ){    
 //
 // !DESCRIPTION:
@@ -8922,7 +8922,7 @@ int Array::sparseMatMulRelease(
   try{
   
   // get XXE from routehandle
-  XXE *xxe = (XXE *)routehandle->ESMC_RouteHandleGetStorage();
+  XXE *xxe = (XXE *)routehandle->getStorage();
   
 #define XXEPROFILEPRINT
 #ifdef XXEPROFILEPRINT
@@ -8948,7 +8948,7 @@ int Array::sparseMatMulRelease(
   delete xxe;
 
   // mark storage pointer in RouteHandle as invalid  
-  routehandle->ESMC_RouteHandleSetStorage(NULL);
+  routehandle->setStorage(NULL);
   
   }catch(int localrc){
     // catch standard ESMF return code

@@ -1,4 +1,4 @@
-// $Id: ESMCI_RHandle.C,v 1.1 2009/07/28 17:34:44 theurich Exp $
+// $Id: ESMCI_RHandle.C,v 1.2 2009/07/28 23:08:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -7,282 +7,269 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-
-// ESMC RHandle method implementation (body) file
+//
+//==============================================================================
 #define ESMF_FILENAME "ESMCI_RHandle.C"
-
+//==============================================================================
+//
+// ESMCI RouteHandle method implementation (body) file
+//
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ RHandle methods declared
-// in the companion file ESMC_RHandle.h
-//
-// 
+// The code in this file implements the C++ RouteHandle methods declared
+// in the companion file ESMCI_RHandle.h
 //
 //-----------------------------------------------------------------------------
-//
-// associated class definition file
+
+// include associated header file
 #include "ESMCI_RHandle.h"
 
-// higher level, 3rd party or system headers
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+// include higher level, 3rd party or system headers
+#include <cstdlib>
 
-// ESMF headers
+// include ESMF headers
 #include "ESMC_Start.h"
-#include "ESMCI_LogErr.h"
 #include "ESMCI_Array.h"
 #include "ESMCI_ArrayBundle.h"
 
-//-----------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = 
-       "$Id: ESMCI_RHandle.C,v 1.1 2009/07/28 17:34:44 theurich Exp $";
-//-----------------------------------------------------------------------------
+// LogErr headers
+#include "ESMCI_LogErr.h"                  // for LogErr
 
-//
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//
-// This section includes all the RouteHandle routines
-//
-//
+using namespace std;
 
 //-----------------------------------------------------------------------------
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = 
+  "$Id: ESMCI_RHandle.C,v 1.2 2009/07/28 23:08:09 theurich Exp $";
+//-----------------------------------------------------------------------------
+
+
+namespace ESMCI {
+
+  //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_RouteHandleCreate"
+#define ESMC_METHOD "ESMCI::RouteHandle::create()"
 //BOP
-// !IROUTINE:  ESMC_RouteHandleCreate - Create a new RouteHandle
+// !IROUTINE:  ESMCI::RouteHandle::create - Create a new RouteHandle
 //
 // !INTERFACE:
-      ESMC_RouteHandle *ESMC_RouteHandleCreate(
+RouteHandle *RouteHandle::create(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMC_RouteHandle
+//  pointer to newly allocated RouteHandle
 //
 // !ARGUMENTS:
-      int *rc) {           // out - return code
+    int *rc) {           // out - return code
 //
 // !DESCRIPTION:
-//      Allocates memory for a new RouteHandle
-//      object and uses the internal routine ESMC_RouteHandleConstruct to
-//      initialize it. 
+//  Allocate memory for a new RouteHandle object and initialize it. 
 //
 //EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  RouteHandle *routehandle;
+  try{
 
-    ESMC_RouteHandle *newrt = new ESMC_RouteHandle();
+    routehandle = new RouteHandle;
 
-    *rc = newrt->ESMC_RouteHandleConstruct();
+    localrc = routehandle->construct();
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
+      return NULL;
+    
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    return NULL;
+  }catch(...){
+    // allocation error
+    ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", rc);  
+    return NULL;
+  }
 
-    return newrt;
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return routehandle;
+}
+//-----------------------------------------------------------------------------
 
- } // end ESMC_RouteHandleCreate
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_RouteHandleDestroy"
+#define ESMC_METHOD "ESMCI::RouteHandle::destroy()"
 //BOP
-// !IROUTINE:  ESMC_RouteHandleDestroy - free a RouteHandle created with Create
+// !IROUTINE:  ESMCI::RouteHandle::destroy - free a RouteHandle
 //
 // !INTERFACE:
-      int ESMC_RouteHandleDestroy(
+int RouteHandle::destroy(
 //
 // !RETURN VALUE:
-//    int error return code
+//  int error return code
 //
 // !ARGUMENTS:
-      ESMC_RouteHandle *rhandle) {    // in - rtable object to destroy
+    RouteHandle *routehandle) {    // in - RouteHandle object to destroy
 //
 // !DESCRIPTION:
-//      ESMF routine which destroys a RouteHandle object previously allocated
-//      via an ESMC_RouteHandleCreate routine.  Define for deep classes only.
-//
-//      Note: this is a class helper function, not a class method
-//      (see declaration in ESMC_RouteHandle.h)
+//  ESMF routine which destroys a RouteHandle object.
 //
 //EOP
-
-    rhandle->ESMC_RouteHandleDestruct();
-    delete rhandle;                      // delete container
-    return ESMF_SUCCESS;
-
- } // end ESMC_RouteHandleDestroy
-
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_RouteHandleConstruct"
-//BOP
-// !IROUTINE:  ESMC_RouteHandleConstruct - fill in an already allocated RouteHandle
-//
-// !INTERFACE:
-      int ESMC_RouteHandle::ESMC_RouteHandleConstruct(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      void) { 
-// 
-// !DESCRIPTION: 
-//      ESMF routine which fills in the contents of an already
-//      allocated RouteHandle object.  May need to do additional allocations
-//      as needed.  Must call the corresponding ESMC_RouteHandleDestruct
-//      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use ESMC_RouteHandleCreate, which calls
-//      ESMC_RouteHandleConstruct.  Define for deep classes only.
-//
-//EOP
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  try{
 
-    htype = ESMC_UNINITIALIZEDHANDLE;
-    storage = NULL;
-
-    return ESMF_SUCCESS;
-
- } // end ESMC_RouteHandleConstruct
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_RouteHandleDestruct"
-//BOP
-// !IROUTINE:  ESMC_RouteHandleDestruct - release resources associated w/a RouteHandle
-//
-// !INTERFACE:
-      int ESMC_RouteHandle::ESMC_RouteHandleDestruct(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      void) {
-//
-// !DESCRIPTION:
-//      ESMF routine which deallocates any space allocated by
-//      ESMF_RouteHandleConstruct, does any additional cleanup before the
-//      original RouteHandle object is freed.  Intended for internal ESMF
-//      use only; end-users use ESMC_RouteHandleDestroy, which calls
-//      ESMC_RouteHandleDestruct.  Define for deep classes only.
-//
-//EOP
-
-    int i;
-
-    // call into the respective distributed data class to release route handle
-    switch (htype){
-      case ESMC_ARRAYXXE:
-        ESMCI::Array::sparseMatMulRelease(this);
-        break;
-      case ESMC_ARRAYBUNDLEXXE:
-        ESMCI::ArrayBundle::sparseMatMulRelease(this);
-        break;
-      default:
-        break;
+    // return with errors for NULL pointer
+    if (routehandle == ESMC_NULL_POINTER){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+        "- Not a valid pointer to RouteHandle", &rc);
+      return rc;
     }
 
-    return ESMF_SUCCESS;
-
- } // end ESMC_RouteHandleDestruct
+    // delete routehandle object
+    delete routehandle;
+  
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
+    return rc;
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", &rc);
+    return rc;
+  }
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_RouteHandleValidate"
+#define ESMC_METHOD "ESMCI::RouteHandle::construct()"
 //BOP
-// !IROUTINE: ESMC_RouteHandleValidate - validate a handle
+// !IROUTINE:  ESMCI::RouteHandle::construct - fill a RouteHandle
 //
 // !INTERFACE:
-      int ESMC_RouteHandle::ESMC_RouteHandleValidate(
+int RouteHandle::construct(
 //
 // !RETURN VALUE:
-//    int error return code
+//  int error return code
 //
 // !ARGUMENTS:
-      const char *options) const {    // in - validate options
-//
-// !DESCRIPTION:
-//      Validates that a RouteHandle is internally consistent.
-//      Returns error code if problems are found.  ESMC_Base class method.
+    void){ 
+// 
+// !DESCRIPTION: 
+//  ESMF routine which fills in the contents of an already
+//  allocated RouteHandle object
 //
 //EOP
+//-----------------------------------------------------------------------------
+  htype = ESMC_UNINITIALIZEDHANDLE;
+  storage = NULL;
 
-    return ESMF_FAILURE;
-
- } // end ESMC_RouteHandleValidate
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_RouteHandlePrint"
+#define ESMC_METHOD "ESMCI::RouteHandle::destruct()"
 //BOP
-// !IROUTINE:  ESMC_RouteHandlePrint - print contents of a RouteHandle
+// !IROUTINE:  ESMCI::RouteHandle::destruct - release RouteHandle resources
 //
 // !INTERFACE:
-      int ESMC_RouteHandle::ESMC_RouteHandlePrint(
+int RouteHandle::destruct(
 //
 // !RETURN VALUE:
-//    int error return code
+//  int error return code
 //
 // !ARGUMENTS:
-      const char *options) const {     //  in - print options
+  void){
 //
 // !DESCRIPTION:
-//      Print information about a RouteHandle.  The options control the
-//      type of information and level of detail.  ESMC_Base class method.
+//  Deallocates any space allocated by ESMF_RouteHandleConstruct.
 //
 //EOP
-    int i;
+//-----------------------------------------------------------------------------
+  switch (htype){
+  case ESMC_ARRAYXXE:
+    ESMCI::Array::sparseMatMulRelease(this);
+    break;
+  case ESMC_ARRAYBUNDLEXXE:
+    ESMCI::ArrayBundle::sparseMatMulRelease(this);
+    break;
+  default:
+    break;
+  }
 
-    return ESMF_SUCCESS;
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
 
- } // end ESMC_RouteHandlePrint
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_RouteHandle()"
+#define ESMC_METHOD "ESMCI::RouteHandle::validate()"
 //BOP
-// !IROUTINE:  ESMC_RouteHandle - native C++ constructor
+// !IROUTINE: ESMCI::RouteHandle::validate - validate a RouteHandle
 //
 // !INTERFACE:
-      ESMC_RouteHandle::ESMC_RouteHandle(
+int RouteHandle::validate(
 //
 // !RETURN VALUE:
-//    none
+//  int error return code
 //
 // !ARGUMENTS:
-      void) {
+  const char *options) const {    // in - validate options
 //
 // !DESCRIPTION:
+//  Validates that a RouteHandle is internally consistent.
 //
 //EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  return rc;
+}
+//-----------------------------------------------------------------------------
 
- } // end ESMC_RouteHandle
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "~ESMC_RouteHandle()"
+#define ESMC_METHOD "ESMCI::RouteHandle::print()"
 //BOP
-// !IROUTINE:  ~ESMC_RouteHandle - native C++ destructor
+// !IROUTINE:  ESMCI::RouteHandle::print - print contents of a RouteHandle
 //
 // !INTERFACE:
-      ESMC_RouteHandle::~ESMC_RouteHandle(
+int RouteHandle::print(
 //
 // !RETURN VALUE:
-//    none
+//  int error return code
 //
 // !ARGUMENTS:
-      void) {
+  const char *options)const{     //  in - print options
 //
 // !DESCRIPTION:
+//  Print information about a RouteHandle.  The options control the
+//  type of information and level of detail.
 //
 //EOP
-
-   // default destructor ok
-
- } // end ~ESMC_RouteHandle
- 
- 
 //-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  return rc;
+}
 //-----------------------------------------------------------------------------
+
+} // namespace ESMCI

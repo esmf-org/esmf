@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.38 2009/07/28 17:34:43 theurich Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.39 2009/07/28 23:08:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ namespace ESMCI {
 
 
 extern "C" void FTN(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
-    ESMCI::Array **dstArray, ESMC_RouteHandle **routehandle,
+    ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
     ESMC_TypeKind *typekind, void *factorList, int *factorListCount,
     ESMCI::InterfaceInt **factorIndexList, int *rc);
 
@@ -67,7 +67,7 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                    Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, int *srcstaggerLoc,
                    Mesh **meshdstpp, ESMCI::Array **arraydstpp, int *dststaggerLoc,
 		   int *regridMethod, int *regridScheme, int *unmappedaction,
-                   ESMC_RouteHandle **rh, int *has_rh, int *has_iw,
+                   ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
                    int *nentries, ESMCI::TempWeights **tweights,
                              int*rc) {
 #undef  ESMC_METHOD
@@ -286,7 +286,7 @@ extern "C" void FTN(c_esmc_regrid_create_mesh)(ESMCI::VM **vmpp,
                    Mesh **gridsrcpp, ESMCI::Array **arraysrcpp, int *srcstaggerLoc,
                    Mesh **griddstpp, ESMCI::Array **arraydstpp, int *dststaggerLoc,
                    int *regridMethod, int *regridScheme,
-                   ESMC_RouteHandle **rh, int *has_rh, int *has_iw,
+                   ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
                    int *nentries, ESMCI::TempWeights **tweights,
                              int*rc) {
   Trace __trace(" FTN(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, int *srcstaggerLoc, ESMCI::Grid **griddstcpp, int *dststaggerLoc, int*rc");

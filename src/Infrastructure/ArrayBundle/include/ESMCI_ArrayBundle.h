@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.h,v 1.8 2009/07/28 17:34:42 theurich Exp $
+// $Id: ESMCI_ArrayBundle.h,v 1.9 2009/07/28 23:08:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -80,22 +80,22 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
                     const ESMC_AttReconcileFlag &attreconflag);
     // comms
     static int redistStore(ArrayBundle *srcArraybundle,
-      ArrayBundle *dstArraybundle, ESMC_RouteHandle **routehandle,
+      ArrayBundle *dstArraybundle, RouteHandle **routehandle,
       InterfaceInt *srcToDstTransposeMap,
       ESMC_TypeKind typekindFactor = ESMF_NOKIND, void *factor = NULL);
     static int redist(ArrayBundle *srcArraybundle,
-      ArrayBundle *dstArraybundle, ESMC_RouteHandle **routehandle,
+      ArrayBundle *dstArraybundle, RouteHandle **routehandle,
       ESMC_Logical checkflag=ESMF_FALSE);
-    static int redistRelease(ESMC_RouteHandle *routehandle);
+    static int redistRelease(RouteHandle *routehandle);
     static int sparseMatMulStore(ArrayBundle *srcArraybundle,
-      ArrayBundle *dstArraybundle, ESMC_RouteHandle **routehandle,
+      ArrayBundle *dstArraybundle, RouteHandle **routehandle,
       ESMC_TypeKind typekindFactors = ESMF_NOKIND, void *factorList = NULL,
       int factorListCount = 0, InterfaceInt *factorIndexList = NULL);
     static int sparseMatMul(ArrayBundle *srcArraybundle,
-      ArrayBundle *dstArraybundle, ESMC_RouteHandle **routehandle,
+      ArrayBundle *dstArraybundle, RouteHandle **routehandle,
       ESMC_RegionFlag zeroflag=ESMF_REGION_TOTAL,
       ESMC_Logical checkflag=ESMF_FALSE);
-    static int sparseMatMulRelease(ESMC_RouteHandle *routehandle);
+    static int sparseMatMulRelease(RouteHandle *routehandle);
           
 };  // class ArrayBundle
 
