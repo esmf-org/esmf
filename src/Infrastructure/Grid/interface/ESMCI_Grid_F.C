@@ -24,7 +24,6 @@
 #include "ESMC_Base.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_DistGrid.h"
-#include "ESMC_RHandle.h"
 
 #include "ESMCI_Grid.h"
 

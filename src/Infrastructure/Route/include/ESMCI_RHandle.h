@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.h,v 1.17 2009/07/27 23:23:34 theurich Exp $
+// $Id: ESMCI_RHandle.h,v 1.1 2009/07/28 17:34:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -14,17 +14,17 @@
 //  the automated document processing.)
 //-----------------------------------------------------------------------------
 //
- // these lines prevent this file from being read more than once if it
- // ends up being included multiple times
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
 
- #ifndef ESMC_RHandle_H
- #define ESMC_RHandle_H
+#ifndef ESMCI_RHandle_H
+#define ESMCI_RHandle_H
 
 //-----------------------------------------------------------------------------
 
- // Put any constants or macros which apply to the whole component in this file.
- // Anything public or esmf-wide should be up higher at the top level
- // include files.
+// Put any constants or macros which apply to the whole component in this file.
+// Anything public or esmf-wide should be up higher at the top level
+// include files.
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -42,8 +42,8 @@
 //-----------------------------------------------------------------------------
 // 
 // !USES:
- #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
- #include <ESMCI_LocalArray.h>
+#include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
+#include <ESMCI_LocalArray.h>
 
 // !PUBLIC TYPES:
  class ESMC_RouteHandle;
@@ -117,4 +117,4 @@ typedef enum {
  int ESMC_RouteHandleDestroy(ESMC_RouteHandle *rtable);
 
 
- #endif  // ESMC_RHandle_H
+#endif  // ESMCI_RHandle_H
