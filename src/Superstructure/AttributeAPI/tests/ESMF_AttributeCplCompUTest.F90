@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCplCompUTest.F90,v 1.19 2009/07/16 21:26:41 rokuingh Exp $
+! $Id: ESMF_AttributeCplCompUTest.F90,v 1.20 2009/07/28 22:16:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeCplCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.19 2009/07/16 21:26:41 rokuingh Exp $'
+      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.20 2009/07/28 22:16:31 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -601,9 +601,9 @@ program ESMF_AttributeCplCompUTest
       !EX_UTest
       ! Remove an Attribute on a CplComp Test, again
       call ESMF_AttributeRemove(cplcomp, name="Charl", rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMC_RC_NOT_FOUND"
       write(name, *) "Removing a Character list Attribute on a CplComp Test, again"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_NOT_FOUND), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -728,9 +728,9 @@ program ESMF_AttributeCplCompUTest
       ! Too Short Get an ESMF_R8 list Attribute from a CplComp Test
       call ESMF_AttributeGet(cplcomp, name="AttrR8l", &
         valueList=outR8lLong(1:2), itemCount=itemCount, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(failMsg, *) "Did not return ESMF_RC_ARG_BAD"
       write(name, *) "Getting an ESMF_R8l Attribute from a CplComp Test with short valueList"
-      call ESMF_Test(rc/=ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(rc==ESMF_RC_ARG_BAD, name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       itemCount = 3
@@ -761,9 +761,9 @@ program ESMF_AttributeCplCompUTest
       ! Too Short Get a char list Attribute from a CplComp Test
       call ESMF_AttributeGet(cplcomp, name="Charl", &
         valueList=outCharlLong(1:2),itemCount=itemCount, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMF_RC_ARG_BAD"
       write(name, *) "Getting an Attribute char list from a CplComp test with short valueList"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_RC_ARG_BAD), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       itemCount = 3
@@ -794,9 +794,9 @@ program ESMF_AttributeCplCompUTest
       ! Too Short Get an ESMF_R8 list Attribute from a CplComp Test
       call ESMF_AttributeGet(cplcomp, name=attrname,  &
         valueList=outLoglLong(1:2), rc=rc)
-      write(failMsg, *) "Did not return logical .TRUE."
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_ITEMSOFF"
       write(name, *) "Getting an logical list Attribute from a CplComp Test with short valueList"
-      call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_ATTR_ITEMSOFF), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       itemCount = 3
@@ -916,9 +916,9 @@ program ESMF_AttributeCplCompUTest
       ! Get an ESMF_I4 Attribute from a CplComp Test
       call ESMF_AttributeGet(cplcomp, name="NotHere", value=outI4, &
         convention=conv, purpose=purp, rc=rc)
-      write(failMsg, *) "Did not return ESMF_FAILURE or wrong value"
+      write(failMsg, *) "Did not return ESMF_RC_ATTR_NOTSET"
       write(name, *) "Getting a nonexistent Attribute from a CplComp Test"
-      call ESMF_Test((rc/=ESMF_SUCCESS), &
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -1096,9 +1096,9 @@ program ESMF_AttributeCplCompUTest
       ! Remove an Attribute in an Attribute package on a CplComp Test, again
       call ESMF_AttributeRemove(cplcomp, name=attrname, convention=nestconv, &
         purpose=nestpurp, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMC_RC_NOT_FOUND"
       write(name, *) "Removing an Attribute in an Attribute package on a CplComp Test, again"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_NOT_FOUND), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       attpackDfltList(1) = "Custom4"
@@ -1203,25 +1203,25 @@ program ESMF_AttributeCplCompUTest
       !EX_UTest
       ! Link a CplComp Attribute hierarchy to a State Attribute hierarchy CplComp Test, again
       call ESMF_AttributeLink(cplcomp, sfc, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
       write(name, *) "Linking a CplComp hierarchy to a State hierarchy Test, again"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_ATTR_LINK), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
       ! Link a CplComp Attribute hierarchy to a CplComp Attribute hierarchy CplComp Test, again
       call ESMF_AttributeLink(cplcomp, cfc, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
       write(name, *) "Linking a CplComp hierarchy to a CplComp hierarchy Test, again"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_ATTR_LINK), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
       ! Link a CplComp Attribute hierarchy to a GridComp Attribute hierarchy CplComp Test, again
       call ESMF_AttributeLink(cplcomp, gfc, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
       write(name, *) "Linking a CplComp hierarchy to a GridComp hierarchy Test, again"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_ATTR_LINK), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif

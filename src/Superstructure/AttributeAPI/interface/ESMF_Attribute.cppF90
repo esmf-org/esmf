@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.49 2009/07/16 21:26:41 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.50 2009/07/28 22:16:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.49 2009/07/16 21:26:41 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.50 2009/07/28 22:16:31 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -1726,18 +1726,18 @@ contains
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       if (convention .ne. "ESMF" .or. purpose .ne. "General") then @\
-        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "Convention must be ESMF, and purpose must be general for standard attpacks", & @\
-                     ESMF_CONTEXT, rc) @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & @\
+          "Convention must be ESMF, and purpose must be General for ESMF standard Attribute packages", & @\
+          ESMF_CONTEXT, rc) @\
         return @\
       endif @\
  @\
       if (present(nestConvention).or.present(nestPurpose)) then @\
         if (present(nestConvention).and..not.present(nestPurpose).or. & @\
             present(nestPurpose).and..not.present(nestConvention)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both nestConvention and nestPurpose must be present or not", & @\
-                     ESMF_CONTEXT, rc) @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            "both nestConvention and nestPurpose must be present or not", & @\
+            ESMF_CONTEXT, rc) @\
           return @\
         else @\
           attpacknest = ESMF_TRUE; @\
@@ -1749,13 +1749,12 @@ contains
           purpose, object, localrc) @\
       else @\
         call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "you cannot nest an ESMF standard Attribute package onto a custom package", & @\
-                     ESMF_CONTEXT, rc) @\
+          "cannot nest an ESMF standard Attribute package onto a custom package", & @\
+          ESMF_CONTEXT, rc) @\
         return @\
       endif @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -1827,9 +1826,9 @@ contains
  @\
       if (present(count)) then @\
         if (count > size(attrList)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                              "count cannot be larger than size(attrList)", & @\
-                              ESMF_CONTEXT, rc) @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & @\
+            "count cannot be larger than size(attrList)", & @\
+            ESMF_CONTEXT, rc) @\
           return @\
         endif @\
 	localCount = count @\
@@ -1838,7 +1837,7 @@ contains
       end if @\
  @\
       if (localCount .le. 0) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & @\
                               "attrList is too small", & @\
                               ESMF_CONTEXT, rc) @\
         return @\
@@ -1847,9 +1846,9 @@ contains
       if (present(nestConvention).or.present(nestPurpose)) then @\
         if (present(nestConvention).and..not.present(nestPurpose).or. & @\
             present(nestPurpose).and..not.present(nestConvention)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both nestConvention and nestPurpose must be present or not", & @\
-                     ESMF_CONTEXT, rc) @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            "both nestConvention and nestPurpose must be present or not", & @\
+            ESMF_CONTEXT, rc) @\
           return @\
         else @\
           attpacknest = ESMF_TRUE @\
@@ -1863,14 +1862,15 @@ contains
         call c_ESMC_AttPackNest(mthisfield, convention, & @\
           purpose, object, nestConvention, nestPurpose, localrc) @\
       endif @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       do i = 1, localCount @\
         call c_ESMC_AttPackAddAttribute(mthisfield, attrList(i), convention, & @\
             purpose, object, localrc) @\
       end do @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -1932,9 +1932,8 @@ contains
  @\
       call c_ESMC_AttributeCopy(mthisfield1, mthisfield2, & @\
                                 attcopyflag, atttreeflag, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -2008,9 +2007,9 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @\
-                     ESMF_CONTEXT, rc) @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            "both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -2019,32 +2018,26 @@ contains
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
           fobject, present_flag, localrc) @\
-        if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttPackGetValue(mthisfield, name, & @\
             ESMF_TYPEKIND_##mtypekind, 1, value, & @\
             convention, purpose, fobject, localrc) @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
         endif @\
       else @\
        @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
-        if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttributeGetValue(mthisfield, name, & @\
             ESMF_TYPEKIND_##mtypekind, 1, value, localrc) @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
         endif @\
       endif @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if(present_flag .ne. ESMF_TRUE) then @\
       if(present(defaultvalue)) then @\
@@ -2122,9 +2115,9 @@ contains
  @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                              "itemCount cannot be larger than size(valueList)", & @\
-                              ESMF_CONTEXT, rc) @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & @\
+            "itemCount cannot be larger than size(valueList)", & @\
+            ESMF_CONTEXT, rc) @\
           return @\
         endif @\
 	      litemCount = itemCount @\
@@ -2133,7 +2126,7 @@ contains
       end if @\
  @\
       if (litemCount .le. 0) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & @\
                               "valueList is too small", & @\
                               ESMF_CONTEXT, rc) @\
         return @\
@@ -2142,9 +2135,9 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @\
-                     ESMF_CONTEXT, rc) @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            "both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -2153,32 +2146,24 @@ contains
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
           fobject, present_flag, localrc) @\
-        if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
         call c_ESMC_AttPackGetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
           convention, purpose, fobject, localrc) @\
-        if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
         end if @\
       else @\
- @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
-        if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttributeGetValue(mthisfield, name, & @\
            ESMF_TYPEKIND_##mtypekind, litemCount, valueList, localrc) @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
- @\
         endif @\
       endif @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if(present_flag .ne. ESMF_TRUE) then @\
       if(present(defaultvalueList)) then @\
@@ -2263,9 +2248,9 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @\
-                     ESMF_CONTEXT, rc) @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            "both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -2274,30 +2259,26 @@ contains
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
           fobject, present_flag, localrc) @\
-        if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttPackGetValue(mthisfield, name, & @\
             ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
             convention, purpose, fobject, localrc) @\
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
           value = localvalue   @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
-        if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttributeGetValue(mthisfield, name, & @\
             ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc) @\
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
           value = localvalue @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
         endif @\
       endif @\
  @\
@@ -2380,7 +2361,7 @@ contains
  @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & @\
                               "itemCount cannot be larger than size(valueList)", & @\
                               ESMF_CONTEXT, rc) @\
           return @\
@@ -2391,7 +2372,7 @@ contains
       end if @\
  @\
       if (litemCount .le. 0) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & @\
                               "valueList is too small", & @\
                               ESMF_CONTEXT, rc) @\
         return @\
@@ -2400,9 +2381,9 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @\
-                     ESMF_CONTEXT, rc) @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            "both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -2411,30 +2392,24 @@ contains
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
           fobject, present_flag, localrc) @\
-        if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttPackGetValue(mthisfield, name, & @\
             ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
             convention, purpose, fobject, localrc) @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
-        if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttributeGetValue(mthisfield, name, & @\
             ESMF_TYPEKIND_LOGICAL, litemCount, valueList, localrc) @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
         endif @\
       endif @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if(present_flag .ne. ESMF_TRUE) then @\
       if(present(defaultvalueList)) then @\
@@ -2518,9 +2493,9 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @\
-                     ESMF_CONTEXT, rc) @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            "both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -2529,28 +2504,22 @@ contains
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
           fobject, present_flag, localrc) @\
-        if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttPackGetChar(mthisfield, name, value, & @\
             convention, purpose, fobject, localrc) @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
-        if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttributeGetChar(mthisfield, name, value, localrc) @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
         endif @\
       endif @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if(present_flag .ne. ESMF_TRUE) then @\
         if(present(defaultvalue)) then @\
@@ -2632,7 +2601,7 @@ contains
  @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & @\
                               "itemCount cannot be larger than size(valueList)", & @\
                               ESMF_CONTEXT, rc) @\
           return @\
@@ -2643,7 +2612,7 @@ contains
       end if @\
  @\
       if (litemCount .le. 0) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & @\
                               "valueList is too small", & @\
                               ESMF_CONTEXT, rc) @\
         return @\
@@ -2656,9 +2625,9 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @\
-                     ESMF_CONTEXT, rc) @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            "both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -2667,29 +2636,23 @@ contains
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
           fobject, present_flag, localrc) @\
-        if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttPackGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
             litemCount, lens, valueString, convention, purpose, fobject, localrc) @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
-        if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttributeGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
             litemCount, lens, valueString, localrc) @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
         endif @\
       endif @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if(present_flag .ne. ESMF_TRUE) then @\
       if(present(defaultvalueList)) then @\
@@ -2777,9 +2740,8 @@ contains
       endif @\
  @\
       call c_ESMC_AttributeGetCount(mthisfield, count, lattcountflag, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                  ESMF_ERR_PASSTHRU, & @\
-                                  ESMF_CONTEXT, rc)) return @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -2839,9 +2801,8 @@ contains
  @\
       call c_ESMC_AttributeGetInfoName(mthisfield, name, & @\
         localTk, litemCount, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                  ESMF_ERR_PASSTHRU, & @\
-                                  ESMF_CONTEXT, rc)) return @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(typekind)) typekind = localTk @\
       if (present(itemCount)) itemCount = litemCount @\
@@ -2909,9 +2870,8 @@ contains
  @\
       call c_ESMC_AttributeGetInfoNum(mthisfield, attributeIndex, & @\
         localName, localTk, litemCount, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                  ESMF_ERR_PASSTHRU, & @\
-                                  ESMF_CONTEXT, rc)) return @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       name = localName @\
       if (present(typekind)) typekind = localTk @\
@@ -2968,9 +2928,8 @@ contains
       ESMF_INIT_CHECK_DEEP(mclass2##GetInit,mthis2,rc) @\
  @\
       call c_ESMC_AttributeLink(mthisfield1, mthisfield2, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3024,9 +2983,8 @@ contains
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis2,rc) @\
  @\
       call c_ESMC_AttributeLink(mthisfield1, mthisfield2, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       ! set the import and export Attributes on any Field connected to this State @\
       lvalue1 = .true. @\
@@ -3034,20 +2992,20 @@ contains
       if (mthis1%mthisfield3 == ESMF_STATE_IMPORT) then @\
         call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname1, & @\
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname2, & @\
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
       else if (mthis1%mthisfield3 == ESMF_STATE_EXPORT) then @\
         call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname1, & @\
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname2, & @\
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
       endif @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3099,9 +3057,8 @@ contains
       ESMF_INIT_CHECK_DEEP(mclass2##GetInit,mthis2,rc) @\
  @\
       call c_ESMC_AttributeLinkRemove(mthisfield1, mthisfield2, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3170,9 +3127,8 @@ contains
       ! invoke C to C++ entry point @\
       ! TODO: convention, purpose @\
       call c_ESMC_AttributeRead(mthisfield, fileNameLen, fileName, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                              ESMF_ERR_PASSTHRU, & @\
-                              ESMF_CONTEXT, rcToReturn=rc)) return @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3233,9 +3189,9 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @\
-                     ESMF_CONTEXT, rc) @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            "both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -3244,21 +3200,14 @@ contains
       if (attpack == ESMF_TRUE .and. .not.present(name)) then @\
         call c_ESMC_AttPackRemove(mthisfield, convention, & @\
           purpose, fobject, localrc) @\
-        if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
       else if (attpack == ESMF_TRUE .and. present(name)) then @\
         call c_ESMC_AttPackRemoveAttribute(mthisfield, name, convention, & @\
           purpose, fobject, localrc) @\
-        if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
       else if (present(name)) then @\
         call c_ESMC_AttributeRemove(mthisfield, name, localrc) @\
-        if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
       endif @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3330,9 +3279,9 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @\
-                     ESMF_CONTEXT, rc) @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            "both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -3342,16 +3291,12 @@ contains
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, 1, value, & @\
           convention, purpose, fobject, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, 1, value, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                  ESMF_ERR_PASSTHRU, & @\
-                                  ESMF_CONTEXT, rc)) return @\
       endif @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3420,7 +3365,7 @@ contains
  @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & @\
                               "itemCount cannot be larger than size(valueList)", & @\
                               ESMF_CONTEXT, rc) @\
           return @\
@@ -3431,7 +3376,7 @@ contains
       end if @\
  @\
       if (litemCount .le. 0) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & @\
                               "valueList is too small", & @\
                               ESMF_CONTEXT, rc) @\
         return @\
@@ -3440,9 +3385,9 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @\
-                     ESMF_CONTEXT, rc) @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            "both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -3452,16 +3397,12 @@ contains
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
           convention, purpose, fobject, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, litemCount, valueList, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                  ESMF_ERR_PASSTHRU, & @\
-                                  ESMF_CONTEXT, rc)) return @\
       endif @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3529,9 +3470,9 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @\
-                     ESMF_CONTEXT, rc) @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            "both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -3542,16 +3483,12 @@ contains
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
           convention, purpose, fobject, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                  ESMF_ERR_PASSTHRU, & @\
-                                  ESMF_CONTEXT, rc)) return @\
       endif @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3620,7 +3557,7 @@ contains
  @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & @\
                               "itemCount cannot be larger than size(valueList)", & @\
                               ESMF_CONTEXT, rc) @\
           return @\
@@ -3631,7 +3568,7 @@ contains
       end if @\
  @\
       if (litemCount .le. 0) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & @\
                               "valueList is too small", & @\
                               ESMF_CONTEXT, rc) @\
         return @\
@@ -3640,9 +3577,9 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @\
-                     ESMF_CONTEXT, rc) @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            "both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -3652,16 +3589,12 @@ contains
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
           convention, purpose, fobject, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, litemCount, valueList, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                  ESMF_ERR_PASSTHRU, & @\
-                                  ESMF_CONTEXT, rc)) return @\
       endif @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3728,9 +3661,9 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @\
-                     ESMF_CONTEXT, rc) @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            "both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -3739,15 +3672,11 @@ contains
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
           ESMF_TYPEKIND_CHARACTER, convention, purpose, fobject, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
       else @\
         call c_ESMC_AttributeSetChar(mthisfield, name, value, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                  ESMF_ERR_PASSTHRU, & @\
-                                  ESMF_CONTEXT, rc)) return @\
       endif @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3814,7 +3743,7 @@ contains
  @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & @\
                               "itemCount cannot be larger than size(valueList)", & @\
                               ESMF_CONTEXT, rc) @\
           return @\
@@ -3825,7 +3754,7 @@ contains
       end if @\
  @\
       if (litemCount .le. 0) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & @\
                               "valueList is too small", & @\
                               ESMF_CONTEXT, rc) @\
         return @\
@@ -3841,9 +3770,9 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @\
-                     ESMF_CONTEXT, rc) @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            "both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -3852,16 +3781,12 @@ contains
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           litemCount, valueString, lens, convention, purpose, fobject, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
       else @\
         call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           litemCount, valueString, lens, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                  ESMF_ERR_PASSTHRU, & @\
-                                  ESMF_CONTEXT, rc)) return @\
       endif @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3916,9 +3841,8 @@ contains
  @\
       count = size(rootList) @\
       call c_ESMC_AttributeUpdate(mthisfield, vm, rootList, count, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3983,9 +3907,9 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-                    "both convention and purpose must be present or not", & @\
-                     ESMF_CONTEXT, rc) @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            "both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -4001,17 +3925,13 @@ contains
         if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
           call c_ESMC_AttributeWriteTab(mthisfield, convention, & @\
             purpose, fobject, ftarobj, localrc) @\
-          if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
         else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then @\
           call c_ESMC_AttributeWriteXML(mthisfield, convention, & @\
             purpose, fobject, ftarobj, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
       	endif @\
       endif @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\

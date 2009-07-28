@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeStateUTest.F90,v 1.19 2009/07/16 21:26:41 rokuingh Exp $
+! $Id: ESMF_AttributeStateUTest.F90,v 1.20 2009/07/28 22:16:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeStateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeStateUTest.F90,v 1.19 2009/07/16 21:26:41 rokuingh Exp $'
+      '$Id: ESMF_AttributeStateUTest.F90,v 1.20 2009/07/28 22:16:31 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -601,9 +601,9 @@ program ESMF_AttributeStateUTest
       !EX_UTest
       ! Remove an Attribute on a State Test, again
       call ESMF_AttributeRemove(state, name="Charl", rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMC_RC_NOT_FOUND"
       write(name, *) "Removing a Character list Attribute on a State Test, again"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_NOT_FOUND), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -636,7 +636,7 @@ program ESMF_AttributeStateUTest
       call ESMF_AttributeGet(state, name=attrname, value=outLog, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting State Attribute (type Fortran logical scalar)"
-      call ESMF_Test((rc == ESMF_SUCCESS).and.(inLog .eqv. outLog),   &
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(inLog .eqv. outLog),   &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -656,7 +656,7 @@ program ESMF_AttributeStateUTest
         defaultvalue=defaultLog, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting State default Attribute (type Fortran logical scalar)"
-      call ESMF_Test((rc == ESMF_SUCCESS).and.(defaultLog .eqv. dfltoutLog),   &
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(defaultLog .eqv. dfltoutLog),   &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -728,9 +728,9 @@ program ESMF_AttributeStateUTest
       ! Too Short Get an ESMF_R8 list Attribute from a State Test
       call ESMF_AttributeGet(state, name="AttrR8l", &
         valueList=outR8lLong(1:2), itemCount=itemCount, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(failMsg, *) "Did not return ESMF_RC_ARG_BAD"
       write(name, *) "Getting an ESMF_R8l Attribute from a State Test with short valueList"
-      call ESMF_Test(rc/=ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(rc==ESMF_RC_ARG_BAD, name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       itemCount = 3
@@ -761,9 +761,9 @@ program ESMF_AttributeStateUTest
       ! Too Short Get a char list Attribute from a State Test
       call ESMF_AttributeGet(state, name="Charl", &
         valueList=outCharlLong(1:2),itemCount=itemCount, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMF_RC_ARG_BAD"
       write(name, *) "Getting an Attribute char list from a State test with short valueList"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_RC_ARG_BAD), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       itemCount = 3
@@ -794,9 +794,9 @@ program ESMF_AttributeStateUTest
       ! Too Short Get an ESMF_R8 list Attribute from a State Test
       call ESMF_AttributeGet(state, name=attrname,  &
         valueList=outLoglLong(1:2), rc=rc)
-      write(failMsg, *) "Did not return logical .TRUE."
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_ITEMSOFF"
       write(name, *) "Getting an logical list Attribute from a State Test with short valueList"
-      call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_ATTR_ITEMSOFF), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       itemCount = 3
@@ -838,7 +838,7 @@ program ESMF_AttributeStateUTest
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_FAILURE or wrong value"
       write(name, *) "Getting a nonexistent Attribute from a State Test"
-      call ESMF_Test((rc/=ESMF_SUCCESS), &
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -1081,9 +1081,9 @@ program ESMF_AttributeStateUTest
       !EX_UTest
       ! Remove an Attribute in an Attribute package on a State Test, again
       call ESMF_AttributeRemove(state, name=attrname, convention=nestconv, purpose=nestpurp, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMC_RC_NOT_FOUND"
       write(name, *) "Removing an Attribute in an Attribute package on a State Test, again"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_NOT_FOUND), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       attpackDfltList(1) = "Custom4"
@@ -1188,25 +1188,25 @@ program ESMF_AttributeStateUTest
       !EX_UTest
       ! Link a State Attribute hierarchy to a State Attribute hierarchy State Test, again
       call ESMF_AttributeLink(state, sfs, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
       write(name, *) "Linking a State hierarchy to a State hierarchy Test, again"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_ATTR_LINK), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
       ! Link a State Attribute hierarchy to a Field Attribute hierarchy State Test, again
       call ESMF_AttributeLink(state, ffs, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
       write(name, *) "Linking a State hierarchy to a Field hierarchy Test, again"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_ATTR_LINK), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
       ! Link a State Attribute hierarchy to a FieldBundle Attribute hierarchy State Test, again
       call ESMF_AttributeLink(state, fbfs, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
       write(name, *) "Linking a State hierarchy to a FieldBundle hierarchy Test, again"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_ATTR_LINK), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif

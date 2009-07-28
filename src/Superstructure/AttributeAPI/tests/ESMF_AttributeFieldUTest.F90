@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFieldUTest.F90,v 1.21 2009/07/16 21:26:41 rokuingh Exp $
+! $Id: ESMF_AttributeFieldUTest.F90,v 1.22 2009/07/28 22:16:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFieldUTest.F90,v 1.21 2009/07/16 21:26:41 rokuingh Exp $'
+      '$Id: ESMF_AttributeFieldUTest.F90,v 1.22 2009/07/28 22:16:31 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -591,9 +591,9 @@ program ESMF_AttributeFieldUTest
       !EX_UTest
       ! Remove an Attribute on a Field Test, again
       call ESMF_AttributeRemove(field, name="Charl", rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMC_RC_NOT_FOUND"
       write(name, *) "Removing a Character list Attribute on a Field Test, again"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_NOT_FOUND), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -718,9 +718,9 @@ program ESMF_AttributeFieldUTest
       ! Too Short Get an ESMF_R8 list Attribute from a Field Test
       call ESMF_AttributeGet(field, name="AttrR8l", &
         valueList=outR8lLong(1:2), itemCount=itemCount, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(failMsg, *) "Did not return ESMF_RC_ARG_BAD"
       write(name, *) "Getting an ESMF_R8l Attribute from a Field Test with short valueList"
-      call ESMF_Test(rc/=ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(rc==ESMF_RC_ARG_BAD, name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       itemCount = 3
@@ -751,9 +751,9 @@ program ESMF_AttributeFieldUTest
       ! Too Short Get a char list Attribute from a Field Test
       call ESMF_AttributeGet(field, name="Charl", &
         valueList=outCharlLong(1:2),itemCount=itemCount, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMF_RC_ARG_BAD"
       write(name, *) "Getting an Attribute char list from a Field test with short valueList"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_RC_ARG_BAD), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       itemCount = 3
@@ -784,9 +784,9 @@ program ESMF_AttributeFieldUTest
       ! Too Short Get an ESMF_R8 list Attribute from a Field Test
       call ESMF_AttributeGet(field, name=attrname,  &
         valueList=outLoglLong(1:2), rc=rc)
-      write(failMsg, *) "Did not return logical .TRUE."
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_ITEMSOFF"
       write(name, *) "Getting an logical list Attribute from a Field Test with short valueList"
-      call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_ATTR_ITEMSOFF), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       itemCount = 3
@@ -827,9 +827,9 @@ program ESMF_AttributeFieldUTest
       ! Get an ESMF_I4 Attribute from a Field Test
       call ESMF_AttributeGet(field, name="NotHere", value=outI4, &
         convention=conv, purpose=purp, rc=rc)
-      write(failMsg, *) "Did not return ESMF_FAILURE or wrong value"
+      write(failMsg, *) "Did not return ESMF_RC_ATTR_NOTSET"
       write(name, *) "Getting a nonexistent Attribute from a Field Test"
-      call ESMF_Test((rc/=ESMF_SUCCESS), &
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -1084,9 +1084,9 @@ program ESMF_AttributeFieldUTest
       !EX_UTest
       ! Remove an Attribute in an Attribute package on a Field Test, again
       call ESMF_AttributeRemove(field, name=attrname, convention=nestconv, purpose=nestpurp, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMC_RC_NOT_FOUND"
       write(name, *) "Removing an Attribute in an Attribute package on a Field Test, again"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_NOT_FOUND), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       attpackDfltList(1) = "Custom4"
@@ -1157,9 +1157,9 @@ program ESMF_AttributeFieldUTest
       !EX_UTest
       ! Link a Field Attribute hierarchy to a Grid Attribute hierarchy Field Test, again
       call ESMF_AttributeLink(field, grid, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
       write(name, *) "Linking a Field hierarchy to a Grid hierarchy Test, again"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_ATTR_LINK), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest

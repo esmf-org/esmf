@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridUTest.F90,v 1.19 2009/07/16 21:26:41 rokuingh Exp $
+! $Id: ESMF_AttributeGridUTest.F90,v 1.20 2009/07/28 22:16:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeGridUTest.F90,v 1.19 2009/07/16 21:26:41 rokuingh Exp $'
+      '$Id: ESMF_AttributeGridUTest.F90,v 1.20 2009/07/28 22:16:31 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -588,9 +588,9 @@ program ESMF_AttributeGridUTest
       !EX_UTest
       ! Remove an Attribute on a Grid Test, again
       call ESMF_AttributeRemove(grid, name="Charl", rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMC_RC_NOT_FOUND"
       write(name, *) "Removing a Character list Attribute on a Grid Test, again"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_NOT_FOUND), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -716,9 +716,9 @@ program ESMF_AttributeGridUTest
       ! Too Short Get an ESMF_R8 list Attribute from a Grid Test
       call ESMF_AttributeGet(grid, name="AttrR8l", &
         valueList=outR8lLong(1:2), itemCount=itemCount, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(failMsg, *) "Did not return ESMF_RC_ARG_BAD"
       write(name, *) "Getting an ESMF_R8l Attribute from a Grid Test with short valueList"
-      call ESMF_Test(rc/=ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(rc==ESMF_RC_ARG_BAD, name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       itemCount = 3
@@ -749,9 +749,9 @@ program ESMF_AttributeGridUTest
       ! Too Short Get a char list Attribute from a Grid Test
       call ESMF_AttributeGet(grid, name="Charl", &
         valueList=outCharlLong(1:2),itemCount=itemCount, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMF_RC_ARG_BAD"
       write(name, *) "Getting an Attribute char list from a Grid test with short valueList"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_RC_ARG_BAD), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       itemCount = 3
@@ -782,9 +782,9 @@ program ESMF_AttributeGridUTest
       ! Too Short Get an ESMF_R8 list Attribute from a Grid Test
       call ESMF_AttributeGet(grid, name=attrname,  &
         valueList=outLoglLong(1:2), rc=rc)
-      write(failMsg, *) "Did not return logical .TRUE."
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_ITEMSOFF"
       write(name, *) "Getting an logical list Attribute from a Grid Test with short valueList"
-      call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_ATTR_ITEMSOFF), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       itemCount = 3
@@ -824,9 +824,9 @@ program ESMF_AttributeGridUTest
       ! Get an ESMF_I4 Attribute from a Grid Test
       call ESMF_AttributeGet(grid, name="NotHere", value=outI4, &
         convention=conv, purpose=purp, rc=rc)
-      write(failMsg, *) "Did not return ESMF_FAILURE or wrong value"
+      write(failMsg, *) "Did not return ESMF_RC_ATTR_NOTSET"
       write(name, *) "Getting a nonexistent Attribute from a Grid Test"
-      call ESMF_Test((rc/=ESMF_SUCCESS), &
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -1069,9 +1069,9 @@ program ESMF_AttributeGridUTest
       !EX_UTest
       ! Remove an Attribute in an Attribute package on a Grid Test, again
       call ESMF_AttributeRemove(grid, name=attrname, convention=nestconv, purpose=nestpurp, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMC_RC_NOT_FOUND"
       write(name, *) "Removing an Attribute in an Attribute package on a Grid Test, again"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_NOT_FOUND), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       attpackDfltList(1) = "Custom4"

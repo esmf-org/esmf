@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.22 2009/07/16 21:25:43 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.23 2009/07/28 22:15:55 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -28,11 +28,12 @@
 #include "ESMCI_Attribute.h"
 #include "ESMC_Base.h"
 #include "ESMCI_LogErr.h"
+#include "ESMF_LogMacros.inc"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.22 2009/07/16 21:25:43 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.23 2009/07/28 22:15:55 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -86,7 +87,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -94,7 +95,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
@@ -102,7 +103,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
       return;
@@ -110,7 +111,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
       return;
@@ -118,7 +119,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
       return;
@@ -134,28 +135,28 @@ extern "C" {
   cobj.resize(cobj.find_last_not_of(" ")+1);
 
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
   if (cconv.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
   if (cpurp.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
   if (cobj.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
       if (rc) *rc = status;
       return;
@@ -163,13 +164,8 @@ extern "C" {
 
   // Set the attribute on the object.
   status = (**base).root.AttPackAddAttribute(cname, cconv, cpurp, cobj);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed c_esmc_attpackaddattribute", &status);
-  }
-
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpackaddattribute
 
@@ -207,7 +203,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -215,7 +211,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
       return;
@@ -223,7 +219,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
       return;
@@ -231,7 +227,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
       return;
@@ -245,21 +241,21 @@ extern "C" {
   cobj.resize(cobj.find_last_not_of(" ")+1);
 
   if (cconv.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
   if (cpurp.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
   if (cobj.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
       if (rc) *rc = status;
       return;
@@ -267,13 +263,8 @@ extern "C" {
 
   // Set the attribute on the object.
   status = (**base).root.AttPackCreateCustom(cconv, cpurp, cobj);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed c_esmc_attpackcreatecustom", &status);
-  }
-
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpackcreatecustom
 
@@ -311,7 +302,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -319,7 +310,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
       return;
@@ -327,7 +318,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
       return;
@@ -335,7 +326,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
       return;
@@ -349,21 +340,21 @@ extern "C" {
   cobj.resize(cobj.find_last_not_of(" ")+1);
 
   if (cconv.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
   if (cpurp.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
   if (cobj.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
       if (rc) *rc = status;
       return;
@@ -371,13 +362,8 @@ extern "C" {
 
   // Set the attribute on the object.
   status = (**base).root.AttPackCreateStandard(cconv, cpurp, cobj);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed c_esmc_attpackcreatestandard", &status);
-  }
-
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpackcreatestandard
 
@@ -419,7 +405,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -427,7 +413,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
       return;
@@ -435,7 +421,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
       return;
@@ -443,7 +429,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
       return;
@@ -451,7 +437,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!nestConvention) || (nclen <= 0) || (nestConvention[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
       return;
@@ -459,7 +445,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!nestPurpose) || (nplen <= 0) || (nestPurpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
       return;
@@ -477,35 +463,35 @@ extern "C" {
   cnpurp.resize(cnpurp.find_last_not_of(" ")+1);
 
   if (cconv.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
   if (cpurp.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
   if (cobj.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
       if (rc) *rc = status;
       return;
   }
 
   if (cnconv.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute nestConvention conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
   if (cnpurp.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute nestPurpose conversion", &status);
       if (rc) *rc = status;
       return;
@@ -513,13 +499,8 @@ extern "C" {
   
   // Set the attribute on the object.
   status = (**base).root.AttPackNest(cconv, cpurp, cobj, cnconv, cnpurp);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed failed c_esmc_attpacknest", &status);
-  }
-
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpacknest
 
@@ -557,7 +538,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -565,7 +546,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
       return;
@@ -573,7 +554,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
       return;
@@ -581,7 +562,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
       return;
@@ -595,21 +576,21 @@ extern "C" {
   cobj.resize(cobj.find_last_not_of(" ")+1);
 
   if (cconv.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
   if (cpurp.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
   if (cobj.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
       if (rc) *rc = status;
       return;
@@ -617,13 +598,8 @@ extern "C" {
 
   // Set the attribute on the object.
   status = (**base).root.AttPackRemove(cconv, cpurp, cobj);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed c_esmc_attpackremove", &status);
-  }
-
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpackremove
 
@@ -664,7 +640,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -672,7 +648,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
@@ -680,7 +656,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
       return;
@@ -688,7 +664,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
       return;
@@ -696,7 +672,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
       return;
@@ -712,28 +688,28 @@ extern "C" {
   cobj.resize(cobj.find_last_not_of(" ")+1);
 
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
   if (cconv.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
   if (cpurp.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
   if (cobj.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
       if (rc) *rc = status;
       return;
@@ -741,13 +717,8 @@ extern "C" {
 
   // Set the attribute on the object.
   status = (**base).root.AttPackRemoveAttribute(cname, cconv, cpurp, cobj);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed c_esmc_attpackremoveattribute", &status);
-  }
-
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpackremoveattribute
 
@@ -792,7 +763,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -800,7 +771,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
@@ -808,7 +779,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
       return;
@@ -816,7 +787,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
       return;
@@ -824,7 +795,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
       return;
@@ -840,28 +811,28 @@ extern "C" {
   cobj.resize(cobj.find_last_not_of(" ")+1);
 
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
 
   if (cconv.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
     if (rc) *rc = status;
     return;
   }
 
   if (cpurp.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
     if (rc) *rc = status;
     return;
   }
 
   if (cobj.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
     if (rc) *rc = status;
     return;
@@ -873,18 +844,18 @@ extern "C" {
   //  use llens to get the lengths of all items on this attribute
   status = (**base).root.AttPackGet(cconv, cpurp, cobj)->\
     AttributeGet(cname, llens, 1);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.Write(
-                         "failed getting item char* lengths", ESMC_LOG_INFO);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc))) {
+    ESMC_LogDefault.Write("failed getting item char* lengths", ESMC_LOG_INFO);
     delete [] llens;
-    if (rc) *rc = status;
     return;
   }
+
   slen = llens[0];
 
   // make sure destination will be long enough
   if (slen > vlen) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_BUFFER_SHORT,
                          "Attribute is too long for buffer", &status);
     delete [] llens;
     if (rc) *rc = status;
@@ -894,25 +865,19 @@ extern "C" {
   string cvalue;
   status = ((**base).root.AttPackGet(cconv, cpurp, cobj))->\
     AttributeGet(cname, &cvalue);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed getting the attpack attribute value", &status);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc))) {
+    ESMC_LogDefault.Write("failed getting Attribute value", ESMC_LOG_INFO);
     delete [] llens;
-    if (rc) *rc = status;
     return;
   }
 
   status = ESMC_CtoF90string(const_cast<char*> (cvalue.c_str()), value, vlen);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed getting attribute value", &status);
-  }
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc));
 
   delete [] llens;
   
-  if (rc) *rc = status;
-  return;
-
 }  // end c_esmc_attpackgetchar
 
 //-----------------------------------------------------------------------------
@@ -961,7 +926,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -969,7 +934,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
@@ -977,7 +942,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
       return;
@@ -985,7 +950,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
       return;
@@ -993,7 +958,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
       return;
@@ -1009,28 +974,28 @@ extern "C" {
   cobj.resize(cobj.find_last_not_of(" ")+1);
 
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
 
   if (cconv.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
     if (rc) *rc = status;
     return;
   }
 
   if (cpurp.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
     if (rc) *rc = status;
     return;
   }
 
   if (cobj.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
     if (rc) *rc = status;
     return;
@@ -1039,18 +1004,20 @@ extern "C" {
   // get the Attribute package
   attr = (**base).root.AttPackGet(cconv, cpurp, cobj);
   if (!attr) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NOTALLOC,
                          "failed getting Attribute package", &status);
     if (rc) *rc = status;
     return;
   }
 
-  // get type of the Attribute from the attpack, do not return error (default value possible)
+  // get type of the Attribute from the attpack
   status = attr->AttributeGet(cname, &attrTypeKind, NULL);
-  if (status != ESMF_SUCCESS || attrTypeKind != *tk) {
-    ESMC_LogDefault.Write(
-                          "failed getting typekind - looking for default value",
-                          ESMC_LOG_INFO);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc))) return;
+  
+  if (attrTypeKind != *tk) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
+                         "typekind does not match this Attribute", &status);
     if (rc) *rc = status;
     return;
   }
@@ -1058,8 +1025,8 @@ extern "C" {
   // we need to get the count first 
   lcount = attr->AttributeGetItemCount(cname);
   if (lcount > *count) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "itemcount-in is less than the itemcount of the attribute", &status);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+                         "attribute has more items than array has space", &status);
     if (rc) *rc = status;
     return;
   }
@@ -1071,11 +1038,9 @@ extern "C" {
   
   //  use llens to get the lengths of all items on this attribute
   status = attr->AttributeGet(cname, llens, lcount);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed getting item char* lengths", &status);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc))) {
     delete [] llens;
-    if (rc) *rc = status;
     return;
   }
 
@@ -1083,7 +1048,7 @@ extern "C" {
   for (i=0; i<lcount; i++) {
     // make sure destination will be long enough
     if (lens[i] < llens[i]) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_BUFFER_SHORT,
                          "Attribute is too long for buffer", &status);
       delete [] llens;
       if (rc) *rc = status;
@@ -1096,11 +1061,9 @@ extern "C" {
 
   // next we get all the strings into the char**
   status = attr->AttributeGet(cname, &lcvalue);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed getting attribute value", &status);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc))) {
     delete [] llens;
-    if (rc) *rc = status;
     return;
   }
   
@@ -1108,23 +1071,19 @@ extern "C" {
   j = 0;
   for (i=0; i<lcount; i++) {
     // convert strings to F90 using F90 length
-    status = ESMC_CtoF90string(const_cast<char*> (lcvalue[i].c_str()), &valueList[j], 
-    (lcvalue[i]).size());
-    if (status != ESMF_SUCCESS) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute value conversion", &status);
-    delete [] llens;
-    if (rc) *rc = status;
-    return;
+    status = ESMC_CtoF90string(const_cast<char*> (lcvalue[i].c_str()), 
+      &valueList[j], (lcvalue[i]).size());
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc))) {
+      delete [] llens;
+      return;
     }
     j = j + lens[i];
   }
       
   delete [] llens;
-  
   if (rc) *rc = status;
-  return;
-
+  
 }  // end c_esmc_attpackgetcharlist
 
 //-----------------------------------------------------------------------------
@@ -1168,7 +1127,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -1176,7 +1135,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
@@ -1184,7 +1143,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
       return;
@@ -1192,7 +1151,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
       return;
@@ -1200,7 +1159,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
       return;
@@ -1216,28 +1175,28 @@ extern "C" {
   cobj.resize(cobj.find_last_not_of(" ")+1);
 
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
 
   if (cconv.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
     if (rc) *rc = status;
     return;
   }
 
   if (cpurp.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
     if (rc) *rc = status;
     return;
   }
 
   if (cobj.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
     if (rc) *rc = status;
     return;
@@ -1245,29 +1204,25 @@ extern "C" {
 
   attpack = (**base).root.AttPackGet(cconv, cpurp, cobj);
   if (!attpack) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NOTALLOC,
                     "failed getting attribute package", &status);
     if (rc) *rc = status;
     return;
   }
 
   status = attpack->AttributeGet(cname, &attrTk, &attrCount);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                    "failed getting attribute type and count", &status);
-    if (rc) *rc = status;
-    return;
-  }
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc))) return;
 
   if (attrTk != *tk) {
-    ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_INCOMP,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
                          "attribute value not expected kind", &status);
     if (rc) *rc = status;
     return;
   }
 
   if (attrCount > *count) {
-    ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_INCOMP,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
                          "attribute has more items than array has space", &status);
     if (rc) *rc = status;
     return;
@@ -1286,12 +1241,10 @@ extern "C" {
       else if (*tk == ESMC_TYPEKIND_LOGICAL)
         status = attpack->AttributeGet(cname, (static_cast<ESMC_Logical*> (value)));
       else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
                          "typekind was inappropriate for this routine", &status);
-      }
-      if (status != ESMF_SUCCESS) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed setting attribute value", &status);
+        if (rc) *rc = status;
+        return;
       }
     }
     else if (*count > 1) {
@@ -1331,14 +1284,21 @@ extern "C" {
           (static_cast<ESMC_Logical*> (value))[i] = temp[i];
         temp.clear();
       } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
                          "typekind was inappropriate for this routine", &status);
+        if (rc) *rc = status;
+        return;
       }
+    }
+    else {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_ITEMSOFF,
+                       "the number of items is inappropriate", &status);
+      if (rc) *rc = status;
+      return;
     }
   }
 
   if (rc) *rc = status;
-  return;
 
 }  // end c_esmc_attpackgetvalue
 
@@ -1379,7 +1339,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -1387,7 +1347,7 @@ extern "C" {
 
   // simple sanity checks before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
@@ -1395,7 +1355,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
       return;
@@ -1403,7 +1363,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
       return;
@@ -1411,7 +1371,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
       return;
@@ -1427,28 +1387,28 @@ extern "C" {
   cobj.resize(cobj.find_last_not_of(" ")+1);
 
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
   if (cconv.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
     if (rc) *rc = status;
     return;
   }
 
   if (cpurp.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
     if (rc) *rc = status;
     return;
   }
 
   if (cobj.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
     if (rc) *rc = status;
     return;
@@ -1456,14 +1416,9 @@ extern "C" {
 
   // Set the attribute on the object.
   status = (**base).root.AttPackIsPresent(cname, cconv, cpurp, cobj, present);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed query for Attribute package Attribute", &status);
-  }
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc));
   
-  if (rc) *rc = status;
-  return;
-
 }  // end c_esmc_attpackispresent
 
 //-----------------------------------------------------------------------------
@@ -1495,27 +1450,22 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!source) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad source base", &status);
     if (rc) *rc = status;    
     return;
   }
   
   if (!destination) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad destination base", &status);
     if (rc) *rc = status;    
     return;
   }
   
   status = (**destination).root.AttributeMove(&((**source).root));
-    if (status != ESMF_SUCCESS) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed AttributeMove", &status);
-    }
-  
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeMove
 
@@ -1558,7 +1508,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -1566,14 +1516,14 @@ extern "C" {
 
   // simple sanity checks before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
   }
 
   if (!value) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value", &status);
       if (rc) *rc = status;
       return;
@@ -1581,7 +1531,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if (!convention) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
       return;
@@ -1589,7 +1539,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if (!purpose) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
       return;
@@ -1597,7 +1547,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if (!object) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
       return;
@@ -1615,22 +1565,16 @@ extern "C" {
   cobj.resize(cobj.find_last_not_of(" ")+1);
 
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion, name must not be empty", &status);
       if (rc) *rc = status;
       return;
   }
-  
 
   // Set the attribute on the object.
   status = (**base).root.AttPackSet(cname, *tk, 1, &cvalue, cconv, cpurp, cobj);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed setting attribute value", &status);
-  }
-  
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpacksetchar
 
@@ -1675,7 +1619,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -1683,7 +1627,7 @@ extern "C" {
 
   // simple sanity checks before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
@@ -1691,7 +1635,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if (!convention) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
       return;
@@ -1699,7 +1643,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if (!purpose) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
       return;
@@ -1707,7 +1651,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if (!object) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
       return;
@@ -1723,7 +1667,7 @@ extern "C" {
   cobj.resize(cobj.find_last_not_of(" ")+1);
 
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion, name must not be empty", &status);
       if (rc) *rc = status;
       return;
@@ -1737,7 +1681,7 @@ extern "C" {
   j = 0;
   for (unsigned int i=0; i<(*count); i++) {
     if (!(valueList[j])) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value", &status);
       if (rc) *rc = status;
       return;
@@ -1752,13 +1696,8 @@ extern "C" {
   
   // Set the attribute on the object.
   status = (**base).root.AttPackSet(cname, *tk, *count, &cvalue, cconv, cpurp, cobj);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed setting attribute char* value", &status);
-  }
-  
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpacksetcharlist
 
@@ -1801,7 +1740,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -1809,7 +1748,7 @@ extern "C" {
 
   // simple sanity checks before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
@@ -1817,7 +1756,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if (!convention) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
       return;
@@ -1825,7 +1764,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if (!purpose) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
       return;
@@ -1833,7 +1772,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if (!object) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
       return;
@@ -1849,7 +1788,7 @@ extern "C" {
   cobj.resize(cobj.find_last_not_of(" ")+1);
 
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion, name must not be empty", &status);
       if (rc) *rc = status;
       return;
@@ -1873,12 +1812,10 @@ extern "C" {
         status = (**base).root.AttPackSet(cname, *tk, *count,
           (static_cast<ESMC_Logical*> (value)), cconv, cpurp, cobj);
       else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
                          "typekind was inappropriate for this routine", &status);
-      }
-      if (status != ESMF_SUCCESS) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed setting attribute value", &status);
+        if (rc) *rc = status;
+        return;
       }
     }
     else if (*count > 1) {
@@ -1918,14 +1855,21 @@ extern "C" {
         status = (**base).root.AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
         temp.clear();
       } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
                          "typekind was inappropriate for this routine", &status);
+        if (rc) *rc = status;
+        return;
       }
+    }
+    else {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_ITEMSOFF,
+                       "the number of items is inappropriate", &status);
+      if (rc) *rc = status;
+      return;
     }
   }
 
   if (rc) *rc = status;
-  return;
 
 }  // end c_esmc_attpacksetvalue
 
@@ -1988,7 +1932,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -1996,7 +1940,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
       return;
@@ -2004,7 +1948,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
       return;
@@ -2012,7 +1956,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
       return;
@@ -2020,7 +1964,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!targetobj) || (tlen <= 0) || (targetobj[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute target object", &status);
       if (rc) *rc = status;
       return;
@@ -2036,28 +1980,28 @@ extern "C" {
   ctarobj.resize(ctarobj.find_last_not_of(" ")+1);
 
   if (cconv.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
     if (rc) *rc = status;
     return;
   }
 
   if (cpurp.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
     if (rc) *rc = status;
     return;
   }
 
   if (cobj.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
     if (rc) *rc = status;
     return;
   }
 
   if (ctarobj.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute target object conversion", &status);
       if (rc) *rc = status;
       return;
@@ -2066,13 +2010,8 @@ extern "C" {
   // Set the attribute on the object.
   status = (**base).root.AttributeWriteTab(cconv, cpurp, cobj, ctarobj,
     (*base)->ESMC_Base::ESMC_BaseGetName());
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed attributewritetab", &status);
-  }
-
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attributewritetab
 
@@ -2112,7 +2051,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -2120,7 +2059,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
       return;
@@ -2128,7 +2067,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
       return;
@@ -2136,7 +2075,7 @@ extern "C" {
   
   // simple sanity check before doing any more work
   if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
       return;
@@ -2144,7 +2083,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!targetobj) || (tlen <= 0) || (targetobj[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute target object", &status);
       if (rc) *rc = status;
       return;
@@ -2160,28 +2099,28 @@ extern "C" {
   ctarobj.resize(ctarobj.find_last_not_of(" ")+1);
 
   if (cconv.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
     if (rc) *rc = status;
     return;
   }
 
   if (cpurp.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
     if (rc) *rc = status;
     return;
   }
 
   if (cobj.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
     if (rc) *rc = status;
     return;
   }
 
   if (ctarobj.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute target object conversion", &status);
       if (rc) *rc = status;
       return;
@@ -2190,13 +2129,8 @@ extern "C" {
   // Set the attribute on the object.
   status = (**base).root.AttributeWriteXML(cconv, cpurp, cobj, ctarobj, 
     (*base)->ESMC_Base::ESMC_BaseGetName());
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed attributewritexml", &status);
-  }
-  
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpackwritexml
 
@@ -2231,28 +2165,28 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!source) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad source base", &status);
     if (rc) *rc = status;    
     return;
   }
   
   if (!destination) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad destination base", &status);
     if (rc) *rc = status;    
     return;
   }
   
   if (!attcopyflag) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad ESMC_AttCopyFlag", &status);
     if (rc) *rc = status;    
     return;
   }
   
   if (!atttreeflag) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad ESMC_AttTreeFlag", &status);
     if (rc) *rc = status;    
     return;
@@ -2260,25 +2194,20 @@ extern "C" {
   
   if (*attcopyflag == ESMC_ATTCOPY_VALUE && *atttreeflag == ESMC_ATTTREE_OFF) {
       status = (**destination).root.AttributeCopyValue((**source).root);
-      if (status != ESMF_SUCCESS) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed attributecopyvalue", &status);
-      }
+      ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc));
   }
   else if (*attcopyflag == ESMC_ATTCOPY_HYBRID) {
       status = (**destination).root.AttributeCopyHybrid((**source).root);
-      if (status != ESMF_SUCCESS) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed attributecopyhybrid", &status);
-      }
+      ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc));
   }
   else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "invalid attribute copy flag combination", &status);
+    if (rc) *rc = status;
+    return;
   }
-  
-  if (rc) *rc = status;
-  return;
 
 }  // end c_ESMC_AttributeCopy
 
@@ -2317,7 +2246,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -2325,7 +2254,7 @@ extern "C" {
 
   // simple sanity checks before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
@@ -2335,7 +2264,7 @@ extern "C" {
   cname.resize(cname.find_last_not_of(" ")+1);
 
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
@@ -2346,18 +2275,17 @@ extern "C" {
   
   //  use llens to get the lengths of all items on this attribute
   status = (**base).root.AttributeGet(cname, llens, 1);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.Write(
-                         "failed getting item char* lengths", ESMC_LOG_INFO);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc))) {
+    ESMC_LogDefault.Write("failed getting item char* lengths", ESMC_LOG_INFO);
     delete [] llens;
-    if (rc) *rc = status;
     return;
   }
   slen = llens[0];
 
   // make sure destination will be long enough
   if (slen > vlen) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_BUFFER_SHORT,
                          "Attribute is too long for buffer", &status);
     delete [] llens;
     if (rc) *rc = status;
@@ -2367,7 +2295,7 @@ extern "C" {
   string cvalue;
   status = (**base).root.AttributeGet(cname, &cvalue);
   if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
     delete [] llens;
     if (rc) *rc = status;
@@ -2375,16 +2303,11 @@ extern "C" {
   }
 
   status = ESMC_CtoF90string(const_cast<char*> (cvalue.c_str()), value, vlen);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed getting attribute value", &status);
-  }
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc));
     
   delete [] llens;
   
-  if (rc) *rc = status;
-  return;
-
 }  // end c_ESMC_AttributeGetChar
 
 //-----------------------------------------------------------------------------
@@ -2425,7 +2348,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -2433,7 +2356,7 @@ extern "C" {
 
   // simple sanity checks before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
@@ -2444,7 +2367,7 @@ extern "C" {
   cname.resize(cname.find_last_not_of(" ")+1);
 
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
@@ -2452,10 +2375,12 @@ extern "C" {
 
   // check the typekind, do not return error (default value possible)
   status = (**base).root.AttributeGet(cname, &attrTypeKind, NULL);
-  if (status != ESMF_SUCCESS || attrTypeKind != *tk) {
-    ESMC_LogDefault.Write(
-                          "failed getting typekind - looking for default value",
-                          ESMC_LOG_INFO);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc))) return;
+  
+  if (attrTypeKind != *tk) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
+                         "typekind is inappropriate for this routine", &status);
     if (rc) *rc = status;
     return;
   }
@@ -2463,8 +2388,8 @@ extern "C" {
   // get the number of items on the attribute, compare to the buffer size
   lcount = (**base).root.AttributeGetItemCount(cname);
   if (lcount > *count) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "itemcount-in is less than the itemcount of the attribute", &status);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_ITEMSOFF,
+                         "attribute has more items than array has space", &status);
     if (rc) *rc = status;
     return;
   }
@@ -2476,11 +2401,9 @@ extern "C" {
   
   //  use llens to get the lengths of all items on this attribute
   status = (**base).root.AttributeGet(cname, llens, lcount);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed getting item char* lengths", &status);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc))) {
     delete [] llens;
-    if (rc) *rc = status;
     return;
   }
 
@@ -2488,7 +2411,7 @@ extern "C" {
   for (i=0; i<lcount; i++) {
     // make sure destination will be long enough
     if (lens[i] < llens[i]) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_BUFFER_SHORT,
                          "Attribute is too long for buffer", &status);
       delete [] llens;
       if (rc) *rc = status;
@@ -2503,11 +2426,9 @@ extern "C" {
 
   // next we get all the strings into the char**
   status = (**base).root.AttributeGet(cname, &cvalue);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed getting attribute value", &status);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc))) {
     delete [] llens;
-    if (rc) *rc = status;
     return;
   }
   
@@ -2516,21 +2437,17 @@ extern "C" {
   for (i=0; i<lcount; i++) {
     // convert strings to F90 using F90 length
     status = ESMC_CtoF90string(const_cast<char*> (cvalue[i].c_str()), &valueList[j], lens[i]);
-    if (status != ESMF_SUCCESS) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute value conversion", &status);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc))) {
     delete [] llens;
-    if (rc) *rc = status;
     return;
     }
     j = j + lens[i];
   }
   
   delete [] llens;
-  
   if (rc) *rc = status;
-  return;
-
+  
 }  // end c_ESMC_AttributeGetCharList
 
 //-----------------------------------------------------------------------------
@@ -2550,7 +2467,7 @@ extern "C" {
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
       ESMC_TypeKind *tk,        // in - typekind
-      int *count,               // in - must match actual length
+      int *items,               // in - must match actual length
       void *value,              // out - value
       int *rc,                  // in - return code
       int nlen) {               // hidden/in - strlen count for name
@@ -2560,14 +2477,14 @@ extern "C" {
 //
 //EOP
 
-  int status, attrCount;
+  int status, attrItems;
   ESMC_TypeKind attrTk;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -2575,7 +2492,7 @@ extern "C" {
 
   // simple sanity checks before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
@@ -2585,35 +2502,32 @@ extern "C" {
   cname.resize(cname.find_last_not_of(" ")+1);
 
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
 
-  status = (**base).root.AttributeGet(cname, &attrTk, &attrCount);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.Write("failed getting attribute type and count", ESMC_LOG_INFO);
-    if (rc) *rc = status;
-    return;
-  }
+  status = (**base).root.AttributeGet(cname, &attrTk, &attrItems);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc))) return;
 
   if (attrTk != *tk) {
-    ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_INCOMP,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
                          "attribute value not expected kind", &status);
     if (rc) *rc = status;
     return;
   }
   
-  if (attrCount > *count) {
-    ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_INCOMP,
-                         "attribute has more items than array has space", &status);
+  if (attrItems > *items) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_ITEMSOFF,
+                         "item count is off", &status);
     if (rc) *rc = status;
     return;
   }
   
   if (value) {
-    if (*count == 1) {
+    if (*items == 1) {
       if (*tk == ESMC_TYPEKIND_I4)
         status = (**base).root.AttributeGet(cname, (static_cast<ESMC_I4*> (value)));  
       else if (*tk == ESMC_TYPEKIND_I8)
@@ -2625,59 +2539,64 @@ extern "C" {
       else if (*tk == ESMC_TYPEKIND_LOGICAL)
         status = (**base).root.AttributeGet(cname, (static_cast<ESMC_Logical*> (value)));
       else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
                          "typekind was inappropriate for this routine", &status);
-      }
-      if (status != ESMF_SUCCESS) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed setting attribute value", &status);
+        if (rc) *rc = status;
+        return;
       }
     }
-    else if (*count > 1) {
+    else if (*items > 1) {
       if (*tk == ESMC_TYPEKIND_I4) {
         vector<ESMC_I4> temp;
-        temp.reserve(*count);
-        status = (**base).root.AttributeGet(cname, count, &temp);
-        for (unsigned int i=0; i<*count; i++)
+        temp.reserve(*items);
+        status = (**base).root.AttributeGet(cname, items, &temp);
+        for (unsigned int i=0; i<*items; i++)
           (static_cast<ESMC_I4*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_I8) {
         vector<ESMC_I8> temp;
-        temp.reserve(*count);
-        status = (**base).root.AttributeGet(cname, count, &temp);
-        for (unsigned int i=0; i<*count; i++)
+        temp.reserve(*items);
+        status = (**base).root.AttributeGet(cname, items, &temp);
+        for (unsigned int i=0; i<*items; i++)
           (static_cast<ESMC_I8*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R4) {
         vector<ESMC_R4> temp;
-        temp.reserve(*count);
-        status = (**base).root.AttributeGet(cname, count, &temp);
-        for (unsigned int i=0; i<*count; i++)
+        temp.reserve(*items);
+        status = (**base).root.AttributeGet(cname, items, &temp);
+        for (unsigned int i=0; i<*items; i++)
           (static_cast<ESMC_R4*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R8) {
         vector<ESMC_R8> temp;
-        temp.reserve(*count);
-        status = (**base).root.AttributeGet(cname, count, &temp);
-        for (unsigned int i=0; i<*count; i++)
+        temp.reserve(*items);
+        status = (**base).root.AttributeGet(cname, items, &temp);
+        for (unsigned int i=0; i<*items; i++)
           (static_cast<ESMC_R8*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
         vector<ESMC_Logical> temp;
-        temp.reserve(*count);
-        status = (**base).root.AttributeGet(cname, count, &temp);
-        for (unsigned int i=0; i<*count; i++)
+        temp.reserve(*items);
+        status = (**base).root.AttributeGet(cname, items, &temp);
+        for (unsigned int i=0; i<*items; i++)
           (static_cast<ESMC_Logical*> (value))[i] = temp[i];
         temp.clear();
       } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
                          "typekind was inappropriate for this routine", &status);
+        if (rc) *rc = status;
+        return;
       }
+    }
+    else {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_ITEMSOFF,
+                       "the number of items is inappropriate", &status);
+      if (rc) *rc = status;
+      return;
     }
   }
 
   if (rc) *rc = status;
-  return;
 
 }  // end c_ESMC_AttributeGetValue
 
@@ -2714,7 +2633,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -2722,21 +2641,21 @@ extern "C" {
 
   // simple sanity checks before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
   }
 
   if (!tk) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute typekind", &status);
       if (rc) *rc = status;
       return;
   }
 
   if (!count) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute count", &status);
       if (rc) *rc = status;
       return;
@@ -2746,20 +2665,15 @@ extern "C" {
   cname.resize(cname.find_last_not_of(" ")+1);
 
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
 
   status = (**base).root.AttributeGet(cname, tk, count);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed getting attribute info by name", &status);
-  }
-  
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeGetInfoName
 
@@ -2794,10 +2708,10 @@ extern "C" {
   int status;
 
   // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMF_RC_NOT_IMPL;
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -2805,21 +2719,21 @@ extern "C" {
 
   // simple sanity checks before doing any more work
   if ((!name)) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
   }
 
   if (!tk) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute typekind", &status);
       if (rc) *rc = status;
       return;
   }
 
   if (!count) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute count", &status);
       if (rc) *rc = status;
       return;
@@ -2829,28 +2743,19 @@ extern "C" {
   string cname;
 
   status = (**base).root.AttributeGet((*num)-1, &cname, tk, count);
-  if (status != ESMF_SUCCESS) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed getting attribute info by num", &status);
-      if (rc) *rc = status;
-      return;
-  }
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc));
 
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute name", &status);
       if (rc) *rc = status;
       return;
   }
 
   status = ESMC_CtoF90string(const_cast<char*> (cname.c_str()), name, nlen);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name conversion", &status);
-  }
-  
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeGetInfoNum
 
@@ -2883,17 +2788,16 @@ extern "C" {
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
-  status = ESMF_SUCCESS;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
   }
 
   if (!count) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute count", &status);
     if (rc) *rc = status;
     return;
@@ -2908,21 +2812,20 @@ extern "C" {
   else if (*flag == ESMC_ATTGETCOUNT_TOTAL)
       *count = (**base).root.AttributeGetCountTotal();
   else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "invalid value for attcountflag", &status);
     if (rc) *rc = status;
     return;
   }
 
   if (count <= 0) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute count", &status);
     if (rc) *rc = status;
     return;
   }
   
-  if (rc) *rc = status;
-  return;
+  if (rc) *rc = ESMF_SUCCESS;    
 
 }  // end c_ESMC_AttributeGetCount
 
@@ -2957,7 +2860,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -2965,14 +2868,14 @@ extern "C" {
 
   // simple sanity checks before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
   }
   
   if (!present) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute present flag", &status);
       if (rc) *rc = status;
       return;
@@ -2981,7 +2884,7 @@ extern "C" {
   string cname(name, nlen);
   cname.resize(cname.find_last_not_of(" ")+1);
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
@@ -2989,13 +2892,8 @@ extern "C" {
   
   // Set the attribute on the object.
   status = (**base).root.AttributeIsPresent(cname, present);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed query for Attribute", &status);
-  }
-  
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attributeispresent
 
@@ -3028,14 +2926,14 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!source) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad source base", &status);
     if (rc) *rc = status;    
     return;
   }
   
   if (!destination) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad destination base", &status);
     if (rc) *rc = status;    
     return;
@@ -3043,13 +2941,8 @@ extern "C" {
 
   // Set the attribute link on the object.
   status = (**source).root.AttributeLink(&(**destination).root);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed setting attribute link", &status);
-  }
-  
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeLink
 
@@ -3082,14 +2975,14 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!source) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad source base", &status);
     if (rc) *rc = status;    
     return;
   }
   
   if (!destination) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad destination base", &status);
     if (rc) *rc = status;    
     return;
@@ -3097,13 +2990,8 @@ extern "C" {
 
   // Set the attribute link on the object.
   status = (**source).root.AttributeLinkRemove(&(**destination).root);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed removing an attribute link", &status);
-  }
-  
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeLinkRemove
 
@@ -3137,7 +3025,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -3145,7 +3033,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
@@ -3155,7 +3043,7 @@ extern "C" {
   cname.resize(cname.find_last_not_of(" ")+1);
 
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
@@ -3163,15 +3051,8 @@ extern "C" {
   
   // Set the attribute on the object.
   status = (**base).root.AttributeRemove(cname);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed removing the attribute", &status);
-    if (rc) *rc = status;
-    return;
-  }
-    
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attributeremove
 
@@ -3209,7 +3090,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -3217,14 +3098,14 @@ extern "C" {
 
   // simple sanity checks before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
   }
 
   if (!value) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value", &status);
       if (rc) *rc = status;
       return;
@@ -3236,7 +3117,7 @@ extern "C" {
   cvalue.resize(cvalue.find_last_not_of(" ")+1);
 
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion, name must not be empty", &status);
       if (rc) *rc = status;
       return;
@@ -3244,13 +3125,8 @@ extern "C" {
   
   // Set the attribute on the object
   status = (**base).root.AttributeSet(cname, &cvalue);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed setting attribute char value", &status);
-  }
-
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeSetChar
 
@@ -3290,7 +3166,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -3298,7 +3174,7 @@ extern "C" {
 
   // simple sanity checks before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
@@ -3307,7 +3183,7 @@ extern "C" {
   string cname(name, nlen);
   cname.resize(cname.find_last_not_of(" ")+1);
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion, name must not be empty", &status);
       if (rc) *rc = status;
       return;
@@ -3321,7 +3197,7 @@ extern "C" {
   j = 0;
   for (unsigned int i=0; i<(*count); i++) {
     if (!(valueList[j])) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value", &status);
       if (rc) *rc = status;
       return;
@@ -3336,13 +3212,8 @@ extern "C" {
 
   // Set the attribute on the object.
   status = (**base).root.AttributeSet(cname, cvalue.size(), &cvalue);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed setting attribute char* value", &status);
-  }
-
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeSetCharList
 
@@ -3381,7 +3252,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -3389,7 +3260,7 @@ extern "C" {
 
   // simple sanity checks before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
     if (rc) *rc = status;
     return;
@@ -3398,7 +3269,7 @@ extern "C" {
   string cname(name, nlen);
   cname.resize(cname.find_last_not_of(" ")+1);
   if (cname.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion, name must not be empty", &status);
     if (rc) *rc = status;
     return;
@@ -3417,12 +3288,10 @@ extern "C" {
       else if (*tk == ESMC_TYPEKIND_LOGICAL)
         status = (**base).root.AttributeSet(cname, *(static_cast<ESMC_Logical*> (value)));
       else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
                          "typekind was inappropriate for this routine", &status);
-      }
-      if (status != ESMF_SUCCESS) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed setting attribute value", &status);
+        if (rc) *rc = status;
+        return;
       }
     }
     else if (*count > 1) {
@@ -3462,14 +3331,21 @@ extern "C" {
         status = (**base).root.AttributeSet(cname, *count, &temp);
         temp.clear();
       } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
                          "typekind was inappropriate for this routine", &status);
+        if (rc) *rc = status;
+        return;
       }
+    }
+    else {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_ITEMSOFF,
+                       "the number of items is inappropriate", &status);
+      if (rc) *rc = status;
+      return;
     }
   }
     
   if (rc) *rc = status;
-  return;
 
 }  // end c_ESMC_AttributeSetValue
 
@@ -3509,7 +3385,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -3517,14 +3393,14 @@ extern "C" {
 
   // simple sanity checks before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
       return;
   }
 
   if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
       return;
@@ -3536,14 +3412,14 @@ extern "C" {
   cobject.resize(cobject.find_last_not_of(" ")+1);
 
   if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
   if (cobject.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
       if (rc) *rc = status;
       return;
@@ -3551,13 +3427,8 @@ extern "C" {
 
   // Set the attribute on the object.
   status = (**base).root.AttributeSetObjsInTree(cname,cobject,*tk,*count,value);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed call AttributeSetObjsInTree", &status);
-  }
-
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeSetObjsInTree
 
@@ -3593,7 +3464,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -3602,11 +3473,10 @@ extern "C" {
   //check the VM
   if (*vm == ESMC_NULL_POINTER){
     *vm = ESMCI::VM::getCurrent(&status);
-    if (ESMC_LogDefault.MsgFoundError(ESMF_FAILURE, ESMF_ERR_PASSTHRU, &status))
-      if (rc) *rc = status;
-      return;
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
   }
-  
+
   // make list into a vector
   rootListl.reserve(*count);
   for (unsigned int i=0; i<*count; ++i)
@@ -3614,13 +3484,8 @@ extern "C" {
 
   // Update the Attribute
   status = (**base).root.AttributeUpdate(*vm, rootListl);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed call AttributeUpdate from interface", &status);
-  }
-
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeUpdate
 
@@ -3652,7 +3517,7 @@ extern "C" {
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad base", &status);
     if (rc) *rc = status;    
     return;
@@ -3660,13 +3525,8 @@ extern "C" {
   
   // Update the Attribute
   status = (**base).root.AttributeUpdateReset();
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed call AttributeUpdateReset from interface", &status);
-  }
-
-  if (rc) *rc = status;
-  return;
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeUpdate
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeDistGridUTest.F90,v 1.16 2009/07/16 21:26:41 rokuingh Exp $
+! $Id: ESMF_AttributeDistGridUTest.F90,v 1.17 2009/07/28 22:16:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeDistGridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeDistGridUTest.F90,v 1.16 2009/07/16 21:26:41 rokuingh Exp $'
+      '$Id: ESMF_AttributeDistGridUTest.F90,v 1.17 2009/07/28 22:16:31 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -590,9 +590,9 @@ program ESMF_AttributeDistGridUTest
       !EX_UTest
       ! Remove an Attribute on a DistGrid Test, again
       call ESMF_AttributeRemove(distgrid, name="Charl", rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMC_RC_NOT_FOUND"
       write(name, *) "Removeing a Character list Attribute on a DistGrid Test, again"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_NOT_FOUND), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -717,9 +717,9 @@ program ESMF_AttributeDistGridUTest
       ! Too Short Get an ESMF_R8 list Attribute from a DistGrid Test
       call ESMF_AttributeGet(distgrid, name="AttrR8l", &
         valueList=outR8lLong(1:2), itemCount=itemCount, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(failMsg, *) "Did not return ESMF_RC_ARG_BAD or wrong value"
       write(name, *) "Getting an ESMF_R8l Attribute from a DistGrid Test with short valueList"
-      call ESMF_Test(rc/=ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(rc==ESMF_RC_ARG_BAD, name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       itemCount = 3
@@ -750,9 +750,9 @@ program ESMF_AttributeDistGridUTest
       ! Too Short Get a char list Attribute from a DistGrid Test
       call ESMF_AttributeGet(distgrid, name="Charl", &
         valueList=outCharlLong(1:2),itemCount=itemCount, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMF_RC_ARG_BAD"
       write(name, *) "Getting an Attribute char list from a DistGrid test with short valueList"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_RC_ARG_BAD), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       itemCount = 3
@@ -825,9 +825,9 @@ program ESMF_AttributeDistGridUTest
       ! Get an ESMF_I4 Attribute from a DistGrid Test
       call ESMF_AttributeGet(distgrid, name="NotHere", value=outI4, &
         convention=conv, purpose=purp, rc=rc)
-      write(failMsg, *) "Did not return ESMF_FAILURE or wrong value"
+      write(failMsg, *) "Did not return ESMF_RC_ATTR_NOTSET"
       write(name, *) "Getting a nonexistent Attribute from a DistGrid Test"
-      call ESMF_Test((rc/=ESMF_SUCCESS), &
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -1069,9 +1069,9 @@ program ESMF_AttributeDistGridUTest
       ! Remove an Attribute in an Attribute package on a DistGrid Test, again
       call ESMF_AttributeRemove(distgrid, name=attrname, convention=nestconv, &
         purpose=nestpurp, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMC_RC_NOT_FOUND"
       write(name, *) "Removeing an Attribute in an Attribute package on a DistGrid Test, again"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMC_RC_NOT_FOUND), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
