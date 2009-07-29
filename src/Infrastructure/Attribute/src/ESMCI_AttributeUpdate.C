@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.17 2009/07/28 22:15:56 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.18 2009/07/29 15:56:31 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.17 2009/07/28 22:15:56 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.18 2009/07/29 15:56:31 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -211,15 +211,16 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
 
   thiskey = NULL; distkey = NULL;
   thiskey = new char[keySize];
-  distkey = new char[keySize];
   if (!thiskey) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                   "Failed allocating key", &localrc);
     return localrc;
   }
+  distkey = new char[keySize];
   if (!distkey) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                   "Failed allocating key", &localrc);
+    delete [] thiskey;
     return localrc;
   }
     
@@ -253,11 +254,21 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
           (*(reinterpret_cast<int*> (distkey+7))));
     }
     */
-    if (attrPackHead == ESMF_TRUE)
+    if (attrPackHead == ESMF_TRUE) {
+      delete [] thiskey;
+      delete [] distkey;
       return 43;
-    else if (attrPack == ESMF_TRUE)
+    }
+    else if (attrPack == ESMF_TRUE) {
+      delete [] thiskey;
+      delete [] distkey;
       return 42;
-    else return 41;
+    }
+    else {
+      delete [] thiskey;
+      delete [] distkey;
+      return 41;
+    }
   }
 
   // get key info
@@ -290,6 +301,8 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
       if (!attr) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                       "Failed allocating Attribute", &localrc);
+        delete [] thiskey;
+        delete [] distkey;
         return localrc;
       }
       attr->setBase(attrBase);
@@ -309,6 +322,8 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
       if (!attr) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                       "Failed allocating Attribute", &localrc);
+        delete [] thiskey;
+        delete [] distkey;
         return localrc;
       }
       attr->setBase(attrBase);
@@ -322,6 +337,8 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
       if (!attr) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                       "Failed allocating Attribute", &localrc);
+        delete [] thiskey;
+        delete [] distkey;
         return localrc;
       }
       attr->setBase(attrBase);
