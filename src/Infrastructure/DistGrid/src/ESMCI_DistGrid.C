@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.19 2009/04/17 22:40:47 rokuingh Exp $
+// $Id: ESMCI_DistGrid.C,v 1.20 2009/07/29 20:33:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.19 2009/04/17 22:40:47 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.20 2009/07/29 20:33:54 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2076,50 +2076,51 @@ int DistGrid::print()const{
   int lrc;
   int indexTuple[2];
   int depth=4;
+  int seqIndex;
   indexTuple[0] = 0; indexTuple[1] = 0;
+  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1],
-    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+    indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 0; indexTuple[1] = 1;
+  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1],
-    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+    indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 1; indexTuple[1] = 1;
+  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1],
-    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+    indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 1; indexTuple[1] = 0;
+  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1],
-    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+    indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 11; indexTuple[1] = 1;
+  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1],
-    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+    indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 1; indexTuple[1] = 5;
+  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1],
-    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+    indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 1; indexTuple[1] = 6;
+  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1],
-    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+    indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 4; indexTuple[1] = 6;
+  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1],
-    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+    indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 10; indexTuple[1] = 5;
+  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1],
-    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+    indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 10; indexTuple[1] = 6;
+  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1],
-    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+    indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 21; indexTuple[1] = 5;
+  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1],
-    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+    indexTuple[0], indexTuple[1], seqIndex, lrc);
   printf("--- ESMCI::DistGrid::print - Topology test end ---\n");
 #endif
 
