@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.19 2009/06/19 05:40:50 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.20 2009/07/30 18:10:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -137,7 +137,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.19 2009/06/19 05:40:50 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.20 2009/07/30 18:10:40 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1221,11 +1221,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
  @\
     ! Initialize return code; assume routine not implemented @\
     localrc = ESMF_RC_NOT_IMPL @\
-    rcpresent = .FALSE. @\
-    if (present(rc)) then @\
-      rcpresent = .TRUE. @\
-      rc = ESMF_RC_NOT_IMPL @\
-    endif @\
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
     ! Assume defaults first, then alter if lb or ub specified, @\
     ! or if an existing pointer is given and can be queried. @\
@@ -1239,6 +1235,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
        willcopy = .false. @\
        do_dealloc = ESMF_TRUE @\
     else @\
+      if (present(docopy)) then @\
        if (docopy .eq. ESMF_DATA_SPACE) then @\
            newp => fptr    ! ptr alias, important this be =>  @\
            lb(1:size(counts)) = lbound(fptr) @\
@@ -1259,6 +1256,14 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
            willcopy = .false. @\
            do_dealloc = ESMF_FALSE @\
        endif @\
+      else @\
+           newp => fptr    ! ptr alias, important this be =>  @\
+           lb(1:size(counts)) = lbound(fptr) @\
+           ub(1:size(counts)) = ubound(fptr) @\
+           willalloc = .false. @\
+           willcopy = .false. @\
+           do_dealloc = ESMF_FALSE @\
+      endif @\
     endif @\
  @\
     ! lbounds, if given, should be used @\
@@ -1293,18 +1298,20 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
                              ESMF_DATA_ADDRESS(newp(mloc)), counts, & @\
                              lb, ub, offsets, & @\
                              ESMF_TRUE, do_dealloc, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, & @\
+                             ESMF_ERR_PASSTHRU, & @\
+                             ESMF_CONTEXT, rc)) return @\
     else @\
       call c_ESMC_LocalArraySetInfo(array, wrap, & @\
                              ESMF_NULL_POINTER, counts, & @\
                              lb, ub, offsets, & @\
                              ESMF_TRUE, do_dealloc, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, & @\
+                             ESMF_ERR_PASSTHRU, & @\
+                             ESMF_CONTEXT, rc)) return @\
     endif @\
  @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
-                              ESMF_ERR_PASSTHRU, & @\
-                              ESMF_CONTEXT, rc)) return @\
- @\
-    if (rcpresent) rc = localrc @\
+    if (present(rc)) rc = localrc @\
  @\
   end subroutine ESMF_LocalArrConstrF90Ptr##mrank##D##mtypekind  @\
  @\
@@ -1849,11 +1856,19 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
     if (ESMF_LogMsgFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rc)) return @\
-    call c_ESMC_LocalArraySetBaseAddr(arrayOut, & @\
-      ESMF_DATA_ADDRESS(lp(mloc)), localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
-      ESMF_ERR_PASSTHRU, & @\
-      ESMF_CONTEXT, rc)) return @\
+    if (size(lp) .ne. 0) then @\
+      call c_ESMC_LocalArraySetBaseAddr(arrayOut, & @\
+        ESMF_DATA_ADDRESS(lp(mloc)), localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+    else @\
+      call c_ESMC_LocalArraySetBaseAddr(arrayOut, & @\
+        ESMF_NULL_POINTER, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+    endif @\
  @\
     ! return successfully @\
     if (present(rc)) rc = ESMF_SUCCESS @\
