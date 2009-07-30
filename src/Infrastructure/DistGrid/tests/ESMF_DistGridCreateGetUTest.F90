@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.16 2009/07/23 21:22:05 theurich Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.17 2009/07/30 16:17:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.16 2009/07/23 21:22:05 theurich Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.17 2009/07/30 16:17:30 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -472,7 +472,6 @@ program ESMF_DistGridCreateGetUTest
   write(name, *) "DistGridCreate() - 1D Single Patch Default - no multiple of 4"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/90/), &
-    decompflag=(/ESMF_DECOMP_HOMOGEN/), &
     regDecompFirstExtra=(/3/), regDecompLastExtra=(/9/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
