@@ -1,4 +1,4 @@
-// $Id: ESMCI_RHandle.C,v 1.2 2009/07/28 23:08:09 theurich Exp $
+// $Id: ESMCI_RHandle.C,v 1.3 2009/07/31 18:21:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@ using namespace std;
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version = 
-  "$Id: ESMCI_RHandle.C,v 1.2 2009/07/28 23:08:09 theurich Exp $";
+  "$Id: ESMCI_RHandle.C,v 1.3 2009/07/31 18:21:38 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -131,7 +131,8 @@ int RouteHandle::destroy(
       return rc;
     }
 
-    // delete routehandle object
+    // destruct and delete routehandle object
+    routehandle->destruct();
     delete routehandle;
   
   }catch(int localrc){
