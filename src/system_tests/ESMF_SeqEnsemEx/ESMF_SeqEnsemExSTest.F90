@@ -1,4 +1,4 @@
-! $Id: ESMF_SeqEnsemExSTest.F90,v 1.5 2009/04/07 05:34:49 theurich Exp $
+! $Id: ESMF_SeqEnsemExSTest.F90,v 1.6 2009/07/31 20:02:33 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -353,6 +353,10 @@ program ESMF_SeqEnsemExSTest
   call ESMF_GridCompDestroy(compC, rc=rc)
   call ESMF_GridCompDestroy(compD, rc=rc)
   call ESMF_CplCompDestroy(cpl, rc=rc)
+
+
+  call ESMF_CalendarDestroy(gregorianCalendar, rc=rc)
+  call ESMF_ClockDestroy(clock, rc=rc)
 
   print *, "All Destroy routines done"
 
