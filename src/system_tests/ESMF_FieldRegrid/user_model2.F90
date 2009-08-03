@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.51 2009/07/22 04:58:07 theurich Exp $
+! $Id: user_model2.F90,v 1.52 2009/08/03 18:43:59 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -39,7 +39,7 @@
  
     subroutine userm2_register(comp, rc)
         type(ESMF_GridComp) :: comp
-        integer :: rc
+        integer, intent(out) :: rc
 
         ! local variables
         type(mylocaldata), pointer :: mydatablock
@@ -76,9 +76,9 @@
 !   !   Initialization routine.
  
     subroutine user_init(comp, importState, exportState, clock, rc)
-      type(ESMF_GridComp), intent(inout) :: comp
-      type(ESMF_State), intent(inout) :: importState, exportState
-      type(ESMF_Clock), intent(in) :: clock
+      type(ESMF_GridComp) :: comp
+      type(ESMF_State) :: importState, exportState
+      type(ESMF_Clock) :: clock
       integer, intent(out) :: rc
 
 !   ! Local variables
@@ -165,9 +165,9 @@
 !   !
  
     subroutine user_run(comp, importState, exportState, clock, rc)
-      type(ESMF_GridComp), intent(inout) :: comp
-      type(ESMF_State), intent(inout) :: importState, exportState
-      type(ESMF_Clock), intent(in) :: clock
+      type(ESMF_GridComp) :: comp
+      type(ESMF_State) :: importState, exportState
+      type(ESMF_Clock) :: clock
       integer, intent(out) :: rc
 
 !   ! Local variables
@@ -191,9 +191,9 @@
 !   !
  
     subroutine user_final(comp, importState, exportState, clock, rc)
-      type(ESMF_GridComp), intent(inout) :: comp
-      type(ESMF_State), intent(inout) :: importState, exportState
-      type(ESMF_Clock), intent(in) :: clock
+      type(ESMF_GridComp) :: comp
+      type(ESMF_State) :: importState, exportState
+      type(ESMF_Clock) :: clock
       integer, intent(out) :: rc
 
       ! Local variables
@@ -260,8 +260,8 @@
 !   !
  
     subroutine verifyResults(humidity, myDE, rc)
-      type(ESMF_Field), intent(inout) :: humidity
-      integer, intent(in)  :: myDE
+      type(ESMF_Field) :: humidity
+      integer  :: myDE
       integer, intent(out) :: rc
 
       ! Local variables
