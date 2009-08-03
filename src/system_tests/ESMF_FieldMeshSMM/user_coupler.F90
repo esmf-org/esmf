@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1 2009/07/07 14:04:23 feiliu Exp $
+! $Id: user_coupler.F90,v 1.2 2009/08/03 19:59:59 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -34,7 +34,7 @@
  
     subroutine usercpl_register(comp, rc)
       type(ESMF_CplComp) :: comp
-      integer :: rc
+      integer, intent(out) :: rc
 
       rc = ESMF_SUCCESS
       print *, "in user setservices routine"
