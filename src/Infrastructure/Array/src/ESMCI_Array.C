@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.45 2009/07/28 23:08:03 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.46 2009/08/03 22:59:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.45 2009/07/28 23:08:03 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.46 2009/08/03 22:59:40 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -5720,49 +5720,22 @@ int Array::sparseMatMulStore(
   
   // determine linIndex <-> seqIndex association for all elements in exclusive 
   // region on all localDEs on srcArray
-  int srcRank = srcArray->rank;
-  int *ii = new int[srcRank];     // index tuple basis 0
-  int *iiEnd = new int[srcRank];
   DD::AssociationElement **srcLinSeqList = 
     new DD::AssociationElement*[srcLocalDeCount];
   int srcSeqIndexMinMax[2]; // [0]=min, [1]=max
   for (int i=0; i<srcLocalDeCount; i++){
-    // allocate memory in srcLinSeqList for this DE
+    // allocate memory in srcLinSeqList for this local DE
     srcLinSeqList[i] = new DD::AssociationElement[srcLocalDeElementCount[i]];
-    // only go into the multi-dim loop if there are elements for the local DE
     if (srcLocalDeElementCount[i]){
-      // reset counters
-      int joff = i*srcArray->distgrid->getDimCount();  // offset into bounds
-      int packedIndex = 0;    // reset
-      int tensorIndex = 0;    // reset
-      for (int jj=0; jj<srcRank; jj++){
-        ii[jj] = 0;  // reset
-        if (srcArray->arrayToDistGridMap[jj]){
-          // decomposed dimension 
-          int j = packedIndex;
-          iiEnd[jj] = srcArray->exclusiveUBound[joff+j]
-            - srcArray->exclusiveLBound[joff+j] + 1;
-          ++packedIndex;
-        }else{
-          // tensor dimension
-          iiEnd[jj] = srcArray->undistUBound[tensorIndex]
-            - srcArray->undistLBound[tensorIndex] + 1;
-          ++tensorIndex;
-        }
-      }
+      // there are elements for this local DE
+      ArrayElement arrayElement(srcArray, i);
       // loop over all elements in exclusive region for this DE
       int elementIndex = 0;  // reset
-      while(ii[srcRank-1] < iiEnd[srcRank-1]){
-        //printf("src: DE = %d  - (", de);
-        //int jjj;
-        //for (jjj=0; jjj<srcRank-1; jjj++)
-        //  printf("%d, ", ii[jjj]);
-        //printf("%d)\n", ii[jjj]);
-        // determine the lin. index for element ii[] in localArray for this DE
-        int linIndex = srcArray->getLinearIndexExclusive(i, ii);
-        // determine the sequentialized index for element ii[] in this DE
-        // getSequenceIndexExclusive() expects basis 0 ii[] in excl. region
-        SeqIndex seqIndex = srcArray->getSequenceIndexExclusive(i, ii);
+      while(arrayElement.isPastLast()==false){
+        // determine the linear index for the current Array element
+        int linIndex = arrayElement.linearIndexExclusive();
+        // determine the sequentialized index for the current Array element
+        SeqIndex seqIndex = arrayElement.sequenceIndexExclusive();
         // store linIndex and seqIndex in srcLinSeqList for this DE
         srcLinSeqList[i][elementIndex].linIndex = linIndex;
         srcLinSeqList[i][elementIndex].seqIndex = seqIndex;
@@ -5780,19 +5753,10 @@ int Array::sparseMatMulStore(
         }
         // increment
         ++elementIndex;
-        // multi-dim index increment
-        ++ii[0];
-        for (int j=0; j<srcRank-1; j++){
-          if (ii[j] == iiEnd[j]){
-            ii[j] = 0;  // reset
-            ++ii[j+1];
-          }
-        }
+        arrayElement.next();
       } // end while over all exclusive elements
     } // if there are elements in localArray associated with this local DE
   } // end for over local DEs
-  delete [] ii;
-  delete [] iiEnd;
   
   // communicate srcSeqIndexMinMax across all Pets
   // todo: use nb-allgather and wait right before needed below
@@ -5809,49 +5773,22 @@ int Array::sparseMatMulStore(
 
   // determine linIndex <-> seqIndex association for all elements in exclusive 
   // region on all localDEs on dstArray
-  int dstRank = dstArray->rank;
-  ii = new int[dstRank];     // index tuple basis 0
-  iiEnd = new int[dstRank];
   DD::AssociationElement **dstLinSeqList = 
     new DD::AssociationElement*[dstLocalDeCount];
   int dstSeqIndexMinMax[2]; // [0]=min, [1]=max
   for (int i=0; i<dstLocalDeCount; i++){
     // allocate memory in dstLinSeqList for this DE
     dstLinSeqList[i] = new DD::AssociationElement[dstLocalDeElementCount[i]];
-    // only go into the multi-dim loop if there are elements for the local DE
     if (dstLocalDeElementCount[i]){
-      // reset counters
-      int joff = i*dstArray->distgrid->getDimCount();  // offset into bounds
-      int packedIndex = 0;    // reset
-      int tensorIndex = 0;    // reset
-      for (int jj=0; jj<dstRank; jj++){
-        ii[jj] = 0;  // reset
-        if (dstArray->arrayToDistGridMap[jj]){
-          // decomposed dimension 
-          int j = packedIndex;
-          iiEnd[jj] = dstArray->exclusiveUBound[joff+j]
-            - dstArray->exclusiveLBound[joff+j] + 1;
-          ++packedIndex;
-        }else{
-          // tensor dimension
-          iiEnd[jj] = dstArray->undistUBound[tensorIndex]
-            - dstArray->undistLBound[tensorIndex] + 1;
-          ++tensorIndex;
-        }
-      }
+      // there are elements for this local DE
+      ArrayElement arrayElement(dstArray, i);
       // loop over all elements in exclusive region for this DE
       int elementIndex = 0;  // reset
-      while(ii[dstRank-1] < iiEnd[dstRank-1]){
-        //printf("dst: DE = %d  - (", de);
-        //int jjj;
-        //for (jjj=0; jjj<dstRank-1; jjj++)
-        //  printf("%d, ", ii[jjj]);
-        //printf("%d)\n", ii[jjj]);
-        // determine the lin. index for element ii[] in localArray for this DE
-        int linIndex = dstArray->getLinearIndexExclusive(i, ii);
-        // determine the sequentialized index for element ii[] in this DE
-        // getSequenceIndexExclusive() expects basis 0 ii[] in excl. region
-        SeqIndex seqIndex = dstArray->getSequenceIndexExclusive(i, ii);
+      while(arrayElement.isPastLast()==false){
+        // determine the linear index for the current Array element
+        int linIndex = arrayElement.linearIndexExclusive();
+        // determine the sequentialized index for the current Array element
+        SeqIndex seqIndex = arrayElement.sequenceIndexExclusive();
         // store linIndex and seqIndex in dstLinSeqList for this DE
         dstLinSeqList[i][elementIndex].linIndex = linIndex;
         dstLinSeqList[i][elementIndex].seqIndex = seqIndex;
@@ -5869,19 +5806,10 @@ int Array::sparseMatMulStore(
         }
         // increment
         ++elementIndex;
-        // multi-dim index increment
-        ++ii[0];
-        for (int j=0; j<dstRank-1; j++){
-          if (ii[j] == iiEnd[j]){
-            ii[j] = 0;  // reset
-            ++ii[j+1];
-          }
-        }
+        arrayElement.next();
       } // end while over all exclusive elements
     } // if there are elements in localArray associated with this local DE
   } // end for over local DEs
-  delete [] ii;
-  delete [] iiEnd;
 
   // communicate dstSeqIndexMinMax across all Pets
   // todo: use nb-allgather and wait right before needed below
@@ -7561,6 +7489,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   
   // prepare tensorContigLength arguments
   int srcTensorContigLength = 1;  // init
+  int srcRank = srcArray->rank;
   for (int jj=0; jj<srcRank; jj++){
     if (srcArray->arrayToDistGridMap[jj])
       // decomposed dimension
@@ -7571,6 +7500,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         - srcArray->undistLBound[jj] + 1;
   }
   int dstTensorContigLength = 1;  // init
+  int dstRank = dstArray->rank;
   for (int jj=0; jj<dstRank; jj++){
     if (dstArray->arrayToDistGridMap[jj])
       // decomposed dimension
@@ -7635,6 +7565,10 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
+    return rc;
+  }catch(exception &x){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      x.what(), &rc);
     return rc;
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -8965,6 +8899,74 @@ int Array::sparseMatMulRelease(
   return rc;
 }
 //-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayElement::ArrayElement()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::ArrayElement
+//
+// !INTERFACE:
+ArrayElement::ArrayElement(
+//
+// !RETURN VALUE:
+//    ArrayElement*
+//
+// !ARGUMENTS:
+//
+  Array *arrayArg,
+  int localDeArg
+  ){    
+//
+// !DESCRIPTION:
+//    Constructor
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input arguments
+  if (arrayArg == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- arrayArg must not be NULL", &rc);
+    throw rc;  // bail out with exception
+  }
+  if (localDeArg < 0 || 
+    localDeArg >= arrayArg->getDELayout()->getLocalDeCount()){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+      "- localDeArg out of range", &rc);
+    throw rc;  // bail out with exception
+  }
+  
+  // set members
+  array = arrayArg;
+  localDe = localDeArg;
+  indexTuple.resize(array->getRank());
+  indexTupleEnd.resize(array->getRank());
+  
+  // initialize tuple variables
+  int iOff = localDe * array->getDistGrid()->getDimCount();
+  int iPacked = 0;    // reset
+  int iTensor = 0;    // reset
+  for (int i=0; i<array->getRank(); i++){
+    indexTuple[i] = 0;  // reset
+    if (array->getArrayToDistGridMap()[i]){
+      // decomposed dimension
+      indexTupleEnd[i] = array->getExclusiveUBound()[iOff+iPacked]
+        - array->getExclusiveLBound()[iOff+iPacked] + 1;
+      ++iPacked;
+    }else{
+      // tensor dimension
+      indexTupleEnd[i] = array->getUndistUBound()[iTensor]
+        - array->getUndistLBound()[iTensor] + 1;
+      ++iTensor;
+    }   
+  }
+}
+
 
 } // namespace ESMCI
 
