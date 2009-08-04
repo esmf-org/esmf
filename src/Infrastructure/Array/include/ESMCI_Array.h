@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.23 2009/08/03 22:59:39 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.24 2009/08/04 23:28:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -47,7 +47,6 @@ namespace ESMCI {
 
   class Array;
   struct SeqIndex;
-  class ArrayElement;
 
   // class definition
   class Array : public ESMC_Base {    // inherits from ESMC_Base class
@@ -243,31 +242,47 @@ namespace ESMCI {
     
   };  // class Array
 
+  
   struct SeqIndex{
     int decompSeqIndex;
     int tensorSeqIndex;
   };  // struct seqIndex
   bool operator==(SeqIndex a, SeqIndex b);
   bool operator<(SeqIndex a, SeqIndex b);
-  
-  class ArrayElement{
-    Array *array;                     // associated Array object
-    int localDe;                      // localDe index
+
+    
+  class MultiDimIndexLoop{
+   protected:
     vector<int> indexTuple;
     vector<int> indexTupleEnd;
    public:
-    ArrayElement(Array *arrayArg, int localDeArg);
+    MultiDimIndexLoop(){}
+    MultiDimIndexLoop(const vector<int> sizes){
+      indexTupleEnd = sizes;
+      indexTuple.resize(sizes.size());
+      for (int i=0; i<indexTuple.size(); i++)
+        indexTuple[i] = 0;  // reset
+    }
     void first(){
-      for (int i=0; i<array->getRank(); i++)
+      for (int i=0; i<indexTuple.size(); i++)
         indexTuple[i] = 0;  // reset
     }
     void last(){
-      for (int i=0; i<array->getRank(); i++)
+      for (int i=0; i<indexTuple.size(); i++)
         indexTuple[i] = indexTupleEnd[i]-1;  // reset
     }
     void next(){
       ++indexTuple[0];
-      for (int i=0; i<array->getRank()-1; i++){
+      for (int i=0; i<indexTuple.size()-1; i++){
+        if (indexTuple[i] == indexTupleEnd[i]){
+          indexTuple[i] = 0;  // reset
+          ++indexTuple[i+1];  // increment
+        }
+      }
+    }
+    void nextLine(){  // skip all remaining elements in 1st dimension
+      indexTuple[0] = indexTupleEnd[0];
+      for (int i=0; i<indexTuple.size()-1; i++){
         if (indexTuple[i] == indexTupleEnd[i]){
           indexTuple[i] = 0;  // reset
           ++indexTuple[i+1];  // increment
@@ -275,24 +290,39 @@ namespace ESMCI {
       }
     }
     bool isFirst(){
-      for (int i=0; i<array->getRank(); i++)
+      for (int i=0; i<indexTuple.size(); i++)
         if (indexTuple[i] != 0) return false;
       return true;
     }
     bool isLast(){
-      for (int i=0; i<array->getRank(); i++)
+      for (int i=0; i<indexTuple.size(); i++)
         if (indexTuple[i] != indexTupleEnd[i]-1) return false;
       return true;
     }
     bool isPastLast(){
-      if (indexTuple[array->getRank()-1] < indexTupleEnd[array->getRank()-1])
+      if (indexTuple[indexTuple.size()-1] < indexTupleEnd[indexTuple.size()-1])
         return false;
       return true;
     }
-    int linearIndexExclusive(){
+    const int *getIndexTuple(){
+      return &indexTuple[0];
+    }
+    const int *getIndexTupleEnd(){
+      return &indexTupleEnd[0];
+    }
+    
+  };  // class MultiDimIndexLoop
+  
+  
+  class ArrayElement : public MultiDimIndexLoop{
+    Array *array;                     // associated Array object
+    int localDe;                      // localDe index
+   public:
+    ArrayElement(Array *arrayArg, int localDeArg);
+    int getLinearIndexExclusive(){
       return array->getLinearIndexExclusive(localDe, &indexTuple[0]);
     }
-    SeqIndex sequenceIndexExclusive(){
+    SeqIndex getSequenceIndexExclusive(){
       // getSequenceIndexExclusive() expects basis 0 indexTuple in excl. region
       return array->getSequenceIndexExclusive(localDe, &indexTuple[0]);
     }

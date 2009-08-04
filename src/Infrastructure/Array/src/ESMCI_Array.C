@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.46 2009/08/03 22:59:40 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.47 2009/08/04 23:28:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.46 2009/08/03 22:59:40 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.47 2009/08/04 23:28:39 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2796,90 +2796,20 @@ int Array::gather(
       // send buffer must be compiled from DE-local array segment piece by p.
       sendBuffer[i] = new char[sendSize];
       char *larrayBaseAddr = (char *)larrayBaseAddrList[i];
-      // reset counters for multi-dim while-loop
-      int *ii = new int[rank];        // index tuple basis 0
-      int *iiSrt = new int[rank];
-      int *iiEnd = new int[rank];
-      int *skipWidth = new int[rank];
-      int packedIndex = 0;    // reset
-      int tensorIndex = 0;    // reset
-      int totalWidthProd = 1; // reset
-      for (int jj=0; jj<rank; jj++){
-        if (arrayToDistGridMap[jj]){
-          // decomposed dimension 
-          int j = packedIndex;
-          iiSrt[jj] =
-            exclusiveLBound[i*redDimCount+j] - totalLBound[i*redDimCount+j];
-          iiEnd[jj] =
-            exclusiveUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1;
-          skipWidth[jj] =
-            (totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j])
-            - (exclusiveUBound[i*redDimCount+j]
-            - exclusiveLBound[i*redDimCount+j]);
-          skipWidth[jj] *= totalWidthProd;  // multiply in previous dims
-          // update totalWidthProd for next dims
-          totalWidthProd *=
-            totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1;
-          ++packedIndex;
-        }else{
-          // tensor dimension
-          iiSrt[jj] = 0;
-          iiEnd[jj] = undistUBound[tensorIndex] - undistLBound[tensorIndex] + 1;
-          totalWidthProd *=
-            undistUBound[tensorIndex] - undistLBound[tensorIndex] + 1;
-          skipWidth[jj] = totalWidthProd;
-          ++tensorIndex;
-        }
-        ii[jj] = iiSrt[jj];
-      }
+      int contigLength = exclusiveUBound[i*redDimCount]
+        - exclusiveLBound[i*redDimCount] + 1;
+      ArrayElement arrayElement(this, i);
       // loop over all elements in exclusive region for this DE and memcpy data
-      // via multi-dim while-loop
       int sendBufferIndex = 0;  // reset
-      // determine start lin. index for this element into larrayBaseAddrList[i]
-      int linearIndex = ii[rank-1];   // init
-      packedIndex = redDimCount-1;   // reset
-      if (arrayToDistGridMap[rank-1])
-        --packedIndex;  // adjust starting index
-      for (int jj=rank-2; jj>=0; jj--){
-        if (arrayToDistGridMap[jj]){
-          // decomposed dimension 
-          int j = packedIndex;
-          linearIndex *= totalUBound[i*redDimCount+j]
-            - totalLBound[i*redDimCount+j] + 1;
-          --packedIndex;
-        }else{
-          // tensor dimension
-          linearIndex *= iiEnd[jj];
-        }
-        linearIndex += ii[jj];
-      }
-      while(ii[rank-1] < iiEnd[rank-1]){
+      while(arrayElement.isPastLast()==false){
         // copy this element from excl. region into the contiguous sendBuffer
+        int linearIndex = arrayElement.getLinearIndexExclusive();
         // contiguous data copy in 1st dim
         memcpy(sendBuffer[i]+sendBufferIndex*dataSize,
-          larrayBaseAddr+linearIndex*dataSize, (iiEnd[0]-iiSrt[0])*dataSize);
-        // skip to end of 1st dimension
-        ii[0] = iiEnd[0];
-        linearIndex += iiEnd[0] - iiSrt[0];
-        sendBufferIndex += iiEnd[0] - iiSrt[0];
-        
-        // multi-dim index increment and linearIndex advancement
-        for (int j=0; j<rank-1; j++){
-          if (ii[j] == iiEnd[j]){
-            ii[j] = iiSrt[j];  // reset
-            ++ii[j+1];
-            linearIndex += skipWidth[j];
-          }else if (j==0){
-            ++linearIndex;
-          }
-        }
-      } // multi-dim while-loop
-
-      // clean-up
-      delete [] ii;
-      delete [] iiEnd;
-      delete [] iiSrt;
-      delete [] skipWidth;
+          larrayBaseAddr+linearIndex*dataSize, contigLength*dataSize);
+        sendBufferIndex += contigLength;
+        arrayElement.nextLine();  // skip ahead to next contiguous line.
+      }
     } // !contiguousFlag
     
     // ready to send the sendBuffer to rootPet
@@ -2903,8 +2833,7 @@ int Array::gather(
   
   if (localPet == rootPet){
     char *array = (char *)arrayArg;
-    int *ii = new int[rank];     // index tuple basis 0
-    int *iiEnd = new int[rank];
+    // rootPet gathers information from _all_ DEs
     for (int i=0; i<deCount; i++){
       int de = i;
       if (patchListPDe[de] == patch){
@@ -2928,18 +2857,18 @@ int Array::gather(
         } // j
 
         // reset counters for multi-dim while-loop
+        vector<int> sizes;
         tensorIndex=0;  // reset
         for (int jj=0; jj<rank; jj++){
-          ii[jj] = 0;  // reset
           int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 f tensor
           if (j){
             // decomposed dimension 
             --j;  // shift to basis 0
-            iiEnd[jj] = indexCountPDimPDe[de*dimCount+j];
+            sizes.push_back(indexCountPDimPDe[de*dimCount+j]);
           }else{
             // tensor dimension
-            iiEnd[jj] = undistUBound[tensorIndex] - undistLBound[tensorIndex]
-              + 1;
+            sizes.push_back(
+              undistUBound[tensorIndex] - undistLBound[tensorIndex] + 1);
             ++tensorIndex;
           }
         }
@@ -2950,10 +2879,10 @@ int Array::gather(
           delete commhList[j];
         }
         
+        MultiDimIndexLoop multiDimIndexLoop(sizes);
         // loop over all elements in exclusive region for this DE 
-        // via multi-dim while-loop
         int recvBufferIndex = 0;  // reset
-        while(ii[rank-1] < iiEnd[rank-1]){        
+        while(!multiDimIndexLoop.isPastLast()){        
           // determine linear index for this element into array
           int linearIndex = 0;  // reset
           for (int jj=rank-1; jj>=0; jj--){
@@ -2962,37 +2891,34 @@ int Array::gather(
             if (j){
               // decomposed dimension 
               --j;  // shift to basis 0
-              if (contigFlagPDimPDe[de*dimCount+j])
-                linearIndex += minIndexPDimPDe[de*dimCount+j] + ii[jj];
-              else
-                linearIndex += indexList[j][ii[jj]];
+              if (contigFlagPDimPDe[de*dimCount+j]){
+                linearIndex += minIndexPDimPDe[de*dimCount+j]
+                  + multiDimIndexLoop.getIndexTuple()[jj];
+              }else{
+                linearIndex +=
+                  indexList[j][multiDimIndexLoop.getIndexTuple()[jj]];
+              }
               // shift basis 1 -> basis 0
               linearIndex -= minIndexPDim[j];
             }else{
               // tensor dimension
-              linearIndex += ii[jj];
+              linearIndex += multiDimIndexLoop.getIndexTuple()[jj];
             }
           }
           // copy this element from the contiguous recvBuffer for this DE
           if (contigFlagPDimPDe[de*dimCount]){
             // contiguous data in first dimension
             memcpy(array+linearIndex*dataSize, 
-              recvBuffer[de]+recvBufferIndex*dataSize, iiEnd[0]*dataSize);
-            ii[0] = iiEnd[0]; // skip to end of 1st dimension
-            recvBufferIndex += iiEnd[0];
+              recvBuffer[de]+recvBufferIndex*dataSize,
+              multiDimIndexLoop.getIndexTupleEnd()[0]*dataSize);
+            multiDimIndexLoop.nextLine();
+            recvBufferIndex += multiDimIndexLoop.getIndexTupleEnd()[0];
           }else{
             // non-contiguous data in first dimension
             memcpy(array+linearIndex*dataSize, 
               recvBuffer[de]+recvBufferIndex*dataSize, dataSize);
-            ++ii[0];
+            multiDimIndexLoop.next();
             ++recvBufferIndex;
-          }
-          // multi-dim index increment
-          for (int j=0; j<rank-1; j++){
-            if (ii[j] == iiEnd[j]){
-              ii[j] = 0;  // reset
-              ++ii[j+1];
-            }
           }
         } // multi-dim while-loop
             
@@ -3003,8 +2929,6 @@ int Array::gather(
         delete [] indexList;
       } // DE on patch
     } // i -> de
-    delete [] ii;
-    delete [] iiEnd;
   }else{
     // localPet is _not_ rootPet -> provide localIndexList to rootPet if nec.
     int commhListCount = 0;  // reset
@@ -5733,9 +5657,9 @@ int Array::sparseMatMulStore(
       int elementIndex = 0;  // reset
       while(arrayElement.isPastLast()==false){
         // determine the linear index for the current Array element
-        int linIndex = arrayElement.linearIndexExclusive();
+        int linIndex = arrayElement.getLinearIndexExclusive();
         // determine the sequentialized index for the current Array element
-        SeqIndex seqIndex = arrayElement.sequenceIndexExclusive();
+        SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive();
         // store linIndex and seqIndex in srcLinSeqList for this DE
         srcLinSeqList[i][elementIndex].linIndex = linIndex;
         srcLinSeqList[i][elementIndex].seqIndex = seqIndex;
@@ -5786,9 +5710,9 @@ int Array::sparseMatMulStore(
       int elementIndex = 0;  // reset
       while(arrayElement.isPastLast()==false){
         // determine the linear index for the current Array element
-        int linIndex = arrayElement.linearIndexExclusive();
+        int linIndex = arrayElement.getLinearIndexExclusive();
         // determine the sequentialized index for the current Array element
-        SeqIndex seqIndex = arrayElement.sequenceIndexExclusive();
+        SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive();
         // store linIndex and seqIndex in dstLinSeqList for this DE
         dstLinSeqList[i][elementIndex].linIndex = linIndex;
         dstLinSeqList[i][elementIndex].seqIndex = seqIndex;
