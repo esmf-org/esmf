@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGatherUTest.F90,v 1.12 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_ArrayGatherUTest.F90,v 1.13 2009/08/04 23:26:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayGatherUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_ArrayGatherUTest.F90,v 1.12 2009/01/21 21:37:58 cdeluca Exp $'
+    '$Id: ESMF_ArrayGatherUTest.F90,v 1.13 2009/08/04 23:26:23 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -58,53 +58,74 @@ program ESMF_ArrayGatherUTest
     if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) &
         call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-#ifdef ESMF_TESTEXHAUSTIVE
-        !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
-        ! Gather test
-        call test_gather_1d(rc)
-        write(failMsg, *) ""
-        write(name, *) "ArrayGather 1d test"
-        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    ! 1D ArrayGather() test contiguous Array
+    call test_gather_1d(totalLWidth=(/0/), totalUWidth=(/0/), rc=rc)
+    write(failMsg, *) ""
+    write(name, *) "ArrayGather 1d test, contiguous Array"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-        !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
-        ! Gather test
-        call test_gather_2d(rc)
-        write(failMsg, *) ""
-        write(name, *) "ArrayGather 2d test"
-        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    ! 1D ArrayGather() test non-contiguous Array
+    call test_gather_1d(totalLWidth=(/2/), totalUWidth=(/3/), rc=rc)
+    write(failMsg, *) ""
+    write(name, *) "ArrayGather 1d test, non-contiguous Array"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-        !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
-        ! Gather test
-        call test_gather_3d(rc)
-        write(failMsg, *) ""
-        write(name, *) "ArrayGather 3d test"
-        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    ! 2D ArrayGather() test contiguous Array
+    call test_gather_2d(totalLWidth=(/0,0/), totalUWidth=(/0,0/), rc=rc)
+    write(failMsg, *) ""
+    write(name, *) "ArrayGather 2d test, contiguous Array"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#endif
+    !------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    ! 2D ArrayGather() test non-contiguous Array
+    call test_gather_2d(totalLWidth=(/2,3/), totalUWidth=(/4,7/), rc=rc)
+    write(failMsg, *) ""
+    write(name, *) "ArrayGather 2d test, non-contiguous Array"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    ! 3D ArrayGather() test contiguous Array
+    call test_gather_3d(totalLWidth=(/0,0,0/), totalUWidth=(/0,0,0/), rc=rc)
+    write(failMsg, *) ""
+    write(name, *) "ArrayGather 3d test, contiguous Array"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    ! 3D ArrayGather() test non-contiguous Array
+    call test_gather_3d(totalLWidth=(/11,21,31/), totalUWidth=(/9,4,3/), rc=rc)
+    write(failMsg, *) ""
+    write(name, *) "ArrayGather 3d test, non-contiguous Array"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
-#ifdef ESMF_TESTEXHAUSTIVE
 
 contains
 
 #undef ESMF_METHOD
 #define ESMF_METHOD "test_gather_1d"
-    subroutine test_gather_1d(rc)
-        integer, intent(out)                        :: rc
+    subroutine test_gather_1d(totalLWidth, totalUWidth, rc)
+        integer, intent(in)   :: totalLWidth(:), totalUWidth(:)
+        integer, intent(out)  :: rc
 
         ! local arguments used to create field etc
-        type(ESMF_Grid)                             :: grid
         type(ESMF_DistGrid)                         :: distgrid
         type(ESMF_VM)                               :: vm
         type(ESMF_Array)                            :: array
+        type(ESMF_ArraySpec)                        :: arrayspec
         integer                                     :: localrc, lpe, i, j
 
         integer, pointer                            :: farray(:)
         integer, pointer                            :: farrayDst(:)
-        integer                                     :: fa_shape(1)
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -125,28 +146,26 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        grid = ESMF_GridCreate(distgrid=distgrid, &
-            gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), &
-            name="grid", rc=localrc)
+        call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=1, &
+          rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, totalCount=fa_shape, rc=localrc)
+        array = ESMF_ArrayCreate(arrayspec, distgrid=distgrid, &
+          totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        allocate(farray(fa_shape(1)))
-        farray = lpe
-        array = ESMF_ArrayCreate(farray, distgrid=distgrid, &
-            staggerloc=0, &
-            rc=localrc)
+        call ESMF_ArrayGet(array, farrayPtr=farray, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        if(lpe .eq. 0) allocate(farrayDst(16))
+        farray = lpe  ! fill array with values
+
+        if(lpe .eq. 0) allocate(farrayDst(16))  ! rootPet
         call ESMF_ArrayGather(array, farrayDst, rootPet=0, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -164,28 +183,26 @@ contains
                 ESMF_CONTEXT, rc)) return
         endif
 
-        call ESMF_GridDestroy(grid)
         call ESMF_ArrayDestroy(array)
-        deallocate(farray)
         if(lpe .eq. 0) deallocate(farrayDst)
         rc = ESMF_SUCCESS
     end subroutine test_gather_1d
 
 #undef ESMF_METHOD
 #define ESMF_METHOD "test_gather_2d"
-    subroutine test_gather_2d(rc)
-        integer, intent(out)                        :: rc
+    subroutine test_gather_2d(totalLWidth, totalUWidth, rc)
+        integer, intent(in)   :: totalLWidth(:), totalUWidth(:)
+        integer, intent(out)  :: rc
 
         ! local arguments used to create field etc
-        type(ESMF_Grid)                             :: grid
         type(ESMF_DistGrid)                         :: distgrid
         type(ESMF_VM)                               :: vm
         type(ESMF_Array)                            :: array
+        type(ESMF_ArraySpec)                        :: arrayspec
         integer                                     :: localrc, lpe, i, j
 
         integer, pointer                            :: farray(:,:)
         integer, pointer                            :: farrayDst(:,:)
-        integer                                     :: fa_shape(2)
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -200,34 +217,32 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
-            regDecomp=(/2,2/), &
-            gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
-            name="grid", rc=localrc)
+        distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,20/), &
+            regDecomp=(/2,2/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
+        call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=2, &
+          rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, totalCount=fa_shape, rc=localrc)
+        array = ESMF_ArrayCreate(arrayspec, distgrid=distgrid, &
+          totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        allocate(farray(fa_shape(1), fa_shape(2)))
-        farray = lpe
-        array = ESMF_ArrayCreate(farray, distgrid=distgrid, &
-            staggerloc=0, &
-            rc=localrc)
+        call ESMF_ArrayGet(array, farrayPtr=farray, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        if(lpe .eq. 0) allocate(farrayDst(10,20))
+        farray = lpe  ! fill array with values
+
+        if(lpe .eq. 0) allocate(farrayDst(10,20))  ! rootPet
         call ESMF_ArrayGather(array, farrayDst, rootPet=0, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -245,28 +260,27 @@ contains
                 ESMF_CONTEXT, rc)) return
         endif
 
-        call ESMF_GridDestroy(grid)
         call ESMF_ArrayDestroy(array)
-        deallocate(farray)
         if(lpe .eq. 0) deallocate(farrayDst)
         rc = ESMF_SUCCESS
     end subroutine test_gather_2d
 
+
 #undef ESMF_METHOD
 #define ESMF_METHOD "test_gather_3d"
-    subroutine test_gather_3d(rc)
-        integer, intent(out)                        :: rc
+    subroutine test_gather_3d(totalLWidth, totalUWidth, rc)
+        integer, intent(in)   :: totalLWidth(:), totalUWidth(:)
+        integer, intent(out)  :: rc
 
         ! local arguments used to create field etc
-        type(ESMF_Grid)                             :: grid
         type(ESMF_DistGrid)                         :: distgrid
         type(ESMF_VM)                               :: vm
         type(ESMF_Array)                            :: array
+        type(ESMF_ArraySpec)                        :: arrayspec
         integer                                     :: localrc, lpe, i, j, k
 
         integer, pointer                            :: farray(:,:,:)
         integer, pointer                            :: farrayDst(:,:,:)
-        integer                                     :: fa_shape(3)
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -281,34 +295,32 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/10,20,5/), &
-            regDecomp=(/2,2,1/), &
-            gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
-            name="grid", rc=localrc)
+        distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1/), &
+            maxIndex=(/10,20,5/), regDecomp=(/2,2,1/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
+        call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=3, &
+          rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, totalCount=fa_shape, rc=localrc)
+        array = ESMF_ArrayCreate(arrayspec, distgrid=distgrid, &
+          totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        allocate(farray(fa_shape(1), fa_shape(2), fa_shape(3)))
-        farray = lpe
-        array = ESMF_ArrayCreate(farray, distgrid=distgrid, &
-            staggerloc=0, &
-            rc=localrc)
+        call ESMF_ArrayGet(array, farrayPtr=farray, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        if(lpe .eq. 0) allocate(farrayDst(10,20,5))
+        farray = lpe  ! fill array with values
+
+        if(lpe .eq. 0) allocate(farrayDst(10,20,5))  ! rootPet
         call ESMF_ArrayGather(array, farrayDst, rootPet=0, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -328,13 +340,9 @@ contains
                 ESMF_CONTEXT, rc)) return
         endif
 
-        call ESMF_GridDestroy(grid)
         call ESMF_ArrayDestroy(array)
-        deallocate(farray)
         if(lpe .eq. 0) deallocate(farrayDst)
         rc = ESMF_SUCCESS
     end subroutine test_gather_3d
-
-#endif
 
 end program ESMF_ArrayGatherUTest
