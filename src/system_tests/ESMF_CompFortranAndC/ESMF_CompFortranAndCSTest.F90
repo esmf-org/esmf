@@ -1,4 +1,4 @@
-! $Id: ESMF_CompFortranAndCSTest.F90,v 1.13 2009/07/22 04:18:11 theurich Exp $
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.14 2009/08/05 21:45:22 svasquez Exp $
 !
 ! System test CompFortranAndC
 !  Description on Sourceforge under System Test #63029
@@ -71,11 +71,6 @@
     type(ESMF_TimeInterval) :: timeStep
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
-
-    type(ESMF_Array) :: array
-    integer :: localDeCount
-    integer, allocatable :: localDeList(:)
-    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)
 
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0
