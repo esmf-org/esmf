@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistUTest.F90,v 1.12 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_ArrayRedistUTest.F90,v 1.13 2009/08/05 23:35:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayRedistUTest.F90,v 1.12 2009/01/21 21:37:58 cdeluca Exp $'
+    '$Id: ESMF_ArrayRedistUTest.F90,v 1.13 2009/08/05 23:35:00 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -296,6 +296,89 @@ call ESMF_ArrayPrint(dstArray)
       (farrayPtr(6).eq.56).and.(farrayPtr(7).eq.57)), &
       name, failMsg, result, ESMF_SRCLINE)
   endif
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "routehandle Release Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayRedistStore w/ srcToDstTransposeMap Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayRedistStore(srcArray=srcArray, dstArray=dstArray, &
+    srcToDstTransposeMap=(/1/), routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayRedist: srcArray -> dstArray w/ srcToDstTransposeMap Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  farrayPtr = -999  ! initialize dstArray to something obvious
+  call ESMF_ArrayRedist(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  ! The expected result of the redistribution of srcArray into dstArray is:
+  !
+  ! PET   localDE   DE    dstArray contents
+  ! 0     0         0     1, 2, 3, 4, 5, 6, 7
+  ! 1     0         1     11, 12, 13, 14, 15, 16, 17
+  ! 2     0         2     21, 22, 23, 24, 25, 26, 27
+  ! 3     0         3     31, 32, 33, 34, 35, 36, 37
+  ! 4     0         4     41, 42, 43, 44, 45, 46, 47
+  ! 5     0         5     51, 52, 53, 54, 55, 56, 57
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify results in dstArray Test"
+  write(failMsg, *) "Wrong results" 
+  if (localPet == 0) then
+    call ESMF_Test(((farrayPtr(1).eq.1).and. &
+      (farrayPtr(2).eq.2).and.(farrayPtr(3).eq.3).and. &
+      (farrayPtr(4).eq.4).and.(farrayPtr(5).eq.5).and. &
+      (farrayPtr(6).eq.6).and.(farrayPtr(7).eq.7)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 1) then
+    call ESMF_Test(((farrayPtr(1).eq.11).and. &
+      (farrayPtr(2).eq.12).and.(farrayPtr(3).eq.13).and. &
+      (farrayPtr(4).eq.14).and.(farrayPtr(5).eq.15).and. &
+      (farrayPtr(6).eq.16).and.(farrayPtr(7).eq.17)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 2) then
+    call ESMF_Test(((farrayPtr(1).eq.21).and. &
+      (farrayPtr(2).eq.22).and.(farrayPtr(3).eq.23).and. &
+      (farrayPtr(4).eq.24).and.(farrayPtr(5).eq.25).and. &
+      (farrayPtr(6).eq.26).and.(farrayPtr(7).eq.27)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 3) then
+    call ESMF_Test(((farrayPtr(1).eq.31).and. &
+      (farrayPtr(2).eq.32).and.(farrayPtr(3).eq.33).and. &
+      (farrayPtr(4).eq.34).and.(farrayPtr(5).eq.35).and. &
+      (farrayPtr(6).eq.36).and.(farrayPtr(7).eq.37)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 4) then
+    call ESMF_Test(((farrayPtr(1).eq.41).and. &
+      (farrayPtr(2).eq.42).and.(farrayPtr(3).eq.43).and. &
+      (farrayPtr(4).eq.44).and.(farrayPtr(5).eq.45).and. &
+      (farrayPtr(6).eq.46).and.(farrayPtr(7).eq.47)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 5) then
+    call ESMF_Test(((farrayPtr(1).eq.51).and. &
+      (farrayPtr(2).eq.52).and.(farrayPtr(3).eq.53).and. &
+      (farrayPtr(4).eq.54).and.(farrayPtr(5).eq.55).and. &
+      (farrayPtr(6).eq.56).and.(farrayPtr(7).eq.57)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  endif
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "routehandle Release Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
