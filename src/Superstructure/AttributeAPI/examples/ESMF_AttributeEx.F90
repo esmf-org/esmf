@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeEx.F90,v 1.9 2009/06/04 20:52:12 rokuingh Exp $
+! $Id: ESMF_AttributeEx.F90,v 1.10 2009/08/05 19:39:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -180,7 +180,7 @@ program ESMF_AttributeEx
 !    number, or a query for the count of the Attributes on a certain object.  
 !    These capabilities are demonstrated here by first retrieving the name of
 !    an Attribute using the index number, keep in mind that these index
-!    numbers start from 0, not from 1.  Then the name that is retrieved
+!    numbers start from 1.  Then the name that is retrieved
 !    is used to get other information about the Attribute, such as the
 !    typekind, and the number of items in the value of the Attribute.
 !    This information is then used to actually retreive the Attribute value.
