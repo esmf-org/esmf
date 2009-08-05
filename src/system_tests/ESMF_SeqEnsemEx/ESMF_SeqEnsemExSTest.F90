@@ -1,4 +1,4 @@
-! $Id: ESMF_SeqEnsemExSTest.F90,v 1.6 2009/07/31 20:02:33 svasquez Exp $
+! $Id: ESMF_SeqEnsemExSTest.F90,v 1.7 2009/08/05 22:00:45 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -81,7 +81,7 @@ program ESMF_SeqEnsemExSTest
   character(ESMF_MAXSTR) :: testname
 
   ! individual test failure message, and final status msg
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
