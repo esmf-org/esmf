@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeDistGridUTest.F90,v 1.17 2009/07/28 22:16:31 rokuingh Exp $
+! $Id: ESMF_AttributeDistGridUTest.F90,v 1.18 2009/08/05 00:06:22 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeDistGridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeDistGridUTest.F90,v 1.17 2009/07/28 22:16:31 rokuingh Exp $'
+      '$Id: ESMF_AttributeDistGridUTest.F90,v 1.18 2009/08/05 00:06:22 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -46,7 +46,7 @@ program ESMF_AttributeDistGridUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_DistGrid)    :: distgrid, distgridMove
+      type(ESMF_DistGrid)    :: distgrid
       character(ESMF_MAXSTR) :: conv, nestconv, purp, nestpurp, attrname, &
                                 attrnameOut, attrvalue
       integer                :: rc, count, items, itemCount
@@ -96,8 +96,6 @@ program ESMF_AttributeDistGridUTest
       ! preparations
       ! distgrid and grid
       distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
-        regDecomp=(/2,3/), rc=rc)
-      distgridMove = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
         regDecomp=(/2,3/), rc=rc)
 
 !-------------------------------------------------------------------------
@@ -1096,18 +1094,6 @@ program ESMF_AttributeDistGridUTest
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-    !-------------------------------------------------------------------------
-    !  Attribute move
-    !-------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Move a DistGrid Attribute hierarchy Test
-      call c_ESMC_AttributeMove(distgrid, distgridMove, rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Move a DistGrid Attribute hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
 #endif
 
     !-------------------------------------------------------------------------
@@ -1155,7 +1141,6 @@ program ESMF_AttributeDistGridUTest
      !------------------------------------------------------------------------
       ! clean up
       call ESMF_DistGridDestroy(distgrid, rc=rc)
-      call ESMF_DistGridDestroy(distgridMove, rc=rc)
       
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 

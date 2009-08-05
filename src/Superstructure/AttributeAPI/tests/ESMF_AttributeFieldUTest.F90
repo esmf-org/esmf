@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFieldUTest.F90,v 1.22 2009/07/28 22:16:31 rokuingh Exp $
+! $Id: ESMF_AttributeFieldUTest.F90,v 1.23 2009/08/05 00:06:22 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFieldUTest.F90,v 1.22 2009/07/28 22:16:31 rokuingh Exp $'
+      '$Id: ESMF_AttributeFieldUTest.F90,v 1.23 2009/08/05 00:06:22 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -47,7 +47,7 @@ program ESMF_AttributeFieldUTest
 
       ! local variables
       type(ESMF_Grid)        :: grid
-      type(ESMF_Field)       :: field, fieldMove
+      type(ESMF_Field)       :: field
       character(ESMF_MAXSTR) :: conv, nestconv, purp, nestpurp, attrname, &
                                 attrnameOut, attrvalue
       integer                :: rc, count, items, itemCount
@@ -97,7 +97,6 @@ program ESMF_AttributeFieldUTest
       ! preparations
       ! fields
       field = ESMF_FieldCreateEmpty(name="original field", rc=rc)
-      fieldMove = ESMF_FieldCreateEmpty(name="fieldMove", rc=rc)
 
       grid = ESMF_GridCreateEmpty(rc=rc)
 
@@ -1126,18 +1125,6 @@ program ESMF_AttributeFieldUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-    !-------------------------------------------------------------------------
-    !  Attribute move
-    !-------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Move a Field Attribute hierarchy Test
-      call c_ESMC_AttributeMove(field%ftypep%base, fieldMove%ftypep%base, rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Moving a Field Attribute hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
 #endif
 
     !-------------------------------------------------------------------------
@@ -1217,7 +1204,6 @@ program ESMF_AttributeFieldUTest
       !------------------------------------------------------------------------
       ! clean up
       call ESMF_FieldDestroy(field, rc=rc)
-      call ESMF_FieldDestroy(fieldMove, rc=rc)
       
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 

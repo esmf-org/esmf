@@ -1,4 +1,4 @@
-!  $Id: ESMF_AttributeFBundleUTest.F90,v 1.20 2009/07/28 22:16:31 rokuingh Exp $
+!  $Id: ESMF_AttributeFBundleUTest.F90,v 1.21 2009/08/05 00:06:22 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.20 2009/07/28 22:16:31 rokuingh Exp $'
+      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.21 2009/08/05 00:06:22 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -46,7 +46,7 @@ program ESMF_AttributeFBundleUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_FieldBundle)       :: fieldbundle, fieldbundleMove
+      type(ESMF_FieldBundle)       :: fieldbundle
       type(ESMF_Field)       :: ffb
       character(ESMF_MAXSTR) :: conv, nestconv, purp, nestpurp, attrname, &
                                 attrnameOut, attrvalue
@@ -100,7 +100,6 @@ program ESMF_AttributeFBundleUTest
       
       ! field bundles
       fieldbundle = ESMF_FieldBundleCreate(name="original field bundle", rc=rc)
-      fieldbundleMove = ESMF_FieldBundleCreate(name="field bundle for swap", rc=rc)
       
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -1122,18 +1121,6 @@ program ESMF_AttributeFBundleUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-    !-------------------------------------------------------------------------
-    !  Attribute move
-    !-------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Move a FieldBundle Attribute hierarchy Test
-      call c_ESMC_AttributeMove(fieldbundle%btypep%base, fieldbundleMove%btypep%base, rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Move a FieldBundle Attribute hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
 #endif
 
     !-------------------------------------------------------------------------
@@ -1213,7 +1200,6 @@ program ESMF_AttributeFBundleUTest
       !------------------------------------------------------------------------
       ! clean up
       call ESMF_FieldBundleDestroy(fieldbundle, rc=rc)
-      call ESMF_FieldBundleDestroy(fieldbundleMove, rc=rc)
       
       call ESMF_FieldDestroy(ffb, rc=rc)
 

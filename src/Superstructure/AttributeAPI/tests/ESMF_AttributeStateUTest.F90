@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeStateUTest.F90,v 1.20 2009/07/28 22:16:31 rokuingh Exp $
+! $Id: ESMF_AttributeStateUTest.F90,v 1.21 2009/08/05 00:06:23 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeStateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeStateUTest.F90,v 1.20 2009/07/28 22:16:31 rokuingh Exp $'
+      '$Id: ESMF_AttributeStateUTest.F90,v 1.21 2009/08/05 00:06:23 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -47,7 +47,7 @@ program ESMF_AttributeStateUTest
 
       ! local variables
       type(ESMF_Field)       :: ffs 
-      type(ESMF_State)       :: state, sfs, stateValue, stateHybrid, stateMove
+      type(ESMF_State)       :: state, sfs, stateValue, stateHybrid
       type(ESMF_FieldBundle) :: fbfs
       character(ESMF_MAXSTR) :: conv, nestconv, purp, nestpurp, attrname, &
                                 attrnameOut, attrvalue
@@ -107,7 +107,6 @@ program ESMF_AttributeStateUTest
       sfs = ESMF_StateCreate("stateforstatelink", ESMF_STATE_EXPORT, rc=rc)
       stateValue = ESMF_StateCreate("stateforvaluecopy", ESMF_STATE_EXPORT, rc=rc)
       stateHybrid = ESMF_StateCreate("stateforhybridcopy", ESMF_STATE_EXPORT, rc=rc)
-      stateMove = ESMF_StateCreate("stateforswap", ESMF_STATE_EXPORT, rc=rc)
 
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -1124,7 +1123,7 @@ program ESMF_AttributeStateUTest
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
-    !  AttributeCopy and move
+    !  AttributeCopy
     !-------------------------------------------------------------------------
 
       !EX_UTest
@@ -1142,14 +1141,6 @@ program ESMF_AttributeStateUTest
         attcopyflag=ESMF_ATTCOPY_HYBRID, atttreeflag=ESMF_ATTTREE_ON, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Copying a State Attribute hierarchy HYBRID Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Move a State Attribute hierarchy Test
-      call c_ESMC_AttributeMove(state%statep%base, stateMove%statep%base, rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Moving a State Attribute hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -1284,7 +1275,6 @@ program ESMF_AttributeStateUTest
       
       call ESMF_StateDestroy(stateValue, rc=rc)
       call ESMF_StateDestroy(stateHybrid, rc=rc)
-      call ESMF_StateDestroy(stateMove, rc=rc)
       call ESMF_StateDestroy(sfs, rc=rc)
       call ESMF_StateDestroy(state, rc=rc)
      

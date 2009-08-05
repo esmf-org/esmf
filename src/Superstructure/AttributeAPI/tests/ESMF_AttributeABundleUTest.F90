@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeABundleUTest.F90,v 1.17 2009/07/28 22:16:31 rokuingh Exp $
+! $Id: ESMF_AttributeABundleUTest.F90,v 1.18 2009/08/05 00:06:21 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeABundleUTest.F90,v 1.17 2009/07/28 22:16:31 rokuingh Exp $'
+      '$Id: ESMF_AttributeABundleUTest.F90,v 1.18 2009/08/05 00:06:21 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -46,7 +46,7 @@ program ESMF_AttributeArrayBundleUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_ArrayBundle)    :: arraybundle, arraybundleMove
+      type(ESMF_ArrayBundle)    :: arraybundle
       type(ESMF_Array), dimension(2) :: array
       type(ESMF_Array)               :: afb
       type(ESMF_ArraySpec) :: arrayspec
@@ -106,8 +106,6 @@ program ESMF_AttributeArrayBundleUTest
       afb = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
       arraybundle = ESMF_ArrayBundleCreate(arrayList=array, &
         name="MyArrayBundle", rc=rc)
-      arraybundleMove = ESMF_ArrayBundleCreate(arrayList=array, &
-        name="MyArrayBundleForMove", rc=rc)
 
 !-------------------------------------------------------------------------
 !  ARRAYBUNDLE
@@ -1126,34 +1124,6 @@ program ESMF_AttributeArrayBundleUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-    !-------------------------------------------------------------------------
-    !  Attribute move
-    !-------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Move an ArrayBundle Attribute hierarchy Test
-      call c_ESMC_AttributeMove(arraybundle, arraybundleMove, rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Move an ArrayBundle Attribute hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Move an ArrayBundle and a DistGrid Attribute hierarchy Test
-      call c_ESMC_AttributeMove(arraybundle, distgrid, rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Move an ArrayBundle and a DistGrid Attribute hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Move an ArrayBundle and an Array Attribute hierarchy Test
-      call c_ESMC_AttributeMove(arraybundle, array(1), rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Move an ArrayBundle and an Array Attribute hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
 #endif
 
     !-------------------------------------------------------------------------
@@ -1233,7 +1203,6 @@ program ESMF_AttributeArrayBundleUTest
      !------------------------------------------------------------------------
       ! clean up
       call ESMF_ArrayBundleDestroy(arraybundle, rc=rc)
-      call ESMF_ArrayBundleDestroy(arraybundleMove, rc=rc)
       call ESMF_ArrayDestroy(array(1), rc=rc)
       call ESMF_ArrayDestroy(array(2), rc=rc)
       call ESMF_DistGridDestroy(distgrid, rc=rc)

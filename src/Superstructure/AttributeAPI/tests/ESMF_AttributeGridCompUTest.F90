@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridCompUTest.F90,v 1.19 2009/07/28 22:16:31 rokuingh Exp $
+! $Id: ESMF_AttributeGridCompUTest.F90,v 1.20 2009/08/05 00:06:23 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.19 2009/07/28 22:16:31 rokuingh Exp $'
+      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.20 2009/08/05 00:06:23 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -47,7 +47,7 @@ program ESMF_AttributeGridCompUTest
 
       ! local variables
       type(ESMF_CplComp)     :: cfg
-      type(ESMF_GridComp)    :: gridcomp, gfg, gridcompValue, gridcompHybrid, gridcompMove
+      type(ESMF_GridComp)    :: gridcomp, gfg, gridcompValue, gridcompHybrid
       type(ESMF_State)       :: sfg
       character(ESMF_MAXSTR) :: conv, nestconv, purp, nestpurp, attrname, &
                                 attrnameOut, attrvalue
@@ -107,7 +107,6 @@ program ESMF_AttributeGridCompUTest
       gfg = ESMF_GridCompCreate(name="gridcompforgridcomp", petList=(/0/), rc=rc)
       gridcompValue = ESMF_GridCompCreate(name="gridcompforvaluecopy", petList=(/0/), rc=rc)
       gridcompHybrid = ESMF_GridCompCreate(name="gridcompforhybridcopy", petList=(/0/), rc=rc)
-      gridcompMove = ESMF_GridCompCreate(name="gridcompforswap", petList=(/0/), rc=rc)
       
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -1132,7 +1131,7 @@ program ESMF_AttributeGridCompUTest
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
-    !  AttributeCopy and move
+    !  AttributeCopy
     !-------------------------------------------------------------------------
 
       !EX_UTest
@@ -1150,14 +1149,6 @@ program ESMF_AttributeGridCompUTest
         attcopyflag=ESMF_ATTCOPY_HYBRID, atttreeflag=ESMF_ATTTREE_ON, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Copying a GridComp Attribute hierarchy HYBRID Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Move a GridComp Attribute hierarchy Test
-      call c_ESMC_AttributeMove(gridcomp%compp%base, gridcompMove%compp%base, rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Moving a GridComp Attribute hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -1291,7 +1282,6 @@ program ESMF_AttributeGridCompUTest
       call ESMF_GridCompDestroy(gfg, rc=rc)
       call ESMF_GridCompDestroy(gridcompValue, rc=rc)
       call ESMF_GridCompDestroy(gridcompHybrid, rc=rc)
-      call ESMF_GridCompDestroy(gridcompMove, rc=rc)
 
       call ESMF_CplCompDestroy(cfg, rc=rc)
 
