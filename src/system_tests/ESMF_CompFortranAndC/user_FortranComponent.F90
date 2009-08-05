@@ -1,4 +1,4 @@
-! $Id: user_FortranComponent.F90,v 1.12 2009/07/22 04:18:11 theurich Exp $
+! $Id: user_FortranComponent.F90,v 1.13 2009/08/05 21:37:11 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -159,11 +159,9 @@
         type(ESMF_Clock) :: clock
         integer, intent(out) :: rc
 
-        integer, save :: onetime=1              ! static variable
 
         type(ESMF_Array) :: array
         real(ESMF_KIND_R8), pointer, dimension(:,:) :: farrayPtr
-        integer :: status
         integer :: i,j
 
         ! Initialize return code
