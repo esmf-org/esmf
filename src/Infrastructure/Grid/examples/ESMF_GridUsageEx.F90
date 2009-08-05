@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.59 2009/05/21 16:09:23 peggyli Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.60 2009/08/05 22:25:45 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -48,7 +48,6 @@ program ESMF_GridCreateEx
       integer :: lbnd(3), ubnd(3), lbnd_corner(3), ubnd_corner(3)
       integer, allocatable :: petMap(:,:,:), localArbIndex(:,:)
       integer :: distgridToGridMap(2)
-      integer :: lbnd1D(1), ubnd1D(1)
 
       type(ESMF_Grid) :: grid2D, grid3D, grid4D
       type(ESMF_Array) :: arrayCoordX, arrayCoordY,array,arrayMask
