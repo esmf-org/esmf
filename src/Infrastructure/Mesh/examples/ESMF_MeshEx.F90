@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.16 2009/02/27 22:54:07 svasquez Exp $
+! $Id: ESMF_MeshEx.F90,v 1.17 2009/08/05 22:47:02 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -48,17 +48,15 @@ program ESMF_MeshEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshEx.F90,v 1.16 2009/02/27 22:54:07 svasquez Exp $'
+    '$Id: ESMF_MeshEx.F90,v 1.17 2009/08/05 22:47:02 svasquez Exp $'
 !------------------------------------------------------------------------------
     
-  ! cumulative result: count failures; no failures equals "all pass"
-  integer :: result = 0
 
   ! individual test result code
   integer :: finalrc, rc, petCount,localPet
 
   ! individual test failure message
-  character(ESMF_MAXSTR) :: name, failMsg
+  character(ESMF_MAXSTR) :: name
 
   logical :: correct
   type(ESMF_VM) :: vm
