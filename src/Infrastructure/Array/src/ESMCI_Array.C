@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.48 2009/08/05 21:19:20 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.49 2009/08/05 23:37:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.48 2009/08/05 21:19:20 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.49 2009/08/05 23:37:06 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1982,8 +1982,8 @@ SeqIndex Array::getSequenceIndexPatch(
 // !ARGUMENTS:
 //
   int patch,                        // in - patch = {1,..., patchCount}
-  int *index,                       // in - index tuple within patch 
-                                    //    - basis min (not basis 0)
+  const int *index,                 // in - index tuple within patch 
+                                    //    - basis 0
   int *rc                           // out - return code
   )const{
 //
@@ -2009,14 +2009,14 @@ SeqIndex Array::getSequenceIndexPatch(
       decompIndex[i] = index[distgridToArrayMap[i]-1];
     }else{
       // DistGrid dim _not_ associated with Array dim
-      decompIndex[i] = distgrid->getMinIndexPDimPPatch()[(patch-1)*dimCount+i];
+      decompIndex[i] = 0;
       // use smallest seq index for replicated dims
     }
   }
   // determine the sequentialized index for decomposed dimensions
   int decompSeqIndex;
-  decompSeqIndex = distgrid->getSequenceIndexPatch(patch, decompIndex, 0,
-    &localrc);  
+  decompSeqIndex = distgrid->getSequenceIndexPatchRelative(patch, decompIndex,
+    0, &localrc);  
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return seqIndex;
   seqIndex.decompSeqIndex = decompSeqIndex;
@@ -2033,7 +2033,7 @@ SeqIndex Array::getSequenceIndexPatch(
       // first time multiply with zero intentionally:
       tensorSeqIndex *= undistUBound[tensorIndex] - undistLBound[tensorIndex]
       + 1;
-      tensorSeqIndex += index[jj] - undistLBound[tensorIndex];
+      tensorSeqIndex += index[jj];
       --tensorIndex;
     }
   }
@@ -3663,7 +3663,7 @@ int Array::redistStore(
         - srcMinIndexPDimPPatch[i*srcDimCount+srcDimCount-1] + 1;
       int intervalSize = lastDimSize/petCount;
       int extraElements = lastDimSize%petCount;
-      localStart[i] = srcMinIndexPDimPPatch[i*srcDimCount+srcDimCount-1];
+      localStart[i] = 0;  // initialize
       localStart[i] += localPet * intervalSize;
       localSize[i] = intervalSize;
       if (localPet < extraElements){
@@ -3751,15 +3751,17 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
             srcTuple[jj] = srcTupleStart[jj];
             srcTupleEnd[jj] = localStart[i] + localSize[i];
           }else{
-            srcTupleStart[jj] = srcMinIndexPDimPPatch[i*srcDimCount+j];
+            srcTupleStart[jj] = 0;
             srcTuple[jj] = srcTupleStart[jj];
-            srcTupleEnd[jj] = srcMaxIndexPDimPPatch[i*srcDimCount+j] + 1;
+            srcTupleEnd[jj] = srcMaxIndexPDimPPatch[i*srcDimCount+j]
+              - srcMinIndexPDimPPatch[i*srcDimCount+j] + 1;
           }
         }else{
           // tensor dimension
-          srcTupleStart[jj] = srcArray->undistLBound[tensorIndex];
+          srcTupleStart[jj] = 0;
           srcTuple[jj] = srcTupleStart[jj];
-          srcTupleEnd[jj] = srcArray->undistUBound[tensorIndex] + 1;
+          srcTupleEnd[jj] = srcArray->undistUBound[tensorIndex]
+            - srcArray->undistLBound[tensorIndex] + 1;
           ++tensorIndex;
         }
       }

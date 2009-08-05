@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.24 2009/08/04 23:28:39 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.25 2009/08/05 23:37:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -193,7 +193,8 @@ namespace ESMCI {
     int getLinearIndexExclusive(int localDe, int *index, int *rc=NULL) const;
     SeqIndex getSequenceIndexExclusive(int localDe, int *index,
       int *rc=NULL) const;
-    SeqIndex getSequenceIndexPatch(int patch, int *index, int *rc=NULL) const;
+    SeqIndex getSequenceIndexPatch(int patch, const int *index, int *rc=NULL)
+      const;
     void setStaggerLoc(int staggerLocArg){
       for (int i=0; i<tensorElementCount; i++) staggerLoc[i] = staggerLocArg;
     }
