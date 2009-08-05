@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.23 2009/07/28 22:15:55 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.24 2009/08/05 00:05:48 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.23 2009/07/28 22:15:55 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.24 2009/08/05 00:05:48 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1420,7 +1420,7 @@ extern "C" {
     ESMC_NOT_PRESENT_FILTER(rc));
   
 }  // end c_esmc_attpackispresent
-
+/*
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  c_ESMC_AttributeMove - Move an attribute between objects
@@ -1462,13 +1462,13 @@ extern "C" {
     if (rc) *rc = status;    
     return;
   }
-  
+
   status = (**destination).root.AttributeMove(&((**source).root));
   ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeMove
-
+*/
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  c_esmc_attpacksetchar - Set attributes in the attribute package
