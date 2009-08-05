@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.20 2009/07/29 20:33:54 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.21 2009/08/05 23:33:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.20 2009/07/29 20:33:54 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.21 2009/08/05 23:33:35 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2431,7 +2431,7 @@ int DistGrid::getSequenceIndexLocalDe(
 // !ARGUMENTS:
 //
   int localDe,                      // in  - local DE = {0, ..., localDeCount-1}
-  int *index,                       // in  - DE-local index tuple in or 
+  const int *index,                 // in  - DE-local index tuple in or 
                                     //       relative to exclusive region
                                     //       basis 0
   int *rc                           // out - return code
@@ -2518,6 +2518,67 @@ int DistGrid::getSequenceIndexLocalDe(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::getSequenceIndexPatchRelative()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::getSequenceIndexPatchRelative
+//
+// !INTERFACE:
+int DistGrid::getSequenceIndexPatchRelative(
+//
+// !RETURN VALUE:
+//    int sequence index
+//
+// !ARGUMENTS:
+//
+  int patch,                        // in  - patch = {1, ..., patchCount}
+  const int *index,                 // in  - patch relative index tuple, base 0
+  int depth,                        // in  - depth of recursive search
+  int *rc                           // out - return code
+  )const{
+//
+// !DESCRIPTION:
+//    Get sequential index provided the patch relative index tuple.
+//
+//    A value of -1 is returned by this function if the specified index tuple
+//    cannot be mapped to a sequence index in DistGrid. If at the same time
+//    the code returned in rc does not indicate an error a return value of -1
+//    indicates that the index tuple lies outside of the DistGrid index space.
+//
+//    Same as getSequenceIndexPatch(), but allows index tuple to be passed in
+//    patch relative, base 0, which is more conveninet in many cases.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // check input
+  if (patch < 1 || patch > patchCount){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "- Specified patch out of bounds", rc);
+    return -1;
+  }
+
+  int *indexPatchSpecific = new int[dimCount];
+  for (int i=0; i<dimCount; i++)
+    indexPatchSpecific[i] = index[i] + minIndexPDimPPatch[(patch-1)*dimCount+i];
+  
+  int seqindex = getSequenceIndexPatch(patch, indexPatchSpecific, depth,
+    &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    rc)) return seqindex;  // bail out
+  
+  delete [] indexPatchSpecific;
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return seqindex;
+}
+//-----------------------------------------------------------------------------
+  
+  //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::DistGrid::getSequenceIndexPatch()"
 //BOPI
 // !IROUTINE:  ESMCI::DistGrid::getSequenceIndexPatch
@@ -2531,7 +2592,7 @@ int DistGrid::getSequenceIndexPatch(
 // !ARGUMENTS:
 //
   int patch,                        // in  - patch = {1, ..., patchCount}
-  int *index,                       // in  - patch relative index tuple
+  const int *index,                 // in  - patch-specific absolute index tuple
   int depth,                        // in  - depth of recursive search
   int *rc                           // out - return code
   )const{
@@ -2543,6 +2604,13 @@ int DistGrid::getSequenceIndexPatch(
 //    cannot be mapped to a sequence index in DistGrid. If at the same time
 //    the code returned in rc does not indicate an error a return value of -1
 //    indicates that the index tuple lies outside of the DistGrid index space.
+//
+//    The way this recursive algorithm is written, it requires that the 
+//    provided index tuple be expressed in a "patch-specific absolute" sense.
+//    It is "absolute" in that the (0,0,...) tuple is not 'defined' to
+//    equal the origin of the patch. Instead the origin of the patch would
+//    be indicated by an index tuple that is equal to the "patch-specific"
+//    vector slice of minIndexPDimPPatch[].
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -2607,7 +2675,7 @@ int DistGrid::getSequenceIndexPatch(
         seqindex = getSequenceIndexPatch(patchB, indexB, depth, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           rc)) return seqindex;  // bail out
-        delete indexB;
+        delete [] indexB;
         if (seqindex > -1)
           break;  // break out of loop over connections
       }
@@ -2630,7 +2698,7 @@ int DistGrid::getSequenceIndexPatch(
         seqindex = getSequenceIndexPatch(patchA, indexA, depth, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           rc)) return seqindex;  // bail out
-        delete indexA;
+        delete [] indexA;
         if (seqindex > -1)
           break;  // break out of loop over connections
       }

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.11 2009/01/21 21:37:58 cdeluca Exp $
+// $Id: ESMCI_DistGrid.h,v 1.12 2009/08/05 23:33:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -150,8 +150,11 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     const int *getCollocationTable() const {return collocationTable;}
     DELayout *getDELayout()         const {return delayout;}
     ESMC_Logical getRegDecompFlag() const {return regDecompFlag;}
-    int getSequenceIndexLocalDe(int localDe, int *index, int *rc=NULL) const;
-    int getSequenceIndexPatch(int patch, int *index, int depth,
+    int getSequenceIndexLocalDe(int localDe, const int *index, int *rc=NULL)
+      const;
+    int getSequenceIndexPatchRelative(int patch, const int *index, int depth,
+      int *rc=NULL)const;
+    int getSequenceIndexPatch(int patch, const int *index, int depth,
       int *rc=NULL)const;
     int *const*getElementCountPCollPLocalDe()
       const {return elementCountPCollPLocalDe;}
