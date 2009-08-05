@@ -1,4 +1,4 @@
-! $Id: user_model4.F90,v 1.6 2009/05/29 19:24:42 theurich Exp $
+! $Id: user_model4.F90,v 1.7 2009/08/05 21:53:09 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -158,8 +158,6 @@ module user_model4
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
     integer               :: i, j, solution
     character(len=ESMF_MAXSTR) :: stateName
-    type(ESMF_Time) :: startTime, currTime
-    type(ESMF_Calendar) :: gregorianCalendar
 
     
     ! Initialize return code
