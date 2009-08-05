@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.47 2009/08/04 23:28:39 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.48 2009/08/05 21:19:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.47 2009/08/04 23:28:39 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.48 2009/08/05 21:19:20 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2808,8 +2808,8 @@ int Array::gather(
         memcpy(sendBuffer[i]+sendBufferIndex*dataSize,
           larrayBaseAddr+linearIndex*dataSize, contigLength*dataSize);
         sendBufferIndex += contigLength;
-        arrayElement.nextLine();  // skip ahead to next contiguous line.
-      }
+        arrayElement.nextLine();  // skip ahead to next contiguous line
+      } // multi dim index loop
     } // !contiguousFlag
     
     // ready to send the sendBuffer to rootPet
@@ -2856,7 +2856,7 @@ int Array::gather(
           }
         } // j
 
-        // reset counters for multi-dim while-loop
+        // initialize multi dim index loop
         vector<int> sizes;
         tensorIndex=0;  // reset
         for (int jj=0; jj<rank; jj++){
@@ -2920,7 +2920,7 @@ int Array::gather(
             multiDimIndexLoop.next();
             ++recvBufferIndex;
           }
-        } // multi-dim while-loop
+        } // multi dim index loop
             
         // clean-up
         for (int j=0; j<dimCount; j++)
@@ -3125,11 +3125,10 @@ int Array::scatter(
   char **sendBuffer;
   if (localPet == rootPet){
     char *array = (char *)arrayArg;
+    // rootPet scatters information to _all_ DEs
     // for each DE of the Array memcpy together a single contiguous sendBuffer
     // from "array" data and send it to the receiving PET non-blocking.
     sendBuffer = new char*[deCount]; // contiguous sendBuffer
-    int *ii = new int[rank];     // index tuple basis 0
-    int *iiEnd = new int[rank];
     for (int i=0; i<deCount; i++){
       int de = i;
       if (patchListPDe[de] == patch){
@@ -3156,19 +3155,20 @@ int Array::scatter(
         int sendSize =
           exclusiveElementCountPDe[de]*tensorElementCount*dataSize;  // bytes
         sendBuffer[de] = new char[sendSize];
-        // reset counters for multi-dim while-loop
+        
+        // initialize multi dim index loop
+        vector<int> sizes;
         tensorIndex=0;  // reset
         for (int jj=0; jj<rank; jj++){
-          ii[jj] = 0;  // reset
           int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 f tensor
           if (j){
             // decomposed dimension 
             --j;  // shift to basis 0
-            iiEnd[jj] = indexCountPDimPDe[de*dimCount+j];
+            sizes.push_back(indexCountPDimPDe[de*dimCount+j]);
           }else{
             // tensor dimension
-            iiEnd[jj] = undistUBound[tensorIndex] - undistLBound[tensorIndex]
-              + 1;
+            sizes.push_back(
+              undistUBound[tensorIndex] - undistLBound[tensorIndex] + 1);
             ++tensorIndex;
           }
         }
@@ -3179,10 +3179,10 @@ int Array::scatter(
           delete commhList[j];
         }
         
+        MultiDimIndexLoop multiDimIndexLoop(sizes);
         // loop over all elements in exclusive region for this DE 
-        // via multi-dim while-loop
         int sendBufferIndex = 0;  // reset
-        while(ii[rank-1] < iiEnd[rank-1]){        
+        while(!multiDimIndexLoop.isPastLast()){
           // determine linear index for this element into array
           int linearIndex = 0;  // reset
           for (int jj=rank-1; jj>=0; jj--){
@@ -3191,39 +3191,36 @@ int Array::scatter(
             if (j){
               // decomposed dimension 
               --j;  // shift to basis 0
-              if (contigFlagPDimPDe[de*dimCount+j])
-                linearIndex += minIndexPDimPDe[de*dimCount+j] + ii[jj];
-              else
-                linearIndex += indexList[j][ii[jj]];
+              if (contigFlagPDimPDe[de*dimCount+j]){
+                linearIndex += minIndexPDimPDe[de*dimCount+j]
+                  + multiDimIndexLoop.getIndexTuple()[jj];
+              }else{
+                linearIndex +=
+                  indexList[j][multiDimIndexLoop.getIndexTuple()[jj]];
+              }
               // shift basis 1 -> basis 0
               linearIndex -= minIndexPDim[j];
             }else{
               // tensor dimension
-              linearIndex += ii[jj];
+              linearIndex += multiDimIndexLoop.getIndexTuple()[jj];
             }
           }
           // copy this element into the contiguous sendBuffer for this DE
           if (contigFlagPDimPDe[de*dimCount]){
             // contiguous data in first dimension
             memcpy(sendBuffer[de]+sendBufferIndex*dataSize,
-              array+linearIndex*dataSize, iiEnd[0]*dataSize);
-            ii[0] = iiEnd[0]; // skip to end of 1st dimension
-            sendBufferIndex += iiEnd[0];
+              array+linearIndex*dataSize,
+              multiDimIndexLoop.getIndexTupleEnd()[0]*dataSize);
+            multiDimIndexLoop.nextLine();
+            sendBufferIndex += multiDimIndexLoop.getIndexTupleEnd()[0];
           }else{
             // non-contiguous data in first dimension
             memcpy(sendBuffer[de]+sendBufferIndex*dataSize,
               array+linearIndex*dataSize, dataSize);
-            ++ii[0];
+            multiDimIndexLoop.next();
             ++sendBufferIndex;
           }
-          // multi-dim index increment
-          for (int j=0; j<rank-1; j++){
-            if (ii[j] == iiEnd[j]){
-              ii[j] = 0;  // reset
-              ++ii[j+1];
-            }
-          }
-        } // multi-dim while-loop
+        } // multi dim index loop
     
         // ready to send the sendBuffer
         int dstPet;
@@ -3246,9 +3243,6 @@ int Array::scatter(
         delete [] indexList;
       } // DE on patch
     } // i -> de
-    
-    delete [] ii;
-    delete [] iiEnd;
   }else{
     // localPet is _not_ rootPet -> provide localIndexList to rootPet if nec.
     int commhListCount = 0;  // reset
@@ -3321,92 +3315,24 @@ int Array::scatter(
       // only if this DE has a non-contiguous decomposition the contiguous
       // receive buffer must be copied into DE-local array segment piece by p.
       char *larrayBaseAddr = (char *)larrayBaseAddrList[i];
-      // reset counters for multi-dim while-loop
-      int *ii = new int[rank];        // index tuple basis 0
-      int *iiSrt = new int[rank];
-      int *iiEnd = new int[rank];
-      int *skipWidth = new int[rank];
-      int packedIndex = 0;    // reset
-      int tensorIndex = 0;    // reset
-      int totalWidthProd = 1; // reset
-      for (int jj=0; jj<rank; jj++){
-        if (arrayToDistGridMap[jj]){
-          // decomposed dimension 
-          int j = packedIndex;
-          iiSrt[jj] =
-            exclusiveLBound[i*redDimCount+j] - totalLBound[i*redDimCount+j];
-          iiEnd[jj] =
-            exclusiveUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1;
-          skipWidth[jj] =
-            (totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j])
-            - (exclusiveUBound[i*redDimCount+j]
-            - exclusiveLBound[i*redDimCount+j]);
-          skipWidth[jj] *= totalWidthProd;  // multiply in previous dims
-          // update totalWidthProd for next dims
-          totalWidthProd *=
-            totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1;
-          ++packedIndex;
-        }else{
-          // tensor dimension
-          iiSrt[jj] = 0;
-          iiEnd[jj] = undistUBound[tensorIndex] - undistLBound[tensorIndex] + 1;
-          totalWidthProd *=
-            undistUBound[tensorIndex] - undistLBound[tensorIndex] + 1;
-          skipWidth[jj] = totalWidthProd;
-          ++tensorIndex;
-        }
-        ii[jj] = iiSrt[jj];
-      }
+      int contigLength = exclusiveUBound[i*redDimCount]
+        - exclusiveLBound[i*redDimCount] + 1;
+      ArrayElement arrayElement(this, i);
       // loop over all elements in exclusive region for this DE and memcpy data
-      // via multi-dim while-loop
       int recvBufferIndex = 0;  // reset
-      // determine start lin. index for this element into larrayBaseAddrList[i]
-      int linearIndex = ii[rank-1];  // init
-      packedIndex = redDimCount-1;  // reset
-      if (arrayToDistGridMap[rank-1])
-        --packedIndex;  // adjust starting index
-      for (int jj=rank-2; jj>=0; jj--){
-        if (arrayToDistGridMap[jj]){
-          // decomposed dimension 
-          int j = packedIndex;
-          linearIndex *= totalUBound[i*redDimCount+j]
-            - totalLBound[i*redDimCount+j] + 1;
-          --packedIndex;
-        }else{
-          // tensor dimension
-          linearIndex *= iiEnd[jj];
-        }
-        linearIndex += ii[jj];
-      }
-      while(ii[rank-1] < iiEnd[rank-1]){
+      while(arrayElement.isPastLast()==false){
         // copy this element from the contiguous recvBuffer into excl. region
+        int linearIndex = arrayElement.getLinearIndexExclusive();
         // since the data in the recvBuffer was constructed to be contiguous
         // wrt data layout on destination DE -> contiguous data copy in 1st dim
         memcpy(larrayBaseAddr+linearIndex*dataSize,
-          recvBuffer[i]+recvBufferIndex*dataSize, (iiEnd[0]-iiSrt[0])*dataSize);
-        // skip to end of 1st dimension
-        ii[0] = iiEnd[0];
-        linearIndex += iiEnd[0] - iiSrt[0];
-        recvBufferIndex += iiEnd[0] - iiSrt[0];
-        
-        // multi-dim index increment and linearIndex advancement
-        for (int j=0; j<rank-1; j++){
-          if (ii[j] == iiEnd[j]){
-            ii[j] = iiSrt[j];  // reset
-            ++ii[j+1];
-            linearIndex += skipWidth[j];
-          }else if (j==0){
-            ++linearIndex;
-          }
-        }
-      } // multi-dim while-loop
+          recvBuffer[i]+recvBufferIndex*dataSize, contigLength*dataSize);
+        recvBufferIndex += contigLength;
+        arrayElement.nextLine();  // skip ahead to next contiguous line        
+      } // multi dim index loop
 
       // clean-up
       delete [] recvBuffer[i];
-      delete [] ii;
-      delete [] iiEnd;
-      delete [] iiSrt;
-      delete [] skipWidth;
     } // !contiguousFlag
   } // i -> de
     
