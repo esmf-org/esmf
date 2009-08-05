@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.50 2009/07/28 22:16:31 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.51 2009/08/05 00:07:08 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.50 2009/07/28 22:16:31 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.51 2009/08/05 00:07:08 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -976,7 +976,8 @@ contains
 !
 ! !DESCRIPTION:
 !     Returns information associated with the indexed Attribute, 
-!     including {\tt name}, {\tt typekind} and {\tt itemCount}.
+!     including {\tt name}, {\tt typekind} and {\tt itemCount}.  Keep in
+!     mind that these indexes start from 1, as expected in a Fortran API.
 !     Supported values for <object> are:  
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array

@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.26 2009/07/01 17:28:47 rokuingh Exp $
+% $Id: Attribute_desc.tex,v 1.27 2009/08/05 00:07:20 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -190,5 +190,16 @@ ESMF also allows nesting of Attribute packages.  This capability is intended to 
 
 The nesting capabilities of Attribute packages are also very useful for organizing the customized metadata supplied by a user.  For example, if a user was not satisfied with the metadata support required in the ESG convention for Field they could supply a list of Attributes they would like to support.  This new Attribute package would then be used as an additional layer, inside which the Attribute package of ESG would be nested, inside which the CF Attribute package would be nested.  One important thing to remember when working with nested Attribute packages is that naming two Attributes in the same nested structure can yield undefined behavior.
 
-
-
+An explanation of the specifiers is in order at this point.  The purpose 
+specifier is really just meant as an additional means, beyond the use of 
+"convention", to specify Attribute packages.  One could imagine that the 
+CF convention would want to be able to have Attribute packages divided 
+up in some fashion, which ESMF could then keep track of with the purpose 
+specifier.  It was added with the intention of allowing Attributes, and 
+packages, maximum flexibility.  Take the Field's ESMF standard Attribute 
+package for example.  This 
+package is made up of three nested Attribute packages.  The lowest one 
+is made up of three Attributes with convention=CF and purpose=General.  
+The next level contains one Attribute with convention=CF but 
+purpose=Extended.  On top of this is the convention=ESG package, also 
+with purpose=General.
