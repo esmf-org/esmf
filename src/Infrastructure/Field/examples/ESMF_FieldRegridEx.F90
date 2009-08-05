@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.25 2009/04/28 15:54:17 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.26 2009/08/05 22:56:15 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,17 +37,15 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.25 2009/04/28 15:54:17 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.26 2009/08/05 22:56:15 svasquez Exp $'
 !------------------------------------------------------------------------------
     
-  ! cumulative result: count failures; no failures equals "all pass"
-  integer :: result = 0
 
   ! individual test result code
   integer :: localrc, rc, petCount,localPet
 
   ! individual test failure message
-  character(ESMF_MAXSTR) :: name, failMsg
+  character(ESMF_MAXSTR) :: name
 
   logical :: correct
   type(ESMF_Grid) :: gridSrc
@@ -62,13 +60,10 @@ program ESMF_FieldRegridEx
   real(ESMF_KIND_R8), pointer :: fptrXC(:,:)
   real(ESMF_KIND_R8), pointer :: fptrYC(:,:)
   real(ESMF_KIND_R8), pointer :: fptr(:,:)
-  integer :: petMap2D(2,2,1)
   integer :: clbnd(2),cubnd(2)
   integer :: fclbnd(2),fcubnd(2)
-  integer :: i1,i2, index(2)
+  integer :: i1,i2
   integer :: lDE, localDECount
-  real(ESMF_KIND_R8) :: coord(2)
-  character(len=ESMF_MAXSTR) :: string
   integer src_nx, src_ny, dst_nx, dst_ny
   integer num_arrays
 
@@ -76,8 +71,6 @@ program ESMF_FieldRegridEx
   real(ESMF_KIND_R8) :: dst_dx, dst_dy
   real(ESMF_KIND_R8) :: ctheta, stheta
   real(ESMF_KIND_R8) :: theta, d2rad, xtmp, x, y
-
-  integer, pointer :: larrayList(:)
 
   integer(ESMF_KIND_I4), pointer :: indicies(:,:)
   real(ESMF_KIND_R8), pointer    :: weights(:)
