@@ -30,21 +30,12 @@ program ESMF_LocStreamEx
       ! Local variables  
       integer:: rc, finalrc
       type(ESMF_VM):: vm
-      type(ESMF_ArraySpec) ::  arrayspec2D,arrayspec
 
-      real(ESMF_KIND_R8), pointer :: centerX(:), centerY(:), centerZ(:)
-      real(ESMF_KIND_R8), pointer :: cornerX(:), cornerY(:), cornerZ(:)
-      real(ESMF_KIND_R8), pointer :: coordX2D(:,:), coordY2D(:,:)
-      real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:)
       real(ESMF_KIND_R8), pointer :: lat(:), lon(:), temperature(:)
       type(ESMF_Field)            :: field_temperature
     
-      type(ESMF_Array) :: arrayCoordX, arrayCoordY,array
-
-      type(ESMF_distGrid) :: distgrid
       type(ESMF_LocStream) :: locstream
       integer :: localPet, petCount
-      integer :: lDE,localDECount
       integer,parameter :: numLocationsOnThisPet=20
       integer :: i
 
