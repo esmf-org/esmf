@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.9 2009/06/04 20:52:12 rokuingh Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.10 2009/08/06 15:45:59 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -53,10 +53,9 @@ program ESMF_AttributePackageEx
       type(ESMF_FieldBundle)  :: fbundle
       type(ESMF_State)        :: importState, exportState
       type(ESMF_GridComp)     :: gridcomp
-      character(ESMF_MAXSTR)  :: name1,name2,name3,name4,name5,name6,name7, &
-                                 name8, name9, name10, value1,value2,value3, &
-                                 value4,value5,value6,value7,value8,value9, &
-                                 value10,convESMF,convCC,purpGen
+      character(ESMF_MAXSTR)  :: name1,name2,name3,name4, &
+                                 value1,value2,value3, value4, &
+                                 convESMF,convCC,purpGen
       
       character(ESMF_MAXSTR),dimension(2)   :: attrList         
 
