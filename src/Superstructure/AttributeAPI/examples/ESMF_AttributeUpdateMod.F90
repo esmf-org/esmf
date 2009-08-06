@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.15 2009/05/29 19:23:34 theurich Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.16 2009/08/06 19:03:27 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -686,7 +686,6 @@ module ESMF_AttributeUpdateMod
     type(ESMF_VM)               :: vm
     integer                     :: myPet
     
-    type(ESMF_Array)            :: array
     integer, dimension(2)       :: rootList
 
     rc = ESMF_SUCCESS
