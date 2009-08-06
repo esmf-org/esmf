@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.13 2009/04/30 18:03:05 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.14 2009/08/06 19:10:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -72,10 +72,7 @@ implicit none
       type(ESMF_GridComp)     :: gridcomp1
       type(ESMF_GridComp)     :: gridcomp2
       type(ESMF_CplComp)      :: cplcomp
-      character(ESMF_MAXSTR)  :: name1,name2,name3,name4,name5,name6,name7, &
-                                 name8, name9, name10, value1,value2,value3, &
-                                 value4,value5,value6,value7,value8,value9, &
-                                 value10,convESMF,purpGen
+      character(ESMF_MAXSTR)  :: convESMF,purpGen
 
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, rc=rc)
