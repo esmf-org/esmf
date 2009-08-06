@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.52 2009/05/20 02:26:21 theurich Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.53 2009/08/06 21:17:10 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.52 2009/05/20 02:26:21 theurich Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.53 2009/08/06 21:17:10 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -48,30 +48,36 @@
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
-      character(ESMF_MAXSTR) :: name, msg_type, pet_num
-      type(ESMF_Time) :: log_time, my_time
-      type(ESMF_TimeInterval) :: time_diff, zero, one_sec
-      character(1) :: pet_char
-      character(4) :: my_pet_char
-      character(8) :: todays_date
-      character(10) :: todays_time
-      character(80) :: filename
-      integer :: my_v(8), log_v(8), k, init_sec
-      integer :: datetime_commbuf(8)
-      integer, pointer :: rndseed(:)
-      
+      character(ESMF_MAXSTR) :: name
 
-      character :: random_char
-      character (9) :: random_string, msg_string
-      character (5) :: random_chars
 
       !LOCAL VARIABLES:
-      integer :: rc2, ran_num, i, input_status, my_pet, num_pets
+      type(ESMF_Log) :: log1, log5, log7
+      type(ESMF_LogType) :: logtype
+
+#ifdef ESMF_TESTEXHAUSTIVE
+      type(ESMF_VM):: vm
+      character(ESMF_MAXSTR) :: pet_num
       real :: r1
       logical :: is_error
-      type(ESMF_Log) :: log1, log2, log3, log4, log5, log6, log7
-      type(ESMF_VM):: vm
-      type(ESMF_LogType) :: logtype
+      character(ESMF_MAXSTR) :: msg_type
+      character(80) :: filename
+      integer :: num_pets, my_pet, input_status, ran_num, rc2, k, i
+      integer :: datetime_commbuf(8)
+      integer, pointer :: rndseed(:)
+      type(ESMF_Log) :: log2, log4, log6
+      character (5) :: random_chars
+      character (9) :: msg_string, random_string
+      character :: random_char
+      integer :: my_v(8), log_v(8)
+      character(8) :: todays_date
+      character(10) :: todays_time
+      character(4) :: my_pet_char
+      character(1) :: pet_char
+      type(ESMF_TimeInterval) :: one_sec, zero, time_diff
+      type(ESMF_Time) :: my_time, log_time
+#endif
+
 
 
 !------------------------------------------------------------------------------
