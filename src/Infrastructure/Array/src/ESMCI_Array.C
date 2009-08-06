@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.49 2009/08/05 23:37:06 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.50 2009/08/06 00:26:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.49 2009/08/05 23:37:06 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.50 2009/08/06 00:26:21 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3733,13 +3733,11 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
     delete [] extent;
     // prepare to fill in factorIndexList elements
     int factorIndexListIndex = 0; // reset
-    int *srcTuple = new int[rank];
-    int *srcTupleStart = new int[rank];
-    int *srcTupleEnd = new int[rank];
     int *dstTuple = new int[rank];
-    // fill in factorIndexList elements
     for (int i=0; i<patchCount; i++){
-      // prepare for multi-dim loop through dims in srcArray patch
+      // initialize multi dim index loop
+      vector<int> offsets;
+      vector<int> sizes;
       int tensorIndex = 0;  // reset
       for (int jj=0; jj<rank; jj++){
         int j = srcArrayToDistGridMap[jj];  // j is dimIndex bas 1, or 0 undist.
@@ -3747,27 +3745,28 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
           // decomposed dimension 
           --j;  // shift to basis 0
           if (j == srcDimCount-1){
-            srcTupleStart[jj] = localStart[i];
-            srcTuple[jj] = srcTupleStart[jj];
-            srcTupleEnd[jj] = localStart[i] + localSize[i];
+            // share work across PETs for last decomposed dim
+            offsets.push_back(localStart[i]);
+            sizes.push_back(localSize[i]);
           }else{
-            srcTupleStart[jj] = 0;
-            srcTuple[jj] = srcTupleStart[jj];
-            srcTupleEnd[jj] = srcMaxIndexPDimPPatch[i*srcDimCount+j]
-              - srcMinIndexPDimPPatch[i*srcDimCount+j] + 1;
+            offsets.push_back(0);
+            sizes.push_back(srcMaxIndexPDimPPatch[i*srcDimCount+j]
+              - srcMinIndexPDimPPatch[i*srcDimCount+j] + 1);
           }
         }else{
           // tensor dimension
-          srcTupleStart[jj] = 0;
-          srcTuple[jj] = srcTupleStart[jj];
-          srcTupleEnd[jj] = srcArray->undistUBound[tensorIndex]
-            - srcArray->undistLBound[tensorIndex] + 1;
+          offsets.push_back(0);
+          sizes.push_back(srcArray->undistUBound[tensorIndex]
+            - srcArray->undistLBound[tensorIndex] + 1);
           ++tensorIndex;
         }
       }
-      // multi-dim loop through dims in srcArray patch
-      while (srcTuple[rank-1] < srcTupleEnd[rank-1]){
-        // srcTuple --srcToDstTMap--> dstTuple
+      
+      MultiDimIndexLoop multiDimIndexLoop(offsets, sizes);
+      while(!multiDimIndexLoop.isPastLast()){
+        const int *srcTuple = multiDimIndexLoop.getIndexTuple();
+        // redist is identity mapping, but must consider srcToDstTMap
+        // srcTuple --(srcToDstTMap)--> dstTuple
         for (int j=0; j<rank; j++)
           dstTuple[srcToDstTMap[j]] = srcTuple[j];
         // determine seq indices
@@ -3780,33 +3779,15 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
         factorIndexListAlloc[fili+2] = dstSeqIndex.decompSeqIndex;
         factorIndexListAlloc[fili+3] = dstSeqIndex.tensorSeqIndex;
 
-#if 0
-printf("factorIndexListIndex=%d (%d, %d) (%d, %d, %d, %d)\n",
-  factorIndexListIndex,
-  srcTuple[0], srcTuple[1],
-  srcSeqIndex.decompSeqIndex, srcSeqIndex.tensorSeqIndex,
-  dstSeqIndex.decompSeqIndex, dstSeqIndex.tensorSeqIndex);
-#endif   
-
         ++factorIndexListIndex;        
-
-        // multi-dim index increment
-        ++srcTuple[0];
-        for (int j=0; j<rank-1; j++){
-          if (srcTuple[j] == srcTupleEnd[j]){
-            srcTuple[j] = srcTupleStart[j];  // reset
-            ++srcTuple[j+1];
-          }
-        }
-      }
+        multiDimIndexLoop.next();
+      } // multi dim index loop
     }
     // garbage collection    
     delete [] srcToDstTMap;
     delete [] dstArrayToTensorMap;
     delete [] localStart;
     delete [] localSize;
-    delete [] srcTuple;
-    delete [] srcTupleEnd;
     delete [] dstTuple;
   }
   
@@ -8796,15 +8777,16 @@ ArrayElement::ArrayElement(
   // set members
   array = arrayArg;
   localDe = localDeArg;
-  indexTuple.resize(array->getRank());
+  indexTupleStart.resize(array->getRank());
   indexTupleEnd.resize(array->getRank());
+  indexTuple.resize(array->getRank());
   
   // initialize tuple variables
   int iOff = localDe * array->getDistGrid()->getDimCount();
   int iPacked = 0;    // reset
   int iTensor = 0;    // reset
   for (int i=0; i<array->getRank(); i++){
-    indexTuple[i] = 0;  // reset
+    indexTupleStart[i] = indexTuple[i] = 0;  // reset
     if (array->getArrayToDistGridMap()[i]){
       // decomposed dimension
       indexTupleEnd[i] = array->getExclusiveUBound()[iOff+iPacked]
