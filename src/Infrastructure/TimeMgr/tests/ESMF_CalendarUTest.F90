@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.48 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.49 2009/08/06 22:10:59 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -40,16 +40,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.48 2009/01/21 21:38:01 cdeluca Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.49 2009/08/06 22:10:59 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, MM, DD, YY, days, totalDays, dayOfWeek
-      integer(ESMF_KIND_I8) :: days_i8, year
-      integer(ESMF_KIND_I8) :: julianDay, advanceCounts
+      integer :: rc
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -57,27 +55,35 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
 
-      logical :: calendarsEqual, calendarsNotEqual, bool
+     ! instantiate a calendar
+     type(ESMF_Calendar) :: gregorianCalendar
 
-      ! instantiate a clock 
-      type(ESMF_Clock) :: clock_gregorian, &
-                          clock_no_leap, clock_360day
-      type(ESMF_Time) :: startTime, stopTime
+
+#ifdef ESMF_TESTEXHAUSTIVE
+      integer :: DD, MM, YY, totalDays, days
 
       ! instantiate a calendar
-      type(ESMF_Calendar) :: gregorianCalendar, gregorianCalendar1, &
-                             gregorianCalendar2, julianCalendar, &
-                             julianDayCalendar, modifiedJulianDayCalendar, &
-                             no_leapCalendar, esmf_360dayCalendar
-      type(ESMF_Calendar) :: customCalendar
-      type(ESMF_CalendarType) :: cal_type, cal_type1, cal_type2
+      type(ESMF_Calendar) :: no_leapCalendar, modifiedJulianDayCalendar, &
+		             julianDayCalendar, gregorianCalendar1, julianCalendar
+      type(ESMF_Calendar) :: customCalendar, esmf_360dayCalendar, gregorianCalendar2
+      type(ESMF_CalendarType) :: cal_type1, cal_type2, cal_type
+
+      ! instantiate a clock 
+      type(ESMF_Clock) :: clock_360day, clock_no_leap, clock_gregorian
+
       integer, dimension(MONTHS_PER_YEAR) :: &
              days_per_month =(/30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30/)
       integer, dimension(MONTHS_PER_YEAR) :: &
          dayspermonth =(/1000, 0, 8900, -120, 930, 70, 80, 90, 0, -70, 90, 60/)
 
+      integer :: dayOfWeek
+      integer(ESMF_KIND_I8) :: advanceCounts, julianDay, year, days_i8
+      type(ESMF_Time) :: startTime, stopTime
+      logical :: bool, calendarsNotEqual, calendarsEqual
+
       ! instantiate Time Intervals
       type(ESMF_TimeInterval) :: timeStep
+#endif
 
 !-------------------------------------------------------------------------------
 !     The unit tests are divided into Sanity and Exhaustive. The Sanity tests
