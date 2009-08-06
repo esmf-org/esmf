@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseUTest.F90,v 1.29 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_BaseUTest.F90,v 1.30 2009/08/06 20:47:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BaseUTest.F90,v 1.29 2009/01/21 21:37:58 cdeluca Exp $'
+      '$Id: ESMF_BaseUTest.F90,v 1.30 2009/08/06 20:47:44 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -49,15 +49,19 @@
       character(ESMF_MAXSTR*2) :: failMsg
 
       ! local variables needed to pass into function/subroutine calls
-      character(ESMF_MAXSTR) :: validate_options
-      character(ESMF_MAXSTR) :: print_options
       !type(ESMF_BaseConfig) :: config_set
       !type(ESMF_BaseConfig) :: config_get
-      type(ESMF_DataValue) :: data_value
-      character(ESMF_MAXSTR) :: name_set, name_get
 
       ! instantiate a Base 
-      type(ESMF_Base) :: base, base1
+      type(ESMF_Base) :: base
+
+#ifdef ESMF_TESTEXHAUSTIVE
+      character(ESMF_MAXSTR) :: print_options
+      character(ESMF_MAXSTR) :: validate_options
+      character(ESMF_MAXSTR) :: name_set, name_get
+      ! instantiate a Base 
+      type(ESMF_Base) :: base1
+#endif
 
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
