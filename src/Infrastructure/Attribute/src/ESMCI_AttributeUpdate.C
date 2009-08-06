@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.18 2009/07/29 15:56:31 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.19 2009/08/06 15:35:14 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.18 2009/07/29 15:56:31 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.19 2009/08/06 15:35:14 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -257,17 +257,17 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
     if (attrPackHead == ESMF_TRUE) {
       delete [] thiskey;
       delete [] distkey;
-      return 43;
+      return ESMC_ATTUPDATERM_ATTPACK;
     }
     else if (attrPack == ESMF_TRUE) {
       delete [] thiskey;
       delete [] distkey;
-      return 42;
+      return ESMC_ATTUPDATERM_ATTPACKATT;
     }
     else {
       delete [] thiskey;
       delete [] distkey;
-      return 41;
+      return ESMC_ATTUPDATERM_ATTRIBUTE;
     }
   }
 
@@ -379,7 +379,7 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
   // recurse through the Attribute hierarchy
   for (i=0; i<attrChange; ++i) {
     localrc = attrList.at(i)->AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
-    if (localrc == 41) 
+    if (localrc == ESMC_ATTUPDATERM_ATTRIBUTE) 
       localrc = AttributeRemove(attrList.at(i)->attrName);
       if (localrc != ESMF_SUCCESS) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
@@ -391,10 +391,10 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
   }
   for (i=0; i<packChange; ++i) {
     localrc = packList.at(i)->AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
-    if (localrc == 42)
+    if (localrc == ESMC_ATTUPDATERM_ATTPACKATT)
       localrc = AttPackRemoveAttribute(packList.at(i)->attrName, packList.at(i)->attrConvention, 
         packList.at(i)->attrPurpose, packList.at(i)->attrObject);
-    else if (localrc == 43) {
+    else if (localrc == ESMC_ATTUPDATERM_ATTPACK) {
       localrc = AttPackRemove(packList.at(i)->attrConvention, 
         packList.at(i)->attrPurpose, packList.at(i)->attrObject);
     if (localrc != ESMF_SUCCESS) {
