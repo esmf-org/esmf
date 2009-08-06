@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.42 2009/03/18 05:27:27 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.43 2009/08/06 23:17:26 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.42 2009/03/18 05:27:27 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.43 2009/08/06 23:17:26 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -50,33 +50,44 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
 
-      logical :: bool
       ! instantiate a clock 
-      type(ESMF_Clock) :: clock, clock1, clock2, domainClock, CLOCK_ATM
-      type(ESMF_Alarm) :: alarm, alarm1, alarm2, alarm3, alarm4, alarm6
-      type(ESMF_Alarm) :: beforeAlarm, afterAlarm, ALARM_HISTORY
-      type(ESMF_Alarm) :: alarm5(200)
-      type(ESMF_Alarm) :: alarmList(201)
-      type(ESMF_Direction) :: forwardDirection, reverseDirection
-      logical :: enabled, isringing, sticky, alarmsEqual, alarmsNotEqual
-      logical :: willRingNext, testPass, alarmCountPass
-      integer(ESMF_KIND_I8) :: forwardCount, reverseCount
-      integer :: alarmCount, ringCount, nring, nclock, nstep, sstep
-      integer :: expectedCount, i, iteration
-      integer :: yy, mm, dd, h, m
+      type(ESMF_Clock) :: clock1
+      type(ESMF_Alarm) :: alarm1
 
       ! instantiate a calendar
       type(ESMF_Calendar) :: gregorianCalendar, julianCalendar, &
                              no_leapCalendar, esmf_360dayCalendar
 
       ! instantiate timestep, start and stop times
-      type(ESMF_TimeInterval) :: timeStep, alarmStep, alarmStep2, ringDuration
-      type(ESMF_TimeInterval) :: runDuration, TIMEINTERVAL_HISTORY
-      type(ESMF_Time) :: startTime, stopTime, nextTime, prevTime
-      type(ESMF_Time) :: alarmTime, alarmStopTime
-      type(ESMF_Time) :: beforeAlarmTime, afterAlarmTime
-      type(ESMF_Time) :: currentTime, currentTime2, currTime
+      type(ESMF_TimeInterval) :: timeStep
+      type(ESMF_Time) :: startTime, stopTime
+      type(ESMF_Time) :: alarmTime
+
+#ifdef ESMF_TESTEXHAUSTIVE
+      logical :: bool
+
+      ! instantiate a clock 
+      type(ESMF_Clock) :: clock, clock2, domainClock, CLOCK_ATM
+      logical :: alarmCountPass, isringing, sticky, enabled
+      integer(ESMF_KIND_I8) :: forwardCount
+      logical :: willRingNext, testPass, alarmsNotEqual, alarmsEqual
+      type(ESMF_Direction) :: reverseDirection, forwardDirection
+      type(ESMF_Alarm) :: alarm, alarm2, afterAlarm, beforeAlarm
+      type(ESMF_Alarm) :: alarmList(201), alarm6
+      type(ESMF_Alarm) :: alarm5(200), alarm3, alarm4
+      type(ESMF_Alarm) :: ALARM_HISTORY
+
+      integer(ESMF_KIND_I8) :: reverseCount, iteration
+      integer :: dd, nclock, ringCount, expectedCount, i, yy
+      integer :: mm, m, h, sstep, nstep, nring, alarmCount
+
+      ! instantiate timestep, start and stop times
+      type(ESMF_TimeInterval) :: TIMEINTERVAL_HISTORY, alarmStep, alarmStep2
+      type(ESMF_TimeInterval) :: runDuration, ringDuration
+      type(ESMF_Time) :: currentTime, currTime, afterAlarmTime, beforeAlarmTime
+      type(ESMF_Time) :: alarmStopTime, nextTime, prevTime, currentTime2
       character(ESMF_MAXSTR) :: aName
+#endif
 
 
       ! initialize ESMF framework
