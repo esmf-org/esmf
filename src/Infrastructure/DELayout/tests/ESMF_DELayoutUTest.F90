@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.22 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.23 2009/08/07 20:45:17 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,26 +37,32 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.22 2009/01/21 21:37:58 cdeluca Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.23 2009/08/07 20:45:17 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc_loop, rc = 1
+      integer :: rc = 1
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
 
 !     !LOCAL VARIABLES:
-      type(ESMF_VM):: vm, vm1
-      type(ESMF_DELayout):: delayout, delayout1, delayout2
-      integer:: petCount, ndes, i, n, nsum, isum
-      integer, allocatable:: list(:)
-      integer, allocatable:: petMap(:), deGrouping(:)
+      type(ESMF_VM):: vm
+      type(ESMF_DELayout):: delayout
+      integer:: petCount
 
+#ifdef ESMF_TESTEXHAUSTIVE
+      type(ESMF_VM):: vm1
+      integer, allocatable:: deGrouping(:)
+      integer, allocatable:: list(:)
+      integer, allocatable:: petMap(:)
+      integer:: i, ndes, n, nsum, isum, rc_loop
+      type(ESMF_DELayout):: delayout1, delayout2
+#endif
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
