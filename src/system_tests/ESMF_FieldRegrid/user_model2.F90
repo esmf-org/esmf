@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.52 2009/08/03 18:43:59 theurich Exp $
+! $Id: user_model2.F90,v 1.53 2009/08/07 14:59:07 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -22,14 +22,6 @@
     
     public userm2_register
         
-    type mylocaldata
-      integer :: dataoffset
-    end type
-
-    type wrapper
-      type(mylocaldata), pointer :: ptr
-    end type
-
     contains
 
 !--------------------------------------------------------------------------------
@@ -40,10 +32,6 @@
     subroutine userm2_register(comp, rc)
         type(ESMF_GridComp) :: comp
         integer, intent(out) :: rc
-
-        ! local variables
-        type(mylocaldata), pointer :: mydatablock
-        type(wrapper) :: wrap
 
         rc = ESMF_SUCCESS
         print *, "In user register routine"
@@ -58,16 +46,6 @@
         if(rc/=ESMF_SUCCESS) return
 
         print *, "Registered Initialize, Run, and Finalize routines"
-
-        allocate(mydatablock)
-
-        mydatablock%dataoffset = 52
-
-        wrap%ptr => mydatablock
-        call ESMF_GridCompSetInternalState(comp, wrap, rc)
-        if(rc/=ESMF_SUCCESS) return
-
-        print *, "Registered Private Data block for Internal State"
 
     end subroutine
 
@@ -199,8 +177,6 @@
       ! Local variables
       type(ESMF_Field) :: field
       type(ESMF_Grid) :: grid
-      type(mylocaldata), pointer :: mydatablock
-      type(wrapper) :: wrap
       type(ESMF_VM) :: vm
       integer       :: de_id
 
@@ -216,27 +192,12 @@
       ! so we can see and compare the output.  but if any of
       ! the verify routines return error, return error at the end.
 
-      ! Get our local info
-      nullify(wrap%ptr)
-      mydatablock => wrap%ptr
-        
-      call ESMF_GridCompGetInternalState(comp, wrap, rc)
-      if(rc/=ESMF_SUCCESS) return
-
-      mydatablock => wrap%ptr
-      print *, "before deallocate, dataoffset = ", mydatablock%dataoffset
-
       ! check validity of results
       ! Get Fields from import state
       call ESMF_StateGet(importState, "humidity", field, rc=rc)
       if(rc/=ESMF_SUCCESS) return
       call verifyResults(field, de_id, rc)
       if(rc/=ESMF_SUCCESS) return
-
-      deallocate(mydatablock, stat=rc)
-      if(rc/=ESMF_SUCCESS) return
-      print *, "deallocate returned ", rc
-      nullify(wrap%ptr)
 
       ! come straight here if you cannot get the data from the state.
       ! otherwise error codes are accumulated but ignored until the
@@ -328,6 +289,7 @@
           maxPerError = max(maxPerError, 100.*abs(error)/abs(calc(i,j)))
         enddo
       enddo
+      deallocate(calc)
 
       write(*,*) "Results for DE #", myDE, ":"
       write(*,*) "   minimum regridded value = ", minDValue

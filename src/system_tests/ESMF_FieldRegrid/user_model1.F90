@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.46 2009/08/03 18:43:59 theurich Exp $
+! $Id: user_model1.F90,v 1.47 2009/08/07 14:59:05 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -20,18 +20,6 @@
 
     implicit none
     
-    type mylocaldata
-      ! instance specific data for ensembles
-      integer :: runparam1
-      integer :: runparam2
-      real :: scale_factor
-      ! plus whatever, including pointers to other stuff
-    end type
-
-    type wrapper
-      type(mylocaldata), pointer :: ptr
-    end type
-   
     public userm1_register
         
     contains
@@ -44,10 +32,6 @@
     subroutine userm1_register(comp, rc)
         type(ESMF_GridComp) :: comp
         integer, intent(out) :: rc
-
-        ! local variables
-        type(mylocaldata), pointer :: mydatablock
-        type(wrapper) :: wrap
 
         rc = ESMF_SUCCESS
         print *, "in user register routine"
@@ -62,18 +46,6 @@
         if(rc/=ESMF_SUCCESS) return
 
         print *, "Registered Initialize, Run, and Finalize routines"
-
-        allocate(mydatablock)
-
-        mydatablock%runparam1 = 100
-        mydatablock%runparam2 = 5
-        mydatablock%scale_factor = 0.66
-
-        wrap%ptr => mydatablock
-        call ESMF_GridCompSetInternalState(comp, wrap, rc)
-        if(rc/=ESMF_SUCCESS) return
-
-        print *, "Registered Private Data block for Internal State"
 
     end subroutine
 
@@ -181,8 +153,6 @@
         real(ESMF_KIND_R8) :: pi
         real(ESMF_KIND_R8), dimension(:,:), pointer :: idata, coordX, coordY
         integer :: i, j, i1, j1, haloWidth, haloUWidth(2), counts(2), tlb(2), tub(2)
-        type(mylocaldata), pointer :: mydatablock
-        type(wrapper) :: wrap
 
         rc = ESMF_SUCCESS
         print *, "User Comp Run starting"
@@ -197,13 +167,6 @@
         !!if (.not.present(rc)) print *, "rc *not* present"
 
         pi = 3.14159
-
-        ! Get our local info
-        call ESMF_GridCompGetInternalState(comp, wrap, rc)
-        if (rc .ne. ESMF_SUCCESS) return
-        mydatablock => wrap%ptr
-
-        print *, "run, scale_factor = ", mydatablock%scale_factor
 
         ! Get the Field and FieldBundle data from the State
         call ESMF_StateGet(exportState, "humidity", humidity, rc=rc)
@@ -257,25 +220,11 @@
         integer, intent(out) :: rc
 
         ! Local variables
-        type(mylocaldata), pointer :: mydatablock
-        type(wrapper) :: wrap
         type(ESMF_Field) :: humidity
         type(ESMF_grid) :: grid
 
         rc = ESMF_SUCCESS
         print *, "User Comp Final starting"
-
-        ! Get our local info
-        nullify(wrap%ptr)
-        mydatablock => wrap%ptr
-        call ESMF_GridCompGetInternalState(comp, wrap, rc)
-        if(rc/=ESMF_SUCCESS) return
-
-        mydatablock => wrap%ptr
-        print *, "before dealloc, runparam1 = ", mydatablock%runparam1
-        deallocate(mydatablock, stat=rc)
-        print *, "deallocate returned ", rc
-        nullify(wrap%ptr)
 
         ! garbage collection   
         call ESMF_StateGet(exportState, "humidity", humidity, rc=rc)
