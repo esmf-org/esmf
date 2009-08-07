@@ -12,7 +12,8 @@
 
     ! This test verifies that the actual size of the Fortran 90 "dope vector"
     ! (private pointer information which stores the rank, indicies, data type,
-    ! etc for any Fortran array) matches the #define values in ESMC_Conf.h
+    ! etc for any Fortran array) will fit within space which has been set aside
+    ! for it.
     !
     ! These tests compute (in C) on the fly the difference between the 
     ! addresses of a(1) and a(2) where a is an array of Fortran pointers.
@@ -23,22 +24,12 @@
     ! upper index bounds for that rank).
     !
     ! This test compares the run-time computed value with the compiled-in
-    ! fixed numbers.   The variables used below in the tests are:
-    !
-    ! 1. compiled_size - the #define hardcoded value for this dimension array.
-    ! 2. computed_size - computed on-the-fly and the correct, definitive value.
-    !
-    ! if they do not match, the compiled-in size must change in 
-    ! $ESMF_DIR/build_config/platform_and_compiler_dep_name/ESMC_Conf.h.   
+    ! fixed numbers.  If the run-time size is larger than the compiled-in
+    ! size, the compiled-in size must change in ESMCI_LocalArray.h.
     !
     ! (this size is not computed at run-time because in some places it has
     ! to be known at compile time to declare fixed size buffers.)
 
-    ! TODO: this test should be part of a preamble or prologue dir which runs
-    ! first because nothing else is going to work reliably if the pointer 
-    ! sizes are off.
-
-    integer :: compiled_size, computed_size
     integer :: rc, result
     character(len=ESMF_MAXSTR) :: failMsg, name
 
