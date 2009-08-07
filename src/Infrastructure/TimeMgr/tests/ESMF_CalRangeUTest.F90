@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.35 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.36 2009/08/07 17:20:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -38,37 +38,48 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.35 2009/01/21 21:38:01 cdeluca Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.36 2009/08/07 17:20:30 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       integer, parameter :: CONVERT_TO_TIME = 1, CONVERT_TO_DATE = 2, &
                             CONVERT_TO_BOTH = 3
 
       ! instantiate calendars
-      type(ESMF_Calendar) :: gregorianCalendar
-      type(ESMF_Calendar) :: julianCalendar
       type(ESMF_Calendar) :: julianDayCalendar
-      type(ESMF_Calendar) :: modifiedJulianDayCalendar
 
-      ! instantiate time instant
-      type(ESMF_Time) :: Time
-
-      integer, dimension(MONTHS_PER_YEAR) :: DaysPerMonth
 
       ! temp variables
-      integer(ESMF_KIND_I8) :: YYl, rYYl, Dl, rDl, endYYl, endDl
-      integer :: MM, rMM, DD, rDD
       integer :: rc
-      logical :: broken 
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
+
+
+      integer, dimension(MONTHS_PER_YEAR) :: DaysPerMonth
+
+#ifdef ESMF_TESTEXHAUSTIVE
       ! individual test name
       character(ESMF_MAXSTR) :: name
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
+
+      ! temp variables
+      integer(ESMF_KIND_I8) :: endDl, rDl, Dl, YYl, rYYl
+      integer :: DD, rDD, rMM, MM
+      logical :: broken 
+      integer(ESMF_KIND_I8) :: endYYl
+
+      ! instantiate time instant
+      type(ESMF_Time) :: Time
+
+      ! instantiate calendars
+      type(ESMF_Calendar) :: julianCalendar
+      type(ESMF_Calendar) :: modifiedJulianDayCalendar
+      type(ESMF_Calendar) :: gregorianCalendar
+
+#endif
 
 !-------------------------------------------------------------------------------
 !     The unit tests are divided into Sanity and Exhaustive. The Sanity tests
@@ -81,6 +92,21 @@
 
       ! initialize ESMF framework
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+
+      ! Calendar months table
+      DaysPerMonth(1) = 31
+      DaysPerMonth(2) = 28
+      DaysPerMonth(3) = 31
+      DaysPerMonth(4) = 30
+      DaysPerMonth(5) = 31 
+      DaysPerMonth(6) = 30
+      DaysPerMonth(7) = 31
+      DaysPerMonth(8) = 31
+      DaysPerMonth(9) = 30
+      DaysPerMonth(10) = 31
+      DaysPerMonth(11) = 30
+      DaysPerMonth(12) = 31
+
 
 #ifdef ESMF_TESTEXHAUSTIVE
 
@@ -107,19 +133,6 @@
       julianCalendar = ESMF_CalendarCreate("Julian", &
                                               ESMF_CAL_JULIAN, rc)
 
-      ! Calendar months table
-      DaysPerMonth(1) = 31
-      DaysPerMonth(2) = 28
-      DaysPerMonth(3) = 31
-      DaysPerMonth(4) = 30
-      DaysPerMonth(5) = 31
-      DaysPerMonth(6) = 30
-      DaysPerMonth(7) = 31
-      DaysPerMonth(8) = 31
-      DaysPerMonth(9) = 30
-      DaysPerMonth(10) = 31
-      DaysPerMonth(11) = 30
-      DaysPerMonth(12) = 31
 
       !-------------------------------------------------------------------------
       ! Test range of Gregorian/Fliegel algorithm for continuity and consistency
