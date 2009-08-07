@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpecUTest.F90,v 1.5 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_ArraySpecUTest.F90,v 1.6 2009/08/07 20:50:17 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ArraySpecUTest.F90,v 1.5 2009/01/21 21:37:58 cdeluca Exp $'
+      '$Id: ESMF_ArraySpecUTest.F90,v 1.6 2009/08/07 20:50:17 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -44,12 +44,12 @@
 
       ! individual test result code
       integer :: rc = 1
-
+#ifdef ESMF_TESTEXHAUSTIVE 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
-
       type(ESMF_ArraySpec)                        :: arrayspec
+#endif
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
