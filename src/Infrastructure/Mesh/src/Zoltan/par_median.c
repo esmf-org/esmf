@@ -6,8 +6,8 @@
 /*****************************************************************************
  * CVS File Information :
  *    $RCSfile: par_median.c,v $
- *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:52 $
+ *    $Author: feiliu $
+ *    $Date: 2009/08/07 14:51:42 $
  *    Revision: 1.6.2.1 $
  ****************************************************************************/
 
@@ -148,6 +148,7 @@ int Zoltan_RB_find_median(
       tolerance = 1.0;   /* if user did not supply weights, all are 1.0 */
   }
   else {
+    MPI_Comm_rank(local_comm, &rank);
     if (wgtflag)
       MPI_Allreduce(&wtmax,&tolerance,1,MPI_DOUBLE,MPI_MAX,local_comm);
     else
