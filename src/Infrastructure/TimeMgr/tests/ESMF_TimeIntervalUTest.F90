@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.52 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.53 2009/08/07 18:02:07 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,16 +37,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.52 2009/01/21 21:38:01 cdeluca Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.53 2009/08/07 18:02:07 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, H, M, S, MM, DD, D, YY, days, months, years, &
-                 hours, secs, ans, ns, sN, sD
-      logical :: bool
+      integer :: rc, H, M, S, MM, DD, YY
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -54,23 +52,37 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
 
+
+      ! instantiate timestep, start and stop times
+      type(ESMF_TimeInterval) :: timeStep
+      type(ESMF_Time) :: startTime
+      type(ESMF_Calendar) :: gregorianCalendar, julianCalendar, &
+                             julianDayCalendar, &
+                             noLeapCalendar, day360Calendar
+
+#ifdef ESMF_TESTEXHAUSTIVE
+
+      ! individual test result code
+      integer :: D, sD, sN, ans, secs, hours, years, ns, &
+		 months, days
+      logical :: bool
+
       ! to retrieve time in string format
       character(ESMF_MAXSTR) :: timeString
 
       ! instantiate timestep, start and stop times
-      type(ESMF_TimeInterval) :: timeStep, timeStep2, timeStep3
-      type(ESMF_Time) :: startTime, time1, time2
-      type(ESMF_Calendar) :: gregorianCalendar, julianCalendar, &
-                             julianDayCalendar, &
-                             noLeapCalendar, day360Calendar
-      type(ESMF_TimeInterval) :: absoluteTime, diffTime
+      type(ESMF_Time) :: time1, time2
+      type(ESMF_TimeInterval) :: timeStep2, timeStep3
+      integer(ESMF_KIND_I8) :: sD_i8
+      real(ESMF_KIND_R8) :: ns_out_r8, sec_in_r8, days_r8, ratio, us_in_r8, &
+			    min_in_r8, hr_out_r8, ns_in_r8, us_out_r8, ms_out_r8, &
+			    ms_in_r8, min_out_r8, hr_in_r8, sec_out_r8
+      integer(ESMF_KIND_I8) :: days2
       type(ESMF_TimeInterval) :: timeInterval1, timeInterval2, timeInterval3, &
-                                 timeInterval4, timeInterval5, timeInterval6
-      integer(ESMF_KIND_I8) :: days2, sD_i8
-      real(ESMF_KIND_R8) :: ratio, days_r8, sec_in_r8, sec_out_r8, &
-                            hr_in_r8, hr_out_r8, min_in_r8, min_out_r8, &
-                            ms_in_r8, ms_out_r8, us_in_r8, us_out_r8, &
-                            ns_in_r8, ns_out_r8
+				 timeInterval4, timeInterval5, timeInterval6
+      type(ESMF_TimeInterval) :: diffTime, absoluteTime
+
+#endif
 
 
 !-------------------------------------------------------------------------------
