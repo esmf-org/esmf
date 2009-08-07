@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.31 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.32 2009/08/07 20:29:34 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,19 +37,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.31 2009/01/21 21:38:01 cdeluca Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.32 2009/08/07 20:29:34 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, H, M, S, MS, US, NS, MM, DD, YY, D, dayOfYear, dayOfWeek
-      integer :: sN, sD
-      integer(ESMF_KIND_I8) :: year, SN_I8, SD_i8
-      real(ESMF_KIND_R8) :: dayOfYear_r8
-      real(ESMF_KIND_R8) :: D_r8, H_r8, M_r8, S_r8, MS_r8, US_r8, NS_r8
-      logical :: bool
+      integer :: rc, H, M, S, MM, DD, YY
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -60,16 +55,31 @@
       ! to retrieve time in string format
       character(ESMF_MAXSTR) :: timeString
 
-      ! instantiate timestep, start and stop times
-      type(ESMF_Time) :: startTime, stopTime, startTime2, midMonth
+      ! instantiate start time
+      type(ESMF_Time) :: startTime
       type(ESMF_Calendar) :: gregorianCalendar, julianCalendar, &
                              julianDayCalendar, modifiedJulianDayCalendar, &
                              noLeapCalendar, day360Calendar
 
+
+#ifdef ESMF_TESTEXHAUSTIVE
+      ! individual test result code
+      logical :: bool
+      integer :: dayOfYear, dayOfWeek, D, sD, sN, MS, NS, &
+		 US
+      real(ESMF_KIND_R8) :: NS_r8, S_r8, US_r8, MS_r8
+      real(ESMF_KIND_R8) :: dayOfYear_r8, M_r8, D_r8, H_r8
+      integer(ESMF_KIND_I8) :: year, SN_I8, SD_i8
+ 
       ! instantitate some general times and timeintervals
-      type(ESMF_Time) :: time1, time2, time3, time4, time5, time6, time7
-      type(ESMF_TimeInterval) :: timeInterval2, timeInterval3, timeInterval4, &
-                                 timeInterval5, timeInterval6, timeInterval7
+      type(ESMF_Time) :: time1, time2, time3, time4, time5, time6, time7, &
+			 midMonth, startTime2
+      type(ESMF_TimeInterval) :: timeInterval2, timeInterval3, timeInterval4, timeInterval5, timeInterval6, timeInterval7
+
+
+      ! instantiate timestep, start and stop times
+      type(ESMF_Time) :: stopTime
+#endif
 
 !-------------------------------------------------------------------------------
 !    The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
