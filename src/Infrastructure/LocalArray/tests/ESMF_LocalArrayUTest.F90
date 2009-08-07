@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.54 2009/06/19 06:33:55 theurich Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.55 2009/08/07 21:34:06 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -29,21 +29,29 @@
     implicit none
 
     ! Local variables
-    integer :: arank, brank, rc 
-    integer :: i, j, k, ni, nj, nk
-    type(ESMF_ArraySpec) :: arrayspec, arrayspec1
-    type(ESMF_TypeKind) :: akind
-    integer :: counts(ESMF_MAXDIM), lb(1), ub(1), rlb(1), rub(1)
-    type(ESMF_LocalArray) :: array1, array2, array4, arrayCpy
-    real(ESMF_KIND_R8), dimension(:,:,:), pointer :: real3dptr, real3d2ptr
-    real(ESMF_KIND_R8), dimension(:,:), pointer :: realptr, realptr2
-    integer(ESMF_KIND_I4), dimension(:), pointer :: intptr, intptr2
-    integer(ESMF_KIND_I4), dimension(:,:), pointer :: int2Dptr
+    integer :: rc 
+    integer :: i, ni
+    integer :: counts(ESMF_MAXDIM), lb(1), ub(1)
+    type(ESMF_LocalArray) :: array1, arrayCpy
+    real(ESMF_KIND_R8), dimension(:,:,:), pointer :: real3dptr
+    integer(ESMF_KIND_I4), dimension(:), pointer :: intptr
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name
     integer :: result = 0
+
+#ifdef ESMF_TESTEXHAUSTIVE
+    integer :: nk, nj, arank, brank, k, j
+    real(ESMF_KIND_R8), dimension(:,:), pointer :: realptr, realptr2
+    real(ESMF_KIND_R8), dimension(:,:,:), pointer :: real3d2ptr
+    integer(ESMF_KIND_I4), dimension(:), pointer :: intptr2
+    integer(ESMF_KIND_I4), dimension(:,:), pointer :: int2Dptr
+    type(ESMF_ArraySpec) :: arrayspec, arrayspec1
+    integer :: rub(1), rlb(1)
+    type(ESMF_TypeKind) :: akind
+    type(ESMF_LocalArray) :: array2, array4
+#endif
 
     
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
