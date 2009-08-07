@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.112 2009/05/08 01:46:30 w6ws Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.113 2009/08/07 16:27:07 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,16 +37,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.112 2009/05/08 01:46:30 w6ws Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.113 2009/08/07 16:27:07 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, H, M, MM, DD, YY, days, totalDays, secs, testResults
-      integer :: checkSec
-      integer :: hr, min, sec, ms, julday, julyr
+      integer :: rc
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -54,42 +52,60 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
 
-      logical :: bool, clocksEqual, clocksNotEqual, testPass, clockStopped
-      logical :: stopTimeEnabled, runTheClock, stepOnePass, stepTwoPass
-
-      type(ESMF_Direction) :: direction
 
       ! instantiate a clock 
-      type(ESMF_Clock) :: clock, clock1, clock2, clock_gregorian, &
-                          clock_no_leap, clock_360day, topClock
-
-      ! Random number
-      real :: ranNum
-      integer, allocatable :: seed(:)
-      integer :: seed_size
-      integer :: timevals(8)
+      type(ESMF_Clock) :: clock
 
       ! instantiate a calendar
       type(ESMF_Calendar) :: gregorianCalendar, julianDayCalendar, &
                              no_leapCalendar, esmf_360dayCalendar, &
                              noCalendar
-      type(ESMF_CalendarType) :: cal_type
+
+      ! instantiate timestep, start times
+      type(ESMF_TimeInterval) :: timeStep
+      type(ESMF_Time) :: startTime
+
+#ifdef ESMF_TESTEXHAUSTIVE
+
+      ! individual test result code
+      integer :: totalDays, DD, MM, YY, H, M, days, hr, checkSec
+      integer :: min, ms, testResults, julyr, julday, sec, secs
+
+      type(ESMF_Direction) :: direction
+
+      ! Random number
+      real :: ranNum
+      integer :: timevals(8)
+      integer, allocatable :: seed(:)
+      integer :: seed_size
+
+      ! individual test failure message
+      logical :: stepOnePass, stepTwoPass, runTheClock, bool, &
+		 clockStopped, testPass, clocksNotEqual, clocksEqual, &
+		 stopTimeEnabled
 
       ! to retrieve time in string format
       character(ESMF_MAXSTR) :: timeString
 
+      ! instantiate a clock 
+      type(ESMF_Clock) :: topClock,  clock_360day, clock_no_leap, &
+			  clock_gregorian, clock1, clock2
+
+
+      ! instantiate a calendar
+      type(ESMF_CalendarType) :: cal_type
+
       ! instantiate timestep, start and stop times
-      type(ESMF_TimeInterval) :: timeStep
-      type(ESMF_Time) :: startTime, stopTime, startTime2, stopTime3
-      type(ESMF_Time) :: currentTime, current_time, &
-                         previousTime, syncTime, stopTime4
-      type(ESMF_TimeInterval) :: currentSimTime, previousSimTime, timeDiff
+      type(ESMF_Time) :: stopTime, stopTime4, syncTime, previousTime, &
+                         current_time, currentTime, stopTime3, startTime2
+      real(ESMF_KIND_R8) :: realSeconds
+      integer :: timeStepCount
+      integer :: datetime(8)
+      integer(ESMF_KIND_I4) :: day, hour
       integer(ESMF_KIND_I8) :: advanceCounts, nTimeSteps, &
                                year, day2, minute, second
-      integer(ESMF_KIND_I4) :: day, hour
-      integer :: datetime(8)
-      integer :: timeStepCount
-      real(ESMF_KIND_R8) :: realSeconds
+      type(ESMF_TimeInterval) :: currentSimTime, previousSimTime, timeDiff
+#endif
 
       ! initialize ESMF framework
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
