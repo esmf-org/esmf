@@ -1,4 +1,4 @@
-! $Id: ESMF_GridItemUTest.F90,v 1.4 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_GridItemUTest.F90,v 1.5 2009/08/10 22:44:00 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridItemUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridItemUTest.F90,v 1.4 2009/01/21 21:37:59 cdeluca Exp $'
+    '$Id: ESMF_GridItemUTest.F90,v 1.5 2009/08/10 22:44:00 svasquez Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -50,28 +50,18 @@ program ESMF_GridItemUTest
   type(ESMF_TypeKind) :: typekind
   type(ESMF_Grid) :: grid
   type(ESMF_VM) :: vm
-  type(ESMF_DistGrid) :: distgrid2D, distgrid3D,tmpDistgrid
-  integer :: dimCount
-  type(ESMF_Array) :: array, array2D, array2, array1D
-  type(ESMF_ArraySpec) :: arrayspec2D,arrayspec1D
-  type(ESMF_StaggerLoc) :: customStagger
+  type(ESMF_DistGrid) :: distgrid2D
+  type(ESMF_Array) :: array2D, array2
+  type(ESMF_ArraySpec) :: arrayspec2D
   integer(ESMF_KIND_I4), pointer :: fptr(:,:), fptr3D(:,:,:)
   real(ESMF_KIND_R8), pointer :: fptrR8(:,:,:)
   real(ESMF_KIND_R4), pointer :: fptrR4(:,:)
   real(kind=ESMF_KIND_R4), parameter :: var=1.0
   integer :: petMap2D(2,2,1)
-  integer :: petMapReg2D(2,1,2)
-  integer :: compELWidth(3),compEUWidth(3)
-  integer :: lbnds(1),ubnds(1),rank,clbnd(3),cubnd(3)
-  integer :: i,i1,i2,i3, index(3)
+  integer :: rank
   integer :: lDE, localDECount
-  real(ESMF_KIND_R8) :: coord(3)
-  character(len=ESMF_MAXSTR) :: string
   INTEGER, PARAMETER :: globalXcount = 5 
   INTEGER, PARAMETER :: globalYcount = 5 
-  REAL(ESMF_KIND_R8) :: cornerX(globalXcount+1)
-  REAL(ESMF_KIND_R8) :: cornerY(globalYcount+1)
-  REAL(ESMF_KIND_R8),pointer :: fptr1D(:)
   integer :: distgridToArrayMap(2)
 
 
