@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.17 2009/06/17 21:30:12 w6ws Exp $
+// $Id: ESMCI_Util.h,v 1.18 2009/08/11 19:53:36 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -80,6 +80,10 @@ enum ESMC_Direction { ESMF_MODE_FORWARD=1,
 enum ESMC_IndexFlag { ESMF_INDEX_DELOCAL=0,
                       ESMF_INDEX_GLOBAL,
                       ESMF_INDEX_USER};
+
+// inquireonly flag type
+enum ESMC_InquireFlag {ESMF_INQUIREONLY=ESMF_TRUE,
+                       ESMF_NOINQUIRE=ESMF_FALSE};
 
 // regionflag type
 enum ESMC_RegionFlag { ESMF_REGION_TOTAL=0,
