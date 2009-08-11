@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.25 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.26 2009/08/11 22:00:42 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
     
 !   ! Local variables
     integer :: rc
-    character(ESMF_MAXSTR) :: cname, bname
+    character(ESMF_MAXSTR) :: cname
     type(ESMF_GridComp) :: comp1
 
     ! individual test failure message
@@ -51,9 +51,12 @@
         type(testData), pointer :: p
     end type
 
-    type (dataWrapper) :: wrap1, wrap2
-    type(testData), target :: data1, data2
 
+#ifdef ESMF_TESTEXHAUSTIVE
+    character(ESMF_MAXSTR) :: bname
+    type(testData), target :: data1, data2
+    type (dataWrapper) :: wrap1, wrap2
+#endif
 
 !-------------------------------------------------------------------------------
 !   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
