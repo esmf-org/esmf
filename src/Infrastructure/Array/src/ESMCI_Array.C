@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.50 2009/08/06 00:26:21 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.51 2009/08/11 04:03:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.50 2009/08/06 00:26:21 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.51 2009/08/11 04:03:03 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4631,16 +4631,6 @@ namespace DD{
     const SeqIndexFactorLookup *seqIndexFactorLookupOut;
     bool tensorMixFlag;
   };
-  struct FillSelfDeInfo{
-    AssociationElement **linSeqList;
-    int localPet;
-    int localDeCount;
-    const int *localDeElementCount;
-    const int *localDeList;
-    const Interval *seqIndexInterval;
-    SeqIndexFactorLookup *seqIndexFactorLookup;
-    bool tensorMixFlag;
-  };
 
 // -- accessLookup()
 
@@ -5092,181 +5082,106 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
   }
 }
 
-// -- updateLookup()
-
-template<typename T>
-int updateSizeFactor(T *t);
-
-template<typename T>
-void clientUpdate(T *t, int i, char **updateStreamClient);
-
-template<typename T>
-void localClientServerUpdate(T *t);
-
-template<typename T>
-int serverUpdate(T *t, int count, int i, char **updateStreamServer);
-
-template<typename T>
-void updateLookup(
-  ESMCI::VM *vm,
-  int petCount,
-  int localPet,
-  int *localIntervalPerPetCount,
-  int *localElementsPerIntervalCount,
-  T *t
-  ){
-  // update look up table
-  VMK::commhandle **sendcommhList = new VMK::commhandle*[petCount];
-  VMK::commhandle **recvcommhList = new VMK::commhandle*[petCount];
-  char **updateStreamClient = new char*[petCount];
-  char **updateStreamServer = new char*[petCount];
-  // t-specific routine
-  int updateFactor = updateSizeFactor(t);
-  // localPet acts as server, posts non-blocking recvs for all client updates
-  for (int ii=localPet+1; ii<localPet+petCount; ii++){
-    // localPet-dependent shifted loop reduces communication contention
-    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
-    // receive update from Pet "i"
-    int count = localIntervalPerPetCount[i];
-    if (count>0){
-      updateStreamServer[i] = new char[updateFactor*count];
-      recvcommhList[i] = NULL;
-      vm->recv(updateStreamServer[i], updateFactor*count, i,
-        &(recvcommhList[i]));
+  // specialize ComPat class for total exchange during DE info fill.
+  class FillSelfDeInfo:public ComPat{
+    AssociationElement **linSeqList;
+    int localPet;
+    int localDeCount;
+    const int *localDeElementCount;
+    const int *localDeList;
+    const Interval *seqIndexInterval;
+    SeqIndexFactorLookup *seqIndexFactorLookup;
+    bool tensorMixFlag;
+    int *localIntervalPerPetCount;
+    int *localElementsPerIntervalCount;
+   public:
+    FillSelfDeInfo(
+      AssociationElement **linSeqList_,
+      int localPet_,
+      int localDeCount_,
+      const int *localDeElementCount_,
+      const int *localDeList_,
+      const Interval *seqIndexInterval_,
+      SeqIndexFactorLookup *seqIndexFactorLookup_,
+      bool tensorMixFlag_,
+      int *localIntervalPerPetCount_,
+      int *localElementsPerIntervalCount_
+    ){
+      linSeqList = linSeqList_;
+      localPet = localPet_;
+      localDeCount = localDeCount_;
+      localDeElementCount = localDeElementCount_;
+      localDeList = localDeList_;
+      seqIndexInterval = seqIndexInterval_;
+      seqIndexFactorLookup = seqIndexFactorLookup_;
+      tensorMixFlag = tensorMixFlag_;
+      localIntervalPerPetCount = localIntervalPerPetCount_;
+      localElementsPerIntervalCount = localElementsPerIntervalCount_;
     }
-  }
-  // localPet acts as a client, sends its updates to the appropriate servers
-  for (int ii=localPet+petCount-1; ii>localPet; ii--){
-    // localPet-dependent shifted loop reduces communication contention
-    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
-    if (localElementsPerIntervalCount[i]>0){
-      // localPet has elements that are located in interval of server Pet "i"
-      updateStreamClient[i] =
-        new char[updateFactor*localElementsPerIntervalCount[i]];
-      // t-specific client routine
-      clientUpdate(t, i, updateStreamClient);
-      // send information to the serving Pet
-      sendcommhList[i] = NULL;
-      vm->send(updateStreamClient[i],
-        updateFactor*localElementsPerIntervalCount[i], i, 
-        &(sendcommhList[i]));
-    }
-  }
-  // localPet locally acts as server and client to do update
-  // t-specific client-server routine
-  localClientServerUpdate(t);
-  // localPet acts as server, processing updates from clients
-  for (int ii=localPet+1; ii<localPet+petCount; ii++){
-    // localPet-dependent shifted loop reduces communication contention
-    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
-    int count = localIntervalPerPetCount[i];
-    if (count>0){
-      // wait for update from Pet "i"
-      vm->commwait(&(recvcommhList[i]));
-      // t-specific server routine
-      serverUpdate(t, count, i, updateStreamServer);
-      // garbage collection
-      delete [] updateStreamServer[i];
-    }
-  }
-  // localPet acts as a client, wait for sends to complete and collect garbage
-  for (int ii=localPet+petCount-1; ii>localPet; ii--){
-    // localPet-dependent shifted loop reduces communication contention
-    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
-    if (localElementsPerIntervalCount[i]>0){
-      // localPet has elements that are located in interval of server Pet i
-      // wait for send
-      vm->commwait(&(sendcommhList[i]));
-      // garbage collection
-      delete [] updateStreamClient[i];
-    }
-  }
-  // garbage collection
-  delete [] updateStreamClient;
-  delete [] updateStreamServer;
-  delete [] sendcommhList;
-  delete [] recvcommhList;
-}
-
-// FillSelfDeInfo-specific updateLookup routines
-
-int updateSizeFactor(FillSelfDeInfo *fillSelfDeInfo){
-  return 2*sizeof(int); // lookupIndex, de
-}
-
-void clientUpdate(FillSelfDeInfo *fillSelfDeInfo, int i,
-  char **updateStreamClient){
-  const int localDeCount = fillSelfDeInfo->localDeCount;
-  const int *localDeList = fillSelfDeInfo->localDeList;
-  const int *localDeElementCount = fillSelfDeInfo->localDeElementCount;
-  const Interval *seqIndexInterval = fillSelfDeInfo->seqIndexInterval;
-  AssociationElement **linSeqList = fillSelfDeInfo->linSeqList;
-  const bool tensorMixFlag = fillSelfDeInfo->tensorMixFlag;
-  // fill the updateStreamClient[i] element
-  int seqIndexMin = seqIndexInterval[i].min;
-  int seqIndexMax = seqIndexInterval[i].max;
-  int seqIndexCount = seqIndexInterval[i].count;
-  int jj = 0; // reset
-  for (int j=0; j<localDeCount; j++){
-    int de = localDeList[j];  // global DE number
-    for (int k=0; k<localDeElementCount[j]; k++){
-      int seqIndex = linSeqList[j][k].seqIndex.decompSeqIndex;
-      if (seqIndex >= seqIndexMin && seqIndex <= seqIndexMax){
-        int lookupIndex = seqIndex - seqIndexMin;
-        if (tensorMixFlag){
-          lookupIndex += (linSeqList[j][k].seqIndex.tensorSeqIndex - 1)
-            * seqIndexCount;
-        }
-        int *updateStreamClientInt = (int *)updateStreamClient[i];
-        updateStreamClientInt[2*jj] = lookupIndex;
-        updateStreamClientInt[2*jj+1] = de;
-        ++jj; // increment counter
+   private:
+    int messageSizeCount(int srcPet, int dstPet)const{
+      if (localPet == srcPet)
+        return localElementsPerIntervalCount[dstPet];
+      else if (localPet == dstPet)
+        return localIntervalPerPetCount[srcPet];
+      else{
+        return 0; // this should provoke MPI errors
       }
     }
-  }
-}
-
-void localClientServerUpdate(FillSelfDeInfo *fillSelfDeInfo){
-  const int localPet = fillSelfDeInfo->localPet;
-  const int localDeCount = fillSelfDeInfo->localDeCount;
-  const int *localDeList = fillSelfDeInfo->localDeList;
-  const int *localDeElementCount = fillSelfDeInfo->localDeElementCount;
-  const Interval *seqIndexInterval = fillSelfDeInfo->seqIndexInterval;
-  AssociationElement **linSeqList = fillSelfDeInfo->linSeqList;
-  const bool tensorMixFlag = fillSelfDeInfo->tensorMixFlag;
-  SeqIndexFactorLookup *seqIndexFactorLookup =
-    fillSelfDeInfo->seqIndexFactorLookup;
-  // localPet locally acts as server and client
-  int seqIndexMin = seqIndexInterval[localPet].min;
-  int seqIndexMax = seqIndexInterval[localPet].max;
-  int seqIndexCount = seqIndexInterval[localPet].count;
-  for (int j=0; j<localDeCount; j++){
-    int de = localDeList[j];  // global DE number
-    for (int k=0; k<localDeElementCount[j]; k++){
-      int seqIndex = linSeqList[j][k].seqIndex.decompSeqIndex;
-      if (seqIndex >= seqIndexMin && seqIndex <= seqIndexMax){
-        int lookupIndex = seqIndex - seqIndexMin;
-        if (tensorMixFlag){
-          lookupIndex += (linSeqList[j][k].seqIndex.tensorSeqIndex - 1)
-            * seqIndexCount;
+    virtual int messageSize(int srcPet, int dstPet)const{
+      return 2 * sizeof(int) * messageSizeCount(srcPet, dstPet);
+    }
+    virtual void messagePrepare(int srcPet, int dstPet, char *buffer)const{
+      int seqIndexMin = seqIndexInterval[dstPet].min;
+      int seqIndexMax = seqIndexInterval[dstPet].max;
+      int seqIndexCount = seqIndexInterval[dstPet].count;
+      int *bufferInt = (int *)buffer;
+      int jj = 0; // reset
+      for (int j=0; j<localDeCount; j++){
+        int de = localDeList[j];  // global DE number
+        for (int k=0; k<localDeElementCount[j]; k++){
+          int seqIndex = linSeqList[j][k].seqIndex.decompSeqIndex;
+          if (seqIndex >= seqIndexMin && seqIndex <= seqIndexMax){
+            int lookupIndex = seqIndex - seqIndexMin;
+            if (tensorMixFlag){
+              lookupIndex += (linSeqList[j][k].seqIndex.tensorSeqIndex - 1)
+                * seqIndexCount;
+            }
+            bufferInt[2*jj] = lookupIndex;
+            bufferInt[2*jj+1] = de;
+            ++jj; // increment counter
+          }
         }
-        seqIndexFactorLookup[lookupIndex].de = de;
       }
     }
-  }
-}
-
-void serverUpdate(FillSelfDeInfo *fillSelfDeInfo, int count,
-  int i, char **updateStreamServer){
-  SeqIndexFactorLookup *seqIndexFactorLookup =
-    fillSelfDeInfo->seqIndexFactorLookup;
-  // update server according to update stream
-  int *updateStreamServerInt = (int *)updateStreamServer[i];
-  for (int jj=0; jj<count; jj++){
-    int lookupIndex = updateStreamServerInt[2*jj];
-    seqIndexFactorLookup[lookupIndex].de = updateStreamServerInt[2*jj+1];
-  }
-}        
+    virtual void messageProcess(int srcPet, int dstPet, char *buffer){
+      int count = messageSizeCount(srcPet, dstPet);
+      int *bufferInt = (int *)buffer;    
+      for (int jj=0; jj<count; jj++){
+        int lookupIndex = bufferInt[2*jj];
+        seqIndexFactorLookup[lookupIndex].de = bufferInt[2*jj+1];
+      }
+    }
+    virtual void localPrepareAndProcess(int localPet){
+      int seqIndexMin = seqIndexInterval[localPet].min;
+      int seqIndexMax = seqIndexInterval[localPet].max;
+      int seqIndexCount = seqIndexInterval[localPet].count;
+      for (int j=0; j<localDeCount; j++){
+        int de = localDeList[j];  // global DE number
+        for (int k=0; k<localDeElementCount[j]; k++){
+          int seqIndex = linSeqList[j][k].seqIndex.decompSeqIndex;
+          if (seqIndex >= seqIndexMin && seqIndex <= seqIndexMax){
+            int lookupIndex = seqIndex - seqIndexMin;
+            if (tensorMixFlag){
+              lookupIndex += (linSeqList[j][k].seqIndex.tensorSeqIndex - 1)
+                * seqIndexCount;
+            }
+            seqIndexFactorLookup[lookupIndex].de = de;
+          }
+        }
+      }
+    }
+  };
         
 } // namespace DD
 
@@ -6475,19 +6390,19 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
 
   // communicate between Pets to set up "de" member in srcSeqIndexFactorLookup[]
   {
-    DD::FillSelfDeInfo *fillSelfDeInfo = new DD::FillSelfDeInfo;
-    fillSelfDeInfo->linSeqList = srcLinSeqList;
-    fillSelfDeInfo->localPet = localPet;
-    fillSelfDeInfo->localDeCount = srcLocalDeCount;
-    fillSelfDeInfo->localDeElementCount = srcLocalDeElementCount;
-    fillSelfDeInfo->localDeList = srcLocalDeList;
-    fillSelfDeInfo->seqIndexInterval = srcSeqIndexInterval;
-    fillSelfDeInfo->seqIndexFactorLookup = srcSeqIndexFactorLookup;
-    fillSelfDeInfo->tensorMixFlag = tensorMixFlag;
+    DD::FillSelfDeInfo fillSelfDeInfo(
+      srcLinSeqList,
+      localPet,
+      srcLocalDeCount,
+      srcLocalDeElementCount,
+      srcLocalDeList,
+      srcSeqIndexInterval,
+      srcSeqIndexFactorLookup,
+      tensorMixFlag,
+      srcLocalIntervalPerPetCount,
+      srcLocalElementsPerIntervalCount);
       
-    DD::updateLookup(vm, petCount, localPet, srcLocalIntervalPerPetCount,
-      srcLocalElementsPerIntervalCount, fillSelfDeInfo);
-    delete fillSelfDeInfo;
+    fillSelfDeInfo.totalExchange(vm);
   }
   
 //vm->barrier();  /// only for profiling tests
@@ -7049,19 +6964,19 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   
   // communicate between Pets to set up "de" member in dstSeqIndexFactorLookup[]
   {
-    DD::FillSelfDeInfo *fillSelfDeInfo = new DD::FillSelfDeInfo;
-    fillSelfDeInfo->linSeqList = dstLinSeqList;
-    fillSelfDeInfo->localPet = localPet;
-    fillSelfDeInfo->localDeCount = dstLocalDeCount;
-    fillSelfDeInfo->localDeElementCount = dstLocalDeElementCount;
-    fillSelfDeInfo->localDeList = dstLocalDeList;
-    fillSelfDeInfo->seqIndexInterval = dstSeqIndexInterval;
-    fillSelfDeInfo->seqIndexFactorLookup = dstSeqIndexFactorLookup;
-    fillSelfDeInfo->tensorMixFlag = tensorMixFlag;
+    DD::FillSelfDeInfo fillSelfDeInfo(
+      dstLinSeqList,
+      localPet,
+      dstLocalDeCount,
+      dstLocalDeElementCount,
+      dstLocalDeList,
+      dstSeqIndexInterval,
+      dstSeqIndexFactorLookup,
+      tensorMixFlag,
+      dstLocalIntervalPerPetCount,
+      dstLocalElementsPerIntervalCount);
       
-    DD::updateLookup(vm, petCount, localPet, dstLocalIntervalPerPetCount,
-      dstLocalElementsPerIntervalCount, fillSelfDeInfo);
-    delete fillSelfDeInfo;
+    fillSelfDeInfo.totalExchange(vm);
   }
 
 //vm->barrier();  /// only for profiling tests
