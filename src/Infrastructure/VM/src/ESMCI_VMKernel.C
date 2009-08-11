@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.6 2009/05/29 19:14:44 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.7 2009/08/11 03:58:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -49,6 +49,9 @@
 #include <time.h>
 #include <float.h>
 #include <math.h>
+#include <vector>
+
+using namespace std;
 
 // Memory mapped files may not be available on all systems
 #ifndef ESMF_NO_POSIXIPC
@@ -4837,3 +4840,66 @@ void sync_reset(shmsync *shms){
   for (int i=0; i<SYNC_NBUFFERS; i++)
     *(shms->buffer_done[i]) = 0;
 }
+
+
+namespace ESMCI{
+  void ComPat::totalExchange(VMK *vmk){
+    int petCount = vmk->getNpets();
+    int localPet = vmk->getMypet();
+    // prepare commhandles and message buffers
+    vector<VMK::commhandle *> sendCommhList(petCount);
+    vector<VMK::commhandle *> recvCommhList(petCount);
+    vector<char *> sendBuffer(petCount);
+    vector<char *> recvBuffer(petCount);
+    // localPet acts as receiver, posting non-blocking recvs for all senders
+    for (int ii=localPet+1; ii<localPet+petCount; ii++){
+      // localPet-dependent shifted loop reduces communication contention
+      int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+      // receive message from Pet "i"
+      int size = messageSize(i, localPet);
+      if (size>0){
+        recvBuffer[i] = new char[size];
+        recvCommhList[i] = NULL;
+        vmk->recv(recvBuffer[i], size, i, &(recvCommhList[i]));
+      }
+    }
+    // localPet acts as a sender, constructs message and sends to receiver
+    for (int ii=localPet+petCount-1; ii>localPet; ii--){
+      // localPet-dependent shifted loop reduces communication contention
+      int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+      // send message to Pet "i"
+      int size = messageSize(localPet, i);
+      if (size>0){
+        sendBuffer[i] = new char[size];
+        messagePrepare(localPet, i, sendBuffer[i]);
+        sendCommhList[i] = NULL;
+        vmk->send(sendBuffer[i], size, i, &(sendCommhList[i]));
+      }
+    }
+    // localPet does local prepare and process
+    localPrepareAndProcess(localPet);
+    // localPet acts receiver, processing message
+    for (int ii=localPet+1; ii<localPet+petCount; ii++){
+      // localPet-dependent shifted loop reduces communication contention
+      int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+      // receive message from Pet "i"
+      int size = messageSize(i, localPet);
+      if (size>0){
+        vmk->commwait(&(recvCommhList[i]));   // wait for receive to finish
+        messageProcess(i, localPet, recvBuffer[i]);
+        delete [] recvBuffer[i];              // garbage collection
+      }
+    }
+    // localPet finishes up as sender
+    for (int ii=localPet+petCount-1; ii>localPet; ii--){
+      // localPet-dependent shifted loop reduces communication contention
+      int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+      // was sending message to Pet "i"
+      int size = messageSize(localPet, i);
+      if (size>0){
+        vmk->commwait(&(sendCommhList[i]));   // wait for send to finish
+        delete [] sendBuffer[i];              // garbage collection
+      }
+    }
+  }
+} // namespace ESMCI

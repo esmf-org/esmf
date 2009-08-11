@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.h,v 1.7 2009/05/29 19:18:02 theurich Exp $
+// $Id: ESMCI_VMKernel.h,v 1.8 2009/08/11 03:58:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -196,7 +196,7 @@ class VMK{
     ipshmAlloc *ipshmLocalTop;  // local top of shared alloc list
     esmf_pthread_mutex_t *ipshmMutex;  // mutex to operate (shared)
     // IntraProcessMutex setup mutex
-    esmf_pthread_mutex_t *ipSetupMutex;  // mutex used to init and destroy (shared)
+    esmf_pthread_mutex_t *ipSetupMutex;// mutex used to init and destroy(shared)
     // Communication requests queue
     int nhandles;
     commhandle *firsthandle;
@@ -470,6 +470,19 @@ class VMKPlan{
   friend class VMK;
   
 };
+
+class ComPat{
+ private:
+  // pure virtual methods to be implemented by user
+  virtual int messageSize(int srcPet, int dstPet)                  const =0;
+  virtual void messagePrepare(int srcPet, int dstPet, char *buffer)const =0;
+  virtual void messageProcess(int srcPet, int dstPet, char *buffer)      =0;
+  virtual void localPrepareAndProcess(int localPet)                      =0;
+ public:
+  // communication patterns
+  void totalExchange(VMK *vmk);
+}; // ComPat
+
 
 } // namespace ESMCI
 
