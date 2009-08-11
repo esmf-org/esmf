@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.6 2009/07/23 00:09:33 peggyli Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.7 2009/08/11 17:20:46 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.6 2009/07/23 00:09:33 peggyli Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.7 2009/08/11 17:20:46 svasquez Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -46,7 +46,7 @@ program ESMF_GridArbitraryUTest
 
   ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
-  character(ESMF_MAXSTR) :: name, grid_name
+  character(ESMF_MAXSTR) :: name
 
   type(ESMF_Grid) :: grid
   type(ESMF_DELayout) :: delayout
@@ -67,12 +67,9 @@ program ESMF_GridArbitraryUTest
   type(ESMF_IndexFlag) :: indexflag
   integer :: distgridToGridMap(3), coordDimCount(3), distDim(2)
   integer :: distgridToArrayMap(2)
-  integer :: gridEdgeLWidth(3),gridEdgeUWidth(3),gridAlign(3)
-  integer :: exlbnd(3),exubnd(3)
-  integer :: clbnd(3),cubnd(3), lwidth(3), uwidth(3)
-  integer(ESMF_KIND_I4), pointer :: buf(:)
+  integer :: lwidth(3), uwidth(3)
   real(ESMF_KIND_R8), pointer :: fptr2D(:,:)
-  integer :: bufCount, offset, localDECount, rank, i1,i2,lDE
+  integer :: rank
   integer :: localCount2(1), deList(1), deCount
   integer, allocatable:: minIndex1(:), maxIndex1(:), localCount3(:)
   integer, allocatable:: minIndex(:,:), maxIndex(:,:)
@@ -84,7 +81,7 @@ program ESMF_GridArbitraryUTest
   REAL(ESMF_KIND_R8), pointer :: dimarray(:), fptr1D(:)
   type(ESMF_Array) :: myarray
   type(ESMF_LocalArray) :: larray
-  REAL(ESMF_KIND_R8)  :: coord(2), coord3(3)
+  REAL(ESMF_KIND_R8)  :: coord3(3)
   integer :: badcount
   integer :: celw(3), ceuw(3)
 
