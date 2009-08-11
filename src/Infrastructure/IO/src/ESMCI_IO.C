@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.C,v 1.8 2009/07/07 05:49:12 eschwab Exp $
+// $Id: ESMCI_IO.C,v 1.9 2009/08/11 05:29:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO.C,v 1.8 2009/07/07 05:49:12 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO.C,v 1.9 2009/08/11 05:29:35 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 #ifdef ESMF_XERCES
@@ -125,7 +125,7 @@ void MySAX2Handler::startElement(const XMLCh* const uri,
       if (cname == "convention") {
         this->convention = value;
       }
-      if (cname == "purpose") {
+      else if (cname == "purpose") {
         this->purpose = value;
       }
       
