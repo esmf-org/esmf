@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.13 2009/07/22 23:29:06 theurich Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.14 2009/08/11 21:20:15 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,22 +36,12 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.13 2009/07/22 23:29:06 theurich Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.14 2009/08/11 21:20:15 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
-      integer :: rc, fieldcount, count, countlist(2)
-      integer :: number, i
-      type(ESMF_Grid) :: grid, grid2
-      type(ESMF_VM) :: vm
-      character (len = ESMF_MAXSTR) :: bname1, fname1, fname2, fname3
-      character(len = ESMF_MAXSTR), dimension(10) :: fieldNameList
-      type(ESMF_Field) :: fields(10)
-      type(ESMF_Field) :: returnedfield1, returnedfield2, returnedfield3
-      type(ESMF_Field) :: simplefield
-      type(ESMF_FieldBundle) :: bundle1, bundle2, bundle3, bundle4
-      real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr2
-      real (ESMF_KIND_R8) :: mincoord(2)
+      integer :: rc
+      type(ESMF_FieldBundle) :: bundle2
 
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -60,6 +50,20 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
+#ifdef ESMF_TESTEXHAUSTIVE
+      type(ESMF_Grid) :: grid
+      integer :: i, fieldcount
+      integer :: number, count
+      character (len = ESMF_MAXSTR) :: fname1, fname2,fname3
+      character(len = ESMF_MAXSTR), dimension(10) :: fieldNameList
+      type(ESMF_Field) :: fields(10)
+      type(ESMF_Grid) :: grid2
+      type(ESMF_Field) :: simplefield
+      type(ESMF_Field) :: returnedfield1, returnedfield2, returnedfield3
+      real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr2
+      type(ESMF_FieldBundle) :: bundle1, bundle3, bundle4
+      character (len = ESMF_MAXSTR) :: bname1
+#endif
 
 
 !-------------------------------------------------------------------------------
