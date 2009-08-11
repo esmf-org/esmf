@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.24 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.25 2009/08/11 22:13:19 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -33,15 +33,13 @@
     
 !   ! Local variables
     integer :: rc
-    character(ESMF_MAXSTR) :: cname, bname, cplname
-    type(ESMF_CplComp) :: cpl, cpl2
+    character(ESMF_MAXSTR) :: cplname
+    type(ESMF_CplComp) :: cpl
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name
-    integer :: localPet, result = 0
-    logical :: bool
-    type(ESMF_VM) :: vm
+    integer :: result = 0
     
     ! Internal State Variables
     type testData
@@ -54,8 +52,15 @@
 	type(testData), pointer :: p
     end type
     
+#ifdef ESMF_TESTEXHAUSTIVE
+    logical :: bool
+    type(ESMF_VM) :: vm
+    type(ESMF_CplComp) :: cpl2
+    integer :: localPet
+    character(ESMF_MAXSTR) :: cname, bname
     type (dataWrapper) :: wrap1, wrap2
     type(testData), target :: data1, data2
+#endif
 
 !-------------------------------------------------------------------------------
 !   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
