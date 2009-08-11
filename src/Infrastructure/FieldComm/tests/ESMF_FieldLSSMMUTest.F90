@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldLSSMMUTest.F90,v 1.3 2009/07/02 19:35:49 feiliu Exp $
+! $Id: ESMF_FieldLSSMMUTest.F90,v 1.4 2009/08/11 20:59:15 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldLSSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldLSSMMUTest.F90,v 1.3 2009/07/02 19:35:49 feiliu Exp $'
+    '$Id: ESMF_FieldLSSMMUTest.F90,v 1.4 2009/08/11 20:59:15 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -45,11 +45,15 @@ program ESMF_FieldLSSMMUTest
     ! individual test result code
     integer :: rc = ESMF_SUCCESS
 
+#ifdef ESMF_TESTEXHAUSTIVE
+
     ! individual test name
     character(ESMF_MAXSTR) :: name
 
     ! individual test failure messages
     character(ESMF_MAXSTR*2) :: failMsg
+
+#endif
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
     if(rc /= ESMF_SUCCESS) &
