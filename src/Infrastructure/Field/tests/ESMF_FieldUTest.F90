@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.139 2009/07/22 20:33:53 theurich Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.140 2009/08/11 19:44:41 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.139 2009/07/22 20:33:53 theurich Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.140 2009/08/11 19:44:41 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -51,42 +51,39 @@
       character(ESMF_MAXSTR) :: name
 
 !     !LOCAL VARIABLES:
-      integer :: i, count, localrc, cl(2),cu(2),cc(2)
-      integer, dimension(3) :: cellCounts
-      type(ESMF_DELayout) :: delayout
       type(ESMF_VM) :: vm
-      type(ESMF_LocStream) :: locstream
-      type(ESMF_Grid) :: grid, grid2, grid3, grid4, grid5
-      type(ESMF_ArraySpec) :: arrayspec
-      real, dimension(:,:), pointer :: f90ptr2, f90ptr4, f90ptr5
-      real(ESMF_KIND_R8) :: minCoord(2), deltas(10)
+      real(ESMF_KIND_R8) :: minCoord(2)
       !type(ESMF_RelLoc) :: rl
-      character (len = 20) :: fname, fname1, fname2
-      character (len = 20) :: gname, gname3
-      type(ESMF_IOSpec) :: ios
       !type(ESMF_Mask) :: mask
-      type(ESMF_Field) :: f1, f2, f3, f4, f5, f6, f7, f8, f9, fls
-      integer(ESMF_KIND_I4) :: intattr, intattr2
-      integer(ESMF_KIND_I4) :: intattrlist(6)
-      real(ESMF_KIND_R8) :: rattr, rattrlist(2)
-      character (len=32) :: lattrstr
-      type(ESMF_Logical) :: lattr, lattrlist(6)
-      character (len=512) :: cattr, cattr2
+      type(ESMF_Field) :: f1
+      logical :: isCommitted
+
+
+#ifdef ESMF_TESTEXHAUSTIVE
+      integer :: cu(2), cl(2), i, cc(2), localrc, count
+      integer :: ldecount
+      integer, dimension(3) :: cellCounts
+      type(ESMF_IOSpec) :: ios
+      type(ESMF_Grid) :: grid3
+      type(ESMF_ArraySpec) 			  :: arrayspec
       real(ESMF_KIND_R8), dimension(:,:), pointer :: farray
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: farray1, farray2
-      type(ESMF_Array)                            :: array8
-      type(ESMF_ArraySpec)                        :: arrayspec8
-      type(ESMF_DistGrid)                         :: distgrid
+      type(ESMF_LocStream) 			  :: locstream
+      type(ESMF_DELayout) 			  :: delayout
       type(ESMF_StaggerLoc)                       :: staggerloc8
-      logical :: correct, isCommitted
-
-      integer :: im, jm, km, ldecount
-      real(ESMF_KIND_R8) :: xmin,xmax,ymin,ymax
-      real(ESMF_KIND_R8), dimension(:), allocatable :: delta
+      type(ESMF_ArraySpec)                        :: arrayspec8
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: fptr
-      real(ESMF_KIND_R8), dimension(:), pointer :: lsfptr, lsfptrOut
       real(ESMF_KIND_R4), dimension(:,:), pointer :: lsfptrR4Out
+      type(ESMF_Grid) :: grid, grid2
+      real(ESMF_KIND_R8), dimension(:), pointer :: lsfptr,lsfptrOut
+      real(ESMF_KIND_R8), dimension(:), allocatable :: delta
+      real(ESMF_KIND_R8) :: xmin, xmax, ymin, ymax
+      type(ESMF_Field) :: f2, f3, f4, f5, f6, fls
+      integer :: km, jm, im
+      character (len = 20) :: gname, gname3
+      character (len = 20) :: fname, fname1, fname2
+      logical :: correct
 
+#endif
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
 ! always run. When the environment variable, EXHAUSTIVE, is set to ON then 
