@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.27 2009/08/05 00:07:20 rokuingh Exp $
+% $Id: Attribute_desc.tex,v 1.28 2009/08/11 05:24:17 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -26,9 +26,9 @@ Attributes are meant to be used as a tool for the user to help internally docume
 \item State
 \end{itemize}
 
-Each Attribute contains a name value pair in which the value can be any of several numeric, character, and logical types.  See Figure \ref{fig:AttributeClassUML} for the available Attribute value types.  All Attributes also contain character strings specifying the convention, purpose, and object type of the Attribute for identification purposes - each of which is initialized as an empty string until specified otherwise.  Each Attribute can be uniquely identified by its name, convention, purpose within any one ESMF object.  
+Each Attribute contains a name-value pair in which the value can be any of several numeric, character, and logical types.  See Figure \ref{fig:AttributeClassUML} for the available Attribute value types.  All Attributes also contain character strings specifying the convention, purpose, and object type of the Attribute for identification purposes - each of which is initialized as an empty string until specified otherwise.  Each Attribute can be uniquely identified by its name, convention, purpose within any one ESMF object.  
 
-All Attributes contain a three vectors of pointers to other Attributes, which are empty until specified otherwise.  These vectors of Attribute pointers hold the Attributes, Attribute packages, and Attribute links.  This feature is what allows the Attribute class to self assemble complex structures for representing and organizing the metadata of an ESMF object hierarchy.
+All Attributes contain three vectors of pointers to other Attributes, which are empty until specified otherwise.  These vectors of Attribute pointers hold the Attributes, Attribute packages, and Attribute links.  This feature is what allows the Attribute class to self assemble complex structures for representing and organizing the metadata of an ESMF object hierarchy.
 
 \subsubsection{Attribute Hierarchies}
 
@@ -44,7 +44,7 @@ Of the ESMF objects with Attributes, only some can link their Attributes togethe
 \item ArrayBundle
 \end{itemize}
 
-The most common use for this capability is for linking the Attributes of a Field to the FieldBundle which holds it, which is then linked to the State that is used to transport all of the data for a Component.  All of these links, with the exception of the link between the Component and the State, are automatically handled by ESMF.  In addition, the State will automatically set the {\it import} and {\tt export} boolean valued Attributes that are part of the ESMF supplied standard Attribute package for Field when that Field is added to the State. 
+The most common use for this capability is for linking the Attributes of a Field to the FieldBundle which holds it, which is then linked to the State that is used to transport all of the data for a Component.  All of these links, with the exception of the link between the Component and the State, are automatically handled by ESMF.  In addition, the State will automatically set the {\it import} and {\it export} boolean valued Attributes that are part of the ESMF supplied standard Attribute package for Field when that Field is added to the State. 
 
 Attribute hierarchies are linked in a ``shallow" manner, meaning that the Attributes belonging to an external object are not copied, they are merely referenced by a pointer.  This is important to ensure that the Attribute hierarchy has a one-to-one correspondence with the object hierarchy.  
 
@@ -161,7 +161,7 @@ The ESMF standard Attribute packages are based on a blend of the Climate and For
 \hline\hline
 {\bf Convention} & {\bf Purpose} & {\bf Name} \\
 \hline\hline
-{\tt ESMF} & {\tt General} & {\tt Grid GridSpec General +} \\
+{\tt ESMF} & {\tt General} & {\bf Grid GridSpec General +} \\
 {\tt GridSpec} & {\tt General} & {\tt CongruentTiles} \\
  & & {\tt GridType} \\ 
  & & {\tt DimOrder} \\ 
@@ -186,9 +186,9 @@ The ESMF standard Attribute packages are based on a blend of the Climate and For
 
 \vspace{18pt}
 
-ESMF also allows nesting of Attribute packages.  This capability is intended to help organize different metadata compliance levels, such as CF and ESG.  The nesting of Attribute packages is also very helpful when adding customized Attributes to a package.  The main use of the nesting capabilities of Attribute packages is geared towards organizing different metadata compliance levels.  For instance, the CF metadata standard for Fields requires that there be Attributes to track the {\it name}, {\it long\_name}, {\it standard\_name}, and {\it units} of the Field.  The ESG standard, on the other hand, requires two additional Attributes called {\it import} and {\it export}.  In this case the ESMF representation of the ESG compliant Attribute package for a Field would involve a nested Attribute package structure.  This would involve the ESG-specific Attribute package, containing the Attributes {\it import} and {\it export} containing a nested version of the CF-specific Attribute package, with the Attributes {\it name}, {\it long\_name}, {\it standard\_name}, and {\it units}.  An Attribute package can be nested by including the specifiers of the both packages in the {\tt ESMF\_AttributeAdd()} interface call.  
+ESMF also allows nesting of Attribute packages.  This capability is intended to help organize different metadata compliance levels, such as CF and ESG.  The nesting of Attribute packages is also very helpful when adding customized Attributes to a package.  The main use of the nesting capabilities of Attribute packages is geared towards organizing different metadata compliance levels.  For instance, the CF metadata standard for Fields requires that there be Attributes to track the {\it name}, {\it long\_name}, {\it standard\_name}, and {\it units} of the Field.  The ESG standard, on the other hand, requires two additional Attributes called {\it import} and {\it export}.  In this case the ESMF representation of the ESG compliant Attribute package for a Field would involve a nested Attribute package structure.  This would involve the ESG-specific Attribute package, containing the Attributes {\it import} and {\it export} containing a nested version of the CF-specific Attribute package, with the Attributes {\it name}, {\it long\_name}, {\it standard\_name}, and {\it units}.  An Attribute package can be nested by including the specifiers of both packages in the {\tt ESMF\_AttributeAdd()} interface call.  
 
-The nesting capabilities of Attribute packages are also very useful for organizing the customized metadata supplied by a user.  For example, if a user was not satisfied with the metadata support required in the ESG convention for Field they could supply a list of Attributes they would like to support.  This new Attribute package would then be used as an additional layer, inside which the Attribute package of ESG would be nested, inside which the CF Attribute package would be nested.  One important thing to remember when working with nested Attribute packages is that naming two Attributes in the same nested structure can yield undefined behavior.
+The nesting capabilities of Attribute packages are also very useful for organizing the customized metadata supplied by a user.  For example, if a user was not satisfied with the metadata support required in the ESG convention for Field they could supply a list of Attributes they would like to support.  This new Attribute package would then be used as an additional layer, inside which the Attribute package of ESG would be nested, inside which the CF Attribute package would be nested.  One important thing to remember when working with nested Attribute packages is that naming two Attributes the same in the same nested structure can yield undefined behavior.
 
 An explanation of the specifiers is in order at this point.  The purpose 
 specifier is really just meant as an additional means, beyond the use of 
