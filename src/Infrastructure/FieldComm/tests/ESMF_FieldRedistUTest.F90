@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistUTest.F90,v 1.9 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_FieldRedistUTest.F90,v 1.10 2009/08/11 20:50:49 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldRedistUTest.F90,v 1.9 2009/01/21 21:37:59 cdeluca Exp $'
+    '$Id: ESMF_FieldRedistUTest.F90,v 1.10 2009/08/11 20:50:49 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -45,11 +45,14 @@ program ESMF_FieldRedistUTest
     ! individual test result code
     integer :: rc = ESMF_SUCCESS
 
+#ifdef ESMF_TESTEXHAUSTIVE
+
     ! individual test name
     character(ESMF_MAXSTR) :: name
 
     ! individual test failure messages
     character(ESMF_MAXSTR*2) :: failMsg
+#endif
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
     if(rc /= ESMF_SUCCESS) &
