@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.18 2009/04/10 05:24:57 theurich Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.19 2009/08/11 22:03:58 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -56,8 +56,10 @@
         type(testData), pointer :: p
     end type
 
+#ifdef ESMF_TESTEXHAUSTIVE
     type (dataWrapper) :: wrap1, wrap2
     type(testData), target :: data1, data2
+#endif
 
 !-------------------------------------------------------------------------------
 !   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
