@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.17 2009/05/08 01:41:57 w6ws Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.18 2009/08/11 21:41:17 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -49,17 +49,15 @@ end module
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.17 2009/05/08 01:41:57 w6ws Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.18 2009/08/11 21:41:17 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
     integer :: rc
-    character(ESMF_MAXSTR) :: sname, bname
+    character(ESMF_MAXSTR) :: sname
     character(1000) :: testName
     !type(ESMF_Field) :: field1, field2
-    type(ESMF_FieldBundle) :: bundle1, bundle2, qbundle
-    type(ESMF_State) :: state1, state2, state3, state4, state5
-    logical :: isNeeded
+    type(ESMF_State) :: state1
 
     ! individual test failure messages
     character(ESMF_MAXSTR) :: failMsg
@@ -72,6 +70,12 @@ end module
     !character(ESMF_MAXSTR) :: validate_options
     !character(ESMF_MAXSTR) :: print_options
 
+#ifdef ESMF_TESTEXHAUSTIVE
+    character(ESMF_MAXSTR) :: bname
+    type(ESMF_State) :: state2, state3, state4, state5
+    type(ESMF_FieldBundle) :: bundle1, bundle2, qbundle
+    logical :: isNeeded
+#endif
 
 !-------------------------------------------------------------------------------
 !   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
