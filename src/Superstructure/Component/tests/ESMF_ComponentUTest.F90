@@ -1,4 +1,4 @@
-! $Id: ESMF_ComponentUTest.F90,v 1.14 2008/11/14 05:06:48 theurich Exp $
+! $Id: ESMF_ComponentUTest.F90,v 1.15 2009/08/11 21:55:52 svasquez Exp $
 !
 ! Test code which creates a new Component.
 
@@ -24,9 +24,8 @@
     implicit none
     
 !   ! Local variables
-    integer :: rc, localPet
     integer :: result = 0
-    logical :: bool
+    integer :: rc
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -34,8 +33,13 @@
 
     ! other local variables
     character(ESMF_MAXSTR) :: cname
-    type(ESMF_GridComp) :: comp1, comp2
+    type(ESMF_GridComp) :: comp1
+#ifdef ESMF_TESTEXHAUSTIVE
     type(ESMF_VM) :: vm
+    logical :: bool
+    integer :: localPet
+    type(ESMF_GridComp) :: comp2
+#endif
         
 !-------------------------------------------------------------------------
 !   !
