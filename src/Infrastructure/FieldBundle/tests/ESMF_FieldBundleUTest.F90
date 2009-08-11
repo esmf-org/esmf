@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.14 2009/08/11 21:20:15 svasquez Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.15 2009/08/11 21:28:17 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.14 2009/08/11 21:20:15 svasquez Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.15 2009/08/11 21:28:17 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -60,7 +60,7 @@
       type(ESMF_Grid) :: grid2
       type(ESMF_Field) :: simplefield
       type(ESMF_Field) :: returnedfield1, returnedfield2, returnedfield3
-      real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr2
+      !real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr2
       type(ESMF_FieldBundle) :: bundle1, bundle3, bundle4
       character (len = ESMF_MAXSTR) :: bname1
 #endif
