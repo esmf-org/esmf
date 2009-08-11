@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.22 2009/08/06 15:23:19 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.23 2009/08/11 05:28:18 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -239,6 +239,8 @@ class Attribute
     int AttributeWriteXMLbufferfield(FILE *xml, const string &convention, const string &purpose, 
       int &index, const int &columns) const;
     int AttributeWriteXMLbufferfieldT(FILE *xml, int &index, const int &columns) const;
+
+    int AttributeWriteWaterMLbuffieldT(FILE *xml, int &index, const int &columns) const;
 
     // Print
     int ESMC_Print(void) const;

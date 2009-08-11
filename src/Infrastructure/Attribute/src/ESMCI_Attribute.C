@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.43 2009/07/28 22:15:56 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.44 2009/08/11 05:28:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.43 2009/07/28 22:15:56 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.44 2009/08/11 05:28:19 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3623,16 +3623,43 @@ namespace ESMCI {
     return ESMF_FAILURE;
   }
   
-  // Write the XML file header
-  sprintf(msgbuf,"<model_component name=\"%s\" full_name=\"%s\" version=\"%s\"\n",
-    modelcompname.c_str(),fullname.c_str(),version.c_str());
-  fprintf(xml,"%s",msgbuf);
-  sprintf(msgbuf,"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
-  fprintf(xml,"%s",msgbuf);
-  sprintf(msgbuf,"xsi:schemaLocation=\"http://www.esmf.ucar.edu file:/esmf_model_component.xsd\"\n");
-  fprintf(xml,"%s",msgbuf);
-  sprintf(msgbuf,"xmlns=\"http://www.esmf.ucar.edu\">\n\n");
-  fprintf(xml,"%s",msgbuf);
+  // TODO: replace this prototype for WaterML TimeSeries
+  if (convention.compare("WaterML")==0 & 
+      purpose.compare("TimeSeries")==0) {
+
+    // Write the WaterML XML file header
+    fprintf(xml,"<timeSeriesResponse xmlns:gml=\"http://www.opengis.net/gml\"\n");
+    fprintf(xml,"    xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n");
+    fprintf(xml,"    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:wtr=\"http://www.cuahsi.org/waterML/\"\n");
+    fprintf(xml,"    xmlns=\"http://www.cuahsi.org/waterML/1.0/\">\n");
+  
+    fprintf(xml,"    <queryInfo>\n");
+    fprintf(xml,"        <creationTime>2009-01-08T15:52:17.8495Z</creationTime>\n");
+    fprintf(xml,"        <criteria>\n");
+    fprintf(xml,"            <locationParam>LittleBearRiver:USU-LBR-Paradise</locationParam>\n");
+    fprintf(xml,"            <variableParam>LBR:USU39</variableParam>\n");
+    fprintf(xml,"            <timeParam>\n");
+    fprintf(xml,"                <beginDateTime>2008-04-14T13:00:00</beginDateTime>\n");
+    fprintf(xml,"                <endDateTime>2008-04-15T12:00:00</endDateTime>\n");
+    fprintf(xml,"            </timeParam>\n");
+    fprintf(xml,"        </criteria>\n");
+    fprintf(xml,"        <note>OD Web Service</note>\n");
+    fprintf(xml,"    </queryInfo>\n");
+    fprintf(xml,"    <timeSeries>\n");
+
+  } else {
+
+    // Write the XML file header
+    sprintf(msgbuf,"<model_component name=\"%s\" full_name=\"%s\" version=\"%s\"\n",
+      modelcompname.c_str(),fullname.c_str(),version.c_str());
+    fprintf(xml,"%s",msgbuf);
+    sprintf(msgbuf,"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
+    fprintf(xml,"%s",msgbuf);
+    sprintf(msgbuf,"xsi:schemaLocation=\"http://www.esmf.ucar.edu file:/esmf_model_component.xsd\"\n");
+    fprintf(xml,"%s",msgbuf);
+    sprintf(msgbuf,"xmlns=\"http://www.esmf.ucar.edu\">\n\n");
+    fprintf(xml,"%s",msgbuf);
+  }
 
   // determine the number of fields to write
   localrc = AttributeCountTree(convention, purpose, varobj, rows, columns);
@@ -3657,9 +3684,20 @@ namespace ESMCI {
     return ESMF_FAILURE;
   }
 
-  // write the footer
-  sprintf(msgbuf,"\n</model_component>\n");
-  fprintf(xml,"%s",msgbuf);
+  // TODO: replace this prototype for WaterML TimeSeries
+  if (convention.compare("WaterML")==0 & 
+      purpose.compare("TimeSeries")==0) {
+
+    // write the WaterML footer
+    fprintf(xml,"    </timeSeries>\n");
+    fprintf(xml,"</timeSeriesResponse>\n");
+  
+  } else {
+
+    // write the XML footer
+    sprintf(msgbuf,"\n</model_component>\n");
+    fprintf(xml,"%s",msgbuf);
+  }
   
   // close the file
   fclose(xml);
@@ -3723,9 +3761,13 @@ namespace ESMCI {
 
   // do field write
   if (!fielddone) {
-    // write the field header
-    sprintf(msgbuf,"<variable_set>\n");
-    fprintf(xml,"%s",msgbuf);
+    // TODO: replace this prototype for WaterML TimeSeries
+    if (!(convention.compare("WaterML")==0 & 
+          purpose.compare("TimeSeries")==0)) {
+      // write the field header
+       sprintf(msgbuf,"<variable_set>\n");
+       fprintf(xml,"%s",msgbuf);
+    }
     // call the field write buffer method
     localrc = AttributeWriteXMLbufferfield(xml, convention, purpose, index, columns);
     if (localrc != ESMF_SUCCESS) {
@@ -3734,9 +3776,12 @@ namespace ESMCI {
       fclose(xml);
       return ESMF_FAILURE;
     }
-    // write the field footer
-    sprintf(msgbuf,"</variable_set>\n\n");
-    fprintf(xml,"%s",msgbuf);
+    if (!(convention.compare("WaterML")==0 & 
+          purpose.compare("TimeSeries")==0)) {
+      // write the field footer
+      sprintf(msgbuf,"</variable_set>\n\n");
+      fprintf(xml,"%s",msgbuf);
+    }
     // done with field
     fielddone = true;
   }
@@ -3957,7 +4002,13 @@ namespace ESMCI {
 
   attpack = AttPackGet(convention, purpose, "field");
   if (attpack) {
-    localrc = attpack->AttributeWriteXMLbufferfieldT(xml, index, columns);
+    // TODO: replace this prototype for WaterML TimeSeries
+    if (convention.compare("WaterML")==0 & 
+        purpose.compare("TimeSeries")==0) {
+      localrc = attpack->AttributeWriteWaterMLbuffieldT(xml, index, columns);
+    } else {
+      localrc = attpack->AttributeWriteXMLbufferfieldT(xml, index, columns);
+    }
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "AttributeWriteXMLbufferfield failed AttributeWriteXMLbufferfieldT");
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -4066,6 +4117,239 @@ namespace ESMCI {
  } // end AttributeWriteXMLbufferfieldT
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeWriteWaterMLbuffieldT"
+//BOPI
+// !IROUTINE:  AttributeWriteWaterMLbuffieldT - Write contents of an {\tt Attribute} package for field
+//
+// !INTERFACE:
+      int Attribute::AttributeWriteWaterMLbuffieldT(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      FILE *xml,                     //  in - file pointer to write
+      int &index,                    //  in - counter            
+      const int &columns) const{     //  in - columns
+//
+// !DESCRIPTION:
+//    Print the contents of an {\tt Attribute}.  Expected to be
+//    called internally.
+//
+//EOPI
+
+  char msgbuf[4*ESMF_MAXSTR];
+  int localrc;
+  unsigned int i;
+  Attribute *attpack;
+
+  // TODO:  replace with actual field->array reference/pointer
+  double array3d[]={0.1192, // 1 (name, values match those in
+                    0.114,  // 2   WaterML use_test_case)
+                    0.1424, // 3
+                    0.1814, // 4
+                    0.3841, // 5
+                    0.9124, // 6
+                    0.0655, // 7
+                    0.4342, // 8
+                    0.9543, // 9
+                    0.7308, // 10
+                    0.7004, // 11
+                    0.6097, // 12
+                    0.5544, // 13
+                    0.6182, // 14
+                    0.5476, // 15
+                    0.5728, // 16
+                    0.369,  // 17
+                    0.3664, // 18
+                    0.4767, // 19
+                    0.3144, // 20
+                    0.4517, // 21
+                    0.3838, // 22
+                    0.4702, // 23
+                    0.389,  // 24
+                    0.4949, // 25
+                    0.2778, // 26
+                    0.3576, // 27
+                    0.3618, // 28
+                    0.2803};// 29
+
+  attpack = NULL;
+
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  // skip TimeSeries attpack (just a wrapper)
+  if (attrPurpose.compare("TimeSeries")!=0) {
+
+    // attpack header
+    if (attrPurpose.compare("sourceInfo")==0) {
+      fprintf(xml, "        <sourceInfo xsi:type=\"SiteInfoType\">\n");
+    } else if (attrPurpose.compare("variable")==0) {
+      fprintf(xml, "        <variable>\n");
+    } else if (attrPurpose.compare("values")==0) {
+      fprintf(xml, "        <values>");
+    } else if (attrPurpose.compare((attrPurpose.size()-2),2,".1")==0) {
+      // <value>
+      fprintf(xml, "            <value>");
+    } else if (attrPurpose.compare("method")==0) {
+      fprintf(xml, "            <method>");
+    } else if (attrPurpose.compare("source")==0) {
+      fprintf(xml, "            <source>");
+    }
+
+    // print each attribute in attpack
+    for (i=0; i<attrList.size(); i++) { 
+      // TODO: check for #items, tk
+
+      if (attrPurpose.compare("sourceInfo")==0) {
+        if (attrList.at(i)->attrName.compare("siteCode")==0) {
+          fprintf(xml, "            <%s network=\"LittleBearRiver\" "
+                       "siteID=\"2\">%s</%s>\n",
+                        attrList.at(i)->attrName.c_str(),
+                       (attrList.at(i)->vcp).c_str(),
+                        attrList.at(i)->attrName.c_str());
+        } else if (attrList.at(i)->attrName.compare("latitude")==0) {
+          fprintf(xml, "            <geoLocation>\n");
+          fprintf(xml, "                <geogLocation xsi:type=\"LatLonPointType\" srs=\"EPSG:4269\">\n");
+          fprintf(xml, "                    <%s>%s</%s>\n",
+                  attrList.at(i)->attrName.c_str(),
+                 (attrList.at(i)->vcp).c_str(),
+                  attrList.at(i)->attrName.c_str());
+        } else if (attrList.at(i)->attrName.compare("longitude")==0) {
+          fprintf(xml, "                    <%s>%s</%s>\n",
+                  attrList.at(i)->attrName.c_str(),
+                 (attrList.at(i)->vcp).c_str(),
+                  attrList.at(i)->attrName.c_str());
+          fprintf(xml, "                </geogLocation>\n");
+        } else if (attrList.at(i)->attrName.compare("X")==0) {
+          fprintf(xml, "                <localSiteXY projectionInformation=\" NAD83 / UTM zone 12N\">\n");
+          fprintf(xml, "                    <%s>%s</%s>\n",
+                  attrList.at(i)->attrName.c_str(),
+                 (attrList.at(i)->vcp).c_str(),
+                  attrList.at(i)->attrName.c_str());
+        } else if (attrList.at(i)->attrName.compare("Y")==0) {
+          fprintf(xml, "                    <%s>%s</%s>\n",
+                  attrList.at(i)->attrName.c_str(),
+                 (attrList.at(i)->vcp).c_str(),
+                  attrList.at(i)->attrName.c_str());
+          fprintf(xml, "                </localSiteXY>\n");
+          fprintf(xml, "            </geoLocation>\n");
+        } else if (attrList.at(i)->attrName.compare("County")==0 ||
+                   attrList.at(i)->attrName.compare("State")==0  ||
+                   attrList.at(i)->attrName.compare("Site Comments")==0) {
+          fprintf(xml, "            <note title=\"%s\">%s</note>\n",
+                  attrList.at(i)->attrName.c_str(),
+                 (attrList.at(i)->vcp).c_str());
+        } else { // siteName or verticalDatum
+          fprintf(xml, "            <%s>%s</%s>\n",
+                  attrList.at(i)->attrName.c_str(),
+                 (attrList.at(i)->vcp).c_str(),
+                  attrList.at(i)->attrName.c_str());
+        }
+      } else if (attrPurpose.compare("variable")==0) {
+        if (attrList.at(i)->attrName.compare("variableCode")==0) {
+          fprintf(xml, "            <%s vocabulary=\"LBR\" "
+                       "default=\"true\" variableID=\"39\">%s</%s>\n",
+                        attrList.at(i)->attrName.c_str(),
+                       (attrList.at(i)->vcp).c_str(),
+                        attrList.at(i)->attrName.c_str());
+        } else if (attrList.at(i)->attrName.compare("units")==0) {
+          fprintf(xml, "            <%s unitsAbbreviation=\"mg/L\" "
+                       "unitsCode=\"199\">%s</%s>\n",
+                        attrList.at(i)->attrName.c_str(),
+                       (attrList.at(i)->vcp).c_str(),
+                        attrList.at(i)->attrName.c_str());
+        } else if (attrList.at(i)->attrName.compare("timeSupport")==0) {
+          fprintf(xml, "            <%s isRegular=\"%s\">\n",
+                        attrList.at(i)->attrName.c_str(),
+                       (attrList.at(i)->vcp).c_str());
+        } else {
+          fprintf(xml, "            <%s>%s</%s>\n",
+                  attrList.at(i)->attrName.c_str(),
+                 (attrList.at(i)->vcp).c_str(),
+                  attrList.at(i)->attrName.c_str());
+        }
+      } else if (attrPurpose.compare("values")==0) {
+        fprintf(xml, " %s=\"%s\"",
+                attrList.at(i)->attrName.c_str(),
+               (attrList.at(i)->vcp).c_str());
+      } else if (attrPurpose.compare((attrPurpose.size()-2),2,".1")==0) {
+        // <value>
+        fprintf(xml, " %s=\"%s\"",
+                attrList.at(i)->attrName.c_str(),
+               (attrList.at(i)->vcp).c_str());
+        if (attrList.at(i)->attrName.compare("dateTime")==0 ||
+            attrList.at(i)->attrName.compare("sourceID")==0) {
+          fprintf(xml, "\n                ");
+        } else if (attrList.at(i)->attrName.compare("sampleID")==0) {
+          fprintf(xml, ">");
+          // TODO: print value from array here
+          fprintf(xml, "%g",
+            array3d[atoi((attrList.at(i)->attrPurpose.substr(5,2)).c_str())-1]);
+        }
+      } else if (attrPurpose.compare("method")==0) {
+        if (attrList.at(i)->attrName.compare("methodID")==0) {
+          fprintf(xml, " %s=\"%s\">\n",
+                        attrList.at(i)->attrName.c_str(),
+                       (attrList.at(i)->vcp).c_str());
+        } else {
+          fprintf(xml, "                <%s>%s</%s>\n",
+                  attrList.at(i)->attrName.c_str(),
+                 (attrList.at(i)->vcp).c_str(),
+                  attrList.at(i)->attrName.c_str());
+        }
+      } else if (attrPurpose.compare("source")==0) {
+        if (attrList.at(i)->attrName.compare("sourceID")==0) {
+          fprintf(xml, " %s=\"%s\">\n",
+                        attrList.at(i)->attrName.c_str(),
+                       (attrList.at(i)->vcp).c_str());
+        } else {
+          fprintf(xml, "                <%s>%s</%s>\n",
+                  attrList.at(i)->attrName.c_str(),
+                 (attrList.at(i)->vcp).c_str(),
+                  attrList.at(i)->attrName.c_str());
+          if (attrList.at(i)->attrName.compare("SourceDescription")==0) {
+            fprintf(xml, "                <ContactInformation>\n");
+            fprintf(xml, "                    <ContactName>Amber Spackman</ContactName>\n");
+            fprintf(xml, "                    <TypeOfContact>main</TypeOfContact>\n");
+            fprintf(xml, "                    <Phone>1-435-797-0045</Phone>\n");
+            fprintf(xml, "                    <Email>amber.s@aggiemail.usu.edu</Email>\n");
+            fprintf(xml, "                    <Address> xsi:type=\"xsd:string\">8200 Old Main Hill ,Logan, Utah 84322-8200</Address>\n");
+            fprintf(xml, "                </ContactInformation>\n");
+          }
+        }
+      }
+    }
+
+    // attpack footer
+    if (attrPurpose.compare("sourceInfo")==0) {
+      fprintf(xml, "        </sourceInfo>\n");
+    } else if (attrPurpose.compare("variable")==0) {
+      fprintf(xml, "        </variable>\n");
+    } else if (attrPurpose.compare("values")==0) {
+      fprintf(xml, ">\n");
+    } else if (attrPurpose.compare((attrPurpose.size()-2),2,".1")==0) {
+      // <value>
+      fprintf(xml, "</value>\n");
+    } else if (attrPurpose.compare("method")==0) {
+      fprintf(xml, "            </method>\n");
+    } else if (attrPurpose.compare("source")==0) {
+      fprintf(xml, "            </source>\n");
+      fprintf(xml, "        </values>\n");
+    }
+
+  } // end if not TimeSeries attpack wrapper
+
+  // recurse remaining attpacks
+  for(i=0; i<packList.size(); i++)
+    localrc = packList.at(i)->AttributeWriteWaterMLbuffieldT(xml,index,columns);
+
+  return ESMF_SUCCESS;
+
+ } // end AttributeWriteWaterMLbuffieldT
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_Print"
 //BOPI
 // !IROUTINE:  Attribute::ESMC_Print - Print the {\tt Attribute} contents
@@ -4155,8 +4439,8 @@ namespace ESMCI {
                     return localrc;
                 }
       printf("%s",msgbuf);
-      }
       ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+      }
   }
 
   // print convention
