@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.10 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.11 2009/08/11 21:23:22 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -45,9 +45,11 @@
     ! individual test result code
     integer :: rc = 1
 
+#ifdef ESMF_TESTEXHAUSTIVE
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name
+#endif
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
  
