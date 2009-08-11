@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.24 2009/05/08 01:44:05 w6ws Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.25 2009/08/11 21:49:17 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
     integer, intent(out) :: rc
 
     type(ESMF_Field) :: field1
-    type(ESMF_State) :: neststate
+!nestbug     `type(ESMF_State) :: neststate
 
     print *, "i am comp1_init"
 
@@ -81,8 +81,7 @@ subroutine comp1_final(gcomp, istate, ostate, clock, rc)
     integer, intent(out) :: rc
 
     type(ESMF_Field) :: field1
-    type(ESMF_State) :: neststate
-    integer :: localrc
+!nestbug    type(ESMF_State) :: neststate
 
     print *, "i am comp1_final"
 
