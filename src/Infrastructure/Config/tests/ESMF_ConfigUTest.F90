@@ -1,4 +1,4 @@
-! $Id: ESMF_ConfigUTest.F90,v 1.35 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_ConfigUTest.F90,v 1.36 2009/08/11 17:03:05 svasquez Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -131,8 +131,8 @@ module config_subrs
 !--------------------------------------------------------------------
       integer, parameter   :: nDE_0 = 32      
       real(ESMF_KIND_R4), parameter      :: tau_0 = 14.0
-      character, parameter :: restart_file_0 = 'RestartFile123'
-      character, parameter   :: answer_0 = 'y'
+      character(ESMF_MAXSTR), parameter :: restart_file_0 = 'RestartFile123'
+      character(ESMF_MAXSTR), parameter   :: answer_0 = 'y'
       logical, parameter     :: optimize_0 = .false.
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
@@ -1396,7 +1396,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.35 2009/01/21 21:37:58 cdeluca Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.36 2009/08/11 17:03:05 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0
