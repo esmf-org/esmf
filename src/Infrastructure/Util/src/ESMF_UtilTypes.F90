@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.79 2009/06/16 23:31:59 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.80 2009/08/11 19:54:52 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -360,6 +360,21 @@
 
       type(ESMF_Logical), parameter :: ESMF_TRUE     = ESMF_Logical(1), &
                                        ESMF_FALSE    = ESMF_Logical(2)
+
+!------------------------------------------------------------------------------
+!
+!     ! Typed inquire-only flag
+
+!     ! WARNING: must match corresponding values in ../include/ESMC_Util.h
+
+      type ESMF_InquireFlag
+      sequence
+      private
+          type(ESMF_Logical) :: flag
+      end type
+
+      type(ESMF_InquireFlag), parameter :: ESMF_INQUIREONLY = ESMF_InquireFlag(ESMF_TRUE), &
+                                           ESMF_NOINQUIRE   = ESMF_InquireFlag(ESMF_FALSE)
 
 !------------------------------------------------------------------------------
 !
