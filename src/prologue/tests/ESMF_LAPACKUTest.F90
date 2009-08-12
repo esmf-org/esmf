@@ -20,7 +20,7 @@ program ESMF_LAPACKUTest
   implicit none
 
   character(ESMF_MAXSTR) :: name, failMsg
-  integer :: info, rc, result
+  integer :: rc, result
 
 #if defined (ESMF_LAPACK)
 
@@ -31,7 +31,7 @@ program ESMF_LAPACKUTest
   integer :: pivs(n)
 
   real(dp_k) :: cond
-  integer :: rank
+  integer :: rank, info
 
   real(dp_k) :: work1(1)
   real(dp_k), allocatable :: work(:)
