@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.15 2009/08/06 20:40:09 svasquez Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.16 2009/08/12 18:29:59 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.15 2009/08/06 20:40:09 svasquez Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.16 2009/08/12 18:29:59 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -80,8 +80,8 @@
 
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
-      call ESMF_VMGetGlobal (vm, rc=rc)
-      call ESMF_VMGet (vm, localPet=localPet, rc=rc)
+      call ESMF_VMGetGlobal(vm, rc=rc)
+      call ESMF_VMGet(vm, localPet=localPet, rc=rc)
 
       ! add tests here
 
@@ -143,7 +143,7 @@
     ! Obtain a few Fortran units
     funits = -1
     do, i=1, size (funits)
-      call ESMF_IOUnitGet (funits(i), rc)
+      call ESMF_IOUnitGet(funits(i), rc)
       ioerr = 0
       if (rc == ESMF_SUCCESS) then
         write (filename,'(a,2i2.2)') 'IOtempfile', localPet, i
@@ -158,7 +158,7 @@
     else
       write (failMsg, *) "Could not obtain unit:", funits(i)
     end if
-    call ESMF_Test (rc == ESMF_SUCCESS .or. ioerr /= 0, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(rc == ESMF_SUCCESS .or. ioerr /= 0, name, failMsg, result, ESMF_SRCLINE)
 
     do, i=1, size (funits)
       if (funits(i) /= -1) then
@@ -173,9 +173,9 @@
     !NEX_UTest
     ! Get a unit number for flush
     write (name, *) "Testing ESMF_IOUnitFlush, get a free unit"
-    call ESMF_IOUnitGet (funits(1), rc)
+    call ESMF_IOUnitGet(funits(1), rc)
     write (failMsg, *) "Obtaining a fresh unit"
-    call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     !
     !NEX_UTest
@@ -184,7 +184,7 @@
     write (name, *) "ESMF_IOUnitFlush, open scratch file: ", trim (filename)
     write (failMsg, *) "Opening scratch unit"
     open (funits(1), file=filename, form='formatted', iostat=ioerr)
-    call ESMF_Test (ioerr == 0, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(ioerr == 0, name, failMsg, result, ESMF_SRCLINE)
 
     !
     !NEX_UTest
@@ -192,7 +192,7 @@
     write (name, *) "ESMF_IOUnitFlush, flush the scratch file"
     write (funits(1), *) 'Testing ESMF_IOUnitFlush'
     write (failMsg, *) 'calling ESMF_IOUnitFlush'
-    call ESMF_IOUnitFlush (funits(1), rc)
+    call ESMF_IOUnitFlush(funits(1), rc)
     call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     close (funits(1), status='delete', iostat=ioerr)
