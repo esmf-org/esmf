@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.16 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.17 2009/08/12 17:02:36 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.16 2009/01/21 21:37:58 cdeluca Exp $'
+    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.17 2009/08/12 17:02:36 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -65,9 +65,9 @@ program ESMF_ArrayArbIdxSMMUTest
   type(ESMF_RouteHandle):: routehandle3
   integer(ESMF_KIND_I4), pointer :: farrayPtr2D(:,:)! matching Fortran array pointer
   integer(ESMF_KIND_I4) :: factorList2(1)
-  integer               :: factorIndexList2(4,1)
+  integer               :: factorIndexList2(4,1), j
 #endif
-  integer               :: rc, i, j, petCount, localPet
+  integer               :: rc, i, petCount, localPet
   integer, allocatable  :: srcIndices(:)
 
   ! cumulative result: count failures; no failures equals "all pass"
