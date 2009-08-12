@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistArbUTest.F90,v 1.1 2009/08/12 18:11:40 peggyli Exp $
+! $Id: ESMF_FieldRedistArbUTest.F90,v 1.2 2009/08/12 21:14:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -212,7 +212,6 @@
   ! --------------------------------------------------------
   ! Set up distribution for the destination grid
   ! --------------------------------------------------------
-  !NEX_UTest
   write(name, *) "Create a 2D Field on a 2D destination arb grid"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   correct=.true.
@@ -333,7 +332,7 @@
   !----------------------------------------------------------------------------=
   ! Regrid the 3D Src field to 3D Dst field
   !-----------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_disable_UTest
   write(name, *) "Redist the 2D src field to the 2D dest field"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   correct=.true.
