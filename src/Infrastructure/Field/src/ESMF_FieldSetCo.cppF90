@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.11 2009/07/23 17:38:06 feiliu Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.12 2009/08/13 15:30:26 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.11 2009/07/23 17:38:06 feiliu Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.12 2009/08/13 15:30:26 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -246,7 +246,6 @@ contains
     integer, intent(in), optional :: maxHaloUWidth(:) @\
     integer, intent(out), optional :: rc                @\
     ! local variables @\
-    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
     type(ESMF_StaggerLoc)          :: localStaggerLoc  @\
     integer                        :: localrc  @\
     type(ESMF_GeomBase)   :: geombase @\
@@ -431,7 +430,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
     integer, intent(in), optional :: maxHaloUWidth(:) @\
     integer, intent(out), optional :: rc                @\
     ! local variables @\
-    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
     type(ESMF_StaggerLoc)          :: localStaggerLoc  @\
     integer                        :: localrc  @\
     type(ESMF_GeomBase)            :: geombase @\
@@ -610,7 +608,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitGridPtr)
     integer, intent(in), optional :: ungriddedUBound(:) @\
     integer, intent(out), optional :: rc                @\
     ! local variables @\
-    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
     integer                        :: localrc  @\
     type(ESMF_GeomBase)   :: geombase @\
 @\
@@ -726,7 +723,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(out), optional :: rc                @\
     ! local variables @\
-    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
     integer                        :: localrc  @\
     type(ESMF_GeomBase)   :: geombase @\
 @\
@@ -869,7 +865,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
     integer, intent(in), optional :: ungriddedUBound(:) @\
     integer, intent(out), optional :: rc                @\
     ! local variables @\
-    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
     integer                        :: localrc  @\
     type(ESMF_GeomBase)   :: geombase @\
 @\
@@ -984,7 +979,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(out), optional :: rc                @\
     ! local variables @\
-    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
     integer                        :: localrc  @\
     type(ESMF_GeomBase)   :: geombase @\
 @\
@@ -1334,15 +1328,16 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
               ESMF_CONTEXT, rc)  @\
         return @\
     endif @\
-    if(fieldDimCount .gt. gridDimCount_norep) then @\
-      if( (.not. present(ungriddedLBound)) .or. & @\
-          (.not. present(ungriddedUBound)) ) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, & @\
-         "- ungridded bounds must be present when Field has ungridded dimension(s)", & @\
-           ESMF_CONTEXT, rc) @\
-        return @\
-      endif @\
-    endif @\
+!   refer to ticket 1888180 @\
+!    if(fieldDimCount .gt. gridDimCount_norep) then @\
+!      if( (.not. present(ungriddedLBound)) .or. & @\
+!          (.not. present(ungriddedUBound)) ) then @\
+!        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, & @\
+!         "- ungridded bounds must be present when Field has ungridded dimension(s)", & @\
+!           ESMF_CONTEXT, rc) @\
+!        return @\
+!      endif @\
+!    endif @\
 @\
     ! ungridded dimensions plus replicated dimensions @\
     fieldUngriddedDimCount = fieldDimCount-gridDimCount + grid_repdimcount @\

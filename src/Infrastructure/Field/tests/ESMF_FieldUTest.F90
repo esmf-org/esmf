@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.140 2009/08/11 19:44:41 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.141 2009/08/13 15:30:28 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.140 2009/08/11 19:44:41 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.141 2009/08/13 15:30:28 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -60,25 +60,20 @@
 
 
 #ifdef ESMF_TESTEXHAUSTIVE
-      integer :: cu(2), cl(2), i, cc(2), localrc, count
+      integer :: cu(2), cl(2), cc(2), localrc
       integer :: ldecount
-      integer, dimension(3) :: cellCounts
       type(ESMF_IOSpec) :: ios
       type(ESMF_Grid) :: grid3
-      type(ESMF_ArraySpec) 			  :: arrayspec
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: farray
-      type(ESMF_LocStream) 			  :: locstream
-      type(ESMF_DELayout) 			  :: delayout
+      type(ESMF_ArraySpec)            :: arrayspec
+      type(ESMF_LocStream)            :: locstream
       type(ESMF_StaggerLoc)                       :: staggerloc8
       type(ESMF_ArraySpec)                        :: arrayspec8
-      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: fptr
+      real(ESMF_KIND_R8), dimension(:,:,:), allocatable :: fptr
       real(ESMF_KIND_R4), dimension(:,:), pointer :: lsfptrR4Out
       type(ESMF_Grid) :: grid, grid2
       real(ESMF_KIND_R8), dimension(:), pointer :: lsfptr,lsfptrOut
-      real(ESMF_KIND_R8), dimension(:), allocatable :: delta
-      real(ESMF_KIND_R8) :: xmin, xmax, ymin, ymax
       type(ESMF_Field) :: f2, f3, f4, f5, f6, fls
-      integer :: km, jm, im
+      integer :: ulb(1), uub(1)
       character (len = 20) :: gname, gname3
       character (len = 20) :: fname, fname1, fname2
       logical :: correct
@@ -600,80 +595,31 @@
       ! Cannot be tested until Bug 705716 "Field Query attributes not 
       !  implemented" is fixed.
 
-! grid destroy to clear previous grids.
-       call ESMF_GridDestroy(grid, rc=rc)
-
-#if 0
+      allocate(fptr(5,10,15))
       !------------------------------------------------------------------------
-      ! ESMF 3D Field Validate test to accommodate the single point mismatch 
-      ! between center and edge staggerings. This Bug is actually a igrid design 
-      ! issue having to do with the igrid being specified by vertex locations.
-
-      ! define igrid dimensions
-       im = 18
-       jm = 36
-       km = 72
-      ! build uniform global igrid in degrees
-       xmin = 0.0
-       xmax = 360.0
-       ymin =-90.0
-       ymax = 90.0
-       igrid = ESMF_IGridCreateHorzLatLonUni(counts=(/im,jm/),         &
-                     minGlobalCoordPerDim=(/xmin,ymin/),             &
-                     maxGlobalCoordPerDim=(/xmax,ymax/),             &
-                     horzStagger=ESMF_IGRID_HORZ_STAGGER_A,           &
-                     periodic=(/ ESMF_TRUE, ESMF_FALSE /),           &
-                     name="A-igrid", rc=rc)
-
-      ! construct vertical coordinate and add to height to igrid
-       allocate( delta(km) )
-       delta(1:km) = 1.0
-       call ESMF_IGridAddVertHeight( igrid, delta=delta,               &
-              vertStagger=ESMF_IGRID_VERT_STAGGER_TOP, rc=rc)
-       deallocate( delta )
-
-      ! distribute first two dimensions of the igrid
-       delayout = ESMF_DELayoutCreate(vm, rc=rc)
-       call ESMF_IGridDistribute(igrid, delayout=delayout,             &
-                                decompIds=(/1,2,0/), rc=rc)
-
-      ! Get local IGrid counts now for use later
-       call ESMF_IGridGetDELocalInfo(igrid, ESMF_STAGGERLOC_CENTER,          &
-                 Vertrelloc=ESMF_CELL_TOPFACE,                       &
-                 localCellCountPerDim=cellCounts, rc=rc)
-      !EX_remove_UTest_Multi_Proc_Only
-       write(failMsg, *) ""
-       write(name, *) "Getting cell counts for each DE"
-       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      ! Create the test field from a fortran pointer  
-       allocate( fptr(cellCounts(1),cellCounts(2),cellCounts(3)+1) )  
-       print*,'cellcounts',cellCounts
-       f1 = ESMF_FieldCreate(igrid, fptr, ESMF_DATA_REF,              &
-                 horzRelloc=ESMF_STAGGERLOC_CENTER,                   &
-                 vertRelloc=ESMF_CELL_TOPFACE,                       &
-                 name="field", rc=rc)
-       print*,'field create',rc
-      !EX_remove_UTest_Multi_Proc_Only
-       write(failMsg, *) ""
-       write(name, *) "Create Field with vertical axis longer than igrid"
-       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      ! validate field
-       call ESMF_FieldValidate(f1, rc=rc)
-       print*,'field create',rc,ESMF_SUCCESS
-      !EX_remove_UTest_Multi_Proc_Only
-       write(failMsg, *) ""
-       write(name, *) "Field Validated "
-       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      ! clean up
-       deallocate( fptr )
-       call ESMF_FieldDestroy(f1, rc)
-
-#endif
+      !EX_UTest_Multi_Proc_Only 
+      f3 = ESMF_FieldCreate(grid, fptr, ESMF_INDEX_DELOCAL, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Create a field from grid and fortran dummy array"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      call ESMF_FieldGet(f3, ungriddedLBound=ulb, ungriddedUBound=uub, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Get ungridded bounds from Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      if(ulb(1) /= 1 .or. uub(1) /= 15) rc = 1
+      write(failMsg, *) ""
+      write(name, *) "Verify ungridded bounds are valid"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
+      deallocate(fptr)
+      call ESMF_FieldDestroy(f3)
+! grid destroy to clear previous grids.
+      call ESMF_GridDestroy(grid, rc=rc)
 
 #endif
 
