@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.141 2009/08/13 15:30:28 feiliu Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.142 2009/08/13 22:58:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.141 2009/08/13 15:30:28 feiliu Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.142 2009/08/13 22:58:29 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -369,7 +369,8 @@
       !EX_UTest_Multi_Proc_Only
       ! Verifying that a Grid can be created
       grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
-                                  regDecomp=(/2,2/), name="landgrid", rc=rc)
+        regDecomp=(/2,2/), gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+        name="landgrid", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Grid to use in Field Tests"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
