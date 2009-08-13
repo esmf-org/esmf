@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridCompUTest.F90,v 1.20 2009/08/05 00:06:23 rokuingh Exp $
+! $Id: ESMF_AttributeGridCompUTest.F90,v 1.21 2009/08/13 17:36:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.20 2009/08/05 00:06:23 rokuingh Exp $'
+      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.21 2009/08/13 17:36:11 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -49,10 +49,22 @@ program ESMF_AttributeGridCompUTest
       type(ESMF_CplComp)     :: cfg
       type(ESMF_GridComp)    :: gridcomp, gfg, gridcompValue, gridcompHybrid
       type(ESMF_State)       :: sfg
-      character(ESMF_MAXSTR) :: conv, nestconv, purp, nestpurp, attrname, &
+      character(ESMF_MAXSTR) :: attrname, &
                                 attrnameOut, attrvalue
-      integer                :: rc, count, items, itemCount
+      integer                :: rc, count, items
       type(ESMF_TypeKind)    :: attrTK
+
+      real(kind=8)                     :: inR8, outR8, defaultR8, dfltoutR8
+      real(kind=8), dimension(3)       :: inR8l, defaultR8l, dfltoutR8l, outR8l
+      character(ESMF_MAXSTR)           :: inChar, outChar, defaultChar, dfltoutChar
+  
+      ! cumulative result: count failures; no failures equals "all pass"
+      integer :: result = 0
+
+#ifdef ESMF_TESTEXHAUSTIVE
+      ! local variables
+      character(ESMF_MAXSTR) :: conv, nestconv, purp, nestpurp
+      integer                :: itemCount
 
       integer(kind=4)                     :: inI4, outI4, defaultI4, dfltoutI4
       integer(kind=4), dimension(3)       :: inI4l, outI4l, defaultI4l, dfltoutI4l
@@ -60,27 +72,21 @@ program ESMF_AttributeGridCompUTest
       integer(kind=8), dimension(3)       :: inI8l, outI8l, defaultI8l, dfltoutI8l
       real(kind=4)                     :: inR4, outR4, defaultR4, dfltoutR4
       real(kind=4), dimension(3)       :: inR4l, outR4l, defaultR4l, dfltoutR4l
-      real(kind=8)                     :: inR8, outR8, defaultR8, dfltoutR8
-      real(kind=8), dimension(3)       :: inR8l, defaultR8l, dfltoutR8l, outR8l
       real(kind=8), dimension(10)       :: outR8lLong
-      character(ESMF_MAXSTR)                     :: inChar, outChar, defaultChar, dfltoutChar, &
-                                                    inEmpty, outEmpty
+      character(ESMF_MAXSTR)                     :: inEmpty, outEmpty
       character(ESMF_MAXSTR), dimension(3)       :: inCharl, defaultCharl, dfltoutCharl, outCharl
       character(ESMF_MAXSTR), dimension(10)       :: outCharlLong
       logical                          :: inLog, outLog, defaultLog, dfltoutLog
       logical, dimension(3)            :: inLogl, defaultLogl, dfltoutLogl, outLogl
       logical, dimension(10)            :: outLoglLong
-  
+
       character(ESMF_MAXSTR), dimension(3)  :: attpackList, attpackListOut, &
                                                attpackListOut2, attpackDfltList, &
                                                attpackListOut3, attpackListOut4, &
-                                               attpackDfltList2   
+                                               attpackDfltList2
       character(ESMF_MAXSTR), dimension(12) :: attpackListTNames
 
-  
-      ! cumulative result: count failures; no failures equals "all pass"
-      integer :: result = 0
-
+#endif
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
 !  always run. When the environment variable, EXHAUSTIVE, is set to ON then
