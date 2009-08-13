@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.54 2009/08/13 18:41:06 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.55 2009/08/13 20:48:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.54 2009/08/13 18:41:06 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.55 2009/08/13 20:48:15 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -6181,12 +6181,12 @@ int Array::sparseMatMulStore(
       typekindFactors,
       memHelperFactorLookup);
     
+    setupSeqIndexFactorLookupStage1.totalExchange(vm);
+    
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t5b1);   //gjt - profile
 #endif
 
-    setupSeqIndexFactorLookupStage1.totalExchange(vm);
-    
     DD::SetupSeqIndexFactorLookupStage2
       setupSeqIndexFactorLookupStage2(setupSeqIndexFactorLookupStage1);
 
