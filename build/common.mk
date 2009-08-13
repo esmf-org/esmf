@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.274 2009/07/07 06:01:38 eschwab Exp $
+#  $Id: common.mk,v 1.275 2009/08/13 23:22:22 w6ws Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -751,11 +751,13 @@ NO_OCFLAG_LIST := \
 	IRIX64.default \
 	Cygwin.intelgcc \
 	Cygwin.intel \
-	MinGW.intel
+	MinGW.intel \
+	MinGW.intelcl
 WINTEL_OFFLAG_LIST := \
 	Cygwin.intelgcc \
 	Cygwin.intel \
-	MinGW.intel
+	MinGW.intel \
+	MinGW.intelcl
 ifeq (,$(findstring $(ESMF_OS).$(ESMF_COMPILER),$(NO_OCFLAG_LIST)))
   ESMF_OBJOUT_OPTION = -o $@
   ESMF_EXEOUT_OPTION = -o $@
