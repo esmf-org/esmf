@@ -1,4 +1,4 @@
-! $Id: ESMF_IOGridCompUTest.F90,v 1.2 2009/05/01 04:48:03 eschwab Exp $
+! $Id: ESMF_IOGridCompUTest.F90,v 1.3 2009/08/13 19:37:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_IOGridCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_IOGridCompUTest.F90,v 1.2 2009/05/01 04:48:03 eschwab Exp $'
+      '$Id: ESMF_IOGridCompUTest.F90,v 1.3 2009/08/13 19:37:03 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -49,13 +49,17 @@ program ESMF_IOGridCompUTest
       ! local variables
       type(ESMF_GridComp)    :: gridcomp
       type(ESMF_IO)          :: io
-      character(ESMF_MAXSTR) :: attrname, attrvalue, outChar
-      character(ESMF_MAXSTR) :: conv, purp
       logical                :: xercesNotPresent
       integer                :: rc
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
+
+#ifdef ESMF_TESTEXHAUSTIVE
+      character(ESMF_MAXSTR) :: attrname, attrvalue, outChar
+      character(ESMF_MAXSTR) :: conv, purp
+
+#endif
 
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
