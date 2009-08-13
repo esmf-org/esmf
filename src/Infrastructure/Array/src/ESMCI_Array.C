@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.53 2009/08/11 23:39:23 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.54 2009/08/13 18:41:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.53 2009/08/11 23:39:23 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.54 2009/08/13 18:41:06 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -5190,15 +5190,22 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     int localPet;
     int petCount;
     InterfaceInt *factorIndexList;
-    const void *factorList;
-    const bool *factorPetFlag;
-    const Interval *seqIndexInterval;
-    const int *seqIntervFactorListCount;
-    int *const*seqIntervFactorListIndex;
+    void const *factorList;
+    bool const *factorPetFlag;
+    Interval const *seqIndexInterval;
+    vector<int> const &seqIntervFactorListCount;
+    vector<vector<int> > const &seqIntervFactorListIndex;
     bool tensorMixFlag;
     bool dstSetupFlag;
     vector<int> totalFactorCount;
     ESMC_TypeKind typekindFactors;
+   public:
+    SetupSeqIndexFactorLookup(
+      vector<int> const &seqIntervFactorListCount_,
+      vector<vector<int> > const &seqIntervFactorListIndex_):
+      // members that need to be set on this level because of reference
+      seqIntervFactorListCount(seqIntervFactorListCount_),
+      seqIntervFactorListIndex(seqIntervFactorListIndex_){}
   };
 
   // specialize SetupSeqIndexFactorLookup for DE info fill stage1
@@ -5210,15 +5217,18 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       int localPet_,
       int petCount_,
       InterfaceInt *factorIndexList_,
-      const void *factorList_,
-      const bool *factorPetFlag_,
-      const Interval *seqIndexInterval_,
-      const int *seqIntervFactorListCount_,
-      int *const*seqIntervFactorListIndex_,
+      void const *factorList_,
+      bool const *factorPetFlag_,
+      Interval const *seqIndexInterval_,
+      vector<int> const &seqIntervFactorListCount_,
+      vector<vector<int> > const &seqIntervFactorListIndex_,
       bool tensorMixFlag_,
       bool dstSetupFlag_,
       ESMC_TypeKind typekindFactors_,
       ArrayHelper::MemHelper *memHelperFactorLookup_
+    ):SetupSeqIndexFactorLookup(
+      seqIntervFactorListCount_,
+      seqIntervFactorListIndex_
     ){
       seqIndexFactorLookup = seqIndexFactorLookup_;
       localPet = localPet_;
@@ -5227,8 +5237,6 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       factorList = factorList_;
       factorPetFlag = factorPetFlag_;
       seqIndexInterval = seqIndexInterval_;
-      seqIntervFactorListCount = seqIntervFactorListCount_;
-      seqIntervFactorListIndex = seqIntervFactorListIndex_;
       tensorMixFlag = tensorMixFlag_;
       dstSetupFlag = dstSetupFlag_;
       totalFactorCount.resize(petCount);
@@ -5330,7 +5338,11 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
   // specialize SetupSeqIndexFactorLookup for DE info fill stage2
   class SetupSeqIndexFactorLookupStage2:public SetupSeqIndexFactorLookup{
    public:
-    SetupSeqIndexFactorLookupStage2(const SetupSeqIndexFactorLookupStage1 &s1){
+    SetupSeqIndexFactorLookupStage2(SetupSeqIndexFactorLookupStage1 const &s1)
+      :SetupSeqIndexFactorLookup(
+      s1.seqIntervFactorListCount,
+      s1.seqIntervFactorListIndex
+    ){
       seqIndexFactorLookup = s1.seqIndexFactorLookup;
       localPet = s1.localPet;
       petCount = s1.petCount;
@@ -5338,8 +5350,6 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       factorList = s1.factorList;
       factorPetFlag = s1.factorPetFlag;
       seqIndexInterval = s1.seqIndexInterval;
-      seqIntervFactorListCount = s1.seqIntervFactorListCount;
-      seqIntervFactorListIndex = s1.seqIntervFactorListIndex;
       tensorMixFlag = s1.tensorMixFlag;
       dstSetupFlag = s1.dstSetupFlag;
       totalFactorCount = s1.totalFactorCount;
@@ -5573,7 +5583,7 @@ int Array::sparseMatMulStore(
   double t4a1, t4a2, t4a3;  //gjt - profile  
   double t4b1, t4b2, t4b3;  //gjt - profile
   double t5a, t5b, t5c, t5d, t5e, t5f;  //gjt - profile
-  double t5a1, t5a2, t5a3;  //gjt - profile  
+  double t5a1, t5b1, t5d1, t5e1;  //gjt - profile  
   vm->barrier();      //synchronize start time across all PETs
   VMK::wtime(&t0);    //gjt - profile
 #endif
@@ -5934,6 +5944,8 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t4a2);   //gjt - profile
 #endif
   
+  // It is more efficient to first sort and then count in a sorted list than
+  // it is to do the counting from an unsorted list.
   int *srcLocalElementsPerIntervalCount = new int[petCount];
   {
     // prepare temporary seqIndexList for sorting
@@ -6031,6 +6043,8 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t4b2);   //gjt - profile
 #endif
 
+  // It is more efficient to first sort and then count in a sorted list than
+  // it is to do the counting from an unsorted list.
   int *dstLocalElementsPerIntervalCount = new int[petCount];
   {
     // prepare temporary seqIndexList for sorting
@@ -6068,13 +6082,19 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t4b);   //gjt - profile
 #endif
 
+  // garbage collection  
+  delete [] srcElementCountList;
+  delete [] dstElementCountList;
+  delete [] srcSeqIndexMinMaxList;
+  delete [] dstSeqIndexMinMaxList;
+
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t4);   //gjt - profile
 #endif
   
   // set up srcSeqIntervFactorListCount and srcSeqIntervFactorListIndex
-  int *srcSeqIntervFactorListCount = new int[petCount];
-  int **srcSeqIntervFactorListIndex = new int*[petCount];
+  vector<int> srcSeqIntervFactorListCount(petCount);
+  vector<vector<int> > srcSeqIntervFactorListIndex(petCount);
   for (int i=0; i<petCount; i++)
     srcSeqIntervFactorListCount[i] = 0; // reset
 
@@ -6096,7 +6116,7 @@ int Array::sparseMatMulStore(
     }
     int iMin=0, iMax=petCount-1;
     int i=petCount/2;
-    int foundFlag=0;  // reset
+    bool foundFlag=false;     // reset
     do{
       if (srcSeqIndex < srcSeqIndexInterval[i].min){
         iMax = i;
@@ -6117,9 +6137,9 @@ int Array::sparseMatMulStore(
           " bounds", &rc);
         return rc;
       }
-      // count this factor for this Pet
-      ++srcSeqIntervFactorListCount[i];
-      foundFlag = 1;  // set
+      ++srcSeqIntervFactorListCount[i]; // count this factor for this Pet
+      srcSeqIntervFactorListIndex[i].push_back(j); // store factorList index
+      foundFlag = true;  // set
       break;
     }while (iMin != iMax);
     if (!foundFlag){
@@ -6129,49 +6149,6 @@ int Array::sparseMatMulStore(
       return rc;
     }
   }
-
-#ifdef ASMMSTORETIMING
-  VMK::wtime(&t5a2);   //gjt - profile
-#endif
-  
-  int *srcSeqIntervFactorCounter = new int[petCount];
-  for (int i=0; i<petCount; i++){
-    srcSeqIntervFactorListIndex[i] = new int[srcSeqIntervFactorListCount[i]];
-    srcSeqIntervFactorCounter[i] = 0;  // reset
-  }
-
-#ifdef ASMMSTORETIMING
-  VMK::wtime(&t5a3);   //gjt - profile
-#endif
-  
-  for (int j=0; j<factorListCount; j++){
-    // loop over all factorList entries, find matching interval via bisection
-    // and factor list index
-    int srcSeqIndex;
-    if (tensorMixFlag)
-      srcSeqIndex = factorIndexList->array[j*4];
-    else
-      srcSeqIndex = factorIndexList->array[j*2];
-    int iMin=0, iMax=petCount-1;
-    int i=petCount/2;
-    do{
-      if (srcSeqIndex < srcSeqIndexInterval[i].min){
-        iMax = i;
-        i = iMin + (iMax - iMin) / 2;
-        continue; 
-      }
-      if (srcSeqIndex > srcSeqIndexInterval[i].max){
-        iMin = i;
-        i = iMin + 1 + (iMax - iMin) / 2;
-        continue; 
-      }
-      // found interval
-      int *k = &(srcSeqIntervFactorCounter[i]);
-      srcSeqIntervFactorListIndex[i][(*k)++] = j; // store factorList index
-      break;
-    }while (iMin != iMax);
-  }
-  delete [] srcSeqIntervFactorCounter;
   
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t5a);   //gjt - profile
@@ -6204,6 +6181,10 @@ int Array::sparseMatMulStore(
       typekindFactors,
       memHelperFactorLookup);
     
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t5b1);   //gjt - profile
+#endif
+
     setupSeqIndexFactorLookupStage1.totalExchange(vm);
     
     DD::SetupSeqIndexFactorLookupStage2
@@ -6211,7 +6192,6 @@ int Array::sparseMatMulStore(
 
     setupSeqIndexFactorLookupStage2.totalExchange(vm);
   }
-  
   
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t5b);   //gjt - profile
@@ -6241,10 +6221,15 @@ int Array::sparseMatMulStore(
 #endif
 
   // set up dstSeqIntervFactorListCount and dstSeqIntervFactorListIndex
-  int *dstSeqIntervFactorListCount = new int[petCount];
-  int **dstSeqIntervFactorListIndex = new int*[petCount];
+  vector<int> dstSeqIntervFactorListCount(petCount);
+  vector<vector<int> >dstSeqIntervFactorListIndex(petCount);
   for (int i=0; i<petCount; i++)
     dstSeqIntervFactorListCount[i] = 0; // reset
+  
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t5d1);   //gjt - profile
+#endif
+
   for (int j=0; j<factorListCount; j++){
     // loop over all factorList entries, find matching interval via bisection
     // and count factor towards that PETs factor list count.
@@ -6259,7 +6244,7 @@ int Array::sparseMatMulStore(
     }
     int iMin=0, iMax=petCount-1;
     int i=petCount/2;
-    int foundFlag=0;  // reset
+    bool foundFlag=false;     // reset
     do{
       if (dstSeqIndex < dstSeqIndexInterval[i].min){
         iMax = i;
@@ -6280,9 +6265,9 @@ int Array::sparseMatMulStore(
           " bounds", &rc);
         return rc;
       }
-      // count this factor for this Pet
-      ++dstSeqIntervFactorListCount[i];
-      foundFlag = 1;  // set
+      ++dstSeqIntervFactorListCount[i]; // count this factor for this Pet
+      dstSeqIntervFactorListIndex[i].push_back(j); // store factorList index
+      foundFlag = true;  // set
       break;
     }while (iMin != iMax);
     if (!foundFlag){
@@ -6292,39 +6277,6 @@ int Array::sparseMatMulStore(
       return rc;
     }
   }
-  int *dstSeqIntervFactorCounter = new int[petCount];
-  for (int i=0; i<petCount; i++){
-    dstSeqIntervFactorListIndex[i] = new int[dstSeqIntervFactorListCount[i]];
-    dstSeqIntervFactorCounter[i] = 0;  // reset
-  }
-  for (int j=0; j<factorListCount; j++){
-    // loop over all factorList entries, find matching interval via bisection
-    // and factor list index
-    int dstSeqIndex;
-    if (tensorMixFlag)
-      dstSeqIndex = factorIndexList->array[j*4+2];
-    else
-      dstSeqIndex = factorIndexList->array[j*2+1];
-    int iMin=0, iMax=petCount-1;
-    int i=petCount/2;
-    do{
-      if (dstSeqIndex < dstSeqIndexInterval[i].min){
-        iMax = i;
-        i = iMin + (iMax - iMin) / 2;
-        continue; 
-      }
-      if (dstSeqIndex > dstSeqIndexInterval[i].max){
-        iMin = i;
-        i = iMin + 1 + (iMax - iMin) / 2;
-        continue; 
-      }
-      // found interval
-      int *k = &(dstSeqIntervFactorCounter[i]);
-      dstSeqIntervFactorListIndex[i][(*k)++] = j; // store factorList index
-      break;
-    }while (iMin != iMax);
-  }
-  delete [] dstSeqIntervFactorCounter;
   
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t5d);   //gjt - profile
@@ -6356,6 +6308,10 @@ int Array::sparseMatMulStore(
     
     setupSeqIndexFactorLookupStage1.totalExchange(vm);
     
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t5e1);   //gjt - profile
+#endif
+
     DD::SetupSeqIndexFactorLookupStage2
       setupSeqIndexFactorLookupStage2(setupSeqIndexFactorLookupStage1);
 
@@ -6390,19 +6346,7 @@ int Array::sparseMatMulStore(
 #endif
   
   // garbage collection  
-  delete [] srcElementCountList;
-  delete [] dstElementCountList;
-  delete [] srcSeqIndexMinMaxList;
-  delete [] dstSeqIndexMinMaxList;
   delete [] factorPetFlag;
-  delete [] srcSeqIntervFactorListCount;
-  for (int i=0; i<petCount; i++)
-    delete [] srcSeqIntervFactorListIndex[i];
-  delete [] srcSeqIntervFactorListIndex;
-  delete [] dstSeqIntervFactorListCount;
-  for (int i=0; i<petCount; i++)
-    delete [] dstSeqIntervFactorListIndex[i];
-  delete [] dstSeqIntervFactorListIndex;
 
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t5);   //gjt - profile
@@ -6699,10 +6643,11 @@ int Array::sparseMatMulStore(
     localPet, t4a1-t3, t4a2-t3, t4a3-t3, t4a-t3, t4b1-t3, t4b2-t3, t4b3-t3,
     t4b-t3);
   printf("gjt - profile for PET %d:\n"
-    " t5a1=%g\n t5a2=%g\n t5a3=%g\n t5a=%g\n"
-    " t5b=%g\n t5c=%g\n t5d=%g\n t5e=%g\n t5f=%g\n",
-    localPet, t5a1-t4, t5a2-t4, t5a3-t4, t5a-t4,
-    t5b-t4, t5c-t4, t5d-t4, t5e-t4, t5f-t4);
+    " t5a1=%g\n t5a=%g\n t5b1=%g\n t5b=%g\n t5c=%g\n"
+    " t5d1=%g\n t5d=%g\n t5e1=%g\n t5e=%g\n t5f=%g\n",
+    localPet, 
+    t5a1-t4, t5a-t4, t5b1-t4, t5b-t4, t5c-t4,
+    t5d1-t4, t5d-t4, t5e1-t4, t5e-t4, t5f-t4);
   printf("gjt - profile for PET %d:\n"
     " t1=%g\n t2=%g\n t3=%g\n t4=%g\n t5=%g\n t6=%g\n"
     " t7=%g\n t8=%g\n t9=%g\n t10=%g\n t11=%g\n t12=%g\n t13=%g\n t14=%g\n"
