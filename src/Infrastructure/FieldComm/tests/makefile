@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 2009/08/12 18:12:21 peggyli Exp $ 
+# $Id: makefile,v 1.26 2009/08/14 16:26:35 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -20,7 +20,7 @@ TESTS_RUN     = RUN_ESMF_FieldGatherUTest \
 	RUN_ESMF_FieldRedistArbUTest 
 #	RUN_ESMF_FieldMeshSMMUTest \
                 
-TESTS_RUN_UNI = 
+TESTS_RUN_UNI = RUN_ESMF_FieldRedistArbUTestUNI
 
 include ${ESMF_DIR}/makefile
 
@@ -42,6 +42,9 @@ RUN_ESMF_FieldRedistUTest:
 
 RUN_ESMF_FieldRedistArbUTest:
 	$(MAKE) TNAME=FieldRedistArb NP=4 ftest
+
+RUN_ESMF_FieldRedistArbUTestUNI:
+	$(MAKE) TNAME=FieldRedistArb NP=1 ftest
 
 RUN_ESMF_FieldLSSMMUTest:
 	$(MAKE) TNAME=FieldLSSMM NP=4 ftest
