@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.C,v 1.11 2009/07/27 17:22:28 theurich Exp $
+// $Id: ESMCI_LocalArray.C,v 1.12 2009/08/14 18:38:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.11 2009/07/27 17:22:28 theurich Exp $";
+static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.12 2009/08/14 18:38:38 theurich Exp $";
 //-----------------------------------------------------------------------------
 
   
@@ -868,7 +868,7 @@ template <class TYPE>
 int LocalArray::getData(
 //
 // !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
+//    int error return code
 //
 // !ARGUMENTS:
   int *index,           // in - index location
