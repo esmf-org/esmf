@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.7 2009/08/11 03:58:19 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.8 2009/08/14 23:00:29 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -77,7 +77,9 @@ using namespace std;
 
 #if defined (ESMF_OS_MinGW)
 // Windows equivalent to POSIX getpid(2)
+#if !defined (__GNUC__)
 typedef DWORD pid_t;
+#endif
 #define getpid GetCurrentProcessId
 #endif
 
