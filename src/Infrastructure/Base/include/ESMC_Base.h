@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.104 2009/07/24 00:15:13 theurich Exp $
+// $Id: ESMC_Base.h,v 1.105 2009/08/14 00:12:48 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -127,7 +127,9 @@ class ESMC_Base
 // fortran interface functions to base objects
 extern "C" {
   void FTN(c_esmc_basecreate)(ESMC_Base **base, char *superclass, char *name,
-                              int *nattrs, int *rc, int sclen, int nlen);
+                              int *nattrs, int *rc,
+                              ESMCI_FortranStrLenArg sclen,
+                              ESMCI_FortranStrLenArg nlen);
   void FTN(c_esmc_basedestroy)(ESMC_Base **base, int *rc);
 
   void FTN(c_esmc_baseserialize)(ESMC_Base **base, char *buf, int *length,
@@ -135,12 +137,17 @@ extern "C" {
   void FTN(c_esmc_basedeserialize)(ESMC_Base **base, char *buf,
                                    int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc);
 
-  void FTN(c_esmc_baseprint)(ESMC_Base **base, char *opts, int *rc, int nlen);
-  void FTN(c_esmc_basevalidate)(ESMC_Base **base, char *opts, int *rc, int nlen);
-  void FTN(c_esmc_getclassname)(ESMC_Base **base, char *name, int *rc, int nlen);
-  void FTN(c_esmc_getname)(ESMC_Base **base, char *name, int *rc, int nlen);
+  void FTN(c_esmc_baseprint)(ESMC_Base **base, char *opts, int *rc,
+                             ESMCI_FortranStrLenArg nlen);
+  void FTN(c_esmc_basevalidate)(ESMC_Base **base, char *opts, int *rc,
+                                ESMCI_FortranStrLenArg nlen);
+  void FTN(c_esmc_getclassname)(ESMC_Base **base, char *name, int *rc,
+                                ESMCI_FortranStrLenArg nlen);
+  void FTN(c_esmc_getname)(ESMC_Base **base, char *name, int *rc,
+                           ESMCI_FortranStrLenArg nlen);
   void FTN(c_esmc_setname)(ESMC_Base **base, char *classname, char *objname, 
-                           int *rc, int clen, int olen);
+                           int *rc,
+                           ESMCI_FortranStrLenArg clen, ESMCI_FortranStrLenArg olen);
   }
 
 #endif  // ESMC_BASE_H

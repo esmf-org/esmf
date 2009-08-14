@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.69 2009/07/21 23:26:25 theurich Exp $
+// $Id: ESMC_Base_F.C,v 1.70 2009/08/14 00:12:49 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.69 2009/07/21 23:26:25 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.70 2009/08/14 00:12:49 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -63,8 +63,8 @@ extern "C" {
       char *name,               // in (opt) - F90, non-null terminated string
       int *nattrs,              // in - number of initial attributes to alloc
       int *rc,                  // out - return code
-      int sclen,                // hidden/in - strlen count for superclass
-      int nlen) {               // hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg sclen,  // hidden/in - strlen count for superclass
+      ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for name
 // 
 // !DESCRIPTION:
 //     Create a new Base object.
@@ -158,7 +158,7 @@ extern "C" {
       ESMC_Base **base,         // in/out - base object
       char *opts,               // in - F90, non-null terminated string
       int *rc,                  // out - return code
-      int nlen) {               // hidden/in - strlen count for options
+      ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for options
 // 
 // !DESCRIPTION:
 //     Print the contents of a base object.
@@ -288,7 +288,7 @@ extern "C" {
       ESMC_Base **base,         // in/out - base object
       char *opts,               // in - F90, non-null terminated string
       int *rc,                  // out - return code
-      int nlen) {               // hidden/in - strlen count for options
+      ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for options
 // 
 // !DESCRIPTION:
 //     Validate the contents of a base object.
@@ -338,7 +338,7 @@ extern "C" {
       ESMC_Base **base,         // in/out - base object
       char *name,               // out - F90, non-null terminated string
       int *rc,                  // out - return code
-      int nlen) {               // hidden/in - max strlen count for name
+      ESMCI_FortranStrLenArg nlen) { // hidden/in - max strlen count for name
 // 
 // !DESCRIPTION:
 //     return the name to a Fortran caller.
@@ -380,8 +380,8 @@ extern "C" {
       char *classname,          // in - F90, non-null terminated string
       char *objname,            // in - F90, non-null terminated string
       int *rc,                  // out - return code
-      int clen,                 // hidden/in - max strlen count for classname
-      int olen) {               // hidden/in - max strlen count for objname
+      ESMCI_FortranStrLenArg clen,   // hidden/in - max strlen count for classname
+      ESMCI_FortranStrLenArg olen) { // hidden/in - max strlen count for objname
 // 
 // !DESCRIPTION:
 //     set the name from an F90 caller.
@@ -412,6 +412,8 @@ extern "C" {
       // copy and convert F90 string to null terminated one
       oname = ESMC_F90toCstring(objname, olen);
       if (!oname) {
+          if (!cname)
+              delete [] cname;
           if (rc) *rc = ESMF_FAILURE;
           return;
       }
@@ -440,7 +442,7 @@ extern "C" {
       ESMC_Base **base,         // in/out - base object
       char *classname,          // out - Fortran, non-null terminated string
       int *rc,                  // out - return code
-      int nlen) {               // hidden/in - max strlen count for name
+      ESMCI_FortranStrLenArg nlen) { // hidden/in - max strlen count for name
 // 
 // !DESCRIPTION:
 //     return the name to a Fortran caller.
