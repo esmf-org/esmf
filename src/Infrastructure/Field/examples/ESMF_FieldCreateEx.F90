@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.81 2009/07/27 20:49:08 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.82 2009/08/18 19:02:21 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -42,16 +42,13 @@
     type(ESMF_LocStream)            :: locs
     type(ESMF_Mesh)                 :: mesh
     type(ESMF_Arrayspec)            :: arrayspec
-    integer                         :: i, j, k
-    integer                                     :: n_node, n_elem, l
-    integer, allocatable :: nodeId(:)
-    real(ESMF_KIND_R8), allocatable :: nodeCoord(:)
-    integer, allocatable :: nodeOwner(:)
+    integer                         :: i, k, localPet, petCount
 
-    integer, allocatable :: elemId(:)
-    integer, allocatable :: elemType(:)
-    integer, allocatable :: elemConn(:)
-    integer              :: conn(16) = (/1,2,5,4,2,3,6,5,4,5,8,7,5,6,9,8/)
+    integer, pointer :: nodeIds(:),nodeOwners(:)
+    real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+    integer :: numNodes
+    integer :: numElems
+    integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
 
     integer                         :: finalrc, rc
 
@@ -63,6 +60,12 @@
 
     if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) &
         call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+    ! get global VM
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
@@ -502,63 +505,226 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_DistGridDestroy(distgrid,rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-! TODO:
-!  enable this example when mesh mpi code is reworked
-!!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!!-------------------------------- Example -----------------------------
-!!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!!B-OE
-!!\subsubsection{Create a Field from a Mesh}
-!!\label{sec:field:usage:create_mesh_arrayspec}
-!! 
-!! In this example, an {\tt ESMF\_Field} is created from an {\tt ESMF\_Mesh} 
-!! and an {\tt ESMF\_Arrayspec}.
-!! The mesh object is on a Euclidean surface that maps to a 2x2 rectangular
-!! grid with 4 elements and 9 vertices. The nodal space is represented by
-!! a distgrid with 16 indices and the element space is represented by a
-!! distgrid with 9 indices internally.
-!!
-!!E-OE  
-!!B-OC
-!        ! create 2x2 mesh on a Euclidean surface and Fields
-!    n_node = 9
-!    n_elem = 4
-!    
-!    allocate(nodeId(n_node), nodeCoord(2*n_node), nodeOwner(n_node))
-!    allocate(elemId(n_elem), elemType(n_elem), elemConn(n_elem*4))
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Create a Field from a Mesh}
+!\label{sec:field:usage:create_mesh_arrayspec}
+! 
+! In this example, an {\tt ESMF\_Field} is created from an {\tt ESMF\_Mesh} 
+! and an {\tt ESMF\_Arrayspec}.
+! The mesh object is on a Euclidean surface that maps to a 2x2 rectangular
+! grid with 4 elements and 9 vertices. The nodal space is represented by
+! a distgrid with 9 indices and the element space is represented by a
+! distgrid with 4 indices internally.
+! \begin{verbatim}
+!              Mesh Ids
 !
-!    do i = 1, n_node
-!        nodeId(i) = i
-!    enddo
-!    do i = 1, 3
-!        do j = 1, 3
-!            l = (i-1)*3+j
-!            nodeCoord(2*l-1) = i
-!            nodeCoord(2*l) = j
-!        enddo
-!    enddo
-!    nodeOwner = 0
-!    do i = 1, n_elem
-!        elemId(i) = i
-!        elemType(i) = 9             ! Quard
-!    enddo
-!    elemConn = conn
+!  2.0   7 ------- 8 -------- 9
+!        |         |          |
+!        |    3    |    4     |
+!        |         |          |
+!  1.0   4 ------- 5 -------- 6
+!        |         |          |
+!        |    1    |    2     |
+!        |         |          |
+!  0.0   1 ------- 2 -------- 3
 !
-!    mesh = ESMF_MeshCreate(2,2,nodeId, nodeCoord, nodeOwner, elemId, elemType,elemConn,rc)
-!    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!       0.0       1.0        2.0 
 !
-!    call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
-!    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!      Node Ids at corners
+!      Element Ids in centers
+! 
 !
-!    field = ESMF_FieldCreate(mesh, arrayspec, &
-!        rc=rc)
-!    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!!E-OC
-!    print *, "Field Create from a Mesh and an Arrayspec returned"
-!    call ESMF_FieldDestroy(field,rc=rc)
-!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!    call ESMF_MeshDestroy(mesh,rc=rc)
-!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!             Mesh Owners
+!
+!  2.0   2 ------- 2 -------- 3
+!        |         |          |
+!        |    2    |    3     |
+!        |         |          |
+!  1.0   0 ------- 0 -------- 1
+!        |         |          |
+!        |    0    |    1     |
+!        |         |          |
+!  0.0   0 ------- 0 -------- 1
+!
+!       0.0       1.0        2.0 
+!
+!      Node Owners at corners
+!      Element Owners in centers
+!\end{verbatim} 
+!
+!EOE  
+!BOC
+  ! Only do this if we have 4 PETs
+   if (petCount .eq. 4) then
+      ! Setup mesh data depending on PET
+      if (localPet .eq. 0) then
+         ! Fill in node data
+         numNodes=4
+
+        !! node ids
+        allocate(nodeIds(numNodes))
+        nodeIds=(/1,2,4,5/) 
+
+        !! node Coords
+        allocate(nodeCoords(numNodes*2))
+        nodeCoords=(/0.0,0.0, &
+                     1.0,0.0, &
+                     0.0,1.0, &
+                     1.0,1.0/)
+
+        !! node owners
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0,0,0,0/) ! everything on proc 0
+
+        ! Fill in elem data
+        numElems=1
+
+        !! elem ids
+        allocate(elemIds(numElems))
+        elemIds=(/1/) 
+
+        !! elem type
+        allocate(elemTypes(numElems))
+        elemTypes=ESMF_MESHELEMENT_QUAD
+
+        !! elem conn
+        allocate(elemConn(numElems*4))
+        elemConn=(/1,2,4,3/)
+      else if (localPet .eq. 1) then
+         ! Fill in node data
+         numNodes=4
+
+        !! node ids
+        allocate(nodeIds(numNodes))
+        nodeIds=(/2,3,5,6/) 
+
+        !! node Coords
+        allocate(nodeCoords(numNodes*2))
+        nodeCoords=(/1.0,0.0, &
+                     2.0,0.0, &
+                     1.0,1.0, &
+                     2.0,1.0/)
+
+        !! node owners
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0,1,0,1/) 
+
+        ! Fill in elem data
+        numElems=1
+
+        !! elem ids
+        allocate(elemIds(numElems))
+        elemIds=(/2/) 
+
+        !! elem type
+        allocate(elemTypes(numElems))
+        elemTypes=ESMF_MESHELEMENT_QUAD
+
+        !! elem conn
+        allocate(elemConn(numElems*4))
+        elemConn=(/1,2,4,3/)
+      else if (localPet .eq. 2) then
+         ! Fill in node data
+         numNodes=4
+
+        !! node ids
+        allocate(nodeIds(numNodes))
+        nodeIds=(/4,5,7,8/) 
+
+        !! node Coords
+        allocate(nodeCoords(numNodes*2))
+        nodeCoords=(/0.0,1.0, &
+                     1.0,1.0, &
+                     0.0,2.0, &
+                     1.0,2.0/)
+
+        !! node owners
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0,0,2,2/) 
+
+        ! Fill in elem data
+        numElems=1
+
+        !! elem ids
+        allocate(elemIds(numElems))
+        elemIds=(/3/) 
+
+        !! elem type
+        allocate(elemTypes(numElems))
+        elemTypes=ESMF_MESHELEMENT_QUAD
+
+        !! elem conn
+        allocate(elemConn(numElems*4))
+        elemConn=(/1,2,4,3/)  
+      else 
+         ! Fill in node data
+         numNodes=4
+
+        !! node ids
+        allocate(nodeIds(numNodes))
+        nodeIds=(/5,6,8,9/) 
+
+        !! node Coords
+        allocate(nodeCoords(numNodes*2))
+        nodeCoords=(/1.0,1.0, &
+                     2.0,1.0, &
+                     1.0,2.0, &
+                     2.0,2.0/)
+
+        !! node owners
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0,1,2,3/) 
+
+        ! Fill in elem data
+        numElems=1
+
+        !! elem ids
+        allocate(elemIds(numElems))
+        elemIds=(/4/) 
+
+        !! elem type
+        allocate(elemTypes(numElems))
+        elemTypes=ESMF_MESHELEMENT_QUAD
+
+        !! elem conn
+        allocate(elemConn(numElems*4))
+        elemConn=(/1,2,4,3/)  
+      endif
+
+      ! Create Mesh structure in 1 step
+      mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+             nodeIds=nodeIds, nodeCoords=nodeCoords, &
+             nodeOwners=nodeOwners, elementIds=elemIds,&
+             elementTypes=elemTypes, elementConn=elemConn, &
+             rc=rc)
+      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+      ! deallocate node data
+      deallocate(nodeIds)
+      deallocate(nodeCoords)
+      deallocate(nodeOwners)
+
+      ! deallocate elem data
+      deallocate(elemIds)
+      deallocate(elemTypes)
+      deallocate(elemConn)
+      call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
+      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+      field = ESMF_FieldCreate(mesh, arrayspec, rc=rc)
+      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! endif for skip for != 4 procs
+    endif 
+!EOC
+    print *, "Field Create from a Mesh and an Arrayspec returned"
+    call ESMF_FieldDestroy(field,rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_MeshDestroy(mesh,rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !-------------------------------------------------------------------------
 ! Destroy objects
     call ESMF_GridDestroy(grid, rc=rc)
