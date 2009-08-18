@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.275 2009/08/13 23:22:22 w6ws Exp $
+#  $Id: common.mk,v 1.276 2009/08/18 05:06:46 w6ws Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2794,10 +2794,16 @@ shared:
 #-------------------------------------------------------------------------------
 defer:
 ifeq ($(ESMF_OS),MinGW)
+ifeq ($(ESMF_COMPILER),gfortran)
+	cd $(ESMF_OBJDIR) ; \
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMFLIB) \
+		$(notdir $(wildcard $(ESMF_OBJDIR)/*.o))
+else
 	cd $(ESMF_OBJDIR) ; \
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:libesmf.a \
 		$(notdir $(wildcard $(ESMF_OBJDIR)/*.o)) ; \
 	$(ESMF_MV) libesmf.a $(ESMFLIB)
+endif
 else
 	cd $(ESMF_OBJDIR) ; \
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMFLIB) \
