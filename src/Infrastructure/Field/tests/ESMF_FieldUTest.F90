@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.142 2009/08/13 22:58:29 theurich Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.143 2009/08/18 15:34:15 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.142 2009/08/13 22:58:29 theurich Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.143 2009/08/18 15:34:15 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -615,11 +615,49 @@
       write(failMsg, *) ""
       write(name, *) "Verify ungridded bounds are valid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldDestroy(f3)
 
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      f3 = ESMF_FieldCreate(grid, fptr, ESMF_INDEX_DELOCAL, ungriddedLBound=(/3/), rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Create a field from grid and fortran dummy array"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      call ESMF_FieldGet(f3, ungriddedLBound=ulb, ungriddedUBound=uub, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Get ungridded bounds from Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      if(ulb(1) /= 3 .or. uub(1) /= 17) rc = 1
+      write(failMsg, *) ""
+      write(name, *) "Verify ungridded bounds are valid"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldDestroy(f3)
 
-      deallocate(fptr)
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      f3 = ESMF_FieldCreate(grid, fptr, ESMF_INDEX_DELOCAL, ungriddedUBound=(/12/), rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Create a field from grid and fortran dummy array"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      call ESMF_FieldGet(f3, ungriddedLBound=ulb, ungriddedUBound=uub, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Get ungridded bounds from Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      if(ulb(1) /= -2 .or. uub(1) /= 12) rc = 1
+      write(failMsg, *) ""
+      write(name, *) "Verify ungridded bounds are valid"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldDestroy(f3)
 ! grid destroy to clear previous grids.
+      deallocate(fptr)
       call ESMF_GridDestroy(grid, rc=rc)
 
 #endif
