@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.143 2009/08/18 15:34:15 feiliu Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.144 2009/08/18 20:11:04 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.143 2009/08/18 15:34:15 feiliu Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.144 2009/08/18 20:11:04 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -140,7 +140,7 @@
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE   
 
       ! Set Array Spec
-      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=localrc)
+      call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R4, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
 
       ! Create Field
@@ -198,7 +198,7 @@
       allocate (lsfptr(10))
 
       ! Create Field
-      fls=ESMF_FieldCreate(locstream, lsfptr, indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
+      fls=ESMF_FieldCreate(locstream, farray=lsfptr, indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
 
       ! check bounds
@@ -437,13 +437,13 @@
       ! and an optional I/O specification. In this case a field will 
       ! allocate its own data. The grid passed into the argument list 
       ! is referenced and not copied.
-      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
+      call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R4, rc=rc)
       write(name, *) "Creating an ArraySpec Test "
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
-      f2 = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, &
+      f2 = ESMF_FieldCreate(grid, arrayspec=arrayspec, indexflag=ESMF_INDEX_DELOCAL, &
                                           staggerloc=ESMF_STAGGERLOC_CENTER, &
                                           name="rh", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -470,8 +470,8 @@
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       ! verify we can create a 3d data on a 2d grid
-      call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc=rc)
-      f2 = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, &
+      call ESMF_ArraySpecSet(arrayspec, rank=3, typekind=ESMF_TYPEKIND_R4, rc=rc)
+      f2 = ESMF_FieldCreate(grid, arrayspec=arrayspec, indexflag=ESMF_INDEX_DELOCAL, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
             name="rh", rc=rc)
@@ -486,8 +486,8 @@
       ! Fields may be created as in FLD1.1.1 with a data array passed into 
       ! the argument list. The data array is referenced and not copied.
       ! Verifying that a Field can be created with a Grid
-      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
-      f3 = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, &
+      call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R4, rc=rc)
+      f3 = ESMF_FieldCreate(grid, arrayspec=arrayspec, indexflag=ESMF_INDEX_DELOCAL, &
                         staggerloc=ESMF_STAGGERLOC_CENTER, &
                         name="Field 0", iospec=ios, rc=rc)
 
@@ -517,7 +517,7 @@
       ! and Array.  f6 is *not* created here and should be invalid.
       grid2 = ESMF_GridCreateEmpty(rc=rc)
       call ESMF_GridDestroy(grid2, rc=rc)
-      f6 = ESMF_FieldCreate(grid2, arrayspec, ESMF_INDEX_DELOCAL, &
+      f6 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, indexflag=ESMF_INDEX_DELOCAL, &
                         staggerloc=ESMF_STAGGERLOC_CENTER, &
                         name="Field 0", iospec=ios, rc=rc)
 
@@ -541,8 +541,8 @@
       ! A field shall be able to return a reference to its grid.
       ! f3 gets created here and used thru the rest of the tests.
       gname="oceangrid"
-      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
-      f3 = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, &
+      call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R4, rc=rc)
+      f3 = ESMF_FieldCreate(grid, arrayspec=arrayspec, indexflag=ESMF_INDEX_DELOCAL, &
                         staggerloc=ESMF_STAGGERLOC_CENTER, &
                         name="Field 0", iospec=ios, rc=rc)
       call ESMF_FieldGet(f3, grid=grid3, localDeCount=ldecount, rc=rc)
@@ -556,7 +556,7 @@
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only 
       ! ESMF_ArraySpecPrint test ArraySpecPrint public interface
-      call ESMF_ArraySpecSet(arrayspec8, 2, ESMF_TYPEKIND_R8, rc=rc)
+      call ESMF_ArraySpecSet(arrayspec8, rank=2, typekind=ESMF_TYPEKIND_R8, rc=rc)
       call ESMF_ArraySpecPrint(arrayspec8, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Test ESMF_ArraySpecPrint public interface"
@@ -599,7 +599,7 @@
       allocate(fptr(5,10,15))
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only 
-      f3 = ESMF_FieldCreate(grid, fptr, ESMF_INDEX_DELOCAL, rc=rc)
+      f3 = ESMF_FieldCreate(grid, farray=fptr, indexflag=ESMF_INDEX_DELOCAL, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Create a field from grid and fortran dummy array"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -619,7 +619,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only 
-      f3 = ESMF_FieldCreate(grid, fptr, ESMF_INDEX_DELOCAL, ungriddedLBound=(/3/), rc=rc)
+      f3 = ESMF_FieldCreate(grid, farray=fptr, indexflag=ESMF_INDEX_DELOCAL, ungriddedLBound=(/3/), rc=rc)
       write(failMsg, *) ""
       write(name, *) "Create a field from grid and fortran dummy array"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -639,7 +639,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only 
-      f3 = ESMF_FieldCreate(grid, fptr, ESMF_INDEX_DELOCAL, ungriddedUBound=(/12/), rc=rc)
+      f3 = ESMF_FieldCreate(grid, farray=fptr, indexflag=ESMF_INDEX_DELOCAL, ungriddedUBound=(/12/), rc=rc)
       write(failMsg, *) ""
       write(name, *) "Create a field from grid and fortran dummy array"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
