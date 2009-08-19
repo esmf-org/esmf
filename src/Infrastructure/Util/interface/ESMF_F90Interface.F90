@@ -1,4 +1,4 @@
-! $Id: ESMF_F90Interface.F90,v 1.8 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_F90Interface.F90,v 1.9 2009/08/19 21:32:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -67,9 +67,9 @@ contains
   function ESMF_InterfaceIntCreate(farray1D, farray2D, farray3D, rc)
 !
 ! !ARGUMENTS:
-    integer,                      intent(in), optional  :: farray1D(:)
-    integer,                      intent(in), optional  :: farray2D(:,:)
-    integer,                      intent(in), optional  :: farray3D(:,:,:)
+    integer,              target, intent(in), optional  :: farray1D(:)
+    integer,              target, intent(in), optional  :: farray2D(:,:)
+    integer,              target, intent(in), optional  :: farray3D(:,:,:)
     integer,                      intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:

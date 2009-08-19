@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.124 2009/07/28 19:54:35 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.125 2009/08/19 21:32:34 theurich Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5394,17 +5394,17 @@ end subroutine ESMF_GridConvertIndex
       integer,               intent(out), optional :: staggerlocsCount
       integer,               intent(out), optional :: localDECount
       type(ESMF_DistGrid),   intent(out), optional :: distgrid
-      integer,               intent(out), optional :: distgridToGridMap(:)
-      integer,               intent(out), optional :: coordDimCount(:)
-      integer,               intent(out), optional :: coordDimMap(:,:)
+      integer,       target, intent(out), optional :: distgridToGridMap(:)
+      integer,       target, intent(out), optional :: coordDimCount(:)
+      integer,       target, intent(out), optional :: coordDimMap(:,:)
       integer,               intent(out), optional :: localArbIndexCount
-      integer,               intent(out), optional :: localArbIndex(:,:)
+      integer,       target, intent(out), optional :: localArbIndex(:,:)
       integer,               intent(out), optional :: arbDim
       integer,               intent(out), optional :: memDimCount
       integer,               intent(out), optional :: arbDimCount
-      integer,               intent(out), optional :: gridEdgeLWidth(:)
-      integer,               intent(out), optional :: gridEdgeUWidth(:)
-      integer,               intent(out), optional :: gridAlign(:)
+      integer,       target, intent(out), optional :: gridEdgeLWidth(:)
+      integer,       target, intent(out), optional :: gridEdgeUWidth(:)
+      integer,       target, intent(out), optional :: gridAlign(:)
       type(ESMF_IndexFlag),  intent(out), optional :: indexflag
       integer,               intent(out), optional :: rc
 !
@@ -5601,8 +5601,8 @@ end subroutine ESMF_GridGetDefault
 ! !Arguments:
     type(ESMF_Grid),    intent(in)            :: grid
 	integer,        intent(in), optional  :: tileNo
-	integer,	intent(out),optional  :: minIndex(:)
-	integer,	intent(out)           :: maxIndex(:)
+	integer,target, intent(out),optional  :: minIndex(:)
+	integer,target, intent(out)           :: maxIndex(:)
 	integer,        intent(out), optional :: rc
 !
 ! !DESCRIPTON:
@@ -5702,12 +5702,12 @@ end subroutine ESMF_GridGetDefault
       type(ESMF_Grid),        intent(in)            :: grid
       integer,                intent(in)            :: localDe
       type (ESMF_StaggerLoc), intent(in)            :: staggerloc
-      integer,                intent(out), optional :: exclusiveLBound(:)
-      integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -5861,10 +5861,10 @@ end subroutine ESMF_GridGetDefault
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
       type (ESMF_StaggerLoc), intent(in)            :: staggerloc
-      integer,                intent(out), optional :: computationalEdgeLWidth(:)
-      integer,                intent(out), optional :: computationalEdgeUWidth(:)
-      integer,                intent(out), optional :: minIndex(:)
-      integer,                intent(out), optional :: maxIndex(:)
+      integer,        target, intent(out), optional :: computationalEdgeLWidth(:)
+      integer,        target, intent(out), optional :: computationalEdgeUWidth(:)
+      integer,        target, intent(out), optional :: minIndex(:)
+      integer,        target, intent(out), optional :: maxIndex(:)
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -6129,15 +6129,15 @@ end subroutine ESMF_GridGetDefault
       integer,                intent(in) :: localDE
       integer,                intent(in) :: coordDim
       type (ESMF_StaggerLoc), intent(in), optional :: staggerloc
-      integer,                intent(out), optional :: exclusiveLBound(:)
-      integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
-      integer,                intent(out), optional :: totalLBound(:)
-      integer,                intent(out), optional :: totalUBound(:)
-      integer,                intent(out), optional :: totalCount(:)
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: totalLBound(:)
+      integer,        target, intent(out), optional :: totalUBound(:)
+      integer,        target, intent(out), optional :: totalCount(:)
       real(ESMF_KIND_R4), pointer                   :: fptr(:)
       type(ESMF_CopyFlag),    intent(in), optional :: docopy
       integer,                intent(out), optional :: rc
@@ -6442,15 +6442,15 @@ end subroutine ESMF_GridGetDefault
       integer, intent(in),optional :: localDE
       integer, intent(in) :: coordDim
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
-      integer,                intent(out), optional :: exclusiveLBound(:)
-      integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
-      integer,                intent(out), optional :: totalLBound(:)
-      integer,                intent(out), optional :: totalUBound(:)
-      integer,                intent(out), optional :: totalCount(:)
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: totalLBound(:)
+      integer,        target, intent(out), optional :: totalUBound(:)
+      integer,        target, intent(out), optional :: totalCount(:)
       real(ESMF_KIND_R4), pointer :: fptr(:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
@@ -6758,15 +6758,15 @@ end subroutine ESMF_GridGetDefault
       integer, intent(in) :: localDE
       integer, intent(in) :: coordDim
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
-      integer,                intent(out), optional :: exclusiveLBound(:)
-      integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
-      integer,                intent(out), optional :: totalLBound(:)
-      integer,                intent(out), optional :: totalUBound(:)
-      integer,                intent(out), optional :: totalCount(:)
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: totalLBound(:)
+      integer,        target, intent(out), optional :: totalUBound(:)
+      integer,        target, intent(out), optional :: totalCount(:)
       real(ESMF_KIND_R4), pointer :: fptr(:,:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
@@ -7084,15 +7084,15 @@ endif
       integer, intent(in)         :: localDE
       integer, intent(in) :: coordDim
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
-      integer,                intent(out), optional :: exclusiveLBound(:)
-      integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
-      integer,                intent(out), optional :: totalLBound(:)
-      integer,                intent(out), optional :: totalUBound(:)
-      integer,                intent(out), optional :: totalCount(:)
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: totalLBound(:)
+      integer,        target, intent(out), optional :: totalUBound(:)
+      integer,        target, intent(out), optional :: totalCount(:)
       real(ESMF_KIND_R8), pointer :: fptr(:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
@@ -7404,15 +7404,15 @@ endif
       integer, intent(in) :: localDE
       integer, intent(in) :: coordDim
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
-      integer,                intent(out), optional :: exclusiveLBound(:)
-      integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
-      integer,                intent(out), optional :: totalLBound(:)
-      integer,                intent(out), optional :: totalUBound(:)
-      integer,                intent(out), optional :: totalCount(:)
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: totalLBound(:)
+      integer,        target, intent(out), optional :: totalUBound(:)
+      integer,        target, intent(out), optional :: totalCount(:)
       real(ESMF_KIND_R8), pointer :: fptr(:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
@@ -7722,15 +7722,15 @@ endif
       integer, intent(in) :: localDE
       integer, intent(in) :: coordDim
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
-      integer,                intent(out), optional :: exclusiveLBound(:)
-      integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
-      integer,                intent(out), optional :: totalLBound(:)
-      integer,                intent(out), optional :: totalUBound(:)
-      integer,                intent(out), optional :: totalCount(:)
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: totalLBound(:)
+      integer,        target, intent(out), optional :: totalUBound(:)
+      integer,        target, intent(out), optional :: totalCount(:)
       real(ESMF_KIND_R8), pointer :: fptr(:,:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
@@ -8039,15 +8039,15 @@ endif
       integer,                intent(in)            :: localDE
       integer,                intent(in)            :: coordDim
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
-      integer,                intent(out), optional :: exclusiveLBound(:)
-      integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
-      integer,                intent(out), optional :: totalLBound(:)
-      integer,                intent(out), optional :: totalUBound(:)
-      integer,                intent(out), optional :: totalCount(:)
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: totalLBound(:)
+      integer,        target, intent(out), optional :: totalUBound(:)
+      integer,        target, intent(out), optional :: totalCount(:)
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -8622,15 +8622,15 @@ endif
       integer,                intent(in) :: localDE
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
-      integer,                intent(out), optional :: exclusiveLBound(:)
-      integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
-      integer,                intent(out), optional :: totalLBound(:)
-      integer,                intent(out), optional :: totalUBound(:)
-      integer,                intent(out), optional :: totalCount(:)
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: totalLBound(:)
+      integer,        target, intent(out), optional :: totalUBound(:)
+      integer,        target, intent(out), optional :: totalCount(:)
       integer(ESMF_KIND_I4), pointer                   :: fptr(:)
       type(ESMF_CopyFlag),    intent(in), optional :: docopy
       integer,                intent(out), optional :: rc
@@ -8906,15 +8906,15 @@ endif
       integer, intent(in) :: localDE
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
-      integer,                intent(out), optional :: exclusiveLBound(:)
-      integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
-      integer,                intent(out), optional :: totalLBound(:)
-      integer,                intent(out), optional :: totalUBound(:)
-      integer,                intent(out), optional :: totalCount(:)
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: totalLBound(:)
+      integer,        target, intent(out), optional :: totalUBound(:)
+      integer,        target, intent(out), optional :: totalCount(:)
       integer(ESMF_KIND_I4), pointer :: fptr(:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
@@ -9194,15 +9194,15 @@ endif
       integer, intent(in) :: localDE
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
-      integer,                intent(out), optional :: exclusiveLBound(:)
-      integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
-      integer,                intent(out), optional :: totalLBound(:)
-      integer,                intent(out), optional :: totalUBound(:)
-      integer,                intent(out), optional :: totalCount(:)
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: totalLBound(:)
+      integer,        target, intent(out), optional :: totalUBound(:)
+      integer,        target, intent(out), optional :: totalCount(:)
       integer(ESMF_KIND_I4), pointer :: fptr(:,:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
@@ -9484,15 +9484,15 @@ endif
       integer,                intent(in) :: localDE
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
-      integer,                intent(out), optional :: exclusiveLBound(:)
-      integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
-      integer,                intent(out), optional :: totalLBound(:)
-      integer,                intent(out), optional :: totalUBound(:)
-      integer,                intent(out), optional :: totalCount(:)
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: totalLBound(:)
+      integer,        target, intent(out), optional :: totalUBound(:)
+      integer,        target, intent(out), optional :: totalCount(:)
       real(ESMF_KIND_R4), pointer                   :: fptr(:)
       type(ESMF_CopyFlag),    intent(in), optional :: docopy
       integer,                intent(out), optional :: rc
@@ -9768,15 +9768,15 @@ endif
       integer, intent(in) :: localDE
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
-      integer,                intent(out), optional :: exclusiveLBound(:)
-      integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
-      integer,                intent(out), optional :: totalLBound(:)
-      integer,                intent(out), optional :: totalUBound(:)
-      integer,                intent(out), optional :: totalCount(:)
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: totalLBound(:)
+      integer,        target, intent(out), optional :: totalUBound(:)
+      integer,        target, intent(out), optional :: totalCount(:)
       real(ESMF_KIND_R4), pointer :: fptr(:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
@@ -10056,15 +10056,15 @@ endif
       integer, intent(in) :: localDE
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
-      integer,                intent(out), optional :: exclusiveLBound(:)
-      integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
-      integer,                intent(out), optional :: totalLBound(:)
-      integer,                intent(out), optional :: totalUBound(:)
-      integer,                intent(out), optional :: totalCount(:)
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: totalLBound(:)
+      integer,        target, intent(out), optional :: totalUBound(:)
+      integer,        target, intent(out), optional :: totalCount(:)
       real(ESMF_KIND_R4), pointer :: fptr(:,:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
@@ -10347,15 +10347,15 @@ endif
       integer,                intent(in) :: localDE
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
-      integer,                intent(out), optional :: exclusiveLBound(:)
-      integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
-      integer,                intent(out), optional :: totalLBound(:)
-      integer,                intent(out), optional :: totalUBound(:)
-      integer,                intent(out), optional :: totalCount(:)
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: totalLBound(:)
+      integer,        target, intent(out), optional :: totalUBound(:)
+      integer,        target, intent(out), optional :: totalCount(:)
       real(ESMF_KIND_R8), pointer                   :: fptr(:)
       type(ESMF_CopyFlag),    intent(in), optional :: docopy
       integer,                intent(out), optional :: rc
@@ -10631,15 +10631,15 @@ endif
       integer, intent(in) :: localDE
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
-      integer,                intent(out), optional :: exclusiveLBound(:)
-      integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
-      integer,                intent(out), optional :: totalLBound(:)
-      integer,                intent(out), optional :: totalUBound(:)
-      integer,                intent(out), optional :: totalCount(:)
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: totalLBound(:)
+      integer,        target, intent(out), optional :: totalUBound(:)
+      integer,        target, intent(out), optional :: totalCount(:)
       real(ESMF_KIND_R8), pointer :: fptr(:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
@@ -10919,15 +10919,15 @@ endif
       integer, intent(in) :: localDE
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
-      integer,                intent(out), optional :: exclusiveLBound(:)
-      integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
-      integer,                intent(out), optional :: totalLBound(:)
-      integer,                intent(out), optional :: totalUBound(:)
-      integer,                intent(out), optional :: totalCount(:)
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: totalLBound(:)
+      integer,        target, intent(out), optional :: totalUBound(:)
+      integer,        target, intent(out), optional :: totalCount(:)
       real(ESMF_KIND_R8), pointer :: fptr(:,:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
@@ -11210,15 +11210,15 @@ endif
       integer,                intent(in)            :: localDE
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
-      integer,                intent(out), optional :: exclusiveLBound(:)
-      integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
-      integer,                intent(out), optional :: totalLBound(:)
-      integer,                intent(out), optional :: totalUBound(:)
-      integer,                intent(out), optional :: totalCount(:)
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: totalLBound(:)
+      integer,        target, intent(out), optional :: totalUBound(:)
+      integer,        target, intent(out), optional :: totalCount(:)
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -14923,12 +14923,12 @@ endif
 !
 ! !ARGUMENTS:
        integer,               intent(in)              :: dimCount
-       integer,               intent(in),   optional  :: lWidthIn(:)
-       integer,               intent(in),   optional  :: uWidthIn(:)
-       integer,               intent(in),   optional  :: alignIn(:)
-       integer,               intent(out)             :: lWidthOut(:)
-       integer,               intent(out)             :: uWidthOut(:)
-       integer,               intent(out)             :: alignOut(:)
+       integer,       target, intent(in),   optional  :: lWidthIn(:)
+       integer,       target, intent(in),   optional  :: uWidthIn(:)
+       integer,       target, intent(in),   optional  :: alignIn(:)
+       integer,       target, intent(out)             :: lWidthOut(:)
+       integer,       target, intent(out)             :: uWidthOut(:)
+       integer,       target, intent(out)             :: alignOut(:)
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:

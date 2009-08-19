@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.53 2009/06/08 18:24:15 w6ws Exp $
+! $Id: ESMF_DistGrid.F90,v 1.54 2009/08/19 21:32:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.53 2009/06/08 18:24:15 w6ws Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.54 2009/08/19 21:32:33 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2123,15 +2123,15 @@ contains
     type(ESMF_DELayout),    intent(out), optional :: delayout
     integer,                intent(out), optional :: dimCount
     integer,                intent(out), optional :: patchCount
-    integer,                intent(out), optional :: minIndexPDimPPatch(:,:)
-    integer,                intent(out), optional :: maxIndexPDimPPatch(:,:)
-    integer,                intent(out), optional :: elementCountPPatch(:)
-    integer,                intent(out), optional :: minIndexPDimPDe(:,:)
-    integer,                intent(out), optional :: maxIndexPDimPDe(:,:)
-    integer,                intent(out), optional :: elementCountPDe(:)
-    integer,                intent(out), optional :: patchListPDe(:)
-    integer,                intent(out), optional :: indexCountPDimPDe(:,:)
-    integer,                intent(out), optional :: collocationPDim(:)
+    integer,        target, intent(out), optional :: minIndexPDimPPatch(:,:)
+    integer,        target, intent(out), optional :: maxIndexPDimPPatch(:,:)
+    integer,        target, intent(out), optional :: elementCountPPatch(:)
+    integer,        target, intent(out), optional :: minIndexPDimPDe(:,:)
+    integer,        target, intent(out), optional :: maxIndexPDimPDe(:,:)
+    integer,        target, intent(out), optional :: elementCountPDe(:)
+    integer,        target, intent(out), optional :: patchListPDe(:)
+    integer,        target, intent(out), optional :: indexCountPDimPDe(:,:)
+    integer,        target, intent(out), optional :: collocationPDim(:)
     logical,                intent(out), optional :: regDecompFlag
     integer,                intent(out), optional :: rc
 !         
@@ -2370,7 +2370,7 @@ contains
     integer,                intent(in)            :: localDe
     integer,                intent(in),  optional :: collocation
     logical,                intent(out), optional :: arbSeqIndexFlag
-    integer,                intent(out), optional :: seqIndexList(:)
+    integer,        target, intent(out), optional :: seqIndexList(:)
     integer,                intent(out), optional :: elementCount
     integer,                intent(out), optional :: rc
 !         
@@ -2454,7 +2454,7 @@ contains
     type(ESMF_DistGrid),    intent(in)            :: distgrid
     integer,                intent(in)            :: localDe
     integer,                intent(in)            :: dim
-    integer,                intent(out)           :: indexList(:)
+    integer,        target, intent(out)           :: indexList(:)
     integer,                intent(out), optional :: rc
 !         
 !
@@ -2904,7 +2904,7 @@ contains
     positionVector, orientationVector, repetitionVector, rc)
 !
 ! !ARGUMENTS:
-    integer,                intent(out)           :: connection(:)
+    integer,        target, intent(out)           :: connection(:)
     integer,                intent(in)            :: patchIndexA
     integer,                intent(in)            :: patchIndexB
     integer,                intent(in)            :: positionVector(:)

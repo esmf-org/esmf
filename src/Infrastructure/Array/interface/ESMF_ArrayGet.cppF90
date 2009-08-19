@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.39 2009/03/04 19:44:06 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.40 2009/08/19 21:32:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -68,7 +68,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.39 2009/03/04 19:44:06 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.40 2009/08/19 21:32:33 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -138,21 +138,21 @@ contains
     integer,                       intent(out), optional :: rank
     type(ESMF_LocalArray), target, intent(out), optional :: larrayList(:)
     type(ESMF_IndexFlag),          intent(out), optional :: indexflag
-    integer,                       intent(out), optional :: distgridToArrayMap(:)
-    integer,                       intent(out), optional :: distgridToPackedArrayMap(:)
-    integer,                       intent(out), optional :: arrayToDistGridMap(:)
-    integer,                       intent(out), optional :: undistLBound(:)
-    integer,                       intent(out), optional :: undistUBound(:)
-    integer,                       intent(out), optional :: exclusiveLBound(:,:)
-    integer,                       intent(out), optional :: exclusiveUBound(:,:)
-    integer,                       intent(out), optional :: computationalLBound(:,:)
-    integer,                       intent(out), optional :: computationalUBound(:,:)
-    integer,                       intent(out), optional :: totalLBound(:,:)
-    integer,                       intent(out), optional :: totalUBound(:,:)
-    integer,                       intent(out), optional :: computationalLWidth(:,:)
-    integer,                       intent(out), optional :: computationalUWidth(:,:)
-    integer,                       intent(out), optional :: totalLWidth(:,:)
-    integer,                       intent(out), optional :: totalUWidth(:,:)
+    integer,               target, intent(out), optional :: distgridToArrayMap(:)
+    integer,               target, intent(out), optional :: distgridToPackedArrayMap(:)
+    integer,               target, intent(out), optional :: arrayToDistGridMap(:)
+    integer,               target, intent(out), optional :: undistLBound(:)
+    integer,               target, intent(out), optional :: undistUBound(:)
+    integer,               target, intent(out), optional :: exclusiveLBound(:,:)
+    integer,               target, intent(out), optional :: exclusiveUBound(:,:)
+    integer,               target, intent(out), optional :: computationalLBound(:,:)
+    integer,               target, intent(out), optional :: computationalUBound(:,:)
+    integer,               target, intent(out), optional :: totalLBound(:,:)
+    integer,               target, intent(out), optional :: totalUBound(:,:)
+    integer,               target, intent(out), optional :: computationalLWidth(:,:)
+    integer,               target, intent(out), optional :: computationalUWidth(:,:)
+    integer,               target, intent(out), optional :: totalLWidth(:,:)
+    integer,               target, intent(out), optional :: totalUWidth(:,:)
     character(len=*),              intent(out), optional :: name
     type(ESMF_DistGrid),           intent(out), optional :: distgrid
     integer,                       intent(out), optional :: dimCount
@@ -831,7 +831,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-
+    
     ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
