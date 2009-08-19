@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.80 2009/08/11 19:54:52 w6ws Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.81 2009/08/19 08:00:05 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -624,6 +624,9 @@
       public ESMF_NULL_POINTER, ESMF_BAD_POINTER
 
       public ESMF_Logical, ESMF_TRUE, ESMF_FALSE
+
+      public ESMF_InquireFlag
+      public ESMF_INQUIREONLY, ESMF_NOINQUIRE
 
       public ESMF_Direction, ESMF_MODE_FORWARD, ESMF_MODE_REVERSE
 
