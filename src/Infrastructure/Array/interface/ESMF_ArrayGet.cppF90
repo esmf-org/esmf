@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.40 2009/08/19 21:32:33 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.41 2009/08/19 22:57:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -68,7 +68,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.40 2009/08/19 21:32:33 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.41 2009/08/19 22:57:16 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -816,7 +816,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
     type(ESMF_Array),       intent(in)            :: array
     type(ESMF_RouteHandle), intent(in)            :: routehandlelist(:)
     integer,                intent(in)            :: localDe
-    integer,                intent(out)           :: totalElementMask(:)
+    integer,        target, intent(out)           :: totalElementMask(:)
     integer,                intent(out), optional :: rc  
 !         
 !
@@ -854,7 +854,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
     type(ESMF_Array),       intent(in)            :: array
     type(ESMF_RouteHandle), intent(in)            :: routehandlelist(:)
     integer,                intent(in)            :: localDe
-    integer,                intent(out)           :: totalElementMask(:,:)
+    integer,        target, intent(out)           :: totalElementMask(:,:)
     integer,                intent(out), optional :: rc  
 !         
 !
@@ -892,7 +892,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
     type(ESMF_Array),       intent(in)            :: array
     type(ESMF_RouteHandle), intent(in)            :: routehandlelist(:)
     integer,                intent(in)            :: localDe
-    integer,                intent(out)           :: totalElementMask(:,:,:)
+    integer,        target, intent(out)           :: totalElementMask(:,:,:)
     integer,                intent(out), optional :: rc  
 !         
 !
@@ -930,8 +930,8 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
     type(ESMF_Array),       intent(in)             :: array
     type(ESMF_RouteHandle), intent(in)             :: routehandle
     type(ESMF_RegionFlag),  intent(out),  optional :: regionflag
-    integer,                intent(out),  optional :: haloLDepth(:)
-    integer,                intent(out),  optional :: haloUDepth(:)
+    integer,        target, intent(out),  optional :: haloLDepth(:)
+    integer,        target, intent(out),  optional :: haloUDepth(:)
     integer,                intent(out),  optional :: rc  
 !         
 !
@@ -972,6 +972,9 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
     ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
+    
+    regionflag = ESMF_REGION_EMPTY  ! quiet down compiler warnings while not fully implemented
+    
   end subroutine ESMF_ArrayGetHalo
 !------------------------------------------------------------------------------
 

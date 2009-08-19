@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.101 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_Array.F90,v 1.102 2009/08/19 22:57:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.101 2009/01/21 21:37:58 cdeluca Exp $'
+    '$Id: ESMF_Array.F90,v 1.102 2009/08/19 22:57:15 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -469,6 +469,8 @@ contains
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    result = real(0.,ESMF_KIND_R8)  ! quiet down compiler warnings while not fully implemented
     
   end subroutine ESMF_ArrayReduce
 !------------------------------------------------------------------------------

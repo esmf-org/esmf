@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.54 2009/08/19 21:32:33 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.55 2009/08/19 22:57:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.54 2009/08/19 21:32:33 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.55 2009/08/19 22:57:16 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2571,6 +2571,8 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
+    linkCount = 0 ! quiet down compiler warnings while not fully implemented
+    
     ! call into the C++ interface, which will sort out optional arguments
 !    call c_ESMC_DistGridGet(distgrid, delayout, patchCount, patchListArg, &
 !      dimCount, dimExtentArg, regDecompFlag, localrc)
@@ -3013,7 +3015,7 @@ contains
     signChangeVector, rc)
 !
 ! !ARGUMENTS:
-    integer,                intent(out)           :: connectionTrans(:)
+    integer,        target, intent(out)           :: connectionTrans(:)
     integer,                intent(in)            :: connectionIndex
     integer,                intent(in)            :: direction
     integer,                intent(in)            :: staggerSrc
