@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.8 2009/08/14 23:00:29 w6ws Exp $
+// $Id: ESMCI_VMKernel.C,v 1.9 2009/08/20 04:19:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -4853,55 +4853,70 @@ namespace ESMCI{
     vector<VMK::commhandle *> recvCommhList(petCount);
     vector<char *> sendBuffer(petCount);
     vector<char *> recvBuffer(petCount);
-    // localPet acts as receiver, posting non-blocking recvs for all senders
-    for (int ii=localPet+1; ii<localPet+petCount; ii++){
-      // localPet-dependent shifted loop reduces communication contention
-      int i = ii%petCount;  // fold back into [0,..,petCount-1] range
-      // receive message from Pet "i"
-      int size = messageSize(i, localPet);
-      if (size>0){
-        recvBuffer[i] = new char[size];
-        recvCommhList[i] = NULL;
-        vmk->recv(recvBuffer[i], size, i, &(recvCommhList[i]));
+    const int boostSize = 512;  // max number of posted non-blocking calls
+    int iiStart = localPet+1; // initialize
+    int sendIndexOffset = 2*localPet+petCount;
+    while (iiStart < localPet+petCount){
+      int iiEnd = iiStart + boostSize;
+      if (iiEnd > localPet+petCount)
+        iiEnd = localPet+petCount;
+      // localPet acts as receiver, posting non-blocking recvs for all senders
+      for (int ii=iiStart; ii<iiEnd; ii++){
+        // localPet-dependent shifted loop reduces communication contention
+        int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+        // receive message from Pet "i"
+        int size = messageSize(i, localPet);
+        if (size>0){
+          recvBuffer[i] = new char[size];
+          recvCommhList[i] = NULL;
+          vmk->recv(recvBuffer[i], size, i, &(recvCommhList[i]));
+//fprintf(stderr, "%d] receive: %d -> %d\n", localPet, i, localPet);
+        }
       }
-    }
-    // localPet acts as a sender, constructs message and sends to receiver
-    for (int ii=localPet+petCount-1; ii>localPet; ii--){
-      // localPet-dependent shifted loop reduces communication contention
-      int i = ii%petCount;  // fold back into [0,..,petCount-1] range
-      // send message to Pet "i"
-      int size = messageSize(localPet, i);
-      if (size>0){
-        sendBuffer[i] = new char[size];
-        messagePrepare(localPet, i, sendBuffer[i]);
-        sendCommhList[i] = NULL;
-        vmk->send(sendBuffer[i], size, i, &(sendCommhList[i]));
+      // localPet acts as a sender, constructs message and sends to receiver
+      for (int ii=sendIndexOffset-iiStart; ii>sendIndexOffset-iiEnd; ii--){
+        // localPet-dependent shifted loop reduces communication contention
+        int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+        // send message to Pet "i"
+        int size = messageSize(localPet, i);
+        if (size>0){
+          sendBuffer[i] = new char[size];
+          messagePrepare(localPet, i, sendBuffer[i]);
+          sendCommhList[i] = NULL;
+          vmk->send(sendBuffer[i], size, i, &(sendCommhList[i]));
+//fprintf(stderr, "%d] send: %d -> %d\n", localPet, localPet, i);
+        }
       }
-    }
-    // localPet does local prepare and process
-    localPrepareAndProcess(localPet);
-    // localPet acts receiver, processing message
-    for (int ii=localPet+1; ii<localPet+petCount; ii++){
-      // localPet-dependent shifted loop reduces communication contention
-      int i = ii%petCount;  // fold back into [0,..,petCount-1] range
-      // receive message from Pet "i"
-      int size = messageSize(i, localPet);
-      if (size>0){
-        vmk->commwait(&(recvCommhList[i]));   // wait for receive to finish
-        messageProcess(i, localPet, recvBuffer[i]);
-        delete [] recvBuffer[i];              // garbage collection
+      if (iiStart==localPet+1){
+        // localPet does local prepare and process
+        localPrepareAndProcess(localPet);
       }
-    }
-    // localPet finishes up as sender
-    for (int ii=localPet+petCount-1; ii>localPet; ii--){
-      // localPet-dependent shifted loop reduces communication contention
-      int i = ii%petCount;  // fold back into [0,..,petCount-1] range
-      // was sending message to Pet "i"
-      int size = messageSize(localPet, i);
-      if (size>0){
-        vmk->commwait(&(sendCommhList[i]));   // wait for send to finish
-        delete [] sendBuffer[i];              // garbage collection
+      // localPet acts receiver, processing message
+      for (int ii=iiStart; ii<iiEnd; ii++){
+        // localPet-dependent shifted loop reduces communication contention
+        int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+        // receive message from Pet "i"
+        int size = messageSize(i, localPet);
+        if (size>0){
+//fprintf(stderr, "%d] wait for receive: %d -> %d\n", localPet, i, localPet);
+          vmk->commwait(&(recvCommhList[i]));   // wait for receive to finish
+          messageProcess(i, localPet, recvBuffer[i]);
+          delete [] recvBuffer[i];              // garbage collection
+        }
       }
+      // localPet finishes up as sender
+      for (int ii=sendIndexOffset-iiStart; ii>sendIndexOffset-iiEnd; ii--){
+        // localPet-dependent shifted loop reduces communication contention
+        int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+        // was sending message to Pet "i"
+        int size = messageSize(localPet, i);
+        if (size>0){
+//fprintf(stderr, "%d] wait for send: %d -> %d\n", localPet, localPet, i);
+          vmk->commwait(&(sendCommhList[i]));   // wait for send to finish
+          delete [] sendBuffer[i];              // garbage collection
+        }
+      }
+      iiStart = iiEnd;
     }
   }
 } // namespace ESMCI
