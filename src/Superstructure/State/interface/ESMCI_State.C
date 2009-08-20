@@ -47,7 +47,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_State.C,v 1.14 2009/06/26 00:48:16 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_State.C,v 1.15 2009/08/20 23:20:04 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -153,6 +153,7 @@ namespace ESMCI {
       return ESMC_NULL_POINTER;
     }
 
+    delete[] fName;
 
     rc = &localrc;
     return state;
