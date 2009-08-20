@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.9 2009/08/20 04:19:42 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.10 2009/08/20 16:13:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -4853,10 +4853,11 @@ namespace ESMCI{
     vector<VMK::commhandle *> recvCommhList(petCount);
     vector<char *> sendBuffer(petCount);
     vector<char *> recvBuffer(petCount);
-    const int boostSize = 512;  // max number of posted non-blocking calls
+    const int boostSize = 512;  // max number of posted non-blocking calls:
+                                // stay below typical system limits
     int iiStart = localPet+1; // initialize
     int sendIndexOffset = 2*localPet+petCount;
-    while (iiStart < localPet+petCount){
+    while (iiStart <= localPet+petCount){
       int iiEnd = iiStart + boostSize;
       if (iiEnd > localPet+petCount)
         iiEnd = localPet+petCount;
@@ -4870,7 +4871,7 @@ namespace ESMCI{
           recvBuffer[i] = new char[size];
           recvCommhList[i] = NULL;
           vmk->recv(recvBuffer[i], size, i, &(recvCommhList[i]));
-//fprintf(stderr, "%d] receive: %d -> %d\n", localPet, i, localPet);
+fprintf(stderr, "%d] receive: %d -> %d\n", localPet, i, localPet);
         }
       }
       // localPet acts as a sender, constructs message and sends to receiver
@@ -4884,10 +4885,11 @@ namespace ESMCI{
           messagePrepare(localPet, i, sendBuffer[i]);
           sendCommhList[i] = NULL;
           vmk->send(sendBuffer[i], size, i, &(sendCommhList[i]));
-//fprintf(stderr, "%d] send: %d -> %d\n", localPet, localPet, i);
+fprintf(stderr, "%d] send: %d -> %d\n", localPet, localPet, i);
         }
       }
       if (iiStart==localPet+1){
+fprintf(stderr, "%d] localPrepareAndProcess\n", localPet);
         // localPet does local prepare and process
         localPrepareAndProcess(localPet);
       }
@@ -4898,7 +4900,7 @@ namespace ESMCI{
         // receive message from Pet "i"
         int size = messageSize(i, localPet);
         if (size>0){
-//fprintf(stderr, "%d] wait for receive: %d -> %d\n", localPet, i, localPet);
+fprintf(stderr, "%d] wait for receive: %d -> %d\n", localPet, i, localPet);
           vmk->commwait(&(recvCommhList[i]));   // wait for receive to finish
           messageProcess(i, localPet, recvBuffer[i]);
           delete [] recvBuffer[i];              // garbage collection
@@ -4911,7 +4913,7 @@ namespace ESMCI{
         // was sending message to Pet "i"
         int size = messageSize(localPet, i);
         if (size>0){
-//fprintf(stderr, "%d] wait for send: %d -> %d\n", localPet, localPet, i);
+fprintf(stderr, "%d] wait for send: %d -> %d\n", localPet, localPet, i);
           vmk->commwait(&(sendCommhList[i]));   // wait for send to finish
           delete [] sendBuffer[i];              // garbage collection
         }
