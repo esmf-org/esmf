@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.11 2009/08/20 16:26:30 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.12 2009/08/20 17:01:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -4857,7 +4857,7 @@ namespace ESMCI{
                                 // stay below typical system limits
     int iiStart = localPet+1; // initialize
     int sendIndexOffset = 2*localPet+petCount;
-    while (iiStart <= localPet+petCount){
+    do{
       int iiEnd = iiStart + boostSize;
       if (iiEnd > localPet+petCount)
         iiEnd = localPet+petCount;
@@ -4919,6 +4919,6 @@ namespace ESMCI{
         }
       }
       iiStart = iiEnd;
-    }
+    }while (iiStart < localPet+petCount);
   }
 } // namespace ESMCI
