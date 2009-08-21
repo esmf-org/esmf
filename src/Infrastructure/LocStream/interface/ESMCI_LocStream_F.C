@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocStream_F.C,v 1.4 2009/01/21 21:38:00 cdeluca Exp $
+// $Id: ESMCI_LocStream_F.C,v 1.5 2009/08/21 18:02:16 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_LocStream_F.C,v 1.4 2009/01/21 21:38:00 cdeluca Exp $";
+             "$Id: ESMCI_LocStream_F.C,v 1.5 2009/08/21 18:02:16 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -279,7 +279,8 @@ void FTN(c_esmc_locstreamgeteubnd)(ESMCI::DistGrid **_distgrid,
 // non-method functions
 void FTN(c_esmc_locstreamserialize)(ESMC_IndexFlag *indexflag, 
                 int *keyCount,
-	        void *buffer, int *length, int *offset, int *localrc){
+	        void *buffer, int *length, int *offset,
+                ESMC_InquireFlag *inquireonly, int *localrc){
 
     ESMC_IndexFlag *ifp;
     int *ip;
@@ -299,11 +300,13 @@ void FTN(c_esmc_locstreamserialize)(ESMC_IndexFlag *indexflag,
 
     // Save indexflag
     ifp = (ESMC_IndexFlag *)((char *)(buffer) + *offset);
-    *ifp++ = *indexflag;
+    if (*inquireflag != ESMC_INQUIREONLY)
+      *ifp++ = *indexflag;
 
     // Save keyCount
     ip= (int *)ifp;
-    *ip++ = *keyCount; 
+    if (*inquireflag != ESMC_INQUIREONLY)
+      *ip++ = *keyCount; 
 
     // Adjust offset
     *offset += sizeof(ESMC_IndexFlag) + sizeof(int);
@@ -404,12 +407,13 @@ void FTN(c_esmc_locstreamkeydeserialize)(
 					 char *keyName,
 					 char *units,
 					 char *longName,
-					 void *buffer, int *offset, int *localrc){
+					 void *buffer, int *offset,
+                                         ESMC_InquireFlag *inquireflag, int *localrc){
 
   int *ip;
   char *cp;
   int r, keyNameLen, unitsLen, longNameLen;  
-
+  ESMC_InquireFlag linquireflag = *inquireflag;
 
   // Initialize return code; assume routine not implemented
   if (localrc) *localrc = ESMC_RC_NOT_IMPL;
@@ -418,29 +422,38 @@ void FTN(c_esmc_locstreamkeydeserialize)(
   ip = (int *)((char *)(buffer) + *offset);
 
   // Save string lengths
-  keyNameLen = *ip++; 
-  unitsLen = *ip++;
-  longNameLen = *ip++;
+  if (linquireflag != ESMF_INQUIREONLY) {
+    keyNameLen = *ip++; 
+    unitsLen = *ip++;
+    longNameLen = *ip++;
+  } else
+    ip += 3;
 
   // Switch to char pointer
   cp = (char *)ip;
 
   // Save keyNames
   // First fill with spaces (NOTE THAT THIS ASSUMES THAT keyName is of size ESMF_MAXSTR)
-  memset((void *)keyName,' ', ESMF_MAXSTR*sizeof(char));  
-  memcpy((void *)keyName, (const void *)cp, keyNameLen*sizeof(char));
+  if (linquireflag != ESMF_INQUIREONLY) {
+    memset((void *)keyName,' ', ESMF_MAXSTR*sizeof(char));  
+    memcpy((void *)keyName, (const void *)cp, keyNameLen*sizeof(char));
+  }
   cp += keyNameLen*sizeof(char);
 
   // Save units
   // First fill with spaces (NOTE THAT THIS ASSUMES THAT units is of size ESMF_MAXSTR)
-  memset((void *)units,' ', ESMF_MAXSTR*sizeof(char));  
-  memcpy((void *)units, (const void *)cp, unitsLen*sizeof(char));
+  if (linquireflag != ESMF_INQUIREONLY) {
+    memset((void *)units,' ', ESMF_MAXSTR*sizeof(char));  
+    memcpy((void *)units, (const void *)cp, unitsLen*sizeof(char));
+  }
   cp += unitsLen*sizeof(char);
 
   // Save longName
   // First fill with spaces (NOTE THAT THIS ASSUMES THAT longName is of size ESMF_MAXSTR)
-  memset((void *)longName,' ', ESMF_MAXSTR*sizeof(char));  
-  memcpy((void *)longName, (const void *)cp, longNameLen*sizeof(char));
+  if (linquireflag != ESMF_INQUIREONLY) {
+    memset((void *)longName,' ', ESMF_MAXSTR*sizeof(char));  
+    memcpy((void *)longName, (const void *)cp, longNameLen*sizeof(char));
+  }
   cp += longNameLen*sizeof(char);
 
   // Adjust offset

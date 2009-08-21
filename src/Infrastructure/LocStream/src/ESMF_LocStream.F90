@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.14 2009/06/24 19:14:16 oehmke Exp $
+! $Id: ESMF_LocStream.F90,v 1.15 2009/08/21 18:02:16 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.14 2009/06/24 19:14:16 oehmke Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.15 2009/08/21 18:02:16 w6ws Exp $'
 
 !==============================================================================
 !
@@ -2555,7 +2555,7 @@ end subroutine ESMF_LocStreamGetBounds
      ! Serialize Base
      attreconflag = ESMF_ATTRECONCILE_OFF
      call c_ESMC_BaseSerialize(lstypep%base, buffer(1), length, offset, &
-      attreconflag, localrc)
+      attreconflag, ESMF_NOINQUIRE, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
