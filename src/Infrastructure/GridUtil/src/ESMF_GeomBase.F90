@@ -148,7 +148,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.8 2009/04/13 15:13:51 rokuingh Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.9 2009/08/21 17:53:01 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -937,14 +937,15 @@ end subroutine ESMF_GeomBaseGet
 !
 ! !INTERFACE:
       subroutine ESMF_GeomBaseSerialize(gridbase, buffer, length, offset, &
-                                        attreconflag, rc) 
+                                        attreconflag, inquireflag, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_GeomBase), intent(inout) :: gridbase 
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
-      type(ESMF_AttReconcileFlag), optional :: attreconflag
+      type(ESMF_AttReconcileFlag), intent(in), optional :: attreconflag
+      type(ESMF_InquireFlag), intent(in), optional :: inquireflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -968,6 +969,9 @@ end subroutine ESMF_GeomBaseGet
 !           available byte in the buffer.
 !     \item[{[attreconflag]}]
 !           Flag to tell if Attribute serialization is to be done
+!     \item[{[inquireflag]}]
+!           Flag to tell if serialization is to be done (ESMF_NOINQUIRE)
+!           or if this is simply a size inquiry (ESMF_INQUIREONLY)
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -976,6 +980,7 @@ end subroutine ESMF_GeomBaseGet
     type(ESMF_GeomBaseClass),pointer :: gbcp
     integer :: localrc
     type(ESMF_AttReconcileFlag) :: lattreconflag
+    type(ESMF_InquireFlag) :: linquireflag
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -983,12 +988,18 @@ end subroutine ESMF_GeomBaseGet
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit, gridbase, rc)
 
-    ! deal with optional attreconflag
+    ! deal with optional attreconflag and inquireflag
     if (present(attreconflag)) then
       lattreconflag = attreconflag
     else
       lattreconflag = ESMF_ATTRECONCILE_OFF
     endif
+
+    if (present (inquireflag)) then
+      linquireflag = inquireflag
+    else
+      linquireflag = ESMF_NOINQUIRE
+    end if
 
     ! Get GeomBaseClass
     gbcp=>gridbase%gbcp
@@ -996,7 +1007,8 @@ end subroutine ESMF_GeomBaseGet
     ! serialize GeomBase info
     call c_ESMC_GeomBaseSerialize(gbcp%type%type, &
                                   gbcp%staggerloc%staggerloc, &
-                                  buffer(1), length, offset, localrc)
+                                  buffer(1), length, offset, linquireflag, &
+                                  localrc)
     if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -1007,7 +1019,8 @@ end subroutine ESMF_GeomBaseGet
        case (ESMF_GEOMTYPE_GRID%type) ! Grid 
           call ESMF_GridSerialize(grid=gbcp%grid, buffer=buffer, &
                      length=length, offset=offset, &
-                     attreconflag=lattreconflag, rc=localrc) 
+                     attreconflag=lattreconflag, inquireflag=linquireflag, &
+                     rc=localrc) 
           if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
