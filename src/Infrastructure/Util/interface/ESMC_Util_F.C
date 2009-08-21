@@ -1,4 +1,4 @@
-// $Id: ESMC_Util_F.C,v 1.9 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMC_Util_F.C,v 1.10 2009/08/21 18:16:37 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util_F.C,v 1.9 2009/01/21 21:38:01 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Util_F.C,v 1.10 2009/08/21 18:16:37 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -55,8 +55,9 @@ extern "C" {
       char *buf,                // in/out - really a byte stream
       int *length,              // in/out - number of allocated bytes
       int *offset,              // in/out - current offset in the stream
+      ESMC_InquireFlag *inquireflag, // in - inquire flag
       int *rc,                  // out - return code
-      int clen) {               // in, hidden - string length
+      ESMCI_FortranStrLenArg clen) { // in, hidden - string length
 // 
 // !DESCRIPTION:
 //     Serialize the contents of a string object.
@@ -85,7 +86,8 @@ extern "C" {
   }
 
   cp = buf + *offset;
-  memcpy(cp, string, clen);
+  if (*inquireflag != ESMF_INQUIREONLY)
+    memcpy(cp, string, clen);
   cp += clen;
   
   *offset = cp - buf;
@@ -112,7 +114,7 @@ extern "C" {
       char *buf,                // in/out - really a byte stream
       int *offset,              // in/out - current offset in the stream
       int *rc,                  // out - return code
-      int clen) {               // in, hidden - string length
+      ESMCI_FortranStrLenArg clen) { // in, hidden - string length
 // 
 // !DESCRIPTION:
 //     Deserialize the contents of a base object.
