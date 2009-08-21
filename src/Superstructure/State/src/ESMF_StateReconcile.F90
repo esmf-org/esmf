@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.56 2009/02/25 05:29:45 rokuingh Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.57 2009/08/21 18:17:48 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.56 2009/02/25 05:29:45 rokuingh Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.57 2009/08/21 18:17:48 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -359,7 +359,7 @@
       si%objsend(1) = ESMF_ID_BASE%objectID
       bptr => si%blindsend(:,1)
       call c_ESMC_BaseSerialize(state%statep%base, bptr(1), bufsize, offset, &
-        attreconflag, localrc)
+        attreconflag, ESMF_NOINQUIRE, localrc)
       attreconstart = 2
     else
       si%mycount = state%statep%datacount
@@ -382,7 +382,8 @@
              si%objsend(i) = ESMF_ID_FIELDBUNDLE%objectID
              bptr => si%blindsend(:,i)
              call ESMF_FieldBundleSerialize(stateitem%datap%fbp, bptr, bufsize, &
-                                       offset, attreconflag=attreconflag, rc=localrc)
+                                       offset, attreconflag=attreconflag, &
+                                       inquireflag=ESMF_NOINQUIRE, rc=localrc)
 !!DEBUG "serialized bundle, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_FIELD%ot)
@@ -391,7 +392,8 @@
              si%objsend(i) = ESMF_ID_FIELD%objectID
              bptr => si%blindsend(:,i)
              call ESMF_FieldSerialize(stateitem%datap%fp, bptr, bufsize, &
-                                       offset, attreconflag=attreconflag, rc=localrc)
+                                       offset, attreconflag=attreconflag, &
+                                       inquireflag=ESMF_NOINQUIRE, rc=localrc)
 !!DEBUG "serialized field, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_ARRAY%ot)
@@ -400,7 +402,8 @@
              si%objsend(i) = ESMF_ID_ARRAY%objectID
              bptr => si%blindsend(:,i)
              call c_ESMC_ArraySerialize(stateitem%datap%ap, bptr(1), &
-                                       bufsize, offset, attreconflag, localrc)
+                                       bufsize, offset, attreconflag, &
+                                       ESMF_NOINQUIRE, localrc)
 !!DEBUG "serialized array, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
@@ -409,7 +412,8 @@
              si%objsend(i) = ESMF_ID_ARRAYBUNDLE%objectID
              bptr => si%blindsend(:,i)
              call c_ESMC_ArrayBundleSerialize(stateitem%datap%abp, bptr(1), &
-                                       bufsize, offset, attreconflag, localrc)
+                                       bufsize, offset, attreconflag, &
+                                       ESMF_NOINQUIRE, localrc)
 !!DEBUG "serialized arraybundle, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_STATE%ot)
@@ -419,7 +423,7 @@
              bptr => si%blindsend(:,i)
              wrapper%statep => stateitem%datap%spp
              call ESMF_StateSerialize(wrapper, bptr, bufsize, offset, &
-              attreconflag=attreconflag, rc=localrc)
+              attreconflag=attreconflag, inquireflag=ESMF_NOINQUIRE, rc=localrc)
 !!DEBUG "serialized substate, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_NAME%ot)
@@ -428,7 +432,8 @@
              si%vmidsend(i) = VMdummyID
              si%objsend(i) = ESMF_STATEITEM_NAME%ot
              bptr => si%blindsend(:,i)
-             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, localrc)
+             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, &
+               ESMF_NOINQUIRE, localrc)
 !!DEBUG "serialized placeholder, name=", trim(stateitem%namep)
              localrc = ESMF_SUCCESS
            case (ESMF_STATEITEM_INDIRECT%ot)
@@ -436,7 +441,8 @@
              si%vmidsend(i) = VMdummyID
              si%objsend(i) = ESMF_STATEITEM_NAME%ot
              bptr => si%blindsend(:,i)
-             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, localrc)
+             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, &
+               ESMF_NOINQUIRE, localrc)
 !!DEBUG "serialized field-in-bundle, name=", trim(stateitem%namep)
              localrc = ESMF_SUCCESS
            case (ESMF_STATEITEM_UNKNOWN%ot)
@@ -444,7 +450,8 @@
              si%vmidsend(i) = VMdummyID
              si%objsend(i) = ESMF_STATEITEM_NAME%ot
              bptr => si%blindsend(:,i)
-             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, localrc)
+             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, &
+               ESMF_NOINQUIRE, localrc)
 !!DEBUG "serialized unknown type, name=", trim(stateitem%namep)
              localrc = ESMF_SUCCESS
         end select

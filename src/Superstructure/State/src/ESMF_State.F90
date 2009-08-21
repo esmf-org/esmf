@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.166 2009/07/16 22:05:57 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.167 2009/08/21 18:17:48 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.166 2009/07/16 22:05:57 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.167 2009/08/21 18:17:48 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -5747,14 +5747,15 @@ module ESMF_StateMod
 !
 ! !INTERFACE:
       recursive subroutine ESMF_StateSerialize(state, buffer, length, offset, &
-                                              attreconflag, rc) 
+                                              attreconflag, inquireflag, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state 
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
-      type(ESMF_AttReconcileFlag), optional :: attreconflag
+      type(ESMF_AttReconcileFlag), intent(in), optional :: attreconflag
+      type(ESMF_InquireFLag), intent(in), optional :: inquireflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -5779,6 +5780,9 @@ module ESMF_StateMod
 !           available byte in the buffer.
 !     \item[{[attreconflag]}]
 !           Flag to tell if Attribute serialization is to be done
+!     \item[{[inquireflag]}}
+!           Flag to tell if serialization is to be done (ESMF_NOINQUIRE)
+!           or if this is simply a size inquiry (ESMF_INQUIREONLY)
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5791,17 +5795,24 @@ module ESMF_StateMod
       type(ESMF_StateItem), pointer :: sip           ! state item
       type(ESMF_State) :: wrapper
       type(ESMF_AttReconcileFlag) :: lattreconflag
+      type(ESMF_InquireFlag) :: linquireflag
 
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
-      ! deal with optional attreconflag
+      ! deal with optional attreconflag and inquireflag
       if (present(attreconflag)) then
         lattreconflag = attreconflag
       else
         lattreconflag = ESMF_ATTRECONCILE_OFF
       endif
+
+      if (present (inquireflag)) then
+        linquireflag = inquireflag
+      else
+        linquireflag = ESMF_NOINQUIRE
+      end if
 
       ! shortcut to internals
       sp => state%statep
@@ -5813,7 +5824,8 @@ module ESMF_StateMod
 
       sp => state%statep
 
-      call c_ESMC_BaseSerialize(sp%base, buffer(1), length, offset, lattreconflag, localrc)
+      call c_ESMC_BaseSerialize(sp%base, buffer(1), length, offset, lattreconflag,  &
+                                 linquireflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -5833,33 +5845,39 @@ module ESMF_StateMod
           call c_ESMC_StateItemSerialize(sip%otype, sip%namep, &
                                          sip%indirect_index, sip%needed, &
                                          sip%ready, sip%valid, sip%reqrestart, &
-                                         buffer(1), length, offset, localrc)
+                                         buffer(1), length, offset, &
+                                         linquireflag, localrc)
 
           select case (sip%otype%ot)
             case (ESMF_STATEITEM_FIELDBUNDLE%ot)
              call ESMF_FieldBundleSerialize(sip%datap%fbp, buffer, length, &
-                                       offset, attreconflag=lattreconflag, rc=localrc)
+                                       offset, attreconflag=lattreconflag, &
+                                       inquireflag=linquireflag, rc=localrc)
               continue ! TODO: serialize
             case (ESMF_STATEITEM_FIELD%ot)
              call ESMF_FieldSerialize(sip%datap%fp, buffer, length, &
-                                       offset, attreconflag=lattreconflag, rc=localrc)
+                                       offset, attreconflag=lattreconflag, &
+                                       inquireflag=linquireflag, rc=localrc)
               continue ! TODO: serialize
             case (ESMF_STATEITEM_ARRAY%ot)
              call c_ESMC_ArraySerialize(sip%datap%ap, buffer(1), &
-                                       length, offset, lattreconflag, localrc)
+                                       length, offset, lattreconflag, &
+                                       linquireflag, localrc)
               continue ! TODO: serialize
             case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
              call c_ESMC_ArrayBundleSerialize(sip%datap%abp, buffer(1), &
-                                       length, offset, lattreconflag, localrc)
+                                       length, offset, lattreconflag, &
+                                       linquireflag, localrc)
               continue ! TODO: serialize
             case (ESMF_STATEITEM_STATE%ot)
              wrapper%statep => sip%datap%spp
              call ESMF_StateSerialize(wrapper, buffer, length, offset, &
-                                       attreconflag=lattreconflag, rc=localrc)
+                                       attreconflag=lattreconflag, &
+                                       inquireflag=linquireflag, rc=localrc)
               continue ! TODO: serialize
             case (ESMF_STATEITEM_NAME%ot)
              call c_ESMC_StringSerialize(sip%namep, buffer(1), &
-                                         length, offset, localrc)
+                                         length, offset, linquireflag, localrc)
               continue ! TODO: serialize
             case (ESMF_STATEITEM_INDIRECT%ot)
               continue ! TODO: serialize

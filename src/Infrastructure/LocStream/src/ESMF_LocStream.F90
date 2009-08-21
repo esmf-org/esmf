@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.15 2009/08/21 18:02:16 w6ws Exp $
+! $Id: ESMF_LocStream.F90,v 1.16 2009/08/21 18:15:02 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.15 2009/08/21 18:02:16 w6ws Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.16 2009/08/21 18:15:02 w6ws Exp $'
 
 !==============================================================================
 !
@@ -2504,13 +2504,14 @@ end subroutine ESMF_LocStreamGetBounds
 ! !IROUTINE: ESMF_LocStreamSerialize - Serialize locstream info into a byte stream
 !
 ! !INTERFACE:
-      subroutine ESMF_LocStreamSerialize(locstream, buffer, length, offset, rc) 
+      subroutine ESMF_LocStreamSerialize(locstream, buffer, length, offset, inquireflag, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_LocStream), intent(inout) :: locstream
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
+      type(ESMF_InquireFlag), intent(in), optional :: inquireflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -2532,6 +2533,7 @@ end subroutine ESMF_LocStreamGetBounds
 !           Current write offset in the current buffer.  This will be
 !           updated by this routine and return pointing to the next
 !           available byte in the buffer.
+!     \item [inquireflag]
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2540,7 +2542,7 @@ end subroutine ESMF_LocStreamGetBounds
       type(ESMF_LocStreamType),pointer :: lstypep
       integer :: i,localrc
       type(ESMF_AttReconcileFlag) :: attreconflag
-
+      type(ESMF_InquireFlag) :: linquireflag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -2549,26 +2551,33 @@ end subroutine ESMF_LocStreamGetBounds
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
 
+      if (present (inquireflag)) then
+        linquireflag = inquireflag
+      else
+        linquireflag = ESMF_NOINQUIRE
+      end if
+
       ! Get internal pointer to locstream type
       lstypep => locstream%lstypep
 
      ! Serialize Base
      attreconflag = ESMF_ATTRECONCILE_OFF
      call c_ESMC_BaseSerialize(lstypep%base, buffer(1), length, offset, &
-      attreconflag, ESMF_NOINQUIRE, localrc)
+      attreconflag, linquireflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
      ! Serialize Distgrid
-     call c_ESMC_DistgridSerialize(lstypep%distgrid, buffer(1), length, offset, localrc)
+     call c_ESMC_DistgridSerialize(lstypep%distgrid, buffer(1), length, offset, &
+                                 linquireflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
       ! Serialize other locstream items
       call c_ESMC_LocStreamSerialize(lstypep%indexflag, lstypep%keyCount, &
-              buffer(1), length, offset, localrc)
+              buffer(1), length, offset, linquireflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -2580,14 +2589,14 @@ end subroutine ESMF_LocStreamGetBounds
                   len_trim(lstypep%keyNames(i)), lstypep%keyNames(i), &
                   len_trim(lstypep%keyUnits(i)), lstypep%keyUnits(i), &
                   len_trim(lstypep%keyLongNames(i)), lstypep%keyLongNames(i), &
-                 buffer(1), length, offset, localrc)
+                 buffer(1), length, offset, linquireflag, localrc)
          if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
          ! Serialize key Array
          call c_ESMC_ArraySerialize(lstypep%keys(i), buffer(1), length, offset, &
-          attreconflag, localrc)
+          attreconflag, linquireflag, localrc)
          if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return

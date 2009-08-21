@@ -1,4 +1,4 @@
-// $Id: ESMCI_State_F.C,v 1.2 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMCI_State_F.C,v 1.3 2009/08/21 18:17:48 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_State_F.C,v 1.2 2009/01/21 21:38:02 cdeluca Exp $";
+             "$Id: ESMCI_State_F.C,v 1.3 2009/08/21 18:17:48 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -71,7 +71,8 @@ void FTN(c_esmc_stateserialize)(int *statestatus,
                            int *reqrestart_default, 
                            int *alloccount, 
                            int *datacount, 
-                           void *buffer, int *length, int *offset, int *localrc){
+                           void *buffer, int *length, int *offset,
+                           ESMC_InquireFlag *inquireflag, int *localrc){
 
     int *ip;
 
@@ -92,14 +93,17 @@ void FTN(c_esmc_stateserialize)(int *statestatus,
 
 
     ip = (int *)((char *)(buffer) + *offset);
-    *ip++ = *statestatus;
-    *ip++ = *st; 
-    *ip++ = *needed_default; 
-    *ip++ = *ready_default; 
-    *ip++ = *stvalid_default; 
-    *ip++ = *reqrestart_default; 
-    *ip++ = *alloccount; 
-    *ip++ = *datacount; 
+    if (*inquireflag != ESMF_INQUIREONLY) {
+      *ip++ = *statestatus;
+      *ip++ = *st; 
+      *ip++ = *needed_default; 
+      *ip++ = *ready_default; 
+      *ip++ = *stvalid_default; 
+      *ip++ = *reqrestart_default; 
+      *ip++ = *alloccount; 
+      *ip++ = *datacount; 
+    } else
+      ip += 8;
 
     *offset = (char *)ip - (char *)buffer;
 
@@ -166,8 +170,9 @@ void FTN(c_esmc_stateitemserialize)(int *otype,
                                int *ready, 
                                int *valid, 
                                int *reqrestart, 
-                           void *buffer, int *length, int *offset, int *localrc,
-                               int clen) {
+                           void *buffer, int *length, int *offset,
+                               ESMC_InquireFlag *inquireflag, int *localrc,
+                               ESMCI_FortranStrLenArg clen) {
 
     int *ip;
     char *cp;
@@ -177,16 +182,25 @@ void FTN(c_esmc_stateitemserialize)(int *otype,
     // TODO: verify length > needed, else realloc longer
 
     ip = (int *)((char *)(buffer) + *offset);
-    *ip++ = *otype;
+    if (*inquireflag != ESMF_INQUIREONLY)
+      *ip++ = *otype;
+    else
+      ip++;
+
     cp = (char *)ip;
-    memcpy(cp, namep, clen);
+    if (*inquireflag != ESMF_INQUIREONLY)
+      memcpy(cp, namep, clen);
     cp += clen;
+
     ip = (int *)cp;
-    *ip++ = *indirect_index; 
-    *ip++ = *needed; 
-    *ip++ = *ready; 
-    *ip++ = *valid; 
-    *ip++ = *reqrestart; 
+    if (*inquireflag != ESMF_INQUIREONLY) {
+      *ip++ = *indirect_index; 
+      *ip++ = *needed; 
+      *ip++ = *ready; 
+      *ip++ = *valid; 
+      *ip++ = *reqrestart; 
+    } else
+      ip += 5;
 
     *offset = (char *)ip - (char *)buffer;
 
@@ -204,7 +218,7 @@ void FTN(c_esmc_stateitemdeserialize)(int *otype,
                                int *valid, 
                                int *reqrestart, 
                                void *buffer, int *offset, int *localrc,
-                               int clen) {
+                               ESMCI_FortranStrLenArg clen) {
 
     int *ip;
     char *cp;
