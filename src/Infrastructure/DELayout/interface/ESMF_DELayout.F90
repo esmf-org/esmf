@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.75 2009/06/08 18:24:14 w6ws Exp $
+! $Id: ESMF_DELayout.F90,v 1.76 2009/08/21 17:46:29 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.75 2009/06/08 18:24:14 w6ws Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.76 2009/08/21 17:46:29 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1585,13 +1585,14 @@ contains
 ! !IROUTINE: ESMF_DELayoutSerialize - Serialize delayout info into a byte stream
 !
 ! !INTERFACE:
-  subroutine ESMF_DELayoutSerialize(delayout, buffer, length, offset, rc) 
+  subroutine ESMF_DELayoutSerialize(delayout, buffer, length, offset, inquireflag, rc) 
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout), intent(in) :: delayout 
     integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
     integer, intent(inout) :: length
     integer, intent(inout) :: offset
+    type(ESMF_InquireFlag), intent(in), optional :: inquireflag
     integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -1614,6 +1615,9 @@ contains
 !           Current write offset in the current buffer.  This will be
 !           updated by this routine and return pointing to the next
 !           available byte in the buffer.
+!     \item [inquireflag]
+!           Flag to tell if serialization is to be done (ESMF_NOINQUIRE)
+!           or if this is simply a size inquiry (ESMF_INQUIREONLY)
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1621,6 +1625,7 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_InquireFlag)  :: linquireflag ! local inquiry flag
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1628,9 +1633,16 @@ contains
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
-    
+
+    if (present (inquireflag)) then
+      linquireflag = inquireflag
+    else
+      linquireflag = ESMF_NOINQUIRE
+    end if
+ 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DELayoutSerialize(delayout, buffer(1), length, offset, localrc)
+    call c_ESMC_DELayoutSerialize(delayout, buffer(1), length, offset, &
+                                  linquireflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.333 2009/04/13 15:11:25 rokuingh Exp $
+! $Id: ESMF_Field.F90,v 1.334 2009/08/21 17:49:01 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -177,7 +177,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.333 2009/04/13 15:11:25 rokuingh Exp $'
+    '$Id: ESMF_Field.F90,v 1.334 2009/08/21 17:49:01 w6ws Exp $'
 
 !==============================================================================
 !
@@ -987,14 +987,15 @@ contains
 !
 ! !INTERFACE:
       subroutine ESMF_FieldSerialize(field, buffer, length, offset, &
-                                    attreconflag, rc) 
+                                    attreconflag, inquireflag, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field 
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
-      type(ESMF_AttReconcileFlag), optional :: attreconflag
+      type(ESMF_AttReconcileFlag), intent(in), optional :: attreconflag
+      type(ESMF_InquireFlag), intent(in), optional :: inquireflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -1019,6 +1020,9 @@ contains
 !           available byte in the buffer.
 !     \item[{[attreconflag]}]
 !           Flag to tell if Attribute serialization is to be done
+!     \item[{[inquireflag]}]
+!           Flag to tell if serialization is to be done (ESMF_NOINQUIRE)
+!           or if this is simply a size inquiry (ESMF_INQUIREONLY)
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1028,6 +1032,7 @@ contains
       integer :: localrc
       type(ESMF_FieldType), pointer :: fp    ! field type
       type(ESMF_AttReconcileFlag) :: lattreconflag
+      type(ESMF_InquireFlag) :: linquireflag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -1036,17 +1041,24 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      ! deal with optional attreconflag
+      ! deal with optional attreconflag and inquireflag
       if (present(attreconflag)) then
         lattreconflag = attreconflag
       else
         lattreconflag = ESMF_ATTRECONCILE_OFF
       endif
 
+      if (present (inquireflag)) then
+        linquireflag = inquireflag
+      else
+        linquireflag = ESMF_NOINQUIRE
+      end if
+
       ! shortcut to internals
       fp => field%ftypep
 
-      call c_ESMC_BaseSerialize(fp%base, buffer(1), length, offset, lattreconflag, localrc)
+      call c_ESMC_BaseSerialize(fp%base, buffer(1), length, offset, &
+                                 lattreconflag, linquireflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -1056,7 +1068,7 @@ contains
                                  0, fp%gridToFieldMap, &
                                  fp%ungriddedLBound, fp%ungriddedUBound, &
                                  fp%maxHaloLWidth, fp%maxHaloUWidth, &
-                                 buffer(1), length, offset, localrc)
+                                 buffer(1), length, offset, linquireflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -1064,15 +1076,15 @@ contains
 
       if (fp%gridstatus .eq. ESMF_STATUS_READY) then
         call ESMF_GeomBaseSerialize(fp%geombase, buffer, length, offset, &
-                                    lattreconflag, localrc)
+                                    lattreconflag, linquireflag, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
       endif
 
       if (fp%datastatus .eq. ESMF_STATUS_READY) then
-          call c_ESMC_ArraySerialize(fp%array, buffer(1),&
-                                    length, offset, lattreconflag, localrc)
+          call c_ESMC_ArraySerialize(fp%array, buffer(1), length, offset, &
+                                     lattreconflag, linquireflag, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return

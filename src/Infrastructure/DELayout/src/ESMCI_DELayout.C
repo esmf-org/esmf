@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.18 2009/04/17 22:40:46 rokuingh Exp $
+// $Id: ESMCI_DELayout.C,v 1.19 2009/08/21 17:46:29 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.18 2009/04/17 22:40:46 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.19 2009/08/21 17:46:29 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1413,8 +1413,9 @@ int DELayout::serialize(
 // !ARGUMENTS:
   char *buffer,          // inout - byte stream to fill
   int *length,           // inout - buf length; realloc'd here if needed
-  int *offset)const{     // inout - original offset, updated to point 
+  int *offset,           // inout - original offset, updated to point 
                          //         to first free byte after current obj info
+  ESMC_InquireFlag inquireflag) const { // in - inquiry flag
 //
 // !DESCRIPTION:
 //    Turn info in delayout class into a stream of bytes.
@@ -1444,7 +1445,8 @@ int DELayout::serialize(
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
   ESMC_AttReconcileFlag attreconflag = ESMC_ATTRECONCILE_OFF;
-  localrc = this->ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag);
+  localrc = this->ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag,
+                                            inquireflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
@@ -1453,46 +1455,64 @@ int DELayout::serialize(
   if (r!=0) *offset += 8-r;  // alignment
   cp = (char *)(buffer + *offset);
   ip = (int *)cp;
-  *ip++ = deCount;
-  *ip++ = oldstyle;
-  if (oldstyle){
-    // ndim must be available before decoding the next loop, so it has
-    // to be sent now.
-    *ip++ = ndim;
-  }
+  if (inquireflag != ESMF_INQUIREONLY) {
+    *ip++ = deCount;
+    *ip++ = oldstyle;
+    if (oldstyle){
+      // ndim must be available before decoding the next loop, so it has
+      // to be sent now.
+      *ip++ = ndim;
+    }
+  } else
+    ip += oldstyle ? 3 : 2;
+
   if (!oldstyle){
     dp = (ESMC_DePinFlag *)ip;
     *dp++ = dePinFlag;
     ip = (int *)dp;
   }
 
-  for (i=0, dep=deInfoList; i<deCount; i++, dep++) {
-    *ip++ = dep->de;
-    *ip++ = dep->pet;
-    *ip++ = dep->vas;
-    if (oldstyle){
-      *ip++ = dep->nconnect;
-      for (j=0; j<dep->nconnect; j++) {
-        *ip++ = dep->connect_de[j];
-        *ip++ = dep->connect_w[j];
+  if (inquireflag != ESMF_INQUIREONLY) {  
+    for (i=0, dep=deInfoList; i<deCount; i++, dep++) {
+      *ip++ = dep->de;
+      *ip++ = dep->pet;
+      *ip++ = dep->vas;
+      if (oldstyle){
+        *ip++ = dep->nconnect;
+        for (j=0; j<dep->nconnect; j++) {
+          *ip++ = dep->connect_de[j];
+          *ip++ = dep->connect_w[j];
+        }
+        for (j=0; j<ndim; j++) 
+          *ip++ = dep->coord[j];
       }
-      for (j=0; j<ndim; j++) 
-        *ip++ = dep->coord[j];
+    }
+  } else {
+    ip += 3*deCount;
+    if (oldstyle) {
+      ip += deCount + deCount * dep->nconnect * 2;
+      ip += deCount * ndim;
     }
   }
   
   // this has to come before dims, since they are not allocated unless
   // logRectFlag is true.
   lp = (ESMC_Logical *)ip;
-  *lp++ = oneToOneFlag;
-  if (oldstyle)
-    *lp++ = logRectFlag;
+  if (inquireflag != ESMF_INQUIREONLY) {
+    *lp++ = oneToOneFlag;
+    if (oldstyle)
+      *lp++ = logRectFlag;
+  } else
+    lp += oldstyle ? 1 : 2;
   
   ip = (int *)lp;
   if (oldstyle){
     if (logRectFlag == ESMF_TRUE)
-      for (i=0; i<ndim; i++) 
-        *ip++ = dims[i];
+      if (inquireflag != ESMF_INQUIREONLY)
+        for (i=0; i<ndim; i++) 
+          *ip++ = dims[i];
+      else
+        ip += ndim;
   }
 
   cp = (char *)ip;

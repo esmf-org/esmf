@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.h,v 1.9 2009/07/28 23:08:04 theurich Exp $
+// $Id: ESMCI_ArrayBundle.h,v 1.10 2009/08/21 17:42:43 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -75,7 +75,8 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     int print() const;
     // serialize() and deserialize()
     int serialize(char *buffer,int *length,int *offset,
-                  const ESMC_AttReconcileFlag &attreconflag) const;
+                  const ESMC_AttReconcileFlag &attreconflag,
+                  const ESMC_InquireFlag &inquireflag) const;
     int deserialize(char *buffer,int *offset,
                     const ESMC_AttReconcileFlag &attreconflag);
     // comms

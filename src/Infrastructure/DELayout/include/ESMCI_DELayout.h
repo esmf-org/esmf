@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.14 2009/02/24 22:25:05 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.15 2009/08/21 17:46:28 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -137,7 +137,8 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     int print() const;
     int validate() const;
     // serialize() and deserialize()
-    int serialize(char *buffer, int *length, int *offset) const;
+    int serialize(char *buffer, int *length, int *offset,
+      ESMC_InquireFlag inquireflag) const;
     static DELayout *deserialize(char *buffer, int *offset);
     // work queue synchronization methods
     DELayoutServiceReply serviceOffer(int de, int *rc);

@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.70 2009/08/14 00:12:49 w6ws Exp $
+// $Id: ESMC_Base_F.C,v 1.71 2009/08/21 17:45:06 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.70 2009/08/14 00:12:49 w6ws Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.71 2009/08/21 17:45:06 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -211,6 +211,7 @@ extern "C" {
       int *length,              // in/out - number of allocated bytes
       int *offset,              // in/out - current offset in the stream
       ESMC_AttReconcileFlag *attreconflag, // in - attreconcile flag
+      ESMC_InquireFlag *inquireflag,       // in - inquire-only flag
       int *rc) {                // out - return code
 // 
 // !DESCRIPTION:
@@ -229,7 +230,8 @@ extern "C" {
     return;
   }
 
-  *rc = (*base)->ESMC_Serialize(buf, length, offset, *attreconflag);
+  *rc = (*base)->ESMC_Serialize(buf, length, offset, *attreconflag,
+                                *inquireflag);
 
   return;
 

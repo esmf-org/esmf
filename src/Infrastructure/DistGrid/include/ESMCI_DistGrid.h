@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.12 2009/08/05 23:33:35 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.13 2009/08/21 17:47:32 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -170,7 +170,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int print() const;
     int validate() const;
     // serialize() and deserialize()
-    int serialize(char *buffer, int *length, int *offset) const;
+    int serialize(char *buffer, int *length, int *offset, ESMC_InquireFlag) const;
     static DistGrid *deserialize(char *buffer, int *offset);
     // connections
     static int connection(InterfaceInt *connection, int patchIndexA, 

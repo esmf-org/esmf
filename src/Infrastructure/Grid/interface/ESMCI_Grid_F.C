@@ -2234,14 +2234,15 @@ extern "C" {
 
 
   void FTN(c_esmc_gridserialize)(ESMCI::Grid **grid, char *buf, int *length,
-    int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc){
+    int *offset, ESMC_AttReconcileFlag *attreconflag,
+    ESMC_InquireFlag *inquireflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridserialize()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*grid)->serialize(
-      buf, length, offset, *attreconflag),
+      buf, length, offset, *attreconflag, *inquireflag),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

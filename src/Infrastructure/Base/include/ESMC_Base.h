@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.105 2009/08/14 00:12:48 w6ws Exp $
+// $Id: ESMC_Base.h,v 1.106 2009/08/21 17:45:06 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -104,7 +104,8 @@ class ESMC_Base
 
     // flatten an object into a byte stream, and reconstitute it again
     int ESMC_Serialize(char *buffer, int *length, int *offset, 
-                      const ESMC_AttReconcileFlag &attreconflag) const;
+                      const ESMC_AttReconcileFlag &attreconflag,
+                      const ESMC_InquireFlag &inquireflag) const;
     int ESMC_Deserialize(char *buffer, int *offset,
                         const ESMC_AttReconcileFlag &attreconflag);
     
@@ -133,7 +134,8 @@ extern "C" {
   void FTN(c_esmc_basedestroy)(ESMC_Base **base, int *rc);
 
   void FTN(c_esmc_baseserialize)(ESMC_Base **base, char *buf, int *length,
-                                 int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc);
+                                 int *offset, ESMC_AttReconcileFlag *attreconflag,
+                                 ESMC_InquireFlag *inquireflag, int *rc);
   void FTN(c_esmc_basedeserialize)(ESMC_Base **base, char *buf,
                                    int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc);
 

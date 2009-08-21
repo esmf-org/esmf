@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.26 2009/08/06 00:26:21 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.27 2009/08/21 17:41:04 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -217,7 +217,8 @@ namespace ESMCI {
     int validate() const;
     // serialize() and deserialize()
     int serialize(char *buffer, int *length, int *offset,
-                  const ESMC_AttReconcileFlag &attreconflag) const;
+                  const ESMC_AttReconcileFlag &attreconflag,
+                  const ESMC_InquireFlag &inquireflag) const;
     int deserialize(char *buffer, int *offset,
                     const ESMC_AttReconcileFlag &attreconflag);
     // comms

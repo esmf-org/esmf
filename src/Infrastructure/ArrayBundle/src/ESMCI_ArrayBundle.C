@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.12 2009/07/28 23:08:06 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.13 2009/08/21 17:42:44 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.12 2009/07/28 23:08:06 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.13 2009/08/21 17:42:44 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1010,7 +1010,8 @@ int ArrayBundle::serialize(
   char *buffer,          // inout - byte stream to fill
   int *length,           // inout - buf length
   int *offset,           // inout - original offset
-  const ESMC_AttReconcileFlag &attreconflag) const {   // in - attreconcile flag
+  const ESMC_AttReconcileFlag &attreconflag,   // in - attreconcile flag
+  const ESMC_InquireFlag &inquireflag) const { // in - inquireflag
 //
 // !DESCRIPTION:
 //    Turn info in ArrayBundle class into a stream of bytes.
@@ -1036,18 +1037,22 @@ int ArrayBundle::serialize(
   // Serialize the Base class
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
-  localrc = ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag);
+  localrc = ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag,inquireflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize the ArrayBundle with all its Arrays
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
   ip = (int *)(buffer + *offset);
-  *ip++ = arrayCount;
+  if (inquireflag != ESMF_INQUIREONLY)
+    *ip++ = arrayCount;
+  else
+    ip++;
+
   cp = (char *)ip;
   *offset = (cp - buffer);
   for (int i=0; i<arrayCount; i++){
-    localrc = arrayList[i]->serialize(buffer,length,offset,attreconflag);
+    localrc = arrayList[i]->serialize(buffer,length,offset,attreconflag,inquireflag);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
   }

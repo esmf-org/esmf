@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.20 2009/06/06 00:46:53 w6ws Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.21 2009/08/21 17:50:16 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -2356,14 +2356,15 @@ end function
 !
 ! !INTERFACE:
       subroutine ESMF_FieldBundleSerialize(bundle, buffer, length, offset, &
-                                          attreconflag, rc) 
+                                          attreconflag, inquireflag, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: bundle 
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
-      type(ESMF_AttReconcileFlag), optional :: attreconflag
+      type(ESMF_AttReconcileFlag), intent(in), optional :: attreconflag
+      type(ESMF_InquireFlag), intent(in), optional :: inquireflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -2388,6 +2389,9 @@ end function
 !           available byte in the buffer.
 !     \item[{[attreconflag]}]
 !           Flag to tell if Attribute serialization is to be done
+!     \item[{[inquireflag]}]
+!           Flag to tell if serialization is to be done (ESMF_NOINQUIRE)
+!           or if this is simply a size inquiry (ESMF_INQUIREONLY)
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2398,6 +2402,7 @@ end function
       integer :: i
       type(ESMF_FieldBundleType), pointer :: bp   ! bundle type
       type(ESMF_AttReconcileFlag) :: lattreconflag
+      type(ESMF_InquireFlag) :: linquireflag
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2406,17 +2411,24 @@ end function
       ! check inputs
       ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)      
 
-      ! deal with optional attreconflag
+      ! deal with optional attreconflag and inquireflag
       if (present(attreconflag)) then
         lattreconflag = attreconflag
       else
         lattreconflag = ESMF_ATTRECONCILE_OFF
       endif
 
+      if (present (inquireflag)) then
+        linquireflag = inquireflag
+      else
+        linquireflag = ESMF_NOINQUIRE
+      end if
+
       ! shortcut to internals
       bp => bundle%btypep
       
-      call c_ESMC_BaseSerialize(bp%base, buffer(1), length, offset, lattreconflag, localrc)
+      call c_ESMC_BaseSerialize(bp%base, buffer(1), length, offset, &
+                                 lattreconflag, linquireflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -2425,14 +2437,15 @@ end function
                                  bp%iostatus, &
                                  bp%field_count, bp%pack_flag, &
                                  bp%isCongruent, bp%hasPattern, &
-                                 buffer(1), length, offset, localrc)
+                                 buffer(1), length, offset, linquireflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
       if (bp%gridstatus .eq. ESMF_STATUS_READY) then
           call ESMF_GridSerialize(bp%grid, buffer, length, offset, &
-                                  attreconflag=lattreconflag, rc=localrc)
+                                  attreconflag=lattreconflag, &
+                                  inquireflag=linquireflag, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
@@ -2442,7 +2455,8 @@ end function
       ! TODO: decide if these need to be sent before or after
       do i = 1, bp%field_count
           call ESMF_FieldSerialize(bp%flist(i), buffer, length, offset, &
-                                  attreconflag=lattreconflag, rc=localrc)
+                                  attreconflag=lattreconflag, &
+                                  inquireflag=linquireflag, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return

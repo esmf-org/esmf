@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.15 2009/06/02 22:59:45 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.16 2009/08/21 17:47:33 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -674,7 +674,7 @@ extern "C" {
 
 
   void FTN(c_esmc_distgridserialize)(ESMCI::DistGrid **distgrid, char *buf, int *length,
-    int *offset, int *rc){
+    int *offset, ESMC_InquireFlag *inquireflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridserialize()"
 
@@ -683,7 +683,7 @@ extern "C" {
 
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(
-      (*distgrid)->serialize(buf, length, offset),
+      (*distgrid)->serialize(buf, length, offset, *inquireflag),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

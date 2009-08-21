@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.9 2009/07/28 23:08:05 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.10 2009/08/21 17:42:44 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -204,14 +204,15 @@ extern "C" {
   }
 
   void FTN(c_esmc_arraybundleserialize)(ESMCI::ArrayBundle **arraybundle, 
-    char *buf, int *length, int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc){
+    char *buf, int *length, int *offset, ESMC_AttReconcileFlag *attreconflag,
+    ESMC_InquireFlag *inquireflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundleserialize()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*arraybundle)->serialize(
-      buf,length,offset,*attreconflag),
+      buf,length,offset,*attreconflag,*inquireflag),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

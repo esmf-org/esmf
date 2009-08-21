@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.59 2009/06/09 04:52:01 theurich Exp $
+// $Id: ESMCI_Grid.h,v 1.60 2009/08/21 17:52:12 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -338,7 +338,8 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
                 char *buffer,   // inout - byte stream to fill
                 int *length,    // inout - buf length
                 int *offset,    // inout - original offset
-                const ESMC_AttReconcileFlag &attreconflag);  // attreconcile flag
+                const ESMC_AttReconcileFlag &attreconflag,  // attreconcile flag
+                const ESMC_InquireFlag &inquireflag);       // inquire flag
 
   int deserialize(
                   char *buffer,          // in - byte stream to read

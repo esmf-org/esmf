@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldBundle.h,v 1.4 2009/01/21 21:37:59 cdeluca Exp $
+// $Id: ESMC_FieldBundle.h,v 1.5 2009/08/21 17:50:16 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -47,7 +47,8 @@ extern "C" {
    void FTN(c_esmc_bundleserialize)(ESMC_Status *bundlestatus,
               ESMC_Status *igridstatus, int *field_count, int *pack_flag,
               void *mapping, ESMC_Status *iostatus,
-              void *buffer, int *length, int *offset, int *localrc);
+              void *buffer, int *length, int *offset,
+              ESMCI_InquireFlag *inquireflag, int *localrc);
    void FTN(c_esmc_bundledeserialize)(ESMC_Status *bundlestatus,
               ESMC_Status *igridstatus, int *field_count, int *pack_flag,
               void *mapping, ESMC_Status *iostatus,

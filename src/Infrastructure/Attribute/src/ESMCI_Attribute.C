@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.44 2009/08/11 05:28:19 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.45 2009/08/21 17:44:08 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.44 2009/08/11 05:28:19 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.45 2009/08/21 17:44:08 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -5192,14 +5192,15 @@ namespace ESMCI {
 // !ARGUMENTS:
       char *buffer,          // inout - byte stream to fill
       int *length,           // inout - buf length; realloc'd here if needed
-      int *offset) const{    // inout - original offset, updated to point 
+      int *offset,           // inout - original offset, updated to point 
                              //  to first free byte after current obj info
+      ESMC_InquireFlag inquireflag) const { // in - inquire flag
 // 
 // !DESCRIPTION:
 //    Turn an {\tt Attribute} into a stream of bytes.
 //
 //EOPI
-    int loffset=0;
+    int loffset=*offset;
     bool cc;
     int localrc;
 
@@ -5209,10 +5210,13 @@ namespace ESMCI {
     localrc = ESMC_SerializeCC(buffer,length,loffset,cc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &localrc)) return localrc;
-    cc = true;
-    localrc = ESMC_SerializeCC(buffer,length,*offset,cc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-          &localrc)) return localrc;
+    if (inquireflag != ESMF_INQUIREONLY) {
+      cc = true;
+      localrc = ESMC_SerializeCC(buffer,length,*offset,cc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+            &localrc)) return localrc;
+    } else
+      *offset = loffset;
 
     // return successfully
     return ESMF_SUCCESS;

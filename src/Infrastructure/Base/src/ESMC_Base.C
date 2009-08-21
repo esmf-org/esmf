@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.120 2009/07/24 00:15:13 theurich Exp $
+// $Id: ESMC_Base.C,v 1.121 2009/08/21 17:45:07 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.120 2009/07/24 00:15:13 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.121 2009/08/21 17:45:07 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -765,7 +765,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       char *buffer,          // inout - byte stream to fill
       int *length,           // inout - buf length; realloc'd here if needed
       int *offset,           // inout - original offset
-      const ESMC_AttReconcileFlag &attreconflag) const {   // in - attreconcile flag
+      const ESMC_AttReconcileFlag &attreconflag,     // in - attreconcile flag
+      const ESMC_InquireFlag &inquireflag) const {   // in - inquire flag
 //
 // !DESCRIPTION:
 //    Turn info in base class into a stream of bytes.
@@ -789,18 +790,30 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     }
 
     ip = (int *)(buffer + *offset);
-    *ip++ = ID;
-    *ip++ = refCount;  
-    *ip++ = classID;  
+    if (inquireflag == ESMF_NOINQUIRE) {
+      *ip++ = ID;
+      *ip++ = refCount;  
+      *ip++ = classID;  
+    } else
+      ip += 3;
+
     sp = (ESMC_Status *)ip;
-    *sp++ = baseStatus;
+    if (inquireflag == ESMF_NOINQUIRE)
+      *sp++ = baseStatus;
+    else
+      sp++;
+
     cp = (char *)sp;
-    memcpy(cp, baseName, ESMF_MAXSTR);
-    cp += ESMF_MAXSTR;
-    memcpy(cp, baseNameF90, ESMF_MAXSTR);
-    cp += ESMF_MAXSTR;
-    memcpy(cp, className, ESMF_MAXSTR);
-    cp += ESMF_MAXSTR;
+    if (inquireflag == ESMF_NOINQUIRE) {
+      memcpy(cp, baseName, ESMF_MAXSTR);
+      cp += ESMF_MAXSTR;
+      memcpy(cp, baseNameF90, ESMF_MAXSTR);
+      cp += ESMF_MAXSTR;
+      memcpy(cp, className, ESMF_MAXSTR);
+      cp += ESMF_MAXSTR;
+    } else
+      cp += 3*ESMF_MAXSTR;
+
     ip = (int *)cp;
     cp = (char *)ip;
 
@@ -809,7 +822,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
     // Serialize the Attribute hierarchy
     if (attreconflag == ESMC_ATTRECONCILE_ON) { 
-      rc = root.ESMC_Serialize(buffer,length,offset);
+      rc = root.ESMC_Serialize(buffer,length,offset, inquireflag);
     }
     
   return ESMF_SUCCESS;

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.90 2009/07/23 00:10:32 peggyli Exp $
+// $Id: ESMCI_Grid.C,v 1.91 2009/08/21 17:52:12 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.90 2009/07/23 00:10:32 peggyli Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.91 2009/08/21 17:52:12 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -5094,7 +5094,8 @@ int Grid::serialize(
   char *buffer,          // inout - byte stream to fill
   int *length,           // inout - buf length
   int *offset,           // inout - original offset
-  const ESMC_AttReconcileFlag &attreconflag) // attreconcile flag
+  const ESMC_AttReconcileFlag &attreconflag, // attreconcile flag
+  const ESMC_InquireFlag &inquireflag)       // inquiry flag
 {
                          
 //
@@ -5170,7 +5171,7 @@ int Grid::serialize(
     loffset=*offset;
 
     // First, serialize the base class,
-    localrc = ESMC_Base::ESMC_Serialize(buffer, length, &loffset, attreconflag);
+    localrc = ESMC_Base::ESMC_Serialize(buffer, length, &loffset, attreconflag, inquireflag);
 
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
@@ -5243,7 +5244,7 @@ int Grid::serialize(
       for (int c=0; c<dimCount; c++) {
 	if (coordExists[s][c]) {
            //// Serialize the Array
-	  localrc = coordArrayList[s][c]->serialize(buffer, length, &loffset, attreconflag);
+	  localrc = coordArrayList[s][c]->serialize(buffer, length, &loffset, attreconflag, inquireflag);
 	  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
 				      ESMF_ERR_PASSTHRU, &rc)) return rc;  
 	}
@@ -5262,7 +5263,7 @@ int Grid::serialize(
       for (int i=0; i<ESMC_GRIDITEM_COUNT; i++) {
 	if (itemExists[s][i]) {
            //// Serialize the Array
-	  localrc = itemArrayList[s][i]->serialize(buffer, length, &loffset, attreconflag);
+	  localrc = itemArrayList[s][i]->serialize(buffer, length, &loffset, attreconflag, inquireflag);
 	  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
 				      ESMF_ERR_PASSTHRU, &rc)) return rc;  
 	}
@@ -5275,7 +5276,7 @@ int Grid::serialize(
     r=loffset%8;
     if (r!=0) loffset += 8-r;
     // Serialize the DistGrid
-    localrc = distgrid->serialize(buffer, length, &loffset);
+    localrc = distgrid->serialize(buffer, length, &loffset, inquireflag);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
      return rc;  
 
@@ -5291,7 +5292,7 @@ int Grid::serialize(
     }
 
     // If we've done the copy then we're done
-    if (cp) {
+    if (cp || (inquireflag == ESMF_INQUIREONLY)) {
       done=true;
     } else { 
       // if we haven't done the the copy,

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.21 2009/08/05 23:33:35 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.22 2009/08/21 17:47:33 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.21 2009/08/05 23:33:35 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.22 2009/08/21 17:47:33 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2992,8 +2992,9 @@ int DistGrid::serialize(
 // !ARGUMENTS:
   char *buffer,          // inout - byte stream to fill
   int *length,           // inout - buf length; realloc'd here if needed
-  int *offset            // inout - original offset, updated to point 
+  int *offset,           // inout - original offset, updated to point 
                              //  to first free byte after current obj info
+  ESMC_InquireFlag inquireflag // in - inquire flag
   )const{
 //
 // !DESCRIPTION:
@@ -3022,44 +3023,56 @@ int DistGrid::serialize(
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
   ESMC_AttReconcileFlag attreconflag = ESMC_ATTRECONCILE_OFF;
-  localrc = this->ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag);
+  localrc = this->ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag,
+      inquireflag);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize the DELayout
-  localrc = delayout->serialize(buffer, length, offset);
+  localrc = delayout->serialize(buffer, length, offset,inquireflag);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize DistGrid meta data
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
   ip = (int *)(buffer + *offset);
-  *ip++ = dimCount;
-  *ip++ = patchCount;
-  for (int i=0; i<dimCount*patchCount; i++){
-    *ip++ = minIndexPDimPPatch[i];
-    *ip++ = maxIndexPDimPPatch[i];
-  }
-  for (int i=0; i<patchCount; i++)
-    *ip++ = elementCountPPatch[i];
+  if (inquireflag != ESMF_INQUIREONLY) {
+    *ip++ = dimCount;
+    *ip++ = patchCount;
+    for (int i=0; i<dimCount*patchCount; i++){
+      *ip++ = minIndexPDimPPatch[i];
+      *ip++ = maxIndexPDimPPatch[i];
+    }
+    for (int i=0; i<patchCount; i++)
+      *ip++ = elementCountPPatch[i];
+  } else
+    ip += 2 + (dimCount+1)*patchCount;
+
   int deCount = delayout->getDeCount();
-  for (int i=0; i<dimCount*deCount; i++){
-    *ip++ = minIndexPDimPDe[i];
-    *ip++ = maxIndexPDimPDe[i];
-    *ip++ = contigFlagPDimPDe[i];
-    *ip++ = indexCountPDimPDe[i];
-  }
-  for (int i=0; i<deCount; i++){
-    *ip++ = elementCountPDe[i];
-    *ip++ = patchListPDe[i];
-  }
-  *ip++ = diffCollocationCount;
-  for (int i=0; i<dimCount; i++){
-    *ip++ = collocationPDim[i];
-    *ip++ = collocationTable[i];
-  }
-  *ip++ = connectionCount;
+  if (inquireflag != ESMF_INQUIREONLY) {
+    for (int i=0; i<dimCount*deCount; i++){
+      *ip++ = minIndexPDimPDe[i];
+      *ip++ = maxIndexPDimPDe[i];
+      *ip++ = contigFlagPDimPDe[i];
+      *ip++ = indexCountPDimPDe[i];
+    }
+    for (int i=0; i<deCount; i++){
+      *ip++ = elementCountPDe[i];
+      *ip++ = patchListPDe[i];
+    }
+    *ip++ = diffCollocationCount;
+    for (int i=0; i<dimCount; i++){
+      *ip++ = collocationPDim[i];
+      *ip++ = collocationTable[i];
+    }
+    *ip++ = connectionCount;
+  } else
+    ip += (dimCount+1)*deCount + 1 + dimCount;
+
   lp = (ESMC_Logical *)ip;
-  *lp++ = regDecompFlag;
+  if (inquireflag != ESMF_INQUIREONLY)
+    *lp++ = regDecompFlag;
+  else
+    lp ++;
 
   cp = (char *)lp;
   *offset = (cp - buffer);

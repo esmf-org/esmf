@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.55 2009/08/13 20:48:15 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.56 2009/08/21 17:41:05 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.55 2009/08/13 20:48:15 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.56 2009/08/21 17:41:05 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2441,7 +2441,8 @@ int Array::serialize(
   char *buffer,          // inout - byte stream to fill
   int *length,           // inout - buf length
   int *offset,           // inout - original offset
-  const ESMC_AttReconcileFlag &attreconflag) const {   // in - attreconcile flag
+  const ESMC_AttReconcileFlag &attreconflag,     // in - attreconcile flag
+  const ESMC_InquireFlag &inquireflag) const {   // in - inquiry flag
 //
 // !DESCRIPTION:
 //    Turn info in array class into a stream of bytes.
@@ -2469,39 +2470,52 @@ int Array::serialize(
   // Serialize the Base class,
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
-  localrc = ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag);
+  localrc = ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag,inquireflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize the DistGrid
-  localrc = distgrid->serialize(buffer,length,offset);
+  localrc = distgrid->serialize(buffer,length,offset,inquireflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize Array meta data
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
   dkp = (ESMC_TypeKind *)(buffer + *offset);
-  *dkp++ = typekind;
+  if (inquireflag != ESMF_INQUIREONLY)
+    *dkp++ = typekind;
+  else
+     dkp++;
   ip = (int *)dkp;
-  *ip++ = rank;
+  if (inquireflag != ESMF_INQUIREONLY)
+    *ip++ = rank;
+  else
+    ip++;
   ifp = (ESMC_IndexFlag *)ip;
-  *ifp++ = indexflag;
+  if (inquireflag != ESMF_INQUIREONLY)
+    *ifp++ = indexflag;
+  else
+    ifp++;
   ip = (int *)ifp;
-  *ip++ = tensorCount;
-  for (int i=0; i<tensorCount; i++){
-    *ip++ = undistLBound[i];
-    *ip++ = undistUBound[i];
-    *ip++ = staggerLoc[i];
-    *ip++ = vectorDim[i];
-  }
-  for (int i=0; i<distgrid->getDimCount(); i++)
-    *ip++ = distgridToArrayMap[i];
-  for (int i=0; i<rank; i++)
-    *ip++ = arrayToDistGridMap[i];
-  for (int i=0; i<distgrid->getDimCount(); i++)
-    *ip++ = distgridToPackedArrayMap[i];
-  *ip++ = tensorElementCount;
-  for (int i=0; i<delayout->getDeCount(); i++)
-    *ip++ = exclusiveElementCountPDe[i];
+  if (inquireflag != ESMF_INQUIREONLY) {
+    *ip++ = tensorCount;
+    for (int i=0; i<tensorCount; i++){
+      *ip++ = undistLBound[i];
+      *ip++ = undistUBound[i];
+      *ip++ = staggerLoc[i];
+      *ip++ = vectorDim[i];
+    }
+    for (int i=0; i<distgrid->getDimCount(); i++)
+      *ip++ = distgridToArrayMap[i];
+    for (int i=0; i<rank; i++)
+      *ip++ = arrayToDistGridMap[i];
+    for (int i=0; i<distgrid->getDimCount(); i++)
+      *ip++ = distgridToPackedArrayMap[i];
+    *ip++ = tensorElementCount;
+    for (int i=0; i<delayout->getDeCount(); i++)
+      *ip++ = exclusiveElementCountPDe[i];
+  } else
+    ip += 1 + 4*tensorCount + 2*distgrid->getDimCount () +
+      rank + tensorElementCount +delayout->getDeCount ();
   
   // fix offset  
   cp = (char *)ip;

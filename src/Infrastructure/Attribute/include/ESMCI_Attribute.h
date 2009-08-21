@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.23 2009/08/11 05:28:18 eschwab Exp $
+// $Id: ESMCI_Attribute.h,v 1.24 2009/08/21 17:44:08 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -258,7 +258,8 @@ class Attribute
     Attribute& operator=(const Attribute& source);
     ~Attribute(void);
     int ESMC_Deserialize(char *buffer, int *offset);
-    int ESMC_Serialize(char *buffer, int *length, int *offset) const;
+    int ESMC_Serialize(char *buffer, int *length, int *offset,
+      ESMC_InquireFlag inquireflag) const;
     int ESMC_SerializeCC(char *buffer, int *length, int &offset, bool cc) const;
 
 };

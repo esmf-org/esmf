@@ -1,4 +1,4 @@
-// $Id: ESMCI_FieldBundle_F.C,v 1.3 2009/01/21 21:37:59 cdeluca Exp $
+// $Id: ESMCI_FieldBundle_F.C,v 1.4 2009/08/21 17:50:16 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_FieldBundle_F.C,v 1.3 2009/01/21 21:37:59 cdeluca Exp $";
+             "$Id: ESMCI_FieldBundle_F.C,v 1.4 2009/08/21 17:50:16 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -47,7 +47,8 @@ void FTN(c_esmc_fieldbundleserialize)(ESMC_Status *bundlestatus,
                             int *pack_flag,
                             int *isCongruent,
                             int *hasPattern,
-                            void *buffer, int *length, int *offset, int *localrc){
+                            void *buffer, int *length, int *offset,
+                            ESMC_InquireFlag *inquireflag, int *localrc){
 
     // either put the code here, or call into a real C++ function
     ESMC_Status *sp;
@@ -68,14 +69,21 @@ void FTN(c_esmc_fieldbundleserialize)(ESMC_Status *bundlestatus,
 
 
     sp = (ESMC_Status *)((char *)(buffer) + *offset);
-    *sp++ = *bundlestatus;
-    *sp++ = *gridstatus; 
-    *sp++ = *iostatus; 
+    if (*inquireflag != ESMF_INQUIREONLY) {
+      *sp++ = *bundlestatus;
+      *sp++ = *gridstatus; 
+      *sp++ = *iostatus; 
+    } else
+      sp += 3;
+
     ip = (int *)sp;
-    *ip++ = *field_count; 
-    *ip++ = *pack_flag; 
-    *ip++ = *isCongruent; 
-    *ip++ = *hasPattern; 
+    if (*inquireflag != ESMF_INQUIREONLY) {
+      *ip++ = *field_count; 
+      *ip++ = *pack_flag; 
+      *ip++ = *isCongruent; 
+      *ip++ = *hasPattern; 
+    } else
+      ip += 4;
 
     *offset = (char *)ip - (char *)buffer;
 

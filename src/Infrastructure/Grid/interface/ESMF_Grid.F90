@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.125 2009/08/19 21:32:34 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.126 2009/08/21 17:52:12 w6ws Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -11529,14 +11529,15 @@ endif
 !
 ! !INTERFACE:
       subroutine ESMF_GridSerialize(grid, buffer, length, offset, &
-                                    attreconflag, rc)
+                                    attreconflag, inquireflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid 
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
-      type(ESMF_AttReconcileFlag), optional :: attreconflag
+      type(ESMF_AttReconcileFlag), intent(in), optional :: attreconflag
+      type(ESMF_InquireFlag), intent(in), optional :: inquireflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -11560,6 +11561,9 @@ endif
 !           available byte in the buffer.
 !     \item[{[attreconflag]}]
 !           Flag to tell if Attribute serialization is to be done
+!     \item[{[inquireflag]}]
+!           Flag to tell if serialization is to be done (ESMF_NOINQUIRE)
+!           or if this is simply a size inquiry (ESMF_INQUIREONLY)
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -11568,6 +11572,7 @@ endif
 
       integer :: localrc
       type(ESMF_AttReconcileFlag) :: lattreconflag
+      type(ESMF_InquireFlag) :: linquireflag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -11576,14 +11581,21 @@ endif
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
-      ! deal with optional attreconflag
+      ! deal with optional attreconflag and inquireflag
       if (present(attreconflag)) then
         lattreconflag = attreconflag
       else
         lattreconflag = ESMF_ATTRECONCILE_OFF
       endif
 
-      call c_ESMC_GridSerialize(grid, buffer(1), length, offset, lattreconflag, localrc)
+      if (present (inquireflag)) then
+        linquireflag = inquireflag
+      else
+        linquireflag = ESMF_NOINQUIRE
+      end if
+
+      call c_ESMC_GridSerialize(grid, buffer(1), length, offset, &
+                                 lattreconflag, linquireflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return

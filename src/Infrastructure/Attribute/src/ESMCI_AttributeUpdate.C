@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.19 2009/08/06 15:35:14 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.20 2009/08/21 17:44:08 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.19 2009/08/06 15:35:14 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.20 2009/08/21 17:44:08 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -512,7 +512,7 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
   // if value changes
   for (i=0; i<attrList.size(); ++i) { 
     if (attrList.at(i)->valueChange == ESMF_TRUE) {
-      localrc = attrList.at(i)->ESMC_Serialize(sendBuf,length,offset);
+      localrc = attrList.at(i)->ESMC_Serialize(sendBuf,length,offset,ESMF_NOINQUIRE);
       if (localrc != ESMF_SUCCESS) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufSend failed Serialize", &localrc);
@@ -533,7 +533,7 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
         delete [] key;
         return ESMF_FAILURE;
       }
-      localrc = attrList.at(i)->ESMC_Serialize(sendBuf,length,offset);
+      localrc = attrList.at(i)->ESMC_Serialize(sendBuf,length,offset,ESMF_NOINQUIRE);
       if (localrc != ESMF_SUCCESS) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufSend failed Serialize", &localrc);
@@ -551,7 +551,7 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
         delete [] key;
         return ESMF_FAILURE;
       }
-      localrc = packList.at(i)->ESMC_Serialize(sendBuf,length,offset);
+      localrc = packList.at(i)->ESMC_Serialize(sendBuf,length,offset,ESMF_NOINQUIRE);
       if (localrc != ESMF_SUCCESS) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufSend failed Serialize", &localrc);

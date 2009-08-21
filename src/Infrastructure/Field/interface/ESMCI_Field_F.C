@@ -1,4 +1,4 @@
-// $Id: ESMCI_Field_F.C,v 1.8 2009/01/21 21:37:58 cdeluca Exp $
+// $Id: ESMCI_Field_F.C,v 1.9 2009/08/21 17:49:01 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_Field_F.C,v 1.8 2009/01/21 21:37:58 cdeluca Exp $";
+             "$Id: ESMCI_Field_F.C,v 1.9 2009/08/21 17:49:01 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -53,10 +53,12 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
                 int * ungriddedUBound,
                 int * maxHaloLWidth,
                 int * maxHaloUWidth,
-				void *buffer, int *length, int *offset, int *localrc){
+		void *buffer, int *length, int *offset,
+                ESMC_InquireFlag *inquireflag, int *localrc){
+
+    ESMC_InquireFlag linquireflag = *inquireflag;
     int i;
-
-
+ 
     // Initialize return code; assume routine not implemented
     if (localrc) *localrc = ESMC_RC_NOT_IMPL;
     // either put the code here, or call into a real C++ function
@@ -77,10 +79,13 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
 
 
     sp = (ESMC_Status *)((char *)(buffer) + *offset);
-    *sp++ = *fieldstatus;
-    *sp++ = *gridstatus; 
-    *sp++ = *datastatus; 
-    *sp++ = *iostatus; 
+    if (linquireflag != ESMF_INQUIREONLY) {
+      *sp++ = *fieldstatus;
+      *sp++ = *gridstatus; 
+      *sp++ = *datastatus; 
+      *sp++ = *iostatus; 
+    } else
+      sp += 4;
 
     // copy the rest of the field parameters
     // we are explicitly assuming Fortran-integer is of size C-int
@@ -88,17 +93,23 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
     // e.g. we know gridToFieldMap is of type cpu_word *, its element maybe int32 or int64
     // depending on the size of Fortran-integer
     char * ptr = (char *)sp;
-    memcpy((void *)ptr, (const void *)staggerloc, sizeof(int));
+    if (linquireflag != ESMF_INQUIREONLY)
+      memcpy((void *)ptr, (const void *)staggerloc, sizeof(int));
     ptr += sizeof(int);
-    memcpy((void *)ptr, (const void *)gridToFieldMap, ESMF_MAXDIM*sizeof(int));
+    if (linquireflag != ESMF_INQUIREONLY)
+      memcpy((void *)ptr, (const void *)gridToFieldMap, ESMF_MAXDIM*sizeof(int));
     ptr += ESMF_MAXDIM*sizeof(int);
-    memcpy((void *)ptr, (const void *)ungriddedLBound, ESMF_MAXDIM*sizeof(int));
+    if (linquireflag != ESMF_INQUIREONLY)
+      memcpy((void *)ptr, (const void *)ungriddedLBound, ESMF_MAXDIM*sizeof(int));
     ptr += ESMF_MAXDIM*sizeof(int);
-    memcpy((void *)ptr, (const void *)ungriddedUBound, ESMF_MAXDIM*sizeof(int));
+    if (linquireflag != ESMF_INQUIREONLY)
+      memcpy((void *)ptr, (const void *)ungriddedUBound, ESMF_MAXDIM*sizeof(int));
     ptr += ESMF_MAXDIM*sizeof(int);
-    memcpy((void *)ptr, (const void *)maxHaloLWidth, ESMF_MAXDIM*sizeof(int));
+    if (linquireflag != ESMF_INQUIREONLY)
+      memcpy((void *)ptr, (const void *)maxHaloLWidth, ESMF_MAXDIM*sizeof(int));
     ptr += ESMF_MAXDIM*sizeof(int);
-    memcpy((void *)ptr, (const void *)maxHaloUWidth, ESMF_MAXDIM*sizeof(int));
+    if (linquireflag != ESMF_INQUIREONLY)
+      memcpy((void *)ptr, (const void *)maxHaloUWidth, ESMF_MAXDIM*sizeof(int));
     ptr += ESMF_MAXDIM*sizeof(int);
 
     *offset = ptr - (char *)buffer;
