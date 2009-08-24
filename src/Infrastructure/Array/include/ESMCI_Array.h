@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.27 2009/08/21 17:41:04 w6ws Exp $
+// $Id: ESMCI_Array.h,v 1.28 2009/08/24 22:46:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -47,6 +47,7 @@ namespace ESMCI {
 
   class Array;
   struct SeqIndex;
+  class SparseMatrix;
 
   // class definition
   class Array : public ESMC_Base {    // inherits from ESMC_Base class
@@ -217,10 +218,10 @@ namespace ESMCI {
     int validate() const;
     // serialize() and deserialize()
     int serialize(char *buffer, int *length, int *offset,
-                  const ESMC_AttReconcileFlag &attreconflag,
-                  const ESMC_InquireFlag &inquireflag) const;
+      const ESMC_AttReconcileFlag &attreconflag,
+      const ESMC_InquireFlag &inquireflag) const;
     int deserialize(char *buffer, int *offset,
-                    const ESMC_AttReconcileFlag &attreconflag);
+      const ESMC_AttReconcileFlag &attreconflag);
     // comms
     int gather(void *array, ESMC_TypeKind typekind, int rank,
       int *counts, int *patch, int rootPet, VM *vm);
@@ -233,9 +234,9 @@ namespace ESMCI {
       RouteHandle **routehandle, ESMC_Logical checkflag=ESMF_FALSE);
     static int redistRelease(RouteHandle *routehandle);
     static int sparseMatMulStore(Array *srcArray, Array *dstArray,
-      RouteHandle **routehandle,
-      ESMC_TypeKind typekindFactors = ESMF_NOKIND, void *factorList = NULL,
-      int factorListCount = 0, InterfaceInt *factorIndexList = NULL);
+      RouteHandle **routehandle, vector<SparseMatrix> &sparseMatrix);
+//      ESMC_TypeKind typekindFactors = ESMF_NOKIND, void *factorList = NULL,
+//      int factorListCount = 0, InterfaceInt *factorIndexList = NULL);
     static int sparseMatMul(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle,
       ESMC_RegionFlag zeroflag=ESMF_REGION_TOTAL,
@@ -251,6 +252,26 @@ namespace ESMCI {
   };  // struct seqIndex
   bool operator==(SeqIndex a, SeqIndex b);
   bool operator<(SeqIndex a, SeqIndex b);
+  
+  
+  class SparseMatrix{
+    ESMC_TypeKind typekind;
+    void const *factorList;
+    int factorListCount;
+    InterfaceInt const *factorIndexList;
+   public:
+    SparseMatrix(ESMC_TypeKind const typekind_, void const *factorList_,
+      int const factorListCount_, InterfaceInt const *factorIndexList_){
+      typekind = typekind_;
+      factorList = factorList_;
+      factorListCount = factorListCount_;
+      factorIndexList = factorIndexList_;
+    }
+    ESMC_TypeKind getTypekind()const{return typekind;}
+    void const *getFactorList()const{return factorList;}
+    int getFactorListCount()const{return factorListCount;}
+    InterfaceInt const *getFactorIndexList()const{return factorIndexList;}
+  };
 
     
   class MultiDimIndexLoop{

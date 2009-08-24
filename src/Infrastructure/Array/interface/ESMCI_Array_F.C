@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.23 2009/08/21 17:41:05 w6ws Exp $
+// $Id: ESMCI_Array_F.C,v 1.24 2009/08/24 22:46:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -652,16 +652,19 @@ extern "C" {
   
   void FTN(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
-    ESMC_TypeKind *typekind, void *factorList, int *factorListCount,
+    ESMC_TypeKind *typekindFactors, void *factorList, int *factorListCount,
     ESMCI::InterfaceInt **factorIndexList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysmmstore()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // prepare SparseMatrix vector
+    vector<ESMCI::SparseMatrix> sparseMatrix;
+    sparseMatrix.push_back(ESMCI::SparseMatrix(*typekindFactors, factorList,
+      *factorListCount, *factorIndexList));
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
-      *srcArray, *dstArray, routehandle, *typekind, factorList,
-      *factorListCount, *factorIndexList),
+      *srcArray, *dstArray, routehandle, sparseMatrix),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -672,9 +675,11 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_arraysmmstorenf()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // prepare SparseMatrix vector
+    vector<ESMCI::SparseMatrix> sparseMatrix;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
-      *srcArray, *dstArray, routehandle),
+      *srcArray, *dstArray, routehandle, sparseMatrix),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

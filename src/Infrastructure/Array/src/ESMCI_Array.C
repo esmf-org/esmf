@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.56 2009/08/21 17:41:05 w6ws Exp $
+// $Id: ESMCI_Array.C,v 1.57 2009/08/24 22:46:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.56 2009/08/21 17:41:05 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.57 2009/08/24 22:46:20 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3833,9 +3833,13 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
     delete (ESMC_I4 *)factorLocal;
   }
   
+  // prepare SparseMatrix vector
+  vector<SparseMatrix> sparseMatrix;
+  sparseMatrix.push_back(SparseMatrix(typekindFactor, factorList,
+    factorListCount, factorIndexList));
+  
   // precompute sparse matrix multiplication
-  localrc = sparseMatMulStore(srcArray, dstArray, routehandle, typekindFactor,
-    factorList, factorListCount, factorIndexList);
+  localrc = sparseMatMulStore(srcArray, dstArray, routehandle, sparseMatrix);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -5101,25 +5105,25 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     AssociationElement *const*linSeqList;
     int localPet;
     int localDeCount;
-    const int *localDeElementCount;
-    const int *localDeList;
-    const Interval *seqIndexInterval;
+    int const *localDeElementCount;
+    int const *localDeList;
+    Interval const *seqIndexInterval;
     SeqIndexFactorLookup *seqIndexFactorLookup;
     bool tensorMixFlag;
-    const int *localIntervalPerPetCount;
-    const int *localElementsPerIntervalCount;
+    int const *localIntervalPerPetCount;
+    int const *localElementsPerIntervalCount;
    public:
     FillSelfDeInfo(
       AssociationElement *const*linSeqList_,
       int localPet_,
       int localDeCount_,
-      const int *localDeElementCount_,
-      const int *localDeList_,
-      const Interval *seqIndexInterval_,
+      int const *localDeElementCount_,
+      int const *localDeList_,
+      Interval const *seqIndexInterval_,
       SeqIndexFactorLookup *seqIndexFactorLookup_,
       bool tensorMixFlag_,
-      const int *localIntervalPerPetCount_,
-      const int *localElementsPerIntervalCount_
+      int const *localIntervalPerPetCount_,
+      int const *localElementsPerIntervalCount_
     ){
       linSeqList = linSeqList_;
       localPet = localPet_;
@@ -5203,7 +5207,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     SeqIndexFactorLookup *seqIndexFactorLookup;
     int localPet;
     int petCount;
-    InterfaceInt *factorIndexList;
+    InterfaceInt const *factorIndexList;
     void const *factorList;
     bool const *factorPetFlag;
     Interval const *seqIndexInterval;
@@ -5230,7 +5234,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       SeqIndexFactorLookup *seqIndexFactorLookup_,
       int localPet_,
       int petCount_,
-      InterfaceInt *factorIndexList_,
+      InterfaceInt const *factorIndexList_,
       void const *factorList_,
       bool const *factorPetFlag_,
       Interval const *seqIndexInterval_,
@@ -5546,10 +5550,7 @@ int Array::sparseMatMulStore(
   Array *srcArray,                      // in    - source Array
   Array *dstArray,                      // in    - destination Array
   RouteHandle **routehandle,            // inout - handle to precomputed comm
-  ESMC_TypeKind typekindFactors,        // in    - typekind of factors
-  void *factorList,                     // in    - sparse matrix factors
-  int factorListCount,                  // in    - number of sparse mat. indices
-  InterfaceInt *factorIndexList         // in    - sparse matrix indices
+  vector<SparseMatrix> &sparseMatrix    // in    - sparse matrix
   ){    
 //
 // !DESCRIPTION:
@@ -5614,12 +5615,29 @@ int Array::sparseMatMulStore(
     return rc;
   }
   
-  // srcArray and dstArray may not point to the identical Array object
+  // srcArray and dstArray must not point to the identical Array object
   if (srcArray == dstArray){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- srcArray and dstArray must not be identical", &rc);
     return rc;
   }
+  
+  // check that sparseMatrix vector does not contain more than one element
+  if (sparseMatrix.size() > 1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- currently only a single sparseMatrix element is supported", &rc);
+    return rc;
+  }
+  
+  // bring things back down on the level of the old arguments
+  ESMC_TypeKind typekindFactors = (sparseMatrix.size()==0) ?
+    ESMF_NOKIND : sparseMatrix[0].getTypekind();
+  void const *factorList = (sparseMatrix.size()==0) ?
+    NULL : sparseMatrix[0].getFactorList();
+  int const factorListCount = (sparseMatrix.size()==0) ?
+    0 : sparseMatrix[0].getFactorListCount();
+  InterfaceInt const *factorIndexList = (sparseMatrix.size()==0) ?
+    NULL : sparseMatrix[0].getFactorIndexList();
   
   // every Pet that specifies factorListCount > 0 must be checked wrt input
   bool tensorMixFlag = false;     // default

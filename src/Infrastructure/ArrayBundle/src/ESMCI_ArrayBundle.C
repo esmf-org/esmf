@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.13 2009/08/21 17:42:44 w6ws Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.14 2009/08/24 22:46:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.13 2009/08/21 17:42:44 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.14 2009/08/24 22:46:20 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -714,8 +714,11 @@ int ArrayBundle::sparseMatMulStore(
 //        printf("localPet=%d, src/dst pair #%d requires precompute\n",
 //          localPet, i);
         RouteHandle *rh;
+        vector<SparseMatrix> sparseMatrix;
+        sparseMatrix.push_back(SparseMatrix(typekindFactors, factorList,
+          factorListCount, factorIndexList));
         localrc = Array::sparseMatMulStore(srcArray, dstArray, &rh,
-          typekindFactors, factorList, factorListCount, factorIndexList);
+          sparseMatrix);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         // get a handle on the XXE stored in rh
