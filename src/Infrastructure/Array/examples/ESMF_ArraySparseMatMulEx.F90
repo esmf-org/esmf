@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.11 2009/03/03 17:23:23 theurich Exp $
+! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.12 2009/08/24 16:57:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -190,10 +190,10 @@ program ESMF_ArraySparseMatMulEx
 ! multiplication factor for each pair. ESMF requires this information in form of
 ! two Fortran arrays. The factors are stored in a 1D array of the appropriate
 ! type and kind, e.g. {\tt real(ESMF\_KIND\_R8)::factorList(:)}. Array sparse
-! matrix multiplications are only supported between Arrays of the same type and
-! kind using factors of identical type and kind. The sequence index pairs
-! associated with the factors provided by {\tt factorList} are stored in a 2D
-! Fortran array of default integer kind of the shape {\tt
+! matrix multiplications are supported between Arrays of different type and
+! kind. The type and kind of the factors can also be chosen freely. The 
+! sequence index pairs associated with the factors provided by {\tt factorList} 
+! are stored in a 2D Fortran array of default integer kind of the shape {\tt
 ! integer::factorIndexList(2,:)}. The sequence indices of the source Array elements
 ! are stored in the first row of {\tt 
 ! factorIndexList} while the sequence indices of the destination Array elements are
