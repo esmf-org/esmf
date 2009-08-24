@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.12 2009/08/20 17:01:41 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.13 2009/08/24 18:18:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,11 +45,15 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <csignal>
 #include <ctime>
 #include <cfloat>
 #include <cmath>
 #include <vector>
+#ifdef __sun
+#include <signal.h>
+#else
+#include <csignal>
+#endif
 
 using namespace std;
 
