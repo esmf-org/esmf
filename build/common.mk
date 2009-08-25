@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.276 2009/08/18 05:06:46 w6ws Exp $
+#  $Id: common.mk,v 1.277 2009/08/25 22:50:50 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1579,8 +1579,8 @@ build_system_tests: reqfile_libesmf reqdir_lib chkdir_tests
 	   fi; \
 	   echo current working directory is now `pwd` ; \
         fi ; \
-	$(MAKE) config_sys_tests update_sys_tests_flags
-	$(MAKE) ACTION=tree_build_system_tests tree ; \
+	$(MAKE) config_sys_tests update_sys_tests_flags ;\
+	$(MAKE) ACTION=tree_build_system_tests tree
 	echo "ESMF system tests built successfully."
 
 tree_build_system_tests: $(SYSTEM_TESTS_BUILD) 
