@@ -588,7 +588,8 @@
   type(ESMF_Config) :: localcf
 
   ! local character strings
-  character(ESMF_MAXSTR) :: ltmp, lchar, lchartmp, lnumb
+  character(ESMF_MAXSTR) :: ltmp, lchar, lnumb
+  ! character(ESMF_MAXSTR) :: lchartmp
   character(ESMF_MAXSTR) :: gtype, gunits, gtag
   type(character_array) :: wchar(10)
 
@@ -603,7 +604,8 @@
   integer :: allocRcToTest
 
   ! local real variables
-  real(ESMF_KIND_R8) :: gmin, gmax, tmp, tmpchar
+  real(ESMF_KIND_R8) :: gmin, gmax, tmp
+  ! real(ESMF_KIND_R8) :: tmpchar
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
