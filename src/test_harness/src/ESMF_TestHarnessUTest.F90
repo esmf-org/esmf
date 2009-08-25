@@ -57,7 +57,7 @@
 
   character(ESMF_MAXSTR) :: name, failmsg
 
-  logical :: localdebugflag = .false.
+  ! logical :: localdebugflag = .false.
 
   ! top level test harness config file
   character(ESMF_MAXSTR) :: test_harness_name = "test_harness.rc"
@@ -403,7 +403,7 @@ contains
   ! local ESMF types
 
   ! local parameters
-  logical :: flag = .true.
+  ! logical :: flag = .true.
 
   ! local integer variables
   integer :: nPEs
