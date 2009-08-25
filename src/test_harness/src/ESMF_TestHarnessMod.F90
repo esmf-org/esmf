@@ -643,7 +643,7 @@
   !
   !-----------------------------------------------------------------------------
   ! arguments
-  integer, intent(in   ) :: nstrings
+   integer, intent(in   ) :: nstrings
   type(problem_descriptor_strings), intent(inout) :: pds
   integer, intent(  out) :: rc
 
@@ -653,7 +653,7 @@
   type(character_array), allocatable :: lsrc(:), ldst(:)
   type(character_array), allocatable :: grid_type(:), dist_type(:)
 
-  logical :: flag = .true.
+  ! logical :: flag = .true.
 
   ! local integer variables
   integer :: k
@@ -671,7 +671,7 @@
   integer, allocatable :: grid_StagLoc(:)
 
   ! local logical variable
-  logical :: endflag = .false.
+  ! logical :: endflag = .false.
 
   ! initialize return flag
   rc = ESMF_RC_NOT_IMPL
@@ -1015,12 +1015,13 @@
   character(ESMF_MAXSTR) :: liG, liD
 
   ! debug
-  real(ESMF_KIND_R8), pointer :: fptr2(:,:)
-  integer :: i1, i2, de, localDeCount, dimCount 
-  integer, allocatable ::  localDeList(:)
-  type(ESMF_LocalArray), allocatable :: larrayList(:)
-  integer, allocatable :: LBnd(:,:), UBnd(:,:) 
-  type(ESMF_IndexFlag) :: indexflag
+  ! real(ESMF_KIND_R8), pointer :: fptr2(:,:)
+  ! integer ::de, localDeCount, dimCount 
+  ! integer :: i1, i2
+  ! integer, allocatable ::  localDeList(:)
+  ! type(ESMF_LocalArray), allocatable :: larrayList(:)
+  ! integer, allocatable :: LBnd(:,:), UBnd(:,:) 
+  ! type(ESMF_IndexFlag) :: indexflag
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -1294,12 +1295,12 @@
   character(ESMF_MAXSTR) :: liG, liD
 
   ! debug
-  real(ESMF_KIND_R8), pointer :: fptr2(:,:)
-  integer :: i1, i2, de, localDeCount, dimCount 
-  integer, allocatable ::  localDeList(:)
-  type(ESMF_LocalArray), allocatable :: larrayList(:)
-  integer, allocatable :: LBnd(:,:), UBnd(:,:) 
-  type(ESMF_IndexFlag) :: indexflag
+  ! real(ESMF_KIND_R8), pointer :: fptr2(:,:)
+  ! integer :: i1, i2, de, localDeCount, dimCount 
+  ! integer, allocatable ::  localDeList(:)
+  ! type(ESMF_LocalArray), allocatable :: larrayList(:)
+  ! integer, allocatable :: LBnd(:,:), UBnd(:,:) 
+  ! type(ESMF_IndexFlag) :: indexflag
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -1645,18 +1646,18 @@
   integer :: iDfile, iGfile, iD, iG
   integer :: test_status
   integer :: localPET
-  integer :: libflag
+  ! integer :: libflag
 
   ! local characters
   character(ESMF_MAXSTR) :: liG, liD
 
   ! debug
-  real(ESMF_KIND_R8), pointer :: fptr2(:,:)
-  integer :: i1, i2, de, localDeCount, dimCount 
-  integer, allocatable ::  localDeList(:)
-  type(ESMF_LocalArray), allocatable :: larrayList(:)
-  integer, allocatable :: LBnd(:,:), UBnd(:,:) 
-  type(ESMF_IndexFlag) :: indexflag
+  ! real(ESMF_KIND_R8), pointer :: fptr2(:,:)
+  ! integer :: i1, i2, de, localDeCount, dimCount 
+  ! integer, allocatable ::  localDeList(:)
+  ! type(ESMF_LocalArray), allocatable :: larrayList(:)
+  ! integer, allocatable :: LBnd(:,:), UBnd(:,:) 
+  ! type(ESMF_IndexFlag) :: indexflag
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -2387,7 +2388,8 @@
   ! local ESMF types
 
   ! local integer variables
-  integer :: i,j,k,l,m
+  integer :: i,j,k
+  ! integer :: l, m
   integer, allocatable :: lbnd(:), ubnd(:), maxI(:)
   integer :: localDECount, lDE, GridRank
   integer, allocatable :: decompOrder(:)
@@ -2665,14 +2667,16 @@
   ! local ESMF types
 
   ! local integer variables
-  integer :: i,j,k,l,m
+  integer :: i,j,k
+  ! integer :: l,m
   integer, allocatable :: lbnd(:), ubnd(:)
   integer :: localDECount, lDE, GridRank
 
   integer :: localrc ! local error status
 
   ! local real variables
-  real(ESMF_KIND_R8) :: a, b, kx, ly, lenk, lenl, exact
+  real(ESMF_KIND_R8) :: a, b, kx, ly, lenk, lenl
+  ! real(ESMF_KIND_R8) :: exact
   real(ESMF_KIND_R8), pointer :: coordX2D(:,:), coordY2D(:,:)
   real(ESMF_KIND_R8), pointer :: exp2D(:,:)
   real(ESMF_KIND_R8), pointer :: coordX3D(:,:,:), coordY3D(:,:,:)
@@ -2919,7 +2923,8 @@
   ! local ESMF types
 
   ! local integer variables
-  integer :: i,j,k,l,m
+  integer :: i,j,k
+  ! integer :: l,m
   integer, allocatable :: lbnd(:), ubnd(:)
   integer :: localDECount, lDE, GridRank
 
@@ -3230,9 +3235,9 @@
   integer, allocatable ::  localDeList(:)
   integer, allocatable :: LBnd(:,:), UBnd(:,:) 
   integer :: i1, i2, i3, i4, i5, i6, i7
-  integer :: irank, k, tensorsize, fsize(7)
-  integer, allocatable :: haloL(:), haloR(:)
-  integer, allocatable :: top(:), bottom(:)
+  ! integer :: irank, k, tensorsize, fsize(7)
+  ! integer, allocatable :: haloL(:), haloR(:)
+  ! integer, allocatable :: top(:), bottom(:)
   integer :: allocRcToTest
 
   ! local real variables
@@ -3506,9 +3511,9 @@
   integer, allocatable ::  localDeList(:)
   integer, allocatable :: LBnd(:,:), UBnd(:,:) 
   integer :: i1, i2, i3, i4, i5, i6, i7
-  integer :: irank, k, tensorsize, fsize(7)
-  integer, allocatable :: haloL(:), haloR(:)
-  integer, allocatable :: top(:), bottom(:)
+  ! integer :: irank, k, tensorsize, fsize(7)
+  ! integer, allocatable :: haloL(:), haloR(:)
+  ! integer, allocatable :: top(:), bottom(:)
   integer :: localrc ! local error status
   integer :: allocRcToTest
 
@@ -3776,9 +3781,9 @@
   integer, allocatable ::  localDeList(:)
   integer, allocatable :: LBnd(:,:), UBnd(:,:) 
   integer :: i1, i2, i3, i4, i5, i6, i7
-  integer :: irank, k, tensorsize, fsize(7)
-  integer, allocatable :: haloL(:), haloR(:)
-  integer, allocatable :: top(:), bottom(:)
+  ! integer :: irank, k, tensorsize, fsize(7)
+  ! integer, allocatable :: haloL(:), haloR(:)
+  ! integer, allocatable :: top(:), bottom(:)
   integer :: allocRcToTest
   integer :: localrc ! local error status
 
@@ -3792,7 +3797,8 @@
 
   !
   integer :: ncells
-  real(ESMF_KIND_R8) :: Urange, Lrange, increment
+  real(ESMF_KIND_R8) :: Urange, Lrange
+  ! real(ESMF_KIND_R8) :: increment
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -4051,19 +4057,19 @@
   type(ESMF_IndexFlag) :: indexflag
 
   ! local integer variables
-  integer :: de, i1, i2, i3, i4, i5, i6, i7
+  integer :: de, i1, i2, i3, i4, i5, i6, i7, k
   integer :: localDeCount1, dimCount1, localDeCount2, dimCount2
   integer, allocatable ::  localDeList1(:), localDeList2(:)
   integer, allocatable :: LBnd(:,:), UBnd(:,:) 
   integer, allocatable :: LBnd2(:,:), UBnd2(:,:) 
-  integer :: irank, k, tensorsize, fsize(7)
-  integer, allocatable :: haloL(:), haloR(:)
-  integer, allocatable :: top(:), bottom(:)
+  ! integer :: irank, tensorsize, fsize(7)
+  ! integer, allocatable :: haloL(:), haloR(:)
+  ! integer, allocatable :: top(:), bottom(:)
   integer :: allocRcToTest
   integer :: localrc ! local error status
 
   ! local logicals
-  logical :: nohaloflag
+  ! logical :: nohaloflag
 
   ! local real variables
   real(ESMF_KIND_R8), pointer :: farray1D(:), farray2D(:,:)
