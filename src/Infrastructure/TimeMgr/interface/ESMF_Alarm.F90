@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.78 2009/06/08 18:46:35 w6ws Exp $
+! $Id: ESMF_Alarm.F90,v 1.79 2009/08/26 20:23:01 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.78 2009/06/08 18:46:35 w6ws Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.79 2009/08/26 20:23:01 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1177,7 +1177,8 @@
 !          ringDuration or ringTimeStepCount (see above).
 !          There is an implicit limitation that in order to properly reverse
 !          timestep through a ring end time in {\tt ESMF\_MODE\_REVERSE},
-!          that time must have already been traversed in the forward direction. !          This is due to the fact that the Time Manager cannot predict when
+!          that time must have already been traversed in the forward direction.
+!          This is due to the fact that the Time Manager cannot predict when
 !          user code will call {\tt ESMF\_AlarmRingerOff()}.  An error message
 !          will be logged when this limitation is not satisfied.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
