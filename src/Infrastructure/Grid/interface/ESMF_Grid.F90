@@ -222,14 +222,12 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.126 2009/08/21 17:52:12 w6ws Exp $'
+      '$Id: ESMF_Grid.F90,v 1.127 2009/08/26 03:43:06 eschwab Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-
-
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -282,6 +280,7 @@ interface ESMF_GridCreate
 !
       module procedure ESMF_GridCreateFromDistGrid
       module procedure ESMF_GridCreateFromDistGridArb
+      module procedure ESMF_GridCreateFromFile
 
       
 ! !DESCRIPTION: 
@@ -2824,6 +2823,148 @@ end subroutine ESMF_GridConvertIndex
 
     end function ESMF_GridCreateFromDistGridArb
 
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateFromFile"
+!BOP
+! !IROUTINE: ESMF_GridCreateFromFile - Create a Grid from a file
+
+! !INTERFACE:
+     function ESMF_GridCreateFromFile(fileName, convention, purpose, rc)
+!
+! !RETURN VALUE:
+     type(ESMF_Grid) :: ESMF_GridCreateFromFile
+!
+! !ARGUMENTS:
+       character (len=*), intent(in)            :: fileName
+       character (len=*), intent(in),  optional :: convention
+       character (len=*), intent(in),  optional :: purpose
+       integer,           intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Create an {\tt ESMF\_Grid} object from specifications in a file.
+!
+! The arguments are:
+! \begin{description}
+! \item[{[fileName]}] 
+!      The file name to be read from. 
+! \item [convention] 
+!      The convention of a grid Attribute package. 
+! \item [purpose] 
+!      The purpose of a grid Attribute package. 
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+
+    type(ESMF_Grid) :: grid 
+    character(ESMF_MAXSTR) :: attrvalue
+    integer :: maxIndex(2), regDecomp(2)  ! TODO: allow more dimensions
+    integer :: fileNameLen, localrc
+    logical :: xercesPresent
+
+    ! Initialize return code; assume failure until success is certain 
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! get length of given fileName for C++ validation
+    fileNameLen = len_trim(fileName)
+
+    ! assume Xerces XML C++ API library present until proven otherwise
+    xercesPresent = .true.
+
+    ! Initialize this grid object as invalid
+    grid%this = ESMF_NULL_POINTER
+
+    grid = ESMF_GridCreateEmpty(rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Read the attribute file; place attributes onto grid base
+    ! TODO: use convention, purpose
+    ! use C call rather than F90, to circumvent mutually dependency
+    call c_ESMC_AttributeRead(grid, fileNameLen, fileName, localrc)
+
+    if (localrc==ESMF_RC_LIB_NOT_PRESENT) xercesPresent = .false.
+    if (localrc .ne. ESMF_SUCCESS .and. xercesPresent) localrc = ESMF_FAILURE
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get the GridSpec "NX" and "NY" Attributes set from file
+    ! (required, for maxIndex in GriCreate())
+    ! use C call rather than F90, to circumvent mutually dependency
+    call c_ESMC_AttPackGetChar(grid, 'NX', attrValue, &
+                               'GridSpec', 'General', 'grid', localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+    read(attrValue, *, iostat=localrc) maxIndex(1)
+    if (localrc.ne.0) then
+      call ESMF_LogMsgSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
+                               ESMF_CONTEXT, rcToReturn=rc)
+      return
+    end if
+
+    ! use C call rather than F90, to circumvent mutually dependency
+    call c_ESMC_AttPackGetChar(grid, 'NY', attrValue, &
+                               'GridSpec', 'General', 'grid', localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+    read(attrValue, *, iostat=localrc) maxIndex(2)
+    if (localrc.ne.0) then
+      call ESMF_LogMsgSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
+                               ESMF_CONTEXT, rcToReturn=rc)
+      return
+    end if
+
+    ! Get the ESMF "RegDecompX" and "RegDecompY" Attributes set from file
+    ! TODO:  make optional
+    ! use C call rather than F90, to circumvent mutually dependency
+    call c_ESMC_AttPackGetChar(grid, 'RegDecompX', attrValue, &
+                               'ESMF', 'General', 'grid', localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+    read(attrValue, *, iostat=localrc) regDecomp(1)
+    if (localrc.ne.0) then
+      call ESMF_LogMsgSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
+                               ESMF_CONTEXT, rcToReturn=rc)
+      return
+    end if
+
+    call c_ESMC_AttPackGetChar(grid, 'RegDecompY', attrValue, &
+                               'ESMF', 'General', 'grid', localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+    read(attrValue, *, iostat=localrc) regDecomp(2)
+    if (localrc.ne.0) then
+      call ESMF_LogMsgSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
+                               ESMF_CONTEXT, rcToReturn=rc)
+      return
+    end if
+
+    ! Create single tile grid with global indices, and with specified 
+    ! regular distribution
+    ! TODO:  when RegDecompX,Y optional and not specified, don't pass regDecomp
+    call ESMF_GridSetCommitShapeTile(grid, maxIndex=maxIndex, &
+                                     regDecomp=regDecomp, &
+                                     indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! TODO: Add coordinates
+    ! call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+
+    ! Set return value
+    ESMF_GridCreateFromFile = grid
+
+    ! Set init status
+    ESMF_INIT_SET_CREATED(ESMF_GridCreateFromFile)
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    end function ESMF_GridCreateFromFile
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
