@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.45 2009/08/21 17:44:08 w6ws Exp $
+// $Id: ESMCI_Attribute.C,v 1.46 2009/08/26 03:40:42 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.45 2009/08/21 17:44:08 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.46 2009/08/26 03:40:42 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -249,6 +249,8 @@ namespace ESMCI {
     localrc = AttPackAddAttribute("NY", "GridSpec", "General", object);
     localrc = AttPackAddAttribute("NZ", "GridSpec", "General", object);
     localrc = AttPackAddAttribute("Resolution", "GridSpec", "General", object);
+    localrc = AttPackAddAttribute("RegDecompX", "ESMF", "General", object);
+    localrc = AttPackAddAttribute("RegDecompY", "ESMF", "General", object);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &localrc)) return localrc;
 
