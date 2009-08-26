@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.60 2009/08/05 22:25:45 svasquez Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.61 2009/08/26 03:46:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -16,6 +16,7 @@ program ESMF_GridCreateEx
 !ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
+#include "ESMF.h"
 
 !  !PROGRAM: ESMF_GridCreateEx - Examples of Grid creation.
 !
@@ -3000,6 +3001,42 @@ endif
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    call ESMF_DistGridDestroy(distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+!\subsubsection{Creating a 2D Regularly Distributed Rectilinear Grid from File} 
+! This example shows how to read an ESMF GridSpec Attribute Package from an
+! XML file and use it to create a grid; see
+! ESMF\_DIR/src/Infrastructure/Grid/etc/esmf\_grid\_shape\_tile.xml.
+!EOE
+!!!!!!!!!!!!!!!!!!!!!!!
+! Setup For Example
+!!!!!!!!!!!!!!!!!!!!!!
+!BOC
+   grid2D=ESMF_GridCreate("esmf_grid_shape_tile.xml", rc=rc)
+!EOC
+
+print *, 'rc = ', rc
+   if (rc == ESMF_RC_LIB_NOT_PRESENT) goto 10
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+   call ESMF_GridGet(grid2D, localDECount=localDECount, rc=rc)
+print *, "localDECount = ", localDECount
+
+   do i=0,localDECount-1
+     call ESMF_GridGet(grid2D, localDE=i,  &
+          staggerLoc=ESMF_STAGGERLOC_CORNER,                         &
+          exclusiveLBound=elbnd, exclusiveUBound=eubnd,              &
+          computationalLBound=clbnd, computationalUBound=cubnd,      & 
+          rc=rc)
+print *, 'elbnd,eubnd = ', elbnd(1), ",", elbnd(2), " ", eubnd(1), ", ", eubnd(2)
+print *, 'clbnd,cubnd = ', clbnd(1), ",", clbnd(2), " ", cubnd(1), ", ", cubnd(2)
+   enddo
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Cleanup after Example
+!!!!!!!!!!!!!!!!!!!!!!!
+   call ESMF_GridDestroy(grid2D, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 
    !-------------------------------------------------------------------
