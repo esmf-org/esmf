@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.14 2009/08/24 22:46:20 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.15 2009/08/26 03:39:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.14 2009/08/24 22:46:20 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.15 2009/08/26 03:39:57 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -586,10 +586,7 @@ int ArrayBundle::sparseMatMulStore(
   ArrayBundle *srcArraybundle,          // in    - source ArrayBundle
   ArrayBundle *dstArraybundle,          // in    - destination ArrayBundle
   RouteHandle **routehandle,            // inout - handle to precomputed comm
-  ESMC_TypeKind typekindFactors,        // in    - typekind of factors
-  void *factorList,                     // in    - sparse matrix factors
-  int factorListCount,                  // in    - number of sparse mat. indices
-  InterfaceInt *factorIndexList         // in    - sparse matrix indices
+  vector<SparseMatrix> &sparseMatrix    // in    - sparse matrix
   ){    
 //
 // !DESCRIPTION:
@@ -714,9 +711,6 @@ int ArrayBundle::sparseMatMulStore(
 //        printf("localPet=%d, src/dst pair #%d requires precompute\n",
 //          localPet, i);
         RouteHandle *rh;
-        vector<SparseMatrix> sparseMatrix;
-        sparseMatrix.push_back(SparseMatrix(typekindFactors, factorList,
-          factorListCount, factorIndexList));
         localrc = Array::sparseMatMulStore(srcArray, dstArray, &rh,
           sparseMatrix);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,

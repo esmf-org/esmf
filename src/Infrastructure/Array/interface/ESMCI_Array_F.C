@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.24 2009/08/24 22:46:20 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.25 2009/08/26 03:39:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -658,15 +658,63 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_arraysmmstore()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    
+    try{
+    
+    // check argument consistency
+    if (*factorListCount > 0){
+      // must provide valid factorList and factorIndexList args
+      if (*factorIndexList == NULL){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+          "- Not a valid pointer to factorIndexList array", rc);
+        return;
+      }
+      if ((*factorIndexList)->dimCount != 2){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          "- factorIndexList array must be of rank 2", rc);
+        return;
+      }
+      if ((*factorIndexList)->extent[0] != 2 && 
+        (*factorIndexList)->extent[0] != 4){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "- 1st dimension of factorIndexList array must be of size 2 or 4",
+          rc);
+        return;
+      }
+      if ((*factorIndexList)->extent[1] != *factorListCount){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "- 2nd dimension of factorIndexList does not match factorListCount",
+          rc);
+        return;
+      }
+    }
     // prepare SparseMatrix vector
     vector<ESMCI::SparseMatrix> sparseMatrix;
+    int srcN = (*factorIndexList)->extent[0]/2;
+    int dstN = (*factorIndexList)->extent[0]/2;
     sparseMatrix.push_back(ESMCI::SparseMatrix(*typekindFactors, factorList,
-      *factorListCount, *factorIndexList));
+      *factorListCount, srcN, dstN, (*factorIndexList)->array));
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
+    if (ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
       *srcArray, *dstArray, routehandle, sparseMatrix),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+      return;
+    }catch(exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), rc);
+      return;
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- Caught exception", rc);
+      return;
+    }
+  
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
   void FTN(c_esmc_arraysmmstorenf)(ESMCI::Array **srcArray,
@@ -675,7 +723,7 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_arraysmmstorenf()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // prepare SparseMatrix vector
+    // prepare empty SparseMatrix vector
     vector<ESMCI::SparseMatrix> sparseMatrix;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(

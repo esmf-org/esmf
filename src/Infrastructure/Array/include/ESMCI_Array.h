@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.28 2009/08/24 22:46:20 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.29 2009/08/26 03:39:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -235,8 +235,6 @@ namespace ESMCI {
     static int redistRelease(RouteHandle *routehandle);
     static int sparseMatMulStore(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, vector<SparseMatrix> &sparseMatrix);
-//      ESMC_TypeKind typekindFactors = ESMF_NOKIND, void *factorList = NULL,
-//      int factorListCount = 0, InterfaceInt *factorIndexList = NULL);
     static int sparseMatMul(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle,
       ESMC_RegionFlag zeroflag=ESMF_REGION_TOTAL,
@@ -254,23 +252,43 @@ namespace ESMCI {
   bool operator<(SeqIndex a, SeqIndex b);
   
   
+  class SeqInd{
+    int n;  // number of components in sequence index
+    int const *index;
+   public:
+    SeqInd(){n=0; index=NULL;}
+    SeqInd(int n_, int const *index_){
+      n = n_;
+      index = index_;
+    }
+    int getIndex(int i)const{return index[i];}
+  };
+  
+  //todo: try to unify SeqIndex and SeqInd structs!
+  
+  
   class SparseMatrix{
     ESMC_TypeKind typekind;
     void const *factorList;
     int factorListCount;
-    InterfaceInt const *factorIndexList;
+    int srcN;
+    int dstN;
+    int const *factorIndexList; // element: (0,..,srcN-1,srcN,..,srcN+dstN-1)
    public:
     SparseMatrix(ESMC_TypeKind const typekind_, void const *factorList_,
-      int const factorListCount_, InterfaceInt const *factorIndexList_){
-      typekind = typekind_;
-      factorList = factorList_;
-      factorListCount = factorListCount_;
-      factorIndexList = factorIndexList_;
-    }
+      int const factorListCount_, int const srcN_, int const dstN_,
+      int const *factorIndexList_);
     ESMC_TypeKind getTypekind()const{return typekind;}
     void const *getFactorList()const{return factorList;}
     int getFactorListCount()const{return factorListCount;}
-    InterfaceInt const *getFactorIndexList()const{return factorIndexList;}
+    SeqInd getSrcSeqIndex(int i)const{
+      return SeqInd(srcN, factorIndexList+(srcN+dstN)*i);
+    }
+    SeqInd getDstSeqIndex(int i)const{
+      return SeqInd(dstN, factorIndexList+(srcN+dstN)*i+srcN);
+    }
+    int getSrcN()const{return srcN;}
+    int getDstN()const{return dstN;}
   };
 
     
