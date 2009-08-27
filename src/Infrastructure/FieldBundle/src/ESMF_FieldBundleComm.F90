@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleComm.F90,v 1.6 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_FieldBundleComm.F90,v 1.7 2009/08/27 05:34:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleComm.F90,v 1.6 2009/01/21 21:37:59 cdeluca Exp $'
+      '$Id: ESMF_FieldBundleComm.F90,v 1.7 2009/08/27 05:34:24 theurich Exp $'
 
 !==============================================================================
 !
@@ -1898,7 +1898,6 @@
 
       integer :: status                           ! Error status
       type(ESMF_FieldBundleType) :: btypep             ! bundle type info
-      !type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for IGrid
       type(ESMF_DELayout) :: delayout          ! layout
       type(ESMF_InternArray) :: dstarray                ! Destination array
       integer :: i, datarank

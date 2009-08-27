@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.334 2009/08/21 17:49:01 w6ws Exp $
+! $Id: ESMF_Field.F90,v 1.335 2009/08/27 05:34:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -177,7 +177,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.334 2009/08/21 17:49:01 w6ws Exp $'
+    '$Id: ESMF_Field.F90,v 1.335 2009/08/27 05:34:24 theurich Exp $'
 
 !==============================================================================
 !
@@ -858,125 +858,6 @@ contains
 !
 !------------------------------------------------------------------------------
 
-!
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBoxIntersect"
-
-!BOPI
-! !IROUTINE: ESMF_FieldBoxIntersect - Intersect bounding boxes
-!
-! !INTERFACE:
-      subroutine ESMF_FieldBoxIntersect(srcField, dstField, & 
-!                                       recvDomainlist, &
-!                                       sendDomainList, &
-                                        rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(inout) :: srcField 
-      type(ESMF_Field), intent(inout) :: dstField
-!      type(ESMF_DomainList), intent(inout) :: recvDomainlist
-!      type(ESMF_DomainList), intent(inout) :: sendDomainlist
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!      Clips the src\_field physgrid box against the clip\_field, i.e. returns
-!      a description of the area in clip\_field which is necessary to cover the
-!      desired area in src\_field.  This procedure is mostly an entry point;
-!      most of the work is done in the {\tt ESMF\_Grid} class.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [srcField]
-!           Source {\tt ESMF\_Field} object.
-!     \item [dstField]
-!           Destination {\tt ESMF\_Field} object.
-!     \item [recvDomainlist]
-!           Receive domain list.
-!     \item [sendDomainlist]
-!           Send domain list.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-
-      integer :: localrc
-      logical :: hassrcdata        ! does this DE contain localdata from src?
-      logical :: hasdstdata        ! does this DE contain localdata from dst?
-      type(ESMF_DELayout) :: gridDELayout
-      type(ESMF_Grid) :: srcGrid, dstGrid
-      type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
-      type(ESMF_StaggerLoc) :: dstStaggerloc, srcStaggerloc
-      type(ESMF_VM) :: vm
-
-      ! Initialize return code
-      localrc = ESMF_RC_NOT_IMPL
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,srcField,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,dstField,rc)
-
-#if 0
-
-      ! TODO: replace this with a better way to get the current VM
-! TODO:FIELDINTEGRATION Find a better way to get the VM.
-      call ESMF_GridGet(srcField%ftypep%grid, delayout=gridDELayout, rc=localrc)
-      call ESMF_DELayoutGet(gridDELayout, vm=vm, rc=localrc)
-
-      ! This routine is called on every processor in the parent layout.
-      !  It is quite possible that the source and destination fields do
-      !  not completely cover every processor on that layout.  Make sure
-      !  we do not go lower than this on the processors which are uninvolved
-      !  in this communication.
-
-      hasdata = ESMF_TRUE   ! temp for now to get rid of warning
-      hassrcdata = (hasdata .eq. ESMF_TRUE)
-      hassrcdata = .true.   ! temp for now
-      if (hassrcdata) then
-        call ESMF_FieldGet(srcField, staggerloc=srcStaggerloc, &
-                           grid=srcGrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-      endif
-
-      hasdstdata = (hasdata .eq. ESMF_TRUE)
-      hasdstdata = .true.   ! temp for now
-      if (hasdstdata) then
-        call ESMF_FieldGet(dstField, staggerloc=dstStaggerloc, &
-                           grid=dstGrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-      endif
-
-      ! if neither are true this DE cannot be involved in the communication
-      !  and it can just return now.
-      if ((.not. hassrcdata) .and. (.not. hasdstdata)) then
-        if  (present(rc)) rc = ESMF_SUCCESS
-        return
-      endif
-
-      ! if src field exists on this DE, query it for information
-      if (hassrcdata) then
-        ! From the grid get the bounding box on this DE
-        call ESMF_GridBoxIntersectSend(srcGrid, dstGrid, sendDomainList, &
-                                       total=.false., layer=.false., rc=localrc)
-      endif
-
-      ! if dst field exists on this DE, query it for information
-      if (hasdstdata) then
-        call ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, vm, recvDomainList, &
-                                       hasdstdata, hassrcdata, &
-                                       total=.false., layer=.false., rc=localrc)
-      endif
-
-      if  (present(rc)) rc = ESMF_SUCCESS
-#endif
-
-      end subroutine ESMF_FieldBoxIntersect
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

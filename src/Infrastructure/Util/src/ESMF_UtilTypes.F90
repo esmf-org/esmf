@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.81 2009/08/19 08:00:05 w6ws Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.82 2009/08/27 05:34:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -247,99 +247,6 @@
          ESMF_ID_CPLCOMPONENT = ESMF_ObjectID(34, "ESMF_CplComponent"), &
          ESMF_ID_COMPONENT = ESMF_ObjectID(35, "ESMF_Component"), &
          ESMF_ID_NONE = ESMF_ObjectID(99, "ESMF_None")
-
-
-!------------------------------------------------------------------------------
-!
-      type ESMF_AxisIndex
-      sequence
-          integer :: min
-          integer :: max
-          integer :: stride
-          integer :: pad    ! insure F90/C++ memory alignment
-          ESMF_INIT_DECLARE
-      end type
-
-!------------------------------------------------------------------------------
-!
-      ! possible new type, unused for now.
-      type ESMF_Domain
-      sequence
-          integer :: DE
-          integer :: rank
-          ! TODO:  add an element for size in points (memory)
-          type (ESMF_AxisIndex) :: ai(ESMF_MAXDIM)
-          ESMF_INIT_DECLARE
-      end type
-
-!------------------------------------------------------------------------------
-!
-      ! in the regrid code if we want to send only parts of the
-      ! data array, here is a structure which allows lists of blocks
-      ! to be described in a single container object.
-      type ESMF_DomainList
-      sequence
-          integer :: num_domains     ! number of domains stored
-          integer :: current_size    ! size of buffer, used in linked list
-          integer :: total_points    ! total size of domain (number of points)
-          integer :: pad_for_64bit   ! unused
-          type(ESMF_Domain), dimension(:), pointer :: domains
-          ESMF_INIT_DECLARE
-      end type
-
-!------------------------------------------------------------------------------
-!
-      ! For logically rectangular igridded data, are the index numbers being
-      ! computed/retrieved/exchanged relative to an origin of (0,0) on our
-      ! local chunk (local), or are they global index numbers relative to 
-      ! all index numbers across the entire igrid (global!). 
-      type ESMF_LocalGlobalFlag
-      sequence
-          integer :: value
-      end type
-   
-      type(ESMF_LocalGlobalFlag), parameter :: &
-                                    ESMF_LOCAL  = ESMF_LocalGlobalFlag(1), &
-                                    ESMF_GLOBAL = ESMF_LocalGlobalFlag(2)
-
-!------------------------------------------------------------------------------
-!
-      ! Once a large igrid of data is decomposed into various local chunks
-      ! there are several different "item counts" or "domains" of interest.  
-      ! They include:
-      !
-      ! exclusive - cells which are far enough inside the local chunks that
-      !  their values are never sent to other chunks as part of a halo update.
-      !
-      ! computational - cells which are the responsibility of the local 
-      !  processor to update.
-      !
-      ! total - computational plus the halo region; all cells which can be
-      !  read by the local processor.
-      !
-      ! allocated - total plus cells which are never read or written, but 
-      !  may be allocated to ensure memory address alignment or even memory 
-      !  block allocations even when the number of cells differs per chunk.
-      !
-      ! (TODO: allocated is not currently supported but has been requested.)
-      !
-      ! (See the ESMF Reference Manual Glossary if you want the precise
-      !  definitions of what these are.  This is not the official blessed
-      !  legal guide...)
-      !
-      type ESMF_DomainTypeFlag
-      sequence
-          integer :: value
-      end type
-   
-      type(ESMF_DomainTypeFlag), parameter :: &
-                     ESMF_DOMAIN_EXCLUSIVE        = ESMF_DomainTypeFlag(1), &
-                     ESMF_DOMAIN_COMPUTATIONAL    = ESMF_DomainTypeFlag(2), &
-                     ESMF_DOMAIN_TOTAL            = ESMF_DomainTypeFlag(3), &
-                     ESMF_DOMAIN_ALLOCATED        = ESMF_DomainTypeFlag(4), &
-                     ESMF_DOMAIN_OLDEXCLUSIVE     = ESMF_DomainTypeFlag(5), &
-                     ESMF_DOMAIN_OLDCOMPUTATIONAL = ESMF_DomainTypeFlag(6), &
-                     ESMF_DOMAIN_OLDTOTAL         = ESMF_DomainTypeFlag(7)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -676,22 +583,8 @@
       public ESMF_ID_REGRID, ESMF_ID_TRANSFORM, ESMF_ID_STATE
       public ESMF_ID_GRIDCOMPONENT, ESMF_ID_CPLCOMPONENT, ESMF_ID_COMPONENT
 
-      public ESMF_LOCAL, ESMF_GLOBAL
-
-      public ESMF_DOMAIN_EXCLUSIVE, ESMF_DOMAIN_COMPUTATIONAL
-      public ESMF_DOMAIN_TOTAL, ESMF_DOMAIN_ALLOCATED
-      public ESMF_DOMAIN_OLDEXCLUSIVE, ESMF_DOMAIN_OLDCOMPUTATIONAL
-      public ESMF_DOMAIN_OLDTOTAL
-
       public ESMF_Status, ESMF_Pointer, ESMF_TypeKind
       public ESMF_DataValue
-      public ESMF_Domain, ESMF_DomainGetInit, ESMF_DomainInit, &
-             ESMF_DomainValidate
-      public ESMF_DomainList, ESMF_DomainListGetInit, ESMF_DomainListInit, & 
-             ESMF_DomainListValidate
-      public ESMF_AxisIndex, ESMF_AxisIndexGetInit, ESMF_AxisIndexInit, &
-             ESMF_AxisIndexValidate
-      public ESMF_LocalGlobalFlag, ESMF_DomainTypeFlag
 
       public ESMF_PointerPrint
       
@@ -710,13 +603,10 @@ interface operator (.eq.)
   module procedure ESMF_dkeq
   module procedure ESMF_pteq
   module procedure ESMF_tfeq
-  module procedure ESMF_aieq
   module procedure ESMF_bfeq
   module procedure ESMF_ctfeq
   module procedure ESMF_tnfeq
   module procedure ESMF_freq
-  module procedure ESMF_lgeq
-  module procedure ESMF_dmeq
   module procedure ESMF_ifeq
   module procedure ESMF_rfeq
 end interface
@@ -726,13 +616,10 @@ interface operator (.ne.)
   module procedure ESMF_dkne
   module procedure ESMF_ptne
   module procedure ESMF_tfne
-  module procedure ESMF_aine
   module procedure ESMF_bfne
   module procedure ESMF_ctfne
   module procedure ESMF_tnfne
   module procedure ESMF_frne
-  module procedure ESMF_lgne
-  module procedure ESMF_dmne
 end interface
 
 interface assignment (=)
@@ -848,293 +735,6 @@ end interface
     end subroutine ESMF_ObjectIDValidate
 
 #endif
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_AxisIndexGetInit"
-!BOPI
-! !IROUTINE:  ESMF_AxisIndexGetInit - Get initialization status.
-
-! !INTERFACE:
-    function ESMF_AxisIndexGetInit(s)
-!
-! !ARGUMENTS:
-       type(ESMF_AxisIndex), intent(in), optional :: s
-       ESMF_INIT_TYPE :: ESMF_AxisIndexGetInit
-!
-! !DESCRIPTION:
-!      Get the initialization status of the shallow class {\tt AxisIndex}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [s]
-!           {\tt ESMF\_AxisIndex} from which to retreive status.
-!     \end{description}
-!
-!EOPI
-
-       if (present(s)) then
-         ESMF_AxisIndexGetInit = ESMF_INIT_GET(s)
-       else
-         ESMF_AxisIndexGetInit = ESMF_INIT_DEFINED
-       endif
-
-    end function ESMF_AxisIndexGetInit
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_AxisIndexInit"
-!BOPI
-! !IROUTINE:  ESMF_AxisIndexInit - Initialize AxisIndex 
-
-! !INTERFACE:
-    subroutine ESMF_AxisIndexInit(s)
-!
-! !ARGUMENTS:
-       type(ESMF_AxisIndex) :: s
-!
-! !DESCRIPTION:
-!      Initialize the shallow class {\tt AxisIndex}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [s]
-!           {\tt ESMF\_AxisIndex} of which being initialized.
-!     \end{description}
-!
-!EOPI
-       ESMF_INIT_SET_DEFINED(s)
-    end subroutine ESMF_AxisIndexInit
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_AxisIndexValidate"
-!BOPI
-! !IROUTINE:  ESMF_AxisIndexValidate - Check validity of a AxisIndex 
-
-! !INTERFACE:
-    subroutine ESMF_AxisIndexValidate(s,rc)
-!
-! !ARGUMENTS:
-       type(ESMF_AxisIndex), intent(inout) :: s
-       integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Validates that the {\tt AxisIndex} is internally consistent.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [s]
-!           {\tt ESMF\_AxisIndex} to validate.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt AxisIndex}
-!           is valid.
-!     \end{description}
-!
-!EOPI
-
-    ! Initialize return code; assume routine not implemented
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-     ESMF_INIT_CHECK_SHALLOW(ESMF_AxisIndexGetInit,ESMF_AxisIndexInit,s)
-
-     ! return success
-     if(present(rc)) then
-       rc = ESMF_SUCCESS
-     endif
-    end subroutine ESMF_AxisIndexValidate
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DomainGetInit"
-!BOPI
-! !IROUTINE:  ESMF_DomainGetInit - Get initialization status.
-
-! !INTERFACE:
-    function ESMF_DomainGetInit(s)
-!
-! !ARGUMENTS:
-       type(ESMF_Domain), intent(in), optional :: s
-       ESMF_INIT_TYPE :: ESMF_DomainGetInit
-!
-! !DESCRIPTION:
-!      Get the initialization status of the shallow class {\tt domain}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [s]
-!           {\tt ESMF\_Domain} from which to retreive status.
-!     \end{description}
-!
-!EOPI
-
-       if (present(s)) then
-         ESMF_DomainGetInit = ESMF_INIT_GET(s)
-       else
-         ESMF_DomainGetInit = ESMF_INIT_DEFINED
-       endif
-
-    end function ESMF_DomainGetInit
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DomainInit"
-!BOPI
-! !IROUTINE:  ESMF_DomainInit - Initialize Domain
-
-! !INTERFACE:
-    subroutine ESMF_DomainInit(s)
-!
-! !ARGUMENTS:
-       type(ESMF_Domain) :: s
-!
-! !DESCRIPTION:
-!      Initialize the shallow class {\tt domain}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [s]
-!           {\tt ESMF\_Domain} of which being initialized.
-!     \end{description}
-!
-!EOPI
-       ESMF_INIT_SET_DEFINED(s)
-    end subroutine ESMF_DomainInit
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DomainValidate"
-!BOPI
-! !IROUTINE:  ESMF_DomainValidate - Check validity of a Domain
-
-! !INTERFACE:
-    subroutine ESMF_DomainValidate(s,rc)
-!
-! !ARGUMENTS:
-       type(ESMF_Domain), intent(inout) :: s
-       integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Validates that the {\tt Domain} is internally consistent.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [s]
-!           {\tt ESMF\_Domain} to validate.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt domain}
-!           is valid.
-!     \end{description}
-!
-!EOPI
-
-    ! Initialize return code; assume routine not implemented
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-     ESMF_INIT_CHECK_SHALLOW(ESMF_DomainGetInit,ESMF_DomainInit,s)
-
-     ! return success
-     if(present(rc)) then
-       rc = ESMF_SUCCESS
-     endif
-    end subroutine ESMF_DomainValidate
-
-!------------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DomainListGetInit"
-!BOPI
-! !IROUTINE:  ESMF_DomainListGetInit - Get initialization status.
-
-! !INTERFACE:
-    function ESMF_DomainListGetInit(s)
-!
-! !ARGUMENTS:
-       type(ESMF_DomainList), intent(in), optional :: s
-       ESMF_INIT_TYPE :: ESMF_DomainListGetInit
-!
-! !DESCRIPTION:
-!      Get the initialization status of the shallow class {\tt domainlist}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [s]
-!           {\tt ESMF\_DomainList} from which to retreive status.
-!     \end{description}
-!
-!EOPI
-
-       if (present(s)) then
-         ESMF_DomainListGetInit = ESMF_INIT_GET(s)
-       else
-         ESMF_DomainListGetInit = ESMF_INIT_DEFINED
-       endif
-
-    end function ESMF_DomainListGetInit
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DomainListInit"
-!BOPI
-! !IROUTINE:  ESMF_DomainListInit - Initialize DomainList
-
-! !INTERFACE:
-    subroutine ESMF_DomainListInit(s)
-!
-! !ARGUMENTS:
-       type(ESMF_DomainList) :: s
-!
-! !DESCRIPTION:
-!      Initialize the shallow class {\tt DomainList}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [s]
-!           {\tt ESMF\_DomainList} of which being initialized.
-!     \end{description}
-!
-!EOPI
-       ESMF_INIT_SET_DEFINED(s)
-    end subroutine ESMF_DomainListInit
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DomainListValidate"
-!BOPI
-! !IROUTINE:  ESMF_DomainListValidate - Check validity of a DomainList
-
-! !INTERFACE:
-    subroutine ESMF_DomainListValidate(s,rc)
-!
-! !ARGUMENTS:
-       type(ESMF_DomainList), intent(inout) :: s
-       integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Validates that the {\tt DomainList} is internally consistent.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [s]
-!           {\tt ESMF\_DomainList} to validate.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt DomainList}
-!           is valid.
-!     \end{description}
-!
-!EOPI
-
-    ! Initialize return code; assume routine not implemented
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-     ESMF_INIT_CHECK_SHALLOW(ESMF_DomainListGetInit,ESMF_DomainListInit,s)
-
-     ! return success
-     if(present(rc)) then
-       rc = ESMF_SUCCESS
-     endif
-    end subroutine ESMF_DomainListValidate
-
 
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Status flags to see if they're the same or not
@@ -1314,35 +914,6 @@ subroutine ESMF_tfas2_v (tfval, lval)
 end subroutine
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_AxisIndex to see if they're the same or not
-
-function ESMF_aieq(ai1, ai2)
- logical ESMF_aieq
- type(ESMF_AxisIndex), intent(in) :: ai1, ai2
-
- ESMF_INIT_CHECK_SHALLOW(ESMF_AxisIndexGetInit,ESMF_AxisIndexInit,ai1)
- ESMF_INIT_CHECK_SHALLOW(ESMF_AxisIndexGetInit,ESMF_AxisIndexInit,ai2)
-
- ESMF_aieq = ((ai1%min .eq. ai2%min) .and. &
-              (ai1%max .eq. ai2%max) .and. &
-              (ai1%stride .eq. ai2%stride))
-
-end function
-
-function ESMF_aine(ai1, ai2)
- logical ESMF_aine
- type(ESMF_AxisIndex), intent(in) :: ai1, ai2
-
- ESMF_INIT_CHECK_SHALLOW(ESMF_AxisIndexGetInit,ESMF_AxisIndexInit,ai1)
- ESMF_INIT_CHECK_SHALLOW(ESMF_AxisIndexGetInit,ESMF_AxisIndexInit,ai2)
-
- ESMF_aine = ((ai1%min .ne. ai2%min) .or. &
-              (ai1%max .ne. ai2%max) .or. &
-              (ai1%stride .ne. ai2%stride))
-
-end function
-
-!------------------------------------------------------------------------------
 ! function to compare two ESMF_Direction types
 
 function ESMF_freq(fr1, fr2)
@@ -1357,40 +928,6 @@ function ESMF_frne(fr1, fr2)
  type(ESMF_Direction), intent(in) :: fr1, fr2
 
  ESMF_frne = (fr1%value .ne. fr2%value)
-end function
-
-!------------------------------------------------------------------------------
-! function to compare two ESMF_LocalGlobalFlag types
-
-function ESMF_lgeq(lg1, lg2)
- logical ESMF_lgeq
- type(ESMF_LocalGlobalFlag), intent(in) :: lg1, lg2
-
- ESMF_lgeq = (lg1%value .eq. lg2%value)
-end function
-
-function ESMF_lgne(lg1, lg2)
- logical ESMF_lgne
- type(ESMF_LocalGlobalFlag), intent(in) :: lg1, lg2
-
- ESMF_lgne = (lg1%value .ne. lg2%value)
-end function
-
-!------------------------------------------------------------------------------
-! function to compare two ESMF_DomainTypeFlag types
-
-function ESMF_dmeq(dm1, dm2)
- logical ESMF_dmeq
- type(ESMF_DomainTypeFlag), intent(in) :: dm1, dm2
-
- ESMF_dmeq = (dm1%value .eq. dm2%value)
-end function
-
-function ESMF_dmne(dm1, dm2)
- logical ESMF_dmne
- type(ESMF_DomainTypeFlag), intent(in) :: dm1, dm2
-
- ESMF_dmne = (dm1%value .ne. dm2%value)
 end function
 
 !------------------------------------------------------------------------------

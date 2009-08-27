@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.18 2009/08/11 19:53:36 w6ws Exp $
+// $Id: ESMCI_Util.h,v 1.19 2009/08/27 05:34:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -116,24 +116,6 @@ enum ESMC_AttTreeFlag { ESMC_ATTTREE_OFF=0,
 // attwrite flag type
 enum ESMC_AttWriteFlag { ESMC_ATTWRITE_TAB=0,
                          ESMC_ATTWRITE_XML};
-                        
-// are the index numbers relative to a local chunk or the overall
-// combined igrid?
-typedef enum {
-    ESMF_LOCAL  = 1, 
-    ESMF_GLOBAL
-} ESMC_LocalGlobalFlag;
-
-// what kind of data chunk are the index numbers describing?
-typedef enum {
-    ESMC_DOMAIN_EXCLUSIVE = 1,
-    ESMC_DOMAIN_COMPUTATIONAL,
-    ESMC_DOMAIN_TOTAL,
-    ESMC_DOMAIN_ALLOCATED,
-    ESMC_DOMAIN_OLDEXCLUSIVE,
-    ESMC_DOMAIN_OLDCOMPUTATIONAL,
-    ESMC_DOMAIN_OLDTOTAL
-} ESMC_DomainType;
 
 // max/min macros if they don't already exist
 #ifndef MAX
@@ -148,68 +130,6 @@ typedef struct ESMC_ObjectID {
    int objectID; 
    char objectName[32]; 
 } ESMC_ObjectID;
-
-
-// TODO:
-// the domain below should be renamed AxisIndexList
-// or the AxisIndex itself could morph into a rank and
-// a list of mins, maxs and lengths.
-
-// elemental index for axis decompositions
-class ESMC_AxisIndex {
- public:
-    int     min;
-    int     max;
-    int  stride;
-    int     pad;    // insure F90/C++ memory alignment
-    ESMF_INIT_C_PAD 
-
-};
-
-// collection of AxisIndices per axis, to describe an n-dim cube
-struct ESMC_Domain {
-    int DE;
-    int rank;
-    ESMC_AxisIndex ai_list[ESMF_MAXDIM];
-
-    ESMF_INIT_C_PAD 
-};
-
-
-// collection of AxisIndices per axis, to describe an n-dim cube
-class ESMC_DomainList {
-  public:   // TODO: fix this to be private?
-    int num_domains;
-    int current_size;
-    int total_points;
-    int pad_for_64;
-    ESMC_Domain *domains;
-
-    int  ESMC_DomainListGetDE(int domainnum);
-    ESMC_AxisIndex ESMC_DomainListGetAI(int domainnum, int ainum);
-
-    ESMF_INIT_C_PAD 
-
-};
-
-// these should all become class methods
-int ESMC_AxisIndexSet(ESMC_AxisIndex *ai, int min, int max);
-int ESMC_AxisIndexSet(ESMC_AxisIndex *ai, int min, int max, int stride);
-int ESMC_AxisIndexGet(ESMC_AxisIndex *ai, int *min, int *max, int *stride);
-int ESMC_AxisIndexCopy(ESMC_AxisIndex *src, ESMC_AxisIndex *dst);
-bool ESMC_AxisIndexIntersect(int ndims, 
-                             ESMC_AxisIndex *src1, ESMC_AxisIndex *src2, 
-                             ESMC_AxisIndex *dst);
-int ESMC_AxisIndexLocalToGlobal(ESMC_AxisIndex *srclocal, 
-                                     ESMC_AxisIndex *global, 
-                                     int *globalStarts, int ndims, 
-                                     ESMC_AxisIndex *dstglobal);
-int ESMC_AxisIndexGlobalToLocal(int ndims, 
-                                ESMC_AxisIndex *srcglobal, 
-                                ESMC_AxisIndex *globalref, 
-                                ESMC_AxisIndex *dstlocal);
-int ESMC_AxisIndexPrint(ESMC_AxisIndex *ai);
-ESMC_Logical ESMC_AxisIndexEqual(ESMC_AxisIndex *ai1, ESMC_AxisIndex *ai2);
 
 // string utility functions:
 // the first set are for converting an F90 char buffer + max count into a 
@@ -244,9 +164,6 @@ const char *ESMC_TypeKindString(ESMC_TypeKind dk);
 const char *ESMC_LogicalString(ESMC_Logical tf);
 
 extern "C" {
-void FTN(f_esmf_domainlistgetde)(ESMC_DomainList *, int *, int *, int *);
-void FTN(f_esmf_domainlistgetai)(ESMC_DomainList *, int *, int *, 
-                                                    ESMC_AxisIndex *ai, int *);
 void FTN(esmf_pointertoint)(int *n, short *s, ESMC_POINTER *len);
 void FTN(esmf_pointerdifference)(int *n, short *s1, short *s2, int *len);
 
