@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.20 2009/07/30 18:10:40 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.21 2009/08/27 18:32:31 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -137,7 +137,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.20 2009/07/30 18:10:40 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.21 2009/08/27 18:32:31 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1209,7 +1209,6 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
  @\
     ! Local variables @\
     integer :: localrc                  ! local return code @\
-    logical :: rcpresent                ! did user specify rc? @\
     logical :: willalloc                ! do we need to alloc/dealloc? @\
     logical :: willcopy                 ! do we need to copy data? @\
     type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInternal call @\
@@ -1843,7 +1842,8 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
     if (ESMF_LogMsgFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rc)) return @\
-    ! mrng is a macro that has correct construction of lb and ub elements @\
+    ! Macro mrng @\
+    ! is a macro that has correct construction of lb and ub elements @\
     allocate(lp(mrng), stat=localrc) @\
     if (ESMF_LogMsgFoundAllocError(localrc, & @\
       "local data space", & @\

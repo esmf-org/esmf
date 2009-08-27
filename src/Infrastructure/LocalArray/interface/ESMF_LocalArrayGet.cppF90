@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.12 2009/06/18 04:40:58 theurich Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.13 2009/08/27 18:32:32 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -132,7 +132,8 @@ module ESMF_LocalArrayGetMod
         if (ESMF_LogMsgFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
-        ! mrng is a macro that has correct construction of lb and ub elements @\
+        ! Macro mrng @\
+        ! is a macro that has correct construction of lb and ub elements @\
         allocate(lp(mrng), stat=localrc) @\
         if (ESMF_LogMsgFoundAllocError(localrc, & @\
           "local data space", & @\
@@ -203,7 +204,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.12 2009/06/18 04:40:58 theurich Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.13 2009/08/27 18:32:32 w6ws Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
