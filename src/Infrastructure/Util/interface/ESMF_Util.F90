@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.17 2009/08/27 05:34:24 theurich Exp $
+! $Id: ESMF_Util.F90,v 1.18 2009/08/27 05:37:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -60,9 +60,6 @@
 !
 
 !  Misc methods
-      public ESMF_SetPointer
-      public ESMF_SetNullPointer
-      public ESMF_GetPointer
       public ESMF_StringLowerCase
       public ESMF_StringUpperCase
 
@@ -86,116 +83,10 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.17 2009/08/27 05:34:24 theurich Exp $'
+               '$Id: ESMF_Util.F90,v 1.18 2009/08/27 05:37:29 theurich Exp $'
 !------------------------------------------------------------------------------
 
       contains
-
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_SetPointer"
-!BOPI
-! !IROUTINE:  ESMF_SetPointer - Set an opaque value
-!
-! !INTERFACE:
-      subroutine ESMF_SetPointer(ptype, contents, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Pointer) :: ptype 
-      integer*8, intent(in) :: contents
-      integer, intent(out), optional :: rc  
-
-!
-! !DESCRIPTION:
-!   Set the contents of an opaque pointer type.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[ptype]
-!       An {\tt ESMF\_Pointer}.
-!     \item[contents]
-!       The contents to set.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-
-      ptype%ptr = contents
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_SetPointer
-
-!-------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_SetNullPointer"
-!BOPI
-! !IROUTINE:  ESMF_SetNullPointer - Set an opaque value
-!
-! !INTERFACE:
-      subroutine ESMF_SetNullPointer(ptype, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Pointer) :: ptype 
-      integer, intent(out), optional :: rc  
-!
-! !DESCRIPTION:
-!   Set the contents of an opaque pointer type.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[ptype]
-!       An {\tt ESMF\_Pointer}.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!
-!EOPI
-
-      integer*8, parameter :: nullp = 0
-
-      ptype%ptr = nullp
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_SetNullPointer
-!------------------------------------------------------------------------- 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GetPointer"
-!BOPI
-!  !IROUTINE:  ESMF_GetPointer - get an opaque value 
-!  
-! !INTERFACE: 
-      function ESMF_GetPointer(ptype, rc) 
-!
-! !RETURN VALUE:
-      integer*8 :: ESMF_GetPointer
-
-! !ARGUMENTS:
-      type(ESMF_Pointer), intent(in) :: ptype 
-      integer, intent(out), optional :: rc  
-
-!
-! !DESCRIPTION:
-!   Get the contents of an opaque pointer type.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[ptype]
-!       An {\tt ESMF\_Pointer}.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      ESMF_GetPointer = ptype%ptr
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end function ESMF_GetPointer
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
