@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.54 2009/07/18 00:22:01 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.55 2009/08/27 05:29:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -309,13 +309,17 @@ contains
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,s)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,s)
 
-     ! return success
-     if(present(rc)) then
-       rc = ESMF_SUCCESS
-     endif
-    end subroutine ESMF_LogValidate
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS 
+    !TODO: Remove the following dummy test when implementing this method
+    if (s%logTableIndex==s%logTableIndex) continue
+
+    ! return success
+    if(present(rc)) then
+      rc = ESMF_SUCCESS
+    endif
+  end subroutine ESMF_LogValidate
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -408,13 +412,17 @@ contains
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,s)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,s)
 
-     ! return success
-     if(present(rc)) then
-       rc = ESMF_SUCCESS
-     endif
-    end subroutine ESMF_LogPrivateValidate
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when implementing this method
+    if (s%maxElements==s%maxElements) continue
+
+    ! return success
+    if(present(rc)) then
+      rc = ESMF_SUCCESS
+    endif
+  end subroutine ESMF_LogPrivateValidate
 
 
 !------------------------------------------------------------------------------
@@ -503,13 +511,17 @@ contains
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     ESMF_INIT_CHECK_SHALLOW(ESMF_LogEntryGetInit,ESMF_LogEntryInit,s)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogEntryGetInit,ESMF_LogEntryInit,s)
 
-     ! return success
-     if(present(rc)) then
-       rc = ESMF_SUCCESS
-     endif
-    end subroutine ESMF_LogEntryValidate
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when implementing this method
+    if (s%h==s%h) continue
+
+    ! return success
+    if(present(rc)) then
+      rc = ESMF_SUCCESS
+    endif
+  end subroutine ESMF_LogEntryValidate
 
 !------------------------------------------------------------------------------
 ! functions to compare two types to see if they're the same or not
@@ -1577,12 +1589,11 @@ end subroutine ESMF_LogMsgSetError
       end subroutine f_ESMF_VMGlobalGet
     end interface
 
-    integer 				                   :: status, i, j, rc2
+    integer 				                   :: status, i, rc2
     type(ESMF_LogEntry), dimension(:), pointer             :: localbuf
     character(len=32)                                      :: fname
     character(len=4)                                       :: fnum
     character(ESMF_MAXSTR)                                 :: petNumChar
-    logical                                                :: inuse
 
     type(ESMF_LogPrivate),pointer     :: alog
 

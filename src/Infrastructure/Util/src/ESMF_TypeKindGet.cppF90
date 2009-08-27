@@ -1,4 +1,4 @@
-! $Id: ESMF_TypeKindGet.cppF90,v 1.4 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_TypeKindGet.cppF90,v 1.5 2009/08/27 05:29:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -109,6 +109,11 @@ TypeKindInterfaceMacro(ESMF_TypeKindGet)
     integer, intent(out), optional :: rc @\
 @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+@\
+     ! the purpose of dummy argument var is to support TK overloading @\
+     ! some compilers will notice that var is unused, and issue warnings @\
+     if (var==var) continue ! dummy check to quiet down compiler warnings @\
+@\
     ESMF_TypeKindGet##mtypekind = ESMF_TYPEKIND_##mtypekind @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\

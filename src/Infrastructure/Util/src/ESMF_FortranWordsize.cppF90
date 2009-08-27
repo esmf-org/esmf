@@ -1,4 +1,4 @@
-! $Id: ESMF_FortranWordsize.cppF90,v 1.7 2009/06/16 02:46:29 theurich Exp $
+! $Id: ESMF_FortranWordsize.cppF90,v 1.8 2009/08/27 05:29:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -159,6 +159,10 @@ contains
          rcpresent = .TRUE. @\
          rc = ESMF_RC_NOT_IMPL @\
      endif @\
+@\
+     ! dummy argument var is only present to allow TK overloading @\
+     ! some compilers will notice that var is unused, and issue warnings @\
+     if (var==var) continue ! dummy check to quiet down compiler warnings @\
 @\
      call ESMF_PointerDifference(ESMC_POINTER_SIZE, varTK(1), varTK(2), size) @\
      ESMF_FortranWordsize##mtypekind = size @\
