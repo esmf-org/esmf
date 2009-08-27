@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.58 2009/02/04 23:14:15 theurich Exp $
+! $Id: ESMF_Config.F90,v 1.59 2009/08/27 23:29:59 w6ws Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -2081,7 +2081,6 @@
 !
 !EOP -------------------------------------------------------------------
 
-      integer :: iret
       integer :: localrc
 
       ! Initialize return code; assume routine not implemented
