@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.12 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_Test.F90,v 1.13 2009/08/27 20:13:05 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.12 2009/01/21 21:38:02 cdeluca Exp $'
+      '$Id: ESMF_Test.F90,v 1.13 2009/08/27 20:13:05 svasquez Exp $'
 
 !==============================================================================
 
@@ -136,6 +136,13 @@
       type(ESMF_VM):: vm
       integer:: petCount, localPet, localResult, localrc
 
+      !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+      !TODO: Remove the following dummy test when implementing this method
+      if (name==name) continue
+
+      !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+      !TODO: Remove the following dummy test when implementing this method
+      if (failMsg==failMsg) continue
 
       if(condition) then
         localResult = ESMF_SUCCESS
