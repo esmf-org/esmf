@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.108 2009/08/28 19:14:42 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.109 2009/08/28 21:23:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.108 2009/08/28 19:14:42 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.109 2009/08/28 21:23:22 theurich Exp $"
 
 !==============================================================================
 
@@ -587,13 +587,12 @@ module ESMF_VMMod
     ! Initialize commhandle to an invalid pointer
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
-    ! Flag not implemented features
+    ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+          "- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rc)
         return
       endif
     endif
@@ -646,13 +645,12 @@ module ESMF_VMMod
     ! Initialize commhandle to an invalid pointer
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
-    ! Flag not implemented features
+    ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+          "- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rc)
         return
       endif
     endif
@@ -705,13 +703,12 @@ module ESMF_VMMod
     ! Initialize commhandle to an invalid pointer
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
-    ! Flag not implemented features
+    ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+          "- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rc)
         return
       endif
     endif
@@ -1185,13 +1182,12 @@ module ESMF_VMMod
     ! Initialize commhandle to an invalid pointer
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
-    ! Flag not implemented features
+    ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+          "- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rc)
         return
       endif
     endif
@@ -1245,13 +1241,12 @@ module ESMF_VMMod
     ! Initialize commhandle to an invalid pointer
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
-    ! Flag not implemented features
+    ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+          "- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rc)
         return
       endif
     endif
@@ -1305,13 +1300,12 @@ module ESMF_VMMod
     ! Initialize commhandle to an invalid pointer
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
-    ! Flag not implemented features
+    ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+          "- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rc)
         return
       endif
     endif
@@ -1440,13 +1434,12 @@ module ESMF_VMMod
     ! Initialize commhandle to an invalid pointer
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
-    ! Flag not implemented features
+    ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+          "- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rc)
         return
       endif
     endif
@@ -1499,13 +1492,12 @@ module ESMF_VMMod
     ! Initialize commhandle to an invalid pointer
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
-    ! Flag not implemented features
+    ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+          "- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rc)
         return
       endif
     endif
@@ -1558,13 +1550,12 @@ module ESMF_VMMod
     ! Initialize commhandle to an invalid pointer
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
-    ! Flag not implemented features
+    ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+          "- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rc)
         return
       endif
     endif
@@ -1702,13 +1693,12 @@ module ESMF_VMMod
     ! Initialize commhandle to an invalid pointer
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
-    ! Flag not implemented features
+    ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+          "- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rc)
         return
       endif
     endif
@@ -1763,13 +1753,12 @@ module ESMF_VMMod
     ! Initialize commhandle to an invalid pointer
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
-    ! Flag not implemented features
+    ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+          "- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rc)
         return
       endif
     endif
@@ -1824,13 +1813,12 @@ module ESMF_VMMod
     ! Initialize commhandle to an invalid pointer
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
-    ! Flag not implemented features
+    ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+          "- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rc)
         return
       endif
     endif
@@ -3692,13 +3680,12 @@ module ESMF_VMMod
     ! Initialize commhandle to an invalid pointer
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
-    ! Flag not implemented features
+    ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+          "- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rc)
         return
       endif
     endif
@@ -3752,13 +3739,12 @@ module ESMF_VMMod
     ! Initialize commhandle to an invalid pointer
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
-    ! Flag not implemented features
+    ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+          "- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rc)
         return
       endif
     endif
@@ -3812,13 +3798,12 @@ module ESMF_VMMod
     ! Initialize commhandle to an invalid pointer
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
-    ! Flag not implemented features
+    ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+          "- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rc)
         return
       endif
     endif
