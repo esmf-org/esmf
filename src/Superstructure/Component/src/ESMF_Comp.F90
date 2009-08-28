@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.191 2009/08/28 18:57:02 svasquez Exp $
+! $Id: ESMF_Comp.F90,v 1.192 2009/08/28 20:37:06 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -249,7 +249,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.191 2009/08/28 18:57:02 svasquez Exp $'
+    '$Id: ESMF_Comp.F90,v 1.192 2009/08/28 20:37:06 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -693,9 +693,9 @@ contains
       call ESMF_VMGet(vm, petCount=petCount, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
-      ! see if pets in the petlist exist
+      ! see if pets in the petlist are negative or if they exist
       do i=1, compp%npetlist
-        if (compp%petlist(i) .ge. petCount) then
+        if ((compp%petlist(i) .ge. petCount) .or. (compp%petlist(i) .lt. 0)) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
             "Conflict between petlist and global pet count", &
             ESMF_CONTEXT, rc)
