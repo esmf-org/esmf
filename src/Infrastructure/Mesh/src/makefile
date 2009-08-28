@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2009/03/16 04:47:44 oehmke Exp $
+# $Id: makefile,v 1.18 2009/08/28 15:58:51 oehmke Exp $
 
 # leave alone.
 ALL: build_here 
@@ -48,6 +48,7 @@ SOURCEC	  = \
            ESMCI_MeshVTK.C \
            ESMCI_MEValues.C \
            ESMCI_Migrator.C \
+           ESMCI_OTree.C \
            ESMCI_OctBox3d.C \
            ESMCI_ParEnv.C \
            ESMCI_ParLog.C \

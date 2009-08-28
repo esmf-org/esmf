@@ -16,9 +16,8 @@
 
 #include <Mesh/include/ESMCI_MeshTypes.h>
 #include <Mesh/include/ESMCI_MeshObj.h>
-#include <Mesh/include/ESMCI_OctBox3d.h>
+#include <Mesh/include/ESMCI_OTree.h>
 #include <vector>
-
 
 
 namespace ESMCI {
@@ -54,8 +53,8 @@ typedef std::vector<Search_result*> SearchResult;
 void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, int unmappedaction, SearchResult &result,
             double stol = 1e-8, std::vector<const MeshObj*> *to_investigate = NULL);
 
-void OctSearch(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &result,
-            double stol = 1e-12, std::vector<const MeshObj*> *to_investigate = NULL, BOX3D *box = NULL);
+void OctSearch(const Mesh &src, const Mesh &dest, UInt dst_obj_type, int unmappedaction, SearchResult &result,
+            double stol = 1e-8, std::vector<const MeshObj*> *to_investigate = NULL, OTree *box = NULL);
 
 void PrintSearchResult(const SearchResult &result);
 

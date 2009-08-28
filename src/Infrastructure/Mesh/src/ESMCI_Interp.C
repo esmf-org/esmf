@@ -383,7 +383,7 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
 void point_serial_transfer(UInt num_fields, MEField<> *const *sfields, _field *const *dfields, int *iflag, SearchResult &sres) {
   Trace __trace("point_serial_transfer(UInt num_fields, MEField<> *const *sfields, _field *const *dfields, int *iflag, SearchResult &sres)");
   
-  
+
   if (num_fields == 0) return;
 
   SearchResult::iterator sb = sres.begin(), se = sres.end();
@@ -448,7 +448,7 @@ dof_add_col(std::vector<IWeights::Entry> &_col, UInt _fdim, double *_sens) :
 {}
 
 void operator()(MeshObj *obj, UInt nvalset, UInt n) {
-  
+
   // Weights are redundant per field dimension entry; just take first
   if (n == 0) {
     col.push_back(IWeights::Entry(obj->get_id(), n, sens[idx*fdim+n]));
@@ -459,7 +459,8 @@ void operator()(MeshObj *obj, UInt nvalset, UInt n) {
 */
     ++idx;
   }
-  
+ 
+ 
 }
 
 UInt idx;
@@ -611,6 +612,7 @@ Par::Out() << std::endl;
  void mat_point_serial_transfer(MEField<> &sfield, _field &dfield, SearchResult &sres, IWeights &iw) {
   Trace __trace("mat_point_serial_transfer(UInt num_fields, MEField<> *const *sfields, _field *const *dfields, int *iflag, SearchResult &sres)");
   
+
   SearchResult::iterator sb = sres.begin(), se = sres.end();
 
   UInt nrhs = sfield.dim();
@@ -619,13 +621,14 @@ Par::Out() << std::endl;
 
   for (; sb != se; sb++) {
 
-    Search_result &sres = **sb;
 
+    Search_result &sres = **sb;
+ 
     // Trick:  Gather the data from the source field so we may call interpolate point
     MeshObj &elem = const_cast<MeshObj&>(*(*sb)->elem);
-
+ 
     const MeshObjTopo *etopo = GetMeshObjTopo(elem);
-
+ 
     UInt pdim = etopo->parametric_dim;
 
     // Create a sensitivity field residing on the degrees of
@@ -642,7 +645,6 @@ Par::Out() << std::endl;
       fads[i].diff(i, nlocal_dof);
     }
     
-
 
     // Inner loop through fields
     MEValues<METraits<fad_type,double>,MEField<SField> > mev(sfield.GetMEFamily());
@@ -664,7 +666,7 @@ Par::Out() << std::endl;
 
     std::vector<fad_type> ires(npts*dfield.dim());
     mev.GetFunctionValues(sF, &ires[0]);
-
+ 
     // Copy data to nodes
     for (UInt n = 0; n < npts; n++) {
       
@@ -707,6 +709,7 @@ std::cout << "**diff=" << sval - ires[n*nrhs+d].val() << std::endl;
     }
 
   } // for searchresult
+
 }
  
 static GeomRend::DstConfig get_dst_config(Mesh &dest, const std::vector<Interp::FieldPair> &fpairs) {
@@ -770,7 +773,6 @@ dstmesh(dest)
        //std::cout << "Building rendezvous..." << std::endl;
     grend.Build(srcF.size(), &srcF[0], dstF.size(), &dstF[0]);
     
-#define MYSEARCH
 #ifdef MYSEARCH
 //    if (Par::Rank() == 0) std::cout << "Start search" << std::endl;
     Search(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), unmappedaction, sres, 1e-8);
@@ -780,7 +782,7 @@ dstmesh(dest)
      if (Par::Rank() == 0)
        std::cout << "Starting search..." << std::endl;
 */
-    OctSearch(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), sres);
+    OctSearch(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), unmappedaction, sres, 1e-8);
   //   if (Par::Rank() == 0)
        //std::cout << "Done with search..." << std::endl;
 #endif
@@ -801,13 +803,14 @@ dstmesh(dest)
      if (Par::Rank() == 0)
        std::cout << "Starting search..." << std::endl;
 */
-     OctSearch(src, dest, search_obj_type, sres);
+    OctSearch(src, dest, search_obj_type, unmappedaction, sres, 1e-8);
 /*
      if (Par::Rank() == 0)
        std::cout << "Done with search..." << std::endl;
 */
 #endif
      
+
      //PrintSearchResult(sres);
   }
   
@@ -843,6 +846,7 @@ void Interp::operator()(int fpair_num, IWeights &iw) {
   if (is_parallel) {
     iw.Migrate(dstmesh);
   }
+
   
 }
 
