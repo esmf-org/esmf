@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.46 2009/07/28 23:08:08 theurich Exp $
+! $Id: ESMF_RHandle.F90,v 1.47 2009/08/28 21:38:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_RHandleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_RHandle.F90,v 1.46 2009/07/28 23:08:08 theurich Exp $'
+    '$Id: ESMF_RHandle.F90,v 1.47 2009/08/28 21:38:37 theurich Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -469,11 +469,10 @@ contains
 ! !IROUTINE: ESMF_RouteHandleValidate - Check internal consistency of a RouteHandle
 
 ! !INTERFACE:
-  subroutine ESMF_RouteHandleValidate(rhandle, options, rc)
+  subroutine ESMF_RouteHandleValidate(rhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(in) :: rhandle       
-    character (len=*), intent(in), optional :: options    
     integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
@@ -483,8 +482,6 @@ contains
 !   \begin{description}
 !   \item[rhandle] 
 !     {\tt ESMF\_RouteHandle} to be queried.
-!   \item[{[options]}]
-!     Validation options.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -507,12 +504,7 @@ contains
 
     ! TODO: the following code is commented out because the C-side
     !       validate routine is empty
-    !if(present(options)) then
-    !    call c_ESMC_RouteHandleValidate(rhandle, options, localrc)   
-    !else
-    !    call c_ESMC_RouteHandleValidate(rhandle, defaultopts, localrc)
-    !endif
-
+    !    call c_ESMC_RouteHandleValidate(rhandle, localrc)   
     !if (ESMF_LogMsgFoundError(localrc, &
     !                           ESMF_ERR_PASSTHRU, &
     !                           ESMF_CONTEXT, rc)) return
