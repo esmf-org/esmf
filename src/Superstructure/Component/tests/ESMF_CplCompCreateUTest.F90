@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.26 2009/08/28 19:16:45 svasquez Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.27 2009/08/28 20:37:48 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -115,6 +115,15 @@
     write(name, *) "Query run status of a deleted Coupler Component"
     call ESMF_Test((.not.bool), name, failMsg, result, ESMF_SRCLINE)
 
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Create a Coupler Component with a negative number in the petlist
+    ! to force ab error.
+    cname = "CplComp with out of range PetList"
+    cpl2 = ESMF_CplCompCreate(name=cname, petList=(/0,-3/), rc=rc)
+    write(failMsg, *) "Did not return ESMF_RC_ARG_VALUE"
+    write(name, *) "Creating a Coupler Component with a negative number in petList"
+    call ESMF_Test((rc.eq.ESMF_RC_ARG_VALUE), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !EX_UTest

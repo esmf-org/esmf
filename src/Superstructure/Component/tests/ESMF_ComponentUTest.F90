@@ -1,4 +1,4 @@
-! $Id: ESMF_ComponentUTest.F90,v 1.16 2009/08/28 19:04:34 svasquez Exp $
+! $Id: ESMF_ComponentUTest.F90,v 1.17 2009/08/28 20:38:23 svasquez Exp $
 !
 ! Test code which creates a new Component.
 
@@ -123,6 +123,16 @@
     comp2 = ESMF_GridCompCreate(name=cname, petList=(/0,1,5,8/), rc=rc)  
     write(failMsg, *) "Did not return ESMF_RC_ARG_VALUE"
     write(name, *) "Creating a Gridded Component with wrong petList "
+    call ESMF_Test((rc.eq.ESMF_RC_ARG_VALUE), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Create a Gridded Component setting the petlist to a negative number
+    ! to force an error
+    cname = "GridComp with out of range PetList"
+    comp2 = ESMF_GridCompCreate(name=cname, petList=(/0,-3/), rc=rc)  
+    write(failMsg, *) "Did not return ESMF_RC_ARG_VALUE"
+    write(name, *) "Creating a Gridded Component with negative number in petList "
     call ESMF_Test((rc.eq.ESMF_RC_ARG_VALUE), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
