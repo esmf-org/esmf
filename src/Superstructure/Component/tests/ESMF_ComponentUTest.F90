@@ -1,4 +1,4 @@
-! $Id: ESMF_ComponentUTest.F90,v 1.15 2009/08/11 21:55:52 svasquez Exp $
+! $Id: ESMF_ComponentUTest.F90,v 1.16 2009/08/28 19:04:34 svasquez Exp $
 !
 ! Test code which creates a new Component.
 
@@ -117,58 +117,29 @@
 
     !------------------------------------------------------------------------
     !EX_UTest
-    ! Create a Gridded Component setting the petlist to 1
-    ! to force run status to be set to false for all other PETs
-    ! Pet list is set to 0, until bug 1839792 is closed
-    cname = "GridComp with PetList"
-    comp2 = ESMF_GridCompCreate(name=cname, petList=(/0/), rc=rc)  
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating a Gridded Component with petList"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    ! Create a Gridded Component setting the petlist to be out of range
+    ! to force an error
+    cname = "GridComp with out of range PetList"
+    comp2 = ESMF_GridCompCreate(name=cname, petList=(/0,1,5,8/), rc=rc)  
+    write(failMsg, *) "Did not return ESMF_RC_ARG_VALUE"
+    write(name, *) "Creating a Gridded Component with wrong petList "
+    call ESMF_Test((rc.eq.ESMF_RC_ARG_VALUE), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !EX_UTest
-    ! Query the run status of a Gridded Component 
+    ! Query the run status of a non created Gridded Component 
     bool = ESMF_GridCompIsPetLocal(comp2, rc=rc)  
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
     write(name, *) "Query run status of a Gridded Component"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !EX_UTest
-    ! Get global VM
-    call ESMF_VMGetGlobal(vm, rc=rc)  
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Get global VM"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !------------------------------------------------------------------------
-    !EX_UTest
-    ! Get localPet from VM
-    call ESMF_VMGet(vm, localPet=localPet, rc=rc)  
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Get localPet from VM"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !------------------------------------------------------------------------
-    !EX_UTest
-    ! Verify that the run status is correct
-    write(failMsg, *) "Did not return true on PET 1, false otherwise"
-    write(name, *) "Verify run status of a Gridded Component"
-    ! Pet list is set to 0, until bug 1839792 is closed
-    if (localPet==0) then
-      call ESMF_Test((bool), name, failMsg, result, ESMF_SRCLINE)
-    else
-      call ESMF_Test((.not.bool), name, failMsg, result, ESMF_SRCLINE)
-    endif
-
-    !------------------------------------------------------------------------
-    !EX_UTest
-    ! Verifing that a Gridded Component can be destroyed
+    ! Try to destroy a non created Gridded Component 
     call ESMF_GridCompDestroy(comp2, rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
     write(name, *) "Destroying a Gridded Component"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !EX_UTest
