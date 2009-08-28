@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.76 2009/08/21 17:46:29 w6ws Exp $
+! $Id: ESMF_DELayout.F90,v 1.77 2009/08/28 21:32:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.76 2009/08/21 17:46:29 w6ws Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.77 2009/08/28 21:32:16 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -450,6 +450,7 @@ contains
 !          and specifies a relative meassure of the computatial weight for each
 !          DE in form of an integer number. The weights are a relative measure
 !          and only meaningful when compared to weights of the same DELayout.
+!          (UNIMPLEMENTED!)
 !     \item[commWeights]
 !          This argument provides the communication weight hint.
 !          {\tt commWeights} is a 2D array and must contain at least 
@@ -459,17 +460,7 @@ contains
 !          matrix must be symmetric and diagonal elements are ignored. The 
 !          weights are a relative measure and only meaningful when compared to 
 !          weights of the same DELayout.
-!     \item[{[deStride]}]
-!          This optional argument can be used to specify DE domains.
-!          The argument holds two elements: {\tt (/interStride, intraStride/)}
-!          which are used to form DE subsets from the full set 
-!          {\tt\{ 0, 1, ..., deCount-1 \}} of DEs. The elements of the {\tt k}th 
-!          subset are {\tt\{ k * interStride + i * intraStride \}} where {\tt i}
-!          and {\tt k} start at {\tt 0}. DEs within each subset are mapped 
-!          against the same PET, causing multiple DE to PET mapping. The default
-!          is to generate homogeneously sized, blocked DE domains. If the number
-!          of DEs is a multiple of the number of PETs the default can be 
-!          expressed as {\tt deStride = (/deCount/petCount, 1/)}.
+!          (UNIMPLEMENTED!)
 !     \item[{[dePinFlag]}]
 !          This flag specifies which type of resource DEs are pinned to. 
 !          The default is to pin DEs to PETs. Alternatively it is
@@ -512,6 +503,14 @@ contains
     
     ! Mark this DELayout as invalid
     delayout%this = ESMF_NULL_POINTER
+    
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(compWeights) == size(compWeights)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(commWeights) == size(commWeights)) continue
 
   !TODO: use the correct C++ implementation once it is available
 
@@ -623,9 +622,10 @@ contains
 !          DE 0, 1, 2, ... and assign the specified PET to the respective DE.
 !     \item[{[connectionWeightDimList]}] 
 !          List of connection weights along each dimension.
+!          (UNIMPLEMENTED!)
 !     \item[{[cyclicFlagDimList]}]
 !          List of flags indicating cyclic boundaries in each dimension.
-!          ({\it Not yet implemented feature!})
+!          (UNIMPLEMENTED!)
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -664,6 +664,20 @@ contains
       opt_petList => dummy
     endif
 
+    ! Not implemented features
+    if (present(connectionWeightDimList)) then
+      call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        "- connectionWeightDimList not implemented", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
+    if (present(cyclicFlagDimList)) then
+      call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        "- cyclicFlagDimList not implemented", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
+    
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutCreateND(delayout, vmObject, opt_deCountList(1), &
       len_deCountList, opt_petList(1), len_petList, localrc)
@@ -834,14 +848,14 @@ contains
     ! Not implemented features
     if (present(compCapacity)) then
       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
-          "- compCapacity query not implemented", &
-          ESMF_CONTEXT, rc)
+        "- compCapacity query not implemented", &
+        ESMF_CONTEXT, rc)
       return
     endif
     if (present(commCapacity)) then
       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
-          "- commCapacity query not implemented", &
-          ESMF_CONTEXT, rc)
+        "- commCapacity query not implemented", &
+        ESMF_CONTEXT, rc)
       return
     endif
     
@@ -1314,6 +1328,14 @@ contains
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    
+    ! Not implemented features
+    if (present(options)) then
+      call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        "- options not implemented", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutPrint(delayout, localrc)
