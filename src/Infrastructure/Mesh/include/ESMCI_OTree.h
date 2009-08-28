@@ -1,4 +1,4 @@
-// $Id: ESMCI_OTree.h,v 1.2 2009/08/28 18:16:14 oehmke Exp $
+// $Id: ESMCI_OTree.h,v 1.3 2009/08/28 21:21:21 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -87,9 +87,7 @@ class OTree {    // inherits from ESMC_Base class
  // Build tree
  void commit();
 
- int runon(double min[3], double max[3],
-	   int (*func)(void *data,void *func_data),
-	   void *func_data);
+ int runon(double [], double [], int (*func)(void *,void *),void *);
    
 };  // end class ESMC_OTree
 
