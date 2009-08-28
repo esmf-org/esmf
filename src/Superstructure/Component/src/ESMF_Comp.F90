@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.190 2009/07/21 18:35:33 peggyli Exp $
+! $Id: ESMF_Comp.F90,v 1.191 2009/08/28 18:57:02 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -249,7 +249,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.190 2009/07/21 18:35:33 peggyli Exp $'
+    '$Id: ESMF_Comp.F90,v 1.191 2009/08/28 18:57:02 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -529,10 +529,11 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    integer :: npets, mypet, i
+    integer :: npets, mypet, i, petCount
     integer, pointer :: petlist_loc(:)
     character(len=ESMF_MAXSTR) :: fullpath    ! config file + dirPath
     character(len=ESMF_MAXSTR) :: msgbuf
+    type(ESMF_VM):: vm
 
     ! Assume not implemented until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -660,6 +661,7 @@ contains
         ESMF_CONTEXT, rc)) return 
     endif
 
+
     ! check for consistency between contextflag and petlist
     call ESMF_VMGet(vm=compp%vm_parent, localPet=mypet, petCount=npets, &
       rc=localrc)
@@ -680,7 +682,30 @@ contains
     else
       compp%contextflag = ESMF_CHILD_IN_NEW_VM    ! default
     endif
+
+
     
+    ! check for conflict between petlist and global petCount
+    if (compp%npetlist .gt. 0) then
+      call ESMF_VMGetGlobal(vm, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rc)) return
+      call ESMF_VMGet(vm, petCount=petCount, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rc)) return
+      ! see if pets in the petlist exist
+      do i=1, compp%npetlist
+        if (compp%petlist(i) .ge. petCount) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+            "Conflict between petlist and global pet count", &
+            ESMF_CONTEXT, rc)
+           return
+        endif
+      enddo
+    endif
+
+
+
     ! set the participation flag
     compp%iAmParticipant = .false.  ! reset
     if (compp%npetlist .gt. 0) then
