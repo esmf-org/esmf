@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.107 2009/06/08 18:52:00 w6ws Exp $
+! $Id: ESMF_VM.F90,v 1.108 2009/08/28 19:14:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.107 2009/06/08 18:52:00 w6ws Exp $"
+      "$Id: ESMF_VM.F90,v 1.108 2009/08/28 19:14:42 theurich Exp $"
 
 !==============================================================================
 
@@ -583,6 +583,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Flag not implemented features
     if (present(blockingflag)) then
@@ -640,6 +643,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
@@ -695,6 +701,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Flag not implemented features
     if (present(blockingflag)) then
@@ -819,6 +828,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
@@ -884,6 +896,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
@@ -951,6 +966,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
@@ -1016,6 +1034,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
@@ -1161,6 +1182,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
@@ -1218,6 +1242,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
@@ -1274,6 +1301,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Flag not implemented features
     if (present(blockingflag)) then
@@ -1407,6 +1437,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
@@ -1463,6 +1496,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
@@ -1518,6 +1554,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Flag not implemented features
     if (present(blockingflag)) then
@@ -1660,6 +1699,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
@@ -1718,6 +1760,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
@@ -1775,6 +1820,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Flag not implemented features
     if (present(blockingflag)) then
@@ -1948,6 +1996,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
@@ -2013,6 +2064,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
@@ -2080,6 +2134,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
@@ -2145,6 +2202,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
@@ -2282,6 +2342,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
@@ -2348,6 +2411,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
@@ -2416,6 +2482,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
@@ -2482,6 +2551,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
@@ -3199,6 +3271,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
@@ -3263,6 +3338,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
@@ -3329,6 +3407,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
@@ -3394,6 +3475,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
@@ -3458,6 +3542,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
@@ -3602,6 +3689,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
@@ -3659,6 +3749,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
@@ -3715,6 +3808,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Flag not implemented features
     if (present(blockingflag)) then
@@ -3844,6 +3940,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
@@ -3910,6 +4009,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
@@ -3978,6 +4080,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
@@ -4044,6 +4149,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
@@ -4359,6 +4467,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
@@ -4423,6 +4534,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
@@ -4489,6 +4603,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
@@ -4554,6 +4671,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
@@ -4618,6 +4738,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
@@ -4760,6 +4883,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
@@ -4831,6 +4957,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
@@ -4904,6 +5033,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
@@ -4976,6 +5108,9 @@ module ESMF_VMMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(blockingflag)) then
@@ -5047,6 +5182,9 @@ module ESMF_VMMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
