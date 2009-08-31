@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.106 2009/08/21 17:45:06 w6ws Exp $
+// $Id: ESMC_Base.h,v 1.107 2009/08/31 22:15:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -70,9 +70,6 @@ class ESMC_Base
 
     // required & optional standard interface methods for all ESMF classes.
     // should not instantiate a ESMC_Base object directly; must sub-class first.
-
-    // accessor to number of class instances
-    int  ESMC_BaseGetInstCount(void) const;
 
     // accessors to unique ID
     void ESMC_BaseSetID(int id);

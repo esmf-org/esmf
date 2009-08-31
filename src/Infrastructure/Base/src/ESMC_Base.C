@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.121 2009/08/21 17:45:07 w6ws Exp $
+// $Id: ESMC_Base.C,v 1.122 2009/08/31 22:15:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -28,6 +28,7 @@
  // associated class definition file and others
 #include <string.h>
 #include <stdlib.h>
+#include <vector>
 #include "ESMC_Base.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
@@ -35,11 +36,12 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.121 2009/08/21 17:45:07 w6ws Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.122 2009/08/31 22:15:38 theurich Exp $";
 //-----------------------------------------------------------------------------
 
-// initialize class-wide instance counter
-static int globalCount = 0;   //TODO: this should be a counter per VM context
+// global instance counter per VM context
+static vector<ESMCI::VMId*> vmIDList;
+static vector<int> objectCountList;
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -227,31 +229,6 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   vmIDCreator = true;  // Base object is responsible for vmID deallocation
 
 } // end ESMC_BaseSetVMId
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseGetInstCount"
-//BOPI
-// !IROUTINE:  ESMC_BaseGetInstCount - Get number of Base class instances
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_BaseGetInstCount(
-// 
-// !ARGUMENTS:
-      void) const {
-//
-// !RETURN VALUE:
-//    Integer instance count.
-//
-// !DESCRIPTION:
-//    Return a count of how many instances of the {\tt ESMC_Base} class
-//    have been instantiated.
-//
-//EOPI
-
-  return globalCount;
-
-} // end ESMC_BaseGetInstCount
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -910,7 +887,21 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   vmID = ESMCI::VM::getCurrentID(&rc);  // get vmID of current VM context
 //  ESMCI::VMIdPrint(vmID);
   vmIDCreator = false;  // vmID points into global table
-  ID = ++globalCount;
+  
+  // find vmID in the vmIDList
+  int i;
+  for (i=0; i<vmIDList.size(); i++)
+    if (ESMCI::VMIdCompare(vmIDList[i],vmID)) break;
+  if (i==vmIDList.size()){
+    // did not find vmID in vmIDList
+    vmIDList.push_back(vmID);     // add this vmID to the list
+    objectCountList.push_back(0); // add new object count for this vmID
+  }
+  
+  // set ID to objectCount;
+  ID = objectCountList[i] + 1;
+  objectCountList[i] = ID;
+  
   refCount = 1;
   strcpy(className, "global");
   sprintf(baseName, "%s%3d", "unnamed", ID);
@@ -948,7 +939,21 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   vmID = ESMCI::VM::getCurrentID(&rc);  // get vmID of current VM context
 //  ESMCI::VMIdPrint(vmID);
   vmIDCreator = false;  // vmID points into global table
-  ID = ++globalCount;
+  
+  // find vmID in the vmIDList
+  int i;
+  for (i=0; i<vmIDList.size(); i++)
+    if (ESMCI::VMIdCompare(vmIDList[i],vmID)) break;
+  if (i==vmIDList.size()){
+    // did not find vmID in vmIDList
+    vmIDList.push_back(vmID);     // add this vmID to the list
+    objectCountList.push_back(0); // add new object count for this vmID
+  }
+  
+  // set ID to objectCount;
+  ID = objectCountList[i] + 1;
+  objectCountList[i] = ID;
+  
   refCount = 1;
   strcpy(className, superclass ? superclass : "global");
   if (name && (name[0]!='\0')) 
