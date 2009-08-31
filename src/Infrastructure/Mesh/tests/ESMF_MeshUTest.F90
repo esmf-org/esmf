@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshUTest.F90,v 1.13 2009/08/28 15:58:51 oehmke Exp $
+! $Id: ESMF_MeshUTest.F90,v 1.14 2009/08/31 19:29:19 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_MeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshUTest.F90,v 1.13 2009/08/28 15:58:51 oehmke Exp $'
+    '$Id: ESMF_MeshUTest.F90,v 1.14 2009/08/31 19:29:19 oehmke Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -120,11 +120,11 @@ program ESMF_MeshUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Fill in node data
-  numNodes=10
+  numNodes=9
 
   !! node ids
   allocate(nodeIds(numNodes))
-  nodeIds=(/1,2,3,4,5,6,7,8,9,10/) 
+  nodeIds=(/1,2,3,4,5,6,7,8,9/) 
 
   !! node Coords
   allocate(nodeCoords(numNodes*2))
@@ -136,8 +136,7 @@ program ESMF_MeshUTest
                2.0,1.0, &
                0.0,2.0, &
                1.0,2.0, &
-               2.0,2.0, &
-               3.0,3.0/)
+               2.0,2.0 /)
 
   !! node owners
   allocate(nodeOwners(numNodes))
