@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.91 2009/08/21 17:52:12 w6ws Exp $
+// $Id: ESMCI_Grid.C,v 1.92 2009/08/31 16:14:40 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.91 2009/08/21 17:52:12 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.92 2009/08/31 16:14:40 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -5203,6 +5203,9 @@ int Grid::serialize(
     SERIALIZE_VAR1D(cp, buffer,loffset,minIndex, dimCount,int);
     SERIALIZE_VAR1D(cp, buffer,loffset,maxIndex, dimCount,int);
 
+    SERIALIZE_VAR1D(cp, buffer,loffset,connL, dimCount,ESMC_GridConn);
+    SERIALIZE_VAR1D(cp, buffer,loffset,connU, dimCount,ESMC_GridConn);
+
     SERIALIZE_VAR1D(cp, buffer,loffset,gridEdgeLWidth,dimCount,int);
     SERIALIZE_VAR1D(cp, buffer,loffset,gridEdgeUWidth,dimCount,int);
     SERIALIZE_VAR1D(cp, buffer,loffset,gridAlign,dimCount,int);
@@ -5405,6 +5408,9 @@ int Grid::deserialize(
 
   DESERIALIZE_VAR1D( buffer,loffset,minIndex,dimCount,int);
   DESERIALIZE_VAR1D( buffer,loffset,maxIndex,dimCount,int);
+
+  DESERIALIZE_VAR1D( buffer,loffset,connL,dimCount,ESMC_GridConn);
+  DESERIALIZE_VAR1D( buffer,loffset,connU,dimCount,ESMC_GridConn);
   
   DESERIALIZE_VAR1D( buffer,loffset,gridEdgeLWidth,dimCount,int);
   DESERIALIZE_VAR1D( buffer,loffset,gridEdgeUWidth,dimCount,int);
