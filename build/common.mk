@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.277 2009/08/25 22:50:50 svasquez Exp $
+#  $Id: common.mk,v 1.278 2009/08/31 20:21:35 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1666,7 +1666,7 @@ run_system_tests:  reqdir_tests update_sys_tests_flags
            $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Multiprocessor/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
            $(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG); \
         fi; \
-	$(MAKE) ACTION=tree_run_system_tests tree ; \
+	$(MAKE) ACTION=tree_run_system_tests tree
 	$(MAKE) check_system_tests
 
 tree_run_system_tests: $(SYSTEM_TESTS_RUN) 
@@ -1689,7 +1689,7 @@ run_system_tests_uni:  reqdir_tests update_sys_tests_flags
 	   fi; \
 	   echo current working directory is now `pwd` ; \
         fi; \
-	$(MAKE) ACTION=tree_run_system_tests_uni tree ; \
+	$(MAKE) ACTION=tree_run_system_tests_uni tree
 	$(MAKE) check_system_tests
 
 tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
