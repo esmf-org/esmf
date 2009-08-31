@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.4 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMCI_VM.C,v 1.5 2009/08/31 22:09:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.4 2009/01/21 21:38:02 cdeluca Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.5 2009/08/31 22:09:58 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -86,12 +86,12 @@ static int matchTableIndex = 0; // process wide index for non-thread based VMs
 //
 //-----------------------------------------------------------------------------
 
-static ESMC_Logical VMKeyCompare(char *vmKey1, char *vmKey2){
+static bool VMKeyCompare(char *vmKey1, char *vmKey2){
   int i;
   for (i=0; i<vmKeyWidth; i++)
     if (vmKey1[i] != vmKey2[i]) break;
-  if (i==vmKeyWidth) return ESMF_TRUE;
-  return ESMF_FALSE;
+  if (i==vmKeyWidth) return true;
+  return false;
 }
 
 
@@ -195,10 +195,10 @@ void VMIdDestroy(
 // !IROUTINE:  ESMCI::VMIdCompare
 //
 // !INTERFACE:
-ESMC_Logical VMIdCompare(
+bool VMIdCompare(
 //
 // !RETURN VALUE:
-//    {\tt ESMC\_Logical} indicating result of comparison. 
+//    bool indicating result of comparison. 
 //
 // !ARGUMENTS:
 //
@@ -214,9 +214,9 @@ ESMC_Logical VMIdCompare(
   if (vmID1==NULL || vmID2==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- Invalid vmIDs", NULL);
-    return ESMF_FALSE;    // bail out
+    return false;    // bail out
   }
-  if (vmID1->localID != vmID2->localID) return ESMF_FALSE;
+  if (vmID1->localID != vmID2->localID) return false;
   return VMKeyCompare(vmID1->vmKey, vmID2->vmKey);
 }
 //-----------------------------------------------------------------------------
@@ -403,7 +403,7 @@ void *VM::startup(
     for (int i=0; i<matchTableBound; i++){
       if (matchTable_vm[i]!=NULL){
         // This is a valid entry to consider
-        if (VMKeyCompare(matchTable_vmID[i].vmKey, vmID.vmKey) == ESMF_TRUE){
+        if (VMKeyCompare(matchTable_vmID[i].vmKey, vmID.vmKey)){
           if (matchTable_vmID[i].localID > vmID.localID)
             vmID.localID = matchTable_vmID[i].localID;
         }

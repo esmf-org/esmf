@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM_F.C,v 1.4 2009/05/29 19:18:02 theurich Exp $
+// $Id: ESMCI_VM_F.C,v 1.5 2009/08/31 22:09:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -1097,7 +1097,9 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_vmidcompare()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    *result = ESMCI::VMIdCompare(*vmid1, *vmid2);
+    bool resultBool = ESMCI::VMIdCompare(*vmid1, *vmid2);
+    if (resultBool) *result = ESMF_TRUE;
+    else *result = ESMF_FALSE;
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
   }
 

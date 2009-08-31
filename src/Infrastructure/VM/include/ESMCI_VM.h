@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.h,v 1.2 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMCI_VM.h,v 1.3 2009/08/31 22:09:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ namespace ESMCI {
 VMId VMIdCreate(int *rc);      // allocates memory for vmKey member
 void VMIdDestroy(VMId *vmID, int *rc); // frees memory for vmKey memb
 void VMIdPrint(VMId *vmID);
-ESMC_Logical VMIdCompare(VMId *vmID1, VMId *vmID2);
+bool VMIdCompare(VMId *vmID1, VMId *vmID2);
 int VMIdCopy(VMId *vmIDdst, VMId *vmIDsrc);
 
 } // namespace ESMCI
