@@ -1,4 +1,4 @@
-! $Id: ESMF_ComponentUTest.F90,v 1.17 2009/08/28 20:38:23 svasquez Exp $
+! $Id: ESMF_ComponentUTest.F90,v 1.18 2009/08/31 22:24:21 svasquez Exp $
 !
 ! Test code which creates a new Component.
 
@@ -141,7 +141,10 @@
     bool = ESMF_GridCompIsPetLocal(comp2, rc=rc)  
     write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
     write(name, *) "Query run status of a Gridded Component"
-    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+    ! most compilers return "ESMF_RC_OBJ_NOT_CREATED
+    ! pgi returns "ESMF_RC_OBJ_BAD"
+    call ESMF_Test(((rc.eq.ESMF_RC_OBJ_NOT_CREATED).or.(rc.eq.ESMF_RC_OBJ_BAD)), &
+				name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !EX_UTest
@@ -149,7 +152,10 @@
     call ESMF_GridCompDestroy(comp2, rc=rc)
     write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
     write(name, *) "Destroying a Gridded Component"
-    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+    ! most compilers return "ESMF_RC_OBJ_NOT_CREATED
+    ! pgi returns "ESMF_RC_OBJ_BAD"
+    call ESMF_Test(((rc.eq.ESMF_RC_OBJ_NOT_CREATED).or.(rc.eq.ESMF_RC_OBJ_BAD)), &
+				name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !EX_UTest

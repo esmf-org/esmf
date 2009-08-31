@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.27 2009/08/28 20:37:48 svasquez Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.28 2009/08/31 22:23:33 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -141,7 +141,10 @@
     bool = ESMF_CplCompIsPetLocal(cpl2, rc=rc)
     write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
     write(name, *) "Query run status of a non- created Gridded Component"
-    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+    ! most compilers return "ESMF_RC_OBJ_NOT_CREATED
+    ! pgi returns "ESMF_RC_OBJ_BAD"
+    call ESMF_Test(((rc.eq.ESMF_RC_OBJ_NOT_CREATED).or.(rc.eq.ESMF_RC_OBJ_BAD)), &
+                                name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
 
