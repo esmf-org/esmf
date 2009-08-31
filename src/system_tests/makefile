@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.75 2009/08/28 16:53:36 oehmke Exp $ 
+# $Id: makefile,v 1.76 2009/08/31 22:42:17 theurich Exp $ 
 
 ALL: build_system_tests
 
@@ -34,6 +34,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldBundleRedistArb2Arb \
             ESMF_FieldRegrid \
             ESMF_FieldRegridDisjoint \
+            ESMF_FieldRegridOverlap \
             ESMF_FieldLSSMM \
 	    ESMF_InternalStateEnsemble \
 	    ESMF_ArrayRedistOpenMP

@@ -1,10 +1,10 @@
-! $Id: ESMF_FieldRegridOverlapSTest.F90,v 1.1 2009/08/28 16:53:36 oehmke Exp $
+! $Id: ESMF_FieldRegridOverlapSTest.F90,v 1.2 2009/08/31 22:42:17 theurich Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
 
 !-------------------------------------------------------------------------
-!ESMF__REMOVE__MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !BOP
