@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.41 2009/06/19 17:42:23 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.42 2009/08/31 20:12:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.41 2009/06/19 17:42:23 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.42 2009/08/31 20:12:12 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -355,8 +355,8 @@ contains
                              ESMF_CONTEXT, rc)) return
         endif
         call ESMF_ArrayGet(ftype%array, &
-                           typekind=typekind, rc=rc)
-        if (ESMF_LogMsgFoundError(rc, &
+                           typekind=typekind, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
     endif
@@ -368,8 +368,8 @@ contains
                              ESMF_CONTEXT, rc)) return
         endif
         call ESMF_ArrayGet(ftype%array, &
-                           rank=memDimCount, rc=rc)
-        if (ESMF_LogMsgFoundError(rc, &
+                           rank=memDimCount, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
     endif
@@ -390,8 +390,8 @@ contains
                              ESMF_CONTEXT, rc)) return
         endif
         call ESMF_ArrayGet(ftype%array, &
-                           localDeCount=localDeCount, rc=rc)
-        if (ESMF_LogMsgFoundError(rc, &
+                           localDeCount=localDeCount, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
     endif
