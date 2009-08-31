@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2009/08/28 16:53:36 oehmke Exp $ 
+# $Id: makefile,v 1.2 2009/08/31 18:11:23 theurich Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -30,5 +30,5 @@ CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 
-RUN_FieldRegrid:
+RUN_FieldRegridDisjoint:
 	$(MAKE) TNAME=FieldRegridDisjoint NP=6 stest
