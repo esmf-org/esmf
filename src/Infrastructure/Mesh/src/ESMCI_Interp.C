@@ -773,6 +773,7 @@ dstmesh(dest)
        //std::cout << "Building rendezvous..." << std::endl;
     grend.Build(srcF.size(), &srcF[0], dstF.size(), &dstF[0]);
     
+#define MYSEARCH
 #ifdef MYSEARCH
 //    if (Par::Rank() == 0) std::cout << "Start search" << std::endl;
     Search(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), unmappedaction, sres, 1e-8);
