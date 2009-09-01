@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeABundleUTest.F90,v 1.19 2009/08/12 22:53:57 svasquez Exp $
+! $Id: ESMF_AttributeABundleUTest.F90,v 1.20 2009/09/01 22:16:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeABundleUTest.F90,v 1.19 2009/08/12 22:53:57 svasquez Exp $'
+      '$Id: ESMF_AttributeABundleUTest.F90,v 1.20 2009/09/01 22:16:09 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1213,6 +1213,7 @@ program ESMF_AttributeArrayBundleUTest
      !------------------------------------------------------------------------
       ! clean up
       call ESMF_ArrayBundleDestroy(arraybundle, rc=rc)
+      call ESMF_ArrayDestroy(afb, rc=rc)
       call ESMF_ArrayDestroy(array(1), rc=rc)
       call ESMF_ArrayDestroy(array(2), rc=rc)
       call ESMF_DistGridDestroy(distgrid, rc=rc)
