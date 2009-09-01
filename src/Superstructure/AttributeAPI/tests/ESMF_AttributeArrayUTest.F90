@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeArrayUTest.F90,v 1.24 2009/08/12 19:59:23 svasquez Exp $
+! $Id: ESMF_AttributeArrayUTest.F90,v 1.25 2009/09/01 22:03:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeArrayUTest.F90,v 1.24 2009/08/12 19:59:23 svasquez Exp $'
+      '$Id: ESMF_AttributeArrayUTest.F90,v 1.25 2009/09/01 22:03:44 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -76,6 +76,7 @@ program ESMF_AttributeArrayUTest
       real(kind=8), dimension(10)       :: outR8lLong
       character(ESMF_MAXSTR)                     :: inEmpty, outEmpty
       character(ESMF_MAXSTR), dimension(3)       :: inCharl, defaultCharl, dfltoutCharl, outCharl
+      character(ESMF_MAXSTR), dimension(4)       :: defaultCharlWrong
       character(ESMF_MAXSTR), dimension(10)       :: outCharlLong
       logical                          :: inLog, outLog, defaultLog, dfltoutLog
       logical, dimension(3)            :: inLogl, defaultLogl, dfltoutLogl, outLogl
@@ -616,6 +617,17 @@ program ESMF_AttributeArrayUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a default Attribute char list from a Array test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (DfltOutCharl == defaultCharl), &
+        name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get a char list default Attribute on a Array Test
+      call ESMF_AttributeGet(array, name="Charl", &
+        valueList=DfltOutCharl, defaultvalueList=defaultCharlWrong, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting a wrong sized default Attribute char list from a Array test"
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. &
+        all (DfltOutCharl==defaultCharlWrong(1:size(DfltOutCharl))), &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 

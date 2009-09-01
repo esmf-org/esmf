@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.53 2009/08/28 22:17:58 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.54 2009/09/01 22:03:43 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.53 2009/08/28 22:17:58 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.54 2009/09/01 22:03:43 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -2170,6 +2170,9 @@ contains
  @\
       if(present_flag .ne. ESMF_TRUE) then @\
       if(present(defaultvalueList)) then @\
+        if(size(valueList) .lt. size(defaultvalueList)) then @\
+          valueList(1:size(defaultvalueList)) = defaultvalueList @\
+        endif @\
         valueList = defaultvalueList @\
       else  @\
         call ESMF_LogMsgSetError(ESMF_RC_ATTR_NOTSET, & @\
@@ -2416,6 +2419,9 @@ contains
  @\
       if(present_flag .ne. ESMF_TRUE) then @\
       if(present(defaultvalueList)) then @\
+        if(size(valueList) .lt. size(defaultvalueList)) then @\
+          valueList(1:size(defaultvalueList)) = defaultvalueList @\
+        endif @\
         valueList = defaultvalueList @\
       else  @\
         call ESMF_LogMsgSetError(ESMF_RC_ATTR_NOTSET, & @\
@@ -2659,6 +2665,9 @@ contains
  @\
       if(present_flag .ne. ESMF_TRUE) then @\
       if(present(defaultvalueList)) then @\
+        if(size(valueList) .lt. size(defaultvalueList)) then @\
+          valueList(1:size(defaultvalueList)) = defaultvalueList @\
+        endif @\
         do i=1,litemCount @\
           valueList(i) = defaultvalueList(i) @\
         enddo @\
