@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeEx.F90,v 1.10 2009/08/05 19:39:53 rokuingh Exp $
+! $Id: ESMF_AttributeEx.F90,v 1.11 2009/09/01 22:30:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -203,6 +203,8 @@ program ESMF_AttributeEx
       if (all (value .NEQV. inLogl)) then
         print *, "Attribute logical list IN did not match OUT"
       endif
+ 
+      call ESMF_GridCompDestroy(gridcomp,rc=rc)
 
   if (localPet==0) then
       print *, "--------------------------------------- "
