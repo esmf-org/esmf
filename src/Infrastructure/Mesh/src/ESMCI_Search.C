@@ -855,4 +855,17 @@ void PrintSearchResult(const SearchResult &result) {
   }
 }
 
+
+void DestroySearchResult(SearchResult &result) {
+  // Delete contents of search results
+  SearchResult::const_iterator si = result.begin(), se = result.end();
+  for (; si != se; ++si) {
+    Search_result *sr = *si;
+    delete sr;
+  }
+ 
+  // Empty search results
+  result.clear();
+}
+
 } // namespace
