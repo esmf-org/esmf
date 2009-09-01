@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.10 2009/08/06 15:45:59 svasquez Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.11 2009/09/01 22:40:41 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -476,6 +476,22 @@ program ESMF_AttributePackageEx
 !EOC
         if (rc/=ESMF_SUCCESS) goto 10
       endif
+
+    ! Destroy
+    call ESMF_FieldDestroy(field=DPEDT, rc=rc)
+    call ESMF_FieldDestroy(field=DTDT, rc=rc)
+    call ESMF_FieldDestroy(field=DUDT, rc=rc)
+    call ESMF_FieldDestroy(field=DVDT, rc=rc)
+    call ESMF_FieldDestroy(field=PHIS, rc=rc)
+    call ESMF_FieldDestroy(field=QTR, rc=rc)
+    call ESMF_FieldDestroy(field=CNV, rc=rc)
+    call ESMF_FieldDestroy(field=CONVCPT, rc=rc)
+    call ESMF_FieldDestroy(field=CONVKE, rc=rc)
+    call ESMF_FieldDestroy(field=CONVPHI, rc=rc)
+    call ESMF_FieldBundleDestroy(fbundle, rc=rc)
+    call ESMF_GridCompDestroy(gridcomp, rc=rc)
+    call ESMF_StateDestroy(importState, rc=rc)
+    call ESMF_StateDestroy(exportState, rc=rc)
 
   if (localPet==0) then
       print *, "--------------------------------------- "
