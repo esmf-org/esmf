@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.38 2009/06/25 21:04:09 oehmke Exp $
+// $Id: ESMC_GridToMesh.C,v 1.39 2009/09/01 22:25:26 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -511,7 +511,6 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
    // Can now build the communication pattern.
    mesh.build_sym_comm_rel(MeshObj::NODE);
 
-
    // ** That's it.  The mesh is now in the pre-commit phase, so other
    // fields can be registered, sides/faces can be turned on, etc, or one
    // can simply call mesh.Commit() and then proceed.
@@ -537,6 +536,11 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
      mesh.HaloFields(1, &cptr);
 */
    }
+
+
+   // delete Grid Iters
+   delete gni;
+   delete gci;
 
 }
 #undef  ESMC_METHOD
