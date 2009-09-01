@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.22 2009/08/21 17:47:33 w6ws Exp $
+// $Id: ESMCI_DistGrid.C,v 1.23 2009/09/01 18:07:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -27,8 +27,8 @@
 #include "ESMCI_DistGrid.h"
 
 // include higher level, 3rd party or system headers
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 // include ESMF headers
 #include "ESMC_Start.h"
@@ -40,11 +40,12 @@
 #include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"
 
+using namespace std;
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.22 2009/08/21 17:47:33 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.23 2009/09/01 18:07:03 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -99,7 +100,7 @@ DistGrid *DistGrid::create(
     distgrid = new DistGrid;
   }catch(...){
      // allocation error
-     ESMC_LogDefault.MsgAllocError("for new ESMCI::DistGrid.", ESMC_CONTEXT, rc);  
+     ESMC_LogDefault.MsgAllocError("for new ESMCI::DistGrid.", ESMC_CONTEXT,rc);
      return ESMC_NULL_POINTER;
   }
 
@@ -575,7 +576,7 @@ DistGrid *DistGrid::create(
     distgrid = new DistGrid;
   }catch(...){
      // allocation error
-     ESMC_LogDefault.MsgAllocError("for new ESMCI::DistGrid.", ESMC_CONTEXT, rc);  
+     ESMC_LogDefault.MsgAllocError("for new ESMCI::DistGrid.", ESMC_CONTEXT,rc);
      return ESMC_NULL_POINTER;
   }
 
@@ -915,7 +916,7 @@ DistGrid *DistGrid::create(
     distgrid = new DistGrid;
   }catch(...){
      // allocation error
-     ESMC_LogDefault.MsgAllocError("for new ESMCI::DistGrid.", ESMC_CONTEXT, rc);  
+     ESMC_LogDefault.MsgAllocError("for new ESMCI::DistGrid.", ESMC_CONTEXT,rc);
      return ESMC_NULL_POINTER;
   }
 
