@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.24 2009/08/05 00:05:48 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.25 2009/09/01 22:01:04 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.24 2009/08/05 00:05:48 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.25 2009/09/01 22:01:04 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -2199,6 +2199,11 @@ extern "C" {
   }
   else if (*attcopyflag == ESMC_ATTCOPY_HYBRID) {
       status = (**destination).root.AttributeCopyHybrid((**source).root);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  else if (*attcopyflag == ESMC_ATTCOPY_REFERENCE) {
+      status = (**destination).root.AttributeMove(&((**source).root));
       ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
   }

@@ -1,4 +1,4 @@
-% $Id: Attribute_implnotes.tex,v 1.17 2009/05/07 03:19:42 rokuingh Exp $
+% $Id: Attribute_implnotes.tex,v 1.18 2009/09/01 22:01:02 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -18,8 +18,10 @@ The decision to remove either an Attribute or an Attribute package is made by ca
 
 \subsubsection{Using {\tt ESMF\_AttributeGet()} to retrieve Attribute lists}
 
-The behavior of the {\tt ESMF\_AttributeGet()} routine,when retrieving an Attribute containing a value list, follows a slightly different convention than other similar ESMF routines.  This routine requires the input of a Fortran array as a place to store the retrieved values of the Attribute list.  If the array that is given is longer that the list of Attribute values, the first part of the array will be filled, leaving the extra space untouched.  If, however the array passed in, is shorter than the number of Attribute values, the routine will exit with an {\bf ESMF\_FAILURE} return code.  It is suggested that if it is required by the user to use a Fortran array that is longer than the number of Attribute values returned, only the indices of the array which the user desires to be filled with retrieved Attribute values should be passed into the routine.  
+The behavior of the {\tt ESMF\_AttributeGet()} routine,when retrieving an Attribute containing a value list, follows a slightly different convention than other similar ESMF routines.  This routine requires the input of a Fortran array as a place to store the retrieved values of the Attribute list.  If the array that is given is longer that the list of Attribute values, the first part of the array will be filled, leaving the extra space untouched.  If, however the array passed in, is shorter than the number of Attribute values, the routine will exit with a return code which is not equal to {\bf ESMF\_SUCCESS}.  It is suggested that if it is required by the user to use a Fortran array that is longer than the number of Attribute values returned, only the indices of the array which the user desires to be filled with retrieved Attribute values should be passed into the routine.  
   
+Similar behavior is exhibited with the {\tt defaultvalueList} argument in the {\tt ESMF\_AttributeGet()} routine.  The difference here is that if the {\tt valueList} is shorter than the {\tt defaultvalueList} only the appropriate values will be filed in, and the routine will exit without error.  Likewise, if the {\tt valueList} is longer than the {\tt defaultvalueList} then the entire {\tt valueList} will be populated with the beginning section of the {\tt defaultvalueList} that is given.  
+
 \subsubsection{Using Attribute package nesting capabilites}
 
 There is a recommended practice when using nested Attribute packages to organize metadata conventions.  The most general Attribute packages should always be added first, followed by the more specific ones.  For instance, when adding Attribute packages to a Field, it is recommend that the CF convention be added first, followed by the ESG convention, followed by any additional customized Attribute packages.  
