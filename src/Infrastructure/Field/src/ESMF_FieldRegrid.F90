@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.23 2009/09/01 00:25:03 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.24 2009/09/01 21:59:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.23 2009/09/01 00:25:03 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.24 2009/09/01 21:59:13 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -255,7 +255,7 @@ contains
 !           to {\tt ESMF\_REGRID\_METHOD\_BILINEAR}.
 !     \item [{[regridMassConserve]}]
 !           The mass conservation correction, options are 
-!           {\tt ESMF\_REGRID\_MASSCONSERVE\_OFF or 
+!           {\tt ESMF\_REGRID\_MASSCONSERVE\_OFF} or 
 !           {\tt ESMF\_REGRID\_MASSCONSERVE\_ON}. If not specified, defaults 
 !           to {\tt ESMF\_REGRID\_MASSCONSERVE\_OFF}. 
 !           {\it NOTE:} this capability is not yet functional
