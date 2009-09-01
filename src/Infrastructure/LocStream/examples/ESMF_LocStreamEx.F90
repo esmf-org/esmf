@@ -126,6 +126,10 @@ program ESMF_LocStreamEx
    call ESMF_LocStreamDestroy(locstream, rc=rc)
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+   deallocate(lon)
+   deallocate(lat)
+   deallocate(temperature)
+
 !BOE
 !\subsubsection{Creating A LocStream Employing Internally Allocated Memory}
 !
@@ -218,7 +222,7 @@ program ESMF_LocStreamEx
    call ESMF_LocStreamDestroy(locstream, rc=rc)
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-
+   deallocate(temperature)
 
 #endif
 
