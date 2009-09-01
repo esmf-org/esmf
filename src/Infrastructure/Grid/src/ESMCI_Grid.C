@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.92 2009/08/31 16:14:40 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.93 2009/09/01 22:12:14 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.92 2009/08/31 16:14:40 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.93 2009/09/01 22:12:14 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -140,10 +140,10 @@ int Grid::addCoordArray(
   int staggerloc;
   int coord;
   CopyFlag docopy;
-  int *staggerAlign;
-  int *staggerMemLBound;
-  int *staggerEdgeLWidth;
-  int *staggerEdgeUWidth;
+  int *staggerAlign=(int *)ESMC_NULL_POINTER;
+  int *staggerMemLBound=(int *)ESMC_NULL_POINTER;
+  int *staggerEdgeLWidth=(int *)ESMC_NULL_POINTER;
+  int *staggerEdgeUWidth=(int *)ESMC_NULL_POINTER;
   const int *distgridToArrayMap, *arrayUndistLBound, *arrayUndistUBound;
   const int *gridUndistLBound, *gridUndistUBound;
   Array *array;
@@ -535,6 +535,7 @@ int Grid::addCoordArray(
   if (staggerEdgeUWidth != ESMC_NULL_POINTER) delete [] staggerEdgeUWidth;
   if (staggerEdgeLWidth != ESMC_NULL_POINTER) delete [] staggerEdgeLWidth;
   if (staggerAlign != ESMC_NULL_POINTER) delete [] staggerAlign;
+  if (staggerMemLBound != ESMC_NULL_POINTER) delete [] staggerMemLBound;
   if (indexflag==ESMF_INDEX_USER) {
     delete [] staggerMemLBoundIntIntArray;
     delete staggerMemLBoundIntInt;
@@ -578,10 +579,10 @@ int Grid::addCoordArrayArb(
   int rc, localrc;
   int staggerloc;
   int coord;
-  int *staggerAlign;
-  int *staggerMemLBound;
-  int *staggerEdgeLWidth;
-  int *staggerEdgeUWidth;
+  int *staggerAlign=(int *)ESMC_NULL_POINTER;;
+  int *staggerMemLBound=(int *)ESMC_NULL_POINTER;
+  int *staggerEdgeLWidth=(int *)ESMC_NULL_POINTER;
+  int *staggerEdgeUWidth=(int *)ESMC_NULL_POINTER;
   const int *distgridToArrayMap;
   Array *array;
   int extent[1];
@@ -688,6 +689,10 @@ int Grid::addCoordArrayArb(
   delete arrayspec;     
   delete [] distgridToArrayMapIntIntArray;
   delete distgridToArrayMapIntInt;
+  if (staggerEdgeUWidth != ESMC_NULL_POINTER) delete [] staggerEdgeUWidth;
+  if (staggerEdgeLWidth != ESMC_NULL_POINTER) delete [] staggerEdgeLWidth;
+  if (staggerAlign != ESMC_NULL_POINTER) delete [] staggerAlign;
+  if (staggerMemLBound != ESMC_NULL_POINTER) delete [] staggerMemLBound;
 
   // return ESMF_SUCCESS
   return ESMF_SUCCESS;
@@ -6560,9 +6565,12 @@ int construct(
       }
   }
 
-  distDim = new int[distDimCount];
-  memcpy(distDim, distDimArg->array, distDimCount*sizeof(int));
-  
+  distDim=ESMC_NULL_POINTER;
+  if (distDimCount > 0) {
+    distDim = new int[distDimCount];
+    memcpy(distDim, distDimArg->array, distDimCount*sizeof(int));
+  }
+
 // indexflag is always ESMF_INDEX_DELOCAL
   indexflag=ESMF_INDEX_DELOCAL;  // default
 
@@ -6602,6 +6610,8 @@ int construct(
   if (undistUBoundArg != NULL)  delete [] undistLBound;
 
   if (name) delete [] name;
+   
+  if (distDim != ESMC_NULL_POINTER) delete [] distDim;
 
   delete [] distgridToGridMap;
 

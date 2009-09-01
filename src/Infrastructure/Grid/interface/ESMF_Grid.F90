@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.127 2009/08/26 03:43:06 eschwab Exp $'
+      '$Id: ESMF_Grid.F90,v 1.128 2009/09/01 22:12:14 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2780,10 +2780,11 @@ end subroutine ESMF_GridConvertIndex
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate helper variables
-
     deallocate(minIndexLocal)
     deallocate(maxIndexLocal)
     deallocate(distSize)
+    deallocate(isDistDim)
+    deallocate(distDimLocal)
     deallocate(local1DIndices)
     deallocate(localArbIndex)
     if (undistDimCount .ne. 0) then
@@ -3984,6 +3985,7 @@ end subroutine ESMF_GridConvertIndex
     deallocate(coordDimCount)
     deallocate(coordDimMap)
     deallocate(minIndexLocal)
+    deallocate(maxIndexLocal)
     deallocate(distgridToGridMap)
     deallocate(maxPerDEDim)
     deallocate(minPerDEDim)
@@ -13221,6 +13223,8 @@ endif
 
 
     ! Clean up memory
+    deallocate(maxIndexLocal)
+    deallocate(minIndexLocal)
     deallocate(coordDimCount)
     deallocate(coordDimMap)
     deallocate(distgridToGridMap)
