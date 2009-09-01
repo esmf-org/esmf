@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.22 2009/06/25 21:04:09 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.23 2009/09/01 00:25:03 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.22 2009/06/25 21:04:09 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.23 2009/09/01 00:25:03 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -200,7 +200,8 @@ contains
                                        dstField, dstMaskValues,        &
                                        unmappedDstAction,              &
                                        routeHandle, indicies, weights, & 
-                                       regridMethod, regridScheme, rc)
+                                       regridMethod, regridMassConserve, &
+                                       regridScheme, rc)
 !
 ! !RETURN VALUE:
 !      
@@ -214,6 +215,7 @@ contains
       integer(ESMF_KIND_I4), pointer, optional        :: indicies(:,:)
       real(ESMF_KIND_R8), pointer, optional           :: weights(:)
       type(ESMF_RegridMethod), intent(in)             :: regridMethod
+      type(ESMF_RegridMassConserve), intent(in), optional :: regridMassConserve
       integer, intent(in), optional                   :: regridScheme
       integer, intent(out), optional                  :: rc 
 !
@@ -251,6 +253,12 @@ contains
 !           {\tt ESMF\_REGRID\_METHOD\_BILINEAR} or 
 !           {\tt ESMF\_REGRID\_METHOD\_PATCH}. If not specified, defaults 
 !           to {\tt ESMF\_REGRID\_METHOD\_BILINEAR}.
+!     \item [{[regridMassConserve]}]
+!           The mass conservation correction, options are 
+!           {\tt ESMF\_REGRID\_MASSCONSERVE\_OFF or 
+!           {\tt ESMF\_REGRID\_MASSCONSERVE\_ON}. If not specified, defaults 
+!           to {\tt ESMF\_REGRID\_MASSCONSERVE\_OFF}. 
+!           {\it NOTE:} this capability is not yet functional
 !     \item [{[regridScheme]}]
 !           Whether to convert to spherical coordinates 
 !           ({\tt ESMF\_REGRID\_SCHEME\_FULL3D}), 
@@ -263,6 +271,7 @@ contains
 !EOP
         integer :: localrc
         integer              :: lregridScheme
+        type(ESMF_RegridMassConserve) :: lregridMassConserve
         integer              :: isSphere
         type(ESMF_GeomType)  :: srcgeomtype
         type(ESMF_GeomType)  :: dstgeomtype
@@ -295,6 +304,12 @@ contains
         call ESMF_FieldGet(dstField, geomtype=dstgeomtype, array=dstArray, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (present(regridMassConserve)) then
+           lregridMassConserve=regridMassConserve
+        else     
+           lregridMassConserve=ESMF_REGRID_MASSCONSERVE_OFF
+        endif
 
         ! Will eventually determine scheme either as a parameter or from properties
         ! of the source grid
@@ -350,26 +365,27 @@ contains
 
         ! call into the Regrid mesh interface
         call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
-              regridMethod, lregridScheme, unmappedDstAction, routeHandle, &
+              regridMethod, lregridMassConserve, lregridScheme, &
+              unmappedDstAction, routeHandle, &
               indicies, weights, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
-	! destroy Meshes, if they were created here
+        ! destroy Meshes, if they were created here
         if (srcgeomtype .ne. ESMF_GEOMTYPE_MESH) then
-	  call ESMF_MeshDestroy(srcMesh,rc=localrc)
+        call ESMF_MeshDestroy(srcMesh,rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
-	endif
+        endif
 
         if (dstgeomtype .ne. ESMF_GEOMTYPE_MESH) then
-	  call ESMF_MeshDestroy(dstMesh,rc=localrc)
+        call ESMF_MeshDestroy(dstMesh,rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
-	endif
+        endif
 
 
         if(present(rc)) rc = ESMF_SUCCESS

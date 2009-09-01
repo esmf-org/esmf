@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.39 2009/07/28 23:08:06 theurich Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.40 2009/09/01 00:25:19 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -47,6 +47,7 @@ using namespace ESMCI;
 
 enum {ESMF_REGRID_SCHEME_FULL3D = 0, ESMF_REGRID_SCHEME_NATIVE = 1};
 enum {ESMF_REGRID_METHOD_BILINEAR = 0, ESMF_REGRID_METHOD_PATCH = 1};
+enum {ESMF_REGRID_MASSCONSERVE_OFF = 0, ESMF_REGRID_MASSCONSERVE_ON = 1};
 
 namespace ESMCI {
   struct TempWeights {
@@ -66,7 +67,8 @@ extern "C" void FTN(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
 extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                    Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, int *srcstaggerLoc,
                    Mesh **meshdstpp, ESMCI::Array **arraydstpp, int *dststaggerLoc,
-		   int *regridMethod, int *regridScheme, int *unmappedaction,
+		   int *regridMethod, int *regridMassConserve, 
+                   int *regridScheme, int *unmappedaction,
                    ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
                    int *nentries, ESMCI::TempWeights **tweights,
                              int*rc) {
