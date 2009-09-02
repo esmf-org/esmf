@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.167 2009/08/21 18:17:48 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.168 2009/09/02 05:52:51 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -50,6 +50,7 @@ module ESMF_StateMod
       use ESMF_StateTypesMod
       use ESMF_StateVaMod
       use ESMF_InitMacrosMod
+      use ESMF_IO_NetCDFMod
       
       implicit none
       
@@ -76,6 +77,7 @@ module ESMF_StateMod
       public ESMF_StateWriteRestart
       public ESMF_StateReadRestart
 
+      public ESMF_StateRead
       public ESMF_StateWrite
       public ESMF_StatePrint
 
@@ -88,7 +90,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.167 2009/08/21 18:17:48 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.168 2009/09/02 05:52:51 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -165,7 +167,6 @@ module ESMF_StateMod
 !  
 !EOPI 
   end interface
-
 
 !==============================================================================
 
@@ -3458,6 +3459,92 @@ module ESMF_StateMod
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateRead"
+!BOP
+! !IROUTINE: ESMF_StateRead -- Read Arrays from a file into a State.
+!
+! !INTERFACE:
+      subroutine ESMF_StateRead(state, fileName, fileFormat, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State)                                :: state 
+      character (len=*),        intent(in)            :: fileName
+      type (ESMF_IOFileFormat), intent(in),  optional :: fileFormat
+      integer,                  intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!     Currently limited to read in all Arrays from a netCDF file and add them
+!     to a State object.  Future releases will enable more items of a State
+!     to be read from a file of various formats.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[state]
+!       The {\tt ESMF\_State} to add Arrays read from file.
+!     \item[fileName]
+!       File to be read.
+!     \item[{[fileFormat]}]
+!       The file format to be used.  Currently, only ESMF_IO_FILEFORMAT_NETCDF
+!       is supported, which is the default. Future releases will support others.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+        type(ESMF_IO_NetCDF) :: io
+        integer :: fileNameLen, localrc
+        character(ESMF_MAXSTR) :: ioName
+        integer :: ioNameLen
+        logical :: netcdfPresent
+
+!       TODO: use item flag ESMF_STATEITEM_ARRAY<BUNDLE>
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
+
+        ! get length of given fileName for C++ validation
+        fileNameLen = len_trim(fileName)
+
+        ! name for IO_NetCDF object
+        ioName = 'netcdfReader'
+        ioNameLen = len_trim(ioName)
+
+        ! assume netCDF C++ API library present until proven otherwise
+        netcdfPresent = .true.
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+        ! TODO: move this code into State C/C++ using C++ IO_NetCDF API
+        call c_ESMC_IO_NetCDFCreate(io, ioNameLen, ioName, &
+                                    state%statep%base, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        call c_ESMC_IO_NetCDFSetState(io, state, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        call c_ESMC_IO_NetCDFRead(io, fileNameLen, fileName, localrc)
+        if (localrc==ESMF_RC_LIB_NOT_PRESENT) netcdfPresent = .false.
+        if (localrc.ne.ESMF_SUCCESS .and. netcdfPresent) localrc = ESMF_FAILURE
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        call c_ESMC_IO_NetCDFDestroy(io, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        if (present(rc)) rc = ESMF_SUCCESS
+        end subroutine ESMF_StateRead
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateReadRestart"
 !BOPI
 ! !IROUTINE: ESMF_StateReadRestart -- ReadRestart the internal data from a State
@@ -3507,19 +3594,19 @@ module ESMF_StateMod
         end function ESMF_StateReadRestart
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateWrite"
+!#undef  ESMF_METHOD
+!#define ESMF_METHOD "ESMF_StateWrite"
 !BOPI
-! !IROUTINE: ESMF_StateWrite -- Write all or part of a State
+! !IROUTINE: ESMF_StateWrite -- Write single item from a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateWrite(state, iospec, itemName, rc)
+!      subroutine ESMF_StateWrite(state, iospec, itemName, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State):: state 
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      character (len=*), intent(in), optional :: itemName
-      integer, intent(out), optional :: rc            
+!      type(ESMF_State):: state 
+!      type(ESMF_IOSpec), intent(in), optional :: iospec
+!      character (len=*), intent(in), optional :: itemName
+!      integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
 !      Used to write out all or part of a State object.
@@ -3537,28 +3624,113 @@ module ESMF_StateMod
 !     \end{description}
 !
 !EOPI
-        ! TODO: hardcoded for interoperability test
-        type(ESMF_Field) :: fred
-        integer :: localrc
+!        ! TODO: hardcoded for interoperability test
+!        type(ESMF_Field) :: fred
+!        integer :: localrc
+!
+!        localrc = ESMF_RC_NOT_IMPL
+!
+!        ! check input variables
+!        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+!
+!        if (present(itemName)) then
+!            call ESMF_StateGetField(state, itemName=itemName, field=fred, rc=localrc)
+!            call ESMF_FieldWrite(fred, iospec=iospec, rc=localrc) 
+!        endif
+!
+!        if (ESMF_LogMsgFoundError(localrc, &
+!                                  ESMF_ERR_PASSTHRU, &
+!                                  ESMF_CONTEXT, rc)) return
+!  
+!
+!        if (present(rc)) rc = ESMF_SUCCESS
+!        end subroutine ESMF_StateWrite
+!
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateWrite"
+!BOP
+! !IROUTINE: ESMF_StateWrite -- Write all Arrays from a State to file.
+!
+! !INTERFACE:
+      subroutine ESMF_StateWrite(state, fileName, fileFormat, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State)                                :: state 
+      character (len=*),        intent(in)            :: fileName
+      type (ESMF_IOFileFormat), intent(in),  optional :: fileFormat
+      integer,                  intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!     Currently limited to write out all Arrays of a State object to a
+!     netCDF file.  Future releases will enable more items of a State to be
+!     written to files of various formats.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[state]
+!       The {\tt ESMF\_State} from which to write Arrays.
+!     \item[fileName]
+!       File to be written.  
+!     \item[{[fileFormat]}]
+!       The file format to be used.  Currently, only ESMF_IO_FILEFORMAT_NETCDF
+!       is supported, which is the default. Future releases will support others.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+        type(ESMF_IO_NetCDF) :: io
+        integer :: fileNameLen, localrc
+        character(ESMF_MAXSTR) :: ioName
+        integer :: ioNameLen
+        logical :: netcdfPresent
 
+!       TODO: use item flag ESMF_STATEITEM_ARRAY<BUNDLE>
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
         localrc = ESMF_RC_NOT_IMPL
+
+        ! get length of given fileName for C++ validation
+        fileNameLen = len_trim(fileName)
+
+        ! name for IO_NetCDF object
+        ioName = 'netcdfReader'
+        ioNameLen = len_trim(ioName)
+
+        ! assume netCDF C++ API library present until proven otherwise
+        netcdfPresent = .true.
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
-        if (present(itemName)) then
-            call ESMF_StateGetField(state, itemName=itemName, field=fred, rc=localrc)
-            call ESMF_FieldWrite(fred, iospec=iospec, rc=localrc) 
-        endif
-
+        ! TODO: move this code into State C/C++ using C++ IO_NetCDF API
+        call c_ESMC_IO_NetCDFCreate(io, ioNameLen, ioName, &
+                                    state%statep%base, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-  
+
+        call c_ESMC_IO_NetCDFSetState(io, state, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        call c_ESMC_IO_NetCDFWrite(io, fileNameLen, fileName, localrc)
+        if (localrc==ESMF_RC_LIB_NOT_PRESENT) netcdfPresent = .false.
+        if (localrc.ne.ESMF_SUCCESS .and. netcdfPresent) localrc = ESMF_FAILURE
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        call c_ESMC_IO_NetCDFDestroy(io, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS
         end subroutine ESMF_StateWrite
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
