@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.17 2009/09/01 18:07:01 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.18 2009/09/02 03:41:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,6 +44,22 @@ extern "C" {
 
   // - ESMF-public methods:
         
+  void FTN(c_esmc_distgridcreatedg)(ESMCI::DistGrid **ptr, 
+    ESMCI::DistGrid **dg, ESMCI::InterfaceInt **regDecompFirstExtra,
+    ESMCI::InterfaceInt **regDecompLastExtra, ESMC_IndexFlag *indexflag,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_distgridcreatedg()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    *ptr = ESMCI::DistGrid::create(*dg, *regDecompFirstExtra,
+      *regDecompLastExtra, ESMC_NOT_PRESENT_FILTER(indexflag), &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
   void FTN(c_esmc_distgridcreaterd)(ESMCI::DistGrid **ptr, 
     ESMCI::InterfaceInt **minIndex, ESMCI::InterfaceInt **maxIndex,
     ESMCI::InterfaceInt **regDecomp,
@@ -205,8 +221,12 @@ extern "C" {
       *patchCount = (*ptr)->getPatchCount();
     if (ESMC_NOT_PRESENT_FILTER(dimCount) != ESMC_NULL_POINTER)
       *dimCount = (*ptr)->getDimCount();
-    if (ESMC_NOT_PRESENT_FILTER(regDecompFlag) != ESMC_NULL_POINTER)
-      *regDecompFlag = (*ptr)->getRegDecompFlag();
+    if (ESMC_NOT_PRESENT_FILTER(regDecompFlag) != ESMC_NULL_POINTER){
+      if ((*ptr)->getRegDecomp())
+        *regDecompFlag = ESMF_TRUE;
+      else
+        *regDecompFlag = ESMF_FALSE;
+    }
     // fill minIndexPDimPPatch
     if (*minIndexPDimPPatch != NULL){
       // minIndexPDimPPatch was provided -> do some error checking

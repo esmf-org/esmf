@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.13 2009/08/21 17:47:32 w6ws Exp $
+// $Id: ESMCI_DistGrid.h,v 1.14 2009/09/02 03:41:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int *collocationTable;        // collocation in packed format [dimCount]
     int **elementCountPCollPLocalDe; // number of elements 
                                   // [collocationCount][localDeCount]
-    ESMC_Logical regDecompFlag;   // flag indicating regular decomposition
+    int *regDecomp;               // regular decomposition descriptor
     // lower level object references
     DELayout *delayout;
     bool delayoutCreator;
@@ -86,11 +86,14 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int construct(int dimCount, int patchCount, int *dePatchList,
       int *minIndex, int *maxIndex, int *minIndexPDimPDe, int *maxIndexPDimPDe,
       int *contigFlagPDimPDe, int *indexCountPDimPDe, int **indexList,
-      ESMC_Logical regDecompFlagArg, InterfaceInt *connectionList,
+      int *regDecompArg, InterfaceInt *connectionList,
       DELayout *delayout, bool delayoutCreator, VM *vm);
     int destruct();
   public:
     // create() and destroy()
+    static DistGrid *create(DistGrid const *dg,
+      InterfaceInt *regDecompFirstExtra, InterfaceInt *regDecompLastExtra, 
+      ESMC_IndexFlag *indexflag, int *rc=NULL);
     static DistGrid *create(InterfaceInt *minIndex,
       InterfaceInt *maxIndex, InterfaceInt *regDecomp, 
       DecompFlag *decompflag, int decompflagCount,
@@ -149,7 +152,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     const int *getCollocationPDim() const {return collocationPDim;}
     const int *getCollocationTable() const {return collocationTable;}
     DELayout *getDELayout()         const {return delayout;}
-    ESMC_Logical getRegDecompFlag() const {return regDecompFlag;}
+    const int *getRegDecomp()       const {return regDecomp;}
     int getSequenceIndexLocalDe(int localDe, const int *index, int *rc=NULL)
       const;
     int getSequenceIndexPatchRelative(int patch, const int *index, int depth,

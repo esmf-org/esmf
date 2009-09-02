@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.23 2009/09/01 18:07:03 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.24 2009/09/02 03:41:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.23 2009/09/01 18:07:03 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.24 2009/09/02 03:41:25 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -56,6 +56,150 @@ namespace ESMCI {
 //
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid:create()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid:create
+//
+// !INTERFACE:
+DistGrid *DistGrid::create(
+//
+// !RETURN VALUE:
+//    ESMCI::DistGrid * to newly allocated DistGrid
+//
+// !ARGUMENTS:
+//
+  DistGrid const *dg,                     // (in)
+  InterfaceInt *regDecompFirstExtra,      // (in)
+  InterfaceInt *regDecompLastExtra,       // (in)
+  ESMC_IndexFlag *indexflag,              // (in)
+  int *rc                                 // (out) return code
+  ){
+//
+// !DESCRIPTION:
+//    Create a new DistGrid from an existing DistGrid, keeping the decomposition
+//    unchanged. Supplying regDecompFirstExtra and/or regDecompLastExtra
+//    requires a regularily decomposed incoming DistGrid. These arguments
+//    allow extra elements to be added at the first/last DE in each dimension.
+//    If these arguments are not specified the method reduces to a deep copy
+//    of the incoming DistGrid.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  DistGrid *distgrid = NULL;  // initialize
+  
+  if (regDecompFirstExtra || regDecompLastExtra || indexflag){
+    // this requires a regDecomp
+    if (dg->regDecomp==NULL){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+        "- This mode requires regDecomp in incoming DistGrid", rc);
+      return ESMC_NULL_POINTER;
+    }
+    // prepare for internal InterfaceInt usage
+    int dimInterfaceInt = 1;  // default
+    if (dg->patchCount > 1)
+      dimInterfaceInt = 2;
+    int *dimCountInterfaceInt = new int(dimInterfaceInt);
+    dimCountInterfaceInt[0] = dg->dimCount;
+    if (dimInterfaceInt==2)
+      dimCountInterfaceInt[1] = dg->patchCount;
+    else
+      dimCountInterfaceInt[1] = 1;
+    int totalCountInterfaceInt = dimCountInterfaceInt[0]
+      * dimCountInterfaceInt[1];
+    // prepare minIndex and maxIndex
+    // regDecompFirstExtra and regDecompLastExtra arguments
+    int *minIndexAlloc = new int[totalCountInterfaceInt];
+    if (regDecompFirstExtra)
+      for (int i=0; i<totalCountInterfaceInt; i++)
+        minIndexAlloc[i] = dg->minIndexPDimPPatch[i]
+          - regDecompFirstExtra->array[i];
+    else
+      memcpy(minIndexAlloc, dg->minIndexPDimPPatch,
+        sizeof(int)*totalCountInterfaceInt);
+    InterfaceInt *minIndex = new InterfaceInt(minIndexAlloc,
+      dimInterfaceInt, dimCountInterfaceInt);
+    int *maxIndexAlloc = new int[totalCountInterfaceInt];
+    if (regDecompLastExtra)
+      for (int i=0; i<totalCountInterfaceInt; i++)
+        maxIndexAlloc[i] = dg->maxIndexPDimPPatch[i]
+          + regDecompLastExtra->array[i];
+    else
+      memcpy(maxIndexAlloc, dg->maxIndexPDimPPatch,
+        sizeof(int)*totalCountInterfaceInt);
+    InterfaceInt *maxIndex = new InterfaceInt(maxIndexAlloc,
+      dimInterfaceInt, dimCountInterfaceInt);
+    // prepare regDecomp
+    InterfaceInt *regDecomp = new InterfaceInt(dg->regDecomp,
+      dimInterfaceInt, dimCountInterfaceInt);
+    // prepare connectionList
+    //TODO: connectionList may need to be modified according to
+    // regDecompFirstExtra and regDecompLastExtra arguments
+    InterfaceInt *connectionList = NULL;  // default
+    int *connectionListAlloc = NULL; // default
+    if (dg->connectionCount){
+      dimInterfaceInt = 2;
+      int elementSize = 3*dg->dimCount+2;
+      dimCountInterfaceInt[0] = elementSize;
+      dimCountInterfaceInt[1] = dg->connectionCount;
+      connectionListAlloc = new int[elementSize * dg->connectionCount];
+      for (int i=0; i<dg->connectionCount; i++){
+        memcpy(&(connectionListAlloc[elementSize*i]), dg->connectionList[i],
+          sizeof(int)*elementSize);
+      }
+      connectionList = new InterfaceInt(dg->maxIndexPDimPPatch,
+        dimInterfaceInt, dimCountInterfaceInt);
+    }
+    //TODO: decompflag needs to be kept in DistGrid so it can be used here!
+    //TODO: indexflag needs to be kept in DistGrid so it can be used here as def
+    
+    // create DistGrid according to collected information
+    if (dg->patchCount==1){
+      // single patch
+      distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, NULL, 0,
+        regDecompFirstExtra, regDecompLastExtra, NULL, indexflag,
+        connectionList, NULL, dg->delayout, dg->vm, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+        return ESMC_NULL_POINTER;
+    }else{
+      // multi patch
+      distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, NULL, 0, 0,
+        regDecompFirstExtra, regDecompLastExtra, NULL, indexflag,
+        connectionList, NULL, dg->delayout, dg->vm, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+        return ESMC_NULL_POINTER;
+    }
+    // garbage collection
+    delete [] dimCountInterfaceInt;
+    delete minIndex;
+    delete [] minIndexAlloc;
+    delete maxIndex;
+    delete [] maxIndexAlloc;
+    delete regDecomp;
+    if (connectionList)
+      delete connectionList;
+    if (connectionListAlloc)
+      delete [] connectionListAlloc;
+  }else{
+    // deep copy
+    //TODO: need to implement DistGrid deep copy
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+      "- DistGrid deep copy not yet implemented", rc);
+    return ESMC_NULL_POINTER;
+  }
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return distgrid;
+}
+//-----------------------------------------------------------------------------
+  
+  
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::DistGrid:create()"
@@ -492,8 +636,8 @@ DistGrid *DistGrid::create(
   // call into construct()
   localrc = distgrid->construct(dimCount, 1, patchListPDe,
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
-    contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe, ESMF_TRUE,
-    connectionList, delayout, delayoutCreator, vm);
+    contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe,
+    regDecomp->array, connectionList, delayout, delayoutCreator, vm);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
@@ -782,7 +926,7 @@ DistGrid *DistGrid::create(
   // call into construct()
   localrc = distgrid->construct(dimCount, 1, patchListPDe, 
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
-    contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe, ESMF_FALSE,
+    contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe, NULL,
     connectionList, delayout, delayoutCreator, vm);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
@@ -1381,8 +1525,8 @@ DistGrid *DistGrid::create(
   // call into construct()
   localrc = distgrid->construct(dimCount, patchCount, patchListPDe,
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
-    contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe, ESMF_TRUE,
-    connectionList, delayout, delayoutCreator, vm);
+    contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe,
+    regDecomp->array, connectionList, delayout, delayoutCreator, vm);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
@@ -1501,7 +1645,7 @@ int DistGrid::construct(
   int *contigFlagPDimPDeArg,            // (in)
   int *indexCountPDimPDeArg,            // (in)
   int **indexListPDimPLocalDeArg,       // (in)
-  ESMC_Logical regDecompFlagArg,        // (in)
+  int *regDecompArg,                    // (in)
   InterfaceInt *connectionListArg,      // (in)
   DELayout *delayoutArg,                // (in) DELayout
   bool delayoutCreatorArg,              // (in)
@@ -1520,7 +1664,6 @@ int DistGrid::construct(
   // fill in the DistGrid object
   dimCount = dimCountArg;
   patchCount = patchCountArg;
-  regDecompFlag = regDecompFlagArg;
   if (connectionListArg != NULL){
     // connectionList was provided
     int elementSize = 3*dimCount+2;
@@ -1616,6 +1759,11 @@ int DistGrid::construct(
       elementCountPCollPLocalDe[i][j] = elementCountPDe[localDeList[i]];
     }
   }
+  if (regDecompArg){
+    regDecomp = new int[dimCount];
+    memcpy(regDecomp, regDecompArg, sizeof(int)*dimCount);
+  }else
+    regDecomp = NULL;
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1674,6 +1822,8 @@ int DistGrid::destruct(void){
   delete [] elementCountPCollPLocalDe;
   delete [] collocationPDim;
   delete [] collocationTable;
+  if (regDecomp)
+    delete [] regDecomp;
   
   if (delayoutCreator){
     localrc = DELayout::destroy(&delayout); 
@@ -2000,7 +2150,7 @@ int DistGrid::print()const{
   for (int i=0; i<patchCount; i++)
     printf("%d ", elementCountPPatch[i]);
   printf("\n");
-  printf("regDecompFlag = %s\n", ESMC_LogicalString(regDecompFlag));
+  printf("regDecomp = %s\n", (regDecomp)?"YES":"NO");
   printf("patchListPDe: ");
   int deCount = delayout->getDeCount();
   for (int i=0; i<deCount; i++)
@@ -3068,14 +3218,21 @@ int DistGrid::serialize(
     *ip++ = connectionCount;
   } else
     ip += (dimCount+1)*deCount + 1 + dimCount;
+  
+  if (inquireflag != ESMF_INQUIREONLY){
+    if (regDecomp){
+      *ip++ = dimCount;
+      for (int i=0; i<dimCount; i++)
+        *ip++ = regDecomp[i];
+    }else
+      *ip++ = 0;
+  }else{
+    ip++;
+    if (regDecomp)
+      ip += dimCount;
+  }
 
-  lp = (ESMC_Logical *)ip;
-  if (inquireflag != ESMF_INQUIREONLY)
-    *lp++ = regDecompFlag;
-  else
-    lp ++;
-
-  cp = (char *)lp;
+  cp = (char *)ip;
   *offset = (cp - buffer);
   
   // return successfully
@@ -3182,10 +3339,16 @@ DistGrid *DistGrid::deserialize(
     a->elementCountPCollPLocalDe[i][0] = 0;
   }
   
-  lp = (ESMC_Logical *)ip;
-  a->regDecompFlag = *lp++;
+  //regDecomp
+  int regDecompDimCount = *ip++;
+  if (regDecompDimCount == a->dimCount){
+    a->regDecomp = new int[a->dimCount];
+    for (int i=0; i<a->dimCount; i++)
+      a->regDecomp[i] = *ip++;
+  }else
+    a->regDecomp = NULL;
 
-  cp = (char *)lp;
+  cp = (char *)ip;
   *offset = (cp - buffer);
   
   // return successfully

@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.17 2009/07/30 16:17:30 theurich Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.18 2009/09/02 03:41:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.17 2009/07/30 16:17:30 theurich Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.18 2009/09/02 03:41:28 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -53,7 +53,7 @@ program ESMF_DistGridCreateGetUTest
   !LOCAL VARIABLES:
   type(ESMF_VM):: vm
   integer:: petCount, localPet, i, localDeCount
-  type(ESMF_DistGrid):: distgrid, distgrid2
+  type(ESMF_DistGrid):: distgrid, distgrid2, distgrid3
   type(ESMF_DELayout):: delayout
   integer:: dimCount, patchCount, deCount
   logical:: regDecompFlag
@@ -404,6 +404,27 @@ program ESMF_DistGridCreateGetUTest
   write(name, *) "DistGridMatch() - different DistGrids that are the same - matchResult"
   write(failMsg, *) "matchResult not ESMF_TRUE"
   call ESMF_Test(matchResult, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridCreate() - from DistGrid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid3 = ESMF_DistGridCreate(distgrid, indexflag=ESMF_INDEX_DELOCAL, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridPrint()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridPrint(distgrid3, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridDestroy()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid3, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest
