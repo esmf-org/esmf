@@ -825,7 +825,6 @@ dstmesh(dest)
   
 Interp::~Interp() {
   DestroySearchResult(sres);
-
 }
 
 void Interp::operator()() {
