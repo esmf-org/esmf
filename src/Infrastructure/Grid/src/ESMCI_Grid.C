@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.93 2009/09/01 22:12:14 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.94 2009/09/02 22:30:05 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.93 2009/09/01 22:12:14 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.94 2009/09/02 22:30:05 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -5366,14 +5366,18 @@ int Grid::deserialize(
   loff += (sizeof(t));  
 
 #define DESERIALIZE_VAR1D(bufptr,loff,varptr,s1,t)  \
-  varptr = new t[s1];           \
-  memcpy(varptr,bufptr+loff,(s1*sizeof(t)));      \
-  loff += (s1*sizeof(t));  
+  if (s1) { \
+     varptr = new t[s1];           \
+     memcpy(varptr,bufptr+loff,(s1*sizeof(t)));      \
+    loff += (s1*sizeof(t));  \
+  }
 
 #define DESERIALIZE_VAR2D(bufptr,loff,varptr,s1,s2,t) \
+  if (s1 && s2) { \
   varptr=_allocate2D<t>(s1,s2);         \
   memcpy(((t **)varptr)+s1,bufptr+loff,(s1*s2*sizeof(t))); \
-  loff += (s1*s2*sizeof(t));  
+  loff += (s1*s2*sizeof(t));  \
+  }
 
   // get localoffset
   loffset=*offset;
