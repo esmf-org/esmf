@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.C,v 1.2 2009/07/21 05:54:01 eschwab Exp $
+// $Id: ESMCI_IO_NetCDF.C,v 1.3 2009/09/02 05:48:51 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.2 2009/07/21 05:54:01 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.3 2009/09/02 05:48:51 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -239,12 +239,24 @@ int IO_NetCDF::count=0;
     //***
     // Create the State object that we'll be filling with Arrays
     //***
+#if 0
     int stateRc = 0;
     theState = State::create(this->fileName, &stateRc);
     //printf("*** State RC: %d\n", stateRc);
     if (stateRc != ESMF_SUCCESS)
     {
       return stateRc; 
+    }
+#endif
+
+    //***
+    // Check that the State object that we'll be filling with Arrays is set
+    //***
+    if (theState == ESMC_NULL_POINTER) 
+    {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'theState' pointer is NULL.", &rc);
+      return(ESMF_FAILURE);
     }
 
     /*
