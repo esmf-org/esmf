@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 2009/04/22 05:26:25 theurich Exp $ 
+# $Id: makefile,v 1.27 2009/09/02 05:54:12 eschwab Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -8,7 +8,8 @@ LOCDIR	  = src/Superstructure/State/tests
 
 TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMC_StateUTest \
                 $(ESMF_TESTDIR)/ESMF_StateCreateUTest \
-                $(ESMF_TESTDIR)/ESMF_StateReconcileUTest
+                $(ESMF_TESTDIR)/ESMF_StateReconcileUTest \
+                $(ESMF_TESTDIR)/ESMF_StateReadWriteUTest
 # TODO:FIELDINTEGRATION Restore State reconcile and other tests.
 #		$(ESMF_TESTDIR)/ESMF_StateUTest
 #		$(ESMF_TESTDIR)/ESMF_StateReconcileUTest \
@@ -16,13 +17,15 @@ TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMC_StateUTest \
 
 TESTS_RUN     =	RUN_ESMC_StateUTest \
          	RUN_ESMF_StateCreateUTest \
-                RUN_ESMF_StateReconcileUTest
+                RUN_ESMF_StateReconcileUTest \
+                RUN_ESMF_StateReadWriteUTest
 #		RUN_ESMF_StateUTest
 #		RUN_ESMF_StateLimitUTest \
 
 TESTS_RUN_UNI =	RUN_ESMC_StateUTestUNI \
                 RUN_ESMF_StateCreateUTestUNI \
-                RUN_ESMF_StateReconcileUTestUNI
+                RUN_ESMF_StateReconcileUTestUNI \
+                RUN_ESMF_StateReadWriteUTestUNI
 #		RUN_ESMF_StateUTestUNI
 #		RUN_ESMF_StateLimitUTestUNI \
 
@@ -91,4 +94,15 @@ RUN_ESMF_StateLimitUTest:
 RUN_ESMF_StateLimitUTestUNI:
 	$(MAKE) TNAME=StateLimit NP=1 ftest
 
+#       
+# State Read/Write Unit Test
+#
+
+RUN_ESMF_StateReadWriteUTest:
+	cp -f $(ESMF_DIR)/src/Infrastructure/IO/tests/io_netcdf_testdata.nc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=StateReadWrite NP=4 ftest
+
+RUN_ESMF_StateReadWriteUTestUNI:
+	cp -f $(ESMF_DIR)/src/Infrastructure/IO/tests/io_netcdf_testdata.nc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=StateReadWrite NP=1 ftest
 
