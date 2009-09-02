@@ -1,4 +1,4 @@
-// $Id: ESMC_IO_NetCDFUTest.C,v 1.1 2009/07/21 05:55:46 eschwab Exp $
+// $Id: ESMC_IO_NetCDFUTest.C,v 1.2 2009/09/02 05:51:11 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -46,6 +46,7 @@ int main(void)
   const char input_nc_filename[]  = "io_netcdf_testdata.nc";
   const char output_nc_filename[] = "io_netcdf_testdata_out.nc";
 
+  State* state;
   IO_NetCDF* nctestIO;
 
   //----------------------------------------------------------------------------
@@ -64,6 +65,17 @@ int main(void)
 
   //----------------------------------------------------------------------------
   //NEX_UTest
+  strcpy(name, "Create ESMCI_State object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  state = State::create("dummy_state_filename", &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  nctestIO->setState(state);
+
+  //----------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   strcpy(name, "read netcdf data into ESMCI_IO_NetCDF object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = nctestIO->read(strlen(input_nc_filename), input_nc_filename);
@@ -79,6 +91,14 @@ int main(void)
   rc = nctestIO->write(strlen(output_nc_filename), output_nc_filename);
   ESMC_Test((rc==ESMF_SUCCESS || netcdfNotPresent), name, failMsg,
              &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Destroy ESMCI_State object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = State::destroy(state);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
