@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGatherUTest.F90,v 1.13 2009/08/04 23:26:23 theurich Exp $
+! $Id: ESMF_ArrayGatherUTest.F90,v 1.14 2009/09/03 05:45:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayGatherUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_ArrayGatherUTest.F90,v 1.13 2009/08/04 23:26:23 theurich Exp $'
+    '$Id: ESMF_ArrayGatherUTest.F90,v 1.14 2009/09/03 05:45:42 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -183,8 +183,18 @@ contains
                 ESMF_CONTEXT, rc)) return
         endif
 
-        call ESMF_ArrayDestroy(array)
+        call ESMF_ArrayDestroy(array, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+                    
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        
         if(lpe .eq. 0) deallocate(farrayDst)
+
         rc = ESMF_SUCCESS
     end subroutine test_gather_1d
 
@@ -260,7 +270,16 @@ contains
                 ESMF_CONTEXT, rc)) return
         endif
 
-        call ESMF_ArrayDestroy(array)
+        call ESMF_ArrayDestroy(array, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+                    
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        
         if(lpe .eq. 0) deallocate(farrayDst)
         rc = ESMF_SUCCESS
     end subroutine test_gather_2d
@@ -340,7 +359,16 @@ contains
                 ESMF_CONTEXT, rc)) return
         endif
 
-        call ESMF_ArrayDestroy(array)
+        call ESMF_ArrayDestroy(array, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+                    
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        
         if(lpe .eq. 0) deallocate(farrayDst)
         rc = ESMF_SUCCESS
     end subroutine test_gather_3d
