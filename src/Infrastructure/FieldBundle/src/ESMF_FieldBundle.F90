@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.21 2009/08/21 17:50:16 w6ws Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.22 2009/09/03 22:35:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -2540,17 +2540,19 @@ end function
                                      ESMF_CONTEXT, rc)) return
 
 
-      call ESMF_BaseCreate(bp%base, "FieldBundle", "dummy", 0, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
-
-      ! this overwrites the name and adds attributes to the base obj.
+      ! Deserialize Base
       call c_ESMC_BaseDeserialize(bp%base, buffer(1), offset, lattreconflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
+      call ESMF_BaseSetInitCreated(bp%base, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      ! Deserialize other FieldBundle members
+      
       call c_ESMC_FieldBundleDeserialize(bp%bundlestatus, bp%gridstatus, &
                                  bp%iostatus, &
                                  bp%field_count, bp%pack_flag, &

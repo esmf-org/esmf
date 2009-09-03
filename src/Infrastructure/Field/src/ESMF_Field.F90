@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.335 2009/08/27 05:34:24 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.336 2009/09/03 22:35:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -177,7 +177,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.335 2009/08/27 05:34:24 theurich Exp $'
+    '$Id: ESMF_Field.F90,v 1.336 2009/09/03 22:35:35 theurich Exp $'
 
 !==============================================================================
 !
@@ -1046,16 +1046,18 @@ contains
                                      "space for new Field object", &
                                      ESMF_CONTEXT, rc)) return
 
-      call ESMF_BaseCreate(fp%base, "Field", "dummy", 0, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
-
-      ! This overwrites the name and adds attributes to the base obj.
+      ! Deserialize Base
       call c_ESMC_BaseDeserialize(fp%base, buffer(1), offset, lattreconflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
+                                 
+      call ESMF_BaseSetInitCreated(fp%base, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      ! Deserialize other Field members
 
       call c_ESMC_FieldDeserialize(fp%fieldstatus, fp%gridstatus, &
                                    fp%datastatus, fp%iostatus, &
