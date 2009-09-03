@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistArb2ArbSTest.F90,v 1.3 2009/05/21 16:02:16 feiliu Exp $
+! $Id: ESMF_FieldBundleRedistArb2ArbSTest.F90,v 1.4 2009/09/03 17:17:40 feiliu Exp $
 !
 ! System test FieldBundleRedistArb2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -313,6 +313,12 @@
     call ESMF_FieldBundleRedistRelease(rh12, status)
     if (status .ne. ESMF_SUCCESS) goto 20
     call ESMF_FieldBundleRedistRelease(rh23, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldBundleDestroy(bundle1, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldBundleDestroy(bundle2, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldBundleDestroy(bundle3, status)
     if (status .ne. ESMF_SUCCESS) goto 20
     call ESMF_FieldDestroy(humidity1, status)
     if (status .ne. ESMF_SUCCESS) goto 20
