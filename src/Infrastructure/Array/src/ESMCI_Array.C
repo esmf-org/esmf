@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.59 2009/09/03 04:15:12 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.60 2009/09/03 05:11:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.59 2009/09/03 04:15:12 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.60 2009/09/03 05:11:10 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3837,9 +3837,6 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
   
   // precompute sparse matrix multiplication
   localrc = sparseMatMulStore(srcArray, dstArray, routehandle, sparseMatrix);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-  
   // garbage collection
   delete [] factorIndexList;
   if (typekindFactor == ESMC_TYPEKIND_R4){
@@ -3855,6 +3852,9 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
     ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
     delete [] factorListT;
   }
+  // error handling
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
 
   }catch(int localrc){
     // catch standard ESMF return code
@@ -5218,7 +5218,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     int localPet;
     int petCount;
     SparseMatrix const &sparseMatrix;
-    bool const *factorPetFlag;
+    vector<bool> const &factorPetFlag;
     Interval const *seqIndexInterval;
     vector<int> const &seqIntervFactorListCount;
     vector<vector<int> > const &seqIntervFactorListIndex;
@@ -5229,10 +5229,12 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
    public:
     SetupSeqIndexFactorLookup(
       SparseMatrix const &sparseMatrix_,
+      vector<bool> const &factorPetFlag_,
       vector<int> const &seqIntervFactorListCount_,
       vector<vector<int> > const &seqIntervFactorListIndex_):
       // members that need to be set on this level because of reference
       sparseMatrix(sparseMatrix_),
+      factorPetFlag(factorPetFlag_),
       seqIntervFactorListCount(seqIntervFactorListCount_),
       seqIntervFactorListIndex(seqIntervFactorListIndex_){}
   };
@@ -5246,7 +5248,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       int localPet_,
       int petCount_,
       SparseMatrix const &sparseMatrix_,
-      bool const *factorPetFlag_,
+      vector<bool> const &factorPetFlag_,
       Interval const *seqIndexInterval_,
       vector<int> const &seqIntervFactorListCount_,
       vector<vector<int> > const &seqIntervFactorListIndex_,
@@ -5256,13 +5258,13 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       ArrayHelper::MemHelper *memHelperFactorLookup_
     ):SetupSeqIndexFactorLookup(
       sparseMatrix_,
+      factorPetFlag_,
       seqIntervFactorListCount_,
       seqIntervFactorListIndex_
     ){
       seqIndexFactorLookup = seqIndexFactorLookup_;
       localPet = localPet_;
       petCount = petCount_;
-      factorPetFlag = factorPetFlag_;
       seqIndexInterval = seqIndexInterval_;
       tensorMixFlag = tensorMixFlag_;
       dstSetupFlag = dstSetupFlag_;
@@ -5360,13 +5362,13 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     SetupSeqIndexFactorLookupStage2(SetupSeqIndexFactorLookupStage1 const &s1)
       :SetupSeqIndexFactorLookup(
       s1.sparseMatrix,
+      s1.factorPetFlag,
       s1.seqIntervFactorListCount,
       s1.seqIntervFactorListIndex
     ){
       seqIndexFactorLookup = s1.seqIndexFactorLookup;
       localPet = s1.localPet;
       petCount = s1.petCount;
-      factorPetFlag = s1.factorPetFlag;
       seqIndexInterval = s1.seqIndexInterval;
       tensorMixFlag = s1.tensorMixFlag;
       dstSetupFlag = s1.dstSetupFlag;
@@ -5655,10 +5657,10 @@ int Array::sparseMatMulStore(
   }
 
   // communicate typekindFactors across all Pets
-  ESMC_TypeKind *typekindList = new ESMC_TypeKind[petCount];
-  vm->allgather(&typekindFactors, typekindList, sizeof(ESMC_TypeKind));
+  vector<ESMC_TypeKind> typekindList(petCount);
+  vm->allgather(&typekindFactors, &(typekindList[0]), sizeof(ESMC_TypeKind));
   // communicate tensorMixFlag across all Pets
-  bool *tensorMixFlagList = new bool[petCount];
+  bool *tensorMixFlagList = new bool[petCount]; // cannot use vector<bool> here
   vm->allgather(&tensorMixFlag, tensorMixFlagList, sizeof(bool));
   // Check that all non-ESMF_NOKIND typekindList elements match,
   // set local typekindFactors accordingly and keep track of Pets that have
@@ -5666,7 +5668,7 @@ int Array::sparseMatMulStore(
   // that provide factors.
   int factorPetCount = 0; // reset
   typekindFactors = ESMF_NOKIND;  // initialize
-  bool *factorPetFlag = new bool[petCount];
+  vector<bool> factorPetFlag(petCount);
   for (int i=0; i<petCount; i++){
     if (typekindList[i] != ESMF_NOKIND){
       factorPetFlag[i] = true;
@@ -5692,7 +5694,7 @@ int Array::sparseMatMulStore(
       }
     }
   }
-  delete [] typekindList;
+  // garbage collection
   delete [] tensorMixFlagList;
   
   // check that factorPetCount at least 1
@@ -6336,9 +6338,6 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t5f);   //gjt - profile
 #endif
   
-  // garbage collection  
-  delete [] factorPetFlag;
-
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t5);   //gjt - profile
 #endif
