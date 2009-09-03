@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.71 2009/08/21 17:45:06 w6ws Exp $
+// $Id: ESMC_Base_F.C,v 1.72 2009/09/03 22:35:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.71 2009/08/21 17:45:06 w6ws Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.72 2009/09/03 22:35:06 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -262,6 +262,12 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
+  // CAUTION:
+  // Allocate Base object in glue code because the ESMCI implementation
+  // of deserialize() does _not_ allocate, since it is meant to be called
+  // on an object of a class derived from Base. On the Fortran side, however,
+  // there is no such thing as a derived class, and Base is held as a data
+  // member in each class -> need allocation here! *gjt*
   *base = new ESMC_Base;
   if (!base) {
     //printf("uninitialized Base object\n");
