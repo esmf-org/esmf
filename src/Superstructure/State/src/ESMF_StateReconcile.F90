@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.57 2009/08/21 18:17:48 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.58 2009/09/03 23:10:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.57 2009/08/21 18:17:48 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.58 2009/09/03 23:10:26 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -805,8 +805,22 @@
             offset = 0
             call c_ESMC_BaseDeserialize(base, bptr, offset, &
               attreconflag, localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
+            call ESMF_BaseSetInitCreated(base, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
             call c_ESMC_AttributeCopy(base, state%statep%base, &
               ESMF_ATTCOPY_VALUE, ESMF_ATTTREE_OFF, localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
+            call ESMF_BaseDestroy(base, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
           endif
           attreconstart = 2
         else
