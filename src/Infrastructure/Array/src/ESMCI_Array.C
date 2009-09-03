@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.58 2009/08/26 03:39:56 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.59 2009/09/03 04:15:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.58 2009/08/26 03:39:56 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.59 2009/09/03 04:15:12 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4794,9 +4794,9 @@ void accessLookup(
         send3commhList[i] = NULL;
         vm->send(responseStreamServer[i], responseStreamSize, i,
           &(send3commhList[i]));
-        // garbage collection
-        delete [] requestStreamServer[i];
       }
+      // garbage collection
+      delete [] requestStreamServer[i];
     }
   }
   // localPet acts as a client, waits for response stream from server, process
