@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.128 2009/09/01 22:12:14 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.129 2009/09/03 21:43:32 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1395,7 +1395,11 @@ end interface
 	   return
        endif
     enddo
-    
+
+    ! clean up memory allocation
+    deallocate(minIndex)
+    deallocate(maxIndex)
+
     ! Call the C function to get the index of the 1D distgrid
     !! index
     gridIndexArg = ESMF_InterfaceIntCreate(gridindex, rc=localrc)
@@ -1440,9 +1444,7 @@ end interface
       distgridindex(1)=index1D
     endif  
 
-    
     ! clean up memory allocation
-    deallocate(minIndex, maxIndex)
     call ESMF_InterfaceIntDestroy(GridIndexArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -13087,9 +13089,9 @@ endif
      enddo
   endif
   
-  do i=1,deCount
-     write(*,*) i,"min=",deBlockList(:,1,i)," max=",deBlockList(:,2,i)
-  enddo
+!  do i=1,deCount
+!     write(*,*) i,"min=",deBlockList(:,1,i)," max=",deBlockList(:,2,i)
+!  enddo
 
 
    

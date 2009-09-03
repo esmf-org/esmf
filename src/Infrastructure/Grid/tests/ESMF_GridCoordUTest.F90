@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.38 2009/08/10 22:47:45 svasquez Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.39 2009/09/03 21:43:36 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.38 2009/08/10 22:47:45 svasquez Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.39 2009/09/03 21:43:36 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -2288,6 +2288,9 @@ program ESMF_GridCoordUTest
            ielbnd3=(/1,1,1/),ieubnd3=(/2,4,5/),iloff3=(/0,0,0/),iuoff3=(/4,5,9/), &
            correct=correct, rc=rc) 
 
+  ! Destroy Test Grid
+  call ESMF_GridDestroy(grid2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
@@ -2439,6 +2442,9 @@ program ESMF_GridCoordUTest
            ielbnd3=(/10,20,30/),ieubnd3=(/15,28,43/),iloff3=(/0,0,0/),iuoff3=(/0,0,0/), &
            correct=correct, checkPtr=.false., rc=rc) 
 
+  ! Destroy Test Grid
+  call ESMF_GridDestroy(grid2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
@@ -2506,7 +2512,9 @@ program ESMF_GridCoordUTest
            ielbnd3=(/2,4,1/),ieubnd3=(/3,7,5/),iloff3=(/0,0,3/),iuoff3=(/4,5,6/), &
            correct=correct, rc=rc) 
 
-
+  ! Destroy Test Grid
+  call ESMF_GridDestroy(grid2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
@@ -2637,6 +2645,9 @@ program ESMF_GridCoordUTest
      
   enddo
 
+  ! Destroy Test Grid
+  call ESMF_GridDestroy(grid2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
@@ -2708,6 +2719,10 @@ program ESMF_GridCoordUTest
   if ((compELWidth(1) .ne. 0) .or. (compELWidth(2) .ne. 0) .or.  (compELWidth(3) .ne. 0)) correct=.false.
   if ((compEUWidth(1) .ne. 0) .or. (compEUWidth(2) .ne. 0) .or. (compEUWidth(3) .ne. 0)) correct=.false.
 
+  ! Destroy Test Grid
+  call ESMF_GridDestroy(grid2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -2771,6 +2786,9 @@ program ESMF_GridCoordUTest
            ielbnd3=(/4/),ieubnd3=(/7/),iloff3=(/0,0/),iuoff3=(/0,0/), &
            correct=correct, rc=rc) 
 
+  ! Destroy Test Grid
+  call ESMF_GridDestroy(grid2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
@@ -2849,6 +2867,9 @@ program ESMF_GridCoordUTest
            ielbnd3=(/1/),ieubnd3=(/5/),iloff3=(/0,0/),iuoff3=(/0,0/), &
            correct=correct, rc=rc) 
 
+  ! Destroy Test Grid
+  call ESMF_GridDestroy(grid2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
@@ -2902,6 +2923,10 @@ program ESMF_GridCoordUTest
            ielbnd3=(/3,2,7/),ieubnd3=(/3,4,9/),iloff3=(/0,0,0/),iuoff3=(/0,0,0/), &
            correct=correct, rc=rc) 
 
+  ! Destroy Test Grid
+  call ESMF_GridDestroy(grid2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
@@ -2952,6 +2977,10 @@ program ESMF_GridCoordUTest
            ielbnd2=(/1,1,6/),ieubnd2=(/2,6,10/),iloff2=(/0,0,0/),iuoff2=(/0,0,0/), &
            ielbnd3=(/3,1,6/),ieubnd3=(/4,6,10/),iloff3=(/0,0,0/),iuoff3=(/0,0,0/), &
            correct=correct, rc=rc) 
+
+  ! Destroy Test Grid
+  call ESMF_GridDestroy(grid2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -3011,10 +3040,11 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
 
+  ! Destroy Test Grid
+  call ESMF_GridDestroy(grid2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-
-
-
 
 
 
@@ -3070,6 +3100,10 @@ program ESMF_GridCoordUTest
   call ESMF_ArrayValidate(array,rc=localrc)  
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
 
+  ! Destroy array
+  call ESMF_ArrayDestroy(array,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+
   ! Create an array on an allocated stagger location
   array=ESMF_ArrayCreateFromGrid(grid2D, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
                              rc=localrc)
@@ -3082,6 +3116,14 @@ program ESMF_GridCoordUTest
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
 
   ! TODO: make sure Array bounds are correct
+
+  ! Destroy array
+  call ESMF_ArrayDestroy(array,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+
+  ! Destroy Test Grid
+  call ESMF_GridDestroy(grid2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

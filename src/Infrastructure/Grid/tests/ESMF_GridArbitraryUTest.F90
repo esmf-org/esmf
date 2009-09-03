@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.7 2009/08/11 17:20:46 svasquez Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.8 2009/09/03 21:43:36 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.7 2009/08/11 17:20:46 svasquez Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.8 2009/09/03 21:43:36 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -353,6 +353,9 @@ program ESMF_GridArbitraryUTest
   if (rank .ne. 1) correct=.false.
   if (typekind .ne. ESMF_TYPEKIND_I4) correct=.false. 
 
+  call ESMF_ArrayDestroy(array1D,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
@@ -475,9 +478,9 @@ program ESMF_GridArbitraryUTest
           rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  print *, 'distgridToArrayMap', distgridToArrayMap
-  print *, 'undistbounds', undistLBound, undistUBound
-  print *, 'computationaledgewidths', celw, ceuw
+!  print *, 'distgridToArrayMap', distgridToArrayMap
+!  print *, 'undistbounds', undistLBound, undistUBound
+!  print *, 'computationaledgewidths', celw, ceuw
 
   if ((undistLBound(1) .ne. 1) .or. (undistUBound(1) .ne. 10)) correct=.false.
   if ((celw(1) .ne. 0) .or. (celw(2) .ne. 0)) correct=.false.
@@ -524,6 +527,10 @@ program ESMF_GridArbitraryUTest
   correct=.true.
   if (rank .ne. 2) correct=.false.
   if (typekind .ne. ESMF_TYPEKIND_I4) correct=.false. 
+
+  ! destroy array
+  call ESMF_ArrayDestroy(array2D,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
@@ -853,6 +860,10 @@ program ESMF_GridArbitraryUTest
   index(2) = index(2)+1
   call ESMF_GridConvertIndex(grid,gridindex=index3, distgridindex=index, rc=localrc)
   if (localrc .eq. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
   
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
@@ -920,6 +931,10 @@ program ESMF_GridArbitraryUTest
   ! Check that array info is as expected
   if (rank .ne. 1) correct=.false.
   if (typekind .ne. ESMF_TYPEKIND_R8) correct=.false. 
+
+  ! destroy array
+  call ESMF_ArrayDestroy(array1D,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1142,7 +1157,13 @@ program ESMF_GridArbitraryUTest
   !! Check that validate returns true
   call ESMF_GridValidate(grid,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
-  call ESMF_GridDestroy(grid, rc=localrc)
+
+  ! destroy array
+  call ESMF_ArrayDestroy(array2D,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
