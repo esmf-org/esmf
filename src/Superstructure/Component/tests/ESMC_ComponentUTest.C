@@ -1,4 +1,4 @@
-// $Id: ESMC_ComponentUTest.C,v 1.9 2009/04/07 06:01:39 theurich Exp $
+// $Id: ESMC_ComponentUTest.C,v 1.10 2009/09/03 16:30:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -171,6 +171,21 @@ int main(void){
   int result = 0;
   int rc;
   int userRc;
+  ESMC_Calendar calendar;
+  ESMC_Time startTime;
+  ESMC_I4 yy1;
+  ESMC_I4 h1;
+  ESMC_CalendarType calType1;
+  int tZ1;
+  ESMC_Time stopTime;
+  ESMC_I4 h2;
+  ESMC_TimeInterval timeStep;
+  const ESMC_I4 one=1;
+  ESMC_Clock clock;
+  ESMC_State importState;
+  ESMC_State exportState;
+  ESMC_GridComp gcomp;
+  ESMC_CplComp cplcomp;
   
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
@@ -183,8 +198,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_Calendar object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_Calendar calendar =
-    ESMC_CalendarCreate(9, "Gregorian", ESMC_CAL_GREGORIAN, &rc);
+  calendar = ESMC_CalendarCreate(9, "Gregorian", ESMC_CAL_GREGORIAN, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -192,11 +206,10 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Set Start Time");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_Time startTime;
-  ESMC_I4 yy1=2006;
-  ESMC_I4 h1=0;
-  ESMC_CalendarType calType1=ESMC_CAL_GREGORIAN;
-  int tZ1=-6;
+  yy1=2006;
+  h1=0;
+  calType1=ESMC_CAL_GREGORIAN;
+  tZ1=-6;
   rc = ESMC_TimeSet(&startTime, yy1, h1, calendar, calType1, tZ1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -205,8 +218,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Set Stop Time");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_Time stopTime;
-  ESMC_I4 h2=1;
+  h2=1;
   rc = ESMC_TimeSet(&stopTime, yy1, h2, calendar, calType1, tZ1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -215,8 +227,6 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Set a TimeInterval");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_TimeInterval timeStep;
-  const ESMC_I4 one=1;
   rc = ESMC_TimeIntervalSet(&timeStep, one);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -225,8 +235,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_Clock object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_Clock clock =
-    ESMC_ClockCreate(10,"TEST_CLOCK",timeStep,startTime, stopTime,
+  clock = ESMC_ClockCreate(10,"TEST_CLOCK",timeStep,startTime, stopTime,
   //      0, 0, 0, 
           &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -236,7 +245,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_State object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_State importState = ESMC_StateCreate("my import state", &rc);
+  importState = ESMC_StateCreate("my import state", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -244,7 +253,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_State object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_State exportState = ESMC_StateCreate("my export state", &rc);
+  exportState = ESMC_StateCreate("my export state", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -255,9 +264,8 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_GridComp object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_GridComp gcomp =
-    ESMC_GridCompCreate("my gridded component in C", ESMF_ATM, "grid.rc", clock,
-    &rc);
+  gcomp = ESMC_GridCompCreate("gridded component in C", ESMF_ATM, "grid.rc",
+    clock, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -313,9 +321,8 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_GridComp object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  gcomp =
-    ESMC_GridCompCreate("my gridded component in C with Fortran registration",
-      ESMF_ATM, "grid.rc", clock, &rc);
+  gcomp = ESMC_GridCompCreate("gridded Component in C w/ Fortran registration",
+    ESMF_ATM, "grid.rc", clock, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -366,8 +373,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_CplComp object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_CplComp cplcomp =
-    ESMC_CplCompCreate("my coupler component in C", "grid.rc", clock, &rc);
+  cplcomp = ESMC_CplCompCreate("coupler component in C", "grid.rc", clock, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -391,7 +397,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "ESMC_CplCompInitialize() w/ myCplRegistrationInC() methods");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_CplCompInitialize(cplcomp, importState, exportState, clock, 1,
+  rc = ESMC_CplCompInitialize(cplcomp, importState, exportState, clock, 1, 
     NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -424,9 +430,8 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_CplComp object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  cplcomp =
-    ESMC_CplCompCreate("my coupler component in C with Fortran registration",
-      "grid.rc", clock, &rc);
+  cplcomp = ESMC_CplCompCreate("coupler component in C w/ Fortran registration",
+    "grid.rc", clock, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -480,6 +485,14 @@ int main(void){
   strcpy(name, "Destroy ESMC_Clock object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_ClockDestroy(&clock);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Destroy ESMC_Calendar object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_CalendarDestroy(&calendar);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
