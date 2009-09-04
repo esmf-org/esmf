@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.168 2009/09/02 05:52:51 eschwab Exp $
+! $Id: ESMF_State.F90,v 1.169 2009/09/04 17:10:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.168 2009/09/02 05:52:51 eschwab Exp $'
+      '$Id: ESMF_State.F90,v 1.169 2009/09/04 17:10:20 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2217,7 +2217,7 @@ module ESMF_StateMod
 ! !IROUTINE: ESMF_StateDestroy - Release resources for a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateDestroy(state, rc)
+      recursive subroutine ESMF_StateDestroy(state, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State) :: state
@@ -4094,7 +4094,7 @@ module ESMF_StateMod
 ! !IROUTINE: ESMF_StateDestruct -- Internal routine to deallocate space
 !
 ! !INTERFACE:
-      subroutine ESMF_StateDestruct(stypep, rc)
+      recursive subroutine ESMF_StateDestruct(stypep, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_StateClass), pointer :: stypep
@@ -4118,6 +4118,7 @@ module ESMF_StateMod
         integer :: localrc
         type(ESMF_StateItem), pointer::stateItem
         integer :: i
+        type(ESMF_State) :: wrapper
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -4150,6 +4151,14 @@ module ESMF_StateMod
               continue
             case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
               call ESMF_ArrayBundleDestroy(stateItem%datap%abp, rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+              continue
+            case (ESMF_STATEITEM_STATE%ot)
+              wrapper%statep => stateItem%datap%spp
+              ESMF_INIT_SET_CREATED(wrapper)             
+              call ESMF_StateDestroy(wrapper, rc=localrc)
               if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -6043,6 +6052,7 @@ module ESMF_StateMod
               continue ! TODO: serialize
             case (ESMF_STATEITEM_STATE%ot)
              wrapper%statep => sip%datap%spp
+             ESMF_INIT_SET_CREATED(wrapper)             
              call ESMF_StateSerialize(wrapper, buffer, length, offset, &
                                        attreconflag=lattreconflag, &
                                        inquireflag=linquireflag, rc=localrc)
@@ -6141,6 +6151,10 @@ module ESMF_StateMod
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
+      call ESMF_BaseSetInitCreated(sp%base, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
 
       call c_ESMC_StateDeserialize(sp%statestatus, sp%st, sp%needed_default, &
                                  sp%ready_default, sp%stvalid_default, &
@@ -6230,10 +6244,20 @@ module ESMF_StateMod
 
       enddo
 
+      !TODO: in the long run the correct thing will be to serialize/deserialize
+      !      the methodTable object! For now just put an empty table into proxy.
+      ! create methodTable object
+      call c_ESMC_MethodTableCreate(sp%methodTable, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+                                  
       ESMF_INIT_SET_CREATED(sp)
 
       !ESMF_StateDeserialize%statep => sp
       substate%statep => sp
+      ESMF_INIT_SET_CREATED(substate)
+      
       if  (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_StateDeserialize

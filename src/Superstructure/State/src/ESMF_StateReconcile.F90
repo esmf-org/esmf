@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.58 2009/09/03 23:10:26 theurich Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.59 2009/09/04 17:10:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.58 2009/09/03 23:10:26 theurich Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.59 2009/09/04 17:10:21 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -422,6 +422,7 @@
              si%objsend(i) = ESMF_ID_STATE%objectID
              bptr => si%blindsend(:,i)
              wrapper%statep => stateitem%datap%spp
+             ESMF_INIT_SET_CREATED(wrapper)
              call ESMF_StateSerialize(wrapper, bptr, bufsize, offset, &
               attreconflag=attreconflag, inquireflag=ESMF_NOINQUIRE, rc=localrc)
 !!DEBUG "serialized substate, obj=", si%objsend(i), " id=", si%idsend(i)
