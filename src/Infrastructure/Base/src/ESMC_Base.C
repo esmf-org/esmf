@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.122 2009/08/31 22:15:38 theurich Exp $
+// $Id: ESMC_Base.C,v 1.123 2009/09/04 17:01:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,12 +36,8 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.122 2009/08/31 22:15:38 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.123 2009/09/04 17:01:25 theurich Exp $";
 //-----------------------------------------------------------------------------
-
-// global instance counter per VM context
-static vector<ESMCI::VMId*> vmIDList;
-static vector<int> objectCountList;
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -863,6 +859,8 @@ static vector<int> objectCountList;
   return ESMC_RC_NOT_IMPL;
 
 } // end ESMC_Write
+
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_Base()"
@@ -888,19 +886,48 @@ static vector<int> objectCountList;
 //  ESMCI::VMIdPrint(vmID);
   vmIDCreator = false;  // vmID points into global table
   
-  // find vmID in the vmIDList
-  int i;
-  for (i=0; i<vmIDList.size(); i++)
-    if (ESMCI::VMIdCompare(vmIDList[i],vmID)) break;
-  if (i==vmIDList.size()){
-    // did not find vmID in vmIDList
-    vmIDList.push_back(vmID);     // add this vmID to the list
-    objectCountList.push_back(0); // add new object count for this vmID
-  }
+  // set ID
+  ID = ESMCI::VM::getBaseIDAndInc(vmID);
+  
+  refCount = 1;
+  strcpy(className, "global");
+  sprintf(baseName, "%s%3d", "unnamed", ID);
+  ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
+  
+  // setup the root Attribute, passing the address of this
+  root.setBase(this);
+  
+  baseStatus = ESMF_STATUS_READY;
+
+ } // end ESMC_Base
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Base()"
+//BOPI
+// !IROUTINE:  ESMC_Base - native C++ constructor for ESMC_Base class
+//
+// !INTERFACE:
+      ESMC_Base::ESMC_Base(int id) {
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//   default initialization 
+//
+//EOPI
+  int rc;
+  
+  vmID = ESMCI::VM::getCurrentID(&rc);  // get vmID of current VM context
+//  ESMCI::VMIdPrint(vmID);
+  vmIDCreator = false;  // vmID points into global table
   
   // set ID to objectCount;
-  ID = objectCountList[i] + 1;
-  objectCountList[i] = ID;
+  ID = id;
   
   refCount = 1;
   strcpy(className, "global");
@@ -940,19 +967,8 @@ static vector<int> objectCountList;
 //  ESMCI::VMIdPrint(vmID);
   vmIDCreator = false;  // vmID points into global table
   
-  // find vmID in the vmIDList
-  int i;
-  for (i=0; i<vmIDList.size(); i++)
-    if (ESMCI::VMIdCompare(vmIDList[i],vmID)) break;
-  if (i==vmIDList.size()){
-    // did not find vmID in vmIDList
-    vmIDList.push_back(vmID);     // add this vmID to the list
-    objectCountList.push_back(0); // add new object count for this vmID
-  }
-  
   // set ID to objectCount;
-  ID = objectCountList[i] + 1;
-  objectCountList[i] = ID;
+  ID = ESMCI::VM::getBaseIDAndInc(vmID);
   
   refCount = 1;
   strcpy(className, superclass ? superclass : "global");
