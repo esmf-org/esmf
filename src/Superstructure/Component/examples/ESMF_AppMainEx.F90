@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.35 2009/03/23 20:40:48 theurich Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.36 2009/09/04 22:36:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -418,24 +418,36 @@
 !BOC
     print *, "Comp Finalize complete"
 
-    ! Destroy components.
-    call ESMF_ClockDestroy(tclock, rc)
+    ! Destroy objects
+    call ESMF_StateDestroy(states(1), rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_CalendarDestroy(gregorianCalendar, rc)
+    call ESMF_StateDestroy(states(2), rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_GridCompDestroy(gcomp1, rc)
+    call ESMF_ClockDestroy(tclock, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_GridCompDestroy(gcomp2, rc)
+    call ESMF_CalendarDestroy(gregorianCalendar, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_CplCompDestroy(cpl, rc)
+    call ESMF_GridCompDestroy(gcomp1, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+    call ESMF_GridCompDestroy(gcomp2, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+    call ESMF_CplCompDestroy(cpl, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+    call ESMF_GridCompDestroy(top, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
