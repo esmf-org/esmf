@@ -1,4 +1,4 @@
-! $Id: ESMF_AttachMethodsEx.F90,v 1.1 2009/04/24 05:20:17 theurich Exp $
+! $Id: ESMF_AttachMethodsEx.F90,v 1.2 2009/09/04 21:07:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -204,6 +204,12 @@ program ESMF_AttachMethodsEx
   endif
 
   call ESMF_GridCompDestroy(consumer, rc=rc)
+  if (rc/=ESMF_SUCCESS) then
+    finalrc = ESMF_FAILURE
+    goto 10
+  endif
+
+  call ESMF_StateDestroy(state, rc=rc)
   if (rc/=ESMF_SUCCESS) then
     finalrc = ESMF_FAILURE
     goto 10
