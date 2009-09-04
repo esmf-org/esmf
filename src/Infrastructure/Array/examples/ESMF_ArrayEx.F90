@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.46 2009/03/03 17:23:23 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.47 2009/09/04 22:20:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -1405,6 +1405,10 @@ program ESMF_ArrayEx
 !BOC
   array1D = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid1D, rc=rc)
 !EOC
+  call ESMF_ArrayDestroy(array1D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(distgrid1D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! 
 ! The creation of a 3D Array proceeds analogous to the 1D case. The rank of the
@@ -1510,6 +1514,14 @@ program ESMF_ArrayEx
 
 !call ESMF_ArrayPrint(array3D)
 !call ESMF_ArrayPrint(array2D)
+  call ESMF_ArrayDestroy(array2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(distgrid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_ArrayDestroy(array3D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(distgrid3D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
 !
@@ -1680,8 +1692,6 @@ program ESMF_ArrayEx
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     distgridToArrayMap=(/3, 1/), totalLWidth=(/0,1/), totalUWidth=(/0,1/), &
     undistLBound=(/1/), undistUBound=(/2/), rc=rc)
-  call ESMF_ArraySet(array, tensorIndex=(/1/), staggerLoc=1, rc=rc)
-  call ESMF_ArraySet(array, tensorIndex=(/2/), staggerLoc=2, rc=rc)
 !EOC
 !BOE
 ! Operations on the Array object as a whole are unchanged by the different
