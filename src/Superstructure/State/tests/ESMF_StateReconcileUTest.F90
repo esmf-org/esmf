@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.25 2009/08/11 21:49:17 svasquez Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.26 2009/09/04 17:12:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
     integer, intent(out) :: rc
 
     type(ESMF_Field) :: field1
-!nestbug     `type(ESMF_State) :: neststate
+    type(ESMF_State) :: neststate
 
     print *, "i am comp1_init"
 
@@ -45,11 +45,11 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
     call ESMF_StateAdd(istate, field1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-!nestbug    neststate = ESMF_StateCreate("Nested State", rc=rc)
-!nestbug    if (rc .ne. ESMF_SUCCESS) return
+    neststate = ESMF_StateCreate("Nested State", rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
     
-!nestbug    call ESMF_StateAdd(istate, neststate, rc=rc)
-!nestbug    if (rc .ne. ESMF_SUCCESS) return
+    call ESMF_StateAdd(istate, neststate, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
 
 end subroutine comp1_init
 
@@ -81,7 +81,7 @@ subroutine comp1_final(gcomp, istate, ostate, clock, rc)
     integer, intent(out) :: rc
 
     type(ESMF_Field) :: field1
-!nestbug    type(ESMF_State) :: neststate
+    type(ESMF_State) :: neststate
 
     print *, "i am comp1_final"
 
@@ -91,11 +91,11 @@ subroutine comp1_final(gcomp, istate, ostate, clock, rc)
     call ESMF_FieldDestroy(field1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-!nestbug    call ESMF_StateGet(istate, "Nested State", neststate,  rc=rc)
-!nestbug    if (rc .ne. ESMF_SUCCESS) return
+    call ESMF_StateGet(istate, "Nested State", neststate,  rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
 
-!nestbug    call ESMF_StateDestroy(neststate, rc=rc)
-!nestbug    if (rc .ne. ESMF_SUCCESS) return
+    call ESMF_StateDestroy(neststate, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
 
 end subroutine comp1_final
 
