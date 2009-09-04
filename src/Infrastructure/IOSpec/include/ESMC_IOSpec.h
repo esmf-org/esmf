@@ -1,4 +1,4 @@
-// $Id: ESMC_IOSpec.h,v 1.7 2009/01/21 21:37:59 cdeluca Exp $
+// $Id: ESMC_IOSpec.h,v 1.8 2009/09/04 17:44:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -46,9 +46,9 @@
 
  // class definition type
 class ESMC_IOSpec {
-//class ESMC_IOSpec : public ESMC_Base { // TODO: inherit from ESMC_Base class
-                                         // when fully aligned with F90 equiv
-
+  // TODO: this is completely _not_ following ESMF conventions of how to
+  // implement and interface a class from C/C++/Fortran!
+  
   private:   // corresponds to F90 module 'type ESMF_IOSpec' members
     ESMC_Status       iostatus;
     ESMC_IOFileFormat iofileformat;
@@ -60,7 +60,6 @@ class ESMC_IOSpec {
 
     // TODO:  define methods equivalent to F90
 
-    // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
     // TODO:  ReadRestart()/WriteRestart() ?
