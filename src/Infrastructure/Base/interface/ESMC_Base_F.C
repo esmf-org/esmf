@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.72 2009/09/03 22:35:06 theurich Exp $
+// $Id: ESMC_Base_F.C,v 1.73 2009/09/04 16:59:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.72 2009/09/03 22:35:06 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.73 2009/09/04 16:59:31 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -268,7 +268,9 @@ extern "C" {
   // on an object of a class derived from Base. On the Fortran side, however,
   // there is no such thing as a derived class, and Base is held as a data
   // member in each class -> need allocation here! *gjt*
-  *base = new ESMC_Base;
+  // Must explicitly set dummy ID (here -1) to prevent inconsistency in
+  // Base object counting. ID will be overwritten by StateReconcile() anyway.
+  *base = new ESMC_Base(-1);
   if (!base) {
     //printf("uninitialized Base object\n");
     ESMC_LogDefault.Write("Base object error", ESMC_LOG_INFO);
