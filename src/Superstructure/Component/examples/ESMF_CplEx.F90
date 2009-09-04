@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.34 2009/03/26 03:28:20 theurich Exp $
+! $Id: ESMF_CplEx.F90,v 1.35 2009/09/04 22:49:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -339,26 +339,38 @@
 
     print *, "Comp Finalize complete"
 
-    ! Destroy components.
-    call ESMF_ClockDestroy(tclock, rc)
+    ! Destroy objects.
+    call ESMF_ClockDestroy(tclock, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if    
 
-    call ESMF_CalendarDestroy(gregorianCalendar, rc)
+    call ESMF_CalendarDestroy(gregorianCalendar, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if    
 
-    call ESMF_CplCompDestroy(cpl, rc)
+    call ESMF_CplCompDestroy(cpl, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if    
 
-    print *, "Comp Destroy returned"
+    call ESMF_StateDestroy(importState, rc=rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+       finalrc = ESMF_FAILURE
+    end if
+     
+    call ESMF_StateDestroy(exportState, rc=rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+       finalrc = ESMF_FAILURE
+    end if
+     
+    print *, "Destroy calls returned"
 
     print *, "Application Example 1 finished"
 
