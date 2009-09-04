@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.5 2009/08/31 22:09:58 theurich Exp $
+// $Id: ESMCI_VM.C,v 1.6 2009/09/04 16:52:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.5 2009/08/31 22:09:58 theurich Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.6 2009/09/04 16:52:55 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -70,6 +70,7 @@ static VM *GlobalVM = NULL;
 static esmf_pthread_t matchTable_tid[ESMC_VM_MATCHTABLEMAX];
 static VM *matchTable_vm[ESMC_VM_MATCHTABLEMAX];
 static VMId matchTable_vmID[ESMC_VM_MATCHTABLEMAX];
+static int matchTable_BaseIDCount[ESMC_VM_MATCHTABLEMAX];
 //gjtNotYet static esmf_pthread_t *matchTable_tid;
 //gjtNotYet static ESMC_VM **matchTable_vm;
 //gjtNotYet static VMId *matchTable_vmID;
@@ -441,6 +442,7 @@ void *VM::startup(
       matchTable_tid[index]  = vmp->myvms[j]->getMypthid();   // pthid
       matchTable_vm[index]   = vmp->myvms[j];                 // ptr to this VM
       matchTable_vmID[index] = VMIdCreate(&localrc);          // vmID
+      matchTable_BaseIDCount[index] = 0;                    // reset
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return NULL;  // bail out on error
       VMIdCopy(&(matchTable_vmID[index]), &vmID);             // deep copy
@@ -1039,6 +1041,40 @@ VMId *VM::getCurrentID(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::getBaseIDAndInc()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::getBaseIDAndInc - Get BaseID and increment counter
+//
+// !INTERFACE:
+int VM::getBaseIDAndInc(
+//
+// !RETURN VALUE:
+//    current BaseID count
+//
+// !ARGUMENTS:
+//
+  VMId *vmID){   // identifying vmID
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int i;
+  for (i=0; i<matchTableBound; i++)
+    if (VMIdCompare(vmID, &(matchTable_vmID[i]))) break;
+  if (i == matchTableBound)
+    return -1;  // no match found -> return invalid count
+  
+  // match found
+  int count = matchTable_BaseIDCount[i];
+  matchTable_BaseIDCount[i] = count + 1;  // increment
+  return count; // return count before increment
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VM::initialize()"
 //BOPI
 // !IROUTINE:  ESMCI::VM::initialize
@@ -1083,7 +1119,8 @@ VM *VM::initialize(
   matchTable_tid[matchTableBound]  = 0;
 #endif
   matchTable_vm[matchTableBound]   = GlobalVM;
-  
+  matchTable_BaseIDCount[matchTableBound] = 0;  // reset
+      
   // set vmID
   vmKeyWidth = GlobalVM->getNpets()/8;
   vmKeyOff   = GlobalVM->getNpets()%8;
