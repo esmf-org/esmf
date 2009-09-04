@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.19 2009/08/21 17:46:29 w6ws Exp $
+// $Id: ESMCI_DELayout.C,v 1.20 2009/09/04 19:09:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.19 2009/08/21 17:46:29 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.20 2009/09/04 19:09:19 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1552,7 +1552,7 @@ DELayout *DELayout::deserialize(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  DELayout *a = new DELayout;
+  DELayout *a = new DELayout(-1); // prevent baseID counter increment
   int i, j;
   char *cp;
   int *ip;

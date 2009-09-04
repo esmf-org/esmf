@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.60 2009/08/21 17:52:12 w6ws Exp $
+// $Id: ESMCI_Grid.h,v 1.61 2009/09/04 19:09:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -395,6 +395,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
   // Grid Construct (grid NOT usable after construction)
   Grid();
+  Grid(int baseID); // prevent baseID counter increment
 
   // Grid Destruct
   ~Grid();

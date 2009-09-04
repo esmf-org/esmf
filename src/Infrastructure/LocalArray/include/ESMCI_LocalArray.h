@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.h,v 1.9 2009/06/19 04:04:15 theurich Exp $
+// $Id: ESMCI_LocalArray.h,v 1.10 2009/09/04 19:09:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -94,6 +94,11 @@ namespace ESMCI {
     struct c_F90ptr f90dopev;       // opaque object which is real f90 ptr
                                     // this is memcpy'd to save and restore 
                                     // contents are not interpreted by esmf
+    
+  public:
+    // native constructor
+    LocalArray(){}
+    LocalArray(int baseID):ESMC_Base(baseID){}// prevent baseID counter incr.
     
    private:
     // construct() and destruct()

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.94 2009/09/02 22:30:05 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.95 2009/09/04 19:09:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.94 2009/09/02 22:30:05 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.95 2009/09/04 19:09:19 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -4675,6 +4675,95 @@ Grid::Grid(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid()"
+//BOPI
+// !IROUTINE:  GridConstruct
+//
+// !INTERFACE:
+Grid::Grid(
+//
+// !RETURN VALUE:
+//    Pointer to a new grid
+//
+// !ARGUMENTS:
+  int baseID
+  ):ESMC_Base(baseID){  // prevent baseID counter increment
+//
+// !DESCRIPTION:
+//    Because of the possible use of incremental create this just
+//    sets default values, the real construction of the internal
+//    grid structures is done in constructInternal.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+  // Set default values for grid members
+  proto = ESMC_NULL_POINTER; 
+  
+  status=ESMC_GRIDSTATUS_NOT_READY; // default status not ready
+  decompType = ESMC_GRID_INVALID;   // grid deompose type unknonw
+  
+  typekind = ESMC_TYPEKIND_R8;
+  distDimCount = 0;
+  distgridToGridMap = ESMC_NULL_POINTER; 
+  
+  undistDimCount = 0;
+  undistLBound = ESMC_NULL_POINTER; 
+  undistUBound = ESMC_NULL_POINTER; 
+  
+  dimCount=0;
+
+  connL = ESMC_NULL_POINTER; 
+  connU = ESMC_NULL_POINTER; 
+
+  gridEdgeLWidth = ESMC_NULL_POINTER; 
+  gridEdgeUWidth = ESMC_NULL_POINTER; 
+  gridAlign = ESMC_NULL_POINTER; 
+  coordDimCount = ESMC_NULL_POINTER; 
+  coordDimMap = ESMC_NULL_POINTER; 
+  
+  staggerLocCount=0;
+  coordArrayList = ESMC_NULL_POINTER;
+  staggerEdgeLWidthList = ESMC_NULL_POINTER;
+  staggerEdgeUWidthList = ESMC_NULL_POINTER;
+  staggerAlignList = ESMC_NULL_POINTER;
+  staggerMemLBoundList = ESMC_NULL_POINTER;
+  coordDidIAllocList = ESMC_NULL_POINTER;
+  
+
+  itemArrayList = ESMC_NULL_POINTER;
+  itemDidIAllocList = ESMC_NULL_POINTER;
+
+
+  gridIsDist = ESMC_NULL_POINTER;
+  gridMapDim = ESMC_NULL_POINTER;
+  
+  coordIsDist = ESMC_NULL_POINTER;
+  coordMapDim = ESMC_NULL_POINTER;
+  
+  isDELBnd = ESMC_NULL_POINTER;
+  isDEUBnd = ESMC_NULL_POINTER;
+  
+  indexflag=ESMF_INDEX_DELOCAL;
+  distgrid= ESMC_NULL_POINTER; 
+
+  minIndex = ESMC_NULL_POINTER;
+  maxIndex = ESMC_NULL_POINTER;
+  localArbIndex = ESMC_NULL_POINTER;
+  localArbIndexCount = -1;  
+
+  destroyDistgrid=false; 
+  destroyDELayout=false;
+
+  // FIXME:  this is a temporary fix for AttributeUpdate() to be able to
+  //         recognize that Grids are multiply created after StateReconcile()
+  classID = 42;
+
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::~Grid()"
 //BOPI
 // !IROUTINE:  ~Grid
@@ -5461,7 +5550,7 @@ int Grid::deserialize(
   for (int s=0; s<staggerLocCount; s++) {
     for (int c=0; c<dimCount; c++) {
       if (coordExists[s][c]) {
-	coordArrayList[s][c]=new Array;
+	coordArrayList[s][c]=new Array(-1); // prevent baseID counter increment
 	coordArrayList[s][c]->deserialize(buffer, &loffset, attreconflag);
       } else {
 	coordArrayList[s][c]=ESMC_NULL_POINTER;
@@ -5492,7 +5581,7 @@ int Grid::deserialize(
   for (int s=0; s<staggerLocCount; s++) {
     for (int i=0; i<ESMC_GRIDITEM_COUNT; i++) {
       if (itemExists[s][i]) {
-	itemArrayList[s][i]=new Array;
+	itemArrayList[s][i]=new Array(-1);  // prevent baseID counter increment
 	itemArrayList[s][i]->deserialize(buffer, &loffset, attreconflag);
       } else {
 	itemArrayList[s][i]=ESMC_NULL_POINTER;

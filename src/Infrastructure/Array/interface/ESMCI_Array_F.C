@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.25 2009/08/26 03:39:56 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.26 2009/09/04 19:09:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -915,7 +915,7 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_arraydeserialize()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    *array = new ESMCI::Array;
+    *array = new ESMCI::Array(-1);  // prevent baseID counter increment
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*array)->deserialize(
       buf, offset, *attreconflag),

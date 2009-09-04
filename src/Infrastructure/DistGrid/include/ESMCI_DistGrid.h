@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.14 2009/09/02 03:41:18 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.15 2009/09/04 19:09:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -81,6 +81,10 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     bool delayoutCreator;
     VM *vm;    
         
+  public:
+    // native constructor
+    DistGrid(){}
+    DistGrid(int baseID):ESMC_Base(baseID){}// prevent baseID counter increment
   private:
     // construct() and destruct()
     int construct(int dimCount, int patchCount, int *dePatchList,

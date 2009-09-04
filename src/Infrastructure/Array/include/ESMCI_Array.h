@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.29 2009/08/26 03:39:55 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.30 2009/09/04 19:09:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -104,8 +104,33 @@ namespace ESMCI {
     DELayout *delayout;
     
    public:
-    // constructor and destructor
+    // native constructor and destructor
     Array(){
+      typekind = ESMF_NOKIND;
+      rank = 0;
+      indexflag = ESMF_INDEX_DELOCAL;
+      larrayList = NULL;
+      larrayBaseAddrList = NULL;
+      exclusiveLBound = NULL;
+      exclusiveUBound = NULL;
+      computationalLBound = NULL;
+      computationalUBound = NULL;
+      totalLBound = NULL;
+      totalUBound = NULL;
+      tensorCount = 0;
+      undistLBound = NULL;
+      undistUBound = NULL;
+      staggerLoc = NULL;
+      vectorDim = NULL;
+      distgridToArrayMap = NULL;
+      arrayToDistGridMap = NULL;
+      distgridToPackedArrayMap = NULL;
+      contiguousFlag = NULL;
+      tensorElementCount = 0;
+      exclusiveElementCountPDe = NULL;
+      totalElementCountPLocalDe = NULL;
+    }
+    Array(int baseID):ESMC_Base(baseID){  // prevent baseID counter increment
       typekind = ESMF_NOKIND;
       rank = 0;
       indexflag = ESMF_INDEX_DELOCAL;

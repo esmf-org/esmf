@@ -2253,7 +2253,7 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_griddeserialize()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    *grid = new ESMCI::Grid;
+    *grid = new ESMCI::Grid(-1);  // prevent baseID counter increment
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*grid)->deserialize(
       buf, offset, *attreconflag),

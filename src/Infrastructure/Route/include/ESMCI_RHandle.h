@@ -1,4 +1,4 @@
-// $Id: ESMCI_RHandle.h,v 1.2 2009/07/28 23:08:07 theurich Exp $
+// $Id: ESMCI_RHandle.h,v 1.3 2009/09/04 19:09:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -54,6 +54,7 @@ namespace ESMCI {
     void *storage;                  // storage used by specific communication
  
    public:
+    RouteHandle():ESMC_Base(-1){}   // use Base constructor w/o BaseID increment
     static RouteHandle *create(int *rc);
     static int destroy(RouteHandle *routehandle);
     int construct(void);

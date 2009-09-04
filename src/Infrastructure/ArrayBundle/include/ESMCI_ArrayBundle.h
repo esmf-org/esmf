@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.h,v 1.11 2009/08/26 03:39:57 theurich Exp $
+// $Id: ESMCI_ArrayBundle.h,v 1.12 2009/09/04 19:09:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -55,6 +55,11 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
   public:
     // constructor and destructor
     ArrayBundle(){
+      arrayList = NULL;
+      arrayCount = 0;
+      arrayCreator = false;
+    }
+    ArrayBundle(int baseID):ESMC_Base(baseID){// prevent baseID counter incr.
       arrayList = NULL;
       arrayCount = 0;
       arrayCreator = false;
