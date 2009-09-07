@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr.C,v 1.7 2009/06/17 21:37:18 w6ws Exp $
+// $Id: ESMCI_LogErr.C,v 1.8 2009/09/07 06:46:00 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 #include <stdio.h>        
 #include <stdlib.h>
 #include <stdarg.h>
-#include <string.h>
+#include <string>
 #include <time.h>
 
 #if !defined (ESMF_OS_MinGW)
@@ -53,7 +53,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_LogErr.C,v 1.7 2009/06/17 21:37:18 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_LogErr.C,v 1.8 2009/09/07 06:46:00 w6ws Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -138,10 +138,11 @@ bool LogErr::MsgAllocError(
 //EOP
 {
     bool result=false;
-    char logMsg[ESMF_MAXSTR];
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
-    strcpy(logMsg, ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE));
-    Write(strcat(logMsg,msg),ESMC_LOG_ERROR);
+
+    string logMsg = ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE);
+    logMsg += msg;
+    Write(logMsg.c_str (),ESMC_LOG_ERROR);
     result=true;
     return result;
 }
@@ -170,10 +171,11 @@ bool LogErr::MsgAllocError(
 //EOP
 {
     bool result=false;
-    char logMsg[ESMF_MAXSTR];
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
-    strcpy(logMsg, ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE));
-    Write(strcat(logMsg,msg),ESMC_LOG_ERROR,LINE,FILE,method);
+
+    string logMsg = ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE);
+    logMsg += msg;
+    Write(logMsg.c_str (),ESMC_LOG_ERROR,LINE,FILE,method);
     result=true;
     return result;
 }
@@ -251,10 +253,11 @@ bool LogErr::MsgDeallocError(
 //EOP
 {
     bool result=false;
-    char logMsg[ESMF_MAXSTR];
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
-    strcpy(logMsg, ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE));
-    Write(strcat(logMsg,msg),ESMC_LOG_ERROR);
+
+    string logMsg = ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE);
+    logMsg += msg;
+    Write(logMsg.c_str (),ESMC_LOG_ERROR);
     result=true;
     return result;
 }
@@ -283,10 +286,11 @@ bool LogErr::MsgDeallocError(
 //EOP
 {
     bool result=false;
-    char logMsg[ESMF_MAXSTR];
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
-    strcpy(logMsg, ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE));
-    Write(strcat(logMsg,msg),ESMC_LOG_ERROR,LINE,FILE,method);
+
+    string logMsg = ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE);
+    logMsg += msg;
+    Write(logMsg.c_str (),ESMC_LOG_ERROR,LINE,FILE,method);
     result=true;
     return result;
 }
@@ -588,9 +592,10 @@ bool LogErr::MsgFoundError(
         // this means that rcToCheck was _not_ in the errorMask -> flag error
         result=true;
         if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
-        char logMsg[ESMF_MAXSTR];
-        strcpy(logMsg, ESMC_LogGetErrMsg(rcToCheck));
-        Write(strcat(logMsg,msg),ESMC_LOG_ERROR);
+
+        string logMsg = ESMC_LogGetErrMsg(rcToCheck);
+        logMsg += msg;
+        Write(logMsg.c_str (),ESMC_LOG_ERROR);
       }
     }
     return result;
@@ -634,9 +639,10 @@ bool LogErr::MsgFoundError(
                        // below, will crash ESMF_TimeIntervalUTest.F90 on 
                        // Linux longs 2.4.20-31.9, Lahey lf95 6.0 optimized
         if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
-        char logMsg[ESMF_MAXSTR];
-        strcpy(logMsg, ESMC_LogGetErrMsg(rcToCheck));
-        Write(strcat(logMsg,msg),ESMC_LOG_ERROR,LINE,FILE,method);
+
+        string logMsg = ESMC_LogGetErrMsg(rcToCheck);
+        logMsg += msg;
+        Write(logMsg.c_str (),ESMC_LOG_ERROR,LINE,FILE,method);
       }
     }
     return result;
