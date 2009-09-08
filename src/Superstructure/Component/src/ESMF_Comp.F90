@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.193 2009/08/29 00:42:56 svasquez Exp $
+! $Id: ESMF_Comp.F90,v 1.194 2009/09/08 18:50:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -249,7 +249,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.193 2009/08/29 00:42:56 svasquez Exp $'
+    '$Id: ESMF_Comp.F90,v 1.194 2009/09/08 18:50:16 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -565,12 +565,6 @@ contains
     compp%vm_released = .FALSE.
     compp%contextflag = ESMF_CHILD_IN_NEW_VM
 
-    ! initialize base class, including component name
-    call ESMF_BaseCreate(compp%base, "Component", name, 0, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
-
     ! parent VM
     call ESMF_VMGetCurrent(vm=compp%vm_parent, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
@@ -613,7 +607,6 @@ contains
         ! TODO: construct a msg string and then call something here.
         ! if (ESMF_LogMsgFoundError(status, msgstr, rc)) return
         if (localrc .ne. ESMF_SUCCESS) then
-          call ESMF_BaseDestroy(compp%base)
           write(msgbuf, *) &
             "ERROR: loading config file, unable to open either", &
             " name = ", trim(configFile), " or name = ", trim(fullpath)
@@ -672,6 +665,7 @@ contains
       if (contextflag==ESMF_CHILD_IN_PARENT_VM) then
         if ((compp%npetlist .gt. 0) .and. (compp%npetlist .lt. npets)) then
           ! conflict between contextflag and petlist -> bail out
+          deallocate(compp%petlist) ! local garbage collection for bail-on-error
           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
             "Conflict between contextflag and petlist arguments", &
             ESMF_CONTEXT, rc) 
@@ -682,8 +676,6 @@ contains
     else
       compp%contextflag = ESMF_CHILD_IN_NEW_VM    ! default
     endif
-
-
     
     ! check for conflict between petlist and current VM petCount
     if (compp%npetlist .gt. 0) then
@@ -696,15 +688,20 @@ contains
       ! see if pets in the petlist are negative or if they exist
       do i=1, compp%npetlist
         if ((compp%petlist(i) .ge. petCount) .or. (compp%petlist(i) .lt. 0)) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+          deallocate(compp%petlist) ! local garbage collection for bail-on-error
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
             "Conflict between petlist and global pet count", &
             ESMF_CONTEXT, rc)
-           return
+          return
         endif
       enddo
     endif
 
-
+    ! initialize base class, including component name
+    call ESMF_BaseCreate(compp%base, "Component", name, 0, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
 
     ! set the participation flag
     compp%iAmParticipant = .false.  ! reset
