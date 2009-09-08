@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.28 2009/08/31 22:23:33 svasquez Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.29 2009/09/08 18:48:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@
 
     !------------------------------------------------------------------------
     !EX_UTest
-    ! Create a Coupler Component setting eith an out of range petlist
+    ! Create a Coupler Component setting with an out of range petlist
     ! to force ab error.
     cname = "CplComp with out of range PetList"
     cpl2 = ESMF_CplCompCreate(name=cname, petList=(/0,2,5,8/), rc=rc)
