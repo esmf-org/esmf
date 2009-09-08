@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.16 2009/09/08 21:25:31 theurich Exp $
+! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.17 2009/09/08 21:29:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -19,8 +19,8 @@
 ! 
 ! The example of the previous section showed how easy it is to create an Array
 ! object from existing PET-local Fortran arrays. The example did, however, not
-! define any halos around the DE-local regions. The following code demonstrates
-! how an Array object with space for a halo can be set up.
+! define any halo elements around the DE-local regions. The following code
+! demonstrates how an Array object with space for a halo can be set up.
 !EOE
 !BOC
 program ESMF_ArrayFarrayHaloEx
