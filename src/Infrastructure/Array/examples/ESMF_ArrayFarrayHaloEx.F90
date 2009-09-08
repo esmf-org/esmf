@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.15 2009/03/03 17:23:23 theurich Exp $
+! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.16 2009/09/08 21:25:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@ program ESMF_ArrayFarrayHaloEx
 !BOE
 ! The {\tt farrayA} can now be used to create an Array object with enough space
 ! for a two element halo in each direction. The Array creation method checks for 
-! each PET that the local Fortran array can accomodate the requested regions.
+! each PET that the local Fortran array can accommodate the requested regions.
 !
 ! The default behavior of ArrayCreate() is to center the exclusive region within
 ! the total region. Consequently the following call will provide the 2 extra 

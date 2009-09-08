@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.12 2009/08/24 16:57:20 theurich Exp $
+! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.13 2009/09/08 21:25:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -74,7 +74,7 @@ program ESMF_ArraySparseMatMulEx
 ! tuple within the patch. While this format may be the most natural way to
 ! express elements in the source and destination Array, it has two major drawbacks.
 ! First the coordinate tuple is {\tt dimCount} specific and second the format
-! is extremly bulky. For 2D source and destination Arrays it would require 6
+! is extremely bulky. For 2D source and destination Arrays it would require 6
 ! integers to store the source and destination element information for each
 ! non-zero coefficient and matters get worse for higher dimensions.
 !

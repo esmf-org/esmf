@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayEx.F90,v 1.14 2009/03/03 17:23:23 theurich Exp $
+! $Id: ESMF_ArrayFarrayEx.F90,v 1.15 2009/09/08 21:25:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@ program ESMF_ArrayFarrayEx
 ! standard.
 !
 ! The {\tt ESMF\_ArrayCreate()} interface has been written to accept native
-! Fortran arrays of any flavor as a means to allow user-contolled memory
+! Fortran arrays of any flavor as a means to allow user-controlled memory
 ! management. The Array create call will check on each PET if sufficient 
 ! memory has been provided by the specified Fortran arrays and will indicate 
 ! an error if a problem is detected. However, the Array create call cannot
@@ -55,10 +55,10 @@ program ESMF_ArrayFarrayEx
 ! an Array object was created in a subroutine from an automatic explicit-shape
 ! array or an allocatable array, the memory allocations referenced by the Array 
 ! object will be automatically deallocated on return from the subroutine unless
-! provissions are made by the application writer to prevent such behavior. The
-! Array object cannot contol when memory that has been provided by the user
+! provisions are made by the application writer to prevent such behavior. The
+! Array object cannot control when memory that has been provided by the user
 ! during Array creation becomes deallocated, however, the Array will indicate
-! an error if it's memory references have been invalidated. 
+! an error if its memory references have been invalidated. 
 
 ! The easiest, portable way to provide safe native Fortran memory allocations
 ! to Array create is to use arrays with the pointer attribute. Memory allocated

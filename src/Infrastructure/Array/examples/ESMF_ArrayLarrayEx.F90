@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayLarrayEx.F90,v 1.15 2009/03/03 17:23:23 theurich Exp $
+! $Id: ESMF_ArrayLarrayEx.F90,v 1.16 2009/09/08 21:25:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -21,7 +21,7 @@
 ! it is also possible to first create an {\tt ESMF\_LocalArray} and create the
 ! Array from it. While this may seem more burdensome for the 1 DE per PET cases
 ! discussed in the previous sections it allows a straight forward 
-! generallization to the multiple DE per PET case. The following example first
+! generalization to the multiple DE per PET case. The following example first
 ! recaptures the previous example using an {\tt ESMF\_LocalArray} and then
 ! expands to the multiple DE per PET case.
 !EOE
@@ -93,7 +93,7 @@ program ESMF_ArrayLarrayEx
 !BOE
 ! The Array object can now be created from {\tt larray}. The Array 
 ! creation method checks for each PET that the LocalArray can 
-! accomodate the requested regions.
+! accommodate the requested regions.
 !EOE
 !BOC
   array = ESMF_ArrayCreate(larrayList=(/larray/), distgrid=distgrid, rc=rc)
@@ -114,7 +114,7 @@ program ESMF_ArrayLarrayEx
 !BOE
 ! Alternatively it is also possible (independent of how the Array object was
 ! created) to obtain the reference to the array allocation held by Array in 
-! form of an {\tt ESMF\_LocalArry} object. The {\tt farrayPtr} can then be
+! form of an {\tt ESMF\_LocalArray} object. The {\tt farrayPtr} can then be
 ! extracted using LocalArray methods.
 !EOE
 !BOC
@@ -154,7 +154,7 @@ program ESMF_ArrayLarrayEx
 !EOC
 !BOE
 ! While the usage of LocalArrays is unnecessarily cumbersome for 1 DE per PET
-! Arrays, it provides a straight forward path for extenting the interfaces 
+! Arrays, it provides a straight forward path for extending the interfaces 
 ! to multiple DEs per PET. 
 !
 ! In the following example a 8 x 8 index space will be decomposed into
@@ -264,7 +264,7 @@ program ESMF_ArrayLarrayEx
   enddo
 !EOC  
 !BOE
-! Note: If the VM associates multiple PEs with a PET the application writter 
+! Note: If the VM associates multiple PEs with a PET the application writer 
 ! may decide to use OpenMP loop parallelization on the {\tt de} loop.
 !
 ! Cleanup requires that the PET-local deallocations are done before the 

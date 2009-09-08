@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.8 2009/03/03 17:23:23 theurich Exp $
+! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.9 2009/09/08 21:25:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -52,7 +52,7 @@ program ESMF_ArrayScatterGatherEx
 ! \subsubsection{Communication -- Scatter and Gather}
 ! \label{Array:ScatterGather}
 ! 
-! It is a common situation, particularily in legacy code, that an ESMF Array
+! It is a common situation, particularly in legacy code, that an ESMF Array
 ! object must be filled with data originating from a large Fortran array stored
 ! on a single PET.
 !EOE
@@ -210,7 +210,7 @@ program ESMF_ArrayScatterGatherEx
 ! Array dimension and will lead to replication of the Array along the DEs of
 ! this direction. Still, the local arrays that comprise the {\tt array} 
 ! object refer to independent pieces of memory and can be initialized 
-! indpendently.
+! independently.
 !EOE
 !BOC
   myFarray2D = localPet ! initialize

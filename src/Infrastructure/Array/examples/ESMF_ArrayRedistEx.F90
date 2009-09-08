@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistEx.F90,v 1.9 2009/03/03 17:23:23 theurich Exp $
+! $Id: ESMF_ArrayRedistEx.F90,v 1.10 2009/09/08 21:25:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -88,7 +88,7 @@ program ESMF_ArrayRedistEx
 !BOE
 ! By construction {\tt srcArray} and {\tt dstArray} are of identical type and
 ! kind. Further the number of exclusive elements matches between both Arrays.
-! These are the prerequesites for the application of an Array redistribution
+! These are the prerequisites for the application of an Array redistribution
 ! in default mode. In order to increase performance of the actual 
 ! redistribution the communication patter must be precomputed and stored.
 !EOE

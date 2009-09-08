@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.47 2009/09/04 22:20:09 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.48 2009/09/08 21:25:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -254,7 +254,7 @@ program ESMF_ArrayEx
 ! \item {\em Computational Region}: Region that can be set arbitrarily within
 !       the bounds of the total region (defined next). The typical use of the
 !       computation region is to define bounds that only include elements that
-!       are updated by a DE-local computation kernel. The compuational region
+!       are updated by a DE-local computation kernel. The computational region
 !       does not need to include all exclusive elements and it may also contain
 !       elements that lie outside the exclusive region.
 ! \item {\em Total (Memory) Region}: Total of all DE-locally allocated elements.
@@ -325,7 +325,7 @@ program ESMF_ArrayEx
 ! memory allocation for each DE, is also determined during Array creation. When
 ! creating the Array object from existing Fortran arrays the total region is
 ! set equal to the memory provided by the Fortran arrays. Otherwise the 
-! default is to allocate as much memory as is needed to accomodate the union
+! default is to allocate as much memory as is needed to accommodate the union
 ! of the DE-local exclusive and computational region. Finally it is also
 ! possible to use optional arguments to the ArrayCreate() call to specify the
 ! total region of the object explicitly.
@@ -946,13 +946,13 @@ program ESMF_ArrayEx
 ! each direction than the corresponding exclusive region. The default
 ! computational region for each DE is equal to the DE's exclusive region. The
 ! extra elements between exclusive and total region are available for halos or
-! can be used to expamd the computational region of the Array.
+! can be used to expand the computational region of the Array.
 !
 ! The following compute loop first executes a halo update which by default
 ! will attempt to halo all elements that are outside of the computational region.
 ! Then the a three step cycle is entered which sets the computational region to
 ! 2, 1 and 0 elements around the exclusive region and each time calls a 
-! compuitational kernel that will access elements from (i-1,j-1) to (i+1,j+1). 
+! computational kernel that will access elements from (i-1,j-1) to (i+1,j+1). 
 ! After the computational width has reached 0 a new halo updated needs to be
 ! performed.
 !EOEI
@@ -1220,7 +1220,7 @@ program ESMF_ArrayEx
 ! Arrays that are defined on the same DistGrid or on congruent DistGrids, i.e.
 ! DistGrids that cover the same index space and have the same decomposition and
 ! distribution, are also congruent in index space. Index space congruent Arrays
-! may still have differing memory layouts, for example by defining differnt
+! may still have differing memory layouts, for example by defining different
 ! total regions. However, index space communication operations are stored in 
 ! Routes in a way to be compatible between index space congruent Arrays. Hence 
 ! an ArrayHalo stored for one Array object may be applied to any other index 
@@ -1562,7 +1562,7 @@ program ESMF_ArrayEx
 ! The Array will be replicated across the DEs that lie along replication
 ! DistGrid dimensions.
 !
-! Undistribted Array dimensions can be used to store multi-dimensional data for
+! Undistributed Array dimensions can be used to store multi-dimensional data for
 ! each Array index space element. A special purpose of undistributed dimensions
 ! is to store multiple data arrays in the same Array object. It is, for example,
 ! possible to store {\tt array1} and {\tt array2} 
@@ -1612,7 +1612,7 @@ program ESMF_ArrayEx
 ! This will create {\tt array} with 2+1 dimensions. The 2D DistGrid is used
 ! to describe decomposition into DEs with 2 Array dimensions mapped to the 
 ! DistGrid dimensions resulting in a 2D index space. The extra Array dimension
-! provides storeage for multiple 2D user data arrays that are kept in a 
+! provides storage for multiple 2D user data arrays that are kept in a 
 ! single Array object. By default the {\tt distgrid} dimensions are associated
 ! with the first Array dimensions in sequence. For the example above this means
 ! that the first 2 Array dimensions are decomposed according to the provided 2D
@@ -1802,7 +1802,7 @@ program ESMF_ArrayEx
 !BOE
 ! Here the default DistGrid to Array dimension mapping is used which assigns
 ! the Array dimensions in sequence to the DistGrid dimensions starting with
-! dimension "1". Extra DistGrid dimensions are considerd replicator dimensions
+! dimension "1". Extra DistGrid dimensions are considered replicator dimensions
 ! because the Array will be replicated along those dimensions. In the above
 ! example the 2nd DistGrid dimension will cause 1D Array pieces to be
 ! replicated along the DEs of the 2nd DistGrid dimension. Replication in the
@@ -1937,7 +1937,7 @@ program ESMF_ArrayEx
 ! The following call creates an Array object on the above distgrid using
 ! the locally existing {\tt myFarray2D} Fortran arrays. The difference 
 ! compared to the case with automatic memory allocation is that instead of
-! {\tt arrayspec} the Fortran array is provided as argument. Futhermore,
+! {\tt arrayspec} the Fortran array is provided as argument. Furthermore,
 ! the {\tt undistLBound} and {\tt undistUBound} arguments can be omitted,
 ! defaulting into Array tensor dimension lower bound of 1 and an upper
 ! bound equal to the size of the respective Fortran array dimension.
