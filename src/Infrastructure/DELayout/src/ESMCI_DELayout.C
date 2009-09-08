@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.20 2009/09/04 19:09:19 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.21 2009/09/08 19:27:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <typeinfo>
+#include <vector>
 
 // include ESMF headers
 #include "ESMC_Start.h"
@@ -44,7 +45,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.20 2009/09/04 19:09:19 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.21 2009/09/08 19:27:36 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -306,11 +307,12 @@ DELayout *DELayout::create(
   // CAUTION: todo: THIS IS A _NASTY_ HACK to make things happy on higher levels
   // that rely on DELayout to be _always 2D! Here I promote a 1D layout request
   // to 2D: N x 1. I write a message to LogErr to make people aware of this!!!
+  vector<int> deCountArgHelper(2);
   if (ndim==0){
     // ESMC_LogDefault.ESMC_LogWrite("Promoting 1D DELayout to 2D",
     //   ESMC_LOG_WARN);
     ndim = 2;
-    deCountArg = new int[2];  // TODO: this will leave a memory leak
+    deCountArg = &(deCountArgHelper[0]);
     deCountArg[0] = vm.getNpets();
     deCountArg[1] = 1;
   }
@@ -319,7 +321,7 @@ DELayout *DELayout::create(
     //  ESMC_LOG_WARN);
     ndim = 2;
     int firstDEdim = deCountArg[0];
-    deCountArg = new int[2];  // TODO: this will leave a memory leak
+    deCountArg = &(deCountArgHelper[0]);
     deCountArg[0] = firstDEdim;
     deCountArg[1] = 1;
   }
