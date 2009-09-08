@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.54 2009/09/01 22:03:43 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.55 2009/09/08 18:49:22 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.54 2009/09/01 22:03:43 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.55 2009/09/08 18:49:22 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -2070,11 +2070,11 @@ contains
         defaultvalueList, convention, purpose, itemCount, rc) @\
  @\
       type(mclass), intent(inout) :: mthis   @\
-      character (len = *), intent(in) :: name @\
+      character (len=*), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(out) :: valueList @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(inout), optional :: defaultvalueList @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
+      character (len=*), intent(in), optional :: convention @\
+      character (len=*), intent(in), optional :: purpose @\
       integer, intent(inout), optional :: itemCount    @\
       integer, intent(out), optional :: rc @\
  @\
@@ -2103,7 +2103,7 @@ contains
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, litemCount @\
+      integer :: localrc, litemCount, i @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: present_flag, attpack @\
  @\
@@ -2171,9 +2171,14 @@ contains
       if(present_flag .ne. ESMF_TRUE) then @\
       if(present(defaultvalueList)) then @\
         if(size(valueList) .lt. size(defaultvalueList)) then @\
-          valueList(1:size(defaultvalueList)) = defaultvalueList @\
+          do i=1,size(valueList) @\
+            valueList(i) = defaultvalueList(i) @\
+          enddo @\
+        else @\
+          do i=1,size(defaultvalueList) @\
+            valueList(i) = defaultvalueList(i) @\
+          enddo @\
         endif @\
-        valueList = defaultvalueList @\
       else  @\
         call ESMF_LogMsgSetError(ESMF_RC_ATTR_NOTSET, & @\
                     "Attribute not found, and no default given", & @\
@@ -2317,11 +2322,11 @@ contains
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
-      character (len = *), intent(in) :: name @\
+      character (len=*), intent(in) :: name @\
       logical, dimension(:), intent(out) :: valueList @\
       logical, dimension(:), intent(inout), optional :: defaultvalueList @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
+      character (len=*), intent(in), optional :: convention @\
+      character (len=*), intent(in), optional :: purpose @\
       integer, intent(inout), optional :: itemCount    @\
       integer, intent(out), optional :: rc @\
  @\
@@ -2352,7 +2357,7 @@ contains
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, litemCount @\
+      integer :: localrc, litemCount, i @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: present_flag, attpack @\
  @\
@@ -2420,9 +2425,14 @@ contains
       if(present_flag .ne. ESMF_TRUE) then @\
       if(present(defaultvalueList)) then @\
         if(size(valueList) .lt. size(defaultvalueList)) then @\
-          valueList(1:size(defaultvalueList)) = defaultvalueList @\
+          do i=1,size(valueList) @\
+            valueList(i) = defaultvalueList(i) @\
+          enddo @\
+        else @\
+          do i=1,size(defaultvalueList) @\
+            valueList(i) = defaultvalueList(i) @\
+          enddo @\
         endif @\
-        valueList = defaultvalueList @\
       else  @\
         call ESMF_LogMsgSetError(ESMF_RC_ATTR_NOTSET, & @\
                     "Attribute not found, and no default given", & @\
@@ -2561,8 +2571,8 @@ contains
       character (len = *), intent(in) :: name @\
       character (len=*), dimension(:), intent(out) :: valueList @\
       character (len=*), dimension(:), intent(in), optional :: defaultvalueList @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
+      character (len=*), intent(in), optional :: convention @\
+      character (len=*), intent(in), optional :: purpose @\
       integer, intent(inout), optional :: itemCount @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -2666,11 +2676,14 @@ contains
       if(present_flag .ne. ESMF_TRUE) then @\
       if(present(defaultvalueList)) then @\
         if(size(valueList) .lt. size(defaultvalueList)) then @\
-          valueList(1:size(defaultvalueList)) = defaultvalueList @\
+          do i=1,size(valueList) @\
+            valueList(i) = defaultvalueList(i) @\
+          enddo @\
+        else @\
+          do i=1,size(defaultvalueList) @\
+            valueList(i) = defaultvalueList(i) @\
+          enddo @\
         endif @\
-        do i=1,litemCount @\
-          valueList(i) = defaultvalueList(i) @\
-        enddo @\
       else  @\
         call ESMF_LogMsgSetError(ESMF_RC_ATTR_NOTSET, & @\
                     "Attribute not found, and no default given", & @\
