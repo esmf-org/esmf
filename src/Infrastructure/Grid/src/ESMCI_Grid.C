@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.95 2009/09/04 19:09:19 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.96 2009/09/08 18:52:54 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.95 2009/09/04 19:09:19 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.96 2009/09/08 18:52:54 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -4957,6 +4957,7 @@ ProtoGrid::ProtoGrid(
   if (gridAlign != ESMC_NULL_POINTER) _freeInterfaceInt(&gridAlign);
   if (gridMemLBound != ESMC_NULL_POINTER) _freeInterfaceInt(&gridMemLBound);
   if (distgridToGridMap != ESMC_NULL_POINTER) _freeInterfaceInt(&distgridToGridMap);
+  if (distDim != ESMC_NULL_POINTER) _freeInterfaceInt(&distDim);
   if (undistLBound != ESMC_NULL_POINTER) _freeInterfaceInt(&undistLBound);
   if (undistUBound != ESMC_NULL_POINTER) _freeInterfaceInt(&undistUBound);
   if (coordDimCount != ESMC_NULL_POINTER) _freeInterfaceInt(&coordDimCount);

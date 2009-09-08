@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.8 2009/09/03 21:43:36 oehmke Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.9 2009/09/08 18:52:54 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.8 2009/09/03 21:43:36 oehmke Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.9 2009/09/08 18:52:54 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -60,6 +60,7 @@ program ESMF_GridArbitraryUTest
   integer, allocatable :: localIndices1(:,:)
   integer, allocatable :: local1DIndices(:)
   type(ESMF_Array) :: array1D, array1, array2D, array2
+  type(ESMF_Array) :: array1D_1,array1D_2
   integer :: coordDimMap(3,3), dimCount, distdimCount
   integer :: undistLBound(2), undistUBound(2)
   integer :: elementCounts(4)
@@ -897,6 +898,10 @@ program ESMF_GridArbitraryUTest
   call ESMF_GridAddCoord(grid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+  ! Get rid of the grid
+  call ESMF_GridDestroy(grid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   
@@ -906,6 +911,17 @@ program ESMF_GridArbitraryUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   correct=.true.
   rc=ESMF_SUCCESS
+
+  ! switch ydim and zdim and set distDim to make xdim and ydim distributed
+  grid = ESMF_GridCreateShapeTile("arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+	minIndex=(/1,1,1/), maxIndex=(/xdim, zdim, ydim/), &
+	localArbIndex=localIndices,localArbIndexCount=localCount, distDim=(/1,3/), &
+	rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, distgrid=distgrid, &
+	distgridToGridMap = distgridToGridMap, rc=localrc)
 
   ! Set Coordinate using GridSetCoord
   ! set arrayspec
@@ -932,6 +948,10 @@ program ESMF_GridArbitraryUTest
   if (rank .ne. 1) correct=.false.
   if (typekind .ne. ESMF_TYPEKIND_R8) correct=.false. 
 
+  ! Get rid of the grid
+  call ESMF_GridDestroy(grid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
   ! destroy array
   call ESMF_ArrayDestroy(array1D,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
@@ -947,12 +967,30 @@ program ESMF_GridArbitraryUTest
   correct=.true.
   rc=ESMF_SUCCESS
 
+  ! switch ydim and zdim and set distDim to make xdim and ydim distributed
+  grid = ESMF_GridCreateShapeTile("arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+	minIndex=(/1,1,1/), maxIndex=(/xdim, zdim, ydim/), &
+	localArbIndex=localIndices,localArbIndexCount=localCount, distDim=(/1,3/), &
+	rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, distgrid=distgrid, &
+	distgridToGridMap = distgridToGridMap, rc=localrc)
+
   ! Set the array for the undistributed dimension
   call ESMF_ArraySpecSet(arrayspec1D, rank=1, typekind=ESMF_TYPEKIND_R8, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   array1D = ESMF_ArrayCreate(arrayspec1D, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
 	     distgridToArrayMap=(/0,1/), rc=localrc);
+
+  array1D_1 = ESMF_ArrayCreate(arrayspec1D, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+	   distgridToArrayMap=(/1,0/), rc=localrc);
+
+  array1D_2 = ESMF_ArrayCreate(arrayspec1D, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+	   distgridToArrayMap=(/1,0/), rc=localrc);
+
 
   ! set coordinate array for the undistributed dimension
   call ESMF_ArrayGet(array1D, 0, farrayptr=fptr1D, rc=localrc)
@@ -963,9 +1001,21 @@ program ESMF_GridArbitraryUTest
       fptr1D(j)=j*100
   enddo 
 
+
   call ESMF_GridSetCoord(grid,coordDim=2, &
                staggerloc=ESMF_STAGGERLOC_CENTER, array=array1D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Set other coordinate arrays
+  call ESMF_GridSetCoord(grid,coordDim=1, &
+               staggerloc=ESMF_STAGGERLOC_CENTER, array=array1D_1, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridSetCoord(grid,coordDim=3, &
+               staggerloc=ESMF_STAGGERLOC_CENTER, array=array1D_2, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
 
   ! Get Coord From Array
   call ESMF_GridGetCoord(grid,coordDim=2,&
@@ -1002,12 +1052,17 @@ program ESMF_GridArbitraryUTest
   call ESMF_GridDestroy(grid,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  ! destroy array
+  ! destroy arrays
   call ESMF_ArrayDestroy(array1D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_ArrayDestroy(array1D_1,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
 
+  call ESMF_ArrayDestroy(array1D_2,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
   ! Fourth grid, using GridCreateEmpty() and GridSetCommitShapeTile() to create a 2D arb. grid
@@ -1125,14 +1180,31 @@ program ESMF_GridArbitraryUTest
       fptr2D(i,j)=j*100
     enddo
   enddo 
+ 
+  ! Create temporary arrays for the other two coordinate dimensions
+  ! set arrayspec
+  call ESMF_ArraySpecSet(arrayspec1D, rank=1, typekind=ESMF_TYPEKIND_R8, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  ! allocate coordinate array
-  call ESMF_GridAddCoord(grid, rc=localrc)
+  array1D_1 = ESMF_ArrayCreate(arrayspec1D, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+	   distgridToArrayMap=(/1,0/), rc=localrc);
+
+  array1D_2 = ESMF_ArrayCreate(arrayspec1D, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+	   distgridToArrayMap=(/1,0/), rc=localrc);
+
+  ! Set coordinate Arrays
+  call ESMF_GridSetCoord(grid,coordDim=1, &
+               staggerloc=ESMF_STAGGERLOC_CENTER, array=array1D_1, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_GridSetCoord(grid,coordDim=2, &
                staggerloc=ESMF_STAGGERLOC_CENTER, array=array2D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridSetCoord(grid,coordDim=3, &
+               staggerloc=ESMF_STAGGERLOC_CENTER, array=array1D_2, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
 
   ! Get Coord From Array
   call ESMF_GridGetCoord(grid,coordDim=2,&
@@ -1158,13 +1230,20 @@ program ESMF_GridArbitraryUTest
   call ESMF_GridValidate(grid,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
 
-  ! destroy array
-  call ESMF_ArrayDestroy(array2D,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) correct=.false.
-
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
+
+  ! destroy arrays
+  call ESMF_ArrayDestroy(array1D_1,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+
+  call ESMF_ArrayDestroy(array2D,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+
+  call ESMF_ArrayDestroy(array1D_2,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 

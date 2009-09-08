@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.129 2009/09/03 21:43:32 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.130 2009/09/08 18:52:54 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -8534,7 +8534,7 @@ endif
    ! THE C++ VERSION. 
 
    ! Call into the C++ interface
-   call c_esmc_gridgetcoordr8(grid, localDE, tmp_staggerloc, &  
+   call c_esmc_gridgetcoordr4(grid, localDE, tmp_staggerloc, &  
                               index, coord, localrc)
    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
