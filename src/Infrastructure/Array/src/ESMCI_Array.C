@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.60 2009/09/03 05:11:10 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.61 2009/09/08 17:45:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.60 2009/09/03 05:11:10 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.61 2009/09/08 17:45:49 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -5217,7 +5217,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     SeqIndexFactorLookup *seqIndexFactorLookup;
     int localPet;
     int petCount;
-    SparseMatrix const &sparseMatrix;
+    SparseMatrix const *sparseMatrix;
     vector<bool> const &factorPetFlag;
     Interval const *seqIndexInterval;
     vector<int> const &seqIntervFactorListCount;
@@ -5228,7 +5228,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     ESMC_TypeKind typekindFactors;
    public:
     SetupSeqIndexFactorLookup(
-      SparseMatrix const &sparseMatrix_,
+      SparseMatrix const *sparseMatrix_,
       vector<bool> const &factorPetFlag_,
       vector<int> const &seqIntervFactorListCount_,
       vector<vector<int> > const &seqIntervFactorListIndex_):
@@ -5247,7 +5247,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       SeqIndexFactorLookup *seqIndexFactorLookup_,
       int localPet_,
       int petCount_,
-      SparseMatrix const &sparseMatrix_,
+      SparseMatrix const *sparseMatrix_,
       vector<bool> const &factorPetFlag_,
       Interval const *seqIndexInterval_,
       vector<int> const &seqIntervFactorListCount_,
@@ -5294,9 +5294,9 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
         int j = seqIntervFactorListIndex[dstPet][jj];
         SeqInd seqInd;
         if (dstSetupFlag)
-          seqInd = sparseMatrix.getDstSeqIndex(j);
+          seqInd = sparseMatrix->getDstSeqIndex(j);
         else
-          seqInd = sparseMatrix.getSrcSeqIndex(j);
+          seqInd = sparseMatrix->getSrcSeqIndex(j);
         int seqIndex = seqInd.getIndex(0);
         int k = seqIndex - seqIndexInterval[dstPet].min;
         if (tensorMixFlag)
@@ -5321,9 +5321,9 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
         int j = seqIntervFactorListIndex[localPet][jj];
         SeqInd seqInd;
         if (dstSetupFlag)
-          seqInd = sparseMatrix.getDstSeqIndex(j);
+          seqInd = sparseMatrix->getDstSeqIndex(j);
         else
-          seqInd = sparseMatrix.getSrcSeqIndex(j);
+          seqInd = sparseMatrix->getSrcSeqIndex(j);
         int seqIndex = seqInd.getIndex(0);
         int k = seqIndex - seqIndexInterval[localPet].min;
         if (tensorMixFlag)
@@ -5446,19 +5446,19 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
         int j = seqIntervFactorListIndex[dstPet][jj];
         SeqInd seqInd;
         if (dstSetupFlag)
-          seqInd = sparseMatrix.getDstSeqIndex(j);
+          seqInd = sparseMatrix->getDstSeqIndex(j);
         else
-          seqInd = sparseMatrix.getSrcSeqIndex(j);
+          seqInd = sparseMatrix->getSrcSeqIndex(j);
         int seqIndex = seqInd.getIndex(0);
         int k = seqIndex - seqIndexInterval[dstPet].min;
         if (tensorMixFlag)
           k += (seqInd.getIndex(1)-1) * seqIndexInterval[dstPet].count;
         *intStream++ = k; // index into distr. dir lookup table
         if (dstSetupFlag)
-          seqInd = sparseMatrix.getSrcSeqIndex(j);
+          seqInd = sparseMatrix->getSrcSeqIndex(j);
           // reverse b/c src side picks dst and rev.
         else
-          seqInd = sparseMatrix.getDstSeqIndex(j);
+          seqInd = sparseMatrix->getDstSeqIndex(j);
           // reverse b/c src side picks dst and rev.
         seqIndex = seqInd.getIndex(0);
         int tensorSeqIndex = -1;  // dummy tensorSeqIndex
@@ -5468,7 +5468,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
         *intStream++ = tensorSeqIndex;    // dummy tensorSeqIndex
         *intStream++ = 0; // padding for 8-byte alignment
         factorStream = (T *)intStream;
-        *factorStream++ = ((T *)sparseMatrix.getFactorList())[j];
+        *factorStream++ = ((T *)sparseMatrix->getFactorList())[j];
       }
     }
     template<typename T> void fillSeqIndexFactorLookup(int localPet){
@@ -5477,19 +5477,19 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
         int j = seqIntervFactorListIndex[localPet][jj];
         SeqInd seqInd;
         if (dstSetupFlag)
-          seqInd = sparseMatrix.getDstSeqIndex(j);
+          seqInd = sparseMatrix->getDstSeqIndex(j);
         else
-          seqInd = sparseMatrix.getSrcSeqIndex(j);
+          seqInd = sparseMatrix->getSrcSeqIndex(j);
         int seqIndex = seqInd.getIndex(0);
         int k = seqIndex - seqIndexInterval[localPet].min;
         if (tensorMixFlag)
           k += (seqInd.getIndex(1)-1) * seqIndexInterval[localPet].count;
         int kk = seqIndexFactorLookup[k].de++;// counter during init
         if (dstSetupFlag)
-          seqInd = sparseMatrix.getSrcSeqIndex(j);
+          seqInd = sparseMatrix->getSrcSeqIndex(j);
           // reverse b/c src side picks dst and rev.
         else
-          seqInd = sparseMatrix.getDstSeqIndex(j);
+          seqInd = sparseMatrix->getDstSeqIndex(j);
           // reverse b/c src side picks dst and rev.
         seqIndex = seqInd.getIndex(0);
         int tensorSeqIndex = -1;  // dummy tensorSeqIndex
@@ -5500,7 +5500,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
         seqIndexFactorLookup[k].factorList[kk]
           .partnerSeqIndex.tensorSeqIndex = tensorSeqIndex; //tensorSeqIndex
         *((T *)seqIndexFactorLookup[k].factorList[kk].factor) =
-          ((T *)sparseMatrix.getFactorList())[j];        
+          ((T *)sparseMatrix->getFactorList())[j];        
       }
     }
   };
@@ -6167,7 +6167,7 @@ int Array::sparseMatMulStore(
       srcSeqIndexFactorLookup,
       localPet,
       petCount,
-      sparseMatrix[0],
+      (sparseMatrix.size()==0) ? NULL : &(sparseMatrix[0]),
       factorPetFlag,
       srcSeqIndexInterval,
       srcSeqIntervFactorListCount,
@@ -6289,7 +6289,7 @@ int Array::sparseMatMulStore(
       dstSeqIndexFactorLookup,
       localPet,
       petCount,
-      sparseMatrix[0],
+      (sparseMatrix.size()==0) ? NULL : &(sparseMatrix[0]),
       factorPetFlag,
       dstSeqIndexInterval,
       dstSeqIntervFactorListCount,
