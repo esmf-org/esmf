@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.C,v 1.4 2009/09/09 05:46:41 eschwab Exp $
+// $Id: ESMCI_IO_NetCDF.C,v 1.5 2009/09/09 14:59:37 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.4 2009/09/09 05:46:41 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.5 2009/09/09 14:59:37 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -686,14 +686,11 @@ fflush(stdout);
 
     thisArray = Array::create(&locArray, 1,
                               distGrid, DATA_COPY,
-                              NULL, 
-                              NULL, 
-                              NULL, 
-                              NULL, 
-                              NULL, 
-                              NULL, NULL, 
-                              NULL, NULL, NULL,
-                              NULL, NULL, 
+                              (InterfaceInt*)NULL, (InterfaceInt*)NULL, 
+                              (InterfaceInt*)NULL, (InterfaceInt*)NULL, 
+                              (InterfaceInt*)NULL, (InterfaceInt*)NULL,
+                              (InterfaceInt*)NULL, (ESMC_IndexFlag*)NULL,
+                              (InterfaceInt*)NULL, (InterfaceInt*)NULL,
                               &arrayRc);
 
     //printf("*** Array RC: %d\n", arrayRc);
