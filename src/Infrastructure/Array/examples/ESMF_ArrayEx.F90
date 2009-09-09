@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.49 2009/09/09 05:38:00 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.50 2009/09/09 22:47:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -22,29 +22,21 @@ program ESMF_ArrayEx
   
   ! local variables
   integer:: rc, de, i, j, k, petCount, localDeCount, localPet
-!  integer:: dim, nodeCount, dimCount
-!  integer:: deNeighborCount, linkCount
   type(ESMF_VM):: vm
   type(ESMF_DELayout):: delayout
   type(ESMF_DistGrid):: distgrid, distgrid3D, distgrid2D, distgrid1D
   type(ESMF_ArraySpec):: arrayspec
   type(ESMF_Array):: array, array1, array2, array1D, array2D, array3D
-!  type(ESMF_Array):: arrayTracer, arrayNScalar, arrayNEu, arrayNEv
-!  type(ESMF_ArrayBundle):: arrayBundle
-!  type(ESMF_Array), allocatable:: arrayList(:)
+  type(ESMF_Array):: arrayTracer, arrayScalar
   type(ESMF_LocalArray), allocatable:: larrayList(:)
   type(ESMF_LocalArray), allocatable:: larrayList1(:), larrayList2(:)
   real(ESMF_KIND_R8), pointer:: myFarray(:,:)
-!  real(ESMF_KIND_R8), pointer:: myFarray1(:,:), myFarray2(:,:)
   real(ESMF_KIND_R8), pointer:: myFarray1D(:), myFarray3D(:,:,:)
   real(ESMF_KIND_R8), pointer:: myFarray2D(:,:)
   real(ESMF_KIND_R8):: dummySum
   type(ESMF_IndexFlag):: indexflag
-!  integer, allocatable:: dimExtent(:,:), indexList(:), regDecompDeCoord(:)
-!  integer, allocatable:: minIndex(:,:), maxIndex(:,:), regDecomp(:,:)
-!  integer, allocatable:: deBlockList(:,:), connectionList(:,:), connectionTransformList(:,:)
-!  integer, allocatable:: deNeighborList(:), deNeighborInterface(:,:)
-!  integer, allocatable:: linkList(:,:)
+  integer, allocatable:: minIndex(:,:), maxIndex(:,:), regDecomp(:,:)
+  integer, allocatable:: connectionList(:,:)
   integer, allocatable:: arrayToDistGridMap(:)
   integer, allocatable:: localDeList(:)
   integer, allocatable:: exclusiveLBound(:,:), exclusiveUBound(:,:)
@@ -54,7 +46,6 @@ program ESMF_ArrayEx
   integer, allocatable:: computationalLWidth(:,:), computationalUWidth(:,:)
   integer, allocatable:: computationalLBound(:,:), computationalUBound(:,:)
 !  integer, allocatable:: haloLDepth(:), haloUDepth(:)
-!  type(ESMF_Logical):: regDecompFlag
 !  type(ESMF_RouteHandle):: haloHandle, haloHandle2
 
   ! result code
@@ -225,7 +216,7 @@ program ESMF_ArrayEx
 ! \item The decomposition of the entire domain into "element exclusive" DE-local
 !       LR chunks. {\em Element exclusive} means that there is no element overlap
 !       between DE-local chunks. This, however, does not exclude degeneracies 
-!       between staggering locations for certain topologies (e.g. bipolar).
+!       on edge boundaries for certain topologies (e.g. bipolar).
 ! \item The layout of DEs over the available PETs and thus the distribution of
 !       the Array data.
 ! \end{itemize}
@@ -247,10 +238,8 @@ program ESMF_ArrayEx
 ! \item {\em Exclusive Region}: Elements for which a DE claims exclusive
 !       ownership. Practically this means that the DE will be the sole source
 !       for these elements in halo and reduce operations. There are exceptions
-!       to this for certain staggering locations in some topologies. These 
-!       cases remain well-defined with the information available through the
-!       associated DistGrid. The exclusive region includes all elements of the
-!       interior region.
+!       to this in some topologies. The exclusive region includes all elements
+!       of the interior region.
 ! \item {\em Computational Region}: Region that can be set arbitrarily within
 !       the bounds of the total region (defined next). The typical use of the
 !       computation region is to define bounds that only include elements that
@@ -378,8 +367,7 @@ program ESMF_ArrayEx
 ! The DE-local {\em exclusive region} takes a central role in the definition
 ! of Array bounds. Even as the {\em computational region} may adjust during 
 ! the course of execution the {\em exclusive region} remains unchanged.
-! Furthermore the {\em exclusive region} is identical for all stagger locations
-! (discussed in a later section) and as such provides a unique reference frame 
+! The {\em exclusive region} provides a unique reference frame
 ! for the index space of all Arrays associated with the same DistGrid.
 !
 ! There is a choice between two indexing options that needs to be made during 
@@ -1019,361 +1007,6 @@ program ESMF_ArrayEx
 #endif
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   
-!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-!!!! UNTIL FURTHER IMPLEMENTATION SKIP SECTIONS OF THIS EXAMPLE >>>>>>>>>>>>>>>>
-#ifdef NOSKIP   
-!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-!BOEI
-!
-!
-!
-! \subsubsection{Stagger locations and multiple Arrays with same DistGrid}
-! \label{ArrayEx_staggerLocations}
-! 
-! The Array class is part of the ESMF index space layer. As such it does not
-! store or interpret any information in terms of physical space. In index space
-! each data element is addressed by a unique index tuple. The interpretation
-! of where this data element is located physically is either left to the 
-! application writer, who wants to use the index space layer directly, or to
-! higher layers in the ESMF class structure (Grids and Fields).
-!
-! There is, however, a special kind of physical information that does affect
-! the index space and must be considered within the Array and DistGrid classes.
-! The
-! index tuple that are used to identify data elements in index space specify 
-! elements, but do not contain any information as to where {\em within} the 
-! physical element
-! the data value actually is located. This orientation of the data point with
-! respect to the element is called its stagger location. In many cases the stagger
-! location, which is physical information, has no effect on the index space.
-! However, in some topologies the stagger location does matter for certain 
-! operations and the index space layer must provide a mechanism to address the
-! issue of stagger locations.
-!
-! The ESMF index space layer (DistGrid and Array) provides support for
-! staggered data by means of a staggering index that is attached to the data.
-! Much like the index space location of a element the stagger location index does 
-! not have a direct physical meaning attached and can be chosen arbitrarily.
-! In fact. the staggering location index is by its nature independent of the 
-! rank of the data and the decomposition. It is simply an integer number that
-! distinguishes different stagger locations. The interpretation of the stagger 
-! location in terms of a physical location in the element is again left to the 
-! user of the index space layer or higher ESMF classes.
-!
-! For the Arrays, that have been used throughout the previous sections
-! of this document, support for staggering simply means that an additional 
-! index variable is attached. This integer variable ({\tt staggerLoc}) can be 
-! specified during Array creation, defaults to 0 if not specified, can be set
-! after creation with {\tt ESMF\_ArraySet()} and can be queried for.
-!
-! In many practical applications a number of different quantities defined on the
-! same grid will need to be stored and distributed in Array objects. Naturally
-! all of these quantities are to be decomposed and distributed in the same manner
-! across the computational resources in order to ensure good data locality.
-! There are two ways the ESMF index space layer offers this to be done. First
-! it is possible to use multiple Arrays (one Array for each quantity) that are
-! all using the same DistGrid. Second a single Array may be used that 
-! contains extra dimensions that are not distributed by the DistGrid and can be
-! used
-! to index the different quantities within the same Array. The first approach is
-! a special case of the more general second approach but has the advantage of
-! leading to simpler argument lists and thus will be used here to demonstrate 
-! the concept.
-!
-! The following example uses the surface of a cylinder to demonstrate
-! the concepts outlined above. There are two physical quantities that are to 
-! be defined on the cylinder surface at different stagger locations. 
-!
-! First a suitable DistGrid must be created to define the index space and its
-! topology. In this example the index space is a  {\tt 20 x 100} grid with
-! the second dimension having a periodic boundary.
-!EOEI
-!BOCI
-  allocate(connectionList(2*2+2,1))
-  call ESMF_ConnectionElementConstruct(connectionElement=connectionList(:,1), &
-    patchIndexA=1, patchIndexB=1, &
-    positionVector=(/0, 100/), orientationVector=(/1, 2/), rc=rc)
-  call ESMF_VMGet(vm, petCount=petCount, rc=rc)
-  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/20,100/), &
-    regDecomp=(/1,2*petCount/), connectionList=connectionList, rc=rc)
-!EOCI
-!BOEI
-! Now {\tt distgrid} defines the index space for the problem. It also contains
-! the decomposition description and decomposes the index space into twice as
-! many DEs along the peripheral direction (second dimension) as there are PETs 
-! in the current context. 
-!
-! Next the first Array object is created which will provide DE-local memory
-! segments for the first quantity defined on {\tt distgrid}. The {\tt arrayspec}
-! of the previous sections is suitable for a 2D Array of double precision real 
-! numbers.
-!EOEI
-!BOCI
-  array1 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    totalLWidth=(/0,1/), totalUWidth=(/0,1/), staggerLoc=1, rc=rc)
-!EOCI
-!BOEI
-! Each DE in {\tt array1} will have allocated enough memory to hold the 
-! exclusive region of elements (which is determined by the decomposition) plus
-! a halo of one element in positive and negative peripheral direction. Furthermore
-! the {\tt staggerLoc} argument was used to indicate that the quantity stored
-! in {\tt array1} is located on stagger location "1", which, at this point, is 
-! nothing but an arbitrary index whose meaning will become clearer below.
-!
-! The second quantity will be provided in {\tt array2} using the same DistGrid
-! object, thus defining it within the same index space and ensuring identical
-! decomposition. However, {\tt array2} will have one more element along the 
-! negative peripheral direction in its computational region and no extra space
-! for a halo.
-!EOEI
-!BOCI
-  array2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    computationalLWidth=(/0,1/), staggerLoc=2, rc=rc)
-!EOCI
-!BOEI
-! This puts {\tt array2} to be on stagger location "2" and distinguishes it from
-! the stagger location given to {\tt array1}. The following diagram shows how the 
-! application writer may interpret the current situation physically. But keep
-! in mind that the ESMF index space layer makes no such interpretation, all it
-! knows is that {\tt array1} and {\tt array2} are associated with 
-! {\em different} stagger locations and that {\tt array2} has one more 
-! computational element in the negative second dimension. The diagram depicts 
-! the situation for
-! a single DE. The labels are {\tt a1} for {\tt array1}, {\tt a2} for 
-! {\tt array2}, {\tt a1h} for the halo elements in {\tt array1} and 
-! {\tt a2c} for the extra computational elements in {\tt array2}, 
-!
-! \begin{verbatim}
-!   ----------------------------------------> 2nd dim
-!   |
-!   |   +---------+---------+---------+---------+---------+
-!   |   | (1,-1)  | (1,1)   |         |         |         |
-!   |   |         |         |         |         |         |
-!   |   |  a1h  a2c   a1   a2   a1   a2   a1   a2   a1h   |
-!   |   |         |         |         |         |         |
-!   |   |         |         |         |         |         |
-!   |   +---------+---------+---------+---------+---------+
-!   |   |         |         |         |         |         |
-!   |   |         |         |         |         |         |
-!   |   |  a1h  a2c   a1   a2   a1   a2   a1   a2   a1h   |
-!   |   |         |         |         |         |         |
-!   |   |         |         |         |         |         |
-!   |   +---------+---------+---------+---------+---------+
-!   |   |         |         |         |         |         |
-!   |   |         |         |         |         |         |
-!   |   |  a1h  a2c   a1   a2   a1   a2   a1   a2   a1h   |
-!   |   |         |         |         |         |         |
-!   |   |         |         |         |         |         |
-!   |   +---------+---------+---------+---------+---------+
-!   |   |         |         |         | (20,N)  | (20,N+1)|
-!   |   |         |         |         |         |         |
-!   |   |  a1h  a2c   a1   a2   a1   a2   a1   a2   a1h   |
-!   |   |         |         |         |         |         |
-!   |   |         |         |         |         |         |
-!   |   +---------+---------+---------+---------+---------+
-!   | 
-!   |
-!   v
-!  1st dim
-! \end{verbatim}
-!
-! The way that the Array class defines the DE-local index space
-! with regards to the exclusive region specified by the DistGrid ensures
-! that the indexing of different Array objects, that use the same DistGrid,
-! matches, as long as the same setting for {\tt indexflag} has been used. 
-! For {\tt array1} and {\tt array2} this means that the following loop is well 
-! defined.
-!EOEI
-!BOCI
-  call ESMF_DistGridGet(distgrid, delayout=delayout, rc=rc)
-  call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=rc)
-  allocate(larrayList1(localDeCount))
-  call ESMF_ArrayGet(array1, larrayList=larrayList1, rc=rc)
-  allocate(larrayList2(localDeCount))
-  call ESMF_ArrayGet(array2, larrayList=larrayList2, rc=rc)
-  allocate(computationalLBound(localDeCount, 2))  ! rank=2
-  allocate(computationalUBound(localDeCount, 2))  ! rank=2
-  call ESMF_ArrayGet(array1, computationalLBound=computationalLBound, &
-    computationalUBound=computationalUBound, rc=rc)
-  do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList1(de), myFarray1, ESMF_DATA_REF, &
-      rc=rc)
-    call ESMF_LocalArrayGet(larrayList2(de), myFarray2, ESMF_DATA_REF, &
-      rc=rc)
-    ! use the computational bounds of array1 for the kernel
-    do i=computationalLBound(de, 1), computationalUBound(de, 1)
-      do j=computationalLBound(de, 2), computationalUBound(de, 2)
-        ! (i,j) references the same element in both Array objects!
-        dummySum = dummySum + &
-          (myFarray2(i,j-1) - myFarray2(i,j)) * myFarray1(i,j)
-      enddo
-    enddo
-  enddo
-!EOCI
-!BOEI
-! 
-!
-!
-!
-! \subsubsection{ArrayBundles and communications}
-!
-! Arrays that are defined on the same DistGrid or on congruent DistGrids, i.e.
-! DistGrids that cover the same index space and have the same decomposition and
-! distribution, are also congruent in index space. Index space congruent Arrays
-! may still have differing memory layouts, for example by defining different
-! total regions. However, index space communication operations are stored in 
-! Routes in a way to be compatible between index space congruent Arrays. Hence 
-! an ArrayHalo stored for one Array object may be applied to any other index 
-! space congruent Array.
-!
-! It is not uncommon in actual applications that the same communication pattern
-! must be applied to a whole set of index space congruent Arrays. Fusion of 
-! the individual communication operations often provides opportunity for 
-! performance enhancements. Furthermore, the encapsulation of a set of Arrays 
-! into a single bundle of Arrays makes code more readable and user-friendly.
-! Finally, in cases such as demonstrated in the previous section 
-! where {\tt array1} and {\tt array2} are defined as quantities on the same 
-! DistGrid, differing only in the {\tt staggerLoc} index, it is very convenient
-! to have a single object that can be used to reference both Arrays. The 
-! {\tt ESMF\_ArrayBundle} class allows to create a single ArrayBundle object
-! from a whole list of index space congruent Arrays.
-!EOEI
-!BOCI
-  arrayBundle = ESMF_ArrayBundleCreate(arrayList=(/array1, array2/), rc=rc)
-!EOCI
-!BOEI
-! The communication calls that are available for ArrayBundles are:
-! \begin{itemize}
-! \item Halo
-! \item Redist
-! \item SparseMatMul
-! \end{itemize}
-! It is for example possible to halo both
-! {\tt array1} and {\tt array2} in a single operation.
-!EOEI
-!BOCI
-  call ESMF_ArrayBundleHalo(arrayBundle, rc=rc)
-!EOCI
-!BOEI
-! Communication operations can be precomputed and RouteHandles are available
-! to use precomputed Routes in subsequent ArrayBundle communication calls.
-!EOEI
-!BOCI
-  call ESMF_ArrayBundleHaloStore(arrayBundle, routehandle=haloHandle, rc=rc)
-  call ESMF_ArrayBundleHaloRun(arrayBundle, routehandle=haloHandle, rc=rc)
-!EOCI
-!BOEI
-! An ArrayBundle is destroyed calling the ArrayBundleDestroy method.
-!EOEI
-!BOCI
-  call ESMF_ArrayBundleDestroy(arrayBundle, rc=rc)
-!EOCI
-!BOEI
-! The individual Arrays that make up the bundle remain valid objects, i.e.
-! ArrayBundleDestroy does not destroy or deallocate {\tt array1} and {\tt
-! array2} of the current example.
-!
-!
-! \subsubsection{Halo communication for staggered Arrays}
-! \label{ArrayEx_staggeredArrays}
-! 
-! One of the key features of the distributed Array class is to support halo
-! operations. Section \ref{ArrayEx_staggerLocations}
-! introduced the concept of the staggering location index. Two Arrays were
-! created on the same DistGrid, but were given different stagger location 
-! indices. Until now this index remained unused.
-!
-! Besides the Array class the DistGrid class also makes reference to stagger
-! location when connection transformations are explicitly defined. By default,
-! i.e. without explicit {\tt connectionTransformList} argument during DistGrid
-! creation, stagger locations are unaffected by connection transformations.
-! For some topologies, however, stagger locations experience transformations as
-! data is mapped through certain connections. The DistGrid contains this 
-! information in the {\tt connectionTransformList} elements as {\tt staggerSrc}
-! and {\tt staggerDst} variables.
-!
-! One of the obvious consequences of such a complex index space topology is that
-! halo operations will need access to multiple stagger locations. First we 
-! look at {\tt array1} and {\tt array2} as they were defined on the 
-! simple topology of the last section. Stagger locations are unaffected
-! by the connection that was used to enforce periodic boundary conditions. Both
-! Arrays can be haloed independent of each other:
-!EOEI
-!BOCI
-  call ESMF_ArrayHalo(array1, rc=rc)
-  call ESMF_ArrayHalo(array2, rc=rc)
-!EOCI
-!BOEI
-! This will change when a more complicated DistGrid is used instead.
-!EOEI
-!BOCI
-  call ESMF_ArrayDestroy(array1, rc=rc)
-  call ESMF_ArrayDestroy(array2, rc=rc)
-  call ESMF_DistGridDestroy(distgrid, rc=rc)
-!EOCI  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOCI
-  allocate(connectionTransformList(4+2*2,1))
-  call ESMF_ConnectionTransformElementConstruct(connectionTransformList(:,1), &
-    connectionIndex=1, direction=0, staggerSrc=2, staggerDst=1, &
-    indexOffsetVector=(/0,0/), signChangeVector=(/+1,+1/), rc=rc)
-  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/20,100/), &
-    regDecomp=(/1,2*petCount/), connectionList=connectionList, &
-    connectionTransformList=connectionTransformList, rc=rc)
-  array1 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    totalLWidth=(/0,1/), totalUWidth=(/0,1/), staggerLoc=1, rc=rc)
-  array2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    computationalLWidth=(/0,1/), staggerLoc=2, rc=rc)
-!EOCI
-!BOEI
-! Now when the first or last DE of {\tt array1} performs a halo update it will 
-! need to fill part of the halo region with data from {\tt array2} because 
-! stagger location "2" maps to stagger location "1" following the connection 
-! rule contained in the {\tt distgrid} object.
-!
-! Since the data for the two stagger locations are kept in two separate Array
-! objects it is not possible to use an ArrayHalo method to satisfy all the 
-! data dependencies. Calling ArrayHalo on {\tt array1} will result in an 
-! incomplete halo update indicated by an error.
-!
-! In order to completely halo {\tt array1} it is necessary to construct a 
-! self-contained ArrayBundle. In the current case this means that {\tt array1}
-! and {\tt array2} must be bundled together
-!EOEI
-!BOCI
-  arrayBundle = ESMF_ArrayBundleCreate(arrayList=(/array1, array2/), rc=rc)
-!EOCI
-!BOEI
-! before the halo operation can be carried out.
-!EOEI
-!BOCI
-  call ESMF_ArrayBundleHalo(arrayBundle, rc=rc)
-!EOCI
-!BOEI
-! In the above case only {\tt array1} will have been haloed because {\tt array2}
-! does not define any elements used by default to halo (the total region is 
-! identical to the computational region). If, however, {\tt array2} had been
-! defined with elements that would default into halo elements, the above halo call
-! would try to update the halo regions of both arrays. The optional argument
-! {\tt arrayIndex} can then be used to indicate which Array is supposed to be
-! haloed.
-!EOEI
-!BOCI
-  call ESMF_ArrayBundleHalo(arrayBundle, arrayIndex=1, rc=rc)
-!EOCI
-!BOEI
-! Finally the objects used in this section can be destroyed.
-!EOEI
-!BOCI
-  call ESMF_ArrayBundleDestroy(arrayBundle, rc=rc)
-  call ESMF_ArrayDestroy(array1, rc=rc)
-  call ESMF_ArrayDestroy(array2, rc=rc)
-  call ESMF_DistGridDestroy(distgrid, rc=rc)
-!EOCI
-
-!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-#endif
-!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 !BOE
 ! \subsubsection{1D and 3D Arrays}
 !
@@ -1456,16 +1089,6 @@ program ESMF_ArrayEx
   array3D = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid3D, rc=rc)
 !EOC
 !BOE
-! 
-! Finally, the definition and usage of the stagger location index 
-! as it was described 
-! %in sections \ref{ArrayEx_staggerLocations} and
-! %\ref{ArrayEx_staggeredArrays}
-! for the 2D case applies without change to 
-! 1D, 3D or any other dimensionality. Connections defined in the DistGrid object
-! may utilize the stagger location index in order to express characteristics of
-! the index space topology. The concept is completely rank independent.
-
 
 ! \subsubsection{Working with Arrays of different rank}
 ! Assume a computational kernel that involves the {\tt array3D} object as it was
@@ -1557,19 +1180,15 @@ program ESMF_ArrayEx
 ! Array dimensions that are not mapped to DistGrid dimensions are the 
 ! {\em undistributed} dimensions of the Array. They are not part
 ! of the index space. The mapping is specified during {\tt ESMF\_ArrayCreate()}
-! via the the {\tt distgridToArrayMap} argument. DistGrid dimensions that have
+! via the {\tt distgridToArrayMap} argument. DistGrid dimensions that have
 ! not been associated with Array dimensions are {\em replicating} dimensions.
 ! The Array will be replicated across the DEs that lie along replication
 ! DistGrid dimensions.
 !
 ! Undistributed Array dimensions can be used to store multi-dimensional data for
-! each Array index space element. A special purpose of undistributed dimensions
-! is to store multiple data arrays in the same Array object. It is, for example,
-! possible to store {\tt array1} and {\tt array2} 
-! %of section \ref{ArrayEx_staggeredArrays}
-! in a single Array object using one 
-! undistributed dimension of size 2. The same {\tt distgrid} object as 
-! before can be used to create the Array. 
+! each Array index space element. One application of this is to store the 
+! components of a vector quantity in a single Array. The same 2D {\tt distgrid}
+! object as before will be used.
 !EOE
 !BOC
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
@@ -1591,11 +1210,6 @@ program ESMF_ArrayEx
 ! order to accommodate multiple undistributed dimensions. The other arguments
 ! remain unchanged and apply across all undistributed components. 
 !
-! The optional arguments used in the following call are identical to those
-! used to create {\tt array1}
-! %of section \ref{ArrayEx_staggeredArrays}
-! . This will set the total region of both undistributed
-! components to be those of {\tt array1}.
 !EOE
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
@@ -1611,32 +1225,14 @@ program ESMF_ArrayEx
 ! This will create {\tt array} with 2+1 dimensions. The 2D DistGrid is used
 ! to describe decomposition into DEs with 2 Array dimensions mapped to the 
 ! DistGrid dimensions resulting in a 2D index space. The extra Array dimension
-! provides storage for multiple 2D user data arrays that are kept in a 
-! single Array object. By default the {\tt distgrid} dimensions are associated
+! provides storage for multi component user data within the Array object.
+!
+! By default the {\tt distgrid} dimensions are associated
 ! with the first Array dimensions in sequence. For the example above this means
 ! that the first 2 Array dimensions are decomposed according to the provided 2D
 ! DistGrid. The 3rd Array dimension does not have an associated DistGrid
 ! dimension, rendering it an undistributed Array dimension.
 !
-! The optional arguments that were used to create {\tt array} ensure that
-! the {\em total region} is large enough to accommodate the arrays for
-! undistributed component 1 and 2.
-!EOE
-
-#ifdef NOSKIP   
-!BOEI
-!
-! The {\tt array} object is now completely self-contained with respect to the
-! connection transformation stored in the DistGrid which mixes stagger location
-! "1" and "2" when crossing the interface. Consequently, {\tt array} can be 
-! haloed without the need to specify a list of Array objects.
-!EOEI
-!BOCI
-  call ESMF_ArrayHalo(array, rc=rc)
-!EOCI
-#endif
-
-!BOE
 ! Native language access to an Array with undistributed dimensions is in
 ! principle the same as without extra dimensions.
 !EOE
@@ -1690,15 +1286,7 @@ program ESMF_ArrayEx
 !BOE
 ! Operations on the Array object as a whole are unchanged by the different
 ! mapping of dimensions.
-!EOE
-
-#ifdef NOSKIP   
-!BOCI
-  call ESMF_ArrayHalo(array, rc=rc)
-!EOCI
-#endif
-
-!BOE
+!
 ! When working with Arrays that contain explicitly mapped Array and DistGrid 
 ! dimensions it is critical to know the order in which the entries of
 ! {\em width} and {\em bound} arguments that are associated with distributed
@@ -1977,31 +1565,21 @@ program ESMF_ArrayEx
 ! used.
 !
 ! The index space of the bipolar region remains logically rectangular (LR) and
-! is assumed to be of size 360 x 50 elements for this example. The index order in
-! the example is assumed $i,j$. The line for $j=1$ corresponds to a line of 
+! is assumed to be of size 360 x 50 elements for this example. The index order
+! in the example is assumed $i,j$. The line for $j=1$ corresponds to a line of 
 ! constant latitude in the spherical coordinate system and the {\em bipolar
 ! fold} is along $j=50$. Two equal sized patches of each 180 x 50 elements need
 ! to be connected in a way that corresponds to the bipolar topology.
 ! 
 !EOEI
 !BOCI
-  allocate(connectionList(2*2+2,1))   ! 1 connection: the bipolar fold
-  call ESMF_ConnectionElementConstruct(connectionElement=connectionList(:,1), &
+  allocate(connectionList(3*2+2,1))   ! 1 connection: the bipolar fold
+  call ESMF_DistGridConnection(connection=connectionList(:,1), &
     patchIndexA=1, patchIndexB=2, &
     positionVector=(/179, 99/), orientationVector=(/-1, -2/), rc=rc)
-  allocate(connectionTransformList(4+2*2,3))  ! 3 transforms: N, NE, E
-  call ESMF_ConnectionTransformElementConstruct(connectionTransformList(:,1), &
-    connectionIndex=1, direction=0, staggerSrc=1, staggerDst=1, &
-    indexOffsetVector=(/0,-1/), signChangeVector=(/-1,-1/), rc=rc) ! N face
-  call ESMF_ConnectionTransformElementConstruct(connectionTransformList(:,2), &
-    connectionIndex=1, direction=0, staggerSrc=2, staggerDst=2, &
-    indexOffsetVector=(/-1,-1/), signChangeVector=(/-1,-1/), rc=rc) ! NE point (U)
-  call ESMF_ConnectionTransformElementConstruct(connectionTransformList(:,3), &
-    connectionIndex=1, direction=0, staggerSrc=3, staggerDst=3, &
-    indexOffsetVector=(/-1,0/), signChangeVector=(/-1,-1/), rc=rc) ! E face
 !EOCI  
 !BOEI
-! With this {\tt connectionList} and {\tt connectionTransformList} it is now
+! With this {\tt connectionList} it is now
 ! possible to define a DistGrid object that captures the index space topology
 ! for a bipolar grid. The DistGrid consists of two patches which need to be
 ! provided in {\tt minIndex} and {\tt maxIndex} list arguments.
@@ -2016,13 +1594,12 @@ program ESMF_ArrayEx
   regDecomp(:,2) = (/petCount/2, 1/)    ! second patch
   
   distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
-    regDecomp=regDecomp, connectionList=connectionList, &
-    connectionTransformList=connectionTransformList, rc=rc)
+    regDecomp=regDecomp, connectionList=connectionList, rc=rc)
 !EOCI  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOEI
 ! The decomposition described by {\tt regDecomp} assumes that there is an even 
-! number of PETs available in the current context. The decomposition will be 
+! number of PETs available in the current Component. The decomposition will be 
 ! into as many DEs as PETs. Half of the DEs handle the first patch and the other
 ! half of DEs handle the second patch.
 !
@@ -2032,64 +1609,30 @@ program ESMF_ArrayEx
 !BOCI
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R4, rank=2, rc=rc)
 !EOCI
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOEI
 ! Finally the Array objects can be created for this {\tt arrayspec} and {\tt 
-! distgrid}. The specification of the {\tt staggerLoc} argument will determine
-! the connection transformation that will apply for the data stored in the 
-! Array. The stagger location indices used in the definitions of the 
-! connection transformations above were chosen arbitrarily, but now are used to
-! specify Arrays that are to pick corresponding transformations through the
-! bipolar fold.
-!
-! First a scalar tracer Array will be created. The default stagger location can
-! be used in this case because "0" (the default) has not been used for any other
-! stagger location in the definitions of the connection transformations. The 
-! trace Array is created without halo elements.
+! distgrid}. A scalar tracer Array will be created without halo padding.
 !EOEI
 !BOCI
   arrayTracer = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
 !EOCI
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOEI
-! Next an Array is created for a scalar living at the north face. The
-! connection transformation corresponding to the north face was tagged with
-! stagger location index "1" so the {\tt staggerLoc} for the Array must be set
-! accordingly. Space for a halo width of one element in each direction will be 
-! provided for this quantity. 
+! Next an Array is created for a scalar with space for a halo width of one 
+! element in each direction.
 !EOEI
 !BOCI
-  arrayNScalar = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    totalLWidth=(/1,1/), totalUWidth=(/1,1/), staggerLoc=1, rc=rc)
+  arrayScalar = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    totalLWidth=(/1,1/), totalUWidth=(/1,1/), rc=rc)
 !EOCI
-!BOEI
-! Finally Arrays for the horizontal velocity components are created at the 
-! NE element corner. The transformation behavior of this point is defined in 
-! the DistGrid for stagger location index "2". Again space for a halo of one 
-! element in each direction is taken into account when creating the Arrays.
-!EOEI
-!BOCI
-  arrayNEu = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    totalLWidth=(/1,1/), totalUWidth=(/1,1/), staggerLoc=2, vectorDim=1, rc=rc)
-  arrayNEv = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    totalLWidth=(/1,1/), totalUWidth=(/1,1/), staggerLoc=2, vectorDim=2, rc=rc)
-!EOCI
-!BOEI
-! Here the optional {\tt vectorDim} argument has been used to indicate that 
-! these Arrays store components of a vector field. The information about which 
-! vector component an Array contains is used to apply the correct
-! {\tt signChangeVector} component when going though a connection with 
-! associated transformation definition. For the bipolar DistGrid a sign change
-! for each component of the horizontal velocity field has been indicated by the
-! connection transformation.
-!
-! A consequence of the bipolar topology is that all three Arrays 
-! {\tt arrayNScalar}, {\tt arrayNEu} and {\tt arrayNEv} contain redundant
-! elements in their DE-local exclusive regions along the bipolar fold. These
-! redundancies are automatically detected during Array creation. The Array
-! class will define communication methods to monitor and enforce redundancies.
-! Furthermore redundant elements in exclusive regions will also be taken into 
-! account in Array reduce operations.
-!
-!EOEI
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_ArrayDestroy(arrayTracer, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_ArrayDestroy(arrayScalar, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_DistGridDestroy(distgrid, rc=rc)
 
