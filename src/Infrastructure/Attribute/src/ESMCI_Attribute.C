@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.47 2009/09/09 05:50:07 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.48 2009/09/09 20:01:32 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.47 2009/09/09 05:50:07 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.48 2009/09/09 20:01:32 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2428,8 +2428,10 @@ namespace ESMCI {
   localrc = ESMC_RC_NOT_IMPL;
     
   for (i=0; i<linkList.size(); i++) {
-    if (destination->attrBase->ESMC_BaseGetID() == 
-      linkList.at(i)->attrBase->ESMC_BaseGetID()) {
+    if ((destination->attrBase->ESMC_BaseGetID() == 
+      linkList.at(i)->attrBase->ESMC_BaseGetID()) &&
+      ESMCI::VMIdCompare(destination->attrBase->ESMC_BaseGetVMId(),
+      linkList.at(i)->attrBase->ESMC_BaseGetVMId())) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_LINK, 
         "AttributeLink tried to double set a link", &localrc);
       return localrc;
@@ -2473,7 +2475,9 @@ namespace ESMCI {
     
   for (i=0; i<linkList.size(); i++) {
     if (destination->attrBase->ESMC_BaseGetID() == 
-        linkList.at(i)->attrBase->ESMC_BaseGetID()) {
+        linkList.at(i)->attrBase->ESMC_BaseGetID() &&
+        ESMCI::VMIdCompare(destination->attrBase->ESMC_BaseGetVMId(),
+        linkList.at(i)->attrBase->ESMC_BaseGetVMId())) {
         // don't delete the root, but erase the Attribute pointer
         linkList.erase(linkList.begin() + i);
         structChange = ESMF_TRUE;
