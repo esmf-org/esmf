@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.h,v 1.1 2009/07/07 06:00:17 eschwab Exp $
+// $Id: ESMCI_IO_NetCDF.h,v 1.2 2009/09/09 05:46:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -8,7 +8,7 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
-// ESMF IO C++ definition include file
+// ESMF IO_NetCDF C++ definition include file
 //
 // (all lines below between the !BOP and !EOP markers will be included in
 //  the automated document processing.)
@@ -29,15 +29,14 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !CLASS: ESMCI::IO_NetCDF - TODO
+// !CLASS: ESMCI::IO_NetCDF - Handles low-level NetCDF IO for ESMF internals and user API.
 //
 // !DESCRIPTION:
 //  TODO
 //-------------------------------------------------------------------------
 //
 // !USES:
-#include "ESMC_Base.h"           // inherited Base class TODO ?
-#include <ESMCI_IO.h>
+#include "ESMC_Base.h"           // inherited Base class
 #include <ESMCI_State.h>
 
 #ifdef ESMF_NETCDF
@@ -52,30 +51,17 @@ namespace ESMCI
  class IO_NetCDF;
 
 // !PRIVATE TYPES:
- // class configuration type:  not needed for IO_NetCDF TODO ?
 
  // class definition type
- class IO_NetCDF : IO { // TODO: inherit public ESMC_Base class when
-            // fully aligned with F90 equiv 
+ class IO_NetCDF : ESMC_Base { // inherit ESMC_Base class
   private:   // corresponds to F90 module 'type ESMF_IO_NetCDF' members
-    char         name[ESMF_MAXSTR];  // name of io object
     ESMC_Base   *base;    // associated object's base
     char         fileName[ESMF_MAXSTR];
     State*       theState;
-    int          id;          // unique identifier. used for equality
-                              //    checks and to generate unique default
-                              //    names.
-                              //    TODO: inherit from ESMC_Base class
-    static int   count;       // number of io objects created. Thread-safe
-                              //   because int is atomic.
-                              //    TODO: inherit from ESMC_Base class
 
 // !PUBLIC MEMBER FUNCTIONS:
 
   public:
-    // IO_NetCDF doesn't need configuration, hence GetConfig/SetConfig
-    // methods are not required TODO ?
-
     // accessor methods
 
     // Get the State object
@@ -94,14 +80,14 @@ namespace ESMCI
 
     // native C++ constructors/destructors
     IO_NetCDF(void);
-    // IO_NetCDF(const IO_NetCDF &io);  TODO
+    // IO_NetCDF(const IO_NetCDF &io_netcdf);  TODO
     ~IO_NetCDF(void);
 
     // friend function to allocate and initialize IO_NetCDF object from heap
     friend IO_NetCDF *ESMCI_IO_NetCDFCreate(int, const char*, ESMC_Base*, int*);
 
-    // friend function to copy an io  TODO ?
-    //friend IO_NetCDF *ESMCI_IO(IO_NetCDF*, int*);
+    // friend function to copy an io_netcdf  TODO ?
+    //friend IO_NetCDF *ESMCI_IO_NetCDF(IO_NetCDF*, int*);
 
     // friend function to de-allocate IO_NetCDF
     friend int ESMCI_IO_NetCDFDestroy(IO_NetCDF**);
@@ -139,16 +125,16 @@ namespace ESMCI
     IO_NetCDF *ESMCI_IO_NetCDFCreate(int nameLen, const char* name=0,
                        ESMC_Base* base=0, int* rc=0);
 
-    // friend function to copy an io  TODO ?
-    //IO_NetCDF *ESMCI_IO_NetCDFCreate(IO_NetCDF *io, int *rc=0);
+    // friend function to copy an io_netcdf  TODO ?
+    //IO_NetCDF *ESMCI_IO_NetCDFCreate(IO_NetCDF *io_netcdf, int *rc=0);
 
     // friend function to de-allocate clock
-    int ESMCI_IO_NetCDFDestroy(IO_NetCDF **io);
+    int ESMCI_IO_NetCDFDestroy(IO_NetCDF **io_netcdf);
 
     // friend to restore state  TODO ?
     //Clock *ESMCI_IO_NetCDFReadRestart(int nameLen,
                                    //const char*  name=0,
-                                   //ESMC_IO_NetCDFSpec* iospec=0,
+                                   //ESMC_IOSpec* iospec=0,
                                    //int*         rc=0);
 
 }   // namespace ESMCI

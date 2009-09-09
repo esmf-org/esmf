@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.C,v 1.3 2009/09/02 05:48:51 eschwab Exp $
+// $Id: ESMCI_IO_NetCDF.C,v 1.4 2009/09/09 05:46:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -30,6 +30,7 @@
  #include <ESMC_Util.h>
  #include <ESMCI_LogErr.h>
  #include <ESMF_LogMacros.inc>
+ #include <ESMCI_VM.h>
  #include <ESMCI_ArraySpec.h>
  #include <ESMCI_LocalArray.h>
  #include <ESMCI_Array.h>
@@ -42,15 +43,11 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.3 2009/09/02 05:48:51 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.4 2009/09/09 05:46:41 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
 {
-
-// initialize static io_netcdf instance counter
-// TODO: inherit from ESMC_Base class
-int IO_NetCDF::count=0;
 
 //
 //-------------------------------------------------------------------------
@@ -68,7 +65,7 @@ int IO_NetCDF::count=0;
       IO_NetCDF *ESMCI_IO_NetCDFCreate(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated IO
+//     pointer to newly allocated IO_NetCDF
 //
 // !ARGUMENTS:
       int                nameLen,          // in
@@ -77,7 +74,7 @@ int IO_NetCDF::count=0;
       int               *rc) {             // out - return code
 
 // !DESCRIPTION:
-//      Allocates and Initializes a {\tt ESMC\_IO} with given values
+//      Allocates and Initializes a {\tt ESMC\_IO\_NetCDF} with given values
 //
 //EOP
 // !REQUIREMENTS:
@@ -86,7 +83,7 @@ int IO_NetCDF::count=0;
  #define ESMC_METHOD "ESMCI_IO_NetCDFCreate(new)"
 
     int returnCode;
-    IO_NetCDF *io;
+    IO_NetCDF *io_netcdf;
 
     // default return code
     if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
@@ -94,7 +91,7 @@ int IO_NetCDF::count=0;
     // allocate an io object & set defaults via constructor
     try 
     {
-      io = new IO_NetCDF;
+      io_netcdf = new IO_NetCDF;
     }
     catch (...) 
     {
@@ -102,40 +99,22 @@ int IO_NetCDF::count=0;
       return(ESMC_NULL_POINTER);
     }
 
-    // TODO: use inherited methods from ESMC_Base
-    if (name != ESMC_NULL_POINTER) 
-    {
-      if (nameLen < ESMF_MAXSTR) 
-      {
-        strncpy(io->name, name, nameLen);
-        io->name[nameLen] = '\0';  // null terminate
-      } 
-      else 
-      {
-        // truncate
-        strncpy(io->name, name, ESMF_MAXSTR-1);
-        io->name[ESMF_MAXSTR-1] = '\0';  // null terminate
-
-        char logMsg[ESMF_MAXSTR];
-        sprintf(logMsg, "io name %s, length >= ESMF_MAXSTR; truncated.",
-                name);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
-        // TODO: return ESMF_WARNING when defined
-        // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
-      }
-    } 
-    else 
-    {
-      // create default name "IONNN"
-      sprintf(io->name, "IO%3.3d\0", io->id);
+    if (name != ESMC_NULL_POINTER) {
+      // use given name
+      returnCode = io_netcdf->ESMC_BaseSetF90Name((char*) name, nameLen);
+    } else {
+      // create default name "IO_NetCDF<ID>"
+      returnCode = io_netcdf->ESMC_BaseSetName((const char*) ESMC_NULL_POINTER,
+                                               "IO_NetCDF");
     }
+    ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
 
-    if (base != ESMC_NULL_POINTER) io->base = base;
+    if (base != ESMC_NULL_POINTER) io_netcdf->base = base;
 
-    // TODO returnCode = io->validate();
+    // TODO returnCode = io_netcdf->validate();
     returnCode = ESMF_SUCCESS;
     ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
-    return(io);
+    return(io_netcdf);
 
  } // end ESMCI_IO_NetCDFCreate (new)
 
@@ -150,7 +129,7 @@ int IO_NetCDF::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      IO_NetCDF **io) {  // in - IO_NetCDF to destroy
+      IO_NetCDF **io_netcdf) {  // in - IO_NetCDF to destroy
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys an IO_NetCDF object previously allocated
@@ -158,10 +137,10 @@ int IO_NetCDF::count=0;
 //
 //EOP
 
-   // TODO: io->destruct(); constructor calls it!  ?
-   delete *io; // ok to delete null pointer
+   // TODO: io_netcdf->destruct(); constructor calls it!  ?
+   delete *io_netcdf; // ok to delete null pointer
 
-   *io = ESMC_NULL_POINTER;
+   *io_netcdf = ESMC_NULL_POINTER;
    return(ESMF_SUCCESS);
 
  } // end ESMCI_IO_NetCDFDestroy
@@ -190,6 +169,8 @@ int IO_NetCDF::count=0;
  #define ESMC_METHOD "ESMCI::IO_NetCDF::read()"
 
     int rc = ESMF_SUCCESS;
+    ESMCI::VM *globalVM;
+    int mypet, numPETs;
 
     if (this == ESMC_NULL_POINTER) 
     {
@@ -198,7 +179,20 @@ int IO_NetCDF::count=0;
       return(rc);
     }
 
-    // TODO: use inherited methods from ESMC_Base
+    // only read on pet 0
+    globalVM = ESMCI::VM::getGlobal(&rc);
+    if ((globalVM == ESMC_NULL_POINTER) || (rc != ESMF_SUCCESS)) {
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "FAIL rc=%d, Unable to get GlobalVM\n", rc);
+      ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN, ESMC_CONTEXT);
+      return(ESMF_FAILURE);
+    }
+    mypet = globalVM->getLocalPet(); 
+    numPETs = globalVM->getPetCount();
+printf("mypet = %d, numPETS = %d\n", mypet, numPETs);
+fflush(stdout);
+    if (mypet != 0) return rc; 
+
     if (fileName != ESMC_NULL_POINTER) 
     {
       // TODO: only use local of fileName this one time;
@@ -215,9 +209,10 @@ int IO_NetCDF::count=0;
         this->fileName[ESMF_MAXSTR-1] = '\0';  // null terminate
 
         char logMsg[ESMF_MAXSTR];
-        sprintf(logMsg, "io fileName %s, length >= ESMF_MAXSTR; truncated.",
-                name);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
+        sprintf(logMsg,
+                "io_netcdf fileName %s, length >= ESMF_MAXSTR; truncated.",
+                fileName);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN, ESMC_CONTEXT);
         // TODO: return ESMF_WARNING when defined
         // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
       }
@@ -348,7 +343,7 @@ int IO_NetCDF::count=0;
       const char        *fileName) {          // in
 
 // !DESCRIPTION:
-//      Writes an {\tt ESMC\_IO} object to file
+//      Writes an {\tt ESMC\_IO_NetCDF} object to file
 //
 //EOP
 // !REQUIREMENTS:
@@ -357,6 +352,8 @@ int IO_NetCDF::count=0;
  #define ESMC_METHOD "ESMCI::IO_NetCDF::write()"
 
     int rc = ESMF_SUCCESS;
+    ESMCI::VM *globalVM;
+    int mypet, numPETs;
 
     if (this == ESMC_NULL_POINTER) 
     {
@@ -364,6 +361,20 @@ int IO_NetCDF::count=0;
          "; 'this' pointer is NULL.", &rc);
       return(ESMF_FAILURE);
     }
+
+    // only read on pet 0
+    globalVM = ESMCI::VM::getGlobal(&rc);
+    if ((globalVM == ESMC_NULL_POINTER) || (rc != ESMF_SUCCESS)) {
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "FAIL rc=%d, Unable to get GlobalVM\n", rc);
+      ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN, ESMC_CONTEXT);
+      return(ESMF_FAILURE);
+    }
+    mypet = globalVM->getLocalPet(); 
+    numPETs = globalVM->getPetCount();
+printf("mypet = %d, numPETS = %d\n", mypet, numPETs);
+fflush(stdout);
+    if (mypet != 0) return rc; 
 
 #ifdef ESMF_NETCDF
     // check only when netCDF present
@@ -375,7 +386,6 @@ int IO_NetCDF::count=0;
     }
 #endif
 
-    // TODO: use inherited methods from ESMC_Base
     if (fileName != ESMC_NULL_POINTER) 
     {
       // TODO: only use local of fileName this one time;
@@ -392,8 +402,9 @@ int IO_NetCDF::count=0;
         this->fileName[ESMF_MAXSTR-1] = '\0';  // null terminate
 
         char logMsg[ESMF_MAXSTR];
-        sprintf(logMsg, "io fileName %s, length >= ESMF_MAXSTR; truncated.",
-                name);
+        sprintf(logMsg,
+                "io_netcdf fileName %s, length >= ESMF_MAXSTR; truncated.",
+                fileName);
         ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
         // TODO: return ESMF_WARNING when defined
         // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
@@ -479,9 +490,9 @@ int IO_NetCDF::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMCI::IO_NetCDF() native constructor"
 
-    name[0] = '\0';
     theState = ESMC_NULL_POINTER; 
-    id = ++count;  // TODO: inherit from ESMC_Base class
+    // create default name "IO_NetCDF<ID>"
+    ESMC_BaseSetName(ESMC_NULL_POINTER, "IO_NetCDF");
     // copy = false;  // TODO: see notes in constructors and destructor below
 
  } // end IO_NetCDF
