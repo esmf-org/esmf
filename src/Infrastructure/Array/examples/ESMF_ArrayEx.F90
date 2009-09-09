@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.48 2009/09/08 21:25:30 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.49 2009/09/09 05:38:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -1594,13 +1594,12 @@ program ESMF_ArrayEx
 ! The optional arguments used in the following call are identical to those
 ! used to create {\tt array1}
 ! %of section \ref{ArrayEx_staggeredArrays}
-! . This
-! will set the total region and the stagger location of both undistributed
+! . This will set the total region of both undistributed
 ! components to be those of {\tt array1}.
 !EOE
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    totalLWidth=(/0,1/), totalUWidth=(/0,1/), staggerLoc=1, &
+    totalLWidth=(/0,1/), totalUWidth=(/0,1/), &
     undistLBound=(/1/), undistUBound=(/2/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
@@ -1621,13 +1620,8 @@ program ESMF_ArrayEx
 !
 ! The optional arguments that were used to create {\tt array} ensure that
 ! the {\em total region} is large enough to accommodate the arrays for
-! undistributed component 1 and 2. The Array class provides a special
-! {\tt Set()} method that allows to individually address undistributed elements
-! in an Array and set {\tt staggerLoc} and {\tt vectorDim} arguments.
+! undistributed component 1 and 2.
 !EOE
-!BOC
-  call ESMF_ArraySet(array, tensorIndex=(/2/), staggerLoc=2, rc=rc)
-!EOC
 
 #ifdef NOSKIP   
 !BOEI

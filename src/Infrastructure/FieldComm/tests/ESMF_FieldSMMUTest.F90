@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMUTest.F90,v 1.10 2009/08/11 20:54:12 svasquez Exp $
+! $Id: ESMF_FieldSMMUTest.F90,v 1.11 2009/09/09 05:38:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMUTest.F90,v 1.10 2009/08/11 20:54:12 svasquez Exp $'
+    '$Id: ESMF_FieldSMMUTest.F90,v 1.11 2009/09/09 05:38:00 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -156,7 +156,6 @@ contains
         allocate(src_farray(fa_shape(1)) )
         src_farray = 1
         srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
-            staggerloc=0, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -171,7 +170,6 @@ contains
         allocate(dst_farray(fa_shape(1)) )
         dst_farray = 0
         dstArray = ESMF_ArrayCreate(dst_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
-            staggerloc=0, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -300,7 +298,6 @@ contains
         allocate(src_farray(fa_shape(1)) )
         src_farray = 1
         srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
-            staggerloc=0, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -315,7 +312,6 @@ contains
         allocate(dst_farray(fa_shape(1)) )
         dst_farray = 0
         dstArray = ESMF_ArrayCreate(dst_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
-            staggerloc=0, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -436,7 +432,6 @@ contains
         allocate(src_farray(fa_shape(1)) )
         src_farray = 1
         srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
-            staggerloc=0, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -451,7 +446,6 @@ contains
         allocate(dst_farray(fa_shape(1)) )
         dst_farray = 0
         dstArray = ESMF_ArrayCreate(dst_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
-            staggerloc=0, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -572,7 +566,6 @@ contains
         allocate(src_farray(fa_shape(1)) )
         src_farray = 1
         srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
-            staggerloc=0, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -588,7 +581,6 @@ contains
         allocate(dst_farray(fa_shape(1)) )
         dst_farray = 0
         dstArray = ESMF_ArrayCreate(dst_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
-            staggerloc=0, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &

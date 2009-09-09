@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.32 2009/02/27 22:53:06 svasquez Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.33 2009/09/09 05:38:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldCommEx.F90,v 1.32 2009/02/27 22:53:06 svasquez Exp $'
+    '$Id: ESMF_FieldCommEx.F90,v 1.33 2009/09/09 05:38:00 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -102,7 +102,6 @@
     allocate(farray(fa_shape(1), fa_shape(2)))
     farray = lpe
     array = ESMF_ArrayCreate(farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
-        staggerloc=0, &
         rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -175,7 +174,6 @@
     allocate(farray(fa_shape(1), fa_shape(2)))
     farray = lpe
     array = ESMF_ArrayCreate(farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
-        staggerloc=0, &
         rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

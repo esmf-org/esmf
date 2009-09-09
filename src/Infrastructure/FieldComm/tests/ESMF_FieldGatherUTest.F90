@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGatherUTest.F90,v 1.37 2009/08/11 20:47:07 svasquez Exp $
+! $Id: ESMF_FieldGatherUTest.F90,v 1.38 2009/09/09 05:38:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldGatherUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldGatherUTest.F90,v 1.37 2009/08/11 20:47:07 svasquez Exp $'
+    '$Id: ESMF_FieldGatherUTest.F90,v 1.38 2009/09/09 05:38:00 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -154,7 +154,6 @@ contains
         allocate(farray(fa_shape(1)))
         farray = lpe
         array = ESMF_ArrayCreate(farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
-            staggerloc=0, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -243,7 +242,6 @@ contains
         allocate(farray(fa_shape(1), fa_shape(2)))
         farray = lpe
         array = ESMF_ArrayCreate(farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
-            staggerloc=0, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -332,7 +330,6 @@ contains
         allocate(farray(fa_shape(1), fa_shape(2), fa_shape(3)))
         farray = lpe
         array = ESMF_ArrayCreate(farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
-            staggerloc=0, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -424,7 +421,6 @@ contains
         allocate(farray(fa_shape(1), fa_shape(2)))
         farray = lpe
         array = ESMF_ArrayCreate(farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
-            staggerloc=0, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &

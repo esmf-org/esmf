@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.46 2009/06/26 16:29:02 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.47 2009/09/09 05:38:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -6578,7 +6578,6 @@ contains
         enddo
         ! create array
         array = ESMF_ArrayCreate(farray, distgrid, ESMF_INDEX_DELOCAL, copyflag, distgridToArrayMap, &
-            staggerLoc=staggerloc%staggerloc, &
             undistLBound = ungriddedLBound, undistUBound = ungriddedUBound, &
             computationalEdgeLWidth=celw, computationalEdgeUWidth=ceuw, &
             totalLWidth=maxHaloLWidth, totalUWidth=maxHaloUWidth, & 
