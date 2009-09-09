@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.59 2009/09/04 17:10:21 theurich Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.60 2009/09/09 23:25:19 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.59 2009/09/04 17:10:21 theurich Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.60 2009/09/09 23:25:19 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -303,10 +303,16 @@
 
     ! get total num pets.  this is not needed by the code, just the debug
     ! messages below.
-    call ESMF_VMGet(vm, localPet=mypet, rc=rc)
+    call ESMF_VMGet(vm, localPet=mypet, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+                              "Accessing the VM", &
+                              ESMF_CONTEXT, rc)) return
 
     ! Get the VM ID of the state to use as a dummy in the code below
     call c_ESMC_GetVMId(state%statep, VMdummyID, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+                              "Getting VM ID", &
+                              ESMF_CONTEXT, rc)) return
 
     ! make some initial space
     ! TODO: the current code only uses the first entry and hangs everything
@@ -355,11 +361,23 @@
       si%mycount = state%statep%datacount + 1
       offset = 0
       call c_ESMC_GetID(state%statep%base, si%idsend(1), localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                             "Top level get ID", &
+                             ESMF_CONTEXT, rc)) return
+
       call c_ESMC_GetVMId(state%statep%base, si%vmidsend(1), localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                             "Top level get VM ID", &
+                             ESMF_CONTEXT, rc)) return
+
       si%objsend(1) = ESMF_ID_BASE%objectID
       bptr => si%blindsend(:,1)
       call c_ESMC_BaseSerialize(state%statep%base, bptr(1), bufsize, offset, &
         attreconflag, ESMF_NOINQUIRE, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                             "Top level Base serialize", &
+                             ESMF_CONTEXT, rc)) return
+
       attreconstart = 2
     else
       si%mycount = state%statep%datacount
@@ -378,53 +396,113 @@
         select case (stateitem%otype%ot)
            case (ESMF_STATEITEM_FIELDBUNDLE%ot)
              call c_ESMC_GetID(stateitem%datap%fbp%btypep, si%idsend(i), localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Fieldbundle get ID", &
+                             ESMF_CONTEXT, rc)) return
+
              call c_ESMC_GetVMId(stateitem%datap%fbp%btypep, si%vmidsend(i), localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                             "nested fieldbundle get VM ID", &
+                             ESMF_CONTEXT, rc)) return
+
              si%objsend(i) = ESMF_ID_FIELDBUNDLE%objectID
              bptr => si%blindsend(:,i)
              call ESMF_FieldBundleSerialize(stateitem%datap%fbp, bptr, bufsize, &
                                        offset, attreconflag=attreconflag, &
                                        inquireflag=ESMF_NOINQUIRE, rc=localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                             "nested fieldbundle serialize", &
+                             ESMF_CONTEXT, rc)) return
+
 !!DEBUG "serialized bundle, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_FIELD%ot)
              call c_ESMC_GetID(stateitem%datap%fp%ftypep, si%idsend(i), localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Field get ID", &
+                             ESMF_CONTEXT, rc)) return
+
              call c_ESMC_GetVMId(stateitem%datap%fp%ftypep, si%vmidsend(i), localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Field get VM ID", &
+                             ESMF_CONTEXT, rc)) return
+
              si%objsend(i) = ESMF_ID_FIELD%objectID
              bptr => si%blindsend(:,i)
              call ESMF_FieldSerialize(stateitem%datap%fp, bptr, bufsize, &
                                        offset, attreconflag=attreconflag, &
                                        inquireflag=ESMF_NOINQUIRE, rc=localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Field serialize", &
+                             ESMF_CONTEXT, rc)) return
+
 !!DEBUG "serialized field, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_ARRAY%ot)
              call c_ESMC_GetID(stateitem%datap%ap, si%idsend(i), localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Array get ID", &
+                             ESMF_CONTEXT, rc)) return
+
              call c_ESMC_GetVMId(stateitem%datap%ap, si%vmidsend(i), localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Array get VM ID", &
+                             ESMF_CONTEXT, rc)) return
+
              si%objsend(i) = ESMF_ID_ARRAY%objectID
              bptr => si%blindsend(:,i)
              call c_ESMC_ArraySerialize(stateitem%datap%ap, bptr(1), &
                                        bufsize, offset, attreconflag, &
                                        ESMF_NOINQUIRE, localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Array serialize", &
+                             ESMF_CONTEXT, rc)) return
+
 !!DEBUG "serialized array, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
              call c_ESMC_GetID(stateitem%datap%abp, si%idsend(i), localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Arraybundle get ID", &
+                             ESMF_CONTEXT, rc)) return
+
              call c_ESMC_GetVMId(stateitem%datap%abp, si%vmidsend(i), localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Arraybundle get VM ID", &
+                             ESMF_CONTEXT, rc)) return
+
              si%objsend(i) = ESMF_ID_ARRAYBUNDLE%objectID
              bptr => si%blindsend(:,i)
              call c_ESMC_ArrayBundleSerialize(stateitem%datap%abp, bptr(1), &
                                        bufsize, offset, attreconflag, &
                                        ESMF_NOINQUIRE, localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Arraybundle serialize", &
+                             ESMF_CONTEXT, rc)) return
+
 !!DEBUG "serialized arraybundle, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_STATE%ot)
              call c_ESMC_GetID(stateitem%datap%spp, si%idsend(i), localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                             "nested State get ID", &
+                             ESMF_CONTEXT, rc)) return
+
              call c_ESMC_GetVMId(stateitem%datap%spp, si%vmidsend(i), localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                             "nested State get VM ID", &
+                             ESMF_CONTEXT, rc)) return
+
              si%objsend(i) = ESMF_ID_STATE%objectID
              bptr => si%blindsend(:,i)
              wrapper%statep => stateitem%datap%spp
              ESMF_INIT_SET_CREATED(wrapper)
              call ESMF_StateSerialize(wrapper, bptr, bufsize, offset, &
               attreconflag=attreconflag, inquireflag=ESMF_NOINQUIRE, rc=localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                             "nested State serialize", &
+                             ESMF_CONTEXT, rc)) return
+
 !!DEBUG "serialized substate, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_NAME%ot)
@@ -435,8 +513,13 @@
              bptr => si%blindsend(:,i)
              call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, &
                ESMF_NOINQUIRE, localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                             "nested string serialize", &
+                             ESMF_CONTEXT, rc)) return
+
 !!DEBUG "serialized placeholder, name=", trim(stateitem%namep)
              localrc = ESMF_SUCCESS
+
            case (ESMF_STATEITEM_INDIRECT%ot)
              si%idsend(i) = -2
              si%vmidsend(i) = VMdummyID
@@ -444,8 +527,13 @@
              bptr => si%blindsend(:,i)
              call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, &
                ESMF_NOINQUIRE, localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                             "nested string serialize (indirect)", &
+                             ESMF_CONTEXT, rc)) return
+
 !!DEBUG "serialized field-in-bundle, name=", trim(stateitem%namep)
              localrc = ESMF_SUCCESS
+
            case (ESMF_STATEITEM_UNKNOWN%ot)
              si%idsend(i) = -3
              si%vmidsend(i) = VMdummyID
@@ -453,6 +541,10 @@
              bptr => si%blindsend(:,i)
              call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, &
                ESMF_NOINQUIRE, localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                             "nested unknown type serialize", &
+                             ESMF_CONTEXT, rc)) return
+
 !!DEBUG "serialized unknown type, name=", trim(stateitem%namep)
              localrc = ESMF_SUCCESS
         end select
