@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.123 2009/09/04 17:01:25 theurich Exp $
+// $Id: ESMC_Base.C,v 1.124 2009/09/09 18:44:18 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.123 2009/09/04 17:01:25 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.124 2009/09/09 18:44:18 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -754,7 +754,7 @@
     rc = ESMC_RC_NOT_IMPL;
 
     fixedpart = sizeof(ESMC_Base);
-    if ((*length - *offset) < fixedpart) {
+    if ((inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < fixedpart) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
                                "Buffer too short to add a Base object", &rc);
         return ESMF_FAILURE; 
@@ -763,7 +763,7 @@
     }
 
     ip = (int *)(buffer + *offset);
-    if (inquireflag == ESMF_NOINQUIRE) {
+    if (inquireflag != ESMF_INQUIREONLY) {
       *ip++ = ID;
       *ip++ = refCount;  
       *ip++ = classID;  
@@ -771,13 +771,13 @@
       ip += 3;
 
     sp = (ESMC_Status *)ip;
-    if (inquireflag == ESMF_NOINQUIRE)
+    if (inquireflag != ESMF_INQUIREONLY)
       *sp++ = baseStatus;
     else
       sp++;
 
     cp = (char *)sp;
-    if (inquireflag == ESMF_NOINQUIRE) {
+    if (inquireflag != ESMF_INQUIREONLY) {
       memcpy(cp, baseName, ESMF_MAXSTR);
       cp += ESMF_MAXSTR;
       memcpy(cp, baseNameF90, ESMF_MAXSTR);
@@ -797,7 +797,11 @@
     if (attreconflag == ESMC_ATTRECONCILE_ON) { 
       rc = root.ESMC_Serialize(buffer,length,offset, inquireflag);
     }
-    
+
+  if (inquireflag == ESMF_INQUIREONLY)
+    if (*offset < fixedpart)
+      *offset = fixedpart;
+ 
   return ESMF_SUCCESS;
 
  } // end ESMC_Serialize
