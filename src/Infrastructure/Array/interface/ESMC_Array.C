@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.17 2009/06/09 04:52:01 theurich Exp $
+// $Id: ESMC_Array.C,v 1.18 2009/09/09 03:45:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.17 2009/06/09 04:52:01 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.18 2009/09/09 03:45:17 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -57,8 +57,7 @@ ESMC_Array ESMC_ArrayCreate(ESMC_ArraySpec arrayspec, ESMC_DistGrid distgrid,
   array.ptr = (void *)
     ESMCI::Array::create((ESMCI::ArraySpec *)&arrayspec,
     (ESMCI::DistGrid *)(distgrid.ptr),
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, &localrc);
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &localrc);
 
   // Set name in newly created Array
   localrc = ((ESMCI::Array*)(array.ptr))->ESMCI::Array::setName(name);

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.61 2009/09/08 17:45:49 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.62 2009/09/09 03:45:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.61 2009/09/08 17:45:49 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.62 2009/09/09 03:45:17 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -90,8 +90,6 @@ Array::Array(
   int tensorElementCountArg,              // (in)
   int *undistLBoundArray,                 // (in)
   int *undistUBoundArray,                 // (in)
-  int *staggerLocArray,                   // (in)
-  int *vectorDimArray,                    // (in)
   int *distgridToArrayMapArray,           // (in)
   int *arrayToDistGridMapArray,           // (in)
   int *distgridToPackedArrayMapArray,     // (in)
@@ -154,11 +152,6 @@ Array::Array(
   memcpy(undistLBound, undistLBoundArray, tensorCountArg * sizeof(int));
   undistUBound = new int[tensorCountArg];
   memcpy(undistUBound, undistUBoundArray, tensorCountArg * sizeof(int));
-  // staggerLoc and vectorDim
-  staggerLoc = new int[tensorElementCount];
-  memcpy(staggerLoc, staggerLocArray, tensorElementCount * sizeof(int));
-  vectorDim = new int[tensorElementCount];
-  memcpy(vectorDim, vectorDimArray, tensorElementCount * sizeof(int));
   // distgridToArrayMap, arrayToDistGridMap and distgridToPackedArrayMap
   int dimCount = distgrid->getDimCount();
   distgridToArrayMap = new int[dimCount];
@@ -289,10 +282,6 @@ Array::~Array(){
     delete [] undistLBound;
   if (undistUBound != NULL)
     delete [] undistUBound;
-  if (staggerLoc != NULL)
-    delete [] staggerLoc;
-  if (vectorDim != NULL)
-    delete [] vectorDim;
   if (distgridToArrayMap != NULL)
     delete [] distgridToArrayMap;
   if (arrayToDistGridMap != NULL)
@@ -343,8 +332,6 @@ Array *Array::create(
   InterfaceInt *totalLWidthArg,               // (in)
   InterfaceInt *totalUWidthArg,               // (in)
   ESMC_IndexFlag *indexflagArg,               // (in)
-  int *staggerLocArg,                         // (in)
-  int *vectorDimArg,                          // (in)
   InterfaceInt *undistLBoundArg,              // (in)
   InterfaceInt *undistUBoundArg,              // (in)
   int *rc                                     // (out) return code
@@ -530,21 +517,6 @@ Array *Array::create(
   int tensorElementCount = 1;  // prime tensorElementCount
   for (int i=0; i<tensorCount; i++)
     tensorElementCount *= (undistUBoundArray[i] - undistLBoundArray[i] + 1);
-  // prepare temporary staggerLoc and vectorDim arrays
-  int *staggerLoc = new int[tensorElementCount];
-  if (staggerLocArg)
-    for (int i=0; i<tensorElementCount; i++)
-      staggerLoc[i] = *staggerLocArg;
-  else
-    for (int i=0; i<tensorElementCount; i++)
-      staggerLoc[i] = 0;
-  int *vectorDim = new int[tensorElementCount];
-  if (vectorDimArg)
-    for (int i=0; i<tensorElementCount; i++)
-      vectorDim[i] = *vectorDimArg;
-  else
-    for (int i=0; i<tensorElementCount; i++)
-      vectorDim[i] = 1;
   
   // delayout -> deCount, localDeCount, localDeList
   int deCount = delayout->getDeCount();
@@ -995,8 +967,8 @@ Array *Array::create(
     array = new Array(typekind, rank, larrayList, distgrid, false,
       exclusiveLBound, exclusiveUBound, computationalLBound,
       computationalUBound, totalLBound, totalUBound, tensorCount,
-      tensorElementCount, undistLBoundArray, undistUBoundArray, staggerLoc,
-      vectorDim, distgridToArrayMapArray, arrayToDistGridMapArray,
+      tensorElementCount, undistLBoundArray, undistUBoundArray, 
+      distgridToArrayMapArray, arrayToDistGridMapArray,
       distgridToPackedArrayMap, indexflag, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
@@ -1021,8 +993,6 @@ Array *Array::create(
   delete [] distgridToArrayMapArray;
   delete [] arrayToDistGridMapArray;
   delete [] distgridToPackedArrayMap;
-  delete [] staggerLoc;
-  delete [] vectorDim;
   if (undistLBoundArrayAllocFlag) delete [] undistLBoundArray;
   if (undistUBoundArrayAllocFlag) delete [] undistUBoundArray;
   
@@ -1068,8 +1038,6 @@ Array *Array::create(
   InterfaceInt *totalUWidthArg,               // (in)
   ESMC_IndexFlag *indexflagArg,               // (in)
   InterfaceInt *distLBoundArg,                // (in)
-  int *staggerLocArg,                         // (in)
-  int *vectorDimArg,                          // (in)
   InterfaceInt *undistLBoundArg,              // (in)
   InterfaceInt *undistUBoundArg,              // (in)
   int *rc                                     // (out) return code
@@ -1226,21 +1194,6 @@ Array *Array::create(
   int tensorElementCount = 1;  // prime tensorElementCount
   for (int i=0; i<tensorCount; i++)
     tensorElementCount *= (undistUBoundArray[i] - undistLBoundArray[i] + 1);
-  // prepare temporary staggerLoc and vectorDim arrays
-  int *staggerLoc = new int[tensorElementCount];
-  if (staggerLocArg)
-    for (int i=0; i<tensorElementCount; i++)
-      staggerLoc[i] = *staggerLocArg;
-  else
-    for (int i=0; i<tensorElementCount; i++)
-      staggerLoc[i] = 0;
-  int *vectorDim = new int[tensorElementCount];
-  if (vectorDimArg)
-    for (int i=0; i<tensorElementCount; i++)
-      vectorDim[i] = *vectorDimArg;
-  else
-    for (int i=0; i<tensorElementCount; i++)
-      vectorDim[i] = 1;
   
   // delayout -> deCount, localDeCount, localDeList
   int deCount = delayout->getDeCount();
@@ -1580,8 +1533,8 @@ Array *Array::create(
     array = new Array(typekind, rank, larrayList, distgrid, false,
       exclusiveLBound, exclusiveUBound, computationalLBound,
       computationalUBound, totalLBound, totalUBound, tensorCount,
-      tensorElementCount, undistLBoundArray, undistUBoundArray, staggerLoc,
-      vectorDim, distgridToArrayMapArray, arrayToDistGridMapArray,
+      tensorElementCount, undistLBoundArray, undistUBoundArray, 
+      distgridToArrayMapArray, arrayToDistGridMapArray,
       distgridToPackedArrayMap, indexflag, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
@@ -1606,8 +1559,6 @@ Array *Array::create(
   delete [] distgridToArrayMapArray;
   delete [] arrayToDistGridMapArray;
   delete [] distgridToPackedArrayMap;
-  delete [] staggerLoc;
-  delete [] vectorDim;
   
   }catch(int localrc){
     // catch standard ESMF return code
@@ -1721,13 +1672,6 @@ Array *Array::create(
     arrayOut->undistUBound = new int[tensorCount];
     memcpy(arrayOut->undistUBound, arrayIn->undistUBound,
       tensorCount * sizeof(int));
-    // staggerLoc and vectorDim
-    arrayOut->staggerLoc = new int[tensorElementCount];
-    memcpy(arrayOut->staggerLoc, arrayIn->staggerLoc,
-      tensorElementCount * sizeof(int));
-    arrayOut->vectorDim = new int[tensorElementCount];
-    memcpy(arrayOut->vectorDim, arrayIn->vectorDim,
-      tensorElementCount * sizeof(int));
     // distgridToArrayMap, arrayToDistGridMap and distgridToPackedArrayMap
     int dimCount = arrayIn->distgrid->getDimCount();
     arrayOut->distgridToArrayMap = new int[dimCount];
@@ -2501,8 +2445,6 @@ int Array::serialize(
     for (int i=0; i<tensorCount; i++){
       *ip++ = undistLBound[i];
       *ip++ = undistUBound[i];
-      *ip++ = staggerLoc[i];
-      *ip++ = vectorDim[i];
     }
     for (int i=0; i<distgrid->getDimCount(); i++)
       *ip++ = distgridToArrayMap[i];
@@ -2584,13 +2526,9 @@ int Array::deserialize(
   tensorCount = *ip++;
   undistLBound = new int[tensorCount];
   undistUBound = new int[tensorCount];
-  staggerLoc = new int[tensorCount];
-  vectorDim = new int[tensorCount];
   for (int i=0; i<tensorCount; i++){
     undistLBound[i] = *ip++;
     undistUBound[i] = *ip++;
-    staggerLoc[i] = *ip++;
-    vectorDim[i] = *ip++;
   }
   distgridToArrayMap = new int[distgrid->getDimCount()];
   for (int i=0; i<distgrid->getDimCount(); i++)

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.30 2009/09/04 19:09:18 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.31 2009/09/09 03:45:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -75,8 +75,6 @@ namespace ESMCI {
     int tensorElementCount;           // number of tensor elements per element
     int *undistLBound;                // [tensorCount]
     int *undistUBound;                // [tensorCount]
-    int *staggerLoc;                  // [tensorElementCount]
-    int *vectorDim;                   // [tensorElementCount]
     int *distgridToArrayMap;          // [dimCount] - entries are basis 1
                                       // entry of 0 indicates replicated dim
     int *arrayToDistGridMap;          // [rank]     - entries are basis 1
@@ -120,8 +118,6 @@ namespace ESMCI {
       tensorCount = 0;
       undistLBound = NULL;
       undistUBound = NULL;
-      staggerLoc = NULL;
-      vectorDim = NULL;
       distgridToArrayMap = NULL;
       arrayToDistGridMap = NULL;
       distgridToPackedArrayMap = NULL;
@@ -145,8 +141,6 @@ namespace ESMCI {
       tensorCount = 0;
       undistLBound = NULL;
       undistUBound = NULL;
-      staggerLoc = NULL;
-      vectorDim = NULL;
       distgridToArrayMap = NULL;
       arrayToDistGridMap = NULL;
       distgridToPackedArrayMap = NULL;
@@ -161,9 +155,8 @@ namespace ESMCI {
       int *exclusiveUBound, int *computationalLBound, int *computationalUBound,
       int *totalLBound, int *totalUBound, int tensorCount,
       int tensorElementCount, int *undistLBoundArray, int *undistUBoundArray,
-      int *staggerLoc, int *vectorDim, int *distgridToArrayMapArray,
-      int *arrayToDistGridMapArray, int *distgridToPackedArrayMapArray,
-      ESMC_IndexFlag indexflagArg, int *rc);
+      int *distgridToArrayMapArray, int *arrayToDistGridMapArray,
+      int *distgridToPackedArrayMapArray, ESMC_IndexFlag indexflagArg, int *rc);
    public:
     ~Array();
     // create() and destroy()
@@ -175,8 +168,8 @@ namespace ESMCI {
       InterfaceInt *computationalLWidthArg,
       InterfaceInt *computationalUWidthArg,
       InterfaceInt *totalLWidthArg, InterfaceInt *totalUWidthArg,
-      ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim,
-      InterfaceInt *undistLBoundArg, InterfaceInt *undistUBoundArg, int *rc);
+      ESMC_IndexFlag *indexflag, InterfaceInt *undistLBoundArg,
+      InterfaceInt *undistUBoundArg, int *rc);
     static Array *create(ArraySpec *arrayspec, DistGrid *distgrid,
       InterfaceInt *distgridToArrayMap,
       InterfaceInt *computationalEdgeLWidthArg,
@@ -184,8 +177,8 @@ namespace ESMCI {
       InterfaceInt *computationalLWidthArg, 
       InterfaceInt *computationalUWidthArg, InterfaceInt *totalLWidthArg,
       InterfaceInt *totalUWidthArg, ESMC_IndexFlag *indexflag,
-      InterfaceInt *distLBoundArg, int *staggerLoc, int *vectorDim,
-      InterfaceInt *undistLBoundArg, InterfaceInt *undistUBoundArg, int *rc);
+      InterfaceInt *distLBoundArg, InterfaceInt *undistLBoundArg,
+      InterfaceInt *undistUBoundArg, int *rc);
     static Array *create(Array *array, int *rc=NULL);
     static int destroy(Array **array);
     // get() and set()
@@ -203,8 +196,6 @@ namespace ESMCI {
     int getTensorCount()                    const {return tensorCount;}
     const int *getUndistLBound()            const {return undistLBound;}
     const int *getUndistUBound()            const {return undistUBound;}
-    const int *getStaggerLoc()              const {return staggerLoc;}
-    const int *getVectorDim()               const {return vectorDim;}
     const int *getExclusiveElementCountPDe()const
       {return exclusiveElementCountPDe;}
     const int *getTotalElementCountPLocalDe()const
@@ -221,18 +212,6 @@ namespace ESMCI {
       int *rc=NULL) const;
     SeqIndex getSequenceIndexPatch(int patch, const int *index, int *rc=NULL)
       const;
-    void setStaggerLoc(int staggerLocArg){
-      for (int i=0; i<tensorElementCount; i++) staggerLoc[i] = staggerLocArg;
-    }
-    void setStaggerLoc(int staggerLocArg, int tensorIndex){
-      staggerLoc[tensorIndex] = staggerLocArg;
-    }
-    void setVectorDim(int vectorDimArg){
-      for (int i=0; i<tensorElementCount; i++) vectorDim[i] = vectorDimArg;
-    }
-    void setVectorDim(int vectorDimArg, int tensorIndex){
-      vectorDim[tensorIndex] = vectorDimArg;
-    }
     int setComputationalLWidth(InterfaceInt *computationalLWidthArg);
     int setComputationalUWidth(InterfaceInt *computationalUWidthArg);
     const char *getName()               const {return ESMC_BaseGetName();}

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.96 2009/09/08 18:52:54 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.97 2009/09/09 03:45:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.96 2009/09/08 18:52:54 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.97 2009/09/09 03:45:17 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -485,7 +485,6 @@ int Grid::addCoordArray(
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           &indexflag, staggerMemLBoundIntInt, 
-                          &staggerloc, ESMC_NULL_POINTER, 
                           undistLBoundIntInt, undistUBoundIntInt, &localrc);
     } else {
       // ...otherwise pass in NUll
@@ -497,7 +496,6 @@ int Grid::addCoordArray(
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           &indexflag, staggerMemLBoundIntInt, 
-                          &staggerloc, ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER, 
                           &localrc);
@@ -663,7 +661,7 @@ int Grid::addCoordArrayArb(
                        (InterfaceInt *)ESMC_NULL_POINTER,
                        (InterfaceInt *)ESMC_NULL_POINTER,
                        (InterfaceInt *)ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, NULL, &staggerloc, ESMC_NULL_POINTER,
+                        ESMC_NULL_POINTER, NULL,
                        (InterfaceInt *)ESMC_NULL_POINTER,
                        (InterfaceInt *)ESMC_NULL_POINTER, 
 			&localrc);
@@ -1436,7 +1434,7 @@ int Grid::addItemArray(
 		       (InterfaceInt *)ESMC_NULL_POINTER,
 		       (InterfaceInt *)ESMC_NULL_POINTER,
 		       (InterfaceInt *)ESMC_NULL_POINTER,
-		       &indexflag, NULL, &staggerloc, ESMC_NULL_POINTER,
+		       &indexflag, NULL,
 		       (InterfaceInt *)ESMC_NULL_POINTER,
 		       (InterfaceInt *)ESMC_NULL_POINTER, 
 		       &localrc);
@@ -1643,7 +1641,7 @@ int Grid::addItemArrayArb(
 		       (InterfaceInt *)ESMC_NULL_POINTER,
 		       (InterfaceInt *)ESMC_NULL_POINTER,
 		       (InterfaceInt *)ESMC_NULL_POINTER,
-		       &indexflag, NULL, &staggerloc, ESMC_NULL_POINTER,
+		       &indexflag, NULL,
 		       (InterfaceInt *)ESMC_NULL_POINTER,
 		       (InterfaceInt *)ESMC_NULL_POINTER, 
 		       &localrc);

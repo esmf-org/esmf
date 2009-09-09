@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.26 2009/09/04 19:09:18 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.27 2009/09/09 03:45:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -55,8 +55,7 @@ extern "C" {
     ESMCI::InterfaceInt **computationalLWidthArg,
     ESMCI::InterfaceInt **computationalUWidthArg, 
     ESMCI::InterfaceInt **totalLWidthArg, ESMCI::InterfaceInt **totalUWidthArg,
-    ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim, 
-    ESMCI::InterfaceInt **undistLBoundArg,
+    ESMC_IndexFlag *indexflag, ESMCI::InterfaceInt **undistLBoundArg,
     ESMCI::InterfaceInt **undistUBoundArg,
     char *name, int *len_name, int *rc){
 #undef  ESMC_METHOD
@@ -70,7 +69,6 @@ extern "C" {
       *computationalEdgeLWidthArg, *computationalEdgeUWidthArg,
       *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
       *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag),
-      ESMC_NOT_PRESENT_FILTER(staggerLoc), ESMC_NOT_PRESENT_FILTER(vectorDim),
       *undistLBoundArg, *undistUBoundArg, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
@@ -94,8 +92,7 @@ extern "C" {
     ESMCI::InterfaceInt **computationalLWidthArg,
     ESMCI::InterfaceInt **computationalUWidthArg, 
     ESMCI::InterfaceInt **totalLWidthArg, ESMCI::InterfaceInt **totalUWidthArg,
-    ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim, 
-    ESMCI::InterfaceInt **undistLBoundArg,
+    ESMC_IndexFlag *indexflag, ESMCI::InterfaceInt **undistLBoundArg,
     ESMCI::InterfaceInt **undistUBoundArg,
     char *name, int *len_name, int *rc){
 #undef  ESMC_METHOD
@@ -108,7 +105,6 @@ extern "C" {
       *computationalEdgeLWidthArg, *computationalEdgeUWidthArg,
       *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
       *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag), NULL,
-      ESMC_NOT_PRESENT_FILTER(staggerLoc), ESMC_NOT_PRESENT_FILTER(vectorDim),
       *undistLBoundArg, *undistUBoundArg, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
@@ -820,19 +816,13 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_arrayset)(ESMCI::Array **array, int *staggerLoc, 
-    int *vectorDim, ESMCI::InterfaceInt **computationalLWidthArg,
+  void FTN(c_esmc_arrayset)(ESMCI::Array **array,
+    ESMCI::InterfaceInt **computationalLWidthArg,
     ESMCI::InterfaceInt **computationalUWidthArg, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayset()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // set staggerLoc
-    if (ESMC_NOT_PRESENT_FILTER(staggerLoc)!=ESMC_NULL_POINTER)
-      (*array)->setStaggerLoc(*staggerLoc);
-    // set vectorDim
-    if (ESMC_NOT_PRESENT_FILTER(vectorDim)!=ESMC_NULL_POINTER)
-      (*array)->setVectorDim(*vectorDim);
     // Call into the C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*array)->setComputationalLWidth(
       *computationalLWidthArg),
@@ -843,56 +833,6 @@ extern "C" {
       *computationalUWidthArg),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
-  }
-  
-  void FTN(c_esmc_arraysettensor)(ESMCI::Array **array,
-    ESMCI::InterfaceInt **tensorIndexArg, int *staggerLoc, int *vectorDim,
-    int *rc){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraysettensor()"
-    // Initialize return code; assume routine not implemented
-    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-
-    // check that tensorIndexArgs was provided    
-    if (*tensorIndexArg == NULL){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Must provide tensorIndexArg-", ESMC_CONTEXT, rc);
-      return;
-    }
-    
-    // check that tensorIndexArg is within limits -> construct tensorIndex
-    if ((*tensorIndexArg)->dimCount != 1){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-        "- tensorIndexArg array must be of rank 1", ESMC_CONTEXT, rc);
-      return;
-    }
-    int tensorCount = (*array)->getTensorCount();
-    if ((*tensorIndexArg)->extent[0] != tensorCount){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-        "- first dim of tensorIndexArg array must be of size tensorCount", 
-        ESMC_CONTEXT, rc);
-      return;
-    }
-    const int *undistLBound = (*array)->getUndistLBound();
-    const int *undistUBound = (*array)->getUndistUBound();
-    int tensorIndex = 0;
-    for (int i=tensorCount-1; i>=0; i--){
-      tensorIndex *= undistUBound[i] - undistLBound[i] + 1;
-      if ((*tensorIndexArg)->array[i] < undistLBound[i] ||
-        (*tensorIndexArg)->array[i] > undistUBound[i]){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
-          "- tensorIndexArg entry is out of range", ESMC_CONTEXT, rc);
-        return;
-      }
-      tensorIndex += (*tensorIndexArg)->array[i] - undistLBound[i];
-    }
-    
-    // set staggerLoc
-    if (ESMC_NOT_PRESENT_FILTER(staggerLoc)!=ESMC_NULL_POINTER)
-      (*array)->setStaggerLoc(*staggerLoc, tensorIndex);
-    // set vectorDim
-    if (ESMC_NOT_PRESENT_FILTER(vectorDim)!=ESMC_NULL_POINTER)
-      (*array)->setVectorDim(*vectorDim, tensorIndex);
   }
   
   void FTN(c_esmc_arrayserialize)(ESMCI::Array **array, char *buf, int *length,

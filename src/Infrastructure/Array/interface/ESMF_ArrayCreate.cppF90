@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.39 2009/06/19 04:11:22 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.40 2009/09/09 03:45:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.39 2009/06/19 04:11:22 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.40 2009/09/09 03:45:17 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -153,8 +153,7 @@ contains
 !   distgrid, copyflag, distgridToArrayMap, computationalEdgeLWidth, & @\
 !   computationalEdgeUWidth, computationalLWidth, & @\
 !   computationalUWidth, totalLWidth, & @\
-!   totalUWidth, staggerLoc, vectorDim, & @\
-!   name, rc) @\
+!   totalUWidth, name, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   <type> (ESMF_KIND_<kind>),dimension(<rank>),pointer :: farrayPtr @\
@@ -167,8 +166,6 @@ contains
 !   integer,               intent(in),   optional  :: computationalUWidth(:) @\
 !   integer,               intent(in),   optional  :: totalLWidth(:) @\
 !   integer,               intent(in),   optional  :: totalUWidth(:) @\
-!   integer,               intent(in),   optional  :: staggerLoc @\
-!   integer,               intent(in),   optional  :: vectorDim @\
 !   character (len=*),     intent(in),   optional  :: name @\
 !   integer,               intent(out),  optional  :: rc @\
 ! @\
@@ -272,16 +269,6 @@ contains
 !      The default is a vector that contains the remaining number of elements @\
 !      in each direction as to fit the union of exclusive and computational @\
 !      region into the memory region provided by the {\tt farrayPtr} argument. @\
-! \item[{[staggerLoc]}] @\
-!      Stagger location is an arbitrary integer index. This information is @\
-!      used to correctly apply connection transformations of the @\
-!      corresponding DistGrid during halo operations. @\
-! \item[{[vectorDim]}] @\
-!      If the data stored in this Array object is a component of a vector field @\
-!      then the {\tt vectorDim} argument may be used to identify the dimension @\
-!      along which the vector component is aligned. This information is used to @\
-!      correctly apply the {\tt signChangeVector} defined in the connection @\
-!      transformations of the corresponding DistGrid during halo operations. @\
 ! \item[{[name]}] @\
 !      Name of the Array object. @\
 ! \item[{[rc]}] @\
@@ -299,8 +286,7 @@ contains
     distgrid, copyflag, distgridToArrayMap, & @\
     computationalEdgeLWidth, computationalEdgeUWidth, & @\
     computationalLWidth, computationalUWidth, totalLWidth, & @\
-    totalUWidth, staggerLoc, vectorDim, & @\
-    name, rc) @\
+    totalUWidth, name, rc) @\
 @\
     type(ESMF_Array) :: ESMF_ArrayCreateFromPtr##mrank##D##mtypekind @\
 @\
@@ -314,8 +300,6 @@ contains
     integer,               intent(in),   optional  :: computationalUWidth(:) @\
     integer,               intent(in),   optional  :: totalLWidth(:) @\
     integer,               intent(in),   optional  :: totalUWidth(:) @\
-    integer,               intent(in),   optional  :: staggerLoc @\
-    integer,               intent(in),   optional  :: vectorDim @\
     character (len=*),     intent(in),   optional  :: name @\
     integer,               intent(out),  optional  :: rc @\
 @\
@@ -354,7 +338,7 @@ contains
     array = ESMF_ArrayCreate(larrayList, distgrid, ESMF_INDEX_USER, & @\
       copyflag_opt, distgridToArrayMap, computationalEdgeLWidth, & @\
       computationalEdgeUWidth, computationalLWidth, computationalUWidth, & @\
-      totalLWidth, totalUWidth, staggerLoc, vectorDim, name=name, rc=localrc) @\
+      totalLWidth, totalUWidth, name=name, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
@@ -390,8 +374,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 !   distgrid, indexflag, copyflag, distgridToArrayMap, & @\
 !   computationalEdgeLWidth, computationalEdgeUWidth, computationalLWidth, & @\
 !   computationalUWidth, totalLWidth, & @\
-!   totalUWidth, staggerLoc, vectorDim, & @\
-!   undistLBound, undistUBound, name, rc) @\
+!   totalUWidth, undistLBound, undistUBound, name, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   <type> (ESMF_KIND_<kind>),dimension(<rank>),intent(in),target :: farray @\
@@ -405,8 +388,6 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 !   integer,               intent(in),   optional  :: computationalUWidth(:) @\
 !   integer,               intent(in),   optional  :: totalLWidth(:) @\
 !   integer,               intent(in),   optional  :: totalUWidth(:) @\
-!   integer,               intent(in),   optional  :: staggerLoc @\
-!   integer,               intent(in),   optional  :: vectorDim @\
 !   integer,               intent(in),   optional  :: undistLBound(:) @\
 !   integer,               intent(in),   optional  :: undistUBound(:) @\
 !   character (len=*),     intent(in),   optional  :: name @\
@@ -512,16 +493,6 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 !      The default is a vector that contains the remaining number of elements @\
 !      in each direction as to fit the union of exclusive and computational @\
 !      region into the memory region provided by the {\tt farray} argument. @\
-! \item[{[staggerLoc]}] @\
-!      Stagger location is an arbitrary integer index. This information is @\
-!      used to correctly apply connection transformations of the @\
-!      corresponding DistGrid during halo operations. @\
-! \item[{[vectorDim]}] @\
-!      If the data stored in this Array object is a component of a vector field @\
-!      then the {\tt vectorDim} argument may be used to identify the dimension @\
-!      along which the vector component is aligned. This information is used to @\
-!      correctly apply the {\tt signChangeVector} defined in the connection @\
-!      transformations of the corresponding DistGrid during halo operations. @\
 ! \item[{[undistLBound]}] @\
 !      Lower bounds for the array dimensions that are not distributed. @\
 !      By default lbound is 1. @\
@@ -546,8 +517,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
     distgrid, indexflag, copyflag, distgridToArrayMap, & @\
     computationalEdgeLWidth, computationalEdgeUWidth, & @\
     computationalLWidth, computationalUWidth, totalLWidth, & @\
-    totalUWidth, staggerLoc, vectorDim, & @\
-    undistLBound, undistUBound, name, rc) @\
+    totalUWidth, undistLBound, undistUBound, name, rc) @\
 @\
     type(ESMF_Array) :: ESMF_ArrayCreateAssmdShape##mrank##D##mtypekind @\
 @\
@@ -562,8 +532,6 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
     integer,               intent(in),   optional  :: computationalUWidth(:) @\
     integer,               intent(in),   optional  :: totalLWidth(:) @\
     integer,               intent(in),   optional  :: totalUWidth(:) @\
-    integer,               intent(in),   optional  :: staggerLoc @\
-    integer,               intent(in),   optional  :: vectorDim @\
     integer,               intent(in),   optional  :: undistLBound(:) @\
     integer,               intent(in),   optional  :: undistUBound(:) @\
     character (len=*),     intent(in),   optional  :: name @\
@@ -613,7 +581,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
     array = ESMF_ArrayCreate(larrayList, distgrid, indexflag, copyflag_opt, & @\
       distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, & @\
       computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, & @\
-      staggerLoc, vectorDim, undistLBound, undistUBound, name, localrc) @\
+      undistLBound, undistUBound, name, localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
@@ -651,8 +619,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
   function ESMF_ArrayCreateLocalArray(larrayList, distgrid, indexflag, &
     copyflag, distgridToArrayMap, computationalEdgeLWidth, &
     computationalEdgeUWidth, computationalLWidth, computationalUWidth, &
-    totalLWidth, totalUWidth, staggerLoc, vectorDim, undistLBound, &
-    undistUBound, name, rc)
+    totalLWidth, totalUWidth, undistLBound, undistUBound, name, rc)
 !
 ! !ARGUMENTS:
        type(ESMF_LocalArray), intent(in)              :: larrayList(:)
@@ -666,8 +633,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
        integer,               intent(in),   optional  :: computationalUWidth(:)
        integer,               intent(in),   optional  :: totalLWidth(:)
        integer,               intent(in),   optional  :: totalUWidth(:)
-       integer,               intent(in),   optional  :: staggerLoc
-       integer,               intent(in),   optional  :: vectorDim
        integer,               intent(in),   optional  :: undistLBound(:)
        integer,               intent(in),   optional  :: undistUBound(:)
        character (len=*),     intent(in),   optional  :: name
@@ -777,16 +742,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      The default is a vector that contains the remaining number of elements
 !      in each direction as to fit the union of exclusive and computational
 !      region into the memory region provided by the {\tt larrayList} argument.
-! \item[{[staggerLoc]}]
-!      Stagger location is an arbitrary integer index. This information is
-!      used to correctly apply connection transformations of the
-!      corresponding DistGrid during halo operations.
-! \item[{[vectorDim]}]
-!      If the data stored in this Array object is a component of a vector field
-!      then the {\tt vectorDim} argument may be used to identify the dimension
-!      along which the vector component is aligned. This information is used to
-!      correctly apply the {\tt signChangeVector} defined in the connection
-!      transformations of the corresponding DistGrid during halo operations.
 ! \item[{[undistLBound]}]
 !      Lower bounds for the array dimensions that are not distributed.
 !      By default lbound is 1.
@@ -901,7 +856,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         distgrid, copyflag_opt, distgridToArrayMapArg, &
         computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
-        totalUWidthArg, indexflag, staggerLoc, vectorDim, &
+        totalUWidthArg, indexflag, &
         undistLBoundArg, undistUBoundArg, name, len_name, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -911,7 +866,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         distgrid, copyflag_opt, distgridToArrayMapArg, &
         computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
-        totalUWidthArg, indexflag, staggerLoc, vectorDim, &
+        totalUWidthArg, indexflag, &
         undistLBoundArg, undistUBoundArg, "", len_name, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -971,7 +926,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
   function ESMF_ArrayCreateAllocate(arrayspec, distgrid, indexflag, &
     distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
-    staggerLoc, vectorDim, undistLBound, undistUBound, name, rc)
+    undistLBound, undistUBound, name, rc)
 !
 ! !ARGUMENTS:
        type(ESMF_ArraySpec),  intent(inout)           :: arrayspec
@@ -984,8 +939,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
        integer,               intent(in),   optional  :: computationalUWidth(:)
        integer,               intent(in),   optional  :: totalLWidth(:)
        integer,               intent(in),   optional  :: totalUWidth(:)
-       integer,               intent(in),   optional  :: staggerLoc
-       integer,               intent(in),   optional  :: vectorDim
        integer,               intent(in),   optional  :: undistLBound(:)
        integer,               intent(in),   optional  :: undistUBound(:)
        character (len=*),     intent(in),   optional  :: name
@@ -1070,16 +1023,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      region with respect to the upper corner of the computational region.
 !      The default is to accommodate the union of exclusive and computational
 !      region.
-! \item[{[staggerLoc]}]
-!      Stagger location is an arbitrary integer index. This information is
-!      used to correctly apply connection transformations of the
-!      corresponding DistGrid during halo operations.
-! \item[{[vectorDim]}]
-!      If the data stored in this Array object is a component of a vector field
-!      then the {\tt vectorDim} argument may be used to identify the dimension
-!      along which the vector component is aligned. This information is used to
-!      correctly apply the {\tt signChangeVector} defined in the connection
-!      transformations of the corresponding DistGrid during halo operations.
 ! \item[{[undistLBound]}]
 !      Lower bounds for the array dimensions that are not distributed.
 ! \item[{[undistUBound]}]
@@ -1168,7 +1111,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         distgridToArrayMapArg, &
         computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
-        totalUWidthArg, indexflag, staggerLoc, vectorDim, &
+        totalUWidthArg, indexflag, &
         undistLBoundArg, undistUBoundArg, name, len_name, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1178,7 +1121,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         distgridToArrayMapArg, &
         computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
-        totalUWidthArg, indexflag, staggerLoc, vectorDim, &
+        totalUWidthArg, indexflag, &
         undistLBoundArg, undistUBoundArg, "", len_name, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
