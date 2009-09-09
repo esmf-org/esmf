@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.1 2009/03/18 05:50:32 eschwab Exp $
+! $Id: ESMF_IO.F90,v 1.2 2009/09/09 05:51:30 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -138,7 +138,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_IO.F90,v 1.1 2009/03/18 05:50:32 eschwab Exp $'
+      '$Id: ESMF_IO.F90,v 1.2 2009/09/09 05:51:30 eschwab Exp $'
 
 !==============================================================================
 !
@@ -303,8 +303,8 @@
       end if
 !
 !     invoke C to C++ entry point to allocate and initialize new io
-      call c_ESMC_IOCreate(ESMF_IOCreate, nameLen, name, gridComp%compp%base, &
-                           localrc)
+      call c_ESMC_IO_XMLCreate(ESMF_IOCreate, nameLen, name, &
+                               gridComp%compp%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 !
@@ -352,7 +352,7 @@
 !     ESMF_INIT_CHECK_DEEP(ESMF_IOGetInit,io,rc)  TODO
 !
 !     invoke C to C++ entry point
-      call c_ESMC_IODestroy(io, localrc)
+      call c_ESMC_IO_XMLDestroy(io, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) then 
 !       ! Don't bail out until Delete
@@ -658,7 +658,7 @@
       end if
 
 !     invoke C to C++ entry point  TODO
-      call c_ESMC_IORead(io, fileNameLen, fileName, localrc)
+      call c_ESMC_IO_XMLRead(io, fileNameLen, fileName, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 !
