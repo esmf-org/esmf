@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseUTest.F90,v 1.30 2009/08/06 20:47:44 svasquez Exp $
+! $Id: ESMF_BaseUTest.F90,v 1.31 2009/09/09 18:45:09 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BaseUTest.F90,v 1.30 2009/08/06 20:47:44 svasquez Exp $'
+      '$Id: ESMF_BaseUTest.F90,v 1.31 2009/09/09 18:45:09 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -61,6 +61,10 @@
       character(ESMF_MAXSTR) :: name_set, name_get
       ! instantiate a Base 
       type(ESMF_Base) :: base1
+      type(ESMF_AttReconcileFlag) :: attreconflag
+      character, allocatable   :: buffer(:)
+      integer :: buffer_l
+      integer :: offset
 #endif
 
 !-------------------------------------------------------------------------------
@@ -206,6 +210,39 @@
       write(failMsg, *) "rc =", rc, ", print_options =", trim(print_options)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! BEGIN tests of certain INTERNAL methods.  They are subject
+      ! to change and are NOT part of the ESMF user API.
+
+      !EX_UTest
+      ! test the serialize inquire-only option
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      attreconflag = ESMF_ATTRECONCILE_OFF
+      call c_ESMC_BaseSerialize (base, buffer, 0, offset, &
+        attreconflag, ESMF_INQUIREONLY, rc)
+      write(name, *) "c_ESMC_BaseSerialize - inquire only option"
+      write(failMsg, *) "rc =", rc, ", offset =", offset
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, '  offset returned =', offset, ' bytes'
+
+      !EX_UTest
+      ! test doing a serialize
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      buffer_l = offset ! from previous inquiry
+      allocate (buffer(buffer_l))
+      offset = 0
+      call c_ESMC_BaseSerialize (base, buffer, buffer_l, offset, &
+        attreconflag, ESMF_NOINQUIRE, rc)
+      write(name, *) "c_ESMC_BaseSerialize - perform serialization"
+      write(failMsg, *) "rc =", rc, ", offset =", offset
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, '  offset returned =', offset, ' bytes'
+
+      ! END of tests of INTERNAL methods.
 
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
