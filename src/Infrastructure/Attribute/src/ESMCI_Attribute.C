@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.46 2009/08/26 03:40:42 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.47 2009/09/09 05:50:07 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -31,13 +31,13 @@
 #include "ESMC_Base.h"
 #include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"
-#include "ESMCI_IO.h"
+#include "ESMCI_IO_XML.h"
 //#include "ESMCI_VM.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.46 2009/08/26 03:40:42 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.47 2009/09/09 05:50:07 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3223,10 +3223,10 @@ namespace ESMCI {
 
   // instantiate IO object; initialize with pointer to this Attribute node, to
   // place file-read attributes into.
-  IO io(this);
+  IO_XML io_xml(this);
 
   // read the XML file, placing contents into this Attribute node
-  rc = io.read(fileNameLen, fileName);
+  rc = io_xml.read(fileNameLen, fileName);
   ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
 
   return rc;
