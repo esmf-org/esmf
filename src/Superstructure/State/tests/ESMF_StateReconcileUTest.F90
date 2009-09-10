@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.26 2009/09/04 17:12:53 theurich Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.27 2009/09/10 18:25:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_Field) :: field1
+    type(ESMF_Field) :: field1, field1nest
     type(ESMF_State) :: neststate
 
     print *, "i am comp1_init"
@@ -49,6 +49,12 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
     if (rc .ne. ESMF_SUCCESS) return
     
     call ESMF_StateAdd(istate, neststate, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+    
+    field1nest = ESMF_FieldCreateEmpty(name="Comp1 Field in nested State", rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
+    call ESMF_StateAdd(neststate, field1nest, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
 end subroutine comp1_init
@@ -80,7 +86,7 @@ subroutine comp1_final(gcomp, istate, ostate, clock, rc)
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_Field) :: field1
+    type(ESMF_Field) :: field1, field1nest
     type(ESMF_State) :: neststate
 
     print *, "i am comp1_final"
@@ -92,6 +98,12 @@ subroutine comp1_final(gcomp, istate, ostate, clock, rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     call ESMF_StateGet(istate, "Nested State", neststate,  rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
+    call ESMF_StateGet(neststate, "Comp1 Field in nested State", field1nest,  rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
+    call ESMF_FieldDestroy(field1nest, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     call ESMF_StateDestroy(neststate, rc=rc)
