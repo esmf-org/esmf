@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.170 2009/09/08 16:31:48 theurich Exp $
+! $Id: ESMF_State.F90,v 1.171 2009/09/10 18:23:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.170 2009/09/08 16:31:48 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.171 2009/09/10 18:23:11 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -6181,7 +6181,8 @@ module ESMF_StateMod
           select case (sip%otype%ot)
             case (ESMF_STATEITEM_FIELDBUNDLE%ot)
               sip%datap%fbp = ESMF_FieldBundleDeserialize(vm, buffer, offset, &
-                                              attreconflag=lattreconflag, rc=localrc)
+                attreconflag=lattreconflag, rc=localrc)
+              sip%proxyflag = .true.  ! indicate that this is proxy object
               !  here we relink the State Attribute hierarchy to the FieldBundle
               !  Attribute hierarchy, as they were linked before
               if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
@@ -6193,10 +6194,10 @@ module ESMF_StateMod
                   return
                 endif
               endif
-              continue ! TODO: deserialize
             case (ESMF_STATEITEM_FIELD%ot)
               sip%datap%fp = ESMF_FieldDeserialize(vm, buffer, offset, &
-                                              attreconflag=lattreconflag, rc=localrc)
+                attreconflag=lattreconflag, rc=localrc)
+              sip%proxyflag = .true.  ! indicate that this is proxy object
               !  here we relink the State Attribute hierarchy to the Field
               !  Attribute hierarchy, as they were linked before
               if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
@@ -6208,19 +6209,19 @@ module ESMF_StateMod
                   return
                 endif
               endif
-              continue ! TODO: deserialize
             case (ESMF_STATEITEM_ARRAY%ot)
               call c_ESMC_ArrayDeserialize(sip%datap%ap, buffer, offset, &
                 lattreconflag, localrc)
-              continue ! TODO: deserialize
+              sip%proxyflag = .true.  ! indicate that this is proxy object
             case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
               call c_ESMC_ArrayBundleDeserialize(sip%datap%abp, buffer, offset,&
                 lattreconflag, localrc)
-              continue ! TODO: deserialize
+              sip%proxyflag = .true.  ! indicate that this is proxy object
             case (ESMF_STATEITEM_STATE%ot)
               subsubstate = ESMF_StateDeserialize(vm, buffer, offset, &
                                               attreconflag=lattreconflag, rc=localrc)
               sip%datap%spp => subsubstate%statep
+              sip%proxyflag = .true.  ! indicate that this is proxy object
               !  here we relink the State Attribute hierarchy to the subState
               !  Attribute hierarchy, as they were linked before
               if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
@@ -6232,10 +6233,9 @@ module ESMF_StateMod
                   return
                 endif
               endif
-              continue ! TODO: deserialize
             case (ESMF_STATEITEM_NAME%ot)
               call c_ESMC_StringDeserialize(sip%namep, buffer(1), offset, localrc)
-              continue ! TODO: deserialize
+              sip%proxyflag = .true.  ! indicate that this is proxy object
             case (ESMF_STATEITEM_INDIRECT%ot)
               continue ! TODO: deserialize
             case (ESMF_STATEITEM_UNKNOWN%ot)
