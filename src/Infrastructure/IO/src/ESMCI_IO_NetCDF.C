@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.C,v 1.5 2009/09/09 14:59:37 eschwab Exp $
+// $Id: ESMCI_IO_NetCDF.C,v 1.6 2009/09/10 05:59:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.5 2009/09/09 14:59:37 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.6 2009/09/10 05:59:04 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -472,7 +472,7 @@ fflush(stdout);
 // !IROUTINE:  IO_NetCDF - native C++ constructor
 //
 // !INTERFACE:
-      IO_NetCDF::IO_NetCDF(void) {
+      IO_NetCDF::IO_NetCDF(void)
 //
 // !RETURN VALUE:
 //    none
@@ -490,6 +490,9 @@ fflush(stdout);
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMCI::IO_NetCDF() native constructor"
 
+ : ESMC_Base(-1) {  // invoke ESMC_Base constructor with id=(-1); prevents
+                    // Base id increment for non-distributed,
+                    // non-reconcilable objects such as IO.
     theState = ESMC_NULL_POINTER; 
     // create default name "IO_NetCDF<ID>"
     ESMC_BaseSetName(ESMC_NULL_POINTER, "IO_NetCDF");
@@ -675,7 +678,7 @@ fflush(stdout);
                                (InterfaceInt*)NULL, (DecompFlag*)NULL, 0,
                                (InterfaceInt*)NULL, (InterfaceInt*)NULL,
                                (InterfaceInt*)NULL, (ESMC_IndexFlag*)NULL,
-                               (InterfaceInt*)NULL, (InterfaceInt*)NULL,
+                               (InterfaceInt*)NULL, 
                                (DELayout*)NULL, (VM*)NULL, &arrayRc);
     //printf("*** DistGrid RC: %d\n", arrayRc);
 
