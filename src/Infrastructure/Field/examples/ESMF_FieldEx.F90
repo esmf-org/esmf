@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.11 2009/09/09 05:38:00 theurich Exp $
+! $Id: ESMF_FieldEx.F90,v 1.12 2009/09/10 15:31:26 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -398,6 +398,7 @@
     call ESMF_FieldSetCommit(field3, grid2d, farray2d, rc=rc)
 !EOC
     print *, "Finish a Field created by ESMF_FieldCreateEmpty returned"
+    deallocate(farray2d)
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------

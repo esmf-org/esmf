@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridEx.F90,v 1.3 2009/05/21 18:14:03 peggyli Exp $
+! $Id: ESMF_FieldArbGridEx.F90,v 1.4 2009/09/10 15:27:05 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -210,6 +210,13 @@
 !EOC
     print *, "Field with replicated dimension returned"
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! release resources
+    call ESMF_FieldDestroy(field, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_GridDestroy(grid3d, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    deallocate(localArbIndex)
 
 !-------------------------------------------------------------------------
      call ESMF_Finalize(rc=rc)
