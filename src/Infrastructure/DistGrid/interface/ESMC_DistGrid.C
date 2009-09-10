@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.7 2009/01/21 21:37:58 cdeluca Exp $
+// $Id: ESMC_DistGrid.C,v 1.8 2009/09/10 04:42:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.7 2009/01/21 21:37:58 cdeluca Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.8 2009/09/10 04:42:48 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -59,7 +59,7 @@ ESMC_DistGrid ESMC_DistGridCreate(ESMC_InterfaceInt minIndexInterfaceArg,
   
   distgrid.ptr = (void *)
     ESMCI::DistGrid::create(minIndexInterface, maxIndexInterface, NULL,
-      NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
+      NULL, 0, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
       &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
     distgrid.ptr = NULL;
