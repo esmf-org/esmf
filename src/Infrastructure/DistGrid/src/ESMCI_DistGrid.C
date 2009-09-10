@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.25 2009/09/04 19:09:19 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.26 2009/09/10 04:24:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.25 2009/09/04 19:09:19 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.26 2009/09/10 04:24:38 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -83,7 +83,7 @@ DistGrid *DistGrid::create(
 //    requires a regularily decomposed incoming DistGrid. These arguments
 //    allow extra elements to be added at the first/last DE in each dimension.
 //    If these arguments are not specified the method reduces to a deep copy
-//    of the incoming DistGrid.
+//    of the incoming DistGrid, without restrictions.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -163,14 +163,14 @@ DistGrid *DistGrid::create(
       // single patch
       distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, NULL, 0,
         regDecompFirstExtra, regDecompLastExtra, NULL, indexflag,
-        connectionList, NULL, dg->delayout, dg->vm, &localrc);
+        connectionList, dg->delayout, dg->vm, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return ESMC_NULL_POINTER;
     }else{
       // multi patch
       distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, NULL, 0, 0,
         regDecompFirstExtra, regDecompLastExtra, NULL, indexflag,
-        connectionList, NULL, dg->delayout, dg->vm, &localrc);
+        connectionList, dg->delayout, dg->vm, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return ESMC_NULL_POINTER;
     }
@@ -224,7 +224,6 @@ DistGrid *DistGrid::create(
   InterfaceInt *deLabelList,              // (in)
   ESMC_IndexFlag *indexflag,              // (in)
   InterfaceInt *connectionList,           // (in)
-  InterfaceInt *connectionTransList,      // (in)
   DELayout *delayout,                     // (in)
   VM *vm,                                 // (in)
   int *rc                                 // (out) return code
@@ -700,7 +699,6 @@ DistGrid *DistGrid::create(
   InterfaceInt *deLabelList,              // (in)
   ESMC_IndexFlag *indexflag,              // (in)
   InterfaceInt *connectionList,           // (in)
-  InterfaceInt *connectionTransList,      // (in)
   DELayout *delayout,                     // (in)
   VM *vm,                                 // (in)
   int *rc                                 // (out) return code
@@ -979,7 +977,6 @@ DistGrid *DistGrid::create(
   InterfaceInt *deLabelList,              // (in)
   ESMC_IndexFlag *indexflag,              // (in)
   InterfaceInt *connectionList,           // (in)
-  InterfaceInt *connectionTransList,      // (in)
   int fastAxis,                           // (in)
   VM *vm,                                 // (in)
   int *rc                                 // (out) return code
@@ -1003,7 +1000,7 @@ DistGrid *DistGrid::create(
   DistGrid *distgrid = 
     create(minIndex, maxIndex, regDecomp, decompflag,
       decompflagCount, regDecompFirstExtra, regDecompLastExtra, deLabelList,
-      indexflag, connectionList, connectionTransList, delayout, vm, &localrc);
+      indexflag, connectionList, delayout, vm, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return distgrid;
   
@@ -1040,7 +1037,6 @@ DistGrid *DistGrid::create(
   InterfaceInt *deLabelList,              // (in)
   ESMC_IndexFlag *indexflag,              // (in)
   InterfaceInt *connectionList,           // (in)
-  InterfaceInt *connectionTransList,      // (in)
   DELayout *delayout,                     // (in)
   VM *vm,                                 // (in)
   int *rc                                 // (out) return code

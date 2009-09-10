@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.18 2009/09/02 03:41:24 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.19 2009/09/10 04:24:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -68,7 +68,6 @@ extern "C" {
     ESMCI::InterfaceInt **regDecompLastExtra,
     ESMCI::InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
     ESMCI::InterfaceInt **connectionList,
-    ESMCI::InterfaceInt **connectionTransList,
     ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterd()"
@@ -87,7 +86,7 @@ extern "C" {
     *ptr = ESMCI::DistGrid::create(*minIndex, *maxIndex, *regDecomp,
       decompflag, *decompflagCount, *regDecompFirstExtra, *regDecompLastExtra,
       *deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
-      *connectionList, *connectionTransList, opt_delayout, opt_vm,
+      *connectionList, opt_delayout, opt_vm,
       &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -98,7 +97,6 @@ extern "C" {
     ESMCI::InterfaceInt **deBlockList,
     ESMCI::InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
     ESMCI::InterfaceInt **connectionList,
-    ESMCI::InterfaceInt **connectionTransList,
     ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreatedb()"
@@ -117,7 +115,7 @@ extern "C" {
     *ptr = ESMCI::DistGrid::create(*minIndex, *maxIndex, *deBlockList,
       *deLabelList, 
       ESMC_NOT_PRESENT_FILTER(indexflag),
-      *connectionList, *connectionTransList, opt_delayout, opt_vm,
+      *connectionList, opt_delayout, opt_vm,
       &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -131,7 +129,6 @@ extern "C" {
     ESMCI::InterfaceInt **regDecompLastExtra,
     ESMCI::InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
     ESMCI::InterfaceInt **connectionList,
-    ESMCI::InterfaceInt **connectionTransList,
     int *fastAxis, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterdfa()"
@@ -146,7 +143,7 @@ extern "C" {
     *ptr = ESMCI::DistGrid::create(*minIndex, *maxIndex, *regDecomp,
       decompflag, *decompflagCount, *regDecompFirstExtra, *regDecompLastExtra,
       *deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
-      *connectionList, *connectionTransList, *fastAxis, opt_vm,
+      *connectionList, *fastAxis, opt_vm,
       &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -160,7 +157,6 @@ extern "C" {
     ESMCI::InterfaceInt **regDecompLastExtra,
     ESMCI::InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
     ESMCI::InterfaceInt **connectionList,
-    ESMCI::InterfaceInt **connectionTransList,
     ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterdp()"
@@ -180,7 +176,7 @@ extern "C" {
       decompflag, *decompflagCount1, *decompflagCount2, 
       *regDecompFirstExtra, *regDecompLastExtra, *deLabelList, 
       ESMC_NOT_PRESENT_FILTER(indexflag),
-      *connectionList, *connectionTransList, opt_delayout, opt_vm,
+      *connectionList, opt_delayout, opt_vm,
       &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));

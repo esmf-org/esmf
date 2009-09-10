@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.15 2009/09/04 19:09:19 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.16 2009/09/10 04:24:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -104,13 +104,11 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
       InterfaceInt *regDecompFirstExtra, InterfaceInt *regDecompLastExtra, 
       InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
       InterfaceInt *connectionList,
-      InterfaceInt *connectionTransList, 
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL);
     static DistGrid *create(InterfaceInt *minIndex,
       InterfaceInt *maxIndex, InterfaceInt *deBlockList, 
       InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
       InterfaceInt *connectionList,
-      InterfaceInt *connectionTransList, 
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL);
     static DistGrid *create(InterfaceInt *minIndex,
       InterfaceInt *maxIndex, InterfaceInt *regDecomp, 
@@ -118,7 +116,6 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
       InterfaceInt *regDecompFirstExtra, InterfaceInt *regDecompLastExtra, 
       InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
       InterfaceInt *connectionList,
-      InterfaceInt *connectionTransList, 
       int fastAxis, VM *vm=NULL, int *rc=NULL);
     static DistGrid *create(InterfaceInt *minIndex,
       InterfaceInt *maxIndex, InterfaceInt *regDecomp, 
@@ -126,7 +123,6 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
       InterfaceInt *regDecompFirstExtra, InterfaceInt *regDecompLastExtra, 
       InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
       InterfaceInt *connectionList,
-      InterfaceInt *connectionTransList, 
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL);
     static int destroy(DistGrid **distgrid);
     // is()
