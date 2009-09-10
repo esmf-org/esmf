@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.C,v 1.1 2009/09/09 05:45:13 eschwab Exp $
+// $Id: ESMCI_IO_XML.C,v 1.2 2009/09/10 05:56:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.1 2009/09/09 05:45:13 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.2 2009/09/10 05:56:38 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 #ifdef ESMF_XERCES
@@ -479,7 +479,7 @@ namespace ESMCI{
 // !IROUTINE:  IO_XML - native C++ constructor
 //
 // !INTERFACE:
-      IO_XML::IO_XML(void) {
+      IO_XML::IO_XML(void)
 //
 // !RETURN VALUE:
 //    none
@@ -497,6 +497,9 @@ namespace ESMCI{
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMCI::IO_XML() native constructor"
 
+ : ESMC_Base(-1) {  // invoke ESMC_Base constructor with id=(-1); prevents
+                    // Base id increment for non-distributed,
+                    // non-reconcilable objects such as IO.
     attr = ESMC_NULL_POINTER;
     // create default name "IO_XML<ID>"
     ESMC_BaseSetName(ESMC_NULL_POINTER, "IO_XML");
@@ -509,7 +512,7 @@ namespace ESMCI{
 // !IROUTINE:  IO_XML - native C++ constructor
 //
 // !INTERFACE:
-      IO_XML::IO_XML(Attribute* attribute) {
+      IO_XML::IO_XML(Attribute* attribute)
 //
 // !RETURN VALUE:
 //    none
@@ -527,6 +530,9 @@ namespace ESMCI{
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMCI::IO_XML() native constructor"
 
+ : ESMC_Base(-1) {  // invoke ESMC_Base constructor with id=(-1); prevents
+                    // Base id increment for non-distributed,
+                    // non-reconcilable objects such as IO.
     attr = attribute;
     attr->ESMC_Print(); // TODO: for debug, comment out
     // create default name "IO_XML<ID>"
