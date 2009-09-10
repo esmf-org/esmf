@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.26 2009/09/10 04:24:38 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.27 2009/09/10 21:01:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.26 2009/09/10 04:24:38 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.27 2009/09/10 21:01:35 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -187,10 +187,93 @@ DistGrid *DistGrid::create(
       delete [] connectionListAlloc;
   }else{
     // deep copy
-    //TODO: need to implement DistGrid deep copy
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-      "- DistGrid deep copy not yet implemented", rc);
-    return ESMC_NULL_POINTER;
+    distgrid = new DistGrid();
+    int dimCount = distgrid->dimCount = dg->dimCount;
+    int patchCount = distgrid->patchCount = dg->patchCount;
+    int deCount = dg->delayout->getDeCount();
+    int localDeCount = dg->delayout->getLocalDeCount();
+    distgrid->minIndexPDimPPatch = new int[dimCount*patchCount];
+    memcpy(distgrid->minIndexPDimPPatch, dg->minIndexPDimPPatch,
+      sizeof(int)*dimCount*patchCount);
+    distgrid->maxIndexPDimPPatch = new int[dimCount*patchCount];
+    memcpy(distgrid->maxIndexPDimPPatch, dg->maxIndexPDimPPatch,
+      sizeof(int)*dimCount*patchCount);
+    distgrid->elementCountPPatch = new int[patchCount];
+    memcpy(distgrid->elementCountPPatch, dg->elementCountPPatch,
+      sizeof(int)*patchCount);
+    distgrid->minIndexPDimPDe = new int[dimCount*deCount];
+    memcpy(distgrid->minIndexPDimPDe, dg->minIndexPDimPDe,
+      sizeof(int)*dimCount*deCount);
+    distgrid->maxIndexPDimPDe = new int[dimCount*deCount];
+    memcpy(distgrid->maxIndexPDimPDe, dg->maxIndexPDimPDe,
+      sizeof(int)*dimCount*deCount);
+    distgrid->elementCountPDe = new int[deCount];
+    memcpy(distgrid->elementCountPDe, dg->elementCountPDe,
+      sizeof(int)*deCount);
+    distgrid->patchListPDe = new int[deCount];
+    memcpy(distgrid->patchListPDe, dg->patchListPDe,
+      sizeof(int)*deCount);
+    distgrid->contigFlagPDimPDe = new int[dimCount*deCount];
+    memcpy(distgrid->contigFlagPDimPDe, dg->contigFlagPDimPDe,
+      sizeof(int)*dimCount*deCount);
+    distgrid->indexCountPDimPDe = new int[dimCount*deCount];
+    memcpy(distgrid->indexCountPDimPDe, dg->indexCountPDimPDe,
+      sizeof(int)*dimCount*deCount);
+    distgrid->indexListPDimPLocalDe = new int*[dimCount*localDeCount];
+    for (int i=0; i<dimCount*localDeCount; i++){
+      int size = distgrid->indexCountPDimPDe[i];
+      distgrid->indexListPDimPLocalDe[i] = new int[size];
+      memcpy(distgrid->indexListPDimPLocalDe[i],
+        dg->indexListPDimPLocalDe[i], sizeof(int)*size);
+    }
+    int connectionCount = distgrid->connectionCount = dg->connectionCount;
+    if (connectionCount){
+      int elementSize = 3*dimCount+2;
+      distgrid->connectionList = new int*[connectionCount];
+      for (int i=0; i<connectionCount; i++){
+        distgrid->connectionList[i] = new int[elementSize];
+        memcpy(distgrid->connectionList[i], dg->connectionList[i],
+          sizeof(int)*elementSize);
+      }
+    }else
+      distgrid->connectionList = NULL;
+
+    distgrid->collocationPDim = new int[dimCount];
+    memcpy(distgrid->collocationPDim, dg->collocationPDim,
+      sizeof(int)*dimCount);
+    distgrid->collocationTable = new int[dimCount];
+    memcpy(distgrid->collocationTable, dg->collocationTable,
+      sizeof(int)*dimCount);
+    int diffCollocationCount =
+      distgrid->diffCollocationCount = dg->diffCollocationCount;
+    distgrid->arbSeqIndexListPCollPLocalDe = new int**[diffCollocationCount];
+    distgrid->elementCountPCollPLocalDe = new int*[diffCollocationCount];
+    for (int i=0; i<diffCollocationCount; i++){
+      distgrid->arbSeqIndexListPCollPLocalDe[i] = new int*[localDeCount];
+      distgrid->elementCountPCollPLocalDe[i] = new int[localDeCount];
+      memcpy(distgrid->elementCountPCollPLocalDe[i],
+        dg->elementCountPCollPLocalDe[i], sizeof(int)*localDeCount);
+      for (int j=0; j<localDeCount; j++){
+        if ((dg->arbSeqIndexListPCollPLocalDe[i][j]!=NULL)
+          && (dg->elementCountPCollPLocalDe[i][j]>0)){
+          distgrid->arbSeqIndexListPCollPLocalDe[i][j] =
+            new int[dg->elementCountPCollPLocalDe[i][j]];
+          memcpy(distgrid->arbSeqIndexListPCollPLocalDe[i][j],
+            dg->arbSeqIndexListPCollPLocalDe[i][j],
+            sizeof(int)*dg->elementCountPCollPLocalDe[i][j]);
+        }else{
+          distgrid->arbSeqIndexListPCollPLocalDe[i][j] = NULL;
+        }
+      }
+    }
+    if (dg->regDecomp){
+      distgrid->regDecomp = new int[dimCount];
+      memcpy(distgrid->regDecomp, dg->regDecomp, sizeof(int)*dimCount);
+    }else
+      distgrid->regDecomp = NULL;
+    distgrid->delayout = dg->delayout;
+    distgrid->delayoutCreator = false;
+    distgrid->vm = dg->vm;
   }
   
   // return successfully

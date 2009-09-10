@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.18 2009/09/02 03:41:28 theurich Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.19 2009/09/10 21:01:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.18 2009/09/02 03:41:28 theurich Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.19 2009/09/10 21:01:35 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -407,7 +407,28 @@ program ESMF_DistGridCreateGetUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "DistGridCreate() - from DistGrid"
+  write(name, *) "DistGridCreate() - from DistGrid (deep copy)"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid3 = ESMF_DistGridCreate(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridPrint()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridPrint(distgrid3, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridDestroy()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid3, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridCreate() - from DistGrid re-created copy"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   distgrid3 = ESMF_DistGridCreate(distgrid, indexflag=ESMF_INDEX_DELOCAL, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

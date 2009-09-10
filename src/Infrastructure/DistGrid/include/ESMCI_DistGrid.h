@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.16 2009/09/10 04:24:38 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.17 2009/09/10 21:01:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -68,14 +68,14 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int connectionCount;          // number of elements in connection list
     int **connectionList;         // list of connection elements
     int ***arbSeqIndexListPCollPLocalDe;// local arb sequence indices
-                                  // [collocationCount][localDeCount]
+                                  // [diffCollocationCount][localDeCount]
                                   // [elementCountPCollPLocalDe(localDe)]
     int *collocationPDim;         // collocation [dimCount]
     int diffCollocationCount;     // number different seqIndex collocations
     int *collocationTable;        // collocation in packed format [dimCount]
     int **elementCountPCollPLocalDe; // number of elements 
-                                  // [collocationCount][localDeCount]
-    int *regDecomp;               // regular decomposition descriptor
+                                  // [diffCollocationCount][localDeCount]
+    int *regDecomp;               // regular decomposition descriptor [dimCount]
     // lower level object references
     DELayout *delayout;
     bool delayoutCreator;
