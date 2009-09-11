@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeEx.F90,v 1.11 2009/09/01 22:30:31 rokuingh Exp $
+! $Id: ESMF_AttributeEx.F90,v 1.12 2009/09/11 19:30:26 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -205,6 +205,8 @@ program ESMF_AttributeEx
       endif
  
       call ESMF_GridCompDestroy(gridcomp,rc=rc)
+
+    call ESMF_Finalize(rc=rc)
 
   if (localPet==0) then
       print *, "--------------------------------------- "

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.11 2009/09/01 22:40:41 rokuingh Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.12 2009/09/11 19:30:26 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -498,6 +498,8 @@ program ESMF_AttributePackageEx
       print *, "End of ESMF_AttributePackage Example"
       print *, "--------------------------------------- "
   endif
+
+    call ESMF_Finalize(rc=rc)
 
 10 continue
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE

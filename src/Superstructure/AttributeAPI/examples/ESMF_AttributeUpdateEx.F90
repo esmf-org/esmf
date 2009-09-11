@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.14 2009/08/06 19:10:55 svasquez Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.15 2009/09/11 19:30:26 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -211,6 +211,8 @@ implicit none
       
       call ESMF_StateDestroy(c1exp, rc=rc)
       call ESMF_StateDestroy(c2imp, rc=rc)
+
+    call ESMF_Finalize(rc=rc)
 
 10  if (localPet==0) then
       print *, "--------------------------------------- "
