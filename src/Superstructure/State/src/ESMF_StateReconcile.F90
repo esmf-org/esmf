@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.60 2009/09/09 23:25:19 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.61 2009/09/11 22:31:36 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.60 2009/09/09 23:25:19 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.61 2009/09/11 22:31:36 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -726,7 +726,10 @@
     si => stateInfoList(1)
 
     ! get total num pets.
-    call ESMF_VMGet(vm, localPet=mypet, petCount=pets, rc=rc)
+    call ESMF_VMGet(vm, localPet=mypet, petCount=pets, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+           "VMGet call", &
+           ESMF_CONTEXT, rc)) return
 
     ! for i=0, npets-1, except us, send object count to each
     do j = 0, pets-1
@@ -901,15 +904,18 @@
             if (ESMF_LogMsgFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rc)) return
+
             call ESMF_BaseSetInitCreated(base, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rc)) return
+
             call c_ESMC_AttributeCopy(base, state%statep%base, &
               ESMF_ATTCOPY_VALUE, ESMF_ATTTREE_OFF, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rc)) return
+
             call ESMF_BaseDestroy(base, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -952,21 +958,43 @@
                     bptr => si%blindrecv(:,k)
                     bundle = ESMF_FieldBundleDeserialize(vm, bptr, offset, &
                       attreconflag=attreconflag, rc=localrc)
-!!DEBUG "created bundle, ready to set id and add to local state"
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Fieldbundle deserialize", &
+                             ESMF_CONTEXT, rc)) return
+
+!!DEBUG "created Fieldbundle, ready to set id and add to local state"
                     call c_ESMC_SetVMId(bundle%btypep, si%vmidrecv(k), localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Fieldbundle SetVMId call", &
+                             ESMF_CONTEXT, rc)) return
+
                     call ESMF_StateAdd(state, bundle, proxyflag=.true., &
                       rc=localrc)
-!!DEBUG "bundle added to state"
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Fieldbundle add to local state", &
+                             ESMF_CONTEXT, rc)) return
+!!DEBUG "Fieldbundle added to state"
 
                    case (ESMF_ID_FIELD%objectID)
 !!DEBUG "need to create proxy field, remote id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
                     field = ESMF_FieldDeserialize(vm, bptr, offset, &
                       attreconflag=attreconflag, rc=localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Field deserialize", &
+                             ESMF_CONTEXT, rc)) return
+
 !!DEBUG "created field, ready to set id and add to local state"
                     call c_ESMC_SetVMId(field%ftypep, si%vmidrecv(k), localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Field SetVMId call", &
+                             ESMF_CONTEXT, rc)) return
+
                     call ESMF_StateAdd(state, field, proxyflag=.true., &
                       rc=localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Field add to local state", &
+                             ESMF_CONTEXT, rc)) return
 !!DEBUG "field added to state"
 
                    case (ESMF_ID_ARRAY%objectID)
@@ -974,12 +1002,27 @@
                     bptr => si%blindrecv(:,k)
                     call c_ESMC_ArrayDeserialize(array, bptr, offset, &
                       attreconflag, localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Array deserialize", &
+                             ESMF_CONTEXT, rc)) return
+
                     ! Set init code
                     call ESMF_ArraySetInitCreated(array, rc=localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "Array SetInit call", &
+                             ESMF_CONTEXT, rc)) return
+
 !!DEBUG "created array, ready to set id and add to local state"
                     call c_ESMC_SetVMId(array, si%vmidrecv(k), localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Array SetVMId call", &
+                             ESMF_CONTEXT, rc)) return
+
                     call ESMF_StateAdd(state, array, proxyflag=.true., &
                       rc=localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Array add to local state", &
+                             ESMF_CONTEXT, rc)) return
 !!DEBUG "array added to state"
 
                    case (ESMF_ID_ARRAYBUNDLE%objectID)
@@ -987,12 +1030,27 @@
                     bptr => si%blindrecv(:,k)
                     call c_ESMC_ArrayBundleDeserialize(arraybundle, bptr, &
                       offset, attreconflag, localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Arraybundle deserialize", &
+                             ESMF_CONTEXT, rc)) return
+
                     ! Set init code
                     call ESMF_ArrayBundleSetInitCreated(arraybundle, rc=localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "Arraybundle SetInit call", &
+                             ESMF_CONTEXT, rc)) return
+
 !!DEBUG "created arraybundle, ready to set id and add to local state"
                     call c_ESMC_SetVMId(arraybundle, si%vmidrecv(k), localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Arraybundle SetVMId call", &
+                             ESMF_CONTEXT, rc)) return
+
                     call ESMF_StateAdd(state, arraybundle, &
                       proxyflag=.true., rc=localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Arraybundle add to local state", &
+                             ESMF_CONTEXT, rc)) return
 !!DEBUG "arraybundle added to state"
 
                    case (ESMF_ID_STATE%objectID)
@@ -1000,30 +1058,56 @@
                     bptr => si%blindrecv(:,k)
                     substate = ESMF_StateDeserialize(vm, bptr, offset, &
                       attreconflag=attreconflag, rc=localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Substate deserialize", &
+                             ESMF_CONTEXT, rc)) return
+
 !!DEBUG "created substate, ready to set id and add to local state"
                     call c_ESMC_SetVMId(substate%statep, si%vmidrecv(k), localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Arraybundle SetVMId call", &
+                             ESMF_CONTEXT, rc)) return
+
                     call ESMF_StateAdd(state, substate, proxyflag=.true., &
                       rc=localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Substate add to local state", &
+                             ESMF_CONTEXT, rc)) return
 !!DEBUG "substate added to state"
 
                    case (ESMF_STATEITEM_NAME%ot)
 !!DEBUG "need to create proxy placeholder name, remote id=", si%idrecv(k)
                      call c_ESMC_StringDeserialize(thisname, &
                                                    bptr(1), offset, localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Stateitem deserialize", &
+                             ESMF_CONTEXT, rc)) return
+
 !!DEBUG "created string, ready to add to local state"
-                     call ESMF_StateAdd(state, thisname, rc=localrc)
+                    call ESMF_StateAdd(state, thisname, rc=localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested Stateitem add to local state", &
+                             ESMF_CONTEXT, rc)) return
 !!DEBUG "placeholder added to state"
          
-                   case (ESMF_STATEITEM_INDIRECT%ot)
+                  case (ESMF_STATEITEM_INDIRECT%ot)
                      !print *, "field inside a bundle"
-                     call c_ESMC_StringDeserialize(thisname, &
+                    call c_ESMC_StringDeserialize(thisname, &
                                                    bptr(1), offset, localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested String deserialize", &
+                             ESMF_CONTEXT, rc)) return
+
                      ! do nothing here
             
-                   case (ESMF_STATEITEM_UNKNOWN%ot)
-                     print *, "WARNING: unknown type"
-                     call c_ESMC_StringDeserialize(thisname, &
+                  case (ESMF_STATEITEM_UNKNOWN%ot)
+                    print *, "WARNING: unknown type"
+                    call c_ESMC_StringDeserialize(thisname, &
                                                    bptr(1), offset, localrc)
+                    if (ESMF_LogMsgFoundError(localrc, &
+                             "nested 'unknown' deserialize", &
+                             ESMF_CONTEXT, rc)) return
+
                      ! do nothing here
 
                    case default
