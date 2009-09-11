@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeDistGridUTest.F90,v 1.19 2009/08/13 15:59:48 svasquez Exp $
+! $Id: ESMF_AttributeDistGridUTest.F90,v 1.20 2009/09/11 19:31:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeDistGridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeDistGridUTest.F90,v 1.19 2009/08/13 15:59:48 svasquez Exp $'
+      '$Id: ESMF_AttributeDistGridUTest.F90,v 1.20 2009/09/11 19:31:44 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -54,6 +54,7 @@ program ESMF_AttributeDistGridUTest
       real(kind=8)                     :: inR8, outR8, defaultR8, dfltoutR8
       real(kind=8), dimension(3)       :: inR8l, defaultR8l, dfltoutR8l, outR8l
       character(ESMF_MAXSTR)           :: inChar, outChar, defaultChar, dfltoutChar
+      real(kind=8), dimension(4)       :: defaultR8lWrong
   
   
       ! cumulative result: count failures; no failures equals "all pass"
@@ -74,9 +75,11 @@ program ESMF_AttributeDistGridUTest
       real(kind=8), dimension(10)       :: outR8lLong
       character(ESMF_MAXSTR)                     :: inEmpty, outEmpty
       character(ESMF_MAXSTR), dimension(3)       :: inCharl, defaultCharl, dfltoutCharl, outCharl
+      character(ESMF_MAXSTR), dimension(4)       :: defaultCharlWrong
       character(ESMF_MAXSTR), dimension(10)       :: outCharlLong
       logical                          :: inLog, outLog, defaultLog, dfltoutLog
       logical, dimension(3)            :: inLogl, defaultLogl, dfltoutLogl, outLogl
+      logical, dimension(4)       :: defaultLoglWrong
       logical, dimension(10)            :: outLoglLong
 
       character(ESMF_MAXSTR), dimension(3)  :: attpackList, attpackListOut, &
@@ -514,6 +517,17 @@ program ESMF_AttributeDistGridUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !NEX_UTest
+      ! Get a R8 list default Attribute on a DistGrid Test
+      call ESMF_AttributeGet(distgrid, name="AttrR8l", &
+        valueList=dfltOutR8l, defaultvalueList=defaultR8lWrong, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting a wrong sized default Attribute R8 list from a DistGrid test"
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. &
+        all (dfltOutR8l==defaultR8lWrong(1:size(DfltOutR8l))), &
+        name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
     !-------------------------------------------------------------------------
     !  Character
     !-------------------------------------------------------------------------
@@ -612,6 +626,17 @@ program ESMF_AttributeDistGridUTest
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest
+      ! Get a char list default Attribute on a DistGrid Test
+      call ESMF_AttributeGet(distgrid, name="Charl", &
+        valueList=DfltOutCharl, defaultvalueList=defaultCharlWrong, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting a wrong sized default Attribute char list from a DistGrid test"
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. &
+        all (DfltOutCharl==defaultCharlWrong(1:size(DfltOutCharl))), &
+        name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
     !-------------------------------------------------------------------------
     !  Logical
     !-------------------------------------------------------------------------
@@ -699,6 +724,17 @@ program ESMF_AttributeDistGridUTest
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting DistGrid default Attribute (type Fortran logical distgrid)"
       call ESMF_Test((rc == ESMF_SUCCESS) .and. all (defaultLogl .eqv. dfltoutLogl),   &
+        name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get a logical list default Attribute on a DistGrid Test
+      call ESMF_AttributeGet(distgrid, name="Logl", &
+        valueList=dfltOutLogl, defaultvalueList=defaultLoglWrong, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting a wrong sized default Attribute logical list from a DistGrid test"
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. &
+        all (dfltOutLogl.eqv.defaultLoglWrong(1:size(DfltOutLogl))), &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
