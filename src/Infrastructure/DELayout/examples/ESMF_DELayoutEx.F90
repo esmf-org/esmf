@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.18 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.19 2009/09/14 21:42:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -183,12 +183,12 @@ program ESMF_DELayoutEx
 ! \subsubsection{DELayout from petMap}
 ! 
 ! Full control over the DE to PET mapping is provided via the {\tt petMap}
-! argument. This example maps the DEs to PETs in reverse order. In the 4 PET
+! argument. This example maps the DEs to PETs in reverse order. In the 4-PET
 ! case this will result in the following mapping:
 ! \begin{verbatim}
 ! DE 0 -> PET 3
-! DE 1 -> PET 1
-! DE 2 -> PET 2
+! DE 1 -> PET 2
+! DE 2 -> PET 1
 ! DE 3 -> PET 0
 ! \end{verbatim}
 !EOE
@@ -205,7 +205,7 @@ program ESMF_DELayoutEx
 ! \subsubsection{DELayout from petMap with multiple DEs per PET}
 ! 
 ! The {\tt petMap} argument gives full control over DE to PET mapping. The 
-! following example runs on 4 or more PETs maps DEs to PETs according to the 
+! following example run on 4 or more PETs maps DEs to PETs according to the 
 ! following table:
 ! \begin{verbatim}
 ! DE 0 -> PET 3

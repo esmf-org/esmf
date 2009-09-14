@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.77 2009/08/28 21:32:16 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.78 2009/09/14 21:42:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@ module ESMF_DELayoutMod
 ! !MODULE: ESMF_DELayoutMod
 !
 
-!   F90 API wrapper of C++ implemenation of DELayout
+!   F90 API wrapper of C++ implementation of DELayout
 !
 !------------------------------------------------------------------------------
 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.77 2009/08/28 21:32:16 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.78 2009/09/14 21:42:59 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -352,7 +352,7 @@ contains
 !          to DE 0, 1, 2, ... and map against the specified PET of the VM
 !          context. The size of the {\tt petMap} 
 !          argument determines the number of DEs in the created DELayout. It is
-!          erroneous to specify a PET identifyer that lies outside the VM 
+!          erroneous to specify a PET identifier that lies outside the VM 
 !          context.
 !     \item[{[dePinFlag]}]
 !          This flag specifies which type of resource DEs are pinned to. 
@@ -447,7 +447,7 @@ contains
 !     \item[compWeights]
 !          This argument provides the computational weight hint. The 
 !          {\tt compWeights} list must contain at least {\tt deCount} elements
-!          and specifies a relative meassure of the computatial weight for each
+!          and specifies a relative measure of the computational weight for each
 !          DE in form of an integer number. The weights are a relative measure
 !          and only meaningful when compared to weights of the same DELayout.
 !          (UNIMPLEMENTED!)
@@ -934,7 +934,7 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!     Get internal decomposion information.
+!     Get internal decomposition information.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1140,7 +1140,7 @@ contains
 !
 ! !DESCRIPTION:
 !     Match the virtual address space of the specified DE in a DELayout with that
-!     of the DEs of a second DELayout. The use of this method is crutial when
+!     of the DEs of a second DELayout. The use of this method is crucial when
 !     dealing with decomposed data structures that were not defined in the
 !     current VM context, i.e. defined in another component.
 !
