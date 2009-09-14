@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.3 2009/08/03 19:59:59 theurich Exp $
+! $Id: user_model1.F90,v 1.4 2009/09/14 20:28:12 oehmke Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -70,6 +70,7 @@
         type(ESMF_ArraySpec) :: arrayspec
         integer(ESMF_KIND_I4), dimension(:), pointer :: srcfptr
         integer :: npets, de_id
+        integer :: elb(1),eub(1),i
 
         ! Query component for VM and create a layout with the right breakdown
         call ESMF_GridCompGet(comp, vm=vm, rc=rc)
@@ -82,11 +83,12 @@
 
         ! Add a "humidity" field to the export state.
         distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/16/), &
-            regDecomp=(/4/), &
+            regDecomp=(/npets/), &
             rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
 
-        locs = ESMF_LocStreamCreate(distgrid=distgrid, destroyDistgrid=.true., rc=rc)
+       locs = ESMF_LocStreamCreate(distgrid=distgrid, destroyDistgrid=.true., &
+               indexflag=ESMF_INDEX_GLOBAL, rc=rc)
 
         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
@@ -95,10 +97,13 @@
             name="humidity", rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
 
-        call ESMF_FieldGet(humidity, localDe=0, farray=srcfptr, rc=rc)
+        call ESMF_FieldGet(humidity, localDe=0, farray=srcfptr, &
+          exclusiveLbound=elb,exclusiveUbound=eub, rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
 
-        srcfptr = 1
+        do i=elb(1),eub(1)
+           srcfptr(i) = i
+        enddo
 
         ! Set up a 2D real array
         call ESMF_ArraySpecSet(arrayspec, rank=2, &

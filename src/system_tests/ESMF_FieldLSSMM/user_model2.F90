@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.3 2009/08/03 19:59:59 theurich Exp $
+! $Id: user_model2.F90,v 1.4 2009/09/14 20:28:12 oehmke Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -83,11 +83,12 @@
 
       ! Add a "humidity" field to the import state.
       distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/16/), &
-          regDecomp=(/4/), &
+          regDecomp=(/npets/), &
           rc=rc)
       if(rc/=ESMF_SUCCESS) return
 
-      locs = ESMF_LocStreamCreate(distgrid=distgrid, destroyDistgrid=.true., rc=rc)
+      locs = ESMF_LocStreamCreate(distgrid=distgrid, destroyDistgrid=.true., &
+              indexflag=ESMF_INDEX_GLOBAL, rc=rc)
       if(rc/=ESMF_SUCCESS) return
       call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
       if(rc/=ESMF_SUCCESS) return
@@ -141,7 +142,7 @@
       ! The smm op reset the values to the index value, verify this is the case.
       !write(*, '(9I3)') l, lpe, fptr
       do i = exlb(1), exub(1)
-          if(fptr(i) .ne. i) rc = ESMF_FAILURE
+          if(fptr(i) .ne. 2*i) rc = ESMF_FAILURE
       enddo
 
       print *, "User Comp Run returning"

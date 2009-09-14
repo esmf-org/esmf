@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.2 2009/08/03 19:59:59 theurich Exp $
+! $Id: user_coupler.F90,v 1.3 2009/09/14 20:28:12 oehmke Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -83,11 +83,11 @@
       ! use a communications call (SMM) here, so first we must make a new
       ! call to reconcile the object lists in all the import and export states.
 
-      !call ESMF_StateReconcile(importState, vm, rc=rc)
-      !if(rc/=ESMF_SUCCESS) return
+      call ESMF_StateReconcile(importState, vm, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
 
-      !call ESMF_StateReconcile(exportState, vm, rc=rc)
-      !if(rc/=ESMF_SUCCESS) return
+      call ESMF_StateReconcile(exportState, vm, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
 
       call ESMF_StateGet(importState, itemcount=itemcount, rc=rc)
       if(rc/=ESMF_SUCCESS) return
@@ -114,7 +114,7 @@
       ! up the SMM structure
       allocate(factorList(4))
       allocate(factorIndexList(2,4))
-      factorList = (/1,2,3,4/)
+      factorList = (/2,2,2,2/)
       factorIndexList(1,:) = (/lpe*4+1,lpe*4+2,lpe*4+3,lpe*4+4/)
       factorIndexList(2,:) = (/lpe*4+1,lpe*4+2,lpe*4+3,lpe*4+4/)
 

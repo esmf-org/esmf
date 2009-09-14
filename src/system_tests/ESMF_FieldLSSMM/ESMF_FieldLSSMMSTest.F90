@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldLSSMMSTest.F90,v 1.2 2009/07/16 20:57:37 feiliu Exp $
+! $Id: ESMF_FieldLSSMMSTest.F90,v 1.3 2009/09/14 20:28:12 oehmke Exp $
 !
 ! System test code FieldLSSMM
 !  Description on Sourceforge under System Test #79497
@@ -86,15 +86,15 @@
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-    if (npets .lt. 4) then
-      print *, "This system test needs to run at least 4-way, current np = ", &
+    if (npets .ne. 4) then
+      print *, "This system test needs to run 4-way, current np = ", &
                npets
       goto 10
     endif
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
-    comp1 = ESMF_GridCompCreate(name=cname1, rc=localrc)
+    comp1 = ESMF_GridCompCreate(name=cname1, petList=(/0,1/), rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -102,7 +102,7 @@
     !  call ESMF_GridCompPrint(comp1, "", rc)
 
     cname2 = "user model 2"
-    comp2 = ESMF_GridCompCreate(name=cname2, rc=localrc)
+    comp2 = ESMF_GridCompCreate(name=cname2, petList=(/2,3/), rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -110,7 +110,7 @@
     !  call ESMF_GridCompPrint(comp2, "", rc)
 
     cplname = "user one-way coupler"
-    cpl = ESMF_CplCompCreate(name=cplname, rc=localrc)
+    cpl = ESMF_CplCompCreate(name=cplname, petList=(/0,1,2,3/), rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
