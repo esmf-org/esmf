@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.55 2009/08/07 21:34:06 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.56 2009/09/14 22:57:55 theurich Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -419,6 +419,8 @@
     call ESMF_LocalArrayDestroy(array1, rc=rc)
     print *, "array 1d destroy returned"
 
+    deallocate(intptr)
+
 
 !-------------------------------------------------------------------------------
 !   !  Create based on an existing, allocated F90 pointer. 
@@ -631,6 +633,8 @@
     write(name, *) "Getting Local Array 3D Real Data with wrong dimension array Test"
     call ESMF_LocalArrayGet(array4, realptr2, ESMF_DATA_COPY, rc=rc)
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+    deallocate(realptr)
 
     !--------------------------------------------------------------------------
    !EX_UTest
@@ -736,7 +740,7 @@
 
     !--------------------------------------------------------------------------
     !EX_UTest
-    write(failMsg, *) "Did not return ESMF_FAILURE"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
     write(name, *) "Creating a Local Array 3D DATA_REF Real Data with deallocated array Test"
     array4 = ESMF_LocalArrayCreate(real3dptr, ESMF_DATA_REF, rc=rc)
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -752,7 +756,7 @@
     !This test is commented out becauses it crashes
     !Bug report 791282 has been filed.
     !This test will be uncommented when the bug is fixed
-    !write(failMsg, *) "Did not return ESMF_FAILURE"
+    !write(failMsg, *) "Did return ESMF_SUCCESS"
     !write(name, *) "Destroying a Local array Test"
     !call ESMF_LocalArrayDestroy(array4, rc=rc)
     !call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -762,7 +766,7 @@
     !--------------------------------------------------------------------------
     !EX_UTest
     allocate(real3dptr(ni,nj,nk))
-    write(failMsg, *) "Did not return ESMF_FAILURE"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
     write(name, *) "Creating a Local Array 3D DATA_REF Real Data with an allocated array Test"
     array4 = ESMF_LocalArrayCreate(real3dptr, ESMF_DATA_REF, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -843,14 +847,14 @@
     !--------------------------------------------------------------------------
     !EX_UTest
     arank = 10
-    write(failMsg, *) "Did not return ESMF_FAILURE"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
     write(name, *) "Initializing an Array Spec of rank 10 Test"
     call ESMF_ArraySpecSet(arrayspec, arank, ESMF_TYPEKIND_R4, rc=rc)
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
     !EX_UTest
-    write(failMsg, *) "Did not return ESMF_FAILURE"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
     write(name, *) "Creating an Array from a Spec with rank of 10 Test"
     array2 = ESMF_LocalArrayCreate(arrayspec, counts, rc=rc)
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -865,13 +869,14 @@
 
     !--------------------------------------------------------------------------
     !EX_UTest
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(failMsg, *) "Did not return the correct return code"
     write(name, *) "Creating an Array from a Spec with rank of 5 Test"
     array2 = ESMF_LocalArrayCreate(arrayspec, counts, rc=rc)
 #ifdef ESMF_NO_GREATER_THAN_4D
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_LocalArrayDestroy(array2, rc=rc)
 #endif
 
     !--------------------------------------------------------------------------
@@ -888,6 +893,7 @@
     write(name, *) "Creating an Array from a Spec with rank of 4 Test"
     array2 = ESMF_LocalArrayCreate(arrayspec, counts, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_LocalArrayDestroy(array2, rc=rc)
 
 
 !-------------------------------------------------------------------------------
