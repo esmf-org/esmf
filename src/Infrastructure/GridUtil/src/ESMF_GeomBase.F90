@@ -148,7 +148,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.9 2009/08/21 17:53:01 w6ws Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.10 2009/09/14 20:27:25 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1031,9 +1031,13 @@ end subroutine ESMF_GeomBaseGet
                                ESMF_CONTEXT, rc)) return
 
        case  (ESMF_GEOMTYPE_LOCSTREAM%type)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                               " LocStream serialize not implemented", &
-                               ESMF_CONTEXT, rc)) return
+          call ESMF_LocStreamSerialize(locstream=gbcp%locstream, &
+                      buffer=buffer,length=length, offset=offset, &
+                      inquireflag=linquireflag, &
+                      rc=localrc) 
+          if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
 
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
@@ -1134,9 +1138,11 @@ end subroutine ESMF_GeomBaseGet
                                ESMF_CONTEXT, rc)) return
 
        case  (ESMF_GEOMTYPE_LOCSTREAM%type)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                               " LocStream deserialize not implemented", &
-                               ESMF_CONTEXT, rc)) return
+          gbcp%locstream=ESMF_LocStreamDeserialize(vm=vm, buffer=buffer, &
+              offset=offset, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return  
 
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
