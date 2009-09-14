@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.21 2009/08/27 18:32:31 w6ws Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.22 2009/09/14 23:00:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -137,7 +137,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.21 2009/08/27 18:32:31 w6ws Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.22 2009/09/14 23:00:03 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -311,6 +311,14 @@ end function
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
+    
+    ! Check rank argument
+    if (rank<1 .or. rank>ESMF_MAXDIM) then
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+        "- Unsupported rank", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
     
     ! Check that enough info from counts, lbounds and ubounds is present
     if (.not.present(counts)) then
