@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentUTest.F90,v 1.25 2009/08/07 20:35:58 svasquez Exp $
+! $Id: ESMF_VMComponentUTest.F90,v 1.26 2009/09/14 21:16:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -118,9 +118,6 @@ module ESMF_VMComponentUTest_gcomp_mod
     type(ESMF_Clock):: clock
     integer, intent(out):: rc
     
-    ! local variables
-    !  type(ESMF_VM):: vm
-
     ! Initialize
     rc = ESMF_SUCCESS
 
@@ -169,7 +166,7 @@ program ESMF_VMComponentUTest
 !------------------------------------------------------------------------------
   ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMComponentUTest.F90,v 1.25 2009/08/07 20:35:58 svasquez Exp $'
+    '$Id: ESMF_VMComponentUTest.F90,v 1.26 2009/09/14 21:16:21 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
