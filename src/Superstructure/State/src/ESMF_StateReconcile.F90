@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.61 2009/09/11 22:31:36 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.62 2009/09/15 20:46:01 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.61 2009/09/11 22:31:36 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.62 2009/09/15 20:46:01 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -173,7 +173,7 @@
 !
 !     NOTE:  The options for {\tt attreconflag} include:
 !            \begin{enumerate}
-!              \item ESMF\_ATTRECONCILE\_ON will allow reconciliatio of metadata (Attributes)
+!              \item ESMF\_ATTRECONCILE\_ON will allow reconciliation of metadata (Attributes)
 !              \item ESMF\_ATTRECONCILE\_OFF is the default behavior, this option turns off
 !                                            the metadata reconciliation
 !            \end{enumerate}
