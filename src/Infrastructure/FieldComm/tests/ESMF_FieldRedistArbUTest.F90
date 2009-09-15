@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistArbUTest.F90,v 1.2 2009/08/12 21:14:00 theurich Exp $
+! $Id: ESMF_FieldRedistArbUTest.F90,v 1.3 2009/09/15 18:12:48 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -158,7 +158,7 @@
 
   ! Set field values
   call ESMF_FieldGet(srcfield2D, farray=fptr1D, computationalLBound=lbnd1, &
-	computationalUBound=ubnd1, computationalCount=cnt1, rc=localrc)
+    computationalUBound=ubnd1, computationalCount=cnt1, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc = ESMF_FAILURE
 
   print *, myPet, " 2D Source field computational bound", lbnd1, ubnd1, cnt1
@@ -166,7 +166,7 @@
   
   ! Set the field values to be the same as its local index
   do i=lbnd1(1),ubnd1(1)
-	fptr1D(i) = (localindices(i,2)-1)*ydim+localIndices(i,1)
+    fptr1D(i) = (localindices(i,2)-1)*ydim+localIndices(i,1)
   enddo
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -194,7 +194,7 @@
 
   ! Set field values
   call ESMF_FieldGet(srcfield, farray=fptr, computationalLBound=lbnd, &
-	computationalUBound=ubnd, computationalCount=cnt, rc=localrc)
+    computationalUBound=ubnd, computationalCount=cnt, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
@@ -204,7 +204,7 @@
   
   ! Set the field values to be the same as its local index
   do i=lbnd(1),ubnd(1)
-	fptr(i,:) = (localindices(i,2)-1)*ydim+localIndices(i,1)
+    fptr(i,:) = (localindices(i,2)-1)*ydim+localIndices(i,1)
   enddo
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -308,7 +308,7 @@
 
   ! Check the destination field
   call ESMF_FieldGet(dstfield2D, localDe=0, farray=fptr1D, computationalLBound=lbnd1, &
-	computationalUBound=ubnd1, computationalCount=cnt1, rc=localrc)
+    computationalUBound=ubnd1, computationalCount=cnt1, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
@@ -318,10 +318,10 @@
   total = 0
   do i=lbnd1(1),ubnd1(1)
      if (fptr1D(i) .ne. (localindices1(i,2)-1)*ydim+localIndices1(i,1)) then 
-	total = total+1
+    total = total+1
         print *, myPet, 'element',i, 'does not match', fptr1D(i), (localindices1(i,2)-1)*ydim+localIndices1(i,1)
-	correct = .false.
-     endif	
+    correct = .false.
+     endif  
   enddo
 
   print *, myPet, " total incorrect results ", total
@@ -350,7 +350,7 @@
 
   ! Check the destination field
   call ESMF_FieldGet(dstfield, localDe=0, farray=fptr, computationalLBound=lbnd, &
-	computationalUBound=ubnd, computationalCount=cnt, rc=localrc)
+    computationalUBound=ubnd, computationalCount=cnt, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct=.false.
 
@@ -369,6 +369,13 @@
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
+
+  call ESMF_FieldDestroy(srcfield, rc=localrc)
+  call ESMF_FieldDestroy(dstfield, rc=localrc)
+  call ESMF_FieldDestroy(srcfield2D, rc=localrc)
+  call ESMF_FieldDestroy(dstfield2D, rc=localrc)
+
+  deallocate(localIndices, localIndices1)
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
