@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCreateEx.F90,v 1.4 2008/05/08 04:46:06 theurich Exp $
+! $Id: ESMF_FieldBundleCreateEx.F90,v 1.5 2009/09/15 17:50:36 feiliu Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -213,6 +213,9 @@
      call ESMF_FieldDestroy(simplefield, rc=rc)
 !EOC
 
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_GridDestroy(grid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     if (finalrc.EQ.ESMF_SUCCESS) then
