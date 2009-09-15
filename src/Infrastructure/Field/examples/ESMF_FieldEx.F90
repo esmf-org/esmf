@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.12 2009/09/10 15:31:26 feiliu Exp $
+! $Id: ESMF_FieldEx.F90,v 1.13 2009/09/15 17:41:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -341,6 +341,8 @@
 !EOC
 
     print *, "Field Create from a Grid and an Array returned"
+    call ESMF_FieldDestroy(field4, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
@@ -398,6 +400,8 @@
     call ESMF_FieldSetCommit(field3, grid2d, farray2d, rc=rc)
 !EOC
     print *, "Finish a Field created by ESMF_FieldCreateEmpty returned"
+    call ESMF_FieldDestroy(field3, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray2d)
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%

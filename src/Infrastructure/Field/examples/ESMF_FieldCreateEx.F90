@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.82 2009/08/18 19:02:21 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.83 2009/09/15 17:44:16 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -147,6 +147,8 @@
 !EOC
     print *, "Field Create from a Grid and a Fortran data array returned"
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_FieldDestroy(field,rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
