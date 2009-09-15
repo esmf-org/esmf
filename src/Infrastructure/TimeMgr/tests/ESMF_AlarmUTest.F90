@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.43 2009/08/06 23:17:26 svasquez Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.44 2009/09/15 04:44:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.43 2009/08/06 23:17:26 svasquez Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.44 2009/09/15 04:44:21 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -939,6 +939,8 @@
       bool =  ESMF_AlarmWasPrevRinging(alarm, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(.not.bool), &
                       name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_AlarmDestroy (alarm, rc=rc)
+      call ESMF_ClockDestroy (clock, rc=rc)
 
       ! ----------------------------------------------------------------------------
       ! Initialize clock 
