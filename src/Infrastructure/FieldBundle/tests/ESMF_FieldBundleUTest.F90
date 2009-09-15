@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.15 2009/08/11 21:28:17 svasquez Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.16 2009/09/15 18:00:33 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.15 2009/08/11 21:28:17 svasquez Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.16 2009/09/15 18:00:33 feiliu Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -253,7 +253,7 @@
       ! is correct for the method to return ESMF_RC_NOT_IMPL when it is used.
       write(failMsg, *) "Did not return ESMF_RC_NOT_IMPL"
       bundle4 = ESMF_FieldBundleCreate(3, fields, ESMF_PACKED_DATA, &
-      			name="atmosphere data", rc=rc)
+            name="atmosphere data", rc=rc)
       write(name, *) "Creating FieldBundle with ESMF_PACKED_DATA"
       call ESMF_Test((rc.eq.ESMF_RC_NOT_IMPL), name, failMsg, result, ESMF_SRCLINE)
       print *, "rc = ", rc
@@ -281,11 +281,11 @@
       write(failMsg, *) "Field names are wrong"
       write(name, *) "Verifying Field names from a FieldBundle Test"
       call ESMF_Test((fieldNameList(1).eq."pressure".and.fieldNameList(2).eq."temperature" &
-		.and.fieldNameList(3).eq."heat flux"), name, failMsg, result, ESMF_SRCLINE)
-		
+        .and.fieldNameList(3).eq."heat flux"), name, failMsg, result, ESMF_SRCLINE)
+
       print *, "The Field names are:"
       do i = 1 , fieldcount
-	print *, fieldNameList(i)
+      print *, fieldNameList(i)
       end do
 
       !------------------------------------------------------------------------
@@ -380,10 +380,10 @@
       write(failMsg, *) "Field name is wrong"
       write(name, *) "Verifying Field name from a FieldBundle Test"
       call ESMF_Test((fieldNameList(1).eq."rh"), name, failMsg, result, ESMF_SRCLINE)
-		
+
       print *, "The Field names is:"
       do i = 1 , fieldcount
-	print *, fieldNameList(i)
+      print *, fieldNameList(i)
       end do
 
       !------------------------------------------------------------------------
@@ -476,7 +476,7 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS or incorrect name returned"
       write(name, *) "Getting first Field from a FieldBundle Test continued"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname1.eq."pressure"), name, &
-					failMsg, result, ESMF_SRCLINE)
+                        failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -491,7 +491,7 @@
       write(failMsg, *) "Subroutine returned ESMF_FAILURE or incorrect name returned"
       write(name, *) "Getting a second Field from a FieldBundle Test continued"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname2.eq."temperature"), name, &
-						failMsg, result, ESMF_SRCLINE)
+                        failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -508,7 +508,7 @@
       write(failMsg, *) "Subroutine returned ESMF_FAILURE or incorrect name returned"
       write(name, *) "Getting a third Field from a FieldBundle Test continued"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname3.eq."heat flux"), name, &
-						failMsg, result, ESMF_SRCLINE)
+                        failMsg, result, ESMF_SRCLINE)
       print *, "FieldBundle returned, field names = ", &
                     trim(fname1), ", ", trim(fname2), ", ", trim(fname3)
       !------------------------------------------------------------------------
@@ -629,7 +629,7 @@
       write(failMsg, *) ""
       write(name, *) "Query FieldBundle Name Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bname1.eq."atmosphere data"), &
-				name, failMsg, result, ESMF_SRCLINE)
+                    name, failMsg, result, ESMF_SRCLINE)
       print *, "FieldBundle name = ", trim(bname1)
       !------------------------------------------------------------------------
 
@@ -642,7 +642,7 @@
       write(failMsg, *) ""
       write(name, *) "FieldBundle Destroy Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      print *, "rc = ", (rc)
+      print *, "rc = ", rc
       !------------------------------------------------------------------------
 
 
@@ -652,7 +652,7 @@
       write(failMsg, *) ""
       write(name, *) "Destroying a Destroyed FieldBundle Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      print *, "rc = ", (rc)
+      print *, "rc = ", rc
       !------------------------------------------------------------------------
 
       !EX_UTest
