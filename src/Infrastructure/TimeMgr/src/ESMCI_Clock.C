@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.C,v 1.11 2009/03/18 05:27:26 eschwab Exp $
+// $Id: ESMCI_Clock.C,v 1.12 2009/09/15 04:39:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.11 2009/03/18 05:27:26 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Clock.C,v 1.12 2009/09/15 04:39:26 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -156,7 +156,14 @@ int Clock::count=0;
     clock->prevTime = clock->currTime = clock->startTime;
 
     returnCode = clock->validate();
-    ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc)) {
+      // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
+      //   and at the F90 level, so isInit flag can be set to usable value.
+      delete clock;
+      return(ESMC_NULL_POINTER);
+    }
+
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
     return(clock);
 
  } // end ESMCI_ClockCreate (new)
@@ -207,8 +214,14 @@ int Clock::count=0;
     }
 
     returnCode = clockCopy->validate();
-    ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc)) {
+      // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
+      //   and at the F90 level, so isInit flag can be set to usable value.
+      delete clockCopy;
+      return(ESMC_NULL_POINTER);
+    }
 
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
     return(clockCopy);
 
  } // end ESMCI_ClockCreate (copy)

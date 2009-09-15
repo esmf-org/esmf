@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar.C,v 1.10 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMCI_Calendar.C,v 1.11 2009/09/15 04:39:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Calendar.C,v 1.10 2009/01/21 21:38:01 cdeluca Exp $";
+ static const char *const version = "$Id: ESMCI_Calendar.C,v 1.11 2009/09/15 04:39:26 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -202,18 +202,22 @@ int Calendar::count=0;
     }
 
     returnCode = calendar->set(strlen(calendar->name), 
-                                            calendar->name, 
-                                            calendarType);
-
-    if (ESMC_LogDefault.MsgFoundError(returnCode,
-                                              ESMF_ERR_PASSTHRU, rc)) {
-      return(calendar);
+                                      calendar->name, 
+                                      calendarType);
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc)) {
+      delete calendar;
+      return(ESMC_NULL_POINTER);
     }
 
     returnCode = calendar->validate();
-    ESMC_LogDefault.MsgFoundError(returnCode,
-                                          ESMF_ERR_PASSTHRU, rc);
-    *rc=ESMF_SUCCESS;
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc)) {
+      // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
+      //   and at the F90 level, so isInit flag can be set to usable value.
+      delete calendar;
+      return(ESMC_NULL_POINTER);
+    }
+
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
     return(calendar);
 
  } // end ESMCI_CalendarCreate (built-in)
@@ -252,8 +256,7 @@ int Calendar::count=0;
     }
 
     // select internal calendar static pointer based on specified cal type
-    Calendar **internalCal =
-                            &(Calendar::internalCalendar[calendarType-1]);
+    Calendar **internalCal = &(Calendar::internalCalendar[calendarType-1]);
 
     // check if valid internal calendar already exists
     if (*internalCal != ESMC_NULL_POINTER) {
@@ -280,16 +283,22 @@ int Calendar::count=0;
                                                     (*internalCal)->id);
 
     returnCode = (*internalCal)->set(strlen((*internalCal)->name), 
-                                                 (*internalCal)->name, 
-                                                 calendarType);
+                                            (*internalCal)->name, calendarType);
     if (ESMC_LogDefault.MsgFoundError(returnCode,
-                                              ESMF_ERR_PASSTHRU, &returnCode)) {
+                                      ESMF_ERR_PASSTHRU, &returnCode)) {
+      delete *internalCal;
       return(returnCode);
     }
 
     returnCode = (*internalCal)->validate();
-    ESMC_LogDefault.MsgFoundError(returnCode,
-                                          ESMF_ERR_PASSTHRU, &returnCode);
+    if (ESMC_LogDefault.MsgFoundError(returnCode,
+                                      ESMF_ERR_PASSTHRU, &returnCode)) {
+      // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
+      //   and at the F90 level, so isInit flag can be set to usable value.
+      delete *internalCal;
+      return(returnCode);
+    }
+
     return(returnCode);
 
  } // end ESMCI_CalendarCreate (internal)
@@ -361,17 +370,24 @@ int Calendar::count=0;
     }
 
     returnCode = calendar->set(strlen(calendar->name),
-                                            calendar->name, 
-                                            daysPerMonth, monthsPerYear,
-                                            secondsPerDay, daysPerYear,
-                                            daysPerYearDn, daysPerYearDd);
-    if (ESMC_LogDefault.MsgFoundError(returnCode,
-                                              ESMF_ERR_PASSTHRU, rc)) {
-      return(calendar);
+                                      calendar->name, 
+                                      daysPerMonth, monthsPerYear,
+                                      secondsPerDay, daysPerYear,
+                                      daysPerYearDn, daysPerYearDd);
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc)) {
+      delete calendar;
+      return(ESMC_NULL_POINTER);
     }
 
     returnCode = calendar->validate();
-    ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc)) {
+      // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
+      //   and at the F90 level, so isInit flag can be set to usable value.
+      delete calendar;
+      return(ESMC_NULL_POINTER);
+    }
+
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
     return(calendar);
 
  } // end ESMCI_CalendarCreate (custom)
@@ -422,8 +438,14 @@ int Calendar::count=0;
     }
 
     returnCode = calendarCopy->validate();
-    ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
-                            
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc)) {
+      // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
+      //   and at the F90 level, so isInit flag can be set to usable value.
+      delete calendarCopy;
+      return(ESMC_NULL_POINTER);
+    }
+
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
     return(calendarCopy);     
 
  } // end ESMCI_CalendarCreate (copy)

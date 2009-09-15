@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.C,v 1.10 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMCI_Alarm.C,v 1.11 2009/09/15 04:39:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Alarm.C,v 1.10 2009/01/21 21:38:01 cdeluca Exp $";
+ static const char *const version = "$Id: ESMCI_Alarm.C,v 1.11 2009/09/15 04:39:26 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -94,7 +94,7 @@ int Alarm::count=0;
 
     if (ringTime == ESMC_NULL_POINTER && ringInterval == ESMC_NULL_POINTER) {
       ESMC_LogDefault.Write("Must specify at least one of ringTime or "
-                                    "ringInterval.", ESMC_LOG_WARN,ESMC_CONTEXT);
+                            "ringInterval.", ESMC_LOG_WARN,ESMC_CONTEXT);
       return(ESMC_NULL_POINTER);
     }
  
@@ -180,14 +180,18 @@ int Alarm::count=0;
     //        this->ringTime > (passed in) ringTime
 
     returnCode = alarm->Alarm::validate();
-    ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
-
-    // add this new valid alarm to the given clock
-    if (returnCode == ESMF_SUCCESS) {
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc)) {
+      // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
+      //   and at the F90 level, so isInit flag can be set to usable value.
+      delete alarm;
+      return(ESMC_NULL_POINTER);
+    } else {
+      // add this new valid alarm to the given clock
+      if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
       returnCode = clock->Clock::addAlarm(alarm);
       ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
     }
-
+ 
     return(alarm);
 
  } // end ESMCI_alarmCreate (new)
@@ -238,8 +242,14 @@ int Alarm::count=0;
     }
 
     returnCode = alarmCopy->Alarm::validate();
-    ESMC_LogDefault.MsgFoundError(returnCode,
-                                          ESMF_ERR_PASSTHRU, rc);
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc)) {
+      // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
+      //   and at the F90 level, so isInit flag can be set to usable value.
+      delete alarmCopy;
+      return(ESMC_NULL_POINTER);
+    } 
+
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
     return(alarmCopy);     
 
  } // end ESMCI_alarmCreate (copy)
