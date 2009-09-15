@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.98 2009/06/08 18:46:35 w6ws Exp $
+! $Id: ESMF_Calendar.F90,v 1.99 2009/09/15 04:41:12 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -141,7 +141,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.98 2009/06/08 18:46:35 w6ws Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.99 2009/09/15 04:41:12 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -678,6 +678,9 @@
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
+
+      ! check inputs
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
 !     invoke C to C++ entry point to copy calendar
       call c_ESMC_CalendarCreateCopy(ESMF_CalendarCreateCopy, calendar, localrc)

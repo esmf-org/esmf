@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Clock.F90,v 1.84 2009/06/08 18:46:35 w6ws Exp $
+! $Id: ESMF_Clock.F90,v 1.85 2009/09/15 04:41:11 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.84 2009/06/08 18:46:35 w6ws Exp $'
+      '$Id: ESMF_Clock.F90,v 1.85 2009/09/15 04:41:11 eschwab Exp $'
 
 !==============================================================================
 !
@@ -480,6 +480,9 @@
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
+
+      ! check inputs
+      ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
 !     invoke C to C++ entry point to copy clock
       call c_ESMC_ClockCreateCopy(ESMF_ClockCreateCopy, clock, localrc)
