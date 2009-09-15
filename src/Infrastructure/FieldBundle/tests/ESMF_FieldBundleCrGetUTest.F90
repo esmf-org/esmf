@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.11 2009/08/11 21:23:22 svasquez Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.12 2009/09/15 18:00:41 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -264,6 +264,8 @@ contains
                     ESMF_CONTEXT, rc)) return
         endif
 
+        deallocate(farray1, farray2, farray3, farray4)
+
     end subroutine assemble_bundle
 
     subroutine retrieve_bundle_dataptr(bundle, copyflag, do_slicing, do_slicing1, rc)
@@ -455,6 +457,8 @@ contains
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
+
+        deallocate(buffer)
 
         if(present(rc)) rc = ESMF_SUCCESS
     end subroutine serialize_bundle
