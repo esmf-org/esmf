@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.38 2009/08/27 05:34:24 theurich Exp $
+// $Id: ESMC_Util.C,v 1.39 2009/09/16 16:29:11 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.38 2009/08/27 05:34:24 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.39 2009/09/16 16:29:11 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -525,7 +525,7 @@ extern "C" {
     if (sizeof(n) != *n) {
         printf("error: fortran pointer size does not match C pointer size\n");
         printf("  fortran is sending %d bytes, C expects %ld bytes\n", 
-                  *n, sizeof(n));
+                  *n, (long) sizeof(n));
         *len = 0;
         return;
     }
@@ -533,7 +533,7 @@ extern "C" {
     if (sizeof(n) != sizeof(ESMC_POINTER)) {
         printf("error: C pointer size does not match include file value\n");
         printf("  C pointer is %ld bytes, ESMC_POINTER is %ld bytes\n",  
-                   sizeof(n), sizeof(ESMC_POINTER));
+                   (long) sizeof(n), (long) sizeof(ESMC_POINTER));
         *len = 0;
         return;
     }
@@ -574,7 +574,7 @@ extern "C" {
     if (sizeof(n) != *n) {
         printf("error: fortran pointer size does not match C pointer size\n");
         printf("  fortran is sending %d bytes, C expects %ld bytes\n", 
-                  *n, sizeof(n));
+                  *n, (long) sizeof(n));
         *len = 0;
         return;
     }
@@ -582,7 +582,7 @@ extern "C" {
     if (sizeof(n) != sizeof(ESMC_POINTER)) {
         printf("error: C pointer size does not match include file value\n");
         printf("  C pointer is %ld bytes, ESMC_POINTER is %ld bytes\n",  
-                   sizeof(n), sizeof(ESMC_POINTER));
+                   (long) sizeof(n), (long) sizeof(ESMC_POINTER));
         *len = 0;
         return;
     }
