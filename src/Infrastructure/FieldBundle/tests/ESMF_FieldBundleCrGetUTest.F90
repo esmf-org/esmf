@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.12 2009/09/15 18:00:41 feiliu Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.13 2009/09/16 16:42:33 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -117,6 +117,10 @@ contains
         type(ESMF_FieldBundle)   :: bundle
         type(ESMF_Grid)     :: grid
         integer             :: localrc
+        
+        real(ESMF_KIND_R4), dimension(:,:), pointer :: fptr
+        integer :: fieldCount, i
+        type(ESMF_Field) :: field
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -148,6 +152,31 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
 
+
+        call ESMF_FieldBundleGet(bundle, fieldCount=fieldCount, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+
+        do i = 1, fieldCount
+            call ESMF_FieldBundleGet(bundle, fieldIndex=i, field=field, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rc)) return
+
+            call ESMF_FieldGet(field, farray=fptr, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rc)) return
+
+            call ESMF_FieldDestroy(field, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rc)) return
+
+            !if(copyflag .eq. ESMF_DATA_REF) deallocate(fptr)
+        enddo
+
         call ESMF_FieldBundleDestroy(bundle, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -169,7 +198,7 @@ contains
         logical, optional, intent(in)               :: do_slicing1
         integer, optional, intent(out)   :: rc
 
-        real(ESMF_KIND_R8), dimension(:,:), pointer :: farray1
+        real(ESMF_KIND_R4), dimension(:,:), pointer :: farray1
         real(ESMF_KIND_R4), dimension(:,:), pointer :: farray2
         real(ESMF_KIND_R4), dimension(:,:), pointer :: farray3
         real(ESMF_KIND_R4), dimension(:,:), pointer :: farray4
@@ -263,8 +292,8 @@ contains
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
         endif
-
-        deallocate(farray1, farray2, farray3, farray4)
+        
+        if(copyflag .eq. ESMF_DATA_COPY) deallocate(farray1, farray2, farray3, farray4)
 
     end subroutine assemble_bundle
 
@@ -275,7 +304,7 @@ contains
         logical, optional, intent(in)               :: do_slicing1
         integer, optional   :: rc
 
-        real(ESMF_KIND_R8), dimension(:,:), pointer :: farray1
+        real(ESMF_KIND_R4), dimension(:,:), pointer :: farray1
         real(ESMF_KIND_R4), dimension(:,:), pointer :: farray2
         real(ESMF_KIND_R4), dimension(:,:), pointer :: farray3
         real(ESMF_KIND_R4), dimension(:,:), pointer :: farray4
@@ -408,7 +437,6 @@ contains
             endif
         endif
 
-
         call ESMF_FieldBundleGet(bundle, fieldcount=fc, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -454,6 +482,11 @@ contains
             ESMF_CONTEXT, rc)) return
 
         call ESMF_FieldBundleValidate(bundle1, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldBundleDestroy(bundle1, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
