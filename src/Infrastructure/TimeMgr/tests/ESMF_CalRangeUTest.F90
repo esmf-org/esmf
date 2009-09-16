@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.36 2009/08/07 17:20:30 svasquez Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.37 2009/09/16 23:44:07 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.36 2009/08/07 17:20:30 svasquez Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.37 2009/09/16 23:44:07 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       integer, parameter :: CONVERT_TO_TIME = 1, CONVERT_TO_DATE = 2, &
@@ -801,6 +801,9 @@
       logical :: leapYear 
 
       if (cal .eq. ESMF_CAL_GREGORIAN) then
+! Note: At least one Absoft compiler (in particular, version 9a SP1 on x86_64 linux)
+! may miscompile the following statement - which causes a floating point error at
+! runtime.  See ticket #2800140.
         leapYear = (mod(YYl,ly1).eq.0) .or. &
                      (mod(YYl,ly2).eq.0 .and. mod(YYl,ly3).ne.0)
       else if (cal .eq. ESMF_CAL_JULIAN) then
