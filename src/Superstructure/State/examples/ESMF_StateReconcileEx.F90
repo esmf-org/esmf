@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.24 2009/05/08 01:44:38 w6ws Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.25 2009/09/16 20:59:27 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -221,6 +221,16 @@ end module ESMF_StateReconcileEx_Mod
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !-------------------------------------------------------------------------
+
+    call ESMF_StateDestroy (state1, rc=rc)
+    if (rc /= ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_GridCompDestroy (comp2, rc=rc)
+    if (rc /= ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_GridCompDestroy (comp1, rc=rc)
+    if (rc /= ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
 20  continue
     call ESMF_Finalize(rc=rc)
 
