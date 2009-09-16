@@ -7,7 +7,7 @@
  * CVS File Information :
  *    $RCSfile: mem.c,v $
  *    $Author: w6ws $
- *    $Date: 2008/12/10 20:45:06 $
+ *    $Date: 2009/09/16 16:22:25 $
  *    Revision: 1.20 $
  ****************************************************************************/
 
@@ -330,9 +330,9 @@ double *Zoltan_Malloc(int n, char *filename, int lineno)
   if (DEBUG_MEMORY > 2) {
     /* Print out details of allocation. */
     GET_RANK(&proc);
-    fprintf(stderr, "Proc %d: order=%d, size=%d, location=0x%lx, "
+    fprintf(stderr, "Proc %d: order=%d, size=%d, location=%p, "
       "file=%s, line=%d\n",
-      proc, nmalloc, n, (long) pntr, filename, lineno);
+      proc, nmalloc, n, pntr, filename, lineno);
   }
 
   return pntr;
@@ -371,8 +371,8 @@ double *Zoltan_Realloc(void *ptr, int n, char *filename, int lineno)
 	if (dbptr == NULL) {	/* previous allocation not found in list. */
            GET_RANK(&proc);
 	   fprintf(stderr, "Proc %d: Memory error: "
-	     "In realloc, address not found in debug list (0x%lx)\n",
-	     proc, (long) ptr);
+	     "In realloc, address not found in debug list (%p)\n",
+	     proc, ptr);
 	}
 	else {	/* Update entry in allocation list */
 	  bytes_used += (n - dbptr->size);
@@ -426,9 +426,9 @@ void Zoltan_Free (void **ptr, char *filename, int lineno)
     }
     if (dbptr == NULL) {
       GET_RANK(&proc);
-      fprintf(stderr, "Proc %d: Memory error: In free, address (0x%lx) "
+      fprintf(stderr, "Proc %d: Memory error: In free, address (%p) "
 	"not found in debug list. File=%s, line=%d.\n", proc, 
-        (long) *ptr, filename, lineno);
+        *ptr, filename, lineno);
    }
    else {
        *prev = dbptr->next;
@@ -515,9 +515,9 @@ void Zoltan_Memory_Stats()
 	if (top != NULL) {
 	    fprintf(stderr, "Proc %d: Remaining allocations:\n", proc);
 	    for (dbptr = top; dbptr != NULL; dbptr = dbptr->next) {
-		fprintf(stderr, " order=%d, size=%d, location=0x%lx, "
+		fprintf(stderr, " order=%d, size=%d, location=%p, "
                   "file=%s, line=%d\n", 
-                  dbptr->order, dbptr->size, (long) dbptr->ptr,
+                  dbptr->order, dbptr->size, dbptr->ptr,
                   dbptr->file, dbptr->line);
 	    }
 	}
