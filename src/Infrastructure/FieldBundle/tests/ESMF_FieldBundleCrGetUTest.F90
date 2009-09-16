@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.13 2009/09/16 16:42:33 feiliu Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.14 2009/09/16 22:15:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -238,7 +238,7 @@ contains
             enddo
         enddo
 
-        f1 = ESMF_FieldCreate(grid, farray1, ESMF_INDEX_DELOCAL, name='field1', rc=localrc)
+        f1 = ESMF_FieldCreate(grid, farray1, ESMF_INDEX_DELOCAL, copyflag, name='field1', rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
