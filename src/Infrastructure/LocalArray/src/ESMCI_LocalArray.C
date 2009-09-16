@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.C,v 1.12 2009/08/14 18:38:38 theurich Exp $
+// $Id: ESMCI_LocalArray.C,v 1.13 2009/09/16 16:43:10 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.12 2009/08/14 18:38:38 theurich Exp $";
+static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.13 2009/09/16 16:43:10 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
   
@@ -961,13 +961,12 @@ int LocalArray::print(
     beforeskip = '\n';
   }
 
-  sprintf(msgbuf,"LocalArrayPrint: Array at address 0x%08lx:\n", 
-    (ESMC_POINTER)this);
+  sprintf(msgbuf,"LocalArrayPrint: Array at address %p:\n", this);
   printf(msgbuf);
   sprintf(msgbuf,"            rank = %d, typekind = %d, ", 
                            this->rank, this->typekind);
   printf(msgbuf);
-  sprintf(msgbuf,"base_addr = 0x%08lx\n", (ESMC_POINTER)this->base_addr);
+  sprintf(msgbuf,"base_addr = %p\n", this->base_addr);
   printf(msgbuf);
   sprintf(msgbuf,"            ");
   printf(msgbuf);
