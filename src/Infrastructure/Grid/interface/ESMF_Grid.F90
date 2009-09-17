@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.131 2009/09/09 03:45:17 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.132 2009/09/17 20:49:56 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -11758,14 +11758,13 @@ endif
 ! !IROUTINE: ESMF_GridDeserialize - Deserialize a byte stream into a Grid
 !
 ! !INTERFACE:
-      function ESMF_GridDeserialize(vm, buffer, offset, &
+      function ESMF_GridDeserialize(buffer, offset, &
                                     attreconflag, rc) 
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridDeserialize   
 !
 ! !ARGUMENTS:
-      type(ESMF_VM), intent(in) :: vm
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       type(ESMF_AttReconcileFlag), optional :: attreconflag
@@ -11779,8 +11778,6 @@ endif
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [vm]
-!           Current VM in which this object should be created.
 !     \item [buffer]
 !           Data buffer which holds the serialized information.
 !     \item [offset]

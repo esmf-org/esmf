@@ -148,7 +148,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.10 2009/09/14 20:27:25 oehmke Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.11 2009/09/17 20:49:57 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1059,13 +1059,12 @@ end subroutine ESMF_GeomBaseGet
 ! !IROUTINE: ESMF_GeomBaseDeserialize - Deserialize a byte stream into a GeomBase
 !
 ! !INTERFACE:
-      function ESMF_GeomBaseDeserialize(vm, buffer, offset, attreconflag, rc) 
+      function ESMF_GeomBaseDeserialize(buffer, offset, attreconflag, rc) 
 !
 ! !RETURN VALUE:
       type(ESMF_GeomBase) :: ESMF_GeomBaseDeserialize   
 !
 ! !ARGUMENTS:
-      type(ESMF_VM), intent(in) :: vm
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       type(ESMF_AttReconcileFlag), optional :: attreconflag
@@ -1079,8 +1078,6 @@ end subroutine ESMF_GeomBaseGet
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [vm]
-!           Current VM in which this object should be created.
 !     \item [buffer]
 !           Data buffer which holds the serialized information.
 !     \item [offset]
@@ -1126,7 +1123,7 @@ end subroutine ESMF_GeomBaseGet
     select case(gbcp%type%type)
 
        case (ESMF_GEOMTYPE_GRID%type) ! Grid
-          gbcp%grid=ESMF_GridDeserialize(vm=vm, buffer=buffer, &
+          gbcp%grid=ESMF_GridDeserialize(buffer=buffer, &
               offset=offset, attreconflag=lattreconflag, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -1138,7 +1135,7 @@ end subroutine ESMF_GeomBaseGet
                                ESMF_CONTEXT, rc)) return
 
        case  (ESMF_GEOMTYPE_LOCSTREAM%type)
-          gbcp%locstream=ESMF_LocStreamDeserialize(vm=vm, buffer=buffer, &
+          gbcp%locstream=ESMF_LocStreamDeserialize(buffer=buffer, &
               offset=offset, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &

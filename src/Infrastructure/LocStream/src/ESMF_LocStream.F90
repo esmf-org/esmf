@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.16 2009/08/21 18:15:02 w6ws Exp $
+! $Id: ESMF_LocStream.F90,v 1.17 2009/09/17 20:49:57 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.16 2009/08/21 18:15:02 w6ws Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.17 2009/09/17 20:49:57 oehmke Exp $'
 
 !==============================================================================
 !
@@ -792,10 +792,7 @@ contains
       integer                            :: localrc  ! Error status
       type (ESMF_LocStreamType), pointer :: lstypep
       type(ESMF_LocStream)               :: locstream 
-      integer :: localPet, petCount
-      character(len=ESMF_MAXSTR)       :: keytemp   ! temporary key name
-      character(len=ESMF_MAXSTR)       :: string    ! temporary string
-      integer :: keyCount,i,dimCount 
+      integer :: dimCount 
       type(ESMF_IndexFlag)  :: indexflagLocal
       logical :: destroyDistgridLocal
 
@@ -923,7 +920,6 @@ contains
 !EOP
 
     integer                                               :: localrc  ! Error status
-    logical                             :: dummy
     integer :: i, currMin
     type(ESMF_DistGrid)                 :: distgrid
     integer, pointer :: deBLockList(:,:,:)   
@@ -1048,7 +1044,6 @@ contains
     integer                                               :: localrc  ! Error status
     type(ESMF_VM)                                   :: vm       ! Virtual machine used
     integer, allocatable  :: countsPerPet(:)
-    logical                             :: dummy
     integer :: localPet, petCount
     integer :: i, currMin
     type(ESMF_DistGrid)                 :: distgrid
@@ -2467,6 +2462,10 @@ end subroutine ESMF_LocStreamGetBounds
         ! check variables
         ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
 
+        !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+        !TODO: Remove the following dummy test when dummy argument actually used
+        if (options==options) continue
+
         write(*,*) "LocStream Print Starts ====>"
 
         ! Get internal pointer to locstream
@@ -2616,13 +2615,12 @@ end subroutine ESMF_LocStreamGetBounds
 ! !IROUTINE: ESMF_LocStreamDeserialize - Deserialize a byte stream into a LocStream
 !
 ! !INTERFACE:
-      function ESMF_LocStreamDeserialize(vm, buffer, offset, rc) 
+      function ESMF_LocStreamDeserialize(buffer, offset, rc) 
 !
 ! !RETURN VALUE:
       type(ESMF_LocStream) :: ESMF_LocStreamDeserialize   
 !
 ! !ARGUMENTS:
-      type(ESMF_VM), intent(in) :: vm
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       integer, intent(out), optional :: rc 
@@ -2635,8 +2633,6 @@ end subroutine ESMF_LocStreamGetBounds
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [vm]
-!           Current VM in which this object should be created.
 !     \item [buffer]
 !           Data buffer which holds the serialized information.
 !     \item [offset]
@@ -2794,8 +2790,6 @@ end subroutine ESMF_LocStreamGetBounds
 
       integer :: localrc
 
-      type(ESMF_LocStreamType), pointer :: lstypep
-
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2803,7 +2797,9 @@ end subroutine ESMF_LocStreamGetBounds
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
 
-      ! TODO: more here once we get everything else settled
+      !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+      !TODO: Remove the following dummy test when dummy argument actually used
+      if (options==options) continue
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2906,6 +2902,10 @@ end subroutine ESMF_LocStreamGetBounds
 !EOPI
 
      ESMF_INIT_CHECK_SHALLOW(ESMF_LocStreamTypeGetInit,ESMF_LocStreamTypeInit,s)
+
+     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+     !TODO: Remove the following dummy test when dummy argument actually used
+     if (s%keycount==s%keycount) continue
 
      ! return success
      if(present(rc)) then

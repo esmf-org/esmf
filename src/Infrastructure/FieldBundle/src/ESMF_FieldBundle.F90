@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.22 2009/09/03 22:35:35 theurich Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.23 2009/09/17 20:49:56 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -2563,7 +2563,7 @@ end function
                                  ESMF_CONTEXT, rc)) return
 
       if (bp%gridstatus .eq. ESMF_STATUS_READY) then
-          bp%grid = ESMF_GridDeserialize(vm, buffer, offset, &
+          bp%grid = ESMF_GridDeserialize(buffer, offset, &
                                       attreconflag=lattreconflag, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
