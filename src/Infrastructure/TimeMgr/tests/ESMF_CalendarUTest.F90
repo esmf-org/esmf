@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.49 2009/08/06 22:10:59 svasquez Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.50 2009/09/18 05:12:09 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.49 2009/08/06 22:10:59 svasquez Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.50 2009/09/18 05:12:09 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -503,6 +503,8 @@
       calendarsNotEqual = (gregorianCalendar2 /= gregorianCalendar1)
       call ESMF_Test((.not.calendarsNotEqual), &
                       name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_CalendarDestroy(gregorianCalendar1, rc)
+      call ESMF_CalendarDestroy(gregorianCalendar2, rc)
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -1060,6 +1062,7 @@
       write(name, *) "Total days 73049 from -100 to +100 years in Gregorian Cal. Test"
       call ESMF_Test((totalDays.eq.73049), &
                       name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_ClockDestroy(clock_gregorian, rc)
 
       ! ----------------------------------------------------------------------------
 
@@ -1112,6 +1115,7 @@
       write(name, *) "Total days 73000 from -100 to +100 years in No Leap Cal. Test"
       call ESMF_Test((totalDays.eq.73000), &
                       name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_ClockDestroy(clock_no_leap, rc)
 
       ! ----------------------------------------------------------------------------
 
@@ -1172,6 +1176,7 @@
       write(failMsg, *) "Results Total Counts = ", advanceCounts
       call ESMF_Test((advanceCounts.eq.72000), &
                       name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_ClockDestroy(clock_360day, rc)
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
