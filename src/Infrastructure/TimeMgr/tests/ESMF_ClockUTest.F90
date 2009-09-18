@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.114 2009/09/15 04:44:21 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.115 2009/09/18 05:11:19 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.114 2009/09/15 04:44:21 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.115 2009/09/18 05:11:19 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -831,7 +831,7 @@
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Testing for clock equality
-      ! clocksEqual = ESMF_ClockOperator(==)(clock1,clock2)
+      ! clocksEqual = ESMF_ClockOperator(==)(clock,clock1)
       write(failMsg, *) "Returned not equal"
       write(name, *) "Clocks Equal Test"
       clocksEqual = (clock == clock1)
@@ -841,7 +841,7 @@
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Testing for clock inequality
-      ! clocksEqual = ESMF_ClockOperator(==)(clock1,clock2)
+      ! clocksEqual = ESMF_ClockOperator(==)(clock,clock2)
       write(failMsg, *) "Returned equal"
       write(name, *) "Clocks Not Equal Test"
       clocksEqual = (clock == clock2)
@@ -851,7 +851,7 @@
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Testing for clock inequality
-      ! clocksEqual = ESMF_ClockOperator(/=)(clock1,clock2)
+      ! clocksEqual = ESMF_ClockOperator(/=)(clock,clock2)
       write(failMsg, *) "Returned not equal"
       write(name, *) "Clocks Not Equal Test"
       clocksNotEqual = (clock /= clock2)
@@ -861,12 +861,13 @@
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Testing for clock equality
-      ! clocksEqual = ESMF_ClockOperator(/=)(clock1,clock2)
+      ! clocksEqual = ESMF_ClockOperator(/=)(clock,clock1)
       write(failMsg, *) "Returned not equal"
       write(name, *) "Clocks Equal Test"
       clocksNotEqual = (clock /= clock1)
       call ESMF_Test((.not.clocksNotEqual), &
                       name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_ClockDestroy(clock1, rc)
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
@@ -959,6 +960,7 @@
       call ESMF_ClockValidate(clock2,rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_ClockDestroy(clock2, rc)
 
       ! ----------------------------------------------------------------------------
 
