@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.h,v 1.15 2009/04/16 04:46:08 theurich Exp $
+// $Id: ESMCI_FTable.h,v 1.16 2009/09/18 18:08:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -123,24 +123,24 @@ class FTable {
     // data
     static void getDP(FTable ***ptr, void **datap, int *rc);
     static void setDP(FTable ***ptr, void **datap, int *rc);
-    int getDataPtr(char *name, void **data, enum dtype *dtype);
-    int setDataPtr(char *name, void **data, enum dtype dtype);
+    int getDataPtr(char const *name, void **data, enum dtype *dtype);
+    int setDataPtr(char const *name, void **data, enum dtype dtype);
     // func
     static void setServices(void *ptr, void (*func)(), int *userRc, int *rc);
     static void setVM(void *ptr, void (*func)(), int *userRc, int *rc);
-    int getEntry(char *name, int *rc);
-    int setFuncPtr(char *name, void *func, enum ftype ftype);
-    int setFuncPtr(char *name, void *func);
-    int setFuncPtr(char *name, void *func, void *arg);
-    int setFuncArgs(char *name, int acount, void **arglist);
-    int callVFuncPtr(char *name, ESMCI::VM *vm, int *funcrc);
+    int getEntry(char const *name, int *rc);
+    int setFuncPtr(char const *name, void *func, enum ftype ftype);
+    int setFuncPtr(char const *name, void *func);
+    int setFuncPtr(char const *name, void *func, void *arg);
+    int setFuncArgs(char const *name, int acount, void **arglist);
+    int callVFuncPtr(char const *name, ESMCI::VM *vm, int *funcrc);
     int extend(int nfuncp, int ndatap);
     int validate(const char*) const;
     int print(const char*) const;
     // native C++ constructors/destructors
     FTable(void);
     ~FTable(void);
-    static void newtrim(char *c, int clen, int *phase, int *nstate,
+    static void newtrim(char const *oldc, int clen, int *phase, int *nstate,
       char **newc);
   private: 
     int query(int *nfuncp, int *ndatap);

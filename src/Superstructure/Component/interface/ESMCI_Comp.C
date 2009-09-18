@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.C,v 1.12 2009/04/07 05:34:48 theurich Exp $
+// $Id: ESMCI_Comp.C,v 1.13 2009/09/18 18:08:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -41,15 +41,15 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Comp.C,v 1.12 2009/04/07 05:34:48 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Comp.C,v 1.13 2009/09/18 18:08:04 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
 //==============================================================================
 // prototypes for Fortran interface routines called by C++ code below
 extern "C" {
-  void FTN(f_esmf_gridcompcreate)(ESMCI::GridComp *comp, char *name, 
-    ESMCI::GridCompType *mtype, char *configFile, ESMCI::Clock **clock, 
+  void FTN(f_esmf_gridcompcreate)(ESMCI::GridComp *comp, char const *name, 
+    ESMCI::GridCompType *mtype, char const *configFile, ESMCI::Clock **clock, 
     int *rc, ESMCI_FortranStrLenArg nlen, ESMCI_FortranStrLenArg clen);
   void FTN(f_esmf_gridcompdestroy)(ESMCI::GridComp *comp, int *rc);
   void FTN(f_esmf_gridcompinitialize)(const ESMCI::GridComp *gcomp,
@@ -65,10 +65,10 @@ extern "C" {
     ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag,
     int *userRc, int *rc);
   void FTN(f_esmf_gridcompprint)(const ESMCI::GridComp *gcomp,
-    const char *options, int *rc, ESMCI_FortranStrLenArg olen);
+    char const *options, int *rc, ESMCI_FortranStrLenArg olen);
   
-  void FTN(f_esmf_cplcompcreate)(ESMCI::CplComp *comp, char *name, 
-    char *configFile, ESMCI::Clock **clock, 
+  void FTN(f_esmf_cplcompcreate)(ESMCI::CplComp *comp, char const *name, 
+    char const *configFile, ESMCI::Clock **clock, 
     int *rc, ESMCI_FortranStrLenArg nlen, ESMCI_FortranStrLenArg clen);
   void FTN(f_esmf_cplcompdestroy)(ESMCI::CplComp *comp, int *rc);
   void FTN(f_esmf_cplcompinitialize)(const ESMCI::CplComp *gcomp,
@@ -84,7 +84,7 @@ extern "C" {
     ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag,
     int *userRc, int *rc);
   void FTN(f_esmf_cplcompprint)(const ESMCI::CplComp *gcomp,
-    const char *options, int *rc, ESMCI_FortranStrLenArg olen);
+    char const *options, int *rc, ESMCI_FortranStrLenArg olen);
 };
 //==============================================================================
 
@@ -176,7 +176,7 @@ int Comp::setEntryPoint(
     return rc;
   }
 
-  char *methodString;
+  char const *methodString;
   switch(method){
   case ESMCI::SETINIT:
     methodString = "Initialize";
@@ -256,7 +256,7 @@ void *Comp::getInternalState(
     return NULL;
   }
   
-  char *name = "localdata";
+  char const *name = "localdata";
   enum dtype dtype;
   void *data;
   
@@ -310,7 +310,7 @@ int Comp::setInternalState(
     return rc;
   }
   
-  char *name = "localdata";
+  char const *name = "localdata";
   enum dtype dtype = DT_VOIDP;
   
   localrc = ftable->setDataPtr(name, &data, dtype);
@@ -338,9 +338,9 @@ GridComp *GridComp::create(
 //
 // !ARGUMENTS:
 //
-    char *name, 
+    char const *name, 
     enum GridCompType mtype,
-    char *configFile,
+    char const *configFile,
     Clock *clock,
     int *rc
   ){
@@ -591,7 +591,7 @@ int GridComp::print(
 //
 // !ARGUMENTS:
 //
-    const char *options
+    char const *options
   )const{
 //
 // !DESCRIPTION:
@@ -634,8 +634,8 @@ CplComp *CplComp::create(
 //
 // !ARGUMENTS:
 //
-    char *name, 
-    char *configFile,
+    char const *name, 
+    char const *configFile,
     Clock *clock,
     int *rc
   ){
@@ -886,7 +886,7 @@ int CplComp::print(
 //
 // !ARGUMENTS:
 //
-    const char *options
+    char const *options
   )const{
 //
 // !DESCRIPTION:

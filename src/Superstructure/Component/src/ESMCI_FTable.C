@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.30 2009/04/24 05:18:40 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.31 2009/09/18 18:08:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.30 2009/04/24 05:18:40 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.31 2009/09/18 18:08:04 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -120,7 +120,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-    char *methodString;
+    char const *methodString;
     switch(*method){
     case ESMCI::SETINIT:
       methodString = "Initialize";
@@ -175,8 +175,8 @@ extern "C" {
   // set the InternalState in FTable
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_ftablesetinternalstate"
-  void FTN(c_esmc_ftablesetinternalstate)(ESMCI::FTable ***ptr, char *type,
-    void **data, enum ESMCI::dtype *dtype, int *rc, int slen) {
+  void FTN(c_esmc_ftablesetinternalstate)(ESMCI::FTable ***ptr,
+    char const *type, void **data, enum ESMCI::dtype *dtype, int *rc, int slen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
@@ -197,8 +197,8 @@ extern "C" {
   // get the InternalState from FTable
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_ftablegetinternalstate"
-  void FTN(c_esmc_ftablegetinternalstate)(ESMCI::FTable ***ptr, char *type,
-    void **data, enum ESMCI::dtype *dtype, int *rc, int slen) {
+  void FTN(c_esmc_ftablegetinternalstate)(ESMCI::FTable ***ptr,
+    char const *type, void **data, enum ESMCI::dtype *dtype, int *rc, int slen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
@@ -230,8 +230,8 @@ extern "C" {
   
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setvmshobj"
-  void FTN(c_esmc_setvmshobj)(void *ptr, char *routineArg, 
-    char *sharedObjArg, int *userRc, int *rc, 
+  void FTN(c_esmc_setvmshobj)(void *ptr, char const *routineArg, 
+    char const *sharedObjArg, int *userRc, int *rc, 
     ESMCI_FortranStrLenArg rlen, ESMCI_FortranStrLenArg llen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -282,8 +282,8 @@ extern "C" {
   
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setservicesshobj"
-  void FTN(c_esmc_setservicesshobj)(void *ptr, char *routineArg, 
-    char *sharedObjArg, int *userRc, int *rc, 
+  void FTN(c_esmc_setservicesshobj)(void *ptr, char const *routineArg, 
+    char const *sharedObjArg, int *userRc, int *rc, 
     ESMCI_FortranStrLenArg rlen, ESMCI_FortranStrLenArg llen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -326,7 +326,8 @@ extern "C" {
     void *func, int *phase, int *rc){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
-    char *methodString;
+    
+    char const *methodString;
     switch(*method){
     case ESMCI::SETINIT:
       methodString = "Initialize";
@@ -469,8 +470,8 @@ extern "C" {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_usercompsetinternalstate"
-  void FTN(esmf_usercompsetinternalstate)(ESMCI::FTable ***ptr, char *name, 
-    void **datap, int *rc, int slen){
+  void FTN(esmf_usercompsetinternalstate)(ESMCI::FTable ***ptr,
+    char const *name, void **datap, int *rc, int slen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
@@ -497,8 +498,8 @@ extern "C" {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_usercompgetinternalstate"
-  void FTN(esmf_usercompgetinternalstate)(ESMCI::FTable ***ptr, char *name,
-    void **datap, int *rc, int slen){
+  void FTN(esmf_usercompgetinternalstate)(ESMCI::FTable ***ptr,
+    char const *name, void **datap, int *rc, int slen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
@@ -602,7 +603,7 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   if (rc) *rc = ESMC_RC_NOT_IMPL;
   localrc = ESMC_RC_NOT_IMPL;
 
-  char *methodString;
+  char const *methodString;
   switch(*method){
   case ESMCI::SETINIT:
     methodString = "Initialize";
@@ -728,7 +729,7 @@ namespace ESMCI {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::FTable::getDP()"
 void FTable::getDP(FTable ***ptr, void **datap, int *rc){
-    char *name = "localdata";
+    char const *name = "localdata";
     enum dtype dtype;
     int localrc;
 
@@ -753,7 +754,7 @@ void FTable::getDP(FTable ***ptr, void **datap, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::FTable::setDP()"
 void FTable::setDP(FTable ***ptr, void **datap, int *rc){
-    char *name = "localdata";
+    char const *name = "localdata";
     enum dtype dtype = DT_FORTRAN_UDT_POINTER;
     int localrc;
 
@@ -787,7 +788,7 @@ int FTable::getDataPtr(
 //    int error return code
 //
 // !ARGUMENTS:
-      char *namep,           // in, data name
+      char const *namep,     // in, data name
       void **datap,          // out, data address
       enum dtype *dtype) {   // out, data type
 //
@@ -830,7 +831,7 @@ int FTable::setDataPtr(
 //    int error return code
 //
 // !ARGUMENTS:
-      char *namep,           // in, data name
+      char const *namep,     // in, data name
       void **datap,          // in, data address
       enum dtype dtype) {    // in, data type
 //
@@ -981,7 +982,7 @@ int FTable::getEntry(
 //    entry index, or -1 if not found.
 //
 // !ARGUMENTS:
-  char *name,            // in, function name
+  char const *name,      // in, function name
   int *rc) {             // out, return code
 //
 // !DESCRIPTION:
@@ -1024,7 +1025,7 @@ int FTable::setFuncPtr(
 //  int error return code
 //
 // !ARGUMENTS:
-    char *name,            // in, function name
+    char const *name,      // in, function name
     void *func) {          // in, function address
 //
 // !DESCRIPTION:
@@ -1089,7 +1090,7 @@ int FTable::setFuncPtr(
 //  int error return code
 //
 // !ARGUMENTS:
-    char *name,            // in, function name
+    char const *name,      // in, function name
     void *func,            // in, function address
     enum ftype ftype) {    // in, function type
 //
@@ -1157,8 +1158,8 @@ int FTable::setFuncPtr(
 //  int error return code
 //
 // !ARGUMENTS:
-    char *name,            // in, function name
-    void *func,            // in, function address
+    char const *name,     // in, function name
+    void *func,           // in, function address
     void *arg){           // in, void *
 //
 // !DESCRIPTION:
@@ -1229,7 +1230,7 @@ int FTable::setFuncArgs(
 //  int error return code
 //
 // !ARGUMENTS:
-    char *name,            // in, function name
+    char const *name,      // in, function name
     int acount,            // in, count of args
     void **arglist) {      // in, address of arg list
 //
@@ -1280,7 +1281,7 @@ int FTable::callVFuncPtr(
 //    integer return code
 //
 // !ARGUMENTS:
-  char *name,           // in, function name
+  char const *name,     // in, function name
   VM *vm_pointer,       // in, optional, pointer to this PET's VM instance
   int *userrc) {        // out, optional, function return
 //
@@ -1491,7 +1492,7 @@ int FTable::validate(
 //    int error return code
 //
 // !ARGUMENTS:
-      const char *options) const {    // in - validate options
+      char const *options) const {    // in - validate options
 //
 // !DESCRIPTION:
 //      Validates that a Component is internally consistent.
@@ -1519,7 +1520,7 @@ int FTable::print(
 //    int error return code
 //
 // !ARGUMENTS:
-      const char *options) const {     //  in - print options
+      char const *options) const {     //  in - print options
 //
 // !DESCRIPTION:
 //      Print information about a Component.  The options control the
@@ -1648,14 +1649,15 @@ FTable::~FTable(void) {
 // this is max of 2 char phase + 'P' + 1 char nstate + 'S' + trailing NULL
 #define MAXPAD 8
 
-void FTable::newtrim(char *c, int clen, int *phase, int *nstate, char **newc) {
+void FTable::newtrim(char const *oldc, int clen, int *phase, int *nstate,
+  char **newc) {
   char *cp, *ctmp;
   int hasphase = 0;
   int hasstate = 0;
   char tspace[MAXPAD];
   int pad=2;         // if neither phase nor nstate, still need term NULL
 
-  //printf("in newtrim, c = '%s', clen = %d\n", c, clen);
+  //printf("in newtrim, oldc = '%s', clen = %d\n", oldc, clen);
 
   // warning - on the intel compiler, optional args come in
   // as -1, not 0.  check for both before dereferencing.
@@ -1675,7 +1677,7 @@ void FTable::newtrim(char *c, int clen, int *phase, int *nstate, char **newc) {
   // make new space and leave room for at least a null terminator, more
   // if it has either phase or num states or both.
   ctmp = new char[clen+pad];
-  strncpy(ctmp, c, clen);
+  strncpy(ctmp, oldc, clen);
   ctmp[clen] = '\0';
   for (cp = &ctmp[clen-1]; *cp == ' '; cp--)   // trim() trailing blanks
     *cp = '\0';
@@ -1743,8 +1745,9 @@ extern "C" {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_methodtableadd"
-  void FTN(c_esmc_methodtableadd)(ESMCI::MethodTable **ptr, char *labelArg,
-    void *pointer, int *rc, ESMCI_FortranStrLenArg labelLen){
+  void FTN(c_esmc_methodtableadd)(ESMCI::MethodTable **ptr,
+    char const *labelArg, void *pointer, int *rc,
+    ESMCI_FortranStrLenArg labelLen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     if (labelLen>=0){
@@ -1771,9 +1774,9 @@ extern "C" {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_methodtableaddshobj"
-  void FTN(c_esmc_methodtableaddshobj)(ESMCI::MethodTable **ptr, char *labelArg,
-    char *nameArg, char *sharedObjArg, int *rc,
-    ESMCI_FortranStrLenArg labelLen, ESMCI_FortranStrLenArg nameLen,
+  void FTN(c_esmc_methodtableaddshobj)(ESMCI::MethodTable **ptr,
+    char const *labelArg, char const *nameArg, char const *sharedObjArg,
+    int *rc, ESMCI_FortranStrLenArg labelLen, ESMCI_FortranStrLenArg nameLen,
     ESMCI_FortranStrLenArg sharedObjLen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -1806,7 +1809,7 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_methodtableremove"
   void FTN(c_esmc_methodtableremove)(ESMCI::MethodTable **ptr,
-    char *label, int *rc, ESMCI_FortranStrLenArg labelLen){
+    char const *label, int *rc, ESMCI_FortranStrLenArg labelLen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     if (labelLen>=0){
@@ -1834,7 +1837,7 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_methodtableexecute"
   void FTN(c_esmc_methodtableexecute)(ESMCI::MethodTable **ptr,
-    char *label, void *object, int *userRc, int *rc,
+    char const *label, void *object, int *userRc, int *rc,
     ESMCI_FortranStrLenArg labelLen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
