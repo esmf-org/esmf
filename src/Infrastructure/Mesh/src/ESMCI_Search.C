@@ -559,35 +559,12 @@ bool is_in;
 static int found_func(void *c, void *y) {
   MeshObj &elem = *static_cast<MeshObj*>(c);
   OctSearchData &si = *static_cast<OctSearchData*>(y);
-  
-  // Do the is_in calculation
-  const MappingBase &map = GetMapping(elem);
-  si.investigated = true;
-  double pcoord[3];
-  double dist;
 
-/*
-if (si.snr.node->get_id() == 54885 || si.snr.node->get_id() == 7599) {
-std::cout << "found it" << std::endl;
-}
-*/
-  
+  // if we already have some one, then make sure this guy has a smaller id 
+  if (si.is_in && (elem.get_id()>si.elem->get_id())) return 0; 
+
+  // Get kernel
   const Kernel &ker = *elem.GetKernel();
-  
-  const MeshObjTopo *etopo = GetMeshObjTopo(elem);
-  
-  MasterElement<> &cme = *GetME(*si.src_cfield, ker)(METraits<>());
-      
-  std::vector<double> node_coord(cme.num_functions()*etopo->spatial_dim);
-      
-  GatherElemData<>(cme, *si.src_cfield, elem, &node_coord[0]);
-    
-  bool in = map.is_in_cell(&node_coord[0], si.coords, &pcoord[0], &dist);
-  /*
-if (elem.get_id() == 2426) {
-  std::cout << "Comping node " << si.snr.node->get_id() << " against 2426, in=" << in << std::endl;
-}*/
-
 
     // Setup for source masks, if used
   std::vector<double> src_node_mask;
@@ -610,18 +587,33 @@ if (elem.get_id() == 2426) {
       }
     }
  
+    // If we're masked and we already have someone then continue
+    // NOTE: if we ever care about finding the lowest gid masked elem
+    //       will have to change this
+    if (elem_masked && si.is_in) return 0; 
+
+    // Do the is_in calculation
+  const MappingBase &map = GetMapping(elem);
+  si.investigated = true;
+  double pcoord[3];
+  double dist;
+    
+  const MeshObjTopo *etopo = GetMeshObjTopo(elem);
+  
+  MasterElement<> &cme = *GetME(*si.src_cfield, ker)(METraits<>());
+      
+  std::vector<double> node_coord(cme.num_functions()*etopo->spatial_dim);
+      
+  GatherElemData<>(cme, *si.src_cfield, elem, &node_coord[0]);
+    
+  bool in = map.is_in_cell(&node_coord[0], si.coords, &pcoord[0], &dist);
+
     if (in) {
       std::copy(pcoord, pcoord+etopo->spatial_dim, &si.snr.pcoord[0]);
-      if (elem_masked) {
-	si.best_dist = 0.0;
-	si.elem = &elem;
-	si.is_in=true;
-	si.elem_masked=true;
-      } else { 
-	si.elem = &elem;
-	si.is_in=true;
-	si.elem_masked=false;
-      }
+      si.best_dist = 0.0;
+      si.elem = &elem;
+      si.is_in=true;
+      si.elem_masked=elem_masked;
     } else if (!si.is_in && (dist < si.best_dist)) {
       // Set up fallback candidate.
       std::copy(pcoord, pcoord+etopo->spatial_dim, &si.snr.pcoord[0]);
@@ -630,22 +622,8 @@ if (elem.get_id() == 2426) {
       si.elem_masked=elem_masked;
     }
     
-#if 0
-  if (in) {
-    std::copy(pcoord, pcoord+etopo->spatial_dim, &si.snr.pcoord[0]);
-    si.elem = &elem;
-  } else {
-    //si.investigated = false;
-    if (dist < si.best_dist) {
-      si.elem = &elem;
-      si.best_dist = dist;
-      std::copy(pcoord, pcoord+etopo->spatial_dim, &si.snr.pcoord[0]);
-    }
-  }
-#endif
-  
- // std::cout << "Found node:" << si.snr.node->get_id() << " in element:" << elem.get_id() << ", in=" << in << std::endl;
-  return in&&!elem_masked ? 1 : 0;
+  //  return in&&!elem_masked ? 1 : 0;
+  return 0;
 }
 
 // The main routine

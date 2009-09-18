@@ -795,6 +795,7 @@ dstmesh(dest)
   } else {
     // Serial track.  Meshes already in geometric rendezvous.  (Perhaps get
     // the subset of the mesh for interpolating??)
+#define MYSEARCH
 #ifdef MYSEARCH
 //    if (Par::Rank() == 0) std::cout << "Start search" << std::endl;
     Search(src, dest, search_obj_type, unmappedaction, sres, 1e-8);
