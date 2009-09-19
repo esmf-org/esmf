@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.17 2009/06/08 18:34:43 w6ws Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.18 2009/09/19 03:41:16 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -103,7 +103,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.17 2009/06/08 18:34:43 w6ws Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.18 2009/09/19 03:41:16 oehmke Exp $'
 
 
 !==============================================================================
@@ -397,49 +397,6 @@ end interface
         if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_StaggerLocString
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StaggerLocCustom"
-!BOPI
-! !IROUTINE: ESMF_StaggerLocCustom - Create a custom stagger location which doesn't necessarily correspond to one of the standard points in a cell
-
-! !INTERFACE:
-      subroutine ESMF_StaggerLocCustom(staggerloc,label,offsets,rc)
-!
-! !ARGUMENTS:
-      type (ESMF_StaggerLoc), intent(inout) :: staggerloc
-      integer , intent(in) :: label
-      integer, intent(in),optional :: offsets(:)
-      integer, optional :: rc 
-
-! !DESCRIPTION:
-!     Creates a custom stagger location which doesn't necessarily correspond to    
-!     one of the standard locations in the cell. This is useful if you want to 
-!     put data at a non-standard location. Note that because of their ambiguous location
-!     these staggers won't be able to be used in some ESMF functionality. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[staggerloc]
-!          Grid location to be initialized
-!     \item[label]
-!          An integer which distinguishes this custom stagger from others. 
-!     \item[offsets]
-!          An array containing +1,0 which describes how this stagger should
-!          be positioned in index space.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-
-      end subroutine ESMF_StaggerLocCustom
-
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

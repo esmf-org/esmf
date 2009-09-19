@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.132 2009/09/17 20:49:56 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.133 2009/09/19 03:41:15 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1267,11 +1267,10 @@ end interface
 !BOPI
 ! !IROUTINE: ESMF_GridConvertIndex - Convert Arbitrary Grid index into DistGrid index
 ! !INTERFACE:
-      subroutine ESMF_GridConvertIndex(grid,staggerloc,gridindex, distgridindex, rc)
+      subroutine ESMF_GridConvertIndex(grid,gridindex, distgridindex, rc)
 !
 ! !ARGUMENTS:
          type(ESMF_Grid),       intent(in)            :: grid
-         type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc
 	 integer	      , intent(in)            :: gridindex(:)
 	 integer	      , intent(out)            :: distgridindex(:)
 	 integer	      , intent(out), optional :: rc
@@ -1287,11 +1286,6 @@ end interface
 ! \begin{description}
 !\item[{grid}]
 !     The grid to get the information from to create the Array.
-!\item[{staggerloc}]
-!     The stagger location to build the Array for. 
-!     Please see Section~\ref{sec:opt:staggerloc} for a list 
-!     of predefined stagger locations. If not present, defaults to
-!      ESMF\_STAGGERLOC\_CENTER.
 ! \item[{[gridindex]}]
 !     The Grid index to be converted.
 ! \item[{[distgridindex]}]
@@ -1306,7 +1300,6 @@ end interface
     integer ::  DimCount, distDimCount, undistDimCount
     integer, pointer ::  minIndex(:)   
     integer, pointer ::  maxIndex(:)
-    integer ::  localArbIndexCount
     integer, pointer ::  distgridToGridMap(:)
     integer          :: i,j,k
     integer ::  index1D    ! the return value
@@ -1316,8 +1309,6 @@ end interface
     integer, allocatable :: undistdim(:)
     logical  :: found
     integer :: distGridDimCount, arbDim
-    integer, allocatable :: collocationPDim(:)
-    logical  :: arbSeqIndexFlag
 
 
     ! Initialize return code; assume failure until success is certain
@@ -1534,14 +1525,10 @@ end subroutine ESMF_GridConvertIndex
     type(ESMF_TypeKind) :: localTypeKind
     type(ESMF_StaggerLoc) :: localStaggerLoc
     integer          :: compEUWidth(ESMF_MAXDIM),compELWidth(ESMF_MAXDIM)
-    integer, pointer :: gridLBound(:),gridUBound(:)
     integer, pointer :: arrayLBound(:),arrayUBound(:)
-    integer, pointer :: arrayDimType(:),gridDimType(:)
-    integer, pointer :: arrayDimInd(:)
-    integer, pointer :: distgridToGridMap(:)
     integer, pointer :: distgridToArrayMap(:)
     integer :: dimCount
-    integer :: i,ungriddedDimCount, arrayDimCount, undistArrayDimCount, bndpos
+    integer :: i,ungriddedDimCount, arrayDimCount, undistArrayDimCount
     logical :: contains_nonzero
     integer :: gridUsedDimCount
    
@@ -1784,11 +1771,10 @@ end subroutine ESMF_GridConvertIndex
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_StaggerLoc) :: localStaggerLoc
     type(ESMF_GridDecompType) :: decompType
-    integer, pointer :: gridLBound(:),gridUBound(:)
-    integer, pointer :: arrayDimType(:),gridDimType(:)
+    integer, pointer :: arrayDimType(:)
     integer, pointer :: arrayDimInd(:)
     integer, pointer :: distgridToGridMap(:)
-    integer :: dimCount,distDimCount,undistDimCount, arrayDimCount
+    integer :: dimCount,distDimCount, arrayDimCount
     integer :: i,j,k,ungriddedDimCount, undistArrayDimCount, bndpos
     integer :: gridComputationalEdgeLWidth(ESMF_MAXDIM)
     integer :: gridComputationalEdgeUWidth(ESMF_MAXDIM)
@@ -1799,7 +1785,7 @@ end subroutine ESMF_GridConvertIndex
     logical :: contains_nonzero   
     integer :: fieldDimCount
     integer :: gridUsedDimCount
-    integer :: arbdim, rep_arb, rep_noarb, arraydim
+    integer :: arbdim, rep_arb, rep_noarb
     logical :: found
 
     ! Initialize return code; assume failure until success is certain
@@ -2217,8 +2203,10 @@ end subroutine ESMF_GridConvertIndex
 ! This is the most general form of creation for an {\tt ESMF\_Grid}
 ! object. It allows the user to fully specify the topology and index space
 ! using the DistGrid methods and then build a grid out
-! of the resulting DistGrid. Note that since the Grid created by this call uses {\tt distgrid} as a description of its index space, the resulting Grid will have exactly the same 
-! number of dimensions (i.e. the same dimCount) as {\tt distgrid}. The {\tt distgridToGridMap} argument
+! of the resulting DistGrid. Note that since the Grid created by this call 
+! uses {\tt distgrid} as a description of its index space, the resulting Grid 
+! will have exactly the same number of dimensions (i.e. the same dimCount) as 
+! {\tt distgrid}. The {\tt distgridToGridMap} argument
 ! specifies how the Grid dimensions are mapped to the {\tt distgrid}. 
 ! The {\tt coordDimCount} and {\tt coordDimMap} arguments
 ! allow the user to specify how the coordinate arrays should map to the grid
