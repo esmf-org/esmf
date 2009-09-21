@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.41 2009/08/19 22:57:16 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.42 2009/09/21 22:05:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -68,7 +68,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.41 2009/08/19 22:57:16 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.42 2009/09/21 22:05:58 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -552,6 +552,9 @@ contains
     integer             :: localDeCount   ! helper variable
     integer, allocatable:: localDeList(:) ! helper variable
     integer             :: de             ! helper variable
+    integer             :: rank           ! helper variable
+    integer, allocatable:: arrayToDistgridMap(:)  ! helper variable
+    integer             :: distgridDim    ! helper variable
 
     ! Initialize return code
     localrc = ESMF_RC_NOT_IMPL
@@ -561,10 +564,28 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
     
     ! Obtain auxiliary information
-    call ESMF_ArrayGet(array, distgrid=distgrid, dimCount=dimCount, &
+    call ESMF_ArrayGet(array, rank=rank, distgrid=distgrid, dimCount=dimCount, &
       delayout=delayout, deCount=deCount, localDeCount=localDeCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    if (dim < 1 .or. dim > rank) then
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+        "dim argument out of range", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
+    allocate(arrayToDistgridMap(rank))
+    call ESMF_ArrayGet(array, arrayToDistgridMap=arrayToDistgridMap, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    distgridDim = arrayToDistgridMap(dim)
+    deallocate(arrayToDistgridMap)
+    if (distgridDim == 0) then
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+        "dim argument does not map to a DistGrid dimension", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
     allocate(indexCountInternal(dimCount,0:deCount-1))
     call ESMF_DistGridGet(distgrid, indexCountPDimPDe=indexCountInternal, &
       rc=localrc)
@@ -576,7 +597,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     de=localDeList(localDe)
     deallocate(localDeList)
-    count = indexCountInternal(dim, de)
+    count = indexCountInternal(distgridDim, de)
     deallocate(indexCountInternal)
       
     ! Set indexCount output
