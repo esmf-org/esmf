@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.h,v 1.4 2009/09/04 16:52:54 theurich Exp $
+// $Id: ESMCI_VM.h,v 1.5 2009/09/21 21:05:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -102,6 +102,7 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static VM *getCurrent(int *rc);     // current VM
     static VMId *getCurrentID(int *rc); // VMId of current VM
     static int getBaseIDAndInc(VMId *vmID);
+    static void addObject(ESMC_Base *, VMId *vmID);
     // misc.
     int print() const;
     int validate() const;

@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.h,v 1.10 2009/09/04 19:09:19 theurich Exp $
+// $Id: ESMCI_LocalArray.h,v 1.11 2009/09/21 21:05:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //EOPI
 //-------------------------------------------------------------------------
 
-#include "ESMC_Base.h"  // Base is superclass to LocalArray
+#include "ESMC_Base.h"
 
 //-------------------------------------------------------------------------
 
@@ -74,7 +74,7 @@ namespace ESMCI {
 
 
   // class definition
-  class LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
+  class LocalArray{
 
    protected:
     ESMC_TypeKind typekind;         // I1, I2, I4, I8, R4, R8
@@ -95,11 +95,7 @@ namespace ESMCI {
                                     // this is memcpy'd to save and restore 
                                     // contents are not interpreted by esmf
     
-  public:
-    // native constructor
-    LocalArray(){}
-    LocalArray(int baseID):ESMC_Base(baseID){}// prevent baseID counter incr.
-    
+  public:    
    private:
     // construct() and destruct()
     int construct(bool aflag, CopyFlag docopy,
@@ -126,7 +122,7 @@ namespace ESMCI {
       const int *lbounds, const int *ubounds, int *rc);
     static int destroy(LocalArray *array);
 
-    // standard methods inherited and overridden from the ESMC_Base class
+    // standard methods
     int print(const char *options = NULL)const;
     int write(const char *options, const char *filename)const;
     int validate(const char *options)const;
@@ -142,8 +138,6 @@ namespace ESMCI {
     LocalArrayOrigin getOrigin()const{ return origin; }
     void setByteCount(int byte_count){ this->byte_count = byte_count; }
     int getByteCount()const{ return byte_count; }
-    int setName(char *name){ return ESMC_BaseSetName(name, "LocalArray"); }
-    const char *getName()const{ return ESMC_BaseGetName(); }
     void setDealloc(bool dealloc){ this->dealloc = dealloc; }
     bool getDealloc()const{ return dealloc; }
     const int *getCounts()const{ return counts; }

@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.171 2009/09/10 18:23:11 theurich Exp $
+! $Id: ESMF_State.F90,v 1.172 2009/09/21 21:05:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.171 2009/09/10 18:23:11 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.172 2009/09/21 21:05:06 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -4126,47 +4126,56 @@ module ESMF_StateMod
         ! check input variable
         ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
         
+        if (stypep%statestatus .ne. ESMF_STATUS_READY) then
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+            "uninitialized or destroyed State object", &
+            ESMF_CONTEXT, rc) 
+          return
+        endif
+        
         ! loop over all items and destroy proxy objects
-        do i=1, stypep%datacount
-          stateItem => stypep%datalist(i)
-          if (stateItem%proxyFlag) then
-            select case(stateItem%otype%ot)
-            case (ESMF_STATEITEM_FIELDBUNDLE%ot)
-              call ESMF_FieldBundleDestroy(stateItem%datap%fbp, rc=localrc)
-              if (ESMF_LogMsgFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
-              continue
-            case (ESMF_STATEITEM_FIELD%ot)
-              call ESMF_FieldDestroy(stateItem%datap%fp, rc=localrc)
-              if (ESMF_LogMsgFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
-              continue
-            case (ESMF_STATEITEM_ARRAY%ot)
-              call ESMF_ArrayDestroy(stateItem%datap%ap, rc=localrc)
-              if (ESMF_LogMsgFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
-              continue
-            case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
-              call ESMF_ArrayBundleDestroy(stateItem%datap%abp, rc=localrc)
-              if (ESMF_LogMsgFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
-              continue
-            case (ESMF_STATEITEM_STATE%ot)
-              wrapper%statep => stateItem%datap%spp
-              ESMF_INIT_SET_CREATED(wrapper)             
-              call ESMF_StateDestroy(wrapper, rc=localrc)
-              if (ESMF_LogMsgFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
-              continue
-            case default
-            end select
-          endif
-        enddo
+!TODO: took this out because it conflicts with the automatic garbage collection
+!TODO: scheme on the Component scope. *gjt*
+!        do i=1, stypep%datacount
+!          stateItem => stypep%datalist(i)
+!          if (stateItem%proxyFlag) then
+!            select case(stateItem%otype%ot)
+!            case (ESMF_STATEITEM_FIELDBUNDLE%ot)
+!              call ESMF_FieldBundleDestroy(stateItem%datap%fbp, rc=localrc)
+!              if (ESMF_LogMsgFoundError(localrc, &
+!                ESMF_ERR_PASSTHRU, &
+!                ESMF_CONTEXT, rc)) return
+!              continue
+!            case (ESMF_STATEITEM_FIELD%ot)
+!              call ESMF_FieldDestroy(stateItem%datap%fp, rc=localrc)
+!              if (ESMF_LogMsgFoundError(localrc, &
+!                ESMF_ERR_PASSTHRU, &
+!                ESMF_CONTEXT, rc)) return
+!              continue
+!            case (ESMF_STATEITEM_ARRAY%ot)
+!              call ESMF_ArrayDestroy(stateItem%datap%ap, rc=localrc)
+!              if (ESMF_LogMsgFoundError(localrc, &
+!                ESMF_ERR_PASSTHRU, &
+!                ESMF_CONTEXT, rc)) return
+!              continue
+!            case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
+!              call ESMF_ArrayBundleDestroy(stateItem%datap%abp, rc=localrc)
+!              if (ESMF_LogMsgFoundError(localrc, &
+!                ESMF_ERR_PASSTHRU, &
+!                ESMF_CONTEXT, rc)) return
+!              continue
+!            case (ESMF_STATEITEM_STATE%ot)
+!              wrapper%statep => stateItem%datap%spp
+!              ESMF_INIT_SET_CREATED(wrapper)             
+!              call ESMF_StateDestroy(wrapper, rc=localrc)
+!              if (ESMF_LogMsgFoundError(localrc, &
+!                ESMF_ERR_PASSTHRU, &
+!                ESMF_CONTEXT, rc)) return
+!              continue
+!            case default
+!            end select
+!          endif
+!        enddo
 
         ! mark object invalid, and free each of the blocks associated
         ! with each entry.  note that we are not freeing the objects
@@ -4184,12 +4193,6 @@ module ESMF_StateMod
           nullify(stypep%datalist)
         endif
         stypep%alloccount = 0
-
-        ! Release the base object
-        call ESMF_BaseDestroy(stypep%base, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
 
         ! destroy the methodTable object
         call c_ESMC_MethodTableDestroy(stypep%methodTable, localrc)

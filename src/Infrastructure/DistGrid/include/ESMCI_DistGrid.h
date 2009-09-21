@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.17 2009/09/10 21:01:34 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.18 2009/09/21 21:04:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -82,9 +82,11 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     VM *vm;    
         
   public:
-    // native constructor
+    // native constructor and destructor
     DistGrid(){}
     DistGrid(int baseID):ESMC_Base(baseID){}// prevent baseID counter increment
+    ~DistGrid(){destruct();}
+    
   private:
     // construct() and destruct()
     int construct(int dimCount, int patchCount, int *dePatchList,
@@ -173,7 +175,8 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int print() const;
     int validate() const;
     // serialize() and deserialize()
-    int serialize(char *buffer, int *length, int *offset, ESMC_InquireFlag) const;
+    int serialize(char *buffer, int *length, int *offset, ESMC_InquireFlag)
+      const;
     static DistGrid *deserialize(char *buffer, int *offset);
     // connections
     static int connection(InterfaceInt *connection, int patchIndexA, 

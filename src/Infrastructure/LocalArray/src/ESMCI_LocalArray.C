@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.C,v 1.13 2009/09/16 16:43:10 w6ws Exp $
+// $Id: ESMCI_LocalArray.C,v 1.14 2009/09/21 21:05:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.13 2009/09/16 16:43:10 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.14 2009/09/21 21:05:04 theurich Exp $";
 //-----------------------------------------------------------------------------
 
   
@@ -226,9 +226,6 @@ int LocalArray::construct(
     memcpy(base_addr, ibase_addr, byte_count);
   }
 
-  // call base class routine to set name 
-  ESMC_BaseSetName(name, "LocalArray");
-    
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -495,14 +492,7 @@ LocalArray *LocalArray::create(
     return ESMC_NULL_POINTER;
   }
 
-  // call base class routine to set name here to get unique object id
-  larrayOut->ESMC_BaseSetName(name, "LocalArray");
-  
-  // copy the LocalArray object contents while preserving base object portion
-  ESMC_Base baseTemp;
-  baseTemp = *larrayOut;  // store base object info in temp. variable
-  *larrayOut = *larrayIn; // copy larrayIn content into larrayOut includ. base
-  *((ESMC_Base*)larrayOut) = baseTemp; // override base part of larrayOut again
+  *larrayOut = *larrayIn; // copy larrayIn content into larrayOut
   
   // if lbounds and ubounds arguments were specified set them in larrayOut
   if (lbounds)

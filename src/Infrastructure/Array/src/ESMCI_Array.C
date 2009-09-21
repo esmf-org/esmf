@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.62 2009/09/09 03:45:17 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.63 2009/09/21 21:04:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.62 2009/09/09 03:45:17 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.63 2009/09/21 21:04:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -98,9 +98,9 @@ Array::Array(
   ){
 //
 // !DESCRIPTION:
-//    Construct the internal information structure of an ESMC\_Array object.
+//    Construct the internal information structure of an ESMCI::Array object.
 //    No error checking wrt consistency of input arguments is needed because
-//    ArrayConstruct() is only to be called by ArrayCreate() interfaces which
+//    Array constructor is only to be called by Array::create() interfaces which
 //    are responsible for providing consistent arguments to this layer.
 //
 //EOPI
@@ -243,59 +243,61 @@ Array::Array(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Array::~Array()"
+#define ESMC_METHOD "ESMCI::Array::destruct()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::~Array   - destructor
+// !IROUTINE:  ESMCI::Array::destruct
 //
 // !INTERFACE:
-Array::~Array(){
+void Array::destruct(void){
 //
 // !DESCRIPTION:
-//    Destruct the internal information structure of an ESMC\_Array object.
+//    Destruct the internal information structure of an ESMCI::Array object.
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // garbage collection
-  int localDeCount = delayout->getLocalDeCount();
-  for (int i=0; i<localDeCount; i++){
-    int localrc = LocalArray::destroy(larrayList[i]);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
-      throw localrc;  // bail out with exception
+  if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
+    // garbage collection
+    int localDeCount = delayout->getLocalDeCount();
+    for (int i=0; i<localDeCount; i++){
+      int localrc = LocalArray::destroy(larrayList[i]);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+        throw localrc;  // bail out with exception
+    }
+    if (larrayList != NULL)
+      delete [] larrayList;
+    if (larrayBaseAddrList != NULL)
+      delete [] larrayBaseAddrList;
+    if (exclusiveLBound != NULL)
+      delete [] exclusiveLBound;
+    if (exclusiveUBound != NULL)
+      delete [] exclusiveUBound;
+    if (computationalLBound != NULL)
+      delete [] computationalLBound;
+    if (computationalUBound != NULL)
+      delete [] computationalUBound;
+    if (totalLBound != NULL)
+      delete [] totalLBound;
+    if (totalUBound != NULL)
+      delete [] totalUBound;
+    if (undistLBound != NULL)
+      delete [] undistLBound;
+    if (undistUBound != NULL)
+      delete [] undistUBound;
+    if (distgridToArrayMap != NULL)
+      delete [] distgridToArrayMap;
+    if (arrayToDistGridMap != NULL)
+      delete [] arrayToDistGridMap;
+    if (distgridToPackedArrayMap != NULL)
+      delete [] distgridToPackedArrayMap;
+    if (contiguousFlag != NULL)
+      delete [] contiguousFlag;
+    if (exclusiveElementCountPDe != NULL)
+      delete [] exclusiveElementCountPDe;
+    if (totalElementCountPLocalDe != NULL)
+      delete [] totalElementCountPLocalDe;
+    if (distgridCreator)
+      DistGrid::destroy(&distgrid);
   }
-  if (larrayList != NULL)
-    delete [] larrayList;
-  if (larrayBaseAddrList != NULL)
-    delete [] larrayBaseAddrList;
-  if (exclusiveLBound != NULL)
-    delete [] exclusiveLBound;
-  if (exclusiveUBound != NULL)
-    delete [] exclusiveUBound;
-  if (computationalLBound != NULL)
-    delete [] computationalLBound;
-  if (computationalUBound != NULL)
-    delete [] computationalUBound;
-  if (totalLBound != NULL)
-    delete [] totalLBound;
-  if (totalUBound != NULL)
-    delete [] totalUBound;
-  if (undistLBound != NULL)
-    delete [] undistLBound;
-  if (undistUBound != NULL)
-    delete [] undistUBound;
-  if (distgridToArrayMap != NULL)
-    delete [] distgridToArrayMap;
-  if (arrayToDistGridMap != NULL)
-    delete [] arrayToDistGridMap;
-  if (distgridToPackedArrayMap != NULL)
-    delete [] distgridToPackedArrayMap;
-  if (contiguousFlag != NULL)
-    delete [] contiguousFlag;
-  if (exclusiveElementCountPDe != NULL)
-    delete [] exclusiveElementCountPDe;
-  if (totalElementCountPLocalDe != NULL)
-    delete [] totalElementCountPLocalDe;
-  if (distgridCreator)
-    DistGrid::destroy(&distgrid); 
 }
 //-----------------------------------------------------------------------------
 
@@ -338,7 +340,7 @@ Array *Array::create(
   ){
 //
 // !DESCRIPTION:
-//    Create an {\tt ESMC\_Array} object from list if LocalArrays and DistGrid.
+//    Create an {\tt ESMCI::Array} object from list if LocalArrays and DistGrid.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -970,15 +972,19 @@ Array *Array::create(
       tensorElementCount, undistLBoundArray, undistUBoundArray, 
       distgridToArrayMapArray, arrayToDistGridMapArray,
       distgridToPackedArrayMap, indexflag, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
-      return ESMC_NULL_POINTER;
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+      array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+      return NULL;
+    }
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }catch(...){
     // allocation error
     ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::Array.", rc);  
+    array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }
   
@@ -1044,7 +1050,7 @@ Array *Array::create(
   ){
 //
 // !DESCRIPTION:
-//    Create an {\tt ESMC\_Array} object from ArraySpec and DistGrid.
+//    Create an {\tt ESMCI::Array} object from ArraySpec and DistGrid.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -1536,15 +1542,19 @@ Array *Array::create(
       tensorElementCount, undistLBoundArray, undistUBoundArray, 
       distgridToArrayMapArray, arrayToDistGridMapArray,
       distgridToPackedArrayMap, indexflag, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
-      return ESMC_NULL_POINTER;
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+      array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+      return NULL;
+    }
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }catch(...){
     // allocation error
     ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::Array.", rc);  
+    array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }
   
@@ -1596,8 +1606,8 @@ Array *Array::create(
   ){
 //
 // !DESCRIPTION:
-//    Create an {\tt ESMC\_Array} object as copy of an existing
-//    {\tt ESMC\_Array} object.
+//    Create an {\tt ESMCI::Array} object as copy of an existing
+//    {\tt ESMCI::Array} object.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -1613,10 +1623,12 @@ Array *Array::create(
     }catch(int localrc){
       // catch standard ESMF return code
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+      arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return NULL;
     }catch(...){
       // allocation error
       ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::Array.", rc);  
+      arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return NULL;
     }
     // copy all scalar members and reference members
@@ -1638,8 +1650,10 @@ Array *Array::create(
     for (int i=0; i<localDeCount; i++){
       arrayOut->larrayList[i] =
         LocalArray::create(arrayIn->larrayList[i], NULL, NULL, NULL, &localrc);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,rc)){
+        arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
         return ESMC_NULL_POINTER;
+      }
     }
     // determine the base addresses of the local arrays:
     arrayOut->larrayBaseAddrList = new void*[localDeCount];
@@ -1701,10 +1715,12 @@ Array *Array::create(
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", rc);
+    arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }
   
@@ -1738,8 +1754,6 @@ int Array::destroy(
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  try{
-
   // return with errors for NULL pointer
   if (array == ESMC_NULL_POINTER || *array == ESMC_NULL_POINTER){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -1747,10 +1761,11 @@ int Array::destroy(
     return rc;
   }
 
-  // delete Array object
-  delete *array;
-  *array = ESMC_NULL_POINTER;
-  
+  try{
+    // destruct Array object
+    (*array)->destruct();
+    // mark as invalid object
+    (*array)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
@@ -5478,10 +5493,10 @@ int Array::sparseMatMulStore(
 //
 // !ARGUMENTS:
 //
-  Array *srcArray,                      // in    - source Array
-  Array *dstArray,                      // in    - destination Array
-  RouteHandle **routehandle,            // inout - handle to precomputed comm
-  vector<SparseMatrix> &sparseMatrix    // in    - sparse matrix
+  Array *srcArray,                        // in    - source Array
+  Array *dstArray,                        // in    - destination Array
+  RouteHandle **routehandle,              // inout - handle to precomputed comm
+  vector<SparseMatrix> const &sparseMatrix// in    - sparse matrix
   ){    
 //
 // !DESCRIPTION:

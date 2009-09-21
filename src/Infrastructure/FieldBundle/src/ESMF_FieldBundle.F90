@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.23 2009/09/17 20:49:56 oehmke Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.24 2009/09/21 21:05:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -2316,10 +2316,9 @@ end function
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      btype%bundlestatus = ESMF_STATUS_INVALID
-      call ESMF_BaseDestroy(btype%base, status)
+      if (btype%bundlestatus .eq. ESMF_STATUS_READY) then
 
-      if(btype%is_proxy) then
+        if(btype%is_proxy) then
           call ESMF_GridDestroy(btype%grid, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                 ESMF_ERR_PASSTHRU, &
@@ -2330,19 +2329,22 @@ end function
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
           enddo
-      endif
+        endif
 
-      if (associated(btype%flist)) then
+        if (associated(btype%flist)) then
           deallocate(btype%flist, stat=status)
           if (ESMF_LogMsgFoundAllocError(status, "FieldBundle deallocate", &
                                          ESMF_CONTEXT, rc)) return
 
+        endif
+
+        btype%bundlestatus = ESMF_STATUS_INVALID  ! invalidate
       endif
 
       ! Set as deleted 
       ESMF_INIT_SET_DELETED(btype)
 
-      if (present(rc)) rc = status
+      if (present(rc)) rc = ESMF_SUCCESS
 
 
       end subroutine ESMF_FieldBundleDestruct

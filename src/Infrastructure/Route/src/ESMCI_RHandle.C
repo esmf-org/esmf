@@ -1,4 +1,4 @@
-// $Id: ESMCI_RHandle.C,v 1.3 2009/07/31 18:21:38 theurich Exp $
+// $Id: ESMCI_RHandle.C,v 1.4 2009/09/21 21:05:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@ using namespace std;
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version = 
-  "$Id: ESMCI_RHandle.C,v 1.3 2009/07/31 18:21:38 theurich Exp $";
+  "$Id: ESMCI_RHandle.C,v 1.4 2009/09/21 21:05:04 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -79,16 +79,20 @@ RouteHandle *RouteHandle::create(
     routehandle = new RouteHandle;
 
     localrc = routehandle->construct();
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc)){
+      routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return NULL;
+    }
     
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }catch(...){
     // allocation error
     ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", rc);  
+    routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }
 
@@ -120,30 +124,23 @@ int RouteHandle::destroy(
 //EOP
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  try{
-
-    // return with errors for NULL pointer
-    if (routehandle == ESMC_NULL_POINTER){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to RouteHandle", &rc);
-      return rc;
-    }
-
-    // destruct and delete routehandle object
-    routehandle->destruct();
-    delete routehandle;
-  
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
-    return rc;
-  }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", &rc);
+  // return with errors for NULL pointer
+  if (routehandle == ESMC_NULL_POINTER){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to RouteHandle", &rc);
     return rc;
   }
+  
+  // destruct DistGrid object
+  localrc = routehandle->destruct();
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // mark as invalid object
+  routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -201,15 +198,17 @@ int RouteHandle::destruct(
 //
 //EOP
 //-----------------------------------------------------------------------------
-  switch (htype){
-  case ESMC_ARRAYXXE:
-    ESMCI::Array::sparseMatMulRelease(this);
-    break;
-  case ESMC_ARRAYBUNDLEXXE:
-    ESMCI::ArrayBundle::sparseMatMulRelease(this);
-    break;
-  default:
-    break;
+  if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
+    switch (htype){
+    case ESMC_ARRAYXXE:
+      ESMCI::Array::sparseMatMulRelease(this);
+      break;
+    case ESMC_ARRAYBUNDLEXXE:
+      ESMCI::ArrayBundle::sparseMatMulRelease(this);
+      break;
+    default:
+      break;
+    }
   }
 
   return ESMF_SUCCESS;

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.16 2009/09/04 19:09:19 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.17 2009/09/21 21:04:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -103,9 +103,10 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     int *serviceMutexFlag;      // local flag to indicate that PET holds mutex
     
   public:
-    // native constructor
+    // native constructor and destructor
     DELayout(){}
     DELayout(int baseID):ESMC_Base(baseID){}// prevent baseID counter increment
+    ~DELayout(){destruct();}
     
   private:
     // construct() and destruct()

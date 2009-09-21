@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.57 2009/09/21 19:48:12 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.58 2009/09/21 21:05:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -64,7 +64,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.57 2009/09/21 19:48:12 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.58 2009/09/21 21:05:00 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -776,22 +776,18 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    if (ftype%fieldstatus .eq. ESMF_STATUS_READY) then
 
-    ! release the base class resources
-    call ESMF_BaseDestroy(ftype%base, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+      if((ftype%is_proxy .or. ftype%array_internal) .and. &
+        ftype%datastatus .eq. ESMF_STATUS_READY) then
+          call ESMF_ArrayDestroy(ftype%array, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+          ftype%datastatus = ESMF_STATUS_INVALID  ! mark invalid
+      endif
 
-    if((ftype%is_proxy .or. ftype%array_internal) .and. &
-      ftype%datastatus .eq. ESMF_STATUS_READY) then
-        call ESMF_ArrayDestroy(ftype%array, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-    endif
-
-    if (ftype%gridstatus .eq. ESMF_STATUS_READY) then
+      if (ftype%gridstatus .eq. ESMF_STATUS_READY) then
     
         if (ftype%is_proxy) then
           call ESMF_GeomBaseGet(ftype%geombase, geomType=geomType, rc=localrc)
@@ -840,6 +836,10 @@ contains
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+      endif
+      
+      ftype%fieldstatus = ESMF_STATUS_INVALID  ! mark invalid
+      
     endif
 
     if  (present(rc)) rc = ESMF_SUCCESS

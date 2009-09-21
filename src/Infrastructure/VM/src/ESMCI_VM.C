@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.6 2009/09/04 16:52:55 theurich Exp $
+// $Id: ESMCI_VM.C,v 1.7 2009/09/21 21:05:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.6 2009/09/04 16:52:55 theurich Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.7 2009/09/21 21:05:06 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -71,6 +71,7 @@ static esmf_pthread_t matchTable_tid[ESMC_VM_MATCHTABLEMAX];
 static VM *matchTable_vm[ESMC_VM_MATCHTABLEMAX];
 static VMId matchTable_vmID[ESMC_VM_MATCHTABLEMAX];
 static int matchTable_BaseIDCount[ESMC_VM_MATCHTABLEMAX];
+static vector<vector<ESMC_Base *> > matchTable_Objects(ESMC_VM_MATCHTABLEMAX);
 //gjtNotYet static esmf_pthread_t *matchTable_tid;
 //gjtNotYet static ESMC_VM **matchTable_vm;
 //gjtNotYet static VMId *matchTable_vmID;
@@ -439,10 +440,11 @@ void *VM::startup(
           return NULL;  // bail out on error
         }
       }
-      matchTable_tid[index]  = vmp->myvms[j]->getMypthid();   // pthid
-      matchTable_vm[index]   = vmp->myvms[j];                 // ptr to this VM
-      matchTable_vmID[index] = VMIdCreate(&localrc);          // vmID
+      matchTable_tid[index]  = vmp->myvms[j]->getMypthid(); // pthid
+      matchTable_vm[index]   = vmp->myvms[j];               // ptr to this VM
+      matchTable_vmID[index] = VMIdCreate(&localrc);        // vmID
       matchTable_BaseIDCount[index] = 0;                    // reset
+      matchTable_Objects[index].reserve(1000);              // start w/ 1000 obj
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return NULL;  // bail out on error
       VMIdCopy(&(matchTable_vmID[index]), &vmID);             // deep copy
@@ -508,9 +510,25 @@ void VM::shutdown(
       if (i < matchTableBound){
         // found matching entry in the matchTable
         matchTable_vm[i] = NULL;  // mark this entry invalid
+        // destroy VMId object
         VMIdDestroy(&(matchTable_vmID[i]), &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           rc)) return;
+        // automatic garbage collection of ESMF objects
+        try{
+          for (int k=matchTable_Objects[i].size()-1; k>=0; k--){
+            delete matchTable_Objects[i][k];
+            matchTable_Objects[i].pop_back();
+          }
+        }catch(int localrc){
+          // catch standard ESMF return code
+          ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+          return;
+        }catch(...){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+            "- Caught exception", rc);
+          return;
+        }
       }else{
         // matchTable must be corrupted
         ESMC_LogDefault.MsgFoundError(ESMC_RC_MEMC,
@@ -1075,6 +1093,42 @@ int VM::getBaseIDAndInc(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::addObject()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::addObject - Add object to table for garbage collection
+//
+// !INTERFACE:
+void VM::addObject(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//
+  ESMC_Base *object,
+  VMId *vmID){   // identifying vmID
+//
+// !DESCRIPTION:
+//    Add object to matchTable_Objects list for this VM. Objects in this
+//    list will be delete during VM shutdown and finalize. This implements
+//    automatic garbage collection of ESMF objeects on the Component scope.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int i;
+  for (i=0; i<matchTableBound; i++)
+    if (VMIdCompare(vmID, &(matchTable_vmID[i]))) break;
+  if (i == matchTableBound)
+    return;  // no match found, bail out
+  
+  // match found
+  matchTable_Objects[i].push_back(object);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VM::initialize()"
 //BOPI
 // !IROUTINE:  ESMCI::VM::initialize
@@ -1119,7 +1173,8 @@ VM *VM::initialize(
   matchTable_tid[matchTableBound]  = 0;
 #endif
   matchTable_vm[matchTableBound]   = GlobalVM;
-  matchTable_BaseIDCount[matchTableBound] = 0;  // reset
+  matchTable_BaseIDCount[matchTableBound] = 0;        // reset
+  matchTable_Objects[matchTableBound].reserve(1000);  // start w/ 1000 obj
       
   // set vmID
   vmKeyWidth = GlobalVM->getNpets()/8;
@@ -1181,13 +1236,6 @@ void VM::finalize(
       "- Invalid GlobalVM", rc);
     return;
   }
-  int finalizeMpi = 1;  // set
-  if (keepMpiFlag){
-    if (*keepMpiFlag==ESMF_TRUE) finalizeMpi = 0; // reset
-  }
-  GlobalVM->VMK::finalize(finalizeMpi);
-  delete GlobalVM;
-  GlobalVM=NULL;
 
   // clean-up matchTable
   matchTableBound = 0;
@@ -1195,9 +1243,32 @@ void VM::finalize(
   VMIdDestroy(&(matchTable_vmID[0]), &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return;
+  // automatic garbage collection of ESMF objects
+  try{
+    for (int k=matchTable_Objects[0].size()-1; k>=0; k--){
+      delete matchTable_Objects[0][k];
+      matchTable_Objects[0].pop_back();
+    }
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    return;
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception", rc);
+    return;
+  }
+
 //gjtNotYet  delete [] matchTable_tid;
 //gjtNotYet  delete [] matchTable_vm;
 //gjtNotYet  delete [] matchTable_vmID;
+
+  int finalizeMpi = 1;  // set
+  if (keepMpiFlag){
+    if (*keepMpiFlag==ESMF_TRUE) finalizeMpi = 0; // reset
+  }
+  GlobalVM->VMK::finalize(finalizeMpi);
+  delete GlobalVM;
+  GlobalVM=NULL;
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;

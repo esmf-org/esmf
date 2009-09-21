@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.97 2009/09/09 03:45:17 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.98 2009/09/21 21:05:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.97 2009/09/09 03:45:17 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.98 2009/09/21 21:05:02 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -1999,20 +1999,21 @@ int Grid::destroy(
     return rc;
   }
 
-  // destruct and delete Grid object
   try{
-     delete *gridArg;
+    // destruct Grid object
+    (*gridArg)->destruct();
+    // mark as invalid object
+    (*gridArg)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
+    return rc;
   }catch(...){
-     // TODO: Change to get rid of return codes
-     // deallocation error
-     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
-      "- Error occurred in ~Grid ",&rc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", &rc);
     return rc;
   }
 
-  // set gridArg to Null
-  *gridArg = ESMC_NULL_POINTER;
-  
   // return successfully
   return ESMF_SUCCESS;
 }
@@ -4762,12 +4763,12 @@ Grid::Grid(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::~Grid()"
+#define ESMC_METHOD "ESMCI::Grid::destruct()"
 //BOPI
-// !IROUTINE:  ~Grid
+// !IROUTINE:  ESMCI::Grid::destruct
 //
 // !INTERFACE:
- Grid::~Grid(void){
+void Grid::destruct(void){
 //
 // !RETURN VALUE:
 //    none
@@ -4776,10 +4777,11 @@ Grid::Grid(
 // none
 //
 // !DESCRIPTION:
-//  Destructor for Grid, deallocates all internal memory, etc. 
+//    Destruct Grid, deallocates all internal memory, etc. 
 //
 //EOPI
 //-----------------------------------------------------------------------------
+ if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
 
    // Delete external class contents of Grid before deleting Grid
    //// Delete Arrays
@@ -4795,7 +4797,7 @@ Grid::Grid(
    //// Delete Item Arrays
    for(int i=0; i<staggerLocCount; i++) {
      for(int j=0; j<ESMC_GRIDITEM_COUNT; j++) {
-       if (itemDidIAllocList[i][j] && (itemArrayList[i][j]!=ESMC_NULL_POINTER)) {
+       if (itemDidIAllocList[i][j] && (itemArrayList[i][j]!=ESMC_NULL_POINTER)){
          Array::destroy(&itemArrayList[i][j]);
        }
      }
@@ -4874,6 +4876,7 @@ Grid::Grid(
   if (localArbIndexCount) {
     _free2D<int>(&localArbIndex);
   }
+ }
 }
 
 

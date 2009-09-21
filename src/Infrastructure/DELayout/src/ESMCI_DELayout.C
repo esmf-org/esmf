@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.21 2009/09/08 19:27:36 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.22 2009/09/21 21:04:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.21 2009/09/08 19:27:36 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.22 2009/09/21 21:04:57 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -90,8 +90,7 @@ DELayout *DELayout::create(
     delayout = new DELayout;
     localrc = delayout->construct(vm, dePinFlag, petMap, petMapCount);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
-      delete delayout;
-      delayout = ESMC_NULL_POINTER;
+      delayout->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return ESMC_NULL_POINTER;
     }
   }catch(...){
@@ -248,15 +247,15 @@ DELayout *DELayout::create(
     localrc = delayout->construct(vm, dePinFlag, petMap, petMapCount);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
       if (petMapDeleteFlag) delete [] petMap;
-      delete delayout;
-      delayout = ESMC_NULL_POINTER;
+      delayout->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return ESMC_NULL_POINTER;
     }
   }catch(...){
-     // allocation error
-     ESMC_LogDefault.ESMC_LogMsgAllocError("for new DELayout.", rc);
-     if (petMapDeleteFlag) delete [] petMap;
-     return ESMC_NULL_POINTER;
+    // allocation error
+    ESMC_LogDefault.ESMC_LogMsgAllocError("for new DELayout.", rc);
+    if (petMapDeleteFlag) delete [] petMap;
+    delayout->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
   }
   
   // final cleanup
@@ -411,12 +410,13 @@ int DELayout::destroy(
     return rc;
   }
 
-  // destruct and delete DELayout object
+  // destruct DELayout object
   localrc = (*delayout)->destruct();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
-  delete *delayout;
-  *delayout = ESMC_NULL_POINTER;
+  
+  // mark as invalid object
+  (*delayout)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -863,36 +863,38 @@ int DELayout::destruct(){
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  if (oldstyle){
-    // oldstyle DELayout has several more allocations that need to be deleted
-    for (int i=0; i<deCount; i++){
-      delete [] deInfoList[i].connect_de;
-      delete [] deInfoList[i].connect_w;
-      delete [] deInfoList[i].coord;
+  if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
+    if (oldstyle){
+      // oldstyle DELayout has several more allocations that need to be deleted
+      for (int i=0; i<deCount; i++){
+        delete [] deInfoList[i].connect_de;
+        delete [] deInfoList[i].connect_w;
+        delete [] deInfoList[i].coord;
+      }
+      if (logRectFlag == ESMF_TRUE)
+        delete [] dims;
     }
-    if (logRectFlag == ESMF_TRUE)
-      delete [] dims;
-  }
-    
-  // oldstyle and newstyle DELayout alike must delete the following members
-  delete [] deInfoList;
-  delete [] localDeList;
-  delete [] deList;
+      
+    // oldstyle and newstyle DELayout alike must delete the following members
+    delete [] deInfoList;
+    delete [] localDeList;
+    delete [] deList;
 
-  if (!oldstyle){
-    // this is only for newstyle DELayouts
-    delete [] vasLocalDeList;
-    delete [] localServiceOfferCount;
-    delete [] serviceMutexFlag;
-    if (vm!=NULL){
-      vm->ipshmdeallocate(maxServiceOfferCount);
-      for (int i=0; i<vasLocalDeCount; i++)
-        vm->ipmutexdeallocate(serviceOfferMutex[i]);
-      for (int i=0; i<vasLocalDeCount; i++)
-        vm->ipmutexdeallocate(serviceMutex[i]);
+    if (!oldstyle){
+      // this is only for newstyle DELayouts
+      delete [] vasLocalDeList;
+      delete [] localServiceOfferCount;
+      delete [] serviceMutexFlag;
+      if (vm!=NULL){
+        vm->ipshmdeallocate(maxServiceOfferCount);
+        for (int i=0; i<vasLocalDeCount; i++)
+          vm->ipmutexdeallocate(serviceOfferMutex[i]);
+        for (int i=0; i<vasLocalDeCount; i++)
+          vm->ipmutexdeallocate(serviceMutex[i]);
+      }
+      delete [] serviceOfferMutex;
+      delete [] serviceMutex;
     }
-    delete [] serviceOfferMutex;
-    delete [] serviceMutex;
   }
 
   // return successfully

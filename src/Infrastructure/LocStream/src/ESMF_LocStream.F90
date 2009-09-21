@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.17 2009/09/17 20:49:57 oehmke Exp $
+! $Id: ESMF_LocStream.F90,v 1.18 2009/09/21 21:05:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.17 2009/09/17 20:49:57 oehmke Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.18 2009/09/21 21:05:02 theurich Exp $'
 
 !==============================================================================
 !
@@ -1326,12 +1326,6 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
      endif
-
-      ! destroy base
-      call ESMF_BaseDestroy(lstypep%base, rc=localrc)       
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
 
       ! Deallocate space for key data (if its been allocated)
       if (lstypep%keyCount .gt. 0) then

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.31 2009/09/09 03:45:16 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.32 2009/09/21 21:04:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -158,7 +158,10 @@ namespace ESMCI {
       int *distgridToArrayMapArray, int *arrayToDistGridMapArray,
       int *distgridToPackedArrayMapArray, ESMC_IndexFlag indexflagArg, int *rc);
    public:
-    ~Array();
+    ~Array(){destruct();}
+   private:
+    void destruct();
+   public:
     // create() and destroy()
     static Array *create(LocalArray **larrayList, int larrayCount,
       DistGrid *distgrid, CopyFlag copyflag,
@@ -238,7 +241,7 @@ namespace ESMCI {
       RouteHandle **routehandle, ESMC_Logical checkflag=ESMF_FALSE);
     static int redistRelease(RouteHandle *routehandle);
     static int sparseMatMulStore(Array *srcArray, Array *dstArray,
-      RouteHandle **routehandle, vector<SparseMatrix> &sparseMatrix);
+      RouteHandle **routehandle, vector<SparseMatrix> const &sparseMatrix);
     static int sparseMatMul(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle,
       ESMC_RegionFlag zeroflag=ESMF_REGION_TOTAL,

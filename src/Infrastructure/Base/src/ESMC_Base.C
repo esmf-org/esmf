@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.124 2009/09/09 18:44:18 w6ws Exp $
+// $Id: ESMC_Base.C,v 1.125 2009/09/21 21:04:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.124 2009/09/09 18:44:18 w6ws Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.125 2009/09/21 21:04:55 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -893,6 +893,9 @@
   // set ID
   ID = ESMCI::VM::getBaseIDAndInc(vmID);
   
+  // add object to list for automatic garbage collection
+  ESMCI::VM::addObject(this, vmID);
+
   refCount = 1;
   strcpy(className, "global");
   sprintf(baseName, "%s%3d", "unnamed", ID);
@@ -933,6 +936,9 @@
   // set ID to objectCount;
   ID = id;
   
+  // add object to list for automatic garbage collection
+  ESMCI::VM::addObject(this, vmID);
+
   refCount = 1;
   strcpy(className, "global");
   sprintf(baseName, "%s%3d", "unnamed", ID);
@@ -971,9 +977,12 @@
 //  ESMCI::VMIdPrint(vmID);
   vmIDCreator = false;  // vmID points into global table
   
-  // set ID to objectCount;
+  // set ID to objectCount
   ID = ESMCI::VM::getBaseIDAndInc(vmID);
   
+  // add object to list for automatic garbage collection
+  ESMCI::VM::addObject(this, vmID);
+
   refCount = 1;
   strcpy(className, superclass ? superclass : "global");
   if (name && (name[0]!='\0')) 
@@ -1010,6 +1019,9 @@
 //
 //EOPI
   int i, rc;
+  
+fprintf(stderr, "gjt in ~ESMC_Base() for %p\n", this);
+  
   
   if (vmIDCreator){
     // Base object is responsible for vmID deallocation

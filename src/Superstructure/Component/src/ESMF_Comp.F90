@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.194 2009/09/08 18:50:16 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.195 2009/09/21 21:05:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -249,7 +249,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.194 2009/09/08 18:50:16 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.195 2009/09/21 21:05:06 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -823,12 +823,6 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
-    ! Release attributes and other things on base class
-    call ESMF_BaseDestroy(compp%base, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
-    
     ! Release attributes on config
     if(compp%configFile .ne. "uninitialized" ) then
       call ESMF_ConfigDestroy(compp%config, localrc)
@@ -935,7 +929,7 @@ contains
 
     if (compp%compstatus .ne. ESMF_STATUS_READY) then
       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-        "uninitialized or destroyed component", &
+        "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc) 
       return
     endif
@@ -1100,7 +1094,7 @@ contains
 
     if (compp%compstatus .ne. ESMF_STATUS_READY) then
       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-        "uninitialized or destroyed component", &
+        "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc)
       return
     endif
@@ -1223,7 +1217,7 @@ contains
 
     if (compp%compstatus .ne. ESMF_STATUS_READY) then
       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-        "uninitialized or destroyed component", &
+        "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc)
       return
     endif
@@ -1362,7 +1356,7 @@ contains
 
     if (compp%compstatus .ne. ESMF_STATUS_READY) then
       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-        "uninitialized or destroyed component", &
+        "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc)
       return
     endif
@@ -1747,7 +1741,7 @@ contains
     ! Check input
     if (.not.associated(compp)) then
       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-        "Uninitialized or destroyed component", &
+        "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc) 
       return
     endif
@@ -1757,7 +1751,7 @@ contains
 
     if (compp%compstatus .ne. ESMF_STATUS_READY) then
       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-        "uninitialized or destroyed component", &
+        "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc) 
       return
     endif

@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.16 2009/09/04 19:09:19 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.17 2009/09/21 21:04:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.16 2009/09/04 19:09:19 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.17 2009/09/21 21:04:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -76,7 +76,7 @@ ArrayBundle::ArrayBundle(
   ){
 //
 // !DESCRIPTION:
-//    Construct the internal structure of an ESMC\_ArrayBundle object.
+//    Construct the internal structure of an ESMCI::ArrayBundle object.
 //    No error checking wrt consistency of input arguments is needed because
 //    this ArrayBundle constructor is only to be called by ArrayCreate()
 //    interfaces which are responsible for providing consistent arguments to
@@ -113,25 +113,35 @@ ArrayBundle::ArrayBundle(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::ArrayBundle::~ArrayBundle()"
+#define ESMC_METHOD "ESMCI::ArrayBundle::destrict()"
 //BOPI
-// !IROUTINE:  ESMCI::ArrayBundle::~ArrayBundle   - destructor
+// !IROUTINE:  ESMCI::ArrayBundle::destruct
 //
 // !INTERFACE:
-ArrayBundle::~ArrayBundle(){
+int ArrayBundle::destruct(){
 //
 // !DESCRIPTION:
-//    Destruct the internal structure of an ESMC\_ArrayBundle object.
+//    Destruct the internal structure of an ESMCI::ArrayBundle object.
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // garbage collection
-  if (arrayList != NULL){
-    if (arrayCreator)
-      for (int i=0; i<arrayCount; i++)
-        Array::destroy(&arrayList[i]);
-    delete [] arrayList;
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
+    // garbage collection
+    if (arrayList != NULL){
+      if (arrayCreator)
+        for (int i=0; i<arrayCount; i++)
+          Array::destroy(&arrayList[i]);
+      delete [] arrayList;
+    }
   }
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 //-----------------------------------------------------------------------------
 
@@ -219,10 +229,9 @@ int ArrayBundle::destroy(
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  try{
-
   // return with errors for NULL pointer
   if (arraybundle == ESMC_NULL_POINTER || *arraybundle == ESMC_NULL_POINTER){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -230,15 +239,13 @@ int ArrayBundle::destroy(
     return rc;
   }
 
-  // delete ArrayBundle object
-  delete *arraybundle;
-  *arraybundle = ESMC_NULL_POINTER;
-  
-  }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", &rc);
+  // destruct ArrayBundle object
+  localrc = (*arraybundle)->destruct();
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
-  }
+  
+  // mark as invalid object
+  (*arraybundle)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
   
   // return successfully
   rc = ESMF_SUCCESS;

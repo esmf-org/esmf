@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.23 2009/08/07 20:45:17 svasquez Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.24 2009/09/21 21:04:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.23 2009/08/07 20:45:17 svasquez Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.24 2009/09/21 21:04:58 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -52,7 +52,7 @@
 
 !     !LOCAL VARIABLES:
       type(ESMF_VM):: vm
-      type(ESMF_DELayout):: delayout
+      type(ESMF_DELayout):: delayout, delayoutAssigned
       integer:: petCount
 
 #ifdef ESMF_TESTEXHAUSTIVE
@@ -87,7 +87,6 @@
       write(name, *) "Default OLDSTYLE DELayout Create Test"
       delayout = ESMF_DELayoutCreate(vm, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      if (rc.ne.ESMF_SUCCESS) goto 10
 
 #ifdef ESMF_TESTEXHAUSTIVE
       !------------------------------------------------------------------------
@@ -195,7 +194,6 @@
       write(name, *) "Default OLDSTYLE DELayout Destroy Test"
       call ESMF_DELayoutDestroy(delayout, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      if (rc.ne.ESMF_SUCCESS) goto 10
 
 !-------------------------------------------------------------------------------
 ! Test the NEWSTYLE DELayout ...
@@ -208,9 +206,10 @@
       write(name, *) "Default DELayout Create Test"
       delayout = ESMF_DELayoutCreate(rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      if (rc.ne.ESMF_SUCCESS) goto 10
 
 !      call ESMF_DELayoutPrint(delayout)
+
+      delayoutAssigned = delayout  ! shallow copy
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -218,8 +217,27 @@
       write(name, *) "Default DELayout Destroy Test"
       call ESMF_DELayoutDestroy(delayout, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      if (rc.ne.ESMF_SUCCESS) goto 10
 
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(failMsg, *) "Did return ESMF_SUCCESS"
+      write(name, *) "Default DELayout Destroy Twice Test"
+      call ESMF_DELayoutDestroy(delayout, rc=rc)
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "DELayout Destroy again through shallow copy Test"
+      call ESMF_DELayoutDestroy(delayoutAssigned, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(failMsg, *) "Did return ESMF_SUCCESS"
+      write(name, *) "DELayout Destroy again through shallow copy Test"
+      call ESMF_DELayoutDestroy(delayoutAssigned, rc=rc)
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_TESTEXHAUSTIVE
       !------------------------------------------------------------------------
@@ -228,7 +246,6 @@
       write(name, *) "DELayout with petList Create Test"
       delayout = ESMF_DELayoutCreate(petList=(/0,3,1,2/), rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      if (rc.ne.ESMF_SUCCESS) goto 10
 
 !      call ESMF_DELayoutPrint(delayout)
 
@@ -238,7 +255,6 @@
       write(name, *) "DELayout with petList Destroy Test"
       call ESMF_DELayoutDestroy(delayout, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      if (rc.ne.ESMF_SUCCESS) goto 10
 
 
       !------------------------------------------------------------------------
@@ -247,7 +263,6 @@
       write(name, *) "DELayout with deCount Create Test"
       delayout = ESMF_DELayoutCreate(deCount=2*petCount, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      if (rc.ne.ESMF_SUCCESS) goto 10
 
 !      call ESMF_DELayoutPrint(delayout)
 
@@ -257,7 +272,6 @@
       write(name, *) "DELayout with deCount Destroy Test"
       call ESMF_DELayoutDestroy(delayout, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      if (rc.ne.ESMF_SUCCESS) goto 10
 
 
       !------------------------------------------------------------------------
@@ -273,7 +287,6 @@
         dePinFlag=ESMF_DE_PIN_VAS, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       deallocate(deGrouping)
-      if (rc.ne.ESMF_SUCCESS) goto 10
 
 !      call ESMF_DELayoutPrint(delayout)
 
@@ -300,7 +313,6 @@
       write(name, *) "DELayout with deCount and deGrouping Destroy Test"
       call ESMF_DELayoutDestroy(delayout, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      if (rc.ne.ESMF_SUCCESS) goto 10
 
       !------------------------------------------------------------------------
       !EX_UTest
