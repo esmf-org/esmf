@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.9 2009/01/21 21:37:59 cdeluca Exp $
+!  $Id: ESMF_Field_C.F90,v 1.10 2009/09/21 20:38:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,6 +15,7 @@
 !   arrays, or ...
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_Field_C.F90"
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -23,44 +24,87 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.9 2009/01/21 21:37:59 cdeluca Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.10 2009/09/21 20:38:32 feiliu Exp $'
 !==============================================================================
-   subroutine f_esmf_fieldcreate(fieldp, rc)
-       use ESMF_UtilTypesMod    ! ESMF base class
-       use ESMF_BaseMod    ! ESMF base class
-       use ESMF_FieldMod
-     type(ESMF_Field), pointer :: fieldp
-     type(ESMF_Field), target :: thefield
-     integer, intent(out), optional :: rc              
 
-     integer :: localrc              
+  subroutine f_esmf_fieldcreate(fieldp, mesh, arrayspec, &
+    gridToFieldMap, ungriddedLBound, ungriddedUBound, rc)
 
-   ! initialize return code; assume routine not implemented
-     localrc = ESMF_RC_NOT_IMPL
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_ArraySpecMod
+    use ESMF_MeshMod
+    use ESMF_FieldMod
+    use ESMF_FieldCreateMod
 
-     thefield = ESMF_FieldCreateNoData(rc=localrc)
-    
-     fieldp => thefield
-     if (present(rc)) rc = localrc
-   end subroutine f_esmf_fieldcreate
+    ! arguments
+    type(ESMF_Field), pointer      :: fieldp
+    type(ESMF_Mesh), pointer       :: mesh
+    type(ESMF_ArraySpec)           :: arrayspec
+    integer, dimension(:), pointer :: gridToFieldMap, ungriddedLBound, ungriddedUBound
+    integer, intent(out), optional :: rc              
+  
+    ! local variables  
+    type(ESMF_Field), target :: thefield
+  
+    integer :: localrc              
+  
+  ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  
+    thefield = ESMF_FieldCreate(mesh, arrayspec=arrayspec, gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+        rc=rc)    
+   
+    fieldp => thefield
+    if (present(rc)) rc = localrc
+  end subroutine f_esmf_fieldcreate
 
-   subroutine f_esmf_fielddestroy(fieldp, rc)
-       use ESMF_UtilTypesMod    ! ESMF base class
-       use ESMF_BaseMod    ! ESMF base class
-       use ESMF_FieldMod
-     type(ESMF_Field), pointer :: fieldp      
-     integer, intent(out), optional :: rc     
+  subroutine f_esmf_fieldget(fieldp, meshp, rc)
 
-     integer :: localrc              
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_ArraySpecMod
+    use ESMF_MeshMod
+    use ESMF_FieldMod
+    use ESMF_FieldGetMod
 
-   ! initialize return code; assume routine not implemented
-     localrc = ESMF_RC_NOT_IMPL
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    type(ESMF_Field), pointer   :: fieldp
+    type(ESMF_Mesh), pointer    :: meshp
+    integer, intent(out), optional :: rc              
 
-     call ESMF_FieldDestroy(fieldp, rc=localrc)
+    integer     :: localrc
 
-     if (present(rc)) rc = localrc
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-   end subroutine f_esmf_fielddestroy
+    call ESMF_FieldGet(fieldp, mesh=meshp, rc=localrc)
 
+    if (present(rc)) rc = localrc
+  end subroutine f_esmf_fieldget
+
+  subroutine f_esmf_fielddestroy(fieldp, rc)
+
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_FieldMod
+    use ESMF_FieldCreateMod
+
+    type(ESMF_Field), pointer :: fieldp      
+    integer, intent(out), optional :: rc     
+  
+    integer :: localrc              
+  
+  ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  
+    call ESMF_FieldDestroy(fieldp, rc=localrc)
+  
+    if (present(rc)) rc = localrc
+
+  end subroutine f_esmf_fielddestroy
