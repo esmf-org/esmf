@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.C,v 1.6 2009/09/10 05:59:04 eschwab Exp $
+// $Id: ESMCI_IO_NetCDF.C,v 1.7 2009/09/21 21:42:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.6 2009/09/10 05:59:04 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.7 2009/09/21 21:42:19 theurich Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -136,13 +136,35 @@ namespace ESMCI
 //      via an {\tt ESMCI\_IO\_NetCDFCreate} routine.  Define for deep classes only.
 //
 //EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-   // TODO: io_netcdf->destruct(); constructor calls it!  ?
-   delete *io_netcdf; // ok to delete null pointer
+  // return with errors for NULL pointer
+  if (io_netcdf == ESMC_NULL_POINTER || *io_netcdf == ESMC_NULL_POINTER){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to io_netcdf", &rc);
+    return rc;
+  }
 
-   *io_netcdf = ESMC_NULL_POINTER;
-   return(ESMF_SUCCESS);
-
+  try{
+    // destruct Array object
+    (*io_netcdf)->destruct();
+    // mark as invalid object
+    (*io_netcdf)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
+    return rc;
+  }catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", &rc);
+    return rc;
+  }
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
  } // end ESMCI_IO_NetCDFDestroy
 
 //-------------------------------------------------------------------------
@@ -502,10 +524,10 @@ fflush(stdout);
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ~IO_NetCDF - native C++ destructor
+// !IROUTINE:  IO_NetCDF - destruct()
 //
 // !INTERFACE:
-      IO_NetCDF::~IO_NetCDF(void) {
+void IO_NetCDF::destruct(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -514,17 +536,12 @@ fflush(stdout);
 //    none
 //
 // !DESCRIPTION:
-//      Calls standard ESMF deep or shallow methods for destruction
+//      Destruct an IO_NetCDF object
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-  // TODO: Decrement static count for one less object; but don't decrement   //       for copies.  Must create and set a copy flag property to detect.
-  //       Also must set copy flag in copy constructor and overloaded
-  //       assignment method, and provide interface from F90.
-  // if (!copy) count--;
-
- } // end ~IO_NetCDF
+ } // end destruct()
 
 
 //-------------------------------------------------------------------------

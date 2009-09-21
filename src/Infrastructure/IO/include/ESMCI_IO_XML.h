@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.h,v 1.1 2009/09/09 05:45:13 eschwab Exp $
+// $Id: ESMCI_IO_XML.h,v 1.2 2009/09/21 21:42:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -110,7 +110,9 @@
     IO_XML(void);
     IO_XML(Attribute*);
     // IO_XML(const IO_XML &io_xml);  TODO
-    ~IO_XML(void);
+    ~IO_XML(){destruct();}
+   private:
+    void destruct();
 
     // friend function to allocate and initialize IO_XML object from heap
     friend IO_XML *ESMCI_IO_XMLCreate(int, const char*, Attribute*, int*);
