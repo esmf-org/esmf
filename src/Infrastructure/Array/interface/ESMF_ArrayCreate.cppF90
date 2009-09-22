@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.41 2009/09/22 04:23:05 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.42 2009/09/22 16:49:43 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.41 2009/09/22 04:23:05 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.42 2009/09/22 16:49:43 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -677,7 +677,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
 ! \item[{[indexflag]}]
-!      Indicate how DE-local indices are defined. By default each DE's
+!      Indicate how DE-local indices are defined. By default each DEs
 !      exclusive region is placed to start at the local index space origin,
 !      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be
 !      aligned with the global index space, if a global index space is well
@@ -967,7 +967,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
 ! \item[{[indexflag]}]
-!      Indicate how DE-local indices are defined. By default each DE's
+!      Indicate how DE-local indices are defined. By default each DEs
 !      exclusive region is placed to start at the local index space origin,
 !      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be
 !      aligned with the global index space, if a global index space is well
