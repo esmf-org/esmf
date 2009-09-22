@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGather.cppF90,v 1.15 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_ArrayGather.cppF90,v 1.16 2009/09/22 04:23:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGatherMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGather.cppF90,v 1.15 2009/01/21 21:37:58 cdeluca Exp $'
+    '$Id: ESMF_ArrayGather.cppF90,v 1.16 2009/09/22 04:23:06 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -185,8 +185,7 @@ contains
     integer                       :: localrc        ! local return code @\
     integer                       :: counts(mrank)  ! counts vector @\
     integer                       :: lb(mrank)      ! lb vector @\
-    integer                       :: i, rank, localPet, count @\
-    type(ESMF_TypeKind)           :: typekind @\
+    integer                       :: i, localPet, count @\
     type(ESMF_VM)                 :: vm_opt @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: fptr @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),allocatable :: farray_dummy @\

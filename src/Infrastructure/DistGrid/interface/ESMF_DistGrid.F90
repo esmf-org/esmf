@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.57 2009/09/10 04:24:38 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.58 2009/09/22 04:22:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.57 2009/09/10 04:24:38 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.58 2009/09/22 04:22:06 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -162,7 +162,6 @@ module ESMF_DistGridMod
 !    module procedure ESMF_DistGridGetPDe
     module procedure ESMF_DistGridGetPLocalDe
     module procedure ESMF_DistGridGetPLocalDePDim
-    module procedure ESMF_DistGridGetLinksPDe
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -1059,6 +1058,34 @@ contains
     ! Initialize the pointer to NULL
     distgrid%this = ESMF_NULL_POINTER
 
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(minIndex) == size(minIndex)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(maxIndex) == size(maxIndex)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(deBlockList) == size(deBlockList)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(deLabelList)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(indexflag)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(connectionList)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (fastaxis == fastaxis) continue
+    
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
 !      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
@@ -1411,6 +1438,30 @@ contains
     ! Initialize the pointer to NULL
     distgrid%this = ESMF_NULL_POINTER
 
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(minIndex) == size(minIndex)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(maxIndex) == size(maxIndex)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(deBlockList) == size(deBlockList)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(deLabelList)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(indexflag)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(connectionList)) continue
+
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
 !      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
@@ -1542,6 +1593,38 @@ contains
     ! Initialize the pointer to NULL
     distgrid%this = ESMF_NULL_POINTER
 
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(minIndex) == size(minIndex)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(maxIndex) == size(maxIndex)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(regDecomp)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(decompflag)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(deLabelList)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(indexflag)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(connectionList)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (fastaxis == fastaxis) continue
+    
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
 !      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
@@ -1671,6 +1754,34 @@ contains
     ! Initialize the pointer to NULL
     distgrid%this = ESMF_NULL_POINTER
 
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(minIndex) == size(minIndex)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(maxIndex) == size(maxIndex)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(deBlockList) == size(deBlockList)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(deLabelList)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(indexflag)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(connectionList)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (fastaxis == fastaxis) continue
+    
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
 !      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
@@ -2451,90 +2562,15 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridGetLinksPDe()"
-!BOPI
-! !IROUTINE: ESMF_DistGridGet - Get DE local information about links
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DistGridGet()
-  subroutine ESMF_DistGridGetLinksPDe(distgrid, de, staggerLoc, lVecInner, &
-    uVecInner, lVecOuter, uVecOuter, linkCount, linkList, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_DistGrid),    intent(in)            :: distgrid
-    integer,                intent(in)            :: de
-    integer,                intent(in)            :: staggerLoc
-    integer,                intent(in)            :: lVecInner(:)
-    integer,                intent(in)            :: uVecInner(:)
-    integer,                intent(in)            :: lVecOuter(:)
-    integer,                intent(in)            :: uVecOuter(:)
-    integer,                intent(out)           :: linkCount
-    integer, target,        intent(out), optional :: linkList(:,:)
-    integer,                intent(out), optional :: rc
-!         
-!
-! !DESCRIPTION:
-!     Query an {\tt ESMF\_DistGrid} object about the index space topology
-!     around a DE.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[distgrid] 
-!        Queried {\tt ESMF\_DistGrid} object.
-!     \item[de] 
-!        Queried DE.
-!     \item[staggerLoc] 
-!        Queried staggering location.
-!     \item[{[linkList]}]
-!        Upon return this array holds {\tt linkCount} link elements. The second
-!        index of {\tt linkList} steps through the link elements which are
-!        defined by the first index. The first index must be of size
-!        {\tt 5*dimCount + 2} and provides the link element information in the 
-!        format {\tt (/minIndex, maxIndex, partnerDe, partnerStaggerLoc, 
-!        partnerStartCorner, partnerEndCorner, partnerIndexOrder, 
-!        signChangeVector/)}.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
-    
-    linkCount = 0 ! quiet down compiler warnings while not fully implemented
-    
-    ! call into the C++ interface, which will sort out optional arguments
-!    call c_ESMC_DistGridGet(distgrid, delayout, patchCount, patchListArg, &
-!      dimCount, dimExtentArg, regDecompFlag, localrc)
-!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! return successfully
-    !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
-
-  end subroutine ESMF_DistGridGetLinksPDe
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridPrint()"
 !BOP
 ! !IROUTINE: ESMF_DistGridPrint - Print DistGrid internals
 
 ! !INTERFACE:
-  subroutine ESMF_DistGridPrint(distgrid, options, rc)
+  subroutine ESMF_DistGridPrint(distgrid, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),  intent(in)              :: distgrid
-    character(len=*),     intent(in),   optional  :: options
     integer,              intent(out),  optional  :: rc  
 !         
 !
@@ -2552,8 +2588,6 @@ contains
 !     \begin{description}
 !     \item[distgrid] 
 !          Specified {\tt ESMF\_DistGrid} object.
-!     \item[{[options]}] 
-!          Print options are not yet supported.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.40 2009/09/09 03:45:17 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.41 2009/09/22 04:23:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.40 2009/09/09 03:45:17 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.41 2009/09/22 04:23:05 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1638,6 +1638,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
       opt_haloWidth => dummy
       len_haloWidth = 0
     endif
+    
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(opt_haloWidth) == size(opt_haloWidth)) continue
+
+
 
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_ArrayCreate(array, larray, opt_haloWidth, len_haloWidth, &
