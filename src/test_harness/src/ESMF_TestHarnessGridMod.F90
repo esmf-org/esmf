@@ -162,7 +162,14 @@
               rcToReturn=rc)
        return
      end select
+  !-----------------------------------------------------------------------------
+  ! clean up CF     
+  !-----------------------------------------------------------------------------
+  call ESMF_ConfigDestroy(localcf, rc=localrc) 
+  if( ESMF_LogMsgFoundError(localrc, "cannot destroy config object",            &
+                            rcToReturn=rc) ) return
 
+              
   !-----------------------------------------------------------------------------
   rc = ESMF_SUCCESS     
   !-----------------------------------------------------------------------------
@@ -537,6 +544,13 @@
   ! deallocate workspace
   !-----------------------------------------------------------------------------
   deallocate( ncolumns )
+
+  !-----------------------------------------------------------------------------
+  ! clean up CF     
+  !-----------------------------------------------------------------------------
+  call ESMF_ConfigDestroy(localcf, rc=localrc) 
+  if( ESMF_LogMsgFoundError(localrc, "cannot destroy config object",            &
+                            rcToReturn=rc) ) return
 
   !-----------------------------------------------------------------------------
   ! set error code to SUCCESS
@@ -1109,6 +1123,13 @@
   ! deallocate workspace
   !-----------------------------------------------------------------------------
   deallocate( ncolumns )
+
+  !-----------------------------------------------------------------------------
+  ! clean up CF     
+  !-----------------------------------------------------------------------------
+  call ESMF_ConfigDestroy(localcf, rc=localrc) 
+  if( ESMF_LogMsgFoundError(localrc, "cannot destroy config object",            &
+                            rcToReturn=rc) ) return
 
   !-----------------------------------------------------------------------------
   ! set error code to SUCCESS

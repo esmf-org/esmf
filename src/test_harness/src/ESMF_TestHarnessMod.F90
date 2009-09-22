@@ -584,6 +584,13 @@
     !---------------------------------------------------------------------------
     ! finish cleaning up workspace before opening new file
     !---------------------------------------------------------------------------
+
+    do k=1, npds
+      deallocate ( lstring(k)%tag )
+    enddo
+    do kstr=1,nstrings(kfile)
+      deallocate ( ltmpstring(kstr)%tag )
+    enddo  
     deallocate( ncolumns, kcount )
     deallocate( ltmpstring, lstring )
     deallocate( pds_loc, pds_flag )
