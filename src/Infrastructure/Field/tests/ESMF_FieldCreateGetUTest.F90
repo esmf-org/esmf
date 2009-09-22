@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.47 2009/09/09 05:38:00 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.48 2009/09/22 16:27:30 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -6468,7 +6468,6 @@ contains
         integer, dimension(:), allocatable          :: l_g2fm, l_dg2gm, distgridToArrayMap
         integer, dimension(:), allocatable          :: l_mhlw, l_mhuw, celw, ceuw
 
-        type(ESMF_VM)                               :: vm
         type(ESMF_Field)                            :: field1
         integer(ESMF_KIND_I4), pointer              :: buffer(:)
         integer                                     :: length, offset
@@ -6480,11 +6479,6 @@ contains
         offset = 0
         allocate(buffer(length))
 
-        call ESMF_VMGetCurrent(vm, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
-    
         ! create distgrid
         distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
             regDecomp=regDecomp, rc=localrc)
@@ -6667,7 +6661,7 @@ contains
 
             offset = 0
 
-            field1 = ESMF_FieldDeserialize(vm, buffer, offset, rc=localrc)
+            field1 = ESMF_FieldDeserialize(buffer, offset, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return

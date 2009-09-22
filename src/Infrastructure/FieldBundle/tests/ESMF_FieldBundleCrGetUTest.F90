@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.15 2009/09/17 13:04:20 feiliu Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.16 2009/09/22 16:27:41 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -449,7 +449,6 @@ contains
 
         ! local variables
         type(ESMF_FieldBundle)                      :: bundle1
-        type(ESMF_VM)                               :: vm
 
         integer(ESMF_KIND_I4), pointer              :: buffer(:)
         integer                                     :: length, offset, localrc
@@ -461,11 +460,6 @@ contains
         offset = 0
         allocate(buffer(length))
 
-        call ESMF_VMGetCurrent(vm, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
-
         ! call serialize and deserialize and verify again
         call ESMF_FieldBundleSerialize(bundle, buffer, length, offset, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -474,7 +468,7 @@ contains
 
         offset = 0
 
-        bundle1 = ESMF_FieldBundleDeserialize(vm, buffer, offset, rc=localrc)
+        bundle1 = ESMF_FieldBundleDeserialize(buffer, offset, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
