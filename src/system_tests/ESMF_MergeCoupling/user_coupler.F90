@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.17 2009/03/23 20:40:48 theurich Exp $
+! $Id: user_coupler.F90,v 1.18 2009/09/22 14:56:34 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -155,16 +155,16 @@
         ! Get input data
         call ESMF_StateGetField(importState, "humidity", humidity1, &
                                 "comp1 export", rc)
-        call ESMF_FieldPrint(humidity1, "", rc=rc)
+        call ESMF_FieldPrint(humidity1, rc=rc)
 
         call ESMF_StateGetField(importState, "humidity", humidity2, &
                                 "comp2 export", rc)
-        call ESMF_FieldPrint(humidity2, "", rc=rc)
+        call ESMF_FieldPrint(humidity2, rc=rc)
 
 
         ! Get location of output data
         call ESMF_StateGetField(exportState, "humidity", humidity3, rc=rc)
-        call ESMF_FieldPrint(humidity3, "", rc=rc)
+        call ESMF_FieldPrint(humidity3, rc=rc)
 
         ! These are fields on different layouts - call Redist to rearrange
         !  the data using the Comm routines.

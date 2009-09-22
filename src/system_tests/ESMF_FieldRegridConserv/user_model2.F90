@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.18 2009/03/23 20:40:48 theurich Exp $
+! $Id: user_model2.F90,v 1.19 2009/09/22 14:56:34 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -189,7 +189,7 @@
       ! Get information from the component.
   !    call ESMF_StatePrint(importState, rc=status)
       call ESMF_StateGetField(importState, "humidity", humidity, rc=status)
-  !    call ESMF_FieldPrint(humidity, "", rc=status)
+  !    call ESMF_FieldPrint(humidity, rc=status)
     
       ! This is where the model specific computation goes.
       print *, "Imported Array in user model 2:"

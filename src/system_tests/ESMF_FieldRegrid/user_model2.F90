@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.53 2009/08/07 14:59:07 feiliu Exp $
+! $Id: user_model2.F90,v 1.54 2009/09/22 14:56:33 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -157,7 +157,7 @@
       ! Get information from the component.
       call ESMF_StateGet(importState, "humidity", humidity, rc=rc)
       if(rc/=ESMF_SUCCESS) return
-  !    call ESMF_FieldPrint(humidity, "", rc=rc)
+  !    call ESMF_FieldPrint(humidity, rc=rc)
 
       print *, "User Comp Run returning"
 

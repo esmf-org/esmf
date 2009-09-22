@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.25 2009/07/22 20:48:33 theurich Exp $
+! $Id: user_model.F90,v 1.26 2009/09/22 14:56:31 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -209,7 +209,7 @@
    
         call ESMF_StatePrint(importState, rc=status)
         call ESMF_StateGet(importState, "humidity", humidity, rc=status)
-        call ESMF_FieldPrint(humidity, "", rc=status)
+        call ESMF_FieldPrint(humidity, rc=status)
 
         ! This is where the model specific computation goes.
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.54 2009/03/23 20:40:48 theurich Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.55 2009/09/22 14:56:33 feiliu Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -279,9 +279,9 @@
       field1 = ESMF_FieldCreate(igrid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=halo_width, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_FieldPrint(field1, "", rc)
+      call ESMF_FieldPrint(field1, rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_FieldValidate(field1, "", rc)
+      call ESMF_FieldValidate(field1, rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       print *, "Field Create returned"
 
