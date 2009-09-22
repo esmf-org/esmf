@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.337 2009/09/17 20:49:55 oehmke Exp $
+! $Id: ESMF_Field.F90,v 1.338 2009/09/22 14:20:53 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,6 @@ module ESMF_FieldMod
   use ESMF_UtilTypesMod
   use ESMF_UtilMod
   use ESMF_BaseMod
-  use ESMF_VMMod
   use ESMF_LogErrMod
   use ESMF_IOSpecMod
   use ESMF_ArraySpecMod
@@ -67,35 +66,6 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
   private
-!------------------------------------------------------------------------------
-! ! ESMF_Access
-!
-! ! Internal flag for tracking whether data is attached. 
-
-  type ESMF_Access
-    sequence
-    private
-    integer :: a_type
-  end type
-
-  type(ESMF_Access), parameter ::  &
-    ESMF_READWRITE = ESMF_Access(0), &
-    ESMF_READONLY = ESMF_Access(1)
-
-!------------------------------------------------------------------------------
-! ! ESMF_AllocFlag
-!
-! ! Interface flag for setting whether Field does the data allocation.
-
-  type ESMF_AllocFlag
-    sequence
-    private
-    integer :: a_type
-  end type
-
-  type(ESMF_AllocFlag), parameter ::  &
-    ESMF_ALLOC = ESMF_AllocFlag(0), &
-    ESMF_NO_ALLOC = ESMF_AllocFlag(1)
 
 !------------------------------------------------------------------------------
 ! ! ESMF_FieldType
@@ -138,9 +108,8 @@ module ESMF_FieldMod
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-  public ESMF_Field, ESMF_Access
+  public ESMF_Field
   public ESMF_FieldType ! For internal use only
-  public ESMF_AllocFlag, ESMF_NO_ALLOC, ESMF_ALLOC
 
 !------------------------------------------------------------------------------
 !
@@ -149,35 +118,22 @@ module ESMF_FieldMod
 ! - ESMF-public methods:
    public ESMF_FieldValidate           ! Check internal consistency
 
-   public ESMF_FieldWrite              ! Write data and Grid from a Field
-
    public assignment(=)
 
 ! - ESMF-internal methods:
-   public ESMF_FieldTypeGetInit        ! For Standardized Initialization
-   public ESMF_FieldTypeInit           ! For Standardized Initialization
-   public ESMF_FieldTypeValidate
    public ESMF_FieldGetInit            ! For Standardized Initialization
    public ESMF_FieldSerialize
    public ESMF_FieldDeserialize
    public ESMF_FieldInitialize         ! Default initiailze field member variables
 
-!  !subroutine ESMF_FieldWriteRestart(field, iospec, rc)
-!  !function ESMF_FieldReadRestart(name, iospec, rc)
-!  !subroutine ESMF_FieldWrite(field, subset, iospec, rc)
-!  !function ESMF_FieldRead(fname, gname, dnames, iospec, rc)
 !
 !
 !EOPI
-
-! !PRIVATE MEMBER FUNCTIONS:
-
-   private ESMF_FieldWriteFileASCII
    
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.337 2009/09/17 20:49:55 oehmke Exp $'
+    '$Id: ESMF_Field.F90,v 1.338 2009/09/22 14:20:53 feiliu Exp $'
 
 !==============================================================================
 !
@@ -249,68 +205,16 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldReadRestart"
-
-!BOPI
-! !IROUTINE: ESMF_FieldReadRestart - Read back in a saved Field
-!
-! !INTERFACE:
-      function ESMF_FieldReadRestart(name, iospec, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Field) :: ESMF_FieldReadRestart
-!
-!
-! !ARGUMENTS:
-      character (len = *), intent(in) :: name
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!      Used to reinitialize
-!      all data associated with an {\tt ESMF\_Field} from the 
-!      last call to WriteRestart.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [name]
-!           An {\tt ESMF\_Field} name.
-!     \item [{[iospec]}]
-!            I/O specification.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-
-!       BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
-
-!
-! TODO: code goes here; this is just filler to make the compiler not complain
-!
-        type (ESMF_Field) :: a
-
-        ! Initialize
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL     
-        nullify(a%ftypep)
-
-        ESMF_FieldReadRestart = a
-
-        end function ESMF_FieldReadRestart
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldValidate"
 
 !BOP
 ! !IROUTINE:  ESMF_FieldValidate - Check validity of a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldValidate(field, options, rc)
+      subroutine ESMF_FieldValidate(field, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field 
-      character (len = *), intent(in), optional :: options 
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -328,8 +232,6 @@ contains
 !     \begin{description}
 !     \item [field]
 !           {\tt ESMF\_Field} to validate.
-!     \item [{[options]}]
-!           Validation options are not yet supported.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt field} 
 !           is valid.
@@ -388,18 +290,18 @@ contains
                                     ESMF_CONTEXT, rc)) return
 
 	  ! get the grid decomp type if geombase is grid
-	  decompType = ESMF_GRID_NONARBITRARY
-    	  call ESMF_GeomBaseGet(ftypep%geombase, geomType=geomType, rc=localrc)
-    	  if (ESMF_LogMsgFoundError(localrc, &  
-        	ESMF_ERR_PASSTHRU, &  
-        	ESMF_CONTEXT, rc)) return  
-
-    	  if (geomType .eq. ESMF_GEOMTYPE_GRID) then
+      decompType = ESMF_GRID_NONARBITRARY
+          call ESMF_GeomBaseGet(ftypep%geombase, geomType=geomType, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &  
+            ESMF_ERR_PASSTHRU, &  
+            ESMF_CONTEXT, rc)) return  
+          
+          if (geomType .eq. ESMF_GEOMTYPE_GRID) then
              call ESMF_GeomBaseGet(ftypep%geombase, grid=grid, rc=localrc)
              if (ESMF_LogMsgFoundError(localrc, &  
           	    ESMF_ERR_PASSTHRU, &  
            	    ESMF_CONTEXT, rc)) return  
-       	     call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
+             call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
              if (ESMF_LogMsgFoundError(localrc, &  
           	    ESMF_ERR_PASSTHRU, &  
            	    ESMF_CONTEXT, rc)) return  
@@ -535,323 +437,6 @@ contains
       end subroutine ESMF_FieldValidate
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldWrite"
-
-!BOPI
-! !IROUTINE: ESMF_FieldWrite - Write a Field to external storage
-!
-! !INTERFACE:
-      subroutine ESMF_FieldWrite(field, iospec, timestamp, rc)
-!
-! !ARGUMENTS:
-        type(ESMF_Field), intent(inout) :: field
-        type(ESMF_IOSpec), intent(in), optional :: iospec
-        type(ESMF_Time), intent(in), optional :: timestamp 
-        integer, intent(out), optional :: rc               ! return code
-
-!
-! !DESCRIPTION:
-!      Used to write data to persistent storage in a variety of formats.  
-!      (see WriteRestart/ReadRestart for quick data dumps.)  Details of I/O 
-!      options specified in the IOSpec derived type. 
-!
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [name]
-!           An {\tt ESMF\_Field} name.
-!     \item [{[iospec]}]
-!            I/O specification. ! NOT IMPLEMENTED
-!     \item [{[timestamp]}]
-!            A timestamp of type {\tt ESMF\_Time} for the data.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-        ! Local variables
-        integer :: localrc, de_id
-        type(ESMF_Array) :: out_array
-        type(ESMF_TypeKind) arr_kind
-        integer out_rank
-        integer out_kind
-        integer, dimension(:), pointer :: out_counts
-        integer, dimension(:), pointer :: out_lbounds
-        integer, dimension(:), pointer :: out_ubounds
-        integer, dimension(:), pointer :: out_strides
-        type(ESMF_Grid) :: grid
-        type(ESMF_DistGrid) :: distgrid
-        type(ESMF_DELayout) :: delayout
-        type (ESMF_IOFileFormat) :: fileformat
-        type(ESMF_Time) :: ts
-        character (19) Date
-      
-        ! Initialize
-        localrc = ESMF_RC_NOT_IMPL
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-#if 0           
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
-
-! TODO:FIELDINTEGRATION Restore the ESMF_FieldWrite() method.
-
-        ! Get filename out of IOSpec, if specified.  Otherwise use the
-        ! name of the Field.
-        if (present(IOSpec)) then
-           call ESMF_IOSpecGet(IOSpec, iofileformat=fileformat, rc=localrc)
-           if (fileformat == ESMF_IO_FILEFORMAT_HDF) then
-              print*, "HDF output is not currently supported."
-              return
-           else if (fileformat == ESMF_IO_FILEFORMAT_UNSPECIFIED) then
-              call ESMF_FieldWriteFileASCII(field, iospec, rc=localrc)
-              if (ESMF_LogMsgFoundError(localrc, &
-                                        ESMF_ERR_PASSTHRU, &
-                                        ESMF_CONTEXT, rc)) return
-              if (present(rc)) rc = ESMF_SUCCESS
-              return
-           else if (fileformat == ESMF_IO_FILEFORMAT_NETCDF) then
-              print*, "NetCDF output is not currently supported."
-              return
-           else
-              print*, "Unrecognized IO Fileformat."
-              return
-           endif
-        else ! No IOSpec passed in, so check in the Field
-           call ESMF_IOSpecGet(field%ftypep%iospec, iofileformat=fileformat, rc=localrc)
-           if (fileformat == ESMF_IO_FILEFORMAT_HDF) then
-              print*, "HDF output is not currently supported."
-              return
-           else if (fileformat == ESMF_IO_FILEFORMAT_UNSPECIFIED) then
-           call ESMF_FieldWriteFileASCII(field, iospec, rc=localrc)
-              if (ESMF_LogMsgFoundError(localrc, &
-                                        ESMF_ERR_PASSTHRU, &
-                                        ESMF_CONTEXT, rc)) return
-              if (present(rc)) rc = ESMF_SUCCESS
-
-              return
-           else if (fileformat == ESMF_IO_FILEFORMAT_NETCDF) then
-              print*, "NetCDF output is not currently supported."
-              return
-           else
-              print*, "Unrecognized IO Fileformat."
-              return
-           endif
-        endif
-
-        if ( present(timestamp) ) then
-           ts = timestamp
-        else
-           ! as a default, set the date/time as the current real time.
-           call ESMF_TimeSyncToRealTime(ts, localrc)
-        endif
-        ! get the date from the timestamp.
-        call ESMF_TimeGet(ts, timeString=Date, rc=localrc)
-        Date = Date(1:10)//'_'//Date(12:19)
-
-        ! Collect results on DE 0 and output to a file
-        call ESMF_FieldGet(field, grid=grid, rc=localrc)
-!!$        call ESMF_FieldGet( field, name=fieldname, rc=localrc)
-! TODO:FIELDINTEGRATION Find another way to get the localDE.
-        call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
-        call ESMF_DistGridGet(distgrid, delayout=delayout, rc=localrc)
-        call ESMF_DELayoutGetDeprecated(delayout, localDE=de_id, rc=localrc)
-
-        ! Output to file, from de_id 0 only
-!!$        call ESMF_FieldAllGather(field, out_array, rc=localrc)
-! TODO:FIELDINTEGRATION IArrayComms are being removed.
-!        call ESMF_IArrayGather(field%ftypep%array, &
-!                              field%ftypep%grid, field%ftypep%mapping, &
-!                              0, out_array, rc=localrc)
-
-
-        if (de_id .eq. 0) then       
-        call ESMF_InternArrayGet(out_array, out_rank, arr_kind, rc=rc)
-        allocate(out_counts (out_rank), &
-                 out_lbounds(out_rank), &
-                 out_ubounds(out_rank), &
-                 out_strides(out_rank), stat=rc)
-        call ESMF_InternArrayGet(out_array, counts=out_counts, lbounds=out_lbounds, &
-                           ubounds=out_ubounds, strides=out_strides, rc=rc)
-
-        out_kind = arr_kind%dkind
-
-        endif ! (de_id .eq. 0) then  
-
-        call ESMF_InternArrayDestroy(out_array, rc=localrc)
-        if  (present(rc)) rc = ESMF_SUCCESS
-#endif
-        
-        end subroutine ESMF_FieldWrite
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_FieldWriteFileASCII - Write a Field to external storage
-!
-! !INTERFACE:
-      subroutine ESMF_FieldWriteFileASCII(field, & ! subset, 
-                                 iospec, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(inout) :: field 
-!     type(ESMF_Subset), intent(in), optional :: subset
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      integer, intent(out), optional :: rc  
-!
-! !DESCRIPTION:
-!      Used to write data to persistent storage in a variety of formats.  
-!      (see WriteRestart/ReadRestart for quick data dumps.)  Details of I/O 
-!      options specified in the IOSpec derived type. 
-!
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [name]
-!           An {\tt ESMF\_Field} name.
-!     \item [{[subset]}]
-!            {\tt ESMF\_Subset}.
-!     \item [{[iospec]}]
-!            I/O specification. ! NOT IMPLEMENTED
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-        ! Local variables
-        integer :: localrc, de_id
-        type(ESMF_Array) :: outarray
-        type(ESMF_GeomBase) :: geombase
-        type(ESMF_DistGrid) :: distgrid
-        type(ESMF_DELayout) :: delayout
-        character(len=ESMF_MAXSTR) :: filename
-        character(len=ESMF_MAXSTR) :: name
-
-! TODO:FIELDINTEGRATION Restore the ESMF_FieldWriteFileASCII() method.
-
-        ! Initialize
-        localrc = ESMF_RC_NOT_IMPL 
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-#if 0 
-        ! check variables
-        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
-           
-        ! Get filename out of IOSpec, if specified.  Otherwise use the
-        ! name of the Field.
-        if (present(IOSpec)) then
-            call ESMF_IOSpecGet(IOSpec, filename=filename, rc=localrc)
-        else
-            call ESMF_FieldGet(field, name=filename, rc=localrc)
-        endif
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        ! Collect results on DE 0 and output to a file
-        call ESMF_FieldGet(field, grid=grid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-! TODO: May want to get DELayout directly from Grid - however this 
-!       may be a deprecated use of DELayout.
-        call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        call ESMF_DistGridGet(distgrid, delayout=delayout, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        call ESMF_DELayoutGetDeprecated(delayout, localDE=de_id, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        write(name,'(i1)') de_id
-        call ESMF_InternArrayWrite(field%ftypep%array,&
-                             filename=trim(name), rc=localrc)
-
-        ! Output to file, from de_id 0 only
-        call ESMF_IArrayGather(field%ftypep%array, &
-                              field%ftypep%grid, field%ftypep%mapping, &
-                              0, outarray, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-        !call ESMF_FieldAllGather(field, outarray, rc=localrc)
-        if (de_id .eq. 0) then       
-            call ESMF_InternArrayWrite(outarray, filename=filename, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
-                                      ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rc)) return
-            call ESMF_InternArrayDestroy(outarray, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
-                                      ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rc)) return
-        endif
-
-      if (present(rc)) rc = ESMF_SUCCESS
-#endif
-
-      end subroutine ESMF_FieldWriteFileASCII
-        
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldWriteRestart"
-
-!BOPI
-! !IROUTINE: ESMF_FieldWriteRestart - Save Field in the quickest manner possible
-!
-! !INTERFACE:
-      subroutine ESMF_FieldWriteRestart(field, iospec, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(inout) :: field 
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!      Used to save all data to disk as quickly as possible.  
-!      (see Read/Write for other options).  Internally this routine uses the
-!      same I/O interface as Read/Write, but the default options are to
-!      select the fastest way to save data to disk.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           An {\tt ESMF\_Field} object.
-!     \item [{[iospec]}]
-!            I/O specification.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-        ! Initialize
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-        ! check variables
-        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
-
-!       BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
-!
-! TODO: code goes here
-!
-        end subroutine ESMF_FieldWriteRestart
-
-
-!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
 ! This section includes all Field internal methods.
@@ -983,14 +568,13 @@ contains
 ! !IROUTINE: ESMF_FieldDeserialize - Deserialize a byte stream into a Field
 !
 ! !INTERFACE:
-      function ESMF_FieldDeserialize(vm, buffer, offset, &
+      function ESMF_FieldDeserialize(buffer, offset, &
                                     attreconflag, rc) 
 !
 ! !RETURN VALUE:
       type(ESMF_Field) :: ESMF_FieldDeserialize   
 !
 ! !ARGUMENTS:
-      type(ESMF_VM), intent(in) :: vm
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       type(ESMF_AttReconcileFlag), optional :: attreconflag
@@ -1005,8 +589,6 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [vm]
-!           Current VM in which this object should be created.
 !     \item [buffer]
 !           Data buffer which holds the serialized information.
 !     \item [offset]
@@ -1110,103 +692,6 @@ contains
       end function ESMF_FieldDeserialize
 
 !----------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldTypeGetInit"
-!BOPI
-! !IROUTINE:  ESMF_FieldTypeGetInit - Get initialization status.
-
-! !INTERFACE:
-    function ESMF_FieldTypeGetInit(s)
-!
-! !ARGUMENTS:
-       type(ESMF_FieldType), intent(in), optional :: s
-       ESMF_INIT_TYPE :: ESMF_FieldTypeGetInit
-!
-! !DESCRIPTION:
-!      Get the initialization status of the shallow class {\tt fieldtype}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [s]
-!           {\tt ESMF\_FieldType} from which to retrieve status.
-!     \end{description}
-!
-!EOPI
-
-       if (present(s)) then
-         ESMF_FieldTypeGetInit = ESMF_INIT_GET(s)
-       else
-         ESMF_FieldTypeGetInit = ESMF_INIT_DEFINED
-       endif
-
-    end function ESMF_FieldTypeGetInit
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldTypeInit"
-!BOPI
-! !IROUTINE:  ESMF_FieldTypeInit - Initialize FieldType
-
-! !INTERFACE:
-    subroutine ESMF_FieldTypeInit(s)
-!
-! !ARGUMENTS:
-       type(ESMF_FieldType) :: s
-!
-! !DESCRIPTION:
-!      Initialize the shallow class {\tt fieldtype}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [s]
-!           {\tt ESMF\_FieldType} of which being initialized.
-!     \end{description}
-!
-!EOPI
-
-        s%fieldstatus   = ESMF_STATUS_UNINIT
-        s%gridstatus    = ESMF_STATUS_UNINIT
-        s%datastatus    = ESMF_STATUS_UNINIT
-        s%array_internal = .false.
-        ESMF_INIT_SET_DEFINED(s)
-    end subroutine ESMF_FieldTypeInit
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldTypeValidate"
-!BOPI
-! !IROUTINE:  ESMF_FieldTypeValidate - Check validity of a FieldType
-
-! !INTERFACE:
-    subroutine ESMF_FieldTypeValidate(s,rc)
-!
-! !ARGUMENTS:
-       type(ESMF_FieldType), intent(inout) :: s
-       integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Validates that the {\tt FieldType} is internally consistent.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [s]
-!           {\tt ESMF\_FieldType} to validate.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt s}
-!           is valid.
-!     \end{description}
-!
-!EOPI
-
-     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldTypeGetInit,ESMF_FieldTypeInit,s)
-
-     ! return success
-     if(present(rc)) then
-       rc = ESMF_SUCCESS
-     endif
-    end subroutine ESMF_FieldTypeValidate
 
 
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.24 2009/09/21 21:05:01 theurich Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.25 2009/09/22 14:22:00 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -38,7 +38,6 @@
 ! !USES:
       use ESMF_UtilTypesMod    ! ESMF base class
       use ESMF_BaseMod
-      use ESMF_VMMod
       use ESMF_LogErrMod
       use ESMF_IOSpecMod
       use ESMF_StaggerLocMod
@@ -2476,14 +2475,13 @@ end function
 ! !IROUTINE: ESMF_FieldBundleDeserialize - Deserialize a byte stream into a FieldBundle
 !
 ! !INTERFACE:
-      function ESMF_FieldBundleDeserialize(vm, buffer, offset, &
+      function ESMF_FieldBundleDeserialize(buffer, offset, &
                                           attreconflag, rc) 
 !
 ! !RETURN VALUE:
       type(ESMF_FieldBundle) :: ESMF_FieldBundleDeserialize   
 !
 ! !ARGUMENTS:
-      type(ESMF_VM), intent(in) :: vm
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       type(ESMF_AttReconcileFlag), optional :: attreconflag
@@ -2498,8 +2496,6 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [vm]
-!           Current VM in which this object should be created.
 !     \item [buffer]
 !           Data buffer which holds the serialized information.
 !     \item [offset]
@@ -2588,7 +2584,7 @@ end function
                                      ESMF_CONTEXT, rc)) return
 
       do i = 1, bp%field_count
-          bp%flist(i) = ESMF_FieldDeserialize(vm, buffer, offset, &
+          bp%flist(i) = ESMF_FieldDeserialize(buffer, offset, &
                                       attreconflag=lattreconflag, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &

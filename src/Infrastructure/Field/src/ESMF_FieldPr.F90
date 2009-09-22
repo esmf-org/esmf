@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.6 2009/06/06 00:46:53 w6ws Exp $
+! $Id: ESMF_FieldPr.F90,v 1.7 2009/09/22 14:20:54 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -80,12 +80,11 @@ contains
 ! !IROUTINE:  ESMF_FieldPrint - Print the contents of a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldPrint(field, options, rc)
+      subroutine ESMF_FieldPrint(field, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field 
-      character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -103,8 +102,6 @@ contains
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
-!     \item [{[options]}]
-!           Print options are not yet supported.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -115,9 +112,7 @@ contains
         type(ESMF_FieldType), pointer   :: fp 
         integer                         :: i, localrc
         integer                         :: gridrank, arrayrank
-        !character(len=ESMF_MAXSTR) :: msgbuf
         character(len=6)                :: defaultopts
-
 
 !	Initialize
         localrc = ESMF_RC_NOT_IMPL

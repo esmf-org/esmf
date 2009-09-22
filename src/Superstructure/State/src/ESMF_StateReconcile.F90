@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.63 2009/09/21 21:05:07 theurich Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.64 2009/09/22 14:22:33 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.63 2009/09/21 21:05:07 theurich Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.64 2009/09/22 14:22:33 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -952,7 +952,7 @@
                    case (ESMF_ID_FIELDBUNDLE%objectID)
 !!DEBUG "need to create proxy bundle, remote id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
-                    bundle = ESMF_FieldBundleDeserialize(vm, bptr, offset, &
+                    bundle = ESMF_FieldBundleDeserialize(bptr, offset, &
                       attreconflag=attreconflag, rc=localrc)
                     if (ESMF_LogMsgFoundError(localrc, &
                              "nested Fieldbundle deserialize", &
@@ -974,7 +974,7 @@
                    case (ESMF_ID_FIELD%objectID)
 !!DEBUG "need to create proxy field, remote id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
-                    field = ESMF_FieldDeserialize(vm, bptr, offset, &
+                    field = ESMF_FieldDeserialize(bptr, offset, &
                       attreconflag=attreconflag, rc=localrc)
                     if (ESMF_LogMsgFoundError(localrc, &
                              "nested Field deserialize", &

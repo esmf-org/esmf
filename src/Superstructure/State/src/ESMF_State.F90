@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.172 2009/09/21 21:05:06 theurich Exp $
+! $Id: ESMF_State.F90,v 1.173 2009/09/22 14:22:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.172 2009/09/21 21:05:06 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.173 2009/09/22 14:22:32 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -6183,7 +6183,7 @@ module ESMF_StateMod
 
           select case (sip%otype%ot)
             case (ESMF_STATEITEM_FIELDBUNDLE%ot)
-              sip%datap%fbp = ESMF_FieldBundleDeserialize(vm, buffer, offset, &
+              sip%datap%fbp = ESMF_FieldBundleDeserialize(buffer, offset, &
                 attreconflag=lattreconflag, rc=localrc)
               sip%proxyflag = .true.  ! indicate that this is proxy object
               !  here we relink the State Attribute hierarchy to the FieldBundle
@@ -6198,7 +6198,7 @@ module ESMF_StateMod
                 endif
               endif
             case (ESMF_STATEITEM_FIELD%ot)
-              sip%datap%fp = ESMF_FieldDeserialize(vm, buffer, offset, &
+              sip%datap%fp = ESMF_FieldDeserialize(buffer, offset, &
                 attreconflag=lattreconflag, rc=localrc)
               sip%proxyflag = .true.  ! indicate that this is proxy object
               !  here we relink the State Attribute hierarchy to the Field
