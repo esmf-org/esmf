@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: testing.tex,v 1.17 2009/03/05 16:54:04 svasquez Exp $
+% CVS $Id: testing.tex,v 1.18 2009/09/22 16:55:41 svasquez Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/testing.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -185,6 +185,14 @@ handle this case, the unit test must verify results from each processor as in th
     !------------------------------------------------------------------------
 
 \end{verbatim}
+
+\paragraph{Disabling unit tests }
+Sometimes in the software development process it becomes necessary to disable one or more unit tests.
+To disable a unit test, two lines need to be modified. First, the line calling "ESMF\_Test" must be commented out.
+Second, the NEX\_UTest, EX\_UTest, NEX\_UTest\_Multi\_Proc\_Only and EX\_UTest\_Multi\_Proc\_Only tags must be modified
+so that they are not found by the Perl script that analyzes the test results.
+The recommended way to modify these tags is to replace the first underscore with "\_disable\_", thus NEX\_UTest becomes
+NEX\_disable\_UTest. 
 
 \subsubsection{Examples}
 The examples are written to help users understand a specific use of an
