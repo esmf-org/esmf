@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.9 2009/06/01 22:13:04 w6ws Exp $
+# $Id: build_rules.mk,v 1.10 2009/09/22 17:39:14 w6ws Exp $
 #
 # MinGW.intel.default
 #
@@ -64,7 +64,7 @@ endif
 # Print compiler version string
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -logo
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -logo
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER}
 
 ############################################################
 # Force Fortran symbols lower case
