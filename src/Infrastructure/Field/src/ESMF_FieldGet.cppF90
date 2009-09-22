@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.42 2009/08/31 20:12:12 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.43 2009/09/22 18:28:55 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.42 2009/08/31 20:12:12 theurich Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.43 2009/09/22 18:28:55 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1622,7 +1622,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     enddo  
 
     ! User must either provide both ungriddedLBound and ungriddedUBound
-    ! with same size or don't specify either one of them. There is no
+    ! with same size or do not specify either one of them. There is no
     ! suitable default value for unbounded variables, especially when
     ! the intent is to create a Field with a greater rank than Grid
     if(present(ungriddedLBound)) then
@@ -1717,7 +1717,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     enddo
     forderIndex = 1
     ! ungridded bounds info present indicates field has ungridded dimension
-    ! otherwise we don't have to worry about this.
+    ! otherwise we do not have to worry about this.
     if(uglb_size /= 0) then
         do i = 1, arrayrank
             ! if the i-th dimension is ungridded
