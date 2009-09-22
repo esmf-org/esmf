@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.8 2009/09/21 23:31:54 theurich Exp $
+// $Id: ESMCI_VM.C,v 1.9 2009/09/22 18:27:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -52,7 +52,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.8 2009/09/21 23:31:54 theurich Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.9 2009/09/22 18:27:12 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -72,7 +72,7 @@ static esmf_pthread_t matchTable_tid[ESMC_VM_MATCHTABLEMAX];
 static VM *matchTable_vm[ESMC_VM_MATCHTABLEMAX];
 static VMId matchTable_vmID[ESMC_VM_MATCHTABLEMAX];
 static int matchTable_BaseIDCount[ESMC_VM_MATCHTABLEMAX];
-static vector<vector<ESMC_Base *> > matchTable_Objects(ESMC_VM_MATCHTABLEMAX);
+static vector<ESMC_Base *> matchTable_Objects[ESMC_VM_MATCHTABLEMAX];
 //gjtNotYet static esmf_pthread_t *matchTable_tid;
 //gjtNotYet static ESMC_VM **matchTable_vm;
 //gjtNotYet static VMId *matchTable_vmID;
