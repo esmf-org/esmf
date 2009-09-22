@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: testing.tex,v 1.18 2009/09/22 16:55:41 svasquez Exp $
+% CVS $Id: testing.tex,v 1.19 2009/09/22 18:46:52 svasquez Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/testing.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -247,6 +247,12 @@ Most examples can be run on multiple processors or a single processor. Those exa
 have the tag, "ESMF\_EXAMPLE" as a comment in the body of the example file. If the example
 can only run on multiple processors then use the tag, "ESMF\_MULTI\_PROC\_EXAMPLE".
 
+\paragraph{Disabling examples}
+When an example is removed from the makefile, the "ESMF\_EXAMPLE" or "ESMF\_MULTI\_PROC\_EXAMPLE"
+tags must be modified so that the example is not flagged as failed. 
+The recommended way to modify these tags is to replace the first underscore with "\_disable\_", thus "ESMF\_EXAMPLE" becomes
+"ESMF\_disable\_EXAMPLE".
+
 
 \subsubsection{System Tests}
 
@@ -297,6 +303,13 @@ web page:
 http://www.esmf.ucar.edu/developers/test/system/
 
 \end{verbatim}
+
+
+\paragraph{Disabling system tests}
+When a system test is removed from the makefile, the "ESMF\_SYSTEM\_TEST" or "ESMF\_MULTI\_PROC\_SYSTEM\_TEST"
+tags must be modified so that the system_test is not counted as failed. 
+The recommended way to modify these tags is to replace the first underscore with "\_disable\_", thus 
+ESMF\_SYSTEM\_TEST becomes ESMF\_disable\_SYSTEM\_TEST
 
 
 \subsubsection{Test Harness}
