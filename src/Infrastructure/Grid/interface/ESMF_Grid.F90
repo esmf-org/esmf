@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.133 2009/09/19 03:41:15 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.134 2009/09/22 19:21:54 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2530,7 +2530,7 @@ end subroutine ESMF_GridConvertIndex
     integer :: patchCount, localCounts
     integer, pointer :: minIndexLocal(:), maxIndexLocal(:)
     logical, pointer :: isDistDim(:)
-    integer :: i, j, d, k, arbDim, deCount
+    integer :: i, j, k, arbDim, deCount
     integer, allocatable :: distDimLocal(:)
     integer, allocatable :: collocationPDim(:)
     logical  :: arbSeqIndexFlag
@@ -2859,6 +2859,19 @@ end subroutine ESMF_GridConvertIndex
     ! Initialize return code; assume failure until success is certain 
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
+
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following test when dummy argument actually used
+    if (present(convention)) then
+       if (convention==convention) continue;
+    endif
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following test when dummy argument actually used
+    if (present(purpose)) then
+    	if (purpose==purpose) continue;
+    endif
 
     ! get length of given fileName for C++ validation
     fileNameLen = len_trim(fileName)
@@ -3249,12 +3262,37 @@ end subroutine ESMF_GridConvertIndex
     type(ESMF_GridConn)  :: connDim1Local(2)
     type(ESMF_GridConn)  :: connDim2Local(2)
     type(ESMF_GridConn)  :: connDim3Local(2)
-    integer              :: connCount, petListCount 
     integer              :: top
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following test when dummy argument actually used
+    if (present(polestaggerloc1)) then
+    	if (polestaggerloc1(1)==polestaggerloc1(1)) continue;
+    endif
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following test when dummy argument actually used
+    if (present(polestaggerloc2)) then
+    	if (polestaggerloc2(1)==polestaggerloc2(1)) continue;
+    endif
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following test when dummy argument actually used
+    if (present(bipolepos1)) then
+    	if (bipolepos1(1)==bipolepos1(1)) continue;
+    endif
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following test when dummy argument actually used
+    if (present(bipolepos2)) then
+    	if (bipolepos2(1)==bipolepos2(1)) continue;
+    endif
+
+
 
     ! Compute the Grid DimCount and Derivatives ---------------------------------------------------
     ! dimCount
@@ -4211,27 +4249,48 @@ end subroutine ESMF_GridConvertIndex
     integer, pointer     :: coordDimCount(:)
     integer, pointer     :: coordDimMap(:,:)
     integer              :: localrc
-    integer              :: dimCount,i,maxSizeDEDim
-    type(ESMF_DecompFlag), pointer :: decompflagDG(:)
+    integer              :: dimCount,i
     integer, pointer     :: regDecompLocal(:)
     type(ESMF_DecompFlag), pointer :: decompflagLocal(:)
-    integer, pointer     :: distgridToGridMap(:), deDimCount(:)
+    integer, pointer     :: distgridToGridMap(:)
     integer, pointer     :: minIndexLocal(:), maxIndexLocal(:)
     integer, pointer     :: gridEdgeLWidthLocal(:)
     integer, pointer     :: gridEdgeUWidthLocal(:)
     integer, pointer     :: gridAlignLocal(:)
-    integer, pointer     :: gridEdgeLWidthDG(:)
-    integer, pointer     :: gridEdgeUWidthDG(:)
     integer              :: deCount
-    integer              :: d,ud,i1,i2,i3,k
+    integer              :: i1,i2,i3,k
     type(ESMF_GridConn)  :: connDim1Local(2)
     type(ESMF_GridConn)  :: connDim2Local(2)
     type(ESMF_GridConn)  :: connDim3Local(2)
-    integer              :: connCount, petListCount
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following test when dummy argument actually used
+    if (present(polestaggerloc1)) then
+    	if (polestaggerloc1(1)==polestaggerloc1(1)) continue;
+    endif
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following test when dummy argument actually used
+    if (present(polestaggerloc2)) then
+    	if (polestaggerloc2(1)==polestaggerloc2(1)) continue;
+    endif
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following test when dummy argument actually used
+    if (present(bipolepos1)) then
+    	if (bipolepos1(1)==bipolepos1(1)) continue;
+    endif
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following test when dummy argument actually used
+    if (present(bipolepos2)) then
+    	if (bipolepos2(1)==bipolepos2(1)) continue;
+    endif
+
 
     ! Compute the Grid DimCount and Derivatives ---------------------------------------------------
     ! dimCount
@@ -5048,23 +5107,17 @@ end subroutine ESMF_GridConvertIndex
 !
 !EOP
     type(ESMF_DistGrid)  :: distgrid
-    type(ESMF_DELayout)  :: delayout
-    integer, pointer     :: petList(:)
     integer, pointer     :: undistLBound(:)
     integer, pointer     :: undistUBound(:)
     integer, pointer     :: coordDimCount(:)
     integer, pointer     :: coordDimMap(:,:)
-    integer, pointer     :: distgridToGridMap(:)
     integer              :: localrc
     integer              :: dimCount,distDimCount,undistDimCount
-    integer, pointer     :: deDimCount(:)
     integer, pointer     :: indexArray(:,:)
-    integer              :: i,j,d,f, i1,i2,i3,k,ud
+    integer              :: i,j,ud
     type(ESMF_GridConn)  :: connDim1Local(2)
     type(ESMF_GridConn)  :: connDim2Local(2)
     type(ESMF_GridConn)  :: connDim3Local(2)
-    integer              :: connCount, petListCount 
-    integer              :: top
     integer, pointer     :: distSize(:)
     integer, pointer     :: distDimLocal(:)
     logical, pointer     :: isDist(:)
@@ -5075,6 +5128,31 @@ end subroutine ESMF_GridConvertIndex
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following test when dummy argument actually used
+    if (present(polestaggerloc1)) then
+    	if (polestaggerloc1(1)==polestaggerloc1(1)) continue;
+    endif
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following test when dummy argument actually used
+    if (present(polestaggerloc2)) then
+    	if (polestaggerloc2(1)==polestaggerloc2(1)) continue;
+    endif
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following test when dummy argument actually used
+    if (present(bipolepos1)) then
+    	if (bipolepos1(1)==bipolepos1(1)) continue;
+    endif
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following test when dummy argument actually used
+    if (present(bipolepos2)) then
+    	if (bipolepos2(1)==bipolepos2(1)) continue;
+    endif
+
 
     ! Compute the Grid DimCount and Derivatives ---------------------------------------------------
     ! dimCount
