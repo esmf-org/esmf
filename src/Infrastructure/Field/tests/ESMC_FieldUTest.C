@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldUTest.C,v 1.1 2009/09/21 20:42:29 feiliu Exp $
+// $Id: ESMC_FieldUTest.C,v 1.2 2009/09/22 15:33:22 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -66,7 +66,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //N-EX_UTest
+  //N-E-X_UTest
   // Create a mesh
   strcpy(name, "MeshCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -75,7 +75,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //N-EX_UTest
+  //N-E-X_UTest
   // Read input files' header data
   strcpy(name, "MeshVTKHeader");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -93,7 +93,7 @@ int main(void){
   elemConn = (int *) malloc (conn_size * sizeof (int));
 
   //----------------------------------------------------------------------------
-  //N-EX_UTest
+  //N-E-X_UTest
   // Read input files
   strcpy(name, "MeshVTKBody");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -108,7 +108,7 @@ int main(void){
     }
 
   //----------------------------------------------------------------------------
-  //N-EX_UTest
+  //N-E-X_UTest
   // Add node information to the mesh
   strcpy(name, "MeshAddNodes");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -117,7 +117,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //N-EX_UTest
+  //N-E-X_UTest
   // Add element information to the mesh
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -125,7 +125,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   
   //----------------------------------------------------------------------------
-  //N-EX_UTest
+  //N-E-X_UTest
   // Set the arrayspec
   strcpy(name, "ArraySpecSet");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -134,7 +134,7 @@ int main(void){
   //----------------------------------------------------------------------------
     
   //----------------------------------------------------------------------------
-  //N-EX_UTest
+  //N-E-X_UTest
   strcpy(name, "Set up minIndex");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   minIndexValues = (int *)malloc(2*sizeof(int));
@@ -144,7 +144,7 @@ int main(void){
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
-  //N-EX_UTest
+  //N-E-X_UTest
   strcpy(name, "Set up maxIndex");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   maxIndexValues = (int *)malloc(2*sizeof(int));
@@ -155,7 +155,7 @@ int main(void){
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
-  //N-EX_UTest
+  //N-E-X_UTest
   strcpy(name, "Create ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   field = ESMC_FieldCreate(&mesh, &arrayspec, 0, 0, 0, "field1", &rc);
@@ -163,7 +163,7 @@ int main(void){
   //----------------------------------------------------------------------------
   
 //  //----------------------------------------------------------------------------
-//  //N-EX_UTest
+//  //N-E-X_UTest
 //  strcpy(name, "Print ESMC_Field object");
 //  strcpy(failMsg, "Did not return ESMF_SUCCESS");
 //  rc = ESMC_FieldPrint(field);
@@ -171,7 +171,7 @@ int main(void){
 //  //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
-  //N-EX_UTest
+  //N-E-X_UTest
   strcpy(name, "Destroy ESMC_Mesh object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_MeshDestroy(&mesh);
@@ -179,7 +179,7 @@ int main(void){
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
-  //N-EX_UTest
+  //N-E-X_UTest
   strcpy(name, "Destroy ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldDestroy(&field, &rc);
