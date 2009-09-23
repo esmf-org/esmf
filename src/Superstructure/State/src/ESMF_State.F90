@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.174 2009/09/23 01:57:44 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.175 2009/09/23 17:26:42 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.174 2009/09/23 01:57:44 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.175 2009/09/23 17:26:42 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -3489,7 +3489,7 @@ module ESMF_StateMod
 !     \item[fileName]
 !       File to be read.
 !     \item[{[fileFormat]}]
-!       The file format to be used.  Currently, only ESMF_IO_FILEFORMAT_NETCDF
+!       The file format to be used.  Currently, only ESMF\_IO\_FILEFORMAT\_NETCDF
 !       is supported, which is the default. Future releases will support others.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3687,7 +3687,7 @@ module ESMF_StateMod
 !     \item[fileName]
 !       File to be written.  
 !     \item[{[fileFormat]}]
-!       The file format to be used.  Currently, only ESMF_IO_FILEFORMAT_NETCDF
+!       The file format to be used.  Currently, only ESMF\_IO\_FILEFORMAT\_NETCDF
 !       is supported, which is the default. Future releases will support others.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
