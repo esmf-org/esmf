@@ -1,4 +1,4 @@
-// $Id: ESMC_ArraySpec.h,v 1.14 2009/01/21 21:37:58 cdeluca Exp $
+// $Id: ESMC_ArraySpec.h,v 1.15 2009/09/23 16:30:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ extern "C" {
 // Class declaration type
 typedef struct{
   // Allocate enough memory to store members in the Fortran side.
-  // Adjust if members are added, rounding up to multiples of 64)
+  // Adjust if members are added, rounding up to multiples of 64 byte
   char shallowMem[192];
 }ESMC_ArraySpec;
 
