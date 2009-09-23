@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.19 2009/07/01 18:47:06 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.20 2009/09/23 23:13:01 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -76,17 +76,17 @@ module ESMF_MeshMod
 !!!!
 !! Use integers instead of type, to be compatible with reading in from VTK and other files
 !!  type(ESMF_MeshElement), parameter :: &
-!!        ESMF_MESHELEMENT_QUAD = ESMF_MeshElement(0), &
-!!        ESMF_MESHELEMENT_TRI = ESMF_MeshElement(1), &
-!!        ESMF_MESHELEMENT_HEX = ESMF_MeshElement(2), &
-!!        ESMF_MESHELEMENT_TET = ESMF_MeshElement(3)
+!!        ESMF_MESHELEMTYPE_QUAD = ESMF_MeshElement(0), &
+!!        ESMF_MESHELEMTYPE_TRI = ESMF_MeshElement(1), &
+!!        ESMF_MESHELEMTYPE_HEX = ESMF_MeshElement(2), &
+!!        ESMF_MESHELEMTYPE_TET = ESMF_MeshElement(3)
 !!!!
 
   integer, parameter :: &
-        ESMF_MESHELEMENT_TRI    = 5,  &  ! Triangle
-        ESMF_MESHELEMENT_QUAD   = 9,  &  ! Quadralateral
-        ESMF_MESHELEMENT_TETRA  = 10, &  ! Tetrahedron
-        ESMF_MESHELEMENT_HEX    = 12     ! Hexahedron
+        ESMF_MESHELEMTYPE_TRI    = 5,  &  ! Triangle
+        ESMF_MESHELEMTYPE_QUAD   = 9,  &  ! Quadralateral
+        ESMF_MESHELEMTYPE_TETRA  = 10, &  ! Tetrahedron
+        ESMF_MESHELEMTYPE_HEX    = 12     ! Hexahedron
 
   type ESMF_MeshPartitionType
   sequence
@@ -106,8 +106,8 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_Mesh               
-  public ESMF_MESHELEMENT_QUAD, ESMF_MESHELEMENT_TRI, &
-         ESMF_MESHELEMENT_HEX, ESMF_MESHELEMENT_TETRA
+  public ESMF_MESHELEMTYPE_QUAD, ESMF_MESHELEMTYPE_TRI, &
+         ESMF_MESHELEMTYPE_HEX, ESMF_MESHELEMTYPE_TETRA
       
 !------------------------------------------------------------------------------
 
@@ -131,7 +131,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.19 2009/07/01 18:47:06 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.20 2009/09/23 23:13:01 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -164,24 +164,46 @@ module ESMF_MeshMod
     integer, dimension(:), intent(in)             :: elementIds
     integer, dimension(:), intent(in)             :: elementTypes
     integer, dimension(:), intent(in)             :: elementConn
-    integer,                intent(out), optional :: rc
+    integer, intent(out), optional                :: rc
 !
 ! !DESCRIPTION:
-!   Add elements to a mesh.  This call should follow a call to AddNodes.
-!   The elements will link together nodes to form topological entitites.
+!   This call is the third and last part of the three part mesh create
+!   sequence and should be called after the nodes are added with
+!   {\tt ESMF\_MeshAddNodes()}. This call adds the elements to the 
+!   mesh and finalizes the create. After this call the Mesh is usable, for
+!   example a Field may be built on the created Mesh object and 
+!   this Field may be used in a {\tt ESMF\_FieldRegridStore()} call.
+!
+!   The parameters to this call {\tt elementIds}, {\tt elementTypes}, and
+!   {\tt elementConn} describe  the elements to be created. The description 
+!   for a particular element lies at the same index location in {\tt elementIds} 
+!   and {\tt elementTypes}, but the connection information for that element in 
+!   {\tt elementConn} will start at the index given by the sum of the number of nodes 
+!   in all of the proceeding elements plus 1. 
 !
 !   \begin{description}
-!   \item [{[elementIds]}]
-!         The global id's of the elements resident on this processor
+!   \item [elementIds]
+!          An array containing the global ids of the elements to be created on this PET. 
+!          This input consists of a 1D array the size of the number of elements on this PET.
 !   \item[elementTypes] 
-!         Topology of the given element (one of ESMF\_MeshElement)
+!          An array containing the types of the elements to be created on this PET. The types used
+!          must be appropriate for the parametric dimension of the Mesh. Please see
+!          Section~\ref{sec:mesh:opt:elemtype} for the list of options. This input consists of 
+!          a 1D array the size of the number of elements on this PET.  
 !   \item[elementConn] 
-!         Connectivity table.  The table should line up with the elementIds and
-!         elementTypes list.  The indices into the node declaration for each
-!         element will reside one after the other in this list.  The number
-!         of entries should be equal to the number of nodes in the given
-!         topology.  The indices should be the local index (1 based) into the array
-!         of nodes that was declared with MeshAddNodes
+!         An array containing the indexes of the sets of nodes to be connected together to form the
+!         elements to be created on this PET. The entries in this list are NOT node global ids, 
+!         but rather each entry is a local index (1 based) into the list of nodes which were
+!         created on this PET by the previous {\tt ESMF\_MeshAddNodes()} call.
+!         In other words, an entry of 1 indicates that this element contains the node
+!         described by {\tt nodeIds(1)}, {\tt nodeCoords(1)}, etc. passed into the
+!         {\tt ESMF\_MeshAddNodes()} call on this PET. It is also
+!         important to note that the order of the nodes in an element connectivity list
+!         matters. Please see Section~\ref{sec:mesh:opt:elemtype} for diagrams illustrating
+!         the correct order of nodes in a element. This input consists of a 1D array with 
+!         a total size equal to the sum of the number of nodes contained in each element on
+!         this PET. The number of nodes in each element is implied by its element type in 
+!         {\tt elementTypes}.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -199,6 +221,7 @@ module ESMF_MeshMod
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
     num_elems = size(elementIds)
+    mesh%num_elements = num_elems
     call C_ESMC_MeshAddElements(mesh%this, num_elems, &
                              elementIds, elementTypes, &
                              elementConn, localrc)
@@ -239,18 +262,36 @@ module ESMF_MeshMod
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Create an empty mesh.
+!   This call is the second part of the three part mesh create
+!   sequence and should be called after the mesh's dimensions are set
+!   using {\tt ESMF\_MeshCreate()}. This call adds the nodes to the 
+!   mesh. The next step is to call {\tt ESMF\_MeshAddElements()}. 
+!
+!   The parameters to this call {\tt nodeIds}, {\tt nodeCoords}, and 
+!   {\tt nodeOwners} describe the nodes to be created on this PET. 
+!   The description for a particular node lies at the same index location in 
+!   {\tt nodeIds} and {\tt nodeOwners}. Each entry
+!   in {\tt nodeCoords} consists of spatial dimension coordinates, so the coordinates
+!   for node $n$ in the {\tt nodeIds} array will start at $(n-1)*spatialDim+1$. 
 !
 !   \begin{description}
 !   \item [nodeIds]
-!         The global id's of the nodes resident on this processor
+!         An array containing the global ids of the nodes to be created on this PET. 
+!         This input consists of a 1D array the size of the number of nodes on this PET.
 !   \item[nodeCoords] 
-!         Physical coordinates of the nodes.  This 1d array will be
-!         interpreted by using mesh.spatial\_dim, and is ordered 
-!         (ndim, nnodes), fortran ordering
+!          An array containing the physical coordinates of the nodes to be created on this
+!          PET. This input consists of a 1D array the size of the number of nodes on this PET times the Mesh's 
+!          spatial dimension ({\tt spatialDim}). The coordinates in this array are ordered
+!          so that the coordinates for a node lie in sequence in memory. (e.g. for a 
+!          Mesh with spatial dimension 2, the coordinates for node 1 are in nodeCoords(0) and
+!          nodeCoords(1), the coordinates for node 2 are in nodeCoords(2) and nodeCoords(3), 
+!          etc.). 
 !   \item[nodeOwners] 
-!         Processor that owns the node.  If the node is shared, the value
-!         will be a processor other than the current one.
+!         An array containing the PETs that own the nodes to be created on this PET. 
+!         If the node is shared with another PET, the value
+!         may be a PET other than the current one. Only nodes owned by this PET
+!         will have PET local entries in a Field created on the Mesh. This input consists of 
+!         a 1D array the size of the number of nodes on this PET.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -298,14 +339,20 @@ module ESMF_MeshMod
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Create an empty mesh in three parts - first the mesh, then add
-!   nodes and finally add elements.
+!   This call is the first part of the three part mesh create
+!   sequence. This call sets the dimension of the elements in the mesh
+!   ({\tt parametricDim}) and the number of coordinate dimensions in the mesh
+!   ({\tt spatialDim}). The next step is to call {\tt ESMF\_MeshAddElements()}. 
 !
 !   \begin{description}
 !   \item [parametricDim]
-!         Dimension of the topology (quad=2, hex=3,...)
+!         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
+!         have a parametric dimension of 2, whereas a Mesh constructed of cubes would have one
+!         of 3.)
 !   \item[spatialDim] 
-!         For a manifold, this can be larger than the parametric dim.
+!         The number of coordinate dimensions needed to describe the locations of the nodes 
+!         making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
+!         parametric dim (e.g. the 2D surface of a sphere in space), but it can't be smaller. 
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -362,33 +409,76 @@ module ESMF_MeshMod
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Create an empty mesh.
+!   Create a Mesh object in one step. After this call the Mesh is usable, for
+!   example, a Field may be built on the created Mesh object and 
+!   this Field may be used in a {\tt ESMF\_FieldRegridStore()} call.
+!
+!   This call sets the dimension of the elements in the mesh
+!   ({\tt parametricDim}) and the number of coordinate dimensions in the mesh
+!   ({\tt spatialDim}). It then creates the nodes, and 
+!   then creates the elements by connecting together the nodes.
+!
+!   The parameters to this call {\tt nodeIds}, {\tt nodeCoords}, and 
+!   {\tt nodeOwners} describe the nodes to be created on this PET. 
+!   The description for a particular node lies at the same index location in 
+!   {\tt nodeIds} and {\tt nodeOwners}. Each entry
+!   in {\tt nodeCoords} consists of spatial dimension coordinates, so the coordinates
+!   for node $n$ in the {\tt nodeIds} array will start at $(n-1)*spatialDim+1$. 
+!
+!   The parameters to this call {\tt elementIds}, {\tt elementTypes}, and
+!   {\tt elementConn} describe  the elements to be created. The description 
+!   for a particular element lies at the same index location in {\tt elementIds} 
+!   and {\tt elementTypes}, but the connection information for that element in 
+!   {\tt elementConn} will start at the index given by the sum of the number of nodes 
+!   in all of the proceeding elements plus 1. 
 !
 !   \begin{description}
 !   \item [parametricDim]
-!         Dimension of the topology (quad=2, hex=3,...)
+!         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
+!         have a parametric dimension of 2, whereas a Mesh constructed of cubes would have one
+!         of 3.)
 !   \item[spatialDim] 
-!         For a manifold, this can be larger than the parametric dim.
+!         The number of coordinate dimensions needed to describe the locations of the nodes 
+!         making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
+!         parametric dim (e.g. the 2D surface of a sphere in space), but it can't be smaller. 
 !   \item [nodeIds]
-!         The global id's of the nodes resident on this processor
+!         An array containing the global ids of the nodes to be created on this PET. 
+!         This input consists of a 1D array the size of the number of nodes on this PET.
 !   \item[nodeCoords] 
-!         Physical coordinates of the nodes.  This 1d array will be
-!         interpreted by using mesh.spatial\_dim, and is ordered 
-!         (ndim, nnodes), fortran ordering
+!          An array containing the physical coordinates of the nodes to be created on this
+!          PET. This input consists of a 1D array the size of the number of nodes on this PET times the Mesh's 
+!          spatial dimension ({\tt spatialDim}). The coordinates in this array are ordered
+!          so that the coordinates for a node lie in sequence in memory. (e.g. for a 
+!          Mesh with spatial dimension 2, the coordinates for node 1 are in nodeCoords(0) and
+!          nodeCoords(1), the coordinates for node 2 are in nodeCoords(2) and nodeCoords(3), 
+!          etc.). 
 !   \item[nodeOwners] 
-!         Processor that owns the node.  If the node is shared, the value
-!         will be a processor other than the current one.
-!   \item [{[elementIds]}]
-!         The global id's of the elements resident on this processor
+!         An array containing the PETs that own the nodes to be created on this PET. 
+!         If the node is shared with another PET, the value
+!         may be a PET other than the current one. Only nodes owned by this PET
+!         will have PET local entries in a Field created on the Mesh. This input consists of 
+!         a 1D array the size of the number of nodes on this PET.
+!   \item [elementIds]
+!          An array containing the global ids of the elements to be created on this PET. 
+!          This input consists of a 1D array the size of the number of elements on this PET.
 !   \item[elementTypes] 
-!         Topology of the given element (one of ESMF\_MeshElement)
+!          An array containing the types of the elements to be created on this PET. The types used
+!          must be appropriate for the parametric dimension of the Mesh. Please see
+!          Section~\ref{sec:mesh:opt:elemtype} for the list of options. This input consists of 
+!          a 1D array the size of the number of elements on this PET.  
 !   \item[elementConn] 
-!         Connectivity table.  The table should line up with the elementIds and
-!         elementTypes list.  The indices into the node declaration for each
-!         element will reside one after the other in this list.  The number
-!         of entries should be equal to the number of nodes in the given
-!         topology.  The indices should be the local index (1 based) into the array
-!         of nodes that was declared with MeshAddNodes
+!         An array containing the indexes of the sets of nodes to be connected together to form the
+!         elements to be created on this PET. The entries in this list are NOT node global ids, 
+!         but rather each entry is a local index (1 based) into the list of nodes to be 
+!         created on this PET by this call.
+!         In other words, an entry of 1 indicates that this element contains the node
+!         described by {\tt nodeIds(1)}, {\tt nodeCoords(1)}, etc. on this PET. It is also
+!         important to note that the order of the nodes in an element connectivity list
+!         matters. Please see Section~\ref{sec:mesh:opt:elemtype} for diagrams illustrating
+!         the correct order of nodes in a element. This input consists of a 1D array with 
+!         a total size equal to the sum of the number of nodes contained in each element on
+!         this PET. The number of nodes in each element is implied by its element type in 
+!         {\tt elementTypes}.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -408,8 +498,6 @@ module ESMF_MeshMod
     call c_ESMC_meshcreate(ESMF_MeshCreate1Part%this, parametricDim, spatialDim, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ESMF_MeshCreate1Part%mesh_freed = 0  ! memory has not been released
 
     ! Set init status of arguments
     ESMF_INIT_SET_CREATED(ESMF_MeshCreate1Part)
@@ -435,6 +523,11 @@ module ESMF_MeshMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Setup F90 mesh stucture
+    ESMF_MeshCreate1Part%num_nodes = num_nodes
+    ESMF_MeshCreate1Part%num_elements = num_elems
+    ESMF_MeshCreate1Part%mesh_freed = 0  ! memory has not been released
+
     !call ESMF_DistGridPrint(ESMF_MeshCreate1Part%nodal_distgrid)
     !ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, ESMF_MeshCreate1Part%nodal_distgrid, rc)
 
@@ -446,7 +539,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateFromPointer()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a C++ pointer
 !
 ! !INTERFACE:
@@ -464,14 +557,18 @@ module ESMF_MeshMod
 !
 !   \begin{description}
 !   \item [parametricDim]
-!         Dimension of the topology (quad=2, hex=3,...)
+!         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
+!         have a parametric dimension of 2, whereas a Mesh constructed of cubes would have one
+!         of 3.)
 !   \item[spatialDim] 
-!         For a manifold, this can be larger than the parametric dim.
+!         The number of coordinate dimensions needed to describe the locations of the nodes 
+!         making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
+!         parametric dim (e.g. the 2D surface of a sphere in space), but it can't be smaller. 
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -503,12 +600,15 @@ module ESMF_MeshMod
     integer,        intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!    Destroy the mesh.
+!    Destroy the Mesh. This call removes all internal memory associated with {\tt mesh}. 
+!  After this call {\tt mesh} will no longer be usable.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item [mesh]
-! Mesh object.
+! Mesh object to be destroyed.
+! \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
 !EOP
@@ -519,6 +619,8 @@ module ESMF_MeshMod
       if (mesh%mesh_freed .eq. 0) then
         call C_ESMC_MeshDestroy(mesh, localrc)
       endif
+
+      ! TODO: destroy distgrids here
 
       ESMF_INIT_SET_DELETED(mesh)
 
@@ -544,13 +646,19 @@ module ESMF_MeshMod
     integer,        intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!    Remove the mesh and its memory,  but retain the Fortran
-!    mesh scheme.
+!    This call removes the portions of Mesh which contain connection and coordinate
+!    information. After this call Fields build on {\tt mesh} will no longer be usable
+!    as part of an {\tt ESMF\_FieldRegridStore()} operation. However, after this call 
+!    Fields built on {\tt mesh} can still be used in an {\tt ESMF\_FieldRegridRun()} 
+!    operation if the routehandle was generated beforehand. New Fields may also
+!    be built on {\tt mesh} after this call.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item [mesh]
-! Mesh object.
+! Mesh object whose memory is to be freed. 
+! \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
 !EOP
@@ -582,26 +690,41 @@ module ESMF_MeshMod
 ! !IROUTINE: ESMF_MeshGet - Get information from a Mesh
 !
 ! !INTERFACE:
-      subroutine ESMF_MeshGet(mesh, nodal_distgrid, element_distgrid, &
-                   num_nodes, num_elements, rc)
+      subroutine ESMF_MeshGet(mesh, nodalDistgrid, elementDistgrid, &
+                   numNodes, numElements, isMemFreed, rc)
 !
 ! !RETURN VALUE:
 !
 ! !ARGUMENTS:
     type(ESMF_Mesh), intent(inout)             :: mesh
-    type(ESMF_DistGrid), intent(out), optional :: nodal_distgrid
-    type(ESMF_DistGrid), intent(out), optional :: element_distgrid
-    integer,             intent(out), optional :: num_nodes
-    integer,             intent(out), optional :: num_elements
+    type(ESMF_DistGrid), intent(out), optional :: nodalDistgrid
+    type(ESMF_DistGrid), intent(out), optional :: elementDistgrid
+    integer,             intent(out), optional :: numNodes
+    integer,             intent(out), optional :: numElements
+    logical,             intent(out), optional :: isMemFreed
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Get information from the mesh.
+!   Get various information from a mesh.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item [mesh]
-! Mesh object.
+! Mesh object to retrieve information from.
+! \item [{[nodalDistgrid]}]
+! A distgrid describing the distribution of the nodes across the PETs. Note that
+! on each PET the distgrid will only contain entries for nodes owned by that PET.
+! \item [{[elementDistgrid]}]
+! A distgrid describing the distribution of the elements across the PETs.
+! \item [{[numNodes]}]
+! The number of nodes on this PET.
+! \item [{[numElements]}]
+! The number of elements on this PET.
+! \item [{[isMemFreed]}]
+! Has the coordinate and connection memory been freed from this mesh. If so, it
+! can no longer be used as a part of {\tt ESMF\_FieldRegridStore()} calls.
+! \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
 !EOP
@@ -611,10 +734,17 @@ module ESMF_MeshMod
 
       ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
-      if (present(nodal_distgrid)) nodal_distgrid = mesh%nodal_distgrid
-      if (present(element_distgrid)) element_distgrid = mesh%element_distgrid
-      if (present(num_nodes)) num_nodes =mesh%num_nodes
-      if (present(num_elements)) num_elements =mesh%num_elements 
+      if (present(nodalDistgrid)) nodalDistgrid = mesh%nodal_distgrid
+      if (present(elementDistgrid)) elementDistgrid = mesh%element_distgrid
+      if (present(numNodes)) numNodes =mesh%num_nodes
+      if (present(numElements)) numElements =mesh%num_elements 
+      if (present(isMemFreed)) then
+         if (mesh%mesh_freed==1) then
+            isMemFreed=.true.
+         else 
+            isMemFreed=.false.
+         endif
+      endif
 
       if (present(rc)) rc = localrc
 
@@ -626,7 +756,7 @@ module ESMF_MeshMod
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshWrite()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_MeshWrite - Write a Mesh to a VTK file
 !
 ! !INTERFACE:
@@ -650,7 +780,7 @@ module ESMF_MeshMod
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 

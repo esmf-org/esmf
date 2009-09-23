@@ -1,4 +1,4 @@
-% $Id: Mesh_refdoc.ctex,v 1.3 2008/09/26 23:28:42 cdeluca Exp $
+% $Id: Mesh_refdoc.ctex,v 1.4 2009/09/23 23:13:01 oehmke Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -61,6 +61,13 @@
 %\input{Mesh_implnotes}
 #elif defined(CONSTITUENT)
 %\input{../Infrastructure/Mesh/doc/Mesh_implnotes}
+#endif
+
+\subsection{Mesh Options}
+#ifdef STANDALONE
+\input{Mesh_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Mesh/doc/Mesh_options}
 #endif
 
 \subsection{Class API}

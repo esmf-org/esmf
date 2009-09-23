@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.27 2009/07/28 17:33:37 theurich Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.28 2009/09/23 23:13:01 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,10 +73,23 @@ extern "C" void FTN(c_esmc_meshcreate)(Mesh **meshpp,
 #define ESMC_METHOD "c_esmc_meshcreate()"
 
    try {
+     // Some error checking of input
     if (*pdim > *sdim) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
 		      "- Parametric dimension can't be greater than spatial dimension", &localrc)) throw localrc;
+    }
+
+    if ((*pdim < 2) || (*pdim >3)) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+		      "- Parametric dimension can't be greater than 3D or less than 2D", &localrc)) throw localrc;
+    }
+
+    if ((*sdim < 2) || (*sdim >3)) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+		      "- Spatial dimension can't be greater than 3D or less than 2D", &localrc)) throw localrc;
     }
 
     *meshpp = new Mesh();
