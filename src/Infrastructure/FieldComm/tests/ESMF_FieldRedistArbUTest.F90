@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistArbUTest.F90,v 1.3 2009/09/15 18:12:48 feiliu Exp $
+! $Id: ESMF_FieldRedistArbUTest.F90,v 1.4 2009/09/23 18:41:38 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -374,6 +374,13 @@
   call ESMF_FieldDestroy(dstfield, rc=localrc)
   call ESMF_FieldDestroy(srcfield2D, rc=localrc)
   call ESMF_FieldDestroy(dstfield2D, rc=localrc)
+  call ESMF_GridDestroy(srcgrid, rc=localrc)
+  call ESMF_GridDestroy(dstgrid, rc=localrc)
+  call ESMF_GridDestroy(srcgrid2D, rc=localrc)
+  call ESMF_GridDestroy(dstgrid2D, rc=localrc)
+
+  call ESMF_FieldRedistRelease(rhandle, rc=localrc)
+  call ESMF_FieldRedistRelease(rhandle2D, rc=localrc)
 
   deallocate(localIndices, localIndices1)
   !-----------------------------------------------------------------------------
