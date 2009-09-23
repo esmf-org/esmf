@@ -1,4 +1,4 @@
-! $Id: ESMF_StateVa.F90,v 1.2 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_StateVa.F90,v 1.3 2009/09/23 01:22:14 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateVa.F90,v 1.2 2009/01/21 21:38:02 cdeluca Exp $'
+      '$Id: ESMF_StateVa.F90,v 1.3 2009/09/23 01:22:14 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -107,12 +107,17 @@
 !
 ! TODO: code goes here
 !
-      character (len=6) :: defaultopts
+      character (len=6) :: localopts
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
-      defaultopts = "brief"
+      localopts = "brief"
+      if (present (options)) then
+        if (options /= " ")  &
+          localopts = options
+      end if
+
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
