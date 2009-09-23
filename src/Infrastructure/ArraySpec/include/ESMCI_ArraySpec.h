@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArraySpec.h,v 1.6 2009/01/21 21:37:58 cdeluca Exp $
+// $Id: ESMCI_ArraySpec.h,v 1.7 2009/09/23 19:07:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@ class ArraySpec;
 class ArraySpec {   // NOT inherited from Base class
   private:
     // Allocate enough memory to store members in the Fortran side.
-    // Adjust if members are added, rounding up to multiples of 64)
+    // Adjust if members are added, rounding up to multiples of 64 byte
     char shallowMem[192];
 
   public:
