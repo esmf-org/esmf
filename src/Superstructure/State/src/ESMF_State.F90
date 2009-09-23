@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.173 2009/09/22 14:22:32 feiliu Exp $
+! $Id: ESMF_State.F90,v 1.174 2009/09/23 01:57:44 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.173 2009/09/22 14:22:32 feiliu Exp $'
+      '$Id: ESMF_State.F90,v 1.174 2009/09/23 01:57:44 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -3328,7 +3328,7 @@ module ESMF_StateMod
 !
 ! TODO: this needs more code added to be complete
 !
-       character (len=6) :: defaultopts
+       character (len=6) :: localopts
        type(ESMF_StateClass), pointer :: sp
        type(ESMF_StateItem), pointer :: dp
        character(len=ESMF_MAXSTR) :: name
@@ -3338,7 +3338,12 @@ module ESMF_StateMod
        character(len=ESMF_MAXSTR) :: msgbuf
        
        ! print option is not implemented, but it has to pass to c_ESMC_BasePrint()
-       defaultopts = "brief"
+       localopts = "brief"
+       if (present (options)) then
+         if (options /= " ")  &
+           localopts = options
+       end if
+
        ! Initialize return code; assume failure until success is certain
        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -3395,7 +3400,7 @@ module ESMF_StateMod
        write (ESMF_IOstdout,*) trim(msgbuf)
 
        !pli print attribute name/value pairs using c_esmc_baseprint() 
-       call c_ESMC_BasePrint(sp%base, defaultopts, localrc)
+       call c_ESMC_BasePrint(sp%base, localopts, localrc)
        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -3513,6 +3518,10 @@ module ESMF_StateMod
         ! assume netCDF C++ API library present until proven otherwise
         netcdfPresent = .true.
 
+        if (present (fileFormat)) then
+!         quiet compiler warning about unused dummy arg
+        end if
+
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
@@ -3587,6 +3596,11 @@ module ESMF_StateMod
         a%statep => b
         nullify(a%statep)
 
+        if (present (iospec)) then
+          if (name /= " ") then
+!           quiet compiler warnings about unused dummy args
+          end if
+        end if
 
         ESMF_StateReadRestart = a 
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -3702,6 +3716,10 @@ module ESMF_StateMod
         ! assume netCDF C++ API library present until proven otherwise
         netcdfPresent = .true.
 
+        if (present (fileFormat)) then
+!         quiet compiler warnings about unused dummy args
+        end if
+
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
@@ -3766,6 +3784,10 @@ module ESMF_StateMod
         integer :: localrc
 
         localrc = ESMF_RC_NOT_IMPL
+
+        if (present (iospec)) then
+!         quiet compiler warning about unused dummy arg
+        end if
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -4116,9 +4138,8 @@ module ESMF_StateMod
 
         ! Local vars
         integer :: localrc
-        type(ESMF_StateItem), pointer::stateItem
-        integer :: i
-        type(ESMF_State) :: wrapper
+!        type(ESMF_StateItem), pointer::stateItem
+!        type(ESMF_State) :: wrapper
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -4443,7 +4464,6 @@ module ESMF_StateMod
       integer :: localrc                  ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: aname
-      character(len=ESMF_MAXSTR) :: errmsg
       integer, allocatable, dimension(:) :: atodo
       integer :: i
       integer :: newcount, aindex
@@ -4640,7 +4660,6 @@ module ESMF_StateMod
       integer :: localrc                  ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: aname
-      character(len=ESMF_MAXSTR) :: errmsg
       integer, allocatable, dimension(:) :: atodo
       integer :: i
       integer :: newcount, aindex
