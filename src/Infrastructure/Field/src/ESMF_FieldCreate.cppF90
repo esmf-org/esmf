@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.59 2009/09/23 15:33:27 theurich Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.60 2009/09/23 22:53:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.59 2009/09/23 15:33:27 theurich Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.60 2009/09/23 22:53:39 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -179,7 +179,7 @@ contains
     ! Set return values.
     ESMF_FieldCreateEmpty%ftypep => ftype
     
-    ! Add copy of this object into ESMF garbage collection table
+    ! Add reference to this object into ESMF garbage collection table
     ! Only call this in those Create() methods that call Construct()
     call c_ESMC_VMAddFObject(ESMF_FieldCreateEmpty, ESMF_ID_FIELD%objectID)
 
@@ -243,15 +243,11 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-!-gjt: taking this out in favor of automatic garbage collection         
-!    if (associated(field%ftypep)) then
-!       deallocate(field%ftypep, stat=localrc)
-!       if (ESMF_LogMsgFoundAllocError(localrc, "Deallocating Field", &
-!                                     ESMF_CONTEXT, rc)) return
-!    endif
-!    nullify(field%ftypep)
-
-    field%ftypep%fieldstatus = ESMF_STATUS_INVALID  ! mark invalid
+    ! mark object invalid
+    call ESMF_BaseSetStatus(field%ftypep%base, ESMF_STATUS_INVALID, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
     ESMF_INIT_SET_DELETED(field)
 
@@ -478,7 +474,10 @@ contains
     ftype%datastatus = ESMF_STATUS_READY
     ftype%geombase  = geombase
     ftype%gridstatus = ESMF_STATUS_READY
-    ftype%fieldstatus = ESMF_STATUS_READY 
+    call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_READY, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
     ftype%dimCount = gridDimCount_norep + ungriddedDimCount
 
     ! cleanup
@@ -683,7 +682,10 @@ contains
     ftype%datastatus = ESMF_STATUS_READY
     ftype%geombase  = geombase
     ftype%gridstatus = ESMF_STATUS_READY
-    ftype%fieldstatus = ESMF_STATUS_READY 
+    call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_READY, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
     ftype%dimCount = gridDimCount_norep + ungriddedDimCount
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -742,7 +744,10 @@ contains
     ftypep%gridstatus = ESMF_STATUS_UNINIT
     ftypep%datastatus = ESMF_STATUS_UNINIT
 
-    ftypep%fieldstatus = ESMF_STATUS_READY
+    call ESMF_BaseSetStatus(ftypep%base, ESMF_STATUS_READY, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -780,12 +785,17 @@ contains
     type(ESMF_Grid)     :: grid
     type(ESMF_Mesh)     :: mesh
     type(ESMF_LocStream)     :: locs
+    type(ESMF_Status) :: fieldstatus
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    if (ftype%fieldstatus .eq. ESMF_STATUS_READY) then
+    call ESMF_BaseGetStatus(ftype%base, fieldstatus, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+    if (fieldstatus .eq. ESMF_STATUS_READY) then
 
       if((ftype%is_proxy .or. ftype%array_internal) .and. &
         ftype%datastatus .eq. ESMF_STATUS_READY) then
@@ -1176,7 +1186,7 @@ contains
     ! Set return values.
     ESMF_FieldCreateGBArraySpec%ftypep => ftype
     
-    ! Add copy of this object into ESMF garbage collection table
+    ! Add reference to this object into ESMF garbage collection table
     ! Only call this in those Create() methods that call Construct()
     call c_ESMC_VMAddFObject(ESMF_FieldCreateGBArraySpec, &
       ESMF_ID_FIELD%objectID)
@@ -1187,8 +1197,8 @@ contains
     if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) then
-        ESMF_FieldCreateGBArraySpec%ftypep%fieldstatus = ESMF_STATUS_INVALID
-        return
+      call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_INVALID, rc=localrc)
+      return
     endif
 
     if(rcpresent) rc = ESMF_SUCCESS
@@ -1587,7 +1597,7 @@ contains
     ! Set return values.
     ESMF_FieldCreateGBArray%ftypep => ftype
     
-    ! Add copy of this object into ESMF garbage collection table
+    ! Add reference to this object into ESMF garbage collection table
     ! Only call this in those Create() methods that call Construct()
     call c_ESMC_VMAddFObject(ESMF_FieldCreateGBArray, ESMF_ID_FIELD%objectID)
     
@@ -1597,8 +1607,8 @@ contains
     if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) then
-        ESMF_FieldCreateGBArray%ftypep%fieldstatus = ESMF_STATUS_INVALID
-        return
+      call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_INVALID, rc=localrc)
+      return
     endif
 
     if(rcpresent) rc = ESMF_SUCCESS

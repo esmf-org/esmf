@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.20 2009/09/23 15:33:28 theurich Exp $
+// $Id: ESMCI_Util.h,v 1.21 2009/09/23 22:53:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
 // !PUBLIC TYPES:
 
 // WARNING:  the values of these enums MUST match the values defined
-//  in ../interface/ESMF_Util.F90
+//  in ../src/ESMF_UtilTypes.F90
 
 
 // ESMF class states
@@ -82,8 +82,12 @@ enum ESMC_IndexFlag { ESMF_INDEX_DELOCAL=0,
                       ESMF_INDEX_USER};
 
 // inquireonly flag type
-enum ESMC_InquireFlag {ESMF_INQUIREONLY=ESMF_TRUE,
-                       ESMF_NOINQUIRE=ESMF_FALSE};
+enum ESMC_InquireFlag { ESMF_INQUIREONLY=ESMF_TRUE,
+                        ESMF_NOINQUIRE=ESMF_FALSE};
+
+// proxy flag type
+enum ESMC_ProxyFlag { ESMF_PROXYYES=1,
+                      ESMF_PROXYNO};
 
 // regionflag type
 enum ESMC_RegionFlag { ESMF_REGION_TOTAL=0,
@@ -199,7 +203,7 @@ extern ESMC_ObjectID ESMC_ID_FIELDDATAMAP;
 extern ESMC_ObjectID ESMC_ID_FIELD;
 extern ESMC_ObjectID ESMC_ID_BUNDLEDATAMAP;
 extern ESMC_ObjectID ESMC_ID_BUNDLE;
-extern ESMC_ObjectID ESMC_ID_TRANSFORMVALUES;
+extern ESMC_ObjectID ESMC_ID_GEOMBASE;
 extern ESMC_ObjectID ESMC_ID_REGRID;
 extern ESMC_ObjectID ESMC_ID_TRANSFORM;
 extern ESMC_ObjectID ESMC_ID_STATE;

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.7 2009/09/22 14:20:54 feiliu Exp $
+! $Id: ESMF_FieldPr.F90,v 1.8 2009/09/23 22:53:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -113,6 +113,7 @@ contains
         integer                         :: i, localrc
         integer                         :: gridrank, arrayrank
         character(len=6)                :: defaultopts
+        type(ESMF_Status)               :: fieldstatus
 
 !	Initialize
         localrc = ESMF_RC_NOT_IMPL
@@ -135,12 +136,17 @@ contains
 
         fp => field%ftypep
 
-        call ESMF_StatusString(fp%fieldstatus, str, localrc)
+        call ESMF_BaseGetStatus(fp%base, fieldstatus, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rc)) return
+        
+        call ESMF_StatusString(fieldstatus, str, localrc)
       !jw  write(msgbuf, *)  "Field status = ", trim(str)
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "Field status = ", trim(str)
 
-        if (fp%fieldstatus .ne. ESMF_STATUS_READY) then
+        if (fieldstatus .ne. ESMF_STATUS_READY) then
           if (present(rc)) rc = ESMF_SUCCESS
           return
         endif

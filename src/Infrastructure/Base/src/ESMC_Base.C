@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.125 2009/09/21 21:04:55 theurich Exp $
+// $Id: ESMC_Base.C,v 1.126 2009/09/23 22:53:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.125 2009/09/21 21:04:55 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.126 2009/09/23 22:53:38 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -300,30 +300,6 @@
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseGetStatus"
-//BOPI
-// !IROUTINE:  ESMC_BaseGetStatus - Get Base class status
-//
-// !INTERFACE:
-      ESMC_Status ESMC_Base::ESMC_BaseGetStatus(
-// 
-// !ARGUMENTS:
-      void) const {
-// 
-// !RETURN VALUE:
-//    {\tt ESMC\_Status} object containing the {\tt ESMC\_Base} status.
-// 
-// !DESCRIPTION:
-//    Accessor method for base class status.
-//
-//EOPI
-
-  return baseStatus;
-
-}  // end ESMC_BaseGetStatus
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_BaseSetClassName"
 //BOPI
 // !IROUTINE:  ESMC_BaseSetClassName - Set Base class name
@@ -560,31 +536,6 @@
   refCount = count;
 
 } // end ESMC_BaseSetRefCount
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseSetStatus"
-//BOPI
-// !IROUTINE:  ESMC_BaseSetStatus - Set Base class status
-//
-// !INTERFACE:
-      void ESMC_Base::ESMC_BaseSetStatus(
-// 
-// !RETURN VALUE:
-//    none
-// 
-// !ARGUMENTS:
-      ESMC_Status status) {   // in - base status to set
-// 
-// !DESCRIPTION:
-//     Accessor method for base class status.
-//
-//EOPI
-
-  baseStatus = status;
-
-}  // end ESMC_BaseSetStatus
- 
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -904,7 +855,9 @@
   // setup the root Attribute, passing the address of this
   root.setBase(this);
   
-  baseStatus = ESMF_STATUS_READY;
+  baseStatus  = ESMF_STATUS_READY;
+  status      = ESMF_STATUS_READY;
+  proxyflag   = ESMF_PROXYNO;
 
  } // end ESMC_Base
 
@@ -947,7 +900,9 @@
   // setup the root Attribute, passing the address of this
   root.setBase(this);
   
-  baseStatus = ESMF_STATUS_READY;
+  baseStatus  = ESMF_STATUS_READY;
+  status      = ESMF_STATUS_READY;
+  proxyflag   = ESMF_PROXYNO;
 
  } // end ESMC_Base
 
@@ -996,7 +951,9 @@
   // setup the root Attribute, passing the address of this
   root.setBase(this);
   
-  baseStatus = ESMF_STATUS_READY;
+  baseStatus  = ESMF_STATUS_READY;
+  status      = ESMF_STATUS_READY;
+  proxyflag   = ESMF_PROXYNO;
 
  } // end ESMC_Base
 
@@ -1029,7 +986,8 @@ fprintf(stderr, "gjt in ~ESMC_Base() for %p\n", this);
     delete vmID;
   }
 
-  baseStatus = ESMF_STATUS_INVALID;
+  baseStatus  = ESMF_STATUS_INVALID;
+  status      = ESMF_STATUS_INVALID;
   
   // setup the root Attribute, passing the address of this
   //delete root;

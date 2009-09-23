@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.43 2009/09/22 18:28:55 w6ws Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.44 2009/09/23 22:53:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.43 2009/09/22 18:28:55 w6ws Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.44 2009/09/23 22:53:39 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -247,6 +247,7 @@ contains
     integer :: localrc
     type(ESMF_GridDecompType) :: decompType
     type(ESMF_GeomType) :: localGeomType
+    type(ESMF_Status) :: fieldstatus
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -257,9 +258,14 @@ contains
 
     ! Get Field pointer
     ftype => field%ftypep
+    
+   call ESMF_BaseGetStatus(ftype%base, fieldstatus, rc=localrc)
+   if (ESMF_LogMsgFoundError(localrc, &
+     ESMF_ERR_PASSTHRU, &
+     ESMF_CONTEXT, rc)) return
 
     if(present(isCommitted)) then
-        if(ftype%fieldstatus .eq. ESMF_STATUS_READY.and.ftype%gridstatus.eq.ESMF_STATUS_READY.and.&
+        if(fieldstatus .eq. ESMF_STATUS_READY.and.ftype%gridstatus.eq.ESMF_STATUS_READY.and.&
            ftype%datastatus.eq.ESMF_STATUS_READY) then
             isCommitted = .true.
         else 

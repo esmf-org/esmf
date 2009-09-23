@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.10 2009/06/25 21:04:09 oehmke Exp $
+! $Id: ESMF_GridUtil.F90,v 1.11 2009/09/23 22:53:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.10 2009/06/25 21:04:09 oehmke Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.11 2009/09/23 22:53:39 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -242,3 +242,35 @@ module ESMF_GridUtilMod
     end function ESMF_GridToMesh
 
 end module ESMF_GridUtilMod
+
+
+  subroutine f_esmf_geombasecollectgarbage(gbtype, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_geombasecollectgarbage()"
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_GeomBaseMod
+
+    type(ESMF_GeomBaseClass), pointer :: gbtype
+    integer, intent(out) :: rc     
+  
+    integer :: localrc              
+  
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    rc = ESMF_RC_NOT_IMPL
+    
+    ! deallocate actual FieldType allocation      
+    if (associated(gbtype)) then
+      deallocate(gbtype, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Deallocating GeomBase", &
+        ESMF_CONTEXT, rc)) return
+    endif
+    nullify(gbtype)
+
+    ! return successfully  
+    rc = ESMF_SUCCESS
+
+  end subroutine f_esmf_geombasecollectgarbage
+

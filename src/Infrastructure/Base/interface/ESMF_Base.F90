@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.141 2009/06/08 18:24:14 w6ws Exp $
+! $Id: ESMF_Base.F90,v 1.142 2009/09/23 22:53:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -93,8 +93,11 @@ module ESMF_BaseMod
 !      public ESMF_BaseSetRefCount
 !      public ESMF_BaseGetRefCount
 
-!      public ESMF_BaseSetStatus
-!      public ESMF_BaseGetStatus
+       public ESMF_BaseSetBaseStatus
+       public ESMF_BaseGetBaseStatus
+
+       public ESMF_BaseSetStatus
+       public ESMF_BaseGetStatus
 
        public ESMF_BasePrint
        public ESMF_BaseValidate
@@ -123,7 +126,7 @@ module ESMF_BaseMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.141 2009/06/08 18:24:14 w6ws Exp $'
+               '$Id: ESMF_Base.F90,v 1.142 2009/09/23 22:53:38 theurich Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -365,6 +368,185 @@ module ESMF_BaseMod
   end subroutine ESMF_GetName
 
 
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseSetBaseStatus"
+!BOPI
+! !IROUTINE:  ESMF_BaseSetBaseStatus - set the baseStatus
+!
+! !INTERFACE:
+  subroutine ESMF_BaseSetBaseStatus(base, baseStatus, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base),    intent(in)            :: base
+      type(ESMF_Status),  intent(in)            :: baseStatus
+      integer,            intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Set the baseStatus
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[base]
+!       Any ESMF type.
+!     \item[baseStatus]
+!       baseStatus to set.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+      integer :: localrc
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      call c_ESMC_BaseSetBaseStatus(base, baseStatus, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! return successfully
+      if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_BaseSetBaseStatus
+
+
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseGetBaseStatus"
+!BOPI
+! !IROUTINE:  ESMF_BaseGetBaseStatus - get the baseStatus
+!
+! !INTERFACE:
+  subroutine ESMF_BaseGetBaseStatus(base, baseStatus, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base),    intent(in)            :: base
+      type(ESMF_Status),  intent(out)           :: baseStatus
+      integer,            intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Return the baseStatus
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[base]
+!       Any ESMF type.
+!     \item[baseStatus]
+!       baseStatus to set.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+      integer :: localrc
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      call c_ESMC_BaseGetBaseStatus(base, baseStatus, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! return successfully
+      if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_BaseGetBaseStatus
+  
+  
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseSetStatus"
+!BOPI
+! !IROUTINE:  ESMF_BaseSetStatus - set the status
+!
+! !INTERFACE:
+  subroutine ESMF_BaseSetStatus(base, status, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base),    intent(in)            :: base
+      type(ESMF_Status),  intent(in)            :: status
+      integer,            intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Set the status
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[base]
+!       Any ESMF type.
+!     \item[status]
+!       status to set.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+      integer :: localrc
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      call c_ESMC_BaseSetStatus(base, status, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! return successfully
+      if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_BaseSetStatus
+
+
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseGetStatus"
+!BOPI
+! !IROUTINE:  ESMF_BaseGetStatus - get the status
+!
+! !INTERFACE:
+  subroutine ESMF_BaseGetStatus(base, status, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base),    intent(in)            :: base
+      type(ESMF_Status),  intent(out)           :: status
+      integer,            intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Get the ststus
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[base]
+!       Any ESMF type.
+!     \item[status]
+!       status returned.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+      integer :: localrc
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      call c_ESMC_BaseGetStatus(base, status, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! return successfully
+      if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_BaseGetStatus
+  
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !  Print routine

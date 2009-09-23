@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.10 2009/09/23 15:33:28 theurich Exp $
+// $Id: ESMCI_VM.C,v 1.11 2009/09/23 22:53:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.10 2009/09/23 15:33:28 theurich Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.11 2009/09/23 22:53:39 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -62,6 +62,7 @@ static const char *const version = "$Id: ESMCI_VM.C,v 1.10 2009/09/23 15:33:28 t
 extern "C" {
   void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);
   void FTN(f_esmf_fieldcollectgarbage)(void *fobject, int *localrc);
+  void FTN(f_esmf_geombasecollectgarbage)(void *fobject, int *localrc);
 }
 //==============================================================================
 
@@ -545,8 +546,14 @@ void VM::shutdown(
             if (matchTable_FObjects[i][k].objectID == ESMC_ID_FIELD.objectID){
               FTN(f_esmf_fieldcollectgarbage)
                 (&(matchTable_FObjects[i][k].fobject),&localrc);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-                rc)) return;
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+                return;
+            }else if (matchTable_FObjects[i][k].objectID ==
+              ESMC_ID_GEOMBASE.objectID){
+              FTN(f_esmf_geombasecollectgarbage)(
+                &(matchTable_FObjects[i][k].fobject), &localrc);
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+                return;
             //}else if(){
             // TODO: add the other deep Fortran classes with Base member
             }
@@ -1331,6 +1338,12 @@ void VM::finalize(
           &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           rc)) return;
+      }else if (matchTable_FObjects[0][k].objectID ==
+        ESMC_ID_GEOMBASE.objectID){
+        FTN(f_esmf_geombasecollectgarbage)(&(matchTable_FObjects[0][k].fobject),
+          &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+          return;
       //}else if(){
       // TODO: add the other deep Fortran classes with Base member
       }

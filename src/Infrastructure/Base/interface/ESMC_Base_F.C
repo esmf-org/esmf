@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.75 2009/09/09 23:18:05 w6ws Exp $
+// $Id: ESMC_Base_F.C,v 1.76 2009/09/23 22:53:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.75 2009/09/09 23:18:05 w6ws Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.76 2009/09/23 22:53:38 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -130,15 +130,11 @@ extern "C" {
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
+  
+  // nothing to be done, because automatic garbage collection takes care
+  // of Base delete
 
-  if (base && *base)
-      delete (*base);
-  else{
-    *rc = ESMC_RC_PTR_NULL;
-    return;
-  }
-    
-
+  // return successfully
   *rc = ESMF_SUCCESS;
   return;
 
@@ -618,5 +614,136 @@ extern "C" {
   return;
 
 }  // end c_ESMC_SetVMId
+
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  c_ESMC_BaseSetBaseStatus - set baseStatus in Base object
+//
+// !INTERFACE:
+      void FTN(c_esmc_basesetbasestatus)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      ESMC_Status *baseStatus,  // in - baseStatus
+      int *rc                   // out - return code
+      ){
+// 
+// !DESCRIPTION:
+//     set baseStatus in Base object
+//
+//EOPI
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+  
+  (*base)->ESMC_BaseSetBaseStatus(*baseStatus);
+
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
+  return;
+
+}  // end c_ESMC_BaseSetBaseStatus
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  c_ESMC_BaseGetBaseStatus - get baseStatus from Base object
+//
+// !INTERFACE:
+      void FTN(c_esmc_basegetbasestatus)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      ESMC_Status *baseStatus,  // in - baseStatus
+      int *rc                   // out - return code
+      ){
+// 
+// !DESCRIPTION:
+//     get baseStatus from Base object
+//
+//EOPI
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+  
+  *baseStatus = (*base)->ESMC_BaseGetBaseStatus();
+
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
+  return;
+
+}  // end c_ESMC_BaseGetBaseStatus
+
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  c_ESMC_BaseSetStatus - set status in Base object
+//
+// !INTERFACE:
+      void FTN(c_esmc_basesetstatus)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      ESMC_Status *status,      // in - status
+      int *rc                   // out - return code
+      ){
+// 
+// !DESCRIPTION:
+//     set status in Base object
+//
+//EOPI
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+  
+  (*base)->ESMC_BaseSetStatus(*status);
+
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
+  return;
+
+}  // end c_ESMC_BaseSetStatus
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  c_ESMC_BaseGetStatus - get status from Base object
+//
+// !INTERFACE:
+      void FTN(c_esmc_basegetstatus)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      ESMC_Status *status,      // in - status
+      int *rc                   // out - return code
+      ){
+// 
+// !DESCRIPTION:
+//     get status from Base object
+//
+//EOPI
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+  
+  *status = (*base)->ESMC_BaseGetStatus();
+
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
+  return;
+
+}  // end c_ESMC_BaseGetStatus
+
 
 } // extern "C"

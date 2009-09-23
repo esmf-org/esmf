@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.109 2009/09/21 21:04:54 theurich Exp $
+// $Id: ESMC_Base.h,v 1.110 2009/09/23 22:53:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -49,14 +49,16 @@ class ESMC_Base;
 class ESMC_Base
 {
   protected:
-    int           ID;           // unique ID for any object in this VM context
-    ESMCI::VMId   *vmID;        // unique vmID for any VM in the system
-    bool          vmIDCreator;  // Base object is responsible for deleting vmID
-    int           refCount;     // number of references to this instance
-    ESMC_Status   baseStatus;   // status of an instance of Base derived class
-    char          baseName[ESMF_MAXSTR];    // object name, unique over class 
-    char          baseNameF90[ESMF_MAXSTR]; // same name, non-null terminated
-    char          className[ESMF_MAXSTR];   // object class
+    int             ID;           // unique ID for any object in this VM context
+    ESMCI::VMId     *vmID;        // unique vmID for any VM in the system
+    bool            vmIDCreator;  // responsible for deleting vmID allocation
+    int             refCount;     // number of references to this instance
+    ESMC_Status     baseStatus;   // status of the Base part of the object
+    ESMC_Status     status;       // overall status of the derived class object
+    ESMC_ProxyFlag  proxyflag;    // whether object is a proxy or not
+    char            baseName[ESMF_MAXSTR];    // object name, unique over class 
+    char            baseNameF90[ESMF_MAXSTR]; // same name, non-null terminated
+    char            className[ESMF_MAXSTR];   // object class
 
   private:
     
@@ -84,10 +86,18 @@ class ESMC_Base
     void ESMC_BaseSetRefCount(int count);
     int  ESMC_BaseGetRefCount(void) const;
 
-    // accessors to base status
-    void        ESMC_BaseSetStatus(ESMC_Status status);
-    ESMC_Status ESMC_BaseGetStatus(void) const;
+    // accessors to baseStatus
+    void ESMC_BaseSetBaseStatus(ESMC_Status s){ baseStatus = s;}
+    ESMC_Status ESMC_BaseGetBaseStatus()const{ return baseStatus;}
  
+    // accessors to status
+    void ESMC_BaseSetStatus(ESMC_Status s){ status = s;}
+    ESMC_Status ESMC_BaseGetStatus()const{ return status;}
+    
+    // accessors to proxyFlag
+    void ESMC_BaseSetProxyFlag(ESMC_ProxyFlag pf){ proxyflag = pf;}
+    ESMC_ProxyFlag ESMC_BaseGetProxyFlag()const{ return proxyflag;}
+    
     // accessors to base name
     int   ESMC_BaseSetName(const char *name, const char *classname);
     char *ESMC_BaseGetName(void) const;
@@ -123,32 +133,5 @@ class ESMC_Base
     virtual ~ESMC_Base(void);
 
 };   // end class ESMC_Base
-
-// fortran interface functions to base objects
-extern "C" {
-  void FTN(c_esmc_basecreate)(ESMC_Base **base, char *superclass, char *name,
-                              int *nattrs, int *rc,
-                              ESMCI_FortranStrLenArg sclen,
-                              ESMCI_FortranStrLenArg nlen);
-  void FTN(c_esmc_basedestroy)(ESMC_Base **base, int *rc);
-
-  void FTN(c_esmc_baseserialize)(ESMC_Base **base, char *buf, int *length,
-                                 int *offset, ESMC_AttReconcileFlag *attreconflag,
-                                 ESMC_InquireFlag *inquireflag, int *rc);
-  void FTN(c_esmc_basedeserialize)(ESMC_Base **base, char *buf,
-                                   int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc);
-
-  void FTN(c_esmc_baseprint)(ESMC_Base **base, char *opts, int *rc,
-                             ESMCI_FortranStrLenArg nlen);
-  void FTN(c_esmc_basevalidate)(ESMC_Base **base, char *opts, int *rc,
-                                ESMCI_FortranStrLenArg nlen);
-  void FTN(c_esmc_getclassname)(ESMC_Base **base, char *name, int *rc,
-                                ESMCI_FortranStrLenArg nlen);
-  void FTN(c_esmc_getname)(ESMC_Base **base, char *name, int *rc,
-                           ESMCI_FortranStrLenArg nlen);
-  void FTN(c_esmc_setname)(ESMC_Base **base, char *classname, char *objname, 
-                           int *rc,
-                           ESMCI_FortranStrLenArg clen, ESMCI_FortranStrLenArg olen);
-  }
 
 #endif  // ESMC_BASE_H

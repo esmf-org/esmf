@@ -148,7 +148,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.11 2009/09/17 20:49:57 oehmke Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.12 2009/09/23 22:53:39 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -415,6 +415,9 @@ end interface
     ! Set GeomBase Type into GeomBase
      ESMF_GeomBaseCreateGrid%gbcp=>gbcp
 
+    ! Add reference to this object into ESMF garbage collection table
+    call c_ESMC_VMAddFObject(ESMF_GeomBaseCreateGrid, ESMF_ID_GEOMBASE%objectID)
+      
     ! Set init status
     ESMF_INIT_SET_CREATED(ESMF_GeomBaseCreateGrid)
 
@@ -479,6 +482,9 @@ end interface
     ! Set GeomBase Type into GeomBase
      ESMF_GeomBaseCreateMesh%gbcp=>gbcp
 
+    ! Add reference to this object into ESMF garbage collection table
+    call c_ESMC_VMAddFObject(ESMF_GeomBaseCreateMesh, ESMF_ID_GEOMBASE%objectID)
+      
     ! Set init status
     ESMF_INIT_SET_CREATED(ESMF_GeomBaseCreateMesh)
 
@@ -544,6 +550,9 @@ end interface
     ! Set GeomBase Type into GeomBase
      ESMF_GeomBaseCreateLocStream%gbcp=>gbcp
 
+    ! Add reference to this object into ESMF garbage collection table
+    call c_ESMC_VMAddFObject(ESMF_GeomBaseCreateLocStream, ESMF_ID_GEOMBASE%objectID)
+    
     ! Set init status
     ESMF_INIT_SET_CREATED(ESMF_GeomBaseCreateLocStream)
 
@@ -1110,7 +1119,6 @@ end subroutine ESMF_GeomBaseGet
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating GeomBase type object", &
                                      ESMF_CONTEXT, rc)) return
 
-
     ! serialize GeomBase info
     call c_ESMC_GeomBaseDeserialize(gbcp%type%type, &
                                                         gbcp%staggerloc%staggerloc, &
@@ -1151,6 +1159,9 @@ end subroutine ESMF_GeomBaseGet
       ! Set pointer 
       ESMF_GeomBaseDeserialize%gbcp=>gbcp
 
+      ! Add reference to this object into ESMF garbage collection table
+      call c_ESMC_VMAddFObject(ESMF_GeomBaseDeserialize, ESMF_ID_GEOMBASE%objectID)
+    
      ! Set init status
       ESMF_INIT_SET_CREATED(ESMF_GeomBaseDeserialize)
 
@@ -1344,3 +1355,4 @@ end subroutine ESMF_GeomBaseGet
 #undef  ESMF_METHOD
 
 end module ESMF_GeomBaseMod
+

@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.339 2009/09/23 15:33:27 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.340 2009/09/23 22:53:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -76,8 +76,7 @@ module ESMF_FieldMod
     !private
     type (ESMF_Base)              :: base             ! base class object
     type (ESMF_Array)             :: array
-    type (ESMF_GeomBase)        :: geombase
-    type (ESMF_Status)            :: fieldstatus
+    type (ESMF_GeomBase)          :: geombase
     type (ESMF_Status)            :: gridstatus
     type (ESMF_Status)            :: datastatus
     type (ESMF_IOSpec)            :: iospec           ! iospec values
@@ -133,7 +132,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.339 2009/09/23 15:33:27 theurich Exp $'
+    '$Id: ESMF_Field.F90,v 1.340 2009/09/23 22:53:39 theurich Exp $'
 
 !==============================================================================
 !
@@ -255,6 +254,7 @@ contains
       type(ESMF_GridDecompType) :: decompType
       type(ESMF_GeomType) :: geomType
       type(ESMF_Grid) :: grid
+      type(ESMF_Status) :: fieldstatus
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -274,13 +274,16 @@ contains
 
 
       ! make sure the field is ready before trying to look at contents
-      if (ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
+      call ESMF_BaseGetStatus(ftypep%base, fieldstatus, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+      if (fieldstatus .ne. ESMF_STATUS_READY) then
          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
             "Uninitialized or already destroyed Field: fieldstatus not ready", &
              ESMF_CONTEXT, rc)
          return
       endif 
-
 
       ! make sure there is a grid before asking it questions.
       if (ftypep%gridstatus .eq. ESMF_STATUS_READY) then
@@ -529,7 +532,7 @@ contains
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_FieldSerialize(fp%fieldstatus, fp%gridstatus, &
+      call c_ESMC_FieldSerialize(fp%gridstatus, &
                                  fp%datastatus, fp%iostatus, & 
                                  0, fp%gridToFieldMap, &
                                  fp%ungriddedLBound, fp%ungriddedUBound, &
@@ -641,7 +644,7 @@ contains
 
       ! Deserialize other Field members
 
-      call c_ESMC_FieldDeserialize(fp%fieldstatus, fp%gridstatus, &
+      call c_ESMC_FieldDeserialize(fp%gridstatus, &
                                    fp%datastatus, fp%iostatus, &
                                    staggerloc, fp%gridToFieldMap, &
                                    fp%ungriddedLBound, fp%ungriddedUBound, &
@@ -758,8 +761,8 @@ contains
 !     \end{description}
 !
 !EOPI
-
-        ftypep%fieldstatus = ESMF_STATUS_UNINIT
+        integer localrc
+        
         ftypep%gridstatus  = ESMF_STATUS_UNINIT
         ftypep%datastatus  = ESMF_STATUS_UNINIT
         ftypep%iostatus    = ESMF_STATUS_UNINIT

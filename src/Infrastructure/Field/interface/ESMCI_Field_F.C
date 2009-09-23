@@ -1,4 +1,4 @@
-// $Id: ESMCI_Field_F.C,v 1.9 2009/08/21 17:49:01 w6ws Exp $
+// $Id: ESMCI_Field_F.C,v 1.10 2009/09/23 22:53:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_Field_F.C,v 1.9 2009/08/21 17:49:01 w6ws Exp $";
+             "$Id: ESMCI_Field_F.C,v 1.10 2009/09/23 22:53:38 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -43,7 +43,7 @@ extern "C" {
 //
 
 // non-method functions
-void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus, 
+void FTN(c_esmc_fieldserialize)(
                 ESMC_Status *gridstatus, 
                 ESMC_Status *datastatus, 
                 ESMC_Status *iostatus,
@@ -80,12 +80,11 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
 
     sp = (ESMC_Status *)((char *)(buffer) + *offset);
     if (linquireflag != ESMF_INQUIREONLY) {
-      *sp++ = *fieldstatus;
       *sp++ = *gridstatus; 
       *sp++ = *datastatus; 
       *sp++ = *iostatus; 
     } else
-      sp += 4;
+      sp += 3;
 
     // copy the rest of the field parameters
     // we are explicitly assuming Fortran-integer is of size C-int
@@ -120,7 +119,7 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
 } 
 
 
-void FTN(c_esmc_fielddeserialize)(ESMC_Status *fieldstatus, 
+void FTN(c_esmc_fielddeserialize)(
                 ESMC_Status *gridstatus, 
                 ESMC_Status *datastatus, 
                 ESMC_Status *iostatus, 
@@ -140,7 +139,6 @@ void FTN(c_esmc_fielddeserialize)(ESMC_Status *fieldstatus,
     ESMC_Status *sp;
 
     sp = (ESMC_Status *)((char *)(buffer) + *offset);
-    *fieldstatus = *sp++;
     *gridstatus = *sp++;
     *datastatus = *sp++;
     *iostatus = *sp++;
