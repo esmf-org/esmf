@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.55 2009/05/04 20:51:13 w6ws Exp $
+! $Id: ESMF_Init.F90,v 1.56 2009/09/23 17:26:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_Initialize"
 !BOP
-! !IROUTINE:  ESMF_Initialize - Initialize the ESMF
+! !IROUTINE:  ESMF_Initialize - Initialize ESMF
 !
 ! !INTERFACE:
       subroutine ESMF_Initialize(defaultConfigFileName, defaultCalendar, &
@@ -112,7 +112,7 @@
 
 !
 ! !DESCRIPTION:
-!     Initialize the ESMF.  This method must be called before
+!     This method must be called once on each PET before
 !     any other ESMF methods are used.  The method contains a
 !     barrier before returning, ensuring that all processes
 !     made it successfully through initialization.
@@ -149,7 +149,7 @@
 !     for more information on how ESMF uses Fortran unit numbers.
 !
 !     Before exiting the application the user must call {\tt ESMF\_Finalize()}
-!     to release resources and clean up the ESMF gracefully.
+!     to release resources and clean up ESMF gracefully.
 !
 !     The arguments are:
 !     \begin{description}
@@ -374,8 +374,9 @@
       ! Initialize the default time manager calendar
       call ESMF_CalendarInitialize(defaultCalendar, status)
       if (status .ne. ESMF_SUCCESS) then
-          print *, "Error initializing the default time manager calendar"
-          return
+          print *, "Error initializing the default time manager &
+                    calendar"
+      return
       endif
 
       ! Open config file if specified
@@ -419,7 +420,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_Finalize"
 !BOP
-! !IROUTINE:  ESMF_Finalize - Clean up and close the ESMF
+! !IROUTINE:  ESMF_Finalize - Clean up and close ESMF
 !
 ! !INTERFACE:
       subroutine ESMF_Finalize(terminationflag, rc)
@@ -430,8 +431,8 @@
 
 !
 ! !DESCRIPTION:
-!     Finalize the ESMF.  This must be called before the application exits
-!     to allow the ESMF to flush buffers, close open connections, and 
+!     This must be called once on each PET before the application exits
+!     to allow ESMF to flush buffers, close open connections, and 
 !     release internal resources cleanly. The optional argument 
 !     {\tt terminationflag} may be used to indicate the mode of termination.
 !
