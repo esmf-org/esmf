@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.9 2009/09/22 18:27:12 theurich Exp $
+// $Id: ESMCI_VM.C,v 1.10 2009/09/23 15:33:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -43,6 +43,8 @@
 // include ESMF headers
 #include "ESMC_Start.h"
 #include "ESMC_Base.h" 
+#include "ESMCI_F90Interface.h"
+#include "ESMCI_Util.h"
 
 // LogErr
 #include "ESMCI_LogErr.h"
@@ -52,8 +54,16 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.9 2009/09/22 18:27:12 theurich Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.10 2009/09/23 15:33:28 theurich Exp $";
 //-----------------------------------------------------------------------------
+
+//==============================================================================
+// prototypes for Fortran interface routines called by C++ code below
+extern "C" {
+  void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);
+  void FTN(f_esmf_fieldcollectgarbage)(void *fobject, int *localrc);
+}
+//==============================================================================
 
 namespace ESMCI {
 
@@ -65,6 +75,11 @@ static VM *GlobalVM = NULL;
 //-----------------------------------------------------------------------------
 
 
+struct FortranObject{
+  F90ClassHolder fobject;
+  int objectID;
+};
+
 //-----------------------------------------------------------------------------
 // Module arrays to hold association table between tid <-> vm <-> vmID
 #define ESMC_VM_MATCHTABLEMAX 10000  // maximum number of entries in table
@@ -73,6 +88,7 @@ static VM *matchTable_vm[ESMC_VM_MATCHTABLEMAX];
 static VMId matchTable_vmID[ESMC_VM_MATCHTABLEMAX];
 static int matchTable_BaseIDCount[ESMC_VM_MATCHTABLEMAX];
 static vector<ESMC_Base *> matchTable_Objects[ESMC_VM_MATCHTABLEMAX];
+static vector<FortranObject> matchTable_FObjects[ESMC_VM_MATCHTABLEMAX];
 //gjtNotYet static esmf_pthread_t *matchTable_tid;
 //gjtNotYet static ESMC_VM **matchTable_vm;
 //gjtNotYet static VMId *matchTable_vmID;
@@ -444,11 +460,12 @@ void *VM::startup(
       matchTable_tid[index]  = vmp->myvms[j]->getMypthid(); // pthid
       matchTable_vm[index]   = vmp->myvms[j];               // ptr to this VM
       matchTable_vmID[index] = VMIdCreate(&localrc);        // vmID
-      matchTable_BaseIDCount[index] = 0;                    // reset
-      matchTable_Objects[index].reserve(1000);              // start w/ 1000 obj
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return NULL;  // bail out on error
-      VMIdCopy(&(matchTable_vmID[index]), &vmID);             // deep copy
+      matchTable_BaseIDCount[index] = 0;                    // reset
+      matchTable_Objects[index].reserve(1000);              // start w/ 1000 obj
+      matchTable_FObjects[index].reserve(1000);             // start w/ 1000 obj
+      VMIdCopy(&(matchTable_vmID[index]), &vmID);           // deep copy
     }
     delete [] emptyList;
     VMIdDestroy(&vmID, &localrc);
@@ -517,9 +534,23 @@ void VM::shutdown(
           rc)) return;
         // automatic garbage collection of ESMF objects
         try{
+          // The following loop deletes deep C++ ESMF objects derived from
+          // Base class. For deep Fortran classes it deletes the Base member.
           for (int k=matchTable_Objects[i].size()-1; k>=0; k--){
-            delete matchTable_Objects[i][k];
+            delete matchTable_Objects[i][k];  // delete ESMF object, incl. Base
             matchTable_Objects[i].pop_back();
+          }
+          // The following loop deallocates deep Fortran ESMF objects
+          for (int k=matchTable_FObjects[i].size()-1; k>=0; k--){
+            if (matchTable_FObjects[i][k].objectID == ESMC_ID_FIELD.objectID){
+              FTN(f_esmf_fieldcollectgarbage)
+                (&(matchTable_FObjects[i][k].fobject),&localrc);
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+                rc)) return;
+            //}else if(){
+            // TODO: add the other deep Fortran classes with Base member
+            }
+            matchTable_FObjects[i].pop_back();
           }
         }catch(int localrc){
           // catch standard ESMF return code
@@ -1112,7 +1143,7 @@ void VM::addObject(
 // !DESCRIPTION:
 //    Add object to matchTable_Objects list for this VM. Objects in this
 //    list will be delete during VM shutdown and finalize. This implements
-//    automatic garbage collection of ESMF objeects on the Component scope.
+//    automatic garbage collection of ESMF objects on the Component scope.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1124,6 +1155,46 @@ void VM::addObject(
   
   // match found
   matchTable_Objects[i].push_back(object);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::addFObject()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::addFObject - Add Fortran object to table for garb col. //
+// !INTERFACE:
+void VM::addFObject(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//
+  void **fobject,
+  int objectID,
+  VMId *vmID){   // identifying vmID
+//
+// !DESCRIPTION:
+//    Add Fortran object to matchTable_FObjects list for this VM. Objects in
+//    list will be delete during VM shutdown and finalize. This implements
+//    automatic garbage collection of ESMF objects on the Component scope.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int i;
+  for (i=0; i<matchTableBound; i++)
+    if (VMIdCompare(vmID, &(matchTable_vmID[i]))) break;
+  if (i == matchTableBound)
+    return;  // no match found, bail out
+  
+  // match found
+  int size = matchTable_FObjects[i].size();
+  matchTable_FObjects[i].resize(size+1);  // add element to FObjects list
+  void *fobjectElement = (void *)&(matchTable_FObjects[i][size].fobject);
+  FTN(f_esmf_fortranudtpointercopy)(fobjectElement, (void *)fobject);
+  matchTable_FObjects[i][size].objectID = objectID;
 }
 //-----------------------------------------------------------------------------
 
@@ -1176,6 +1247,7 @@ VM *VM::initialize(
   matchTable_vm[matchTableBound]   = GlobalVM;
   matchTable_BaseIDCount[matchTableBound] = 0;        // reset
   matchTable_Objects[matchTableBound].reserve(1000);  // start w/ 1000 obj
+  matchTable_FObjects[matchTableBound].reserve(1000); // start w/ 1000 obj
       
   // set vmID
   vmKeyWidth = GlobalVM->getNpets()/8;
@@ -1246,9 +1318,23 @@ void VM::finalize(
     return;
   // automatic garbage collection of ESMF objects
   try{
+    // The following loop deletes deep C++ ESMF objects derived from
+    // Base class. For deep Fortran classes it deletes the Base member.
     for (int k=matchTable_Objects[0].size()-1; k>=0; k--){
-      delete matchTable_Objects[0][k];
+      delete matchTable_Objects[0][k];  // delete ESMF object, incl. Base
       matchTable_Objects[0].pop_back();
+    }
+    // The following loop deallocates deep Fortran ESMF objects
+    for (int k=matchTable_FObjects[0].size()-1; k>=0; k--){
+      if (matchTable_FObjects[0][k].objectID == ESMC_ID_FIELD.objectID){
+        FTN(f_esmf_fieldcollectgarbage)(&(matchTable_FObjects[0][k].fobject),
+          &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          rc)) return;
+      //}else if(){
+      // TODO: add the other deep Fortran classes with Base member
+      }
+      matchTable_FObjects[0].pop_back();
     }
   }catch(int localrc){
     // catch standard ESMF return code

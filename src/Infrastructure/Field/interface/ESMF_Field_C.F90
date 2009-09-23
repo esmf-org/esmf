@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.10 2009/09/21 20:38:32 feiliu Exp $
+!  $Id: ESMF_Field_C.F90,v 1.11 2009/09/23 15:33:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.10 2009/09/21 20:38:32 feiliu Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.11 2009/09/23 15:33:27 theurich Exp $'
 !==============================================================================
 
   subroutine f_esmf_fieldcreate(fieldp, mesh, arrayspec, &
@@ -108,3 +108,41 @@
     if (present(rc)) rc = localrc
 
   end subroutine f_esmf_fielddestroy
+
+
+  subroutine f_esmf_fieldcollectgarbage(ftype, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_fieldcollectgarbage()"
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_FieldMod
+    use ESMF_FieldCreateMod
+
+    type(ESMF_FieldType), pointer :: ftype
+    integer, intent(out) :: rc     
+  
+    integer :: localrc              
+  
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    rc = ESMF_RC_NOT_IMPL
+  
+    ! destruct intenal data allocations
+    call ESMF_FieldDestruct(ftype, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
+
+    ! deallocate actual FieldType allocation      
+    if (associated(ftype)) then
+      deallocate(ftype, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Deallocating Field", &
+        ESMF_CONTEXT, rc)) return
+    endif
+    nullify(ftype)
+
+    ! return successfully  
+    rc = ESMF_SUCCESS
+
+  end subroutine f_esmf_fieldcollectgarbage

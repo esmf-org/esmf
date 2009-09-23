@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.144 2009/08/18 20:11:04 feiliu Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.145 2009/09/23 15:33:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.144 2009/08/18 20:11:04 feiliu Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.145 2009/09/23 15:33:28 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -72,7 +72,7 @@
       real(ESMF_KIND_R4), dimension(:,:), pointer :: lsfptrR4Out
       type(ESMF_Grid) :: grid, grid2
       real(ESMF_KIND_R8), dimension(:), pointer :: lsfptr,lsfptrOut
-      type(ESMF_Field) :: f2, f3, f4, f5, f6, fls
+      type(ESMF_Field) :: f2, f3, f4, f5, f6, fls, fS
       integer :: ulb(1), uub(1)
       character (len = 20) :: gname, gname3
       character (len = 20) :: fname, fname1, fname2
@@ -286,6 +286,8 @@
       write(name, *) "Verifying uniqueness of fields created default name"
       call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
 
+      fS = f2 ! assignment will lead to shallow copy, use later down
+      
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       ! Verifying that a Field with no data can be destroyed
@@ -460,12 +462,20 @@
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
-      ! Verifying that a destroying a destroyed  Field is handled properly.
+      ! Verifying that destroying a destroyed  Field is handled properly.
       call ESMF_FieldDestroy(f2, rc=rc)  ! should succeed, f2 exists
       call ESMF_FieldDestroy(f2, rc=rc)  ! should fail
       write(failMsg, *) ""
       write(name, *) "Destroying a destroyed Field Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      ! Verifying that destroying a shallow copy of destroyed Field is o.k.
+      call ESMF_FieldDestroy(fS, rc=rc)  ! should be o.k.
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Destroying a shallow copy of destroyed Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only

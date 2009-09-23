@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM_F.C,v 1.6 2009/09/21 21:05:05 theurich Exp $
+// $Id: ESMCI_VM_F.C,v 1.7 2009/09/23 15:33:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -1176,6 +1176,18 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_vmpointerprint()"
     // print the address to which this pointer points
     printf("c_esmc_vmpointerprint: %p\n", ptr);
+  }
+  
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // Fortran entry point to automatic garbage collection on Component scope
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  void FTN(c_esmc_vmaddfobject)(void **fobject, int *objectID){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmaddfobject()"
+    int rc;
+    ESMCI::VMId *vmID = ESMCI::VM::getCurrentID(&rc);  // get current vmID
+    ESMCI::VM::addFObject(fobject, *objectID, vmID);
   }
   
 #undef  ESMC_METHOD

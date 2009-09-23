@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.338 2009/09/22 14:20:53 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.339 2009/09/23 15:33:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -133,7 +133,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.338 2009/09/22 14:20:53 feiliu Exp $'
+    '$Id: ESMF_Field.F90,v 1.339 2009/09/23 15:33:27 theurich Exp $'
 
 !==============================================================================
 !
@@ -685,6 +685,10 @@ contains
     
       fp%is_proxy = .true.
       ESMF_FieldDeserialize%ftypep => fp
+      
+      ! Add copy of this object into ESMF garbage collection table
+      call c_ESMC_VMAddFObject(ESMF_FieldDeserialize, ESMF_ID_FIELD%objectID)
+      
       ESMF_INIT_SET_CREATED(ESMF_FieldDeserialize)
 
       if  (present(rc)) rc = ESMF_SUCCESS

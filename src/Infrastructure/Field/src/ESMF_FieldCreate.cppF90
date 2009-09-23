@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.58 2009/09/21 21:05:00 theurich Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.59 2009/09/23 15:33:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -59,12 +59,13 @@ module ESMF_FieldCreateMod
   public ESMF_FieldCreate
   public ESMF_FieldCreateEmpty
   public ESMF_FieldDestroy            ! Destroy a Field
+  public ESMF_FieldDestruct           ! For internal ESMF use only
 
  
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.58 2009/09/21 21:05:00 theurich Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.59 2009/09/23 15:33:27 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -177,6 +178,10 @@ contains
 
     ! Set return values.
     ESMF_FieldCreateEmpty%ftypep => ftype
+    
+    ! Add copy of this object into ESMF garbage collection table
+    ! Only call this in those Create() methods that call Construct()
+    call c_ESMC_VMAddFObject(ESMF_FieldCreateEmpty, ESMF_ID_FIELD%objectID)
 
     ESMF_INIT_SET_CREATED(ESMF_FieldCreateEmpty)
 
@@ -225,25 +230,29 @@ contains
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-    ! TODO: If already destroyed or never created, return ok?
-    ! (should it be ok to destroy the same object twice without complaint?)
-    ! for now, no, you cannot delete an object twice 
-    call ESMF_FieldValidate(field, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-                               ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rc)) return
+    if (.not.associated(field%ftypep)) then 
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        "Uninitialized or already destroyed Field: ftypep unassociated", &
+        ESMF_CONTEXT, rc)
+      return
+    endif 
 
     ! Destruct all field internals and then free field memory.
-    call ESMF_FieldDestruct(field%ftypep, localrc)
+    call ESMF_FieldDestruct(field%ftypep, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-         
-    if (associated(field%ftypep)) then
-       deallocate(field%ftypep, stat=localrc)
-       if (ESMF_LogMsgFoundAllocError(localrc, "Deallocating Field", &
-                                     ESMF_CONTEXT, rc)) return
-    endif 
+
+!-gjt: taking this out in favor of automatic garbage collection         
+!    if (associated(field%ftypep)) then
+!       deallocate(field%ftypep, stat=localrc)
+!       if (ESMF_LogMsgFoundAllocError(localrc, "Deallocating Field", &
+!                                     ESMF_CONTEXT, rc)) return
+!    endif
+!    nullify(field%ftypep)
+
+    field%ftypep%fieldstatus = ESMF_STATUS_INVALID  ! mark invalid
+
     ESMF_INIT_SET_DELETED(field)
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -786,59 +795,6 @@ contains
                                 ESMF_CONTEXT, rc)) return
           ftype%datastatus = ESMF_STATUS_INVALID  ! mark invalid
       endif
-
-      if (ftype%gridstatus .eq. ESMF_STATUS_READY) then
-    
-        if (ftype%is_proxy) then
-          call ESMF_GeomBaseGet(ftype%geombase, geomType=geomType, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
-
-          ! release proxy grid
-          if (geomType.eq.ESMF_GEOMTYPE_GRID) then
-            call ESMF_GeomBaseGet(ftype%geombase, grid=grid, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rc)) return
-            call ESMF_GridDestroy(grid, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rc)) return
-          endif
-
-          ! release proxy mesh
-          if (geomType.eq.ESMF_GEOMTYPE_MESH) then
-            call ESMF_GeomBaseGet(ftype%geombase, mesh=mesh, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rc)) return
-            call ESMF_MeshDestroy(mesh, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rc)) return
-          endif
-
-          ! release proxy locstream
-          if (geomType.eq.ESMF_GEOMTYPE_LOCSTREAM) then
-            call ESMF_GeomBaseGet(ftype%geombase, locstream=locs, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rc)) return
-            call ESMF_LocStreamDestroy(locs, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rc)) return
-          endif
-        endif
-    
-        call ESMF_GeomBaseDestroy(ftype%geombase, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      
-      ftype%fieldstatus = ESMF_STATUS_INVALID  ! mark invalid
       
     endif
 
@@ -1219,6 +1175,12 @@ contains
    
     ! Set return values.
     ESMF_FieldCreateGBArraySpec%ftypep => ftype
+    
+    ! Add copy of this object into ESMF garbage collection table
+    ! Only call this in those Create() methods that call Construct()
+    call c_ESMC_VMAddFObject(ESMF_FieldCreateGBArraySpec, &
+      ESMF_ID_FIELD%objectID)
+    
     ESMF_INIT_SET_CREATED(ESMF_FieldCreateGBArraySpec)
 
     call ESMF_FieldValidate(ESMF_FieldCreateGBArraySpec, rc=localrc)
@@ -1624,6 +1586,11 @@ contains
 
     ! Set return values.
     ESMF_FieldCreateGBArray%ftypep => ftype
+    
+    ! Add copy of this object into ESMF garbage collection table
+    ! Only call this in those Create() methods that call Construct()
+    call c_ESMC_VMAddFObject(ESMF_FieldCreateGBArray, ESMF_ID_FIELD%objectID)
+    
     ESMF_INIT_SET_CREATED(ESMF_FieldCreateGBArray)
 
     call ESMF_FieldValidate(ESMF_FieldCreateGBArray, rc=localrc)
