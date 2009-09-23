@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.13 2009/09/15 17:41:17 feiliu Exp $
+! $Id: ESMF_FieldEx.F90,v 1.14 2009/09/23 18:18:12 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -519,6 +519,8 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_GridDestroy(grid3d, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_GridDestroy(grid2d, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_ArrayDestroy(array3d, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
