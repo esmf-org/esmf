@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.126 2009/06/05 21:32:39 w6ws Exp $
+! $Id: ESMF_GridComp.F90,v 1.127 2009/09/24 17:15:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.126 2009/06/05 21:32:39 w6ws Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.127 2009/09/24 17:15:26 theurich Exp $'
 
 !==============================================================================
 !
@@ -206,6 +206,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     type(ESMF_CompClass), pointer :: compclass       ! generic comp
+    type(ESMF_GridComp)           :: gcomp
     integer :: localrc                               ! local error status
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -224,7 +225,7 @@ contains
     allocate(compclass, stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "compclass", &
       ESMF_CONTEXT, rc)) return
-   
+      
     ! call Comp method
     call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
       gridcomptype=gridcomptype, configFile=configFile, config=config, &
@@ -232,10 +233,18 @@ contains
       rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rc)) then
+      deallocate(compclass)
+      return
+    endif
 
+    gcomp%compp => compclass
+    ! Add reference to this object into ESMF garbage collection table
+    call c_ESMC_VMAddFObject(gcomp, ESMF_ID_COMPONENT%objectID)
+      
     ! Set return values
     ESMF_GridCompCreate%compp => compclass
+    
     ESMF_INIT_SET_CREATED(ESMF_GridCompCreate)
 
     ! return successfully
@@ -294,14 +303,15 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
-    ! Deallocate the gridcomp struct itself and mark as deleted
-    deallocate(gridcomp%compp, stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, &
-      "deallocating GridComp object", &
+    ! mark object invalid
+    call ESMF_BaseSetStatus(gridcomp%compp%base, ESMF_STATUS_INVALID, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
-    nullify(gridcomp%compp)
+
     ESMF_INIT_SET_DELETED(gridcomp)
-    
+
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 

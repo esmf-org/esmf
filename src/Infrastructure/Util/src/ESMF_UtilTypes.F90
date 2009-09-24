@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.83 2009/09/23 22:53:39 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.84 2009/09/24 17:15:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -241,7 +241,7 @@
          ESMF_ID_FIELDBUNDLE = ESMF_ObjectID(28, "ESMF_FieldBundle"), &
          ESMF_ID_GEOMBASE = ESMF_ObjectID(29, "ESMF_GeomBase"), &
          ESMF_ID_REGRID = ESMF_ObjectID(30, "ESMF_Regrid"), &
-         ESMF_ID_TRANSFORM = ESMF_ObjectID(31, "ESMF_Transform"), &
+         ESMF_ID_LOCSTREAM = ESMF_ObjectID(31, "ESMF_Locstream"), &
          ESMF_ID_STATE = ESMF_ObjectID(32, "ESMF_State"), &
          ESMF_ID_GRIDCOMPONENT = ESMF_ObjectID(33, "ESMF_GridComponent"), &
          ESMF_ID_CPLCOMPONENT = ESMF_ObjectID(34, "ESMF_CplComponent"), &
@@ -580,7 +580,7 @@
       public ESMF_ID_COMMTABLE, ESMF_ID_ROUTETABLE, ESMF_ID_ROUTE
       public ESMF_ID_ROUTEHANDLE, ESMF_ID_FIELDDATAMAP, ESMF_ID_FIELD
       public ESMF_ID_FIELDBUNDLE, ESMF_ID_GEOMBASE
-      public ESMF_ID_REGRID, ESMF_ID_TRANSFORM, ESMF_ID_STATE
+      public ESMF_ID_REGRID, ESMF_ID_LOCSTREAM, ESMF_ID_STATE
       public ESMF_ID_GRIDCOMPONENT, ESMF_ID_CPLCOMPONENT, ESMF_ID_COMPONENT
 
       public ESMF_Status, ESMF_Pointer, ESMF_TypeKind

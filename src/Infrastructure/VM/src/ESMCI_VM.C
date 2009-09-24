@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.11 2009/09/23 22:53:39 theurich Exp $
+// $Id: ESMCI_VM.C,v 1.12 2009/09/24 17:15:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.11 2009/09/23 22:53:39 theurich Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.12 2009/09/24 17:15:25 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -62,7 +62,11 @@ static const char *const version = "$Id: ESMCI_VM.C,v 1.11 2009/09/23 22:53:39 t
 extern "C" {
   void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);
   void FTN(f_esmf_fieldcollectgarbage)(void *fobject, int *localrc);
+  void FTN(f_esmf_fbundlecollectgarbage)(void *fobject, int *localrc);
   void FTN(f_esmf_geombasecollectgarbage)(void *fobject, int *localrc);
+  void FTN(f_esmf_locstreamcollectgarbage)(void *fobject, int *localrc);
+  void FTN(f_esmf_statecollectgarbage)(void *fobject, int *localrc);
+  void FTN(f_esmf_compcollectgarbage)(void *fobject, int *localrc);
 }
 //==============================================================================
 
@@ -535,12 +539,6 @@ void VM::shutdown(
           rc)) return;
         // automatic garbage collection of ESMF objects
         try{
-          // The following loop deletes deep C++ ESMF objects derived from
-          // Base class. For deep Fortran classes it deletes the Base member.
-          for (int k=matchTable_Objects[i].size()-1; k>=0; k--){
-            delete matchTable_Objects[i][k];  // delete ESMF object, incl. Base
-            matchTable_Objects[i].pop_back();
-          }
           // The following loop deallocates deep Fortran ESMF objects
           for (int k=matchTable_FObjects[i].size()-1; k>=0; k--){
             if (matchTable_FObjects[i][k].objectID == ESMC_ID_FIELD.objectID){
@@ -549,15 +547,43 @@ void VM::shutdown(
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
                 return;
             }else if (matchTable_FObjects[i][k].objectID ==
+              ESMC_ID_FIELDBUNDLE.objectID){
+              FTN(f_esmf_fbundlecollectgarbage)(
+                &(matchTable_FObjects[i][k].fobject), &localrc);
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+                return;
+            }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_GEOMBASE.objectID){
               FTN(f_esmf_geombasecollectgarbage)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
                 return;
-            //}else if(){
-            // TODO: add the other deep Fortran classes with Base member
+            }else if (matchTable_FObjects[i][k].objectID ==
+              ESMC_ID_LOCSTREAM.objectID){
+              FTN(f_esmf_locstreamcollectgarbage)(
+                &(matchTable_FObjects[i][k].fobject), &localrc);
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+                return;
+            }else if (matchTable_FObjects[i][k].objectID ==
+              ESMC_ID_STATE.objectID){
+              FTN(f_esmf_statecollectgarbage)(
+                &(matchTable_FObjects[i][k].fobject), &localrc);
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+                return;
+            }else if (matchTable_FObjects[i][k].objectID ==
+              ESMC_ID_COMPONENT.objectID){
+              FTN(f_esmf_compcollectgarbage)(
+                &(matchTable_FObjects[i][k].fobject), &localrc);
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+                return;
             }
             matchTable_FObjects[i].pop_back();
+          }
+          // The following loop deletes deep C++ ESMF objects derived from
+          // Base class. For deep Fortran classes it deletes the Base member.
+          for (int k=matchTable_Objects[i].size()-1; k>=0; k--){
+            delete matchTable_Objects[i][k];  // delete ESMF object, incl. Base
+            matchTable_Objects[i].pop_back();
           }
         }catch(int localrc){
           // catch standard ESMF return code
@@ -1325,12 +1351,6 @@ void VM::finalize(
     return;
   // automatic garbage collection of ESMF objects
   try{
-    // The following loop deletes deep C++ ESMF objects derived from
-    // Base class. For deep Fortran classes it deletes the Base member.
-    for (int k=matchTable_Objects[0].size()-1; k>=0; k--){
-      delete matchTable_Objects[0][k];  // delete ESMF object, incl. Base
-      matchTable_Objects[0].pop_back();
-    }
     // The following loop deallocates deep Fortran ESMF objects
     for (int k=matchTable_FObjects[0].size()-1; k>=0; k--){
       if (matchTable_FObjects[0][k].objectID == ESMC_ID_FIELD.objectID){
@@ -1339,15 +1359,43 @@ void VM::finalize(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           rc)) return;
       }else if (matchTable_FObjects[0][k].objectID ==
+        ESMC_ID_FIELDBUNDLE.objectID){
+        FTN(f_esmf_fbundlecollectgarbage)(
+          &(matchTable_FObjects[0][k].fobject), &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+          return;
+      }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_GEOMBASE.objectID){
         FTN(f_esmf_geombasecollectgarbage)(&(matchTable_FObjects[0][k].fobject),
           &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
           return;
-      //}else if(){
-      // TODO: add the other deep Fortran classes with Base member
+      }else if (matchTable_FObjects[0][k].objectID ==
+        ESMC_ID_LOCSTREAM.objectID){
+        FTN(f_esmf_locstreamcollectgarbage)(
+          &(matchTable_FObjects[0][k].fobject), &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+          return;
+      }else if (matchTable_FObjects[0][k].objectID ==
+        ESMC_ID_STATE.objectID){
+        FTN(f_esmf_statecollectgarbage)(
+          &(matchTable_FObjects[0][k].fobject), &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+          return;
+      }else if (matchTable_FObjects[0][k].objectID ==
+        ESMC_ID_COMPONENT.objectID){
+        FTN(f_esmf_compcollectgarbage)(
+          &(matchTable_FObjects[0][k].fobject), &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+          return;
       }
       matchTable_FObjects[0].pop_back();
+    }
+    // The following loop deletes deep C++ ESMF objects derived from
+    // Base class. For deep Fortran classes it deletes the Base member.
+    for (int k=matchTable_Objects[0].size()-1; k>=0; k--){
+      delete matchTable_Objects[0][k];  // delete ESMF object, incl. Base
+      matchTable_Objects[0].pop_back();
     }
   }catch(int localrc){
     // catch standard ESMF return code

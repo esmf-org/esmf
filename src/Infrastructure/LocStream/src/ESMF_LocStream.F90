@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.18 2009/09/21 21:05:02 theurich Exp $
+! $Id: ESMF_LocStream.F90,v 1.19 2009/09/24 17:15:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -104,6 +104,7 @@ module ESMF_LocStreamMod
    public ESMF_LocStreamDeserialize
    public ESMF_LocStreamSerialize
    public ESMF_LocStreamDestroy
+   public ESMF_LocStreamDestruct           ! for ESMF garbage collection
    public ESMF_LocStreamPrint              ! Print contents of a LocStream
    public ESMF_LocStreamGetKey
    public ESMF_LocStreamAddKey
@@ -122,7 +123,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.18 2009/09/21 21:05:02 theurich Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.19 2009/09/24 17:15:23 theurich Exp $'
 
 !==============================================================================
 !
@@ -862,6 +863,11 @@ contains
 
       ! Set return value.
       ESMF_LocStreamCreateFromDG=locstream
+      
+      ! Add reference to this object into ESMF garbage collection table
+      ! Only call this in those Create() methods that do not call other LSCreate()
+      call c_ESMC_VMAddFObject(locstream, &
+        ESMF_ID_LOCSTREAM%objectID)
 
       ! set init status to created
       ESMF_INIT_SET_CREATED(ESMF_LocStreamCreateFromDG)
@@ -1304,44 +1310,25 @@ contains
       ! Init check input types
       ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit,locstream,rc)      
 
-      ! Get internal pointer
-      lstypep=>locstream%lstypep
+      if (.not.associated(locstream%lstypep)) then 
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+          "Uninitialized or already destroyed LocStream: lstypep unassociated", &
+          ESMF_CONTEXT, rc)
+        return
+      endif 
 
-     ! Destroy  key Arrays
-     do i=1,lstypep%keyCount
-          if (lstypep%destroyKeys(i)) then
-             call ESMF_ArrayDestroy(lstypep%keys(i), rc=localrc)       
-             if (ESMF_LogMsgFoundError(localrc, &
+      ! Destruct all field internals and then free field memory.
+      call ESMF_LocStreamDestruct(locstream%lstypep, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-          endif
-     enddo
 
-
-     ! destroy distgrid
-     if (lstypep%destroyDistGrid) then
-         !! destroy distgrid
-         call ESMF_DistGridDestroy(lstypep%distgrid, rc=localrc)       
-         if (ESMF_LogMsgFoundError(localrc, &
+      ! mark object invalid
+      call ESMF_BaseSetStatus(locstream%lstypep%base, ESMF_STATUS_INVALID, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-     endif
-
-      ! Deallocate space for key data (if its been allocated)
-      if (lstypep%keyCount .gt. 0) then
-         deallocate (lstypep%keyNames)
-         deallocate (lstypep%keyUnits)
-         deallocate (lstypep%keyLongNames)
-         deallocate( lstypep%keys)
-         deallocate( lstypep%destroyKeys)
-      endif
-
-      ! Deallocate type memory
-      deallocate(lstypep)
-
-      ! Nullify pointer in structure
-      nullify(locstream%lstypep)
-
+                                
       ! Set init status to indicate structure has been destroyed
       ESMF_INIT_SET_DELETED(locstream)
 
@@ -1349,6 +1336,85 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LocStreamDestroy
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocStreamDestruct"
+!BOP
+! !IROUTINE: ESMF_LocStreamDestruct - Destruct a LocStream 
+
+! !INTERFACE:
+      subroutine ESMF_LocStreamDestruct(lstypep,rc)
+!
+! !ARGUMENTS:
+      type (ESMF_LocStreamType), pointer :: lstypep
+      integer, intent(out), optional               :: rc
+!
+! !DESCRIPTION:
+!     Destruct an {\tt ESMF\_LocStream} object and all appropriate 
+!     internal structures.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[lstypep]
+!          locstream to destruct
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+      integer :: localrc  ! Error status
+      integer :: i 
+      type(ESMF_Status) :: status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      call ESMF_BaseGetStatus(lstypep%base, status, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+        
+      if (status .eq. ESMF_STATUS_READY) then  
+        
+        ! Destroy  key Arrays
+        do i=1,lstypep%keyCount
+          if (lstypep%destroyKeys(i)) then
+             call ESMF_ArrayDestroy(lstypep%keys(i), rc=localrc)       
+             if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+          endif
+        enddo
+
+
+        ! destroy distgrid
+        if (lstypep%destroyDistGrid) then
+         !! destroy distgrid
+         call ESMF_DistGridDestroy(lstypep%distgrid, rc=localrc)       
+         if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+
+        ! Deallocate space for key data (if its been allocated)
+        if (lstypep%keyCount .gt. 0) then
+          deallocate (lstypep%keyNames)
+          deallocate (lstypep%keyUnits)
+          deallocate (lstypep%keyLongNames)
+          deallocate( lstypep%keys)
+          deallocate( lstypep%destroyKeys)
+        endif
+        
+      endif
+
+      ! return successfully
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_LocStreamDestruct
 !------------------------------------------------------------------------------
 
 
@@ -2738,6 +2804,11 @@ end subroutine ESMF_LocStreamGetBounds
      ! Set pointer to locstream
      ESMF_LocStreamDeserialize%lstypep=>lstypep
 
+     ! Add reference to this object into ESMF garbage collection table
+     ! Only call this in those Create() methods that do not call other LSCreate()
+     call c_ESMC_VMAddFObject(ESMF_LocStreamDeserialize, &
+       ESMF_ID_LOCSTREAM%objectID)
+        
      ! Set init status
      ESMF_INIT_SET_CREATED(ESMF_LocStreamDeserialize)
 
@@ -4467,6 +4538,44 @@ end subroutine ESMF_LocStreamGetBounds
       end function ESMF_LocStreamCreateByBkg
 #endif
 
-
-
 end module ESMF_LocStreamMod
+
+
+  subroutine f_esmf_locstreamcollectgarbage(lstype, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_fieldcollectgarbage()"
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_LocStreamMod
+
+    type(ESMF_LocStreamType), pointer :: lstype
+    integer, intent(out) :: rc     
+  
+    integer :: localrc              
+  
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    rc = ESMF_RC_NOT_IMPL
+  
+    !print *, "collecting LocStream garbage"
+  
+    ! destruct internal data allocations
+    call ESMF_LocStreamDestruct(lstype, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
+
+    ! deallocate actual LocStreamType allocation      
+    if (associated(lstype)) then
+      deallocate(lstype, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Deallocating LocStream", &
+        ESMF_CONTEXT, rc)) return
+    endif
+    nullify(lstype)
+
+    ! return successfully  
+    rc = ESMF_SUCCESS
+
+  end subroutine f_esmf_locstreamcollectgarbage
+

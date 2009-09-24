@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.25 2009/09/22 14:22:00 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.26 2009/09/24 17:15:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -115,7 +115,6 @@
       !private
         type(ESMF_Base) :: base                   ! base class object
         type(ESMF_Field), dimension(:), pointer :: flist
-        type(ESMF_Status) :: bundlestatus
         type(ESMF_Status) :: gridstatus
 
         type(ESMF_Grid) :: grid                  ! associated global Grid
@@ -173,6 +172,8 @@
 
        public ESMF_FieldBundleCreate       ! Create a new FieldBundle
        public ESMF_FieldBundleDestroy      ! Destroy a FieldBundle
+
+       public ESMF_FieldBundleDestruct      ! for ESMF garbage collection
 
        public ESMF_FieldBundleGet          ! Get FieldBundle information
        public ESMF_FieldBundleAdd          ! Add field/fields to FieldBundle
@@ -592,7 +593,11 @@ end function
 
       ! set the return bundle
       ESMF_FieldBundleCreateNew%btypep => btypep
-
+      
+      ! Add reference to this object into ESMF garbage collection table
+      ! Only call this in those Create() methods that call Construct()
+      call c_ESMC_VMAddFObject(ESMF_FieldBundleCreateNew, &
+        ESMF_ID_FIELDBUNDLE%objectID)
 
       ! do this before ESMF_FieldBundleIsConguent so it doesn't complain
       ! about uninitialized bundles
@@ -698,6 +703,12 @@ end function
 
       ! Set return values.
       ESMF_FieldBundleCreateNoFields%btypep => btypep
+      
+      ! Add reference to this object into ESMF garbage collection table
+      ! Only call this in those Create() methods that call Construct()
+      call c_ESMC_VMAddFObject(ESMF_FieldBundleCreateNoFields, &
+        ESMF_ID_FIELDBUNDLE%objectID)
+      
       ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateNoFields)
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -736,34 +747,35 @@ end function
 !EOP
 
       ! Local variables
-      integer :: status                           ! Error status
-      type(ESMF_FieldBundleType), pointer :: btype
+      integer :: localrc                           ! Error status
 
       ! Initialize return code
-      status = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check inputs 
       ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
 
-
-      ! If already destroyed or never created, return ok
-      btype => bundle%btypep
-      if (.not. associated(btype)) then
-        if (present(rc)) rc = ESMF_FAILURE   ! should this really be an error?
+      if (.not.associated(bundle%btypep)) then 
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+          "Uninitialized or already destroyed FieldBundle: btypep unassociated", &
+          ESMF_CONTEXT, rc)
         return
-      endif
-
+      endif 
+    
       ! Destruct all bundle internals and then free field memory.
-      call ESMF_FieldBundleDestruct(btype, status)
-      if (ESMF_LogMsgFoundError(status, &
+      call ESMF_FieldBundleDestruct(bundle%btypep, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      deallocate(bundle%btypep, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, "FieldBundle deallocate", &
-                                       ESMF_CONTEXT, rc)) return
-      nullify(bundle%btypep)
+      ! mark object invalid
+      call ESMF_BaseSetStatus(bundle%btypep%base, ESMF_STATUS_INVALID, &
+        rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+                                
       ESMF_INIT_SET_DELETED(bundle)
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1438,15 +1450,15 @@ end function
 ! !IROUTINE: ESMF_FieldBundleRead - Create a FieldBundle from an external source
 !
 ! !INTERFACE:
-      function ESMF_FieldBundleRead(name, iospec, rc)
+!      function ESMF_FieldBundleRead(name, iospec, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_FieldBundle) :: ESMF_FieldBundleRead
+!      type(ESMF_FieldBundle) :: ESMF_FieldBundleRead
 !
 ! !ARGUMENTS:
-      character (len = *), intent(in) :: name
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      integer, intent(out), optional :: rc
+!      character (len = *), intent(in) :: name
+!      type(ESMF_IOSpec), intent(in), optional :: iospec
+!      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Used to read data from persistent storage in a variety of formats.
@@ -1466,18 +1478,16 @@ end function
 !
 !  TODO: code goes here
 !
-      type(ESMF_FieldBundle) :: b
+!      type(ESMF_FieldBundle) :: b
 
       ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+!      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      allocate(b%btypep)
+!      allocate(b%btypep)
 
-      b%btypep%bundlestatus = ESMF_STATUS_UNINIT
+!      ESMF_FieldBundleRead = b
 
-      ESMF_FieldBundleRead = b
-
-      end function ESMF_FieldBundleRead
+!      end function ESMF_FieldBundleRead
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1486,15 +1496,15 @@ end function
 ! !IROUTINE: ESMF_FieldBundleReadRestart - Read back a saved FieldBundle
 !
 ! !INTERFACE:
-      function ESMF_FieldBundleReadRestart(name, iospec, rc)
+!      function ESMF_FieldBundleReadRestart(name, iospec, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_FieldBundle) :: ESMF_FieldBundleReadRestart
+!      type(ESMF_FieldBundle) :: ESMF_FieldBundleReadRestart
 !
 ! !ARGUMENTS:
-      character (len = *), intent(in) :: name     
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      integer, intent(out), optional :: rc         
+!      character (len = *), intent(in) :: name     
+!      type(ESMF_IOSpec), intent(in), optional :: iospec
+!      integer, intent(out), optional :: rc         
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
@@ -1517,18 +1527,17 @@ end function
 !
 !  TODO: code goes here
 !
-      type(ESMF_FieldBundle) :: b
+!      type(ESMF_FieldBundle) :: b
 
       ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+!      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      allocate(b%btypep)
+!      allocate(b%btypep)
 
-      b%btypep%bundlestatus = ESMF_STATUS_UNINIT
+ 
+!      ESMF_FieldBundleReadRestart = b
 
-      ESMF_FieldBundleReadRestart = b
-
-      end function ESMF_FieldBundleReadRestart
+!      end function ESMF_FieldBundleReadRestart
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1743,10 +1752,11 @@ end function
 
 
       ! Local variables
-      integer :: status                           ! Error status
+      integer :: localrc                           ! Error status
+      type(ESMF_Status) :: fieldbundlestatus
 
       ! Initialize return code; assume routine not implemented
-      status = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
@@ -1758,7 +1768,12 @@ end function
                                  ESMF_CONTEXT, rc)) return
       endif 
 
-      if (bundle%btypep%bundlestatus .ne. ESMF_STATUS_READY) then
+      call ESMF_BaseGetStatus(bundle%btypep%base, fieldbundlestatus, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rc)) return
+          
+      if (fieldbundlestatus .ne. ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed FieldBundle", &
                                  ESMF_CONTEXT, rc)) return
@@ -2272,7 +2287,6 @@ end function
       
       btype%pack_flag = ESMF_NO_PACKED_DATA
 !     nullify(btype%localbundle%packed_data)
-      btype%bundlestatus = ESMF_STATUS_READY
   
 
       ! Set as created 
@@ -2309,35 +2323,27 @@ end function
 !
 !EOPI
 
-      integer :: status, i
+      integer :: localrc, i
+      type(ESMF_Status) :: fieldbundlestatus
 
       ! Initialize return code; assume routine not implemented
-      status = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      if (btype%bundlestatus .eq. ESMF_STATUS_READY) then
+      call ESMF_BaseGetStatus(btype%base, fieldbundlestatus, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rc)) return
 
-        if(btype%is_proxy) then
-          call ESMF_GridDestroy(btype%grid, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
-          do i = 1, btype%field_count
-            call ESMF_FieldDestroy(btype%flist(i), rc=status)
-            if (ESMF_LogMsgFoundError(status, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
-          enddo
-        endif
+      if (fieldbundlestatus .eq. ESMF_STATUS_READY) then
 
         if (associated(btype%flist)) then
-          deallocate(btype%flist, stat=status)
-          if (ESMF_LogMsgFoundAllocError(status, "FieldBundle deallocate", &
+          deallocate(btype%flist, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "FieldBundle deallocate", &
                                          ESMF_CONTEXT, rc)) return
 
         endif
 
-        btype%bundlestatus = ESMF_STATUS_INVALID  ! invalidate
       endif
 
       ! Set as deleted 
@@ -2434,7 +2440,7 @@ end function
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_FieldBundleSerialize(bp%bundlestatus, bp%gridstatus, &
+      call c_ESMC_FieldBundleSerialize(bp%gridstatus, &
                                  bp%iostatus, &
                                  bp%field_count, bp%pack_flag, &
                                  bp%isCongruent, bp%hasPattern, &
@@ -2551,7 +2557,7 @@ end function
 
       ! Deserialize other FieldBundle members
       
-      call c_ESMC_FieldBundleDeserialize(bp%bundlestatus, bp%gridstatus, &
+      call c_ESMC_FieldBundleDeserialize(bp%gridstatus, &
                                  bp%iostatus, &
                                  bp%field_count, bp%pack_flag, &
                                  bp%isCongruent, bp%hasPattern, &
@@ -2609,6 +2615,10 @@ end function
 
       ESMF_FieldBundleDeserialize%btypep => bp
 
+      ! Add copy of this object into ESMF garbage collection table
+      call c_ESMC_VMAddFObject(ESMF_FieldBundleDeserialize, &
+        ESMF_ID_FIELDBUNDLE%objectID)
+      
       ! Set as created
       ESMF_INIT_SET_CREATED(ESMF_FieldBundleDeserialize)
 

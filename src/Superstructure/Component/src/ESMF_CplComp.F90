@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.113 2009/06/05 21:32:39 w6ws Exp $
+! $Id: ESMF_CplComp.F90,v 1.114 2009/09/24 17:15:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.113 2009/06/05 21:32:39 w6ws Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.114 2009/09/24 17:15:26 theurich Exp $'
 
 !==============================================================================
 !
@@ -191,6 +191,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     type(ESMF_CompClass), pointer :: compclass        ! generic comp
+    type(ESMF_CplComp)            :: cplcomp
     integer :: localrc                                ! local error localrc
 
     ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
@@ -215,10 +216,18 @@ contains
       contextflag=contextflag, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rc)) then
+      deallocate(compclass)
+      return
+    endif
 
+    cplcomp%compp => compclass
+    ! Add reference to this object into ESMF garbage collection table
+    call c_ESMC_VMAddFObject(cplcomp, ESMF_ID_COMPONENT%objectID)
+      
     ! Set return values
     ESMF_CplCompCreate%compp => compclass
+    
     ESMF_INIT_SET_CREATED(ESMF_CplCompCreate)
 
     ! return successfully
@@ -277,12 +286,13 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
-    ! Deallocate the cplcomp struct itself and mark as deleted
-    deallocate(cplcomp%compp, stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, &
-      "deallocating CplComp object", &
+    ! mark object invalid
+    call ESMF_BaseSetStatus(cplcomp%compp%base, ESMF_STATUS_INVALID, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
-    nullify(cplcomp%compp)
+
     ESMF_INIT_SET_DELETED(cplcomp)
     
     ! return successfully

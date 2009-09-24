@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.126 2009/09/23 22:53:38 theurich Exp $
+// $Id: ESMC_Base.C,v 1.127 2009/09/24 17:15:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.126 2009/09/23 22:53:38 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.127 2009/09/24 17:15:18 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -563,6 +563,7 @@
     
     int *ip, i, nbytes;
     ESMC_Status *sp;
+    ESMC_ProxyFlag *pfp;
     char *cp;
     int localrc;
 
@@ -575,7 +576,10 @@
     classID = *ip++;  
     sp = (ESMC_Status *)ip;
     baseStatus = *sp++;
-    cp = (char *)sp;
+    status = *sp++;
+    pfp = (ESMC_ProxyFlag *)sp;
+    proxyflag = *pfp++;
+    cp = (char *)pfp;
     memcpy(baseName, cp, ESMF_MAXSTR);
     cp += ESMF_MAXSTR;
     memcpy(baseNameF90, cp, ESMF_MAXSTR);
@@ -699,6 +703,7 @@
     int fixedpart;
     int *ip, i, rc;
     ESMC_Status *sp;
+    ESMC_ProxyFlag *pfp;
     char *cp;
 
     // Initialize local return code; assume routine not implemented
@@ -722,12 +727,19 @@
       ip += 3;
 
     sp = (ESMC_Status *)ip;
-    if (inquireflag != ESMF_INQUIREONLY)
+    if (inquireflag != ESMF_INQUIREONLY){
       *sp++ = baseStatus;
-    else
-      sp++;
+      *sp++ = status;
+    }else
+      sp += 2;
 
-    cp = (char *)sp;
+    pfp = (ESMC_ProxyFlag *)sp;
+    if (inquireflag != ESMF_INQUIREONLY)
+      *pfp++ = proxyflag;
+    else
+      pfp++;
+
+    cp = (char *)pfp;
     if (inquireflag != ESMF_INQUIREONLY) {
       memcpy(cp, baseName, ESMF_MAXSTR);
       cp += ESMF_MAXSTR;
@@ -977,8 +989,7 @@
 //EOPI
   int i, rc;
   
-fprintf(stderr, "gjt in ~ESMC_Base() for %p\n", this);
-  
+//fprintf(stderr, "final garbage collection in ~ESMC_Base() for %p\n", this);
   
   if (vmIDCreator){
     // Base object is responsible for vmID deallocation

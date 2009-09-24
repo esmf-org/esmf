@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.175 2009/09/23 17:26:42 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.176 2009/09/24 17:15:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -67,6 +67,8 @@ module ESMF_StateMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
       public ESMF_StateCreate, ESMF_StateDestroy
+      
+      public ESMF_StateDestruct    ! for ESMF garbage collection
 
       public ESMF_StateAdd
       public ESMF_StateGet
@@ -90,7 +92,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.175 2009/09/23 17:26:42 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.176 2009/09/24 17:15:27 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2202,6 +2204,9 @@ module ESMF_StateMod
         ! Set return values
         ESMF_StateCreate%statep => stypep
 
+        ! Add reference to this object into ESMF garbage collection table
+        call c_ESMC_VMAddFObject(ESMF_StateCreate, ESMF_ID_STATE%objectID)
+      
         ! validate created state
         ESMF_INIT_SET_CREATED(ESMF_StateCreate)
  
@@ -2249,12 +2254,12 @@ module ESMF_StateMod
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
-        ! Simple sanity checks
-        call ESMF_StateValidate(state, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
+        if (.not.associated(state%statep)) then 
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+            "Uninitialized or already destroyed State: statep unassociated", &
+            ESMF_CONTEXT, rc)
+          return
+        endif 
 
         ! Call Destruct to release resources
         call ESMF_StateDestruct(state%statep, localrc)
@@ -2262,11 +2267,12 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        ! Release space
- 	deallocate(state%statep, stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate State", &
-                                       ESMF_CONTEXT, rc)) return
-        nullify(state%statep)
+        ! mark object invalid
+        call ESMF_BaseSetStatus(state%statep%base, ESMF_STATUS_INVALID, &
+          rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
         ! Invalidate Destroyed State
         ESMF_INIT_SET_DELETED(state)
@@ -4090,7 +4096,6 @@ module ESMF_StateMod
         else
           stypep%st = ESMF_STATE_UNSPECIFIED
         endif
-        stypep%statestatus = ESMF_STATUS_READY
         stypep%alloccount = 0
         stypep%datacount = 0
         nullify(stypep%datalist)
@@ -4138,88 +4143,42 @@ module ESMF_StateMod
 
         ! Local vars
         integer :: localrc
-!        type(ESMF_StateItem), pointer::stateItem
-!        type(ESMF_State) :: wrapper
+        type(ESMF_StateItem), pointer::stateItem
+        type(ESMF_State) :: wrapper
+        type(ESMF_Status):: status
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-        ! check input variable
-        ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
-        
-        if (stypep%statestatus .ne. ESMF_STATUS_READY) then
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-            "uninitialized or destroyed State object", &
-            ESMF_CONTEXT, rc) 
-          return
-        endif
-        
-        ! loop over all items and destroy proxy objects
-!TODO: took this out because it conflicts with the automatic garbage collection
-!TODO: scheme on the Component scope. *gjt*
-!        do i=1, stypep%datacount
-!          stateItem => stypep%datalist(i)
-!          if (stateItem%proxyFlag) then
-!            select case(stateItem%otype%ot)
-!            case (ESMF_STATEITEM_FIELDBUNDLE%ot)
-!              call ESMF_FieldBundleDestroy(stateItem%datap%fbp, rc=localrc)
-!              if (ESMF_LogMsgFoundError(localrc, &
-!                ESMF_ERR_PASSTHRU, &
-!                ESMF_CONTEXT, rc)) return
-!              continue
-!            case (ESMF_STATEITEM_FIELD%ot)
-!              call ESMF_FieldDestroy(stateItem%datap%fp, rc=localrc)
-!              if (ESMF_LogMsgFoundError(localrc, &
-!                ESMF_ERR_PASSTHRU, &
-!                ESMF_CONTEXT, rc)) return
-!              continue
-!            case (ESMF_STATEITEM_ARRAY%ot)
-!              call ESMF_ArrayDestroy(stateItem%datap%ap, rc=localrc)
-!              if (ESMF_LogMsgFoundError(localrc, &
-!                ESMF_ERR_PASSTHRU, &
-!                ESMF_CONTEXT, rc)) return
-!              continue
-!            case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
-!              call ESMF_ArrayBundleDestroy(stateItem%datap%abp, rc=localrc)
-!              if (ESMF_LogMsgFoundError(localrc, &
-!                ESMF_ERR_PASSTHRU, &
-!                ESMF_CONTEXT, rc)) return
-!              continue
-!            case (ESMF_STATEITEM_STATE%ot)
-!              wrapper%statep => stateItem%datap%spp
-!              ESMF_INIT_SET_CREATED(wrapper)             
-!              call ESMF_StateDestroy(wrapper, rc=localrc)
-!              if (ESMF_LogMsgFoundError(localrc, &
-!                ESMF_ERR_PASSTHRU, &
-!                ESMF_CONTEXT, rc)) return
-!              continue
-!            case default
-!            end select
-!          endif
-!        enddo
-
-        ! mark object invalid, and free each of the blocks associated
-        ! with each entry.  note that we are not freeing the objects
-        ! themselves; they could be added to multiple states.  it is
-        ! the user's responsibility to delete them when finished.
-        stypep%st = ESMF_STATE_INVALID
-        stypep%statestatus = ESMF_STATUS_INVALID
-        stypep%datacount = 0
-
-        ! Now release the entire list
-        if (associated(stypep%datalist)) then
-          deallocate(stypep%datalist, stat=localrc)
-          if (ESMF_LogMsgFoundAllocError(localrc, "data list", &
-                                         ESMF_CONTEXT, rc)) return
-          nullify(stypep%datalist)
-        endif
-        stypep%alloccount = 0
-
-        ! destroy the methodTable object
-        call c_ESMC_MethodTableDestroy(stypep%methodTable, localrc)
+        call ESMF_BaseGetStatus(stypep%base, status, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rc)) return
+        
+        if (status .eq. ESMF_STATUS_READY) then
+        
+          ! mark object invalid, and free each of the blocks associated
+          ! with each entry.  note that we are not freeing the objects
+          ! themselves; they could be added to multiple states.  it is
+          ! the user's responsibility to delete them when finished.
+          stypep%st = ESMF_STATE_INVALID
+          stypep%datacount = 0
+
+          ! Now release the entire list
+          if (associated(stypep%datalist)) then
+            deallocate(stypep%datalist, stat=localrc)
+            if (ESMF_LogMsgFoundAllocError(localrc, "data list", &
+                                         ESMF_CONTEXT, rc)) return
+            nullify(stypep%datalist)
+          endif
+          stypep%alloccount = 0
+
+          ! destroy the methodTable object
+          call c_ESMC_MethodTableDestroy(stypep%methodTable, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+        endif
 
         ! Set as deleted
         ESMF_INIT_SET_DELETED(stypep)
@@ -6033,7 +5992,7 @@ module ESMF_StateMod
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_StateSerialize(sp%statestatus, sp%st, sp%needed_default, &
+      call c_ESMC_StateSerialize(sp%st, sp%needed_default, &
                                  sp%ready_default, sp%stvalid_default, &
                                  sp%reqrestart_default, &
                                  sp%alloccount, sp%datacount, &
@@ -6179,7 +6138,7 @@ module ESMF_StateMod
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_StateDeserialize(sp%statestatus, sp%st, sp%needed_default, &
+      call c_ESMC_StateDeserialize(sp%st, sp%needed_default, &
                                  sp%ready_default, sp%stvalid_default, &
                                  sp%reqrestart_default, &
                                  sp%alloccount, sp%datacount, &
@@ -6279,6 +6238,10 @@ module ESMF_StateMod
 
       !ESMF_StateDeserialize%statep => sp
       substate%statep => sp
+      
+      ! Add reference to this object into ESMF garbage collection table
+      call c_ESMC_VMAddFObject(substate, ESMF_ID_STATE%objectID)
+      
       ESMF_INIT_SET_CREATED(substate)
       
       if  (present(rc)) rc = ESMF_SUCCESS

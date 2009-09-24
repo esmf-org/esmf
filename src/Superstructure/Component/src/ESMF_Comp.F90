@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.195 2009/09/21 21:05:06 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.196 2009/09/24 17:15:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -136,7 +136,6 @@ module ESMF_CompMod
     !private
     type(ESMF_Pointer)  :: this             ! C++ ftable pointer - MUST BE FIRST
     type(ESMF_Base)     :: base             ! base class
-    type(ESMF_Status)   :: compstatus       ! valid object or not?
     type(ESMF_CompType) :: ctype            ! component type
     type(ESMF_Config)   :: config           ! configuration object
     type(ESMF_Clock)    :: clock            ! private component clock
@@ -249,7 +248,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.195 2009/09/21 21:05:06 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.196 2009/09/24 17:15:25 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -550,7 +549,6 @@ contains
     ! Set values for the derived type members
     compp%this = ESMF_NULL_POINTER
     compp%base%this = ESMF_NULL_POINTER
-    compp%compstatus = ESMF_STATUS_INVALID 
     compp%ctype = ctype
     compp%configFile = "uninitialized"
     compp%dirPath = "uninitialized"
@@ -738,9 +736,6 @@ contains
     compp%currentMethod = ESMF_SETNONE
     compp%currentPhase  = 0
 
-    ! ready   
-    compp%compstatus = ESMF_STATUS_READY
-
     ! Set init code
     ESMF_INIT_SET_CREATED(compp)
 
@@ -778,6 +773,7 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
+    type(ESMF_Status) :: status
 
     ! Assume not implemented until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -791,48 +787,48 @@ contains
       return
     endif
 
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+    call ESMF_BaseGetStatus(compp%base, status, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+        
+    if (status .eq. ESMF_STATUS_READY) then
+    
+      if (compp%vm_info /= ESMF_NULL_POINTER) then
+        ! shut down this component's VM
+        call ESMF_VMShutdown(vm=compp%vm_parent, vmplan=compp%vmplan, &
+          vm_info=compp%vm_info, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rc)) return
+      endif
 
-    if (compp%vm_info /= ESMF_NULL_POINTER) then
-      ! shut down this component's VM
-      call ESMF_VMShutdown(vm=compp%vm_parent, vmplan=compp%vmplan, &
-        vm_info=compp%vm_info, rc=localrc)
+      ! destruct the VMPlan
+      call ESMF_VMPlanDestruct(vmplan=compp%vmplan, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
-    endif
 
-    ! destruct the VMPlan
-    call ESMF_VMPlanDestruct(vmplan=compp%vmplan, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ! deallocate space held for petlist
+      deallocate(compp%petlist, stat=localrc)
+      if (ESMF_LogMsgFoundDeallocError(localrc, "local petlist", &
+        ESMF_CONTEXT, rc)) return 
 
-    ! deallocate space held for petlist
-    deallocate(compp%petlist, stat=localrc)
-    if (ESMF_LogMsgFoundDeallocError(localrc, "local petlist", &
-      ESMF_CONTEXT, rc)) return 
-
-    ! mark obj invalid
-    compp%compstatus = ESMF_STATUS_INVALID
-
-    ! call C++ to release function and data pointer tables.
-    call c_ESMC_FTableDestroy(compp%this, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
-
-    ! Release attributes on config
-    if(compp%configFile .ne. "uninitialized" ) then
-      call ESMF_ConfigDestroy(compp%config, localrc)
+      ! call C++ to release function and data pointer tables.
+      call c_ESMC_FTableDestroy(compp%this, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
-    endif
 
-    ! Set init code
-    ESMF_INIT_SET_DELETED(compp)
+      ! Release attributes on config
+      if(compp%configFile .ne. "uninitialized" ) then
+        call ESMF_ConfigDestroy(compp%config, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rc)) return
+      endif
+
+    endif
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -911,6 +907,7 @@ contains
     ! dummys that will provide initializer values if args are not present
     type(ESMF_State)        :: dummyis, dummyes
     type(ESMF_Clock)        :: dummyclock
+    type(ESMF_Status)       :: status
 
     ! Initialize return code; assume not implemented until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -927,7 +924,12 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
-    if (compp%compstatus .ne. ESMF_STATUS_READY) then
+    call ESMF_BaseGetStatus(compp%base, status, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+        
+    if (status .ne. ESMF_STATUS_READY) then
       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
         "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc) 
@@ -1076,6 +1078,7 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_Status)       :: status
 
     ! Initialize return code; assume not implemented until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1092,7 +1095,12 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
-    if (compp%compstatus .ne. ESMF_STATUS_READY) then
+    call ESMF_BaseGetStatus(compp%base, status, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+        
+    if (status .ne. ESMF_STATUS_READY) then
       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
         "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc)
@@ -1196,6 +1204,7 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_Status)       :: status
 
     ! Initialize return code; assume not implemented until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1215,7 +1224,12 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
-    if (compp%compstatus .ne. ESMF_STATUS_READY) then
+    call ESMF_BaseGetStatus(compp%base, status, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+        
+    if (status .ne. ESMF_STATUS_READY) then
       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
         "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc)
@@ -1257,9 +1271,10 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    character(len=6)        :: defaultopts
-    character(len=ESMF_MAXSTR) :: cname
+    integer                     :: localrc      ! local return code
+    character(len=6)            :: defaultopts
+    character(len=ESMF_MAXSTR)  :: cname
+    type(ESMF_Status)           :: status
 
     ! Initialize return code; assume not implemented until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1283,7 +1298,12 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
-    if (compp%compstatus .ne. ESMF_STATUS_READY) then
+    call ESMF_BaseGetStatus(compp%base, status, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+        
+    if (status .ne. ESMF_STATUS_READY) then
       !nsc  call ESMF_LogWrite("Invalid or uninitialized Component",  &
       !nsc                      ESMF_LOG_INFO)
       write (*,*)  "Invalid or uninitialized Component"
@@ -1338,6 +1358,7 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_Status)       :: status
 
     ! Initialize return code; assume not implemented until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1354,7 +1375,12 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
-    if (compp%compstatus .ne. ESMF_STATUS_READY) then
+    call ESMF_BaseGetStatus(compp%base, status, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+        
+    if (status .ne. ESMF_STATUS_READY) then
       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
         "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc)
@@ -1663,6 +1689,7 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_Status)       :: status
 
     ! Initialize return code; assume not implemented until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1679,7 +1706,12 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
-    if (compp%compstatus .ne. ESMF_STATUS_READY) then
+    call ESMF_BaseGetStatus(compp%base, status, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+        
+    if (status .ne. ESMF_STATUS_READY) then
       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
         "Unini/destroyed comp", &
         ESMF_CONTEXT, rc)
@@ -1733,6 +1765,7 @@ contains
     integer                 :: localUserRc  ! return code from user code
     type(ESMF_BlockingFlag) :: blocking     ! local blocking flag
     type(ESMF_VM)           :: vm           ! VM for current context
+    type(ESMF_Status)       :: status
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1749,7 +1782,12 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
-    if (compp%compstatus .ne. ESMF_STATUS_READY) then
+    call ESMF_BaseGetStatus(compp%base, status, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+        
+    if (status .ne. ESMF_STATUS_READY) then
       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
         "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc) 

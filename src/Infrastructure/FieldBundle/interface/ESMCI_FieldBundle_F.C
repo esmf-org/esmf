@@ -1,4 +1,4 @@
-// $Id: ESMCI_FieldBundle_F.C,v 1.4 2009/08/21 17:50:16 w6ws Exp $
+// $Id: ESMCI_FieldBundle_F.C,v 1.5 2009/09/24 17:15:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_FieldBundle_F.C,v 1.4 2009/08/21 17:50:16 w6ws Exp $";
+             "$Id: ESMCI_FieldBundle_F.C,v 1.5 2009/09/24 17:15:21 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -40,7 +40,7 @@ extern "C" {
 //
 
 // non-method functions
-void FTN(c_esmc_fieldbundleserialize)(ESMC_Status *bundlestatus,
+void FTN(c_esmc_fieldbundleserialize)(
                             ESMC_Status *gridstatus,
                             ESMC_Status *iostatus,
                             int *field_count,
@@ -70,11 +70,10 @@ void FTN(c_esmc_fieldbundleserialize)(ESMC_Status *bundlestatus,
 
     sp = (ESMC_Status *)((char *)(buffer) + *offset);
     if (*inquireflag != ESMF_INQUIREONLY) {
-      *sp++ = *bundlestatus;
       *sp++ = *gridstatus; 
       *sp++ = *iostatus; 
     } else
-      sp += 3;
+      sp += 2;
 
     ip = (int *)sp;
     if (*inquireflag != ESMF_INQUIREONLY) {
@@ -93,7 +92,7 @@ void FTN(c_esmc_fieldbundleserialize)(ESMC_Status *bundlestatus,
 
 
 // non-method functions
-void FTN(c_esmc_fieldbundledeserialize)(ESMC_Status *bundlestatus, 
+void FTN(c_esmc_fieldbundledeserialize)( 
                               ESMC_Status *gridstatus, 
                               ESMC_Status *iostatus, 
                               int *field_count, 
@@ -107,7 +106,6 @@ void FTN(c_esmc_fieldbundledeserialize)(ESMC_Status *bundlestatus,
     int *ip;
 
     sp = (ESMC_Status *)((char *)(buffer) + *offset);
-    *bundlestatus = *sp++;
     *gridstatus = *sp++;
     *iostatus = *sp++;
     ip = (int *)sp;

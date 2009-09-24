@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.11 2009/09/23 22:53:39 theurich Exp $
+! $Id: ESMF_GridUtil.F90,v 1.12 2009/09/24 17:15:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.11 2009/09/23 22:53:39 theurich Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.12 2009/09/24 17:15:23 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -261,7 +261,9 @@ end module ESMF_GridUtilMod
     localrc = ESMF_RC_NOT_IMPL
     rc = ESMF_RC_NOT_IMPL
     
-    ! deallocate actual FieldType allocation      
+    !print *, "collecting GeomBase garbage"
+    
+    ! deallocate actual GeomBaseClass allocation      
     if (associated(gbtype)) then
       deallocate(gbtype, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Deallocating GeomBase", &

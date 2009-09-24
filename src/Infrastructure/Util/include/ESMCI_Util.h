@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.21 2009/09/23 22:53:39 theurich Exp $
+// $Id: ESMCI_Util.h,v 1.22 2009/09/24 17:15:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -187,7 +187,7 @@ extern ESMC_ObjectID ESMC_ID_ALARM;
 extern ESMC_ObjectID ESMC_ID_CLOCK;
 extern ESMC_ObjectID ESMC_ID_ARRAYSPEC;
 extern ESMC_ObjectID ESMC_ID_LOCALARRAY;
-extern ESMC_ObjectID ESMC_ID_ARRAYDATAMAP;
+extern ESMC_ObjectID ESMC_ID_ARRAYBUNDLE;
 extern ESMC_ObjectID ESMC_ID_VM;
 extern ESMC_ObjectID ESMC_ID_DELAYOUT;
 extern ESMC_ObjectID ESMC_ID_CONFIG;
@@ -202,10 +202,10 @@ extern ESMC_ObjectID ESMC_ID_ROUTEHANDLE;
 extern ESMC_ObjectID ESMC_ID_FIELDDATAMAP;
 extern ESMC_ObjectID ESMC_ID_FIELD;
 extern ESMC_ObjectID ESMC_ID_BUNDLEDATAMAP;
-extern ESMC_ObjectID ESMC_ID_BUNDLE;
+extern ESMC_ObjectID ESMC_ID_FIELDBUNDLE;
 extern ESMC_ObjectID ESMC_ID_GEOMBASE;
 extern ESMC_ObjectID ESMC_ID_REGRID;
-extern ESMC_ObjectID ESMC_ID_TRANSFORM;
+extern ESMC_ObjectID ESMC_ID_LOCSTREAM;
 extern ESMC_ObjectID ESMC_ID_STATE;
 extern ESMC_ObjectID ESMC_ID_GRIDCOMPONENT;
 extern ESMC_ObjectID ESMC_ID_CPLCOMPONENT;

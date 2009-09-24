@@ -1,4 +1,4 @@
-! $Id: ESMF_State_C.F90,v 1.19 2009/05/29 23:54:04 w6ws Exp $
+! $Id: ESMF_State_C.F90,v 1.20 2009/09/24 17:15:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.19 2009/05/29 23:54:04 w6ws Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.20 2009/09/24 17:15:26 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -315,3 +315,44 @@
        enddo
 
    end subroutine f_esmf_stategetitemnames
+
+!------------------------------------------------------------------------------
+
+  subroutine f_esmf_statecollectgarbage(stype, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_statecollectgarbage()"
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_StateTypesMod
+    use ESMF_StateMod
+    
+    type(ESMF_StateClass), pointer :: stype
+    integer, intent(out) :: rc     
+  
+    integer :: localrc              
+  
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    rc = ESMF_RC_NOT_IMPL
+  
+    !print *, "collecting State garbage"
+
+    ! destruct internal data allocations
+    call ESMF_StateDestruct(stype, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
+
+    ! deallocate actual StateClass allocation      
+    if (associated(stype)) then
+      deallocate(stype, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Deallocating State", &
+        ESMF_CONTEXT, rc)) return
+    endif
+    nullify(stype)
+
+    ! return successfully  
+    rc = ESMF_SUCCESS
+
+  end subroutine f_esmf_statecollectgarbage

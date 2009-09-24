@@ -1,4 +1,4 @@
-// $Id: ESMCI_State_F.C,v 1.3 2009/08/21 18:17:48 w6ws Exp $
+// $Id: ESMCI_State_F.C,v 1.4 2009/09/24 17:15:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_State_F.C,v 1.3 2009/08/21 18:17:48 w6ws Exp $";
+             "$Id: ESMCI_State_F.C,v 1.4 2009/09/24 17:15:26 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -47,23 +47,8 @@ extern "C" {
 //
 //
 
-#if 0
-      type ESMF_StateClass
-        type(ESMF_Base) :: base
-        type(ESMF_Status) :: statestatus
-        type(ESMF_StateType) :: st
-        type(ESMF_NeededFlag) :: needed_default
-        type(ESMF_ReadyFlag) :: ready_default
-        type(ESMF_ValidFlag) :: stvalid_default
-        type(ESMF_ReqForRestartFlag) :: reqrestart_default
-        integer :: alloccount
-        integer :: datacount
-        type(ESMF_StateItem), dimension(:), pointer :: datalist
-
-#endif
-
 // non-method functions
-void FTN(c_esmc_stateserialize)(int *statestatus, 
+void FTN(c_esmc_stateserialize)(
                            int *st, 
                            int *needed_default, 
                            int *ready_default,
@@ -94,7 +79,6 @@ void FTN(c_esmc_stateserialize)(int *statestatus,
 
     ip = (int *)((char *)(buffer) + *offset);
     if (*inquireflag != ESMF_INQUIREONLY) {
-      *ip++ = *statestatus;
       *ip++ = *st; 
       *ip++ = *needed_default; 
       *ip++ = *ready_default; 
@@ -103,7 +87,7 @@ void FTN(c_esmc_stateserialize)(int *statestatus,
       *ip++ = *alloccount; 
       *ip++ = *datacount; 
     } else
-      ip += 8;
+      ip += 7;
 
     *offset = (char *)ip - (char *)buffer;
 
@@ -113,7 +97,7 @@ void FTN(c_esmc_stateserialize)(int *statestatus,
 } 
 
 
-void FTN(c_esmc_statedeserialize)(int *statestatus, 
+void FTN(c_esmc_statedeserialize)(
                              int *st, 
                              int *needed_default, 
                              int *ready_default,
@@ -128,7 +112,6 @@ void FTN(c_esmc_statedeserialize)(int *statestatus,
     if (localrc) *localrc = ESMC_RC_NOT_IMPL;
 
     ip = (int *)((char *)(buffer) + *offset);
-    *statestatus = *ip++;
     *st = *ip++; 
     *needed_default = *ip++; 
     *ready_default = *ip++; 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.40 2009/09/23 22:53:39 theurich Exp $
+// $Id: ESMC_Util.C,v 1.41 2009/09/24 17:15:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.40 2009/09/23 22:53:39 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.41 2009/09/24 17:15:25 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -50,7 +50,7 @@ ESMC_ObjectID ESMC_ID_ALARM = {7, "ESMF_Alarm"};
 ESMC_ObjectID ESMC_ID_CLOCK = {8, "ESMF_Clock"};
 ESMC_ObjectID ESMC_ID_ARRAYSPEC = {9, "ESMF_ArraySpec"};
 ESMC_ObjectID ESMC_ID_LOCALARRAY = {10, "ESMF_LocalArray"};
-ESMC_ObjectID ESMC_ID_ARRAYDATAMAP = {11, "ESMF_ArrayDataMap"};
+ESMC_ObjectID ESMC_ID_ARRAYBUNDLE = {11, "ESMF_ArrayBundle"};
 ESMC_ObjectID ESMC_ID_VM = {12, "ESMF_VM"};
 ESMC_ObjectID ESMC_ID_DELAYOUT = {13, "ESMF_DELayout"};
 ESMC_ObjectID ESMC_ID_CONFIG = {14, "ESMF_Config"};
@@ -65,10 +65,10 @@ ESMC_ObjectID ESMC_ID_ROUTEHANDLE = {24, "ESMF_RouteHandle"};
 ESMC_ObjectID ESMC_ID_FIELDDATAMAP = {25, "ESMF_FieldDataMap"};
 ESMC_ObjectID ESMC_ID_FIELD = {26, "ESMF_Field"};
 ESMC_ObjectID ESMC_ID_BUNDLEDATAMAP = {27, "ESMF_FieldBundleDataMap"};
-ESMC_ObjectID ESMC_ID_BUNDLE = {28, "ESMF_FieldBundle"};
+ESMC_ObjectID ESMC_ID_FIELDBUNDLE = {28, "ESMF_FieldBundle"};
 ESMC_ObjectID ESMC_ID_GEOMBASE = {29, "ESMF_GeomBase"};
 ESMC_ObjectID ESMC_ID_REGRID = {30, "ESMF_Regrid"};
-ESMC_ObjectID ESMC_ID_TRANSFORM = {31, "ESMF_Transform"};
+ESMC_ObjectID ESMC_ID_LOCSTREAM = {31, "ESMF_Locstream"};
 ESMC_ObjectID ESMC_ID_STATE = {32, "ESMF_State"};
 ESMC_ObjectID ESMC_ID_GRIDCOMPONENT = {33, "ESMF_GridComponent"};
 ESMC_ObjectID ESMC_ID_CPLCOMPONENT = {34, "ESMF_CplComponent"};
