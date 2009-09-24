@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar.h,v 1.9 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMCI_Calendar.h,v 1.10 2009/09/24 05:50:44 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -68,8 +68,8 @@
 //  
 // !USES:
 #include "ESMC_Base.h"           // inherited Base class
-#include "ESMCI_BaseTime.h"       // inherited BaseTime class
-#include "ESMC_Calendar.h"
+#include "ESMCI_BaseTime.h"      // inherited BaseTime class
+#include "ESMC_Calendar.h"       // for enum ESMC_CalendarType
 
 // TODO: replace with monthsPerYear property
 #define MONTHS_PER_YEAR 12
