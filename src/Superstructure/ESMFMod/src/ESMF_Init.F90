@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.56 2009/09/23 17:26:02 rokuingh Exp $
+! $Id: ESMF_Init.F90,v 1.57 2009/09/24 15:32:29 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -374,8 +374,7 @@
       ! Initialize the default time manager calendar
       call ESMF_CalendarInitialize(defaultCalendar, status)
       if (status .ne. ESMF_SUCCESS) then
-          print *, "Error initializing the default time manager &
-                    calendar"
+          print *, "Error initializing the default time manager calendar"
       return
       endif
 
