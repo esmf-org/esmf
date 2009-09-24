@@ -148,7 +148,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.13 2009/09/23 23:15:57 oehmke Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.14 2009/09/24 20:42:30 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -595,9 +595,8 @@ end interface
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit, gridbase, rc)
 
-    ! deallocate/nullify GeomBase memory
-    deallocate(gridbase%gbcp)
-    nullify(gridbase%gbcp)
+    ! do _not_ deallocate/nullify GeomBase memory here because ESMF
+    ! garbage collection will handle cleaning up GeomBase allocations
 
     ! Set init code
     ESMF_INIT_SET_DELETED(gridbase)
