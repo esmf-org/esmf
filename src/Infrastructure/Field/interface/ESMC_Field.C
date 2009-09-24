@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.12 2009/09/21 20:38:31 feiliu Exp $
+// $Id: ESMC_Field.C,v 1.13 2009/09/24 18:48:37 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -30,10 +30,10 @@ using namespace ESMCI;
 
 extern "C" {
 // Prototypes of the Fortran interface functions.
-void FTN(f_esmf_fieldcreate)(ESMC_Field *fieldp, ESMC_Mesh *mesh, ESMC_ArraySpec *arrayspec, int *gridToFieldMap, 
+void FTN(f_esmf_fieldcreate)(ESMC_Field *fieldp, void *mesh_pointer, ESMC_ArraySpec *arrayspec, int *gridToFieldMap, 
     int *ungriddedLBound, int *ungriddedUBound, int *rc);
 
-void FTN(f_esmf_fieldget)(ESMC_Field *field, ESMC_Mesh *mesh, int *rc);
+void FTN(f_esmf_fieldget)(ESMC_Field *field, void *mesh_pointer, int *rc);
 
 void FTN(f_esmf_fielddestroy)(ESMC_Field *field, int *rc);
 
@@ -49,7 +49,7 @@ ESMC_Field ESMC_FieldCreate(ESMC_Mesh *mesh, ESMC_ArraySpec *arrayspec, int *gri
 
   ESMC_Field field;
 
-  FTN(f_esmf_fieldcreate)(&field, mesh, arrayspec, gridToFieldMap, ungriddedLBound, ungriddedUBound, rc);
+  FTN(f_esmf_fieldcreate)(&field, mesh->ptr, arrayspec, gridToFieldMap, ungriddedLBound, ungriddedUBound, &localrc);
 
   if (rc) *rc = localrc;
 
@@ -60,7 +60,17 @@ ESMC_Field ESMC_FieldCreate(ESMC_Mesh *mesh, ESMC_ArraySpec *arrayspec, int *gri
 #define ESMC_METHOD "ESMC_FieldGet()"
 int ESMC_FieldGet(ESMC_Field *field, ESMC_Mesh *mesh, int *rc){
 
-    return 0;
+    int localrc;
+
+    // Initialize return code. Assume routine not implemented
+    localrc = ESMC_RC_NOT_IMPL;
+    if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+
+    mesh->ptr = malloc(sizeof(void *));
+    FTN(f_esmf_fieldget)(field, mesh->ptr, &localrc);
+  
+    if (rc) *rc = localrc;
+    return localrc;
 }
 
 
@@ -76,11 +86,13 @@ int ESMC_FieldDestroy(ESMC_Field *field, int *rc){
    int localrc;
    // Initialize return code. Assume routine not implemented
    localrc = ESMC_RC_NOT_IMPL;
+   if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
    
-   FTN(f_esmf_fielddestroy)(field, rc);
+   FTN(f_esmf_fielddestroy)(field, &localrc);
 
    localrc = ESMF_SUCCESS;
 
+   if (rc) *rc = localrc;
    return localrc;
 
 } // ESMC_FieldDestroy

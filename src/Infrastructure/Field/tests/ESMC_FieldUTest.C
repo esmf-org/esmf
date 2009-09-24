@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldUTest.C,v 1.2 2009/09/22 15:33:22 feiliu Exp $
+// $Id: ESMC_FieldUTest.C,v 1.3 2009/09/24 18:48:37 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -40,13 +40,13 @@ int main(void){
   int rc;
   
   ESMC_ArraySpec arrayspec;
-  int *minIndexValues, *maxIndexValues;
-  ESMC_InterfaceInt minIndex, maxIndex;
+  int *gridToFieldMap, *ungriddedLBound, *ungriddedUBound;
+  ESMC_InterfaceInt i_gridToFieldMap, i_ungriddedLBound, i_ungriddedUBound;
   ESMC_Field field;
 
   int num_elem, num_node, conn_size;
   int num_elements, num_nodes;
-  ESMC_Mesh mesh;
+  ESMC_Mesh mesh, mesh1;
   int pdim=2;
   int sdim=3;
 
@@ -66,7 +66,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //N-E-X_UTest
+  //NEX_UTest
   // Create a mesh
   strcpy(name, "MeshCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -75,7 +75,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //N-E-X_UTest
+  //NEX_UTest
   // Read input files' header data
   strcpy(name, "MeshVTKHeader");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -93,7 +93,7 @@ int main(void){
   elemConn = (int *) malloc (conn_size * sizeof (int));
 
   //----------------------------------------------------------------------------
-  //N-E-X_UTest
+  //NEX_UTest
   // Read input files
   strcpy(name, "MeshVTKBody");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -108,7 +108,7 @@ int main(void){
     }
 
   //----------------------------------------------------------------------------
-  //N-E-X_UTest
+  //NEX_UTest
   // Add node information to the mesh
   strcpy(name, "MeshAddNodes");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -117,7 +117,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //N-E-X_UTest
+  //NEX_UTest
   // Add element information to the mesh
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -125,61 +125,81 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   
   //----------------------------------------------------------------------------
-  //N-E-X_UTest
+  //NEX_UTest
   // Set the arrayspec
   strcpy(name, "ArraySpecSet");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_ArraySpecSet(&arrayspec, 2, ESMC_TYPEKIND_I4);
+  rc = ESMC_ArraySpecSet(&arrayspec, 1, ESMC_TYPEKIND_I4);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
     
   //----------------------------------------------------------------------------
-  //N-E-X_UTest
-  strcpy(name, "Set up minIndex");
+  //NEX_UTest
+  strcpy(name, "Set up gridToFieldMap");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  minIndexValues = (int *)malloc(2*sizeof(int));
-  minIndexValues[0] = minIndexValues[1] = 1;
-  minIndex = ESMC_InterfaceIntCreate(minIndexValues, 2, &rc);
+  gridToFieldMap = (int *)malloc(sizeof(int));
+  gridToFieldMap[0] = 1;
+  i_gridToFieldMap = ESMC_InterfaceIntCreate(gridToFieldMap, 1, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
-  //N-E-X_UTest
-  strcpy(name, "Set up maxIndex");
+  //NEX_UTest
+  strcpy(name, "Set up ungriddedLBound");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  maxIndexValues = (int *)malloc(2*sizeof(int));
-  maxIndexValues[0] = 5;
-  maxIndexValues[1] = 10;
-  maxIndex = ESMC_InterfaceIntCreate(maxIndexValues, 2, &rc);
+  ungriddedLBound = (int *)malloc(2*sizeof(int));
+  ungriddedLBound[0] = 1;
+  ungriddedLBound[1] = 1;
+  i_ungriddedLBound = ESMC_InterfaceIntCreate(ungriddedLBound, 2, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Set up ungriddedUBound");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  ungriddedUBound = (int *)malloc(2*sizeof(int));
+  ungriddedUBound[0] = 2;
+  ungriddedUBound[1] = 3;
+  i_ungriddedUBound = ESMC_InterfaceIntCreate(ungriddedUBound, 2, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
-  //N-E-X_UTest
+  //NEX_UTest
   strcpy(name, "Create ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  field = ESMC_FieldCreate(&mesh, &arrayspec, 0, 0, 0, "field1", &rc);
+  //field = ESMC_FieldCreate(&mesh, &arrayspec, i_gridToFieldMap, i_ungriddedLBound, i_ungriddedUBound, "field1", &rc);
+  field = ESMC_FieldCreate(&mesh, &arrayspec, gridToFieldMap, ungriddedLBound, ungriddedUBound, "field1", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
 //  //----------------------------------------------------------------------------
-//  //N-E-X_UTest
+//  //NEX_disable_UTest
 //  strcpy(name, "Print ESMC_Field object");
 //  strcpy(failMsg, "Did not return ESMF_SUCCESS");
 //  rc = ESMC_FieldPrint(field);
 //  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 //  //----------------------------------------------------------------------------
   
-  //----------------------------------------------------------------------------
-  //N-E-X_UTest
-  strcpy(name, "Destroy ESMC_Mesh object");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshDestroy(&mesh);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
+//  //----------------------------------------------------------------------------
+//  //NEX_disable_UTest
+//  strcpy(name, "Destroy ESMC_Mesh object");
+//  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+//  rc = ESMC_MeshDestroy(&mesh);
+//  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+//  //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
-  //N-E-X_UTest
+  //NEX_UTest
+  strcpy(name, "Get an ESMC_Mesh object from ESMC_Field object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_FieldGet(&field, &mesh1, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   strcpy(name, "Destroy ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldDestroy(&field, &rc);

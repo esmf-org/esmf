@@ -35,6 +35,7 @@ extern "C" {
 
 typedef struct {
   void * ptr;
+  long long isinit;
 } ESMC_Field;
 
 ESMC_Field ESMC_FieldCreate(ESMC_Mesh *mesh, ESMC_ArraySpec *arrayspec, int *gridToFieldMap, int *ungriddedLBound, int *ungriddedUBound, const char *name, int *rc);
