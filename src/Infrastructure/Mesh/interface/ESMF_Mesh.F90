@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.20 2009/09/23 23:13:01 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.21 2009/09/24 18:42:50 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.20 2009/09/23 23:13:01 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.21 2009/09/24 18:42:50 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -544,13 +544,14 @@ module ESMF_MeshMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromPointer(mesh_pointer)
+    function ESMF_MeshCreateFromPointer(mesh_pointer, rc)
 !
 !
 ! !RETURN VALUE:
     type(ESMF_Mesh)         :: ESMF_MeshCreateFromPointer
 ! !ARGUMENTS:
     type(ESMF_Pointer),        intent(in)            :: mesh_pointer
+    integer, intent(out), optional                   :: rc
 !
 ! !DESCRIPTION:
 !   Create an empty mesh.
@@ -571,7 +572,9 @@ module ESMF_MeshMod
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    integer                 :: num_nodes, num_elements
 
+    if(present(rc)) rc = ESMF_RC_NOT_IMPL
     ! initialize return code; assume routine not implemented
 
     ESMF_MeshCreateFromPointer%this = mesh_pointer
@@ -580,6 +583,19 @@ module ESMF_MeshMod
 
     ! Check init status of arguments
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromPointer)
+
+    call C_ESMC_MeshGet(ESMF_MeshCreateFromPointer%this, num_nodes, num_elements, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! We create two dist grids, one for nodal one for element
+    call C_ESMC_MeshCreateDistGrids(ESMF_MeshCreateFromPointer%this, ESMF_MeshCreateFromPointer%nodal_distgrid, &
+                      ESMF_MeshCreateFromPointer%element_distgrid, &
+                      ESMF_MeshCreateFromPointer%num_nodes, ESMF_MeshCreateFromPointer%num_elements, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if(present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_MeshCreateFromPointer
 !------------------------------------------------------------------------------

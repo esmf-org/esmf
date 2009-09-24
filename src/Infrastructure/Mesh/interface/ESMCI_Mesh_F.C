@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.28 2009/09/23 23:13:01 oehmke Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.29 2009/09/24 18:42:49 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -528,6 +528,17 @@ void getNodeGIDS(Mesh &mesh, std::vector<int> &ngid) {
   for (UInt i = 0; i < gids.size(); ++i) ngid.push_back(gids[i].second);
 
 }
+
+extern "C" void FTN(c_esmc_meshget)(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc){
+
+    Mesh *meshp = *meshpp;
+
+    *num_nodes = meshp->num_nodes();
+    *num_elements = meshp->num_elems();
+
+    if(rc != NULL) *rc = ESMF_SUCCESS;
+}
+    
 
 extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *egrid, int *num_lnodes, int *num_lelems, int *rc) {
 
