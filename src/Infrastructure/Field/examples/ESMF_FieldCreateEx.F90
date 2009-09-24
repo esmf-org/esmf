@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.83 2009/09/15 17:44:16 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.84 2009/09/24 15:52:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -590,7 +590,7 @@
 
         !! elem type
         allocate(elemTypes(numElems))
-        elemTypes=ESMF_MESHELEMENT_QUAD
+        elemTypes=ESMF_MESHELEMTYPE_QUAD
 
         !! elem conn
         allocate(elemConn(numElems*4))
@@ -623,7 +623,7 @@
 
         !! elem type
         allocate(elemTypes(numElems))
-        elemTypes=ESMF_MESHELEMENT_QUAD
+        elemTypes=ESMF_MESHELEMTYPE_QUAD
 
         !! elem conn
         allocate(elemConn(numElems*4))
@@ -656,7 +656,7 @@
 
         !! elem type
         allocate(elemTypes(numElems))
-        elemTypes=ESMF_MESHELEMENT_QUAD
+        elemTypes=ESMF_MESHELEMTYPE_QUAD
 
         !! elem conn
         allocate(elemConn(numElems*4))
@@ -689,7 +689,7 @@
 
         !! elem type
         allocate(elemTypes(numElems))
-        elemTypes=ESMF_MESHELEMENT_QUAD
+        elemTypes=ESMF_MESHELEMTYPE_QUAD
 
         !! elem conn
         allocate(elemConn(numElems*4))
