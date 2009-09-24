@@ -1,4 +1,4 @@
-// $Id: ESMC_ComponentUTest.C,v 1.10 2009/09/03 16:30:31 theurich Exp $
+// $Id: ESMC_ComponentUTest.C,v 1.11 2009/09/24 05:55:16 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -198,7 +198,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_Calendar object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  calendar = ESMC_CalendarCreate(9, "Gregorian", ESMC_CAL_GREGORIAN, &rc);
+  calendar = ESMC_CalendarCreate("Gregorian", ESMC_CAL_GREGORIAN, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -235,8 +235,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_Clock object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  clock = ESMC_ClockCreate(10,"TEST_CLOCK",timeStep,startTime, stopTime,
-  //      0, 0, 0, 
+  clock = ESMC_ClockCreate("TEST_CLOCK",timeStep,startTime, stopTime,
           &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
