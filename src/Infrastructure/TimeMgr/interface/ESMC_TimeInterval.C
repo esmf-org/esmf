@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.5 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMC_TimeInterval.C,v 1.6 2009/09/24 05:49:55 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -23,142 +23,145 @@
 //
 //-----------------------------------------------------------------------------
 
-
 // include associated header file
 #include "ESMC_TimeInterval.h"
 
 // include ESMF headers
 #include "ESMCI_Arg.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMC_LogMacros.inc"             // for LogErr
 #include "ESMCI_TimeInterval.h"
 #include "ESMCI_Calendar.h"
-#include "ESMC_Calendar.h"
-#include "ESMC_Interface.h"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.5 2009/01/21 21:38:01 cdeluca Exp $";
+static const char *const version =
+  "$Id: ESMC_TimeInterval.C,v 1.6 2009/09/24 05:49:55 eschwab Exp $";
 //-----------------------------------------------------------------------------
+
+// TODO: Implement more -native- C++ TimeMgr API alongside existing
+//       C++ API, which was designed to support the F90 TimeMgr API,
+//       (optional args).  E.g. separate get()'s for each property (or small
+//       groups of properties) would eliminate sparsely populated arg lists
+//       (lots of NULLs); instead each call would be guarded by a NULL check.
 
 extern "C" {
 
-int  ESMC_TimeIntervalSet(ESMC_TimeInterval* timeInterval,       
-                       ESMC_I4 h_I4){
-
-#undef ESMC_METHOD
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_TimeIntervalSet()"
 
+int ESMC_TimeIntervalSet(ESMC_TimeInterval *timeInterval,       
+                         ESMC_I4 h_I4) {
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  int rc = ESMC_RC_NOT_IMPL;   // final return code
+  int      rc = ESMC_RC_NOT_IMPL;         // final return code
 
-  ESMCI::TimeInterval* pTimeInterval = new(ESMCI::TimeInterval);
-
-  localrc = pTimeInterval->set( (ESMC_I4*)NULL, (ESMC_I8*)NULL,
-                                (ESMC_I4*)NULL, (ESMC_I8*)NULL,
-                                (ESMC_I4*)NULL, (ESMC_I8*)NULL,
-                                         &h_I4, (ESMC_I4*)NULL,
-                                (ESMC_I4*)NULL, (ESMC_I8*)NULL,
-                                (ESMC_I4*)NULL, (ESMC_I4*)NULL,
-                                (ESMC_I4*)NULL,
-                                (ESMC_R8*)NULL, (ESMC_R8*)NULL,
-                                (ESMC_R8*)NULL, (ESMC_R8*)NULL,
-                                (ESMC_R8*)NULL, (ESMC_R8*)NULL,
-                                (ESMC_R8*)NULL,
-                                (ESMC_I4*)NULL, (ESMC_I8*)NULL,
-                                (ESMC_I4*)NULL, (ESMC_I8*)NULL,
-                                (ESMCI::Time*)NULL, (ESMCI::Time*)NULL,
-                                (ESMCI::Calendar**)NULL,
-                                (ESMC_CalendarType*)NULL);
-
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
-    (*timeInterval).ptr = NULL;
-    return localrc;  // bail out
+  // ensure given timeInterval pointer is non-NULL
+  if (timeInterval == NULL) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+                    ", invalid ESMC_TimeInterval object", ESMC_CONTEXT, &rc);
+    return rc;  // bail out
   }
 
-  (*timeInterval).ptr = (void *)(pTimeInterval);
-
+  // call into ESMCI method
+  localrc = ((ESMCI::TimeInterval *)timeInterval)->set(
+                                (ESMC_I4 *)NULL, (ESMC_I8 *)NULL,
+                                (ESMC_I4 *)NULL, (ESMC_I8 *)NULL,
+                                (ESMC_I4 *)NULL, (ESMC_I8 *)NULL,
+                                               &h_I4,
+                                (ESMC_I4 *)NULL,
+                                (ESMC_I4 *)NULL, (ESMC_I8 *)NULL,
+                                (ESMC_I4 *)NULL, (ESMC_I4 *)NULL,
+                                (ESMC_I4 *)NULL,
+                                (ESMC_R8 *)NULL, (ESMC_R8 *)NULL,
+                                (ESMC_R8 *)NULL, (ESMC_R8 *)NULL,
+                                (ESMC_R8 *)NULL, (ESMC_R8 *)NULL,
+                                (ESMC_R8 *)NULL,
+                                (ESMC_I4 *)NULL, (ESMC_I8 *)NULL,
+                                (ESMC_I4 *)NULL, (ESMC_I8 *)NULL,
+                                (ESMCI::Time *)NULL, (ESMCI::Time *)NULL,
+                                (ESMCI::Calendar **)NULL,
+                                (ESMC_CalendarType *)NULL);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+                                    &rc)) return rc;  // bail out
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
 
 } // end ESMC_TimeIntervalSet
+//-----------------------------------------------------------------------------
 
-
-int  ESMC_TimeIntervalGet(ESMC_TimeInterval timeInterval,
-                       ESMC_I8* s_I8,
-                       ESMC_R8* h_R8){
-#undef ESMC_METHOD
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_TimeIntervalGet()"
 
+int ESMC_TimeIntervalGet(ESMC_TimeInterval timeInterval,
+                         ESMC_I8 *s_I8,
+                         ESMC_R8 *h_R8) {
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  int rc = ESMC_RC_NOT_IMPL;   // final return code
+  int      rc = ESMC_RC_NOT_IMPL;         // final return code
 
-  ESMCI::TimeInterval* pTimeInterval = (ESMCI::TimeInterval*)(timeInterval.ptr);
+  // Note: Don't need to check for passed-thru NULL input pointers currently;
+  //       ESMCI::TimeInterval::get() intreprets them as "not desired".
+  //       (designed to support F90 not-present args)
 
-  localrc = pTimeInterval->get( (ESMC_I4*)NULL, (ESMC_I8*)NULL,
-                             (ESMC_I4*)NULL, (ESMC_I8*)NULL,
-                             (ESMC_I4*)NULL, (ESMC_I8*)NULL,
-                             (ESMC_I4*)NULL, (ESMC_I4*)NULL,
-                             (ESMC_I4*)NULL,  s_I8,
-                             (ESMC_I4*)NULL, (ESMC_I4*)NULL,
-                             (ESMC_I4*)NULL,
-                             (ESMC_R8*)NULL,  h_R8,
-                             (ESMC_R8*)NULL, (ESMC_R8*)NULL,
-                             (ESMC_R8*)NULL, (ESMC_R8*)NULL,
-                             (ESMC_R8*)NULL,
-                             (ESMC_I4*)NULL, (ESMC_I8*)NULL,
-                             (ESMC_I4*)NULL, (ESMC_I8*)NULL,
-                             (ESMCI::Time*)NULL, (ESMCI::Time*)NULL,
-                             (ESMCI::Calendar**)NULL,
-                             (ESMC_CalendarType*)NULL,
-                             (ESMCI::Time*)NULL, (ESMCI::Time*)NULL,
-                             (ESMCI::Calendar**)NULL,
-                             (ESMC_CalendarType*)NULL,
-                             0, (int*)NULL,
-                             (char*)NULL,
-                             0,
-                             (int*)NULL,
-                             (char*)NULL);
-
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
-    timeInterval.ptr = NULL;
-    return localrc;  // bail out
-  }
-
+  // call into ESMCI method
+  localrc = ((ESMCI::TimeInterval *)&timeInterval)->get(
+                             (ESMC_I4 *)NULL, (ESMC_I8 *)NULL,
+                             (ESMC_I4 *)NULL, (ESMC_I8 *)NULL,
+                             (ESMC_I4 *)NULL, (ESMC_I8 *)NULL,
+                             (ESMC_I4 *)NULL, (ESMC_I4 *)NULL,
+                             (ESMC_I4 *)NULL,
+                                            s_I8,
+                             (ESMC_I4 *)NULL, (ESMC_I4 *)NULL,
+                             (ESMC_I4 *)NULL,
+                             (ESMC_R8 *)NULL,
+                                            h_R8,
+                             (ESMC_R8 *)NULL, (ESMC_R8 *)NULL,
+                             (ESMC_R8 *)NULL, (ESMC_R8 *)NULL,
+                             (ESMC_R8 *)NULL,
+                             (ESMC_I4 *)NULL, (ESMC_I8 *)NULL,
+                             (ESMC_I4 *)NULL, (ESMC_I8 *)NULL,
+                             (ESMCI::Time *)NULL, (ESMCI::Time *)NULL,
+                             (ESMCI::Calendar **)NULL,
+                             (ESMC_CalendarType *)NULL,
+                             (ESMCI::Time *)NULL, (ESMCI::Time *)NULL,
+                             (ESMCI::Calendar **)NULL,
+                             (ESMC_CalendarType *)NULL,
+                             (int)0, (int *)NULL, (char *)NULL,
+                             (int)0, (int *)NULL, (char *)NULL);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+                                    &rc)) return rc;  // bail out
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
 
 } // end ESMC_TimeIntervalGet
+//-----------------------------------------------------------------------------
 
-
-
-int ESMC_TimeIntervalPrint(ESMC_TimeInterval timeInterval){
-
-#undef ESMC_METHOD
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_TimeIntervalPrint()"
 
+int ESMC_TimeIntervalPrint(ESMC_TimeInterval timeInterval) {
+
   // initialize return code; assume routine not implemented
-  int rc= ESMC_RC_NOT_IMPL;          // local return code
-  int localrc = ESMC_RC_NOT_IMPL;    // local return code
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int      rc = ESMC_RC_NOT_IMPL;         // final return code
 
-  ESMCI::TimeInterval *pTimeInterval = (ESMCI::TimeInterval*)(timeInterval.ptr);
-  localrc = pTimeInterval->print();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
-    timeInterval.ptr = NULL;
-    return rc;  // bail out
-  }
-
+  // call into ESMCI method
+  localrc = ((ESMCI::TimeInterval *)&timeInterval)->print("string");
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+                                    &rc)) return rc;  // bail out
   //return successfully
   return ESMF_SUCCESS;
 
 } // end ESMC_TimeIntervalPrint
-
+//-----------------------------------------------------------------------------
 
 }; // extern "C"

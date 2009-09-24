@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.60 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMC_Clock.h,v 1.61 2009/09/24 05:49:55 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -23,48 +23,50 @@
 #ifndef ESMC_Clock_H
 #define ESMC_Clock_H
 
-#include "ESMC_Time.h"
-#include "ESMC_TimeInterval.h"
-
 //-----------------------------------------------------------------------------
 //BOPI
 // !CLASS:  ESMC_Clock - Public C interface to the ESMF Clock class
 //
 // !DESCRIPTION:
 //
-// The code in this file defines the public C Clock class and declares method
-// signatures (prototypes).  The companion file {\tt ESMC\_Clock.C} contains
-// the definitions (full code bodies) for the Clock methods.
+// The code in this file defines the public C Clock interfaces and declares
+// method signatures (prototypes).  The companion file {\tt ESMC\_Clock.C}
+// contains the definitions (full code bodies) for the Clock methods.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 
+#include "ESMC_Util.h"
+#include "ESMC_Time.h"
+#include "ESMC_TimeInterval.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // Class declaration type
-typedef struct{
-  void *ptr;
-}ESMC_Clock;
+typedef struct {
+  // private:  // members opaque on C side, philosophically.
+    void *ptr;
+    // TODO:  implement isInit initialization like in F90 API?
+} ESMC_Clock;
 
 // Class API
+ESMC_Clock ESMC_ClockCreate(const char *name,
+                            ESMC_TimeInterval timeStep, ESMC_Time startTime,
+                            ESMC_Time stopTime, int *rc);
 
-ESMC_Clock ESMC_ClockCreate(int, const char*, ESMC_TimeInterval, ESMC_Time,
-  ESMC_Time, int*);
+int ESMC_ClockDestroy(ESMC_Clock *clock);
 
-int ESMC_ClockPrint(ESMC_Clock);
+int ESMC_ClockGet(ESMC_Clock clock, ESMC_TimeInterval *currSimTime,
+                  ESMC_I8 *advanceCount);
 
-int ESMC_ClockAdvance(ESMC_Clock);
+int ESMC_ClockAdvance(ESMC_Clock clock);
 
-int ESMC_ClockGet(ESMC_Clock, ESMC_TimeInterval* currSimTime,
-                              ESMC_I8* advanceCount);
-
-int ESMC_ClockDestroy(ESMC_Clock*);
+int ESMC_ClockPrint(ESMC_Clock clock);
 
 #ifdef __cplusplus
-} //extern "C"
+} // extern "C"
 #endif
 
 #endif // ESMC_Clock_H

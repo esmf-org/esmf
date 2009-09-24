@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.63 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMC_Calendar.h,v 1.64 2009/09/24 05:49:55 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -29,14 +29,14 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file defines the public C Calendar class and declares method
-// signatures (prototypes).  The companion file {\tt ESMC\_Calendar.C} contains
-// the definitions (full code bodies) for the Calendar methods.
+// The code in this file defines the public C Calendar interfaces and declares
+// method signatures (prototypes).  The companion file {\tt ESMC\_Calendar.C}
+// contains the definitions (full code bodies) for the Calendar methods.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 
-// (TMG 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.3.5)
+// TODO: these definitions need different home (shared with ESMCI_Calendar)
 #define CALENDAR_TYPE_COUNT 8
 enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
                         ESMC_CAL_JULIAN,
@@ -49,31 +49,32 @@ enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
                         ESMC_CAL_NOCALENDAR}; // track base time seconds
                                               //   only
                         // Note: add new calendars between ESMC_CAL_GREGORIAN
-                        // and ESMC_CAL_NOCALENDAR so Validate() doesn't need
+                        // and ESMC_CAL_NOCALENDAR so
+                        // ESMCI::Calendar::validate() does not need
                         // to change.  Also add to static intializers at top
                         // of ESMCI_Calendar.C
-
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // Class declaration type
-typedef struct{
-  void *ptr;
-}ESMC_Calendar;
+typedef struct {
+  // private:  // members opaque on C side, philosophically.
+    void *ptr;
+    // TODO:  implement isInit initialization like in F90 API?
+} ESMC_Calendar;
 
 // Class API
+ESMC_Calendar ESMC_CalendarCreate(const char *name,
+                                  ESMC_CalendarType calendarType, int *rc);  
 
-ESMC_Calendar ESMC_CalendarCreate(int, const char*, enum ESMC_CalendarType, int*);  
+int ESMC_CalendarDestroy(ESMC_Calendar *calendar);
 
-int ESMC_CalendarPrint(ESMC_Calendar);
-
-int ESMC_CalendarDestroy(ESMC_Calendar*);
+int ESMC_CalendarPrint(ESMC_Calendar calendar);
 
 #ifdef __cplusplus
-} //extern "C"
+} // extern "C"
 #endif
 
 #endif // ESMC_Calendar_H

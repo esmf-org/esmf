@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.5 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMC_Calendar.C,v 1.6 2009/09/24 05:49:55 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -23,90 +23,122 @@
 //
 //-----------------------------------------------------------------------------
 
+// include system headers
+#include <string.h>
+
 // include associated header file
 #include "ESMC_Calendar.h"
 
 // include ESMF headers
 #include "ESMCI_Arg.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMC_LogMacros.inc"             // for LogErr
 #include "ESMCI_Calendar.h"
-#include "ESMC_Interface.h"
-
+#include "ESMCI_Time.h"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Calendar.C,v 1.5 2009/01/21 21:38:01 cdeluca Exp $";
+static const char *const version =
+  "$Id: ESMC_Calendar.C,v 1.6 2009/09/24 05:49:55 eschwab Exp $";
 //-----------------------------------------------------------------------------
+
+// TODO: Implement more -native- C++ TimeMgr API alongside existing
+//       C++ API, which was designed to support the F90 TimeMgr API,
+//       (optional args).  E.g. separate get()'s for each property (or small
+//       groups of properties) would eliminate sparsely populated arg lists
+//       (lots of NULLs); instead each call would be guarded by a NULL check.
 
 extern "C" {
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CalendarCreate()"
+
 ESMC_Calendar ESMC_CalendarCreate(
-      int                nameLen,      // in
       const char        *name,         // in
       ESMC_CalendarType  calendarType, // in
       int               *rc) {         // out - return code
-#undef ESMC_METHOD
-#define ESMC_METHOD "ESMC_CalendarCreate()"
 
   // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  *rc = ESMC_RC_NOT_IMPL;   // final return code
+  int localrc = ESMC_RC_NOT_IMPL;           // local return code
+  if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   ESMC_Calendar calendar;
 
   // call into ESMCI method
-
   calendar.ptr = (void *)
-     ESMCI::ESMCI_CalendarCreate(nameLen, name, calendarType, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
-    calendar.ptr = NULL;
+     ESMCI::ESMCI_CalendarCreate(strlen(name), name, calendarType, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,                                       rc)) {
+    calendar.ptr = NULL; // defensive; should already be set in CalendarCreate()
     return calendar;  // bail out
   }
 
   // return successfully
-  *rc = ESMF_SUCCESS;
+  if (rc != NULL) *rc = ESMF_SUCCESS;
   return calendar;
 
 } // end ESMC_CalendarCreate
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CalendarDestroy()"
+
+int ESMC_CalendarDestroy(ESMC_Calendar *calendar) {
+  
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int      rc = ESMC_RC_NOT_IMPL;         // final return code
+
+  // ensure given calendar pointer is non-NULL
+  if (calendar == NULL) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+                    ", invalid ESMC_Calendar object", ESMC_CONTEXT, &rc);
+    return rc;  // bail out
+  }
+
+  // call into ESMCI method; let it handle possible NULL ptr
+  localrc = ESMCI::ESMCI_CalendarDestroy((ESMCI::Calendar **)&(calendar->ptr));
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+                                    &rc)) return rc;  // bail out
+  // invalidate pointer
+  calendar->ptr = NULL; // defensive; should already be set in CalendarDestroy()
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+
+} // end ESMC_CalendarDestroy
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CalendarPrint()"
 
 int ESMC_CalendarPrint(ESMC_Calendar calendar){
 
-#undef ESMC_METHOD
-#define ESMC_METHOD "ESMC_CalendarPrint()"
-
   // initialize return code; assume routine not implemented
-  int rc= ESMC_RC_NOT_IMPL;          // local return code
-  int localrc = ESMC_RC_NOT_IMPL;    // local return code
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int      rc = ESMC_RC_NOT_IMPL;         // final return code
 
-  ESMCI::Calendar *IntCalendar = (ESMCI::Calendar*)(calendar.ptr);
-  localrc = IntCalendar->print();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
-    calendar.ptr = NULL;
+  // ensure given calendar pointer is non-NULL
+  if (calendar.ptr == NULL) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+                    ", invalid ESMC_Calendar object", ESMC_CONTEXT, &rc);
     return rc;  // bail out
   }
 
-  //return successfully
-  return ESMF_SUCCESS;
- 
-} // end ESMC_CalendarPrint
-
-int ESMC_CalendarDestroy(ESMC_Calendar* pCalendar){
-  int rc = ESMF_RC_NOT_IMPL;
-  int localrc = ESMF_RC_NOT_IMPL;
-   
-  ESMCI::Calendar **intCalendar = (ESMCI::Calendar**)(pCalendar);
-  localrc = ESMCI::ESMCI_CalendarDestroy(intCalendar);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
-    pCalendar = NULL;
-    return rc;  // bail out
-  }
-  
-  //return successfully
-  return ESMF_SUCCESS;
+  // call into ESMCI method
+  localrc = ((ESMCI::Calendar*)(calendar.ptr))->print((const char *)NULL,
+                                                    (const ESMCI::Time *)NULL);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+                                    &rc)) return rc;  // bail out
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
 
 } // end ESMC_CalendarPrint
+//-----------------------------------------------------------------------------
 
 }; // extern "C"
