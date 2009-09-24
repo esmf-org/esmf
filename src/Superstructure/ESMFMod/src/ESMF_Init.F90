@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.57 2009/09/24 15:32:29 rokuingh Exp $
+! $Id: ESMF_Init.F90,v 1.58 2009/09/24 21:37:27 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -374,7 +374,7 @@
       ! Initialize the default time manager calendar
       call ESMF_CalendarInitialize(defaultCalendar, status)
       if (status .ne. ESMF_SUCCESS) then
-          print *, "Error initializing the default time manager calendar"
+         print *, "Error initializing the default time manager calendar"
       return
       endif
 
@@ -433,7 +433,11 @@
 !     This must be called once on each PET before the application exits
 !     to allow ESMF to flush buffers, close open connections, and 
 !     release internal resources cleanly. The optional argument 
-!     {\tt terminationflag} may be used to indicate the mode of termination.
+!     {\tt terminationflag} may be used to indicate the mode of termination.  
+!     Note that this call must be issued only once per PET with 
+!     {\tt terminationflag=ESMF\_FINAL}, and that this call may not be followed
+!     by {\tt ESMF\_Initialize()}.  This last restriction means that it is not
+!     possible to restart ESMF within the same execution.
 !
 !     The arguments are:
 !     \begin{description}
