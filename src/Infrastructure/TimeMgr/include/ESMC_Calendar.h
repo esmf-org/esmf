@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.64 2009/09/24 05:49:55 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.65 2009/09/24 16:27:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -67,7 +67,7 @@ typedef struct {
 
 // Class API
 ESMC_Calendar ESMC_CalendarCreate(const char *name,
-                                  ESMC_CalendarType calendarType, int *rc);  
+                                  enum ESMC_CalendarType calendarType, int *rc);  
 
 int ESMC_CalendarDestroy(ESMC_Calendar *calendar);
 
