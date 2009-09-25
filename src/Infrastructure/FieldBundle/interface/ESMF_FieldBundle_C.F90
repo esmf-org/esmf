@@ -1,4 +1,4 @@
-!  $Id: ESMF_FieldBundle_C.F90,v 1.5 2009/09/24 17:15:22 theurich Exp $
+!  $Id: ESMF_FieldBundle_C.F90,v 1.6 2009/09/25 17:17:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_FieldBundle_C.F90,v 1.5 2009/09/24 17:15:22 theurich Exp $'
+!      '$Id: ESMF_FieldBundle_C.F90,v 1.6 2009/09/25 17:17:04 theurich Exp $'
 !==============================================================================
    subroutine f_esmf_bundlecreate(bundlep, rc)
        use ESMF_UtilTypesMod    ! ESMF generic types class
@@ -61,16 +61,16 @@
 
   subroutine f_esmf_fbundlecollectgarbage(fbtype, rc)
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_fbundlecollectgarbage()"
+#define ESMF_METHOD "f_esmf_fbcollectgarbage"
     use ESMF_UtilTypesMod
     use ESMF_BaseMod
     use ESMF_LogErrMod
     use ESMF_FieldBundleMod
 
     type(ESMF_FieldBundleType), pointer :: fbtype
-    integer, intent(out) :: rc     
+    integer, intent(out) :: rc
   
-    integer :: localrc              
+    integer :: localrc
   
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -82,17 +82,19 @@
     call ESMF_FieldBundleDestruct(fbtype, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, &
+      rc)) return
 
     ! deallocate actual FieldBundleType allocation      
     if (associated(fbtype)) then
       deallocate(fbtype, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Deallocating FieldBundle", &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, &
+        rc)) return
     endif
     nullify(fbtype)
 
-    ! return successfully  
+    ! return successfully
     rc = ESMF_SUCCESS
 
   end subroutine f_esmf_fbundlecollectgarbage
