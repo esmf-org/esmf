@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.57 2009/09/24 17:15:25 theurich Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.58 2009/09/25 17:30:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.57 2009/09/24 17:15:25 theurich Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.58 2009/09/25 17:30:53 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -240,8 +240,6 @@ recursive subroutine f_esmf_comprefcopy(comp, comp_src, rc)
   type(ESMF_CWrap) :: comp
   integer :: rc
 
-  type (ESMF_CompClass), pointer :: compclass_src, compclass
-  
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
