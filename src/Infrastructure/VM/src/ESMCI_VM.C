@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.12 2009/09/24 17:15:25 theurich Exp $
+// $Id: ESMCI_VM.C,v 1.13 2009/09/25 22:14:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.12 2009/09/24 17:15:25 theurich Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.13 2009/09/25 22:14:42 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -512,8 +512,6 @@ void VM::shutdown(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  VMK::shutdown(static_cast<VMKPlan *>(vmp), info);
-
   // For each locally spawned PET mark the matchTable entry invalid
   if (!(vmp->parentVMflag)){
     // This is really a separate VM context (not the parent's)
@@ -602,6 +600,8 @@ void VM::shutdown(
       }
     }
   }
+
+  VMK::shutdown(static_cast<VMKPlan *>(vmp), info);
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
