@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.65 2009/09/24 18:48:37 feiliu Exp $ 
+# $Id: makefile,v 1.66 2009/09/25 16:41:41 feiliu Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -52,6 +52,8 @@ RUN_ESMF_FieldUTest:
 	$(MAKE) TNAME=Field NP=4 ftest
 
 RUN_ESMC_FieldUTest:
+	cp -r data $(ESMF_TESTDIR)
+	chmod u+rw $(ESMF_TESTDIR)/data/*
 	$(MAKE) TNAME=Field NP=1 ctest
 
 RUN_ESMF_FieldCreateGetUTest:
