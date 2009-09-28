@@ -1,4 +1,4 @@
-! $Id: ESMF_ConfigUTest.F90,v 1.36 2009/08/11 17:03:05 svasquez Exp $
+! $Id: ESMF_ConfigUTest.F90,v 1.37 2009/09/28 15:09:32 eschwab Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -1396,7 +1396,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.36 2009/08/11 17:03:05 svasquez Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.37 2009/09/28 15:09:32 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0
@@ -1473,6 +1473,7 @@ end module config_subrs
 !----------------
       call Initialization()
       if (rc /= ESMF_RC_DUP_NAME) then
+        call ESMF_ConfigDestroy( cf, rc ) 
         call ESMF_TestEnd(result, ESMF_SRCLINE)
         STOP            ! Catastropic Error
       endif
