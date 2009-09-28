@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.138 2009/09/01 00:25:19 rokuingh Exp $
+! $Id: ESMF_Regrid.F90,v 1.139 2009/09/28 20:31:19 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -142,7 +142,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.138 2009/09/01 00:25:19 rokuingh Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.139 2009/09/28 20:31:19 oehmke Exp $'
 
 !==============================================================================
 !
@@ -351,6 +351,7 @@ end function my_xor
        type(ESMF_TempWeights) :: tweights
        type(ESMF_RegridMassConserve) :: localregridMassConserve
        type(ESMF_UnmappedAction) :: localunmappedDstAction
+       logical :: isMemFreed
 
        ! Logic to determine if valid optional args are passed.  
 
@@ -406,6 +407,31 @@ end function my_xor
        else
           localunmappedDstAction=ESMF_UNMAPPEDACTION_ERROR
        endif
+
+       ! Make sure the srcMesh has its internal bits in place
+       call ESMF_MeshGet(srcMesh, isMemFreed=isMemFreed, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       if (isMemFreed)  then
+           call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- source Mesh has had its coordinate and connectivity info freed", & 
+                 ESMF_CONTEXT, rc) 
+          return 
+       endif
+
+       ! Make sure the dstMesh has its internal bits in place
+       call ESMF_MeshGet(dstMesh, isMemFreed=isMemFreed, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       if (isMemFreed)  then
+           call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- destination Mesh has had its coordinate and connectivity info freed", & 
+                 ESMF_CONTEXT, rc) 
+          return 
+       endif
+
 
        ! Call through to the C++ object that does the work
        call c_ESMC_regrid_create(vm, srcMesh%this, srcArray, staggerLoc,  &
