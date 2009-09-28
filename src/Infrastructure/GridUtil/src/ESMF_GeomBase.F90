@@ -1,4 +1,4 @@
-! $Id: ESMF_GeomBase.F90,v 1.15 2009/09/24 20:45:34 theurich Exp $
+! $Id: ESMF_GeomBase.F90,v 1.16 2009/09/28 20:30:51 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -148,7 +148,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.15 2009/09/24 20:45:34 theurich Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.16 2009/09/28 20:30:51 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -878,13 +878,13 @@ end subroutine ESMF_GeomBaseGet
        case  (ESMF_GEOMTYPE_MESH%type) ! Mesh
           if (present(exclusiveLBound)) exclusiveLBound(1) = 1
           if (present(exclusiveUBound)) then
-             call ESMF_MeshGet(gbcp%mesh, numNodes=exclusiveUBound(1), rc=localrc)
+             call ESMF_MeshGet(gbcp%mesh, numOwnedNodes=exclusiveUBound(1), rc=localrc)
              if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
           endif
           if (present(exclusiveCount)) then
-              call ESMF_MeshGet(gbcp%mesh, numNodes=exclusiveCount(1), rc=localrc)
+              call ESMF_MeshGet(gbcp%mesh, numOwnedNodes=exclusiveCount(1), rc=localrc)
               if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -892,14 +892,14 @@ end subroutine ESMF_GeomBaseGet
           if (present(computationalLBound)) computationalLBound(1) = 1
 
           if (present(computationalUBound)) then
-             call ESMF_MeshGet(gbcp%mesh, numNodes=computationalUBound(1), rc=localrc)
+             call ESMF_MeshGet(gbcp%mesh, numOwnedNodes=computationalUBound(1), rc=localrc)
              if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
           endif
 
           if (present(computationalCount)) then
-             call ESMF_MeshGet(gbcp%mesh, numNodes=computationalCount(1), rc=localrc)
+             call ESMF_MeshGet(gbcp%mesh, numOwnedNodes=computationalCount(1), rc=localrc)
              if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
