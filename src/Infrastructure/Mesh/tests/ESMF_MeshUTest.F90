@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshUTest.F90,v 1.15 2009/09/23 23:13:01 oehmke Exp $
+! $Id: ESMF_MeshUTest.F90,v 1.16 2009/09/28 20:29:24 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_MeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshUTest.F90,v 1.15 2009/09/23 23:13:01 oehmke Exp $'
+    '$Id: ESMF_MeshUTest.F90,v 1.16 2009/09/28 20:29:24 oehmke Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -58,11 +58,12 @@ program ESMF_MeshUTest
   logical :: correct
   integer, pointer :: nodeIds(:),nodeOwners(:)
   real(ESMF_KIND_R8), pointer :: nodeCoords(:)
-  integer :: numNodes, numNodesTst
-  integer :: numElems, numElemsTst
+  integer :: numNodes, numOwnedNodes, numOwnedNodesTst
+  integer :: numElems,numOwnedElemsTst
   integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_Field)  ::  field
+  logical :: isMemFreed
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -248,6 +249,7 @@ program ESMF_MeshUTest
      if (localPet .eq. 0) then
         ! Fill in node data
         numNodes=4
+        numOwnedNodes=4
 
        !! node ids
        allocate(nodeIds(numNodes))
@@ -281,6 +283,7 @@ program ESMF_MeshUTest
      else if (localPet .eq. 1) then
         ! Fill in node data
         numNodes=4
+        numOwnedNodes=2
 
        !! node ids
        allocate(nodeIds(numNodes))
@@ -314,6 +317,7 @@ program ESMF_MeshUTest
      else if (localPet .eq. 2) then
         ! Fill in node data
         numNodes=4
+        numOwnedNodes=2
 
        !! node ids
        allocate(nodeIds(numNodes))
@@ -347,6 +351,7 @@ program ESMF_MeshUTest
      else 
         ! Fill in node data
         numNodes=4
+        numOwnedNodes=1
 
        !! node ids
        allocate(nodeIds(numNodes))
@@ -400,12 +405,14 @@ program ESMF_MeshUTest
 
   ! Test Mesh Get
   call ESMF_MeshGet(mesh, nodalDistgrid=nodeDistgrid, elementDistgrid=elemDistgrid, &
-                   numNodes=numNodesTst, numElements=numElemsTst, rc=localrc)
+                   numOwnedNodes=numOwnedNodesTst, numOwnedElements=numOwnedElemsTst, &
+                   isMemFreed=isMemFreed, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check results
-  if (numNodesTst .ne. numNodes) correct=.false.
-  if (numElemsTst .ne. numElems) correct=.false.
+  if (numOwnedNodesTst .ne. numOwnedNodes) correct=.false.
+  if (numOwnedElemsTst .ne. numElems) correct=.false. ! all elements are owned
+  if (isMemFreed) correct=.false. ! Hasn't been freed yet
 
   ! Make sure node distgrid is ok
   call ESMF_DistGridValidate(nodeDistgrid, rc=localrc)
@@ -414,6 +421,17 @@ program ESMF_MeshUTest
   ! Make sure element distgrid is ok
   call ESMF_DistGridValidate(elemDistgrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
+
+  ! Free memory
+  call ESMF_MeshFreeMemory(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Test isMemFreed flag
+  call ESMF_MeshGet(mesh, isMemFreed=isMemFreed, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! now it should indicate freed memory
+  if (.not. isMemFreed) correct=.false. ! Has been freed 
 
   !! Write mesh for debugging
   !! call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
@@ -635,9 +653,6 @@ program ESMF_MeshUTest
   deallocate(elemConn)
 
 
-#if 0
-  ! TODO: Look into this tomorrow
-
   ! Test MeshFreeMemory
   call ESMF_MeshFreeMemory(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -662,7 +677,6 @@ program ESMF_MeshUTest
   call ESMF_FieldDestroy(field, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-#endif
 
  ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=localrc)
@@ -673,6 +687,130 @@ program ESMF_MeshUTest
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test error checking"
+  write(failMsg, *) "Incorrect result"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! Only do this if we have 1 processor
+  if (petCount .eq. 1) then
+
+  ! Create Mesh structure
+  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Fill in node data
+  numNodes=9
+
+  !! node ids
+  allocate(nodeIds(numNodes))
+  nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+  !! node Coords
+  allocate(nodeCoords(numNodes*2))
+  nodeCoords=(/0.0,0.0, &
+               1.0,0.0, &
+               2.0,0.0, &
+               0.0,1.0, &
+               1.0,1.0, &
+               2.0,1.0, &
+               0.0,2.0, &
+               1.0,2.0, &
+               2.0,2.0 /)
+
+  !! node owners
+  allocate(nodeOwners(numNodes))
+  nodeOwners=0 ! everything on proc 0
+
+  ! Fill in elem data
+  numElems=4
+
+  !! elem ids
+  allocate(elemIds(numElems))
+  elemIds=(/1,2,3,4/) 
+
+  !! elem types
+  allocate(elemTypes(numElems))
+  elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+
+  !! elem conn
+  allocate(elemConn(numElems*4))
+  elemConn=(/1,2,5,4, & 
+             2,3,6,5, & 
+             4,5,8,7, & 
+             5,6,9,8/)
+
+  ! Shouldn't be able to do this here before AddNodes()
+  call ESMF_MeshAddElements(mesh,elemIds,elemTypes,elemConn,rc=localrc)
+  if (localrc .eq. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Add nodes
+  call ESMF_MeshAddNodes(mesh,nodeIds,nodeCoords,nodeOwners,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Shouldn't be able to do this twice
+  call ESMF_MeshAddNodes(mesh,nodeIds,nodeCoords,nodeOwners,rc=localrc)
+  if (localrc .eq. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Mesh Get shouldn't work here
+  call ESMF_MeshGet(mesh, nodalDistgrid=nodeDistgrid, elementDistgrid=elemDistgrid, &
+                   numOwnedNodes=numOwnedNodesTst, numOwnedElements=numOwnedElemsTst, rc=localrc)
+  if (localrc .eq. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Try using a bad element type
+  elemTypes(1)=ESMF_MESHELEMTYPE_HEX
+
+  ! Add Elements
+  call ESMF_MeshAddElements(mesh,elemIds,elemTypes,elemConn,rc=localrc)
+  if (localrc .eq. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Use a better element
+  elemTypes(1)=ESMF_MESHELEMTYPE_QUAD
+
+  ! Try using a bad connectivity
+  elemConn(1)=5 
+
+  ! Add Elements
+  call ESMF_MeshAddElements(mesh,elemIds,elemTypes,elemConn,rc=localrc)
+  if (localrc .eq. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Try using a bad connectivity
+  elemConn(1)=1
+
+  ! Add Elements
+  call ESMF_MeshAddElements(mesh,elemIds,elemTypes,elemConn,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! deallocate node data
+  deallocate(nodeIds)
+  deallocate(nodeCoords)
+  deallocate(nodeOwners)
+
+
+  ! deallocate elem data
+  deallocate(elemIds)
+  deallocate(elemTypes)
+  deallocate(elemConn)
+
+  !! Write mesh for debugging
+  ! call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
+  !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! endif for skip for >1 proc
+  endif 
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
 
   !------------------------------------------------------------------------

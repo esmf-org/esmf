@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.21 2009/09/24 18:42:50 feiliu Exp $
+! $Id: ESMF_Mesh.F90,v 1.22 2009/09/28 20:29:24 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -61,9 +61,11 @@ module ESMF_MeshMod
     type(ESMF_Pointer) :: this
     type(ESMF_DistGrid) :: nodal_distgrid
     type(ESMF_DistGrid) :: element_distgrid
-    integer :: mesh_freed   ! Has the mesh memory been release?
-    integer :: num_nodes
-    integer :: num_elements
+    logical :: isCMeshFreed   ! Has the mesh memory been release?
+    integer :: createStage
+    logical :: isFullyCreated ! Are the distgrids there and the numOwned X correct
+    integer :: numOwnedNodes
+    integer :: numOwnedElements
     ESMF_INIT_DECLARE
   end type
 
@@ -131,7 +133,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.21 2009/09/24 18:42:50 feiliu Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.22 2009/09/28 20:29:24 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -211,7 +213,7 @@ module ESMF_MeshMod
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: num_elems
+    integer                 :: num_elems, num_elementConn
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -220,23 +222,43 @@ module ESMF_MeshMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
+    ! If mesh has been freed then exit
+    if (mesh%isCMeshFreed) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh internals have been freed", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+    ! If we're at the wrong stage then complain
+    if (mesh%createStage .ne. 2) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- MeshAddNodes() should be called before this", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+
     num_elems = size(elementIds)
-    mesh%num_elements = num_elems
+    num_elementConn = size(elementConn)
     call C_ESMC_MeshAddElements(mesh%this, num_elems, &
                              elementIds, elementTypes, &
-                             elementConn, localrc)
+                             num_elementConn, elementConn, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! We create two dist grids, one for nodal one for element
     call C_ESMC_MeshCreateDistGrids(mesh%this, mesh%nodal_distgrid, &
                       mesh%element_distgrid, &
-                      mesh%num_nodes, mesh%num_elements, localrc)
+                      mesh%numOwnedNodes, mesh%numOwnedElements, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return    
 
     !call ESMF_DistGridPrint(mesh%nodal_distgrid)
     !ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, mesh%nodal_distgrid, rc)
+
+    ! Set as fully created 
+    mesh%isFullyCreated=.true.
 
     if (present (rc)) rc = localrc
     
@@ -308,12 +330,30 @@ module ESMF_MeshMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
+    ! If mesh has been freed then exit
+    if (mesh%isCMeshFreed) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh internals have been freed", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+    ! If we're at the wrong stage then complain
+    if (mesh%createStage .ne. 1) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- MeshAddNodes() should be called before this", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
     num_nodes = size(nodeIds)
-    mesh%num_nodes = num_nodes
     call C_ESMC_MeshAddNodes(mesh%this, num_nodes, nodeIds, nodeCoords, &
                              nodeOwners, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Go to next stage 
+    mesh%createStage=2
 
     if (present (rc)) rc = localrc
     
@@ -371,7 +411,14 @@ module ESMF_MeshMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ESMF_MeshCreate3Part%mesh_freed = 0  ! memory has not been released
+    ! The C side has been created
+    ESMF_MeshCreate3Part%isCMeshFreed=.false.
+
+    ! Go to next stage 
+    ESMF_MeshCreate3Part%createStage=1
+
+    ! Set as not yet created
+    ESMF_MeshCreate3Part%isFullyCreated=.false.
 
     ! Check init status of arguments
     ESMF_INIT_SET_CREATED(ESMF_MeshCreate3Part)
@@ -487,7 +534,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: num_nodes
-    integer                 :: num_elems
+    integer                 :: num_elems, num_elementConn
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -510,23 +557,26 @@ module ESMF_MeshMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     num_elems = size(elementTypes)
+    num_elementConn = size(elementConn)
     call C_ESMC_MeshAddElements(ESMF_MeshCreate1Part%this, num_elems, &
                              elementIds, elementTypes, &
-                             elementConn, localrc)
+                             num_elementConn, elementConn, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! We create two dist grids, one for nodal one for element
     call C_ESMC_MeshCreateDistGrids(ESMF_MeshCreate1Part%this, ESMF_MeshCreate1Part%nodal_distgrid, &
                       ESMF_MeshCreate1Part%element_distgrid, &
-                      ESMF_MeshCreate1Part%num_nodes, ESMF_MeshCreate1Part%num_elements, localrc)
+                      ESMF_MeshCreate1Part%numOwnedNodes, ESMF_MeshCreate1Part%numOwnedElements, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Setup F90 mesh stucture
-    ESMF_MeshCreate1Part%num_nodes = num_nodes
-    ESMF_MeshCreate1Part%num_elements = num_elems
-    ESMF_MeshCreate1Part%mesh_freed = 0  ! memory has not been released
+
+    ! The C side has been created
+    ESMF_MeshCreate1Part%isCMeshFreed=.false.
+
+    ! Set as fully created 
+    ESMF_MeshCreate1Part%isFullyCreated=.true.
 
     !call ESMF_DistGridPrint(ESMF_MeshCreate1Part%nodal_distgrid)
     !ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, ESMF_MeshCreate1Part%nodal_distgrid, rc)
@@ -572,28 +622,30 @@ module ESMF_MeshMod
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: num_nodes, num_elements
 
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
     ! initialize return code; assume routine not implemented
 
+    ! Set pointer
     ESMF_MeshCreateFromPointer%this = mesh_pointer
-
-    ESMF_MeshCreateFromPointer%mesh_freed = 0  ! memory has not been released
 
     ! Check init status of arguments
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromPointer)
 
-    call C_ESMC_MeshGet(ESMF_MeshCreateFromPointer%this, num_nodes, num_elements, localrc)
+    ! We create two dist grids, one for nodal one for element
+    call C_ESMC_MeshCreateDistGrids(ESMF_MeshCreateFromPointer%this, &
+                      ESMF_MeshCreateFromPointer%nodal_distgrid, &
+                      ESMF_MeshCreateFromPointer%element_distgrid, &
+                      ESMF_MeshCreateFromPointer%numOwnedNodes, &
+                      ESMF_MeshCreateFromPointer%numOwnedElements, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! We create two dist grids, one for nodal one for element
-    call C_ESMC_MeshCreateDistGrids(ESMF_MeshCreateFromPointer%this, ESMF_MeshCreateFromPointer%nodal_distgrid, &
-                      ESMF_MeshCreateFromPointer%element_distgrid, &
-                      ESMF_MeshCreateFromPointer%num_nodes, ESMF_MeshCreateFromPointer%num_elements, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! The C side has been created
+    ESMF_MeshCreateFromPointer%isCMeshFreed=.false.
+
+    ! Set as fully created 
+    ESMF_MeshCreateFromPointer%isFullyCreated=.true.
 
     if(present(rc)) rc = ESMF_SUCCESS
 
@@ -632,11 +684,30 @@ module ESMF_MeshMod
 
       ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
-      if (mesh%mesh_freed .eq. 0) then
-        call C_ESMC_MeshDestroy(mesh, localrc)
+      ! If not already freed then free the c side
+      if (.not. mesh%isCMeshFreed) then
+        call C_ESMC_MeshDestroy(mesh%this, localrc)
+
+        ! Set this for consistancies sake
+         mesh%isCMeshFreed=.true.
       endif
 
+
       ! TODO: destroy distgrids here
+      if (mesh%isFullyCreated) then
+         ! destroy node distgrid          
+         call ESMF_DistgridDestroy(mesh%nodal_distgrid, rc=localrc)
+         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
+         ! destroy element distgrid          
+         call ESMF_DistgridDestroy(mesh%element_distgrid, rc=localrc)
+         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+         ! Set this for consistancies sake
+          mesh%isFullyCreated=.false.
+      endif
 
       ESMF_INIT_SET_DELETED(mesh)
 
@@ -683,15 +754,16 @@ module ESMF_MeshMod
       ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
       ! If already free, fine just return
-      if (mesh%mesh_freed .eq. 1) then
+      if (mesh%isCMeshFreed) then
         if (present (rc)) rc = ESMF_SUCCESS
         return
       endif
 
-   
+      ! Free internal C++ mesh   
       call C_ESMC_MeshFreeMemory(mesh,localrc)
 
-      mesh%mesh_freed = 1
+      ! Set Freed status
+      mesh%isCMeshFreed = .true.
 
       if (present (rc)) rc = localrc
 
@@ -707,7 +779,7 @@ module ESMF_MeshMod
 !
 ! !INTERFACE:
       subroutine ESMF_MeshGet(mesh, nodalDistgrid, elementDistgrid, &
-                   numNodes, numElements, isMemFreed, rc)
+                   numOwnedNodes, numOwnedElements, isMemFreed, rc)
 !
 ! !RETURN VALUE:
 !
@@ -715,8 +787,8 @@ module ESMF_MeshMod
     type(ESMF_Mesh), intent(inout)             :: mesh
     type(ESMF_DistGrid), intent(out), optional :: nodalDistgrid
     type(ESMF_DistGrid), intent(out), optional :: elementDistgrid
-    integer,             intent(out), optional :: numNodes
-    integer,             intent(out), optional :: numElements
+    integer,             intent(out), optional :: numOwnedNodes
+    integer,             intent(out), optional :: numOwnedElements
     logical,             intent(out), optional :: isMemFreed
     integer,             intent(out), optional :: rc
 !
@@ -732,10 +804,12 @@ module ESMF_MeshMod
 ! on each PET the distgrid will only contain entries for nodes owned by that PET.
 ! \item [{[elementDistgrid]}]
 ! A distgrid describing the distribution of the elements across the PETs.
-! \item [{[numNodes]}]
-! The number of nodes on this PET.
-! \item [{[numElements]}]
-! The number of elements on this PET.
+! \item [{[numOwnedNodes]}]
+! The number of local nodes which are owned by this PET. This is the number of PET local entries in
+! the nodalDistgrid.
+! \item [{[numOwnedElements]}]
+! The number of local elements which are owned by this PET. This is the number of PET local entries in
+! the elementDistgrid.
 ! \item [{[isMemFreed]}]
 ! Has the coordinate and connection memory been freed from this mesh. If so, it
 ! can no longer be used as a part of {\tt ESMF\_FieldRegridStore()} calls.
@@ -750,16 +824,21 @@ module ESMF_MeshMod
 
       ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
+    ! If mesh has been freed then exit
+    if (.not. mesh%isFullyCreated) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh has not been fully created", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+
       if (present(nodalDistgrid)) nodalDistgrid = mesh%nodal_distgrid
       if (present(elementDistgrid)) elementDistgrid = mesh%element_distgrid
-      if (present(numNodes)) numNodes =mesh%num_nodes
-      if (present(numElements)) numElements =mesh%num_elements 
+      if (present(numOwnedNodes)) numOwnedNodes =mesh%numOwnedNodes
+      if (present(numOwnedElements)) numOwnedElements =mesh%numOwnedElements 
       if (present(isMemFreed)) then
-         if (mesh%mesh_freed==1) then
-            isMemFreed=.true.
-         else 
-            isMemFreed=.false.
-         endif
+            isMemFreed=mesh%isCMeshFreed
       endif
 
       if (present(rc)) rc = localrc
@@ -806,6 +885,22 @@ module ESMF_MeshMod
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    ! If mesh has been freed then exit
+    if (mesh%isCMeshFreed) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh internals have been freed", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+    ! If mesh has been freed then exit
+    if (.not. mesh%isFullyCreated) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh has not been fully created", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
 
     call C_ESMC_MeshWrite(mesh%this, filename, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &

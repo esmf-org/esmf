@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.29 2009/09/24 18:42:49 feiliu Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.30 2009/09/28 20:29:24 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 #include "ESMCI_ParEnv.h"
 #include "ESMCI_MeshUtils.h"
 #include "ESMCI_GlobalIds.h"
-
+#include "ESMCI_VM.h"
 
 
 
@@ -131,6 +131,22 @@ extern "C" void FTN(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *nod
     ThrowRequire(meshp);
     Mesh &mesh = *meshp;
 
+    // Get petCount for error checking
+    int localrc;
+    int petCount = VM::getCurrent(&localrc)->getPetCount();
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+      throw localrc;  // bail out with exception
+
+    // Check node owners
+    for (int n = 0; n < *num_nodes; ++n) {
+      if ((nodeOwner[n]<0) || (nodeOwner[n]>petCount-1)) {
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- Bad nodeOwner value ", &localrc)) throw localrc;
+      }
+    }
+
+
+    // Create new nodes
     for (int n = 0; n < *num_nodes; ++n) {
 
       MeshObj *node = new MeshObj(MeshObj::NODE, nodeId[n], n);
@@ -225,7 +241,7 @@ extern "C" void FTN(c_esmc_meshwrite)(Mesh **meshpp, char *fname, int *rc, int n
 }
 
 extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *elemId, 
-               int *elemType, int *elemConn, int *rc) 
+               int *elemType, int *num_elemConn, int *elemConn, int *rc) 
 {
    try {
     Mesh *meshp = *meshpp;
@@ -234,11 +250,53 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
 
     Mesh &mesh = *meshp;
 
+    // Get parametric dimension
+    int parametric_dim=mesh.parametric_dim();
+
+    // Error check input
+    //// Check element type
+    for (int i=0; i< *num_elems; i++) {
+      if (parametric_dim==2) {
+        if ((elemType[i] != 5) && (elemType[i] != 9)) {
+	  int localrc;
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- for a mesh with parametric dimension 2 element types must be either triangles or quadrilaterals ", &localrc)) throw localrc;
+        }
+      } else if (parametric_dim==3) {
+        if ((elemType[i] != 10) && (elemType[i] != 12)) {
+	  int localrc;
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- for a mesh with parametric dimension 3 element types must be either tetrahedron or hexahedron ", &localrc)) throw localrc;
+        }
+
+      }
+    }
+
+    //// Check size of connectivity list
+    int expected_conn_size=0;
+    for (int i=0; i< *num_elems; i++) {
+      if (elemType[i]==5) expected_conn_size += 3;   
+      else if (elemType[i]==9) expected_conn_size += 4;   
+      else if (elemType[i]==10) expected_conn_size += 4;   
+      else if (elemType[i]==12) expected_conn_size += 8;   
+    }
+    if (expected_conn_size != *num_elemConn) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+       "- element connectivity list doesn't contain the right number of entries ", &localrc)) throw localrc;
+    }
+
+    // Get number of nodes
+    int num_nodes = mesh.num_nodes();
+
+    // Allocate array to make sure that there are no local nodes without a home
+    std::vector<int> node_used;
+    node_used.resize(num_nodes, 0);
+
+
     // We must first store all nodes in a flat array since element
     // connectivity will index into this array.
     std::vector<MeshObj*> all_nodes;
-
-    int num_nodes = mesh.num_nodes();
 
     all_nodes.resize(num_nodes, static_cast<MeshObj*>(0));
 
@@ -273,18 +331,44 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
 
       for (int n = 0; n < nnodes; ++n) {
       
-        if (elemConn[cur_conn] > num_nodes) {
+        // Get 0-based node index
+        int node_index=elemConn[cur_conn]-1;
+
+        // Check elemConn
+        if ((node_index < 0) || (node_index > num_nodes-1)) {
 	  int localrc;
 	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
 	   "- elemConn entries should not be greater than number of nodes on processor ", &localrc)) throw localrc;
 	}
 
-        nconnect[n] = all_nodes[elemConn[cur_conn++]-1];
+        // Setup connectivity list
+        nconnect[n] = all_nodes[node_index];
+
+        // Mark as used
+        node_used[node_index]=1;
+
+        // Advance to next
+        cur_conn++;
       }
 
       mesh.add_element(elem, nconnect, topo->number, topo);
 
     } // for e
+
+    // Make sure every node used
+    bool every_node_used=true;
+    for (int i=0; i<num_nodes; i++) {
+      if (node_used[i] == 0) {
+        every_node_used=false;
+        break;
+      }
+    }
+    
+    if (!every_node_used) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+	   "- there are nodes on this PET that were not used in the element connectivity list ", &localrc)) throw localrc;
+    }
 
     // Perhaps commit will be a separate call, but for now commit the mesh here.
 
