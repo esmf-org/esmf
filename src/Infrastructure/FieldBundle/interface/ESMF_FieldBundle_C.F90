@@ -1,4 +1,4 @@
-!  $Id: ESMF_FieldBundle_C.F90,v 1.6 2009/09/25 17:17:04 theurich Exp $
+!  $Id: ESMF_FieldBundle_C.F90,v 1.7 2009/09/29 05:46:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -9,21 +9,22 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_FieldBundle_C.F90"
+!==============================================================================
 !
-! F77 interface files for C++ layer calling into F90 implementation layer.
-!  This cannot use any F90 syntax, including modules, or allocatable 
-!   arrays, or ...
+! F77 interfaces for C++ layer calling into F90 implementation layer.
 !
 !==============================================================================
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include "ESMF.h"
+
 !==============================================================================
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_FieldBundle_C.F90,v 1.6 2009/09/25 17:17:04 theurich Exp $'
+!      '$Id: ESMF_FieldBundle_C.F90,v 1.7 2009/09/29 05:46:08 theurich Exp $'
 !==============================================================================
    subroutine f_esmf_bundlecreate(bundlep, rc)
        use ESMF_UtilTypesMod    ! ESMF generic types class
@@ -61,7 +62,7 @@
 
   subroutine f_esmf_fbundlecollectgarbage(fbtype, rc)
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_fbcollectgarbage"
+#define ESMF_METHOD "f_esmf_fbundlecollectgarbage"
     use ESMF_UtilTypesMod
     use ESMF_BaseMod
     use ESMF_LogErrMod
