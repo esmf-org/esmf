@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistBlk2ArbSTest.F90,v 1.14 2009/05/21 16:02:16 feiliu Exp $
+! $Id: ESMF_FieldRedistBlk2ArbSTest.F90,v 1.15 2009/09/29 16:53:07 feiliu Exp $
 !
 ! System test FieldRedistBlk2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -174,9 +174,9 @@
     if (status .ne. ESMF_SUCCESS) goto 20
 
     ! Get pointers to the data and set it up
-    call ESMF_FieldGet(humidity1, farray=srcdata, rc=status)
+    call ESMF_FieldGet(humidity1, farrayPtr=srcdata, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldGet(humidity3, farray=resdata, rc=status)
+    call ESMF_FieldGet(humidity3, farrayPtr=resdata, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
 
     ! initialize data arrays

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.3 2009/08/03 19:59:59 theurich Exp $
+! $Id: user_model1.F90,v 1.4 2009/09/29 16:53:07 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -123,7 +123,7 @@
             name="humidity", rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
 
-        call ESMF_FieldGet(humidity, localDe=0, farray=srcfptr, rc=rc)
+        call ESMF_FieldGet(humidity, localDe=0, farrayPtr=srcfptr, rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
 
         srcfptr = 1

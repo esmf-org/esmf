@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMMUTest.F90,v 1.4 2009/08/11 21:34:28 svasquez Exp $
+! $Id: ESMF_FieldBundleSMMUTest.F90,v 1.5 2009/09/29 16:56:18 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldBundleSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleSMMUTest.F90,v 1.4 2009/08/11 21:34:28 svasquez Exp $'
+    '$Id: ESMF_FieldBundleSMMUTest.F90,v 1.5 2009/09/29 16:56:18 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -152,7 +152,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
 
-            call ESMF_FieldGet(srcField(i), localDe=0, farray=srcfptr, rc=localrc)
+            call ESMF_FieldGet(srcField(i), localDe=0, farrayPtr=srcfptr, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -171,7 +171,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
 
-            call ESMF_FieldGet(dstField(i), localDe=0, farray=dstfptr, rc=localrc)
+            call ESMF_FieldGet(dstField(i), localDe=0, farrayPtr=dstfptr, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -204,7 +204,7 @@ contains
 
         ! verify smm
         do l = 1, 3
-            call ESMF_FieldGet(dstField(l), localDe=0, farray=fptr, &
+            call ESMF_FieldGet(dstField(l), localDe=0, farrayPtr=fptr, &
                 exclusiveLBound=exlb, exclusiveUBound=exub, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &

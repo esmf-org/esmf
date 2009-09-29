@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.16 2009/09/22 16:27:41 feiliu Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.17 2009/09/29 16:56:16 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -323,7 +323,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(f1, localDe=0, farray=farray1, rc=localrc)
+        call ESMF_FieldGet(f1, localDe=0, farrayPtr=farray1, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -333,7 +333,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(f2, localDe=0, farray=farray2, rc=localrc)
+        call ESMF_FieldGet(f2, localDe=0, farrayPtr=farray2, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -364,7 +364,7 @@ contains
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
 
-            call ESMF_FieldGet(f3, localDe=0, farray=farray3, rc=localrc)
+            call ESMF_FieldGet(f3, localDe=0, farrayPtr=farray3, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
@@ -385,7 +385,7 @@ contains
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
 
-            call ESMF_FieldGet(f4, localDe=0, farray=farray4, rc=localrc)
+            call ESMF_FieldGet(f4, localDe=0, farrayPtr=farray4, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
@@ -413,7 +413,7 @@ contains
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
 
-            call ESMF_FieldGet(f5, localDe=0, farray=farray5, rc=localrc)
+            call ESMF_FieldGet(f5, localDe=0, farrayPtr=farray5, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return

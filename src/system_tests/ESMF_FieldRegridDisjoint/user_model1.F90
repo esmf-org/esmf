@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1 2009/08/28 16:53:36 oehmke Exp $
+! $Id: user_model1.F90,v 1.2 2009/09/29 16:53:08 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -122,7 +122,7 @@
         if (rc .ne. ESMF_SUCCESS) return
 
         ! Get the allocated array back and get an F90 array pointer
-        call ESMF_FieldGet(humidity, farray=idata, rc=rc)
+        call ESMF_FieldGet(humidity, farrayPtr=idata, rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
 
         ! Set initial data values over whole array to our de id
@@ -187,7 +187,7 @@
         ! update field values here
         ! call ESMF_StateGetDataPointer(exportState, "humidity", idata, rc=rc)
         ! Get a pointer to the start of the data
-        call ESMF_FieldGet(humidity, farray=idata, rc=rc)
+        call ESMF_FieldGet(humidity, farrayPtr=idata, rc=rc)
         if(rc/=ESMF_SUCCESS) return
 
         ! increment data values in place

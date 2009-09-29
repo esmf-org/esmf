@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.5 2009/05/29 19:24:42 theurich Exp $
+! $Id: user_model2.F90,v 1.6 2009/09/29 16:53:07 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -187,7 +187,7 @@ module user_model2
         if (rc/=ESMF_SUCCESS) return ! bail out
 
         ! Gain access to actual data via F90 array pointer
-        call ESMF_FieldGet(field, localDe=0, farray=farrayPtr, rc=rc)
+        call ESMF_FieldGet(field, localDe=0, farrayPtr=farrayPtr, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
           
         ! Test FieldBundle in import state against exact solution

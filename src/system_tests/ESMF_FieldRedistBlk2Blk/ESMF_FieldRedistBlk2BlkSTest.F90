@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.14 2008/11/14 04:39:16 theurich Exp $
+! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.15 2009/09/29 16:53:07 feiliu Exp $
 !
 ! System test FieldRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -190,13 +190,13 @@
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     
     ! Get pointers to the data and set it up
-    call ESMF_FieldGet(field1, localDe=0, farray=srcdata, &
+    call ESMF_FieldGet(field1, localDe=0, farrayPtr=srcdata, &
         computationalLBound=src_fclb, computationalUBound=src_fcub, & 
         rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-    call ESMF_FieldGet(field3, localDe=0, farray=resdata, &
+    call ESMF_FieldGet(field3, localDe=0, farrayPtr=resdata, &
         computationalLBound=res_fclb, computationalUBound=res_fcub, & 
         rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &

@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.9 2009/05/29 19:24:42 theurich Exp $
+! $Id: user_model2.F90,v 1.10 2009/09/29 16:53:07 feiliu Exp $
 !
 ! System test for Concurrent Components, user-written component 2.
 
@@ -175,7 +175,7 @@
         call ESMF_StateGet(importState, "sorted_data2", sorted_data, rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        call ESMF_FieldGet(sorted_data, localDe=0, farray=sdptr, rc=status)
+        call ESMF_FieldGet(sorted_data, localDe=0, farrayPtr=sdptr, rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         

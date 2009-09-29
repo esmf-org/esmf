@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.45 2009/05/21 16:02:16 feiliu Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.46 2009/09/29 16:53:07 feiliu Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -188,13 +188,13 @@
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     
     ! Get pointers to the data and set it up
-    call ESMF_FieldGet(field1, localDe=0, farray=srcdata, &
+    call ESMF_FieldGet(field1, localDe=0, farrayPtr=srcdata, &
         computationalLBound=src_fclb, computationalUBound=src_fcub, & 
         rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-    call ESMF_FieldGet(field3, localDe=0, farray=resdata, &
+    call ESMF_FieldGet(field3, localDe=0, farrayPtr=resdata, &
         computationalLBound=res_fclb, computationalUBound=res_fcub, & 
         rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &

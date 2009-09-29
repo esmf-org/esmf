@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.54 2009/09/22 14:56:33 feiliu Exp $
+! $Id: user_model2.F90,v 1.55 2009/09/29 16:53:07 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -126,7 +126,7 @@
       if(rc/=ESMF_SUCCESS) return
   
       ! Get the allocated array back and get an F90 array pointer
-      call ESMF_FieldGet(humidity, farray=idata, rc=rc)
+      call ESMF_FieldGet(humidity, farrayPtr=idata, rc=rc)
       if(rc/=ESMF_SUCCESS) return
   
       call ESMF_StateAdd(importState, humidity, rc)
@@ -252,7 +252,7 @@
 
       ! update field values here
       ! Get a pointer to the start of the data
-      call ESMF_FieldGet(humidity, farray=data, rc=rc)
+      call ESMF_FieldGet(humidity, farrayPtr=data, rc=rc)
       if(rc/=ESMF_SUCCESS) return
       print *, "rc from array get data = ", rc
       !if (associated(data)) print *, "pointer is associated"

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMMEx.F90,v 1.5 2009/02/27 22:52:01 svasquez Exp $
+! $Id: ESMF_FieldBundleSMMEx.F90,v 1.6 2009/09/29 16:56:15 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleSMMEx.F90,v 1.5 2009/02/27 22:52:01 svasquez Exp $'
+    '$Id: ESMF_FieldBundleSMMEx.F90,v 1.6 2009/09/29 16:56:15 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -116,7 +116,7 @@
             rc=rc)
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-        call ESMF_FieldGet(srcField(i), localDe=0, farray=srcfptr, rc=rc)
+        call ESMF_FieldGet(srcField(i), localDe=0, farrayPtr=srcfptr, rc=rc)
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
         srcfptr = 1
@@ -129,7 +129,7 @@
             rc=rc)
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-        call ESMF_FieldGet(dstField(i), localDe=0, farray=dstfptr, rc=rc)
+        call ESMF_FieldGet(dstField(i), localDe=0, farrayPtr=dstfptr, rc=rc)
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
         dstfptr = 0
@@ -154,7 +154,7 @@
 
     ! verify smm
     do l = 1, 3
-        call ESMF_FieldGet(dstField(l), localDe=0, farray=fptr, &
+        call ESMF_FieldGet(dstField(l), localDe=0, farrayPtr=fptr, &
             exclusiveLBound=exlb, exclusiveUBound=exub, rc=rc)
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
