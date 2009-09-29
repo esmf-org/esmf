@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.145 2009/09/23 15:33:28 theurich Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.146 2009/09/29 19:37:04 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.145 2009/09/23 15:33:28 theurich Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.146 2009/09/29 19:37:04 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -153,7 +153,7 @@
       ! check bounds
       call ESMF_FieldGet(fls, localDE=0, computationalCount=cc, &
              computationalLBound=cl, computationalUBound=cu, &
-             farray=lsfptrR4Out, rc=localrc)
+             farrayPtr=lsfptrR4Out, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
 
       ! Check output
@@ -204,7 +204,7 @@
       ! check bounds
       call ESMF_FieldGet(fls, localDE=0, computationalCount=cc(1:1), &
              computationalLBound=cl(1:1), computationalUBound=cu(1:1), &
-             farray=lsfptrOut, rc=localrc)
+             farrayPtr=lsfptrOut, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
 
       ! Check output
