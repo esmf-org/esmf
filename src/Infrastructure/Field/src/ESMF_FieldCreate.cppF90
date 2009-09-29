@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.62 2009/09/25 17:30:53 theurich Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.63 2009/09/29 15:07:58 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.62 2009/09/25 17:30:53 theurich Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.63 2009/09/29 15:07:58 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1651,6 +1651,10 @@ contains
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_GeomBase}. @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried but it does not @\
+! reference the original data array passed into this method. Thus deallocating @\
+! the retrieved data pointer is not allowed. User should leave the memory deallocation @\
+! to the {\tt ESMF\_FieldDestroy} method. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -1830,7 +1834,10 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
-! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_GeomBase}. @\
+! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_GeomBase}. @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! copyflag is {\tt ESMF\_DATA\_REF}. This gives user more flexibility over memory management. @\
+! @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -1838,7 +1845,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 !       {\tt ESMF\_GeomBase} object.  The dimCount of the @\
 !       GeomBase must be smaller than or equal to the rank of the {\tt farrayPtr}. @\
 ! \item [farrayPtr] @\
-!       Native fortran data array to be copied/referenced in the Field @\
+!       Native fortran data pointer to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[copyflag]}] @\
@@ -2390,6 +2397,10 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Grid}. @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried but it does not @\
+! reference the original data array passed into this method. Thus deallocating @\
+! the retrieved data pointer is not allowed. User should leave the memory deallocation @\
+! to the {\tt ESMF\_FieldDestroy} method. @\
 ! For examples and @\
 ! associated documentations using this method see Section  @\
 ! \ref{sec:field:usage:create_2dptr}, @\
@@ -2623,7 +2634,10 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
-! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Grid}. @\
+! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_Grid}. @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! copyflag is {\tt ESMF\_DATA\_REF}. This gives user more flexibility over memory management. @\
+! @\
 ! For examples and @\
 ! associated documentations using this method see Section  @\
 ! \ref{sec:field:usage:create_2dptr}, @\
@@ -2637,7 +2651,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 ! \item [grid]  @\
 !       {\tt ESMF\_Grid} object. @\
 ! \item [farrayPtr] @\
-!       Native fortran data array to be copied/referenced in the Field @\
+!       Native fortran data pointer to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[copyflag]}] @\
@@ -3076,6 +3090,10 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_LocStream}. @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried but it does not @\
+! reference the original data array passed into this method. Thus deallocating @\
+! the retrieved data pointer is not allowed. User should leave the memory deallocation @\
+! to the {\tt ESMF\_FieldDestroy} method. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -3231,14 +3249,16 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
-! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_LocStream}. @\
+! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_LocStream}. @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! copyflag is {\tt ESMF\_DATA\_REF}. This gives user more flexibility over memory management. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item [locstream]  @\
 !       {\tt ESMF\_LocStream} object. @\
 ! \item [farrayPtr] @\
-!       Native fortran data array to be copied/referenced in the Field @\
+!       Native fortran data pointer to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[copyflag]}] @\
@@ -3609,6 +3629,10 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Mesh}. @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried but it does not @\
+! reference the original data array passed into this method. Thus deallocating @\
+! the retrieved data pointer is not allowed. User should leave the memory deallocation @\
+! to the {\tt ESMF\_FieldDestroy} method. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -3764,14 +3788,16 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
-! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Mesh}. @\
+! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_Mesh}. @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! copyflag is {\tt ESMF\_DATA\_REF}. This gives user more flexibility over memory management. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item [mesh]  @\
 !       {\tt ESMF\_Mesh} object. @\
 ! \item [farrayPtr] @\
-!       Native fortran data array to be copied/referenced in the Field @\
+!       Native fortran data pointer to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[copyflag]}] @\

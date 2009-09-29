@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.13 2009/09/23 22:53:39 theurich Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.14 2009/09/29 15:08:02 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.13 2009/09/23 22:53:39 theurich Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.14 2009/09/29 15:08:02 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -87,7 +87,7 @@ module ESMF_FieldSetCoMod
 
 ! !DESCRIPTION:
 !   This interface finishes a {\tt ESMF\_Field} started with FieldCreateEmpty
-!   These methods all take {\tt ESMF\_Grid} and Fortran data pointer as input to
+!   These methods all take {\tt ESMF\_Grid} and Fortran data array or pointer as input to
 !   fill in the {\tt ESMF\_Field} internals. 
   end interface
 !EOPI
@@ -133,6 +133,11 @@ contains
 ! {\tt ESMF\_FieldCreateEmpty()} call. For an example and @\
 ! associated documentation using this method see Section  @\
 ! \ref{sec:field:usage:create_empty_setcommit}. @\
+! @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried but it does not @\
+! reference the original data array passed into this method. Thus deallocating @\
+! the retrieved data pointer is not allowed. User should leave the memory deallocation @\
+! to the {\tt ESMF\_FieldDestroy} method. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -342,6 +347,9 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 ! associated documentation using this method see Section  @\
 ! \ref{sec:field:usage:create_empty_setcommit}. @\
 ! @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! copyflag is {\tt ESMF\_DATA\_REF}. This gives user more flexibility over memory management. @\
+! @\
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item [field]  @\
@@ -351,7 +359,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 ! \item [grid]  @\
 !       The {\tt ESMF\_Grid} object to finish the Field. @\
 ! \item [farrayPtr] @\
-!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[copyflag]}] @\
@@ -527,6 +535,11 @@ TypeKindRankDeclarationMacro(FieldSetCommitGridPtr)
 ! associated documentation using this method see Section  @\
 ! \ref{sec:field:usage:create_empty_setcommit}. @\
 ! @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried but it does not @\
+! reference the original data array passed into this method. Thus deallocating @\
+! the retrieved data pointer is not allowed. User should leave the memory deallocation @\
+! to the {\tt ESMF\_FieldDestroy} method. @\
+! @\
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item [field]  @\
@@ -666,6 +679,9 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 ! associated documentation using this method see Section  @\
 ! \ref{sec:field:usage:create_empty_setcommit}. @\
 ! @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! copyflag is {\tt ESMF\_DATA\_REF}. This gives user more flexibility over memory management. @\
+! @\
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item [field]  @\
@@ -675,7 +691,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 ! \item [locstream]  @\
 !       The {\tt ESMF\_LocStream} object to finish the Field. @\
 ! \item [farrayPtr] @\
-!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[copyflag]}] @\
@@ -783,6 +799,11 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
 ! {\tt ESMF\_FieldCreateEmpty()} call. For an example and @\
 ! associated documentation using this method see Section  @\
 ! \ref{sec:field:usage:create_empty_setcommit}. @\
+! @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried but it does not @\
+! reference the original data array passed into this method. Thus deallocating @\
+! the retrieved data pointer is not allowed. User should leave the memory deallocation @\
+! to the {\tt ESMF\_FieldDestroy} method. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -923,6 +944,9 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 ! associated documentation using this method see Section  @\
 ! \ref{sec:field:usage:create_empty_setcommit}. @\
 ! @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! copyflag is {\tt ESMF\_DATA\_REF}. This gives user more flexibility over memory management. @\
+! @\
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item [field]  @\
@@ -932,7 +956,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 ! \item [mesh]  @\
 !       The {\tt ESMF\_Mesh} object to finish the Field. @\
 ! \item [farrayPtr] @\
-!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[copyflag]}] @\
@@ -1040,6 +1064,11 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
 ! {\tt ESMF\_FieldCreateEmpty()} call. For an example and @\
 ! associated documentation using this method see Section  @\
 ! \ref{sec:field:usage:create_empty_setcommit}. @\
+! @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried but it does not @\
+! reference the original data array passed into this method. Thus deallocating @\
+! the retrieved data pointer is not allowed. User should leave the memory deallocation @\
+! to the {\tt ESMF\_FieldDestroy} method. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -1595,6 +1624,9 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 ! associated documentation using this method see Section  @\
 ! \ref{sec:field:usage:create_empty_setcommit}. @\
 ! @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! copyflag is {\tt ESMF\_DATA\_REF}. This gives user more flexibility over memory management. @\
+! @\
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item [field]  @\
@@ -1605,7 +1637,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 !       The {\tt ESMF\_GeomBase} object to finish the Field.  The dimCount of the @\
 !       GeomBase must be smaller than or equal to the rank of the {\tt farrayPtr}. @\
 ! \item [farrayPtr] @\
-!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[copyflag]}] @\

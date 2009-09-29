@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.44 2009/09/23 22:53:39 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.45 2009/09/29 15:08:02 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.44 2009/09/23 22:53:39 theurich Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.45 2009/09/29 15:08:02 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -485,7 +485,7 @@ contains
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldGet() @\
-! subroutine ESMF_FieldGetDataPtr<rank><type><kind>(field, localDe, farray, & @\
+! subroutine ESMF_FieldGetDataPtr<rank><type><kind>(field, localDe, farrayPtr, & @\
 !   exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
 !   computationalLBound, computationalUBound, computationalCount, & @\
 !   totalLBound, totalUBound, totalCount, rc) @\
@@ -493,7 +493,7 @@ contains
 ! !ARGUMENTS: @\
 !   type(ESMF_Field), intent(in)            :: field @\
 !   integer,          intent(in), optional  :: localDe @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farray @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
 !   integer,          intent(out), optional :: exclusiveLBound(:) @\
 !   integer,          intent(out), optional :: exclusiveUBound(:) @\
 !   integer,          intent(out), optional :: exclusiveCount(:) @\
@@ -520,7 +520,7 @@ contains
 !  Local DE for which information is requested. {\tt [0,..,localDeCount-1]}. @\
 !  For {\tt localDeCount==1} the {\tt localDe} argument may be omitted, @\
 !  in which case it will default to {\tt localDe=0}. @\
-! \item [farray] @\
+! \item [farrayPtr] @\
 !   Fortran array pointer which will be pointed at DE-local memory allocation. @\
 ! \item[{[exclusiveLBound]}] @\
 !   Upon return this holds the lower bounds of the exclusive region. @\
@@ -581,7 +581,7 @@ contains
 !---------------------------------------------------------------------------- @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldGetDataPtr" @\
-  subroutine ESMF_FieldGetDataPtr##mrank##D##mtypekind(field, localDe, farray, & @\
+  subroutine ESMF_FieldGetDataPtr##mrank##D##mtypekind(field, localDe, farrayPtr, & @\
     exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
     computationalLBound, computationalUBound, computationalCount, & @\
     totalLBound, totalUBound, totalCount, rc) @\
@@ -589,7 +589,7 @@ contains
     ! input arguments @\
     type(ESMF_Field), intent(in)            :: field @\
     integer,          intent(in), optional  :: localDe @\
-    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farray @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
     integer,          intent(out), optional :: exclusiveLBound(:) @\
     integer,          intent(out), optional :: exclusiveUBound(:) @\
     integer,          intent(out), optional :: exclusiveCount(:) @\
@@ -611,7 +611,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
 @\
     call ESMF_ArrayGet(field%ftypep%array, localDe=localDe, & @\
-      farrayPtr=farray, rc=localrc) @\
+      farrayPtr=farrayPtr, rc=localrc) @\
 @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
