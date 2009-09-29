@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.109 2009/08/28 21:23:22 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.110 2009/09/29 20:52:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.109 2009/08/28 21:23:22 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.110 2009/09/29 20:52:40 theurich Exp $"
 
 !==============================================================================
 
@@ -2874,16 +2874,30 @@ module ESMF_VMMod
     integer,       intent(out), optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Get the global default {\tt ESMF\_VM} object. This is the {\tt ESMF\_VM}
-!   object that is created during {\tt ESMF\_Initialize()} and is the ultimate
-!   parent of all {\tt ESMF\_VM} objects in an ESMF application.\newline
+!   Get the global {\tt ESMF\_VM} object. This is the VM object
+!   that is created during {\tt ESMF\_Initialize()} and is the ultimate
+!   parent of all VM objects in an ESMF application. It is identical to the VM
+!   object returned by {\tt ESMF\_Initialize(..., vm=vm, ...)}.
+!
+!   The {\tt ESMF\_VMGetGlobal()} call provides access to information about the
+!   global execution context via the global VM. This call is necessary because
+!   ESMF does not created a global ESMF Component during
+!   {\tt ESMF\_Initialize()}, that could be queried for information about
+!   the global execution context of an ESMF application.
+!
+!   Usage of {\tt ESMF\_VMGetGlobal()} from within Component code is
+!   strongly discouraged. ESMF Components should only access their own VM
+!   objects through Component methods. Global information, if required by
+!   the Component user code, should be passed down to the Component from the 
+!   driver through the Component calling interface.\newline
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[vm] 
-!        Upon return this holds the global default {\tt ESMF\_VM} object.
+!     Upon return this holds the {\tt ESMF\_VM} object of the global execution 
+!     context.
 !   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
@@ -2914,12 +2928,34 @@ module ESMF_VMMod
     integer,       intent(out), optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Get the {\tt ESMF\_VM} object of the current execution context.\newline
+!   Get the {\tt ESMF\_VM} object of the current execution context. Calling
+!   {\tt ESMF\_VMGetCurrent()} within an ESMF Component, will return the
+!   same VM object as {\tt ESMF\_GridCompGet(..., vm=vm, ...)} or
+!   {\tt ESMF\_CplCompGet(..., vm=vm, ...)}. 
+! 
+!   The main purpose of providing {\tt ESMF\_VMGetCurrent()} is to simplify ESMF
+!   adoption in legacy code. Specifically, code that uses {\tt MPI\_COMM\_WORLD}
+!   deep within its calling tree can easily be modified to use the correct MPI
+!   communicator of the current ESMF execution context. The advantage is that
+!   these modifications are very local, and do not require wide reaching
+!   interface changes in the legacy code to pass down the ESMF component object,
+!   or the MPI communicator.
+!
+!   The use of {\tt ESMF\_VMGetCurrent()} is strongly discouraged in newly
+!   written Component code. Instead, the ESMF Component object should be used as
+!   the appropriate container of ESMF context information. This object should be
+!   passed between the subroutines of a Component, and be queried for any
+!   Component specific information.
+!
+!   Outside of a Component context, i.e. within the driver context, the call
+!   to {\tt ESMF\_VMGetCurrent()} is identical to {\tt ESMF\_VMGetGlobal()}.
+!   \newline
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[vm] 
-!     Upon return this holds the {\tt ESMF\_VM} object of the current context.
+!     Upon return this holds the {\tt ESMF\_VM} object of the current execution
+!     context.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
