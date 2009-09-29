@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.85 2009/09/29 15:35:48 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.86 2009/09/29 18:49:49 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,12 +37,13 @@
     integer, dimension(2)           :: gridToFieldMap2d
     integer, dimension(2)           :: maxHaloLWidth2d, maxHaloUWidth2d
     type(ESMF_VM)                   :: vm
-    type(ESMF_Field)                :: field
+    type(ESMF_Field)                :: field, field1
     type(ESMF_Grid)                 :: grid
     type(ESMF_DistGrid)             :: distgrid
     type(ESMF_LocStream)            :: locs
     type(ESMF_Mesh)                 :: mesh
     type(ESMF_Arrayspec)            :: arrayspec
+    type(ESMF_Array)                :: array
     integer                         :: i, k, localPet, petCount
 
     integer, pointer :: nodeIds(:),nodeOwners(:)
@@ -755,6 +756,32 @@
     endif 
 !EOC
     print *, "Field Create from a Mesh and an Arrayspec returned"
+
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Create a Field from a Mesh and an Array}
+!\label{sec:field:usage:create_mesh_array}
+! 
+! In this example, an {\tt ESMF\_Field} is created from an {\tt ESMF\_Mesh} 
+! and an {\tt ESMF\_Array}. The mesh object is created in the previous example and
+! the array object is retrieved from the field created in the previous example too.
+!
+!EOE  
+
+!BOC
+    ! query the array from the previous example
+    call ESMF_FieldGet(field, array=array, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    ! create a Field from a mesh and an array
+    field1 = ESMF_FieldCreate(mesh, array, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!EOC
+
+    print *, "Field Create from a Mesh and an Array returned"
+    call ESMF_FieldDestroy(field1,rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_FieldDestroy(field,rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_MeshDestroy(mesh,rc=rc)
