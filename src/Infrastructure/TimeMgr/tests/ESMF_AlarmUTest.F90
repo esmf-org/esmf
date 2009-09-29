@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.45 2009/09/18 13:56:49 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.46 2009/09/29 05:59:37 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.45 2009/09/18 13:56:49 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.46 2009/09/29 05:59:37 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -62,6 +62,7 @@
       type(ESMF_TimeInterval) :: timeStep
       type(ESMF_Time) :: startTime, stopTime
       type(ESMF_Time) :: alarmTime
+
 
 #ifdef ESMF_TESTEXHAUSTIVE
       logical :: bool
@@ -177,6 +178,7 @@
       alarm1 = ESMF_AlarmCreate(name="WAKEUP", clock=clock1, ringTime=alarmTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
@@ -185,10 +187,10 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      
 
 #ifdef ESMF_TESTEXHAUSTIVE
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
       write(name, *) "Destroy a destroyed Alarm Test"
@@ -197,6 +199,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Destroy a non-created Alarm Test"
@@ -205,6 +208,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
       write(name, *) "Check if destroyed Alarm is sticky Test"
@@ -213,6 +217,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Check if non-created Alarm is sticky Test"
@@ -220,8 +225,8 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
       write(name, *) "Validate destroyed Alarm Test"
@@ -230,6 +235,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Validate non-created Alarm Test"
@@ -238,6 +244,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
       write(name, *) "Check if destroyed Alarm is enabled Test"
@@ -246,6 +253,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Check if non-created Alarm is enabled Test"
@@ -269,7 +277,6 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
@@ -292,7 +299,7 @@
 
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
-      write(name, *) "Set  name of destroyed Alarm Test"
+      write(name, *) "Set name of destroyed Alarm Test"
       call  ESMF_AlarmSet(alarm1, name="ALARM1", rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -301,7 +308,7 @@
 
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
-      write(name, *) "Set  name of non-created Alarm Test"
+      write(name, *) "Set name of non-created Alarm Test"
       call  ESMF_AlarmSet(alarm6, name="ALARM1", rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -351,6 +358,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Enable non-create Alarm Test"
@@ -359,6 +367,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
       write(name, *) "Check if destroyed Alarm is enabled Test"
@@ -367,6 +376,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Check if non-created Alarm is enabled Test"
@@ -375,6 +385,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
       write(name, *) "Disable destroyed Alarm Test"
@@ -383,6 +394,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Disable non-created Alarm Test"
@@ -428,8 +440,8 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test destroyed Alarm will ring next
       write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
@@ -439,6 +451,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test non-created Alarm will ring next
       write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
@@ -446,8 +459,6 @@
       willRingNext = ESMF_AlarmWillRingNext(alarm6, timeStep, rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
-
-
 
       ! ----------------------------------------------------------------------------
 
@@ -467,8 +478,8 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Create Alarm Copy Test"
@@ -477,6 +488,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS and alarmCount = 3"
       write(name, *) "Clock Get Alarm List Test"
@@ -484,48 +496,46 @@
                                   alarmCount, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS.and.alarmCount.eq.3), &
                       name, failMsg, result, ESMF_SRCLINE)
-      print *, "alarmCount = ", alarmCount
+      !print *, "alarmCount = ", alarmCount
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
-      ! Testing for alarm equality
-      ! alarmsEqual = ESMF_AlarmOperator(==)(alarm1,alarm2)
+      ! Testing ESMF_AlarmOperator(==)(alarm1,alarm2)
       write(failMsg, *) "Returned not equal"
       write(name, *) "Alarms Equal Test"
-      alarmsEqual = (alarm1 == alarm2)
+      alarmsEqual = (alarm1 == alarm2)  ! exercise Alarm == operator
       call ESMF_Test((alarmsEqual), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
-      ! Testing for alarm inequality:
-      ! alarmsEqual = ESMF_AlarmOperator(==)(alarm1,alarm3)
+      ! Testing ESMF_AlarmOperator(==)(alarm1,alarm2)
       write(failMsg, *) "Returned equal"
       write(name, *) "Alarms Not Equal Test"
-      alarmsEqual = (alarm1 == alarm3)
+      alarmsEqual = (alarm1 == alarm3)  ! exercise Alarm == operator
       call ESMF_Test((.not.alarmsEqual), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-
       ! ----------------------------------------------------------------------------
-      !EX_UTest
-      ! Testing alarms equality using:
-      ! alarmsNotEqual = ESMF_AlarmOperator(/=)(alarm1,alarm2)
+
+      !EX_UTest 
+      ! Testing ESMF_AlarmOperator(/=)(alarm1,alarm2)
       write(failMsg, *) "Returned not equal"
       write(name, *) "Alarms Equal Test"
-      alarmsNotEqual = (alarm1 /= alarm2)
+      alarmsNotEqual = (alarm1 /= alarm2)  ! exercise Alarm /= operator
       call ESMF_Test((.not.alarmsNotEqual), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_AlarmDestroy(alarm2, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
-      ! Testing alarms inequality using:
-      ! alarmsNotEqual = ESMF_AlarmOperator(/=)(alarm1,alarm3)
+      ! Testing ESMF_AlarmOperator(/=)(alarm1,alarm2)
       write(failMsg, *) "Returned equal"
       write(name, *) "Alarms Not Equal Test"
-      alarmsNotEqual = (alarm1 /= alarm3)
+      alarmsNotEqual = (alarm1 /= alarm3)  ! exercise Alarm /= operator
       call ESMF_Test((alarmsNotEqual), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_AlarmDestroy(alarm3, rc=rc)
@@ -538,7 +548,9 @@
       call ESMF_AlarmValidate(alarm1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned not sticky"
       write(name, *) "Check if Alarm is sticky Test"
@@ -547,6 +559,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned not enabled"
       write(name, *) "Check if Alarm is enabled Test"
@@ -570,8 +583,7 @@
       call  ESMF_AlarmGet(alarm1, name=aName, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(aName.eq."WAKEUP"), &
                       name, failMsg, result, ESMF_SRCLINE)
-	print *, "Alarm name is ", aName
-
+      !print *, "Alarm name is ", aName
 
       ! ----------------------------------------------------------------------------
 
@@ -581,6 +593,7 @@
       call  ESMF_AlarmSet(alarm1, name="ALARM1", rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
@@ -589,8 +602,7 @@
       call  ESMF_AlarmGet(alarm1, name=aName, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(aName.eq."ALARM1"), &
                       name, failMsg, result, ESMF_SRCLINE)
-        print *, "Alarm name is ", aName
-
+      !print *, "Alarm name is ", aName
 
       ! ----------------------------------------------------------------------------
 
@@ -601,8 +613,8 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(.not.sticky), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Set Alarm sticky Test"
@@ -610,14 +622,15 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned not sticky"
       write(name, *) "Check if Alarm is sticky Test"
       sticky =  ESMF_AlarmIsSticky(alarm1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(sticky), &
                       name, failMsg, result, ESMF_SRCLINE)
+
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
@@ -664,6 +677,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Enable Alarm Test"
@@ -672,6 +686,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned enabled"
       write(name, *) "Check if Alarm is enabled Test"
@@ -680,6 +695,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Alarm Print Test"
@@ -688,6 +704,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Disable Alarm Test"
@@ -696,6 +713,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned enabled"
       write(name, *) "Check if Alarm is disabled Test"
@@ -704,6 +722,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Destroy Alarm Test"
@@ -712,6 +731,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Destroy Clock Test"
@@ -730,6 +750,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       ! Test Setting the Start Time
       write(failMsg, *) " Returned ESMF_FAILURE"
@@ -753,6 +774,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       ! Test Setting the Alarm Time
       write(failMsg, *) " Returned ESMF_FAILURE"
@@ -761,7 +783,9 @@
                                    calendarType=ESMF_CAL_GREGORIAN, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
       ! ----------------------------------------------------------------------------
+
       ! Initialize clock 
       !EX_UTest
        write(name, *) "Clock Initialization Test"
@@ -771,8 +795,8 @@
        call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                        name, failMsg, result, ESMF_SRCLINE)
 
-
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Sticky Alarm Time Initialization Test"
@@ -781,6 +805,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Get Alarm Test"
@@ -789,6 +814,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm will ring next
       call ESMF_ClockAdvance(clock, rc=rc)
@@ -800,6 +826,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Get Clock Next Time
       write(failMsg, *) " Did not return ESMF_SUCCESS)"
@@ -809,6 +836,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm will ring next
       call ESMF_ClockAdvance(clock, rc=rc)
@@ -819,6 +847,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Get Time from clock
       write(failMsg, *) " Did not return ESMF_SUCCESS"
@@ -828,15 +857,18 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test that Clock Get Next Time Passed
+      !Testing ESMF_TimeOperator(==)(time1,time2)
       write(failMsg, *) " Next Time not equal to current Time"
       write(name, *) "Get Clock Next Time Test"
-      bool = (nextTime == currentTime) 
+      bool = (nextTime == currentTime)  ! exercising Time == operator
       call ESMF_Test((bool), &
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm ringing
       call ESMF_ClockAdvance(clock, rc=rc)
@@ -847,6 +879,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm still ringing
       call ESMF_ClockAdvance(clock, rc=rc)
@@ -856,7 +889,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bool), &
                       name, failMsg, result, ESMF_SRCLINE)
       
-    ! ----------------------------------------------------------------------------
+      ! ----------------------------------------------------------------------------
 
       !EX_UTest
       !Test Alarm Previously ringing
@@ -866,8 +899,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bool), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-	print *, "bool is ", bool
-
+      !print *, "bool is ", bool
 
       ! ----------------------------------------------------------------------------
 
@@ -881,6 +913,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm still ringing
       call ESMF_ClockAdvance(clock, rc=rc)
@@ -896,7 +929,6 @@
       bool =  ESMF_AlarmIsRinging(alarm, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bool), &
                       name, failMsg, result, ESMF_SRCLINE)
-      
 
       ! ----------------------------------------------------------------------------
 
@@ -926,7 +958,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bool), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
@@ -952,6 +983,7 @@
       call ESMF_ClockDestroy (clock, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       ! Initialize clock 
       !EX_UTest
        write(name, *) "Clock Initialization Test"
@@ -961,8 +993,8 @@
        call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                        name, failMsg, result, ESMF_SRCLINE)
 
-
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Non-Sticky Alarm Time Initialization Test"
@@ -983,6 +1015,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm will ring next
       call ESMF_ClockAdvance(clock, rc=rc)
@@ -993,6 +1026,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm ringing
       call ESMF_ClockAdvance(clock, rc=rc)
@@ -1003,6 +1037,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm still ringing
       call ESMF_ClockAdvance(clock, rc=rc)
@@ -1012,7 +1047,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(.not.bool), &
                       name, failMsg, result, ESMF_SRCLINE)
       
-    ! ----------------------------------------------------------------------------
+      ! ----------------------------------------------------------------------------
 
       !EX_UTest
       !Test Alarm Previously ringing
@@ -1022,8 +1057,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bool), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-	print *, "bool is ", bool
-
+      !print *, "bool is ", bool
 
       ! ----------------------------------------------------------------------------
 
@@ -1037,6 +1071,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Non-Sticky Alarms 1
       !  from Chris Hill via support issue 988241, bug 996229
@@ -1203,6 +1238,7 @@
       call ESMF_ClockDestroy(clock2, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Non-Sticky Alarms 5
       !  Test reverse non-sticky alarm 
@@ -1258,7 +1294,6 @@
         call ESMF_ClockSet(clock2, direction=ESMF_MODE_REVERSE, rc=rc)
         nclock = nclock + 1
 
-
       enddo
 
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nstep.eq.24).and. &
@@ -1274,6 +1309,7 @@
       call ESMF_ClockDestroy(clock2, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Sticky Alarms 1
       !  Test reverse sticky alarm 
@@ -1317,12 +1353,13 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nstep.eq.2), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      print *, "nstep = ", nstep, " nclock = ", nclock
+      !print *, "nstep = ", nstep, " nclock = ", nclock
 
       call ESMF_AlarmDestroy(alarm4, rc=rc)
       call ESMF_ClockDestroy(clock2, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Sticky Alarms 2
       !  Test reverse interval sticky alarm 
@@ -1374,6 +1411,7 @@
       call ESMF_ClockDestroy(clock2, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Sticky Alarms 3
       !  Test reverse one-shot sticky alarms per WRF use case
@@ -1408,81 +1446,81 @@
 
       call ESMF_ClockGet(domainClock, currTime=currentTime, rc=rc)
       call ESMF_TimeGet(currentTime, yy=yy, mm=mm, dd=dd, h=h, rc=rc)
-      print *, "Begin"
-      print *, mm, "/", dd, "/", yy, " ", h, ": 0"
+      !print *, "Begin"
+      !print *, mm, "/", dd, "/", yy, " ", h, ": 0"
 
       ! run the clock forward
       do while (.not. ESMF_ClockIsDone(domainClock, rc=rc))
         iteration = iteration + 1
-        print *, "Iteration = ", iteration
+        !print *, "Iteration = ", iteration
 
         if (ESMF_AlarmIsRinging(beforeAlarm, rc=rc)) then
           if (iteration .ne. 2 .or. h .ne. 2) then
             testPass = .false.
           endif
-          print *, "  beforeAlarm on"
+          !print *, "  beforeAlarm on"
           call ESMF_AlarmRingerOff(beforeAlarm, rc=rc)
         else
-          print *, "  beforeAlarm off"
+          !print *, "  beforeAlarm off"
         endif
 
         ! would call WRF solver here, before clock advance
-        print *, "  Solve"
+        !print *, "  Solve"
 
         call ESMF_ClockAdvance(domainClock, rc=rc)
         call ESMF_ClockGet(domainClock, currTime=currentTime, rc=rc)
         call ESMF_TimeGet(currentTime, yy=yy, mm=mm, dd=dd, h=h, rc=rc)
-        print *, " ClockAdvance()"
-        print *, mm, "/", dd, "/", yy, " ", h, ": 0"
+        !print *, " ClockAdvance()"
+        !print *, mm, "/", dd, "/", yy, " ", h, ": 0"
 
         if (ESMF_AlarmIsRinging(afterAlarm, rc=rc)) then
           if (iteration .ne. 2 .or. h .ne. 3) then
             testPass = .false.
           endif
-          print *, "  afterAlarm on"
+          !print *, "  afterAlarm on"
           call ESMF_AlarmRingerOff(afterAlarm, rc=rc)
         else
-          print *, "  afterAlarm off"
+          !print *, "  afterAlarm off"
         endif
       enddo
 
       ! run the clock backwards
       call ESMF_ClockSet(domainClock, direction=ESMF_MODE_REVERSE, rc=rc)
-      print *
-      print *, "domainClock set in reverse"
-      print *
+      !print *
+      !print *, "domainClock set in reverse"
+      !print *
 
       do while (.not. ESMF_ClockIsDone(domainClock, rc=rc))
-        print *, "Iteration = ", iteration
+        !print *, "Iteration = ", iteration
 
         if (ESMF_AlarmIsRinging(afterAlarm, rc=rc)) then
           if (iteration .ne. 2 .or. h .ne. 3) then
             testPass = .false.
           endif
-          print *, "  afterAlarm on"
+          !print *, "  afterAlarm on"
           call ESMF_AlarmRingerOff(afterAlarm, rc=rc)
         else
-          print *, "  afterAlarm off"
+          !print *, "  afterAlarm off"
         endif
 
         ! advance clock
         call ESMF_ClockAdvance(domainClock, rc=rc)
         call ESMF_ClockGet(domainClock, currTime=currentTime, rc=rc)
         call ESMF_TimeGet(currentTime, yy=yy, mm=mm, dd=dd, h=h, rc=rc)
-        print *, " ClockAdvance()"
-        print *, mm, "/", dd, "/", yy, " ", h, ": 0"
+        !print *, " ClockAdvance()"
+        !print *, mm, "/", dd, "/", yy, " ", h, ": 0"
 
         ! would call WRF solver here, after clock advance
-        print *, "  Solve"
+        !print *, "  Solve"
 
         if (ESMF_AlarmIsRinging(beforeAlarm, rc=rc)) then
           if (iteration .ne. 2 .or. h .ne. 2) then
             testPass = .false.
           endif
-          print *, "  beforeAlarm on"
+          !print *, "  beforeAlarm on"
           call ESMF_AlarmRingerOff(beforeAlarm, rc=rc)
         else
-          print *, "  beforeAlarm off"
+          !print *, "  beforeAlarm off"
         endif
 
         iteration = iteration - 1
@@ -1496,6 +1534,7 @@
       call ESMF_ClockDestroy(domainClock, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Sticky Alarms 4
       !  Test reverse *interval* sticky alarms; variation on WRF use case above
@@ -1533,13 +1572,13 @@
 
       call ESMF_ClockGet(domainClock, currTime=currentTime, rc=rc)
       call ESMF_TimeGet(currentTime, yy=yy, mm=mm, dd=dd, h=h, rc=rc)
-      print *, "Begin"
-      print *, mm, "/", dd, "/", yy, " ", h, ": 0"
+      !print *, "Begin"
+      !print *, mm, "/", dd, "/", yy, " ", h, ": 0"
 
       ! run the clock forward
       do while (.not. ESMF_ClockIsDone(domainClock, rc=rc))
         iteration = iteration + 1
-        print *, "Iteration = ", iteration
+        !print *, "Iteration = ", iteration
 
         if (ESMF_AlarmIsRinging(beforeAlarm, rc=rc)) then
           if ((iteration .ne. 2 .or. h .ne. 2).and. &
@@ -1547,20 +1586,20 @@
               (iteration .ne. 8 .or. h .ne. 8)) then
             testPass = .false.
           endif
-          print *, "  beforeAlarm on"
+          !print *, "  beforeAlarm on"
           call ESMF_AlarmRingerOff(beforeAlarm, rc=rc)
         else
-          print *, "  beforeAlarm off"
+          !print *, "  beforeAlarm off"
         endif
 
         ! would call WRF solver here, before clock advance
-        print *, "  Solve"
+        !print *, "  Solve"
 
         call ESMF_ClockAdvance(domainClock, rc=rc)
         call ESMF_ClockGet(domainClock, currTime=currentTime, rc=rc)
         call ESMF_TimeGet(currentTime, yy=yy, mm=mm, dd=dd, h=h, rc=rc)
-        print *, " ClockAdvance()"
-        print *, mm, "/", dd, "/", yy, " ", h, ": 0"
+        !print *, " ClockAdvance()"
+        !print *, mm, "/", dd, "/", yy, " ", h, ": 0"
 
         if (ESMF_AlarmIsRinging(afterAlarm, rc=rc)) then
           if ((iteration .ne. 2 .or. h .ne. 3).and. &
@@ -1569,21 +1608,21 @@
               (iteration .ne. 8 .or. h .ne. 9)) then
             testPass = .false.
           endif
-          print *, "  afterAlarm on"
+          !print *, "  afterAlarm on"
           call ESMF_AlarmRingerOff(afterAlarm, rc=rc)
         else
-          print *, "  afterAlarm off"
+          !print *, "  afterAlarm off"
         endif
       enddo
 
       ! run the clock backwards
       call ESMF_ClockSet(domainClock, direction=ESMF_MODE_REVERSE, rc=rc)
-      print *
-      print *, "domainClock set in reverse"
-      print *
+      !print *
+      !print *, "domainClock set in reverse"
+      !print *
 
       do while (.not. ESMF_ClockIsDone(domainClock, rc=rc))
-        print *, "Iteration = ", iteration
+        !print *, "Iteration = ", iteration
 
         if (ESMF_AlarmIsRinging(afterAlarm, rc=rc)) then
           if ((iteration .ne. 2 .or. h .ne. 3).and. &
@@ -1592,21 +1631,21 @@
               (iteration .ne. 8 .or. h .ne. 9)) then
             testPass = .false.
           endif
-          print *, "  afterAlarm on"
+          !print *, "  afterAlarm on"
           call ESMF_AlarmRingerOff(afterAlarm, rc=rc)
         else
-          print *, "  afterAlarm off"
+          !print *, "  afterAlarm off"
         endif
 
         ! advance clock
         call ESMF_ClockAdvance(domainClock, rc=rc)
         call ESMF_ClockGet(domainClock, currTime=currentTime, rc=rc)
         call ESMF_TimeGet(currentTime, yy=yy, mm=mm, dd=dd, h=h, rc=rc)
-        print *, " ClockAdvance()"
-        print *, mm, "/", dd, "/", yy, " ", h, ": 0"
+        !print *, " ClockAdvance()"
+        !print *, mm, "/", dd, "/", yy, " ", h, ": 0"
 
         ! would call WRF solver here, after clock advance
-        print *, "  Solve"
+        !print *, "  Solve"
 
         if (ESMF_AlarmIsRinging(beforeAlarm, rc=rc)) then
           if ((iteration .ne. 2 .or. h .ne. 2).and. &
@@ -1614,10 +1653,10 @@
               (iteration .ne. 8 .or. h .ne. 8)) then
             testPass = .false.
           endif
-          print *, "  beforeAlarm on"
+          !print *, "  beforeAlarm on"
           call ESMF_AlarmRingerOff(beforeAlarm, rc=rc)
         else
-          print *, "  beforeAlarm off"
+          !print *, "  beforeAlarm off"
         endif
 
         iteration = iteration - 1
@@ -1631,6 +1670,7 @@
       call ESMF_ClockDestroy(domainClock, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Fractional Time Alarms 1
       write(failMsg, *) " Did not return nstep=8, and ESMF_SUCCESS"
@@ -1666,6 +1706,7 @@
       call ESMF_ClockDestroy(clock2, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Fractional Time Alarms 2
       write(failMsg, *) " Did not return nstep=4, and ESMF_SUCCESS"
@@ -1682,14 +1723,14 @@
       alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=alarmTime, &
                                 ringInterval=alarmStep, rc=rc)
 
-      print *, "stopTime = "
-      call ESMF_TimePrint(stopTime)
-      print *, "alarmTime = "
-      call ESMF_TimePrint(alarmTime)
-      print *, "timeStep = "
-      call ESMF_TimeIntervalPrint(timeStep)
-      print *, "alarmStep = "
-      call ESMF_TimeIntervalPrint(alarmStep)
+      !print *, "stopTime = "
+      !call ESMF_TimePrint(stopTime)
+      !print *, "alarmTime = "
+      !call ESMF_TimePrint(alarmTime)
+      !print *, "timeStep = "
+      !call ESMF_TimeIntervalPrint(timeStep)
+      !print *, "alarmStep = "
+      !call ESMF_TimeIntervalPrint(alarmStep)
 
       ! number of clock time steps alarm rings for
       nstep = 0
@@ -1710,6 +1751,7 @@
       call ESMF_ClockDestroy(clock2, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm ringTime = clock startTime => should ring immediately
       !  upon alarm creation.
@@ -1732,6 +1774,7 @@
       call ESMF_ClockDestroy(clock2, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm ringTime = clock startTime *and* ringInterval specified
       !  upon alarm creation => should ring immediately.  Test 1
@@ -1758,6 +1801,7 @@
       call ESMF_ClockDestroy(clock2, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm ringTime = clock startTime *and* ringInterval specified
       !  upon alarm creation => should ring immediately.  Test 2
@@ -1800,7 +1844,7 @@
         !call ESMF_TimePrint(currentTime2, "string", rc=rc)
         if (clock2 /= clock1) then
            testPass = .false.
-           print *, "Alarm's clock and domain clock are *not* the same"
+           !print *, "Alarm's clock and domain clock are *not* the same"
         endif
 
         call ESMF_ClockGet(clock2, currTime=currentTime, prevTime=prevTime, &
@@ -1811,7 +1855,7 @@
 
         if (currentTime /= currentTime2) then
            testPass = .false.
-           print *, "Alarm's clock's currTime is *not* the same as the domain clock's currTime"
+           !print *, "Alarm's clock's currTime is *not* the same as the domain clock's currTime"
         endif
 
         call ESMF_AlarmGet(alarm4, ringTime=alarmTime, rc=rc)
@@ -1823,14 +1867,14 @@
             !print *, " Alarm is ringing"
             if (alarmTime /= currentTime+alarmStep) then
                testPass = .false.
-               print *, "  Alarm ringTime *not* equal to clock currTime + alarmStep"
+               !print *, "  Alarm ringTime *not* equal to clock currTime + alarmStep"
             endif
         endif
         call ESMF_ClockAdvance(clock2, rc=rc)
       enddo
 
       call ESMF_ClockGet(clock2, advanceCount=forwardCount, rc=rc)        
-      print *, "End of clock run: At clock timestep #", forwardCount
+      !print *, "End of clock run: At clock timestep #", forwardCount
       if (ESMF_AlarmIsRinging(alarm=alarm4, rc=rc)) then
           !print *, " Alarm is ringing"
           ringCount = ringCount + 1
@@ -1843,7 +1887,7 @@
       call ESMF_Test(((alarmTime==startTime+runDuration+alarmStep).and. &
                        ringCount==21.and.testPass.and. &
                        rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      print *, "Alarm rang ", ringCount, " times."
+      !print *, "Alarm rang ", ringCount, " times."
       !print *, "Alarm's final ringTime, after final clockAdvance() ..."
       !call ESMF_TimePrint(alarmTime, "string", rc=rc)
 
@@ -1851,6 +1895,7 @@
       call ESMF_ClockDestroy(clock2, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm ringTime = clock startTime *and* ringInterval specified
       !  upon alarm creation => should ring immediately.  Test 3, test REVERSE
@@ -1898,11 +1943,11 @@
         if (nclock.eq.0) then
           call ESMF_ClockGet(clock2, direction=forwardDirection, &
                                      advanceCount=forwardCount, rc=rc)
-          print *, "forwardCount = ", forwardCount
+          !print *, "forwardCount = ", forwardCount
         else
           call ESMF_ClockGet(clock2, direction=reverseDirection, &
                              advanceCount=reverseCount, rc=rc)
-          print *, "reverseCount = ", reverseCount
+          !print *, "reverseCount = ", reverseCount
         endif
 
         call ESMF_ClockSet(clock2, direction=ESMF_MODE_REVERSE, rc=rc)
@@ -1925,12 +1970,13 @@
                      ESMF_ClockIsReverse(clock2), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      print *, "nring = ", nring, " nclock = ", nclock
+      !print *, "nring = ", nring, " nclock = ", nclock
 
       call ESMF_AlarmDestroy(alarm4, rc=rc)
       call ESMF_ClockDestroy(clock2, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm ringTime = clock startTime *and* ringInterval specified
       !  upon alarm creation *and* after clock restored from restart state --
@@ -2000,6 +2046,7 @@
       call ESMF_ClockDestroy(CLOCK_ATM, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm list re-allocation within clock, part 1
       write(failMsg, *) " Did not return ESMF_SUCCESS"
@@ -2034,6 +2081,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm list re-allocation within clock, part 2
       write(failMsg, *) " Did not return 201 alarms and name '201st Alarm'"
@@ -2043,8 +2091,8 @@
       write(*,*) "rc=",rc
       call ESMF_AlarmGet(alarmList(alarmCount), name=aName, rc=rc)
 
-      print *, "alarmCount = ", alarmCount
-      print *, "201st alarm name = ", aName
+      !print *, "alarmCount = ", alarmCount
+      !print *, "201st alarm name = ", aName
       write(*,*) "rc=",rc
 
       ! see if we have 201 alarms and if the 201st alarm has the right name!
@@ -2053,6 +2101,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm list re-allocation within clock, part 3
       write(failMsg, *) " Did not return 201st alarm ringing"
@@ -2063,10 +2112,10 @@
       ! double check ringing with Alarm API call
       isringing = ESMF_AlarmIsRinging(alarm4, rc=rc)
 
-      print *, "alarmCount = ", alarmCount
+      !print *, "alarmCount = ", alarmCount
       call ESMF_AlarmGet(alarmList(alarmCount), name=aName, rc=rc)
-      print *, "Ringing alarm name = ", trim(aName), ", is ringing = ", &
-            isringing
+      !print *, "Ringing alarm name = ", trim(aName), ", is ringing = ", &
+            !isringing
 
       ! see if the 201st alarm is the only one ringing
       call ESMF_Test(isringing.and.(alarmCount.eq.1) &
@@ -2082,6 +2131,7 @@
       call ESMF_ClockDestroy(clock2, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm ringTime increment, first forwards a fixed number of
       !timesteps, stopping at an alarm ringing time step.
@@ -2125,7 +2175,7 @@
         end if
       end do
 
-      print *, 'SETTING CLOCK BACKWARDS'
+      !print *, 'SETTING CLOCK BACKWARDS'
       call ESMF_ClockSet (clock, direction=ESMF_MODE_REVERSE, rc=rc)
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
 
@@ -2140,11 +2190,11 @@
           !call ESMF_AlarmPrint(alarm1, "ringTime string")
         else
           !print *, 'alarm not ringing at backwards timestep', i
-          ! call ESMF_ClockPrint (clock, options="currTime string")
+          !call ESMF_ClockPrint (clock, options="currTime string")
         end if
       end do
 
-      print *, 'SETTING CLOCK FORWARDS'
+      !print *, 'SETTING CLOCK FORWARDS'
       call ESMF_ClockSet (clock, direction=ESMF_MODE_FORWARD, rc=rc)
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
 
@@ -2161,7 +2211,7 @@
         end if
       end do
 
-      print *, 'SETTING CLOCK BACKWARDS'
+      !print *, 'SETTING CLOCK BACKWARDS'
       call ESMF_ClockSet (clock, direction=ESMF_MODE_REVERSE, rc=rc)
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
 
@@ -2176,7 +2226,7 @@
           !call ESMF_AlarmPrint(alarm1, "ringTime string")
         else
           !print *, 'alarm not ringing at backwards timestep', i
-          ! call ESMF_ClockPrint (clock, options="currTime string")
+          !call ESMF_ClockPrint (clock, options="currTime string")
         end if
       end do
 
@@ -2194,6 +2244,7 @@
       call ESMF_ClockDestroy (clock, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm ringTime increment, first forwards a fixed number of
       !timesteps, stopping at an alarm ringing time step.  Using a negative
@@ -2233,7 +2284,7 @@
         end if
       end do
 
-      print *, 'SETTING CLOCK BACKWARDS WITH NEGATIVE TIMESTEP'
+      !print *, 'SETTING CLOCK BACKWARDS WITH NEGATIVE TIMESTEP'
       timeStep = -timeStep
       call ESMF_ClockSet (clock, timeStep=timeStep, rc=rc)
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
@@ -2244,11 +2295,11 @@
         if (ESMF_alarmIsRinging (alarm1)) then
           alarmCount = alarmCount + 1
           !print *, 'alarm IS ringing at backwards timestep', i, ', time:'
-          ! call ESMF_ClockPrint (clock, options="currTime string")
+          !call ESMF_ClockPrint (clock, options="currTime string")
           call ESMF_AlarmRingerOff (alarm1, rc=rc)
         else
           !print *, 'alarm not ringing at backwards timestep', i
-          ! call ESMF_ClockPrint (clock, options="currTime string")
+          !call ESMF_ClockPrint (clock, options="currTime string")
         end if
       end do
 
@@ -2266,6 +2317,7 @@
       call ESMF_ClockDestroy (clock, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm ringTime increment, first forwards a fixed number of
       !timesteps, stopping at a non-alarm ringing time step.  Using a negative
@@ -2305,7 +2357,7 @@
         end if
       end do
 
-      print *, 'SETTING CLOCK BACKWARDS WITH NEGATIVE TIMESTEP'
+      !print *, 'SETTING CLOCK BACKWARDS WITH NEGATIVE TIMESTEP'
       timeStep = -timeStep
       call ESMF_ClockSet (clock, timeStep=timeStep, rc=rc)
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
@@ -2316,11 +2368,11 @@
         if (ESMF_alarmIsRinging (alarm1)) then
           alarmCount = alarmCount + 1
           !print *, 'alarm IS ringing at backwards timestep', i, ', time:'
-          ! call ESMF_ClockPrint (clock, options="currTime string")
+          !call ESMF_ClockPrint (clock, options="currTime string")
           call ESMF_AlarmRingerOff (alarm1, rc=rc)
         else
           !print *, 'alarm not ringing at backwards timestep', i
-          ! call ESMF_ClockPrint (clock, options="currTime string")
+          !call ESMF_ClockPrint (clock, options="currTime string")
         end if
       end do
 
@@ -2338,6 +2390,7 @@
       call ESMF_ClockDestroy (clock, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       !Test Alarm ringTime increment, arbitrarily forwards and backwards using
       ! positive and negative timesteps.  Alarm ringTime and ringInterval are
@@ -2382,10 +2435,10 @@
       end do
       if (alarmCountPass .and. alarmCount /= 3) then
         alarmCountPass = .false.
-        print *, 'alarmCount = ', alarmCount, ' not 3 at 1st turnaround point'
+        !print *, 'alarmCount = ', alarmCount, ' not 3 at 1st turnaround point'
       end if
 
-      print *, 'SETTING CLOCK BACKWARDS WITH NEW NEGATIVE TIMESTEP AND RINGINTERVAL'
+      !print *, 'SETTING CLOCK BACKWARDS WITH NEW NEGATIVE TIMESTEP AND RINGINTERVAL'
       timeStep = -2 * timeStep
       alarmStep = -2 * alarmStep
       call ESMF_ClockSet (clock, timeStep=timeStep, rc=rc)
@@ -2406,10 +2459,10 @@
       end do
       if (alarmCountPass .and. alarmCount /= 9) then
         alarmCountPass = .false.
-        print *, 'alarmCount = ', alarmCount, ' not 9 at 2nd turnaround point'
+        !print *, 'alarmCount = ', alarmCount, ' not 9 at 2nd turnaround point'
       end if
 
-      print *, 'SETTING CLOCK FORWARDS WITH NEW POSITIVE TIMESTEP, RINGINTERVAL, and RINGTIME'
+      !print *, 'SETTING CLOCK FORWARDS WITH NEW POSITIVE TIMESTEP, RINGINTERVAL, and RINGTIME'
       call ESMF_TimeIntervalSet (timeStep, h=3, rc=rc)
       call ESMF_TimeSet (alarmTime, yy=2008, mm=1, dd=22, h=11,  &
           calendar=gregorianCalendar, rc=rc)
@@ -2433,10 +2486,10 @@
       end do
       if (alarmCountPass .and. alarmCount /= 11) then
         alarmCountPass = .false.
-        print *, 'alarmCount = ', alarmCount, ' not 11 at 3rd turnaround point'
+        !print *, 'alarmCount = ', alarmCount, ' not 11 at 3rd turnaround point'
       end if
 
-      print *, 'SETTING CLOCK BACKWARDS WITH NEW NEGATIVE TIMESTEP AND RINGTIME'
+      !print *, 'SETTING CLOCK BACKWARDS WITH NEW NEGATIVE TIMESTEP AND RINGTIME'
       call ESMF_TimeIntervalSet (timeStep, h=-1, rc=rc)
       call ESMF_TimeSet (alarmTime, yy=2008, mm=1, dd=22, h=21,  &
           calendar=gregorianCalendar, rc=rc)
@@ -2458,10 +2511,10 @@
       end do
       if (alarmCountPass .and. alarmCount /= 12) then
         alarmCountPass = .false.
-        print *, 'alarmCount = ', alarmCount, ' not 12 at 4th turnaround point'
+        !print *, 'alarmCount = ', alarmCount, ' not 12 at 4th turnaround point'
       end if
 
-      print *, 'SETTING CLOCK FORWARDS WITH NEW POSITIVE TIMESTEP'
+      !print *, 'SETTING CLOCK FORWARDS WITH NEW POSITIVE TIMESTEP'
       timeStep = -timeStep
       call ESMF_ClockGet(clock, currTime=startTime, rc=rc)
       call ESMF_ClockSet(clock, timeStep=timeStep, startTime=startTime, &
@@ -2482,14 +2535,14 @@
       end do
       if (alarmCountPass .and. alarmCount /= expectedCount) then
         alarmCountPass = .false.
-        print *, 'alarmCount = ', alarmCount, ', not ', expectedCount, ' at the end'
+        !print *, 'alarmCount = ', alarmCount, ', not ', expectedCount, ' at the end'
       end if
 
       if (.not. alarmCountPass) then
           write(failMsg,*) trim(failMsg), ', alarmCount incorrect at one or more turnaround points'
-          print *, 'Final alarmCount = ', alarmCount, ', expected = ', expectedCount
-          print *, 'Final alarm ringTime:'
-          call ESMF_AlarmPrint (alarm1, "ringTime string")
+          !print *, 'Final alarmCount = ', alarmCount, ', expected = ', expectedCount
+          !print *, 'Final alarm ringTime:'
+          !call ESMF_AlarmPrint (alarm1, "ringTime string")
       end if
 
       if (.not. testPass) print *, 'bad return codes discovered'

@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.37 2009/09/16 23:44:07 w6ws Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.38 2009/09/29 05:59:37 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.37 2009/09/16 23:44:07 w6ws Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.38 2009/09/29 05:59:37 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       integer, parameter :: CONVERT_TO_TIME = 1, CONVERT_TO_DATE = 2, &
@@ -156,10 +156,10 @@
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeGet(Time, yy_i8=rYYl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
     
-      print *, "Low range test"
-      print *, "  Start Time Gregorian = ", rYYl, "/", rMM, "/", rDD
-      print *, "  Start Julian Days = ", rDl
-      print *
+      !print *, "Low range test"
+      !print *, "  Start Time Gregorian = ", rYYl, "/", rMM, "/", rDD
+      !print *, "  Start Julian Days = ", rDl
+      !print *
 
       call ESMF_RunTestBackwards(CONVERT_TO_TIME, YYl, MM, DD, Dl, &
                                  gregorianCalendar)
@@ -170,7 +170,7 @@
       call ESMF_Test((YYl.eq.-4800 .and. MM.eq.2 .and. DD.eq.29 &
                       .and. Dl.eq.-32045 .and. rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      print *
+      !print *
 
       ! Convert-To-Date limit actually goes back 100 years further to 3/1/-4900
 
@@ -182,7 +182,7 @@
       call ESMF_Test((YYl.eq.-4900 .and. MM.eq.2 .and. DD.eq.28 &
                       .and. Dl.eq.-68570 .and. rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      print *
+      !print *
 
       !------------------------------------------------------------------!
       !                  Gregorian/Fliegel High Range Test               !
@@ -209,10 +209,10 @@
       call ESMF_TimeSet(Time, yy_i8=YYl, mm=MM, dd=DD, &
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeGet(Time, yy_i8=rYYl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
-      print *, "High range test"
-      print *, "  Start Time Gregorian = ", rYYl, "/", rMM, "/", rDD
-      print *, "  Start Julian Days = ", rDl
-      print *
+      !print *, "High range test"
+      !print *, "  Start Time Gregorian = ", rYYl, "/", rMM, "/", rDD
+      !print *, "  Start Julian Days = ", rDl
+      !print *
 
       call ESMF_RunTestForwards(YYl, MM, DD, Dl, gregorianCalendar)
 
@@ -248,10 +248,10 @@
       call ESMF_TimeSet(Time, yy_i8=YYl, mm=MM, dd=DD, &
                         calendar=julianCalendar, rc=rc)
       call ESMF_TimeGet(Time, yy_i8=rYYl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
-      print *, "Low range test"
-      print *, "  Start Time Julian = ", rYYl, "/", rMM, "/", rDD
-      print *, "  Start Julian Days = ", rDl
-      print *
+      !print *, "Low range test"
+      !print *, "  Start Time Julian = ", rYYl, "/", rMM, "/", rDD
+      !print *, "  Start Julian Days = ", rDl
+      !print *
 
       call ESMF_RunTestBackwards(CONVERT_TO_TIME, YYl, MM, DD, Dl, &
                                  julianCalendar)
@@ -262,7 +262,7 @@
       call ESMF_Test((YYl.eq.-4712 .and. MM.eq.2 .and. DD.eq.29 &
                       .and. Dl.eq.59 .and. rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      print *
+      !print *
 
       ! Convert-To-Date limit actually goes back 1 day further to 2/29/-4712
 
@@ -275,7 +275,7 @@
       call ESMF_Test((YYl.eq.-4712 .and. MM.eq.2 .and. DD.eq.28 &
                       .and. Dl.eq.58 .and. rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      print *
+      !print *
 
       !------------------------------------------------------------------!
       !                     Julian/Hatcher High range test               !
@@ -302,10 +302,10 @@
       call ESMF_TimeSet(Time, yy_i8=YYl, mm=MM, dd=DD, &
                         calendar=JulianCalendar, rc=rc)
       call ESMF_TimeGet(Time, yy_i8=rYYl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
-      print *, "High range test"
-      print *, "  Start Time Julian = ", rYYl, "/", rMM, "/", rDD
-      print *, "  Start Julian Days = ", rDl
-      print *
+      !print *, "High range test"
+      !print *, "  Start Time Julian = ", rYYl, "/", rMM, "/", rDD
+      !print *, "  Start Julian Days = ", rDl
+      !print *
 
       call ESMF_RunTestForwards(YYl, MM, DD, Dl, julianCalendar)
 
@@ -342,10 +342,10 @@
 
       call ESMF_TimeSet(Time, d_i8=Dl, calendar=julianDayCalendar, rc=rc)
       call ESMF_TimeGet(Time, d_i8=rDl, rc=rc)
-      print *
-      print *, "Low range test"
-      print *, "  Start Julian Days = ", rDl
-      print *
+      !print *
+      !print *, "Low range test"
+      !print *, "  Start Julian Days = ", rDl
+      !print *
 
       broken = .false.
       do while (.not.broken)
@@ -361,10 +361,10 @@
 
         if (.not.(rDl.eq.Dl)) then
           broken = .true.
-          print *, "Julian Day Set/Get breaks,"
-          print *, " should be = ", Dl
-          print *, " returned  = ", rDl
-          print *
+          !print *, "Julian Day Set/Get breaks,"
+          !print *, " should be = ", Dl
+          !print *, " returned  = ", rDl
+          !print *
         end if
       end do
   
@@ -392,10 +392,10 @@
 
       call ESMF_TimeSet(Time, d_i8=Dl, calendar=julianDayCalendar, rc=rc)
       call ESMF_TimeGet(Time, d_i8=rDl, rc=rc)
-      print *
-      print *, "High range test"
-      print *, "  Start Julian Days = ", rDl
-      print *
+      !print *
+      !print *, "High range test"
+      !print *, "  Start Julian Days = ", rDl
+      !print *
 
       broken = .false.
       do while (.not.broken)
@@ -411,10 +411,10 @@
 
         if (.not.(rDl.eq.Dl)) then
           broken = .true.
-          print *, "Julian Day Set/Get breaks,"
-          print *, " should be = ", Dl
-          print *, " returned  = ", rDl
-          print *
+          !print *, "Julian Day Set/Get breaks,"
+          !print *, " should be = ", Dl
+          !print *, " returned  = ", rDl
+          !print *
         end if
       end do
   
@@ -447,10 +447,10 @@
       call ESMF_TimeSet(Time, d_i8=Dl, calendar=modifiedJulianDayCalendar, &
                         rc=rc)
       call ESMF_TimeGet(Time, d_i8=rDl, rc=rc)
-      print *
-      print *, "Low range test"
-      print *, "  Start Modified Julian Days = ", rDl
-      print *
+      !print *
+      !print *, "Low range test"
+      !print *, "  Start Modified Julian Days = ", rDl
+      !print *
 
       broken = .false.
       do while (.not.broken)
@@ -467,10 +467,10 @@
 
         if (.not.(rDl.eq.Dl)) then
           broken = .true.
-          print *, "Modified Julian Day Set/Get breaks,"
-          print *, " should be = ", Dl
-          print *, " returned  = ", rDl
-          print *
+          !print *, "Modified Julian Day Set/Get breaks,"
+          !print *, " should be = ", Dl
+          !print *, " returned  = ", rDl
+          !print *
         end if
       end do
   
@@ -499,10 +499,10 @@
       call ESMF_TimeSet(Time, d_i8=Dl, calendar=modifiedJulianDayCalendar, &
                         rc=rc)
       call ESMF_TimeGet(Time, d_i8=rDl, rc=rc)
-      print *
-      print *, "High range test"
-      print *, "  Start Modified Julian Days = ", rDl
-      print *
+      !print *
+      !print *, "High range test"
+      !print *, "  Start Modified Julian Days = ", rDl
+      !print *
 
       broken = .false.
       do while (.not.broken)
@@ -519,10 +519,10 @@
 
         if (.not.(rDl.eq.Dl)) then
           broken = .true.
-          print *, "Modified Julian Day Set/Get breaks,"
-          print *, " should be = ", Dl
-          print *, " returned  = ", rDl
-          print *
+          !print *, "Modified Julian Day Set/Get breaks,"
+          !print *, " should be = ", Dl
+          !print *, " returned  = ", rDl
+          !print *
         end if
       end do
   
@@ -708,10 +708,10 @@
                   rDl.eq.Dl)) then
           broken = .true.
           call ESMF_CalendarGet(cal, name=calName)
-          print *, trim(calName), " Set/Get breaks,"
-          print *, " should be = ", YYl, "/", MM, "/", DD, " ", Dl
-          print *, " returned  = ", rYYl, "/", rMM, "/", rDD, " ", rDl
-          print *
+          !print *, trim(calName), " Set/Get breaks,"
+          !print *, " should be = ", YYl, "/", MM, "/", DD, " ", Dl
+          !print *, " returned  = ", rYYl, "/", rMM, "/", rDD, " ", rDl
+          !print *
         end if
 
         !
@@ -725,10 +725,10 @@
         if (.not.(rDl.eq.Dl)) then
           broken = .true.
           call ESMF_CalendarGet(cal, name=calName)
-          print *, trim(calName), " Set/Julian Day Get breaks,"
-          print *,                " should be = ", Dl
-          print *,                " returned  = ", rDl
-          print *
+          !print *, trim(calName), " Set/Julian Day Get breaks,"
+          !print *,                " should be = ", Dl
+          !print *,                " returned  = ", rDl
+          !print *
         end if
 
       end if
@@ -747,10 +747,10 @@
 
         if (.not.(rDl.eq.Dl)) then
           broken = .true.
-          print *, "Julian Day Set/Get breaks,"
-          print *, " should be = ", Dl
-          print *, " returned  = ", rDl
-          print *
+          !print *, "Julian Day Set/Get breaks,"
+          !print *, " should be = ", Dl
+          !print *, " returned  = ", rDl
+          !print *
         end if
   
         !
@@ -764,12 +764,12 @@
         if (.not.(rYYl.eq.YYl .and. rMM.eq.MM .and. rDD.eq.DD .and. &
                   rDl.eq.Dl)) then
           broken = .true.
-          print *, "Julian Day Set/"
+          !print *, "Julian Day Set/"
           call ESMF_CalendarGet(cal, name=calName)
-          print *, trim(calName), " Get breaks,"
-          print *, " should be = ", YYl, "/", MM, "/", DD, " ", Dl
-          print *, " returned  = ", rYYl, "/", rMM, "/", rDD, " ", rDl
-          print *
+          !print *, trim(calName), " Get breaks,"
+          !print *, " should be = ", YYl, "/", MM, "/", DD, " ", Dl
+          !print *, " returned  = ", rYYl, "/", rMM, "/", rDD, " ", rDl
+          !print *
         end if
 
       end if
@@ -809,7 +809,7 @@
       else if (cal .eq. ESMF_CAL_JULIAN) then
         leapYear = mod(YYl,ly2).eq.0
       else
-        print *, "Error:  Leap year rule unknown for given calendar."
+        !print *, "Error:  Leap year rule unknown for given calendar."
       end if
 
       ! function return value

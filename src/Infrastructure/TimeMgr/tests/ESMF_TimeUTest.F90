@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.32 2009/08/07 20:29:34 svasquez Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.33 2009/09/29 05:59:37 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.32 2009/08/07 20:29:34 svasquez Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.33 2009/09/29 05:59:37 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -74,8 +74,8 @@
       ! instantitate some general times and timeintervals
       type(ESMF_Time) :: time1, time2, time3, time4, time5, time6, time7, &
 			 midMonth, startTime2
-      type(ESMF_TimeInterval) :: timeInterval2, timeInterval3, timeInterval4, timeInterval5, timeInterval6, timeInterval7
-
+      type(ESMF_TimeInterval) :: timeInterval2, timeInterval3, timeInterval4, &
+                                 timeInterval5, timeInterval6, timeInterval7
 
       ! instantiate timestep, start and stop times
       type(ESMF_Time) :: stopTime
@@ -110,8 +110,6 @@
       modifiedJulianDayCalendar = ESMF_CalendarCreate("ModifiedJulianDay", &
                                                       ESMF_CAL_MODJULIANDAY, rc)
 
-
-      
       ! ----------------------------------------------------------------------------
 
       !NEX_UTest
@@ -135,7 +133,7 @@
                       timeString=="2004-01-29T12:17:58" .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      print *, "startTime = ", timeString
+      !print *, "startTime = ", timeString
 
 
 #ifdef ESMF_TESTEXHAUSTIVE
@@ -154,7 +152,7 @@
                       timeString=="0009-02-07T00:00:00" .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      print *, "time1 = ", timeString
+      !print *, "time1 = ", timeString
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -170,7 +168,7 @@
                       timeString=="10000-02-07T00:00:00" .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      print *, "time1 = ", timeString
+      !print *, "time1 = ", timeString
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -211,7 +209,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and. &
                      (abs(dayOfYear_r8 - 29.5124768518518d0) < 1d-13), &
                       name, failMsg, result, ESMF_SRCLINE)
-      print *, "dayOfYear_r8 = ", dayOfyear_r8
+      !print *, "dayOfYear_r8 = ", dayOfyear_r8
 
       ! ----------------------------------------------------------------------------
 
@@ -302,190 +300,160 @@
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      ! Testing the ==  operator 
-      ! resultTime = ESMF_Time(==)(time, time)
+      ! Testing ESMF_TimeOperator(==)(time, time)
       write(failMsg, *) "The result is not correct."
       write(name, *) "Time == operator Test"
-      bool = startTime == stopTime    
+      bool = startTime == stopTime  ! exercise Time == operator
       call ESMF_Test((bool), &
                       name, failMsg, result, ESMF_SRCLINE)
       
-
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      ! Testing the ==  operator 
-      ! resultTime = ESMF_TimeOperator(==)(time, time)
+      ! Testing ESMF_TimeOperator(==)(time, time)
       write(failMsg, *) "The result is not correct."
       write(name, *) "Time == operator Test"
-      bool = startTime == startTime2    
+      bool = startTime == startTime2  ! exercise Time == operator
       call ESMF_Test((.not.bool), &
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      ! Testing the /=  operator 
-      ! resultTime = ESMF_TimeOperator(/=)(time, time)
+      ! Testing ESMF_TimeOperator(/=)(time, time)
       write(failMsg, *) "The result is not correct."
       write(name, *) "Time /= operator Test"
-      bool = startTime /= stopTime    
+      bool = startTime /= stopTime  ! exercise Time /= operator
       call ESMF_Test((.not.bool), &
                       name, failMsg, result, ESMF_SRCLINE)
-      
 
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      ! Testing the /=  operator 
-      ! resultTime = ESMF_TimeIntervalOperator(/=)(time, time)
+      ! Testing ESMF_TimeOperator(/=)(time, time)
       write(failMsg, *) "The result is not correct."
       write(name, *) "Time /= operator Test"
-      bool = startTime /= startTime2    
+      bool = startTime /= startTime2  ! exercise Time /= operator
       call ESMF_Test((bool), &
                       name, failMsg, result, ESMF_SRCLINE)
-      
 
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      ! Testing the >  operator 
-      ! resultTime = ESMF_TimeOperator(>)(time, time)
+      ! Testing ESMF_TimeOperator(>)(time, time)
       write(failMsg, *) "The result is not correct."
       write(name, *) "Time > operator Test"
-      bool = startTime > stopTime    
+      bool = startTime > stopTime  ! exercise Time > operator
+      call ESMF_Test((.not.bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_TimeOperator(>)(time, time)
+      write(failMsg, *) "The result is not correct."
+      write(name, *) "Time > operator Test"
+      bool = startTime > startTime2  ! exercise Time > operator
+      call ESMF_Test((.not.bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_TimeOperator(>)(time, time)
+      write(failMsg, *) "The result is not correct."
+      write(name, *) "Time > operator Test"
+      bool = startTime2 > startTime  ! exercise Time > operator
+      call ESMF_Test((bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_TimeOperator(<=)(time, time)
+      write(failMsg, *) "The result is not correct."
+      write(name, *) "Time <= operator Test"
+      bool = startTime <= stopTime  ! exercise Time <= operator
+      call ESMF_Test((bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_TimeOperator(<=)(time, time)
+      write(failMsg, *) "The result is not correct."
+      write(name, *) "Time <= operator Test"
+      bool = startTime <= startTime2  ! exercise Time <= operator
+      call ESMF_Test((bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_TimeOperator(<=)(time, time)
+      write(failMsg, *) "The result is not correct."
+      write(name, *) "Time <= operator Test"
+      bool = startTime2 <= startTime  ! exercise Time <= operator
+      call ESMF_Test((.not.bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_TimeOperator(>)(time, time)
+      write(failMsg, *) "The result is not correct."
+      write(name, *) "Time > operator Test"
+      bool = startTime > stopTime  ! exercise Time > operator
       call ESMF_Test((.not.bool), &
                       name, failMsg, result, ESMF_SRCLINE)
       
-
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      ! Testing the >  operator 
-      ! resultTime = ESMF_TimeOperator(>)(time, time)
-      write(failMsg, *) "The result is not correct."
-      write(name, *) "Time > operator Test"
-      bool = startTime > startTime2    
-      call ESMF_Test((.not.bool), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      
-
-      ! ----------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Testing the >  operator 
-      ! resultTime = ESMF_TimeOperator(>)(time, time)
-      write(failMsg, *) "The result is not correct."
-      write(name, *) "Time > operator Test"
-      bool = startTime2 > startTime    
-      call ESMF_Test((bool), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      
-
-      ! ----------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Testing the <=  operator 
-      ! resultTime = ESMF_TimeOperator(<=)(time, time)
-      write(failMsg, *) "The result is not correct."
-      write(name, *) "Time <= operator Test"
-      bool = startTime <= stopTime    
-      call ESMF_Test((bool), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      
-
-      ! ----------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Testing the <=  operator 
-      ! resultTime = ESMF_TimeOperator(<=)(time, time)
-      write(failMsg, *) "The result is not correct."
-      write(name, *) "Time <= operator Test"
-      bool = startTime <= startTime2    
-      call ESMF_Test((bool), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      
-
-      ! ----------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Testing the <=  operator 
-      ! resultTime = ESMF_TimeOperator(<=)(time, time)
-      write(failMsg, *) "The result is not correct."
-      write(name, *) "Time <= operator Test"
-      bool = startTime2 <= startTime    
-      call ESMF_Test((.not.bool), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      
-
-      ! ----------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Testing the <  operator 
-      ! resultTime = ESMF_TimeOperator(<)(time, time)
+      ! Testing ESMF_TimeOperator(<)(time, time)
       write(failMsg, *) "The result is not correct."
       write(name, *) "Time < operator Test"
-      bool = startTime > stopTime    
-      call ESMF_Test((.not.bool), &
+      bool = startTime < startTime2  ! exercise Time < operator
+      call ESMF_Test((bool), &
                       name, failMsg, result, ESMF_SRCLINE)
       
-
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      ! Testing the <  operator 
-      ! resultTime = ESMF_TimeOperator(<)(time, time)
+      ! Testing ESMF_TimeOperator(<)(time, time)
       write(failMsg, *) "The result is not correct."
       write(name, *) "Time < operator Test"
-      bool = startTime < startTime2    
-      call ESMF_Test((bool), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      
-
-      ! ----------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Testing the <  operator 
-      ! resultTime = ESMF_TimeOperator(<)(time, time)
-      write(failMsg, *) "The result is not correct."
-      write(name, *) "Time > operator Test"
-      bool = startTime2 < startTime    
+      bool = startTime2 < startTime  ! exercise Time < operator    
       call ESMF_Test((.not.bool), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      ! Testing the >=  operator 
-      ! resultTime = ESMF_TimeOperator(>=)(time, time)
+      ! Testing ESMF_TimeOperator(>=)(time, time)
       write(failMsg, *) "The result is not correct."
       write(name, *) "Time >= operator Test"
-      bool = startTime >= stopTime    
+      bool = startTime >= stopTime  ! exercise Time >= operator
       call ESMF_Test((bool), &
                       name, failMsg, result, ESMF_SRCLINE)
-      
 
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      ! Testing the >=  operator 
-      ! resultTime = ESMF_TimeOperator(>=)(time, time)
+      ! Testing ESMF_TimeOperator(>=)(time, time)
       write(failMsg, *) "The result is not correct."
       write(name, *) "Time >= operator Test"
-      bool = startTime >= startTime2    
+      bool = startTime >= startTime2  ! exercise Time >= operator
       call ESMF_Test((.not.bool), &
                       name, failMsg, result, ESMF_SRCLINE)
       
-
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      ! Testing the >=  operator 
-      ! resultTime = ESMF_TimeOperator(>=)(time, time)
+      ! Testing ESMF_TimeOperator(>=)(time, time)
       write(failMsg, *) "The result is not correct."
       write(name, *) "Time >= operator Test"
-      bool = startTime2 >= startTime    
+      bool = startTime2 >= startTime  ! exercise Time >= operator
       call ESMF_Test((bool), &
                       name, failMsg, result, ESMF_SRCLINE)
       
@@ -584,7 +552,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_CalendarSetDefault(ESMF_CAL_NOCALENDAR)
 
-  ! ----------------------------------------------------------------------------
+      ! ----------------------------------------------------------------------------
       
       !EX_UTest
       ! This test verifies the fix to support #1415439, reported
@@ -721,10 +689,11 @@
 
       !EX_UTest
       ! Test differencing two fractional times 1
+      ! Testing ESMF_TimeOperator(-)(time, time)
       write(failMsg, *) " Did not return 9980 us and ESMF_SUCCESS"
-      timeInterval3 = time1 - time2
+      timeInterval3 = time1 - time2  ! exercise Time - operator
       call ESMF_TimeIntervalGet(timeInterval3, us=US, rc=rc)
-      call ESMF_TimeIntervalPrint(timeInterval3, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval3, rc=rc)
       write(name, *) "Difference between two fractional Times Test 2"
       call ESMF_Test((US.eq.9980.and.rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -733,11 +702,12 @@
 
       !EX_UTest
       ! Test differencing two fractional times 2
+      ! Testing ESMF_TimeOperator(-)(time, time)
       write(failMsg, *) " Did not return D=0, H=-23, M=-59, S=-59, -1/99 seconds and ESMF_SUCCESS"
-      timeInterval5 = time5 - time4
+      timeInterval5 = time5 - time4  ! exercise Time - operator
       call ESMF_TimeIntervalGet(timeInterval5, d=D, h=H, m=M, s=S, &
                                 sN=sN, sD=sD, rc=rc)
-      call ESMF_TimeIntervalPrint(timeInterval5, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval5, rc=rc)
       write(name, *) "Difference between two fractional Times Test 2"
       call ESMF_Test((D.eq.0.and.H.eq.-23.and.M.eq.-59.and.S.eq.-59 &
                       .and.sN.eq.-1.and.sD.eq.99.and.rc.eq.ESMF_SUCCESS), &
@@ -747,10 +717,11 @@
 
       !EX_UTest
       ! Test adding a fractional time and time interval
+      ! Testing ESMF_TimeOperator(+)(time, timeinterval)
       write(failMsg, *) " Did not return 10/14/2004 15:52:59.040020 and ESMF_SUCCESS"
-      time3 = time2 + timeInterval2
+      time3 = time2 + timeInterval2  ! exercise Time + operator
       call ESMF_TimeGet(time3, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, us=US, rc=rc)
-      call ESMF_TimePrint(time3, rc=rc)
+      !call ESMF_TimePrint(time3, rc=rc)
       write(name, *) "Adding fractional Time and Timeinterval Test"
       call ESMF_Test((YY.eq.2004.and.MM.eq.10.and.DD.eq.14.and.H.eq.15.and. &
                       M.eq.52.and.S.eq.59.and.US.eq.40020 &
@@ -761,11 +732,12 @@
 
       !EX_UTest
       ! Test subtracting a fractional time and time interval
+      ! Testing ESMF_TimeOperator(-)(time, timeinterval)
       write(failMsg, *) " Did not return 10/22/2004 13:44:59 29/36 second and ESMF_SUCCESS"
-      time5 = time4 - timeInterval4
+      time5 = time4 - timeInterval4  ! exercise Time - operator
       call ESMF_TimeGet(time5, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, sN=sN, &
                         sD=sD, rc=rc)
-      call ESMF_TimePrint(time5, rc=rc)
+      !call ESMF_TimePrint(time5, rc=rc)
       write(name, *) "Subtracting fractional Time and Timeinterval Test"
       call ESMF_Test((YY.eq.2004.and.MM.eq.10.and.DD.eq.22.and.H.eq.13.and. &
                       M.eq.44.and.S.eq.59.and.sN.eq.29.and.sD.eq.36 &
@@ -776,8 +748,9 @@
 
       !EX_UTest
       ! Test comparing (>) two fractional times 1
+      ! Testing ESMF_TimeOperator(>)(time, time)
       write(failMsg, *) " Did not return (time1 > time2)"
-      bool = time1 > time2
+      bool = time1 > time2  ! exercise Time > operator
       write(name, *) "Fractional time1 > time2 Test"
       call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
 
@@ -785,8 +758,9 @@
 
       !EX_UTest
       ! Test comparing (>) two fractional times 2
+      ! Testing ESMF_TimeOperator(>)(time, time)
       write(failMsg, *) " Did not return (time4 > time5)"
-      bool = time4 > time5
+      bool = time4 > time5  ! exercise Time > operator
       write(name, *) "Fractional time4 > time5 Test"
       call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
 
@@ -794,8 +768,9 @@
 
       !EX_UTest
       ! Test comparing (<) two fractional times 1
+      ! Testing ESMF_TimeOperator(<)(time, time)
       write(failMsg, *) " Did not return (time2 < time3)"
-      bool = time2 < time3
+      bool = time2 < time3  ! exercise Time < operator
       write(name, *) "Fractional time2 < time3 Test"
       call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
 
@@ -803,8 +778,9 @@
 
       !EX_UTest
       ! Test comparing (<) two fractional times 2
+      ! Testing ESMF_TimeOperator(<)(time, time)
       write(failMsg, *) " Did not return (time2 < time5)"
-      bool = time2 < time5
+      bool = time2 < time5  ! exercise Time < operator
       write(name, *) "Fractional time2 < time5 Test"
       call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
 
@@ -812,8 +788,9 @@
 
       !EX_UTest
       ! Test comparing (==) two fractional times
+      ! Testing ESMF_TimeOperator(==)(time, time)
       write(failMsg, *) " Did not return (time3 == time3)"
-      bool = time3 == time3
+      bool = time3 == time3  ! exercise Time == operator
       write(name, *) "Fractional time3 == time3 Test"
       call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
 
@@ -821,8 +798,9 @@
 
       !EX_UTest
       ! Test comparing (/=) two fractional times
+      ! Testing ESMF_TimeOperator(/=)(time, time)
       write(failMsg, *) " Did not return (time1 /= time2)"
-      bool = time1 /= time2
+      bool = time1 /= time2  ! exercise Time /= operator
       write(name, *) "Fractional time1 /= time2 Test"
       call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
 
@@ -830,8 +808,9 @@
 
       !EX_UTest
       ! Test comparing (>=) two fractional times
+      ! Testing ESMF_TimeOperator(>=)(time, time)
       write(failMsg, *) " Did not return (time1 >= time2)"
-      bool = time1 >= time2
+      bool = time1 >= time2  ! exercise Time >= operator
       write(name, *) "Fractional time1 >= time2 Test"
       call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
 
@@ -839,8 +818,9 @@
 
       !EX_UTest
       ! Test comparing (<=) two fractional times
+      ! Testing ESMF_TimeOperator(<=)(time, time)
       write(failMsg, *) " Did not return (time1 <= time3)"
-      bool = time1 <= time3
+      bool = time1 <= time3  ! exercise Time <= operator
       write(name, *) "Fractional time1 <= time3 Test"
       call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
 
@@ -858,7 +838,7 @@
                         sN_i8=1234567890_ESMF_KIND_I8, &
                         sD_i8=3000000000_ESMF_KIND_I8, & 
                         calendar=julianDayCalendar, rc=rc)
-      call ESMF_TimePrint(time1, rc=rc)
+      !call ESMF_TimePrint(time1, rc=rc)
       call ESMF_TimeGet(time1, d_r8=D_r8, h_r8=H_r8, m_r8=M_r8, s_r8=S_r8, &
                         ms_r8=MS_r8, us_r8=US_r8, ns_r8=NS_r8, &
                         sN_i8=SN_i8, sD_i8=SD_i8, rc=rc)
@@ -874,8 +854,8 @@
                       SD_i8.eq.8000000000_ESMF_KIND_I8 .and. &
                       rc.eq.ESMF_SUCCESS, &
                       name, failMsg, result, ESMF_SRCLINE)
-      print *, D_r8, H_r8, M_r8, S_r8, MS_r8, US_r8, NS_r8, SN_i8, SD_i8
-      print *, "D_r8 - 9.1 = ", D_r8 - 9.1d0
+      !print *, D_r8, H_r8, M_r8, S_r8, MS_r8, US_r8, NS_r8, SN_i8, SD_i8
+      !print *, "D_r8 - 9.1 = ", D_r8 - 9.1d0
 
       ! ----------------------------------------------------------------------------
 
@@ -889,7 +869,7 @@
                         sN_i8=1234567890_ESMF_KIND_I8, &
                         sD_i8=3000000000_ESMF_KIND_I8, & 
                         calendar=modifiedJulianDayCalendar, rc=rc)
-      call ESMF_TimePrint(time1, rc=rc)
+      !call ESMF_TimePrint(time1, rc=rc)
       call ESMF_TimeGet(time1, d_r8=D_r8, h_r8=H_r8, m_r8=M_r8, s_r8=S_r8, &
                         ms_r8=MS_r8, us_r8=US_r8, ns_r8=NS_r8, &
                         sN_i8=SN_i8, sD_i8=SD_i8, rc=rc)
@@ -905,70 +885,74 @@
                       SD_i8.eq.8000000000_ESMF_KIND_I8 .and. &
                       rc.eq.ESMF_SUCCESS, &
                       name, failMsg, result, ESMF_SRCLINE)
-      print *, D_r8, H_r8, M_r8, S_r8, MS_r8, US_r8, NS_r8, SN_i8, SD_i8
-      print *, "D_r8 - 9.1 = ", D_r8 - 9.1d0
+      !print *, D_r8, H_r8, M_r8, S_r8, MS_r8, US_r8, NS_r8, SN_i8, SD_i8
+      !print *, "D_r8 - 9.1 = ", D_r8 - 9.1d0
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Test adding a time and real fractional days time interval
+      ! Testing ESMF_TimeOperator(+)(time, timeinterval)
       write(failMsg, *) " Did not return 11/27/2008 03:45:40 and ESMF_SUCCESS"
       call ESMF_TimeSet(time6, yy=2008, mm=11, dd=25, h=17, m=15, s=40, &
                        calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(timeInterval6, d_r8=1.4375d0, rc=rc)
-      time7 = time6 + timeInterval6
+      time7 = time6 + timeInterval6  ! exercise Time + operator
       call ESMF_TimeGet(time7, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
-      call ESMF_TimePrint(time7, rc=rc)
+      !call ESMF_TimePrint(time7, rc=rc)
       write(name, *) "Adding Time and real fractional days Timeinterval Test"
       call ESMF_Test((YY.eq.2008.and.MM.eq.11.and.DD.eq.27.and.H.eq.3.and. &
                       M.eq.45.and.S.eq.40 &
                       .and.rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      print *, YY, "/", MM, "/", DD, " ", H, ":", M, ":", S
+      !print *, YY, "/", MM, "/", DD, " ", H, ":", M, ":", S
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Test taking the difference of two times to produce a real fractional
       ! days result.
+      ! Testing ESMF_TimeOperator(-)(time, time)
       write(failMsg, *) " Did not return D_r8=1.4375 and ESMF_SUCCESS"
-      timeInterval7 = time7 - time6
+      timeInterval7 = time7 - time6  ! exercise Time - operator
       call ESMF_TimeIntervalGet(timeInterval7, d_r8=D_r8, rc=rc)
-      call ESMF_TimeIntervalPrint(timeInterval7, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval7, rc=rc)
       write(name, *) "Test subtracting two times, resulting in a real fractional days Timeinterval"
       call ESMF_Test((D_r8.eq.1.4375d0.and.rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      print *, D_r8
+      !print *, D_r8
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Test subracting a real fractional time and real fractional days time interval
+      ! Testing ESMF_TimeOperator(-)(time, timeinterval)
       write(failMsg, *) " Did not return 11/27/2008 03:45:40 and ESMF_SUCCESS"
       call ESMF_TimeSet(time6, yy=2008, mm=12, dd=1, h=2, m=3, s=4, &
                        ms_r8=0.125d0, calendar=gregorianCalendar, rc=rc)
-      call ESMF_TimePrint(time6, rc=rc)
+      !call ESMF_TimePrint(time6, rc=rc)
       ! interval of 1+5/7 days, to 16 digits of precison
       call ESMF_TimeIntervalSet(timeInterval6, d_r8=1.714285714285714d0, rc=rc)
-      call ESMF_TimeIntervalPrint(timeInterval6, rc=rc)
-      time7 = time6 - timeInterval6
-      call ESMF_TimePrint(time7, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval6, rc=rc)
+      time7 = time6 - timeInterval6  ! exercise Time - operator
+      !call ESMF_TimePrint(time7, rc=rc)
       call ESMF_TimeGet(time7, yy=YY, mm=MM, dd=DD, s_r8=S_r8, rc=rc)
       write(name, *) "Subtracting real fractional Time and real fractional days Timeinterval Test"
       call ESMF_Test((YY.eq.2008.and.MM.eq.11.and.DD.eq.29.and. &
                       abs(S_r8-32069.7144107143d0) < 1d-10 &
                       .and.rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      print *, YY, "/", MM, "/", DD, " ", S_r8
+      !print *, YY, "/", MM, "/", DD, " ", S_r8
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Test taking the difference of two times to produce time interval
       ! equal to previous subtraction
+      ! Testing ESMF_TimeOperator(-)(time, time)
       write(failMsg, *) " Did not return equivalent timeInterval and ESMF_SUCCESS"
-      timeInterval7 = time6 - time7
-      call ESMF_TimeIntervalPrint(timeInterval7, rc=rc)
+      timeInterval7 = time6 - time7  ! exercise Time - operator
+      !call ESMF_TimeIntervalPrint(timeInterval7, rc=rc)
       ! calendars must match for equality test, so reset timeInterval6 with cal
       call ESMF_TimeIntervalSet(timeInterval6, d_r8=1.714285714285714d0, &
                                 calendar=gregorianCalendar, rc=rc)
-      call ESMF_TimeIntervalPrint(timeInterval6, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval6, rc=rc)
       write(name, *) "Test subtracting two times, producing equal Timeinterval used in previous test"
       call ESMF_Test((timeInterval7.eq.timeInterval6.and.rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -989,9 +973,7 @@
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Leap Year Test 2
-      year = 500000000  ! break up initialization,
-      year = year * 10  !  since F90 constants
-      year = year + 100 !    are 32-bit
+      year = 5000000100_ESMF_KIND_I8
       call ESMF_TimeSet(time1, yy_i8=year, mm=2, dd=28, &
                                    calendar=gregorianCalendar, rc=rc)
       bool =  ESMF_TimeIsLeapYear(time1, rc=rc)
