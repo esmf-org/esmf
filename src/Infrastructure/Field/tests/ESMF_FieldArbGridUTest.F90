@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridUTest.F90,v 1.8 2009/07/24 18:58:09 peggyli Exp $
+! $Id: ESMF_FieldArbGridUTest.F90,v 1.9 2009/09/29 15:59:27 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -183,7 +183,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using a 2D arb. grid and 1D Fortran array - empty/setcommit"
-  call ESMF_FieldGet(field, farray=fptr1d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field2 = ESMF_FieldCreateEmpty(rc=localrc)
@@ -204,7 +204,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using a 2D arb. grid and 1D Fortran array"
-  call ESMF_FieldGet(field, farray=fptr1d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field4 = ESMF_FieldCreate(grid2d, farray=fptr1d, &
@@ -223,7 +223,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using a 2D arb. grid and 1D Fortran array pointer - empty/setcommit"
-  call ESMF_FieldGet(field, farray=fptr1d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field3 = ESMF_FieldCreateEmpty(rc=localrc)
@@ -244,7 +244,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using a 2D arb. grid and 1D Fortran array pointer"
-  call ESMF_FieldGet(field, farray=fptr1d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field5 = ESMF_FieldCreate(grid2d, farrayPtr=fptr1d, &
@@ -362,7 +362,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array - empty/setcommit"
-  call ESMF_FieldGet(field, farray=fptr1d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field2 = ESMF_FieldCreateEmpty(rc=localrc)
@@ -383,7 +383,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array"
-  call ESMF_FieldGet(field, farray=fptr1d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field4 = ESMF_FieldCreate(grid3d, farray=fptr1d, gridToFieldMap=(/1,2,0/), &
@@ -402,7 +402,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array pointer - empty/setcommit"
-  call ESMF_FieldGet(field, farray=fptr1d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field3 = ESMF_FieldCreateEmpty(rc=localrc)
@@ -423,7 +423,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array pointer"
-  call ESMF_FieldGet(field, farray=fptr1d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field5 = ESMF_FieldCreate(grid3d, farrayPtr=fptr1d, gridToFieldMap=(/1,2,0/), &
@@ -536,7 +536,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array - empty/setcommit"
-  call ESMF_FieldGet(field, farray=fptr2d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field2 = ESMF_FieldCreateEmpty(rc=localrc)
@@ -557,7 +557,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array"
-  call ESMF_FieldGet(field, farray=fptr2d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field4 = ESMF_FieldCreate(grid3d, farray=fptr2d, &
@@ -576,7 +576,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array pointer - empty/setcommit"
-  call ESMF_FieldGet(field, farray=fptr2d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field3 = ESMF_FieldCreateEmpty(rc=localrc)
@@ -597,7 +597,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array pointer"
-  call ESMF_FieldGet(field, farray=fptr2d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field5 = ESMF_FieldCreate(grid3d, farrayPtr=fptr2d, &
@@ -712,7 +712,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 3D Fortran array - empty/setcommit"
-  call ESMF_FieldGet(field, farray=fptr3d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr3d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field2 = ESMF_FieldCreateEmpty(rc=localrc)
@@ -734,7 +734,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 3D Fortran array"
-  call ESMF_FieldGet(field, farray=fptr3d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr3d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field4 = ESMF_FieldCreate(grid3d, farray=fptr3d, &
@@ -831,7 +831,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array - empty/setcommit"
-  call ESMF_FieldGet(field, farray=fptr2d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field2 = ESMF_FieldCreateEmpty(rc=localrc)
@@ -854,7 +854,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array"
-  call ESMF_FieldGet(field, farray=fptr2d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field4 = ESMF_FieldCreate(grid3d, farray=fptr2d, &
@@ -950,7 +950,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array - empty/setcommit"
-  call ESMF_FieldGet(field, farray=fptr1d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field2 = ESMF_FieldCreateEmpty(rc=localrc)
@@ -972,7 +972,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array"
-  call ESMF_FieldGet(field, farray=fptr1d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field4 = ESMF_FieldCreate(grid3d, farray=fptr1d, &
@@ -992,7 +992,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array pointer - empty/setcommit"
-  call ESMF_FieldGet(field, farray=fptr1d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field3 = ESMF_FieldCreateEmpty(rc=localrc)
@@ -1014,7 +1014,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array pointer"
-  call ESMF_FieldGet(field, farray=fptr1d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field5 = ESMF_FieldCreate(grid3d, farrayPtr=fptr1d, &
@@ -1127,7 +1127,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array - empty/setcommit"
-  call ESMF_FieldGet(field, farray=fptr2d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field2 = ESMF_FieldCreateEmpty(rc=localrc)
@@ -1150,7 +1150,7 @@
 
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array"
-  call ESMF_FieldGet(field, farray=fptr2d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field4 = ESMF_FieldCreate(grid3d, farray=fptr2d, &
@@ -1231,7 +1231,7 @@
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field, farray=fptr1d, rc=localrc)
+  call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field2 = ESMF_FieldCreateEmpty(rc=localrc)

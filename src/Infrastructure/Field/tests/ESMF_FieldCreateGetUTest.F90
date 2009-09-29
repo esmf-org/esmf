@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.48 2009/09/22 16:27:30 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.49 2009/09/29 15:59:27 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -2127,7 +2127,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(field, localDe=0, farray=farray1, totalCount=totalCount, &
+        call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, totalCount=totalCount, &
           rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2491,7 +2491,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(field, localDe=0, farray=farray1, rc=localrc)
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -3105,7 +3105,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+        call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
             exclusiveLBound=felb, exclusiveUBound=feub, &
             computationalLBound=fclb, computationalUBound=fcub, &
             rc=localrc)
@@ -3208,7 +3208,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+        call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
             exclusiveLBound=felb, exclusiveUBound=feub, &
             computationalLBound=fclb, computationalUBound=fcub, &
             rc=localrc)
@@ -3649,7 +3649,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+        call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
             exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
             computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
             totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -3806,7 +3806,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -4091,7 +4091,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -4277,7 +4277,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -4511,7 +4511,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -4728,7 +4728,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -4890,7 +4890,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(field, localDe=0, farray=farray, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -4966,7 +4966,7 @@ contains
              enddo
             enddo
             ! access and verify
-            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -5124,7 +5124,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(field, localDe=0, farray=farray, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -5207,7 +5207,7 @@ contains
              enddo
             enddo
             ! access and verify
-            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -5365,7 +5365,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(field, localDe=0, farray=farray, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -5440,7 +5440,7 @@ contains
              enddo
             enddo
             ! access and verify
-            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -5598,7 +5598,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(field, localDe=0, farray=farray, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -5681,7 +5681,7 @@ contains
              enddo
             enddo
             ! access and verify
-            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -5847,7 +5847,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(field, localDe=0, farray=farray, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -5922,7 +5922,7 @@ contains
              enddo
             enddo
             ! access and verify
-            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -6076,7 +6076,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(field, localDe=0, farray=farray, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -6151,7 +6151,7 @@ contains
              enddo
             enddo
             ! access and verify
-            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -6298,7 +6298,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(field, localDe=0, farray=farray, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -6371,7 +6371,7 @@ contains
              enddo
             enddo
             ! access and verify
-            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -6593,7 +6593,7 @@ contains
         if(present(fieldget)) then
           if(fieldget) then
             ! verify FieldGetDataBounds are correct
-            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -6767,7 +6767,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             ! access and verify
-            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+            call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -6951,7 +6951,7 @@ contains
                 ESMF_CONTEXT, rc)) return
        
             ! Get field bounds
-            call ESMF_FieldGet(field, localde=0, farray=farray, &
+            call ESMF_FieldGet(field, localde=0, farrayPtr=farray, &
                 computationalLBound=compLBnd, computationalUBound=compUBnd, &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
