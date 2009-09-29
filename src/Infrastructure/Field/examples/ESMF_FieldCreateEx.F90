@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.84 2009/09/24 15:52:21 oehmke Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.85 2009/09/29 15:35:48 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -30,6 +30,7 @@
     ! Local variables
 
     real(ESMF_KIND_R8), dimension(:,:), allocatable     :: farray
+    real(ESMF_KIND_R8), dimension(:,:), pointer         :: farrayPtr, farrayPtr2
     real(ESMF_KIND_R8), dimension(:,:,:), allocatable   :: farray3d
     integer, dimension(3)                     :: gcc, gec, fa_shape
 
@@ -144,6 +145,37 @@
 
     field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!EOC
+    print *, "Field Create from a Grid and a Fortran data array returned"
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_FieldDestroy(field,rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    deallocate(farray)
+
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Create 2D Field with 2D Grid and Fortran data pointer}
+!\label{sec:field:usage:create_2dptr}
+!
+! The setup of this example is similar to the previous section except 
+! that the Field is created from a data pointer instead of a data array.
+! We highlight the ability to deallocate the internal fortran data
+! pointer queried from the Field. This gives a user more flexibility with
+! memory management.
+!
+!EOE
+
+!BOC
+    allocate(farrayPtr(max(gec(1), gcc(1)), max(gec(2), gcc(2))) )
+
+    field = ESMF_FieldCreate(grid, farrayPtr, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_FieldGet(field, farrayPtr=farrayPtr2, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    ! deallocate the retrieved fortran array pointer
+    deallocate(farrayPtr2)
 !EOC
     print *, "Field Create from a Grid and a Fortran data array returned"
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -731,7 +763,6 @@
 ! Destroy objects
     call ESMF_GridDestroy(grid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    deallocate(farray)
 
 !-------------------------------------------------------------------------
      call ESMF_Finalize(rc=rc)

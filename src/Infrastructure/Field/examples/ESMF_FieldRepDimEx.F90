@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRepDimEx.F90,v 1.4 2009/06/19 17:42:23 feiliu Exp $
+! $Id: ESMF_FieldRepDimEx.F90,v 1.5 2009/09/29 15:35:48 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -126,7 +126,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! get bounds information from the field
-    call ESMF_FieldGet(field, localDe=0, farray=farray, &
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=farray, &
         exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
         computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
         totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -185,7 +185,7 @@
      enddo
     enddo
     ! access and verify
-    call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
         rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     do ik = ftlb(3), ftub(3)

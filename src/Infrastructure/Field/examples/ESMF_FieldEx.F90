@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.14 2009/09/23 18:18:12 feiliu Exp $
+! $Id: ESMF_FieldEx.F90,v 1.15 2009/09/29 15:35:48 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -142,11 +142,11 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
     ! retrieve the Fortran data pointer from the Field
-    call ESMF_FieldGet(field=field, localDe=0, farray=farray1, rc=rc)
+    call ESMF_FieldGet(field=field, localDe=0, farrayPtr=farray1, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! retrieve the Fortran data pointer from the Field and bounds
-    call ESMF_FieldGet(field=field, localDe=0, farray=farray1, &
+    call ESMF_FieldGet(field=field, localDe=0, farrayPtr=farray1, &
         computationalLBound=compLBnd, computationalUBound=compUBnd, &
         exclusiveLBound=exclLBnd, exclusiveUBound=exclUBnd, &
         totalLBound=totalLBnd, totalUBound=totalUBnd, &
@@ -244,7 +244,7 @@
          staggerloc=ESMF_STAGGERLOC_CENTER, name="pressure", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldGet(field1, localDe=0, farray=farray2dd, &
+    call ESMF_FieldGet(field1, localDe=0, farrayPtr=farray2dd, &
         totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, rc=rc)
 
     do i = ftlb(1), ftub(1)
