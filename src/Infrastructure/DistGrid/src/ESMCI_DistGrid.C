@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.28 2009/09/21 21:05:00 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.29 2009/09/29 05:48:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.28 2009/09/21 21:05:00 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.29 2009/09/29 05:48:27 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1791,7 +1791,12 @@ int DistGrid::construct(
 // !IROUTINE:  ESMCI::DistGrid::destruct
 //
 // !INTERFACE:
-int DistGrid::destruct(void){
+int DistGrid::destruct(bool followCreator){
+//
+// TODO: The followCreator flag is only needed until we have reference counting // TODO: For now followCreator, which by default is true, will be coming in as
+// TODO: false when calling through the native destructor. This prevents
+// TODO: sequence problems during automatic garbage collection unitl reference
+// TODO: counting comes in to solve this problem in the final manner.
 //
 // !RETURN VALUE:
 //    int return code
@@ -1839,7 +1844,7 @@ int DistGrid::destruct(void){
     if (regDecomp)
       delete [] regDecomp;
     
-    if (delayoutCreator){
+    if (delayoutCreator && followCreator){
       localrc = DELayout::destroy(&delayout); 
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
         return rc;

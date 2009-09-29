@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.63 2009/09/21 21:04:53 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.64 2009/09/29 05:48:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.63 2009/09/21 21:04:53 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.64 2009/09/29 05:48:27 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -248,7 +248,12 @@ Array::Array(
 // !IROUTINE:  ESMCI::Array::destruct
 //
 // !INTERFACE:
-void Array::destruct(void){
+void Array::destruct(bool followCreator){
+//
+// TODO: The followCreator flag is only needed until we have reference counting // TODO: For now followCreator, which by default is true, will be coming in as
+// TODO: false when calling through the native destructor. This prevents
+// TODO: sequence problems during automatic garbage collection unitl reference
+// TODO: counting comes in to solve this problem in the final manner.
 //
 // !DESCRIPTION:
 //    Destruct the internal information structure of an ESMCI::Array object.
@@ -295,8 +300,13 @@ void Array::destruct(void){
       delete [] exclusiveElementCountPDe;
     if (totalElementCountPLocalDe != NULL)
       delete [] totalElementCountPLocalDe;
-    if (distgridCreator)
-      DistGrid::destroy(&distgrid);
+    if (distgridCreator && followCreator){
+      int localrc = DistGrid::destroy(&distgrid);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+        throw localrc;  // bail out with exception
+    }
+    
+    
   }
 }
 //-----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.18 2009/09/21 21:04:59 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.19 2009/09/29 05:48:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     // native constructor and destructor
     DistGrid(){}
     DistGrid(int baseID):ESMC_Base(baseID){}// prevent baseID counter increment
-    ~DistGrid(){destruct();}
+    ~DistGrid(){destruct(false);}
     
   private:
     // construct() and destruct()
@@ -94,7 +94,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
       int *contigFlagPDimPDe, int *indexCountPDimPDe, int **indexList,
       int *regDecompArg, InterfaceInt *connectionList,
       DELayout *delayout, bool delayoutCreator, VM *vm);
-    int destruct();
+    int destruct(bool followCreator=true);
   public:
     // create() and destroy()
     static DistGrid *create(DistGrid const *dg,

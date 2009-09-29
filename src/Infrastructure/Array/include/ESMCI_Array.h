@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.32 2009/09/21 21:04:52 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.33 2009/09/29 05:48:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -158,9 +158,9 @@ namespace ESMCI {
       int *distgridToArrayMapArray, int *arrayToDistGridMapArray,
       int *distgridToPackedArrayMapArray, ESMC_IndexFlag indexflagArg, int *rc);
    public:
-    ~Array(){destruct();}
+    ~Array(){destruct(false);}
    private:
-    void destruct();
+    void destruct(bool followCreator=true);
    public:
     // create() and destroy()
     static Array *create(LocalArray **larrayList, int larrayCount,
