@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.33 2009/09/09 05:38:00 theurich Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.34 2009/09/29 19:44:51 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldCommEx.F90,v 1.33 2009/09/09 05:38:00 theurich Exp $'
+    '$Id: ESMF_FieldCommEx.F90,v 1.34 2009/09/29 19:44:51 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -203,7 +203,7 @@
     call ESMF_FieldScatter(field, farraySrc, rootPet=0, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldGet(field, localDe=0, farray=fptr, rc=rc)
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=fptr, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! verify that the scattered data is properly distributed

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistArbUTest.F90,v 1.4 2009/09/23 18:41:38 feiliu Exp $
+! $Id: ESMF_FieldRedistArbUTest.F90,v 1.5 2009/09/29 19:44:03 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -157,7 +157,7 @@
   if (localrc .ne. ESMF_SUCCESS) rc = ESMF_FAILURE
 
   ! Set field values
-  call ESMF_FieldGet(srcfield2D, farray=fptr1D, computationalLBound=lbnd1, &
+  call ESMF_FieldGet(srcfield2D, farrayPtr=fptr1D, computationalLBound=lbnd1, &
     computationalUBound=ubnd1, computationalCount=cnt1, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc = ESMF_FAILURE
 
@@ -193,7 +193,7 @@
             ESMF_CONTEXT, rc)) correct = .false.
 
   ! Set field values
-  call ESMF_FieldGet(srcfield, farray=fptr, computationalLBound=lbnd, &
+  call ESMF_FieldGet(srcfield, farrayPtr=fptr, computationalLBound=lbnd, &
     computationalUBound=ubnd, computationalCount=cnt, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
@@ -307,7 +307,7 @@
             ESMF_CONTEXT, rc)) correct = .false.
 
   ! Check the destination field
-  call ESMF_FieldGet(dstfield2D, localDe=0, farray=fptr1D, computationalLBound=lbnd1, &
+  call ESMF_FieldGet(dstfield2D, localDe=0, farrayPtr=fptr1D, computationalLBound=lbnd1, &
     computationalUBound=ubnd1, computationalCount=cnt1, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
@@ -349,7 +349,7 @@
             ESMF_CONTEXT, rc)) correct=.false.
 
   ! Check the destination field
-  call ESMF_FieldGet(dstfield, localDe=0, farray=fptr, computationalLBound=lbnd, &
+  call ESMF_FieldGet(dstfield, localDe=0, farrayPtr=fptr, computationalLBound=lbnd, &
     computationalUBound=ubnd, computationalCount=cnt, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct=.false.

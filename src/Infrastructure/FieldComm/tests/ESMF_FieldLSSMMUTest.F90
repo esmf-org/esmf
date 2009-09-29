@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldLSSMMUTest.F90,v 1.4 2009/08/11 20:59:15 svasquez Exp $
+! $Id: ESMF_FieldLSSMMUTest.F90,v 1.5 2009/09/29 19:44:03 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldLSSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldLSSMMUTest.F90,v 1.4 2009/08/11 20:59:15 svasquez Exp $'
+    '$Id: ESMF_FieldLSSMMUTest.F90,v 1.5 2009/09/29 19:44:03 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -137,7 +137,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(srcField, localDe=0, farray=srcfptr, rc=localrc)
+        call ESMF_FieldGet(srcField, localDe=0, farrayPtr=srcfptr, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -150,7 +150,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(dstField, localDe=0, farray=dstfptr, rc=localrc)
+        call ESMF_FieldGet(dstField, localDe=0, farrayPtr=dstfptr, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -177,7 +177,7 @@ contains
             ESMF_CONTEXT, rc)) return
 
         ! verify smm
-        call ESMF_FieldGet(dstField, localDe=0, farray=fptr, &
+        call ESMF_FieldGet(dstField, localDe=0, farrayPtr=fptr, &
             exclusiveLBound=exlb, exclusiveUBound=exub, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &

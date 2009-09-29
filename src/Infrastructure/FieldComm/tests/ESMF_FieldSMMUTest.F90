@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMUTest.F90,v 1.11 2009/09/09 05:38:00 theurich Exp $
+! $Id: ESMF_FieldSMMUTest.F90,v 1.12 2009/09/29 19:44:03 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMUTest.F90,v 1.11 2009/09/09 05:38:00 theurich Exp $'
+    '$Id: ESMF_FieldSMMUTest.F90,v 1.12 2009/09/29 19:44:03 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -207,7 +207,7 @@ contains
             ESMF_CONTEXT, rc)) return
 
         ! verify smm
-        call ESMF_FieldGet(dstField, localDe=0, farray=fptr, rc=localrc)
+        call ESMF_FieldGet(dstField, localDe=0, farrayPtr=fptr, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -341,7 +341,7 @@ contains
             ESMF_CONTEXT, rc)) return
 
         ! verify smm
-        call ESMF_FieldGet(dstField, localDe=0, farray=fptr, rc=localrc)
+        call ESMF_FieldGet(dstField, localDe=0, farrayPtr=fptr, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -475,7 +475,7 @@ contains
             ESMF_CONTEXT, rc)) return
 
         ! verify smm
-        call ESMF_FieldGet(dstField, localDe=0, farray=fptr, rc=localrc)
+        call ESMF_FieldGet(dstField, localDe=0, farrayPtr=fptr, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -611,7 +611,7 @@ contains
             ESMF_CONTEXT, rc)) return
 
         ! verify smm
-        call ESMF_FieldGet(dstField, localDe=0, farray=fptr, &
+        call ESMF_FieldGet(dstField, localDe=0, farrayPtr=fptr, &
             exclusiveLBound=exlb, exclusiveUBound=exub, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
