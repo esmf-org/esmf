@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.58 2009/09/25 17:30:53 theurich Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.59 2009/09/29 05:35:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define ESMF_FILENAME "ESMF_COMP_C.F90"
+#define ESMF_FILENAME "ESMF_Comp_C.F90"
 !==============================================================================
 !
 ! F77 interfaces for C++ layer calling into F90 implementation layer.
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.58 2009/09/25 17:30:53 theurich Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.59 2009/09/29 05:35:59 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
