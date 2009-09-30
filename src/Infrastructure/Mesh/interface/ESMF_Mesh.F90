@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.22 2009/09/28 20:29:24 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.23 2009/09/30 16:17:56 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -133,7 +133,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.22 2009/09/28 20:29:24 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.23 2009/09/30 16:17:56 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -177,11 +177,12 @@ module ESMF_MeshMod
 !   this Field may be used in a {\tt ESMF\_FieldRegridStore()} call.
 !
 !   The parameters to this call {\tt elementIds}, {\tt elementTypes}, and
-!   {\tt elementConn} describe  the elements to be created. The description 
+!   {\tt elementConn} describe the elements to be created. The description 
 !   for a particular element lies at the same index location in {\tt elementIds} 
-!   and {\tt elementTypes}, but the connection information for that element in 
-!   {\tt elementConn} will start at the index given by the sum of the number of nodes 
-!   in all of the proceeding elements plus 1. 
+!   and {\tt elementTypes}. Each entry in {\tt elementConn} consists of the list of
+!   nodes used to create that element, so the connections for element $e$ in the 
+!   {\tt elementIds} array will start at $number\_of\_nodes\_in\_element(1) + number\_of\_nodes\_in\_element(2) +
+!   \cdots + number\_of\_nodes\_in\_element(e-1) + 1$ in {\tt elementConn}.
 !
 !   \begin{description}
 !   \item [elementIds]
@@ -203,9 +204,11 @@ module ESMF_MeshMod
 !         important to note that the order of the nodes in an element connectivity list
 !         matters. Please see Section~\ref{sec:mesh:opt:elemtype} for diagrams illustrating
 !         the correct order of nodes in a element. This input consists of a 1D array with 
-!         a total size equal to the sum of the number of nodes contained in each element on
+!         a total size equal to the sum of the number of nodes in each element on
 !         this PET. The number of nodes in each element is implied by its element type in 
-!         {\tt elementTypes}.
+!         {\tt elementTypes}. The nodes for each element 
+!         are in sequence in this array (e.g. the nodes for element 1 are elementConn(1),
+!         elementConn(2), etc.). 
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -392,7 +395,7 @@ module ESMF_MeshMod
 !   \item[spatialDim] 
 !         The number of coordinate dimensions needed to describe the locations of the nodes 
 !         making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
-!         parametric dim (e.g. the 2D surface of a sphere in space), but it can't be smaller. 
+!         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -473,11 +476,12 @@ module ESMF_MeshMod
 !   for node $n$ in the {\tt nodeIds} array will start at $(n-1)*spatialDim+1$. 
 !
 !   The parameters to this call {\tt elementIds}, {\tt elementTypes}, and
-!   {\tt elementConn} describe  the elements to be created. The description 
+!   {\tt elementConn} describe the elements to be created. The description 
 !   for a particular element lies at the same index location in {\tt elementIds} 
-!   and {\tt elementTypes}, but the connection information for that element in 
-!   {\tt elementConn} will start at the index given by the sum of the number of nodes 
-!   in all of the proceeding elements plus 1. 
+!   and {\tt elementTypes}. Each entry in {\tt elementConn} consists of the list of
+!   nodes used to create that element, so the connections for element $e$ in the 
+!   {\tt elementIds} array will start at $number\_of\_nodes\_in\_element(1) + number\_of\_nodes\_in\_element(2) +
+!   \cdots + number\_of\_nodes\_in\_element(e-1) + 1$ in {\tt elementConn}.
 !
 !   \begin{description}
 !   \item [parametricDim]
@@ -487,7 +491,7 @@ module ESMF_MeshMod
 !   \item[spatialDim] 
 !         The number of coordinate dimensions needed to describe the locations of the nodes 
 !         making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
-!         parametric dim (e.g. the 2D surface of a sphere in space), but it can't be smaller. 
+!         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
 !   \item [nodeIds]
 !         An array containing the global ids of the nodes to be created on this PET. 
 !         This input consists of a 1D array the size of the number of nodes on this PET.
@@ -525,7 +529,9 @@ module ESMF_MeshMod
 !         the correct order of nodes in a element. This input consists of a 1D array with 
 !         a total size equal to the sum of the number of nodes contained in each element on
 !         this PET. The number of nodes in each element is implied by its element type in 
-!         {\tt elementTypes}.
+!         {\tt elementTypes}. The nodes for each element 
+!         are in sequence in this array (e.g. the nodes for element 1 are elementConn(1),
+!         elementConn(2), etc.). 
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -614,7 +620,7 @@ module ESMF_MeshMod
 !   \item[spatialDim] 
 !         The number of coordinate dimensions needed to describe the locations of the nodes 
 !         making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
-!         parametric dim (e.g. the 2D surface of a sphere in space), but it can't be smaller. 
+!         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -733,10 +739,10 @@ module ESMF_MeshMod
     integer,        intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!    This call removes the portions of Mesh which contain connection and coordinate
-!    information. After this call Fields build on {\tt mesh} will no longer be usable
+!    This call removes the portions of {\tt mesh} which contain connection and coordinate
+!    information. After this call, Fields build on {\tt mesh} will no longer be usable
 !    as part of an {\tt ESMF\_FieldRegridStore()} operation. However, after this call 
-!    Fields built on {\tt mesh} can still be used in an {\tt ESMF\_FieldRegridRun()} 
+!    Fields built on {\tt mesh} can still be used in an {\tt ESMF\_FieldRegrid()} 
 !    operation if the routehandle was generated beforehand. New Fields may also
 !    be built on {\tt mesh} after this call.
 !
@@ -800,10 +806,13 @@ module ESMF_MeshMod
 ! \item [mesh]
 ! Mesh object to retrieve information from.
 ! \item [{[nodalDistgrid]}]
-! A distgrid describing the distribution of the nodes across the PETs. Note that
+! A 1D arbitrary distgrid describing the distribution of the nodes across the PETs. Note that
 ! on each PET the distgrid will only contain entries for nodes owned by that PET.
+! This is the DistGrid that would be used to construct the Array in a Field that is constructed
+! on {\tt mesh}.
 ! \item [{[elementDistgrid]}]
-! A distgrid describing the distribution of the elements across the PETs.
+! A 1D arbitrary distgrid describing the distribution of elements across the PETs. Note that
+! on each PET the distgrid will only contain entries for elements owned by that PET.
 ! \item [{[numOwnedNodes]}]
 ! The number of local nodes which are owned by this PET. This is the number of PET local entries in
 ! the nodalDistgrid.
@@ -811,8 +820,8 @@ module ESMF_MeshMod
 ! The number of local elements which are owned by this PET. This is the number of PET local entries in
 ! the elementDistgrid.
 ! \item [{[isMemFreed]}]
-! Has the coordinate and connection memory been freed from this mesh. If so, it
-! can no longer be used as a part of {\tt ESMF\_FieldRegridStore()} calls.
+! Indicates if the coordinate and connection memory been freed from {\tt mesh}. If so, it
+! can no longer be used as part of an {\tt ESMF\_FieldRegridStore()} call.
 ! \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}

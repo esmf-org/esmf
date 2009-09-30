@@ -1,8 +1,8 @@
-% $Id: Mesh_desc.tex,v 1.2 2009/09/23 23:13:01 oehmke Exp $
+% $Id: Mesh_desc.tex,v 1.3 2009/09/30 16:17:55 oehmke Exp $
 
-Unstructured grids are commonly used in the computational solution of Partial Differential equations.  The are especially useful for problems that involve complex geometry, where a structured approach
-would suffer from over-prescription of resources to cells where no computation is performed.  Finite
-element and finite volume methods map naturally to these representations and are used commonly
+Unstructured grids are commonly used in the computational solution of Partial Differential equations.  These are especially useful for problems that involve complex geometry, where using the less flexible structured grids can
+result in grid representation of regions where no computation is needed.  Finite
+element and finite volume methods map naturally to unstructured grids and are used commonly
 in hydrology, ocean modeling, and many other applications.
 
 In order to provide support for application codes using unstructured grids, the ESMF library provides a class for representing 
@@ -12,7 +12,7 @@ moved to or from or between unstructured grids. This section describes the Mesh 
 
 \subsubsection{Mesh Representation in ESMF}
 
-A Mesh in ESMF is described in terms of {\bf nodes} and {\bf elements}. A node is a 0 dimensional point which represents where the coordinate 
+A Mesh in ESMF is described in terms of {\bf nodes} and {\bf elements}. A node is a point in space which represents where the coordinate 
 information in a Mesh is located. This is also where Field data may be located in a Mesh (i.e. Fields may be created on a Mesh's nodes). An 
 element is a higher dimensional shape constructed of nodes. Elements give a Mesh its shape and define the relationship of the nodes to one 
 another. 
@@ -25,7 +25,7 @@ ESMF currently only supports Meshes whose number of coordinate dimensions (spati
 (parametric dimension) must be less than or equal to the spatial dimension, but also must be either 2 or 3. This means that an ESMF mesh may be
 either 2D elements in 2D space, 3D elements in 3D space, or a manifold constructed of 2D elements embedded in 3D space. 
 
-ESMF currently supports two types of element for each Mesh parametric dimension. For a parametric dimension of 2 the 
+ESMF currently supports two types of elements for each Mesh parametric dimension. For a parametric dimension of 2 the 
 supported element types are triangles or quadralaterals. For a parametric dimension of 3 the supported element types are tetrahedrons
 and hexahedrons. See Section~\ref{sec:mesh:opt:elemtype} for diagrams of these. The Mesh supports any combination of element types within a particular
 dimension, but types from different dimensions may not be mixed, for example, a Mesh cannot be constructed of both quadralaterals and tetrahedra.
