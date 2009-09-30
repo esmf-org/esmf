@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalType.F90,v 1.16 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_TimeIntervalType.F90,v 1.17 2009/09/30 05:57:12 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -40,11 +40,8 @@
 !------------------------------------------------------------------------------
 ! !USES:
       ! inherit from ESMF base class
+      use ESMF_InitMacrosMod
       use ESMF_UtilTypesMod
-
-      ! associated derived types
-      use ESMF_TimeTypeMod
-      use ESMF_CalendarMod
 
       implicit none
 
@@ -62,14 +59,17 @@
 !     ! Equivalent sequence and kind to C++:
 
       type ESMF_TimeInterval
-      private                              !   (members opaque on Fortran side)
-
-      ! allocate enough memory for the TimeInterval class data (set in C++ side)
-      ! in 8 byte units: 
-      !         3*BaseTime + 2*(6*ESMC_Time) + 1*ESMC_Calendar pointer +
-      !         3*ESMC_I8
-      integer(ESMF_KIND_I8) :: shallowMemory(19)
-
+        !sequence
+        private                           !   (members opaque on Fortran side)
+        ! allocate enough memory for the TimeInterval class data
+        ! (set in C++ side) in 8 byte units: 
+        !         3*BaseTime + 2*(6*ESMC_Time) + 1*ESMC_Calendar pointer +
+        !         3*ESMC_I8
+#ifdef ESMF_NO_INITIALIZERS
+        integer(ESMF_KIND_I8) :: shallowMemory(19)
+#else
+        integer(ESMF_KIND_I8) :: shallowMemory(19) = 0
+#endif
         ESMF_INIT_DECLARE
       end type
 
@@ -83,7 +83,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeIntervalType.F90,v 1.16 2009/01/21 21:38:01 cdeluca Exp $'
+      '$Id: ESMF_TimeIntervalType.F90,v 1.17 2009/09/30 05:57:12 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       contains
