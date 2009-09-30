@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.61 2009/08/26 03:46:14 eschwab Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.62 2009/09/30 22:07:32 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -1294,7 +1294,6 @@ call ESMF_GridDestroy(grid3D,rc=rc)
               rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  print *, "setcoord1"
 !BOC
    call ESMF_GridSetCoord(grid2D, &
           staggerLoc=ESMF_STAGGERLOC_CORNER, &
@@ -2057,7 +2056,7 @@ endif
     ! construct ArraySpec
     call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R8, rc=rc)
 
-    ! Create an Array based on the presence of distributed dimensions
+    ! Create an Array based on info from grid
     array=ESMF_ArrayCreate(arrayspec=arrayspec, &
             distgrid=distgrid, distgridToArrayMap=distgridToGridMap, &
             computationalEdgeLWidth=celwdth, &
@@ -2070,6 +2069,8 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
 !!!!!!!!!!!!!!!!!!!!!!
+   call ESMF_ArrayDestroy(array, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    call ESMF_GridDestroy(grid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    call ESMF_DistGridDestroy(distgrid2D, rc=rc)
@@ -3015,12 +3016,11 @@ endif
    grid2D=ESMF_GridCreate("esmf_grid_shape_tile.xml", rc=rc)
 !EOC
 
-print *, 'rc = ', rc
    if (rc == ESMF_RC_LIB_NOT_PRESENT) goto 10
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!print *, "localDECount = ", localDECount
 
    call ESMF_GridGet(grid2D, localDECount=localDECount, rc=rc)
-print *, "localDECount = ", localDECount
 
    do i=0,localDECount-1
      call ESMF_GridGet(grid2D, localDE=i,  &
@@ -3028,8 +3028,8 @@ print *, "localDECount = ", localDECount
           exclusiveLBound=elbnd, exclusiveUBound=eubnd,              &
           computationalLBound=clbnd, computationalUBound=cubnd,      & 
           rc=rc)
-print *, 'elbnd,eubnd = ', elbnd(1), ",", elbnd(2), " ", eubnd(1), ", ", eubnd(2)
-print *, 'clbnd,cubnd = ', clbnd(1), ",", clbnd(2), " ", cubnd(1), ", ", cubnd(2)
+!print *, 'elbnd,eubnd = ', elbnd(1), ",", elbnd(2), " ", eubnd(1), ", ", eubnd(2)
+!print *, 'clbnd,cubnd = ', clbnd(1), ",", clbnd(2), " ", cubnd(1), ", ", cubnd(2)
    enddo
 
 !!!!!!!!!!!!!!!!!!!!!!!
