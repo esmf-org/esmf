@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.98 2009/09/21 21:05:02 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.99 2009/09/30 03:19:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.98 2009/09/21 21:05:02 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.99 2009/09/30 03:19:00 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -4768,7 +4768,12 @@ Grid::Grid(
 // !IROUTINE:  ESMCI::Grid::destruct
 //
 // !INTERFACE:
-void Grid::destruct(void){
+void Grid::destruct(bool followCreator){
+//
+// TODO: The followCreator flag is only needed until we have reference counting // TODO: For now followCreator, which by default is true, will be coming in as
+// TODO: false when calling through the native destructor. This prevents
+// TODO: sequence problems during automatic garbage collection unitl reference
+// TODO: counting comes in to solve this problem in the final manner.
 //
 // !RETURN VALUE:
 //    none
@@ -4787,7 +4792,8 @@ void Grid::destruct(void){
    //// Delete Arrays
    for(int i=0; i<staggerLocCount; i++) {
      for(int j=0; j<dimCount; j++) {
-       if (coordDidIAllocList[i][j] && (coordArrayList[i][j]!=ESMC_NULL_POINTER)) {
+       if (followCreator && coordDidIAllocList[i][j] &&
+        (coordArrayList[i][j]!=ESMC_NULL_POINTER)) {
          Array::destroy(&coordArrayList[i][j]);
        }
      }
@@ -4797,7 +4803,8 @@ void Grid::destruct(void){
    //// Delete Item Arrays
    for(int i=0; i<staggerLocCount; i++) {
      for(int j=0; j<ESMC_GRIDITEM_COUNT; j++) {
-       if (itemDidIAllocList[i][j] && (itemArrayList[i][j]!=ESMC_NULL_POINTER)){
+       if (followCreator && itemDidIAllocList[i][j] &&
+        (itemArrayList[i][j]!=ESMC_NULL_POINTER)){
          Array::destroy(&itemArrayList[i][j]);
        }
      }
@@ -4807,17 +4814,17 @@ void Grid::destruct(void){
    // Get tmpDELayout if we need it later
    // (also if prevents us from getting layout from empty grid)
    DELayout *tmpDELayout;
-   if (destroyDELayout) {
+   if (followCreator && destroyDELayout) {
      tmpDELayout=distgrid->getDELayout();
    }
 
    // delete distgrid
-   if (destroyDistgrid) {
+   if (followCreator && destroyDistgrid) {
      DistGrid::destroy(&distgrid);
    }
 
    // delete delayout
-   if (destroyDELayout) {
+   if (followCreator && destroyDELayout) {
      DELayout::destroy(&tmpDELayout);
    }
 

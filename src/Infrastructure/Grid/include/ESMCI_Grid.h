@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.62 2009/09/21 21:05:01 theurich Exp $
+// $Id: ESMCI_Grid.h,v 1.63 2009/09/30 03:19:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -399,9 +399,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
   // Grid Destruct
  private:
-  void destruct();
+  void destruct(bool followCreator=true);
  public:
-  ~Grid(){destruct();}
+  ~Grid(){destruct(false);}
 
   // get lower stagger offset for a particular localDe and staggerloc
   int getLDEStaggerUOffset(

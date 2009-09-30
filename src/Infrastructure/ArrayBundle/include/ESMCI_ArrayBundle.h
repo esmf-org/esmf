@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.h,v 1.13 2009/09/21 21:04:53 theurich Exp $
+// $Id: ESMCI_ArrayBundle.h,v 1.14 2009/09/30 03:19:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -67,9 +67,9 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
   private:
     ArrayBundle(Array **arrayList, int arrayCount, int *rc);
   public:
-    ~ArrayBundle(){destruct();}
+    ~ArrayBundle(){destruct(false);}
   private:
-    int destruct();
+    int destruct(bool followCreator=true);
   public:
     // create() and destroy()
     static ArrayBundle *create(Array **arrayList, int arrayCount, int *rc);

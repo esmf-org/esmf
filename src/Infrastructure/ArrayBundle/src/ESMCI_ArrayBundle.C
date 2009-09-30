@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.17 2009/09/21 21:04:53 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.18 2009/09/30 03:19:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.17 2009/09/21 21:04:53 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.18 2009/09/30 03:19:00 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -118,7 +118,12 @@ ArrayBundle::ArrayBundle(
 // !IROUTINE:  ESMCI::ArrayBundle::destruct
 //
 // !INTERFACE:
-int ArrayBundle::destruct(){
+int ArrayBundle::destruct(bool followCreator){
+//
+// TODO: The followCreator flag is only needed until we have reference counting // TODO: For now followCreator, which by default is true, will be coming in as
+// TODO: false when calling through the native destructor. This prevents
+// TODO: sequence problems during automatic garbage collection unitl reference
+// TODO: counting comes in to solve this problem in the final manner.
 //
 // !DESCRIPTION:
 //    Destruct the internal structure of an ESMCI::ArrayBundle object.
@@ -132,7 +137,7 @@ int ArrayBundle::destruct(){
   if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
     // garbage collection
     if (arrayList != NULL){
-      if (arrayCreator)
+      if (arrayCreator && followCreator)
         for (int i=0; i<arrayCount; i++)
           Array::destroy(&arrayList[i]);
       delete [] arrayList;
