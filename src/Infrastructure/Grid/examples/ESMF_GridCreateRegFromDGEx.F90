@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.10 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.11 2009/09/30 22:39:19 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -76,6 +76,14 @@ program ESMF_GridCreateEx
    call ESMF_GridAddCoord(Grid2D,  &
           staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
 !EOC
+
+   ! Get rid of memory
+   call ESMF_GridDestroy(Grid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+   ! Get rid of memory
+   call ESMF_DistgridDestroy(distgrid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 
 10 continue
