@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2009/08/28 16:41:00 oehmke Exp $
+# $Id: makefile,v 1.20 2009/09/30 05:02:21 theurich Exp $
 
 # leave alone.
 ALL: build_here 
@@ -67,7 +67,7 @@ SOURCEC	  = \
            ESMCI_WriteWeightsPar.C \
            ESMCI_MeshCXX.C
 
-SOURCEF	  = ESMF_Mesh_C.F90 \
+SOURCEF	  = \
 	    ESMF_SolverUtil_C.F90 \
 
 SOURCEH	  = ESMCI_MeshCXX.h
