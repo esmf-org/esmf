@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.30 2009/09/28 20:29:24 oehmke Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.31 2009/09/30 05:09:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -682,8 +682,10 @@ extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *
   {
     int nsize = *num_lnodes = ngids.size();
     int rc1;
+    
+    int *indices = (nsize==0)?NULL:&ngids[0];
 
-    FTN(f_esmf_getmeshdistgrid)(ngrid, &nsize, &ngids[0], &rc1);
+    FTN(f_esmf_getmeshdistgrid)(ngrid, &nsize, indices, &rc1);
 
     if (ESMC_LogDefault.MsgFoundError(rc1,
       ESMF_ERR_PASSTHRU,
@@ -692,7 +694,10 @@ extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *
   {
     int esize = *num_lelems = egids.size();
     int rc1;
-    FTN(f_esmf_getmeshdistgrid)(egrid, &esize, &egids[0], &rc1);
+    
+    int *indices = (esize==0)?NULL:&egids[0];
+
+    FTN(f_esmf_getmeshdistgrid)(egrid, &esize, indices, &rc1);
 
     if(ESMC_LogDefault.MsgFoundError(rc1,
       ESMF_ERR_PASSTHRU,
