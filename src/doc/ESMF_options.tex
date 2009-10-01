@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.33 2009/03/17 05:21:36 theurich Exp $
+% $Id: ESMF_options.tex,v 1.34 2009/10/01 15:41:01 oehmke Exp $
 
 \section{Global Options, Flags and Parameters}
 
@@ -426,6 +426,23 @@ version of ESMF in use.
 \end{description}
 
 
+
+\subsubsection{ESMF\_GeomType}
+\label{opt:geomtype}
+
+{\sf DESCRIPTION:\\}
+Different types of geometries upon which an ESMF Field or ESMF Fieldbundle may
+be built. 
+
+Valid values are:
+\begin{description}
+\item [ESMF\_GEOMTYPE\_GRID]
+      An ESMF\_Grid, a structured grid composed of one or more logically rectangular tiles
+\item [ESMF\_GEOMTYPE\_MESH]
+      An ESMF\_Mesh, an unstructured grid
+\item [ESMF\_TYPEKIND\_LOCSTREAM]
+      An ESMF\_LocStream, a disconnected series of points with associated key values
+\end{description}
 
 
 
