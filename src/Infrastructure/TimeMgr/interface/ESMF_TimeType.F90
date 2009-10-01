@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeType.F90,v 1.16 2009/09/30 05:57:12 eschwab Exp $
+! $Id: ESMF_TimeType.F90,v 1.17 2009/10/01 05:09:31 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -61,7 +61,7 @@
 !     ! Equivalent sequence and kind to C++:
 
       type ESMF_Time
-        !sequence
+        sequence
         private                            !  (members opaque on Fortran side)
 #ifdef ESMF_NO_INITIALIZERS
         integer(ESMF_KIND_I8), dimension(6) :: shallowMemory
@@ -81,7 +81,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeType.F90,v 1.16 2009/09/30 05:57:12 eschwab Exp $'
+      '$Id: ESMF_TimeType.F90,v 1.17 2009/10/01 05:09:31 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -141,8 +141,10 @@
 !
 !EOPI
     ! Note: ESMF_TimeType is private
+
         s%shallowMemory = 0
         ESMF_INIT_SET_DEFINED(s)
+
     end subroutine ESMF_TimeInit
 
 !------------------------------------------------------------------------------
