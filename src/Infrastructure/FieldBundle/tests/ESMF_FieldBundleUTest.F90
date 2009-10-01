@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.18 2009/10/01 15:52:10 oehmke Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.19 2009/10/01 20:24:03 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.18 2009/10/01 15:52:10 oehmke Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.19 2009/10/01 20:24:03 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -646,6 +646,7 @@
        deallocate(elemConn)
 
      else if (petCount .eq. 4) then
+
      ! Setup mesh data depending on PET
      if (localPet .eq. 0) then
         ! Fill in node data
@@ -780,6 +781,7 @@
        allocate(elemConn(numElems*4))
        elemConn=(/1,2,4,3/)  
      endif
+
 
     ! Create Mesh structure in 1 step
     meshTst1=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
@@ -927,12 +929,13 @@
 
        !! elem type
        allocate(elemTypes(numElems))
-       elemTypes=ESMF_MESHELEMTYPE_QUAD
+       elemTypes=ESMF_MESHELEMTYPE_TRI
 
        !! elem conn
        allocate(elemConn(numElems*3))
        elemConn=(/1,2,3/)  
      endif
+
 
     ! Create Mesh structure in 1 step
     meshTst2=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
@@ -955,6 +958,7 @@
 
    endif ! endif for skip for >4 proc
 
+
    if ((petCount .eq. 1) .or. (petCount .eq. 4)) then
       ! Set ArraySpec
       call ESMF_ArraySpecSet(arrayspec, rank=1, typekind=ESMF_TYPEKIND_R8, rc=localrc)
@@ -968,7 +972,7 @@
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
       ! Create FieldBundle
-      ! SHOULD FAIL BECAUSE ON DIFFERENT LocStreams
+      ! SHOULD FAIL BECAUSE ON DIFFERENT Meshes
       bundleTst=ESMF_FieldBundleCreate(2,fieldTst,rc=localrc)      
       if (localrc .eq. ESMF_SUCCESS) rc=ESMF_FAILURE ! SHOULD FAIL
 
