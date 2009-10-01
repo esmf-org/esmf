@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.16 2009/08/06 19:03:27 svasquez Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.17 2009/10/01 17:24:22 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -219,14 +219,14 @@ module ESMF_AttributeUpdateMod
 !BOE
 ! This first bit is a verification that the {\tt ESMF\_StateReconcile()} call will correctly
 ! reconcile Attributes and Attribute packages that are attached to the top level 
-! State in an Attribute hierarchy.  A customized Attribute package is set up and added
-! to the export State, as well as a single Attribute.  During the initialize phase of the
+! State in an Attribute hierarchy.  During the initialize phase of the
 ! coupler Component, the structure of these Attributes should be reconciled across the
 ! VM.  The value of the Attributes in this structure are not guaranteed after the 
 ! completion of {\tt ESMF\_StateReconcile()}, as that is the responsibility of the
 ! {\tt ESMF\_AttributeUpdate()} call.  There will be more on this subject when we get
 ! to the coupler Component.
 !EOE
+!BOC
     call ESMF_AttributeSet(exportState, name="TESTESTEST", &
                            value="SUCCESUCCESUCCES", rc=status)
     if (status .ne. ESMF_SUCCESS) return

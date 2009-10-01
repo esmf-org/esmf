@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.15 2009/09/11 19:30:26 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.16 2009/10/01 17:24:21 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -96,7 +96,6 @@ implicit none
 
 
       if (petCount<4) then
-      goto 10
         gridcomp1 = ESMF_GridCompCreate(name="gridcomp1", &
           petList=(/0/), rc=rc)
         gridcomp2 = ESMF_GridCompCreate(name="gridcomp2", &
