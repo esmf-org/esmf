@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.26 2009/09/24 17:15:22 theurich Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.27 2009/10/01 15:52:10 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -28,7 +28,8 @@
 ! !DESCRIPTION:
 ! The code in this file implements the {\tt ESMF\_FieldBundle} class, which 
 ! represents a set of {\tt ESMF\_Fields} discretized on the same 
-! {\tt ESMF\_Grid}.  {\tt ESMF\_FieldBundle}s offer the option to pack the data 
+! geometry (i.e. {\tt ESMF\_Grid}, {\tt ESMF\_Mesh}, etc.).
+! {\tt ESMF\_FieldBundle}s offer the option to pack the data 
 ! from the {\tt ESMF\_Field}s they contain into a single buffer. 
 !
 !  This type is implemented in Fortran 90 and a corresponding
@@ -46,6 +47,10 @@
       use ESMF_FieldCreateMod
       use ESMF_FieldGetMod
       use ESMF_InitMacrosMod
+      use ESMF_GeomBaseMod
+      use ESMF_LocStreamMod
+      use ESMF_MeshMod
+
       implicit none
 !
 ! !PRIVATE TYPES:
@@ -117,7 +122,7 @@
         type(ESMF_Field), dimension(:), pointer :: flist
         type(ESMF_Status) :: gridstatus
 
-        type(ESMF_Grid) :: grid                  ! associated global Grid
+        type(ESMF_GeomBase) :: geombase           ! associated global grid, mesh, etc.
         type(ESMF_LocalFieldBundle) :: localbundle    ! this differs per DE
         type(ESMF_Packflag) :: pack_flag         ! is packed data present?
         type(ESMF_IOSpec) :: iospec              ! iospec values
@@ -180,7 +185,9 @@
 
 !      public ESMF_FieldBundleRemoveField   ! Delete one or more Fields by name or number
 
+
       public ESMF_FieldBundleSetGrid           ! In empty FieldBundle, set Grid
+      public ESMF_FieldBundleSet               ! In empty FieldBundle, set Grid
 
       public ESMF_FieldBundleIsCongruent        ! private to framework
 
@@ -231,11 +238,33 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldBundleCreateNew
-        module procedure ESMF_FieldBundleCreateNoFields
+        module procedure ESMF_FieldBundleCreateNFNone
+        module procedure ESMF_FieldBundleCreateNFGrid
+        module procedure ESMF_FieldBundleCreateNFLS
+        module procedure ESMF_FieldBundleCreateNFMesh
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
 !  types of {\tt ESMF\_FieldBundleCreate} functions.
+!EOPI
+      end interface
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_FieldBundleSet - Set a geometry into a FieldBundle
+!
+! !INTERFACE:
+     interface ESMF_FieldBundleSet
+
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_FieldBundleSetGrid
+        module procedure ESMF_FieldBundleSetLS
+        module procedure ESMF_FieldBundleSetMesh
+
+! !DESCRIPTION:
+! This interface provides a single entry point for the various
+!  types of {\tt ESMF\_FieldBundleSet} functions.
 !EOPI
       end interface
 
@@ -342,7 +371,7 @@ end function
 !
 ! !DESCRIPTION:
 !      Adds a single {\tt field} to an existing {\tt bundle}.  The
-!      {\tt field} must be associated with the same {\tt ESMF\_Grid} 
+!      {\tt field} must be associated with the same geometry (i.e. ESMF\_Grid, ESMF\_Mesh, or ESMF\_LocStream) 
 !      as the other {\tt ESMF\_Field}s in the {\tt bundle}.   
 !      The {\tt field} is referenced by the {\tt bundle}, not copied.
 ! 
@@ -421,7 +450,8 @@ end function
 ! !DESCRIPTION:
 !      Adds a {\tt fieldList} to an existing {\tt ESMF\_FieldBundle}.  
 !      The items added from the {\tt ESMF\_fieldList} must be associated 
-!      with the same {\tt ESMF\_Grid} as the other {\tt ESMF\_Field}s in the 
+!      with the same geometry (i.e. ESMF\_Grid, ESMF\_Mesh, or ESMF\_LocStream) 
+!       as the other {\tt ESMF\_Field}s in the 
 !      {\tt bundle}.  The items in the {\tt fieldList} are referenced by
 !      the {\tt bundle}, not copied.  
 !
@@ -516,7 +546,8 @@ end function
 !   Creates an {\tt ESMF\_FieldBundle} from a list of existing
 !   {\tt ESMF\_Fields} stored in a {\tt fieldList}.  All items in 
 !   the {\tt fieldList} must be associated with the same 
-!   {\tt ESMF\_Grid}.  Returns a new {\tt ESMF\_FieldBundle}.
+!   geometry (i.e. ESMF\_Grid, ESMF\_Mesh, or ESMF\_LocStream).  
+!   Returns a new {\tt ESMF\_FieldBundle}.
 !
 !   The arguments are:
 !   \begin{description}
@@ -614,22 +645,20 @@ end function
 
       end function ESMF_FieldBundleCreateNew
 
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleCreateNoFields"
+#define ESMF_METHOD "ESMF_FieldBundleCreateNFNone"
 !BOP
-! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle with no Fields
+! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle with no Fields no Grid
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleCreate()
-      function ESMF_FieldBundleCreateNoFields(grid, name, iospec, rc)
+      function ESMF_FieldBundleCreateNFNone(name, iospec, rc)
 !
-! !RETURN VALUE:
-      type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNoFields
+! !RETURN VALUE:                
+      type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNFNone
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in), optional :: grid
       character (len = *), intent(in), optional :: name 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc             
@@ -640,11 +669,6 @@ end function
 !
 !   The arguments are:
 !   \begin{description}
-!   \item [{[grid]}]
-!       The {\tt ESMF\_Grid} which all {\tt ESMF\_Field}s added to this
-!       {\tt ESMF\_FieldBundle} must be associated with.  If not specified now, the 
-!       grid associated with the first {\tt ESMF\_Field} added will be
-!       used as the reference grid for the {\tt ESMF\_FieldBundle}.
 !   \item [{[name]}]
 !       {\tt ESMF\_FieldBundle} name.  A default name is generated if
 !       one is not specified.
@@ -665,7 +689,84 @@ end function
       ! Initialize pointers
       status = ESMF_RC_NOT_IMPL
       nullify(btypep)
-      nullify(ESMF_FieldBundleCreateNoFields%btypep)
+      nullify(ESMF_FieldBundleCreateNFNone%btypep)
+
+      ! Initialize return code
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      allocate(btypep, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "FieldBundle allocate", &
+                                       ESMF_CONTEXT, rc)) return
+
+      ! Call construction method to allocate and initialize bundle internals.
+      call ESMF_FieldBundleConstructEmpty(btypep, name, iospec, rc)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+
+      ! Set return values.
+      ESMF_FieldBundleCreateNFNone%btypep => btypep
+      ! Add reference to this object into ESMF garbage collection table
+      ! Only call this in those Create() methods that call Construct()
+      call c_ESMC_VMAddFObject(ESMF_FieldBundleCreateNFNone, &
+        ESMF_ID_FIELDBUNDLE%objectID)
+
+      ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateNFNone)
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_FieldBundleCreateNFNone
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleCreateNFGrid"
+!BOP
+! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle with no Fields, but a Grid
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleCreate()
+      function ESMF_FieldBundleCreateNFGrid(grid, name, iospec, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNFGrid
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in), optional :: name 
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!   Creates an {\tt ESMF\_FieldBundle} with no associated {\tt ESMF\_Fields}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [grid]
+!       The {\tt ESMF\_Grid} which all {\tt ESMF\_Field}s added to this
+!       {\tt ESMF\_FieldBundle} must be associated with. 
+!   \item [{[name]}]
+!       {\tt ESMF\_FieldBundle} name.  A default name is generated if
+!       one is not specified.
+!   \item [{[iospec]}]
+!       The {\tt ESMF\_IOSpec} is not yet used by {\tt ESMF\_FieldBundle}s.  Any 
+!       values passed in will be ignored.
+!   \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!
+!EOP
+
+
+      type(ESMF_FieldBundleType), pointer :: btypep   ! Pointer to new bundle
+      integer :: status                          ! Error status
+
+      ! Initialize pointers
+      status = ESMF_RC_NOT_IMPL
+      nullify(btypep)
+      nullify(ESMF_FieldBundleCreateNFGrid%btypep)
 
       ! Initialize return code
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -683,15 +784,19 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      ! If specified, set the Grid.  All Fields added to this FieldBundle
+      ! Set the Grid.  All Fields added to this FieldBundle
       !  must be based on this same Grid.
-
-      if (present(grid)) then
           call ESMF_GridValidate(grid, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-          btypep%grid = grid
+
+          ! Create the geombase around the grid, use the center stagger as a generic stagger here, 
+          ! because the stagger won't really matter in this case
+          btypep%geombase=ESMF_GeomBaseCreate(grid,ESMF_STAGGERLOC_CENTER,rc=status)
+          if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
           btypep%gridstatus = ESMF_STATUS_READY
 
           !  link the Attribute hierarchies
@@ -699,22 +804,201 @@ end function
           if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
-      endif
 
       ! Set return values.
-      ESMF_FieldBundleCreateNoFields%btypep => btypep
-      
+      ESMF_FieldBundleCreateNFGrid%btypep => btypep
       ! Add reference to this object into ESMF garbage collection table
       ! Only call this in those Create() methods that call Construct()
-      call c_ESMC_VMAddFObject(ESMF_FieldBundleCreateNoFields, &
+      call c_ESMC_VMAddFObject(ESMF_FieldBundleCreateNFGrid, &
         ESMF_ID_FIELDBUNDLE%objectID)
-      
-      ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateNoFields)
+
+      ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateNFGrid)
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_FieldBundleCreateNoFields
+      end function ESMF_FieldBundleCreateNFGrid
 
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleCreateNFMesh"
+!BOP
+! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle with no Fields, but a Mesh
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleCreate()
+      function ESMF_FieldBundleCreateNFMesh(mesh, name, iospec, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNFMesh
+!
+! !ARGUMENTS:
+      type(ESMF_Mesh), intent(in) :: mesh
+      character (len = *), intent(in), optional :: name 
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!   Creates an {\tt ESMF\_FieldBundle} with no associated {\tt ESMF\_Fields}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [mesh]
+!       The {\tt ESMF\_Mesh} which all {\tt ESMF\_Field}s added to this
+!       {\tt ESMF\_FieldBundle} must be associated with. 
+!   \item [{[name]}]
+!       {\tt ESMF\_FieldBundle} name.  A default name is generated if
+!       one is not specified.
+!   \item [{[iospec]}]
+!       The {\tt ESMF\_IOSpec} is not yet used by {\tt ESMF\_FieldBundle}s.  Any 
+!       values passed in will be ignored.
+!   \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!
+!EOP
+
+
+      type(ESMF_FieldBundleType), pointer :: btypep   ! Pointer to new bundle
+      integer :: status                          ! Error status
+
+      ! Initialize pointers
+      status = ESMF_RC_NOT_IMPL
+      nullify(btypep)
+      nullify(ESMF_FieldBundleCreateNFMesh%btypep)
+
+      ! Initialize return code
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check inputs 
+      ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,mesh,rc)
+
+      allocate(btypep, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "FieldBundle allocate", &
+                                       ESMF_CONTEXT, rc)) return
+
+      ! Call construction method to allocate and initialize bundle internals.
+      call ESMF_FieldBundleConstructEmpty(btypep, name, iospec, rc)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      ! Set the Mesh.  All Fields added to this FieldBundle
+      !  must be based on this same Mesh.
+
+          ! Create the geombase around the mesh
+          btypep%geombase=ESMF_GeomBaseCreate(mesh,rc=status)
+          if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+          btypep%gridstatus = ESMF_STATUS_READY
+
+      ! Set return values.
+      ESMF_FieldBundleCreateNFMesh%btypep => btypep
+
+      ! Add reference to this object into ESMF garbage collection table
+      ! Only call this in those Create() methods that call Construct()
+      call c_ESMC_VMAddFObject(ESMF_FieldBundleCreateNFMesh, &
+        ESMF_ID_FIELDBUNDLE%objectID)
+
+      ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateNFMesh)
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_FieldBundleCreateNFMesh
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleCreateNFLS"
+!BOP
+! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle with no Fields, but a LocStream
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleCreate()
+      function ESMF_FieldBundleCreateNFLS(locstream, name, iospec, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNFLS
+!
+! !ARGUMENTS:
+      type(ESMF_LocStream), intent(in) :: locstream
+      character (len = *), intent(in), optional :: name 
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!   Creates an {\tt ESMF\_FieldBundle} with no associated {\tt ESMF\_Fields}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [locstream]
+!       The {\tt ESMF\_LocStream} which all {\tt ESMF\_Field}s added to this
+!       {\tt ESMF\_FieldBundle} must be associated with. 
+!   \item [{[name]}]
+!       {\tt ESMF\_FieldBundle} name.  A default name is generated if
+!       one is not specified.
+!   \item [{[iospec]}]
+!       The {\tt ESMF\_IOSpec} is not yet used by {\tt ESMF\_FieldBundle}s.  Any 
+!       values passed in will be ignored.
+!   \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!
+!EOP
+
+
+      type(ESMF_FieldBundleType), pointer :: btypep   ! Pointer to new bundle
+      integer :: status                          ! Error status
+
+      ! Initialize pointers
+      status = ESMF_RC_NOT_IMPL
+      nullify(btypep)
+      nullify(ESMF_FieldBundleCreateNFLS%btypep)
+
+      ! Initialize return code
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check inputs 
+      ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
+
+      allocate(btypep, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "FieldBundle allocate", &
+                                       ESMF_CONTEXT, rc)) return
+
+      ! Call construction method to allocate and initialize bundle internals.
+      call ESMF_FieldBundleConstructEmpty(btypep, name, iospec, rc)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      ! Set the LocStream.  All Fields added to this FieldBundle
+      !  must be based on this same LocStream.
+
+          ! Create the geombase around the mesh
+          btypep%geombase=ESMF_GeomBaseCreate(locstream,rc=status)
+          if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+          btypep%gridstatus = ESMF_STATUS_READY
+
+      ! Set return values.
+      ESMF_FieldBundleCreateNFLS%btypep => btypep
+      ! Add reference to this object into ESMF garbage collection table
+      ! Only call this in those Create() methods that call Construct()
+      call c_ESMC_VMAddFObject(ESMF_FieldBundleCreateNFLS, &
+        ESMF_ID_FIELDBUNDLE%objectID)
+
+      ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateNFLS)
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_FieldBundleCreateNFLS
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -790,11 +1074,14 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleGet()
-      subroutine ESMF_FieldBundleGetInfo(bundle, grid, fieldCount, name, rc)
+      subroutine ESMF_FieldBundleGetInfo(bundle, geomtype, grid, mesh, locstream, fieldCount, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: bundle
+      type(ESMF_GeomType), intent(out), optional :: geomtype
       type(ESMF_Grid), intent(out), optional :: grid
+      type(ESMF_Mesh), intent(out), optional :: mesh
+      type(ESMF_LocStream), intent(out), optional :: locstream
       integer, intent(out), optional :: fieldCount
       character (len = *), intent(out), optional :: name
       integer, intent(out), optional :: rc
@@ -809,8 +1096,16 @@ end function
 !     \begin{description}
 !     \item [bundle]
 !           The {\tt ESMF\_FieldBundle} object to query.
+!     \item [{[geomtype]}]
+!           Specifies the type of geometry on which the FieldBundle is built. Please see Section~\ref{opt:geomtype} for 
+!           the range of values. Based on this value the user can use this method to retrieve one and only one 
+!           of {\tt grid}, {\tt mesh}, or {\tt locstream}. 
 !     \item [{[grid]}]
 !           The {\tt ESMF\_Grid} associated with the {\tt bundle}.
+!     \item [{[mesh]}]
+!           The {\tt ESMF\_Mesh} associated with the {\tt bundle}.
+!     \item [{[locstream]}]
+!           The {\tt ESMF\_LocStream} associated with the {\tt bundle}.
 !     \item [{[fieldCount]}]
 !           Number of {\tt ESMF\_Field}s in the {\tt bundle}.
 !     \item [{[name]}]
@@ -824,6 +1119,7 @@ end function
 
       integer :: status                           ! Error status
       type(ESMF_FieldBundleType), pointer :: btype     ! internal data
+      type(ESMF_GeomType) :: localGeomType
 
       ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
@@ -846,17 +1142,60 @@ end function
 
       btype => bundle%btypep
 
-      if (present(grid)) then
-          ! Check to be sure bundle has grid before trying to return it.
-          if (btype%gridstatus .ne. ESMF_STATUS_READY) then
-               if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "FieldBundle does not contain a Grid", &
-                                 ESMF_CONTEXT, rc)) return
-          endif
-          
-          ! OK to return grid
-          grid = btype%grid
-      endif
+    ! Get the geometry type
+    if (present(geomtype)) then
+        if (btype%gridstatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                            "No Grid or Mesh or LocStream attached to FieldBundle", &
+                             ESMF_CONTEXT, rc)) return
+        endif
+
+        call ESMF_GeomBaseGet(btype%geombase, geomtype=localGeomType, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        geomType = localGeomType
+    endif
+
+    if (present(grid)) then
+        if (btype%gridstatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                            "No Grid or invalid Grid attached to FieldBundle", &
+                             ESMF_CONTEXT, rc)) return
+        endif
+        call ESMF_GeomBaseGet(btype%geombase, &
+                  grid=grid, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+    endif
+
+    if (present(mesh)) then
+        if (btype%gridstatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                            "No Mesh or invalid Mesh attached to FieldBundle", &
+                             ESMF_CONTEXT, rc)) return
+        endif
+        call ESMF_GeomBaseGet(btype%geombase, &
+                  mesh=mesh, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+    endif
+
+    if (present(locstream)) then
+        if (btype%gridstatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                            "No LocStream or invalid LocStream attached to FieldBundle", &
+                             ESMF_CONTEXT, rc)) return
+        endif
+        call ESMF_GeomBaseGet(btype%geombase, &
+                  locstream=locstream, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+    endif
+
 
       if (present(fieldCount)) then
           ! Return Field count
@@ -1642,6 +1981,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleSetGrid"
 !BOP
+! Private name; call using ESMF_FieldBundleSet()
 ! !IROUTINE: ESMF_FieldBundleSetGrid - Associate a Grid with an empty FieldBundle
 ! 
 ! !INTERFACE:
@@ -1682,6 +2022,7 @@ end function
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
       ! Validate bundle before going further
       call ESMF_FieldBundleValidate(bundle, rc=status)
@@ -1704,8 +2045,16 @@ end function
        if (ESMF_LogMsgFoundError(status, &
                                    ESMF_ERR_PASSTHRU, &
                                    ESMF_CONTEXT, rc)) return
-      btype%grid = grid
+
+       ! Create the geombase around the grid, use the center stagger as a generic stagger here, 
+       ! because the stagger won't really matter in this case
+       btype%geombase=ESMF_GeomBaseCreate(grid,ESMF_STAGGERLOC_CENTER,rc=status)
+       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+      ! Set Status to containing a Grid
       btype%gridstatus = ESMF_STATUS_READY
+
 
       !  link the Attribute hierarchies
       call c_ESMC_AttributeLink(btype%base, grid, status)
@@ -1715,6 +2064,164 @@ end function
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldBundleSetGrid
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleSetMesh"
+!BOP
+! Private name; call using ESMF_FieldBundleSet()
+! !IROUTINE: ESMF_FieldBundleSetMesh - Associate a Mesh with an empty FieldBundle
+! 
+! !INTERFACE:
+      subroutine ESMF_FieldBundleSetMesh(bundle, mesh, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle
+      type(ESMF_Mesh), intent(in) :: mesh
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Sets the {\tt mesh} for a {\tt bundle} that contains no {\tt ESMF\_Field}s. 
+!   All {\tt ESMF\_Field}s added to this {\tt bundle} must be
+!   associated with the same {\tt ESMF\_Mesh}.  Returns an error if 
+!   there is already an {\tt ESMF\_Mesh} associated with the {\tt bundle}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [bundle]
+!        An {\tt ESMF\_FieldBundle} object.
+!   \item [mesh]
+!        The {\tt ESMF\_Mesh} which all {\tt ESMF\_Field}s added to this
+!        {\tt ESMF\_FieldBundle} must have.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!
+!EOP
+
+
+      integer :: status                           ! Error status
+      type(ESMF_FieldBundleType), pointer :: btype     ! internal data
+
+      ! Initialize return code; assume routine not implemented
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,mesh,rc)
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      btype => bundle%btypep
+   
+      ! here we will only let someone associate a grid with a bundle
+      ! if there is not one already associated with it.  
+      if (btype%gridstatus .eq. ESMF_STATUS_READY) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "FieldBundle is already associated with a geometry", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! OK to set mesh
+
+       ! Create the geombase around the grid, use the center stagger as a generic stagger here, 
+       ! because the stagger won't really matter in this case
+       btype%geombase=ESMF_GeomBaseCreate(mesh,rc=status)
+       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+      ! Set Status to containing a Grid
+      btype%gridstatus = ESMF_STATUS_READY
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleSetMesh
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleSetLS"
+!BOP
+! Private name; call using ESMF_FieldBundleSet()
+! !IROUTINE: ESMF_FieldBundleSetLS - Associate a LocStream with an empty FieldBundle
+! 
+! !INTERFACE:
+      subroutine ESMF_FieldBundleSetLS(bundle, locstream, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle
+      type(ESMF_LocStream), intent(in) :: locstream
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Sets the {\tt locstream} for a {\tt bundle} that contains no {\tt ESMF\_Field}s. 
+!   All {\tt ESMF\_Field}s added to this {\tt bundle} must be
+!   associated with the same {\tt ESMF\_LocStream}.  Returns an error if 
+!   there is already an {\tt ESMF\_LocStream} associated with the {\tt bundle}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [bundle]
+!        An {\tt ESMF\_FieldBundle} object.
+!   \item [locstream]
+!        The {\tt ESMF\_LocStream} which all {\tt ESMF\_Field}s added to this
+!        {\tt ESMF\_FieldBundle} must have.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!
+!EOP
+
+
+      integer :: status                           ! Error status
+      type(ESMF_FieldBundleType), pointer :: btype     ! internal data
+
+      ! Initialize return code; assume routine not implemented
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      btype => bundle%btypep
+   
+      ! here we will only let someone associate a grid with a bundle
+      ! if there is not one already associated with it.  
+      if (btype%gridstatus .eq. ESMF_STATUS_READY) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "FieldBundle is already associated with a geometry", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+       ! Create the geombase around the locstream
+       btype%geombase=ESMF_GeomBaseCreate(locstream,rc=status)
+       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+      ! Set Status to containing a Grid
+      btype%gridstatus = ESMF_STATUS_READY
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleSetLS
+
 
 
 !------------------------------------------------------------------------------
@@ -1900,8 +2407,8 @@ end function
 ! !DESCRIPTION:
 !  Add a Field reference to an existing {\tt ESMF\_FieldBundle}.  
 !  The {\tt ESMF\_Field} must have the
-!  same {\tt ESMF\_Grid} as the rest of the 
-!  {\tt ESMF\_Field}s in the {\tt ESMF\_FieldBundle}.
+!  same geometry (i.e. ESMF\_Grid, ESMF\_Mesh, or ESMF\_LocStream) 
+!   as the rest of the {\tt ESMF\_Field}s in the {\tt ESMF\_FieldBundle}.
 !  If the {\tt ESMF\_FieldBundle} has
 !  packed data this will mean making a copy of the data.
 !  Note: packed data is currently not supported. 
@@ -1927,8 +2434,14 @@ end function
       integer :: i                                ! temp var
       type(ESMF_Field), dimension(:), pointer :: temp_flist  
                                                   ! list of fields
-      type(ESMF_Grid) :: testgrid, matchgrid
-      logical :: wasempty, isCommitted
+      logical :: isGeomFound
+      type(ESMF_GeomType) :: geomtype, geomtypeToCheck
+      type(ESMF_Grid) :: grid, gridToCheck
+      type(ESMF_LocStream) :: locstream, locstreamToCheck
+      type(ESMF_Mesh) :: mesh, meshToCheck
+      logical :: wasempty, isCommitted,theyMatch
+      integer :: indexToStartChecking
+
 
       ! Initialize return code.  Assume routine not implemented.
       status = ESMF_RC_NOT_IMPL
@@ -1966,8 +2479,8 @@ end function
       !       unchanged
       !    if all ok, then if bundle had no grid originally, set it here 
 
-      matchgrid%this = ESMF_NULL_POINTER
-      if (btype%gridstatus .eq. ESMF_STATUS_UNINIT) then
+      isGeomFound=.false.
+      if (btype%gridstatus .ne. ESMF_STATUS_READY) then
           do i=1, fieldCount
             ! determine if a Field is committed and has a Grid associated with it
             call ESMF_FieldGet(fields(i), isCommitted=isCommitted, rc=status)
@@ -1975,46 +2488,195 @@ end function
                         "Invalid Field found when trying to access Field", &
                         ESMF_CONTEXT, rc)) return
             if(.not.isCommitted) cycle
-            call ESMF_FieldGet(fields(i), grid=testgrid, rc=status)
+
+            ! Get geomtype
+            call ESMF_FieldGet(fields(i), geomtype=geomtype, rc=status)
             if (ESMF_LogMsgFoundError(status, &
                         "Invalid Field found when trying to access Field", &
                         ESMF_CONTEXT, rc)) return
 
-            ! use grid from first field in add list which contains one
-            matchgrid = testgrid
+            ! Get geom based on geomtype
+            if (geomtype==ESMF_GEOMTYPE_GRID) then
+               call ESMF_FieldGet(fields(i), grid=grid, rc=status)
+               if (ESMF_LogMsgFoundError(status, &
+                        "Invalid Field found when trying to access Field", &
+                        ESMF_CONTEXT, rc)) return
+
+            else if (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
+               call ESMF_FieldGet(fields(i), locstream=locstream, rc=status)
+               if (ESMF_LogMsgFoundError(status, &
+                        "Invalid Field found when trying to access Field", &
+                        ESMF_CONTEXT, rc)) return
+
+            else if (geomtype==ESMF_GEOMTYPE_MESH) then
+               call ESMF_FieldGet(fields(i), mesh=mesh, rc=status)
+               if (ESMF_LogMsgFoundError(status, &
+                        "Invalid Field found when trying to access Field", &
+                        ESMF_CONTEXT, rc)) return
+
+            else
+               if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                   "Bad geomtype", &
+                    ESMF_CONTEXT, rc)) return
+            endif
+
+            ! We've found a geometry
+	    isGeomFound=.true.
+
+            ! Set the index we should start checking fields at
+            indexToStartChecking=i+1
+
             exit
           enddo
        else
-          ! use the grid already associated with the bundle 
-          matchgrid = btype%grid
+            ! Get geomtype
+            call ESMF_GeomBaseGet(btype%geombase, geomtype=geomtype, rc=status)
+            if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+            ! Get geom based on geomtype
+            if (geomtype==ESMF_GEOMTYPE_GRID) then
+               call ESMF_GeomBaseGet(btype%geombase, grid=grid, rc=status)
+               if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+            else if (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
+               call ESMF_GeomBaseGet(btype%geombase, locstream=locstream, rc=status)
+               if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+            else if (geomtype==ESMF_GEOMTYPE_MESH) then
+               call ESMF_GeomBaseGet(btype%geombase, mesh=mesh, rc=status)
+               if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+            else
+               if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                   "Bad geomtype", &
+                    ESMF_CONTEXT, rc)) return
+            endif
+
+            ! We've found a geometry
+            isGeomFound=.true.
+
+            ! Set the index we should start checking fields at
+            indexToStartChecking=1
        endif
-  
+
+       ! Set FieldBundle geombase if we now have one
+       if (isGeomFound .and. (btype%gridstatus .ne. ESMF_STATUS_READY)) then
+            ! Get geom based on geomtype
+            if (geomtype==ESMF_GEOMTYPE_GRID) then
+               ! Construct GeomBase for FieldBundle
+	       btype%geombase=ESMF_GeomBaseCreate(grid,ESMF_STAGGERLOC_CENTER,rc=status)
+       	       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+            else if (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
+               ! Construct GeomBase for FieldBundle
+	       btype%geombase=ESMF_GeomBaseCreate(locstream,rc=status)
+       	       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+            else if (geomtype==ESMF_GEOMTYPE_MESH) then
+               ! Construct GeomBase for FieldBundle
+	       btype%geombase=ESMF_GeomBaseCreate(mesh,rc=status)
+       	       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+            else
+               if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                   "Bad geomtype", &
+                    ESMF_CONTEXT, rc)) return
+            endif
+
+            ! Set Status to containing a geometry
+             btype%gridstatus = ESMF_STATUS_READY
+
+       endif
+
+
        ! if bundle has no grid, and all new fields have no grid, then 
        ! we cannot do any grid consistency checks here.  so only continue
        ! here if someone somewhere has a grid to compare against.
+       if (isGeomFound) then
+          ! check matchgrid against each new grid in the add list
+          do i=indexToStartChecking, fieldCount
 
-! TODO:FIELDINTEGRATION This section checks new grid values against
-! old grid.  It needs to be rewritten for new Grid, which, due to the
-! switch from Fortran to C++, does not use Fortran pointers.
+            ! determine if a Field is committed and has a Grid associated with it
+            call ESMF_FieldGet(fields(i), isCommitted=isCommitted, rc=status)
+            if (ESMF_LogMsgFoundError(status, &
+                        "Invalid Field found when trying to access Field", &
+                        ESMF_CONTEXT, rc)) return
+            if(.not.isCommitted) cycle
 
-!       if (associated(matchgrid%ptr)) then
-!          ! check matchgrid against each new grid in the add list
-!          do i=1, fieldCount
-!            call ESMF_FieldGet(fields(i), grid=testgrid, rc=status)
-!            if (status .ne. ESMF_SUCCESS) cycle
-!
-!            if (.not. associated(matchgrid%ptr,testgrid%ptr)) then
-!                if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-!                   "Fields with inconsistent Grids cannot be added to FieldBundle", &
-!                                 ESMF_CONTEXT, rc)) return
-!            endif
-!          enddo
-!          ! if this is the first field added with a grid, set the bundle grid
-!          if (btype%gridstatus .eq. ESMF_STATUS_UNINIT) then
-!            btype%grid = matchgrid
-!            btype%gridstatus = ESMF_STATUS_READY
-!          endif
-!      endif
+            ! Get geomtype from field
+            call ESMF_FieldGet(fields(i), geomtype=geomtypeToCheck, rc=status)
+            if (ESMF_LogMsgFoundError(status, &
+                        "Invalid Field found when found when trying to access field", &
+                        ESMF_CONTEXT, rc)) return
+
+            ! Make sure geomtypes match
+            if (geomType .ne. geomTypeToCheck) then
+               if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                   " Fields in Field Bundle must all have the same type of gemetry (e.g. grid, mesh, etc)", &
+                    ESMF_CONTEXT, rc)) return     
+            endif
+
+            ! Get geom based on geomtype
+            if (geomtypeToCheck==ESMF_GEOMTYPE_GRID) then
+               call ESMF_FieldGet(fields(i), grid=gridToCheck, rc=status)
+               if (ESMF_LogMsgFoundError(status, &
+                        "Invalid Field found when trying to access Field", &
+                        ESMF_CONTEXT, rc)) return
+               
+               ! make sure this fields grid matches the rest in the bundle
+               theyMatch=ESMF_GridMatch(grid,gridToCheck,status)
+               if (ESMF_LogMsgFoundAllocError(status, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+	       if (.not. theyMatch) then
+                  if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                   " Fields in a FieldBundle must all be on the same Grid", &
+                    ESMF_CONTEXT, rc)) return     
+               endif
+            else if (geomtypeToCheck==ESMF_GEOMTYPE_LOCSTREAM) then
+               call ESMF_FieldGet(fields(i), locstream=locstreamToCheck, rc=status)
+               if (ESMF_LogMsgFoundError(status, &
+                        "Invalid Field found when trying to access Field", &
+                        ESMF_CONTEXT, rc)) return
+
+               ! make sure this fields grid matches the rest in the bundle
+               theyMatch=ESMF_LocStreamMatch(locstream,locstreamToCheck,status)
+               if (ESMF_LogMsgFoundAllocError(status, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+	       if (.not. theyMatch) then
+                  if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                   " Fields in a FieldBundle must all be on the same LocStream", &
+                    ESMF_CONTEXT, rc)) return     
+               endif
+
+            else if (geomtypeToCheck==ESMF_GEOMTYPE_MESH) then
+               call ESMF_FieldGet(fields(i), mesh=meshToCheck, rc=status)
+               if (ESMF_LogMsgFoundError(status, &
+                        "Invalid Field found when trying to access Field", &
+                        ESMF_CONTEXT, rc)) return
+
+               ! make sure this fields grid matches the rest in the bundle
+               theyMatch=ESMF_MeshMatch(mesh,meshToCheck,status)
+               if (ESMF_LogMsgFoundAllocError(status, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+	       if (.not. theyMatch) then
+                  if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                   " Fields in a FieldBundle must all be on the same Mesh", &
+                    ESMF_CONTEXT, rc)) return     
+               endif
+            else
+               if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                   "Bad geomtype", &
+                    ESMF_CONTEXT, rc)) return
+            endif
+         enddo ! do i=indexToStartCheck, fieldCount
+       endif
 
       ! if we get this far, either no one has any grids, or the grids
       ! have passed the consistency check.  add them to the bundle.
@@ -2335,8 +2997,22 @@ end function
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
 
-      if (fieldbundlestatus .eq. ESMF_STATUS_READY) then
 
+!        if(btype%is_proxy) then
+!          With the new garbage collection I don't think we need to do this
+!          call ESMF_GridDestroy(btype%grid, rc=status)
+!          if (ESMF_LogMsgFoundError(status, &
+!                ESMF_ERR_PASSTHRU, &
+!                ESMF_CONTEXT, rc)) return
+!          do i = 1, btype%field_count
+!            call ESMF_FieldDestroy(btype%flist(i), rc=status)
+!            if (ESMF_LogMsgFoundError(status, &
+!                ESMF_ERR_PASSTHRU, &
+!                ESMF_CONTEXT, rc)) return
+!          enddo
+!        endif
+
+      if (fieldbundlestatus .eq. ESMF_STATUS_READY) then
         if (associated(btype%flist)) then
           deallocate(btype%flist, stat=localrc)
           if (ESMF_LogMsgFoundAllocError(localrc, "FieldBundle deallocate", &
@@ -2450,7 +3126,7 @@ end function
                                  ESMF_CONTEXT, rc)) return
 
       if (bp%gridstatus .eq. ESMF_STATUS_READY) then
-          call ESMF_GridSerialize(bp%grid, buffer, length, offset, &
+          call ESMF_GeomBaseSerialize(bp%geombase, buffer, length, offset, &
                                   attreconflag=lattreconflag, &
                                   inquireflag=linquireflag, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -2520,7 +3196,8 @@ end function
       integer :: i
       type(ESMF_FieldBundleType), pointer :: bp   ! bundle type
       type(ESMF_AttReconcileFlag) :: lattreconflag
-
+      type(ESMF_Grid) :: grid
+      type(ESMF_GeomType) :: geomtype
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2567,7 +3244,7 @@ end function
                                  ESMF_CONTEXT, rc)) return
 
       if (bp%gridstatus .eq. ESMF_STATUS_READY) then
-          bp%grid = ESMF_GridDeserialize(buffer, offset, &
+          bp%geombase = ESMF_GeomBaseDeserialize(buffer, offset, &
                                       attreconflag=lattreconflag, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
@@ -2576,11 +3253,23 @@ end function
           !  here we relink the FieldBundle Attribute hierarchies to the
           !  Grid Attribute hierarchy, as they were before
           if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
-            call c_ESMC_AttributeLink(bp%base, bp%grid, localrc)
+	    call ESMF_GeomBaseGet(bp%geombase,geomtype=geomtype,rc=localrc)            
             if (ESMF_LogMsgFoundError(localrc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+
+            if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
+       	       call ESMF_GeomBaseGet(bp%geombase,grid=grid,rc=localrc)            
+               if (ESMF_LogMsgFoundError(localrc, &
+                                         ESMF_ERR_PASSTHRU, &
+                                         ESMF_CONTEXT, rc)) return
+
+               call c_ESMC_AttributeLink(bp%base, grid, localrc)
+               if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          endif
+	    endif
+         endif
       endif
 
       ! TODO: decide if these need to be sent before or after

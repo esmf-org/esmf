@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleComm.F90,v 1.7 2009/08/27 05:34:24 theurich Exp $
+! $Id: ESMF_FieldBundleComm.F90,v 1.8 2009/10/01 15:52:10 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleComm.F90,v 1.7 2009/08/27 05:34:24 theurich Exp $'
+      '$Id: ESMF_FieldBundleComm.F90,v 1.8 2009/10/01 15:52:10 oehmke Exp $'
 
 !==============================================================================
 !
@@ -711,12 +711,12 @@
 !     done only a single time; otherwise computing and reusing a communication
 !     pattern will be more efficient. 
 !     This routine reads the source bundle and leaves 
-!     the data untouched.  It reads the {\tt ESMF\_IGrid} and 
+!     the data untouched.  It reads the distribution and 
 !     {\tt ESMF\_FieldDataMap}
 !     from the destination bundle and updates the array data in the destination.
-!     The {\tt ESMF\_IGrid}s may have different decompositions (different
+!     The FieldBundles may have different decompositions (different
 !     {\tt ESMF\_DELayout}s) or different data maps, but the source and
-!     destination igrids must describe the same set of coordinates.
+!     destination must describe the same set of coordinates.
 !     Unlike {\tt ESMF\_FieldBundleRegrid} this routine does not do interpolation,
 !     only data movement.
 !
@@ -725,7 +725,7 @@
 !     \item [srcFieldBundle] 
 !           {\tt ESMF\_FieldBundle} containing source data.
 !     \item [dstFieldBundle] 
-!           {\tt ESMF\_FieldBundle} containing destination igrid.
+!           {\tt ESMF\_FieldBundle} containing destination.
 !     \item [parentVM]
 !           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_FieldBundle}s,
 !           most commonly the VM of the Coupler if the redistribution is
@@ -824,12 +824,12 @@
 !     Perform a redistribution operation over the data
 !     in an {\tt ESMF\_FieldBundle}.  
 !     This routine reads the source bundle and leaves 
-!     the data untouched.  It reads the {\tt ESMF\_IGrid} and 
+!     the data untouched.  It reads the distribution and 
 !     {\tt ESMF\_FieldDataMap}
 !     from the destination bundle and updates the array data in the destination.
-!     The {\tt ESMF\_IGrid}s may have different decompositions (different
+!     The FieldBundles may have different decompositions (different
 !     {\tt ESMF\_DELayout}s) or different data maps, but the source and
-!     destination igrids must describe the same set of coordinates.
+!     destination must describe the same set of coordinates.
 !     Unlike {\tt ESMF\_FieldBundleRegrid} this routine does not do interpolation,
 !     only data movement.
 !
@@ -838,7 +838,7 @@
 !     \item [srcbundle] 
 !           {\tt ESMF\_FieldBundle} containing source data.
 !     \item [dstbundle] 
-!           {\tt ESMF\_FieldBundle} containing destination igrid.
+!           {\tt ESMF\_FieldBundle} containing destination.
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} which was returned by the corresponding
 !           {\tt ESMF\_FieldBundleRedistStore()} call. It is associated with
@@ -1086,17 +1086,17 @@
 !     in that redistribution does no interpolation, only a 1-for-1 movement
 !     of data from one location to another.
 !     Therefore, while 
-!     the {\tt ESMF\_IGrid}s for the source and destination may have
+!     the source and destination FieldBundles may have
 !     different decompositions (different {\tt ESMF\_DELayout}s) 
-!     or different data maps, the source and destination igrids 
-!     must describe the same set of coordinates.
+!     or different data maps, the source and destination
+!     must have the same set of coordinates.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [srcFieldBundle]
 !           {\tt ESMF\_FieldBundle} containing source data.
 !     \item [dstFieldBundle]
-!           {\tt ESMF\_FieldBundle} containing destination igrid.
+!           {\tt ESMF\_FieldBundle} containing destination.
 !     \item [parentVM]
 !           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_FieldBundle}s, 
 !           most commonly the VM
@@ -1310,7 +1310,7 @@
 ! !DESCRIPTION:
 !     Perform a regrid operation over the data
 !     in an {\tt ESMF\_FieldBundle}.  This routine reads the source bundle and 
-!     leaves the data untouched.  It uses the {\tt ESMF\_IGrid} and
+!     leaves the data untouched.  It uses the distribution and
 !     {\tt ESMF\_FieldDataMap} information in the destination bundle to
 !     control the transformation of data.  The array data in the 
 !     destination bundle is overwritten by this call.
@@ -1433,7 +1433,7 @@
 ! !DESCRIPTION:
 !     Perform a regrid operation over the data
 !     in an {\tt ESMF\_FieldBundle}.  This routine reads the source bundle and 
-!     leaves the data untouched.  It uses the {\tt ESMF\_IGrid} and
+!     leaves the data untouched.  It uses the geometry and
 !     {\tt ESMF\_FieldDataMap} information in the destination bundle to
 !     control the transformation of data.  The array data in the 
 !     destination bundle is overwritten by this call.
