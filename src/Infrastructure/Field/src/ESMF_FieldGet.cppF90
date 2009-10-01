@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.45 2009/09/29 15:08:02 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.46 2009/10/01 15:42:16 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.45 2009/09/29 15:08:02 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.46 2009/10/01 15:42:16 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -151,8 +151,8 @@ contains
 ! \item [{[isCommitted]}]
 !       Indicates if the Field is fully committed and ready.
 ! \item [{[geomtype]}]
-!       Specifies what type of geometry the field is built on. {\tt ESMF\_GEOMTYPE\_GRID}={\tt ESMF\_Grid}.
-!       {\tt ESMF\_GEOMTYPE\_MESH}={\tt ESMF\_Mesh}. {\tt ESMF\_GEOMTYPE\_LOCSTREAM}={\tt ESMF\_LocStream}.
+!       Specifies the type of geometry on which the Field is built. Please see Section~\ref{opt:geomtype} for 
+!       the range of values.
 ! \item [{[grid]}]
 !       {\tt ESMF\_Grid}.
 ! \item [{[mesh]}]
