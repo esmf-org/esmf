@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.23 2009/09/30 16:17:56 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.24 2009/10/01 15:39:59 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -126,6 +126,8 @@ module ESMF_MeshMod
   public ESMF_MeshFreeMemory
   public ESMF_MeshGetInit
   public ESMF_MeshGet
+  public ESMF_MeshMatch
+
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -133,7 +135,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.23 2009/09/30 16:17:56 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.24 2009/10/01 15:39:59 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -833,7 +835,7 @@ module ESMF_MeshMod
 
       ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
-    ! If mesh has been freed then exit
+    ! If mesh has not been fully created
     if (.not. mesh%isFullyCreated) then
        call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh has not been fully created", & 
@@ -854,6 +856,94 @@ module ESMF_MeshMod
 
     end subroutine ESMF_MeshGet
 
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshMatch()"
+!BOPI
+! !IROUTINE: ESMF_MeshMatch - Check if two Mesh objects match
+
+! !INTERFACE:
+  function ESMF_MeshMatch(mesh1, mesh2, rc)
+!
+! !RETURN VALUE:
+    logical :: ESMF_MeshMatch
+      
+! !ARGUMENTS:
+    type(ESMF_Mesh),  intent(in)              :: mesh1
+    type(ESMF_Mesh),  intent(in)              :: mesh2
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Check if {\tt mesh1} and {\tt mesh2} match. Returns
+!      .true. if Mesh objects match, .false. otherwise. This
+!      method current just checks if mesh1 and mesh2s distgrids match,
+!      future work will do a more complex check.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[mesh1] 
+!          {\tt ESMF\_Mesh} object.
+!     \item[mesh2] 
+!          {\tt ESMF\_Mesh} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer      :: localrc      ! local return code
+    logical      :: matchResultNode, matchResultElem
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! init to one setting in case of error
+    ESMF_MeshMatch = .false.
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh1, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh2, rc)
+    
+    ! If meshs have not been fully created
+    if (.not. mesh1%isFullyCreated) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh has not been fully created", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif        
+
+    if (.not. mesh2%isFullyCreated) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh has not been fully created", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif        
+
+    ! For now just make match to mean that the Mesh's have the same distgrids because that's
+    ! all the fields care about
+    matchResultNode=ESMF_DistGridMatch(mesh1%nodal_distgrid, mesh2%nodal_distgrid, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    matchResultElem=ESMF_DistGridMatch(mesh1%element_distgrid, mesh2%element_distgrid, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! return successfully
+    if (matchResultNode .and. matchResultElem) then
+       ESMF_MeshMatch = .true.
+    else
+       ESMF_MeshMatch = .false.
+    endif
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end function ESMF_MeshMatch
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -924,7 +1014,7 @@ module ESMF_MeshMod
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshGetInit"
 !BOPI
-! !IROUTINE: ESMF_GridGetInit - Internal access routine for init code
+! !IROUTINE: ESMF_MeshGetInit - Internal access routine for init code
 !
 ! !INTERFACE:
       function ESMF_MeshGetInit(mesh)
@@ -940,8 +1030,8 @@ module ESMF_MeshMod
 !
 ! The arguments are:
 ! \begin{description}
-! \item [grid]
-! Grid object.
+! \item [mesh]
+! Mesh object.
 ! \end{description}
 !
 !EOPI
