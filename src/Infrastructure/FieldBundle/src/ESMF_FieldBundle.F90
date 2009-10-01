@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.29 2009/10/01 18:14:07 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.30 2009/10/01 18:19:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -1323,7 +1323,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                            ! Error status
       integer :: i, newstart
