@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.19 2009/09/24 17:15:23 theurich Exp $
+! $Id: ESMF_LocStream.F90,v 1.20 2009/10/01 15:38:35 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -108,6 +108,7 @@ module ESMF_LocStreamMod
    public ESMF_LocStreamPrint              ! Print contents of a LocStream
    public ESMF_LocStreamGetKey
    public ESMF_LocStreamAddKey
+   public ESMF_LocStreamMatch
 
 
 ! - ESMF-internal methods:
@@ -123,7 +124,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.19 2009/09/24 17:15:23 theurich Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.20 2009/10/01 15:38:35 oehmke Exp $'
 
 !==============================================================================
 !
@@ -2476,7 +2477,67 @@ end subroutine ESMF_LocStreamGetKeyR8
 
 end subroutine ESMF_LocStreamGetBounds
 
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocStreamMatch()"
+!BOPI
+! !IROUTINE: ESMF_LocStreamMatch - Check if two Locstream objects match
 
+! !INTERFACE:
+  function ESMF_LocStreamMatch(locstream1, locstream2, rc)
+!
+! !RETURN VALUE:
+    logical :: ESMF_LocStreamMatch
+      
+! !ARGUMENTS:
+    type(ESMF_Locstream),  intent(in)              :: locstream1
+    type(ESMF_Locstream),  intent(in)              :: locstream2
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Check if {\tt locstream1} and {\tt locstream2} match. Returns
+!      .true. if Locstream objects match, .false. otherwise. This
+!      method current just checks if locstream1 and locstream2 are the
+!      same object, future work will do a more complex check.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[locstream1] 
+!          {\tt ESMF\_Locstream} object.
+!     \item[locstream2] 
+!          {\tt ESMF\_Locstream} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer      :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! init to one setting in case of error
+    ESMF_LocStreamMatch = .false.
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_LocstreamGetInit, locstream1, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_LocstreamGetInit, locstream2, rc)
+    
+    ! make sure the locstreams point to the same thing
+    if (associated(locstream1%lstypep,locstream2%lstypep)) then
+       ESMF_LocStreamMatch = .true.
+    else
+       ESMF_LocStreamMatch = .false.
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end function ESMF_LocStreamMatch
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
