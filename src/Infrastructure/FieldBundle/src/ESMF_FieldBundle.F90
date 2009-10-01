@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.27 2009/10/01 15:52:10 oehmke Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.28 2009/10/01 16:51:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -2997,21 +2997,6 @@ end function
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
 
-
-!        if(btype%is_proxy) then
-!          With the new garbage collection I don't think we need to do this
-!          call ESMF_GridDestroy(btype%grid, rc=status)
-!          if (ESMF_LogMsgFoundError(status, &
-!                ESMF_ERR_PASSTHRU, &
-!                ESMF_CONTEXT, rc)) return
-!          do i = 1, btype%field_count
-!            call ESMF_FieldDestroy(btype%flist(i), rc=status)
-!            if (ESMF_LogMsgFoundError(status, &
-!                ESMF_ERR_PASSTHRU, &
-!                ESMF_CONTEXT, rc)) return
-!          enddo
-!        endif
-
       if (fieldbundlestatus .eq. ESMF_STATUS_READY) then
         if (associated(btype%flist)) then
           deallocate(btype%flist, stat=localrc)
@@ -3019,7 +3004,6 @@ end function
                                          ESMF_CONTEXT, rc)) return
 
         endif
-
       endif
 
       ! Set as deleted 
@@ -3304,7 +3288,7 @@ end function
 
       ESMF_FieldBundleDeserialize%btypep => bp
 
-      ! Add copy of this object into ESMF garbage collection table
+      ! Add reference to this object into ESMF garbage collection table
       call c_ESMC_VMAddFObject(ESMF_FieldBundleDeserialize, &
         ESMF_ID_FIELDBUNDLE%objectID)
       
