@@ -1,4 +1,4 @@
-! $Id: ESMF_State_C.F90,v 1.22 2009/09/29 05:46:08 theurich Exp $
+! $Id: ESMF_State_C.F90,v 1.23 2009/10/01 16:42:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.22 2009/09/29 05:46:08 theurich Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.23 2009/10/01 16:42:17 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -319,7 +319,7 @@
 
 !------------------------------------------------------------------------------
 
-  subroutine f_esmf_statecollectgarbage(stype, rc)
+  subroutine f_esmf_statecollectgarbage(state, rc)
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_statecollectgarbage"
     use ESMF_UtilTypesMod
@@ -328,7 +328,7 @@
     use ESMF_StateTypesMod
     use ESMF_StateMod
     
-    type(ESMF_StateClass), pointer :: stype
+    type(ESMF_State)     :: state
     integer, intent(out) :: rc
   
     integer :: localrc
@@ -340,20 +340,20 @@
     !print *, "collecting State garbage"
 
     ! destruct internal data allocations
-    call ESMF_StateDestruct(stype, rc=localrc)
+    call ESMF_StateDestruct(state%statep, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rc)) return
 
     ! deallocate actual StateClass allocation      
-    if (associated(stype)) then
-      deallocate(stype, stat=localrc)
+    if (associated(state%statep)) then
+      deallocate(state%statep, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Deallocating State", &
         ESMF_CONTEXT, &
         rc)) return
     endif
-    nullify(stype)
+    nullify(state%statep)
 
     ! return successfully  
     rc = ESMF_SUCCESS

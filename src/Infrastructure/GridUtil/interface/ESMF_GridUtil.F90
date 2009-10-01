@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.12 2009/09/24 17:15:23 theurich Exp $
+! $Id: ESMF_GridUtil.F90,v 1.13 2009/10/01 16:42:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.12 2009/09/24 17:15:23 theurich Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.13 2009/10/01 16:42:17 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -244,7 +244,7 @@ module ESMF_GridUtilMod
 end module ESMF_GridUtilMod
 
 
-  subroutine f_esmf_geombasecollectgarbage(gbtype, rc)
+  subroutine f_esmf_geombasecollectgarbage(gb, rc)
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_geombasecollectgarbage()"
     use ESMF_UtilTypesMod
@@ -252,7 +252,7 @@ end module ESMF_GridUtilMod
     use ESMF_LogErrMod
     use ESMF_GeomBaseMod
 
-    type(ESMF_GeomBaseClass), pointer :: gbtype
+    type(ESMF_GeomBase)  :: gb
     integer, intent(out) :: rc     
   
     integer :: localrc              
@@ -264,12 +264,12 @@ end module ESMF_GridUtilMod
     !print *, "collecting GeomBase garbage"
     
     ! deallocate actual GeomBaseClass allocation      
-    if (associated(gbtype)) then
-      deallocate(gbtype, stat=localrc)
+    if (associated(gb%gbcp)) then
+      deallocate(gb%gbcp, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Deallocating GeomBase", &
         ESMF_CONTEXT, rc)) return
     endif
-    nullify(gbtype)
+    nullify(gb%gbcp)
 
     ! return successfully  
     rc = ESMF_SUCCESS

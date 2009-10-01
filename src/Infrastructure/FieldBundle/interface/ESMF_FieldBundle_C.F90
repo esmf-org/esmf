@@ -1,4 +1,4 @@
-!  $Id: ESMF_FieldBundle_C.F90,v 1.7 2009/09/29 05:46:08 theurich Exp $
+!  $Id: ESMF_FieldBundle_C.F90,v 1.8 2009/10/01 16:42:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_FieldBundle_C.F90,v 1.7 2009/09/29 05:46:08 theurich Exp $'
+!      '$Id: ESMF_FieldBundle_C.F90,v 1.8 2009/10/01 16:42:16 theurich Exp $'
 !==============================================================================
    subroutine f_esmf_bundlecreate(bundlep, rc)
        use ESMF_UtilTypesMod    ! ESMF generic types class
@@ -60,7 +60,7 @@
 
    end subroutine f_esmf_bundledestroy
 
-  subroutine f_esmf_fbundlecollectgarbage(fbtype, rc)
+  subroutine f_esmf_fbundlecollectgarbage(fb, rc)
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_fbundlecollectgarbage"
     use ESMF_UtilTypesMod
@@ -68,8 +68,8 @@
     use ESMF_LogErrMod
     use ESMF_FieldBundleMod
 
-    type(ESMF_FieldBundleType), pointer :: fbtype
-    integer, intent(out) :: rc
+    type(ESMF_FieldBundle):: fb
+    integer, intent(out)  :: rc
   
     integer :: localrc
   
@@ -80,20 +80,20 @@
     !print *, "collecting FieldBundle garbage"
   
     ! destruct internal data allocations
-    call ESMF_FieldBundleDestruct(fbtype, rc=localrc)
+    call ESMF_FieldBundleDestruct(fb%btypep, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rc)) return
 
     ! deallocate actual FieldBundleType allocation      
-    if (associated(fbtype)) then
-      deallocate(fbtype, stat=localrc)
+    if (associated(fb%btypep)) then
+      deallocate(fb%btypep, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Deallocating FieldBundle", &
         ESMF_CONTEXT, &
         rc)) return
     endif
-    nullify(fbtype)
+    nullify(fb%btypep)
 
     ! return successfully
     rc = ESMF_SUCCESS

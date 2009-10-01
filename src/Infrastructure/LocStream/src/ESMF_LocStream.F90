@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.20 2009/10/01 15:38:35 oehmke Exp $
+! $Id: ESMF_LocStream.F90,v 1.21 2009/10/01 16:42:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -124,7 +124,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.20 2009/10/01 15:38:35 oehmke Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.21 2009/10/01 16:42:17 theurich Exp $'
 
 !==============================================================================
 !
@@ -4602,7 +4602,7 @@ end subroutine ESMF_LocStreamGetBounds
 end module ESMF_LocStreamMod
 
 
-  subroutine f_esmf_locstreamcollectgarbage(lstype, rc)
+  subroutine f_esmf_locstreamcollectgarbage(ls, rc)
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_fieldcollectgarbage()"
     use ESMF_UtilTypesMod
@@ -4610,7 +4610,7 @@ end module ESMF_LocStreamMod
     use ESMF_LogErrMod
     use ESMF_LocStreamMod
 
-    type(ESMF_LocStreamType), pointer :: lstype
+    type(ESMF_LocStream) :: ls
     integer, intent(out) :: rc     
   
     integer :: localrc              
@@ -4622,18 +4622,18 @@ end module ESMF_LocStreamMod
     !print *, "collecting LocStream garbage"
   
     ! destruct internal data allocations
-    call ESMF_LocStreamDestruct(lstype, rc=localrc)
+    call ESMF_LocStreamDestruct(ls%lstypep, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
     ! deallocate actual LocStreamType allocation      
-    if (associated(lstype)) then
-      deallocate(lstype, stat=localrc)
+    if (associated(ls%lstypep)) then
+      deallocate(ls%lstypep, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Deallocating LocStream", &
         ESMF_CONTEXT, rc)) return
     endif
-    nullify(lstype)
+    nullify(ls%lstypep)
 
     ! return successfully  
     rc = ESMF_SUCCESS
