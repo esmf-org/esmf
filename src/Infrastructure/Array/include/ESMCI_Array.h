@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.33 2009/09/29 05:48:27 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.34 2009/10/02 21:58:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -298,89 +298,6 @@ namespace ESMCI {
     int getDstN()const{return dstN;}
   };
 
-    
-  class MultiDimIndexLoop{
-   protected:
-    vector<int> indexTupleStart;
-    vector<int> indexTupleEnd;
-    vector<int> indexTuple;
-   public:
-    MultiDimIndexLoop(){
-      indexTupleStart.resize(0);
-      indexTupleEnd.resize(0);
-      indexTuple.resize(0);
-    }
-    MultiDimIndexLoop(const vector<int> sizes){
-      indexTupleEnd = sizes;
-      indexTupleStart.resize(sizes.size());
-      indexTuple.resize(sizes.size());
-      for (int i=0; i<indexTuple.size(); i++)
-        indexTupleStart[i] = indexTuple[i] = 0;  // reset
-    }
-    MultiDimIndexLoop(const vector<int> offsets, const vector<int> sizes){
-      indexTupleStart = offsets;
-      indexTupleEnd = sizes;
-      // todo: check that vector size matches, and throw exception if not
-      indexTuple.resize(sizes.size());
-      for (int i=0; i<indexTuple.size(); i++){
-        indexTuple[i] = indexTupleStart[i];     // reset
-        indexTupleEnd[i] += indexTupleStart[i]; // shift end by offsets
-      }
-    }
-    void first(){
-      for (int i=0; i<indexTuple.size(); i++)
-        indexTuple[i] = indexTupleStart[i];  // reset
-    }
-    void last(){
-      for (int i=0; i<indexTuple.size(); i++)
-        indexTuple[i] = indexTupleEnd[i]-1;  // reset
-    }
-    void next(){
-      ++indexTuple[0];
-      for (int i=0; i<indexTuple.size()-1; i++){
-        if (indexTuple[i] == indexTupleEnd[i]){
-          indexTuple[i] = indexTupleStart[i];  // reset
-          ++indexTuple[i+1];  // increment
-        }
-      }
-    }
-    void nextLine(){  // skip all remaining elements in 1st dimension
-      indexTuple[0] = indexTupleEnd[0];
-      for (int i=0; i<indexTuple.size()-1; i++){
-        if (indexTuple[i] == indexTupleEnd[i]){
-          indexTuple[i] = indexTupleStart[i];  // reset
-          ++indexTuple[i+1];  // increment
-        }
-      }
-    }
-    bool isFirst(){
-      for (int i=0; i<indexTuple.size(); i++)
-        if (indexTuple[i] != indexTupleStart[i]) return false;
-      return true;
-    }
-    bool isLast(){
-      for (int i=0; i<indexTuple.size(); i++)
-        if (indexTuple[i] != indexTupleEnd[i]-1) return false;
-      return true;
-    }
-    bool isPastLast(){
-      if (indexTuple[indexTuple.size()-1] < indexTupleEnd[indexTuple.size()-1])
-        return false;
-      return true;
-    }
-    const int *getIndexTuple(){
-      return &indexTuple[0];
-    }
-    const int *getIndexTupleEnd(){
-      return &indexTupleEnd[0];
-    }
-    const int *getIndexTupleStart(){
-      return &indexTupleStart[0];
-    }
-    
-  };  // class MultiDimIndexLoop
-  
-  
   class ArrayElement : public MultiDimIndexLoop{
     Array *array;                     // associated Array object
     int localDe;                      // localDe index

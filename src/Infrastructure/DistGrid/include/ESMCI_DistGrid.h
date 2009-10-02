@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.19 2009/09/29 05:48:27 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.20 2009/10/02 21:58:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,19 +39,19 @@
 
 namespace ESMCI {
 
-// constants and enums
+  // constants and enums
 
-enum DecompFlag {DECOMP_DEFAULT=1, DECOMP_HOMOGEN,
-  DECOMP_RESTFIRST, DECOMP_RESTLAST, DECOMP_CYCLIC};
+  enum DecompFlag {DECOMP_DEFAULT=1, DECOMP_HOMOGEN,
+    DECOMP_RESTFIRST, DECOMP_RESTLAST, DECOMP_CYCLIC};
 
-// classes
+  // classes
 
-class DistGrid;
+  class DistGrid;
 
-// class definition
-class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
+  // class definition
+  class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
 
-  private:
+   private:
     int dimCount;                 // rank of DistGrid
     int patchCount;               // number of patches in DistGrid
     int *minIndexPDimPPatch;      // lower corner indices [dimCount*patchCount]
@@ -81,13 +81,13 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     bool delayoutCreator;
     VM *vm;    
         
-  public:
+   public:
     // native constructor and destructor
     DistGrid(){}
     DistGrid(int baseID):ESMC_Base(baseID){}// prevent baseID counter increment
     ~DistGrid(){destruct(false);}
     
-  private:
+   private:
     // construct() and destruct()
     int construct(int dimCount, int patchCount, int *dePatchList,
       int *minIndex, int *maxIndex, int *minIndexPDimPDe, int *maxIndexPDimPDe,
@@ -95,7 +95,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
       int *regDecompArg, InterfaceInt *connectionList,
       DELayout *delayout, bool delayoutCreator, VM *vm);
     int destruct(bool followCreator=true);
-  public:
+   public:
     // create() and destroy()
     static DistGrid *create(DistGrid const *dg,
       InterfaceInt *regDecompFirstExtra, InterfaceInt *regDecompLastExtra, 
@@ -182,7 +182,96 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     static int connection(InterfaceInt *connection, int patchIndexA, 
       int patchIndexB, InterfaceInt *positionVector,
       InterfaceInt *orientationVector, InterfaceInt *repetitionVector);
-};  // class DistGrid
+  };  // class DistGrid
+
+  
+  class MultiDimIndexLoop{
+   protected:
+    vector<int> indexTupleStart;
+    vector<int> indexTupleEnd;
+    vector<int> indexTuple;
+    vector<bool> skipMask;
+   public:
+    MultiDimIndexLoop(){
+      indexTupleStart.resize(0);
+      indexTupleEnd.resize(0);
+      indexTuple.resize(0);
+      skipMask.resize(0);
+    }
+    MultiDimIndexLoop(const vector<int> sizes){
+      indexTupleEnd = sizes;
+      indexTupleStart.resize(sizes.size());
+      indexTuple.resize(sizes.size());
+      skipMask.resize(sizes.size());
+      for (int i=0; i<indexTuple.size(); i++){
+        indexTupleStart[i] = indexTuple[i] = 0; // reset
+        skipMask[i] = false;                    // reset
+      }
+    }
+    MultiDimIndexLoop(const vector<int> offsets, const vector<int> sizes){
+      indexTupleStart = offsets;
+      indexTupleEnd = sizes;
+      // todo: check that vector size matches, and throw exception if not
+      indexTuple.resize(sizes.size());
+      skipMask.resize(sizes.size());
+      for (int i=0; i<indexTuple.size(); i++){
+        indexTuple[i] = indexTupleStart[i];     // reset
+        indexTupleEnd[i] += indexTupleStart[i]; // shift end by offsets
+        skipMask[i] = false;                    // reset
+      }
+    }
+    void setSkipDim(int dim){
+      // todo: check that dim is between 0...,size-1
+      skipMask[dim] = true;
+    }
+    void first(){
+      for (int i=0; i<indexTuple.size(); i++)
+        indexTuple[i] = indexTupleStart[i];  // reset
+    }
+    void last(){
+      for (int i=0; i<indexTuple.size(); i++)
+        indexTuple[i] = indexTupleEnd[i]-1;  // reset
+    }
+    void next(){
+      if (skipMask[0])
+        indexTuple[0] = indexTupleEnd[0]; // skip
+      else
+        ++indexTuple[0];                  // increment
+      for (int i=0; i<indexTuple.size()-1; i++){
+        if (indexTuple[i] == indexTupleEnd[i]){
+          indexTuple[i] = indexTupleStart[i];  // reset
+          if (skipMask[i+1])
+            indexTuple[i+1] = indexTupleEnd[i+1]; // skip
+          else
+            ++indexTuple[i+1];                    // increment
+        }
+      }
+    }
+    bool isFirst(){
+      for (int i=0; i<indexTuple.size(); i++)
+        if (indexTuple[i] != indexTupleStart[i]) return false;
+      return true;
+    }
+    bool isLast(){
+      for (int i=0; i<indexTuple.size(); i++)
+        if (indexTuple[i] != indexTupleEnd[i]-1) return false;
+      return true;
+    }
+    bool isPastLast(){
+      if (indexTuple[indexTuple.size()-1] < indexTupleEnd[indexTuple.size()-1])
+        return false;
+      return true;
+    }
+    const int *getIndexTuple(){
+      return &indexTuple[0];
+    }
+    const int *getIndexTupleEnd(){
+      return &indexTupleEnd[0];
+    }
+    const int *getIndexTupleStart(){
+      return &indexTupleStart[0];
+    }
+  };  // class MultiDimIndexLoop
 
 } // namespace ESMCI
 

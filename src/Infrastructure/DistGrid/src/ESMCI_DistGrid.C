@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.29 2009/09/29 05:48:27 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.30 2009/10/02 21:58:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.29 2009/09/29 05:48:27 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.30 2009/10/02 21:58:30 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2387,27 +2387,36 @@ bool DistGrid::isLocalDeOnEdgeL(
   
   // determine which patch localDe is located on
   int de = delayout->getLocalDeList()[localDe];
-  bool onEdge = false;            // assume local De is _not_ on edge
+  bool onEdge = true;            // assume local De is on edge
   if (elementCountPDe[de]){
     // local De is associated with elements
     // prepare localDe relative index tuple of neighbor index to check
-    int *localDeIndexTuple = new int[dimCount];
-    for (int i=0; i<dimCount; i++){
-      if (i==(dim-1))
-        localDeIndexTuple[i] = -1;
-      else
-        localDeIndexTuple[i] = 0;
-    }
-    // get sequence index providing localDe relative index tuple
-    int seqindex =
-      getSequenceIndexLocalDe(localDe, localDeIndexTuple, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
-      return false;
-    delete [] localDeIndexTuple;
-    // determine if seqindex indicates edge or not
-    if (seqindex == -1){
-      // invalid seqindex indicates edge was crossed
-      onEdge = true;
+    vector<int> localDeIndexTupleVec(dimCount);
+    int *localDeIndexTuple = &(localDeIndexTupleVec[0]);
+    vector<int> sizes;
+    for (int i=0; i<dimCount; i++)
+      sizes.push_back(indexCountPDimPDe[de*dimCount+i]);
+    MultiDimIndexLoop multiDimIndexLoop(sizes);
+    multiDimIndexLoop.setSkipDim(dim-1);  // next() to skip dim
+    while(!multiDimIndexLoop.isPastLast()){
+      // look at the entire interface spanned by all dimensions except dim
+      int const *indexTuple = multiDimIndexLoop.getIndexTuple();
+      for (int i=0; i<dimCount; i++)
+        localDeIndexTuple[i] = indexTuple[i];
+      // look just across interface along dim
+      localDeIndexTuple[dim-1] = -1;
+      // get sequence index providing localDe relative index tuple
+      int seqindex =
+        getSequenceIndexLocalDe(localDe, localDeIndexTuple, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+        return false;
+      // determine if seqindex indicates edge or not
+      if (seqindex != -1){
+        // valid seqindex indicates that there is a neighbor
+        onEdge = false;
+        break;
+      }
+      multiDimIndexLoop.next(); // increment tuple, but skip dim
     }
   }
     
@@ -2461,27 +2470,36 @@ bool DistGrid::isLocalDeOnEdgeU(
   
   // determine which patch localDe is located on
   int de = delayout->getLocalDeList()[localDe];
-  bool onEdge = false;            // assume local De is _not_ on edge
+  bool onEdge = true;            // assume local De is on edge
   if (elementCountPDe[de]){
     // local De is associated with elements
     // prepare localDe relative index tuple of neighbor index to check
-    int *localDeIndexTuple = new int[dimCount];
-    for (int i=0; i<dimCount; i++){
-      if (i==(dim-1))
-        localDeIndexTuple[i] = indexCountPDimPDe[de*dimCount+i];
-      else
-        localDeIndexTuple[i] = indexCountPDimPDe[de*dimCount+i] - 1;
-    }
-    // get sequence index providing localDe relative index tuple
-    int seqindex =
-      getSequenceIndexLocalDe(localDe, localDeIndexTuple, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
-      return false;
-    delete [] localDeIndexTuple;
-    // determine if seqindex indicates edge or not
-    if (seqindex == -1){
-      // invalid seqindex indicates edge was crossed
-      onEdge = true;
+    vector<int> localDeIndexTupleVec(dimCount);
+    int *localDeIndexTuple = &(localDeIndexTupleVec[0]);
+    vector<int> sizes;
+    for (int i=0; i<dimCount; i++)
+      sizes.push_back(indexCountPDimPDe[de*dimCount+i]);
+    MultiDimIndexLoop multiDimIndexLoop(sizes);
+    multiDimIndexLoop.setSkipDim(dim-1);  // next() to skip dim
+    while(!multiDimIndexLoop.isPastLast()){
+      // look at the entire interface spanned by all dimensions except dim
+      int const *indexTuple = multiDimIndexLoop.getIndexTuple();
+      for (int i=0; i<dimCount; i++)
+        localDeIndexTuple[i] = indexTuple[i];
+      // look just across interface along dim
+      localDeIndexTuple[dim-1] = indexCountPDimPDe[de*dimCount+(dim-1)];
+      // get sequence index providing localDe relative index tuple
+      int seqindex =
+        getSequenceIndexLocalDe(localDe, localDeIndexTuple, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+        return false;
+      // determine if seqindex indicates edge or not
+      if (seqindex != -1){
+        // valid seqindex indicates that there is a neighbor
+        onEdge = false;
+        break;
+      }
+      multiDimIndexLoop.next(); // increment tuple, but skip dim
     }
   }
     

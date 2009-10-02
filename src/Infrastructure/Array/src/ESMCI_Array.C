@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.64 2009/09/29 05:48:27 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.65 2009/10/02 21:58:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.64 2009/09/29 05:48:27 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.65 2009/10/02 21:58:27 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2776,6 +2776,7 @@ int Array::gather(
       int contigLength = exclusiveUBound[i*redDimCount]
         - exclusiveLBound[i*redDimCount] + 1;
       ArrayElement arrayElement(this, i);
+      arrayElement.setSkipDim(0); // next() will skip ahead to next contig. line
       // loop over all elements in exclusive region for this DE and memcpy data
       int sendBufferIndex = 0;  // reset
       while(arrayElement.isPastLast()==false){
@@ -2785,10 +2786,10 @@ int Array::gather(
         memcpy(sendBuffer[i]+sendBufferIndex*dataSize,
           larrayBaseAddr+linearIndex*dataSize, contigLength*dataSize);
         sendBufferIndex += contigLength;
-        arrayElement.nextLine();  // skip ahead to next contiguous line
+        arrayElement.next();  // skip ahead to next contiguous line
       } // multi dim index loop
     } // !contiguousFlag
-    
+        
     // ready to send the sendBuffer to rootPet
     *commh = NULL; // invalidate
     localrc = vm->send(sendBuffer[i], sendSize, rootPet, commh);
@@ -2857,9 +2858,11 @@ int Array::gather(
         }
         
         MultiDimIndexLoop multiDimIndexLoop(sizes);
+        if (contigFlagPDimPDe[de*dimCount])
+          multiDimIndexLoop.setSkipDim(0); // contiguous data in first dimension
         // loop over all elements in exclusive region for this DE 
         int recvBufferIndex = 0;  // reset
-        while(!multiDimIndexLoop.isPastLast()){        
+        while(!multiDimIndexLoop.isPastLast()){
           // determine linear index for this element into array
           int linearIndex = 0;  // reset
           for (int jj=rank-1; jj>=0; jj--){
@@ -2888,13 +2891,13 @@ int Array::gather(
             memcpy(array+linearIndex*dataSize, 
               recvBuffer[de]+recvBufferIndex*dataSize,
               multiDimIndexLoop.getIndexTupleEnd()[0]*dataSize);
-            multiDimIndexLoop.nextLine();
+            multiDimIndexLoop.next(); // skip to next contiguous line
             recvBufferIndex += multiDimIndexLoop.getIndexTupleEnd()[0];
           }else{
             // non-contiguous data in first dimension
             memcpy(array+linearIndex*dataSize, 
               recvBuffer[de]+recvBufferIndex*dataSize, dataSize);
-            multiDimIndexLoop.next();
+            multiDimIndexLoop.next(); // next element
             ++recvBufferIndex;
           }
         } // multi dim index loop
@@ -3157,6 +3160,8 @@ int Array::scatter(
         }
         
         MultiDimIndexLoop multiDimIndexLoop(sizes);
+        if (contigFlagPDimPDe[de*dimCount])
+          multiDimIndexLoop.setSkipDim(0); // contiguous data in first dimension
         // loop over all elements in exclusive region for this DE 
         int sendBufferIndex = 0;  // reset
         while(!multiDimIndexLoop.isPastLast()){
@@ -3188,13 +3193,13 @@ int Array::scatter(
             memcpy(sendBuffer[de]+sendBufferIndex*dataSize,
               array+linearIndex*dataSize,
               multiDimIndexLoop.getIndexTupleEnd()[0]*dataSize);
-            multiDimIndexLoop.nextLine();
+            multiDimIndexLoop.next(); // skip to next contiguous line
             sendBufferIndex += multiDimIndexLoop.getIndexTupleEnd()[0];
           }else{
             // non-contiguous data in first dimension
             memcpy(sendBuffer[de]+sendBufferIndex*dataSize,
               array+linearIndex*dataSize, dataSize);
-            multiDimIndexLoop.next();
+            multiDimIndexLoop.next(); // next element
             ++sendBufferIndex;
           }
         } // multi dim index loop
@@ -3295,6 +3300,7 @@ int Array::scatter(
       int contigLength = exclusiveUBound[i*redDimCount]
         - exclusiveLBound[i*redDimCount] + 1;
       ArrayElement arrayElement(this, i);
+      arrayElement.setSkipDim(0); // next() will skip ahead to next contig. line
       // loop over all elements in exclusive region for this DE and memcpy data
       int recvBufferIndex = 0;  // reset
       while(arrayElement.isPastLast()==false){
@@ -3305,7 +3311,7 @@ int Array::scatter(
         memcpy(larrayBaseAddr+linearIndex*dataSize,
           recvBuffer[i]+recvBufferIndex*dataSize, contigLength*dataSize);
         recvBufferIndex += contigLength;
-        arrayElement.nextLine();  // skip ahead to next contiguous line        
+        arrayElement.next();  // skip ahead to next contiguous line
       } // multi dim index loop
 
       // clean-up
@@ -7995,13 +8001,15 @@ ArrayElement::ArrayElement(
   indexTupleStart.resize(array->getRank());
   indexTupleEnd.resize(array->getRank());
   indexTuple.resize(array->getRank());
+  skipMask.resize(array->getRank());
   
   // initialize tuple variables
   int iOff = localDe * array->getDistGrid()->getDimCount();
   int iPacked = 0;    // reset
   int iTensor = 0;    // reset
   for (int i=0; i<array->getRank(); i++){
-    indexTupleStart[i] = indexTuple[i] = 0;  // reset
+    indexTupleStart[i] = indexTuple[i] = 0;   // reset
+    skipMask[i] = false;                      // reset
     if (array->getArrayToDistGridMap()[i]){
       // decomposed dimension
       indexTupleEnd[i] = array->getExclusiveUBound()[iOff+iPacked]
@@ -8015,6 +8023,7 @@ ArrayElement::ArrayElement(
     }   
   }
 }
+//-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
@@ -8081,6 +8090,7 @@ SparseMatrix::SparseMatrix(
     }
   }
 }
+//-----------------------------------------------------------------------------
 
 
 } // namespace ESMCI
