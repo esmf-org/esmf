@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.23 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.24 2009/10/02 23:36:39 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.23 2009/01/21 21:38:02 cdeluca Exp $'
+      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.24 2009/10/02 23:36:39 w6ws Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -57,6 +57,9 @@
       real(ESMF_KIND_R4), allocatable:: r4_localData(:),r4_soln(:)
 
       type(ESMF_logical), allocatable:: local_logical(:),logical_soln(:)
+
+      character(10), allocatable  :: local_chars(:), char_soln(:)
+      character(10) :: lchars
      
       integer :: isum
       real(ESMF_KIND_R8) :: R8Sum
@@ -91,12 +94,14 @@
       allocate(r8_localData(count))
       allocate(r4_localData(count))
       allocate(local_logical(count))
+      allocate(local_chars(count))
 
       ! Allocate the solution arrays
       Allocate(soln(count))
       Allocate(r8_soln(count))
       Allocate(r4_soln(count))
       allocate(logical_soln(count))
+      allocate(char_soln(count))
 
       !Assign values
       do i=1,count
@@ -108,7 +113,8 @@
         else
           local_logical(i)= ESMF_FALSE
         endif
-      end do 
+        write (local_chars(i), '(i2.2,i3)') localPet, i
+      end do
 
       src = localPet - 1
       if (src < 0) src = petCount - 1
@@ -126,8 +132,10 @@
         else
           logical_soln(i)= ESMF_FALSE
         endif
+        write (char_soln(i), '(i2.2,i3)') src, i
       end do 
 
+     
      !Test with integer arguments
      !===========================     
       !------------------------------------------------------------------------
@@ -246,7 +254,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
       ! Verify localData after VM Receive
-      ISum=0.
+      ISum=0
       write(failMsg, *) "Wrong Local Data"
       write(name, *) "Verify local data after receive Test"
       call ESMF_LogicalString(local_logical(1), strvalue, rc)
@@ -259,6 +267,90 @@
       print *, localPet, "After recv: logical_soln(2) is ", trim(strvalue)
       do i=1,count
         if (local_logical(i).ne. logical_soln(i)) ISum= ISum + 1
+      end do
+      call ESMF_Test( (ISum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
+
+call ESMF_IOUnitFlush (6)
+call ESMF_VMBarrier (vm)
+
+     !Test with scalar character string arguments
+     !===========================================
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      ! Send local data to dst
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Sending local character string data Test"
+      lchars = local_chars(1)
+      call ESMF_VMSend(vm, sendData=lchars, count=len(lchars), dst=dst, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+call ESMF_IOUnitFlush (6)
+call ESMF_VMBarrier (vm)
+
+      !------------------------------------------------------------------------
+      print *, localPet, "before recv: Local_chars is ", local_chars
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      ! dst receives local data from src
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Receiving local data Test"
+      call ESMF_VMRecv(vm, recvData=lchars, count=len(lchars), src=src, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+call ESMF_IOUnitFlush (6)
+call ESMF_VMBarrier (vm)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      ! Verify localData after VM Receive
+      write(failMsg, *) "Wrong Local Data"
+      write(name, *) "Verify local data after receive Test"
+      call ESMF_Test (lchars == char_soln(1),  &
+          name, failMsg, result, ESMF_SRCLINE)
+
+call ESMF_IOUnitFlush (6)
+call ESMF_VMBarrier (vm)
+
+     !Test with character string array arguments
+     !==========================================
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      ! Send local data to dst
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Sending local character array data Test"
+      call ESMF_VMSend(vm, sendData=local_chars, count=count*len(local_chars), dst=dst, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      print *, localPet, "before recv: Local_chars(1) is ", local_chars(1) 
+      print *, localPet, "before recv: Local_chars(2) is ", local_chars(2)
+      !------------------------------------------------------------------------
+
+call ESMF_IOUnitFlush (6)
+call ESMF_VMBarrier (vm)
+
+      !NEX_UTest_Multi_Proc_Only
+      ! dst receives local data from src
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Receiving local data Test"
+      call ESMF_VMRecv(vm, recvData=local_chars, count=count*len(local_chars), src=src, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+call ESMF_IOUnitFlush (6)
+call ESMF_VMBarrier (vm)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      ! Verify localData after VM Receive
+      ISum=0
+      write(failMsg, *) "Wrong Local Data"
+      write(name, *) "Verify local data after receive Test"
+      print *, localPet, "After recv: Local_chars(1) is ", local_chars(1)
+      print *, localPet, "After recv: Local_chars(2) is ", local_chars(2)
+      print *, localPet, "After recv: char_soln(1) is ", char_soln(1)
+      print *, localPet, "After recv: char_soln(2) is ", char_soln(2)
+      do i=1,count
+        if (local_chars(i) /= char_soln(i)) ISum= ISum + 1
       end do
       call ESMF_Test( (ISum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
 
