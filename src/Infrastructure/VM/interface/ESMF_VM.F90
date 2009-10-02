@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.110 2009/09/29 20:52:40 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.111 2009/10/02 23:34:08 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.110 2009/09/29 20:52:40 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.111 2009/10/02 23:34:08 w6ws Exp $"
 
 !==============================================================================
 
@@ -362,6 +362,7 @@ module ESMF_VMMod
       module procedure ESMF_VMRecvR8
       module procedure ESMF_VMRecvLogical
       module procedure ESMF_VMRecvCharacter
+      module procedure ESMF_VMRecvCharacterArray
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -441,6 +442,7 @@ module ESMF_VMMod
       module procedure ESMF_VMSendR8
       module procedure ESMF_VMSendLogical
       module procedure ESMF_VMSendCharacter
+      module procedure ESMF_VMSendCharacterArray
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -3602,6 +3604,74 @@ module ESMF_VMMod
 
 
 ! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMRecvCharacterArray()"
+!BOPI
+! !IROUTINE: ESMF_VMRecv - Receive Character array
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMRecv()
+  subroutine ESMF_VMRecvCharacterArray(vm, recvData, count, src, blockingflag, &
+    commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    character(*),             intent(out)             :: recvData(*)
+    integer,                  intent(in)              :: count
+    integer,                  intent(in)              :: src
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: size
+    logical                 :: blocking
+    type(ESMF_CommHandle)   :: localcommhandle
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    endif
+
+    size = count * 1 ! 1 byte
+    ! Call into the C++ interface, which will sort out optional arguments.
+    if (blocking) then
+      call c_ESMC_VMRecv(vm, recvData, size, src, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call c_ESMC_VMRecvNB(vm, recvData, size, src, localcommhandle, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Check if we need to pass back the commhandle
+      if (present(commhandle)) then
+        commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMRecvCharacterArray
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
 !BOP
 ! !IROUTINE: ESMF_VMReduce - Reduce data from across VM
 !
@@ -4791,6 +4861,74 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMSendCharacter
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMSendCharacterArray()"
+!BOPI
+! !IROUTINE: ESMF_VMSend - Send Character
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMSend()
+  subroutine ESMF_VMSendCharacterArray(vm, sendData, count, dst, blockingflag, &
+    commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    character(*),             intent(in)              :: sendData(*)
+    integer,                  intent(in)              :: count
+    integer,                  intent(in)              :: dst
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: size
+    logical                 :: blocking
+    type(ESMF_CommHandle)   :: localcommhandle
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    endif
+
+    size = count ! 1 byte
+    ! Call into the C++ interface, which will sort out optional arguments.
+    if (blocking) then
+      call c_ESMC_VMSend(vm, sendData, size, dst, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call c_ESMC_VMSendNB(vm, sendData, size, dst, localcommhandle, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Check if we need to pass back the commhandle
+      if (present(commhandle)) then
+        commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMSendCharacterArray
 !------------------------------------------------------------------------------
 
 
