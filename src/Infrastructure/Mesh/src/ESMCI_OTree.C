@@ -1,4 +1,4 @@
-// $Id: ESMCI_OTree.C,v 1.1 2009/08/28 15:58:51 oehmke Exp $
+// $Id: ESMCI_OTree.C,v 1.2 2009/10/04 02:59:48 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -18,8 +18,9 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ Array methods declared
-// in the companion file ESMCI_OTree.h
+// The code in this file implements the C++ spatial search methods declared
+// in ESMCI_OTree.h. This code/algorithm developed by Bob Oehmke. Note to self,
+// put ref here when article is done making its way through publication process. 
 //
 //-----------------------------------------------------------------------------
 
@@ -32,7 +33,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_OTree.C,v 1.1 2009/08/28 15:58:51 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_OTree.C,v 1.2 2009/10/04 02:59:48 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 

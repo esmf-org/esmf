@@ -1,4 +1,4 @@
-// $Id: ESMCI_OTree.h,v 1.3 2009/08/28 21:21:21 oehmke Exp $
+// $Id: ESMCI_OTree.h,v 1.4 2009/10/04 02:59:48 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -30,6 +30,9 @@
 // The code in this file defines the C++ {\tt OTree} members and method
 // signatures (prototypes).  The companion file {\tt ESMC\_OTree.C}
 // contains the full code (bodies) for the {\tt OTree} methods.
+// This code/algorithm developed by Bob Oehmke. Note to self:
+// put full ref here when paper is done making its way through 
+// publication process. 
 //
 ///EOP
 //-------------------------------------------------------------------------

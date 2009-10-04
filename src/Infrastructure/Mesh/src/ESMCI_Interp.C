@@ -27,7 +27,7 @@
 
 //#define CHECK_SENS
 
-#define MYSEARCH
+
 
 namespace ESMCI {
 

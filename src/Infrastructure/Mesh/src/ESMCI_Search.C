@@ -496,6 +496,9 @@ static int num_intersecting_elems(const Mesh &src, const BBox &dstBBox, double b
 static void populate_box(OTree *box, const Mesh &src, const BBox &dstBBox, double btol, double nexp) {
 
   MEField<> &coord_field = *src.GetCoordField();
+
+  // Get spatial dim of mesh
+  UInt sdim = src.spatial_dim();
   
   KernelList::const_iterator ki = src.set_begin(), ke = src.set_end();
   
@@ -523,17 +526,20 @@ static void populate_box(OTree *box, const Mesh &src, const BBox &dstBBox, doubl
        
        min[0] = bounding_box.getMin()[0] - btol;
        min[1] = bounding_box.getMin()[1] - btol;
-       min[2] = bounding_box.getMin()[2] - btol;
-       
+       if (sdim >2) min[2] = bounding_box.getMin()[2] - btol;
+       else min[2] = - btol;
+
        max[0] = bounding_box.getMax()[0] + btol;
        max[1] = bounding_box.getMax()[1] + btol;
-       max[2] = bounding_box.getMax()[2] + btol;
+       if (sdim >2) max[2] = bounding_box.getMax()[2] + btol;
+       else  max[2] = btol;
     
        /*
        if (elem.get_id() == 2426) {
          std::cout << "elem 2426, bbox=" << bounding_box << std::endl;
        }*/
 
+       // Add element to search tree
        box->add(min, max, (void*)&elem);
 
      }
