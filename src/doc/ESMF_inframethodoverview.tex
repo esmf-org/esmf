@@ -1,4 +1,4 @@
-% $Id: ESMF_inframethodoverview.tex,v 1.24 2009/07/27 17:47:40 theurich Exp $
+% $Id: ESMF_inframethodoverview.tex,v 1.25 2009/10/05 22:51:48 rokuingh Exp $
 
 \section{Overview of Distributed Data Methods}
 
@@ -549,13 +549,13 @@ surrounding that destination point.
 interpolation is the ESMF version of a techique called ``patch recovery'' commonly
 used in finite element modeling~\cite{PatchInterp1}~\cite{PatchInterp2}. It typically results in better approximations to values and derivatives when compared to bilinear interpolation.  
 Patch interpolation works by constructing multiple polynomial patches to represent
-the data in a source element. For 2D grids, these poylnoimals 
-are currently 2nd degree 2D polynomials. The interpolated value at the destination pointis then a weighted average of the values of the patches at that point. 
+the data in a source element. For 2D grids, these polynomials 
+are currently 2nd degree 2D polynomials. The interpolated value at the destination point is then a weighted average of the values of the patches at that point. 
 
 The patch interpolation process works as follows. 
 For each source element containing a destination point
 we construct a patch for each corner node that makes up the element (e.g. 4 patches for 
-quadralateral elements, 3 for triangular elements). To construct a polynomial patch for
+quadrilateral elements, 3 for triangular elements). To construct a polynomial patch for
  a corner node we gather all the elements around that node. 
 (Note that this means that the patch interpolation weights depends on the source elements nodes,
 and the nodes of all elements neighboring the source element.)  We then use a least squares fitting 
