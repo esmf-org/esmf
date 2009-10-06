@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.22 2009/09/21 21:04:57 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.23 2009/10/06 11:29:49 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.22 2009/09/21 21:04:57 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.23 2009/10/06 11:29:49 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1439,10 +1439,12 @@ int DELayout::serialize(
   int r;
 
   // Check if buffer has enough free memory to hold object
-  if ((*length - *offset) < sizeof(DELayout)) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
-    "- Buffer too short to add a DELayout object", &rc);
-    return rc;
+  if (inquireflag != ESMF_INQUIREONLY) {
+    if ((*length - *offset) < sizeof(DELayout)) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+      "- Buffer too short to add a DELayout object", &rc);
+      return rc;
+    }
   }
 
   // Serialize the Base class
@@ -1472,7 +1474,10 @@ int DELayout::serialize(
 
   if (!oldstyle){
     dp = (ESMC_DePinFlag *)ip;
-    *dp++ = dePinFlag;
+    if (inquireflag != ESMF_INQUIREONLY)
+      *dp++ = dePinFlag;
+    else
+      dp++;
     ip = (int *)dp;
   }
 
@@ -1522,7 +1527,11 @@ int DELayout::serialize(
   cp = (char *)ip;
 
   *offset = (cp - buffer);
-  
+ 
+  if (inquireflag == ESMF_INQUIREONLY)
+    if (*offset < sizeof (DELayout))
+      *offset = sizeof (DELayout);
+ 
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
