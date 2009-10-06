@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.30 2009/10/02 21:58:30 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.31 2009/10/06 05:25:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.30 2009/10/02 21:58:30 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.31 2009/10/06 05:25:57 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -71,19 +71,18 @@ DistGrid *DistGrid::create(
 // !ARGUMENTS:
 //
   DistGrid const *dg,                     // (in)
-  InterfaceInt *regDecompFirstExtra,      // (in)
-  InterfaceInt *regDecompLastExtra,       // (in)
+  InterfaceInt *firstExtra,               // (in)
+  InterfaceInt *lastExtra,                // (in)
   ESMC_IndexFlag *indexflag,              // (in)
   int *rc                                 // (out) return code
   ){
 //
 // !DESCRIPTION:
 //    Create a new DistGrid from an existing DistGrid, keeping the decomposition
-//    unchanged. Supplying regDecompFirstExtra and/or regDecompLastExtra
-//    requires a regularily decomposed incoming DistGrid. These arguments
-//    allow extra elements to be added at the first/last DE in each dimension.
-//    If these arguments are not specified the method reduces to a deep copy
-//    of the incoming DistGrid, without restrictions.
+//    unchanged. The firstExtra and lastExtra arguments allow extra elements to
+//    be added at the first/last edge DE in each dimension. If neither
+//    firstExtra, lastExtra, nor indexflag are specified the method reduces to
+//    a deep copy of the incoming DistGrid.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -93,13 +92,7 @@ DistGrid *DistGrid::create(
   
   DistGrid *distgrid = NULL;  // initialize
   
-  if (regDecompFirstExtra || regDecompLastExtra || indexflag){
-    // this requires a regDecomp
-    if (dg->regDecomp==NULL){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- This mode requires regDecomp in incoming DistGrid", rc);
-      return ESMC_NULL_POINTER;
-    }
+  if (firstExtra || lastExtra || indexflag){
     // prepare for internal InterfaceInt usage
     int dimInterfaceInt = 1;  // default
     if (dg->patchCount > 1)
@@ -113,33 +106,30 @@ DistGrid *DistGrid::create(
     int totalCountInterfaceInt = dimCountInterfaceInt[0]
       * dimCountInterfaceInt[1];
     // prepare minIndex and maxIndex
-    // regDecompFirstExtra and regDecompLastExtra arguments
+    // firstExtra and lastExtra arguments
     int *minIndexAlloc = new int[totalCountInterfaceInt];
-    if (regDecompFirstExtra)
+    if (firstExtra)
       for (int i=0; i<totalCountInterfaceInt; i++)
         minIndexAlloc[i] = dg->minIndexPDimPPatch[i]
-          - regDecompFirstExtra->array[i];
+          - firstExtra->array[i];
     else
       memcpy(minIndexAlloc, dg->minIndexPDimPPatch,
         sizeof(int)*totalCountInterfaceInt);
     InterfaceInt *minIndex = new InterfaceInt(minIndexAlloc,
       dimInterfaceInt, dimCountInterfaceInt);
     int *maxIndexAlloc = new int[totalCountInterfaceInt];
-    if (regDecompLastExtra)
+    if (lastExtra)
       for (int i=0; i<totalCountInterfaceInt; i++)
         maxIndexAlloc[i] = dg->maxIndexPDimPPatch[i]
-          + regDecompLastExtra->array[i];
+          + lastExtra->array[i];
     else
       memcpy(maxIndexAlloc, dg->maxIndexPDimPPatch,
         sizeof(int)*totalCountInterfaceInt);
     InterfaceInt *maxIndex = new InterfaceInt(maxIndexAlloc,
       dimInterfaceInt, dimCountInterfaceInt);
-    // prepare regDecomp
-    InterfaceInt *regDecomp = new InterfaceInt(dg->regDecomp,
-      dimInterfaceInt, dimCountInterfaceInt);
     // prepare connectionList
     //TODO: connectionList may need to be modified according to
-    // regDecompFirstExtra and regDecompLastExtra arguments
+    // firstExtra and lastExtra arguments
     InterfaceInt *connectionList = NULL;  // default
     int *connectionListAlloc = NULL; // default
     if (dg->connectionCount){
@@ -159,20 +149,78 @@ DistGrid *DistGrid::create(
     //TODO: indexflag needs to be kept in DistGrid so it can be used here as def
     
     // create DistGrid according to collected information
-    if (dg->patchCount==1){
-      // single patch
-      distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, NULL, 0,
-        regDecompFirstExtra, regDecompLastExtra, NULL, indexflag,
-        connectionList, dg->delayout, dg->vm, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
-        return ESMC_NULL_POINTER;
+    if (dg->regDecomp!=NULL){
+      // this is a regDecomp
+      // prepare regDecomp
+      InterfaceInt *regDecomp = new InterfaceInt(dg->regDecomp,
+        dimInterfaceInt, dimCountInterfaceInt);
+      if (dg->patchCount==1){
+        // single patch
+        distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, NULL, 0,
+          firstExtra, lastExtra, NULL, indexflag,
+          connectionList, dg->delayout, dg->vm, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+          return ESMC_NULL_POINTER;
+      }else{
+        // multi patch
+        distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, NULL, 0, 0,
+          firstExtra, lastExtra, NULL, indexflag,
+          connectionList, dg->delayout, dg->vm, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+          return ESMC_NULL_POINTER;
+      }
+      delete regDecomp;
     }else{
-      // multi patch
-      distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, NULL, 0, 0,
-        regDecompFirstExtra, regDecompLastExtra, NULL, indexflag,
-        connectionList, dg->delayout, dg->vm, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
-        return ESMC_NULL_POINTER;
+      // this is a deBlockList
+      if (dg->patchCount==1){
+        // single patch
+        // prepare deBlockList
+        int deCount = dg->delayout->getDeCount();
+        int dimCount = dg->dimCount;
+        int *deBlockListAlloc = new int[dimCount*2*deCount];
+        int *deBlockListDims = new int[3];
+        deBlockListDims[0] = dimCount;
+        deBlockListDims[1] = 2;
+        deBlockListDims[2] = deCount;
+        InterfaceInt *deBlockList = new InterfaceInt(deBlockListAlloc, 3,
+          deBlockListDims);
+        delete [] deBlockListDims;
+        // fill deBlockListAlloc with correct info
+        for (int i=0; i<deCount; i++){
+          for (int k=0; k<dimCount; k++){
+            deBlockListAlloc[i*2*dimCount+k] =
+              dg->minIndexPDimPDe[i*dimCount+k];
+            if (firstExtra){
+              if (deBlockListAlloc[i*2*dimCount+k]
+                == dg->minIndexPDimPPatch[k]){
+                // found edge DE on single patch DistGrid
+                deBlockListAlloc[i*2*dimCount+k] -=
+                  firstExtra->array[k];
+              }
+            }
+            deBlockListAlloc[i*2*dimCount+dimCount+k] =
+              dg->maxIndexPDimPDe[i*dimCount+k];
+            if (firstExtra){
+              if (deBlockListAlloc[i*2*dimCount+dimCount+k] ==
+                dg->maxIndexPDimPPatch[k]){
+                // found edge DE on single patch DistGrid
+                deBlockListAlloc[i*2*dimCount+dimCount+k] +=
+                  lastExtra->array[k];
+              }
+            }
+          }
+        }
+        // create DistGrid
+        distgrid = DistGrid::create(minIndex, maxIndex, deBlockList,
+          NULL, indexflag, connectionList, dg->delayout, dg->vm, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+          return ESMC_NULL_POINTER;
+        delete deBlockList;
+        delete [] deBlockListAlloc;
+      }else{
+        // multi patch
+        //TODO: activate this branch once deBlockList multi-patch is implemented
+      }
     }
     // garbage collection
     delete [] dimCountInterfaceInt;
@@ -180,7 +228,6 @@ DistGrid *DistGrid::create(
     delete [] minIndexAlloc;
     delete maxIndex;
     delete [] maxIndexAlloc;
-    delete regDecomp;
     if (connectionList)
       delete connectionList;
     if (connectionListAlloc)

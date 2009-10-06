@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.58 2009/09/22 04:22:06 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.59 2009/10/06 05:25:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.58 2009/09/22 04:22:06 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.59 2009/10/06 05:25:57 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -188,13 +188,12 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDG(distgrid, regDecompFirstExtra, &
-    regDecompLastExtra, indexflag, rc)
+  function ESMF_DistGridCreateDG(distgrid, firstExtra, lastExtra, indexflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),          intent(in)            :: distgrid
-    integer, target,              intent(in), optional  :: regDecompFirstExtra(:)
-    integer, target,              intent(in), optional  :: regDecompLastExtra(:)
+    integer, target,              intent(in), optional  :: firstExtra(:)
+    integer, target,              intent(in), optional  :: lastExtra(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
     integer,                      intent(out),optional  :: rc
 !         
@@ -202,24 +201,23 @@ contains
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDG
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from an existing DistGrid object. If none
-!     of the optional arguments are specified this ends up being a deep copy
-!     of the {\tt distgrid} argument. Specifying any of the optional arguments
-!     requires that the {\tt distgrid} argument was created with a regular
-!     decomposition descriptor. In this case some aspects of the DistGrid can
-!     be changed, but the decomposition and distribution will be identical to
-!     that of the incoming {\tt distgrid} object.
+!     Create a new DistGrid from an existing DistGrid, keeping the decomposition
+!     unchanged. The {\tt firstExtra} and {\tt lastExtra} arguments allow extra
+!     elements to be added at the first/last edge DE in each dimension. If
+!     neither {\tt firstExtra}, {\tt lastExtra}, nor {\tt indexflag} are
+!     specified the method reduces to a deep copy of the incoming DistGrid
+!     object.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[distgrid]
 !          Incoming DistGrid object.
-!     \item[{[regDecompFirstExtra]}]
-!          Extra elements on the first DEs along each dimension in a regular
-!          decomposition. The default is a zero vector.
-!     \item[{[regDecompLastExtra]}]
-!          Extra elements on the last DEs along each dimension in a regular
-!          decomposition. The default is a zero vector.
+!     \item[{[firstExtra]}]
+!          Extra elements on the edge of the first DEs along each dimension.
+!          The default is a zero vector.
+!     \item[{[lastExtra]}]
+!          Extra elements on the edge of the last DEs along each dimension.
+!          The default is a zero vector.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
 !          {\tt maxIndex} arguments are to be interpreted to form a flat
@@ -233,8 +231,8 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_DistGrid)     :: dg           ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt) :: regDecompFirstExtraArg ! helper variable
-    type(ESMF_InterfaceInt) :: regDecompLastExtraArg ! helper variable
+    type(ESMF_InterfaceInt) :: firstExtraArg ! helper variable
+    type(ESMF_InterfaceInt) :: lastExtraArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -244,12 +242,10 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Deal with (optional) array arguments
-    regDecompFirstExtraArg = ESMF_InterfaceIntCreate(regDecompFirstExtra, &
-      rc=localrc)
+    firstExtraArg = ESMF_InterfaceIntCreate(firstExtra, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    regDecompLastExtraArg = ESMF_InterfaceIntCreate(regDecompLastExtra, &
-      rc=localrc)
+    lastExtraArg = ESMF_InterfaceIntCreate(lastExtra, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -257,16 +253,16 @@ contains
     dg%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateDG(dg, distgrid, regDecompFirstExtraArg, &
-      regDecompLastExtraArg, indexflag, localrc)
+    call c_ESMC_DistGridCreateDG(dg, distgrid, firstExtraArg, &
+      lastExtraArg, indexflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(regDecompFirstExtraArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(firstExtraArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(regDecompLastExtraArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(lastExtraArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -291,13 +287,12 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDGP(distgrid, regDecompFirstExtra, &
-    regDecompLastExtra, indexflag, rc)
+  function ESMF_DistGridCreateDGP(distgrid, firstExtra, lastExtra, indexflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),          intent(in)            :: distgrid
-    integer, target,              intent(in)            :: regDecompFirstExtra(:,:)
-    integer, target,              intent(in)            :: regDecompLastExtra(:,:)
+    integer, target,              intent(in)            :: firstExtra(:,:)
+    integer, target,              intent(in)            :: lastExtra(:,:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
     integer,                      intent(out),optional  :: rc
 !         
@@ -305,20 +300,17 @@ contains
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDGP
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from an existing DistGrid object, while
-!     preserving the decomposition and distribution of the incoming
-!     {\tt distgrid} object.
+!     Create a new DistGrid from an existing DistGrid, keeping the decomposition
+!     unchanged.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[distgrid]
 !          Incoming DistGrid object.
-!     \item[regDecompFirstExtra]
-!          Extra elements on the first DEs along each dimension in a regular
-!          decomposition.
-!     \item[regDecompLastExtra]
-!          Extra elements on the last DEs along each dimension in a regular
-!          decomposition.
+!     \item[firstExtra]
+!          Extra elements on the edge of the first DEs along each dimension.
+!     \item[lastExtra]
+!          Extra elements on the edge of the last DEs along each dimension.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
 !          {\tt maxIndex} arguments are to be interpreted to form a flat
@@ -332,8 +324,8 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_DistGrid)     :: dg           ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt) :: regDecompFirstExtraArg ! helper variable
-    type(ESMF_InterfaceInt) :: regDecompLastExtraArg ! helper variable
+    type(ESMF_InterfaceInt) :: firstExtraArg ! helper variable
+    type(ESMF_InterfaceInt) :: lastExtraArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -343,12 +335,10 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Deal with (optional) array arguments
-    regDecompFirstExtraArg = &
-      ESMF_InterfaceIntCreate(farray2D=regDecompFirstExtra, rc=localrc)
+    firstExtraArg = ESMF_InterfaceIntCreate(farray2D=firstExtra, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    regDecompLastExtraArg = &
-      ESMF_InterfaceIntCreate(farray2D=regDecompLastExtra, rc=localrc)
+    lastExtraArg = ESMF_InterfaceIntCreate(farray2D=lastExtra, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -356,16 +346,16 @@ contains
     dg%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateDG(dg, distgrid, regDecompFirstExtraArg, &
-      regDecompLastExtraArg, indexflag, localrc)
+    call c_ESMC_DistGridCreateDG(dg, distgrid, firstExtraArg, &
+      lastExtraArg, indexflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(regDecompFirstExtraArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(firstExtraArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(regDecompLastExtraArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(lastExtraArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
