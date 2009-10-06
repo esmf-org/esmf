@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.99 2009/09/30 03:19:00 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.100 2009/10/06 20:01:23 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.99 2009/09/30 03:19:00 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.100 2009/10/06 20:01:23 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -5391,7 +5391,7 @@ int Grid::serialize(
     if (r!=0) loffset += 8-r;
 
     // Check if buffer has enough free memory to hold object
-    if (*length < loffset){
+    if ((inquireflag != ESMF_INQUIREONLY) && (*length < loffset)){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                       "Buffer too short to add a Grid object", &rc);
       return rc;

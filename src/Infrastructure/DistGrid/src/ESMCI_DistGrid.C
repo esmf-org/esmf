@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.31 2009/10/06 05:25:57 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.32 2009/10/06 19:56:28 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.31 2009/10/06 05:25:57 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.32 2009/10/06 19:56:28 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3249,7 +3249,7 @@ int DistGrid::serialize(
   int r;
 
   // Check if buffer has enough free memory to hold object
-  if ((*length - *offset) < sizeof(DistGrid)) {
+  if ((inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < sizeof(DistGrid)) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
       "Buffer too short to add a DistGrid object", &rc);
     return rc;
