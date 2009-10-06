@@ -1,4 +1,4 @@
-// $Id: ESMCI_FieldBundle_F.C,v 1.5 2009/09/24 17:15:21 theurich Exp $
+// $Id: ESMCI_FieldBundle_F.C,v 1.6 2009/10/06 11:40:22 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_FieldBundle_F.C,v 1.5 2009/09/24 17:15:21 theurich Exp $";
+             "$Id: ESMCI_FieldBundle_F.C,v 1.6 2009/10/06 11:40:22 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -56,7 +56,8 @@ void FTN(c_esmc_fieldbundleserialize)(
 
     // TODO: verify length > need, and if not, make room.
     int fixedpart = 8 * sizeof(int *);
-    if ((*length - *offset) < fixedpart) {
+    if (*inquireflag != ESMF_INQUIREONLY) {
+      if ((*length - *offset) < fixedpart) {
          
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                             "Buffer too short to add a FieldBundle object", localrc);
@@ -65,6 +66,7 @@ void FTN(c_esmc_fieldbundleserialize)(
         //buffer = (char *)realloc((void *)buffer,
         //                         *length + 2*fixedpart + byte_count);
         //*length += 2 * fixedpart;
+      }
     }
 
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_GeomBase_F.C,v 1.3 2009/08/21 17:53:01 w6ws Exp $
+// $Id: ESMCI_GeomBase_F.C,v 1.4 2009/10/06 11:43:35 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_GeomBase_F.C,v 1.3 2009/08/21 17:53:01 w6ws Exp $";
+             "$Id: ESMCI_GeomBase_F.C,v 1.4 2009/10/06 11:43:35 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -53,10 +53,12 @@ extern "C" {
 
     // TODO: verify length > 4 status vars, and if not, make room.
     int fixedpart = 2 * sizeof(int);
-    if ((*length - *offset) < fixedpart) {     
+    if (*inquireflag != ESMF_INQUIREONLY) {
+      if ((*length - *offset) < fixedpart) {     
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                     "Buffer too short to add a GeomBase object", localrc);
          return;
+      }
     }
 
 
