@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.18 2009/09/30 03:19:00 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.19 2009/10/06 01:09:33 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.18 2009/09/30 03:19:00 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.19 2009/10/06 01:09:33 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1037,7 +1037,7 @@ int ArrayBundle::serialize(
   int r;
 
   // Check if buffer has enough free memory to hold object
-  if ((*length - *offset) < sizeof(ArrayBundle)){
+  if ((inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < sizeof(ArrayBundle)){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "Buffer too short to add an ArrayBundle object", &rc);
     return rc;
