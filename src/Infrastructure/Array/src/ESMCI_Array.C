@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.66 2009/10/06 00:30:19 w6ws Exp $
+// $Id: ESMCI_Array.C,v 1.67 2009/10/06 00:38:05 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.66 2009/10/06 00:30:19 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.67 2009/10/06 00:38:05 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2488,6 +2488,10 @@ int Array::serialize(
   cp = (char *)ip;
   *offset = (cp - buffer);
   
+  if (inquireflag == ESMF_INQUIREONLY)
+    if (*offset < sizeof (Array))
+      *offset = sizeof (Array);
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
