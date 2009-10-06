@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocStream_F.C,v 1.7 2009/08/21 18:49:59 w6ws Exp $
+// $Id: ESMCI_LocStream_F.C,v 1.8 2009/10/06 11:48:41 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_LocStream_F.C,v 1.7 2009/08/21 18:49:59 w6ws Exp $";
+             "$Id: ESMCI_LocStream_F.C,v 1.8 2009/10/06 11:48:41 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -291,10 +291,12 @@ void FTN(c_esmc_locstreamserialize)(ESMC_IndexFlag *indexflag,
 
     // TODO: verify length > vars.
     int size = sizeof(ESMC_IndexFlag) + sizeof(int);
-    if ((*length - *offset) < size) {         
+    if (*inquireflag != ESMF_INQUIREONLY) {
+      if ((*length - *offset) < size) {         
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "Buffer too short to add a LocStream object", localrc);
          return;
+      }
     }
 
 
@@ -306,7 +308,7 @@ void FTN(c_esmc_locstreamserialize)(ESMC_IndexFlag *indexflag,
     // Save keyCount
     ip= (int *)ifp;
     if (*inquireflag != ESMF_INQUIREONLY)
-      *ip++ = *keyCount; 
+      *ip++ = *keyCount;
 
     // Adjust offset
     *offset += sizeof(ESMC_IndexFlag) + sizeof(int);
@@ -362,10 +364,12 @@ void FTN(c_esmc_locstreamkeyserialize)(
   
   // TODO: verify length > vars.
   int size = *keyNameLen + *unitsLen + *longNameLen;
-  if ((*length - *offset) < size) {         
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-       "Buffer too short to add a LocStream object", localrc);
-    return;
+  if (*inquireflag != ESMF_INQUIREONLY) {
+    if ((*length - *offset) < size) {         
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+         "Buffer too short to add a LocStream object", localrc);
+      return;
+    }
   }
 
   // Get pointer to memory
