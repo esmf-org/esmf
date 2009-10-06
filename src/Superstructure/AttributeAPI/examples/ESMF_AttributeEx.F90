@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeEx.F90,v 1.12 2009/09/11 19:30:26 rokuingh Exp $
+! $Id: ESMF_AttributeEx.F90,v 1.13 2009/10/06 22:56:00 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -49,14 +49,15 @@ program ESMF_AttributeEx
       type(ESMF_VM)           :: vm
       type(ESMF_GridComp)     :: gridcomp
       character(ESMF_MAXSTR)  :: name
-      integer(kind=4)                       :: inI4
-      integer(kind=4), dimension(3)         :: inI4l
-      integer(kind=8)                       :: inI8
-      integer(kind=8), dimension(3)         :: inI8l
-      real(kind=4)                          :: inR4
-      real(kind=4), dimension(3)            :: inR4l
-      real(kind=8)                          :: inR8
-      real(kind=8), dimension(3)            :: inR8l
+
+      integer(ESMF_KIND_I4)                         :: inI4
+      integer(ESMF_KIND_I4), dimension(3)         :: inI4l
+      integer(ESMF_KIND_I8)                       :: inI8
+      integer(ESMF_KIND_I8), dimension(3)         :: inI8l
+      real(ESMF_KIND_I4)                          :: inR4
+      real(ESMF_KIND_I4), dimension(3)            :: inR4l
+      real(ESMF_KIND_I8)                          :: inR8
+      real(ESMF_KIND_I8), dimension(3)            :: inR8l
       character(ESMF_MAXSTR)                :: inChar
       character(ESMF_MAXSTR), dimension(3)  :: inCharl, &
                                                defaultCharl, dfltoutCharl
