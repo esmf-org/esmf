@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.20 2009/10/06 05:25:57 theurich Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.21 2009/10/06 15:59:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.20 2009/10/06 05:25:57 theurich Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.21 2009/10/06 15:59:54 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -451,8 +451,8 @@ program ESMF_DistGridCreateGetUTest
   !NEX_UTest
   write(name, *) "DistGridCreate() - from DistGrid with extra edge elements"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  distgrid3 = ESMF_DistGridCreate(distgrid, regDecompFirstExtra=(/1/), &
-    regDecompLastExtra=(/5/), rc=rc)
+  distgrid3 = ESMF_DistGridCreate(distgrid, firstExtra=(/1/), lastExtra=(/5/), &
+    rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -626,8 +626,8 @@ program ESMF_DistGridCreateGetUTest
   !NEX_UTest
   write(name, *) "DistGridCreate() - from DistGrid with extra edge elements"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  distgrid3 = ESMF_DistGridCreate(distgrid, regDecompFirstExtra=(/2/), &
-    regDecompLastExtra=(/3/), rc=rc)
+  distgrid3 = ESMF_DistGridCreate(distgrid, firstExtra=(/2/), lastExtra=(/3/), &
+    rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
