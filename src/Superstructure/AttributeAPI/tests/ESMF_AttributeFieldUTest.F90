@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFieldUTest.F90,v 1.25 2009/09/11 19:31:44 rokuingh Exp $
+! $Id: ESMF_AttributeFieldUTest.F90,v 1.26 2009/10/06 23:02:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFieldUTest.F90,v 1.25 2009/09/11 19:31:44 rokuingh Exp $'
+      '$Id: ESMF_AttributeFieldUTest.F90,v 1.26 2009/10/06 23:02:17 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -53,10 +53,10 @@ program ESMF_AttributeFieldUTest
       integer                :: rc, count, items
       type(ESMF_TypeKind)    :: attrTK
 
-      real(kind=8)                     :: inR8, outR8, defaultR8, dfltoutR8
-      real(kind=8), dimension(3)       :: inR8l, defaultR8l, dfltoutR8l, outR8l
+      real(ESMF_KIND_I8)                     :: inR8, outR8, defaultR8, dfltoutR8
+      real(ESMF_KIND_I8), dimension(3)       :: inR8l, defaultR8l, dfltoutR8l, outR8l
       character(ESMF_MAXSTR)           :: inChar, outChar, defaultChar, dfltoutChar
-      real(kind=8), dimension(4)       :: defaultR8lWrong
+      real(ESMF_KIND_I8), dimension(4)       :: defaultR8lWrong
   
   
       ! cumulative result: count failures; no failures equals "all pass"
@@ -68,13 +68,13 @@ program ESMF_AttributeFieldUTest
       character(ESMF_MAXSTR) :: nestconv, nestpurp
       integer                :: itemCount
 
-      integer(kind=4)                     :: inI4, outI4, defaultI4, dfltoutI4
-      integer(kind=4), dimension(3)       :: inI4l, outI4l, defaultI4l, dfltoutI4l
-      integer(kind=8)                     :: inI8, outI8, defaultI8, dfltoutI8
-      integer(kind=8), dimension(3)       :: inI8l, outI8l, defaultI8l, dfltoutI8l
-      real(kind=4)                     :: inR4, outR4, defaultR4, dfltoutR4
-      real(kind=4), dimension(3)       :: inR4l, outR4l, defaultR4l, dfltoutR4l
-      real(kind=8), dimension(10)       :: outR8lLong
+      integer(ESMF_KIND_I4)                     :: inI4, outI4, defaultI4, dfltoutI4
+      integer(ESMF_KIND_I4), dimension(3)       :: inI4l, outI4l, defaultI4l, dfltoutI4l
+      integer(ESMF_KIND_I8)                     :: inI8, outI8, defaultI8, dfltoutI8
+      integer(ESMF_KIND_I8), dimension(3)       :: inI8l, outI8l, defaultI8l, dfltoutI8l
+      real(ESMF_KIND_I4)                     :: inR4, outR4, defaultR4, dfltoutR4
+      real(ESMF_KIND_I4), dimension(3)       :: inR4l, outR4l, defaultR4l, dfltoutR4l
+      real(ESMF_KIND_I8), dimension(10)       :: outR8lLong
       character(ESMF_MAXSTR)                     :: inEmpty, outEmpty
       character(ESMF_MAXSTR), dimension(3)       :: inCharl, defaultCharl, dfltoutCharl, outCharl
       character(ESMF_MAXSTR), dimension(4)        :: defaultCharlWrong
