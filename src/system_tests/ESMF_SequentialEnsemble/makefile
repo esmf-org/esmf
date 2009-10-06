@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2009/10/05 18:25:34 svasquez Exp $
+# $Id: makefile,v 1.2 2009/10/06 16:05:12 svasquez Exp $
 
 ALL: tree_build_system_tests
 
@@ -20,7 +20,7 @@ SYSTEM_TESTS_RUN      = RUN_ESMF_SequentialEnsemble
 SYSTEM_TESTS_RUN_UNI  = RUN_ESMF_SequentialEnsembleUNI
 
 
-ESMF_SeqEnsemExSTest.o : $(SYSTEM_TESTS_OBJ)
+ESMF_SequentialEnsembleSTest.o : $(SYSTEM_TESTS_OBJ)
 
 include $(ESMF_DIR)/makefile
 
