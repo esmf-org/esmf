@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time.h,v 1.11 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMCI_Time.h,v 1.12 2009/10/07 05:52:29 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -136,12 +136,11 @@
     //   corresponds to F90 named-optional-arguments interface
 
     // (TMG 2.1, 2.5.1, 2.5.6)
-    int get(const char *timeList, ...) const;
+    //int get(const char *timeList, ...) const;
     // e.g. Time::get("YY:MM:DD", (int *)YY,(int *)MM, (int *)DD);
-
-    int set(Calendar *calendar, int timeZone,
-                     const char *timeList, ...);
-    int set(const char *timeList, ...);
+    //int set(Calendar *calendar, int timeZone,
+                     //const char *timeList, ...);
+    //int set(const char *timeList, ...);
     // e.g. Time::set("s" , (ESMC_R8) s);
 
     bool isLeapYear(int *rc=0) const;

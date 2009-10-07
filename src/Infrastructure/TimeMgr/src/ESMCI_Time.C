@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time.C,v 1.11 2009/01/21 21:38:01 cdeluca Exp $"
+// $Id: ESMCI_Time.C,v 1.12 2009/10/07 05:52:29 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Time.C,v 1.11 2009/01/21 21:38:01 cdeluca Exp $";
+ static const char *const version = "$Id: ESMCI_Time.C,v 1.12 2009/10/07 05:52:29 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -403,7 +403,7 @@ namespace ESMCI{
         d  != ESMC_NULL_POINTER || d_i8  != ESMC_NULL_POINTER ||
         d_r8 != ESMC_NULL_POINTER) {
       if (this->calendar == ESMC_NULL_POINTER) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_INIT,
                                  ", calendar required.", &rc); return(rc);
       }
       rc = this->calendar->convertToDate(&timeToConvert, yy, yy_i8, mm, dd,
@@ -440,7 +440,7 @@ namespace ESMCI{
         dayOfYear_intvl != ESMC_NULL_POINTER ||
         dayOfWeek       != ESMC_NULL_POINTER) {
       if (timeToConvert.calendar == ESMC_NULL_POINTER) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_INIT,
                                  ", calendar required.", &rc); return(rc);
       }
       timeToConvert.setw(timeToConvert.getw() %
@@ -499,14 +499,14 @@ namespace ESMCI{
 // !IROUTINE:  Time::get - Get a Time value
 //
 // !INTERFACE:
-      int Time::get(
+//      int Time::get(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      const char *timeList,    // in  - time value specifier string
-      ...) const {             // out - specifier values (variable args)
+//      const char *timeList,    // in  - time value specifier string
+//      ...) const {             // out - specifier values (variable args)
 //
 // !DESCRIPTION:
 //      Gets a {\tt Time}'s values in user-specified format. This version
@@ -514,27 +514,27 @@ namespace ESMCI{
 //
 //EOP
 // !REQUIREMENTS:  
-
-    // TODO
-    return(ESMF_SUCCESS);
-
- }  // end Time::get
+//
+//    // TODO
+//    return(ESMF_SUCCESS);
+//
+// }  // end Time::get
 
 //-------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  Time::set - Set a Time value (1)
 //
 // !INTERFACE:
-      int Time::set(
+//      int Time::set(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      Calendar *calendar,  // in - associated calendar
-      int timeZone,             // in - timezone
-      const char *timeList,     // in - initializer specifier string
-      ...) {                    // in - specifier values (variable args)
+//      Calendar *calendar,  // in - associated calendar
+//      int timeZone,             // in - timezone
+//      const char *timeList,     // in - initializer specifier string
+//      ...) {                    // in - specifier values (variable args)
 //
 // !DESCRIPTION:
 //      Initialzes a {\tt Time} with values given in variable arg list.
@@ -542,34 +542,34 @@ namespace ESMCI{
 //
 //EOP
 // !REQUIREMENTS:  
-
-    // set calendar type
-    if (calendar != ESMC_NULL_POINTER) {
-      this->calendar = calendar;
-    }
-
-    // set timezone
-    this->timeZone = timeZone;
-
-    // TODO
-
-    return(ESMF_SUCCESS);
-
- }  // end Time::set
+//
+//    // set calendar type
+//    if (calendar != ESMC_NULL_POINTER) {
+//      this->calendar = calendar;
+//    }
+//
+//    // set timezone
+//    this->timeZone = timeZone;
+//
+//    // TODO timeList
+//
+//    return(ESMF_SUCCESS);
+//
+// }  // end Time::set
 
 //-------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  Time::set - Set a Time value (2)
 //
 // !INTERFACE:
-      int Time::set(
+//      int Time::set(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      const char *timeList,    // in - initializer specifier string
-      ...) {                   // in - specifier values (variable args)
+//      const char *timeList,    // in - initializer specifier string
+//      ...) {                   // in - specifier values (variable args)
 //
 // !DESCRIPTION:
 //      Initialzes a {\tt Time} with values given in variable arg list.
@@ -577,11 +577,11 @@ namespace ESMCI{
 //
 //EOP
 // !REQUIREMENTS:  
-
-    // TODO
-    return(ESMF_SUCCESS);
-
- }  // end Time::set
+//
+//    // TODO
+//    return(ESMF_SUCCESS);
+//
+// }  // end Time::set
 
 //-------------------------------------------------------------------------
 //BOP
@@ -666,8 +666,8 @@ namespace ESMCI{
 
     // must have a calendar
     if (this->calendar == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-                                            "; calendar is NULL.", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_INIT,
+                                            "; calendar required.", rc);
       return(false);
     }
 
@@ -714,8 +714,8 @@ namespace ESMCI{
       return(this->calendar->calendarType == time->calendar->calendarType);
     }
     else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-                           "; calendar1 and/or calendar2 is NULL.", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_INIT,
+                          "; calendar required on both time1 and time2.", rc);
       return(false);
     }
 
@@ -750,8 +750,8 @@ namespace ESMCI{
 
     // validate for calendar type
     if (this->calendar == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-                                            "; calendar is NULL.", &rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_INIT,
+                                            "; calendar required.", &rc);
       return(rc);
     }
 
@@ -810,7 +810,7 @@ namespace ESMCI{
 //
 // !ARGUMENTS:
       const TimeInterval &timeinterval) const {  // in - TimeInterval
-                                                      //      to add
+                                                 //      to add
 //
 // !DESCRIPTION:
 //    Adds {\tt timeinterval} expression to this time.
@@ -935,6 +935,9 @@ namespace ESMCI{
 //                          Visibility into ESMCI::Fraction is lost; if not
 //                          defined here, the compiler won't see the 2nd (-)
 //                          operator defined at ESMCI::Fraction!
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMCI::Time::operator-(time)"
 
     // the calendars of the two times must be the same
     int rc;
@@ -1299,8 +1302,8 @@ namespace ESMCI{
       return(rc);
     }
     if (this->calendar == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-                                            "; calendar is NULL", &rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_INIT,
+                                            "; calendar required", &rc);
       return(rc);
     }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
@@ -1399,8 +1402,8 @@ namespace ESMCI{
       return(rc);
     }
     if (this->calendar == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-                                            "; calendar is NULL", &rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_INIT,
+                                            "; calendar required", &rc);
       return(rc);
     }
 
@@ -1517,8 +1520,8 @@ namespace ESMCI{
       return(rc);
     }
     if (this->calendar == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-                                            "; calendar is NULL", &rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_INIT,
+                                            "; calendar required", &rc);
       return(rc);
     }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
@@ -1635,8 +1638,8 @@ namespace ESMCI{
       return(rc);
     }
     if (this->calendar == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-                                            "; calendar is NULL", &rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_INIT,
+                                            "; calendar required", &rc);
       return(rc);
     }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
@@ -1706,8 +1709,8 @@ namespace ESMCI{
       return(rc);
     }
     if (this->calendar == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-                                            "; calendar is NULL", &rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_INIT,
+                                            "; calendar required", &rc);
       return(rc);
     }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
@@ -1778,8 +1781,8 @@ namespace ESMCI{
       return(rc);
     }
     if (this->calendar == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-                                            "; calendar is NULL", &rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_INIT,
+                                            "; calendar required", &rc);
       return(rc);
     }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
