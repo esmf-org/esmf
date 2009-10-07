@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.99 2009/09/15 04:41:12 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.100 2009/10/07 05:56:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -141,7 +141,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.99 2009/09/15 04:41:12 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.100 2009/10/07 05:56:21 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -544,7 +544,7 @@
 !
 ! !ARGUMENTS:
     type(ESMF_Calendar), intent(inout)           :: c
-    integer,          intent(out),  optional  :: rc  
+    integer,             intent(out),  optional  :: rc  
 !         
 !
 ! !DESCRIPTION:
@@ -1630,6 +1630,8 @@
       end subroutine ESMF_CalendarWriteRestart
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarEQ"
 !BOPI
 ! !IROUTINE:  ESMF_CalendarEQ - Compare two Calendars for equality
 !
@@ -1648,8 +1650,24 @@
 !     class.  See "interface operator(==)" above for complete description.
 !
 !EOPI
-!     invoke C to C++ entry point
-      call c_ESMC_CalendarEQ(calendar1, calendar2, ESMF_CalendarEQ)
+      ESMF_INIT_TYPE calinit1, calinit2
+      integer :: localrc1, localrc2                 ! local return codes
+      logical :: lval1, lval2
+
+      ! check inputs
+      calinit1 = ESMF_CalendarGetInit(calendar1)
+      calinit2 = ESMF_CalendarGetInit(calendar2)
+
+      ! TODO: consider moving this logic to C++: use Base class? status?
+      if (calinit1.eq.ESMF_INIT_CREATED.and.calinit2.eq.ESMF_INIT_CREATED) then
+        ! invoke C to C++ entry point
+        call c_ESMC_CalendarEQ(calendar1, calendar2, ESMF_CalendarEQ)
+      else
+        ! log error, convert to return code, and compare
+        lval1 = ESMF_IMErr(calinit1, ESMF_CONTEXT, rc=localrc1)
+        lval2 = ESMF_IMErr(calinit2, ESMF_CONTEXT, rc=localrc2)
+        ESMF_CalendarEQ = localrc1.eq.localrc2
+      endif
 
       end function ESMF_CalendarEQ
 
