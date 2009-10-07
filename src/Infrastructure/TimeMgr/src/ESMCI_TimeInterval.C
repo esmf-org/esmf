@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.C,v 1.12 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMCI_TimeInterval.C,v 1.13 2009/10/07 05:53:33 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.12 2009/01/21 21:38:01 cdeluca Exp $";
+ static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.13 2009/10/07 05:53:33 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -833,14 +833,14 @@ namespace ESMCI{
 // !IROUTINE:  TimeInterval::set - Set a TimeInterval value
 //
 // !INTERFACE:
-      int TimeInterval::set(
+//      int TimeInterval::set(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      const char *timeList,    // in - time interval value specifier string
-      ...) {                   // in - specifier values (variable args)
+//      const char *timeList,    // in - time interval value specifier string
+//      ...) {                   // in - specifier values (variable args)
 //
 // !DESCRIPTION:
 //      Sets a {\tt ESMC\_TimeInterval}'s values in user-specified values.
@@ -848,25 +848,25 @@ namespace ESMCI{
 //
 //EOP
 // !REQUIREMENTS:  
-
-    // TODO
-    return(ESMF_SUCCESS);
-
- }  // end TimeInterval::set
+//
+//    // TODO
+//    return(ESMF_SUCCESS);
+//
+// }  // end TimeInterval::set
 
 //-------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  TimeInterval::get - Get a TimeInterval value
 //
 // !INTERFACE:
-      int TimeInterval::get(
+//      int TimeInterval::get(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      const char *timeList,    // in  - time interval value specifier string
-      ...) const {             // out - specifier values (variable args)
+//      const char *timeList,    // in  - time interval value specifier string
+//      ...) const {             // out - specifier values (variable args)
 //
 // !DESCRIPTION:
 //      Gets a {\tt ESMC\_TimeInterval}'s values in user-specified format.
@@ -874,11 +874,11 @@ namespace ESMCI{
 //
 //EOP
 // !REQUIREMENTS:  
-
-    // TODO
-    return(ESMF_SUCCESS);
-
- }  // end TimeInterval::get
+//
+//    // TODO
+//    return(ESMF_SUCCESS);
+//
+// }  // end TimeInterval::get
 
 //-------------------------------------------------------------------------
 //BOP

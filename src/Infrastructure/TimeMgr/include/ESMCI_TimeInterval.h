@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.h,v 1.13 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMCI_TimeInterval.h,v 1.14 2009/10/07 05:53:33 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -147,11 +147,11 @@ class TimeInterval : public BaseTime {
     // native C++ interface -- via variable argument lists
     //   corresponds to F90 named-optional-arguments interface
 
-    int set(const char *timeList, ...);
+    //int set(const char *timeList, ...);
     // e.g. Set("s" , (ESMC_R8) s);
 
     // (TMG 1.1)
-    int get(const char *timeList, ...) const;
+    //int get(const char *timeList, ...) const;
     // e.g. Get("D:S",(int *)D, (int *)S);
 
     // return positive value (TMG 1.5.8)
