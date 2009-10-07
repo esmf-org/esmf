@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.278 2009/08/31 20:21:35 svasquez Exp $
+#  $Id: common.mk,v 1.279 2009/10/07 18:32:46 w6ws Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -312,6 +312,9 @@ endif
 ESMF_ABISTRING = $(ESMF_ABI)
 
 ifeq ($(ESMF_COMPILER),default)
+ifeq ($(ESMF_OS),Cygwin)
+export ESMF_COMPILER = gfortran
+endif
 ifeq ($(ESMF_OS),Darwin)
 export ESMF_COMPILER = absoft
 ifeq ($(ESMF_MACHINE),i386)
@@ -322,6 +325,9 @@ export ESMF_COMPILER = intel
 endif
 endif
 ifeq ($(ESMF_OS),Linux)
+export ESMF_COMPILER = intel
+endif
+ifeq ($(ESMF_OS),MinGW)
 export ESMF_COMPILER = intel
 endif
 endif
