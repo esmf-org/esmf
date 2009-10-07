@@ -1,4 +1,4 @@
-// $Id: ESMCI_Fraction.C,v 1.4 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMCI_Fraction.C,v 1.5 2009/10/07 05:45:17 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Fraction.C,v 1.4 2009/01/21 21:38:01 cdeluca Exp $";
+ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.5 2009/10/07 05:45:17 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // TODO:  Use logarithms for checking if a multiplication or division is about
@@ -1407,7 +1407,7 @@ fflush(stdout);
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "must have non-zero denominator."); 
       ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR,ESMC_CONTEXT);
-      return(ESMF_FAILURE);
+      return(ESMC_RC_DIV_ZERO);
     }
 
     rc = ESMF_SUCCESS;
