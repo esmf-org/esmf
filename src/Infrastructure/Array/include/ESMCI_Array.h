@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.34 2009/10/02 21:58:25 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.35 2009/10/07 16:13:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -100,6 +100,11 @@ namespace ESMCI {
     DistGrid *distgrid;
     bool distgridCreator;
     DELayout *delayout;
+    int localDeCountAux;  // auxiliary variable for garbage collection
+                          // TODO: remove this variable again once
+                          // TODO: reference counting scheme is implemented
+                          // TODO: and DELayout cannot be pulled from under
+                          // TODO: DistGrid and Array until they are destroyed.
     
    public:
     // native constructor and destructor

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.32 2009/10/06 19:56:28 w6ws Exp $
+// $Id: ESMCI_DistGrid.C,v 1.33 2009/10/07 16:13:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.32 2009/10/06 19:56:28 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.33 2009/10/07 16:13:23 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -321,6 +321,7 @@ DistGrid *DistGrid::create(
     distgrid->delayout = dg->delayout;
     distgrid->delayoutCreator = false;
     distgrid->vm = dg->vm;
+    distgrid->localDeCountAux = dg->localDeCountAux;
   }
   
   // return successfully
@@ -1824,6 +1825,9 @@ int DistGrid::construct(
     memcpy(regDecomp, regDecompArg, sizeof(int)*dimCount);
   }else
     regDecomp = NULL;
+  
+  localDeCountAux = localDeCount; // TODO: auxilary for garb until ref. counting
+  
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1869,7 +1873,11 @@ int DistGrid::destruct(bool followCreator){
     delete [] patchListPDe;
     delete [] elementCountPDe;
     delete [] contigFlagPDimPDe;
-    int localDeCount = delayout->getLocalDeCount();
+    
+//    int localDeCount = delayout->getLocalDeCount();
+    int localDeCount = localDeCountAux; // TODO: delayout may be gone already!
+// TODO: replace the above line with the line before once ref. counting implem.
+    
     for (int i=0; i<dimCount*localDeCount; i++)
       delete [] indexListPDimPLocalDe[i];
     delete [] indexListPDimPLocalDe;
@@ -3436,6 +3444,8 @@ DistGrid *DistGrid::deserialize(
   cp = (char *)ip;
   *offset = (cp - buffer);
   
+  a->localDeCountAux = a->delayout->getLocalDeCount(); // TODO: auxilary f garb
+                                                 // TODO: until ref. counting
   // return successfully
   rc = ESMF_SUCCESS;
   return a;

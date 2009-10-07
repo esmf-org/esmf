@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.67 2009/10/06 00:38:05 w6ws Exp $
+// $Id: ESMCI_Array.C,v 1.68 2009/10/07 16:13:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.67 2009/10/06 00:38:05 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.68 2009/10/07 16:13:22 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -222,6 +222,8 @@ Array::Array(
     } // jj
   }
   
+  localDeCountAux = localDeCount; // TODO: auxilary for garb until ref. counting
+  
   // invalidate the name for this Array object in the Base class
   ESMC_BaseSetName(NULL, "Array");
    
@@ -262,7 +264,9 @@ void Array::destruct(bool followCreator){
 //-----------------------------------------------------------------------------
   if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
     // garbage collection
-    int localDeCount = delayout->getLocalDeCount();
+//    int localDeCount = delayout->getLocalDeCount();
+    int localDeCount = localDeCountAux; // TODO: delayout may be gone already!
+// TODO: replace the above line with the line before once ref. counting implem.
     for (int i=0; i<localDeCount; i++){
       int localrc = LocalArray::destroy(larrayList[i]);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
@@ -2439,11 +2443,12 @@ int Array::serialize(
   // Serialize the Base class,
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
-  localrc = ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag,inquireflag);
+  localrc = ESMC_Base::ESMC_Serialize(buffer, length, offset, attreconflag,
+    inquireflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize the DistGrid
-  localrc = distgrid->serialize(buffer,length,offset,inquireflag);
+  localrc = distgrid->serialize(buffer, length, offset, inquireflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize Array meta data
@@ -2491,7 +2496,7 @@ int Array::serialize(
   if (inquireflag == ESMF_INQUIREONLY)
     if (*offset < sizeof (Array))
       *offset = sizeof (Array);
-
+  
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -2534,11 +2539,11 @@ int Array::deserialize(
   // Deserialize the Base class
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
-  localrc = ESMC_Base::ESMC_Deserialize(buffer,offset,attreconflag);
+  localrc = ESMC_Base::ESMC_Deserialize(buffer, offset, attreconflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Deserialize the DistGrid
-  distgrid = DistGrid::deserialize(buffer,offset);
+  distgrid = DistGrid::deserialize(buffer, offset);
   distgridCreator = true;  // deserialize creates a local object
   // Pull DELayout out of DistGrid
   delayout = distgrid->getDELayout();
@@ -2581,6 +2586,9 @@ int Array::deserialize(
   larrayList = new LocalArray*[0];     // no DE on proxy object
   larrayBaseAddrList = new void*[0];        // no DE on proxy object
   totalElementCountPLocalDe = NULL;         // no De on proxy object
+
+  localDeCountAux = delayout->getLocalDeCount(); // TODO: auxilary for garb
+                                                 // TODO: until ref. counting
 
   // return successfully
   rc = ESMF_SUCCESS;
