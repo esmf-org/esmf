@@ -1,4 +1,4 @@
-//$Id: ESMC_ErrMsgs.C,v 1.18 2009/07/28 22:15:25 rokuingh Exp $
+//$Id: ESMC_ErrMsgs.C,v 1.19 2009/10/07 05:43:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -20,7 +20,7 @@ static const char *errMsg[] = {
 // F90 Error message                                     Return Code (1-500)
 // -----------------------------------------------       ----------------------
   "Invalid object ",                                  //    1 = ESMF_RC_OBJ_BAD
-  "Object SetDefault method not called ",             //    2 = ESMF_RC_OBJ_INIT
+  "Object Set or SetDefault method not called ",      //    2 = ESMF_RC_OBJ_INIT
   "Object Create method not called ",                 //    3 = ESMF_RC_OBJ_CREATE
   "Corrupted ESMF object detected ",                  //    4 = ESMF_RC_OBJ_COR
   "Wrong object specified ",                          //    5 = ESMF_RC_OBJ_WRONG
@@ -117,7 +117,7 @@ static const char *errMsg[] = {
 // C++ Error message                                     Return Code (501-1000)
 // -----------------------------------------------       -----------------------
   "Invalid object ",                                  //  501 = ESMC_RC_OBJ_BAD
-  "Object SetDefault method not called ",             //  502 = ESMC_RC_OBJ_INIT
+  "Object Set or SetDefault method not called ",      //  502 = ESMC_RC_OBJ_INIT
   "Object Create method not called ",                 //  503 = ESMC_RC_OBJ_CREATE
   "Corrupted ESMF object detected ",                  //  504 = ESMC_RC_OBJ_COR
   "Wrong object specified ",                          //  505 = ESMC_RC_OBJ_WRONG
