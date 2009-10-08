@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.35 2009/10/07 16:13:21 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.36 2009/10/08 17:14:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -130,6 +130,7 @@ namespace ESMCI {
       tensorElementCount = 0;
       exclusiveElementCountPDe = NULL;
       totalElementCountPLocalDe = NULL;
+      localDeCountAux = 0;  // auxiliary variable for garbage collection
     }
     Array(int baseID):ESMC_Base(baseID){  // prevent baseID counter increment
       typekind = ESMF_NOKIND;
@@ -153,6 +154,7 @@ namespace ESMCI {
       tensorElementCount = 0;
       exclusiveElementCountPDe = NULL;
       totalElementCountPLocalDe = NULL;
+      localDeCountAux = 0;  // auxiliary variable for garbage collection
     }
    private:
     Array(ESMC_TypeKind typekind, int rank, LocalArray **larrayList,
