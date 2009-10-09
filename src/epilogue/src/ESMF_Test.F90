@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.13 2009/08/27 20:13:05 svasquez Exp $
+! $Id: ESMF_Test.F90,v 1.14 2009/10/09 22:40:31 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -39,6 +39,7 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
       public ESMF_Test
+      public ESMF_STest
       public ESMF_TestGlobal
       public ESMF_TestEnd
       public ESMF_TestNumPETs
@@ -51,7 +52,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.13 2009/08/27 20:13:05 svasquez Exp $'
+      '$Id: ESMF_Test.F90,v 1.14 2009/10/09 22:40:31 svasquez Exp $'
 
 !==============================================================================
 
@@ -103,6 +104,49 @@
       end if
 
       end subroutine ESMF_Test
+
+
+
+!-------------------------------------------------------------------------------
+!BOP
+!
+! !IROUTINE:  ESMF_STest - Print PASS/FAIL and number of processor messages for tests
+!
+! !INTERFACE:
+      subroutine ESMF_STest(condition, name, failMsg, result, file, line, unit)
+
+! !ARGUMENTS:
+      logical, intent(in) :: condition      ! pass/fail condition
+      character(*), intent(in) :: name      ! test name
+      character(*), intent(in) :: failMsg   ! fail message
+      integer, intent(inout) :: result      ! accumulated result
+      character(*), intent(in) :: file      ! test file name
+      integer, intent(in) :: line           ! test file line number
+      integer, intent(in), optional :: unit ! additional output unit number
+
+! !DESCRIPTION:
+!     Gets the PET count and prints out a number of processors message.
+!     Prints a {\tt PASS} message to stdout if {\tt condition} is true,
+!     and a {\tt FAIL} message if {\tt condition} is false.  If {\tt unit}
+!     is specified, will in addition write the same message to that
+!     Fortran unit number.
+!
+!EOP
+!-------------------------------------------------------------------------------
+
+      type(ESMF_VM):: vm
+      integer:: petCount, localrc
+      character(ESMF_MAXSTR) :: msg
+     
+
+      call ESMF_VMGetGlobal(vm, rc=localrc)
+      call ESMF_VMGet(vm, petCount=petCount, rc=localrc)
+      write(msg, *) "NUMBER_OF_PROCESSORS", petCount
+      call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
+
+      call ESMF_Test(condition, name, failMsg, result,  file, line, unit)
+
+      end subroutine ESMF_STest
 
 
 !-------------------------------------------------------------------------------
