@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockType.F90,v 1.19 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_ClockType.F90,v 1.20 2009/10/09 05:41:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -68,7 +68,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ClockType.F90,v 1.19 2009/01/21 21:38:01 cdeluca Exp $'
+      '$Id: ESMF_ClockType.F90,v 1.20 2009/10/09 05:41:58 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -83,11 +83,11 @@
     function ESMF_ClockGetInit(d)
 !
 ! !ARGUMENTS:
-       type(ESMF_Clock), intent(in), optional :: d
-       ESMF_INIT_TYPE                         :: ESMF_ClockGetInit
+      type(ESMF_Clock), intent(in), optional :: d
+      ESMF_INIT_TYPE                         :: ESMF_ClockGetInit
 !
 ! !DESCRIPTION:
-!      Get the initialization status of the Deep class {\tt bundle}.
+!     Get the initialization status of the Deep class {\tt bundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -122,7 +122,7 @@
 !         
 !
 ! !DESCRIPTION:
-!      Set init code in Clock object to "CREATED".
+!     Set init code in Clock object to "CREATED".
 !
 !     The arguments are:
 !     \begin{description}
@@ -147,7 +147,6 @@
   end subroutine ESMF_ClockSetInitCreated
 !------------------------------------------------------------------------------
 
-
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ClockSetInitDeleted()"
@@ -163,7 +162,7 @@
 !         
 !
 ! !DESCRIPTION:
-!      Set init code in Clock object to "DELETED".
+!     Set init code in Clock object to "DELETED".
 !
 !     The arguments are:
 !     \begin{description}
@@ -187,7 +186,6 @@
     
   end subroutine ESMF_ClockSetInitDeleted
 !------------------------------------------------------------------------------
-
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
@@ -231,7 +229,6 @@
     
   end subroutine ESMF_ClockGetThis
 !------------------------------------------------------------------------------
-
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
