@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.33 2009/05/31 22:09:58 theurich Exp $
+# $Id: build_rules.mk,v 1.34 2009/10/09 04:13:01 theurich Exp $
 #
 # AIX.default.default
 #
@@ -86,6 +86,8 @@ ESMF_OPENMP_F90COMPILEOPTS += -qsmp=omp
 ESMF_OPENMP_CXXCOMPILEOPTS += -qsmp=omp
 ESMF_OPENMP_F90LINKOPTS    += -qsmp=omp
 ESMF_OPENMP_CXXLINKOPTS    += -qsmp=omp
+# Library build slows down to a crawl on bluefire with OpenMP enabled for lib
+ESMF_OPENMP := OFF
 
 ############################################################
 # Blank out variables to prevent rpath encoding
