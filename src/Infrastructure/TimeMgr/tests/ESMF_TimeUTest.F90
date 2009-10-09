@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.33 2009/09/29 05:59:37 eschwab Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.34 2009/10/09 05:57:19 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.33 2009/09/29 05:59:37 eschwab Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.34 2009/10/09 05:57:19 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -139,6 +139,7 @@
 #ifdef ESMF_TESTEXHAUSTIVE
 
       ! ----------------------------------------------------------------------------
+
       !EX_UTest
       ! Tests fix to support #1115836, bug #1118178, "ESMF_TimeGet returns
       !   string with %lld not %04lld" reported by Paul Schopf/GMU
@@ -579,10 +580,10 @@
 
       !EX_UTest
       ! Test Setting Stop Time with mm=0
-      write(failMsg, *) " Did return ESMF_SUCCESS"
+      write(failMsg, *) " Did not return ESMC_RC_ARG_OUTOFRANGE"
       call ESMF_TimeSet(stopTime, mm=0, dd=1, calendar=noLeapCalendar, rc=rc)
       write(name, *) "Set End Time with mm=0 Initialization Test"
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      call ESMF_Test((rc.eq.ESMC_RC_ARG_OUTOFRANGE), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
@@ -592,7 +593,7 @@
       write(failMsg, *) " Did return ESMF_SUCCESS"
       call ESMF_TimeSet(stopTime, dd=0, s=58, calendar=noLeapCalendar, rc=rc)
       write(name, *) "Set End Time with dd=0 Initialization Test"
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      call ESMF_Test((rc.eq.ESMC_RC_ARG_OUTOFRANGE), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
