@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.79 2009/08/26 20:23:01 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.80 2009/10/09 05:48:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.79 2009/08/26 20:23:01 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.80 2009/10/09 05:48:21 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1500,8 +1500,26 @@
 !     class.  See "interface operator(==)" above for complete description.
 !
 !EOPI
-!     invoke C to C++ entry point
-      call c_ESMC_AlarmEQ(alarm1, alarm2, ESMF_AlarmEQ)
+      ESMF_INIT_TYPE alarminit1, alarminit2
+      integer :: localrc1, localrc2                 ! local return codes
+      logical :: lval1, lval2
+
+      ! check inputs
+      alarminit1 = ESMF_AlarmGetInit(alarm1)
+      alarminit2 = ESMF_AlarmGetInit(alarm2)
+
+      ! TODO: consider moving this logic to C++: use Base class? status?
+      !       or replicate logic for C interface also
+      if (alarminit1.eq.ESMF_INIT_CREATED.and. &
+          alarminit2.eq.ESMF_INIT_CREATED) then
+        ! invoke C to C++ entry point
+        call c_ESMC_AlarmEQ(alarm1, alarm2, ESMF_AlarmEQ)
+      else
+        ! log error, convert to return code, and compare
+        lval1 = ESMF_IMErr(alarminit1, ESMF_CONTEXT, rc=localrc1)
+        lval2 = ESMF_IMErr(alarminit2, ESMF_CONTEXT, rc=localrc2)
+        ESMF_AlarmEQ = localrc1.eq.localrc2
+      endif
 
       end function ESMF_AlarmEQ
 
@@ -1526,8 +1544,26 @@
 !     class.  See "interface operator(/=)" above for complete description.
 !
 !EOPI
-!     invoke C to C++ entry point
-      call c_ESMC_AlarmNE(alarm1, alarm2, ESMF_AlarmNE)
+      ESMF_INIT_TYPE alarminit1, alarminit2
+      integer :: localrc1, localrc2                 ! local return codes
+      logical :: lval1, lval2
+
+      ! check inputs
+      alarminit1 = ESMF_AlarmGetInit(alarm1)
+      alarminit2 = ESMF_AlarmGetInit(alarm2)
+
+      ! TODO: consider moving this logic to C++: use Base class? status?
+      !       or replicate logic for C interface also
+      if (alarminit1.eq.ESMF_INIT_CREATED.and. &
+          alarminit2.eq.ESMF_INIT_CREATED) then
+        ! invoke C to C++ entry point
+        call c_ESMC_AlarmNE(alarm1, alarm2, ESMF_AlarmNE)
+      else
+        ! log error, convert to return code, and compare
+        lval1 = ESMF_IMErr(alarminit1, ESMF_CONTEXT, rc=localrc1)
+        lval2 = ESMF_IMErr(alarminit2, ESMF_CONTEXT, rc=localrc2)
+        ESMF_AlarmNE = localrc1.ne.localrc2
+      endif
 
       end function ESMF_AlarmNE
 

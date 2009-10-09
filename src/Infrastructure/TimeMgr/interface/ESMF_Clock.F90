@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Clock.F90,v 1.85 2009/09/15 04:41:11 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.86 2009/10/09 05:48:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.85 2009/09/15 04:41:11 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.86 2009/10/09 05:48:21 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1632,8 +1632,26 @@
 !     class.  See "interface operator(==)" above for complete description.
 !
 !EOPI
-!     invoke C to C++ entry point
-      call c_ESMC_ClockEQ(clock1, clock2, ESMF_ClockEQ)
+      ESMF_INIT_TYPE clockinit1, clockinit2
+      integer :: localrc1, localrc2                 ! local return codes
+      logical :: lval1, lval2
+
+      ! check inputs
+      clockinit1 = ESMF_ClockGetInit(clock1)
+      clockinit2 = ESMF_ClockGetInit(clock2)
+
+      ! TODO: consider moving this logic to C++: use Base class? status?
+      !       or replicate logic for C interface also
+      if (clockinit1.eq.ESMF_INIT_CREATED.and. &
+          clockinit2.eq.ESMF_INIT_CREATED) then
+        ! invoke C to C++ entry point
+        call c_ESMC_ClockEQ(clock1, clock2, ESMF_ClockEQ)
+      else
+        ! log error, convert to return code, and compare
+        lval1 = ESMF_IMErr(clockinit1, ESMF_CONTEXT, rc=localrc1)
+        lval2 = ESMF_IMErr(clockinit2, ESMF_CONTEXT, rc=localrc2)
+        ESMF_ClockEQ = localrc1.eq.localrc2
+      endif
 
       end function ESMF_ClockEQ
 
@@ -1658,8 +1676,26 @@
 !     class.  See "interface operator(/=)" above for complete description.
 !
 !EOPI
-!     invoke C to C++ entry point
-      call c_ESMC_ClockNE(clock1, clock2, ESMF_ClockNE)
+      ESMF_INIT_TYPE clockinit1, clockinit2
+      integer :: localrc1, localrc2                 ! local return codes
+      logical :: lval1, lval2
+
+      ! check inputs
+      clockinit1 = ESMF_ClockGetInit(clock1)
+      clockinit2 = ESMF_ClockGetInit(clock2)
+
+      ! TODO: consider moving this logic to C++: use Base class? status?
+      !       or replicate logic for C interface also
+      if (clockinit1.eq.ESMF_INIT_CREATED.and. &
+          clockinit2.eq.ESMF_INIT_CREATED) then
+        ! invoke C to C++ entry point
+        call c_ESMC_ClockNE(clock1, clock2, ESMF_ClockNE)
+      else
+        ! log error, convert to return code, and compare
+        lval1 = ESMF_IMErr(clockinit1, ESMF_CONTEXT, rc=localrc1)
+        lval2 = ESMF_IMErr(clockinit2, ESMF_CONTEXT, rc=localrc2)
+        ESMF_ClockNE = localrc1.ne.localrc2
+      endif
 
       end function ESMF_ClockNE
 

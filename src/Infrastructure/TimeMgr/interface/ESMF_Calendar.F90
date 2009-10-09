@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.100 2009/10/07 05:56:21 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.101 2009/10/09 05:48:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -60,6 +60,8 @@
 !
 !     ! Fortran "enum" type to match C++ ESMC_CalendarType enum
 
+      ! TODO: add isInit init macro infrastructure to initialize calendartype ?
+      !       to 0 (to detect unset) or possibly 8 (default ESMF_CAL_NOCALENDAR)
       type ESMF_CalendarType
       sequence
       private
@@ -141,7 +143,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.100 2009/10/07 05:56:21 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.101 2009/10/09 05:48:21 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -503,19 +505,19 @@
 
 !==============================================================================
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CalendarGetInit"
+#define ESMF_METHOD "ESMF_CalendarGetInit()"
 !BOPI
 ! !IROUTINE:  ESMF_CalendarGetInit - Get initialization status.
 
 ! !INTERFACE:
-    function ESMF_CalendarGetInit(d)
+      function ESMF_CalendarGetInit(d)
 !
 ! !ARGUMENTS:
-       type(ESMF_Calendar), intent(in), optional :: d
-       ESMF_INIT_TYPE :: ESMF_CalendarGetInit
+      type(ESMF_Calendar), intent(in), optional :: d
+      ESMF_INIT_TYPE :: ESMF_CalendarGetInit
 !
 ! !DESCRIPTION:
-!      Get the initialization status of the Deep class {\tt bundle}.
+!     Get the initialization status of the Deep class {\tt bundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -525,13 +527,13 @@
 !
 !EOPI
 
-       if (present(d)) then
-         ESMF_CalendarGetInit = ESMF_INIT_GET(d)
-       else
-         ESMF_CalendarGetInit = ESMF_INIT_CREATED
-       endif
+      if (present(d)) then
+        ESMF_CalendarGetInit = ESMF_INIT_GET(d)
+      else
+        ESMF_CalendarGetInit = ESMF_INIT_CREATED
+      endif
 
-    end function ESMF_CalendarGetInit
+      end function ESMF_CalendarGetInit
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
@@ -540,15 +542,15 @@
 ! !IROUTINE: ESMF_CalendarSetInitCreated - Set Calendar init code to "CREATED"
 
 ! !INTERFACE:
-  subroutine ESMF_CalendarSetInitCreated(c, rc)
+      subroutine ESMF_CalendarSetInitCreated(c, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Calendar), intent(inout)           :: c
-    integer,             intent(out),  optional  :: rc  
+      type(ESMF_Calendar), intent(inout)           :: c
+      integer,             intent(out),  optional  :: rc  
 !         
 !
 ! !DESCRIPTION:
-!      Set init code in Calendar object to "CREATED".
+!     Set init code in Calendar object to "CREATED".
 !
 !     The arguments are:
 !     \begin{description}
@@ -560,21 +562,23 @@
 !
 !EOPI
 !------------------------------------------------------------------------------
-    ! Set return code to not implemented
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      ! Set return code to not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
-    ! Set init code
-    ESMF_INIT_SET_CREATED(c)
+      ! Set init code
+      ESMF_INIT_SET_CREATED(c)
 
-    ! Return success
-    if (present(rc)) rc = ESMF_SUCCESS
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
     
-  end subroutine ESMF_CalendarSetInitCreated
+      end subroutine ESMF_CalendarSetInitCreated
 !------------------------------------------------------------------------------
 
 
 
 !==============================================================================
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarCreateBuiltIn()"
 !BOP
 ! !IROUTINE: ESMF_CalendarCreate - Create a new ESMF Calendar of built-in type
 
@@ -644,6 +648,8 @@
       end function ESMF_CalendarCreateBuiltIn
     
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarCreateCopy()"
 !BOP    
 ! !IROUTINE: ESMF_CalendarCreate - Create a copy of an ESMF Calendar
 
@@ -694,6 +700,8 @@
       end function ESMF_CalendarCreateCopy
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarCreateCustom()"
 !BOP
 ! !IROUTINE: ESMF_CalendarCreate - Create a new custom ESMF Calendar
 
@@ -808,6 +816,8 @@
       end function ESMF_CalendarCreateCustom
     
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarDestroy()"
 !BOP
 ! !IROUTINE: ESMF_CalendarDestroy - Free resources associated with a Calendar
 !
@@ -850,6 +860,8 @@
       end subroutine ESMF_CalendarDestroy
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarFinalize()"
 !BOPI
 ! !IROUTINE: ESMF_CalendarFinalize
 !
@@ -885,6 +897,8 @@
       end subroutine ESMF_CalendarFinalize
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarGet()"
 !BOP
 ! !IROUTINE: ESMF_CalendarGet - Get Calendar properties
 
@@ -1010,6 +1024,8 @@
       end subroutine ESMF_CalendarGet
     
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarInitialize()"
 !BOPI
 ! !IROUTINE: ESMF_CalendarInitialize - Initialize the default Calendar type
 
@@ -1051,6 +1067,8 @@
       end subroutine ESMF_CalendarInitialize
     
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarIsLeapYearI4()"
 !BOP
 ! !IROUTINE: ESMF_CalendarIsLeapYear - Determine if given year is a leap year
 
@@ -1104,6 +1122,8 @@
       end function ESMF_CalendarIsLeapYearI4
     
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarIsLeapYearI8()"
 !BOP
 ! !IROUTINE: ESMF_CalendarIsLeapYear - Determine if given year is a leap year
 
@@ -1157,6 +1177,8 @@
       end function ESMF_CalendarIsLeapYearI8
     
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarPrint()"
 !BOP
 ! !IROUTINE:  ESMF_CalendarPrint - Print the contents of a Calendar
 
@@ -1220,6 +1242,8 @@
       end subroutine ESMF_CalendarPrint
       
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarReadRestart()"
 !BOPI
 ! !IROUTINE:  ESMF_CalendarReadRestart - Restore the contents of a Calendar (not implemented)
 
@@ -1271,6 +1295,8 @@
       end function ESMF_CalendarReadRestart
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarSetBuiltIn()"
 !BOP
 ! !IROUTINE: ESMF_CalendarSet - Set a Calendar to a built-in type
 
@@ -1337,6 +1363,8 @@
       end subroutine ESMF_CalendarSetBuiltIn
     
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarSetCustom()"
 !BOP
 ! !IROUTINE: ESMF_CalendarSet - Set properties of a custom Calendar
 
@@ -1448,6 +1476,8 @@
       end subroutine ESMF_CalendarSetCustom
     
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarSetDefaultType()"
 !BOP
 ! !IROUTINE: ESMF_CalendarSetDefault - Set the default Calendar type
 
@@ -1492,6 +1522,8 @@
       end subroutine ESMF_CalendarSetDefaultType
     
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarSetDefaultCal()"
 !BOP
 ! !IROUTINE: ESMF_CalendarSetDefault - Set the default Calendar
 
@@ -1539,6 +1571,8 @@
       end subroutine ESMF_CalendarSetDefaultCal
     
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarValidate()"
 !BOP
 ! !IROUTINE:  ESMF_CalendarValidate - Validate a Calendar's properties
 
@@ -1585,6 +1619,8 @@
       end subroutine ESMF_CalendarValidate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarWriteRestart()"
 !BOPI
 ! !IROUTINE:  ESMF_CalendarWriteRestart - Save the contents of a Calendar (not implemented)
 
@@ -1650,6 +1686,7 @@
 !     class.  See "interface operator(==)" above for complete description.
 !
 !EOPI
+
       ESMF_INIT_TYPE calinit1, calinit2
       integer :: localrc1, localrc2                 ! local return codes
       logical :: lval1, lval2
@@ -1659,6 +1696,7 @@
       calinit2 = ESMF_CalendarGetInit(calendar2)
 
       ! TODO: consider moving this logic to C++: use Base class? status?
+      !       or replicate logic for C interface also
       if (calinit1.eq.ESMF_INIT_CREATED.and.calinit2.eq.ESMF_INIT_CREATED) then
         ! invoke C to C++ entry point
         call c_ESMC_CalendarEQ(calendar1, calendar2, ESMF_CalendarEQ)
@@ -1672,6 +1710,8 @@
       end function ESMF_CalendarEQ
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarTypeEQ()"
 !BOPI
 ! !IROUTINE:  ESMF_CalendarTypeEQ - Compare two Calendar types for equality
 !
@@ -1697,6 +1737,8 @@
       end function ESMF_CalendarTypeEQ
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarCalAndTypeEQ"
 !BOPI
 ! !IROUTINE:  ESMF_CalendarCalAndTypeEQ - Compare a Calendar and Calendar type for equality
 !
@@ -1715,13 +1757,31 @@
 !     class.  See "interface operator(==)" above for complete description.
 !             
 !EOPI
-!     invoke C to C++ entry point
-      call c_ESMC_CalendarCalAndTypeEQ(calendar, calendartype, &
-                                       ESMF_CalendarCalAndTypeEQ)
+
+      ESMF_INIT_TYPE calinit
+      integer :: localrc                                ! local return codes
+      logical :: lval
+
+      ! check input
+      calinit = ESMF_CalendarGetInit(calendar)
+
+      ! TODO: consider moving this logic to C++: use Base class? status?
+      !       or replicate logic for C interface also
+      if (calinit.eq.ESMF_INIT_CREATED) then
+        ! invoke C to C++ entry point
+        call c_ESMC_CalendarCalAndTypeEQ(calendar, calendartype, &
+                                         ESMF_CalendarCalAndTypeEQ)
+      else
+        ! log error, and return false
+        lval = ESMF_IMErr(calinit, ESMF_CONTEXT, rc=localrc)
+        ESMF_CalendarCalAndTypeEQ = .false.
+      endif
 
       end function ESMF_CalendarCalAndTypeEQ
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarTypeAndCalEQ"
 !BOPI
 ! !IROUTINE:  ESMF_CalendarTypeAndCalEQ - Compare a Calendar type and Calendar for equality
 !
@@ -1740,13 +1800,31 @@
 !     class.  See "interface operator(==)" above for complete description.
 !             
 !EOPI
-!     invoke C to C++ entry point
+
+      ESMF_INIT_TYPE calinit
+      integer :: localrc                                ! local return codes
+      logical :: lval
+
+      ! check input
+      calinit = ESMF_CalendarGetInit(calendar)
+
+      ! TODO: consider moving this logic to C++: use Base class? status?
+      !       or replicate logic for C interface also
+      if (calinit.eq.ESMF_INIT_CREATED) then
+        ! invoke C to C++ entry point
       call c_ESMC_CalendarTypeAndCalEQ(calendartype, calendar, &
                                        ESMF_CalendarTypeAndCalEQ)
+      else
+        ! log error, and return false
+        lval = ESMF_IMErr(calinit, ESMF_CONTEXT, rc=localrc)
+        ESMF_CalendarTypeAndCalEQ = .false.
+      endif
 
       end function ESMF_CalendarTypeAndCalEQ
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarNE"
 !BOPI
 ! !IROUTINE:  ESMF_CalendarNE - Compare two Calendars for inequality
 !
@@ -1765,12 +1843,32 @@
 !     class.  See "interface operator(/=)" above for complete description.
 !             
 !EOPI
-!     invoke C to C++ entry point
-      call c_ESMC_CalendarNE(calendar1, calendar2, ESMF_CalendarNE)
+
+      ESMF_INIT_TYPE calinit1, calinit2
+      integer :: localrc1, localrc2                 ! local return codes
+      logical :: lval1, lval2
+
+      ! check inputs
+      calinit1 = ESMF_CalendarGetInit(calendar1)
+      calinit2 = ESMF_CalendarGetInit(calendar2)
+
+      ! TODO: consider moving this logic to C++: use Base class? status?
+      !       or replicate logic for C interface also
+      if (calinit1.eq.ESMF_INIT_CREATED.and.calinit2.eq.ESMF_INIT_CREATED) then
+        ! invoke C to C++ entry point
+        call c_ESMC_CalendarNE(calendar1, calendar2, ESMF_CalendarNE)
+      else
+        ! log error, convert to return code, and compare
+        lval1 = ESMF_IMErr(calinit1, ESMF_CONTEXT, rc=localrc1)
+        lval2 = ESMF_IMErr(calinit2, ESMF_CONTEXT, rc=localrc2)
+        ESMF_CalendarNE = localrc1.ne.localrc2
+      endif
 
       end function ESMF_CalendarNE
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarTypeNE()"
 !BOPI
 ! !IROUTINE:  ESMF_CalendarTypeNE - Compare two Calendar types for inequality
 !
@@ -1796,6 +1894,8 @@
       end function ESMF_CalendarTypeNE
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarCalAndTypeNE"
 !BOPI
 ! !IROUTINE:  ESMF_CalendarCalAndTypeNE - Compare a Calendar and Calendar type for inequality
 !
@@ -1814,13 +1914,31 @@
 !     class.  See "interface operator(/=)" above for complete description.
 !             
 !EOPI
-!     invoke C to C++ entry point
-      call c_ESMC_CalendarCalAndTypeNE(calendar, calendartype, &
-                                       ESMF_CalendarCalAndTypeNE)
+
+      ESMF_INIT_TYPE calinit
+      integer :: localrc                                ! local return codes
+      logical :: lval
+
+      ! check input
+      calinit = ESMF_CalendarGetInit(calendar)
+
+      ! TODO: consider moving this logic to C++: use Base class? status?
+      !       or replicate logic for C interface also
+      if (calinit.eq.ESMF_INIT_CREATED) then
+        ! invoke C to C++ entry point
+        call c_ESMC_CalendarCalAndTypeNE(calendar, calendartype, &
+                                         ESMF_CalendarCalAndTypeNE)
+      else
+        ! log error, and return true
+        lval = ESMF_IMErr(calinit, ESMF_CONTEXT, rc=localrc)
+        ESMF_CalendarCalAndTypeNE = .true.
+      endif
 
       end function ESMF_CalendarCalAndTypeNE
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarTypeAndCalNE"
 !BOPI
 ! !IROUTINE:  ESMF_CalendarTypeAndCalNE - Compare a Calendar type and Calendar for inequality
 !
@@ -1839,9 +1957,25 @@
 !     class.  See "interface operator(/=)" above for complete description.
 !             
 !EOPI
-!     invoke C to C++ entry point
-      call c_ESMC_CalendarTypeAndCalNE(calendartype, calendar, &
-                                       ESMF_CalendarTypeAndCalNE)
+
+      ESMF_INIT_TYPE calinit
+      integer :: localrc                                ! local return codes
+      logical :: lval
+
+      ! check input
+      calinit = ESMF_CalendarGetInit(calendar)
+
+      ! TODO: consider moving this logic to C++: use Base class? status?
+      !       or replicate logic for C interface also
+      if (calinit.eq.ESMF_INIT_CREATED) then
+        ! invoke C to C++ entry point
+        call c_ESMC_CalendarTypeAndCalNE(calendartype, calendar, &
+                                         ESMF_CalendarTypeAndCalNE)
+      else
+        ! log error, and return true
+        lval = ESMF_IMErr(calinit, ESMF_CONTEXT, rc=localrc)
+        ESMF_CalendarTypeAndCalNE = .true.
+      endif
 
       end function ESMF_CalendarTypeAndCalNE
 
