@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmType.F90,v 1.20 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_AlarmType.F90,v 1.21 2009/10/09 05:40:43 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -86,7 +86,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_AlarmType.F90,v 1.20 2009/01/21 21:38:01 cdeluca Exp $'
+      '$Id: ESMF_AlarmType.F90,v 1.21 2009/10/09 05:40:43 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -99,11 +99,11 @@
     function ESMF_AlarmGetInit(d)
 !
 ! !ARGUMENTS:
-       type(ESMF_Alarm), intent(inout), optional :: d
-       ESMF_INIT_TYPE                            :: ESMF_AlarmGetInit
+      type(ESMF_Alarm), intent(in), optional :: d
+      ESMF_INIT_TYPE                         :: ESMF_AlarmGetInit
 !
 ! !DESCRIPTION:
-!      Get the initialization status of the Deep class {\tt alarm}.
+!     Get the initialization status of the Deep class {\tt alarm}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -113,16 +113,15 @@
 !
 !EOPI
 
-       if (present(d)) then
-         ESMF_AlarmGetInit = ESMF_INIT_GET(d)
-       else
-         ESMF_AlarmGetInit = ESMF_INIT_CREATED
-       endif
+      if (present(d)) then
+        ESMF_AlarmGetInit = ESMF_INIT_GET(d)
+      else
+        ESMF_AlarmGetInit = ESMF_INIT_CREATED
+      endif
 
     end function ESMF_AlarmGetInit
 
 !------------------------------------------------------------------------------
-
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
@@ -139,7 +138,7 @@
 !         
 !
 ! !DESCRIPTION:
-!      Set init code in Alarm object to "CREATED".
+!     Set init code in Alarm object to "CREATED".
 !
 !     The arguments are:
 !     \begin{description}
@@ -151,6 +150,7 @@
 !
 !EOPI
 !------------------------------------------------------------------------------
+
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
@@ -162,7 +162,6 @@
     
   end subroutine ESMF_AlarmSetInitCreated
 !------------------------------------------------------------------------------
-
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
@@ -179,7 +178,7 @@
 !         
 !
 ! !DESCRIPTION:
-!      Set init code in Alarm object to "DELETED".
+!     Set init code in Alarm object to "DELETED".
 !
 !     The arguments are:
 !     \begin{description}
@@ -191,6 +190,7 @@
 !
 !EOPI
 !------------------------------------------------------------------------------
+
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
@@ -210,32 +210,36 @@
   subroutine ESMF_AlarmGetThis(alarm, this, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Alarm),   intent(in),  optional :: alarm
+    type(ESMF_Alarm),   intent(in)            :: alarm
     type(ESMF_Pointer), intent(out)           :: this
     integer,            intent(out), optional :: rc
 !
 !
 ! !DESCRIPTION:
-! Internal access routine for C++ pointer.
+!     Internal access routine for C++ pointer.
 !
-! The arguments are:
-! \begin{description}
-! \item[alarm]
-! Specified {\tt ESMF\_Alarm} object.
-! \item[this]
-! C++ pointer.
-! \item[{[rc]}]
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          Specified {\tt ESMF\_Alarm} object.
+!     \item[this]
+!          C++ pointer.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
+
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     ! Copy C++ pointer
     this = alarm%this
+
     ! Return success
     if (present(rc)) rc = ESMF_SUCCESS
+
   end subroutine ESMF_AlarmGetThis
 !------------------------------------------------------------------------------
 
@@ -252,26 +256,30 @@
 !
 !
 ! !DESCRIPTION:
-! Set C++ pointer in Alarm.
+!     Set C++ pointer in Alarm.
 !
-! The arguments are:
-! \begin{description}
-! \item[alarm]
-! Specified {\tt ESMF\_Alarm} object.
-! \item[this]
-! C++ pointer.
-! \item[{[rc]}]
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          Specified {\tt ESMF\_Alarm} object.
+!     \item[this]
+!          C++ pointer.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
+
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     ! Copy C++ pointer
     alarm%this = this
+
     ! Return success
     if (present(rc)) rc = ESMF_SUCCESS
+
   end subroutine ESMF_AlarmSetThis
 !------------------------------------------------------------------------------
 
