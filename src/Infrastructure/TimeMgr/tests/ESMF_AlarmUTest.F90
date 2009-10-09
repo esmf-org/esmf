@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.46 2009/09/29 05:59:37 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.47 2009/10/09 05:52:23 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.46 2009/09/29 05:59:37 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.47 2009/10/09 05:52:23 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -74,7 +74,7 @@
       logical :: willRingNext, testPass, alarmsNotEqual, alarmsEqual
       type(ESMF_Direction) :: reverseDirection, forwardDirection
       type(ESMF_Alarm) :: alarm, alarm2, afterAlarm, beforeAlarm
-      type(ESMF_Alarm) :: alarmList(201), alarm6
+      type(ESMF_Alarm) :: alarmList(201), alarm6, alarm7
       type(ESMF_Alarm) :: alarm5(200), alarm3, alarm4
       type(ESMF_Alarm) :: ALARM_HISTORY
 
@@ -539,6 +539,66 @@
       call ESMF_Test((alarmsNotEqual), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_AlarmDestroy(alarm3, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_AlarmOperator(==)(alarm,alarm1)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Deleted Alarm Not Equal Created Alarm Test 1"
+      alarmsEqual = (alarm2 == alarm1)  ! exercise Alarm == operator
+      call ESMF_Test((.not.alarmsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_AlarmOperator(==)(alarm,alarm1)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Deleted Alarm Not Equal Uncreated Alarm Test 1"
+      alarmsEqual = (alarm3 == alarm7)  ! exercise Alarm == operator
+      call ESMF_Test((.not.alarmsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_AlarmOperator(==)(alarm,alarm1)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Uncreated Alarm Not Equal Created Alarm Test 1"
+      alarmsEqual = (alarm7 == alarm1)  ! exercise Alarm == operator
+      call ESMF_Test((.not.alarmsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_AlarmOperator(/=)(alarm,alarm1)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Deleted Alarm Not Equal Created Alarm Test 2"
+      alarmsNotEqual = (alarm2 /= alarm1)  ! exercise Alarm /= operator
+      call ESMF_Test((alarmsNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_AlarmOperator(/=)(alarm,alarm1)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Deleted Alarm Not Equal Uncreated Alarm Test 2"
+      alarmsNotEqual = (alarm3 /= alarm7)  ! exercise Alarm /= operator
+      call ESMF_Test((alarmsNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_AlarmOperator(/=)(alarm,alarm1)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Uncreated Alarm Not Equal Created Alarm Test 2"
+      alarmsNotEqual = (alarm7 /= alarm1)  ! exercise Alarm /= operator
+      call ESMF_Test((alarmsNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
 

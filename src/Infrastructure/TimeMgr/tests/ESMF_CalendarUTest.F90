@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.52 2009/10/07 05:57:50 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.53 2009/10/09 05:52:23 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.52 2009/10/07 05:57:50 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.53 2009/10/09 05:52:23 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -212,13 +212,68 @@
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      ! test fix for bug 1648057
-      ! Testing for calendar equality of deleted and uncreated calendars
-      ! calendarsEqual = ESMF_CalendarOperator(==)(calendar1,calendar2)
+      ! Test fix for bug 1648057
+      ! Testing ESMF_CalendarOperator(==)(calendar1,calendar2)
       write(failMsg, *) "Returned equal"
-      write(name, *) "Calendar Equality of deleted and uncreated Calendars Test"
+      write(name, *) "Calendar equality of deleted and uncreated Calendars Test"
       calendarsEqual = (gregorianCalendar == gregorianCalendar1)
+      !                                   ^-- exercise Calendar == operator
       call ESMF_Test((.not.calendarsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testig ESMF_CalendarOperator(/=)(calendar1,calendar2)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Calendar Non Equality of deleted and uncreated Calendars Test"
+      calendarsNotEqual = (gregorianCalendar /= gregorianCalendar1)
+      !                                      ^-- exercise Calendar == operator
+      call ESMF_Test((calendarsNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testig ESMF_CalendarOperator(==)(calendar1,calendartype)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Deleted Calendar Equal CalendarType Test" 
+      calendarsEqual = (gregorianCalendar == ESMF_CAL_GREGORIAN )
+      !                                   ^-- exercise Calendar == operator
+      call ESMF_Test((.not.calendarsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testig ESMF_CalendarOperator(==)(calendartype,calendar1)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "CalendarType Equal uncreated Calendar Test" 
+      calendarsEqual = (ESMF_CAL_GREGORIAN == gregorianCalendar1)
+      !                                    ^-- exercise Calendar == operator
+      call ESMF_Test((.not.calendarsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testig ESMF_CalendarOperator(/=)(calendar1,calendartype)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Uncreated Calendar Not Equal CalendarType Test" 
+      calendarsNotEqual = (gregorianCalendar1 /= ESMF_CAL_GREGORIAN )
+      !                                       ^-- exercise Calendar /= operator
+      call ESMF_Test((calendarsNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testig ESMF_CalendarOperator(/=)(calendartype,calendar1)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "CalendarType Not Equal Deleted Calendar Test" 
+      calendarsNotEqual = (ESMF_CAL_GREGORIAN /= gregorianCalendar)
+      !                                       ^-- exercise Calendar /= operator
+      call ESMF_Test((calendarsNotEqual), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
@@ -278,15 +333,15 @@
 
       ! ----------------------------------------------------------------------------
 
-      !EX_____UTest
-      ! Commented out until bug 1648057 is closed
+      !EX_UTest
+      ! Test fix for bug 1648057
       ! Testing ESMF_CalendarOperator(==)(calendar1,calendar2)
-      !write(failMsg, *) "Returned equal"
-      !write(name, *) "Calendar Equal of created  and uncreated Calendars Test"
-      !calendarsEqual = (gregorianCalendar == gregorianCalendar1)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Calendar equality of created and uncreated Calendars Test"
+      calendarsEqual = (gregorianCalendar == gregorianCalendar1)
       !                                   ^-- exercise Calendar == operator
-      !call ESMF_Test((.not.calendarsEqual), &
-                      !name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((.not.calendarsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
 

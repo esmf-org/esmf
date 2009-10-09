@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.116 2009/09/29 05:59:37 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.117 2009/10/09 05:52:23 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.116 2009/09/29 05:59:37 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.117 2009/10/09 05:52:23 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -89,7 +89,7 @@
 
       ! instantiate a clock 
       type(ESMF_Clock) :: topClock,  clock_360day, clock_no_leap, &
-			  clock_gregorian, clock1, clock2
+			  clock_gregorian, clock1, clock2, clock3
 
 
       ! instantiate a calendar
@@ -191,6 +191,7 @@
       call ESMF_ClockDestroy(clock, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -200,6 +201,7 @@
       call ESMF_ClockDestroy(clock1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
  
@@ -209,6 +211,7 @@
       call ESMF_ClockSet(clock, name="Clock 2", rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
  
@@ -218,6 +221,7 @@
       call ESMF_ClockSet(clock1, name="Clock 2", rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -227,6 +231,7 @@
       call ESMF_ClockGet(clock, prevTime=previousTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -236,6 +241,7 @@
       call ESMF_ClockGet(clock1, prevTime=previousTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -245,6 +251,7 @@
       call ESMF_ClockAdvance(clock, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -254,6 +261,7 @@
       call ESMF_ClockAdvance(clock1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -262,6 +270,7 @@
       bool = ESMF_ClockIsStopTime(clock, rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -270,6 +279,7 @@
       bool = ESMF_ClockIsStopTime(clock1, rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -620,13 +630,14 @@
 ! see bug #755424
 ! TODO:  test count will be "off-by-one" on platforms where this test
 !        doesn't run
-      ! This code crashes, bug 79753 has been opened.
+      ! This code crashes, bug 797533 has been opened.
       ! Attempt to get un-initialized year from stop time
       write(name, *) "Get Uninitialized StopTime Year Test"
       call ESMF_TimeGet(stopTime, yy=YY, rc=rc)
       write(failMsg, *) " Returned ESMF_SUCCESS"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                      name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -638,6 +649,7 @@
                                   calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -649,6 +661,7 @@
                                   calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -660,6 +673,7 @@
                                   calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -672,6 +686,7 @@
                                   calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -683,6 +698,7 @@
                                   calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -728,6 +744,7 @@
       call ESMF_ClockPrint(clock, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -735,10 +752,11 @@
       ! TODO:  This test is commented out bug 1649164 has been opened.
       ! Initialize clock with uninitialized Start Time.
       write(name, *) "Clock Initialization Test with uninitialized startTime"
-      write(failMsg, *) " Returned ESMF_SUCCESS"
+      write(failMsg, *) " Did not return ESMC_RC_DIV_ZERO"
       clock = ESMF_ClockCreate("Clock 1", timeStep, startTime2, &
                                           stopTime, rc=rc)
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      !print *, "rc = ", rc
+      call ESMF_Test((rc.eq.ESMC_RC_DIV_ZERO), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_ClockDestroy(clock, rc)
 
@@ -904,6 +922,66 @@
       call ESMF_ClockDestroy(clock, rc)
 
       ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_ClockOperator(==)(clock,clock1)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Deleted Clock Not Equal Created Clock Test 1"
+      clocksEqual = (clock == clock2)  ! exercise Clock == operator
+      call ESMF_Test((.not.clocksEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_ClockOperator(==)(clock,clock1)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Deleted Clock Not Equal Uncreated Clock Test 1"
+      clocksEqual = (clock == clock3)  ! exercise Clock == operator
+      call ESMF_Test((.not.clocksEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_ClockOperator(==)(clock,clock1)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Uncreated Clock Not Equal Created Clock Test 1"
+      clocksEqual = (clock3 == clock2)  ! exercise Clock == operator
+      call ESMF_Test((.not.clocksEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_ClockOperator(/=)(clock,clock1)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Deleted Clock Not Equal Created Clock Test 2"
+      clocksNotEqual = (clock /= clock2)  ! exercise Clock /= operator
+      call ESMF_Test((clocksNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_ClockOperator(/=)(clock,clock1)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Deleted Clock Not Equal Uncreated Clock Test 2"
+      clocksNotEqual = (clock /= clock3)  ! exercise Clock /= operator
+      call ESMF_Test((clocksNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_ClockOperator(/=)(clock,clock1)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Uncreated Clock Not Equal Created Clock Test 2"
+      clocksNotEqual = (clock3 /= clock2)  ! exercise Clock /= operator
+      call ESMF_Test((clocksNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
  
       !EX_UTest
       write(failMsg, *) " Returned ESMF_FAILURE"
@@ -916,18 +994,18 @@
       ! ----------------------------------------------------------------------------
 
       if (rc.eq.ESMF_SUCCESS) then
-      	!EX_UTest
-      	! time step from start time to stop time
-      	do while (.not.ESMF_ClockIsStopTime(clock, rc))
-        	call ESMF_ClockAdvance(clock, rc=rc)
-        	!call ESMF_ClockPrint(clock, "currtime string", rc=rc)
-      	end do
+        !EX_UTest
+        ! time step from start time to stop time
+        do while (.not.ESMF_ClockIsStopTime(clock, rc))
+          call ESMF_ClockAdvance(clock, rc=rc)
+          !call ESMF_ClockPrint(clock, "currtime string", rc=rc)
+        end do
 
-      	bool = ESMF_ClockIsStopTime(clock, rc)
-      	!print *, "bool = ", bool
-      	write(failMsg, *) " Did not return ESMF_SUCCESS and/or bool not True"
-      	write(name, *) "Clock Advance Test"
-      	call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(bool)), &
+        bool = ESMF_ClockIsStopTime(clock, rc)
+        !print *, "bool = ", bool
+        write(failMsg, *) " Did not return ESMF_SUCCESS and/or bool not True"
+        write(name, *) "Clock Advance Test"
+        call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(bool)), &
                       name, failMsg, result, ESMF_SRCLINE)
        end if
 
