@@ -1,4 +1,4 @@
-// $Id: ESMCI_Fraction.C,v 1.5 2009/10/07 05:45:17 eschwab Exp $
+// $Id: ESMCI_Fraction.C,v 1.6 2009/10/10 05:57:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Fraction.C,v 1.5 2009/10/07 05:45:17 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.6 2009/10/10 05:57:38 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // TODO:  Use logarithms for checking if a multiplication or division is about
@@ -223,7 +223,7 @@
         return(ESMF_SUCCESS);
       }
     }
-printf("rabs, w, target = %g, %lld, %g\n", rabs, w, target);
+//printf("rabs, w, target = %g, %lld, %g\n", rabs, w, target);
 
     // Target precision is relative to given rin (not target, due to possible
     // loss of significant digits from the subraction of w).  Precision is
@@ -238,8 +238,8 @@ printf("rabs, w, target = %g, %lld, %g\n", rabs, w, target);
     // 15 to 16 digits (due to loss in subraction operations in user's code).
 
     p = pow(10.0, -(DBL_DIG-(int)log10(rabs)));
-printf("p = %g\n", p);
-fflush(stdout);
+//printf("p = %g\n", p);
+//fflush(stdout);
 
     r = target;
     nprevprev = 0; nprev = 1;
@@ -254,9 +254,9 @@ int i=0; f=0.0;
       a = (ESMC_I8) r;            // Compute
       n = a * nprev + nprevprev;  //  next
       d = a * dprev + dprevprev;  //   convergent n/d.
-printf("i, a, f, r, n/d = %d, %lld, %g, %g, %lld/%lld\n", ++i, a, f, r, n, d);
-printf("diff with given r = %21.18e\n", fabs((ESMC_R8)n/(ESMC_R8)d - target));
-fflush(stdout);
+//printf("i, a, f, r, n/d = %d, %lld, %g, %g, %lld/%lld\n", ++i, a, f, r, n, d);
+//printf("diff with given r = %21.18e\n", fabs((ESMC_R8)n/(ESMC_R8)d - target));
+//fflush(stdout);
       if (fabs((ESMC_R8)n/(ESMC_R8)d - target) < p) break; // done when double
                                                            //  precision reached
       f = r - (ESMC_R8) a;
@@ -526,7 +526,7 @@ fflush(stdout);
     if (d == 0) {
       ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_CONTEXT,
                                  ESMC_NULL_POINTER);
-      return(ESMF_FAILURE);
+      return(ESMC_RC_DIV_ZERO);
     }
 
     // normalize to proper fraction (labs(n/d) < 1)
@@ -597,7 +597,7 @@ fflush(stdout);
     if (d == 0) {
       ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_CONTEXT,
                                  ESMC_NULL_POINTER);
-      return(ESMF_FAILURE);
+      return(ESMC_RC_DIV_ZERO);
     }
 
     ESMC_I8 conversion = w * denominator + (n * denominator) / d;
@@ -1239,7 +1239,7 @@ fflush(stdout);
         fraction.w * fraction.d + fraction.n == 0) {
       ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_CONTEXT,
                                  ESMC_NULL_POINTER);
-      return(ESMF_FAILURE);
+      return(ESMC_RC_DIV_ZERO);
     }
 
     ESMC_R8 quotient = 
