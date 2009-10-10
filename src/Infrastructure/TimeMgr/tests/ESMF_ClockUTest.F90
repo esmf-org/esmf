@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.117 2009/10/09 05:52:23 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.118 2009/10/10 05:54:55 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.117 2009/10/09 05:52:23 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.118 2009/10/10 05:54:55 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -191,7 +191,6 @@
       call ESMF_ClockDestroy(clock, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -201,7 +200,6 @@
       call ESMF_ClockDestroy(clock1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
  
@@ -211,7 +209,6 @@
       call ESMF_ClockSet(clock, name="Clock 2", rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
  
@@ -221,7 +218,6 @@
       call ESMF_ClockSet(clock1, name="Clock 2", rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -231,7 +227,6 @@
       call ESMF_ClockGet(clock, prevTime=previousTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -241,7 +236,6 @@
       call ESMF_ClockGet(clock1, prevTime=previousTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -251,7 +245,6 @@
       call ESMF_ClockAdvance(clock, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -261,7 +254,6 @@
       call ESMF_ClockAdvance(clock1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -270,7 +262,6 @@
       bool = ESMF_ClockIsStopTime(clock, rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -279,7 +270,6 @@
       bool = ESMF_ClockIsStopTime(clock1, rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -635,9 +625,8 @@
       write(name, *) "Get Uninitialized StopTime Year Test"
       call ESMF_TimeGet(stopTime, yy=YY, rc=rc)
       write(failMsg, *) " Returned ESMF_SUCCESS"
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      call ESMF_Test((rc.eq.ESMC_RC_OBJ_INIT), &
                      name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -647,9 +636,8 @@
       write(failMsg, *) " Should not return ESMF_SUCCESS."
       call ESMF_TimeSet(stopTime, yy=2003, mm=0, dd=14, &
                                   calendar=gregorianCalendar, rc=rc)
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      call ESMF_Test((rc.eq.ESMC_RC_ARG_OUTOFRANGE), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -659,9 +647,8 @@
       write(failMsg, *) " Should not return ESMF_SUCCESS."
       call ESMF_TimeSet(stopTime, yy=2003, mm=13, dd=14, &
                                   calendar=gregorianCalendar, rc=rc)
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      call ESMF_Test((rc.eq.ESMC_RC_ARG_OUTOFRANGE), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -671,9 +658,8 @@
       write(failMsg, *) " Should return ESMF_FAILURE."
       call ESMF_TimeSet(stopTime, yy=2003, mm=2, dd=31, &
                                   calendar=gregorianCalendar, rc=rc)
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      call ESMF_Test((rc.eq.ESMC_RC_ARG_OUTOFRANGE), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -686,7 +672,6 @@
                                   calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -696,9 +681,8 @@
       write(failMsg, *) " Should return ESMF_FAILURE."
       call ESMF_TimeSet(stopTime, yy=-4800, mm=2, dd=28, &
                                   calendar=gregorianCalendar, rc=rc)
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      call ESMF_Test((rc.eq.ESMC_RC_ARG_OUTOFRANGE), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
@@ -733,29 +717,23 @@
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
-! run these tests only on platforms that support F95 initializers, otherwise
-!   may crash or produce FAIL
-! see bug #755445
-! TODO:  test count will be "off-by-one" on platforms where this test
-!        doesn't run
+      ! Test fix for bug #755445
       ! ClockPrint with an unallocated clock
       write(name, *) "Clock Print Test with unallocated clock"
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
       call ESMF_ClockPrint(clock, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      ! TODO:  This test is commented out bug 1649164 has been opened.
+      ! Test fix for bug 1649164.
       ! Initialize clock with uninitialized Start Time.
       write(name, *) "Clock Initialization Test with uninitialized startTime"
       write(failMsg, *) " Did not return ESMC_RC_DIV_ZERO"
       clock = ESMF_ClockCreate("Clock 1", timeStep, startTime2, &
                                           stopTime, rc=rc)
-      !print *, "rc = ", rc
       call ESMF_Test((rc.eq.ESMC_RC_DIV_ZERO), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_ClockDestroy(clock, rc)
@@ -1084,7 +1062,7 @@
       write(failMsg, *) "Should not return ESMF_SUCCESS because timestep is positive."
       clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, &
                                stopTime, rc=rc)
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      call ESMF_Test((rc.eq.ESMC_RC_VAL_OUTOFRANGE), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_ClockDestroy(clock, rc)
 
@@ -1097,7 +1075,7 @@
       write(failMsg, *) "Should not return ESMF_SUCCESS."
       clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, &
                                stopTime, rc=rc)
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      call ESMF_Test((rc.eq.ESMC_RC_OBJ_BAD), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_ClockDestroy(clock, rc)
 
@@ -1315,16 +1293,16 @@
       ! ----------------------------------------------------------------------------
 
       if (rc.eq.ESMF_SUCCESS) then
-      	totalDays=0
-      	days=-1
-      	call ESMF_TimeIntervalSet(timeStep, d=days, rc=rc)
-      	!call ESMF_TimePrint(startTime, rc=rc)
-      	!call ESMF_TimePrint(stopTime, rc=rc)
-      	! time step from start time to stop time
-      	do while (.not.ESMF_ClockIsStopTime(clock_gregorian, rc))
-        	call ESMF_ClockAdvance(clock_gregorian, timeStep=timeStep, rc=rc)
-        	totalDays=totalDays+days
-      	end do
+        totalDays=0
+        days=-1
+        call ESMF_TimeIntervalSet(timeStep, d=days, rc=rc)
+        !call ESMF_TimePrint(startTime, rc=rc)
+        !call ESMF_TimePrint(stopTime, rc=rc)
+        ! time step from start time to stop time
+        do while (.not.ESMF_ClockIsStopTime(clock_gregorian, rc))
+          call ESMF_ClockAdvance(clock_gregorian, timeStep=timeStep, rc=rc)
+          totalDays=totalDays+days
+        end do
 
        end if
 
@@ -1466,16 +1444,16 @@
       ! ----------------------------------------------------------------------------
 
       if (rc.eq.ESMF_SUCCESS) then
-      	totalDays=0
-      	days=1
-      	call ESMF_TimeIntervalSet(timeStep, d=days, rc=rc)
-      	!call ESMF_TimePrint(startTime, rc=rc)
-      	!call ESMF_TimePrint(stopTime, rc=rc)
-      	! time step from start time to stop time
-      	do while (.not.ESMF_ClockIsStopTime(clock_no_leap, rc))
-        	call ESMF_ClockAdvance(clock_no_leap, timeStep=timeStep, rc=rc)
-        	totalDays=totalDays+days
-      	end do
+        totalDays=0
+        days=1
+        call ESMF_TimeIntervalSet(timeStep, d=days, rc=rc)
+        !call ESMF_TimePrint(startTime, rc=rc)
+        !call ESMF_TimePrint(stopTime, rc=rc)
+        ! time step from start time to stop time
+        do while (.not.ESMF_ClockIsStopTime(clock_no_leap, rc))
+          call ESMF_ClockAdvance(clock_no_leap, timeStep=timeStep, rc=rc)
+          totalDays=totalDays+days
+        end do
 
       end if
 
@@ -1508,7 +1486,7 @@
       clock_360day = ESMF_ClockCreate("360 Day Clock", timeStep, startTime, &
                                          stopTime, rc=rc)
       write(name, *) "Clock initialization with Start Time equal to Stop Time Test"
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      call ESMF_Test((rc.eq.ESMC_RC_VAL_WRONG), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_ClockDestroy(clock_360day, rc)
 
@@ -1528,7 +1506,7 @@
       call ESMF_TimeSet(startTime, yy=-100, mm=1, dd=31, &
                                         calendar=esmf_360dayCalendar, rc=rc)
       write(name, *) "Start Time set to illegitimate day in 360 day Calendar Test"
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      call ESMF_Test((rc.eq.ESMC_RC_ARG_OUTOFRANGE), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
@@ -1538,7 +1516,7 @@
       call ESMF_TimeSet(startTime, yy=-100, mm=1, dd=380, &
                                         calendar=esmf_360dayCalendar, rc=rc)
       write(name, *) "Start Time set to illegitimate day in 360 day Calendar Test"
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      call ESMF_Test((rc.eq.ESMC_RC_ARG_OUTOFRANGE), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
@@ -1881,7 +1859,7 @@
       write(failMsg, *) "Should not return ESMF_SUCCESS "
       write(name, *) "Validate an uninitialzed time Test"
       call ESMF_TimeValidate(stopTime3, rc=rc)
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      call ESMF_Test((rc.eq.ESMC_RC_DIV_ZERO), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
@@ -1912,7 +1890,7 @@
                                   calendar=gregorianCalendar, rc=rc)
       write(name, *) "Stop Time initialization with year = -4900 Test"
       !print *, "  "
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      call ESMF_Test((rc.eq.ESMC_RC_ARG_OUTOFRANGE), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
@@ -1992,10 +1970,10 @@
                                          timeStep, startTime, stopTime, rc=rc)
 
       if (rc.eq.ESMF_SUCCESS) then
-      	! time step from start time to stop time
-      	do while (.not.ESMF_ClockIsStopTime(clock, rc))
-        	call ESMF_ClockAdvance(clock, rc=rc)
-      	end do
+        ! time step from start time to stop time
+        do while (.not.ESMF_ClockIsStopTime(clock, rc))
+          call ESMF_ClockAdvance(clock, rc=rc)
+        end do
       end if
 
       !call ESMF_ClockPrint(clock, rc=rc)
@@ -2023,10 +2001,10 @@
                                          timeStep, startTime, stopTime, rc=rc)
 
       if (rc.eq.ESMF_SUCCESS) then
-      	! time step from start time to stop time
-      	do while (.not.ESMF_ClockIsStopTime(clock, rc))
-        	call ESMF_ClockAdvance(clock, rc=rc)
-      	end do
+        ! time step from start time to stop time
+        do while (.not.ESMF_ClockIsStopTime(clock, rc))
+          call ESMF_ClockAdvance(clock, rc=rc)
+        end do
       end if
 
       !call ESMF_ClockPrint(clock, "currtime string", rc=rc)
@@ -2055,10 +2033,10 @@
       !call ESMF_ClockPrint(clock, "currtime string", rc=rc)
 
       if (rc.eq.ESMF_SUCCESS) then
-      	! time step from start time to stop time
-      	do while (.not.ESMF_ClockIsStopTime(clock, rc))
-        	call ESMF_ClockAdvance(clock, rc=rc)
-      	end do
+        ! time step from start time to stop time
+        do while (.not.ESMF_ClockIsStopTime(clock, rc))
+          call ESMF_ClockAdvance(clock, rc=rc)
+        end do
       end if
 
       !call ESMF_ClockPrint(clock, "currtime string", rc=rc)
@@ -2130,10 +2108,10 @@
                                          timeStep, startTime, stopTime, rc=rc)
 
       if (rc.eq.ESMF_SUCCESS) then
-      	! time step from start time to stop time
-      	do while (.not.ESMF_ClockIsStopTime(clock, rc))
-        	call ESMF_ClockAdvance(clock, rc=rc)
-      	end do
+        ! time step from start time to stop time
+        do while (.not.ESMF_ClockIsStopTime(clock, rc))
+          call ESMF_ClockAdvance(clock, rc=rc)
+        end do
       end if
 
       !call ESMF_ClockPrint(clock, "currtime", rc=rc)
@@ -2167,10 +2145,10 @@
       !call ESMF_ClockPrint(clock, "timestep", rc=rc)
 
       if (rc.eq.ESMF_SUCCESS) then
-      	! Run the clock for 100,000 0.1 second time steps
-      	do while (.not.ESMF_ClockIsStopTime(clock, rc))
-        	call ESMF_ClockAdvance(clock, rc=rc)
-      	end do
+        ! Run the clock for 100,000 0.1 second time steps
+        do while (.not.ESMF_ClockIsStopTime(clock, rc))
+          call ESMF_ClockAdvance(clock, rc=rc)
+        end do
       end if
 
       !call ESMF_ClockPrint(clock, "currtime", rc=rc)
@@ -2323,10 +2301,10 @@
       runTheClock = .true.
       do while (runTheClock)
 
-      	! time step from start time to stop time
-      	do while (.not.ESMF_ClockIsDone(clock, rc))
-        	call ESMF_ClockAdvance(clock, rc=rc)
-      	end do
+        ! time step from start time to stop time
+        do while (.not.ESMF_ClockIsDone(clock, rc))
+          call ESMF_ClockAdvance(clock, rc=rc)
+        end do
 
         call ESMF_ClockGet(clock, advanceCount=advanceCounts, &
                            direction=direction, rc=rc)

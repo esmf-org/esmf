@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.54 2009/09/29 05:59:37 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.55 2009/10/10 05:54:55 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.54 2009/09/29 05:59:37 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.55 2009/10/10 05:54:55 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -2782,10 +2782,8 @@
       write(failMsg, *) "should return ESMF_FAILURE."
       call ESMF_TimeIntervalSet(timeStep, yy=2, mm=30, d=720, rc=rc)
       call ESMF_TimeIntervalGet(timeStep, yy=years, d=days, rc=rc)
-      call ESMF_Test((rc/=ESMF_SUCCESS), &
+      call ESMF_Test((rc==ESMC_RC_ARG_BAD), &
                       name, failMsg, result, ESMF_SRCLINE)
-
-      !print *, " rc = ", rc
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -2804,10 +2802,8 @@
       write(failMsg, *) "should return ESMF_FAILURE."
       call ESMF_TimeIntervalSet(timeStep, yy=1, mm=48, rc=rc)
       call ESMF_TimeIntervalGet(timeStep, yy=years, rc=rc)
-      call ESMF_Test((rc/=ESMF_SUCCESS), &
+      call ESMF_Test((rc==ESMC_RC_ARG_BAD), &
                       name, failMsg, result, ESMF_SRCLINE)
-
-      !print *, "rc = ", rc
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -3017,7 +3013,7 @@
       write(failMsg, *) "Should not return ESMF_SUCCESS."
       call ESMF_TimeIntervalGet(timeStep2, s=secs, rc=rc)
       write(name, *) "Time Step Get of no calendar Time Interval Test"
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      call ESMF_Test((rc.eq.ESMC_RC_ARG_BAD), &
                       name, failMsg, result, ESMF_SRCLINE)
       !print *, " Seconds = ", secs
 
