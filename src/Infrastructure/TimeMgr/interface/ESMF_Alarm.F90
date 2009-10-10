@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.80 2009/10/09 05:48:21 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.81 2009/10/10 05:52:29 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.80 2009/10/09 05:48:21 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.81 2009/10/10 05:52:29 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1504,12 +1504,18 @@
       integer :: localrc1, localrc2                 ! local return codes
       logical :: lval1, lval2
 
+      ! Use the following logic, rather than ESMF_INIT_CHECK_DEEP, to gain 
+      ! init checks on both args, and in the case where both are unintialized,
+      ! to distinguish equality based on uninitialized type (uncreated,
+      ! deleted).
+
+      ! TODO: Consider moving this logic to C++: use Base class? status?
+      !       Or replicate logic for C interface also.
+
       ! check inputs
       alarminit1 = ESMF_AlarmGetInit(alarm1)
       alarminit2 = ESMF_AlarmGetInit(alarm2)
 
-      ! TODO: consider moving this logic to C++: use Base class? status?
-      !       or replicate logic for C interface also
       if (alarminit1.eq.ESMF_INIT_CREATED.and. &
           alarminit2.eq.ESMF_INIT_CREATED) then
         ! invoke C to C++ entry point
@@ -1548,12 +1554,18 @@
       integer :: localrc1, localrc2                 ! local return codes
       logical :: lval1, lval2
 
+      ! Use the following logic, rather than ESMF_INIT_CHECK_DEEP, to gain 
+      ! init checks on both args, and in the case where both are unintialized,
+      ! to distinguish equality based on uninitialized type (uncreated,
+      ! deleted).
+
+      ! TODO: Consider moving this logic to C++: use Base class? status?
+      !       Or replicate logic for C interface also.
+
       ! check inputs
       alarminit1 = ESMF_AlarmGetInit(alarm1)
       alarminit2 = ESMF_AlarmGetInit(alarm2)
 
-      ! TODO: consider moving this logic to C++: use Base class? status?
-      !       or replicate logic for C interface also
       if (alarminit1.eq.ESMF_INIT_CREATED.and. &
           alarminit2.eq.ESMF_INIT_CREATED) then
         ! invoke C to C++ entry point
