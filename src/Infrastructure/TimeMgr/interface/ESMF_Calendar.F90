@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.102 2009/10/10 05:51:21 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.103 2009/10/10 17:27:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -143,7 +143,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.102 2009/10/10 05:51:21 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.103 2009/10/10 17:27:58 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -1667,7 +1667,7 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CalendarEQ"
+#define ESMF_METHOD "ESMF_CalendarEQ()"
 !BOPI
 ! !IROUTINE:  ESMF_CalendarEQ - Compare two Calendars for equality
 !
@@ -1744,7 +1744,7 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CalendarCalAndTypeEQ"
+#define ESMF_METHOD "ESMF_CalendarCalAndTypeEQ()"
 !BOPI
 ! !IROUTINE:  ESMF_CalendarCalAndTypeEQ - Compare a Calendar and Calendar type for equality
 !
@@ -1771,7 +1771,7 @@
       ESMF_CalendarCalAndTypeEQ = .false.
 
       ! check input
-      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_CalendarGetInit,calendar,rc)
 
       ! invoke C to C++ entry point
       call c_ESMC_CalendarCalAndTypeEQ(calendar, calendartype, &
@@ -1781,7 +1781,7 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CalendarTypeAndCalEQ"
+#define ESMF_METHOD "ESMF_CalendarTypeAndCalEQ()"
 !BOPI
 ! !IROUTINE:  ESMF_CalendarTypeAndCalEQ - Compare a Calendar type and Calendar for equality
 !
@@ -1808,7 +1808,7 @@
       ESMF_CalendarTypeAndCalEQ = .false.
 
       ! check input
-      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_CalendarGetInit,calendar,rc)
 
       ! invoke C to C++ entry point
       call c_ESMC_CalendarTypeAndCalEQ(calendartype, calendar, &
@@ -1818,7 +1818,7 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CalendarNE"
+#define ESMF_METHOD "ESMF_CalendarNE()"
 !BOPI
 ! !IROUTINE:  ESMF_CalendarNE - Compare two Calendars for inequality
 !
@@ -1895,7 +1895,7 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CalendarCalAndTypeNE"
+#define ESMF_METHOD "ESMF_CalendarCalAndTypeNE()"
 !BOPI
 ! !IROUTINE:  ESMF_CalendarCalAndTypeNE - Compare a Calendar and Calendar type for inequality
 !
@@ -1922,7 +1922,7 @@
       ESMF_CalendarCalAndTypeNE = .true.
 
       ! check input
-      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_CalendarGetInit,calendar,rc)
 
       ! invoke C to C++ entry point
       call c_ESMC_CalendarCalAndTypeNE(calendar, calendartype, &
@@ -1932,7 +1932,7 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CalendarTypeAndCalNE"
+#define ESMF_METHOD "ESMF_CalendarTypeAndCalNE()"
 !BOPI
 ! !IROUTINE:  ESMF_CalendarTypeAndCalNE - Compare a Calendar type and Calendar for inequality
 !
@@ -1959,7 +1959,7 @@
       ESMF_CalendarTypeAndCalNE = .true.
 
       ! check input
-      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_CalendarGetInit,calendar,rc)
 
       ! invoke C to C++ entry point
       call c_ESMC_CalendarTypeAndCalNE(calendartype, calendar, &
