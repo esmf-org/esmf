@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.103 2009/10/10 17:27:58 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.104 2009/10/10 20:25:51 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -143,7 +143,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.103 2009/10/10 17:27:58 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.104 2009/10/10 20:25:51 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -1691,7 +1691,7 @@
       integer :: localrc1, localrc2
       logical :: lval1, lval2
 
-      ! Use the following logic, rather than ESMF_INIT_CHECK_DEEP, to gain 
+      ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
       ! init checks on both args, and in the case where both are unintialized,
       ! to distinguish equality based on uninitialized type (uncreated,
       ! deleted).
@@ -1771,7 +1771,7 @@
       ESMF_CalendarCalAndTypeEQ = .false.
 
       ! check input
-      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_CalendarGetInit,calendar,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
       ! invoke C to C++ entry point
       call c_ESMC_CalendarCalAndTypeEQ(calendar, calendartype, &
@@ -1808,7 +1808,7 @@
       ESMF_CalendarTypeAndCalEQ = .false.
 
       ! check input
-      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_CalendarGetInit,calendar,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
       ! invoke C to C++ entry point
       call c_ESMC_CalendarTypeAndCalEQ(calendartype, calendar, &
@@ -1842,7 +1842,7 @@
       integer :: localrc1, localrc2
       logical :: lval1, lval2
 
-      ! Use the following logic, rather than ESMF_INIT_CHECK_DEEP, to gain 
+      ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
       ! init checks on both args, and in the case where both are unintialized,
       ! to distinguish equality based on uninitialized type (uncreated,
       ! deleted).
@@ -1922,7 +1922,7 @@
       ESMF_CalendarCalAndTypeNE = .true.
 
       ! check input
-      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_CalendarGetInit,calendar,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
       ! invoke C to C++ entry point
       call c_ESMC_CalendarCalAndTypeNE(calendar, calendartype, &
@@ -1959,7 +1959,7 @@
       ESMF_CalendarTypeAndCalNE = .true.
 
       ! check input
-      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_CalendarGetInit,calendar,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
       ! invoke C to C++ entry point
       call c_ESMC_CalendarTypeAndCalNE(calendartype, calendar, &
