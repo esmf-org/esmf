@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.101 2009/10/09 05:48:21 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.102 2009/10/10 05:51:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -143,7 +143,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.101 2009/10/09 05:48:21 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.102 2009/10/10 05:51:21 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -1688,15 +1688,21 @@
 !EOPI
 
       ESMF_INIT_TYPE calinit1, calinit2
-      integer :: localrc1, localrc2                 ! local return codes
+      integer :: localrc1, localrc2
       logical :: lval1, lval2
+
+      ! Use the following logic, rather than ESMF_INIT_CHECK_DEEP, to gain 
+      ! init checks on both args, and in the case where both are unintialized,
+      ! to distinguish equality based on uninitialized type (uncreated,
+      ! deleted).
+
+      ! TODO: Consider moving this logic to C++: use Base class? status?
+      !       Or replicate logic for C interface also.
 
       ! check inputs
       calinit1 = ESMF_CalendarGetInit(calendar1)
       calinit2 = ESMF_CalendarGetInit(calendar2)
 
-      ! TODO: consider moving this logic to C++: use Base class? status?
-      !       or replicate logic for C interface also
       if (calinit1.eq.ESMF_INIT_CREATED.and.calinit2.eq.ESMF_INIT_CREATED) then
         ! invoke C to C++ entry point
         call c_ESMC_CalendarEQ(calendar1, calendar2, ESMF_CalendarEQ)
@@ -1758,24 +1764,18 @@
 !             
 !EOPI
 
-      ESMF_INIT_TYPE calinit
-      integer :: localrc                                ! local return codes
-      logical :: lval
+      ! to satisfy macro
+      integer :: rc
+
+      ! if calendar uninitialized, return 'not equal'
+      ESMF_CalendarCalAndTypeEQ = .false.
 
       ! check input
-      calinit = ESMF_CalendarGetInit(calendar)
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
-      ! TODO: consider moving this logic to C++: use Base class? status?
-      !       or replicate logic for C interface also
-      if (calinit.eq.ESMF_INIT_CREATED) then
-        ! invoke C to C++ entry point
-        call c_ESMC_CalendarCalAndTypeEQ(calendar, calendartype, &
-                                         ESMF_CalendarCalAndTypeEQ)
-      else
-        ! log error, and return false
-        lval = ESMF_IMErr(calinit, ESMF_CONTEXT, rc=localrc)
-        ESMF_CalendarCalAndTypeEQ = .false.
-      endif
+      ! invoke C to C++ entry point
+      call c_ESMC_CalendarCalAndTypeEQ(calendar, calendartype, &
+                                       ESMF_CalendarCalAndTypeEQ)
 
       end function ESMF_CalendarCalAndTypeEQ
 
@@ -1801,24 +1801,18 @@
 !             
 !EOPI
 
-      ESMF_INIT_TYPE calinit
-      integer :: localrc                                ! local return codes
-      logical :: lval
+      ! to satisfy macro
+      integer :: rc
+
+      ! if calendar uninitialized, return 'not equal'
+      ESMF_CalendarTypeAndCalEQ = .false.
 
       ! check input
-      calinit = ESMF_CalendarGetInit(calendar)
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
-      ! TODO: consider moving this logic to C++: use Base class? status?
-      !       or replicate logic for C interface also
-      if (calinit.eq.ESMF_INIT_CREATED) then
-        ! invoke C to C++ entry point
+      ! invoke C to C++ entry point
       call c_ESMC_CalendarTypeAndCalEQ(calendartype, calendar, &
                                        ESMF_CalendarTypeAndCalEQ)
-      else
-        ! log error, and return false
-        lval = ESMF_IMErr(calinit, ESMF_CONTEXT, rc=localrc)
-        ESMF_CalendarTypeAndCalEQ = .false.
-      endif
 
       end function ESMF_CalendarTypeAndCalEQ
 
@@ -1845,15 +1839,21 @@
 !EOPI
 
       ESMF_INIT_TYPE calinit1, calinit2
-      integer :: localrc1, localrc2                 ! local return codes
+      integer :: localrc1, localrc2
       logical :: lval1, lval2
+
+      ! Use the following logic, rather than ESMF_INIT_CHECK_DEEP, to gain 
+      ! init checks on both args, and in the case where both are unintialized,
+      ! to distinguish equality based on uninitialized type (uncreated,
+      ! deleted).
+
+      ! TODO: Consider moving this logic to C++: use Base class? status?
+      !       Or replicate logic for C interface also.
 
       ! check inputs
       calinit1 = ESMF_CalendarGetInit(calendar1)
       calinit2 = ESMF_CalendarGetInit(calendar2)
 
-      ! TODO: consider moving this logic to C++: use Base class? status?
-      !       or replicate logic for C interface also
       if (calinit1.eq.ESMF_INIT_CREATED.and.calinit2.eq.ESMF_INIT_CREATED) then
         ! invoke C to C++ entry point
         call c_ESMC_CalendarNE(calendar1, calendar2, ESMF_CalendarNE)
@@ -1915,24 +1915,18 @@
 !             
 !EOPI
 
-      ESMF_INIT_TYPE calinit
-      integer :: localrc                                ! local return codes
-      logical :: lval
+      ! to satisfy macro
+      integer :: rc
+
+      ! if calendar uninitialized, return 'not equal'
+      ESMF_CalendarCalAndTypeNE = .true.
 
       ! check input
-      calinit = ESMF_CalendarGetInit(calendar)
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
-      ! TODO: consider moving this logic to C++: use Base class? status?
-      !       or replicate logic for C interface also
-      if (calinit.eq.ESMF_INIT_CREATED) then
-        ! invoke C to C++ entry point
-        call c_ESMC_CalendarCalAndTypeNE(calendar, calendartype, &
-                                         ESMF_CalendarCalAndTypeNE)
-      else
-        ! log error, and return true
-        lval = ESMF_IMErr(calinit, ESMF_CONTEXT, rc=localrc)
-        ESMF_CalendarCalAndTypeNE = .true.
-      endif
+      ! invoke C to C++ entry point
+      call c_ESMC_CalendarCalAndTypeNE(calendar, calendartype, &
+                                       ESMF_CalendarCalAndTypeNE)
 
       end function ESMF_CalendarCalAndTypeNE
 
@@ -1958,24 +1952,18 @@
 !             
 !EOPI
 
-      ESMF_INIT_TYPE calinit
-      integer :: localrc                                ! local return codes
-      logical :: lval
+      ! to satisfy macro
+      integer :: rc
+
+      ! if calendar uninitialized, return 'not equal'
+      ESMF_CalendarTypeAndCalNE = .true.
 
       ! check input
-      calinit = ESMF_CalendarGetInit(calendar)
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
-      ! TODO: consider moving this logic to C++: use Base class? status?
-      !       or replicate logic for C interface also
-      if (calinit.eq.ESMF_INIT_CREATED) then
-        ! invoke C to C++ entry point
-        call c_ESMC_CalendarTypeAndCalNE(calendartype, calendar, &
-                                         ESMF_CalendarTypeAndCalNE)
-      else
-        ! log error, and return true
-        lval = ESMF_IMErr(calinit, ESMF_CONTEXT, rc=localrc)
-        ESMF_CalendarTypeAndCalNE = .true.
-      endif
+      ! invoke C to C++ entry point
+      call c_ESMC_CalendarTypeAndCalNE(calendartype, calendar, &
+                                       ESMF_CalendarTypeAndCalNE)
 
       end function ESMF_CalendarTypeAndCalNE
 
