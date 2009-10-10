@@ -1,4 +1,4 @@
-% $Id: LogErr_options.tex,v 1.13 2009/10/10 00:03:20 w6ws Exp $
+% $Id: LogErr_options.tex,v 1.14 2009/10/10 00:31:43 w6ws Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -13,16 +13,16 @@
 \label{opt:Halttype}
 {\sf DESCRIPTION:\\}
 Specifies when to halt --- e.g., never, when a warning is issued, or when an
-error is encountered.
+error message is encountered.
 
 Valid values are:
 \begin{description}
    \item [ESMF\_LOG\_HALTNEVER] 
          Never halt.  (Default.)
    \item [ESMF\_LOG\_HALTWARNING]
-         Halt when a warning message is issued.
-   \item [ESMF\_LOG\_HALTERROR]
          Halt when either a warning or an error message is issued.
+   \item [ESMF\_LOG\_HALTERROR]
+         Halt only when an error message is issued.
 \end{description}
 
 \subsubsection{ESMF\_MsgType}
@@ -30,7 +30,7 @@ Valid values are:
 \label{opt:msgtype}
 {\sf DESCRIPTION:\\}
 Specifies what message level --- e.g., informational, warning, 
-error --- will be written to {\tt ESMF\_Log} files.
+error --- will be written to log files.
 
 Valid values are:
 \begin{description}
@@ -51,11 +51,11 @@ Specifies a single log file, multiple log files (one per PET), or no log files.
 Valid values are:
 \begin{description}
    \item [ESMF\_LOG\_SINGLE] 
-         Create a single log file, combining messages from all of the PETs.  Not supported on some platforms.
+         Use a single log file, combining messages from all of the PETs.  Not supported on some platforms.
    \item [ESMF\_LOG\_MULTI]
-         Create multiple log files --- one per PET.  (Default.)
+         Use multiple log files --- one per PET.  (Default.)
    \item [ESMF\_LOG\_NONE]
-         Do not create a log file.
+         Do not issue messages to a log file.
 \end{description}
 
 
