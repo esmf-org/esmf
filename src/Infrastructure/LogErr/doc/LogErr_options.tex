@@ -1,4 +1,4 @@
-% $Id: LogErr_options.tex,v 1.12 2009/01/21 21:38:00 cdeluca Exp $
+% $Id: LogErr_options.tex,v 1.13 2009/10/10 00:03:20 w6ws Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -12,49 +12,50 @@
 
 \label{opt:Halttype}
 {\sf DESCRIPTION:\\}
-Specifies when to halt - e.g., never, warning, error.
+Specifies when to halt --- e.g., never, when a warning is issued, or when an
+error is encountered.
 
 Valid values are:
 \begin{description}
    \item [ESMF\_LOG\_HALTNEVER] 
-         Never halt.
+         Never halt.  (Default.)
    \item [ESMF\_LOG\_HALTWARNING]
-         Halt on a warning.
+         Halt when a warning message is issued.
    \item [ESMF\_LOG\_HALTERROR]
-         Halt on an error.
+         Halt when either a warning or an error message is issued.
 \end{description}
 
 \subsubsection{ESMF\_MsgType}
 
 \label{opt:msgtype}
 {\sf DESCRIPTION:\\}
-Specifies what sort of message - e.g., info, warning, 
-error - will be written to an {\tt ESMF\_Log} file.
+Specifies what message level --- e.g., informational, warning, 
+error --- will be written to {\tt ESMF\_Log} files.
 
 Valid values are:
 \begin{description}
    \item [ESMF\_LOG\_INFO] 
-         Message is informational.
+         Issue informational, warning, and error messages.  (Default.)
    \item [ESMF\_LOG\_WARNING]
-         Message is a warning.
+         Issue warning and error messages.
    \item [ESMF\_LOG\_ERROR]
-         Message indicates an error.
+         Only issue error messages.
 \end{description}
 
 \subsubsection{ESMF\_LogType}
 
 \label{opt:logtype}
 {\sf DESCRIPTION:\\}
-Specifies single, multi or no Log.
+Specifies a single log file, multiple log files (one per PET), or no log files.
 
 Valid values are:
 \begin{description}
    \item [ESMF\_LOG\_SINGLE] 
-         Log is single Log.
+         Create a single log file, combining messages from all of the PETs.  Not supported on some platforms.
    \item [ESMF\_LOG\_MULTI]
-         Log is multi Log.
+         Create multiple log files --- one per PET.  (Default.)
    \item [ESMF\_LOG\_NONE]
-         There is no Log.
+         Do not create a log file.
 \end{description}
 
 
