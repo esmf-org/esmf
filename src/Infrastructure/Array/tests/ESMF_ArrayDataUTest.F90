@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataUTest.F90,v 1.15 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_ArrayDataUTest.F90,v 1.16 2009/10/12 23:52:35 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayDataUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayDataUTest.F90,v 1.15 2009/01/21 21:37:58 cdeluca Exp $'
+    '$Id: ESMF_ArrayDataUTest.F90,v 1.16 2009/10/12 23:52:35 w6ws Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -60,6 +60,12 @@ program ESMF_ArrayDataUTest
   type(ESMF_DistGrid) :: distgrid
   type(ESMF_Array)    :: array
   type(ESMF_VM)       :: vm
+
+  character, allocatable :: buffer(:)
+  integer :: buff_len, offset
+  integer :: alloc_err
+  type(ESMF_AttReconcileFlag) :: attreconflag
+  type(ESMF_InquireFlag) :: inquireflag
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -452,7 +458,53 @@ program ESMF_ArrayDataUTest
   enddo
   call ESMF_Test(looptest, name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+  ! BEGIN tests of certain INTERNAL methods.  They are subject
+  ! to change and are NOT part of the ESMF user API.
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  ! test the serialize inquire-only option
+  ! WARNING: This is testing an INTERNAL method.  It is NOT
+  ! part of the supported ESMF user API!
+  write(name, *) "Computing space for serialization buffer"
+  write(failMsg, *) "Size could not be determined"
+  buff_len = 0
+  offset = 0
+  attreconflag = ESMF_ATTRECONCILE_OFF
+  inquireflag  = ESMF_INQUIREONLY
+  call c_esmc_arrayserialize (array, buffer, buff_len, offset,  &
+      attreconflag, inquireflag, rc)
+  print *, 'computed serialization buffer length =', offset, ' bytes'
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+ 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Allocate serialization buffer"
+  write(failMsg, *) "Size was illegal"
+  buff_len = offset
+  allocate (buffer(buff_len), stat=alloc_err)
+  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, alloc_err == 0)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
   
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  ! test actually doing the serialization
+  ! WARNING: This is testing an INTERNAL method.  It is NOT 
+  ! part of the supported ESMF user API!
+  write(name, *) "Serialization Array data"
+  write(failMsg, *) "Serialization failed"
+  buff_len = size (buffer)
+  offset = 0
+  attreconflag = ESMF_ATTRECONCILE_OFF
+  inquireflag  = ESMF_NOINQUIRE
+  call c_esmc_arrayserialize (array, buffer, buff_len, offset,  &
+      attreconflag, inquireflag, rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Destroying Array created from an allocated Fortran ",&
