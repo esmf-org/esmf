@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.41 2009/09/04 22:49:14 theurich Exp $
+! $Id: ESMF_GCompEx.F90,v 1.42 2009/10/12 20:28:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -16,7 +16,9 @@
 
 !-------------------------------------------------------------------------
 !BOP
-!\subsubsection{Specifying a User-Code SetServices Routine}
+!\subsubsection{Implementing a User-Code SetServices Routine}
+! 
+! \label{sec:GridSetServ}
 !
 ! Every {\tt ESMF\_GridComp} is required to provide and document
 ! a set services routine.  It can have any name, but must
@@ -70,7 +72,10 @@
 !EOC
 
 !BOP
-!\subsubsection{Specifying a User-Code Initialize Routine}
+!\subsubsection{Implementing a User-Code Initialize Routine}
+! 
+! \label{sec:GridInitialize}
+!
 !
 ! When a higher level component is ready to begin using an 
 ! {\tt ESMF\_GridComp}, it will call its initialize routine.
@@ -109,8 +114,10 @@
 !EOC
 
 !BOP
-!\subsubsection{Specifying a User-Code Run Routine}
+!\subsubsection{Implementing a User-Code Run Routine}
 ! 
+! \label{sec:GridRun}
+!
 ! During the execution loop, the run routine may be called many times.
 ! Each time it should read data from the {\tt importState}, use the
 ! {\tt clock} to determine what the current time is in the calling
@@ -154,7 +161,9 @@
 !EOC
 
 !BOP
-!\subsubsection{Specifying a User-Code Finalize Routine}
+!\subsubsection{Implementing a User-Code Finalize Routine}
+! 
+! \label{sec:GridFinalize}
 !
 ! At the end of application execution, each {\tt ESMF\_GridComp} should
 ! deallocate data space, close open files, and flush final results.

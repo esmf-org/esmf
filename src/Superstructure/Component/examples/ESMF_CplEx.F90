@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.35 2009/09/04 22:49:14 theurich Exp $
+! $Id: ESMF_CplEx.F90,v 1.36 2009/10/12 20:28:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -16,7 +16,9 @@
 
 !-----------------------------------------------------------------------------
 !BOP
-!\subsubsection{Specifying a User-Code SetServices Routine}
+!\subsubsection{Implementing a User-Code SetServices Routine}
+! 
+! \label{sec:CplSetServ}
 !
 ! Every {\tt ESMF\_CplComp} is required to provide and document
 ! a set services routine.  It can have any name, but must
@@ -70,7 +72,9 @@
 
 
 !BOP
-!\subsubsection{Specifying a User-Code Initialize Routine}
+!\subsubsection{Implementing a User-Code Initialize Routine}
+! 
+! \label{sec:CplInitialize}
 !
 ! When a higher level component is ready to begin using an 
 ! {\tt ESMF\_CplComp}, it will call its initialize routine.
@@ -108,7 +112,9 @@
 !EOC
 
 !BOP
-!\subsubsection{Specifying a User-Code Run Routine}
+!\subsubsection{Implementing a User-Code Run Routine}
+! 
+! \label{sec:CplRun}
 !
 ! During the execution loop, the run routine may be called many times.
 ! Each time it should read data from the {\tt importState}, use the
@@ -150,7 +156,9 @@
 !EOC
 
 !BOP
-!\subsubsection{Specifying a User-Code Finalize Routine}
+!\subsubsection{Implementing a User-Code Finalize Routine}
+! 
+! \label{sec:CplFinalize}
 !
 ! At the end of application execution, each {\tt ESMF\_CplComp} should
 ! deallocate data space, close open files, and flush final results.
