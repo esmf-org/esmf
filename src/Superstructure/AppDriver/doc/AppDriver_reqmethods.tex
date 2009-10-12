@@ -1,4 +1,4 @@
-% $Id: AppDriver_reqmethods.tex,v 1.12 2009/01/21 21:38:02 cdeluca Exp $
+% $Id: AppDriver_reqmethods.tex,v 1.13 2009/10/12 20:33:56 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -22,8 +22,8 @@ have standard argument lists and perform specific operations.
 For technical reasons {\em none} of the arguments in user-provided subroutines
 must be declared as {\em optional}.
 
-One of the required interfaces a component must provide is 
-the set services method.  This subroutine must have an
+The only {\em required} public interface of a Component is its
+set services method.  This subroutine must have an
 externally accessible name (be a public symbol), take a component
 as the first argument, and an integer return code as the second. 
 Both arguments are required and must {\em not} be declared as 
@@ -33,38 +33,44 @@ second argument. The subroutine name is not predefined, it is set by the
 component writer, but must be provided as part of the component 
 documentation.
 
-The required function of the set services subroutine is to
-register the rest of the required functions in the component,
-currently initialize, run, and finalize methods.  The ESMF method \\
-{\tt ESMF\_<Grid/Cpl>CompSetEntryPoint()} should be called for
-each of the required subroutines.  
+The required function that the set services subroutine must provide is to
+specify the user-code entry points for the standard ESMF Component methods. To
+this end the user-written set services routine calls the
+{\tt ESMF\_<Grid/Cpl>CompSetEntryPoint()} method to set each 
+Component entry point.
 
-The names of the initialize, run, and finalize user-code 
-subroutines do not need to be public; in fact it is far better 
-for them to be private to lower the chances of public symbol clashes 
-between different components.
-
-Within the set services routine, the user can also register a 
-private data block by calling the 
-{\tt ESMF\_<Grid|Cpl>CompSetInternalState} method.
+See sections \ref{sec:GridSetServ} and \ref{sec:CplSetServ} for examples of
+how to write a user-code set services routine.
 
 Note that a component does not call its own set services routine;
-the AppDriver or parent component code which is creating a component 
+the AppDriver or parent component code, which is creating a component, 
 will first call {\tt ESMF\_<Grid/Cpl>CompCreate()} to create an "empty" 
-component, and then must call the component-specific set services routine 
-to associate ESMF-standard methods to user-code methods, and to create
-the VM in which this component will run. After set 
-services has been called, the framework
-now will be able to call the component's initialize, run, and finalize 
-routines as required.  
+component, and then must call into {\tt ESMF\_<Grid/Cpl>SetServices()}, 
+supplying the user-code set services routine as an argument. The framework
+calls into the user-code set services, after the Component's VM has been
+started up.
 
 \subsubsection{User-Code Initialize, Run, and Finalize Methods}
 
-User-code initialize, run, and finalize routines must be provided for
-each component.  See Sections \ref{sec:GridSetServ} and \ref{sec:CplSetServ}
-for the prescribed interfaces and examples of how to set these up.
-The provided user-code must abide {\em exactly} to the prescribed interfaces.
-{\em None} of the arguments must be declared as {\em optional}.
+The required standard ESMF Component methods, for which user-code entry
+points must be set, are Initialize, Run, and Finalize. Currently optional,
+a Component may also set entry points for the WriteRestart and
+ReadRestart methods.
 
+Sections \ref{sec:GridSetServ} and \ref{sec:CplSetServ} provide examples
+of how the entry points for Initialize, Run, and Finalize are set during
+the user-code set services routine, using the 
+{\tt ESMF\_<Grid/Cpl>CompSetEntryPoint()} library call.
 
+All standard user-code methods must abide {\em exactly} to the prescribed
+interfaces. {\em None} of the arguments must be declared as {\em optional}.
+
+The names of the Initialize, Run, and Finalize user-code subroutines do
+not need to be public; in fact it is far better for them to be private to
+lower the chances of public symbol clashes between different components.
+
+See sections \ref{sec:GridInitialize}, \ref{sec:GridRun},
+\ref{sec:GridFinalize}, and \ref{sec:CplInitialize}, \ref{sec:CplRun},
+\ref{sec:CplFinalize} for examples of how to write entry points for the 
+standard ESMF Component methods.
 

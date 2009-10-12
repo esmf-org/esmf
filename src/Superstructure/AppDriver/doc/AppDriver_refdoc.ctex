@@ -1,4 +1,4 @@
-% $Id: AppDriver_refdoc.ctex,v 1.19 2009/01/21 21:38:02 cdeluca Exp $
+% $Id: AppDriver_refdoc.ctex,v 1.20 2009/10/12 20:33:56 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -79,9 +79,11 @@
 
 \subsection{Required ESMF Methods}
 #ifdef STANDALONE
+\input{AppDriver_reqmethodsintro}
 \input{../../ESMFMod/doc/ESMF_Init_fapi.tex}
 \input{AppDriver_reqmethods}
 #elif defined(CONSTITUENT)
+\input{../Superstructure/AppDriver/doc/AppDriver_reqmethodsintro}
 \input{../Superstructure/ESMFMod/doc/ESMF_Init_fapi.tex}
 \input{../Superstructure/AppDriver/doc/AppDriver_reqmethods}
 #endif
@@ -89,20 +91,20 @@
 %%%%%%% end class sections %%%%%%%%
 
 #ifdef STANDALONE
-\section{Review Status}
-\input{AppDriver_desrev}
+%\section{Review Status}
+%\input{AppDriver_desrev}
 #endif
 
 #ifdef STANDALONE
 %\section{Glossary}
-\input{AppDriver_glos}
+%\input{AppDriver_glos}
 #endif
 
 #ifdef STANDALONE
 %\section{Bibliography}
-\bibliography{comp} 
-\bibliographystyle{plain}
-\addcontentsline{toc}{section}{Bibliography}
+%\bibliography{comp} 
+%\bibliographystyle{plain}
+%\addcontentsline{toc}{section}{Bibliography}
 #endif
 
 #ifdef STANDALONE
