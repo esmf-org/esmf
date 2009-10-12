@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Clock.F90,v 1.87 2009/10/10 05:52:30 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.88 2009/10/12 04:24:08 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.87 2009/10/10 05:52:30 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.88 2009/10/12 04:24:08 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1636,7 +1636,7 @@
       integer :: localrc1, localrc2
       logical :: lval1, lval2
 
-      ! Use the following logic, rather than ESMF_INIT_CHECK_DEEP, to gain 
+      ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
       ! init checks on both args, and in the case where both are unintialized,
       ! to distinguish equality based on uninitialized type (uncreated,
       ! deleted).
@@ -1686,7 +1686,7 @@
       integer :: localrc1, localrc2
       logical :: lval1, lval2
 
-      ! Use the following logic, rather than ESMF_INIT_CHECK_DEEP, to gain 
+      ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
       ! init checks on both args, and in the case where both are unintialized,
       ! to distinguish equality based on uninitialized type (uncreated,
       ! deleted).
