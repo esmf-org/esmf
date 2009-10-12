@@ -1,4 +1,4 @@
-% $Id: AppDriver_desc.tex,v 1.22 2009/01/21 21:38:02 cdeluca Exp $
+% $Id: AppDriver_desc.tex,v 1.23 2009/10/12 18:36:46 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -88,7 +88,8 @@ machines in getting the different executables started, and getting
 inter-process communcations established.  ESMF currently has some
 support for MPMD: different Components can run as separate executables,
 but the Coupler that transfers data between the Components must still
-run on the union of their PETs.
+run on the union of their PETs. This means that the Coupler Component
+must be linked into all of the executables.
 
 \end{description}
 
