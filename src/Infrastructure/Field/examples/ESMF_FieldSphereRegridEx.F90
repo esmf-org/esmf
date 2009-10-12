@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSphereRegridEx.F90,v 1.19 2009/04/28 15:54:17 oehmke Exp $
+! $Id: ESMF_FieldSphereRegridEx.F90,v 1.20 2009/10/12 22:00:20 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@ program ESMF_FieldSphereRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.19 2009/04/28 15:54:17 oehmke Exp $'
+    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.20 2009/10/12 22:00:20 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -359,14 +359,24 @@ program ESMF_FieldSphereRegridEx
 !EOC
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  ! Uncomment these calls to see some actual regrid results
-  spherical_grid = 1
-  call ESMF_MeshIO(vm, GridSrc, ESMF_STAGGERLOC_CENTER, &
-               "srcmesh", srcArray, rc=localrc, &
-               spherical=spherical_grid)
-  call ESMF_MeshIO(vm, Griddst, ESMF_STAGGERLOC_CENTER, &
-               "dstmesh", dstArray, dstArray1, rc=localrc, &
-               spherical=spherical_grid)
+!  ! Uncomment these calls to see some actual regrid results
+!  spherical_grid = 1
+!  call ESMF_MeshIO(vm, GridSrc, ESMF_STAGGERLOC_CENTER, &
+!               "srcmesh", srcArray, rc=localrc, &
+!               spherical=spherical_grid)
+!  call ESMF_MeshIO(vm, Griddst, ESMF_STAGGERLOC_CENTER, &
+!               "dstmesh", dstArray, dstArray1, rc=localrc, &
+!               spherical=spherical_grid)
+
+   ! Free Fields
+   call ESMF_FieldDestroy(srcField, rc=localrc)
+   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+   call ESMF_FieldDestroy(dstField, rc=localrc)
+   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+   call ESMF_FieldDestroy(dstField1, rc=localrc)
+   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 
   ! Free the grids

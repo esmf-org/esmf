@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshUTest.C,v 1.9 2009/01/28 18:15:29 rosalind Exp $
+// $Id: ESMC_MeshUTest.C,v 1.10 2009/10/12 22:00:00 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -173,6 +173,14 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+  // Free arrays used to create Mesh
+  free(nodeId);
+  free(nodeCoord);
+  free(nodeOwner);
+
+  free(elemId);
+  free(elemType);
+  free(elemConn);
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(result, __FILE__, __LINE__, 0);
