@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.10 2009/09/22 17:39:14 w6ws Exp $
+# $Id: build_rules.mk,v 1.11 2009/10/12 23:49:24 w6ws Exp $
 #
 # MinGW.intel.default
 #
@@ -205,12 +205,12 @@ ESMF_OPENMP_CXXLINKOPTS    += -Qopenmp
 ###########################################################
 # Determine where libraries are located
 #
-ESMF_F90LINKPATHS = -libpath:`$(ESMF_DIR)/scripts/path_mingw2win $(ESMF_LDIR)`
+ESMF_F90LINKPATHS =
 
 ############################################################
 # Determine where libraries are located
 #
-ESMF_CXXLINKPATHS = -libpath:`$(ESMF_DIR)/scripts/path_mingw2win $(ESMF_LDIR)`
+ESMF_CXXLINKPATHS =
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
