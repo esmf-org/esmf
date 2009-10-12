@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.14 2009/10/12 16:53:34 feiliu Exp $
+// $Id: ESMC_Field.C,v 1.15 2009/10/12 17:04:34 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -90,7 +90,7 @@ ESMC_Field ESMC_FieldCreate(ESMC_Mesh *mesh, ESMC_ArraySpec *arrayspec, ESMC_Int
       return field;
   }
 
-  delete fName;
+  delete[] fName;
 
   if (rc) *rc = localrc;
 

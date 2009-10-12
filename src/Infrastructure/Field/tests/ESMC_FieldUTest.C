@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldUTest.C,v 1.5 2009/10/12 16:53:34 feiliu Exp $
+// $Id: ESMC_FieldUTest.C,v 1.6 2009/10/12 17:04:34 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -196,6 +196,13 @@ int main(void){
   rc = ESMC_FieldDestroy(&field, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+  free(gridToFieldMap);
+  ESMC_InterfaceIntDestroy(&i_gridToFieldMap);
+  free(ungriddedLBound);
+  ESMC_InterfaceIntDestroy(&i_ungriddedLBound);
+  free(ungriddedUBound);
+  ESMC_InterfaceIntDestroy(&i_ungriddedUBound);
   
   //----------------------------------------------------------------------------
   ESMC_TestEnd(result, __FILE__, __LINE__, 0);
