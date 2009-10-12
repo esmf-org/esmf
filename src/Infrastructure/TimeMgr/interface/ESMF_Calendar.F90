@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.104 2009/10/10 20:25:51 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.105 2009/10/12 04:26:16 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -23,6 +23,7 @@
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include "ESMF_TimeMgr.inc"
+#include "ESMF.h"
 
 !==============================================================================
 !BOPI
@@ -39,12 +40,12 @@
 !------------------------------------------------------------------------------
 ! !USES:
       ! inherit from ESMF base class
+      use ESMF_InitMacrosMod
       use ESMF_UtilTypesMod
       use ESMF_BaseMod
 
       ! for ReadRestart()/WriteRestart()
       use ESMF_IOSpecMod
-      use ESMF_InitMacrosMod
 
       implicit none
 !
@@ -143,7 +144,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.104 2009/10/10 20:25:51 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.105 2009/10/12 04:26:16 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -1703,7 +1704,9 @@
       calinit1 = ESMF_CalendarGetInit(calendar1)
       calinit2 = ESMF_CalendarGetInit(calendar2)
 
-      if (calinit1.eq.ESMF_INIT_CREATED.and.calinit2.eq.ESMF_INIT_CREATED) then
+      ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
+      if (calinit1 .eq. ESMF_INIT_CREATED .and. &
+          calinit2 .eq. ESMF_INIT_CREATED) then
         ! invoke C to C++ entry point
         call c_ESMC_CalendarEQ(calendar1, calendar2, ESMF_CalendarEQ)
       else
@@ -1854,7 +1857,9 @@
       calinit1 = ESMF_CalendarGetInit(calendar1)
       calinit2 = ESMF_CalendarGetInit(calendar2)
 
-      if (calinit1.eq.ESMF_INIT_CREATED.and.calinit2.eq.ESMF_INIT_CREATED) then
+      ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
+      if (calinit1 .eq. ESMF_INIT_CREATED .and. &
+          calinit2 .eq. ESMF_INIT_CREATED) then
         ! invoke C to C++ entry point
         call c_ESMC_CalendarNE(calendar1, calendar2, ESMF_CalendarNE)
       else
