@@ -32,13 +32,14 @@ extern "C" {
 
 #include "ESMC_Mesh.h"
 #include "ESMC_ArraySpec.h"
+#include "ESMC_Interface.h"
 
 typedef struct {
   void * ptr;
   long long isinit;
 } ESMC_Field;
 
-ESMC_Field ESMC_FieldCreate(ESMC_Mesh *mesh, ESMC_ArraySpec *arrayspec, int *gridToFieldMap, int *ungriddedLBound, int *ungriddedUBound, const char *name, int *rc);
+ESMC_Field ESMC_FieldCreate(ESMC_Mesh *mesh, ESMC_ArraySpec *arrayspec, ESMC_InterfaceInt gridToFieldMap, ESMC_InterfaceInt ungriddedLBound, ESMC_InterfaceInt ungriddedUBound, const char *name, int *rc);
 
 int ESMC_FieldGet(ESMC_Field *field, ESMC_Mesh *mesh, int *rc);
 

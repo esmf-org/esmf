@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldUTest.C,v 1.4 2009/09/29 20:51:59 feiliu Exp $
+// $Id: ESMC_FieldUTest.C,v 1.5 2009/10/12 16:53:34 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -66,7 +66,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   // Create a mesh
   strcpy(name, "MeshCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -75,7 +75,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   // Read input files' header data
   strcpy(name, "MeshVTKHeader");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -93,7 +93,7 @@ int main(void){
   elemConn = (int *) malloc (conn_size * sizeof (int));
 
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   // Read input files
   strcpy(name, "MeshVTKBody");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -108,7 +108,7 @@ int main(void){
     }
 
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   // Add node information to the mesh
   strcpy(name, "MeshAddNodes");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -117,7 +117,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   // Add element information to the mesh
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -125,16 +125,16 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   // Set the arrayspec
   strcpy(name, "ArraySpecSet");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_ArraySpecSet(&arrayspec, 1, ESMC_TYPEKIND_I4);
+  rc = ESMC_ArraySpecSet(&arrayspec, 3, ESMC_TYPEKIND_I4);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
     
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   strcpy(name, "Set up gridToFieldMap");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   gridToFieldMap = (int *)malloc(sizeof(int));
@@ -144,7 +144,7 @@ int main(void){
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   strcpy(name, "Set up ungriddedLBound");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   ungriddedLBound = (int *)malloc(2*sizeof(int));
@@ -155,7 +155,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   strcpy(name, "Set up ungriddedUBound");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   ungriddedUBound = (int *)malloc(2*sizeof(int));
@@ -166,32 +166,23 @@ int main(void){
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   strcpy(name, "Create ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  //field = ESMC_FieldCreate(&mesh, &arrayspec, i_gridToFieldMap, i_ungriddedLBound, i_ungriddedUBound, "field1", &rc);
-  field = ESMC_FieldCreate(&mesh, &arrayspec, gridToFieldMap, ungriddedLBound, ungriddedUBound, "field1", &rc);
+  field = ESMC_FieldCreate(&mesh, &arrayspec, i_gridToFieldMap, i_ungriddedLBound, i_ungriddedUBound, "field1", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
-//  //----------------------------------------------------------------------------
-//  //NEX_disable_UTest
-//  strcpy(name, "Print ESMC_Field object");
-//  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-//  rc = ESMC_FieldPrint(field);
-//  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-//  //----------------------------------------------------------------------------
-  
-//  //----------------------------------------------------------------------------
-//  //NEX_disable_UTest
-//  strcpy(name, "Destroy ESMC_Mesh object");
-//  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-//  rc = ESMC_MeshDestroy(&mesh);
-//  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-//  //----------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Destroy ESMC_Mesh object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_MeshDestroy(&mesh);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   strcpy(name, "Get an ESMC_Mesh object from ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldGet(&field, &mesh1, &rc);
@@ -199,7 +190,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   strcpy(name, "Destroy ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldDestroy(&field, &rc);
