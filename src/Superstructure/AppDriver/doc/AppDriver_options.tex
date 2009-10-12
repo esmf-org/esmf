@@ -1,4 +1,4 @@
-% $Id: AppDriver_options.tex,v 1.3 2006/08/07 23:47:17 cdeluca Exp $
+% $Id: AppDriver_options.tex,v 1.4 2009/10/12 18:38:59 theurich Exp $
 
 \subsubsection{ESMF\_TerminationFlag}
 \label{app:terminationflag}
@@ -18,13 +18,13 @@ Valid values are:
          Typical conditions that warrant the use of {\tt ESMF\_ABORT} are those
          that occur on a per PET basis where other PETs may be blocked in 
          communication calls, unable to reach the normal termination point.
-   \item [ESMF\_FINALIZE]
+   \item [ESMF\_FINAL]
          Normal termination of the ESMF application. Wait for all PETs of the
          global VM to reach {\tt ESMF\_Finalize()} before termination. This is
          the clean way of terminating an application. {\tt MPI\_Finalize()} will
          be called in case of MPI applications.
    \item [ESMF\_KEEPMPI]
-         Same as {\tt ESMF\_FINALIZE} but {\tt MPI\_Finalize()} will {\em not}
+         Same as {\tt ESMF\_FINAL} but {\tt MPI\_Finalize()} will {\em not}
          be called. It is the user code's responsibility to shut down MPI
-         cleanly.
+         cleanly if necessary.
 \end{description}
