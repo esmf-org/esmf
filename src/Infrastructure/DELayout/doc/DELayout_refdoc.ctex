@@ -1,4 +1,4 @@
-% $Id: DELayout_refdoc.ctex,v 1.9 2009/01/21 21:37:58 cdeluca Exp $ 
+% $Id: DELayout_refdoc.ctex,v 1.10 2009/10/12 18:32:04 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -55,12 +55,12 @@
 \input{../Infrastructure/DELayout/doc/DELayout_desc}
 #endif
 
-%\subsection{DELayout Options}
-%#ifdef STANDALONE
-%\input{DELayout_options}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/DELayout/doc/DELayout_options}
-%#endif
+\subsection{DELayout Options}
+#ifdef STANDALONE
+\input{DELayout_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/DELayout/doc/DELayout_options}
+#endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
