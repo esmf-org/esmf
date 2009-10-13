@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.11 2009/10/12 23:49:24 w6ws Exp $
+# $Id: build_rules.mk,v 1.12 2009/10/13 21:10:03 w6ws Exp $
 #
 # MinGW.intel.default
 #
@@ -213,16 +213,16 @@ ESMF_F90LINKPATHS =
 ESMF_CXXLINKPATHS =
 
 ############################################################
-# Link against libesmf.a using the F90 linker front-end
+# Link against libesmf.lib using the F90 linker front-end
 #
 ESMF_F90LINKLIBS += -link -debug -libpath:`$(ESMF_DIR)/scripts/path_mingw2win $(ESMF_LDIR)` $(ESMF_MPILIBPATH)
-ESMF_F90ESMFLINKLIBS = libesmf.a $(ESMF_F90LINKLIBS)
+ESMF_F90ESMFLINKLIBS = libesmf.lib $(ESMF_F90LINKLIBS)
 
 ############################################################
-# Link against libesmf.a using the C++ linker front-end
+# Link against libesmf.lib using the C++ linker front-end
 #
 ESMF_CXXLINKLIBS += -link -debug -libpath:`$(ESMF_DIR)/scripts/path_mingw2win $(ESMF_LDIR)` $(ESMF_MPILIBPATH)
-ESMF_CXXESMFLINKLIBS = libesmf.a $(ESMF_CXXLINKLIBS)
+ESMF_CXXESMFLINKLIBS = libesmf.lib $(ESMF_CXXLINKLIBS)
 
 ############################################################
 # Blank out shared library options
