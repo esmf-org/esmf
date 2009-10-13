@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.279 2009/10/07 18:32:46 w6ws Exp $
+#  $Id: common.mk,v 1.280 2009/10/13 17:38:09 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1742,15 +1742,22 @@ endif
 #
 # run the systests, either redirecting the stdout from the command line, or
 # relying on the mpirun script to redirect stdout from inside the batch script.
+# the test macros open PETx.name.Log files by default (set when the tests 
+# call ESMF_Initialize()).  after the tests run, we cat all the per-pet 
+# files together into a single log file. 
 #
 stest:
-	-@if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
-	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)STest ; \
-	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)STest ; \
+	-@cd $(ESMF_TESTDIR) ; \
+	$(ESMF_RM) ./PET*$(TNAME)STest.Log ; \
+	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
+	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)STest ; \
+	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)STest ; \
 	else \
-	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)STest 1\> $(ESMF_TESTDIR)/ESMF_$(TNAME)STest.stdout 2\>\&1 ; \
-	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)STest 1> $(ESMF_TESTDIR)/ESMF_$(TNAME)STest.stdout 2>&1 ; \
-	fi 
+	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)STest 1\> ./ESMF_$(TNAME)STest.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)STest 1> ./ESMF_$(TNAME)STest.stdout 2>&1 ; \
+	fi ; \
+	cat ./PET*$(TNAME)STest.Log> ./ESMF_$(TNAME)STest.Log ; \
+	$(ESMF_RM) ./PET*$(TNAME)STest.Log
 
 #
 # this target deletes only the system test related files from the test subdir
