@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.15 2009/10/12 16:53:34 feiliu Exp $
+!  $Id: ESMF_Field_C.F90,v 1.16 2009/10/13 17:04:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.15 2009/10/12 16:53:34 feiliu Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.16 2009/10/13 17:04:32 feiliu Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -77,8 +77,8 @@
     use ESMF_FieldMod
     use ESMF_FieldGetMod
 
-    type(ESMF_Field)            :: field
-    type(ESMF_Pointer)          :: meshp
+    type(ESMF_Field),intent(inout) :: field
+    type(ESMF_Pointer)             :: meshp
     integer, intent(out), optional :: rc              
 
     integer     :: localrc
