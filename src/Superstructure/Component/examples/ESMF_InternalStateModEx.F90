@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateModEx.F90,v 1.2 2009/10/13 00:52:08 theurich Exp $
+! $Id: ESMF_InternalStateModEx.F90,v 1.3 2009/10/13 20:50:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -17,11 +17,11 @@
 !-------------------------------------------------------------------------
 !BOP
 !
-!   When working with ESMF internal states it is important to consider the
+!   When working with ESMF Internal States it is important to consider the
 !   applying scoping rules. The user must ensure that the private data block,
 !   that is being referenced, persists for the entire access period. This is
 !   not an issue in the previous example, where the private data block was
-!   defined on the scope of the main program. However, the InternalState 
+!   defined on the scope of the main program. However, the Internal State 
 !   construct is often useful inside of Component modules to hold Component
 !   specific data between calls. One option to ensure persisting private data
 !   blocks is to use the Fortran SAVE attribute either on local or module
@@ -34,7 +34,7 @@
 !   be tricky to distinguish which data, held in saved module variables, 
 !   belongs to which ensemble member - especially if the ensemble members
 !   are executing on the same set of PETs. The Internal State solves this
-!   problem because each instance of a Component has its own Internal State.
+!   problem by providing a handle to instance specific data allocations.
 !
 !EOP
 !-------------------------------------------------------------------------
@@ -54,8 +54,9 @@ module user_mod
   ! Internal State Variables
   type testData
   sequence
-    integer :: testValue
-    real    :: testScaling
+    integer       :: testValue        ! scalar data
+    real          :: testScaling      ! scalar data
+    real, pointer :: testArray(:)     ! array data
   end type
 
   type dataWrapper
@@ -93,6 +94,7 @@ module user_mod
     ! Local variables
     type(dataWrapper) :: wrap
     type(testData), pointer :: data
+    integer :: i
 
     rc = ESMF_SUCCESS
     
@@ -100,8 +102,19 @@ module user_mod
     allocate(data)
 
     ! Initialize private data block
-    data%testValue = 4567
-    data%testScaling = 0.5
+    data%testValue = 4567         ! initialize scalar data
+    data%testScaling = 0.5        ! initialize scalar data
+    allocate(data%testArray(10))  ! allocate array data
+    
+    do i=1, 10
+      data%testArray(i) = real(i) ! initialize array data
+    enddo
+    
+    ! In a real ensemble application the initial data would be set to something
+    ! unique for this ensemble member. This could be accomplished for example
+    ! by reading a member specific config file that was specified by the
+    ! driver code. Alternatively, Attributes, set by the driver, could be used
+    ! to label the Component instances as specific ensemble members.
     
     ! Set Internal State
     wrap%p => data
@@ -118,7 +131,9 @@ module user_mod
     ! Local variables
     type(dataWrapper) :: wrap
     type(testData), pointer :: data
-
+    logical :: match = .true.
+    integer :: i
+    
     rc = ESMF_SUCCESS
 
     ! Get Internal State
@@ -127,11 +142,17 @@ module user_mod
 
     ! Access private data block and verify data
     data => wrap%p 
-    if ((data%testValue .ne. 4567) .or. (data%testScaling .ne. 0.5)) then
+    if (data%testValue .ne. 4567) match = .false.   ! test scalar data
+    if (data%testScaling .ne. 0.5) match = .false.  ! test scalar data
+    do i=1, 10
+      if (data%testArray(i) .ne. real(i)) match = .false. ! test array data
+    enddo
+    
+    if (match) then
+      print *, "got same values back from GetInternalState as original"
+    else
       print *, "did not get same values back"
       rc = ESMF_FAILURE
-    else
-      print *, "got same values back from GetInternalState as original"
     endif
     
   end subroutine !--------------------------------------------------------------
@@ -154,6 +175,7 @@ module user_mod
     
     ! Deallocate private data block
     data => wrap%p 
+    deallocate(data%testArray)  ! deallocate array data
     deallocate(data)
     
   end subroutine !--------------------------------------------------------------

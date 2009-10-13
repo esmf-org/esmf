@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEx.F90,v 1.17 2009/10/13 00:52:08 theurich Exp $
+! $Id: ESMF_InternalStateEx.F90,v 1.18 2009/10/13 20:50:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -22,7 +22,7 @@
 !   a Component. Through the Internal State API a user can attach a private
 !   data block to a Component, and later retrieve a pointer to this memory
 !   allocation. Setting and getting of Internal State information are
-!   supported from anywhere in the Component's SetServives, Initialize, Run,
+!   supported from anywhere in the Component's SetServices, Initialize, Run,
 !   or Finalize code.
 !
 !   The code below demonstrates the basic Internal State API
