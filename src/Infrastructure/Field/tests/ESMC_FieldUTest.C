@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldUTest.C,v 1.6 2009/10/12 17:04:34 feiliu Exp $
+// $Id: ESMC_FieldUTest.C,v 1.7 2009/10/13 15:43:20 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -175,14 +175,6 @@ int main(void){
   
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Destroy ESMC_Mesh object");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshDestroy(&mesh);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-  
-  //----------------------------------------------------------------------------
-  //NEX_UTest
   strcpy(name, "Get an ESMC_Mesh object from ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldGet(&field, &mesh1, &rc);
@@ -197,6 +189,14 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Destroy ESMC_Mesh object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_MeshDestroy(&mesh);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
   free(gridToFieldMap);
   ESMC_InterfaceIntDestroy(&i_gridToFieldMap);
   free(ungriddedLBound);
