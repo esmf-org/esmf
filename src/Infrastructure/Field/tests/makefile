@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.68 2009/10/12 22:40:52 feiliu Exp $ 
+# $Id: makefile,v 1.69 2009/10/13 17:12:43 feiliu Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -7,18 +7,18 @@ run_uni:  run_unit_tests_uni
 LOCDIR	  = src/Infrastructure/Field/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldUTest \
-		$(ESMF_TESTDIR)/ESMC_FieldUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldCreateGetUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldArbGridUTest \
-		$(ESMF_TESTDIR)/ESMF_FieldStressUTest
+		$(ESMF_TESTDIR)/ESMF_FieldStressUTest \
+		$(ESMF_TESTDIR)/ESMC_FieldUTest
                
 TESTS_RUN     = RUN_ESMF_FieldUTest \
-		RUN_ESMC_FieldUTest \
 		RUN_ESMF_FieldCreateGetUTest \
 		RUN_ESMF_FieldRegridUTest \
 		RUN_ESMF_FieldArbGridUTest \
-		RUN_ESMF_FieldStressUTest
+		RUN_ESMF_FieldStressUTest \
+		RUN_ESMC_FieldUTest
  
 ifeq ($(ESMF_TESTHARNESS), NONEXHAUSTIVE)
   TESTS_RUN  := $(TESTS_RUN) \
