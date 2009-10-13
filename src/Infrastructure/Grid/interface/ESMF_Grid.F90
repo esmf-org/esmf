@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.134 2009/09/22 19:21:54 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.135 2009/10/13 05:44:47 eschwab Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2838,11 +2838,11 @@ end subroutine ESMF_GridConvertIndex
 !
 ! The arguments are:
 ! \begin{description}
-! \item[{[fileName]}] 
+! \item[fileName] 
 !      The file name to be read from. 
-! \item [convention] 
+! \item [{[convention]}] 
 !      The convention of a grid Attribute package. 
-! \item [purpose] 
+! \item [{[purpose]}] 
 !      The purpose of a grid Attribute package. 
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2859,7 +2859,6 @@ end subroutine ESMF_GridConvertIndex
     ! Initialize return code; assume failure until success is certain 
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
-
 
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following test when dummy argument actually used
@@ -2889,6 +2888,7 @@ end subroutine ESMF_GridConvertIndex
     ! Read the attribute file; place attributes onto grid base
     ! TODO: use convention, purpose
     ! use C call rather than F90, to circumvent mutually dependency
+    ! between Grid and Attribute
     call c_ESMC_AttributeRead(grid, fileNameLen, fileName, localrc)
 
     if (localrc==ESMF_RC_LIB_NOT_PRESENT) xercesPresent = .false.
@@ -2898,11 +2898,13 @@ end subroutine ESMF_GridConvertIndex
 
     ! Get the GridSpec "NX" and "NY" Attributes set from file
     ! (required, for maxIndex in GriCreate())
-    ! use C call rather than F90, to circumvent mutually dependency
+    ! use C calls rather than F90, to circumvent mutually dependency
+    ! between Grid and Attribute
     call c_ESMC_AttPackGetChar(grid, 'NX', attrValue, &
                                'GridSpec', 'General', 'grid', localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
+    ! convert from character to integer
     read(attrValue, *, iostat=localrc) maxIndex(1)
     if (localrc.ne.0) then
       call ESMF_LogMsgSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
@@ -2910,11 +2912,11 @@ end subroutine ESMF_GridConvertIndex
       return
     end if
 
-    ! use C call rather than F90, to circumvent mutually dependency
     call c_ESMC_AttPackGetChar(grid, 'NY', attrValue, &
                                'GridSpec', 'General', 'grid', localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
+    ! convert from character to integer
     read(attrValue, *, iostat=localrc) maxIndex(2)
     if (localrc.ne.0) then
       call ESMF_LogMsgSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
@@ -2924,11 +2926,13 @@ end subroutine ESMF_GridConvertIndex
 
     ! Get the ESMF "RegDecompX" and "RegDecompY" Attributes set from file
     ! TODO:  make optional
-    ! use C call rather than F90, to circumvent mutually dependency
+    ! use C calls rather than F90, to circumvent mutually dependency
+    ! between Grid and Attribute
     call c_ESMC_AttPackGetChar(grid, 'RegDecompX', attrValue, &
                                'ESMF', 'General', 'grid', localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
+    ! convert from character to integer
     read(attrValue, *, iostat=localrc) regDecomp(1)
     if (localrc.ne.0) then
       call ESMF_LogMsgSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
@@ -2940,6 +2944,7 @@ end subroutine ESMF_GridConvertIndex
                                'ESMF', 'General', 'grid', localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
+    ! convert from character to integer
     read(attrValue, *, iostat=localrc) regDecomp(2)
     if (localrc.ne.0) then
       call ESMF_LogMsgSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
