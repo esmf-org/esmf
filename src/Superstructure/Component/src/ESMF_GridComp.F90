@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.128 2009/10/13 00:54:53 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.129 2009/10/13 19:22:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.128 2009/10/13 00:54:53 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.129 2009/10/13 19:22:03 theurich Exp $'
 
 !==============================================================================
 !
@@ -1532,10 +1532,10 @@ contains
 !   Intra process communication preference.
 !   {\em Currently options not documented. Use default.}
 ! \item[{[pref\_intra\_ssi]}] 
-!   Intra SSI communication preference. {\em Currently use default.}
+!   Intra SSI communication preference.
 !   {\em Currently options not documented. Use default.}
 ! \item[{[pref\_inter\_ssi]}] 
-!   Inter process communication preference. {\em Currently use default.}
+!   Inter process communication preference.
 !   {\em Currently options not documented. Use default.}
 ! \item[{[rc]}] 
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
