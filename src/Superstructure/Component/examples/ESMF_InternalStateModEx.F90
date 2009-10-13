@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateModEx.F90,v 1.1 2009/03/27 05:39:47 theurich Exp $
+! $Id: ESMF_InternalStateModEx.F90,v 1.2 2009/10/13 00:52:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -28,6 +28,13 @@
 !   variables. A second option, illustrated in the following example, is to 
 !   use Fortran pointers and user controlled memory management via allocate()
 !   and deallocate() calls.
+!
+!   One situation where the Internal State is useful is in the
+!   creation of ensembles of the same Component. In this case it can 
+!   be tricky to distinguish which data, held in saved module variables, 
+!   belongs to which ensemble member - especially if the ensemble members
+!   are executing on the same set of PETs. The Internal State solves this
+!   problem because each instance of a Component has its own Internal State.
 !
 !EOP
 !-------------------------------------------------------------------------

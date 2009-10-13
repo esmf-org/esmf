@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEx.F90,v 1.16 2009/03/27 05:33:32 theurich Exp $
+! $Id: ESMF_InternalStateEx.F90,v 1.17 2009/10/13 00:52:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -18,18 +18,17 @@
 !BOP
 !\subsubsection{Setting and Getting the Internal State}  
 !
-!   These routines save the address of an internal, private data block
-!   during the execution of a Component's initialize, run, or finalize
-!   code, and retrieve the address back during a different invocation 
-!   of these routines.  One situation where this is useful is in the
-!   creation of ensembles of the same component.  In this case it can 
-!   be tricky to distinguish which data belongs to which ensemble
-!   member - especially if the ensemble members are executing on the
-!   same PETs.  Internal states enable the user to create an array of
-!   internal data spaces, one for each ensemble member.  The correct
-!   data space can then be referenced for each ensemble member's calculations.
-!   
-!   See the code below for a simple example of using this capability.
+!   ESMF provides the concept of an Internal State that is associated with
+!   a Component. Through the Internal State API a user can attach a private
+!   data block to a Component, and later retrieve a pointer to this memory
+!   allocation. Setting and getting of Internal State information are
+!   supported from anywhere in the Component's SetServives, Initialize, Run,
+!   or Finalize code.
+!
+!   The code below demonstrates the basic Internal State API
+!   of {\tt ESMF\_<Grid|Cpl>SetInternalState()} and
+!   {\tt ESMF\_<Grid|Cpl>GetInternalState()}. Notice that an extra level of
+!   indirection to the user data is necessary!
 !
 !EOP
 !-------------------------------------------------------------------------
@@ -60,7 +59,7 @@ program ESMF_InternalStateEx
 
   type(dataWrapper) :: wrap1, wrap2
   type(testData), target :: data
-  type(testData), pointer :: datap
+  type(testData), pointer :: datap  ! extra level of indirection
 
   finalrc = ESMF_SUCCESS
 !-------------------------------------------------------------------------
