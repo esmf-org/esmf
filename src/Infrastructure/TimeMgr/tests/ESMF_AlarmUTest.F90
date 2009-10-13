@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.47 2009/10/09 05:52:23 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.48 2009/10/13 05:50:06 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.47 2009/10/09 05:52:23 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.48 2009/10/13 05:50:06 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -573,6 +573,26 @@
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
+      ! Testing ESMF_AlarmOperator(==)(alarm,alarm1)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Deleted Alarm Equal Deleted Alarm Test 1"
+      alarmsEqual = (alarm2 == alarm3)  ! exercise Alarm == operator
+      call ESMF_Test((alarmsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_AlarmOperator(==)(alarm,alarm1)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Uncreated Alarm Equal Uncreated Alarm Test 1"
+      alarmsEqual = (alarm7 == alarm7)  ! exercise Alarm == operator
+      call ESMF_Test((alarmsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
       ! Testing ESMF_AlarmOperator(/=)(alarm,alarm1)
       write(failMsg, *) "Returned equal"
       write(name, *) "Deleted Alarm Not Equal Created Alarm Test 2"
@@ -598,6 +618,26 @@
       write(name, *) "Uncreated Alarm Not Equal Created Alarm Test 2"
       alarmsNotEqual = (alarm7 /= alarm1)  ! exercise Alarm /= operator
       call ESMF_Test((alarmsNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_AlarmOperator(/=)(alarm,alarm1)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Deleted Alarm Equal Deleted Alarm Test 2"
+      alarmsNotEqual = (alarm2 /= alarm3)  ! exercise Alarm /= operator
+      call ESMF_Test((.not.alarmsNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_AlarmOperator(/=)(alarm,alarm1)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Uncreated Alarm Equal Uncreated Alarm Test 2"
+      alarmsNotEqual = (alarm7 /= alarm7)  ! exercise Alarm /= operator
+      call ESMF_Test((.not.alarmsNotEqual), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------

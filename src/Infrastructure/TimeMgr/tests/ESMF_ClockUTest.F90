@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.118 2009/10/10 05:54:55 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.119 2009/10/13 05:50:06 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.118 2009/10/10 05:54:55 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.119 2009/10/13 05:50:06 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -932,6 +932,26 @@
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
+      ! Testing ESMF_ClockOperator(==)(clock,clock1)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Uncreated Clock Equal Uncreated Clock Test 1"
+      clocksEqual = (clock3 == clock3)  ! exercise Clock == operator
+      call ESMF_Test((clocksEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_ClockOperator(==)(clock,clock1)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Deleted Clock Equal Deleted Clock Test 1"
+      clocksEqual = (clock == clock)  ! exercise Clock == operator
+      call ESMF_Test((clocksEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
       ! Testing ESMF_ClockOperator(/=)(clock,clock1)
       write(failMsg, *) "Returned equal"
       write(name, *) "Deleted Clock Not Equal Created Clock Test 2"
@@ -957,6 +977,26 @@
       write(name, *) "Uncreated Clock Not Equal Created Clock Test 2"
       clocksNotEqual = (clock3 /= clock2)  ! exercise Clock /= operator
       call ESMF_Test((clocksNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_ClockOperator(/=)(clock,clock1)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Uncreated Clock Equal Uncreated Clock Test 2"
+      clocksNotEqual = (clock3 /= clock3)  ! exercise Clock /= operator
+      call ESMF_Test((.not.clocksNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_ClockOperator(/=)(clock,clock1)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Deleted Clock Equal Deleted Clock Test 2"
+      clocksNotEqual = (clock /= clock)  ! exercise Clock /= operator
+      call ESMF_Test((.not.clocksNotEqual), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------

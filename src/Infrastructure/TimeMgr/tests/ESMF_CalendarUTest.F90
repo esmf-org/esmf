@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.53 2009/10/09 05:52:23 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.54 2009/10/13 05:50:05 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.53 2009/10/09 05:52:23 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.54 2009/10/13 05:50:05 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -230,6 +230,28 @@
       calendarsNotEqual = (gregorianCalendar /= gregorianCalendar1)
       !                                      ^-- exercise Calendar == operator
       call ESMF_Test((calendarsNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_CalendarOperator(==)(calendar1,calendar2)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Calendar equality of two deleted Calendars Test"
+      calendarsEqual = (gregorianCalendar == gregorianCalendar)
+      !                                   ^-- exercise Calendar == operator
+      call ESMF_Test((calendarsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testig ESMF_CalendarOperator(/=)(calendar1,calendar2)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Calendar Equality of two uncreated Calendars Test"
+      calendarsNotEqual = (gregorianCalendar1 /= gregorianCalendar1)
+      !                                       ^-- exercise Calendar == operator
+      call ESMF_Test((.not.calendarsNotEqual), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
