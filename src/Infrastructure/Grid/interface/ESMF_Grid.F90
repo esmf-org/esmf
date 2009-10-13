@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.135 2009/10/13 05:44:47 eschwab Exp $'
+      '$Id: ESMF_Grid.F90,v 1.136 2009/10/13 23:02:49 w6ws Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -736,6 +736,7 @@ end interface
 	  
     ! check for not implemented parameters
     if (present(totalLWidth)) then
+       totalLWidth = 0
        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
                  "- totalLWidth specification not yet implemented", & 
                  ESMF_CONTEXT, rc) 
@@ -743,6 +744,7 @@ end interface
     endif
 
     if (present(totalUWidth)) then
+       totalUWidth = 0
        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
                  "- totalUWidth specification not yet implemented", & 
                  ESMF_CONTEXT, rc) 
@@ -1076,6 +1078,7 @@ end interface
 	  
     ! check for not implemented parameters
     if (present(totalLWidth)) then
+       totalLWidth = 0
        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
                  "- totalLWidth specification not yet implemented", & 
                  ESMF_CONTEXT, rc) 
@@ -1083,6 +1086,7 @@ end interface
     endif
 
     if (present(totalUWidth)) then
+       totalUWidth = 0
        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
                  "- totalUWidth specification not yet implemented", & 
                  ESMF_CONTEXT, rc) 
