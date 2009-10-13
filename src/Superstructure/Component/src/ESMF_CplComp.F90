@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.114 2009/09/24 17:15:26 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.115 2009/10/13 00:54:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.114 2009/09/24 17:15:26 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.115 2009/10/13 00:54:51 theurich Exp $'
 
 !==============================================================================
 !
@@ -1462,8 +1462,8 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompSetVMMaxPEs"
-!BOPI
-! !IROUTINE: ESMF_CplCompSetVMMaxPEs - Define a VM for this CplComp
+!BOP
+! !IROUTINE: ESMF_CplCompSetVMMaxPEs - Set VM for Coupler Component to associate max PEs with PETs.
 !
 ! !INTERFACE:
   subroutine ESMF_CplCompSetVMMaxPEs(cplcomp, max, pref_intra_process, &
@@ -1478,25 +1478,35 @@ contains
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
+!   Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
+!   Attempts to associate {\tt max} PEs with each PET. Only PEs that are 
+!   located on the same single system image can be associated with the same PET.
+!   Within this constraint the call tries to get as close as possible to the
+!   number specified by {\tt max}.
+!
+!   The typical use of {\tt ESMF\_CplCompSetVMMaxPEs()} is to allocate
+!   multiple PEs per PET in a Component for user-level threading, e.g. OpenMP.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp] 
 !   {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
 ! \item[{[max]}] 
-!   Maximum number of PEs per PET.
+!   Maximum number of PEs per PET. Default is peCount.
 ! \item[{[pref\_intra\_process]}] 
 !   Intra process communication preference.
+!   {\em Currently options not documented. Use default.}
 ! \item[{[pref\_intra\_ssi]}] 
 !   Intra SSI communication preference.
+!   {\em Currently options not documented. Use default.}
 ! \item[{[pref\_inter\_ssi]}] 
 !   Inter process communication preference.
+!   {\em Currently options not documented. Use default.}
 ! \item[{[rc]}] 
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer :: localrc                     ! local error localrc
 
@@ -1522,8 +1532,8 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompSetVMMaxThreads"
-!BOPI
-! !IROUTINE: ESMF_CplCompSetVMMaxThreads - Define a VM for this CplComp
+!BOP
+! !IROUTINE: ESMF_CplCompSetVMMaxThreads - Set VM for Gridded Component with multi-threaded PETs.
 !
 ! !INTERFACE:
   subroutine ESMF_CplCompSetVMMaxThreads(cplcomp, max, pref_intra_process, &
@@ -1538,7 +1548,15 @@ contains
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
+!   Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
+!   Attempts to provide {\tt max} threaded PETs in each VAS. Only as many
+!   threaded PETs as there are PEs located on the same single system image
+!   can be associated with the same VAS. Within this constraint the call
+!   tries to get as close as possible to the number specified by {\tt max}.
+!
+!   The typical use of {\tt ESMF\_CplCompSetVMMaxThreads()} is to run a 
+!   Component multi-threaded with a groups of PETs that execute within the
+!   same virtual address space.
 !
 ! The arguments are:
 ! \begin{description}
@@ -1548,15 +1566,18 @@ contains
 !   Maximum threading level.
 ! \item[{[pref\_intra\_process]}] 
 !   Intra process communication preference.
+!   {\em Currently options not documented. Use default.}
 ! \item[{[pref\_intra\_ssi]}] 
 !   Intra SSI communication preference.
+!   {\em Currently options not documented. Use default.}
 ! \item[{[pref\_inter\_ssi]}] 
 !   Inter process communication preference.
+!   {\em Currently options not documented. Use default.}
 ! \item[{[rc]}] 
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer :: localrc                     ! local error localrc
 
@@ -1582,8 +1603,8 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompSetVMMinThreads"
-!BOPI
-! !IROUTINE: ESMF_CplCompSetVMMinThreads - Define a VM for this CplComp
+!BOP
+! !IROUTINE: ESMF_CplCompSetVMMinThreads - Set VM for Coupler Component with reduced threading level.
 !
 ! !INTERFACE:
   subroutine ESMF_CplCompSetVMMinThreads(cplcomp, max, pref_intra_process, &
@@ -1598,25 +1619,34 @@ contains
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
+!   Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
+!   Reduces the number of threaded PETs in each VAS. The {\tt max} argument
+!   may be specified to limit the maximum number of PEs that a single PET 
+!   may be associated with.
+!
+!   The typical use of {\tt ESMF\_CplCompSetVMMinThreads()} is to run a 
+!   Component across a set of single-threaded PETs.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp] 
 !   {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
 ! \item[{[max]}] 
-!   Maximum number of PEs per PET.
+!   Maximum number of PEs per PET. Default is peCount.
 ! \item[{[pref\_intra\_process]}] 
 !   Intra process communication preference.
+!   {\em Currently options not documented. Use default.}
 ! \item[{[pref\_intra\_ssi]}] 
 !   Intra SSI communication preference.
+!   {\em Currently options not documented. Use default.}
 ! \item[{[pref\_inter\_ssi]}] 
 !   Inter process communication preference.
+!   {\em Currently options not documented. Use default.}
 ! \item[{[rc]}] 
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer :: localrc                     ! local error localrc
 

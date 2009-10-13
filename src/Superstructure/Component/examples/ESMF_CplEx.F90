@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.36 2009/10/12 20:28:21 theurich Exp $
+! $Id: ESMF_CplEx.F90,v 1.37 2009/10/13 00:54:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -21,7 +21,7 @@
 ! \label{sec:CplSetServ}
 !
 ! Every {\tt ESMF\_CplComp} is required to provide and document
-! a set services routine.  It can have any name, but must
+! a public set services routine.  It can have any name, but must
 ! follow the declaration below: a subroutine which takes an 
 ! {\tt ESMF\_CplComp} as the first argument, and 
 ! an integer return code as the second.
@@ -57,14 +57,10 @@
       type(ESMF_CplComp)    :: comp   ! must not be optional
       integer, intent(out)  :: rc     ! must not be optional
 
-      ! SetServices the callback routines.
+      ! Set the entry points for standard ESMF Component methods
       call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=CPL_Init, rc=rc)
       call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=CPL_Run, rc=rc)
       call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=CPL_Final, rc=rc)
-
-      ! If desired, this routine can register a private data block
-      ! to be passed in to the routines above:
-      ! call ESMF_CplCompSetInternalState(comp, mydatablock, rc)
 
       rc = ESMF_SUCCESS
     end subroutine
@@ -190,6 +186,55 @@
       print *, "Coupler Final returning"
    
     end subroutine CPL_Final
+
+!EOC
+
+!-------------------------------------------------------------------------
+!BOP
+!\subsubsection{Implementing a User-Code SetVM Routine}
+! 
+! \label{sec:CplSetVM}
+!
+! Every {\tt ESMF\_CplComp} can optionally provide and document
+! a public set vm routine.  It can have any name, but must
+! follow the declaration below: a subroutine which takes an
+! {\tt ESMF\_CplComp} as the first argument, and
+! an integer return code as the second.
+! Both arguments are required and must {\em not} be declared as 
+! {\tt optional}. If an intent is specified in the interface it must be 
+! {\tt intent(inout)} for the first and {\tt intent(out)} for the 
+! second argument.
+!
+! The set vm routine is the only place where the child component can
+! use the {\tt ESMF\_CplCompSetVMMaxPEs()}, or
+! {\tt ESMF\_CplCompSetVMMaxThreads()}, or 
+! {\tt ESMF\_CplCompSetVMMinThreads()} call to modify aspects of its own VM.
+!
+! A component's VM is started up right before its set services routine is
+! entered. {\tt ESMF\_CplCompSetVM()} is executing in the parent VM, and must
+! be called {\em before} {\tt ESMF\_CplCompSetServices()}.
+!EOP
+
+!BOC
+    subroutine GComp_SetVM(comp, rc)
+      type(ESMF_CplComp)   :: comp   ! must not be optional
+      integer, intent(out)  :: rc     ! must not be optional
+      
+      type(ESMF_VM) :: vm
+      logical :: pthreadsEnabled
+      
+      ! Test for Pthread support, all SetVM calls require it
+      call ESMF_VMGetGlobal(vm, rc=rc)
+      call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+
+      if (pthreadsEnabled) then
+        ! run PETs single-threaded
+        call ESMF_CplCompSetVMMinThreads(comp, rc=rc)
+      endif
+
+      rc = ESMF_SUCCESS
+
+    end subroutine
 
     end module ESMF_CouplerEx
 !EOC

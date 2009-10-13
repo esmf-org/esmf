@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.42 2009/10/12 20:28:21 theurich Exp $
+! $Id: ESMF_GCompEx.F90,v 1.43 2009/10/13 00:54:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -21,7 +21,7 @@
 ! \label{sec:GridSetServ}
 !
 ! Every {\tt ESMF\_GridComp} is required to provide and document
-! a set services routine.  It can have any name, but must
+! a public set services routine.  It can have any name, but must
 ! follow the declaration below: a subroutine which takes an
 ! {\tt ESMF\_GridComp} as the first argument, and
 ! an integer return code as the second.
@@ -50,6 +50,7 @@
     use ESMF_Mod
     implicit none
     public GComp_SetServices
+    public GComp_SetVM
 
     contains
 
@@ -57,14 +58,10 @@
       type(ESMF_GridComp)   :: comp   ! must not be optional
       integer, intent(out)  :: rc     ! must not be optional
 
-      ! SetServices the callback routines.
+      ! Set the entry points for standard ESMF Component methods
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=GComp_Init, rc=rc)
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=GComp_Run, rc=rc)
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=GComp_Final, rc=rc)
-
-      ! If desired, this routine can register a private data block
-      ! to be passed in to the routines above:
-      ! call ESMF_GridCompSetData(comp, mydatablock, rc)
 
       rc = ESMF_SUCCESS
 
@@ -194,6 +191,54 @@
       rc = ESMF_SUCCESS
 
     end subroutine GComp_Final
+!EOC
+
+!-------------------------------------------------------------------------
+!BOP
+!\subsubsection{Implementing a User-Code SetVM Routine}
+! 
+! \label{sec:GridSetVM}
+!
+! Every {\tt ESMF\_GridComp} can optionally provide and document
+! a public set vm routine.  It can have any name, but must
+! follow the declaration below: a subroutine which takes an
+! {\tt ESMF\_GridComp} as the first argument, and
+! an integer return code as the second.
+! Both arguments are required and must {\em not} be declared as 
+! {\tt optional}. If an intent is specified in the interface it must be 
+! {\tt intent(inout)} for the first and {\tt intent(out)} for the 
+! second argument.
+!
+! The set vm routine is the only place where the child component can
+! use the {\tt ESMF\_GridCompSetVMMaxPEs()}, or
+! {\tt ESMF\_GridCompSetVMMaxThreads()}, or 
+! {\tt ESMF\_GridCompSetVMMinThreads()} call to modify aspects of its own VM.
+!
+! A component's VM is started up right before its set services routine is
+! entered. {\tt ESMF\_GridCompSetVM()} is executing in the parent VM, and must
+! be called {\em before} {\tt ESMF\_GridCompSetServices()}.
+!EOP
+
+!BOC
+    subroutine GComp_SetVM(comp, rc)
+      type(ESMF_GridComp)   :: comp   ! must not be optional
+      integer, intent(out)  :: rc     ! must not be optional
+      
+      type(ESMF_VM) :: vm
+      logical :: pthreadsEnabled
+      
+      ! Test for Pthread support, all SetVM calls require it
+      call ESMF_VMGetGlobal(vm, rc=rc)
+      call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+
+      if (pthreadsEnabled) then
+        ! run PETs single-threaded
+        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+      endif
+
+      rc = ESMF_SUCCESS
+
+    end subroutine
 
     end module ESMF_GriddedCompEx
 !EOC
@@ -209,7 +254,7 @@
     use ESMF_Mod
     
     ! User supplied modules
-    use ESMF_GriddedCompEx, only: GComp_SetServices
+    use ESMF_GriddedCompEx, only: GComp_SetServices, GComp_SetVM
     implicit none
     
 !   ! Local variables
@@ -246,6 +291,13 @@
        finalrc = ESMF_FAILURE
      end if
 
+    ! Optional user-supplied subroutine must be a public entry point.
+    call ESMF_GridCompSetVM(gcomp, GComp_SetVM, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+       finalrc = ESMF_FAILURE
+     end if
+     
     ! This single user-supplied subroutine must be a public entry point.
     call ESMF_GridCompSetServices(gcomp, GComp_SetServices, rc)
 

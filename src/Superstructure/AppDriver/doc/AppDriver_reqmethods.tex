@@ -1,4 +1,4 @@
-% $Id: AppDriver_reqmethods.tex,v 1.13 2009/10/12 20:33:56 theurich Exp $
+% $Id: AppDriver_reqmethods.tex,v 1.14 2009/10/13 00:54:49 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -50,6 +50,7 @@ supplying the user-code set services routine as an argument. The framework
 calls into the user-code set services, after the Component's VM has been
 started up.
 
+
 \subsubsection{User-Code Initialize, Run, and Finalize Methods}
 
 The required standard ESMF Component methods, for which user-code entry
@@ -74,3 +75,34 @@ See sections \ref{sec:GridInitialize}, \ref{sec:GridRun},
 \ref{sec:CplFinalize} for examples of how to write entry points for the 
 standard ESMF Component methods.
 
+
+\subsubsection{User-Code SetVM Method}
+
+When the AppDriver or parent component code calls
+{\tt ESMF\_<Grid/Cpl>CompCreate()} it has the option to specify a 
+{\tt petList} argument. All of the parent PETs contained in this list become
+resources of the child component. By default all of the parent PETs are 
+provided to the child component.
+
+Unless the optional {\tt contextflag} argument is used during 
+{\tt ESMF\_<Grid/Cpl>CompCreate()}, to indicate that the child component will
+execute in the same VM as the parent, the child component has the option
+to set certain aspects of how the provided resources are to be used when
+executing child component methods. The resources provided via the parent PETs
+are the associated processing elements (PEs) and virtual address spaces (VASs).
+
+The optional user-written set vm routine is called from the parent
+through the {\tt ESMF\_<Grid/Cpl>SetVM()} library code, and is the only place
+where the child component can set aspects of its own VM before it is started
+up. The child component's VM must be running before its set services
+routine can be called, and thus the optional {\tt ESMF\_<Grid/Cpl>SetVM()} call
+must be placed {\em before} {\tt ESMF\_<Grid/Cpl>SetServices()}.
+
+If called by the parent, the user-code set vm routine has the option to
+specify how the PETs of the child component share the provided parent PEs.
+Further, PETs on the same single system image can be set to run multi-threaded,
+within a reduced number of VAS, allowing a component to leverage shared memory
+concepts.
+
+Sections \ref{sec:GridSetVM} and \ref{sec:CplSetVM} provide examples for
+simple user-written set vm routines.

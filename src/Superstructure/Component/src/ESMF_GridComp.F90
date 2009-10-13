@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.127 2009/09/24 17:15:26 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.128 2009/10/13 00:54:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.127 2009/09/24 17:15:26 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.128 2009/10/13 00:54:53 theurich Exp $'
 
 !==============================================================================
 !
@@ -1497,8 +1497,8 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompSetVMMaxPEs"
-!BOPI
-! !IROUTINE: ESMF_GridCompSetVMMaxPEs - Define a VM for this GridComp
+!BOP
+! !IROUTINE: ESMF_GridCompSetVMMaxPEs - Set VM for Gridded Component to associate max PEs with PETs.
 !
 ! !INTERFACE:
   subroutine ESMF_GridCompSetVMMaxPEs(gridcomp, max, pref_intra_process, &
@@ -1513,25 +1513,35 @@ contains
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
+!   Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
+!   Attempts to associate {\tt max} PEs with each PET. Only PEs that are 
+!   located on the same single system image can be associated with the same PET.
+!   Within this constraint the call tries to get as close as possible to the
+!   number specified by {\tt max}.
+!
+!   The typical use of {\tt ESMF\_GridCompSetVMMaxPEs()} is to allocate
+!   multiple PEs per PET in a Component for user-level threading, e.g. OpenMP.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp] 
 !   {\tt ESMF\_GridComp} to set the {\tt ESMF\_VM} for.
 ! \item[{[max]}] 
-!   Maximum number of PEs per PET.
+!   Maximum number of PEs per PET. Default is peCount.
 ! \item[{[pref\_intra\_process]}] 
 !   Intra process communication preference.
+!   {\em Currently options not documented. Use default.}
 ! \item[{[pref\_intra\_ssi]}] 
-!   Intra SSI communication preference.
+!   Intra SSI communication preference. {\em Currently use default.}
+!   {\em Currently options not documented. Use default.}
 ! \item[{[pref\_inter\_ssi]}] 
-!   Inter process communication preference.
+!   Inter process communication preference. {\em Currently use default.}
+!   {\em Currently options not documented. Use default.}
 ! \item[{[rc]}] 
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer :: localrc                     ! local error status
 
@@ -1557,8 +1567,8 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompSetVMMaxThreads"
-!BOPI
-! !IROUTINE: ESMF_GridCompSetVMMaxThreads - Define a VM for this GridComp
+!BOP
+! !IROUTINE: ESMF_GridCompSetVMMaxThreads - Set VM for Gridded Component with multi-threaded PETs.
 !
 ! !INTERFACE:
   subroutine ESMF_GridCompSetVMMaxThreads(gridcomp, max, pref_intra_process, &
@@ -1573,7 +1583,15 @@ contains
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
+!   Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
+!   Attempts to provide {\tt max} threaded PETs in each VAS. Only as many
+!   threaded PETs as there are PEs located on the same single system image
+!   can be associated with the same VAS. Within this constraint the call
+!   tries to get as close as possible to the number specified by {\tt max}.
+!
+!   The typical use of {\tt ESMF\_GridCompSetVMMaxThreads()} is to run a 
+!   Component multi-threaded with a groups of PETs that execute within the
+!   same virtual address space.
 !
 ! The arguments are:
 ! \begin{description}
@@ -1583,15 +1601,18 @@ contains
 !   Maximum threading level.
 ! \item[{[pref\_intra\_process]}] 
 !   Intra process communication preference.
+!   {\em Currently options not documented. Use default.}
 ! \item[{[pref\_intra\_ssi]}] 
 !   Intra SSI communication preference.
+!   {\em Currently options not documented. Use default.}
 ! \item[{[pref\_inter\_ssi]}] 
 !   Inter process communication preference.
+!   {\em Currently options not documented. Use default.}
 ! \item[{[rc]}] 
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer :: localrc                     ! local error status
 
@@ -1617,8 +1638,8 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompSetVMMinThreads"
-!BOPI
-! !IROUTINE: ESMF_GridCompSetVMMinThreads - Define a VM for this GridComp
+!BOP
+! !IROUTINE: ESMF_GridCompSetVMMinThreads - Set VM for Gridded Component with reduced threading level.
 !
 ! !INTERFACE:
   subroutine ESMF_GridCompSetVMMinThreads(gridcomp, max, pref_intra_process, &
@@ -1633,25 +1654,34 @@ contains
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
+!   Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
+!   Reduces the number of threaded PETs in each VAS. The {\tt max} argument
+!   may be specified to limit the maximum number of PEs that a single PET 
+!   may be associated with.
+!
+!   The typical use of {\tt ESMF\_GridCompSetVMMinThreads()} is to run a 
+!   Component across a set of single-threaded PETs.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp] 
 !   {\tt ESMF\_GridComp} to set the {\tt ESMF\_VM} for.
 ! \item[{[max]}] 
-!   Maximum number of PEs per PET.
+!   Maximum number of PEs per PET. Default is peCount.
 ! \item[{[pref\_intra\_process]}] 
 !   Intra process communication preference.
+!   {\em Currently options not documented. Use default.}
 ! \item[{[pref\_intra\_ssi]}] 
 !   Intra SSI communication preference.
+!   {\em Currently options not documented. Use default.}
 ! \item[{[pref\_inter\_ssi]}] 
 !   Inter process communication preference.
+!   {\em Currently options not documented. Use default.}
 ! \item[{[rc]}] 
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer :: localrc                     ! local error status
 
