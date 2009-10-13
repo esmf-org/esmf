@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.280 2009/10/13 17:38:09 svasquez Exp $
+#  $Id: common.mk,v 1.281 2009/10/13 21:17:48 w6ws Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1033,8 +1033,14 @@ FPPFLAGS        += $(addprefix $(ESMF_FPPPREFIX), $(CPPFLAGS))
 
 #-------------------------------------------------------------------------------
 # common variables
+ifneq ($(ESMF_OS),MinGW)
 LIBNAME		= $(ESMF_LIBDIR)/$(LIBBASE).a
 ESMFLIB		= $(ESMF_LIBDIR)/libesmf.a
+else
+# The Microsoft linker prefers .lib over .a
+LIBNAME         = $(ESMF_LIBDIR)/$(LIBBASE).lib
+ESMFLIB         = $(ESMF_LIBDIR)/libesmf.lib
+endif
 SOURCE		= $(SOURCEC) $(SOURCEF)
 OBJS		= $(OBJSC) $(OBJSF)
 #-------------------------------------------------------------------------------
@@ -2750,6 +2756,19 @@ else
 endif
 	$(ESMF_RM) $*.o
 
+ifeq ($(ESMF_OS),MinGW)
+# The Microsoft linker prefers .lib over .a
+.F90.lib:
+	$(ESMF_F90COMPILEFREECPP_CMD) $<
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:$(LIBNAME) $*.o
+	$(ESMF_RM) $*.o
+
+.C.lib:
+	$(ESMF_CXXCOMPILE_CMD) $<
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:$(LIBNAME) $*.o
+	$(ESMF_RM) $*.o
+endif
+
 # The rules below generate a valid Fortran file using gcc as a preprocessor:
 # The -P option prevents putting #line directives in the output, and
 # -E stops after preprocessing.
@@ -2813,9 +2832,9 @@ ifeq ($(ESMF_COMPILER),gfortran)
 		$(notdir $(wildcard $(ESMF_OBJDIR)/*.o))
 else
 	cd $(ESMF_OBJDIR) ; \
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:libesmf.a \
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:libesmf.lib \
 		$(notdir $(wildcard $(ESMF_OBJDIR)/*.o)) ; \
-	$(ESMF_MV) libesmf.a $(ESMFLIB)
+	$(ESMF_MV) libesmf.lib $(ESMFLIB)
 endif
 else
 	cd $(ESMF_OBJDIR) ; \
