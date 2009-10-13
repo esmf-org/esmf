@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistOpenMPSTest.F90,v 1.3 2009/05/29 21:54:55 theurich Exp $
+! $Id: ESMF_ArrayRedistOpenMPSTest.F90,v 1.4 2009/10/13 22:44:46 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST   String used by test script to count system tests.
@@ -140,7 +140,7 @@ program ESMF_ArrayRedistOpenMPSTest
 
   call ESMF_GridCompSetVM(comp1, userRoutine=userm1_setvm, rc=localrc, &
     userRc=userrc)
-  print *, "Comp1 SetVM finished, rc= ", localrc
+  print *, "Comp1 SetVM finished, rc= ", localrc, userrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -149,7 +149,7 @@ program ESMF_ArrayRedistOpenMPSTest
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_GridCompSetServices(comp1, userRoutine=userm1_register, rc=localrc,&
     userRc=userrc)
-  print *, "Comp1 SetServices finished, rc= ", localrc
+  print *, "Comp1 SetServices finished, rc= ", localrc, userrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -159,7 +159,7 @@ program ESMF_ArrayRedistOpenMPSTest
 
   call ESMF_GridCompSetVM(comp2, userRoutine=userm2_setvm, rc=localrc, &
     userRc=userrc)
-  print *, "Comp2 SetVM finished, rc= ", localrc
+  print *, "Comp2 SetVM finished, rc= ", localrc, userrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -168,7 +168,7 @@ program ESMF_ArrayRedistOpenMPSTest
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_GridCompSetServices(comp2, userRoutine=userm2_register, rc=localrc,&
     userRc=userrc)
-  print *, "Comp2 SetServices finished, rc= ", localrc
+  print *, "Comp2 SetServices finished, rc= ", localrc, userrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -178,7 +178,7 @@ program ESMF_ArrayRedistOpenMPSTest
 
   call ESMF_CplCompSetVM(cpl, userRoutine=usercpl_setvm, rc=localrc, &
     userRc=userrc)
-  print *, "Cpl SetVM finished, rc= ", localrc
+  print *, "Cpl SetVM finished, rc= ", localrc, userrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -187,7 +187,7 @@ program ESMF_ArrayRedistOpenMPSTest
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_CplCompSetServices(cpl, userRoutine=usercpl_register, rc=localrc, &
     userRc=userrc)
-  print *, "Cpl SetServices finished, rc= ", localrc
+  print *, "Cpl SetServices finished, rc= ", localrc, userrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -207,7 +207,7 @@ program ESMF_ArrayRedistOpenMPSTest
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_GridCompInitialize(comp1, exportState=c1exp, rc=localrc, &
     userRc=userrc)
-  print *, "Comp 1 Initialize finished, rc =", localrc
+  print *, "Comp 1 Initialize finished, rc =", localrc, userrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -221,7 +221,7 @@ program ESMF_ArrayRedistOpenMPSTest
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_GridCompInitialize(comp2, importState=c2imp, rc=localrc, &
     userRc=userrc)
-  print *, "Comp 2 Initialize finished, rc =", localrc
+  print *, "Comp 2 Initialize finished, rc =", localrc, userrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -247,7 +247,7 @@ program ESMF_ArrayRedistOpenMPSTest
 !-------------------------------------------------------------------------
 
   call ESMF_GridCompRun(comp1, exportState=c1exp, rc=localrc, userRc=userrc)
-  print *, "Comp 1 Run returned, rc =", localrc
+  print *, "Comp 1 Run returned, rc =", localrc, userrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -256,7 +256,7 @@ program ESMF_ArrayRedistOpenMPSTest
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_CplCompRun(cpl, c1exp, c2imp, rc=localrc, userRc=userrc)
-  print *, "Coupler Run returned, rc =", localrc
+  print *, "Coupler Run returned, rc =", localrc, userrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -265,7 +265,7 @@ program ESMF_ArrayRedistOpenMPSTest
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_GridCompRun(comp2, importState=c2imp, rc=localrc, userRc=userrc)
-  print *, "Comp 2 Run returned, rc =", localrc
+  print *, "Comp 2 Run returned, rc =", localrc, userrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -280,7 +280,7 @@ program ESMF_ArrayRedistOpenMPSTest
 !-------------------------------------------------------------------------
 
   call ESMF_CplCompFinalize(cpl, c1exp, c2imp, rc=localrc, userRc=userrc)
-  print *, "Coupler Finalize finished, rc =", localrc
+  print *, "Coupler Finalize finished, rc =", localrc, userrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -290,7 +290,7 @@ program ESMF_ArrayRedistOpenMPSTest
 
   call ESMF_GridCompFinalize(comp1, exportState=c1exp, rc=localrc, &
     userRc=userrc)
-  print *, "Comp 1 Finalize finished, rc =", localrc
+  print *, "Comp 1 Finalize finished, rc =", localrc, userrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -300,7 +300,7 @@ program ESMF_ArrayRedistOpenMPSTest
 
   call ESMF_GridCompFinalize(comp2, importState=c2imp, rc=localrc, &
     userRc=userrc)
-  print *, "Comp 2 Finalize finished, rc =", localrc
+  print *, "Comp 2 Finalize finished, rc =", localrc, userrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
