@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.55 2009/08/27 05:29:39 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.56 2009/10/13 17:59:41 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -1592,7 +1592,6 @@ end subroutine ESMF_LogMsgSetError
     integer 				                   :: status, i, rc2
     type(ESMF_LogEntry), dimension(:), pointer             :: localbuf
     character(len=32)                                      :: fname
-    character(len=4)                                       :: fnum
     character(ESMF_MAXSTR)                                 :: petNumChar
 
     type(ESMF_LogPrivate),pointer     :: alog
@@ -1651,32 +1650,11 @@ end subroutine ESMF_LogMsgSetError
     if (alog%logtype .eq. ESMF_LOG_SINGLE) then
         alog%nameLogErrFile=trim(filename)
     else
-        if (alog%petNumber .le. 9) then
-	    write(fnum,11) alog%petNumber 
-        else if (alog%petNumber .le. 99) then
-            write(fnum,21) alog%petNumber
-        else if (alog%petNumber .le. 999) then
-            write(fnum,31) alog%petNumber
-        else if (alog%petNumber .le. 9999) then
-            write(fnum,41) alog%petNumber
-        else if (alog%petNumber .le. 99999) then
-            write(fnum,51) alog%petNumber
-        else if (alog%petNumber .le. 999999) then
-            write(fnum,61) alog%petNumber
-        else 
-            write(fnum,*) alog%petNumber
-        endif
-        fname = "PET" // trim(fnum) // "." // trim(filename)
+        fname = trim(alog%petNumLabel) // "." // trim(filename)
         alog%nameLogErrFile=fname
     endif
- 11     format(I1.1)
- 21     format(I2.2)
- 31     format(I3.3)
- 41     format(I4.4)
- 51     format(I5.5)
- 61     format(I6.6)
     if (len(alog%nameLogErrFile) .gt. 32) then
-        print *, "Filename exceeded 32 characters."
+        print *, "ESMF_LogOpen: Filename exceeded 32 characters."
         if (present(rc)) then
             rc = ESMF_FAILURE
         endif
@@ -1694,8 +1672,19 @@ end subroutine ESMF_LogMsgSetError
 
     ! open the file, with retries
     do i=1, ESMF_LOG_MAXTRYOPEN
+#if !defined (ESMF_OS_MinGW)
         OPEN(UNIT=alog%unitNumber,File=alog%nameLogErrFile,& 
 	     POSITION="APPEND", ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=status)
+#else
+#if defined (__INTEL_COMPILER)
+        OPEN(UNIT=alog%unitNumber,File=alog%nameLogErrFile,&
+             POSITION="APPEND", ACTION="WRITE", STATUS="UNKNOWN", &
+             SHARE="DENYNONE", IOSTAT=status)
+#else
+        OPEN(UNIT=alog%unitNumber,File=alog%nameLogErrFile,&
+             POSITION="APPEND", ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=status)
+#endif
+#endif
         if (status.eq.0) then
             alog%FileIsOpen = ESMF_TRUE
             exit
@@ -1707,6 +1696,7 @@ end subroutine ESMF_LogMsgSetError
         if (present(rc)) then
             rc=ESMF_FAILURE
         endif
+        print *, "ESMF_LogOpen: open error.  iostat =", status
         return
     endif
 
@@ -1716,7 +1706,7 @@ end subroutine ESMF_LogMsgSetError
     
     allocate(localbuf(alog%maxElements), stat=status)
     if (status .ne. 0) then
-      print *, "Allocation of buffer failed."
+      print *, "ESMF_LogOpen: Allocation of buffer failed."
       if (present(rc)) then
           rc = ESMF_FAILURE
       endif
