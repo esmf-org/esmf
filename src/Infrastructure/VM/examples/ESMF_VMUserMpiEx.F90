@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiEx.F90,v 1.10 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_VMUserMpiEx.F90,v 1.11 2009/10/14 04:41:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -17,10 +17,15 @@
 !------------------------------------------------------------------------------
 !BOE
 !
-! \subsubsection{ESMF inside user MPI application}
+! \subsubsection{Nesting ESMF inside a user MPI application}
 !
-! The following example code demonstrates how ESMF can be used inside of a 
-! user application that explicitly calls MPI\_Init() and MPI\_Finalize().
+! It is possible to nest an ESMF application inside a user application that 
+! explicitly calls {\tt MPI\_Init()} and {\tt MPI\_Finalize()}. The
+! {\tt ESMF\_Initialize()} call automatically checks whether MPI has already
+! been initialized, and if so does not call {\tt MPI\_Init()} internally. 
+! On the finalize side, {\tt ESMF\_Finalize()} can be instructed to {\em not}
+! call {\tt MPI\_Finalize()}, making it the responsibility of the outer code
+! to finalize MPI.
 !
 !EOE
 !------------------------------------------------------------------------------
@@ -42,27 +47,28 @@ program ESMF_VMUserMpiEx
   ! result code
   integer :: finalrc
   finalrc = ESMF_SUCCESS
-  ! user code initializes MPI
 #ifndef ESMF_MPIUNI     
 !BOC
   call MPI_Init(ierr)
+  ! User code initializes MPI.
 !EOC
   if (ierr/=0) finalrc = ESMF_FAILURE
 #endif
-  ! user code initializes ESMF
 !BOC
   call ESMF_Initialize(rc=rc)
+  ! ESMF_Initialize() does not call MPI_Init() if it finds MPI initialized.
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
-  ! user code finalizes ESMF
 !BOC
   call ESMF_Finalize(terminationflag=ESMF_KEEPMPI, rc=rc)
+  ! Calling with terminationflag=ESMF_KEEPMPI instructs ESMF_Finalize() to keep
+  ! MPI active.
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
-  ! user code finalizes MPI
 #ifndef ESMF_MPIUNI     
 !BOC
   call MPI_Finalize(ierr)
+  ! It is the responsibility of the outer user code to finalize MPI.
 !EOC
   if (ierr/=0) finalrc = ESMF_FAILURE
 #endif

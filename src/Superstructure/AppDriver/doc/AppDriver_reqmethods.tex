@@ -1,4 +1,4 @@
-% $Id: AppDriver_reqmethods.tex,v 1.14 2009/10/13 00:54:49 theurich Exp $
+% $Id: AppDriver_reqmethods.tex,v 1.15 2009/10/14 04:41:17 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ how to write a user-code set services routine.
 Note that a component does not call its own set services routine;
 the AppDriver or parent component code, which is creating a component, 
 will first call {\tt ESMF\_<Grid/Cpl>CompCreate()} to create an "empty" 
-component, and then must call into {\tt ESMF\_<Grid/Cpl>SetServices()}, 
+component, and then must call into {\tt ESMF\_<Grid/Cpl>CompSetServices()}, 
 supplying the user-code set services routine as an argument. The framework
 calls into the user-code set services, after the Component's VM has been
 started up.
@@ -77,6 +77,7 @@ standard ESMF Component methods.
 
 
 \subsubsection{User-Code SetVM Method}
+\label{sec:AppDriverSetVM}
 
 When the AppDriver or parent component code calls
 {\tt ESMF\_<Grid/Cpl>CompCreate()} it has the option to specify a 
@@ -92,11 +93,11 @@ executing child component methods. The resources provided via the parent PETs
 are the associated processing elements (PEs) and virtual address spaces (VASs).
 
 The optional user-written set vm routine is called from the parent
-through the {\tt ESMF\_<Grid/Cpl>SetVM()} library code, and is the only place
-where the child component can set aspects of its own VM before it is started
-up. The child component's VM must be running before its set services
-routine can be called, and thus the optional {\tt ESMF\_<Grid/Cpl>SetVM()} call
-must be placed {\em before} {\tt ESMF\_<Grid/Cpl>SetServices()}.
+through the {\tt ESMF\_<Grid/Cpl>CompSetVM()} library code, and is the only
+place where the child component can set aspects of its own VM before it is 
+started up. The child component's VM must be running before its set services
+routine can be called, and thus the optional {\tt ESMF\_<Grid/Cpl>CompSetVM()}
+call must be placed {\em before} {\tt ESMF\_<Grid/Cpl>CompSetServices()}.
 
 If called by the parent, the user-code set vm routine has the option to
 specify how the PETs of the child component share the provided parent PEs.

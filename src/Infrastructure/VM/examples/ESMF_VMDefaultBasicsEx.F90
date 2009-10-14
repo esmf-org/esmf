@@ -1,4 +1,4 @@
-! $Id: ESMF_VMDefaultBasicsEx.F90,v 1.8 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_VMDefaultBasicsEx.F90,v 1.9 2009/10/14 04:41:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -17,12 +17,17 @@
 !------------------------------------------------------------------------------
 !BOE
 !
-! \subsubsection{VM Default Basics Example}
+! \subsubsection{Global VM}
 !
 ! This complete example program demonstrates the simplest ESMF application, 
-! consisting of only a main program without any components. The global default
+! consisting of only a main program without any Components. The global
 ! VM, which is automatically created during the {\tt ESMF\_Initialize()} call,
-! is obtained and then used in its print method and several VM query calls.
+! is obtained using two different methods. First the global VM will be returned
+! by {\tt ESMF\_Initialize()} if the optional {\tt vm} argument is specified.
+! The example uses the VM object obtained this way to call the VM print method.
+! Second, the global VM can be obtained anywhere in the user application using
+! the {\tt ESMF\_VMGetGlobal()} call. The identical VM is returned and several
+! VM query methods are called to inquire about the associated resources.
 !
 !EOE
 !------------------------------------------------------------------------------
@@ -44,6 +49,8 @@ program ESMF_VMDefaultBasicsEx
   finalrc = ESMF_SUCCESS
 !BOC
   call ESMF_Initialize(vm=vm, rc=rc)
+  ! Providing the optional vm argument to ESMF_Initialize() is one way of
+  ! obtaining the global VM.
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -51,8 +58,16 @@ program ESMF_VMDefaultBasicsEx
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
+  call ESMF_VMGetGlobal(vm=vm, rc=rc)
+  ! Calling ESMF_VMGetGlobal() anywhere in the user application is the other
+  ! way to obtain the global VM object.
+!EOC
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, peCount=peCount, &
     rc=rc)
+  ! The VM object contains information about the associated resources. If the
+  ! user code requires this information it must query the VM object.
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC

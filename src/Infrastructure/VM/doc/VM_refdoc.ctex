@@ -1,4 +1,4 @@
-% $Id: VM_refdoc.ctex,v 1.21 2009/01/21 21:38:01 cdeluca Exp $ 
+% $Id: VM_refdoc.ctex,v 1.22 2009/10/14 04:41:17 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -66,13 +66,13 @@
 #ifdef STANDALONE
 \input{VM_usage}
 \input{ESMF_VMDefaultBasicsEx_fapi}
+\input{ESMF_VMComponentEx_fapi}
 \input{ESMF_VMGetMPICommunicatorEx_fapi}
 \input{ESMF_VMUserMpiEx_fapi}
 \input{ESMF_VMUserMpiCommEx_fapi}
 \input{ESMF_VMSendVMRecvEx_fapi}
 \input{ESMF_VMScatterVMGatherEx_fapi}
 \input{ESMF_VMAllFullReduceEx_fapi}
-\input{ESMF_VMComponentEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/VM/doc/VM_usage}
 \input{../Infrastructure/VM/doc/ESMF_VMDefaultBasicsEx_fapi}

@@ -1,4 +1,4 @@
-! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.15 2009/03/03 17:23:24 theurich Exp $
+! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.16 2009/10/14 04:41:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -17,13 +17,15 @@
 !------------------------------------------------------------------------------
 !BOE
 !
-! \subsubsection{VMGet MPI Communicator Example}
+! \subsubsection{Getting the MPI Communicator from an VM object}
 !
-! The following example code shows how to obtain the MPI intra-communicator
-! out of a VM object. In order not to interfere with ESMF communications it is 
+! Sometimes user code requires access to the MPI communicator, e.g. to support
+! legacy code that contains explict MPI communication calls. The correct way of
+! wrapping such code into ESMF is to obtain the MPI intra-communicator out of
+! the VM object. In order not to interfere with ESMF communications it is
 ! advisable to duplicate the communicator before using it in user-level MPI
 ! calls. In this example the duplicated communicator is used for a user
-! controlled barrier accross the context.
+! controlled {\tt MPI\_Barrier()}.
 !
 !EOE
 !------------------------------------------------------------------------------
@@ -43,10 +45,13 @@ program ESMF_VMGetMPICommunicatorEx
   type(ESMF_VM):: vm
 !BOC
   integer:: mpic
+!EOC  
 #ifndef ESMF_MPIUNI     
+!BOC
   integer:: mpic2
-#endif
 !EOC
+#endif
+
   ! result code
   integer :: finalrc
   finalrc = ESMF_SUCCESS
@@ -54,11 +59,16 @@ program ESMF_VMGetMPICommunicatorEx
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
   call ESMF_VMGet(vm, mpiCommunicator=mpic, rc=rc)
+  ! The returned MPI communicator spans the same MPI processes that the VM
+  ! is defined on.
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 #ifndef ESMF_MPIUNI     
 !BOC
   call MPI_Comm_dup(mpic, mpic2, ierr)
+  ! Duplicate the MPI communicator not to interfere with ESMF communications.
+  ! The duplicate MPI communicator can be used in any MPI call in the user
+  ! code. Here the MPI_Barrier() routine is called.
   call MPI_Barrier(mpic2, ierr)
 !EOC
 #endif

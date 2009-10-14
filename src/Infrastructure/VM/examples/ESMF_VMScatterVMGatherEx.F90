@@ -1,4 +1,4 @@
-! $Id: ESMF_VMScatterVMGatherEx.F90,v 1.9 2009/03/03 17:23:24 theurich Exp $
+! $Id: ESMF_VMScatterVMGatherEx.F90,v 1.10 2009/10/14 04:41:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -17,10 +17,12 @@
 !------------------------------------------------------------------------------
 !BOE
 !
-! \subsubsection{VMScatter/VMGather Example}
+! \subsubsection{Scatter and Gather}
 !
-! The VM layer provides MPI-like collective communication. This example 
-! demonstrates the use of VM-wide VMScatter and VMGather.
+! The VM layer provides MPI-like collective communication. {\tt ESMF\_VMScatter()}
+! scatters data located on {\tt root} PET across all the PETs of the VM. 
+! {\tt ESMF\_VMGather()} provides the opposite operation, gathering data from
+! all the PETs of the VM onto {\tt root} PET.
 !
 !EOE
 !------------------------------------------------------------------------------
@@ -71,11 +73,13 @@ program ESMF_VMScatterVMGatherEx
 !BOC
   call ESMF_VMScatter(vm, sendData=array1, recvData=array2, count=nsize, &
     root=scatterRoot, rc=rc)
+  ! Both sendData and recvData must be 1-d arrays.
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
   call ESMF_VMGather(vm, sendData=array2, recvData=array1, count=nsize, &
     root=gatherRoot, rc=rc)
+  ! Both sendData and recvData must be 1-d arrays.
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
  

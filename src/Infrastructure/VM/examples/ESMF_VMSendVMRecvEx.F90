@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvEx.F90,v 1.12 2009/03/03 17:23:24 theurich Exp $
+! $Id: ESMF_VMSendVMRecvEx.F90,v 1.13 2009/10/14 04:41:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -17,12 +17,13 @@
 !------------------------------------------------------------------------------
 !BOE
 !
-! \subsubsection{VMSend/VMRecv Example}
+! \subsubsection{Send/Recv}
 !
-! The VM layer provides MPI-like point-to-point communication. Use VMSend and
-! VMRecv to communicate between two PETs. The following SPMD code sends data
-! from PET 'src' and receives it on PET 'dst' of the VM. The sendData and
-! recvData arguments must be 1-dimensional arrays.
+! The VM layer provides MPI-like point-to-point communication. Use 
+! {\tt ESMF\_VMSend()} and {\tt ESMF\_VMRecv()} to pass data between two PETs.
+! The following code sends data from PET 'src' and receives it on PET 'dst'.
+! Both PETs must be part of the same VM. The sendData and recvData arguments
+! must be 1-dimensional arrays.
 !
 !EOE
 !------------------------------------------------------------------------------

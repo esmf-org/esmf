@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentEx.F90,v 1.16 2009/03/23 20:40:47 theurich Exp $
+! $Id: ESMF_VMComponentEx.F90,v 1.17 2009/10/14 04:41:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -17,13 +17,18 @@
 !------------------------------------------------------------------------------
 !BOE
 !
-! \subsubsection{VM Component Example}
+! \subsubsection{VM and Components}
 !
-! The following example shows the role that VMs play in connetion with ESMF 
-! components. Here a single component is created in the main program and the
-! default VM gives all its resources to the child component. When the child
-! component code is entered through the registered methods (Initialize, Run or 
-! Finalize) the user code will be executed in the child's VM.
+! The following example shows the role that the VM plays in connection with ESMF 
+! Components. A single Component is created in the main program. Through the
+! optional {\tt petList} argument the driver code specifies that only resources
+! associated with PET 0 are given to the {\tt gcomp} object. 
+!
+! When the Component code is invoked through the standard ESMF Component methods
+! Initialize, Run, or Finalize the Component's VM is automatically entered.
+! Inside of the user-written Component code the Component VM can be obtained
+! by querying the Component object. The VM object will indicate that only a
+! single PET is executing the Component code.
 !
 !EOE
 !------------------------------------------------------------------------------
@@ -41,26 +46,16 @@ module ESMF_VMComponentEx_gcomp_mod
   private
   
   ! module procedures
-!BOC
+  
   public mygcomp_register
     
   contains !--------------------------------------------------------------------
 
   subroutine mygcomp_register(gcomp, rc)
-!EOC
     ! arguments
     type(ESMF_GridComp):: gcomp
     integer, intent(out):: rc
     
-    print *, '*** hi from mygcomp_register ***'
-    
-    ! Currently only the MPI-only VM is accessible!!!
-    ! Optionally set properties for this component's VM via one of three methods
-    !    call ESMF_GridCompSetVMMaxThreads(gcomp, ...)
-    !    call ESMF_GridCompSetVMMinThreads(gcomp, ...)
-    !    call ESMF_GridCompSetVMMaxPEs(gcomp, ...)
-    
-!BOC
     ! register INIT method
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, mygcomp_init, rc=rc)
     ! register RUN method
@@ -69,81 +64,66 @@ module ESMF_VMComponentEx_gcomp_mod
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, mygcomp_final, rc=rc)
   end subroutine !--------------------------------------------------------------
   
+!BOC
   recursive subroutine mygcomp_init(gcomp, istate, estate, clock, rc)
-!EOC
-    ! arguments
-    type(ESMF_GridComp):: gcomp
-    type(ESMF_State):: istate, estate
-    type(ESMF_Clock):: clock
-    integer, intent(out):: rc
+    type(ESMF_GridComp)   :: gcomp
+    type(ESMF_State)      :: istate, estate
+    type(ESMF_Clock)      :: clock
+    integer, intent(out)  :: rc
 
     ! local variables
     type(ESMF_VM):: vm
     
-    print *, '*** hi from mygcomp_init ***'
-    
-!BOC
-    ! get this component's vm    
+    ! get this Component's vm    
     call ESMF_GridCompGet(gcomp, vm=vm)
+    
+    ! the VM object contains information about the execution environment of
+    ! the Component
 
     call ESMF_VMPrint(vm, rc)
-!EOC
     
     rc = 0
-
-!BOC
   end subroutine !--------------------------------------------------------------
+
   
   recursive subroutine mygcomp_run(gcomp, istate, estate, clock, rc)
-!EOC
-    ! like mygcomp_init...
-    ! arguments
-    type(ESMF_GridComp):: gcomp
-    type(ESMF_State):: istate, estate
-    type(ESMF_Clock):: clock
-    integer, intent(out):: rc
+    type(ESMF_GridComp)   :: gcomp
+    type(ESMF_State)      :: istate, estate
+    type(ESMF_Clock)      :: clock
+    integer, intent(out)  :: rc
     
     ! local variables
     type(ESMF_VM):: vm
-
-    print *, '*** hi from mygcomp_run ***'
     
-!BOC
-    ! get this component's vm    
+    ! get this Component's vm    
     call ESMF_GridCompGet(gcomp, vm=vm)
+    
+    ! the VM object contains information about the execution environment of
+    ! the Component
 
     call ESMF_VMPrint(vm, rc)
-!EOC
     
     rc = 0
-
-!BOC
   end subroutine !--------------------------------------------------------------
 
   recursive subroutine mygcomp_final(gcomp, istate, estate, clock, rc)
-!EOC
-    ! like mygcomp_init...
-    ! arguments
-    type(ESMF_GridComp):: gcomp
-    type(ESMF_State):: istate, estate
-    type(ESMF_Clock):: clock
-    integer, intent(out):: rc
-
+    type(ESMF_GridComp)   :: gcomp
+    type(ESMF_State)      :: istate, estate
+    type(ESMF_Clock)      :: clock
+    integer, intent(out)  :: rc
+    
     ! local variables
     type(ESMF_VM):: vm
-
-    print *, '*** hi from mygcomp_final ***'
-
-!BOC
-    ! get this component's vm    
+    
+    ! get this Component's vm    
     call ESMF_GridCompGet(gcomp, vm=vm)
+    
+    ! the VM object contains information about the execution environment of
+    ! the Component
 
     call ESMF_VMPrint(vm, rc)
-!EOC
     
     rc = 0
-
-!BOC
   end subroutine !--------------------------------------------------------------
 
 end module
@@ -152,14 +132,12 @@ end module
 
 !BOC
 program ESMF_VMComponentEx
-!EOC
   use ESMF_Mod
-!BOC  
   use ESMF_VMComponentEx_gcomp_mod
-!EOC  
   implicit none
   
   ! local variables
+!EOC  
   integer:: rc
   type(ESMF_GridComp):: gcomp
   ! result code
@@ -170,7 +148,7 @@ program ESMF_VMComponentEx
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC  
-  gcomp = ESMF_GridCompCreate(name='My gridded component', rc=rc)
+  gcomp = ESMF_GridCompCreate(petList=(/0/), rc=rc)
 !EOC  
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

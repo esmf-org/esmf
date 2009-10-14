@@ -1,20 +1,3 @@
-% $Id: VM_usage.tex,v 1.9 2004/12/30 18:54:30 theurich Exp $
+% $Id: VM_usage.tex,v 1.10 2009/10/14 04:41:17 theurich Exp $
 
-The concept of the ESMF Virtual Machine (VM) is so fundamental to the framework that every ESMF application uses it. Even in the simplest case, that of an ESMF main program without any components, a global default VM is being created during the {\tt ESMF\_Initialize()} call and removed during {\tt ESMF\_Finalize()}.
-
-By its very nature the VM class is quite different from other ESMF classes. One reflection of this fact is that VM objects appear in the API of infrastructure {\it and} superstructure ESMF classes. The first place to encounter a VM object is at the {\tt ESMF\_Initialize()} call. If the optional {\tt vm=} argument is specified the global default VM will be returned to the user code. The default VM can also be obtained anywhere throughout the application by calling {\tt ESMF\_VMGetGlobal()}.
-
-The default VM is an MPI-only VM that spans all processes in {\tt MPI\_COMM\_WORLD} and it is the context in which the main program is executing. After the initialization the default VM may be used within the main program in query or communication calls, just like any other VM.
-
-One of the main tasks of the VM class is resource management. Thus the VM plays a major part when a new ESMF component is created. On the parent side of this process the parent VM serves as a contributor of resources. When the parent component creates a child component it provides its own VM object and further may specify a list of resources (in terms of PETs) that it wants to give to the child component. This allows a parent to divide its resources among several children without oversubscribing the computational resources it holds.
-
-On the child side of the creation process each child may set key properties of its VM, i.e. it is up to the child component to decide on how to use the resources it receives from the parent component. This is done in the child's SetServices routine. 
-
-%TODO: when we allow ESMF-threading here is the place to describe on how the
-%      child sets its VM properties.
-
-Notice that the SetServices routine, although part of the child component, executes within the parent VM context. The child's VM has not been started up when the SetServices routine is being called. It is during the return of the SetServices call that all required information about the child component's VM is available and the child's VM can be started up.
-
-After a child component has been created by the parent, and its SetServices has been called, it may be entered via one of the registered initialize / run / finalize entry points. Each time a component is entered through these registered methods the associated component routine will start running within the context of the child's own VM. On return of a registered component method the VM is placed on hold, waiting for the next invocation. It is not until the a component is destroyed that the associated VM is shut down.
-
-The user component code may gain access to the VM of its context by querying the active component object via the respective CompGet call. Alternatively, a simpler way to obtain the current VM context is to use the {\tt ESMF\_VMGetCurrent()} call which does not require any input information and returns the VM of the current context. Either way, once a {\tt ESMF\_VM} object has been obtained it may be used in query and communication calls, and - creating a hierarchy of components - to create child components.
+The concept of the ESMF Virtual Machine (VM) is so fundamental to the framework that every ESMF application uses it. However, for many user applications the VM class is transparently hidden behind the ESMF Component concept and higher data classes (e.g. Array, Field). The interaction between user code and VM is often only indirect. The following examples provide an overview of where the VM class can come into play in user code.

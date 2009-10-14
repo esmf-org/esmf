@@ -1,4 +1,4 @@
-! $Id: ESMF_VMAllFullReduceEx.F90,v 1.7 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_VMAllFullReduceEx.F90,v 1.8 2009/10/14 04:41:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -17,10 +17,12 @@
 !------------------------------------------------------------------------------
 !BOE
 !
-! \subsubsection{VMAllFullReduce Example}
+! \subsubsection{AllReduce and AllFullReduce}
 !
-! The VMAllFullReduce method can be used to find the VM-wide global sum of a
-! data set.
+! Use {\tt ESMF\_VMAllReduce()} to reduce data distributed across the PETs of a 
+! VM into a result vector, returned on all the PETs. Further, use
+! {\tt ESMF\_VMAllFullReduce()} to reduce the data into a single scalar returned
+! on all PETs.
 !
 !EOE
 !------------------------------------------------------------------------------
@@ -35,7 +37,7 @@ program ESMF_VMAllFullReduceEx
   integer:: rc
   type(ESMF_VM):: vm
   integer:: localPet
-  integer, allocatable:: array1(:)
+  integer, allocatable:: array1(:), array2(:)
   integer:: result
   integer:: nsize, i
   ! result code
@@ -51,6 +53,7 @@ program ESMF_VMAllFullReduceEx
   ! allocate data arrays
   nsize = 2
   allocate(array1(nsize))
+  allocate(array2(nsize))
 
   ! prepare data array1
   do i=1, nsize
@@ -63,10 +66,20 @@ program ESMF_VMAllFullReduceEx
     print *, localPet,' array1: ', array1(i)
   enddo
 
+!BOC
+  call ESMF_VMAllReduce(vm, sendData=array1, recvData=array2, count=nsize, &
+    reduceflag=ESMF_SUM, rc=rc)
+  ! Both sendData and recvData must be 1-d arrays. Reduce distributed sendData
+  ! element by element into recvData and return in on all PETs.
+!EOC
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  
   ! global sum
 !BOC
   call ESMF_VMAllFullReduce(vm, sendData=array1, recvData=result, count=nsize, &
     reduceflag=ESMF_SUM, rc=rc)
+  ! sendData must be 1-d array. Fully reduce the distributed sendData into a
+  ! single scalar and return it in recvData on all PETs.
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
