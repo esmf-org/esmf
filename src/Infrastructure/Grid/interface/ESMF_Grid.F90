@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.137 2009/10/14 05:17:16 eschwab Exp $'
+      '$Id: ESMF_Grid.F90,v 1.138 2009/10/14 23:02:06 eschwab Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2823,9 +2823,10 @@ end subroutine ESMF_GridConvertIndex
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFromFile"
 !BOP
-! !IROUTINE: ESMF_GridCreateFromFile - Create a Grid from a file
+! !IROUTINE: ESMF_GridCreate - Create a Grid from a file
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_GridCreate()
      function ESMF_GridCreateFromFile(fileName, convention, purpose, rc)
 !
 ! !RETURN VALUE:
