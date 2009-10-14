@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.2 2009/09/09 05:51:30 eschwab Exp $
+! $Id: ESMF_IO.F90,v 1.3 2009/10/14 22:42:48 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -138,7 +138,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_IO.F90,v 1.2 2009/09/09 05:51:30 eschwab Exp $'
+      '$Id: ESMF_IO.F90,v 1.3 2009/10/14 22:42:48 eschwab Exp $'
 
 !==============================================================================
 !
@@ -151,7 +151,7 @@
        contains
 
 !==============================================================================
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IOCreate - Create a new ESMF IO object
 !
 ! !INTERFACE:
@@ -217,7 +217,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !     
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 !     IOx.y, IOx.y.z  TODO
 !
@@ -317,7 +317,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IODestroy()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IODestroy - Free all resources associated with an ESMF IO object
 !
 ! !INTERFACE:
@@ -338,7 +338,7 @@
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 !     IOx.y, IOx.y.z  TODO
 !
@@ -366,7 +366,7 @@
       end subroutine ESMF_IODestroy
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IOGet - Get an ESMF IO object's properties
 !
 ! !INTERFACE:
@@ -418,7 +418,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 !     IOx.y, IOx.y.z  TODO
 !
@@ -464,7 +464,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IOPrint()"
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_IOPrint - Print the contents of a ESMF IO object
 !
 ! !INTERFACE:
@@ -506,7 +506,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 !     IOx.y, IOx.y.z  TODO
 !
@@ -529,7 +529,7 @@
 !     end subroutine ESMF_IOPrint
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IORead - Perform a read on an ESMF IO object
 !
 ! !INTERFACE:
@@ -585,7 +585,7 @@
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 !     IOx.y, IOx.y.z  TODO
 !
@@ -723,7 +723,7 @@
 !     end function ESMF_IOReadRestart
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IOSet - Set one or more properties of an ESMF IO object
 !
 ! !INTERFACE:
@@ -780,7 +780,7 @@
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 !     IOx.y, IOx.y.z  TODO
 !
@@ -814,7 +814,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IOValidate()"
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_IOValidate - Validate an ESMF IO object's properties
 !
 ! !INTERFACE:
@@ -838,7 +838,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description} 
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 !     IOx.y, IOx.y.z  TODO
 !
@@ -861,7 +861,7 @@
 !     end subroutine ESMF_IOValidate
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_IOWrite - Perform a write on an ESMF IO object
 !
 ! !INTERFACE:
@@ -917,7 +917,7 @@
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 !     IOx.y, IOx.y.z  TODO
 !
