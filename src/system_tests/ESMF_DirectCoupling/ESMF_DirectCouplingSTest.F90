@@ -1,4 +1,4 @@
-! $Id: ESMF_DirectCouplingSTest.F90,v 1.6 2009/03/26 03:28:20 theurich Exp $
+! $Id: ESMF_DirectCouplingSTest.F90,v 1.7 2009/10/14 20:53:20 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -120,7 +120,7 @@ program ESMF_DirectCouplingSTest
   type(ESMF_State) :: ioExp, ioImp, modelExp, modelImp
 
   ! Test variables
-  integer :: testresult = 0     ! all pass
+  integer :: result = 0     ! all pass
   character(ESMF_MAXSTR) :: testname
   character(ESMF_MAXSTR) :: failMsg, finalMsg
 
@@ -128,7 +128,7 @@ program ESMF_DirectCouplingSTest
 !-------------------------------------------------------------------------
 
   write(failMsg, *) "System Test failure"
-  write(testname, *) "System Test ESMF_DirectCouplingTest"
+  write(testname, *) "System Test ESMF_DirectCouplingSTest"
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -144,7 +144,8 @@ program ESMF_DirectCouplingSTest
 !-------------------------------------------------------------------------
 
   ! Initialize framework and get back default global VM
-  call ESMF_Initialize(vm=vm, rc=localrc)
+  call ESMF_Initialize(vm=vm,  defaultlogfilename="DirectCouplingSTest.Log", &
+                        defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -367,11 +368,8 @@ program ESMF_DirectCouplingSTest
   ! Normal ESMF Test output
   print *, testname, " complete."
 
-  ! IMPORTANT: TestGlobal() prints the PASS: string that the scripts grep for.
-  call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), testname, failMsg, testresult, &
-    ESMF_SRCLINE)
 
-  if ((localPet .eq. 0) .and. (rc .eq. ESMF_SUCCESS)) then
+  if (rc .eq. ESMF_SUCCESS) then
     ! Separate message to console, for quick confirmation of success/failure
     write(finalMsg, *) "SUCCESS: ",trim(testname)," finished correctly."
     write(0, *) ""
@@ -385,6 +383,10 @@ program ESMF_DirectCouplingSTest
   print *, "Test finished, localPet = ", localPet
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
+
+  ! Print final PASS/FAIL and add # of procs message to log file.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 
   call ESMF_Finalize()
 
