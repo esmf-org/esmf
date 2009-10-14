@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.136 2009/10/13 23:02:49 w6ws Exp $'
+      '$Id: ESMF_Grid.F90,v 1.137 2009/10/14 05:17:16 eschwab Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2838,16 +2838,27 @@ end subroutine ESMF_GridConvertIndex
        integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_Grid} object from specifications in a file.
+! Create an {\tt ESMF\_Grid} object from specifications in a file 
+! containing an ESMF GridSpec Attribute package in XML format. Currently limited
+! to creating a 2D regularly distributed rectilinear Grid; in the future more
+! dimensions, grid types and distributions will be supported.
+! See Section~\ref{example:GridCrFromFile} for an example, as well as the
+! accompanying file
+! ESMF\_DIR/src/Infrastructure/Grid/etc/esmf\_grid\_shape\_tile.xml.
+!
+! Requires the third party Xerces C++ XML Parser library to be installed.
+! For more details, see the ESMF Users Guide, section
+! "Third Party Library, Xerces" and the website
+! http://xerces.apache.org/xerces-c/.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[fileName] 
-!      The file name to be read from. 
+!      The name of the XML file to be read, containing ESMF GridSpec Attributes.
 ! \item [{[convention]}] 
-!      The convention of a grid Attribute package. 
+!      The convention of a grid Attribute package. [CURRENTLY NOT IMPLEMENTED]
 ! \item [{[purpose]}] 
-!      The purpose of a grid Attribute package. 
+!      The purpose of a grid Attribute package.    [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
