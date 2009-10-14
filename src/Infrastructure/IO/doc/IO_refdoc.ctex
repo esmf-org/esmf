@@ -93,12 +93,12 @@
 \input{../Infrastructure/IO/doc/IO_implnotes}
 #endif
 
-\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMF_IO_fapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/IO/doc/ESMF_IO_fapi}
-#endif
+%\subsection{Class API}
+%#ifdef STANDALONE
+%\input{ESMF_IO_fapi}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/IO/doc/ESMF_IO_fapi}
+%#endif
 
 #ifdef STANDALONE
 %\section{Bibliography}
