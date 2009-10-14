@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.62 2009/09/30 22:07:32 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.63 2009/10/14 05:15:46 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -45,6 +45,7 @@ program ESMF_GridCreateEx
       integer :: clbnd(3),cubnd(3)
       integer :: celwdth(2),ceuwdth(2)
       integer :: tlbnd(3),tubnd(3)
+      integer :: minIndex(2), maxIndex(2)
       integer :: i,j,k
       integer :: lbnd(3), ubnd(3), lbnd_corner(3), ubnd_corner(3)
       integer, allocatable :: petMap(:,:,:), localArbIndex(:,:)
@@ -3005,32 +3006,134 @@ endif
 
 !BOE
 !\subsubsection{Creating a 2D Regularly Distributed Rectilinear Grid from File} 
+! \label{example:GridCrFromFile}
+!
 ! This example shows how to read an ESMF GridSpec Attribute Package from an
 ! XML file and use it to create a grid; see
 ! ESMF\_DIR/src/Infrastructure/Grid/etc/esmf\_grid\_shape\_tile.xml.
+!
+! The following XML attributes, from the file mentioned above, specifies a
+! two dimensional, 10x20 single-tile rectilinear grid that is regularly
+! distributed into 2 DEs in the first dimension and 3 DEs in the second
+! dimension, for a total of 6 DEs (2x3):
+!
+! \begin{verbatim}
+! <?xml version="1.0" encoding="UTF-8"?>
+! <GridSpec>
+!    <attribute_package convention="ESMF" purpose="General">
+!      <NX>10</NX>
+!      <NY>20</NY>
+!      <RegDecompX>2</RegDecompX>
+!      <RegDecompY>3</RegDecompY>
+!    </attribute_package>
+! </GridSpec>
+! \end{verbatim}
 !EOE
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Setup For Example
 !!!!!!!!!!!!!!!!!!!!!!
+!BOE
+! Read the file and create the grid,
+!EOE
+
 !BOC
    grid2D=ESMF_GridCreate("esmf_grid_shape_tile.xml", rc=rc)
 !EOC
-
    if (rc == ESMF_RC_LIB_NOT_PRESENT) goto 10
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!print *, "localDECount = ", localDECount
+!BOE
+! then show that the minimum and maximum global indices of the Grid are
+! (1,1) $\sim$ (11,21) (one extra default stagger pad in each dimension):
+!EOE
+
+!BOC
+   call ESMF_GridGet(grid2D, minIndex=minIndex, maxIndex=maxIndex, rc=rc)
+   print *, "minIndex(1), minIndex(2) = ", minIndex(1), minIndex(2)
+   print *, "maxIndex(1), maxIndex(2) = ", maxIndex(1), maxIndex(2)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   print *, " "
+
+!BOE
+! Get the resulting computational bounds for each local DE within the local PET,
+! for center stagger locations:
+!EOE
+
+!BOC
+   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+   print *, "localPet = ", localPet, "petCount = ", petCount
 
    call ESMF_GridGet(grid2D, localDECount=localDECount, rc=rc)
+   print *, "localDECount = ", localDECount
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   print *, " "
 
+!BOC
    do i=0,localDECount-1
      call ESMF_GridGet(grid2D, localDE=i,  &
-          staggerLoc=ESMF_STAGGERLOC_CORNER,                         &
-          exclusiveLBound=elbnd, exclusiveUBound=eubnd,              &
-          computationalLBound=clbnd, computationalUBound=cubnd,      & 
-          rc=rc)
-!print *, 'elbnd,eubnd = ', elbnd(1), ",", elbnd(2), " ", eubnd(1), ", ", eubnd(2)
-!print *, 'clbnd,cubnd = ', clbnd(1), ",", clbnd(2), " ", cubnd(1), ", ", cubnd(2)
+                       staggerLoc=ESMF_STAGGERLOC_CENTER, &
+                       computationalLBound=clbnd, computationalUBound=cubnd, & 
+                       rc=rc)
+       print *, "clbnd,cubnd = ", clbnd(1), ", ", clbnd(2), " ", &
+                                  cubnd(1), ", ", cubnd(2)
+       print *, " "
    enddo
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+! For a 4 PET run, this will show the following (lower) $\sim$ (upper)
+! computational bounds per DE, 6 DEs total (2x3):
+!
+! \begin{verbatim}
+!  PET 0:
+!    local DE 0 - (1,1)  ~ (5,7)
+!    local DE 1 - (1,15) ~ (5,20)
+!  PET 1:
+!    local DE 0 - (6,1)  ~ (10,7)
+!    local DE 1 - (6,15) ~ (10,20)
+!  PET 2:
+!    local DE 0 - (1,8)  ~ (5,14)
+!  PET 3:
+!    local DE 0 - (6,8)  ~ (10,14)
+! \end{verbatim}
+!
+! For a 1 PET run, the distribution will be
+!
+! \begin{verbatim}
+!    local DE 0 - (1,1)  ~ (5,7)
+!    local DE 1 - (6,1)  ~ (10,7)
+!    local DE 2 - (1,8)  ~ (5,14)
+!    local DE 3 - (6,8)  ~ (10,14)
+!    local DE 4 - (1,15) ~ (5,20)
+!    local DE 5 - (6,15) ~ (10,20)
+! \end{verbatim}
+!
+! The Grid and its distribution, represented graphically:
+!
+! \begin{verbatim}
+!    -------------------------------------------------------> 2nd dim
+!    |
+!    |  (1,1)-------(1,7)(1,8)------(1,14)(1,15)-----(1,20)
+!    |  |               ||              ||                |
+!    |  |               ||              ||                |
+!    |  |               ||              ||                |
+!    |  |               ||              ||                |
+!    |  |               ||              ||                |
+!    |  (5,1)-------(5,7)(5,8)------(5,14)(5,15)-----(5,20)
+!    |  (6,1)-------(6,7)(6,8)------(6,14)(6,15)-----(6,20)
+!    |  |               ||              ||                |
+!    |  |               ||              ||                |
+!    |  |               ||              ||                |
+!    |  |               ||              ||                |
+!    |  |               ||              ||                |
+!    |  (10,1)-----(10,7)(10,8)----(10,14)(10,15)---(10,20)
+!    |
+!    |
+!    v
+!   1st dim
+! \end{verbatim}
+!EOE
 
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
