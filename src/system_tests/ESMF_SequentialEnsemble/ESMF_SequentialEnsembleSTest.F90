@@ -1,4 +1,4 @@
-! $Id: ESMF_SequentialEnsembleSTest.F90,v 1.1 2009/10/05 18:24:06 svasquez Exp $
+! $Id: ESMF_SequentialEnsembleSTest.F90,v 1.2 2009/10/14 19:28:36 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -75,7 +75,7 @@ program ESMF_SequentialEnsemble
 
 
   ! cumulative result: count failures; no failures equals "all pass"
-  integer :: testresult = 0
+  integer :: result = 0
 
   ! individual test name
   character(ESMF_MAXSTR) :: testname
@@ -97,7 +97,8 @@ program ESMF_SequentialEnsemble
 !-------------------------------------------------------------------------
 !
   ! Initialize framework and get back default global VM
-  call ESMF_Initialize(vm=vm, rc=rc)
+  call ESMF_Initialize(vm=vm, defaultlogfilename="SequentialEnsembleSTest.Log", &
+                        defaultlogtype=ESMF_LOG_MULTI, rc=rc)
   if (rc .ne. ESMF_SUCCESS) goto 10
 
   ! Get number of PETs we are running with
@@ -370,14 +371,15 @@ program ESMF_SequentialEnsemble
   write(failMsg, *) "System Test failure"
   write(testname, *) "System Test ESMF_SequentialEnsemble"
 
-  call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), testname, failMsg, testresult, &
-    ESMF_SRCLINE)
-
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
   print *, "Test finished, localPet = ", localPet
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
+
+  ! Print final PASS/FAIL and add # of procs message to log file.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 
   call ESMF_Finalize()
 
