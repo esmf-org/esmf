@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.16 2009/10/13 17:04:32 feiliu Exp $
+!  $Id: ESMF_Field_C.F90,v 1.17 2009/10/14 16:12:40 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.16 2009/10/13 17:04:32 feiliu Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.17 2009/10/14 16:12:40 feiliu Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -63,6 +63,8 @@
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
    
+    rc = ESMF_SUCCESS
+  
   end subroutine f_esmf_fieldcreate
 
 #undef  ESMF_METHOD
@@ -79,21 +81,20 @@
 
     type(ESMF_Field),intent(inout) :: field
     type(ESMF_Pointer)             :: meshp
-    integer, intent(out), optional :: rc              
+    integer, intent(out)           :: rc              
 
-    integer     :: localrc
     type(ESMF_Mesh)             :: mesh
 
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    rc = ESMF_RC_NOT_IMPL
 
-    call ESMF_FieldGet(field, mesh=mesh, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    call ESMF_FieldGet(field, mesh=mesh, rc=rc)
+    if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     meshp = mesh%this;
 
-    if (present(rc)) rc = localrc
+    rc = ESMF_SUCCESS
+  
   end subroutine f_esmf_fieldget
 
 #undef  ESMF_METHOD
@@ -107,20 +108,17 @@
     use ESMF_FieldCreateMod
 
     type(ESMF_Field)               :: field
-    integer, intent(out), optional :: rc     
-  
-    integer :: localrc              
+    integer, intent(out)           :: rc     
   
   ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    rc = ESMF_RC_NOT_IMPL
   
-    call ESMF_FieldDestroy(field, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    call ESMF_FieldDestroy(field, rc=rc)
+    if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
   
-    if (present(rc)) rc = localrc
-
+    rc = ESMF_SUCCESS
+  
   end subroutine f_esmf_fielddestroy
 
 
