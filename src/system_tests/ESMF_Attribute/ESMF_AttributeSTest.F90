@@ -36,7 +36,7 @@ program ESMF_AttributeSTest
   character(ESMF_MAXSTR) :: conv,purp
     
   ! cumulative result: count failures; no failures equals "all pass"
-  integer :: testresult = 0
+  integer :: result = 0
 
   ! individual test name
   character(ESMF_MAXSTR) :: testname
@@ -58,7 +58,8 @@ program ESMF_AttributeSTest
 !
   
   ! Initialize framework and get back default global VM
-  call ESMF_Initialize(vm=vm, rc=rc)
+  call ESMF_Initialize(vm=vm, defaultlogfilename="AttributeSTest.Log", &
+                        defaultlogtype=ESMF_LOG_MULTI, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -330,10 +331,8 @@ program ESMF_AttributeSTest
       print *, "--------------------------------------- "
   endif
 
-  call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), testname, failMsg, testresult, &
-    ESMF_SRCLINE)
 
-  if ((localPet .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+  if (rc .eq. ESMF_SUCCESS) then
     ! Separate message to console, for quick confirmation of success/failure
     write(finalMsg, *) "SUCCESS: ",trim(testname)," finished correctly."
     write(0, *) ""
@@ -347,6 +346,9 @@ program ESMF_AttributeSTest
 !  print *, "Test finished, localPet = ", localPet
 !  print *, "------------------------------------------------------------"
 !  print *, "------------------------------------------------------------"
+
+  ! Print final PASS/FAIL and add # of procs message to log file.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_Finalize() 
 
