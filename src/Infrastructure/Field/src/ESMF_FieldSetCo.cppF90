@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.14 2009/09/29 15:08:02 feiliu Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.15 2009/10/14 19:48:38 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.14 2009/09/29 15:08:02 feiliu Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.15 2009/10/14 19:48:38 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -134,10 +134,8 @@ contains
 ! associated documentation using this method see Section  @\
 ! \ref{sec:field:usage:create_empty_setcommit}. @\
 ! @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but it does not @\
-! reference the original data array passed into this method. Thus deallocating @\
-! the retrieved data pointer is not allowed. User should leave the memory deallocation @\
-! to the {\tt ESMF\_FieldDestroy} method. @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! the retrieved data pointer is not allowed. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -348,7 +346,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 ! \ref{sec:field:usage:create_empty_setcommit}. @\
 ! @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
-! copyflag is {\tt ESMF\_DATA\_REF}. This gives user more flexibility over memory management. @\
+! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
+! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -535,10 +534,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitGridPtr)
 ! associated documentation using this method see Section  @\
 ! \ref{sec:field:usage:create_empty_setcommit}. @\
 ! @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but it does not @\
-! reference the original data array passed into this method. Thus deallocating @\
-! the retrieved data pointer is not allowed. User should leave the memory deallocation @\
-! to the {\tt ESMF\_FieldDestroy} method. @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! the retrieved data pointer is not allowed. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -680,7 +677,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 ! \ref{sec:field:usage:create_empty_setcommit}. @\
 ! @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
-! copyflag is {\tt ESMF\_DATA\_REF}. This gives user more flexibility over memory management. @\
+! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
+! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -800,10 +798,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
 ! associated documentation using this method see Section  @\
 ! \ref{sec:field:usage:create_empty_setcommit}. @\
 ! @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but it does not @\
-! reference the original data array passed into this method. Thus deallocating @\
-! the retrieved data pointer is not allowed. User should leave the memory deallocation @\
-! to the {\tt ESMF\_FieldDestroy} method. @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! the retrieved data pointer is not allowed. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -945,7 +941,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 ! \ref{sec:field:usage:create_empty_setcommit}. @\
 ! @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
-! copyflag is {\tt ESMF\_DATA\_REF}. This gives user more flexibility over memory management. @\
+! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
+! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -1065,10 +1062,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
 ! associated documentation using this method see Section  @\
 ! \ref{sec:field:usage:create_empty_setcommit}. @\
 ! @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but it does not @\
-! reference the original data array passed into this method. Thus deallocating @\
-! the retrieved data pointer is not allowed. User should leave the memory deallocation @\
-! to the {\tt ESMF\_FieldDestroy} method. @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! the retrieved data pointer is not allowed. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -1625,7 +1620,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 ! \ref{sec:field:usage:create_empty_setcommit}. @\
 ! @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
-! copyflag is {\tt ESMF\_DATA\_REF}. This gives user more flexibility over memory management. @\
+! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
+! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
