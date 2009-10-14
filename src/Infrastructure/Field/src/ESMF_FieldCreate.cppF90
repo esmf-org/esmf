@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.63 2009/09/29 15:07:58 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.64 2009/10/14 19:45:29 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.63 2009/09/29 15:07:58 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.64 2009/10/14 19:45:29 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1651,11 +1651,8 @@ contains
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_GeomBase}. @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but it does not @\
-! reference the original data array passed into this method. Thus deallocating @\
-! the retrieved data pointer is not allowed. User should leave the memory deallocation @\
-! to the {\tt ESMF\_FieldDestroy} method. @\
-! @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! the retrieved data pointer is not allowed. @\
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item [geombase]  @\
@@ -1836,7 +1833,8 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_GeomBase}. @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
-! copyflag is {\tt ESMF\_DATA\_REF}. This gives user more flexibility over memory management. @\
+! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not @\
+! deallocate the fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! @\
 ! The arguments are: @\
@@ -2397,10 +2395,8 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Grid}. @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but it does not @\
-! reference the original data array passed into this method. Thus deallocating @\
-! the retrieved data pointer is not allowed. User should leave the memory deallocation @\
-! to the {\tt ESMF\_FieldDestroy} method. @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! the retrieved data pointer is not allowed. @\
 ! For examples and @\
 ! associated documentations using this method see Section  @\
 ! \ref{sec:field:usage:create_2dptr}, @\
@@ -2636,7 +2632,8 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_Grid}. @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
-! copyflag is {\tt ESMF\_DATA\_REF}. This gives user more flexibility over memory management. @\
+! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not @\
+! deallocate the fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! For examples and @\
 ! associated documentations using this method see Section  @\
@@ -3090,10 +3087,8 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_LocStream}. @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but it does not @\
-! reference the original data array passed into this method. Thus deallocating @\
-! the retrieved data pointer is not allowed. User should leave the memory deallocation @\
-! to the {\tt ESMF\_FieldDestroy} method. @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! the retrieved data pointer is not allowed. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -3251,7 +3246,8 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_LocStream}. @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
-! copyflag is {\tt ESMF\_DATA\_REF}. This gives user more flexibility over memory management. @\
+! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not @\
+! deallocate the fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -3629,10 +3625,8 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Mesh}. @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but it does not @\
-! reference the original data array passed into this method. Thus deallocating @\
-! the retrieved data pointer is not allowed. User should leave the memory deallocation @\
-! to the {\tt ESMF\_FieldDestroy} method. @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! the retrieved data pointer is not allowed. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -3790,7 +3784,8 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_Mesh}. @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
-! copyflag is {\tt ESMF\_DATA\_REF}. This gives user more flexibility over memory management. @\
+! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not @\
+! deallocate the fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
