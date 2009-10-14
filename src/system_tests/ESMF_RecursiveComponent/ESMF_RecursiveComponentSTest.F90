@@ -1,4 +1,4 @@
-! $Id: ESMF_RecursiveComponentSTest.F90,v 1.6 2009/03/26 03:28:21 theurich Exp $
+! $Id: ESMF_RecursiveComponentSTest.F90,v 1.7 2009/10/14 19:41:54 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -56,9 +56,10 @@ program ESMF_RecursiveComponentSTest
   type(ESMF_VM):: vm
   type(ESMF_GridComp) :: component
   type(ESMF_State) :: import, export
+  
 
   ! Test variables
-  integer :: testresult = 0     ! all pass
+  integer :: result = 0     ! all pass
   character(ESMF_MAXSTR) :: testname
   character(ESMF_MAXSTR) :: failMsg, finalMsg
 
@@ -66,7 +67,7 @@ program ESMF_RecursiveComponentSTest
 !-------------------------------------------------------------------------
 
   write(failMsg, *) "System Test failure"
-  write(testname, *) "System Test ESMF_RecursiveComponentTest"
+  write(testname, *) "System Test ESMF_RecursiveComponentSTest"
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -82,7 +83,8 @@ program ESMF_RecursiveComponentSTest
 !-------------------------------------------------------------------------
 
   ! Initialize framework and get back default global VM
-  call ESMF_Initialize(vm=vm, rc=localrc)
+  call ESMF_Initialize(vm=vm, defaultlogfilename="RecursiveComponentSTest.Log", &
+                        defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -193,9 +195,6 @@ program ESMF_RecursiveComponentSTest
   ! Normal ESMF Test output
   print *, testname, " complete."
 
-  ! IMPORTANT: TestGlobal() prints the PASS: string that the scripts grep for.
-  call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), testname, failMsg, testresult, &
-    ESMF_SRCLINE)
 
   if ((localPet .eq. 0) .and. (rc .eq. ESMF_SUCCESS)) then
     ! Separate message to console, for quick confirmation of success/failure
@@ -205,6 +204,9 @@ program ESMF_RecursiveComponentSTest
     write(0, *) trim(finalMsg)
     write(0, *) ""
   endif
+
+  ! Print final PASS/FAIL and add # of procs message to log file.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
   
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
