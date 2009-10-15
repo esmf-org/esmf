@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.19 2009/10/01 20:24:03 oehmke Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.20 2009/10/15 03:08:32 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.19 2009/10/01 20:24:03 oehmke Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.20 2009/10/15 03:08:32 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -69,7 +69,7 @@
       integer, pointer :: nodeIds(:),nodeOwners(:)
       real(ESMF_KIND_R8), pointer :: nodeCoords(:)
       integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
-      integer :: numNodes, numElems, tmpId
+      integer :: numNodes, numElems
 #endif
 
 
@@ -253,6 +253,57 @@
       write(name, *) "Make sure FieldBundleCreate fails when fields created on different Location Streams"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      !EX_UTest
+
+      ! init rc
+      rc=ESMF_SUCCESS
+
+      ! Create a LocStream
+      locstreamTst1=ESMF_LocStreamCreate(maxIndex=32, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Set ArraySpec
+      call ESMF_ArraySpecSet(arrayspec, rank=1, typekind=ESMF_TYPEKIND_R8, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Create a couple of Fields
+      fieldTst(1)=ESMF_FieldCreate(locstream=locstreamTst1, arrayspec=arrayspec, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      fieldTst(2)=ESMF_FieldCreate(locstream=locstreamTst1, arrayspec=arrayspec, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Try creating a bundle
+      bundleTst=ESMF_FieldBundleCreate(rc=localrc)      
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+
+      ! Set locstream
+      call  ESMF_FieldBundleSet(bundleTst, locstreamTst1, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+
+      ! Add fields
+      call ESMF_FieldBundleAdd(bundleTst, 2,fieldTst,rc=localrc)      
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+
+      ! Destroy FieldBundle
+      call ESMF_FieldBundleDestroy(bundleTst, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+
+      ! Destroy Fields
+      call ESMF_FieldDestroy(fieldTst(1), rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      call ESMF_FieldDestroy(fieldTst(2), rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Destroy LocStream
+      call ESMF_LocStreamDestroy(locStreamTst1, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      write(failMsg, *) "Test not successful"
+      write(name, *) "Test of creating a LocStream FieldBundle using FieldBundleSet"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -996,6 +1047,276 @@
       write(failMsg, *) "Test not successful"
       write(name, *) "Make sure FieldBundleCreate fails when fields created on different Meshes"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+
+      ! init rc
+      rc=ESMF_SUCCESS
+
+      ! Create a Mesh
+      if (petCount .eq. 1) then
+         ! Fill in node data
+         numNodes=9
+
+         !! node ids
+         allocate(nodeIds(numNodes))
+         nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+        !! node Coords
+        allocate(nodeCoords(numNodes*2))
+        nodeCoords=(/0.0,0.0, &
+                     1.0,0.0, &
+                     2.0,0.0, &
+                     0.0,1.0, &
+                     1.0,1.0, &
+                     2.0,1.0, &
+                     0.0,2.0, &
+                     1.0,2.0, &
+                     2.0,2.0 /)
+
+        !! node owners
+        allocate(nodeOwners(numNodes))
+        nodeOwners=0 ! everything on proc 0
+
+        ! Fill in elem data
+        numElems=4
+
+        !! elem ids
+        allocate(elemIds(numElems))
+        elemIds=(/1,2,3,4/) 
+
+        !! elem types
+        allocate(elemTypes(numElems))
+        elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+        !! elem conn
+        allocate(elemConn(numElems*4))
+        elemConn=(/1,2,5,4, & 
+                   2,3,6,5, & 
+                   4,5,8,7, & 
+                   5,6,9,8/)
+
+       ! Create Mesh structure in 1 step
+       meshTst1=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+                  nodeIds=nodeIds, nodeCoords=nodeCoords, &
+                  nodeOwners=nodeOwners, elementIds=elemIds,&
+                  elementTypes=elemTypes, elementConn=elemConn, &
+                  rc=localrc)
+       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+       ! deallocate node data
+       deallocate(nodeIds)
+       deallocate(nodeCoords)
+       deallocate(nodeOwners)
+
+       ! deallocate elem data
+       deallocate(elemIds)
+       deallocate(elemTypes)
+       deallocate(elemConn)
+
+     else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+     if (localPet .eq. 0) then
+        ! Fill in node data
+        numNodes=4
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,4,5/) 
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/0.0,0.0, &
+                    1.0,0.0, &
+                    0.0,1.0, &
+                    1.0,1.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,0,0,0/) ! everything on proc 0
+
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/1/) 
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)
+     else if (localPet .eq. 1) then
+        ! Fill in node data
+        numNodes=4
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/2,3,5,6/) 
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/1.0,0.0, &
+                    2.0,0.0, &
+                    1.0,1.0, &
+                    2.0,1.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,1,0,1/) 
+
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/2/) 
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)
+     else if (localPet .eq. 2) then
+        ! Fill in node data
+        numNodes=4
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/4,5,7,8/) 
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/0.0,1.0, &
+                    1.0,1.0, &
+                    0.0,2.0, &
+                    1.0,2.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,0,2,2/) 
+
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/3/) 
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)  
+     else 
+        ! Fill in node data
+        numNodes=4
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/5,6,8,9/) 
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/1.0,1.0, &
+                    2.0,1.0, &
+                    1.0,2.0, &
+                    2.0,2.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,1,2,3/) 
+
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/4/) 
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)  
+     endif
+
+    ! Create Mesh structure in 1 step
+    meshTst1=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, elementIds=elemIds,&
+         elementTypes=elemTypes, elementConn=elemConn, &
+         rc=localrc)
+    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+    ! deallocate node data
+    deallocate(nodeIds)
+    deallocate(nodeCoords)
+    deallocate(nodeOwners)
+
+    ! deallocate elem data
+    deallocate(elemIds)
+    deallocate(elemTypes)
+    deallocate(elemConn)
+
+   endif ! endif for skip for .ne. 1 or 4 proc
+
+   if ((petCount .eq. 1) .or. (petCount .eq. 4)) then
+      ! Set ArraySpec
+      call ESMF_ArraySpecSet(arrayspec, rank=1, typekind=ESMF_TYPEKIND_R8, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Create a couple of Fields
+      fieldTst(1)=ESMF_FieldCreate(mesh=meshTst1, arrayspec=arrayspec, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      fieldTst(2)=ESMF_FieldCreate(mesh=meshTst1, arrayspec=arrayspec, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Try creating a bundle
+      bundleTst=ESMF_FieldBundleCreate(rc=localrc)      
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+
+      ! Set Mesh
+      call  ESMF_FieldBundleSet(bundleTst, meshTst1, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+
+      ! Add fields
+      call ESMF_FieldBundleAdd(bundleTst, 2,fieldTst,rc=localrc)      
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+
+      ! Destroy FieldBundle
+      call ESMF_FieldBundleDestroy(bundleTst, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+
+      ! Destroy Fields
+      call ESMF_FieldDestroy(fieldTst(1), rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      call ESMF_FieldDestroy(fieldTst(2), rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Get rid of Mesh
+      call ESMF_MeshDestroy(meshTst1, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     endif ! if 1 or 4 PETS
+
+      write(failMsg, *) "Test not successful"
+      write(name, *) "Test of creating a Mesh FieldBundle using FieldBundleSet"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 
 
       !------------------------------------------------------------------------
