@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistArb2ArbSTest.F90,v 1.5 2009/09/29 16:53:06 feiliu Exp $
+! $Id: ESMF_FieldBundleRedistArb2ArbSTest.F90,v 1.6 2009/10/15 17:22:12 svasquez Exp $
 !
 ! System test FieldBundleRedistArb2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -55,6 +55,7 @@
 
      ! cumulative result: count failures; no failures equals "all pass"
      integer :: testresult = 0
+     integer :: result = 0
 
      ! individual test name
      character(ESMF_MAXSTR) :: testname
@@ -74,7 +75,8 @@
 !-------------------------------------------------------------------------
 !
      ! Initialize the framework and get back the default global VM
-     call ESMF_Initialize(vm=vm, rc=status)
+     call ESMF_Initialize(vm=vm, defaultlogfilename="FieldBundleRedistArb2ArbSTest.Log", &
+                        defaultlogtype=ESMF_LOG_MULTI, rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Get the PET count and our PET number
@@ -357,6 +359,10 @@
       write(0, *) ""
 
     endif
+
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((status.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
     
     call ESMF_Finalize(rc=status)
 

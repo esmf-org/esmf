@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridSTest.F90,v 1.37 2009/07/16 20:57:23 feiliu Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.38 2009/10/15 17:26:53 svasquez Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -58,6 +58,7 @@
 
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0
+    integer :: result = 0
 
     ! individual test name
     character(ESMF_MAXSTR) :: testname
@@ -80,7 +81,8 @@
 !-------------------------------------------------------------------------
 !
     ! Initialize framework and get back default global VM
-    call ESMF_Initialize(vm=vm, rc=localrc)
+    call ESMF_Initialize(vm=vm, defaultlogfilename="FieldRegridSTest.Log", &
+                        defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -370,6 +372,11 @@
       write(0, *) ""
 
     endif
+
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
   
     call ESMF_Finalize(rc=rc) 
 
