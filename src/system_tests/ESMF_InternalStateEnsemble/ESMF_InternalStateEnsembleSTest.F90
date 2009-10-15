@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEnsembleSTest.F90,v 1.9 2009/10/15 18:18:43 svasquez Exp $
+! $Id: ESMF_InternalStateEnsembleSTest.F90,v 1.10 2009/10/15 18:26:13 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -378,6 +378,11 @@ program ESMF_InternalStateEnsembleSTest
   print *, "Test finished, localPet = ", localPet
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
+
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 
   call ESMF_Finalize()
 
