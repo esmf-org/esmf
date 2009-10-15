@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.30 2009/10/01 18:19:01 theurich Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.31 2009/10/15 16:22:05 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -1981,7 +1981,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleSetGrid"
 !BOP
-! !IROUTINE: ESMF_FieldBundleSetGrid - Associate a Grid with an empty FieldBundle
+! !IROUTINE: ESMF_FieldBundleSet - Associate a Grid with an empty FieldBundle
 ! 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleSet()
@@ -2071,7 +2071,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleSetMesh"
 !BOP
-! !IROUTINE: ESMF_FieldBundleSetMesh - Associate a Mesh with an empty FieldBundle
+! !IROUTINE: ESMF_FieldBundleSet - Associate a Mesh with an empty FieldBundle
 ! 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleSet()
@@ -2151,7 +2151,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleSetLS"
 !BOP
-! !IROUTINE: ESMF_FieldBundleSetLS - Associate a LocStream with an empty FieldBundle
+! !IROUTINE: ESMF_FieldBundleSet - Associate a LocStream with an empty FieldBundle
 ! 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleSet()
