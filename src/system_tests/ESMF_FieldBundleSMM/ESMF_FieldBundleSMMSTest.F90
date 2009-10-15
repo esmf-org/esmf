@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMMSTest.F90,v 1.6 2009/03/26 03:28:20 theurich Exp $
+! $Id: ESMF_FieldBundleSMMSTest.F90,v 1.7 2009/10/15 16:43:22 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -59,6 +59,7 @@ program ESMF_FieldBundleSMMSTest
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: testresult = 0
+  integer :: result = 0
 
   ! individual test name
   character(ESMF_MAXSTR) :: testname
@@ -86,7 +87,8 @@ program ESMF_FieldBundleSMMSTest
 !-------------------------------------------------------------------------
 !
   ! Initialize framework and get back default global VM
-  call ESMF_Initialize(vm=vm, rc=localrc)
+  call ESMF_Initialize(vm=vm, defaultlogfilename="FieldBundleSMMSTest.Log", &
+                        defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -303,6 +305,10 @@ program ESMF_FieldBundleSMMSTest
   print *, "Test finished, localPet = ", localPet
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
+
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_Finalize()
 

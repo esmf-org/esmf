@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.46 2009/09/29 16:53:07 feiliu Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.47 2009/10/15 16:48:06 svasquez Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -55,6 +55,7 @@
 
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0
+    integer :: result = 0
 
     ! individual test name
     character(ESMF_MAXSTR) :: testname
@@ -76,7 +77,8 @@
 !-------------------------------------------------------------------------
 !
     ! Initialize the framework and get back the default global VM
-    call ESMF_Initialize(vm=vm, rc=localrc)
+    call ESMF_Initialize(vm=vm, defaultlogfilename="FieldRedistSTest.Log", &
+                        defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
@@ -363,6 +365,10 @@
       write(0, *) ""
 
     endif
+
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
     
     call ESMF_Finalize(rc=rc)
 
