@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEnsembleSTest.F90,v 1.8 2009/07/21 21:37:32 theurich Exp $
+! $Id: ESMF_InternalStateEnsembleSTest.F90,v 1.9 2009/10/15 18:18:43 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -73,6 +73,7 @@ program ESMF_InternalStateEnsembleSTest
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: testresult = 0
+  integer :: result = 0
 
   ! individual test name
   character(ESMF_MAXSTR) :: testname
@@ -100,7 +101,8 @@ program ESMF_InternalStateEnsembleSTest
 !-------------------------------------------------------------------------
 !
   ! Initialize framework and get back default global VM
-  call ESMF_Initialize(vm=vm, rc=localrc)
+  call ESMF_Initialize(vm=vm, defaultlogfilename="InternalStateEnsembleSTest.Log", &
+                        defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
