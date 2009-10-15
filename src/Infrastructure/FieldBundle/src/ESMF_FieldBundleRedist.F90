@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedist.F90,v 1.6 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_FieldBundleRedist.F90,v 1.7 2009/10/15 16:02:37 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -40,6 +40,7 @@ module ESMF_FieldBundleRedistMod
     use ESMF_FieldRedistMod
     use ESMF_FieldBundleMod
     use ESMF_RHandleMod
+    use ESMF_ArrayBundleMod
     implicit none
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
@@ -57,7 +58,7 @@ module ESMF_FieldBundleRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRedist.F90,v 1.6 2009/01/21 21:37:59 cdeluca Exp $'
+      '$Id: ESMF_FieldBundleRedist.F90,v 1.7 2009/10/15 16:02:37 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleRedistStore
@@ -66,7 +67,7 @@ module ESMF_FieldBundleRedistMod
         module procedure ESMF_FieldBundleRedistStoreR4
         module procedure ESMF_FieldBundleRedistStoreR8
         module procedure ESMF_FieldBundleRedistStoreNF
-    end interface ESMF_FieldBundleRedistStore
+    end interface
 !------------------------------------------------------------------------------
 contains
 
@@ -135,6 +136,8 @@ contains
         logical                 :: src_bundle = .true.
         logical                 :: dst_bundle = .true.
         integer                 :: fcount, i
+        type(ESMF_ArrayBundle)  :: srcab, dstab
+        type(ESMF_Array), allocatable :: srca(:), dsta(:)
 
         ! initialize return code; assume routine not implemented
         localrc = ESMF_RC_NOT_IMPL
@@ -143,61 +146,69 @@ contains
         ! Check init status of arguments, deal with optional FieldBundle args
         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit, routehandle, rc)
 
+        ! Set default flags
+        l_checkflag = ESMF_FALSE
+        if (present(checkflag)) l_checkflag = checkflag
+
         if (present(srcFieldBundle)) then
             ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, srcFieldBundle, rc)
+
+            fcount = srcFieldBundle%btypep%field_count
+
+            allocate(srca(fcount))
+            do i = 1, fcount
+                call ESMF_FieldBundleGet(srcFieldBundle, i, l_srcField, rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+                call ESMF_FieldGet(l_srcField, array=srca(i), rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+            enddo
+            srcab = ESMF_ArrayBundleCreate(srca, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            deallocate(srca)
         else
             src_bundle = .false.
         endif
 
         if (present(dstFieldBundle)) then
             ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, dstFieldBundle, rc)
+
+            fcount = dstFieldBundle%btypep%field_count
+
+            allocate(dsta(fcount))
+            do i = 1, fcount
+                call ESMF_FieldBundleGet(dstFieldBundle, i, l_dstField, rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+                call ESMF_FieldGet(l_dstField, array=dsta(i), rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+            enddo
+            dstab = ESMF_ArrayBundleCreate(dsta, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            deallocate(dsta)
         else
             dst_bundle = .false.
         endif
         
-        ! Set default flags
-        l_checkflag = ESMF_FALSE
-        if (present(checkflag)) l_checkflag = checkflag
-
-        ! loop over source and destination fields. 
-        ! verify src and dst FieldBundles can communicate
-        ! field_count match
-        if(srcFieldBundle%btypep%field_count .ne. dstFieldBundle%btypep%field_count) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-               "src and dst FieldBundle must have same number of fields", &
-                ESMF_CONTEXT, rc)
-            return
-        endif 
-
-        fcount = srcFieldBundle%btypep%field_count
-
         ! perform FieldBundle redistribution
-        do i = 1, fcount
-            if(src_bundle) then
-                call ESMF_FieldBundleGet(srcFieldBundle, i, field=l_srcField, rc=localrc)
-                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc)) return
-            endif
-            if(dst_bundle) then
-                call ESMF_FieldBundleGet(dstFieldBundle, i, field=l_dstField, rc=localrc)
-                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc)) return
-            endif
-            if(src_bundle .and. dst_bundle) &
-                call ESMF_FieldRedist(l_srcField, l_dstField, routehandle, &
-                    checkflag=l_checkflag, rc=localrc)
-            if(src_bundle .and. .not. dst_bundle) &
-                call ESMF_FieldRedist(srcField=l_srcField, routehandle=routehandle, &
-                    checkflag=l_checkflag, rc=localrc)
-            if(.not. src_bundle .and. dst_bundle) &
-                call ESMF_FieldRedist(dstField=l_dstField, routehandle=routehandle, &
-                    checkflag=l_checkflag, rc=localrc)
-            if(.not. src_bundle .and. .not. dst_bundle) &
-                call ESMF_FieldRedist(routehandle=routehandle, &
-                    checkflag=l_checkflag, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-        enddo
+        if(src_bundle .and. dst_bundle) &
+            call ESMF_ArrayBundleRedist(srcab, dstab, routehandle, &
+                checkflag=l_checkflag, rc=localrc)
+        if(src_bundle .and. .not. dst_bundle) &
+            call ESMF_ArrayBundleRedist(srcArrayBundle=srcab, routehandle=routehandle, &
+                checkflag=l_checkflag, rc=localrc)
+        if(.not. src_bundle .and. dst_bundle) &
+            call ESMF_ArrayBundleRedist(dstArrayBundle=dstab, routehandle=routehandle, &
+                checkflag=l_checkflag, rc=localrc)
+        if(.not. src_bundle .and. .not. dst_bundle) &
+            call ESMF_ArrayBundleRedist(routehandle=routehandle, &
+                checkflag=l_checkflag, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! return successfully
         if (present(rc)) rc = ESMF_SUCCESS
@@ -354,7 +365,9 @@ contains
 
         ! internal local variables 
         integer                                       :: localrc, fcount, i 
-        type(ESMF_Field)                              :: srcField, dstField   
+        type(ESMF_Field)                              :: l_srcField, l_dstField   
+        type(ESMF_ArrayBundle)                        :: srcab, dstab
+        type(ESMF_Array), allocatable                 :: srca(:), dsta(:)
 
         ! Initialize return code; assume routine not implemented 
         localrc = ESMF_RC_NOT_IMPL 
@@ -376,23 +389,42 @@ contains
 
         ! Retrieve source and destination fields. 
         ! TODO: change loop end if necessary
-        fcount = srcFieldBundle%btypep%field_count
-        do i = 1, 1
-            call ESMF_FieldBundleGet(srcFieldBundle, i, field=srcField, rc=localrc) 
-            if (ESMF_LogMsgFoundError(localrc, & 
-                ESMF_ERR_PASSTHRU, & 
-                ESMF_CONTEXT, rc)) return 
-            call ESMF_FieldBundleGet(dstFieldBundle, i, field=dstField, rc=localrc) 
-            if (ESMF_LogMsgFoundError(localrc, & 
-                ESMF_ERR_PASSTHRU, & 
-                ESMF_CONTEXT, rc)) return 
 
-            call ESMF_FieldRedistStore(srcField, dstField, routehandle, factor, & 
-                srcToDstTransposeMap, rc=localrc) 
-            if (ESMF_LogMsgFoundError(localrc, & 
-                ESMF_ERR_PASSTHRU, & 
-                ESMF_CONTEXT, rc)) return 
+        fcount = srcFieldBundle%btypep%field_count
+        allocate(srca(fcount))
+        do i = 1, fcount
+            call ESMF_FieldBundleGet(srcFieldBundle, i, l_srcField, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_FieldGet(l_srcField, array=srca(i), rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
+        srcab = ESMF_ArrayBundleCreate(srca, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        deallocate(srca)
+
+        fcount = dstFieldBundle%btypep%field_count
+        allocate(dsta(fcount))
+        do i = 1, fcount
+            call ESMF_FieldBundleGet(dstFieldBundle, i, l_dstField, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_FieldGet(l_dstField, array=dsta(i), rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+        dstab = ESMF_ArrayBundleCreate(dsta, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        deallocate(dsta)
+
+        call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, factor, & 
+            srcToDstTransposeMap, rc=localrc) 
+        if (ESMF_LogMsgFoundError(localrc, & 
+            ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rc)) return 
 
         if (present(rc)) rc = ESMF_SUCCESS 
     end subroutine ESMF_FieldBundleRedistStoreI4
@@ -421,7 +453,9 @@ contains
 
         ! internal local variables 
         integer                                       :: localrc, fcount, i 
-        type(ESMF_Field)                              :: srcField, dstField   
+        type(ESMF_Field)                              :: l_srcField, l_dstField   
+        type(ESMF_ArrayBundle)                        :: srcab, dstab
+        type(ESMF_Array), allocatable                 :: srca(:), dsta(:)
 
         ! Initialize return code; assume routine not implemented 
         localrc = ESMF_RC_NOT_IMPL 
@@ -441,24 +475,41 @@ contains
             return
         endif 
 
-        ! Retrieve source and destination fields. 
         fcount = srcFieldBundle%btypep%field_count
-        do i = 1, 1
-            call ESMF_FieldBundleGet(srcFieldBundle, i, field=srcField, rc=localrc) 
-            if (ESMF_LogMsgFoundError(localrc, & 
-                ESMF_ERR_PASSTHRU, & 
-                ESMF_CONTEXT, rc)) return 
-            call ESMF_FieldBundleGet(dstFieldBundle, i, field=dstField, rc=localrc) 
-            if (ESMF_LogMsgFoundError(localrc, & 
-                ESMF_ERR_PASSTHRU, & 
-                ESMF_CONTEXT, rc)) return 
-
-            call ESMF_FieldRedistStore(srcField, dstField, routehandle, factor, & 
-                srcToDstTransposeMap, rc=localrc) 
-            if (ESMF_LogMsgFoundError(localrc, & 
-                ESMF_ERR_PASSTHRU, & 
-                ESMF_CONTEXT, rc)) return 
+        allocate(srca(fcount))
+        do i = 1, fcount
+            call ESMF_FieldBundleGet(srcFieldBundle, i, l_srcField, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_FieldGet(l_srcField, array=srca(i), rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
+        srcab = ESMF_ArrayBundleCreate(srca, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        deallocate(srca)
+
+        fcount = dstFieldBundle%btypep%field_count
+        allocate(dsta(fcount))
+        do i = 1, fcount
+            call ESMF_FieldBundleGet(dstFieldBundle, i, l_dstField, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_FieldGet(l_dstField, array=dsta(i), rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+        dstab = ESMF_ArrayBundleCreate(dsta, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        deallocate(dsta)
+
+        call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, factor, & 
+            srcToDstTransposeMap, rc=localrc) 
+        if (ESMF_LogMsgFoundError(localrc, & 
+            ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rc)) return 
 
         if (present(rc)) rc = ESMF_SUCCESS 
     end subroutine ESMF_FieldBundleRedistStoreI8
@@ -487,7 +538,9 @@ contains
 
         ! internal local variables 
         integer                                       :: localrc, fcount, i 
-        type(ESMF_Field)                              :: srcField, dstField   
+        type(ESMF_Field)                              :: l_srcField, l_dstField   
+        type(ESMF_ArrayBundle)                        :: srcab, dstab
+        type(ESMF_Array), allocatable                 :: srca(:), dsta(:)
 
         ! Initialize return code; assume routine not implemented 
         localrc = ESMF_RC_NOT_IMPL 
@@ -507,24 +560,41 @@ contains
             return
         endif 
 
-        ! Retrieve source and destination fields. 
         fcount = srcFieldBundle%btypep%field_count
-        do i = 1, 1
-            call ESMF_FieldBundleGet(srcFieldBundle, i, field=srcField, rc=localrc) 
-            if (ESMF_LogMsgFoundError(localrc, & 
-                ESMF_ERR_PASSTHRU, & 
-                ESMF_CONTEXT, rc)) return 
-            call ESMF_FieldBundleGet(dstFieldBundle, i, field=dstField, rc=localrc) 
-            if (ESMF_LogMsgFoundError(localrc, & 
-                ESMF_ERR_PASSTHRU, & 
-                ESMF_CONTEXT, rc)) return 
-
-            call ESMF_FieldRedistStore(srcField, dstField, routehandle, factor, & 
-                srcToDstTransposeMap, rc=localrc) 
-            if (ESMF_LogMsgFoundError(localrc, & 
-                ESMF_ERR_PASSTHRU, & 
-                ESMF_CONTEXT, rc)) return 
+        allocate(srca(fcount))
+        do i = 1, fcount
+            call ESMF_FieldBundleGet(srcFieldBundle, i, l_srcField, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_FieldGet(l_srcField, array=srca(i), rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
+        srcab = ESMF_ArrayBundleCreate(srca, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        deallocate(srca)
+
+        fcount = dstFieldBundle%btypep%field_count
+        allocate(dsta(fcount))
+        do i = 1, fcount
+            call ESMF_FieldBundleGet(dstFieldBundle, i, l_dstField, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_FieldGet(l_dstField, array=dsta(i), rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+        dstab = ESMF_ArrayBundleCreate(dsta, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        deallocate(dsta)
+
+        call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, factor, & 
+            srcToDstTransposeMap, rc=localrc) 
+        if (ESMF_LogMsgFoundError(localrc, & 
+            ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rc)) return 
 
         if (present(rc)) rc = ESMF_SUCCESS 
     end subroutine ESMF_FieldBundleRedistStoreR4
@@ -553,7 +623,9 @@ contains
 
         ! internal local variables 
         integer                                       :: localrc, fcount, i 
-        type(ESMF_Field)                              :: srcField, dstField   
+        type(ESMF_Field)                              :: l_srcField, l_dstField   
+        type(ESMF_ArrayBundle)                        :: srcab, dstab
+        type(ESMF_Array), allocatable                 :: srca(:), dsta(:)
 
         ! Initialize return code; assume routine not implemented 
         localrc = ESMF_RC_NOT_IMPL 
@@ -573,24 +645,41 @@ contains
             return
         endif 
 
-        ! Retrieve source and destination fields. 
         fcount = srcFieldBundle%btypep%field_count
-        do i = 1, 1
-            call ESMF_FieldBundleGet(srcFieldBundle, i, field=srcField, rc=localrc) 
-            if (ESMF_LogMsgFoundError(localrc, & 
-                ESMF_ERR_PASSTHRU, & 
-                ESMF_CONTEXT, rc)) return 
-            call ESMF_FieldBundleGet(dstFieldBundle, i, field=dstField, rc=localrc) 
-            if (ESMF_LogMsgFoundError(localrc, & 
-                ESMF_ERR_PASSTHRU, & 
-                ESMF_CONTEXT, rc)) return 
-
-            call ESMF_FieldRedistStore(srcField, dstField, routehandle, factor, & 
-                srcToDstTransposeMap, rc=localrc) 
-            if (ESMF_LogMsgFoundError(localrc, & 
-                ESMF_ERR_PASSTHRU, & 
-                ESMF_CONTEXT, rc)) return 
+        allocate(srca(fcount))
+        do i = 1, fcount
+            call ESMF_FieldBundleGet(srcFieldBundle, i, l_srcField, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_FieldGet(l_srcField, array=srca(i), rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
+        srcab = ESMF_ArrayBundleCreate(srca, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        deallocate(srca)
+
+        fcount = dstFieldBundle%btypep%field_count
+        allocate(dsta(fcount))
+        do i = 1, fcount
+            call ESMF_FieldBundleGet(dstFieldBundle, i, l_dstField, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_FieldGet(l_dstField, array=dsta(i), rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+        dstab = ESMF_ArrayBundleCreate(dsta, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        deallocate(dsta)
+
+        call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, factor, & 
+            srcToDstTransposeMap, rc=localrc) 
+        if (ESMF_LogMsgFoundError(localrc, & 
+            ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rc)) return 
 
         if (present(rc)) rc = ESMF_SUCCESS 
     end subroutine ESMF_FieldBundleRedistStoreR8
@@ -696,7 +785,9 @@ contains
 
         ! internal local variables 
         integer                                       :: localrc, fcount, i
-        type(ESMF_Field)                              :: srcField, dstField
+        type(ESMF_Field)                              :: l_srcField, l_dstField   
+        type(ESMF_ArrayBundle)                        :: srcab, dstab
+        type(ESMF_Array), allocatable                 :: srca(:), dsta(:)
 
         ! Initialize return code; assume routine not implemented 
         localrc = ESMF_RC_NOT_IMPL 
@@ -725,21 +816,41 @@ contains
         !    return
         !endif 
 
-        ! perform redistribution
-        ! For performance consideration: 
-        ! Rely on underlying ArrayRedist to perform sanity checking of the other parameters 
-
-        !TODO:
-        ! decide if routehandle(:) or routehandle should be used
         fcount = srcFieldBundle%btypep%field_count
-        do i = 1, 1 !fcount
-            srcField = srcFieldBundle%btypep%flist(i)
-            dstField = dstFieldBundle%btypep%flist(i)
-            call ESMF_FieldRedistStore(srcField, dstField, routehandle, srcToDstTransposeMap, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, & 
-                ESMF_ERR_PASSTHRU, & 
-                ESMF_CONTEXT, rc)) return 
+        allocate(srca(fcount))
+        do i = 1, fcount
+            call ESMF_FieldBundleGet(srcFieldBundle, i, l_srcField, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_FieldGet(l_srcField, array=srca(i), rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
+        srcab = ESMF_ArrayBundleCreate(srca, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        deallocate(srca)
+
+        fcount = dstFieldBundle%btypep%field_count
+        allocate(dsta(fcount))
+        do i = 1, fcount
+            call ESMF_FieldBundleGet(dstFieldBundle, i, l_dstField, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_FieldGet(l_dstField, array=dsta(i), rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+        dstab = ESMF_ArrayBundleCreate(dsta, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        deallocate(dsta)
+
+        call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, & 
+            srcToDstTransposeMap, rc=localrc) 
+        if (ESMF_LogMsgFoundError(localrc, & 
+            ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rc)) return 
 
         if (present(rc)) rc = ESMF_SUCCESS 
     end subroutine ESMF_FieldBundleRedistStoreNF
