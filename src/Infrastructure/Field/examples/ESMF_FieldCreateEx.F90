@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.86 2009/09/29 18:49:49 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.87 2009/10/15 18:51:31 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -782,6 +782,31 @@
     print *, "Field Create from a Mesh and an Array returned"
     call ESMF_FieldDestroy(field1,rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_FieldDestroy(field,rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Create a Field from a Mesh and an ArraySpec with optional features}
+!\label{sec:field:usage:createMeshArrayspecOpt}
+!
+! In this example, an {\tt ESMF\_Field} is created from an {\tt ESMF\_Mesh}
+! and an {\tt ESMF\_ArraySpec}. The mesh object is created in the previous example.
+! The Field is also created with optional arguments such as ungridded dimensions
+! and dimension mapping.
+!
+! In this example, the mesh is mapped to the 2nd dimension of the
+! {\tt ESMF\_Field}, with its first dimension being the ungridded dimension with bounds 1,3.
+!
+!EOE
+!BOC
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_I4, rc=rc)
+    field = ESMF_FieldCreate(mesh, arrayspec=arrayspec, gridToFieldMap=(/2/), &
+        ungriddedLBound=(/1/), ungriddedUBound=(/3/), rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!EOC
+    print *, "Field Create from a Mesh and an ArraySpec with ungridded dimension returned"
     call ESMF_FieldDestroy(field,rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_MeshDestroy(mesh,rc=rc)
