@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.26 2009/08/11 22:00:42 svasquez Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.27 2009/10/15 05:52:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -54,8 +54,7 @@
 
 #ifdef ESMF_TESTEXHAUSTIVE
     character(ESMF_MAXSTR) :: bname
-    type(testData), target :: data1, data2
-    type (dataWrapper) :: wrap1, wrap2
+    type (dataWrapper) :: wrap1, wrap2, wrap3, wrap4
 #endif
 
 !-------------------------------------------------------------------------------
@@ -165,8 +164,8 @@
 !-------------------------------------------------------------------------
 !   !  Set Internal State
     !EX_UTest
-    data1%testnumber=4567
-    wrap1%p=>data1
+    allocate(wrap1%p)
+    wrap1%p%testnumber=4567
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set Internal State Test"
@@ -177,7 +176,6 @@
 !   !
 !   !  Get Internal State
     !EX_UTest
-    !wrap2%p=>data2
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Get Internal State Test"
     call ESMF_GridCompGetInternalState(comp1, wrap2, rc)
@@ -187,12 +185,42 @@
 !   !
 !   !  Verify Internal State
     !EX_UTest
-    data2 = wrap2%p 
     write(failMsg, *) "Did not return correct data"
     write(name, *) "Verify Internal State Test"
-    call ESMF_Test((data2%testnumber.eq.4567), name, failMsg, result, ESMF_SRCLINE)
-    print *, "data2%testnumber = ", data2%testnumber
+    call ESMF_Test((wrap2%p%testnumber.eq.4567), name, failMsg, result, ESMF_SRCLINE)
+    print *, "wrap2%p%testnumber = ", wrap2%p%testnumber
+    
+!-------------------------------------------------------------------------
+!   !  Set Internal State
+    !EX_UTest
+    allocate(wrap3%p)
+    wrap3%p%testnumber=1234
 
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set Internal State 2nd time Test"
+    call ESMF_GridCompSetInternalState(comp1, wrap3, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+!   !  Get Internal State
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Get Internal State 2nd time Test"
+    call ESMF_GridCompGetInternalState(comp1, wrap4, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+!   !  Verify Internal State
+    !EX_UTest
+    write(failMsg, *) "Did not return correct data"
+    write(name, *) "Verify Internal State 2nd time Test"
+    call ESMF_Test((wrap4%p%testnumber.eq.1234), name, failMsg, result, ESMF_SRCLINE)
+    print *, "wrap4%p%testnumber = ", wrap4%p%testnumber
+    
+    deallocate(wrap1%p)
+    deallocate(wrap3%p)
 
 !-------------------------------------------------------------------------
 !   !
