@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.129 2009/10/13 19:22:03 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.130 2009/10/15 05:57:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.129 2009/10/13 19:22:03 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.130 2009/10/15 05:57:21 theurich Exp $'
 
 !==============================================================================
 !
@@ -532,7 +532,9 @@ contains
 ! When the call returns the pointer will now reference the original
 ! data block which was set during the previous call to
 ! {\tt ESMF\_GridCompSetInternalState}.
-
+!
+! Only the {\em last} data block set via
+! {\tt ESMF\_GridCompSetInternalState} will be accessible.
 !   
 ! The arguments are:
 ! \begin{description}
@@ -542,8 +544,8 @@ contains
 !   A derived type, containing only an unassociated pointer 
 !   to the private data block.
 !   The framework will fill in the pointer. When this call returns the
-!   pointer is set to the same address set during 
-!   {\tt ESMF\_GridCompSetInternalState}.
+!   pointer is set to the same address set during the last
+!   {\tt ESMF\_GridCompSetInternalState} call.
 !   This level of indirection is needed to reliably set and retrieve 
 !   the data block no matter which architecture or compiler is used.  
 ! \item[rc] 
@@ -1131,6 +1133,9 @@ contains
 ! each run with private data blocks.  A corresponding 
 ! {\tt ESMF\_GridCompGetInternalState} call retrieves the data pointer.
 !   
+! Only the {\em last} data block set via
+! {\tt ESMF\_GridCompSetInternalState} will be accessible.
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]

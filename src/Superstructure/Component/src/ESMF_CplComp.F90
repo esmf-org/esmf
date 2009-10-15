@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.115 2009/10/13 00:54:51 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.116 2009/10/15 05:57:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.115 2009/10/13 00:54:51 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.116 2009/10/15 05:57:21 theurich Exp $'
 
 !==============================================================================
 !
@@ -508,6 +508,9 @@ contains
 ! data block which was set during the previous call to
 ! {\tt ESMF\_CplCompSetInternalState}.
 !   
+! Only the {\em last} data block set via
+! {\tt ESMF\_CplCompSetInternalState} will be accessible.
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
@@ -516,8 +519,8 @@ contains
 !   A derived type, containing only an unassociated pointer 
 !   to the private data block.
 !   The framework will fill in the pointer. When this call returns the
-!   pointer is set to the same address set during 
-!   {\tt ESMF\_CplCompSetInternalState}.
+!   pointer is set to the same address set during the last
+!   {\tt ESMF\_CplCompSetInternalState} call.
 !   This level of indirection is needed to reliably set and retrieve 
 !   the data block no matter which architecture or compiler is used.  
 ! \item[rc] 
@@ -1097,6 +1100,9 @@ contains
 ! each run with private data blocks.  A corresponding 
 ! {\tt ESMF\_CplCompGetInternalState} call retrieves the data pointer.
 !   
+! Only the {\em last} data block set via
+! {\tt ESMF\_CplCompSetInternalState} will be accessible.
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp] 
