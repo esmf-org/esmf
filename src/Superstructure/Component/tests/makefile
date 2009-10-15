@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.46 2008/09/26 21:11:39 cdeluca Exp $ 
+# $Id: makefile,v 1.47 2009/10/15 03:22:05 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -10,18 +10,21 @@ TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_ComponentUTest \
 		$(ESMF_TESTDIR)/ESMF_GridCompCreateUTest \
 		$(ESMF_TESTDIR)/ESMF_CompSetServUTest \
 		$(ESMF_TESTDIR)/ESMF_CplCompCreateUTest \
+		$(ESMF_TESTDIR)/ESMF_StdCompMethodsUTest \
                 $(ESMF_TESTDIR)/ESMC_ComponentUTest
 
 TESTS_RUN     =	RUN_ESMF_ComponentUTest \
 		RUN_ESMF_GridCompCreateUTest \
 		RUN_ESMF_CompSetServUTest \
 		RUN_ESMF_CplCompCreateUTest \
+		RUN_ESMF_StdCompMethodsUTest \
                 RUN_ESMC_ComponentUTest
 
 TESTS_RUN_UNI =	RUN_ESMF_ComponentUTestUNI \
 		RUN_ESMF_GridCompCreateUTestUNI \
 		RUN_ESMF_CompSetServUTestUNI \
 		RUN_ESMF_CplCompCreateUTestUNI \
+		RUN_ESMF_StdCompMethodsUTestUNI \
                 RUN_ESMC_ComponentUTestUNI
 
 
@@ -64,6 +67,16 @@ RUN_ESMF_CplCompCreateUTest:
 RUN_ESMF_CplCompCreateUTestUNI:
 	cp -f grid.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=CplCompCreate NP=1 ftest
+
+# ---
+
+RUN_ESMF_StdCompMethodsUTest:
+	cp -f grid.rc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=StdCompMethods NP=4 ftest
+
+RUN_ESMF_StdCompMethodsUTestUNI:
+	cp -f grid.rc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=StdCompMethods NP=1 ftest
 
 # ---
 
