@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.24 2009/10/01 15:39:59 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.25 2009/10/15 21:12:42 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -135,7 +135,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.24 2009/10/01 15:39:59 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.25 2009/10/15 21:12:42 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -157,7 +157,7 @@ module ESMF_MeshMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshAddElements()"
 !BOP
-! !IROUTINE: ESMF_MeshAddElements - Add elements to a Mesh
+! !IROUTINE: ESMF_MeshAddElements - Add elements to a Mesh \label{sec:mesh:api:meshaddelements}
 !
 ! !INTERFACE:
     subroutine ESMF_MeshAddElements(mesh, elementIds, elementTypes, elementConn, rc)
@@ -172,8 +172,10 @@ module ESMF_MeshMod
 !
 ! !DESCRIPTION:
 !   This call is the third and last part of the three part mesh create
-!   sequence and should be called after the nodes are added with
-!   {\tt ESMF\_MeshAddNodes()}. This call adds the elements to the 
+!   sequence and should be called after the mesh is created with {\tt ESMF\_MeshCreate()} 
+!   (\ref{sec:mesh:api:meshcreate})
+!   and after the nodes are added with {\tt ESMF\_MeshAddNodes()} (\ref{sec:mesh:api:meshaddnodes}).
+!   This call adds the elements to the 
 !   mesh and finalizes the create. After this call the Mesh is usable, for
 !   example a Field may be built on the created Mesh object and 
 !   this Field may be used in a {\tt ESMF\_FieldRegridStore()} call.
@@ -275,7 +277,7 @@ module ESMF_MeshMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshAddNodes()"
 !BOP
-! !IROUTINE: ESMF_MeshAddNodes - Add nodes to a Mesh
+! !IROUTINE: ESMF_MeshAddNodes - Add nodes to a Mesh \label{sec:mesh:api:meshaddnodes}
 !
 ! !INTERFACE:
     subroutine ESMF_MeshAddNodes(mesh, nodeIds, nodeCoords, nodeOwners, rc)
@@ -291,8 +293,9 @@ module ESMF_MeshMod
 ! !DESCRIPTION:
 !   This call is the second part of the three part mesh create
 !   sequence and should be called after the mesh's dimensions are set
-!   using {\tt ESMF\_MeshCreate()}. This call adds the nodes to the 
-!   mesh. The next step is to call {\tt ESMF\_MeshAddElements()}. 
+!   using {\tt ESMF\_MeshCreate()} (\ref{sec:mesh:api:meshcreate}).
+!   This call adds the nodes to the 
+!   mesh. The next step is to call {\tt ESMF\_MeshAddElements()} (\ref{sec:mesh:api:meshaddelements}).
 !
 !   The parameters to this call {\tt nodeIds}, {\tt nodeCoords}, and 
 !   {\tt nodeOwners} describe the nodes to be created on this PET. 
@@ -369,7 +372,7 @@ module ESMF_MeshMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreate3Part()"
 !BOP
-! !IROUTINE: ESMF_MeshCreate - Create a Mesh as a 3 step process
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh as a 3 step process \label{sec:mesh:api:meshcreate}
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
@@ -387,7 +390,9 @@ module ESMF_MeshMod
 !   This call is the first part of the three part mesh create
 !   sequence. This call sets the dimension of the elements in the mesh
 !   ({\tt parametricDim}) and the number of coordinate dimensions in the mesh
-!   ({\tt spatialDim}). The next step is to call {\tt ESMF\_MeshAddElements()}. 
+!   ({\tt spatialDim}). The next step is to call {\tt ESMF\_MeshAddNodes()} (\ref{sec:mesh:api:meshaddnodes}) 
+!   to add the nodes and then {\tt ESMF\_MeshAddElements()} (\ref{sec:mesh:api:meshaddelements}) to add 
+!   the elements and finalize the mesh.
 !
 !   \begin{description}
 !   \item [parametricDim]
@@ -819,8 +824,9 @@ module ESMF_MeshMod
 ! The number of local nodes which are owned by this PET. This is the number of PET local entries in
 ! the nodalDistgrid.
 ! \item [{[numOwnedElements]}]
-! The number of local elements which are owned by this PET. This is the number of PET local entries in
-! the elementDistgrid.
+! The number of local elements which are owned by this PET. Note that every element is owned by 
+! the PET it resides on, so unlike for nodes, {\tt numOwnedElements} is identical to the number of elements on
+! the PET. It is also the number of PET local entries in the elementDistgrid. 
 ! \item [{[isMemFreed]}]
 ! Indicates if the coordinate and connection memory been freed from {\tt mesh}. If so, it
 ! can no longer be used as part of an {\tt ESMF\_FieldRegridStore()} call.

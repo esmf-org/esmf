@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshUTest.F90,v 1.16 2009/09/28 20:29:24 oehmke Exp $
+! $Id: ESMF_MeshUTest.F90,v 1.17 2009/10/15 21:12:51 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_MeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshUTest.F90,v 1.16 2009/09/28 20:29:24 oehmke Exp $'
+    '$Id: ESMF_MeshUTest.F90,v 1.17 2009/10/15 21:12:51 oehmke Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -665,18 +665,13 @@ program ESMF_MeshUTest
   field = ESMF_FieldCreate(mesh, arrayspec,  rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  write(*,*) "h4",correct, rc
-
   ! check field
   call ESMF_FieldValidate(field,rc=localrc) 
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  write(*,*) "h5",correct, rc
-
  ! Get rid of field
   call ESMF_FieldDestroy(field, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
 
  ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=localrc)
