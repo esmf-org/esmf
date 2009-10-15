@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.59 2009/10/06 05:25:57 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.60 2009/10/15 02:23:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.59 2009/10/06 05:25:57 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.60 2009/10/15 02:23:41 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2666,7 +2666,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridSet()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridSet - Set DistGrid sequence index collocation labels
 
 ! !INTERFACE:
@@ -2697,7 +2697,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: collocationPDimArg  ! helper variable
