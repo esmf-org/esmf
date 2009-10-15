@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.53 2009/08/06 21:17:10 svasquez Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.54 2009/10/15 00:38:23 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.53 2009/08/06 21:17:10 svasquez Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.54 2009/10/15 00:38:23 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -292,6 +292,80 @@
       print *, " rc2 = ", rc2
 
       !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Log Found Dealloc Error
+      write(failMsg, *) "Did not return .TRUE."
+      is_error=ESMF_LogFoundDeallocError(ESMF_FAILURE,rcToReturn=rc2)
+      write(name, *) "Log Found Dealloc Error Test"
+      call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Value of rcToReturn
+      write(failMsg, *) "Did not return ESMF_RC_MEM_DEALLOCATE"
+      write(name, *) " Verify rcToReturn Value Test"
+      call ESMF_Test((rc2.eq.ESMF_RC_MEM_DEALLOCATE), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc2 = ", rc2
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Error Msg Found Dealloc Error
+      write(failMsg, *) "Did not return .TRUE."
+      is_error=ESMF_LogMsgFoundDeallocError(ESMF_FAILURE,"hello",rcToReturn=rc2)
+      write(name, *) "Error Msg Found Dealloc Error Test"
+      call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Value of rcToReturn
+      write(failMsg, *) "Did not return ESMF_RC_MEM_DEALLOCATE"
+      write(name, *) " Verify rcToReturn Value Test"
+      call ESMF_Test((rc2.eq.ESMF_RC_MEM_DEALLOCATE), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc2 = ", rc2
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Error Msg Found Error
+      write(failMsg, *) "Did not return .FALSE."
+      is_error=ESMF_LogMsgFoundDeallocError(ESMF_SUCCESS,"hello",rcToReturn=rc2)
+      write(name, *) "Error Msg Found Error Test"
+      call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Log Found Dealloc Error
+      write(failMsg, *) "Did not return ESMF_FAILURE"
+      is_error=ESMF_LogFoundDeallocError(ESMF_FAILURE,rcToReturn=rc2)
+      write(name, *) "Log Found Dealloc Error Test"
+      call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc2 = ", rc2
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Value of rcToReturn
+      write(failMsg, *) "Did not return ESMF_RC_MEM_DEALLOCATE"
+      write(name, *) " Verify rcToReturn Value Test"
+      call ESMF_Test((rc2.eq.ESMF_RC_MEM_DEALLOCATE), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc2 = ", rc2
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Log Found Dealloc Error
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      is_error=ESMF_LogFoundDeallocError(ESMF_SUCCESS,rcToReturn=rc2)
+      write(name, *) "Log Found Dealloc Error Test"
+      call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Value of rcToReturn
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " Verify rcToReturn Value Test"
+      call ESMF_Test((rc2.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc2 = ", rc2
+
+      !-----------------------------------------------------------------------
       !EX_UTest
       ! Test Log Found Error
       write(failMsg, *) "Did not return ESMF_SUCCESS"
