@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.26 2009/04/07 05:34:49 theurich Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.27 2009/10/15 18:36:42 svasquez Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -36,6 +36,7 @@
         
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0
+    integer :: result = 0
 
     ! individual test name
     character(ESMF_MAXSTR) :: testname
@@ -55,7 +56,8 @@
 !-------------------------------------------------------------------------
 !
 
-    call ESMF_Initialize(rc=rc)
+    call ESMF_Initialize(defaultlogfilename="CompCreateSTest.Log", &
+                        defaultlogtype=ESMF_LOG_MULTI, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Get the default global VM
@@ -183,6 +185,11 @@
         write(0, *) ""
 
       endif
+
+      ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+      ! file that the scripts grep for.
+      call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 
       call ESMF_Finalize(rc=rc)
 
