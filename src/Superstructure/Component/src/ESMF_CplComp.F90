@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.116 2009/10/15 05:57:21 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.117 2009/10/16 17:50:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.116 2009/10/15 05:57:21 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.117 2009/10/16 17:50:09 theurich Exp $'
 
 !==============================================================================
 !
@@ -491,7 +491,7 @@ contains
 ! !DESCRIPTION:
 ! Available to be called by an {\tt ESMF\_CplComp} at any time after 
 ! {\tt ESMF\_CplCompSetInternalState} has been called.
-! Since init, run, and finalize must be separate subroutines data that
+! Since init, run, and finalize must be separate subroutines, data that
 ! they need to share in common can either be module global data, or can
 ! be allocated in a private data block and the address of that block
 ! can be registered with the framework and retrieved by this call.
@@ -504,7 +504,7 @@ contains
 ! Note that the {\tt dataPointer} argument needs to be a derived type
 ! which contains only a pointer of the type of the data block defined
 ! by the user.  When making this call the pointer needs to be unassociated.
-! When the call returns the pointer will now reference the original
+! When the call returns, the pointer will now reference the original
 ! data block which was set during the previous call to
 ! {\tt ESMF\_CplCompSetInternalState}.
 !   
@@ -518,7 +518,7 @@ contains
 ! \item[dataPointer]
 !   A derived type, containing only an unassociated pointer 
 !   to the private data block.
-!   The framework will fill in the pointer. When this call returns the
+!   The framework will fill in the pointer. When this call returns, the
 !   pointer is set to the same address set during the last
 !   {\tt ESMF\_CplCompSetInternalState} call.
 !   This level of indirection is needed to reliably set and retrieve 
