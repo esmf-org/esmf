@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReadWriteEx.F90,v 1.1 2009/10/16 05:58:29 eschwab Exp $
+! $Id: ESMF_StateReadWriteEx.F90,v 1.2 2009/10/16 21:33:52 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -16,15 +16,14 @@
 !ESMF_EXAMPLE        String used by test script to count examples.
 !-------------------------------------------------------------------------
 !BOE
-!\subsubsection{State Read/Write from/to a netCDF file}
-!
-!  Initialize ESMF and Create an empty {\tt ESMF\_State}, which will be
-!  subsequently filled with {\tt ESMF\_Array}s from a file.
-!  
+!\subsubsection{State Read/Write from/to a NetCDF file}
 !EOE
+
+#include "ESMF.h"
+
 !==============================================================================
 !BOC
-! !PROGRAM: ESMF_StateReadWriteEx - State Read/Write from/to a netCDF file
+! !PROGRAM: ESMF_StateReadWriteEx - State Read/Write from/to a NetCDF file
 !
 ! !DESCRIPTION:
 !
@@ -42,7 +41,6 @@
                         tempArray, pArray, rhArray
     type(ESMF_VM) :: vm
     integer :: rc
-    character(ESMF_MAXSTR) :: state_name
 !EOC
     integer :: finalrc
     finalrc = ESMF_SUCCESS
@@ -52,25 +50,23 @@
 !\subsubsection{ESMF Initialization and Empty State Create}
 !
 !  Initialize ESMF and Create an empty {\tt ESMF\_State}, which will be
-!  subsequently filled with {\tt ESMF\_Array}s from a file.
+!  subsequently filled with {\tt ESMF\_Arrays} from a file.
 !  
 !EOE
 
 !BOC
     call ESMF_Initialize(rc=rc)
-    call ESMF_VMGetGlobal(vm=vm, rc=rc)
 
-    state_name = "Ocean Import"
-    state = ESMF_StateCreate(state_name, ESMF_STATE_IMPORT, rc=rc)  
+    state = ESMF_StateCreate("Ocean Import", ESMF_STATE_IMPORT, rc=rc)  
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !-------------------------------------------------------------------------
 !BOE
-!\subsubsection{Reading Arrays from a netCDF file and Adding to a State}
+!\subsubsection{Reading Arrays from a NetCDF file and Adding to a State}
 !
 !  The following line of code will read all Array data contained in a netCDF
-!  file, place them in {\tt ESMF\_Array}s and add them to an {\tt ESMF\_State}.
+!  file, place them in {\tt ESMF\_Arrays} and add them to an {\tt ESMF\_State}.
 !  Only PET 0 reads the file; the remaining PETs get a copy via the subsequent
 !  call to {\tt ESMF\_StateReconcile()}.  Note that currently, the data
 !  is not distributed; each PET has only one DE which contains a full copy
@@ -81,16 +77,21 @@
 !BOC
     ! Read netCDF data file into Array objects in the State on PET 0
     call ESMF_StateRead(state, "io_netcdf_testdata.nc", rc=rc)
+!EOC
+    if (rc == ESMF_RC_LIB_NOT_PRESENT) goto 10  ! exit if netCDF not present
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOC
     ! Reconcile the Arrays, including their attributes, across all PETS in
     ! the VM
+    call ESMF_VMGetGlobal(vm=vm, rc=rc)
     call ESMF_StateReconcile(state, vm, ESMF_ATTRECONCILE_ON, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!  Only reading data into {\tt ESMF\_Array}s is supported at this time;
-!  {\tt ESMF\_ArrayBundle}s, {\tt ESMF\_Field}s, and {\tt ESMF\_FieldBundle}s
+!  Only reading data into {\tt ESMF\_Arrays} is supported at this time;
+!  {\tt ESMF\_ArrayBundles}, {\tt ESMF\_Fields}, and {\tt ESMF\_FieldBundles}
 !  will be supported in future releases of ESMF.
 !EOE
 
@@ -100,7 +101,7 @@
 !
 !  To see that the State now contains the same data as in the file, the
 !  following shows how to print out what Arrays are contained within the
-!  State and the data contained within each Array.  The netCDF utility
+!  State and to print the data contained within each Array.  The netCDF utility
 !  "ncdump" can be used to view the contents of the netCDF file.
 !EOE
 
@@ -130,15 +131,16 @@
 
 !BOE
 !  Note that the Arrays "lat", "lon", and "time" hold spatial and temporal
-!  coordinate data for latitude, longitude and time, respectively.  These
-!  will be used in future releases of ESMF to create {\tt ESMF\_Grid}s.
+!  coordinate data for the dimensions latitude, longitude and time,
+!  respectively.  These will be used in future releases of ESMF to create
+!  {\tt ESMF\_Grids}.
 !EOE
 
 !-------------------------------------------------------------------------
 !BOE
-!\subsubsection{Writing Array data within a State to a netCDF file}
+!\subsubsection{Writing Array data within a State to a NetCDF file}
 !
-!  All the data within the State on PET 0 can be written out to a netCDF
+!  All the Array data within the State on PET 0 can be written out to a netCDF
 !  file as follows:
 !EOE
 
@@ -149,7 +151,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!  Currently writing is limited to PET 0, future versions of ESMF will allow
+!  Currently writing is limited to PET 0; future versions of ESMF will allow
 !  parallel writing, as well as parallel reading.
 !EOE
 
@@ -174,7 +176,11 @@
     call ESMF_ArrayDestroy(tempArray,  rc=rc)
     call ESMF_ArrayDestroy(pArray,     rc=rc)
     call ESMF_ArrayDestroy(rhArray,    rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+ 10 continue  ! exit point if netCDF not present
+!BOC
     call ESMF_Finalize(rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
