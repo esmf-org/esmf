@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2009/03/25 00:24:53 theurich Exp $ 
+# $Id: makefile,v 1.5 2009/10/16 00:57:40 theurich Exp $ 
 
 # share the symbol table of the main executable to allow dynamic
 # linking against its symbols
@@ -41,4 +41,5 @@ CLOBBERDIRS =
 
 
 RUN_ArrayRedistSharedObj:
+	cp -f *.$(ESMF_SL_SUFFIX) $(ESMF_TESTDIR)
 	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=ArrayRedistSharedObj NP=6 stest
