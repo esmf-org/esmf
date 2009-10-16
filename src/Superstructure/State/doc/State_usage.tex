@@ -1,4 +1,4 @@
-% $Id: State_usage.tex,v 1.14 2009/02/16 19:14:31 rokuingh Exp $
+% $Id: State_usage.tex,v 1.15 2009/10/16 05:56:27 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -21,22 +21,22 @@ by the parent component into the Gridded Component's initialize
 method.  This is where the States get prepared for use 
 and the import State is first filled with data.
 
-States can be created without the Fields, Arrays, FieldBundles,
-and other States they will eventually contain in a number 
-of ways.  They can be created with names as placeholders where 
+States can be created in a number of ways without the Fields, Arrays,
+FieldBundles, ArrayBundles, and other States they will eventually contain.
+They can be created with names as placeholders where 
 these data items will eventually be.  When the States are passed 
 into the Gridded Component's initialize method, Field,
-FieldBundle, and Array create calls can be made in that method
+FieldBundle, Array, and ArrayBundle create calls can be made in that method
 to replace the name placeholders with real data objects.
 
 States can also be filled with data items that do not yet 
-have data allocated.  Fields, FieldBundles, and Arrays each have 
+have data allocated.  Fields, FieldBundles, Arrays, and ArrayBundles each have 
 methods that support their creation without actual data 
 allocation - the Grid and Attributes are set up but no
 Fortran array of data values is allocated.  In this approach, 
 when a State is passed into its associated Gridded Component's 
-initialize method, the incomplete Arrays, Fields, and 
-FieldBundles within the State can allocate or reference data 
+initialize method, the incomplete Arrays, Fields, FieldBundles,
+and ArrayBundles within the State can allocate or reference data 
 inside the initialize method.
 
 States are passed through the interfaces of the Gridded 
@@ -79,7 +79,7 @@ each PET executing a component makes the same object create call.
 If the object contains data, like a Field, each PET may have a
 different local chunk of the entire dataset but each Field has
 the same name and is logically one part of a single distributed 
-object.   As States are passed between components if any object
+object.   As States are passed between components, if any object
 in a State was not created in unison on all the current PETs 
 then some PETs have no object to pass into a
 communication method (e.g. regrid or data redistribution).

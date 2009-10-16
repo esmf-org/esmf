@@ -1,4 +1,4 @@
-% $Id: State_desc.tex,v 1.14 2009/01/21 21:38:02 cdeluca Exp $
+% $Id: State_desc.tex,v 1.15 2009/10/16 05:56:27 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ States can contain Arrays, ArrayBundles, Fields, FieldBundles, and other States.
 cannot directly contain Fortran arrays.   Objects in a State must span
 the VM on which they are running.  For sequentially executing components
 which run on the same set of PETs this happens by calling the object
-create methods on each PET creating the object in unison.   For
+create methods on each PET, creating the object in unison.   For
 concurrently executing components which are running on subsets of PETs,
 an additional reconcile method is provided by the ESMF to broadcast information
 about objects which were created in sub-components.

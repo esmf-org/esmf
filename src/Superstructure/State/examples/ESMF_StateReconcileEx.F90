@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.25 2009/09/16 20:59:27 w6ws Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.26 2009/10/16 05:56:27 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -20,7 +20,7 @@ contains
 !BOE
 !\subsubsection{Initialization and SetServices Routines}
 !  
-! These are the separate subroutines called by the code above.
+! These are the separate subroutines called by the code below.
 !EOE
 
 !BOC
@@ -200,7 +200,7 @@ end module ESMF_StateReconcileEx_Mod
 ! {\tt state1} containing {\tt field2} on PETs 2 and 3.  For the code
 ! to have a rational view of the data, we call {\tt ESMF\_StateReconcile}
 ! which determines which objects are missing from any PET, and communicates
-! information about the object.  There is the option of turning metadat
+! information about the object.  There is the option of turning metadata
 ! reconciliation on or off with the optional parameter shown in the call 
 ! below.  The default behavior is for metadata reconciliation to be off.
 ! After the call to reconcile, all
