@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulSTest.F90,v 1.20 2009/10/14 19:52:49 svasquez Exp $
+! $Id: ESMF_ArraySparseMatMulSTest.F90,v 1.21 2009/10/16 21:04:43 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -300,7 +300,8 @@ program ESMF_ArraySparseMatMulSTest
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
 
-  ! Print final PASS/FAIL and add # of procs message to log file.
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
   call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_Finalize()

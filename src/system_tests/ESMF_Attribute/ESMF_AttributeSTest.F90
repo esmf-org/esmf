@@ -347,7 +347,8 @@ program ESMF_AttributeSTest
 !  print *, "------------------------------------------------------------"
 !  print *, "------------------------------------------------------------"
 
-  ! Print final PASS/FAIL and add # of procs message to log file.
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
   call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_Finalize() 

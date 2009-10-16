@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSharedObjSTest.F90,v 1.8 2009/10/16 18:43:20 theurich Exp $
+! $Id: ESMF_ArrayRedistSharedObjSTest.F90,v 1.9 2009/10/16 21:13:27 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SHAREDOBJ_SYSTEM_TEST        String used by test script to count system tests.
@@ -305,7 +305,8 @@ program ESMF_ArrayRedistSharedObjSTest
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
 
-  ! Print final PASS/FAIL and add # of procs message to log file.
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
   call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
   
   call ESMF_Finalize()

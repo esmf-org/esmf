@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTestB.F90,v 1.9 2009/10/15 22:34:53 svasquez Exp $
+! $Id: ESMF_ArrayRedistSTestB.F90,v 1.10 2009/10/16 21:11:40 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 ! ESMF_ArrayRedistSTestA.F90 sets string used by test script to count system tests.
@@ -336,7 +336,8 @@ program ESMF_ArrayRedistSTest
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
 
-  ! Print final PASS/FAIL and add # of procs message to log file.
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
   call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_Finalize()
