@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentCompSTest.F90,v 1.8 2009/10/15 18:41:59 svasquez Exp $
+! $Id: ESMF_ConcurrentCompSTest.F90,v 1.9 2009/10/16 20:19:51 svasquez Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -422,28 +422,16 @@
     write(failMsg, *) "System Test failure"
     write(testname, *) "System Test ConcurrentComponent: Array Concurrent Components"
 
-    ! IMPORTANT: TestGlobal() prints the PASS: string that the scripts grep for.
-    call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), testname, failMsg, testresult, &
-      ESMF_SRCLINE)
-
-    ! Only on PET 0 or any PET with an error. 
-    if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
-
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                        testname, failMsg, testresult, ESMF_SRCLINE)
-
-      ! Separate message to console, for quick confirmation of success/failure
-      if (rc .eq. ESMF_SUCCESS) then
-        write(finalMsg, *) "SUCCESS: Concurrent Component test finished correctly."
-      else
+    if (rc .eq. ESMF_SUCCESS) then
+      write(finalMsg, *) "SUCCESS: Concurrent Component test finished correctly."
+    else
         write(finalMsg, *) "System Test did not succeed.  Error code ", rc
-      endif
-      write(0, *) ""
-      write(0, *) trim(testname)
-      write(0, *) trim(finalMsg)
-      write(0, *) ""
-
     endif
+    write(0, *) ""
+    write(0, *) trim(testname)
+    write(0, *) trim(finalMsg)
+    write(0, *) ""
+
 
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
     ! file that the scripts grep for.
