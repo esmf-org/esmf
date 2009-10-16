@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.C,v 1.3 2009/09/21 21:42:19 theurich Exp $
+// $Id: ESMCI_IO_XML.C,v 1.4 2009/10/16 05:39:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.3 2009/09/21 21:42:19 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.4 2009/10/16 05:39:47 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 #ifdef ESMF_XERCES
@@ -73,8 +73,8 @@ void MySAX2Handler::startElement(const XMLCh* const uri,
     char* msg1 = XMLString::transcode(uri);
     char* msg2 = XMLString::transcode(localname);
     char* msg3 = XMLString::transcode(qname);
-    cout << "Start of element: "<< msg1 << ", " << msg2 << ", "
-                                << msg3 << ", " << endl;
+    //cout << "Start of element: "<< msg1 << ", " << msg2 << ", "
+    //                            << msg3 << ", " << endl;
     // remember this name to associate with the subsequent value callback
     //   to MySAX2Handler::characters()
     // TODO:  qname better than localname?
@@ -101,8 +101,8 @@ void MySAX2Handler::startElement(const XMLCh* const uri,
       local = XMLString::transcode(attrs.getLocalName(i));
       type  = XMLString::transcode(attrs.getType(i));
       value = XMLString::transcode(attrs.getValue(i));
-      cout << "  Attributes: " << Qname << ", " << URI << ", " << local << ", "
-                               << type << ", " << value << endl;
+      //cout <<"  Attributes: " << Qname << ", " << URI << ", " << local << ", "
+      //                         << type << ", " << value << endl;
 
       string cname(Qname, strlen(Qname));
       string cvalue(value, strlen(value));
@@ -150,10 +150,10 @@ void MySAX2Handler::startElement(const XMLCh* const uri,
     // Create attribute package, if just now specified
     if (cqname == "attribute_package" && 
         !convention.empty() && !purpose.empty()) {
-      cout << "creating attribute package, " << convention << ", "
-                                             << purpose << endl;
+      //cout << "creating attribute package, " << convention << ", "
+      //                                      << purpose << endl;
       status = attr->AttPackCreateStandard(convention, purpose, object);
-      cout << "AttPackCreateStandard() status = " << status << endl;
+      //cout << "AttPackCreateStandard() status = " << status << endl;
       if (status != ESMF_SUCCESS) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                              "failed creating attribute package", &status);
@@ -182,8 +182,8 @@ void MySAX2Handler::characters(const XMLCh *const chars,
     char* msg = XMLString::transcode(chars);
     if (msg[0] != '\n' &&
         msg[0] != ' ') {  // TODO: can these callbacks be prevented?
-      cout << "      characters: "<< msg << endl;
-      cout << "      length: "<< length << " characters" << endl;
+      //cout << "      characters: "<< msg << endl;
+      //cout << "      length: "<< length << " characters" << endl;
 
       string cvalue(msg, length);
       cvalue.resize(cvalue.find_last_not_of(" ")+1);
@@ -231,8 +231,8 @@ void MySAX2Handler::endElement(const XMLCh* const uri,
     char* msg1 = XMLString::transcode(uri);
     char* msg2 = XMLString::transcode(localname);
     char* msg3 = XMLString::transcode(qname);
-    cout << "End of element: "<< msg1 << ", " << msg2 << ", "
-                              << msg3 << ", " << endl;
+    //cout << "End of element: "<< msg1 << ", " << msg2 << ", "
+    //                          << msg3 << ", " << endl;
     // TODO:  qname better than localname?
     this->qname.clear();
 
@@ -255,9 +255,9 @@ void MySAX2Handler::endElement(const XMLCh* const uri,
 void MySAX2Handler::fatalError(const SAXParseException& exception)
 {
     char* message = XMLString::transcode(exception.getMessage());
-    cout << "SAX XML Fatal Error: " << message
-         << " at line: " << exception.getLineNumber()
-         << endl;
+    //cout << "SAX XML Fatal Error: " << message
+    //     << " at line: " << exception.getLineNumber()
+    //     << endl;
     // TODO:  proper ESMC_Log* call
     XMLString::release(&message);
 
@@ -442,9 +442,9 @@ namespace ESMCI{
     }
     catch (const XMLException& toCatch) {
         char* message = XMLString::transcode(toCatch.getMessage());
-        cout << "Error during initialization! :\n";
-        cout << "Exception message is: \n"
-             << message << "\n";
+        //cout << "Error during initialization! :\n";
+        //cout << "Exception message is: \n"
+        //     << message << "\n";
         XMLString::release(&message);
         return ESMF_FAILURE; // TODO: specific ESMF rc
     }
@@ -466,20 +466,20 @@ namespace ESMCI{
     }
     catch (const XMLException& toCatch) {
         char* message = XMLString::transcode(toCatch.getMessage());
-        cout << "Exception message is: \n"
-             << message << "\n";
+        //cout << "Exception message is: \n"
+        //     << message << "\n";
         XMLString::release(&message);
         return ESMF_FAILURE; // TODO: specific ESMF rc
     }
     catch (const SAXParseException& toCatch) {
         char* message = XMLString::transcode(toCatch.getMessage());
-        cout << "Exception message is: \n"
-             << message << "\n";
+        //cout << "Exception message is: \n"
+        //     << message << "\n";
         XMLString::release(&message);
         return ESMF_FAILURE; // TODO: specific ESMF rc
     }
     catch (...) {
-        cout << "Unexpected Exception \n" ;
+        //cout << "Unexpected Exception \n" ;
         return ESMF_FAILURE; // TODO: specific ESMF rc
     }
 

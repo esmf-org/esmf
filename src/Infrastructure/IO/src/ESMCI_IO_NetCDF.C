@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.C,v 1.7 2009/09/21 21:42:19 theurich Exp $
+// $Id: ESMCI_IO_NetCDF.C,v 1.8 2009/10/16 05:39:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.7 2009/09/21 21:42:19 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.8 2009/10/16 05:39:58 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -211,8 +211,8 @@ namespace ESMCI
     }
     mypet = globalVM->getLocalPet(); 
     numPETs = globalVM->getPetCount();
-printf("mypet = %d, numPETS = %d\n", mypet, numPETs);
-fflush(stdout);
+//printf("mypet = %d, numPETS = %d\n", mypet, numPETs);
+//fflush(stdout);
     if (mypet != 0) return rc; 
 
     if (fileName != ESMC_NULL_POINTER) 
@@ -384,7 +384,7 @@ fflush(stdout);
       return(ESMF_FAILURE);
     }
 
-    // only read on pet 0
+    // only write on pet 0
     globalVM = ESMCI::VM::getGlobal(&rc);
     if ((globalVM == ESMC_NULL_POINTER) || (rc != ESMF_SUCCESS)) {
       char logMsg[ESMF_MAXSTR];
@@ -394,8 +394,8 @@ fflush(stdout);
     }
     mypet = globalVM->getLocalPet(); 
     numPETs = globalVM->getPetCount();
-printf("mypet = %d, numPETS = %d\n", mypet, numPETs);
-fflush(stdout);
+//printf("mypet = %d, numPETS = %d\n", mypet, numPETs);
+//fflush(stdout);
     if (mypet != 0) return rc; 
 
 #ifdef ESMF_NETCDF
@@ -727,8 +727,8 @@ void IO_NetCDF::destruct(void) {
     for (int j = 0; j < thisVar->num_atts(); ++j)
     {
       NcAtt*	thisAtt = thisVar->get_att(j);
-      printf("      nc att name[%d]: %s\n", j, thisAtt->name());
-      printf("      nc att type[%d]: %d ", j, thisAtt->type());
+      //printf("      nc att name[%d]: %s\n", j, thisAtt->name());
+      //printf("      nc att type[%d]: %d ", j, thisAtt->type());
 
       void* valueBase;
       string attValString;
@@ -741,30 +741,30 @@ void IO_NetCDF::destruct(void) {
       case NC_CHAR:
          attValString = string(thisAtt->values()->as_string(0));
          valueBase = (void*) (&attValString);
-         printf("(ncChar)\n");
-         printf("     nc att value[%d]: %s\n", j, attValString.c_str());
+         //printf("(ncChar)\n");
+         //printf("     nc att value[%d]: %s\n", j, attValString.c_str());
          
         break;
 
       case NC_INT:
          attValInt = thisAtt->values()->as_int(0);
          valueBase = (void*) (&attValInt);
-         printf("(ncInt)\n");
-         printf("     nc att value[%d]: %d\n", j, attValInt);
+         //printf("(ncInt)\n");
+         //printf("     nc att value[%d]: %d\n", j, attValInt);
         break;
 
       case NC_FLOAT:
          attValFloat = thisAtt->values()->as_float(0);
          valueBase = (void*) (&attValFloat);
-         printf("(ncFloat)\n");
-         printf("     nc att value[%d]: %f\n", j, attValFloat);
+         //printf("(ncFloat)\n");
+         //printf("     nc att value[%d]: %f\n", j, attValFloat);
         break;
 
       case NC_DOUBLE:
          attValDouble = thisAtt->values()->as_double(0);
          valueBase = (void*) (&attValDouble);
-         printf("(ncDouble)\n");
-         printf("     nc att value[%d]: %g\n", j, attValDouble);
+         //printf("(ncDouble)\n");
+         //printf("     nc att value[%d]: %g\n", j, attValDouble);
         break;
 
       default:
@@ -772,15 +772,15 @@ void IO_NetCDF::destruct(void) {
       }
 
       ESMC_TypeKind	attType = ncToEsmcType(thisAtt->type());
-      printf("   ESMC type[%d]: %d (%s)\n", j, attType, 
-                                            ESMC_TypeKindString(attType));
+      //printf("   ESMC type[%d]: %d (%s)\n", j, attType, 
+      //                                      ESMC_TypeKindString(attType));
 
       Attribute* esmfAtt = new Attribute(thisAtt->name(),
                                          attType,
                                          1,
                                          valueBase);
       thisArray->root.AttributeSet(esmfAtt);
-      thisArray->root.ESMC_Print();
+      //thisArray->root.ESMC_Print();
     }
 
     return thisArray;
@@ -866,8 +866,8 @@ void IO_NetCDF::destruct(void) {
           string  attVal;
           thisArray->root.AttributeGet(attName, &attVal);
           thisVar->add_att(attName.c_str(), attVal.c_str());
-          printf("      att name[%d]: %s\n", i, attName.c_str());
-          printf("      att val[%d]: %s\n", i, attVal.c_str());
+          //printf("      att name[%d]: %s\n", i, attName.c_str());
+          //printf("      att val[%d]: %s\n", i, attVal.c_str());
         }
         break;
 
@@ -876,8 +876,8 @@ void IO_NetCDF::destruct(void) {
           int  attVal;
           thisArray->root.AttributeGet(attName, &attVal);
           thisVar->add_att(attName.c_str(), attVal);
-          printf("      att name[%d]: %s\n", i, attName.c_str());
-          printf("      att val[%d]: %d\n", i, attVal);
+          //printf("      att name[%d]: %s\n", i, attName.c_str());
+          //printf("      att val[%d]: %d\n", i, attVal);
         }
         break;
 
@@ -886,8 +886,8 @@ void IO_NetCDF::destruct(void) {
           float  attVal;
           thisArray->root.AttributeGet(attName, &attVal);
           thisVar->add_att(attName.c_str(), attVal);
-          printf("      att name[%d]: %s\n", i, attName.c_str());
-          printf("      att val[%d]: %f\n", i, attVal);
+          //printf("      att name[%d]: %s\n", i, attName.c_str());
+          //printf("      att val[%d]: %f\n", i, attVal);
         }
         break;
 
@@ -896,8 +896,8 @@ void IO_NetCDF::destruct(void) {
           double  attVal;
           thisArray->root.AttributeGet(attName, &attVal);
           thisVar->add_att(attName.c_str(), attVal);
-          printf("      att name[%d]: %s\n", i, attName.c_str());
-          printf("      att val[%d]: %g\n", i, attVal);
+          //printf("      att name[%d]: %s\n", i, attName.c_str());
+          //printf("      att val[%d]: %g\n", i, attVal);
         }
         break;
 
