@@ -1,4 +1,4 @@
-% $Id: State_refdoc.ctex,v 1.20 2009/01/21 21:38:02 cdeluca Exp $
+% $Id: State_refdoc.ctex,v 1.21 2009/10/16 05:58:29 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -66,10 +66,12 @@
 \input{State_usage}
 \input{ESMF_StateEx_fapi}
 \input{ESMF_StateReconcileEx_fapi}
+\input{ESMF_StateReadWriteEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/State/doc/State_usage}
 \input{../Superstructure/State/doc/ESMF_StateEx_fapi}
 \input{../Superstructure/State/doc/ESMF_StateReconcileEx_fapi}
+\input{../Superstructure/State/doc/ESMF_StateReadWriteEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
