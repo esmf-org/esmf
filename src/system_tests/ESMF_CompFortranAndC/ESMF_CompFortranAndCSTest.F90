@@ -1,4 +1,4 @@
-! $Id: ESMF_CompFortranAndCSTest.F90,v 1.15 2009/10/13 18:34:02 svasquez Exp $
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.16 2009/10/16 20:43:36 svasquez Exp $
 !
 ! System test CompFortranAndC
 !  Description on Sourceforge under System Test #63029
@@ -264,7 +264,8 @@
         write(0, *) trim(finalMsg)
         write(0, *) ""
 
-      ! Print final PASS/FAIL and add # of procs message to log file.
+      ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+      ! file that the scripts grep for.
       call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
       call ESMF_Finalize(rc=rc)
