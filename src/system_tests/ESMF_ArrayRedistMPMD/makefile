@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2009/10/15 22:35:28 svasquez Exp $ 
+# $Id: makefile,v 1.7 2009/10/16 01:38:28 theurich Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -35,6 +35,7 @@ CLOBBERDIRS =
 
 
 RUN_ArrayRedistMPMD:
-	-${ESMF_MPIMPMDRUN} -n 4 $(ESMF_TESTDIR)/ESMF_ArrayRedistSTestA : -n 2 $(ESMF_TESTDIR)/ESMF_ArrayRedistSTestB >$(ESMF_TESTDIR)/ESMF_ArrayRedistSTestA.stdout
-	cat $(ESMF_DIR)/$(LOCDIR)/PET*ArrayRedistSTest* > $(ESMF_TESTDIR)/ESMF_ArrayRedistSTestA.Log
-	rm $(ESMF_DIR)/$(LOCDIR)/PET*ArrayRedistSTest*
+	-@cd $(ESMF_TESTDIR) ; \
+	${ESMF_MPIMPMDRUN} -n 4 ./ESMF_ArrayRedistSTestA : -n 2 ./ESMF_ArrayRedistSTestB > ./ESMF_ArrayRedistSTestA.stdout ; \
+	cat ./PET*ArrayRedistSTest*.Log> ./ESMF_ArrayRedistSTestA.Log ; \
+	$(ESMF_RM) ./PET*ArrayRedistSTest*.Log
