@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.29 2009/02/18 01:33:32 rokuingh Exp $
+! $Id: ESMF_StateEx.F90,v 1.30 2009/10/16 05:57:26 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -123,7 +123,7 @@
 ! {\tt ESMF\_State}.  Other components can call framework routines to
 ! set the {\tt ESMF\_NEEDED} flag to indicate they require that data.
 ! The original component can query this flag and then produce only the
-! data what is required by another component.
+! data that is required by another component.
 !EOE
 
     print *, "State Example 3: Export State with Placeholder"
@@ -225,10 +225,9 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     if (finalrc.EQ.ESMF_SUCCESS) then
-        print *, "PASS: ESMF_StateExample.F90"
+        print *, "PASS: ESMF_StateEx.F90"
     else
-        print *, "FAIL: ESMF_StateExample.F90"
+        print *, "FAIL: ESMF_StateEx.F90"
     end if
 
     end program ESMF_StateEx
-    
