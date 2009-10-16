@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.27 2009/10/15 18:36:42 svasquez Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.28 2009/10/16 20:34:28 svasquez Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -169,10 +169,7 @@
       write(failMsg, *) "System Test failure"
       write(testname, *) "System Test CompCreate: Component Create Test"
   
-      call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), &
-        testname, failMsg, testresult, ESMF_SRCLINE)
-
-      if ((my_pet .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+      if (rc .ne. ESMF_SUCCESS) then
         ! Separate message to console, for quick confirmation of success/failure
         if (rc .eq. ESMF_SUCCESS) then
           write(finalMsg, *) "SUCCESS: Component Create complete."
