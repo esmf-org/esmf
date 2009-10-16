@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.56 2009/10/13 17:59:41 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.57 2009/10/16 03:18:35 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -53,6 +53,7 @@
 
 implicit none
 
+integer, parameter :: MAX_FNAME_LEN = 64
 !
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
@@ -102,7 +103,8 @@ type ESMF_LogEntry
     integer		::  line
     logical             ::  methodflag,lineflag,fileflag
     character(len=2*ESMF_MAXSTR) ::  msg
-    character(len=32) 	::  file,method
+    character(len=MAX_FNAME_LEN) ::  file
+    character(len=32)   ::  method
     character(len=8) 	::  d
     character(len=8)	::  lt  			
     ESMF_INIT_DECLARE    
@@ -148,7 +150,7 @@ type ESMF_LogPrivate
     integer                                         ::  errorMaskCount
     integer, dimension(:), pointer                  ::  errorMask(:)
 #endif                                          
-    character(len=32)                               ::  nameLogErrFile
+    character(len=MAX_FNAME_LEN)                    ::  nameLogErrFile
     character(len=ESMF_MAXSTR)                      ::  petNumLabel
     ESMF_INIT_DECLARE    
 end type ESMF_LogPrivate
@@ -1165,9 +1167,9 @@ end subroutine ESMF_LogGet
 !      \begin{description}
 ! 
 !      \item [filename]
-!            Name of file.  Maximum length 26 characters to allow for
+!            Name of file.  Maximum length 58 characters to allow for
 !            the PET number to be added and keep the total file name
-!            length under 32 characters.
+!            length under 64 characters.
 !      \item [{[logtype]}]
 !            Specifies {\tt ESMF\_LOG\_SINGLE}, {\tt ESMF\_LOG\_MULTI} or
 !            {\tt ESMF\_LOG\_NONE}.
@@ -1570,9 +1572,9 @@ end subroutine ESMF_LogMsgSetError
 !      \item [log]
 !            An {\tt ESMF\_Log} object.
 !      \item [filename]
-!            Name of file.  Maximum length 26 characters to allow for
+!            Name of file.  Maximum length 58 characters to allow for
 !            the PET number to be added and keep the total file name
-!            length under 32 characters.
+!            length under 64 characters.
 !      \item [{[logtype]}]
 !            Set the logtype. See section \ref{opt:logtype} for a list of
 !            valid options.
@@ -1591,7 +1593,7 @@ end subroutine ESMF_LogMsgSetError
 
     integer 				                   :: status, i, rc2
     type(ESMF_LogEntry), dimension(:), pointer             :: localbuf
-    character(len=32)                                      :: fname
+    character(len=MAX_FNAME_LEN)                           :: fname
     character(ESMF_MAXSTR)                                 :: petNumChar
 
     type(ESMF_LogPrivate),pointer     :: alog
@@ -1653,8 +1655,8 @@ end subroutine ESMF_LogMsgSetError
         fname = trim(alog%petNumLabel) // "." // trim(filename)
         alog%nameLogErrFile=fname
     endif
-    if (len(alog%nameLogErrFile) .gt. 32) then
-        print *, "ESMF_LogOpen: Filename exceeded 32 characters."
+    if (len_trim (fname) > MAX_FNAME_LEN) then
+        print *, "ESMF_LogOpen: Filename exceeded", MAX_FNAME_LEN, " characters."
         if (present(rc)) then
             rc = ESMF_FAILURE
         endif
@@ -1928,7 +1930,8 @@ end subroutine ESMF_LogSet
     character(len=10)               :: t
     character(len=8)                :: d
     !character(len=7)               :: lt
-    character(len=32)               ::tmethod,tfile
+    character(len=32)               ::tmethod
+    character(len=MAX_FNAME_LEN)    ::tfile
     integer			    ::tline
     integer                         ::h,m,s,ms,y,mn,dy
     integer			    ::rc2,index
