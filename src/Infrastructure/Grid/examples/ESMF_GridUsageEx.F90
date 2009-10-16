@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.63 2009/10/14 05:15:46 eschwab Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.64 2009/10/16 21:34:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -3039,7 +3039,7 @@ endif
 !BOC
    grid2D=ESMF_GridCreate("esmf_grid_shape_tile.xml", rc=rc)
 !EOC
-   if (rc == ESMF_RC_LIB_NOT_PRESENT) goto 10
+   if (rc == ESMF_RC_LIB_NOT_PRESENT) goto 10  ! exit if Xerces not present
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! then show that the minimum and maximum global indices of the Grid are
@@ -3145,7 +3145,7 @@ endif
    !-------------------------------------------------------------------
    ! Shut down and end.
    !-------------------------------------------------------------------
-10 continue
+10 continue  ! exit point if Xerces not present
   call ESMF_Finalize(rc=rc)
   
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
