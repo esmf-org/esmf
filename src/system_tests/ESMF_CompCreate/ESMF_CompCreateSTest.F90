@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.28 2009/10/16 20:34:28 svasquez Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.29 2009/10/16 20:37:05 svasquez Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -35,7 +35,6 @@
     character(len=ESMF_MAXSTR) :: cname
         
     ! cumulative result: count failures; no failures equals "all pass"
-    integer :: testresult = 0
     integer :: result = 0
 
     ! individual test name
