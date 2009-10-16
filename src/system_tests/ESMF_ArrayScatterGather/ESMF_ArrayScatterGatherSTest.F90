@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.9 2009/03/26 03:28:20 theurich Exp $
+! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.10 2009/10/16 18:43:21 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -77,7 +77,7 @@ program ESMF_ArrayScatterGatherSTest
   type(ESMF_CplComp) :: cpl
 
   ! cumulative result: count failures; no failures equals "all pass"
-  integer :: testresult = 0
+  integer :: result = 0
 
   ! individual test name
   character(ESMF_MAXSTR) :: testname
@@ -105,7 +105,8 @@ program ESMF_ArrayScatterGatherSTest
 !-------------------------------------------------------------------------
 !
   ! Initialize framework and get back default global VM
-  call ESMF_Initialize(vm=vm, rc=localrc)
+  call ESMF_Initialize(vm=vm, defaultlogfilename="ArrayScatterGatherSTest.Log",&
+    defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -315,11 +316,7 @@ program ESMF_ArrayScatterGatherSTest
   ! Normal ESMF Test output
   print *, trim(testname), " complete."
 
-  ! IMPORTANT: TestGlobal() prints the PASS: string that the scripts grep for.
-  call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), testname, failMsg, testresult, &
-    ESMF_SRCLINE)
-
-  if ((localPet .eq. 0) .and. (rc .eq. ESMF_SUCCESS)) then
+  if (rc .eq. ESMF_SUCCESS) then
     ! Separate message to console, for quick confirmation of success/failure
     write(finalMsg, *) "SUCCESS: ",trim(testname)," finished correctly."
     write(0, *) ""
@@ -333,6 +330,9 @@ program ESMF_ArrayScatterGatherSTest
   print *, "Test finished, localPet = ", localPet
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
+
+  ! Print final PASS/FAIL and add # of procs message to log file.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_Finalize()
 

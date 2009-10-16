@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2009/10/16 00:57:40 theurich Exp $ 
+# $Id: makefile,v 1.6 2009/10/16 18:43:21 theurich Exp $ 
 
 # share the symbol table of the main executable to allow dynamic
 # linking against its symbols
@@ -12,7 +12,7 @@ LOCDIR	  = src/system_tests/ESMF_ArrayRedistSharedObj
 
 
 ifeq ($(ESMF_TESTSHAREDOBJ),ON)
-SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_ArrayRedistSharedObjSTest
+SYSTEM_TESTS_BUILD    = $(ESMF_TESTDIR)/ESMF_ArrayRedistSharedObjSTest
 SYSTEM_TESTS_RUN      = RUN_ArrayRedistSharedObj
 else
 SYSTEM_TESTS_BUILD    =
