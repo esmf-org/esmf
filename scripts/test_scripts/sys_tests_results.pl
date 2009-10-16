@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.14 2009/05/29 21:26:23 svasquez Exp $
+# $Id: sys_tests_results.pl,v 1.15 2009/10/16 19:50:45 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -20,8 +20,8 @@ use File::Find
 @st_st_files = ();	# Stripped system Test files
 @ex_files = (); 	# All executable files
 @all_files = (); 	# All files
-@stdout_files = (); 	# System Test stdout files 
-@tmp_stdout_files = (); # tmp system Test stdout files 
+@Log_files = (); 	# System Test Log files 
+@tmp_Log_files = (); 	# tmp system Test Logt files 
 @file_lines = ();	# stdout file lines
 @fail_tests = ();	# system tests that failed
 @pass_tests = ();	# system tests that passed
@@ -157,7 +157,7 @@ use File::Find
                 s/ESMF/ ESMF/;# Break it into 2 fields
                 s/([^ ]*) ([^ ]*)/$2/; # Get rid of the 1st field
                 s/\./ /; # Break it into 2 fields
-                s/([^ ]*) ([^ ]*)/$1.stdout\n/; # Get rid of the 2nd field
+                s/([^ ]*) ([^ ]*)/$1.Log\n/; # Get rid of the 2nd field
         }
         #Sort the list of st_st_files
         @st_st_files = sort (@st_st_files);
@@ -184,31 +184,37 @@ use File::Find
                                 # Put all files in a list
                                 push all_files, "$File::Find::name\n"  if -e;
                 }
-                # Get *STest*.stdout files in 2 steps
-                @tmp_stdout_files=grep (/stdout/, @all_files);
-                @stdout_files=grep (/STest/, @tmp_stdout_files);
-                #Sort the list of stdout files.
-                @stdout_files = sort (@stdout_files);
-                # Find the stdout fles that are in the st_ex_files
+                # Get *STest*.Log files in 2 steps
+                @tmp_Log_files=grep (/Log/, @all_files);
+                @Log_files=grep (/STest/, @tmp_Log_files);
+                #Sort the list of Log files.
+                @Log_files = sort (@Log_files);
+                # Find the Log fles that are in the st_ex_files
                 foreach $file ( @st_st_files) {
-                                push @stdout_st_files, grep (/$file/, @stdout_files);
+                                push @Log_st_files, grep (/$file/, @Log_files);
                 }
-                #Sort the list of stdout files.
-                @stdout_st_files = sort (@stdout_st_files);
+                #Sort the list of Log files.
+                @Log_st_files = sort (@Log_st_files);
 
-                # Count the number of PASS and FAIL
-                # push pass system test to a list.
+		# For each system test we need to
+		# find the corresponding Log file.
+		# if it does not exist, add the system test to the crashed list.
+		# If the Log file exists, read the number of processors.
+		# Count the PASSes and compare to the number of processors
+		# If they are not equal put the system test in the crashed list.
+		# Keep track of pass count and failed tests list.
                 $count=0;
                 $pass_count=0;
                 $fail_count=0;
-                foreach $file ( @stdout_st_files) {
+                foreach $file ( @Log_st_files) {
                         open(F,$file);
                         foreach $line (<F>){
                                 push(file_lines, $line);
                         }
                         close ($file);
+			$pet_count=grep ( /NUMBER_OF_PROCESSORS/, @file_lines);
                         $count=grep ( /PASS/, @file_lines);
-                        if ($count != 0) {
+			if (($count == $pet_count) and ($pet_count ne 0)){
                                 push (pass_tests, $file);
                                 $pass_count=$pass_count + 1;
                         }
