@@ -1,4 +1,4 @@
-! $Id: ESMF_RecursiveComponentSTest.F90,v 1.7 2009/10/14 19:41:54 svasquez Exp $
+! $Id: ESMF_RecursiveComponentSTest.F90,v 1.8 2009/10/16 20:52:40 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -205,7 +205,8 @@ program ESMF_RecursiveComponentSTest
     write(0, *) ""
   endif
 
-  ! Print final PASS/FAIL and add # of procs message to log file.
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
   call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
   
   print *, "------------------------------------------------------------"

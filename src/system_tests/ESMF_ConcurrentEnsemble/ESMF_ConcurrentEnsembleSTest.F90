@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.10 2009/10/13 17:41:45 svasquez Exp $
+! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.11 2009/10/16 20:49:17 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -572,7 +572,8 @@ program ESMF_ConcurrentEnsembleSTest
     write(0, *) ""
   endif
 
-  ! Print final PASS/FAIL and add # of procs message to log file.
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
   call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
   
   print *, "------------------------------------------------------------"
