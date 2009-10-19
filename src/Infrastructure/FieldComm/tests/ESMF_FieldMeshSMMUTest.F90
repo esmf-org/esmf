@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshSMMUTest.F90,v 1.3 2009/10/19 23:15:29 feiliu Exp $
+! $Id: ESMF_FieldMeshSMMUTest.F90,v 1.4 2009/10/19 23:34:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldMeshSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldMeshSMMUTest.F90,v 1.3 2009/10/19 23:15:29 feiliu Exp $'
+    '$Id: ESMF_FieldMeshSMMUTest.F90,v 1.4 2009/10/19 23:34:23 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -308,7 +308,7 @@ contains
           dstfptr = 0
 
           ! initialize factorList and factorIndexList
-          ! the diagonal of the 9x9 diagonal matrix on 3 PETs is (1 2 3 1 2 3 1 2 3)
+          ! the diagonal of the 9x9 diagonal matrix on 3 PETs is ((1 2 3) (1 2) (1 2) (1 2))
           if (localPet == 0) then
               ! 4 -> 3
               allocate(factorList(3))
@@ -322,6 +322,7 @@ contains
                   ESMF_CONTEXT, rc)) return
               deallocate(factorList, factorIndexList)
           else if (localPet == 1) then
+              ! 2 -> 2
               allocate(factorList(2))
               allocate(factorIndexList(2,2))
               factorList = (/1,2/)
@@ -333,6 +334,7 @@ contains
                   ESMF_CONTEXT, rc)) return
               deallocate(factorList, factorIndexList)
           else if (localPet == 2) then
+              ! 2 -> 2
               allocate(factorList(2))
               allocate(factorIndexList(2,2))
               factorList = (/1,2/)
@@ -344,6 +346,7 @@ contains
                   ESMF_CONTEXT, rc)) return
               deallocate(factorList, factorIndexList)
           else if (localPet == 3) then
+              ! 1 -> 2
               allocate(factorList(2))
               allocate(factorIndexList(2,2))
               factorList = (/1,2/)
