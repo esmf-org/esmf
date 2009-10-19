@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.47 2009/10/15 16:48:06 svasquez Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.48 2009/10/19 17:16:34 svasquez Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -54,7 +54,6 @@
     type(ESMF_VM):: vm
 
     ! cumulative result: count failures; no failures equals "all pass"
-    integer :: testresult = 0
     integer :: result = 0
 
     ! individual test name
@@ -348,10 +347,7 @@
     write(failMsg, *)  "Transposed transpose not same as original"
     write(testname, *) "System Test FieldRedist: Field Transpose/Redistribute"
 
-    call ESMF_TestGlobal(((miscount.eq.0).and.(rc.eq.ESMF_SUCCESS)), &
-      testname, failMsg, testresult, ESMF_SRCLINE)
-
-    if ((my_pet .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+    if (rc .ne. ESMF_SUCCESS) then
       ! Separate message to console, for quick confirmation of success/failure
       if ((miscount.eq.0) .and. (rc .eq. ESMF_SUCCESS)) then
         write(finalMsg, *) "SUCCESS: Data transposed twice same as original."
