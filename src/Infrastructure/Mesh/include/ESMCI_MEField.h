@@ -255,7 +255,7 @@ std::vector<SField*> fields;
 std::vector<std::set<MeshObj*> > field_objs;
 SField *primaryfield; // if nodal or elemental
 std::vector<MeshObj*> cur_elems;
-MEField<> &f;
+MEField<_field> &f;
 fad_type *dof_buffer;
 };
 
