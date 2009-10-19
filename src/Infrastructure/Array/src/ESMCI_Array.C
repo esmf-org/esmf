@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.69 2009/10/08 17:14:48 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.70 2009/10/19 21:41:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.69 2009/10/08 17:14:48 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.70 2009/10/19 21:41:52 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3117,14 +3117,45 @@ int Array::scatter(
   VMK::commhandle **commhList = 
     new VMK::commhandle*[dimCount]; // used for indexList comm
   
-  // rootPet is the only sender for scatter, but may need info from other PETs
-  char **sendBuffer;
+  // all PETs may be receivers of data, each PET issues a maximum of one
+  // non-blocking receive, so no problem with too many outstanding comms here
+  char **recvBuffer = new char*[localDeCount];
+  for (int i=0; i<localDeCount; i++){
+    int de = localDeList[i];
+    if (patchListPDe[de] != patch) continue; // skip to next local DE
+    recvBuffer[i] = (char *)larrayBaseAddrList[i]; // default: contiguous
+    int recvSize =
+      exclusiveElementCountPDe[de]*tensorElementCount*dataSize; // bytes
+    if (!contiguousFlag[i])
+      recvBuffer[i] = new char[recvSize];
+    *commh = NULL; // invalidate
+    // receive data into recvBuffer
+    localrc = vm->recv(recvBuffer[i], recvSize, rootPet, commh);
+    if (localrc){
+      char *message = new char[160];
+      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        message, &rc);
+      delete [] message;
+      return rc;
+    }
+  }
+  // - done issuing nb receives (potentially all Pets) -
+
+  // rootPet is the only sender of scatter data,
+  // but may need info from other PETs to construct sendBuffer
   if (localPet == rootPet){
+    int nbCount = 0; // reset: count of outstanding non-blocking comms
+    const int boostSize = 512;  // max number of posted non-blocking calls:
+                                // stay below typical system limits
+    VMK::commhandle **commhDataList = 
+      new VMK::commhandle*[boostSize]; // used for data comms
+    
     char *array = (char *)arrayArg;
     // rootPet scatters information to _all_ DEs
     // for each DE of the Array memcpy together a single contiguous sendBuffer
     // from "array" data and send it to the receiving PET non-blocking.
-    sendBuffer = new char*[deCount]; // contiguous sendBuffer
+    char **sendBuffer = new char*[deCount]; // contiguous sendBuffer
     for (int i=0; i<deCount; i++){
       int de = i;
       if (patchListPDe[de] == patch){
@@ -3223,8 +3254,10 @@ int Array::scatter(
         // ready to send the sendBuffer
         int dstPet;
         delayout->getDEMatchPET(de, *vm, NULL, &dstPet, 1);
-        *commh = NULL; // invalidate
-        localrc = vm->send(sendBuffer[de], sendSize, dstPet, commh);
+        commhDataList[nbCount] = NULL;  // invalidate
+        localrc = vm->send(sendBuffer[de], sendSize, dstPet,
+          &(commhDataList[nbCount]));
+        ++nbCount;  // count this non-blocking send
         if (localrc){
           char *message = new char[160];
           sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -3239,9 +3272,39 @@ int Array::scatter(
           if(contigFlagPDimPDe[de*dimCount+j]==0)
             delete [] indexList[j];
         delete [] indexList;
+        
+        // see if outstanding nb-sends have reached boostSize limit
+        if (nbCount >= boostSize){
+//printf("clearing Scatter() boost at nbCount = %d\n", nbCount);
+          // wait for nb-sends to finish before posting any more
+          for (int j=0; j<nbCount; j++){
+            vm->commwait(&(commhDataList[j]));
+            delete commhDataList[j];
+          }
+          nbCount = 0;  // reset
+        }
+        
       } // DE on patch
     } // i -> de
-  }else{
+//printf("clearing Scatter() boost at nbCount = %d\n", nbCount);
+    // wait for nb-sends to finish before exiting
+    for (int j=0; j<nbCount; j++){
+      vm->commwait(&(commhDataList[j]));
+      delete commhDataList[j];
+    }
+    nbCount = 0;  // reset
+    delete [] commhDataList;
+    // TODO: move the delete [] sendBuffer[] into nb-wait loops to lower
+    // TODO: memory foot print.
+    for (int i=0; i<deCount; i++)
+      if (patchListPDe[i] == patch)
+        delete [] sendBuffer[i];
+    delete [] sendBuffer;
+  }
+  // - done issuing nb sends (from rootPet) -
+  
+  // send localIndexList information to rootPet if necessary
+  if (localPet != rootPet){
     // localPet is _not_ rootPet -> provide localIndexList to rootPet if nec.
     int commhListCount = 0;  // reset
     for (int i=0; i<localDeCount; i++){
@@ -3269,41 +3332,10 @@ int Array::scatter(
         delete commhList[j];
     }
   }
-  
-  // - done issuing nb sends (from rootPet) -
 
-  // all PETs may be receivers
-  char **recvBuffer = new char*[localDeCount];
-  for (int i=0; i<localDeCount; i++){
-    int de = localDeList[i];
-    if (patchListPDe[de] != patch) continue; // skip to next local DE
-    recvBuffer[i] = (char *)larrayBaseAddrList[i]; // default: contiguous
-    int recvSize =
-      exclusiveElementCountPDe[de]*tensorElementCount*dataSize; // bytes
-    if (!contiguousFlag[i])
-      recvBuffer[i] = new char[recvSize];
-    *commh = NULL; // invalidate
-    // receive data into recvBuffer
-    localrc = vm->recv(recvBuffer[i], recvSize, rootPet, commh);
-    if (localrc){
-      char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-        message, &rc);
-      delete [] message;
-      return rc;
-    }
-  }
-  
-  // - done issuing nb receives (potentially all Pets) -
-
-  // todo: separate receive and send commhandles and separately wait!
   // wait until all the local receives are complete
-  // wait until all the local sends are complete
-  // for now wait on _all_ outstanding non-blocking comms for this PET
   vm->commqueuewait();
-  
-  // - done waiting on sends and receives -
+  // - done waiting on receives -
     
   // distribute received data into non-contiguous exclusive regions
   for (int i=0; i<localDeCount; i++){
@@ -3337,12 +3369,6 @@ int Array::scatter(
     
   // garbage collection
   delete [] recvBuffer;
-  if (localPet == rootPet){
-    for (int i=0; i<deCount; i++)
-      if (patchListPDe[i] == patch)
-        delete [] sendBuffer[i];
-    delete [] sendBuffer;
-  }
   delete commh;
   delete [] commhList;
   
