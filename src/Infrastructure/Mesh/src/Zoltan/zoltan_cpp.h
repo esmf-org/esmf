@@ -7,8 +7,8 @@
 // *****************************************************************************
 // * CVS File Information :
 // *    $RCSfile: zoltan_cpp.h,v $
-// *    $Author: dneckels $
-// *    $Date: 2007/11/28 16:13:54 $
+// *    $Author: w6ws $
+// *    $Date: 2009/10/19 21:56:11 $
 // *    Revision: 1.15.2.3 $
 // *****************************************************************************
 
@@ -36,11 +36,7 @@ extern void Zoltan_RIB_Print_Structure(struct Zoltan_Struct *zz, int howMany);
 extern void Zoltan_HSFC_Print_Structure(struct Zoltan_Struct *zz);
 }
 
-#ifdef TFLOP
-  #include <string.h>
-#else
-  #include <string>
-#endif
+#include <string>
 
 class Zoltan {
 
@@ -514,16 +510,13 @@ public:
     // the name passed in, so in order to compile we need a non-const
     // "char *" file name to pass to Zoltan_Generate_Files.
 
-#ifdef TFLOP
-    char *fn = strdup((char *)fname.c_str());
-#else
-    char *fn = strdup(fname.c_str());
-#endif
+    char *fn = new char[fname.size ()+1];
+    strcpy (fn, fname.c_str ());
 
     int rc = Zoltan_Generate_Files( ZZ_Ptr, fn, base_index,
                                   gen_geom, gen_graph, gen_hg );
 
-    free(fn);
+    delete []fn;
 
     return rc;
   }
