@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 2009/08/14 16:26:35 theurich Exp $ 
+# $Id: makefile,v 1.27 2009/10/19 23:15:29 feiliu Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -10,15 +10,15 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldGatherUTest \
 	$(ESMF_TESTDIR)/ESMF_FieldRedistUTest \
 	$(ESMF_TESTDIR)/ESMF_FieldLSSMMUTest \
 	$(ESMF_TESTDIR)/ESMF_FieldSMMUTest   \
-	$(ESMF_TESTDIR)/ESMF_FieldRedistArbUTest 
-#	$(ESMF_TESTDIR)/ESMF_FieldMeshSMMUTest \
+	$(ESMF_TESTDIR)/ESMF_FieldRedistArbUTest \
+	$(ESMF_TESTDIR)/ESMF_FieldMeshSMMUTest
 
 TESTS_RUN     = RUN_ESMF_FieldGatherUTest \
 	RUN_ESMF_FieldRedistUTest \
 	RUN_ESMF_FieldLSSMMUTest \
 	RUN_ESMF_FieldSMMUTest   \
-	RUN_ESMF_FieldRedistArbUTest 
-#	RUN_ESMF_FieldMeshSMMUTest \
+	RUN_ESMF_FieldRedistArbUTest \
+	RUN_ESMF_FieldMeshSMMUTest
                 
 TESTS_RUN_UNI = RUN_ESMF_FieldRedistArbUTestUNI
 
@@ -49,8 +49,8 @@ RUN_ESMF_FieldRedistArbUTestUNI:
 RUN_ESMF_FieldLSSMMUTest:
 	$(MAKE) TNAME=FieldLSSMM NP=4 ftest
 
-#RUN_ESMF_FieldMeshSMMUTest:
-#	$(MAKE) TNAME=FieldMeshSMM NP=3 ftest
+RUN_ESMF_FieldMeshSMMUTest:
+	$(MAKE) TNAME=FieldMeshSMM NP=4 ftest
 
 RUN_ESMF_FieldSMMUTest:
 	$(MAKE) TNAME=FieldSMM NP=4 ftest

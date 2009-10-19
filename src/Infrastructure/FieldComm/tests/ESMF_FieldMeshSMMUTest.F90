@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshSMMUTest.F90,v 1.2 2009/07/29 16:38:52 feiliu Exp $
+! $Id: ESMF_FieldMeshSMMUTest.F90,v 1.3 2009/10/19 23:15:29 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldMeshSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldMeshSMMUTest.F90,v 1.2 2009/07/29 16:38:52 feiliu Exp $'
+    '$Id: ESMF_FieldMeshSMMUTest.F90,v 1.3 2009/10/19 23:15:29 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -55,7 +55,7 @@ program ESMF_FieldMeshSMMUTest
     if(rc /= ESMF_SUCCESS) &
         call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-    if (.not. ESMF_TestMinPETs(3, ESMF_SRCLINE)) &
+    if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) &
         call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 #ifdef ESMF_TESTEXHAUSTIVE
@@ -64,7 +64,7 @@ program ESMF_FieldMeshSMMUTest
         !E-X_UTest_Multi_Proc_Only
         call test_smm_1db(rc)
         write(failMsg, *) ""
-        write(name, *) "FieldMeshSMM test using lpe for both src and dst, with halos"
+        write(name, *) "FieldMeshSMM test using localPet for both src and dst, with halos"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
@@ -88,7 +88,7 @@ contains
         type(ESMF_VM)                               :: vm
         type(ESMF_RouteHandle)                      :: routehandle
         type(ESMF_ArraySpec)                        :: arrayspec
-        integer                                     :: localrc, lpe, i
+        integer                                     :: finalrc
 
         integer, pointer                            :: srcfptr(:), dstfptr(:)
         integer, pointer                            :: fptr(:)
@@ -97,155 +97,306 @@ contains
         integer(ESMF_KIND_I4), allocatable          :: factorList(:)
         integer, allocatable                        :: factorIndexList(:,:)
 
-        integer                                     :: n_node, n_elem, j, l
-        integer, allocatable :: nodeId(:)
-        real(ESMF_KIND_R8), allocatable :: nodeCoord(:)
-        integer, allocatable :: nodeOwner(:)
+        integer                         :: i, localPet, petCount
 
-        integer, allocatable :: elemId(:)
-        integer, allocatable :: elemType(:)
-        integer, allocatable :: elemConn(:)
-        integer              :: conn(16) = (/1,2,5,4,2,3,6,5,4,5,8,7,5,6,9,8/)
+        integer, pointer :: nodeIds(:),nodeOwners(:)
+        real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+        integer :: numNodes
+        integer :: numElems
+        integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
 
         rc = ESMF_SUCCESS
-        localrc = ESMF_SUCCESS
+        finalrc = ESMF_SUCCESS
 
-        call ESMF_VMGetCurrent(vm, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+        ! get global VM
+        call ESMF_VMGetGlobal(vm, rc=rc)
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+        call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-        call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+       if (petCount .eq. 4) then
+          ! Setup mesh data depending on PET
+          if (localPet .eq. 0) then
+             ! Fill in node data
+             numNodes=4
 
-        ! create 2x2 mesh on a Euclidean surface and Fields
-        n_node = 9
-        n_elem = 4
-        
-        allocate(nodeId(n_node), nodeCoord(2*n_node), nodeOwner(n_node))
-        allocate(elemId(n_elem), elemType(n_elem), elemConn(n_elem*4))
+            !! node ids
+            allocate(nodeIds(numNodes))
+            nodeIds=(/1,2,4,5/) 
 
-        do i = 1, n_node
-            nodeId(i) = i
-        enddo
-        do i = 1, 3
-            do j = 1, 3
-                l = (i-1)*3+j
-                nodeCoord(2*l-1) = i
-                nodeCoord(2*l) = j
-            enddo
-        enddo
-        nodeOwner = 0
-        do i = 1, n_elem
-            elemId(i) = i
-            elemType(i) = 9             ! Quard
-        enddo
-        elemConn = conn
+            !! node Coords
+            allocate(nodeCoords(numNodes*2))
+            nodeCoords=(/0.0,0.0, &
+                         1.0,0.0, &
+                         0.0,1.0, &
+                         1.0,1.0/)
 
-        mesh = ESMF_MeshCreate(2,2,nodeId, nodeCoord, nodeOwner, elemId, elemType,elemConn,localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            !! node owners
+            allocate(nodeOwners(numNodes))
+            nodeOwners=(/0,0,0,0/) ! everything on proc 0
 
-        call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ! Fill in elem data
+            numElems=1
 
-        srcField = ESMF_FieldCreate(mesh, arrayspec, &
-            rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            !! elem ids
+            allocate(elemIds(numElems))
+            elemIds=(/1/) 
 
-        call ESMF_FieldGet(srcField, localDe=0, farray=srcfptr, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            !! elem type
+            allocate(elemTypes(numElems))
+            elemTypes=ESMF_MESHELEMTYPE_QUAD
 
-        srcfptr = 1
+            !! elem conn
+            allocate(elemConn(numElems*4))
+            elemConn=(/1,2,4,3/)
+          else if (localPet .eq. 1) then
+             ! Fill in node data
+             numNodes=4
 
-        ! a one dimensional grid whose index space is an isomorphism with the mesh's
-        distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/n_node/), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            !! node ids
+            allocate(nodeIds(numNodes))
+            nodeIds=(/2,3,5,6/) 
 
-        grid = ESMF_GridCreate(distgrid=distgrid, gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            !! node Coords
+            allocate(nodeCoords(numNodes*2))
+            nodeCoords=(/1.0,0.0, &
+                         2.0,0.0, &
+                         1.0,1.0, &
+                         2.0,1.0/)
 
-        dstField = ESMF_FieldCreate(grid, arrayspec, &
-            rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            !! node owners
+            allocate(nodeOwners(numNodes))
+            nodeOwners=(/0,1,0,1/) 
 
-        call ESMF_FieldGet(dstField, localDe=0, farray=dstfptr, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ! Fill in elem data
+            numElems=1
 
-        dstfptr = 0
+            !! elem ids
+            allocate(elemIds(numElems))
+            elemIds=(/2/) 
 
-        ! initialize factorList and factorIndexList
-        ! the diagonal of the 9x9 diagonal matrix on 3 PETs is (1 2 3 1 2 3 1 2 3)
-        allocate(factorList(3))
-        allocate(factorIndexList(2,3))
-        factorList = (/1,2,3/)
-        factorIndexList(1,:) = (/lpe*3+1,lpe*3+2,lpe*3+3/)
-        factorIndexList(2,:) = (/lpe*3+1,lpe*3+2,lpe*3+3/)
-        call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
-            factorList, factorIndexList, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            !! elem type
+            allocate(elemTypes(numElems))
+            elemTypes=ESMF_MESHELEMTYPE_QUAD
 
-        ! perform smm
-        call ESMF_FieldSMM(srcField, dstField, routehandle, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            !! elem conn
+            allocate(elemConn(numElems*4))
+            elemConn=(/1,2,4,3/)
+          else if (localPet .eq. 2) then
+             ! Fill in node data
+             numNodes=4
 
-        ! verify smm
-        call ESMF_FieldGet(dstField, localDe=0, farray=fptr, &
-            exclusiveLBound=exlb, exclusiveUBound=exub, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            !! node ids
+            allocate(nodeIds(numNodes))
+            nodeIds=(/4,5,7,8/) 
 
-        ! Verify that the smm data in dstField(l) is correct.
-        ! Before the smm op, the dst Field contains all 0. 
-        ! The smm op reset the values to the index value, verify this is the case.
-        ! This is a result of the collapsing index and matrix multiplication with
-        ! the diagonal matrix A and a column vector of all 1
-        !write(*, '(9I3)') l, lpe, fptr
-        do i = exlb(1), exub(1)
-            if(fptr(i) .ne. i) localrc = ESMF_FAILURE
-        enddo
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            !! node Coords
+            allocate(nodeCoords(numNodes*2))
+            nodeCoords=(/0.0,1.0, &
+                         1.0,1.0, &
+                         0.0,2.0, &
+                         1.0,2.0/)
 
-        ! release SMM route handle
-        call ESMF_FieldSMMRelease(routehandle, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            !! node owners
+            allocate(nodeOwners(numNodes))
+            nodeOwners=(/0,0,2,2/) 
 
-        ! release all acquired resources
-        call ESMF_FieldDestroy(srcField)
-        call ESMF_FieldDestroy(dstField)
-        call ESMF_MeshDestroy(mesh)
-        call ESMF_GridDestroy(grid)
-        call ESMF_DistGridDestroy(distgrid)
-        deallocate(factorList, factorIndexList)
-        deallocate(nodeId, nodeCoord, nodeOwner)
-        deallocate(elemId, elemType, elemConn)
-        rc = ESMF_SUCCESS
+            ! Fill in elem data
+            numElems=1
+
+            !! elem ids
+            allocate(elemIds(numElems))
+            elemIds=(/3/) 
+
+            !! elem type
+            allocate(elemTypes(numElems))
+            elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+            !! elem conn
+            allocate(elemConn(numElems*4))
+            elemConn=(/1,2,4,3/)  
+          else 
+             ! Fill in node data
+             numNodes=4
+
+            !! node ids
+            allocate(nodeIds(numNodes))
+            nodeIds=(/5,6,8,9/) 
+
+            !! node Coords
+            allocate(nodeCoords(numNodes*2))
+            nodeCoords=(/1.0,1.0, &
+                         2.0,1.0, &
+                         1.0,2.0, &
+                         2.0,2.0/)
+
+            !! node owners
+            allocate(nodeOwners(numNodes))
+            nodeOwners=(/0,1,2,3/) 
+
+            ! Fill in elem data
+            numElems=1
+
+            !! elem ids
+            allocate(elemIds(numElems))
+            elemIds=(/4/) 
+
+            !! elem type
+            allocate(elemTypes(numElems))
+            elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+            !! elem conn
+            allocate(elemConn(numElems*4))
+            elemConn=(/1,2,4,3/)  
+          endif
+
+          ! Create Mesh structure in 1 step
+          mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+                 nodeIds=nodeIds, nodeCoords=nodeCoords, &
+                 nodeOwners=nodeOwners, elementIds=elemIds,&
+                 elementTypes=elemTypes, elementConn=elemConn, &
+                 rc=rc)
+          if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+          ! deallocate node data
+          deallocate(nodeIds)
+          deallocate(nodeCoords)
+          deallocate(nodeOwners)
+
+          ! deallocate elem data
+          deallocate(elemIds)
+          deallocate(elemTypes)
+          deallocate(elemConn)
+          call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
+          if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+          srcField = ESMF_FieldCreate(mesh, arrayspec, &
+              rc=rc)
+          if (ESMF_LogMsgFoundError(rc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
+
+          call ESMF_FieldGet(srcField, localDe=0, farrayPtr=srcfptr, rc=rc)
+          if (ESMF_LogMsgFoundError(rc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
+
+          srcfptr = 1
+
+          ! a one dimensional grid whose index space is an isomorphism with the mesh's
+          distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/9/), rc=rc)
+          if (ESMF_LogMsgFoundError(rc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
+
+          grid = ESMF_GridCreate(distgrid=distgrid, gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), rc=rc)
+          if (ESMF_LogMsgFoundError(rc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
+
+          dstField = ESMF_FieldCreate(grid, arrayspec, &
+              rc=rc)
+          if (ESMF_LogMsgFoundError(rc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
+
+          call ESMF_FieldGet(dstField, localDe=0, farrayPtr=dstfptr, rc=rc)
+          if (ESMF_LogMsgFoundError(rc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
+
+          dstfptr = 0
+
+          ! initialize factorList and factorIndexList
+          ! the diagonal of the 9x9 diagonal matrix on 3 PETs is (1 2 3 1 2 3 1 2 3)
+          if (localPet == 0) then
+              ! 4 -> 3
+              allocate(factorList(3))
+              allocate(factorIndexList(2,3))
+              factorList = (/1,2,3/)
+              factorIndexList(1,:) = (/1, 1, 1/)
+              factorIndexList(2,:) = (/1, 2, 3/)
+              call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
+                  factorList, factorIndexList, rc=rc)
+              if (ESMF_LogMsgFoundError(rc,  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rc)) return
+              deallocate(factorList, factorIndexList)
+          else if (localPet == 1) then
+              allocate(factorList(2))
+              allocate(factorIndexList(2,2))
+              factorList = (/1,2/)
+              factorIndexList(1,:) = (/5, 6/)
+              factorIndexList(2,:) = (/4, 5/)
+              call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
+                  factorList, factorIndexList, rc=rc)
+              if (ESMF_LogMsgFoundError(rc,  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rc)) return
+              deallocate(factorList, factorIndexList)
+          else if (localPet == 2) then
+              allocate(factorList(2))
+              allocate(factorIndexList(2,2))
+              factorList = (/1,2/)
+              factorIndexList(1,:) = (/7, 8/)
+              factorIndexList(2,:) = (/6, 7/)
+              call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
+                  factorList, factorIndexList, rc=rc)
+              if (ESMF_LogMsgFoundError(rc,  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rc)) return
+              deallocate(factorList, factorIndexList)
+          else if (localPet == 3) then
+              allocate(factorList(2))
+              allocate(factorIndexList(2,2))
+              factorList = (/1,2/)
+              factorIndexList(1,:) = (/9,9/)
+              factorIndexList(2,:) = (/8,9/)
+              call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
+                  factorList, factorIndexList, rc=rc)
+              if (ESMF_LogMsgFoundError(rc,  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rc)) return
+              deallocate(factorList, factorIndexList)
+          endif
+
+          ! perform smm
+          call ESMF_FieldSMM(srcField, dstField, routehandle, rc=rc)
+          if (ESMF_LogMsgFoundError(rc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
+
+          ! verify smm
+          call ESMF_FieldGet(dstField, localDe=0, farrayPtr=fptr, &
+              exclusiveLBound=exlb, exclusiveUBound=exub, rc=rc)
+          if (ESMF_LogMsgFoundError(rc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
+
+          ! Verify that the smm data in dstField(l) is correct.
+          ! Before the smm op, the dst Field contains all 0. 
+          ! The smm op reset the values to the index value, verify this is the case.
+          ! This is a result of the collapsing index and matrix multiplication with
+          ! the diagonal matrix A and a column vector of all 1
+          !write(*, '(9I3)') l, localPet, fptr
+          do i = exlb(1), exub(1)
+              if(fptr(i) .ne. i) finalrc = ESMF_FAILURE
+          enddo
+          if (ESMF_LogMsgFoundError(rc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
+
+          ! release SMM route handle
+          call ESMF_FieldSMMRelease(routehandle, rc=rc)
+          if (ESMF_LogMsgFoundError(rc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
+
+          ! release all acquired resources
+          call ESMF_FieldDestroy(srcField)
+          call ESMF_FieldDestroy(dstField)
+          call ESMF_MeshDestroy(mesh)
+          call ESMF_GridDestroy(grid)
+          call ESMF_DistGridDestroy(distgrid)
+        ! endif for skip for != 4 procs
+        endif 
+        rc = finalrc
     end subroutine test_smm_1db
 #endif
 
