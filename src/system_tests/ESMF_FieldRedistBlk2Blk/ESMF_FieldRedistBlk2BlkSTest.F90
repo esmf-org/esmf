@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.16 2009/10/15 16:52:51 svasquez Exp $
+! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.17 2009/10/19 17:19:43 svasquez Exp $
 !
 ! System test FieldRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -56,7 +56,6 @@
     type(ESMF_VM):: vm
 
     ! cumulative result: count failures; no failures equals "all pass"
-    integer :: testresult = 0
     integer :: result = 0
 
     ! individual test name
@@ -350,10 +349,7 @@
     write(failMsg, *)  "Redistribution back not same as original"
     write(testname, *) "System Test FieldRedistBlk2Blk: Field Redistribute"
 
-    call ESMF_TestGlobal(((miscount.eq.0).and.(rc.eq.ESMF_SUCCESS)), &
-      testname, failMsg, testresult, ESMF_SRCLINE)
-
-    if ((my_pet .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+    if (rc .ne. ESMF_SUCCESS) then
       ! Separate message to console, for quick confirmation of success/failure
       if ((miscount.eq.0) .and. (rc .eq. ESMF_SUCCESS)) then
         write(finalMsg, *) "SUCCESS: Data redistributed twice same as original."
