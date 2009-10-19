@@ -1,4 +1,4 @@
-! $Id: ESMF_DirectCouplingSTest.F90,v 1.7 2009/10/14 20:53:20 svasquez Exp $
+! $Id: ESMF_DirectCouplingSTest.F90,v 1.8 2009/10/19 16:57:53 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -384,7 +384,8 @@ program ESMF_DirectCouplingSTest
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
 
-  ! Print final PASS/FAIL and add # of procs message to log file.
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
   call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
 
