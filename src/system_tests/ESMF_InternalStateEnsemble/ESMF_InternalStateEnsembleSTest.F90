@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEnsembleSTest.F90,v 1.10 2009/10/15 18:26:13 svasquez Exp $
+! $Id: ESMF_InternalStateEnsembleSTest.F90,v 1.11 2009/10/19 17:39:41 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -72,7 +72,6 @@ program ESMF_InternalStateEnsembleSTest
 
 
   ! cumulative result: count failures; no failures equals "all pass"
-  integer :: testresult = 0
   integer :: result = 0
 
   ! individual test name
@@ -360,11 +359,8 @@ program ESMF_InternalStateEnsembleSTest
   ! Normal ESMF Test output
   print *, testname, " complete."
 
-  ! IMPORTANT: TestGlobal() prints the PASS: string that the scripts grep for.
-  call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), testname, failMsg, testresult, &
-    ESMF_SRCLINE)
 
-  if ((localPet .eq. 0) .and. (rc .eq. ESMF_SUCCESS)) then
+  if (rc .eq. ESMF_SUCCESS) then
     ! Separate message to console, for quick confirmation of success/failure
     write(finalMsg, *) "SUCCESS: ",trim(testname)," finished correctly."
     write(0, *) ""

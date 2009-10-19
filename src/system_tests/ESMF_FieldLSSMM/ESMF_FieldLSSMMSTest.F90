@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldLSSMMSTest.F90,v 1.4 2009/10/15 18:15:06 svasquez Exp $
+! $Id: ESMF_FieldLSSMMSTest.F90,v 1.5 2009/10/19 17:37:03 svasquez Exp $
 !
 ! System test code FieldLSSMM
 !  Description on Sourceforge under System Test #79497
@@ -52,7 +52,6 @@
     type(ESMF_Time) :: stopTime
 
     ! cumulative result: count failures; no failures equals "all pass"
-    integer :: testresult = 0
     integer :: result = 0
 
     ! individual test name
@@ -350,11 +349,7 @@
     write(failMsg, *) "System Test failure"
     write(testname, *) "System Test FieldLSSMM: LocStream based Field SMM"
 
-    call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), &
-      testname, failMsg, testresult, ESMF_SRCLINE)
-
-    ! Only on PET 0 or any PET with an error. 
-    if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+    if (rc .ne. ESMF_SUCCESS) then
       ! Separate message to console, for quick confirmation of success/failure
       if (rc .eq. ESMF_SUCCESS) then
         write(finalMsg, *) "SUCCESS: LocStream based Field SMM test finished correctly."
