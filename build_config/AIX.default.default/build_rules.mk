@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.34 2009/10/09 04:13:01 theurich Exp $
+# $Id: build_rules.mk,v 1.35 2009/10/20 15:57:43 theurich Exp $
 #
 # AIX.default.default
 #
@@ -46,7 +46,7 @@ endif
 # Print compiler version string
 #
 ESMF_F90COMPILER_VERSION    = lslpp -l | fgrep xlf
-ESMF_CXXCOMPILER_VERSION    = lslpp -l | fgrep xlC
+ESMF_CXXCOMPILER_VERSION    = lslpp -l | fgrep C++
 
 ############################################################
 # 32- vs. 64-bit ABI
