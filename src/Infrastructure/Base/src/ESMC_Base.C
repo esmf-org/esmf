@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.127 2009/09/24 17:15:18 theurich Exp $
+// $Id: ESMC_Base.C,v 1.128 2009/10/20 23:50:00 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.127 2009/09/24 17:15:18 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.128 2009/10/20 23:50:00 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -710,61 +710,49 @@
     rc = ESMC_RC_NOT_IMPL;
 
     fixedpart = sizeof(ESMC_Base);
-    if ((inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < fixedpart) {
+    if (inquireflag == ESMF_INQUIREONLY) {
+      *offset += fixedpart;
+    } else {
+      if ((*length - *offset) < fixedpart) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
                                "Buffer too short to add a Base object", &rc);
         return ESMF_FAILURE; 
         //buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
         //*length += 2 * fixedpart;
-    }
+      }
 
-    ip = (int *)(buffer + *offset);
-    if (inquireflag != ESMF_INQUIREONLY) {
+      ip = (int *)(buffer + *offset);
       *ip++ = ID;
       *ip++ = refCount;  
       *ip++ = classID;  
-    } else
-      ip += 3;
 
-    sp = (ESMC_Status *)ip;
-    if (inquireflag != ESMF_INQUIREONLY){
+      sp = (ESMC_Status *)ip;
       *sp++ = baseStatus;
       *sp++ = status;
-    }else
-      sp += 2;
 
-    pfp = (ESMC_ProxyFlag *)sp;
-    if (inquireflag != ESMF_INQUIREONLY)
+      pfp = (ESMC_ProxyFlag *)sp;
       *pfp++ = proxyflag;
-    else
-      pfp++;
 
-    cp = (char *)pfp;
-    if (inquireflag != ESMF_INQUIREONLY) {
+      cp = (char *)pfp;
       memcpy(cp, baseName, ESMF_MAXSTR);
       cp += ESMF_MAXSTR;
       memcpy(cp, baseNameF90, ESMF_MAXSTR);
       cp += ESMF_MAXSTR;
       memcpy(cp, className, ESMF_MAXSTR);
       cp += ESMF_MAXSTR;
-    } else
-      cp += 3*ESMF_MAXSTR;
 
-    ip = (int *)cp;
-    cp = (char *)ip;
+      ip = (int *)cp;
+      cp = (char *)ip;
 
-    // update the offset before calling AttributeSerialize
-    *offset = (cp - buffer);
+      // update the offset before calling AttributeSerialize
+      *offset = (cp - buffer);
+    }
 
     // Serialize the Attribute hierarchy
     if (attreconflag == ESMC_ATTRECONCILE_ON) { 
       rc = root.ESMC_Serialize(buffer,length,offset, inquireflag);
     }
 
-  if (inquireflag == ESMF_INQUIREONLY)
-    if (*offset < fixedpart)
-      *offset = fixedpart;
- 
   return ESMF_SUCCESS;
 
  } // end ESMC_Serialize
