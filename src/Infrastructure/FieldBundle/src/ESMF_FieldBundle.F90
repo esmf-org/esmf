@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.31 2009/10/15 16:22:05 oehmke Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.32 2009/10/20 03:16:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -1077,7 +1077,7 @@ end function
       subroutine ESMF_FieldBundleGetInfo(bundle, geomtype, grid, mesh, locstream, fieldCount, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle
+      type(ESMF_FieldBundle), intent(in) :: bundle
       type(ESMF_GeomType), intent(out), optional :: geomtype
       type(ESMF_Grid), intent(out), optional :: grid
       type(ESMF_Mesh), intent(out), optional :: mesh
@@ -1223,7 +1223,7 @@ end function
       subroutine ESMF_FieldBundleGetAllFields(bundle, fieldList, fieldCount, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle
+      type(ESMF_FieldBundle), intent(in) :: bundle
       type(ESMF_Field), dimension (:), optional :: fieldList
       integer, intent(out), optional :: fieldCount
       integer, intent(out), optional :: rc
@@ -1299,7 +1299,7 @@ end function
       logical :: ESMF_FieldBundleIsCongruent
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle
+      type(ESMF_FieldBundle), intent(in) :: bundle
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -1452,7 +1452,7 @@ end function
       subroutine ESMF_FieldBundleGetFieldByName(bundle, name, field, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle
+      type(ESMF_FieldBundle), intent(in) :: bundle
       character (len = *), intent(in) :: name
       type(ESMF_Field), intent(out) :: field
       integer, intent(out), optional :: rc
@@ -1548,7 +1548,7 @@ end function
       subroutine ESMF_FieldBundleGetFieldByNum(bundle, fieldIndex, field, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle
+      type(ESMF_FieldBundle), intent(in) :: bundle
       integer, intent(in) :: fieldIndex
       type(ESMF_Field), intent(out) :: field
       integer, intent(out), optional :: rc
@@ -1628,7 +1628,7 @@ end function
       subroutine ESMF_FieldBundleGetFieldNames(bundle, nameList, nameCount, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle 
+      type(ESMF_FieldBundle), intent(in) :: bundle 
       character (len = *), intent(out) :: nameList(:)
       integer, intent(out), optional :: nameCount     
       integer, intent(out), optional :: rc     
@@ -1694,7 +1694,7 @@ end function
       subroutine ESMF_FieldBundlePrint(bundle, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle
+      type(ESMF_FieldBundle), intent(in) :: bundle
       character (len=*), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !

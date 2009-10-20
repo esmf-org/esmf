@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMM.F90,v 1.6 2009/10/15 16:02:32 feiliu Exp $
+! $Id: ESMF_FieldBundleSMM.F90,v 1.7 2009/10/20 03:16:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldBundleSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleSMM.F90,v 1.6 2009/10/15 16:02:32 feiliu Exp $'
+      '$Id: ESMF_FieldBundleSMM.F90,v 1.7 2009/10/20 03:16:39 theurich Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleSMMStore
@@ -81,7 +81,7 @@ contains
   subroutine ESMF_FieldBundleSMM(srcFieldBundle, dstFieldBundle, routehandle, zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-        type(ESMF_FieldBundle), intent(inout),optional  :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(in),   optional  :: srcFieldBundle
         type(ESMF_FieldBundle), intent(inout),optional  :: dstFieldBundle
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
         type(ESMF_RegionFlag),  intent(in),   optional  :: zeroflag
@@ -288,7 +288,7 @@ contains
 !        routehandle, factorList, factorIndexList, rc) 
 ! 
 ! !ARGUMENTS: 
-!   type(ESMF_FieldBundle),   intent(inout)         :: srcFieldBundle  
+!   type(ESMF_FieldBundle),   intent(in)            :: srcFieldBundle  
 !   type(ESMF_FieldBundle),   intent(inout)         :: dstFieldBundle  
 !   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
 !   <type>(ESMF_KIND_<kind>), intent(in)            :: factorList(:) 
@@ -392,7 +392,7 @@ contains
         routehandle, factorList, factorIndexList, rc) 
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(inout)         :: srcFieldBundle  
+        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
         type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         integer(ESMF_KIND_I4),  intent(in)            :: factorList(:)
@@ -476,7 +476,7 @@ contains
         routehandle, factorList, factorIndexList, rc) 
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(inout)         :: srcFieldBundle  
+        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
         type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         integer(ESMF_KIND_I8),  intent(in)            :: factorList(:)
@@ -560,7 +560,7 @@ contains
         routehandle, factorList, factorIndexList, rc) 
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(inout)         :: srcFieldBundle  
+        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
         type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         real(ESMF_KIND_R4),     intent(in)            :: factorList(:)
@@ -644,7 +644,7 @@ contains
         routehandle, factorList, factorIndexList, rc) 
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(inout)         :: srcFieldBundle  
+        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
         type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         real(ESMF_KIND_R8),     intent(in)            :: factorList(:)
@@ -726,7 +726,7 @@ contains
 !        routehandle, factorList, factorIndexList, rc) 
 ! 
 ! !ARGUMENTS: 
-!   type(ESMF_FieldBundle),   intent(inout)         :: srcFieldBundle  
+!   type(ESMF_FieldBundle),   intent(in)            :: srcFieldBundle  
 !   type(ESMF_FieldBundle),   intent(inout)         :: dstFieldBundle  
 !   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
 !   integer,                  intent(out), optional :: rc 
@@ -800,7 +800,7 @@ contains
         routehandle, rc) 
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(inout)         :: srcFieldBundle  
+        type(ESMF_FieldBundle), intent(in)           :: srcFieldBundle  
         type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         integer,                intent(out), optional :: rc 
