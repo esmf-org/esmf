@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.69 2009/10/13 17:12:43 feiliu Exp $ 
+# $Id: makefile,v 1.70 2009/10/20 04:48:14 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -33,7 +33,8 @@ endif
                
 TESTS_RUN_UNI = RUN_ESMF_FieldStressUTestUNI \
 	RUN_ESMF_FieldRegridUTestUNI \
-	RUN_ESMF_FieldArbGridUTestUNI
+	RUN_ESMF_FieldArbGridUTestUNI \
+	RUN_ESMC_FieldUTestUNI
 
 include ${ESMF_DIR}/makefile
 
@@ -56,6 +57,11 @@ RUN_ESMC_FieldUTest:
 	chmod u+rw $(ESMF_TESTDIR)/data/*
 	$(MAKE) TNAME=Field NP=1 ctest
 
+RUN_ESMC_FieldUTestUNI:
+	cp -r data $(ESMF_TESTDIR)
+	chmod u+rw $(ESMF_TESTDIR)/data/*
+	$(MAKE) TNAME=Field NP=1 ctest
+        
 RUN_ESMF_FieldCreateGetUTest:
 	$(MAKE) TNAME=FieldCreateGet NP=4 ftest
 
