@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.27 2009/10/20 17:15:43 theurich Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.28 2009/10/20 18:52:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@ program ESMF_DistGridEx
   integer, allocatable:: dimExtent(:,:), localIndexList(:)
   integer, allocatable:: minIndex(:,:), maxIndex(:,:), regDecomp(:,:)
   integer, allocatable:: deBlockList(:,:,:), connectionList(:,:)
-  integer, allocatable:: localDeList(:)
+  integer, allocatable:: localDeList(:), arbSeqIndexList(:)
   ! result code
   integer :: finalrc
   
@@ -750,7 +750,7 @@ program ESMF_DistGridEx
   
   distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
     regDecomp=regDecomp, rc=rc)
-!EOC  
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !  call ESMF_DistGridPrint(distgrid, rc=rc)
@@ -788,6 +788,114 @@ program ESMF_DistGridEx
 ! in the single LR domain case to overwrite the default grid decomposition 
 ! (per patch) and to change the overall DE labeling sequence, respectively.
 !EOE
+
+!BOE
+! \subsubsection{Arbitrary DistGrids with user-supplied sequence indices}
+!
+! The DistGrid class supports the communication methods of higher classes, 
+! like Array and Field, by associating a unique {\em sequence index} with each
+! DistGrid index tuple. This sequence index can be used to address every Array
+! or Field element. By default, the DistGrid does not actually generate and
+! store the sequence index of each element. Instead a default sequence through
+! the elements is implemented in the DistGrid code. This default sequence 
+! is used internally when needed.
+!
+! The DistGrid class provides two {\tt ESMF\_DistGridCreate()} calls that 
+! allow the user to specify arbitrary sequence indices, overriding the use of
+! the default sequence index scheme. The user sequence indices are passed to
+! the DistGrid in form of 1d Fortran arrays, one array on each PET. The local
+! size of this array on each PET determines the number of DistGrid elements on
+! the PET. The supplied sequence indices must be unique across all PETs. 
+!
+!EOE
+
+!BOC
+  allocate(arbSeqIndexList(10))   ! each PET will have 10 elements
+  
+  do i=1, 10
+    arbSeqIndexList(i) = (i-1)*petCount + localPet  ! initialize unique seq. indices
+  enddo
+!EOC
+  
+!BOE
+! A default DELayout will be created automatically during 
+! {\tt ESMF\_DistGridCreate()}, associating 1 DE per PET.
+!EOE
+
+!BOC
+  distgrid = ESMF_DistGridCreate(arbSeqIndexList=arbSeqIndexList, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! The user provided sequence index array can be deallocated once it has
+! been used.
+!EOE
+
+!BOC
+  deallocate(arbSeqIndexList)
+!EOC
+
+!  call ESMF_DistGridPrint(distgrid, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! The {\tt distgrid} object can be used just like any other DistGrid object.
+! The "arbitrary" nature of {\tt distgrid} will only become visible during
+! Array or Field communication methods, where source and destination objects
+! map elements according to the sequence indices provided by the associated
+! DistGrid objects.
+!EOE
+
+!BOC
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! The second {\tt ESMF\_DistGridCreate()} call, that accepts the 
+! {\tt arbSeqIndexList} argument, allows the user to specify additional,
+! regular DistGrid dimensions. These additional DistGrid dimensions are not
+! decomposed across DEs, but instead are simply "added" or "multiplied" to the
+! 1D arbitrary dimension.
+!
+! The same {\tt arbSeqIndexList} array as before is used to define the 
+! user supplied sequence indices.
+!EOE
+
+!BOC
+  allocate(arbSeqIndexList(10))   ! each PET will have 10 elements
+  
+  do i=1, 10
+    arbSeqIndexList(i) = (i-1)*petCount + localPet  ! initialize unique seq. indices
+  enddo
+!EOC
+
+!BOE
+! The additional DistGrid dimensions are specified in the usual manner using
+! {\tt minIndex} and {\tt maxIndex} arguments. The {\tt dimCount} of the
+! resulting DistGrid is the size of the {\tt minIndex} and {\tt maxIndex}
+! arguments plus 1 for the arbitrary dimension. The {\tt arbDim} argument is
+! used to indicate which or the resulting DistGrid dimensions
+! is associated with the arbitrary sequence indices provided by the user.
+!EOE
+
+!BOC
+  distgrid = ESMF_DistGridCreate(arbSeqIndexList=arbSeqIndexList, &
+    arbDim=1, minIndex=(/1,1/), maxIndex=(/5,7/), rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOC
+  deallocate(arbSeqIndexList)
+!EOC
+  call ESMF_DistGridPrint(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOC
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 
 10 continue
