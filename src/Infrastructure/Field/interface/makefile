@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.14 2009/10/20 04:35:19 theurich Exp $ 
+# $Id: makefile,v 1.15 2009/10/20 18:45:46 feiliu Exp $ 
 
 ALL: build_here 
 
-SOURCEC	  = ESMCI_Field_F.C ESMC_Field.C
+SOURCEC	  = ESMCI_Field_F.C ESMCI_Field.C ESMC_Field.C
 SOURCEF	  = ESMF_Field_C.F90 
 
 # List all .h files which should be copied to a common include dir

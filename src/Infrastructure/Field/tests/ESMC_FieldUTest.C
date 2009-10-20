@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldUTest.C,v 1.8 2009/10/20 04:43:16 theurich Exp $
+// $Id: ESMC_FieldUTest.C,v 1.9 2009/10/20 18:45:46 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -16,6 +16,9 @@
 
 // ESMF header
 #include "ESMC.h"
+#include "ESMC_ArraySpec.h"
+#include "ESMC_Mesh.h"
+#include "ESMC_Field.h"
 
 // ESMF Test header
 #include "ESMC_Test.h"
@@ -166,7 +169,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  field = ESMC_FieldCreate(&mesh, &arrayspec, i_gridToFieldMap, i_ungriddedLBound, i_ungriddedUBound, "field1", &rc);
+  field = ESMC_FieldCreate(mesh, arrayspec, i_gridToFieldMap, i_ungriddedLBound, i_ungriddedUBound, "field1", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -174,7 +177,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Get an ESMC_Mesh object from ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_FieldGet(&field, &mesh1, &rc);
+  rc = ESMC_FieldGet(field, &mesh1, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -182,7 +185,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Destroy ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_FieldDestroy(&field, &rc);
+  rc = ESMC_FieldDestroy(field, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -190,7 +193,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Destroy ESMC_Mesh object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshDestroy(&mesh);
+  rc = ESMC_MeshDestroy(&mesh1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.70 2009/10/20 04:48:14 theurich Exp $ 
+# $Id: makefile,v 1.71 2009/10/20 18:45:46 feiliu Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -7,11 +7,11 @@ run_uni:  run_unit_tests_uni
 LOCDIR	  = src/Infrastructure/Field/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldUTest \
+		$(ESMF_TESTDIR)/ESMC_FieldUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldCreateGetUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldArbGridUTest \
-		$(ESMF_TESTDIR)/ESMF_FieldStressUTest \
-		$(ESMF_TESTDIR)/ESMC_FieldUTest
+		$(ESMF_TESTDIR)/ESMF_FieldStressUTest
                
 TESTS_RUN     = RUN_ESMF_FieldUTest \
 		RUN_ESMF_FieldCreateGetUTest \
