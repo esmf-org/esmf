@@ -26,9 +26,14 @@ Migrator::Migrator(UInt ndest_gids, const UInt dest_gids[],
   
   // Assign default lids, if not provided
   if (!dest_lids) {
-    lids.resize(ndest_gids);
-    for (UInt i = 0; i < ndest_gids; i++)
-      lids[i] = i;
+    if (ndest_gids > 0) {
+      lids.resize(ndest_gids);
+      for (UInt i = 0; i < ndest_gids; i++)
+        lids[i] = i;
+    } else {
+      lids.resize (1);
+      lids[0] = 0;
+    }
   }
   
   dir.Create(ndest_gids, dest_gids, dest_lids ? dest_lids : &lids[0]);
