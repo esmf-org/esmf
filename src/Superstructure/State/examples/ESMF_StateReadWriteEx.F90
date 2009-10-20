@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReadWriteEx.F90,v 1.2 2009/10/16 21:33:52 eschwab Exp $
+! $Id: ESMF_StateReadWriteEx.F90,v 1.3 2009/10/20 05:52:13 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 ! !DESCRIPTION:
 !
 ! This program shows an example of reading and writing Arrays from a State
-! to/from a netCDF file.
+! from/to a NetCDF file.
 !-----------------------------------------------------------------------------
 
     ! ESMF Framework module
@@ -40,7 +40,7 @@
     type(ESMF_Array) :: latArray, lonArray, timeArray, humidArray, &
                         tempArray, pArray, rhArray
     type(ESMF_VM) :: vm
-    integer :: rc
+    integer :: localPet, rc
 !EOC
     integer :: finalrc
     finalrc = ESMF_SUCCESS
@@ -55,7 +55,8 @@
 !EOE
 
 !BOC
-    call ESMF_Initialize(rc=rc)
+    call ESMF_Initialize(vm=vm, rc=rc)
+    call ESMF_VMGet(vm, localPet=localPet, rc=rc)
 
     state = ESMF_StateCreate("Ocean Import", ESMF_STATE_IMPORT, rc=rc)  
 !EOC
@@ -65,27 +66,29 @@
 !BOE
 !\subsubsection{Reading Arrays from a NetCDF file and Adding to a State}
 !
-!  The following line of code will read all Array data contained in a netCDF
+!  The following line of code will read all Array data contained in a NetCDF
 !  file, place them in {\tt ESMF\_Arrays} and add them to an {\tt ESMF\_State}.
-!  Only PET 0 reads the file; the remaining PETs get a copy via the subsequent
-!  call to {\tt ESMF\_StateReconcile()}.  Note that currently, the data
-!  is not distributed; each PET has only one DE which contains a full copy
-!  of all the data.  Future versions of ESMF will support data decomposition
+!  Only PET 0 reads the file; the States in the other PETs remain empty.
+!  Currently, the data is not decomposed or distributed; each PET
+!  has only 1 DE and only PET 0 contains data after reading the file.
+!  Future versions of ESMF will support data decomposition and distribution
 !  upon reading a file.
+!
+!  Note that the third party NetCDF library must be installed.  For more
+!  details, see the "ESMF Users Guide", 
+!  "Building and Installing the ESMF, Third Party Libraries, NetCDF" and
+!  the website http://www.unidata.ucar.edu/software/netcdf.
 !EOE
 
 !BOC
-    ! Read netCDF data file into Array objects in the State on PET 0
+    ! Read the NetCDF data file into Array objects in the State on PET 0
     call ESMF_StateRead(state, "io_netcdf_testdata.nc", rc=rc)
-!EOC
-    if (rc == ESMF_RC_LIB_NOT_PRESENT) goto 10  ! exit if netCDF not present
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-!BOC
-    ! Reconcile the Arrays, including their attributes, across all PETS in
-    ! the VM
-    call ESMF_VMGetGlobal(vm=vm, rc=rc)
-    call ESMF_StateReconcile(state, vm, ESMF_ATTRECONCILE_ON, rc=rc)
+    ! If the NetCDF library is not present (on PET 0), cleanup and exit 
+    if (rc == ESMF_RC_LIB_NOT_PRESENT) then
+      call ESMF_StateDestroy(state, rc=rc)
+      goto 10
+    endif
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -101,31 +104,34 @@
 !
 !  To see that the State now contains the same data as in the file, the
 !  following shows how to print out what Arrays are contained within the
-!  State and to print the data contained within each Array.  The netCDF utility
-!  "ncdump" can be used to view the contents of the netCDF file.
+!  State and to print the data contained within each Array.  The NetCDF utility
+!  "ncdump" can be used to view the contents of the NetCDF file.
+!  In this example, only PET 0 will contain data.
 !EOE
 
 !BOC
-    ! Print the names and attributes of Array objects contained in the State
-    call ESMF_StatePrint(state, rc=rc)
+    if (localPet == 0) then
+      ! Print the names and attributes of Array objects contained in the State
+      call ESMF_StatePrint(state, rc=rc)
 
-    ! Get each Array by name from the State
-    call ESMF_StateGet(state, "lat",  latArray,   rc=rc)
-    call ESMF_StateGet(state, "lon",  lonArray,   rc=rc)
-    call ESMF_StateGet(state, "time", timeArray,  rc=rc)
-    call ESMF_StateGet(state, "Q",    humidArray, rc=rc)
-    call ESMF_StateGet(state, "TEMP", tempArray,  rc=rc)
-    call ESMF_StateGet(state, "p",    pArray,     rc=rc)
-    call ESMF_StateGet(state, "rh",   rhArray,    rc=rc)
+      ! Get each Array by name from the State
+      call ESMF_StateGet(state, "lat",  latArray,   rc=rc)
+      call ESMF_StateGet(state, "lon",  lonArray,   rc=rc)
+      call ESMF_StateGet(state, "time", timeArray,  rc=rc)
+      call ESMF_StateGet(state, "Q",    humidArray, rc=rc)
+      call ESMF_StateGet(state, "TEMP", tempArray,  rc=rc)
+      call ESMF_StateGet(state, "p",    pArray,     rc=rc)
+      call ESMF_StateGet(state, "rh",   rhArray,    rc=rc)
 
-    ! Print out the Array data
-    call ESMF_ArrayPrint(latArray,   rc=rc)
-    call ESMF_ArrayPrint(lonArray,   rc=rc)
-    call ESMF_ArrayPrint(timeArray,  rc=rc)
-    call ESMF_ArrayPrint(humidArray, rc=rc)
-    call ESMF_ArrayPrint(tempArray,  rc=rc)
-    call ESMF_ArrayPrint(pArray,     rc=rc)
-    call ESMF_ArrayPrint(rhArray,    rc=rc)
+      ! Print out the Array data
+      call ESMF_ArrayPrint(latArray,   rc=rc)
+      call ESMF_ArrayPrint(lonArray,   rc=rc)
+      call ESMF_ArrayPrint(timeArray,  rc=rc)
+      call ESMF_ArrayPrint(humidArray, rc=rc)
+      call ESMF_ArrayPrint(tempArray,  rc=rc)
+      call ESMF_ArrayPrint(pArray,     rc=rc)
+      call ESMF_ArrayPrint(rhArray,    rc=rc)
+    endif
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -140,12 +146,12 @@
 !BOE
 !\subsubsection{Writing Array data within a State to a NetCDF file}
 !
-!  All the Array data within the State on PET 0 can be written out to a netCDF
+!  All the Array data within the State on PET 0 can be written out to a NetCDF
 !  file as follows:
 !EOE
 
 !BOC
-    ! Write Arrays within the State on PET 0 to a netCDF file
+    ! Write Arrays within the State on PET 0 to a NetCDF file
     call ESMF_StateWrite(state, "io_netcdf_testdata_out.nc", rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -162,25 +168,28 @@
 !  Destroying a State only deallocates the container, not the contents, as
 !  the contents may be used in other States and elsewhere.  The contents of a
 !  State, such as the Arrays in this example, must be destroyed separately.
+!  Only PET 0 in this example will have Arrays that need to be destroyed.
 !EOE
 
 !BOC
     ! Destroy the State container
     call ESMF_StateDestroy(state, rc=rc)
 
-    ! Destroy the constituent Arrays
-    call ESMF_ArrayDestroy(latArray,   rc=rc)
-    call ESMF_ArrayDestroy(lonArray,   rc=rc)
-    call ESMF_ArrayDestroy(timeArray,  rc=rc)
-    call ESMF_ArrayDestroy(humidArray, rc=rc)
-    call ESMF_ArrayDestroy(tempArray,  rc=rc)
-    call ESMF_ArrayDestroy(pArray,     rc=rc)
-    call ESMF_ArrayDestroy(rhArray,    rc=rc)
+    if (localPet == 0) then
+      ! Destroy the constituent Arrays
+      call ESMF_ArrayDestroy(latArray,   rc=rc)
+      call ESMF_ArrayDestroy(lonArray,   rc=rc)
+      call ESMF_ArrayDestroy(timeArray,  rc=rc)
+      call ESMF_ArrayDestroy(humidArray, rc=rc)
+      call ESMF_ArrayDestroy(tempArray,  rc=rc)
+      call ESMF_ArrayDestroy(pArray,     rc=rc)
+      call ESMF_ArrayDestroy(rhArray,    rc=rc)
+    endif
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
- 10 continue  ! exit point if netCDF not present
 !BOC
+ 10 continue  ! Exit point if NetCDF not present (PET 0)
     call ESMF_Finalize(rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -192,3 +201,4 @@
     end if
 
     end program ESMF_StateReadWriteEx
+
