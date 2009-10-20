@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.70 2009/10/19 21:41:52 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.71 2009/10/20 05:31:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.70 2009/10/19 21:41:52 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.71 2009/10/20 05:31:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2745,38 +2745,8 @@ int Array::gather(
   VMK::commhandle **commhList = 
     new VMK::commhandle*[dimCount]; // used for indexList comm
   
-  // rootPet is the only receiver for gather
-  char **recvBuffer;
-  if (localPet == rootPet){
-    // for each DE of the Array ceceive a single contiguous recvBuffer
-    // from the associated PET non-blocking and memcpy it into the right 
-    // location in "array".
-    recvBuffer = new char*[deCount]; // contiguous recvBuffer
-    for (int i=0; i<deCount; i++){
-      int de = i;
-      if (patchListPDe[de] == patch){
-        // this DE is located on sending patch
-        // prepare contiguous recvBuffer for this DE and issue non-blocking recv
-        int recvSize =
-          exclusiveElementCountPDe[de]*tensorElementCount*dataSize;  // bytes
-        recvBuffer[de] = new char[recvSize];
-        int srcPet;
-        delayout->getDEMatchPET(de, *vm, NULL, &srcPet, 1);
-        *commh = NULL; // invalidate
-        localrc = vm->recv(recvBuffer[de], recvSize, srcPet, commh);
-        if (localrc){
-          char *message = new char[160];
-          sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-            message, &rc);
-          delete [] message;
-          return rc;
-        }
-      } // DE on patch
-    } // i -> de
-  }
-  
-  // all PETs may be senders
+  // all PETs may be senders of data, each PET issues a maximum of one
+  // non-blocking send, so no problem with too many outstanding comms here
   char **sendBuffer = new char*[localDeCount];
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
@@ -2819,11 +2789,68 @@ int Array::gather(
     }
   } // i -> de
   
-  // todo: separate receive and send commhandles and separately wait!
-  // wait until all the local receives are complete
+  // rootPet is the only receiver for gather data
+  char **recvBuffer;
+  if (localPet == rootPet){
+    int nbCount = 0;  // reset: count of outstanding non-blocking comms
+    const int boostSize = 512;  // max number of posted non-blocking calls:
+                                // stay below typical system limits
+    VMK::commhandle **commhDataList = 
+      new VMK::commhandle*[boostSize]; // used for data comms
+    
+    // for each DE of the Array receive a single contiguous recvBuffer
+    // from the associated PET non-blocking and memcpy it into the right 
+    // location in "array".
+    recvBuffer = new char*[deCount]; // contiguous recvBuffer
+    for (int i=0; i<deCount; i++){
+      int de = i;
+      if (patchListPDe[de] == patch){
+        // this DE is located on sending patch
+        // prepare contiguous recvBuffer for this DE and issue non-blocking recv
+        int recvSize =
+          exclusiveElementCountPDe[de]*tensorElementCount*dataSize;  // bytes
+        recvBuffer[de] = new char[recvSize];
+        int srcPet;
+        delayout->getDEMatchPET(de, *vm, NULL, &srcPet, 1);
+        commhDataList[nbCount] = NULL; // invalidate
+        localrc = vm->recv(recvBuffer[de], recvSize, srcPet,
+          &(commhDataList[nbCount]));
+        ++nbCount;  // count this non-blocking recv
+        if (localrc){
+          char *message = new char[160];
+          sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+            message, &rc);
+          delete [] message;
+          return rc;
+        }
+        
+        // see if outstanding nb-recvs have reached boostSize limit
+        if (nbCount >= boostSize){
+//printf("clearing Gather() boost at nbCount = %d\n", nbCount);
+          // wait for nb-recvs to finish before posting any more
+          for (int j=0; j<nbCount; j++){
+            vm->commwait(&(commhDataList[j]));
+            delete commhDataList[j];
+          }
+          nbCount = 0;  // reset
+        }
+        
+      } // DE on patch
+    } // i -> de
+//printf("clearing Gather() boost at nbCount = %d\n", nbCount);
+    // wait for nb-recvs to finish before exiting
+    for (int j=0; j<nbCount; j++){
+      vm->commwait(&(commhDataList[j]));
+      delete commhDataList[j];
+    }
+    nbCount = 0;  // reset
+    delete [] commhDataList;
+  }
+  
   // wait until all the local sends are complete
-  // for now wait on _all_ outstanding non-blocking comms for this PET
   vm->commqueuewait();
+  // - done waiting on sends -
   
   if (localPet == rootPet){
     char *array = (char *)arrayArg;
