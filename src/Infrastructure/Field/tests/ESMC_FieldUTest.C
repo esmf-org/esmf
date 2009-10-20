@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldUTest.C,v 1.9 2009/10/20 18:45:46 feiliu Exp $
+// $Id: ESMC_FieldUTest.C,v 1.10 2009/10/20 18:46:45 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -16,9 +16,6 @@
 
 // ESMF header
 #include "ESMC.h"
-#include "ESMC_ArraySpec.h"
-#include "ESMC_Mesh.h"
-#include "ESMC_Field.h"
 
 // ESMF Test header
 #include "ESMC_Test.h"
