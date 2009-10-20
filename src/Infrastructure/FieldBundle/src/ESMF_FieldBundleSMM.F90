@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMM.F90,v 1.7 2009/10/20 03:16:39 theurich Exp $
+! $Id: ESMF_FieldBundleSMM.F90,v 1.8 2009/10/20 03:25:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldBundleSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleSMM.F90,v 1.7 2009/10/20 03:16:39 theurich Exp $'
+      '$Id: ESMF_FieldBundleSMM.F90,v 1.8 2009/10/20 03:25:32 theurich Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleSMMStore
@@ -225,6 +225,18 @@ contains
                 zeroflag=l_zeroflag, checkflag=l_checkflag, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+            
+        ! garbage collection
+        if (present(srcFieldBundle)) then
+          call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        if (present(dstFieldBundle)) then
+          call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
         
         ! return successfully
         if (present(rc)) rc = ESMF_SUCCESS
@@ -460,8 +472,18 @@ contains
             factorIndexList, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+            
+        ! garbage collection
+        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if (present(rc)) rc = ESMF_SUCCESS 
+        ! return successfully
+        if (present(rc)) rc = ESMF_SUCCESS
+        
     end subroutine ESMF_FieldBundleSMMStoreI4
 !------------------------------------------------------------------------------ 
 
@@ -544,7 +566,17 @@ contains
             factorIndexList, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        if (present(rc)) rc = ESMF_SUCCESS 
+            
+        ! garbage collection
+        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! return successfully
+        if (present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_FieldBundleSMMStoreI8
 !------------------------------------------------------------------------------ 
@@ -629,7 +661,17 @@ contains
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if (present(rc)) rc = ESMF_SUCCESS 
+        ! garbage collection
+        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! return successfully
+        if (present(rc)) rc = ESMF_SUCCESS
+        
     end subroutine ESMF_FieldBundleSMMStoreR4
 !------------------------------------------------------------------------------ 
 
@@ -713,7 +755,17 @@ contains
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if (present(rc)) rc = ESMF_SUCCESS 
+        ! garbage collection
+        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! return successfully
+        if (present(rc)) rc = ESMF_SUCCESS
+        
     end subroutine ESMF_FieldBundleSMMStoreR8
 
 !---------------------------------------------------------------------------- 
@@ -875,6 +927,16 @@ contains
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if (present(rc)) rc = ESMF_SUCCESS 
+        ! garbage collection
+        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! return successfully
+        if (present(rc)) rc = ESMF_SUCCESS
+        
     end subroutine ESMF_FieldBundleSMMStoreNF
 end module
