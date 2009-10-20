@@ -1,7 +1,7 @@
-! $Id: ESMF_InternalStateEnsembleSTest.F90,v 1.11 2009/10/19 17:39:41 svasquez Exp $
+! $Id: ESMF_InternalStateEnsembleSTest.F90,v 1.12 2009/10/20 18:57:04 svasquez Exp $
 !
 !-------------------------------------------------------------------------
-!ESMF_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
