@@ -1,4 +1,4 @@
-! $Id: ESMF_EnsembleSTest.F90,v 1.1 2009/10/20 17:41:38 peggyli Exp $
+! $Id: ESMF_EnsembleSTest.F90,v 1.2 2009/10/20 18:29:50 peggyli Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -140,7 +140,8 @@ program ESMF_EnsembleSTest
 !-------------------------------------------------------------------------
 !
   ! Initialize framework and get back default global VM
-  call ESMF_Initialize(vm=vm, rc=localrc)
+  call ESMF_Initialize(vm=vm, defaultlogfilename="EnsembleSTest.Log", &
+	defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -575,8 +576,8 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
   ! Normal ESMF Test output
   print *, testname, " complete."
 
-  ! IMPORTANT: TestGlobal() prints the PASS: string that the scripts grep for.
-  call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), testname, failMsg, testresult, &
+  ! IMPORTANT: Test() prints the PASS: string that the scripts grep for.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, testresult, &
     ESMF_SRCLINE)
 
   if ((localPet .eq. 0) .and. (rc .eq. ESMF_SUCCESS)) then
@@ -587,6 +588,7 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
     write(0, *) trim(finalMsg)
     write(0, *) ""
   endif
+
 
   call ESMF_Finalize()
 
