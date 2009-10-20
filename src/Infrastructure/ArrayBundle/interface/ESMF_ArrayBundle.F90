@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.9 2009/07/01 17:28:17 rokuingh Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.10 2009/10/20 02:59:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.9 2009/07/01 17:28:17 rokuingh Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.10 2009/10/20 02:59:49 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -678,11 +678,11 @@ contains
       routehandle, checkflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in),   optional  :: srcArrayBundle
-    type(ESMF_ArrayBundle), intent(out),  optional  :: dstArrayBundle
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    logical,                intent(in),   optional  :: checkflag
-    integer,                intent(out),  optional  :: rc
+    type(ESMF_ArrayBundle), intent(in),     optional  :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout),  optional  :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)             :: routehandle
+    logical,                intent(in),     optional  :: checkflag
+    integer,                intent(out),    optional  :: rc
 !
 ! !DESCRIPTION:
 !   Execute a precomputed ArrayBundle redistribution from the Arrays in
@@ -811,12 +811,12 @@ contains
 !   dstArrayBundle, routehandle, factor, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
-!   type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
-!   type(ESMF_RouteHandle),     intent(inout)           :: routehandle
-!   <type>(ESMF_KIND_<kind>),   intent(in)              :: factor
-!   integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
-!   integer,                    intent(out),  optional  :: rc
+!   type(ESMF_ArrayBundle),   intent(in)              :: srcArrayBundle
+!   type(ESMF_ArrayBundle),   intent(inout)           :: dstArrayBundle
+!   type(ESMF_RouteHandle),   intent(inout)           :: routehandle
+!   <type>(ESMF_KIND_<kind>), intent(in)              :: factor
+!   integer,                  intent(in),   optional  :: srcToDstTransposeMap(:)
+!   integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Store an ArrayBundle redistribution operation from
@@ -889,12 +889,12 @@ contains
     routehandle, factor, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
-    type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
-    integer(ESMF_KIND_I4),      intent(in)              :: factor
-    integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
-    integer,                    intent(out),  optional  :: rc
+    type(ESMF_ArrayBundle), intent(in)              :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout)           :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    integer(ESMF_KIND_I4),  intent(in)              :: factor
+    integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
+    integer,                intent(out),  optional  :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -950,12 +950,12 @@ contains
     routehandle, factor, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
-    type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
-    integer(ESMF_KIND_I8),      intent(in)              :: factor
-    integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
-    integer,                    intent(out),  optional  :: rc
+    type(ESMF_ArrayBundle), intent(in)              :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout)           :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    integer(ESMF_KIND_I8),  intent(in)              :: factor
+    integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
+    integer,                intent(out),  optional  :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -1011,12 +1011,12 @@ contains
     routehandle, factor, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
-    type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
-    real(ESMF_KIND_R4),         intent(in)              :: factor
-    integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
-    integer,                    intent(out),  optional  :: rc
+    type(ESMF_ArrayBundle), intent(in)              :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout)           :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    real(ESMF_KIND_R4),     intent(in)              :: factor
+    integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
+    integer,                intent(out),  optional  :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -1072,12 +1072,12 @@ contains
     routehandle, factor, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
-    type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
-    real(ESMF_KIND_R8),         intent(in)              :: factor
-    integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
-    integer,                    intent(out),  optional  :: rc
+    type(ESMF_ArrayBundle), intent(in)              :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout)           :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    real(ESMF_KIND_R8),     intent(in)              :: factor
+    integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
+    integer,                intent(out),  optional  :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -1133,11 +1133,11 @@ contains
     routehandle, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
-    type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
-    integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
-    integer,                    intent(out),  optional  :: rc
+    type(ESMF_ArrayBundle), intent(in)              :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout)           :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
+    integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Store an ArrayBundle redistribution operation from
