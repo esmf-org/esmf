@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.78 2009/10/15 05:04:13 theurich Exp $ 
+# $Id: makefile,v 1.79 2009/10/20 17:42:49 peggyli Exp $ 
 
 ALL: build_system_tests
 
@@ -9,8 +9,7 @@ include $(ESMF_DIR)/makefile
 # arranged roughly in order of complexity
 DIRS      = ESMF_CompCreate \
             ESMF_CompFortranAndC \
-	    ESMF_SequentialEnsemble \
-	    ESMF_ConcurrentEnsemble \
+	    ESMF_Ensemble \
             ESMF_RecursiveComponent \
             ESMF_ArrayScatterGather \
             ESMF_Attribute \
@@ -37,7 +36,6 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldRegridDisjoint \
             ESMF_FieldRegridOverlap \
             ESMF_FieldLSSMM \
-	    ESMF_InternalStateEnsemble \
 	    ESMF_ArrayRedistOpenMP
 # Tests temporarily disabled
 #            ESMF_FieldMeshSMM \
