@@ -1,7 +1,7 @@
-! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.11 2009/10/16 20:49:17 svasquez Exp $
+! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.12 2009/10/20 18:55:39 svasquez Exp $
 !
 !-------------------------------------------------------------------------
-!ESMF_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------

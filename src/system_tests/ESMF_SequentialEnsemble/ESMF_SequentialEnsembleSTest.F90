@@ -1,7 +1,7 @@
-! $Id: ESMF_SequentialEnsembleSTest.F90,v 1.3 2009/10/16 20:46:27 svasquez Exp $
+! $Id: ESMF_SequentialEnsembleSTest.F90,v 1.4 2009/10/20 18:53:49 svasquez Exp $
 !
 !-------------------------------------------------------------------------
-!ESMF_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !
