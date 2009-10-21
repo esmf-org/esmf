@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.4 2009/09/29 16:53:07 feiliu Exp $
+! $Id: user_model1.F90,v 1.5 2009/10/21 22:30:01 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -68,59 +68,171 @@
         type(ESMF_VM) :: vm
         type(ESMF_ArraySpec) :: arrayspec
         integer(ESMF_KIND_I4), dimension(:), pointer :: srcfptr
-        integer :: npets, de_id
+        integer :: npets, localPet
 
-        integer                                     :: n_node, n_elem, i, j, l
-        integer, allocatable :: nodeId(:)
-        real(ESMF_KIND_R8), allocatable :: nodeCoord(:)
-        integer, allocatable :: nodeOwner(:)
-
-        integer, allocatable :: elemId(:)
-        integer, allocatable :: elemType(:)
-        integer, allocatable :: elemConn(:)
-        integer              :: conn(16) = (/1,2,5,4,2,3,6,5,4,5,8,7,5,6,9,8/)
+        integer, pointer :: nodeIds(:),nodeOwners(:)
+        real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+        integer :: numNodes
+        integer :: numElems
+        integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
 
         ! Query component for VM and create a layout with the right breakdown
         call ESMF_GridCompGet(comp, vm=vm, rc=rc)
         if(rc/=ESMF_SUCCESS) return
-        call ESMF_VMGet(vm, localPet=de_id, petCount=npets, rc=rc)
+        call ESMF_VMGet(vm, localPet=localPet, petCount=npets, rc=rc)
         if(rc/=ESMF_SUCCESS) return
 
         rc = ESMF_SUCCESS
-        print *, de_id, "User Comp 1 Init starting"
+        print *, localPet, "User Comp 1 Init starting"
 
-        ! Add a "humidity" field to the export state.
-        n_node = 9
-        n_elem = 4
-        
-        allocate(nodeId(n_node), nodeCoord(2*n_node), nodeOwner(n_node))
-        allocate(elemId(n_elem), elemType(n_elem), elemConn(n_elem*4))
+        ! Set up a src humidity field on a mesh
+        ! Setup mesh data depending on PET
+        if (localPet .eq. 0) then
+             ! Fill in node data
+             numNodes=4
 
-        do i = 1, n_node
-            nodeId(i) = i
-        enddo
-        do i = 1, 3
-            do j = 1, 3
-                l = (i-1)*3+j
-                nodeCoord(2*l-1) = i
-                nodeCoord(2*l) = j
-            enddo
-        enddo
-        nodeOwner = 0
-        do i = 1, n_elem
-            elemId(i) = i
-            elemType(i) = 9             ! Quard
-        enddo
-        elemConn = conn
+            !! node ids
+            allocate(nodeIds(numNodes))
+            nodeIds=(/1,2,4,5/) 
 
-        mesh = ESMF_MeshCreate(2,2,nodeId, nodeCoord, nodeOwner, elemId, elemType,elemConn,rc)
-        if(rc/=ESMF_SUCCESS) return
+            !! node Coords
+            allocate(nodeCoords(numNodes*2))
+            nodeCoords=(/0.0,0.0, &
+                         1.0,0.0, &
+                         0.0,1.0, &
+                         1.0,1.0/)
+
+            !! node owners
+            allocate(nodeOwners(numNodes))
+            nodeOwners=(/0,0,0,0/) ! everything on proc 0
+
+            ! Fill in elem data
+            numElems=1
+
+            !! elem ids
+            allocate(elemIds(numElems))
+            elemIds=(/1/) 
+
+            !! elem type
+            allocate(elemTypes(numElems))
+            elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+            !! elem conn
+            allocate(elemConn(numElems*4))
+            elemConn=(/1,2,4,3/)
+          else if (localPet .eq. 1) then
+             ! Fill in node data
+             numNodes=4
+
+            !! node ids
+            allocate(nodeIds(numNodes))
+            nodeIds=(/2,3,5,6/) 
+
+            !! node Coords
+            allocate(nodeCoords(numNodes*2))
+            nodeCoords=(/1.0,0.0, &
+                         2.0,0.0, &
+                         1.0,1.0, &
+                         2.0,1.0/)
+
+            !! node owners
+            allocate(nodeOwners(numNodes))
+            nodeOwners=(/0,1,0,1/) 
+
+            ! Fill in elem data
+            numElems=1
+
+            !! elem ids
+            allocate(elemIds(numElems))
+            elemIds=(/2/) 
+
+            !! elem type
+            allocate(elemTypes(numElems))
+            elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+            !! elem conn
+            allocate(elemConn(numElems*4))
+            elemConn=(/1,2,4,3/)
+          else if (localPet .eq. 2) then
+             ! Fill in node data
+             numNodes=4
+
+            !! node ids
+            allocate(nodeIds(numNodes))
+            nodeIds=(/4,5,7,8/) 
+
+            !! node Coords
+            allocate(nodeCoords(numNodes*2))
+            nodeCoords=(/0.0,1.0, &
+                         1.0,1.0, &
+                         0.0,2.0, &
+                         1.0,2.0/)
+
+            !! node owners
+            allocate(nodeOwners(numNodes))
+            nodeOwners=(/0,0,2,2/) 
+
+            ! Fill in elem data
+            numElems=1
+
+            !! elem ids
+            allocate(elemIds(numElems))
+            elemIds=(/3/) 
+
+            !! elem type
+            allocate(elemTypes(numElems))
+            elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+            !! elem conn
+            allocate(elemConn(numElems*4))
+            elemConn=(/1,2,4,3/)  
+          else 
+             ! Fill in node data
+             numNodes=4
+
+            !! node ids
+            allocate(nodeIds(numNodes))
+            nodeIds=(/5,6,8,9/) 
+
+            !! node Coords
+            allocate(nodeCoords(numNodes*2))
+            nodeCoords=(/1.0,1.0, &
+                         2.0,1.0, &
+                         1.0,2.0, &
+                         2.0,2.0/)
+
+            !! node owners
+            allocate(nodeOwners(numNodes))
+            nodeOwners=(/0,1,2,3/) 
+
+            ! Fill in elem data
+            numElems=1
+
+            !! elem ids
+            allocate(elemIds(numElems))
+            elemIds=(/4/) 
+
+            !! elem type
+            allocate(elemTypes(numElems))
+            elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+            !! elem conn
+            allocate(elemConn(numElems*4))
+            elemConn=(/1,2,4,3/)  
+        endif
+
+        ! Create Mesh structure in 1 step
+        mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+               nodeIds=nodeIds, nodeCoords=nodeCoords, &
+               nodeOwners=nodeOwners, elementIds=elemIds,&
+               elementTypes=elemTypes, elementConn=elemConn, &
+               rc=rc)
+        if(rc .ne. ESMF_SUCCESS) return
 
         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
 
-        humidity = ESMF_FieldCreate(mesh, arrayspec, &
-            name="humidity", rc=rc)
+        humidity = ESMF_FieldCreate(mesh, arrayspec, name="humidity", rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
 
         call ESMF_FieldGet(humidity, localDe=0, farrayPtr=srcfptr, rc=rc)
@@ -132,7 +244,7 @@
         if (rc .ne. ESMF_SUCCESS) return
      !   call ESMF_StatePrint(exportState, rc=rc)
 
-        print *, de_id, "User Comp 1 Init returning"
+        print *, localPet, "User Comp 1 Init returning"
 
     end subroutine user_init
 

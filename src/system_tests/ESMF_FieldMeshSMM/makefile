@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2009/07/16 20:57:32 feiliu Exp $ 
+# $Id: makefile,v 1.3 2009/10/21 22:30:00 feiliu Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -32,4 +32,4 @@ CLOBBERDIRS =
 
 
 RUN_FieldMeshSMM:
-	$(MAKE) TNAME=FieldMeshSMM NP=3 stest
+	$(MAKE) TNAME=FieldMeshSMM NP=4 stest

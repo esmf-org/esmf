@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.2 2009/08/03 19:59:59 theurich Exp $
+! $Id: user_coupler.F90,v 1.3 2009/10/21 22:30:01 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -68,13 +68,13 @@
       type(ESMF_VM) :: vm
       integer(ESMF_KIND_I4), allocatable          :: factorList(:)
       integer, allocatable                        :: factorIndexList(:,:)
-      integer       :: lpe
+      integer       :: localPet
 
       rc = ESMF_SUCCESS
       print *, "User Coupler Init starting"
 
       call ESMF_CplCompGet(comp, vm=vm, rc=rc)
-      call ESMF_VMGet(vm, localPET=lpe, rc=rc)
+      call ESMF_VMGet(vm, localPET=localPet, rc=rc)
 
       ! uncomment the following when locstream supports reconcile
 
@@ -112,15 +112,54 @@
 
       ! These are fields on different Grids - call SMMStore to set
       ! up the SMM structure
-      allocate(factorList(3))
-      allocate(factorIndexList(2,3))
-      factorList = (/1,2,3/)
-      factorIndexList(1,:) = (/lpe*3+1,lpe*3+2,lpe*3+3/)
-      factorIndexList(2,:) = (/lpe*3+1,lpe*3+2,lpe*3+3/)
 
-      call ESMF_FieldSMMStore(humidity1, humidity2, routehandle, &
-            factorList, factorIndexList, rc=rc)
-      if(rc/=ESMF_SUCCESS) return
+      ! initialize factorList and factorIndexList
+      ! the diagonal of the 9x9 diagonal matrix on 4 PETs is ((1 2 3) (1 2) (1 2) (1 2))
+      if (localPet == 0) then
+          ! 4 -> 3
+          allocate(factorList(3))
+          allocate(factorIndexList(2,3))
+          factorList = (/1,2,3/)
+          factorIndexList(1,:) = (/1, 1, 1/)
+          factorIndexList(2,:) = (/1, 2, 3/)
+          call ESMF_FieldSMMStore(humidity1, humidity2, routehandle, &
+              factorList, factorIndexList, rc=rc)
+          if(rc/=ESMF_SUCCESS) return
+          deallocate(factorList, factorIndexList)
+      else if (localPet == 1) then
+          ! 2 -> 2
+          allocate(factorList(2))
+          allocate(factorIndexList(2,2))
+          factorList = (/1,2/)
+          factorIndexList(1,:) = (/5, 6/)
+          factorIndexList(2,:) = (/4, 5/)
+          call ESMF_FieldSMMStore(humidity1, humidity2, routehandle, &
+              factorList, factorIndexList, rc=rc)
+          if(rc/=ESMF_SUCCESS) return
+          deallocate(factorList, factorIndexList)
+      else if (localPet == 2) then
+          ! 2 -> 2
+          allocate(factorList(2))
+          allocate(factorIndexList(2,2))
+          factorList = (/1,2/)
+          factorIndexList(1,:) = (/7, 8/)
+          factorIndexList(2,:) = (/6, 7/)
+          call ESMF_FieldSMMStore(humidity1, humidity2, routehandle, &
+              factorList, factorIndexList, rc=rc)
+          if(rc/=ESMF_SUCCESS) return
+          deallocate(factorList, factorIndexList)
+      else if (localPet == 3) then
+          ! 1 -> 2
+          allocate(factorList(2))
+          allocate(factorIndexList(2,2))
+          factorList = (/1,2/)
+          factorIndexList(1,:) = (/9,9/)
+          factorIndexList(2,:) = (/8,9/)
+          call ESMF_FieldSMMStore(humidity1, humidity2, routehandle, &
+              factorList, factorIndexList, rc=rc)
+          if(rc/=ESMF_SUCCESS) return
+          deallocate(factorList, factorIndexList)
+      endif
 
       print *, "User Coupler Init returning"
    

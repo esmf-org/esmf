@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.5 2009/07/27 15:03:33 feiliu Exp $
+! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.6 2009/10/21 22:29:59 feiliu Exp $
 !
 ! System test code FieldMeshSMM
 !  Description on Sourceforge under System Test #79497
@@ -52,9 +52,8 @@
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
 
-    ! cumulative result: count failures; no failures equals "all pass"
-    integer :: testresult = 0
-
+    !cumulative result: count failures; no failures equals "all pass"
+    integer :: result = 0
     ! individual test name
     character(ESMF_MAXSTR) :: testname
 
@@ -76,7 +75,8 @@
 !-------------------------------------------------------------------------
 !
     ! Initialize framework and get back default global VM
-    call ESMF_Initialize(vm=vm, rc=localrc)
+    call ESMF_Initialize(vm=vm, defaultlogfilename="FieldMeshSMMSTest.Log", &
+              defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -349,11 +349,7 @@
     write(failMsg, *) "System Test failure"
     write(testname, *) "System Test FieldMeshSMM: Mesh based Field SMM"
 
-    call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), &
-      testname, failMsg, testresult, ESMF_SRCLINE)
-
-    ! Only on PET 0 or any PET with an error. 
-    if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+    if (rc .ne. ESMF_SUCCESS) then
       ! Separate message to console, for quick confirmation of success/failure
       if (rc .eq. ESMF_SUCCESS) then
         write(finalMsg, *) "SUCCESS: Mesh based Field SMM test finished correctly."
@@ -367,6 +363,9 @@
 
     endif
   
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
     call ESMF_Finalize(rc=rc) 
 
     end program ESMF_FieldMeshSMMSTest
