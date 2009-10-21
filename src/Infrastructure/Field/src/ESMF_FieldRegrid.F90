@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.24 2009/09/01 21:59:13 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.25 2009/10/21 21:09:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.24 2009/09/01 21:59:13 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.25 2009/10/21 21:09:21 oehmke Exp $'
 
 !==============================================================================
 !
@@ -100,29 +100,58 @@ contains
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegrid()
       subroutine ESMF_FieldRegridRun(srcField, dstField, &
-                      routeHandle, rc)
+                   routehandle, zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(inout)     :: srcField
-      type(ESMF_Field), intent(inout)     :: dstField
-      type(ESMF_RouteHandle), intent(inout)  :: routeHandle
+      type(ESMF_Field), intent(inout)                 :: srcField
+      type(ESMF_Field), intent(inout)                 :: dstField
+      type(ESMF_RouteHandle), intent(inout)           :: routeHandle
+      type(ESMF_RegionFlag),  intent(in),    optional :: zeroflag
+      logical,                intent(in),    optional :: checkflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!       Applys the regrid operation.
+!   Execute a precomputed regrid operation from {\tt srcField}
+!   to {\tt dstField}. Both {\tt srcField} and {\tt dstField} must be
+!   congruent and typekind conform with the respective Fields used during 
+!   {\tt ESMF\_FieldRegridStore()}. Congruent Fields possess
+!   matching DistGrids and the shape of the local array tiles matches between
+!   the Fields for every DE.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item [srcField]
-!           Source Field.
-!     \item [dstField]
-!           Destination Field.
-!     \item [routeHandle]
-!           The regrid operator.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   It is erroneous to specify the identical Field object for {\tt srcField} and
+!   {\tt dstField} arguments.
 !
+!   See {\tt ESMF\_FieldRegridStore()} on how to precompute {\tt routehandle}
+!
+!   This call is {\em collective} across the current VM.
+!
+!   \begin{description}
+!   \item [{[srcField]}]
+!     {\tt ESMF\_Field} with source data.
+!   \item [{[dstField]}]
+!     {\tt ESMF\_Field} with destination data.
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[zeroflag]}]
+!     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of
+!     all DEs in {\tt dstField} will be initialized to zero before updating the 
+!     elements with the results of the sparse matrix multiplication. If set to
+!     {\tt ESMF\_REGION\_EMPTY} the elements in {\tt dstField} will not be
+!     modified prior to the sparse matrix multiplication and results will be
+!     added to the incoming element values. Setting {\tt zeroflag} to 
+!     {\tt ESMF\_REGION\_SELECT} will only zero out those elements in the 
+!     destination Array that will be updated by the sparse matrix
+!     multiplication. See section \ref{opt:regionflag} for a complete list of
+!     valid settings.
+!   \item [{[checkflag]}]
+!     If set to {\tt .TRUE.} the input Array pair will be checked for
+!     consistency with the precomputed operation provided by {\tt routehandle}.
+!     If set to {\tt .FALSE.} {\em (default)} only a very basic input check
+!     will be performed, leaving many inconsistencies undetected. Set
+!     {\tt checkflag} to {\tt .FALSE.} to achieve highest performance.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !EOP
         integer :: localrc
         type(ESMF_Array)     :: srcArray
@@ -143,7 +172,8 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
-                   routehandle=routeHandle, rc=localrc)
+                   routehandle=routeHandle, zeroflag=zeroflag, &
+                   checkflag=checkflag, rc=localrc)
 
         if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &

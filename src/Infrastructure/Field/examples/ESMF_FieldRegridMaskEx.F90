@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMaskEx.F90,v 1.4 2009/08/05 23:16:12 svasquez Exp $
+! $Id: ESMF_FieldRegridMaskEx.F90,v 1.5 2009/10/21 21:09:20 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.4 2009/08/05 23:16:12 svasquez Exp $'
+    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.5 2009/10/21 21:09:20 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! individual test result code
@@ -312,7 +312,7 @@ program ESMF_FieldRegridEx
 ! may then be applied as in the previous example.
 !EOE
 
-  call ESMF_FieldRegrid(srcField, dstField, routeHandle, localrc)
+  call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_FieldRegridRelease(routeHandle, rc=localrc)

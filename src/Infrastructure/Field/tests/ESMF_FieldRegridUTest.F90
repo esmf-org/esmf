@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.5 2009/06/26 16:30:04 oehmke Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.6 2009/10/21 21:09:22 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -501,7 +501,7 @@ contains
 
 
   ! Do regrid
-  call ESMF_FieldRegrid(srcField360, field180, routeHandle, localrc)
+  call ESMF_FieldRegrid(srcField360, field180, routeHandle, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -526,7 +526,7 @@ contains
 
 
   ! Do regrid
-  call ESMF_FieldRegrid(field180, dstField360, routeHandle, localrc)
+  call ESMF_FieldRegrid(field180, dstField360, routeHandle, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -970,7 +970,7 @@ contains
 
 
   ! Do regrid
-  call ESMF_FieldRegrid(srcFieldA, fieldB, routeHandle, localrc)
+  call ESMF_FieldRegrid(srcFieldA, fieldB, routeHandle, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -995,7 +995,7 @@ contains
 
 
   ! Do regrid
-  call ESMF_FieldRegrid(fieldB, dstFieldA, routeHandle, localrc)
+  call ESMF_FieldRegrid(fieldB, dstFieldA, routeHandle, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -1431,7 +1431,7 @@ contains
    endif
 
   ! Do regrid
-  call ESMF_FieldRegrid(srcFieldA, fieldB, routeHandle, localrc)
+  call ESMF_FieldRegrid(srcFieldA, fieldB, routeHandle, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -1859,7 +1859,7 @@ contains
 
 
   ! Do regrid
-  call ESMF_FieldRegrid(srcFieldA, fieldB, routeHandle, localrc)
+  call ESMF_FieldRegrid(srcFieldA, fieldB, routeHandle, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -1887,7 +1887,7 @@ contains
 
 
   ! Do regrid
-  call ESMF_FieldRegrid(srcFieldA, fieldBPatch, routeHandlePatch, localrc)
+  call ESMF_FieldRegrid(srcFieldA, fieldBPatch, routeHandlePatch, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -2309,7 +2309,7 @@ contains
    endif
 
   ! Do regrid
-  call ESMF_FieldRegrid(srcFieldA, fieldB, routeHandle, localrc)
+  call ESMF_FieldRegrid(srcFieldA, fieldB, routeHandle, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -2338,7 +2338,7 @@ contains
 
 
   ! Do regrid
-  call ESMF_FieldRegrid(srcFieldA, fieldBPatch, routeHandlePatch, localrc)
+  call ESMF_FieldRegrid(srcFieldA, fieldBPatch, routeHandlePatch, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -2719,7 +2719,7 @@ contains
    endif
 
   ! Do regrid
-  call ESMF_FieldRegrid(srcFieldA, fieldB, routeHandle, localrc)
+  call ESMF_FieldRegrid(srcFieldA, fieldB, routeHandle, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -3086,7 +3086,7 @@ contains
    endif
 
   ! Do regrid
-  call ESMF_FieldRegrid(srcFieldA, fieldB, routeHandle, localrc)
+  call ESMF_FieldRegrid(srcFieldA, fieldB, routeHandle, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
