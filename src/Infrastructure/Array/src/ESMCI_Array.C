@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.73 2009/10/21 05:40:22 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.74 2009/10/21 15:30:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.73 2009/10/21 05:40:22 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.74 2009/10/21 15:30:28 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4629,8 +4629,15 @@ namespace ArrayHelper{
     void *malloc(int bytes){
       const int limit=1024;     // 1kByte
       const int block=1048576;  // 1MByte
-      if (bytes > limit)
-        return std::malloc(bytes);
+      if (bytes > limit){
+        MemHelper *mh = this; // initialize to first element in list
+        while (mh->next) mh = mh->next; // find last element in list
+        mh->next = new MemHelper();
+        mh = mh->next;
+        mh->memAlloc = std::malloc(bytes);
+        mh->memPtr = (char *)(mh->memAlloc);
+        return mh->memAlloc;
+      }
       if (memPtr==NULL){
         memAlloc = std::malloc(block);
         memPtr = (char *)memAlloc;
