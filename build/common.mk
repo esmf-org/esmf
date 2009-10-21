@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.281 2009/10/13 21:17:48 w6ws Exp $
+#  $Id: common.mk,v 1.282 2009/10/21 05:52:55 eschwab Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -882,7 +882,7 @@ endif
 
 ifeq ($(ESMF_NETCDF),split)
 ifneq ($(origin ESMF_NETCDF_LIBS), environment)
-ESMF_NETCDF_LIBS = -lnetcdff -lnetcdf
+ESMF_NETCDF_LIBS = -lnetcdff -lnetcdf_c++ -lnetcdf
 endif
 endif
 
