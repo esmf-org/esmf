@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2009/10/21 01:14:10 svasquez Exp $ 
+# $Id: makefile,v 1.4 2009/10/21 01:30:08 svasquez Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -35,6 +35,5 @@ RUN_Ensemble:
 	$(ESMF_RM) ./PET*EnsembleSTest.Log ; \
 	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 ${ESMF_MPIRUN} -n 4 ./ESMF_EnsembleSTest > ./ESMF_EnsembleSequentialSTest.stdout ; \
 	cat ./PET*EnsembleSTest.Log >> ./ESMF_EnsembleSTest.Log ; \
-	cat ./ESMF_EnsembleSTest.tmpLog >> ./ESMF_EnsembleSTest.Log ; \
 	$(ESMF_RM) ./PET*EnsembleSTest.Log 
 
