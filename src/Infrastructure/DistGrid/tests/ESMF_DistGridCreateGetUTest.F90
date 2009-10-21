@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.21 2009/10/06 15:59:54 theurich Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.22 2009/10/21 05:27:24 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.21 2009/10/06 15:59:54 theurich Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.22 2009/10/21 05:27:24 w6ws Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -69,6 +69,11 @@ program ESMF_DistGridCreateGetUTest
   logical:: loopResult
   logical:: matchResult
   logical:: arbSeqIndexFlag
+
+  integer(ESMF_KIND_I4), allocatable :: buffer(:)
+  integer :: buff_len, offset
+  integer :: alloc_err
+  type(ESMF_InquireFlag) :: inquireflag
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -753,6 +758,52 @@ program ESMF_DistGridCreateGetUTest
   call ESMF_Test((.not.arbSeqIndexFlag), name, failMsg, result, ESMF_SRCLINE)
 
   deallocate(collocationPDim)
+
+
+  !-----------------------------------------------------------------------------
+  !EX_UTest
+  ! test the serialize inquire-only option
+  ! WARNING: This is testing an INTERNAL method.  It is NOT
+  ! part of the supported ESMF user API!
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Computing space for serialization buffer"
+  write(failMsg, *) "Size could not be determined"
+  buff_len = 0
+  offset = 0
+  inquireflag  = ESMF_INQUIREONLY
+  call c_esmc_distgridserialize (distgrid, buffer, buff_len, offset,  &
+      inquireflag, rc)
+  print *, 'computed serialization buffer length =', offset, ' bytes'
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "Allocate serialization buffer"
+  write(failMsg, *) "Size was illegal"
+  buff_len = offset
+  allocate (buffer(buff_len), stat=alloc_err)
+  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, alloc_err == 0)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !EX_UTest
+  ! test actually doing the serialization
+  ! WARNING: This is testing an INTERNAL method.  It is NOT
+  ! part of the supported ESMF user API!
+  write(name, *) "Serialization DistGrid data"
+  write(failMsg, *) "Serialization failed"
+  buff_len = size (buffer)
+  offset = 0
+  inquireflag  = ESMF_NOINQUIRE
+  call c_esmc_distgridserialize (distgrid, buffer, buff_len, offset,  &
+      inquireflag, rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
   
   !------------------------------------------------------------------------
   !NEX_UTest
