@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.72 2009/10/21 05:34:22 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.73 2009/10/21 05:40:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.72 2009/10/21 05:34:22 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.73 2009/10/21 05:40:22 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -7976,39 +7976,36 @@ int Array::sparseMatMulRelease(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-printf("gjt made it into Array::sparseMatMulRelease()\n");
-  
-
   try{
   
-  // get XXE from routehandle
-  XXE *xxe = (XXE *)routehandle->getStorage();
+    // get XXE from routehandle
+    XXE *xxe = (XXE *)routehandle->getStorage();
   
 #define XXEPROFILEPRINT
 #ifdef XXEPROFILEPRINT
-  // print XXE stream profile
-  VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-  int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
-  for (int pet=0; pet<petCount; pet++){
-    if (pet==localPet){
-      localrc = xxe->printProfile();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-        &rc))
+    // print XXE stream profile
+    VM *vm = VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
-      fflush(stdout);
+    int localPet = vm->getLocalPet();
+    int petCount = vm->getPetCount();
+    for (int pet=0; pet<petCount; pet++){
+      if (pet==localPet){
+        localrc = xxe->printProfile();
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          &rc))
+        return rc;
+        fflush(stdout);
+      }
+      vm->barrier();
     }
-    vm->barrier();
-  }
 #endif
   
-  // delete xxe
-  delete xxe;
+    // delete xxe
+    delete xxe;
 
-  // mark storage pointer in RouteHandle as invalid  
-  routehandle->setStorage(NULL);
+    // mark storage pointer in RouteHandle as invalid  
+    routehandle->setStorage(NULL);
   
   }catch(int localrc){
     // catch standard ESMF return code
