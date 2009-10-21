@@ -198,7 +198,7 @@ std::cout << std::endl;
   } //else std::cout << "Converged, dnorm=" << dnorm << " rnorm=" << rnorm<< std::endl;
 
   if (dist) *dist = std::sqrt(
-       s[sdim-1].val()*(
+       std::abs(s[sdim-1].val())*(
        normal[0].val()*normal[0].val()
        +normal[1].val()*normal[1].val()
        +normal[2].val()*normal[2].val()));
