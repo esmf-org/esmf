@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.15 2009/09/29 15:35:48 feiliu Exp $
+! $Id: ESMF_FieldEx.F90,v 1.16 2009/10/21 18:02:43 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -318,11 +318,7 @@
 !BOC
     ! Get necessary information from the Grid
     call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-        computationalEdgeLWidth=compEdgeLWdith, &
-        computationalEdgeUWidth=compEdgeUWdith, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
+        staggerDistgrid=distgrid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! Create a 2D ESMF_TYPEKIND_R4 arrayspec
@@ -330,9 +326,8 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! Create a ESMF_Array from the arrayspec and distgrid
-    array2d = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-            computationalEdgeLWidth=compEdgeLWdith, &
-            computationalEdgeUWidth=compEdgeUWdith, rc=rc)
+    array2d = ESMF_ArrayCreate(arrayspec=arrayspec, &
+            distgrid=distgrid, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! Create a ESMF_Field from the grid and array

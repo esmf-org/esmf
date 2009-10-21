@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.49 2009/09/29 15:59:27 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.50 2009/10/21 18:02:44 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -53,6 +53,7 @@
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
  
 #ifdef ESMF_TESTEXHAUSTIVE
+#if 0
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create an empty field
@@ -1808,7 +1809,7 @@
         write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
             "using generic interface"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
+#endif
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
@@ -1823,7 +1824,7 @@
         write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
             "using generic interface"
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
+#if 0
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
@@ -1933,8 +1934,9 @@
             "using generic interface, irregular gridToFieldMap and distgridToGridMap " // &
             "data copy, corner stagger"
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
 #endif
+#endif
+#if 0
         !------------------------------------------------------------------------
         !NEX_UTest_Multi_Proc_Only
         !    create a 3d array.
@@ -1957,6 +1959,7 @@
         write(failMsg, *) ""
         write(name, *) "Testing field create from uninit array"
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
 contains 
@@ -2182,7 +2185,7 @@ contains
     subroutine test2a_fail(rc)
         integer, intent(out)  :: rc
         integer                 :: localrc
-        real, dimension(4,20)  :: farray
+        real, dimension(3,19)  :: farray
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
 
@@ -4853,6 +4856,8 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
+write(*,*) "H -1",localrc
+
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=staggerloc,&
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
@@ -4879,6 +4884,9 @@ contains
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
+
+
+write(*,*) "H0",localrc
 
         if(present(fieldget)) then
           if(fieldget) then
@@ -4914,6 +4922,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
+
             ! verify the numbers returned are correct
             if(ldec .ne. 1)  localrc = ESMF_FAILURE
             if (ESMF_LogMsgFoundError(localrc, &
@@ -4924,7 +4933,7 @@ contains
             !if (ESMF_LogMsgFoundError(localrc, &
             !    ESMF_ERR_PASSTHRU, &
             !    ESMF_CONTEXT, rc)) return
-            
+
             do i = 1, arank-adimCount
                 if(lungriddedLBound(i) .ne. audlb(i) ) &
                     localrc = ESMF_FAILURE
@@ -4948,6 +4957,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
+
             ! verify the data in the created Field can be accessed, updated and verified
             ! access and update
             do ip = flb(7), fub(7)
@@ -4965,12 +4975,14 @@ contains
               enddo
              enddo
             enddo
+
             ! access and verify
             call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
+
             do ip = ftlb(7), ftub(7)
              do io = ftlb(6), ftub(6)
               do im = ftlb(5), ftub(5)
@@ -6479,6 +6491,8 @@ contains
         offset = 0
         allocate(buffer(length))
 
+write(*,*) "H1",localrc,rc
+
         ! create distgrid
         distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
             regDecomp=regDecomp, rc=localrc)
@@ -6494,7 +6508,7 @@ contains
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-
+write(*,*) "H2",localrc,rc
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=staggerloc,&
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
@@ -6510,7 +6524,7 @@ contains
         ! array pointer
         allocate(farray(flb(1):fub(1), flb(2):fub(2), flb(3):fub(3), &
             flb(4):fub(4), flb(5):fub(5), flb(6):fub(6), flb(7):fub(7)) )
-
+write(*,*) "H3",localrc,rc
         if(present(fieldget)) then
           if(fieldget) then
             ! reverse looping order to make this a little faster by improving data locality
@@ -6543,7 +6557,7 @@ contains
                 l_g2fm(i) = i
             enddo
         endif
-
+write(*,*) "H4",localrc,rc
         if(present(distgridToGridMap)) then
             l_dg2gm(1:gdimCount) = distgridToGridMap(1:gdimCount)
         else
@@ -6573,13 +6587,12 @@ contains
         ! create array
         array = ESMF_ArrayCreate(farray, distgrid, ESMF_INDEX_DELOCAL, copyflag, distgridToArrayMap, &
             undistLBound = ungriddedLBound, undistUBound = ungriddedUBound, &
-            computationalEdgeLWidth=celw, computationalEdgeUWidth=ceuw, &
             totalLWidth=maxHaloLWidth, totalUWidth=maxHaloUWidth, & 
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-
+write(*,*) "H5",localrc,rc
         ! create field
         field = ESMF_FieldCreate(grid, array, copyflag, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
@@ -6610,7 +6623,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-
+write(*,*) "H6",localrc,rc
             ! verify parameters from getdefault are correct
             if(present(gridToFieldMap)) then
                 do i = 1, size(gridToFieldMap)
@@ -6652,7 +6665,7 @@ contains
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
             endif
-
+write(*,*) "H7",localrc,rc
             ! call serialize and deserialize and verify again
             call ESMF_FieldSerialize(field, buffer, length, offset, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
@@ -6674,7 +6687,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-
+write(*,*) "H8",localrc,rc
             ! verify parameters from getdefault are correct from a deseriailzed field
             if(present(gridToFieldMap)) then
                 do i = 1, size(gridToFieldMap)
@@ -6742,7 +6755,7 @@ contains
             !if (ESMF_LogMsgFoundError(localrc, &
             !    ESMF_ERR_PASSTHRU, &
             !    ESMF_CONTEXT, rc)) return
-            
+ write(*,*) "H9",localrc,rc
             do i = 1, arank-adimCount
                 if(lungriddedLBound(i) .ne. audlb(i) ) &
                     localrc = ESMF_FAILURE
@@ -6793,7 +6806,7 @@ contains
                 ESMF_CONTEXT, rc)) return
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
-
+write(*,*) "H10",localrc,rc
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -6808,9 +6821,11 @@ contains
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-
+write(*,*) "H11",localrc,rc
         deallocate(farray)
         deallocate(buffer)
+
+
     end subroutine test7d4_generic
 
 !----------------------------------------------------------------------------------

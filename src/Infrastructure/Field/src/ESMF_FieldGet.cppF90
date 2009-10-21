@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.46 2009/10/01 15:42:16 oehmke Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.47 2009/10/21 18:02:44 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.46 2009/10/01 15:42:16 oehmke Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.47 2009/10/21 18:02:44 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1539,8 +1539,8 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     integer, dimension(:), allocatable     :: l_alb, l_aub, l_ac
 
 !   internal local variables 
-    integer, dimension(ESMF_MAXDIM)        :: ec, cc, dg2gm
-    integer, dimension(ESMF_MAXDIM)        :: f2gm, gelb, geub, gclb, gcub
+    integer, dimension(ESMF_MAXDIM)        :: ec, dg2gm
+    integer, dimension(ESMF_MAXDIM)        :: f2gm, gelb, geub
     logical, dimension(ESMF_MAXDIM)        :: flipflop
     integer                                :: forderIndex, i
     integer                                :: gridrank, arrayrank, uglb_size, ugub_size
@@ -1574,8 +1574,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     endif
 
     call ESMF_GeomBaseGetPLocalDE(geombase, localDe=l_localDe, &
-       exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
-       computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
+       exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
@@ -1735,15 +1734,15 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
             endif
         enddo
     endif
-
+!XXX
     ! Next compute the gridded bounds using the mapping
     ! from Field to Grid computed in last step
     forderIndex = 1
     do i = 1, arrayrank
         ! if i-th dimension is gridded
         if(f2gm(i) .gt. 0) then
-            l_ac(i) = max(cc(f2gm(i))+l_mhlw(forderIndex)+l_mhuw(forderIndex), ec(f2gm(i)))
-            l_alb(i) = min(gclb(f2gm(i)) - l_mhlw(forderIndex), gelb(f2gm(i)))
+            l_ac(i) = ec(f2gm(i))+l_mhlw(forderIndex)+l_mhuw(forderIndex)
+            l_alb(i) = gelb(f2gm(i)) - l_mhlw(forderIndex)
             l_aub(i) = l_alb(i) + l_ac(i) - 1
             forderIndex = forderIndex + 1
         endif

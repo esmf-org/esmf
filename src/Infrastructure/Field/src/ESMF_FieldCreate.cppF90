@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.64 2009/10/14 19:45:29 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.65 2009/10/21 18:02:44 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.64 2009/10/14 19:45:29 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.65 2009/10/21 18:02:44 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -368,7 +368,6 @@ contains
     type(ESMF_IndexFlag) :: indexflag    
     integer, pointer :: distgridToArrayMap(:)
     integer, pointer :: arrayLBound(:),arrayUBound(:)
-    integer              :: compEUWidth(ESMF_MAXDIM),compELWidth(ESMF_MAXDIM)
     integer              :: ungriddedDimCount
     integer              :: distgridDimCount, distgridDimCount_norep
 
@@ -426,9 +425,12 @@ contains
 
     ! Get dimmap and undistibuted bounds
     call ESMF_GeomBaseGetArrayInfo(geombase,                                            &
-                            gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-                            distgridToArrayMap, arrayLBound, arrayUBound,   &
-                            computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
+                            gridToFieldMap=gridToFieldMap, &
+                            ungriddedLBound=ungriddedLBound, &
+                            ungriddedUBound=ungriddedUBound, &
+                            distgridToArrayMap=distgridToArrayMap, &
+                            undistLBound=arrayLBound, &
+                            undistUBound=arrayUBound,   &
                             rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -441,8 +443,6 @@ contains
     array=ESMF_ArrayCreate(arrayspec=arrayspec, &                     
               distgrid=distgrid, &                                                         
               distgridToArrayMap=distgridToArrayMap, &                   
-              computationalEdgeLWidth=compELWidth(1:distgridDimCount_norep), & 
-              computationalEdgeUWidth=compEUWidth(1:distgridDimCount_norep), & 
               totalLWidth=maxHaloLWidth, totalUWidth=maxHaloUWidth, & 
               indexflag=indexflag, &                                                              
               undistLBound=arrayLBound, undistUBound=arrayUBound, &

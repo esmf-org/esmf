@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.15 2009/10/14 19:48:38 feiliu Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.16 2009/10/21 18:02:44 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.15 2009/10/14 19:48:38 feiliu Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.16 2009/10/21 18:02:44 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1188,7 +1188,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
     integer                        :: distgridToGridMap(ESMF_MAXDIM) @\
     type(ESMF_Array)               :: array @\
     type(ESMF_DistGrid)            :: distgrid @\
-    integer                        :: compEUWidth(ESMF_MAXDIM), compELWidth(ESMF_MAXDIM) @\
     integer                        :: fieldUndistDimCount                         @\
     logical                        :: flipflop(ESMF_MAXDIM) @\
     type(ESMF_IndexFlag)           :: g_indexflag @\
@@ -1517,8 +1516,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
          ungriddedUBound=localUngriddedUBound (1:fieldUngriddedDimCount), & @\
          distgridToArrayMap=distgridToArrayMap, & @\
          undistLBound=undistLBound, undistUBound=undistUBound, & @\
-         computationalEdgeLWidth=compELWidth, & @\
-         computationalEdgeUWidth=compEUWidth, & @\
          rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
@@ -1531,8 +1528,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
                 distgridToArrayMap=distgridToArrayMap (1:distgridDimCount), & @\
                 undistLBound=undistLBound(1:fieldUndistDimCount), & @\
                 undistUBound=undistUBound(1:fieldUndistDimCount), & @\
-                computationalEdgeLWidth=compELWidth(1:distgridDimCount_norep), & @\
-                computationalEdgeUWidth=compEUWidth(1:distgridDimCount_norep), & @\
                 totalLWidth=localMaxHaloLWidth(1:gridDimCount_norep), & @\
                 totalUWidth=localMaxHaloUWidth(1:gridDimCount_norep), & @\
                 rc=localrc) @\
@@ -1545,8 +1540,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
                 distgridToArrayMap=distgridToArrayMap (1:distgridDimCount), & @\
                 undistLBound=undistLBound(1:fieldUndistDimCount), & @\
                 undistUBound=undistUBound(1:fieldUndistDimCount), & @\
-                computationalEdgeLWidth=compELWidth(1:distgridDimCount_norep), & @\
-                computationalEdgeUWidth=compEUWidth(1:distgridDimCount_norep), & @\
                 rc=localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                ESMF_ERR_PASSTHRU, & @\
@@ -1719,7 +1712,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
     integer                        :: distgridToGridMap(ESMF_MAXDIM) @\
     type(ESMF_Array)               :: array @\
     type(ESMF_DistGrid)            :: distgrid @\
-    integer                        :: compEUWidth(ESMF_MAXDIM), compELWidth(ESMF_MAXDIM) @\
     integer                        :: fieldUndistDimCount                         @\
     logical                        :: flipflop(ESMF_MAXDIM) @\
     type(ESMF_IndexFlag)           :: indexflag @\
@@ -1948,8 +1940,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
          gridToFieldMap=localGridToFieldMap, & @\
          distgridToArrayMap=distgridToArrayMap, & @\
          undistLBound=undistLBound, undistUBound=undistUBound, & @\
-         computationalEdgeLWidth=compELWidth, & @\
-         computationalEdgeUWidth=compEUWidth, & @\
          rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
@@ -1959,8 +1949,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
     if (decompType .eq. ESMF_GRID_NONARBITRARY) then @\
         array = ESMF_ArrayCreate(farrayPtr, distgrid=distgrid, copyflag=copyflag, & @\
                 distgridToArrayMap=distgridToArrayMap (1:distgridDimCount), & @\
-                computationalEdgeLWidth=compELWidth(1:distgridDimCount_norep), & @\
-                computationalEdgeUWidth=compEUWidth(1:distgridDimCount_norep), & @\
                 totalLWidth=localMaxHaloLWidth(1:gridDimCount_norep), & @\
                 totalUWidth=localMaxHaloUWidth(1:gridDimCount_norep), & @\
                 rc=localrc) @\
@@ -1970,8 +1958,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
     else @\
         array = ESMF_ArrayCreate(farrayPtr, distgrid=distgrid, copyflag=copyflag, & @\
                 distgridToArrayMap=distgridToArrayMap (1:distgridDimCount), & @\
-                computationalEdgeLWidth=compELWidth(1:distgridDimCount_norep), & @\
-                computationalEdgeUWidth=compEUWidth(1:distgridDimCount_norep), & @\
                 rc=localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                ESMF_ERR_PASSTHRU, & @\
