@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.9 2009/09/08 21:25:31 theurich Exp $
+! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.10 2009/10/21 05:48:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -77,7 +77,6 @@ program ESMF_ArrayScatterGatherEx
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=3, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
 !EOC
@@ -239,6 +238,7 @@ program ESMF_ArrayScatterGatherEx
   if (localPet == 0) then
     deallocate(myFarray2D2)
   endif
+!EOC
 !BOE
 ! The Array pieces on every DE will receive the same source data, resulting
 ! in a replication of data along DistGrid dimension 1.
