@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.76 2009/06/17 19:00:34 theurich Exp $
+% $Id: ESMF_install.tex,v 1.77 2009/10/21 05:53:54 eschwab Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -89,14 +89,17 @@ of the desired NETCDF library and associated header files:
 The {\tt ESMF\_NETCDF\_INCLUDE}, {\tt ESMF\_NETCDF\_LIBPATH}, and
 {\tt ESMF\_NETCDF\_LIBS} environment variables will be ignored.
 
-\item[split] {\tt ESMF\_NETCDF\_LIBS} will be set to "-lnetcdff -lnetcdf".  This option
+\item[split] {\tt ESMF\_NETCDF\_LIBS} will be set to "-lnetcdff -lnetcdf\_c++ -lnetcdf".  This option
 is useful for systems which have the Fortran and C bindings archived in seperate
-library files.  The {\tt ESMF\_NETLIB\_INCLUDE} and {\tt ESMF\_NETCDF\_LIBPATH}
+library files; 
+the C++ bindings are always in a separate library file.  The {\tt ESMF\_NETLIB\_INCLUDE} and {\tt ESMF\_NETCDF\_LIBPATH}
 environment variables will also be used, if defined.
 
-\item[standard] {\tt ESMF\_NETCDF\_LIBS} will be set to "-lnetcdf".  This option
+\item[standard] {\tt ESMF\_NETCDF\_LIBS} will be set to "-lnetcdf\_c++ -lnetcdf".  This option
 is useful when the Fortran and C bindings are archived together in the same
-libray file.  The {\tt ESMF\_NETLIB\_INCLUDE} and {\tt ESMF\_NETCDF\_LIBPATH}
+library file, 
+alongside the always separate C++ bindings library file. 
+The {\tt ESMF\_NETLIB\_INCLUDE} and {\tt ESMF\_NETCDF\_LIBPATH}
 environment variables will be also used, if defined.
 
 \item[<userstring>] If set, {\tt ESMF\_NETCDF\_INCLUDE}, {\tt ESMF\_NETCDF\_LIBPATH},
@@ -111,15 +114,15 @@ Specifies the path where the NETCDF header files are located.
 
 Specifies the path where the NETCDF library file is located.
 
-\item[ESMF\_NETCDF\_LIBS] Typical value: "-lnetcdf" (no default)
+\item[ESMF\_NETCDF\_LIBS] Typical value: "-lnetcdf\_c++ -lnetcdf" (no default)
 
 Specifies the linker directives needed to link the NETCDF library to
 the application.
 
 The default value depends on the setting of {\tt ESMF\_NETCDF}.  For the
 typical case where {\tt ESMF\_NETCDF} is set to "standard", {\tt ESMF\_NETCDF\_LIBS}
-is set to "-lnetcdf".  When {\tt ESMF\_NETCDF} is set to "split",
-{\tt ESMF\_NETCDF\_LIBS} is set to "-lnetcdff -lnetcdf".
+is set to "-lnetcdf\_c++ -lnetcdf".  When {\tt ESMF\_NETCDF} is set to "split",
+{\tt ESMF\_NETCDF\_LIBS} is set to "-lnetcdff -lnetcdf\_c++ -lnetcdf".
 \end{description}
 
 \subsubsection{PNETCDF}
