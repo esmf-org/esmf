@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.64 2009/10/16 21:34:58 eschwab Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.65 2009/10/21 18:00:12 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -54,7 +54,7 @@ program ESMF_GridCreateEx
       type(ESMF_Grid) :: grid2D, grid3D, grid4D
       type(ESMF_Array) :: arrayCoordX, arrayCoordY,array,arrayMask
 
-      type(ESMF_distGrid) :: distgrid2D,distgrid4D,distgrid
+      type(ESMF_distGrid) :: distgrid2D,distgrid4D,distgrid,staggerDistgrid
       type(ESMF_StaggerLoc) :: staggerloc
       integer :: localPet, petCount
       integer :: lDE,localDECount
@@ -1289,9 +1289,12 @@ call ESMF_GridDestroy(grid3D,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_GridGet(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, &
+         staggerdistgrid=staggerdistgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    call ESMF_ArraySpecSet(arrayspec2D,rank=2,typekind=ESMF_TYPEKIND_R8)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-   arrayCoordX=ESMF_ArrayCreate(arrayspec=arrayspec2D, distgrid=distgrid2D, &
+   arrayCoordX=ESMF_ArrayCreate(arrayspec=arrayspec2D, distgrid=staggerDistgrid, &
               rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -1456,9 +1459,12 @@ call ESMF_GridDestroy(grid3D,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_GridGet(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, &
+         staggerdistgrid=staggerdistgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    call ESMF_ArraySpecSet(arrayspec2D,rank=2,typekind=ESMF_TYPEKIND_I4)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-   arrayMask=ESMF_ArrayCreate(arrayspec=arrayspec2D, distgrid=distgrid2D, &
+   arrayMask=ESMF_ArrayCreate(arrayspec=arrayspec2D, distgrid=staggerDistgrid, &
               rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -1966,14 +1972,14 @@ endif
 ! In addition to the per DE information that can be accessed about
 ! a stagger location there is some global information that can
 ! accessed by using {\tt ESMF\_GridGet} without specifying a
-! localDE. One of the main uses of this information is to create
+! localDE. One of the uses of this information is to create
 ! an ESMF Array to hold data for a stagger location. 
 !
 ! The information currently available from a stagger
-! location is {\tt computationalEdgeLWidth}  and
-! {\tt computationalEdgeUWidth} these give the difference between
-! the lower and upper boundary of the exclusive region and the computational 
-! region.
+! location is the {\tt staggerDistgrid}  and
+! {\tt minIndex} and {\tt maxIndex}. The {\tt staggerDistgrid} gives the 
+! distgrid which describes the size and distribution of the elements in the stagger location.
+! The {\tt minIndex} and {\tt maxIndex} describe the lower and upper bounds of the stagger location.
 !
 ! The following is an example of retrieving information for localDE 0
 ! from the corner stagger location. 
@@ -1993,7 +1999,8 @@ endif
 !BOC
     ! Get info about staggerloc
     call ESMF_GridGet(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER,  &
-           computationalEdgeLWidth=celwdth, computationalEdgeUWidth=ceuwdth, &
+           staggerDistgrid=staggerDistgrid, &
+           minIndex=minIndex, maxIndex=maxIndex, &
            rc=rc)
 
 !EOC
@@ -2017,17 +2024,14 @@ endif
 ! Grid and the stagger location in the Grid. 
 !
 ! The information that needs to be obtained from the Grid
-! is the {\tt distgrid} and {\tt distgridToGridMap} to ensure that the new Array
-! has the correct size and distribution and that its 
-! dimensions are mapped correctly to the Grid. These
+! is the {\tt distgridToGridMap} to ensure that the new Array
+! has its  dimensions are mapped correctly to the Grid. These
 ! are obtained using the {\tt ESMF\_GridGet} method. 
 !
 ! The information that needs to be obtained from the stagger
-! location are the offsets from the edges of the 
-! exclusive region of the distgrid. These may be obtained
-! from {\tt ESMF\_GridGet} by passing in the 
-! stagger location and the arguments {\tt computationalEdgeLWidth}  and
-! {\tt computationalEdgeUWidth}. 
+! location is the distgrid that describes the size and distribution
+! of the elements in the stagger location. This information can 
+! be obtained using the stagger location specific {\tt ESMF\_GridGet} method. 
 !
 ! The following is an example of using information from a 2D Grid with non-arbitrary 
 ! distribution to create an Array corresponding to a stagger location.
@@ -2047,11 +2051,11 @@ endif
 !BOC
 
     ! Get info from Grid
-    call ESMF_GridGet(grid2D, distgrid=distgrid, distgridToGridMap=distgridToGridMap, rc=rc)
+    call ESMF_GridGet(grid2D, distgridToGridMap=distgridToGridMap, rc=rc)
 
     ! Get info about staggerloc
     call ESMF_GridGet(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-           computationalEdgeLWidth=celwdth, computationalEdgeUWidth=ceuwdth, &
+           staggerDistgrid=staggerDistgrid, &
            rc=rc)
 
     ! construct ArraySpec
@@ -2059,9 +2063,7 @@ endif
 
     ! Create an Array based on info from grid
     array=ESMF_ArrayCreate(arrayspec=arrayspec, &
-            distgrid=distgrid, distgridToArrayMap=distgridToGridMap, &
-            computationalEdgeLWidth=celwdth, &
-            computationalEdgeUWidth=ceuwdth, &
+            distgrid=staggerDistgrid, distgridToArrayMap=distgridToGridMap, &
             rc=rc)
 
 !EOC

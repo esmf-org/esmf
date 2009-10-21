@@ -1,4 +1,4 @@
-! $Id: ESMF_GridItemUTest.F90,v 1.6 2009/09/04 20:43:24 oehmke Exp $
+! $Id: ESMF_GridItemUTest.F90,v 1.7 2009/10/21 18:00:16 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridItemUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridItemUTest.F90,v 1.6 2009/09/04 20:43:24 oehmke Exp $'
+    '$Id: ESMF_GridItemUTest.F90,v 1.7 2009/10/21 18:00:16 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -50,7 +50,7 @@ program ESMF_GridItemUTest
   type(ESMF_TypeKind) :: typekind
   type(ESMF_Grid) :: grid
   type(ESMF_VM) :: vm
-  type(ESMF_DistGrid) :: distgrid2D
+  type(ESMF_DistGrid) :: distgrid2D, tmpDistGrid
   type(ESMF_Array) :: array2D, array2
   type(ESMF_ArraySpec) :: arrayspec2D
   integer(ESMF_KIND_I4), pointer :: fptr(:,:), fptr3D(:,:,:)
@@ -99,8 +99,12 @@ program ESMF_GridItemUTest
          indexflag=ESMF_INDEX_GLOBAL, rc=rc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
+  ! get distgrid
+  call ESMF_GridGet(grid, ESMF_STAGGERLOC_CORNER, staggerdistgrid=tmpDistGrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
   ! Create Array 
-  array2D=ESMF_ArrayCreate(arrayspec2D, distgrid=distgrid2D, &
+  array2D=ESMF_ArrayCreate(arrayspec2D, distgrid=tmpDistgrid, &
                            indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -195,8 +199,12 @@ program ESMF_GridItemUTest
          indexflag=ESMF_INDEX_GLOBAL, rc=rc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
+  ! get distgrid
+  call ESMF_GridGet(grid, ESMF_STAGGERLOC_CORNER, staggerdistgrid=tmpDistGrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
   ! Create Array 
-  array2D=ESMF_ArrayCreate(arrayspec2D, distgrid=distgrid2D, &
+  array2D=ESMF_ArrayCreate(arrayspec2D, distgrid=tmpDistgrid, &
             indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -616,15 +624,16 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
              if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 !   write(*,*) "0:",clbnd,",",cubnd, correct
 
-!     if (elbnd(1) .ne. ielbnd0(1)) correct=.false.
-!     if (elbnd(2) .ne. ielbnd0(2)) correct=.false.
-!     if (elbnd(3) .ne. ielbnd0(3)) correct=.false.
-!     if (eubnd(1) .ne. ieubnd0(1)) correct=.false.
-!     if (eubnd(2) .ne. ieubnd0(2)) correct=.false.
-!     if (eubnd(3) .ne. ieubnd0(3)) correct=.false.
-!     if (ecnt(1) .ne. ieubnd0(1)-ielbnd0(1)+1) correct=.false.
-!     if (ecnt(2) .ne. ieubnd0(2)-ielbnd0(2)+1) correct=.false.
-!     if (ecnt(3) .ne. ieubnd0(3)-ielbnd0(3)+1) correct=.false.
+
+     if (elbnd(1) .ne. ielbnd0(1)-iloff0(1)) correct=.false.
+     if (elbnd(2) .ne. ielbnd0(2)-iloff0(2)) correct=.false.
+     if (elbnd(3) .ne. ielbnd0(3)-iloff0(3)) correct=.false.
+     if (eubnd(1) .ne. ieubnd0(1)+iuoff0(1)) correct=.false.
+     if (eubnd(2) .ne. ieubnd0(2)+iuoff0(2)) correct=.false.
+     if (eubnd(3) .ne. ieubnd0(3)+iuoff0(3)) correct=.false.
+     if (ecnt(1) .ne. ieubnd0(1)-ielbnd0(1)+1+iloff0(1)+iuoff0(1)) correct=.false.
+     if (ecnt(2) .ne. ieubnd0(2)-ielbnd0(2)+1+iloff0(2)+iuoff0(2)) correct=.false.
+     if (ecnt(3) .ne. ieubnd0(3)-ielbnd0(3)+1+iloff0(3)+iuoff0(3)) correct=.false.
 
      if (clbnd(1) .ne. ielbnd0(1)-iloff0(1)) correct=.false.
      if (clbnd(2) .ne. ielbnd0(2)-iloff0(2)) correct=.false.
@@ -635,6 +644,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
      if (ccnt(1) .ne. ieubnd0(1)-ielbnd0(1)+1+iloff0(1)+iuoff0(1)) correct=.false.
      if (ccnt(2) .ne. ieubnd0(2)-ielbnd0(2)+1+iloff0(2)+iuoff0(2)) correct=.false.
      if (ccnt(3) .ne. ieubnd0(3)-ielbnd0(3)+1+iloff0(3)+iuoff0(3)) correct=.false.
+
  
       ! check DE 1
       call ESMF_GridGetItem(grid, localDE=1, &
@@ -644,15 +654,15 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
              if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 !    write(*,*) "1:",clbnd,",",cubnd, correct
 
-!     if (elbnd(1) .ne. ielbnd1(1)) correct=.false.
-!     if (elbnd(2) .ne. ielbnd1(2)) correct=.false.
-!     if (elbnd(3) .ne. ielbnd1(3)) correct=.false.
-!     if (eubnd(1) .ne. ieubnd1(1)) correct=.false.
-!     if (eubnd(2) .ne. ieubnd1(2)) correct=.false.
-!     if (eubnd(3) .ne. ieubnd1(3)) correct=.false.
-!     if (ecnt(1) .ne. ieubnd1(1)-ielbnd1(1)+1) correct=.false.
-!     if (ecnt(2) .ne. ieubnd1(2)-ielbnd1(2)+1) correct=.false.
-!     if (ecnt(3) .ne. ieubnd1(3)-ielbnd1(3)+1) correct=.false.
+     if (elbnd(1) .ne. ielbnd1(1)-iloff1(1)) correct=.false.
+     if (elbnd(2) .ne. ielbnd1(2)-iloff1(2)) correct=.false.
+     if (elbnd(3) .ne. ielbnd1(3)-iloff1(3)) correct=.false.
+     if (eubnd(1) .ne. ieubnd1(1)+iuoff1(1)) correct=.false.
+     if (eubnd(2) .ne. ieubnd1(2)+iuoff1(2)) correct=.false.
+     if (eubnd(3) .ne. ieubnd1(3)+iuoff1(3)) correct=.false.
+     if (ecnt(1) .ne. ieubnd1(1)-ielbnd1(1)+1+iloff1(1)+iuoff1(1)) correct=.false.
+     if (ecnt(2) .ne. ieubnd1(2)-ielbnd1(2)+1+iloff1(2)+iuoff1(2)) correct=.false.
+     if (ecnt(3) .ne. ieubnd1(3)-ielbnd1(3)+1+iloff1(3)+iuoff1(3)) correct=.false.
 
      if (clbnd(1) .ne. ielbnd1(1)-iloff1(1)) correct=.false.
      if (clbnd(2) .ne. ielbnd1(2)-iloff1(2)) correct=.false.
@@ -672,15 +682,16 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
              if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 !   write(*,*) "2:",clbnd,",",cubnd, correct
 
-!     if (elbnd(1) .ne. ielbnd2(1)) correct=.false.
-!     if (elbnd(2) .ne. ielbnd2(2)) correct=.false.
-!     if (elbnd(3) .ne. ielbnd2(3)) correct=.false.
-!     if (eubnd(1) .ne. ieubnd2(1)) correct=.false.
-!     if (eubnd(2) .ne. ieubnd2(2)) correct=.false.
-!     if (eubnd(3) .ne. ieubnd2(3)) correct=.false.
-!     if (ecnt(1) .ne. ieubnd2(1)-ielbnd2(1)+1) correct=.false.
-!     if (ecnt(2) .ne. ieubnd2(2)-ielbnd2(2)+1) correct=.false.
-!     if (ecnt(3) .ne. ieubnd2(3)-ielbnd2(3)+1) correct=.false.
+
+     if (elbnd(1) .ne. ielbnd2(1)-iloff2(1)) correct=.false.
+     if (elbnd(2) .ne. ielbnd2(2)-iloff2(2)) correct=.false.
+     if (elbnd(3) .ne. ielbnd2(3)-iloff2(3)) correct=.false.
+     if (eubnd(1) .ne. ieubnd2(1)+iuoff2(1)) correct=.false.
+     if (eubnd(2) .ne. ieubnd2(2)+iuoff2(2)) correct=.false.
+     if (eubnd(3) .ne. ieubnd2(3)+iuoff2(3)) correct=.false.
+     if (ecnt(1) .ne. ieubnd2(1)-ielbnd2(1)+1+iloff2(1)+iuoff2(1)) correct=.false.
+     if (ecnt(2) .ne. ieubnd2(2)-ielbnd2(2)+1+iloff2(2)+iuoff2(2)) correct=.false.
+     if (ecnt(3) .ne. ieubnd2(3)-ielbnd2(3)+1+iloff2(3)+iuoff2(3)) correct=.false.
 
      if (clbnd(1) .ne. ielbnd2(1)-iloff2(1)) correct=.false.
      if (clbnd(2) .ne. ielbnd2(2)-iloff2(2)) correct=.false.
@@ -700,16 +711,15 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
              if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 !    write(*,*) "3:",clbnd,",",cubnd, correct
 
-!     if (elbnd(1) .ne. ielbnd3(1)) correct=.false.
-!     if (elbnd(2) .ne. ielbnd3(2)) correct=.false.
-!     if (elbnd(3) .ne. ielbnd3(3)) correct=.false.
-!     if (eubnd(1) .ne. ieubnd3(1)) correct=.false.
-!     if (eubnd(2) .ne. ieubnd3(2)) correct=.false.
-!     if (eubnd(3) .ne. ieubnd3(3)) correct=.false.
-!     if (ecnt(1) .ne. ieubnd3(1)-ielbnd3(1)+1) correct=.false.
-!     if (ecnt(2) .ne. ieubnd3(2)-ielbnd3(2)+1) correct=.false.
-!     if (ecnt(3) .ne. ieubnd3(3)-ielbnd3(3)+1) correct=.false.
-
+     if (elbnd(1) .ne. ielbnd3(1)-iloff3(1)) correct=.false.
+     if (elbnd(2) .ne. ielbnd3(2)-iloff3(2)) correct=.false.
+     if (elbnd(3) .ne. ielbnd3(3)-iloff3(3)) correct=.false.
+     if (eubnd(1) .ne. ieubnd3(1)+iuoff3(1)) correct=.false.
+     if (eubnd(2) .ne. ieubnd3(2)+iuoff3(2)) correct=.false.
+     if (eubnd(3) .ne. ieubnd3(3)+iuoff3(3)) correct=.false.
+     if (ecnt(1) .ne. ieubnd3(1)-ielbnd3(1)+1+iloff3(1)+iuoff3(1)) correct=.false.
+     if (ecnt(2) .ne. ieubnd3(2)-ielbnd3(2)+1+iloff3(2)+iuoff3(2)) correct=.false.
+     if (ecnt(3) .ne. ieubnd3(3)-ielbnd3(3)+1+iloff3(3)+iuoff3(3)) correct=.false.
 
      if (clbnd(1) .ne. ielbnd3(1)-iloff3(1)) correct=.false.
      if (clbnd(2) .ne. ielbnd3(2)-iloff3(2)) correct=.false.
@@ -729,15 +739,15 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
              if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      if (localPet .eq. 0) then
-!        if (elbnd(1) .ne. ielbnd0(1)) correct=.false.
-!        if (elbnd(2) .ne. ielbnd0(2)) correct=.false.
-!        if (elbnd(3) .ne. ielbnd0(3)) correct=.false.
-!        if (eubnd(1) .ne. ieubnd0(1)) correct=.false.
-!        if (eubnd(2) .ne. ieubnd0(2)) correct=.false.
-!        if (eubnd(3) .ne. ieubnd0(3)) correct=.false.
-!        if (ecnt(1) .ne. ieubnd0(1)-ielbnd0(1)+1) correct=.false.
-!        if (ecnt(2) .ne. ieubnd0(2)-ielbnd0(2)+1) correct=.false.
-!        if (ecnt(3) .ne. ieubnd0(3)-ielbnd0(3)+1) correct=.false.
+        if (elbnd(1) .ne. ielbnd0(1)-iloff0(1)) correct=.false.
+        if (elbnd(2) .ne. ielbnd0(2)-iloff0(2)) correct=.false.
+        if (elbnd(3) .ne. ielbnd0(3)-iloff0(3)) correct=.false.
+        if (eubnd(1) .ne. ieubnd0(1)+iuoff0(1)) correct=.false.
+        if (eubnd(2) .ne. ieubnd0(2)+iuoff0(2)) correct=.false.
+        if (eubnd(3) .ne. ieubnd0(3)+iuoff0(3)) correct=.false.
+        if (ecnt(1) .ne. ieubnd0(1)-ielbnd0(1)+1+iloff0(1)+iuoff0(1)) correct=.false.
+        if (ecnt(2) .ne. ieubnd0(2)-ielbnd0(2)+1+iloff0(2)+iuoff0(2)) correct=.false.
+        if (ecnt(3) .ne. ieubnd0(3)-ielbnd0(3)+1+iloff0(3)+iuoff0(3)) correct=.false.
 
         if (clbnd(1) .ne. ielbnd0(1)-iloff0(1)) correct=.false.
         if (clbnd(2) .ne. ielbnd0(2)-iloff0(2)) correct=.false.
@@ -749,15 +759,15 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
         if (ccnt(2) .ne. ieubnd0(2)-ielbnd0(2)+1+iloff0(2)+iuoff0(2)) correct=.false.
         if (ccnt(3) .ne. ieubnd0(3)-ielbnd0(3)+1+iloff0(3)+iuoff0(3)) correct=.false.
      else if (localPet .eq. 1) then
-!        if (elbnd(1) .ne. ielbnd1(1)) correct=.false.
-!        if (elbnd(2) .ne. ielbnd1(2)) correct=.false.
-!        if (elbnd(3) .ne. ielbnd1(3)) correct=.false.
-!        if (eubnd(1) .ne. ieubnd1(1)) correct=.false.
-!        if (eubnd(2) .ne. ieubnd1(2)) correct=.false.
-!        if (eubnd(3) .ne. ieubnd1(3)) correct=.false.
-!        if (ecnt(1) .ne. ieubnd1(1)-ielbnd1(1)+1) correct=.false.
-!        if (ecnt(2) .ne. ieubnd1(2)-ielbnd1(2)+1) correct=.false.
-!        if (ecnt(3) .ne. ieubnd1(3)-ielbnd1(3)+1) correct=.false.
+        if (elbnd(1) .ne. ielbnd1(1)-iloff1(1)) correct=.false.
+        if (elbnd(2) .ne. ielbnd1(2)-iloff1(2)) correct=.false.
+        if (elbnd(3) .ne. ielbnd1(3)-iloff1(3)) correct=.false.
+        if (eubnd(1) .ne. ieubnd1(1)+iuoff1(1)) correct=.false.
+        if (eubnd(2) .ne. ieubnd1(2)+iuoff1(2)) correct=.false.
+        if (eubnd(3) .ne. ieubnd1(3)+iuoff1(3)) correct=.false.
+        if (ecnt(1) .ne. ieubnd1(1)-ielbnd1(1)+1+iloff1(1)+iuoff1(1)) correct=.false.
+        if (ecnt(2) .ne. ieubnd1(2)-ielbnd1(2)+1+iloff1(2)+iuoff1(2)) correct=.false.
+        if (ecnt(3) .ne. ieubnd1(3)-ielbnd1(3)+1+iloff1(3)+iuoff1(3)) correct=.false.
 
         if (clbnd(1) .ne. ielbnd1(1)-iloff1(1)) correct=.false.
         if (clbnd(2) .ne. ielbnd1(2)-iloff1(2)) correct=.false.
@@ -769,15 +779,16 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
         if (ccnt(2) .ne. ieubnd1(2)-ielbnd1(2)+1+iloff1(2)+iuoff1(2)) correct=.false.
         if (ccnt(3) .ne. ieubnd1(3)-ielbnd1(3)+1+iloff1(3)+iuoff1(3)) correct=.false.
      else if (localPet .eq. 2) then
-!        if (elbnd(1) .ne. ielbnd2(1)) correct=.false.
-!        if (elbnd(2) .ne. ielbnd2(2)) correct=.false.
-!        if (elbnd(3) .ne. ielbnd2(3)) correct=.false.
-!        if (eubnd(1) .ne. ieubnd2(1)) correct=.false.
-!        if (eubnd(2) .ne. ieubnd2(2)) correct=.false.
-!        if (eubnd(3) .ne. ieubnd2(3)) correct=.false.
-!        if (ecnt(1) .ne. ieubnd2(1)-ielbnd2(1)+1) correct=.false.
-!        if (ecnt(2) .ne. ieubnd2(2)-ielbnd2(2)+1) correct=.false.
-!        if (ecnt(3) .ne. ieubnd2(3)-ielbnd2(3)+1) correct=.false.
+
+        if (elbnd(1) .ne. ielbnd2(1)-iloff2(1)) correct=.false.
+        if (elbnd(2) .ne. ielbnd2(2)-iloff2(2)) correct=.false.
+        if (elbnd(3) .ne. ielbnd2(3)-iloff2(3)) correct=.false.
+        if (eubnd(1) .ne. ieubnd2(1)+iuoff2(1)) correct=.false.
+        if (eubnd(2) .ne. ieubnd2(2)+iuoff2(2)) correct=.false.
+        if (eubnd(3) .ne. ieubnd2(3)+iuoff2(3)) correct=.false.
+        if (ecnt(1) .ne. ieubnd2(1)-ielbnd2(1)+1+iloff2(1)+iuoff2(1)) correct=.false.
+        if (ecnt(2) .ne. ieubnd2(2)-ielbnd2(2)+1+iloff2(2)+iuoff2(2)) correct=.false.
+        if (ecnt(3) .ne. ieubnd2(3)-ielbnd2(3)+1+iloff2(3)+iuoff2(3)) correct=.false.
 
         if (clbnd(1) .ne. ielbnd2(1)-iloff2(1)) correct=.false.
         if (clbnd(2) .ne. ielbnd2(2)-iloff2(2)) correct=.false.
@@ -789,15 +800,15 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
         if (ccnt(2) .ne. ieubnd2(2)-ielbnd2(2)+1+iloff2(2)+iuoff2(2)) correct=.false.
         if (ccnt(3) .ne. ieubnd2(3)-ielbnd2(3)+1+iloff2(3)+iuoff2(3)) correct=.false.
      else if (localPet .eq. 3) then
-!        if (elbnd(1) .ne. ielbnd3(1)) correct=.false.
-!        if (elbnd(2) .ne. ielbnd3(2)) correct=.false.
-!        if (elbnd(3) .ne. ielbnd3(3)) correct=.false.
-!        if (eubnd(1) .ne. ieubnd3(1)) correct=.false.
-!        if (eubnd(2) .ne. ieubnd3(2)) correct=.false.
-!        if (eubnd(3) .ne. ieubnd3(3)) correct=.false.
-!        if (ecnt(1) .ne. ieubnd3(1)-ielbnd3(1)+1) correct=.false.
-!        if (ecnt(2) .ne. ieubnd3(2)-ielbnd3(2)+1) correct=.false.
-!        if (ecnt(3) .ne. ieubnd3(3)-ielbnd3(3)+1) correct=.false.
+        if (elbnd(1) .ne. ielbnd3(1)-iloff3(1)) correct=.false.
+        if (elbnd(2) .ne. ielbnd3(2)-iloff3(2)) correct=.false.
+        if (elbnd(3) .ne. ielbnd3(3)-iloff3(3)) correct=.false.
+        if (eubnd(1) .ne. ieubnd3(1)+iuoff3(1)) correct=.false.
+        if (eubnd(2) .ne. ieubnd3(2)+iuoff3(2)) correct=.false.
+        if (eubnd(3) .ne. ieubnd3(3)+iuoff3(3)) correct=.false.
+        if (ecnt(1) .ne. ieubnd3(1)-ielbnd3(1)+1+iloff3(1)+iuoff3(1)) correct=.false.
+        if (ecnt(2) .ne. ieubnd3(2)-ielbnd3(2)+1+iloff3(2)+iuoff3(2)) correct=.false.
+        if (ecnt(3) .ne. ieubnd3(3)-ielbnd3(3)+1+iloff3(3)+iuoff3(3)) correct=.false.
 
         if (clbnd(1) .ne. ielbnd3(1)-iloff3(1)) correct=.false.
         if (clbnd(2) .ne. ielbnd3(2)-iloff3(2)) correct=.false.

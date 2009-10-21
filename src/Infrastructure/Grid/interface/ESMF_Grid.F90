@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.140 2009/10/21 14:52:59 eschwab Exp $'
+      '$Id: ESMF_Grid.F90,v 1.141 2009/10/21 18:00:13 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -989,9 +989,8 @@ end interface
 ! !INTERFACE:
   ! Private name; call using ESMF_GridAddItem()
      subroutine ESMF_GridAddItemNoValues(grid, staggerloc, item, itemTypeKind, &
-                staggerEdgeLWidth, staggerEdgeUWidth, staggerAlign,            &
-                totalLWidth, totalUWidth,rc)
-
+                staggerEdgeLWidth, staggerEdgeUWidth, staggerAlign,  &
+                staggerMemLBound,  totalLWidth, totalUWidth,rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)              :: grid 
@@ -1001,6 +1000,7 @@ end interface
       integer,                intent(in),optional     :: staggerEdgeLWidth(:)
       integer,                intent(in),optional     :: staggerEdgeUWidth(:)
       integer,                intent(in),optional     :: staggerAlign(:)
+      integer,                intent(in),optional     :: staggerMemLBound(:)      
       integer,                intent(out), optional   :: totalLWidth(:)         ! N. IMP
       integer,                intent(out), optional   :: totalUWidth(:)         ! N. IMP
       integer,                intent(out),optional    :: rc
@@ -1043,6 +1043,9 @@ end interface
 !      If not set, then this defaults to all negative. (e.g. 
 !      The most negative part of the stagger in a cell is aligned with the 
 !      center and the padding is all on the postive side.) 
+! \item[{[staggerMemLBound]}] 
+!      Specifies the lower index range of the memory of every DE in this staggerloc in this Grid. 
+!      Only used when Grid indexflag is {\tt ESMF\_INDEX\_USER}. 
 !\item[{[totalLWidth]}]
 !     The lower boundary of the computatational region in reference to the computational region. 
 !     Note, the computational region includes the extra padding specified by {\tt ccordLWidth}.
@@ -1062,6 +1065,7 @@ end interface
     type(ESMF_InterfaceInt) :: staggerEdgeLWidthArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: staggerEdgeUWidthArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: staggerAlignArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: staggerMemLBoundArg  ! Language Interface Helper Var
     type(ESMF_GridDecompType) :: decompType     ! decompose type: arbitrary or non-arbitrary
 
     ! Initialize return code; assume failure until success is certain
@@ -1143,9 +1147,15 @@ end interface
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
+       !! staggerMemLBound
+       staggerMemLBoundArg = ESMF_InterfaceIntCreate(staggerMemLBound, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
        ! Call C++ Subroutine to do the create
        call c_ESMC_gridadditem(grid%this,tmp_staggerloc, item, itemTypeKind, &
-          staggerEdgeLWidthArg, staggerEdgeUWidthArg, staggerAlignArg, localrc)
+          staggerEdgeLWidthArg, staggerEdgeUWidthArg, staggerAlignArg, &
+          staggerMemLBoundArg,  localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1159,6 +1169,10 @@ end interface
           ESMF_CONTEXT, rcToReturn=rc)) return
 
        call ESMF_InterfaceIntDestroy(staggerAlignArg, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterfaceIntDestroy(staggerMemLBoundArg, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -1528,7 +1542,6 @@ end subroutine ESMF_GridConvertIndex
     type(ESMF_IndexFlag) :: indexflag    
     type(ESMF_TypeKind) :: localTypeKind
     type(ESMF_StaggerLoc) :: localStaggerLoc
-    integer          :: compEUWidth(ESMF_MAXDIM),compELWidth(ESMF_MAXDIM)
     integer, pointer :: arrayLBound(:),arrayUBound(:)
     integer, pointer :: distgridToArrayMap(:)
     integer :: dimCount
@@ -1584,7 +1597,7 @@ end subroutine ESMF_GridConvertIndex
    endif
 
     ! Get info from Grid
-    call ESMF_GridGet(grid, distgrid=distgrid, dimCount=dimCount,  &
+    call ESMF_GridGet(grid, dimCount=dimCount,  &
                       indexflag=indexflag, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1668,10 +1681,9 @@ end subroutine ESMF_GridConvertIndex
 
 
     ! Get dimmap and undistibuted bounds
-    call ESMF_GridGetArrayInfo(grid, localstaggerloc,               &
+    call ESMF_GridGetArrayInfo(grid, localstaggerloc,                         &
                             gridToArrayMap, ungriddedLBound, ungriddedUBound, &
-                            distgridToArrayMap, arrayLBound, arrayUBound,   &
-                            computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
+                            distgrid, distgridToArrayMap, arrayLBound, arrayUBound,   &
                             rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1681,8 +1693,6 @@ end subroutine ESMF_GridConvertIndex
     ! create Array
     array=ESMF_ArrayCreate(arrayspec=arrayspec, &
               distgrid=distgrid, distgridToArrayMap=distgridToArrayMap, &
-              computationalEdgeLWidth=compELWidth(1:gridUsedDimCount), &
-              computationalEdgeUWidth=compEUWidth(1:gridUsedDimCount), &
               totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
               indexflag=indexflag, &
               undistLBound=arrayLBound, undistUBound=arrayUBound, name=name, &
@@ -1705,6 +1715,7 @@ end subroutine ESMF_GridConvertIndex
 
     end function ESMF_ArrayCreateFromGrid
 
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetArrayInfo"
@@ -1713,10 +1724,10 @@ end subroutine ESMF_GridConvertIndex
 ! !IROUTINE: ESMF_GridGetArrayInfo - get information to make an Array from a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetArrayInfo(grid, staggerloc,               &
+      subroutine ESMF_GridGetArrayInfo(grid, staggerloc, &
                            gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-                           distgridToArrayMap, undistLBound, undistUBound,   &
-                           computationalEdgeLWidth, computationalEdgeUWidth, &
+                           staggerDistgrid, distgridToArrayMap, &
+                           undistLBound, undistUBound,   &
                            rc)
 !
 ! !ARGUMENTS:
@@ -1725,11 +1736,10 @@ end subroutine ESMF_GridConvertIndex
        integer,               intent(in),  optional :: gridToFieldMap(:)
        integer,               intent(in),  optional :: ungriddedLBound(:)
        integer,               intent(in),  optional :: ungriddedUBound(:)
+       type(ESMF_DistGrid),   intent(out), optional :: staggerDistgrid 
        integer,               intent(out)           :: distgridToArrayMap(:)
        integer,               intent(out)           :: undistLBound(:)
        integer,               intent(out)           :: undistUBound(:)
-       integer,               intent(out)           :: computationalEdgeLWidth(:)
-       integer,               intent(out)           :: computationalEdgeUWidth(:)
        integer,               intent(out), optional :: rc
 
 !
@@ -1750,6 +1760,8 @@ end subroutine ESMF_GridConvertIndex
 !     Please see Section~\ref{sec:opt:staggerloc} for a list 
 !     of predefined stagger locations. If not present, defaults to
 !      ESMF\_STAGGERLOC\_CENTER.
+!\item[staggerDistgrid]
+!   The class that describes the stagger locations in the grids distribution.
 !\item[{[gridToFieldMap]}]
 !     Indicates how the grid dimension map to the field that the newly created array 
 !     is associated with. {\tt The array gridToFieldMap} should be at least of size equal 
@@ -1772,7 +1784,6 @@ end subroutine ESMF_GridConvertIndex
 !
 !EOPI
     integer :: localrc ! local error status
-    type(ESMF_DistGrid) :: distgrid
     type(ESMF_StaggerLoc) :: localStaggerLoc
     type(ESMF_GridDecompType) :: decompType
     integer, pointer :: arrayDimType(:)
@@ -1791,6 +1802,8 @@ end subroutine ESMF_GridConvertIndex
     integer :: gridUsedDimCount
     integer :: arbdim, rep_arb, rep_noarb
     logical :: found
+    type(ESMF_DistGrid) :: distgrid
+    
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1839,7 +1852,7 @@ end subroutine ESMF_GridConvertIndex
    endif
 
     ! Get info from Grid
-    call ESMF_GridGet(grid, distgrid=distgrid, dimCount=dimCount, rc=localrc)
+    call ESMF_GridGet(grid, dimCount=dimCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1856,6 +1869,16 @@ end subroutine ESMF_GridConvertIndex
        endif
     endif
     
+    ! Get grid distgrid
+    call ESMF_GridGet(grid, localStaggerLoc, distgrid, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! if argument is present, then pass out distgrid
+    if (present(staggerDistGrid)) then
+          staggerDistGrid=distgrid
+    endif
+
 
     ! if the Grid is arbitrary, the array dimension will be different depending on how many
     ! grid dimensions are arbitrarily distributed
@@ -1914,21 +1937,6 @@ end subroutine ESMF_GridConvertIndex
            return 
        endif
 
-       ! Check distgridToArrayMap
-       if (size(computationalEdgeLWidth) < gridUsedDimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                      "- computationalEdgeLWidth is too small", & 
-                             ESMF_CONTEXT, rc) 
-           return 
-       endif
-
-       ! Check distgridToArrayMap
-       if (size(computationalEdgeUWidth) < gridUsedDimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                      "- computationalEdgeUWidth is too small", & 
-                             ESMF_CONTEXT, rc) 
-           return 
-       endif
 
       ! set default GridToFieldMap
       if (present(gridToFieldMap)) then
@@ -1948,32 +1956,6 @@ end subroutine ESMF_GridConvertIndex
        call ESMF_GridGet(grid, distgridToGridMap=distgridToGridMap, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-
-       ! Get grid mapped computationalEdgeWidths
-       call ESMF_GridGet(grid, localStaggerLoc, &
-              computationalEdgeLWidth=gridComputationalEdgeLWidth, &
-              computationalEdgeUWidth=gridComputationalEdgeUWidth, &
-              rc=localrc)
-
-       ! map to Array ordering
-       filled=.false.
-       do i=1,dimCount
-          if (localGridToFieldMap(i) .gt. 0) then ! Skip replicated dimensions
-             tmpArrayComputationalEdgeLWidth(localGridToFieldMap(i))=gridComputationalEdgeLWidth(i)
-             tmpArrayComputationalEdgeUWidth(localGridToFieldMap(i))=gridComputationalEdgeUWidth(i)
-             filled(localGridToFieldMap(i))=.true.
-          endif
-       enddo
-
-       ! Collapse
-       j=1
-       do i=1,arrayDimCount
-          if (filled(i)) then
-             computationalEdgeLWidth(j)=tmpArrayComputationalEdgeLWidth(i)
-             computationalEdgeUWidth(j)=tmpArrayComputationalEdgeUWidth(i)
-             j=j+1
-          endif
-       enddo
 
        ! construct distgridToArrayMap
        do i=1,dimCount
@@ -2133,27 +2115,8 @@ end subroutine ESMF_GridConvertIndex
 
        arrayDimCount=ungriddedDimCount+distDimCount-rep_noarb-rep_arb
 
-       ! Check computationalEdgeLWidth
-       if (size(computationalEdgeLWidth) < ArrayDimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                      "- computationalEdgeLWidth is too small", & 
-                          ESMF_CONTEXT, rc) 
-           return 
-       endif
-
-       ! Check computationalEdgeUWidth
-       if (size(computationalEdgeUWidth) < ArrayDimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                   "- computationalEdgeUWidth is too small", & 
-                          ESMF_CONTEXT, rc) 
-           return 
-       endif
-
        deallocate(distgridToGridMap)
               
-       computationalEdgeLWidth(:)=0
-       computationalEdgeUWidth(:)=0
-
        ! construct array based on the presence of distributed dimensions
        ! if there are undistributed dimensions ...
        if (undistArrayDimCount .gt. 0) then      
@@ -3753,11 +3716,12 @@ end subroutine ESMF_GridConvertIndex
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+
+#if 0
     ! Modify lower bound
     do i=1,dimCount
        minIndexLocal(i)=minIndexLocal(i)-gridEdgeLWidthLocal(i)
     enddo
-
 
     ! Modify lower size
     countsPerDEDim1Local(1)=countsPerDEDim1Local(1)+gridEdgeLWidthLocal(1)
@@ -3780,6 +3744,7 @@ end subroutine ESMF_GridConvertIndex
        top=size(countsPerDEDim3Local)
        countsPerDEDim3Local(top)=countsPerDEDim3Local(top)+gridEdgeUWidthLocal(3)
     endif
+#endif
 
 
    ! Calc minIndex,maxIndex,distgridToGridMap for DistGrid -----------------------------------
@@ -4757,6 +4722,8 @@ end subroutine ESMF_GridConvertIndex
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+
+#if 0 
     ! Modify lower bound
     do i=1,dimCount
        minIndexLocal(i)=minIndexLocal(i)-gridEdgeLWidthLocal(i)
@@ -4766,6 +4733,7 @@ end subroutine ESMF_GridConvertIndex
     do i=1,dimCount
        maxIndexLocal(i)=maxIndexLocal(i)+gridEdgeUWidthLocal(i)
     enddo
+#endif
 
 
    ! Set default for decomp flag based on gridEdgeWidths -----------------------------------
@@ -4852,8 +4820,10 @@ end subroutine ESMF_GridConvertIndex
     distgrid=ESMF_DistGridCreate(minIndex=minIndexLocal, maxIndex=maxIndexLocal, &
               regDecomp=regDecompLocal, decompFlag=decompFlagLocal, delayout=delayout,&
               indexflag=indexflag, &
+#if 0
               regDecompFirstExtra=gridEdgeLWidthLocal, &
               regDecompLastExtra=gridEdgeUWidthLocal, &
+#endif
               rc=localrc)   
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6087,15 +6057,13 @@ end subroutine ESMF_GridGetDefault
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
       subroutine ESMF_GridGetPSloc(grid, staggerloc, &
-          computationalEdgeLWidth, computationalEdgeUWidth,  &
-          minIndex, maxIndex, rc)
+          staggerDistgrid, minIndex, maxIndex, rc)
 
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
       type (ESMF_StaggerLoc), intent(in)            :: staggerloc
-      integer,        target, intent(out), optional :: computationalEdgeLWidth(:)
-      integer,        target, intent(out), optional :: computationalEdgeUWidth(:)
+      type(ESMF_DistGrid),   intent(out), optional :: staggerDistgrid
       integer,        target, intent(out), optional :: minIndex(:)
       integer,        target, intent(out), optional :: maxIndex(:)
       integer,                intent(out), optional :: rc
@@ -6113,18 +6081,8 @@ end subroutine ESMF_GridGetDefault
 !     The stagger location to get the information for. 
 !     Please see Section~\ref{sec:opt:staggerloc} for a list 
 !     of predefined stagger locations. 
-!\item[{[computationalEdgeLWidth]}]
-!     Upon return this holds the global lower width of the stagger region.
-!     The width returned is only for the distGrid dimensions and is
-!     mapped to correspond to those dimensions. 
-!     {\tt computationalEdgeLWidth} must be allocated to be of size equal to the grid distDimCount
-!     (i.e. the grid's distgrid's dimCount).
-!\item[{[computationalEdgeUWidth]}]
-!     Upon return this holds the global upper width of the stagger region.
-!     The width returned is only for the distGrid dimensions and is
-!     mapped to correspond to those dimensions. 
-!     {\tt computationalEdgeUWidth} must be allocated to be of size equal to the grid distDimCount
-!     (i.e. the grid's distgrid's dimCount).
+!\item[{[staggerDistgrid]}]
+!   The structure describing the distribution of this staggerloc in this grid. 
 !\item[{[minIndex]}]
 !     Upon return this holds the global lower index of this stagger location.
 !     {\tt minIndex} must be allocated to be of size equal to the grid DimCount.
@@ -6142,8 +6100,6 @@ end subroutine ESMF_GridGetDefault
 !EOP
 
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: computationalEdgeLWidthArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalEdgeUWidthArg ! helper variable
     type(ESMF_InterfaceInt) :: minIndexArg ! helper variable
     type(ESMF_InterfaceInt) :: maxIndexArg ! helper variable
     integer :: tmp_staggerloc
@@ -6157,12 +6113,6 @@ end subroutine ESMF_GridGetDefault
     tmp_staggerloc=staggerloc%staggerloc
 
     ! process optional arguments
-    computationalEdgeLWidthArg=ESMF_InterfaceIntCreate(computationalEdgeLWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalEdgeUWidthArg=ESMF_InterfaceIntCreate(computationalEdgeUWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
     minIndexArg=ESMF_InterfaceIntCreate(minIndex, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6173,24 +6123,24 @@ end subroutine ESMF_GridGetDefault
     ! Call into the C++ interface, which will sort out optional arguments
 
     call c_ESMC_GridGetPSloc(grid, tmp_staggerLoc, &
-      computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
-     minIndexArg, maxIndexArg,localrc)
+         staggerDistgrid, minIndexArg, maxIndexArg,localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(computationalEdgeLWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalEdgeUWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set Deep Classes as created
+    if (present(staggerDistgrid)) then
+       call ESMF_DistGridSetInitCreated(staggerDistgrid, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+   	   ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -13025,6 +12975,8 @@ endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+
+#if 0
     ! Modify lower bound
     do i=1,dimCount
        minIndexLocal(i)=minIndexLocal(i)-gridEdgeLWidthLocal(i)
@@ -13052,6 +13004,7 @@ endif
        top=size(countsPerDEDim3Local)
        countsPerDEDim3Local(top)=countsPerDEDim3Local(top)+gridEdgeUWidthLocal(3)
     endif
+#endif
 
 
    ! Calc minIndex,maxIndex,distgridToGridMap for DistGrid -----------------------------------
@@ -14030,6 +13983,7 @@ endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+#if 0
     ! Modify lower bound
     do i=1,dimCount
        minIndexLocal(i)=minIndexLocal(i)-gridEdgeLWidthLocal(i)
@@ -14039,6 +13993,8 @@ endif
     do i=1,dimCount
        maxIndexLocal(i)=maxIndexLocal(i)+gridEdgeUWidthLocal(i)
     enddo
+#endif
+
 
    ! Set default for decomp flag based on gridEdgeWidths -----------------------------------
    ! NOTE: This is a temporary fix until we have something better implemented in distGrid
@@ -14125,8 +14081,10 @@ endif
     distgrid=ESMF_DistGridCreate(minIndex=minIndexLocal, maxIndex=maxIndexLocal, &
               regDecomp=regDecompLocal, decompFlag=decompFlagLocal, delayout=delayout,&
               indexflag=indexflag, &
+#if 0
               regDecompFirstExtra=gridEdgeLWidthLocal, &
               regDecompLastExtra=gridEdgeUWidthLocal, &
+#endif
               rc=localrc)   
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

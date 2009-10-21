@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.92 2009/10/13 14:44:15 eschwab Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.93 2009/10/21 18:00:16 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.92 2009/10/13 14:44:15 eschwab Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.93 2009/10/21 18:00:16 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -1296,8 +1296,6 @@ program ESMF_GridCreateUTest
           gridToFieldMap=(/0,3,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
           distgridToArrayMap=distgridToArrayMap, &
           undistLBound=undistLBound, undistUBound=undistUBound, &
-          computationalEdgeLWidth=celw, &
-          computationalEdgeUWidth=ceuw, &
           rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1306,8 +1304,6 @@ program ESMF_GridCreateUTest
       (distgridToArrayMap(2) .ne. 3) .or. &
       (distgridToArrayMap(3) .ne. 0)) correct=.false. 
 
-  if (celw(1) .ne. -2) correct=.false.
-  if (ceuw(1) .ne. -5) correct=.false.
   if ((undistLBound(1) .ne. 2) .or. (undistLBound(2) .ne. 3)) correct=.false.
   if ((undistUBound(1) .ne. 7) .or. (undistUBound(2) .ne. 6)) correct=.false.
 
@@ -1317,8 +1313,6 @@ program ESMF_GridCreateUTest
           gridToFieldMap=(/3,1,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
           distgridToArrayMap=distgridToArrayMap, &
           undistLBound=undistLBound, undistUBound=undistUBound, &
-          computationalEdgeLWidth=celw, &
-          computationalEdgeUWidth=ceuw, &
           rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1327,8 +1321,6 @@ program ESMF_GridCreateUTest
       (distgridToArrayMap(2) .ne. 1) .or. &
       (distgridToArrayMap(3) .ne. 0)) correct=.false. 
 
-  if ((celw(1) .ne. -2) .or. (celw(2) .ne. -1)) correct=.false.
-  if ((ceuw(1) .ne. -5) .or. (ceuw(2) .ne. -4)) correct=.false.
 
   if ((undistLBound(1) .ne. 2) .or. (undistLBound(2) .ne. 3)) correct=.false.
   if ((undistUBound(1) .ne. 7) .or. (undistUBound(2) .ne. 6)) correct=.false.
@@ -1363,8 +1355,6 @@ program ESMF_GridCreateUTest
           gridToFieldMap=(/0,1/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
           distgridToArrayMap=distgridToArrayMap, &
           undistLBound=undistLBound, undistUBound=undistUBound, &
-          computationalEdgeLWidth=celw, &
-          computationalEdgeUWidth=ceuw, &
           rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1372,8 +1362,6 @@ program ESMF_GridCreateUTest
   if ((distgridToArrayMap(1) .ne. 1) .or. &
       (distgridToArrayMap(2) .ne. 0)) correct=.false. 
 
-  if (celw(1) .ne. -2) correct=.false.
-  if (ceuw(1) .ne. -4) correct=.false.
   if ((undistLBound(1) .ne. 2) .or. (undistLBound(2) .ne. 3)) correct=.false.
   if ((undistUBound(1) .ne. 7) .or. (undistUBound(2) .ne. 6)) correct=.false.
 
@@ -1383,8 +1371,6 @@ program ESMF_GridCreateUTest
           gridToFieldMap=(/1,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
           distgridToArrayMap=distgridToArrayMap, &
           undistLBound=undistLBound, undistUBound=undistUBound, &
-          computationalEdgeLWidth=celw, &
-          computationalEdgeUWidth=ceuw, &
           rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1392,8 +1378,6 @@ program ESMF_GridCreateUTest
   if ((distgridToArrayMap(1) .ne. 0) .or. &
       (distgridToArrayMap(2) .ne. 1)) correct=.false. 
 
-  if (celw(1) .ne. -1) correct=.false.
-  if (ceuw(1) .ne. -3) correct=.false.
   if ((undistLBound(1) .ne. 2) .or. (undistLBound(2) .ne. 3)) correct=.false.
   if ((undistUBound(1) .ne. 7) .or. (undistUBound(2) .ne. 6)) correct=.false.
 
@@ -1482,8 +1466,6 @@ program ESMF_GridCreateUTest
           gridToFieldMap=(/0,3,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
           distgridToArrayMap=distgridToArrayMap, &
           undistLBound=undistLBound, undistUBound=undistUBound, &
-          computationalEdgeLWidth=celw, &
-          computationalEdgeUWidth=ceuw, &
           rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1492,8 +1474,6 @@ program ESMF_GridCreateUTest
       (distgridToArrayMap(2) .ne. 3) .or. &
       (distgridToArrayMap(3) .ne. 0)) correct=.false. 
 
-  if (celw(1) .ne. -2) correct=.false.
-  if (ceuw(1) .ne. -5) correct=.false.
   if ((undistLBound(1) .ne. 2) .or. (undistLBound(2) .ne. 3)) correct=.false.
   if ((undistUBound(1) .ne. 7) .or. (undistUBound(2) .ne. 6)) correct=.false.
 
@@ -1503,8 +1483,6 @@ program ESMF_GridCreateUTest
           gridToFieldMap=(/3,1,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
           distgridToArrayMap=distgridToArrayMap, &
           undistLBound=undistLBound, undistUBound=undistUBound, &
-          computationalEdgeLWidth=celw, &
-          computationalEdgeUWidth=ceuw, &
           rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1513,8 +1491,6 @@ program ESMF_GridCreateUTest
       (distgridToArrayMap(2) .ne. 1) .or. &
       (distgridToArrayMap(3) .ne. 0)) correct=.false. 
 
-  if ((celw(1) .ne. -2) .or. (celw(2) .ne. -1)) correct=.false.
-  if ((ceuw(1) .ne. -5) .or. (ceuw(2) .ne. -4)) correct=.false.
 
   if ((undistLBound(1) .ne. 2) .or. (undistLBound(2) .ne. 3)) correct=.false.
   if ((undistUBound(1) .ne. 7) .or. (undistUBound(2) .ne. 6)) correct=.false.
@@ -1549,8 +1525,6 @@ program ESMF_GridCreateUTest
           gridToFieldMap=(/0,1/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
           distgridToArrayMap=distgridToArrayMap, &
           undistLBound=undistLBound, undistUBound=undistUBound, &
-          computationalEdgeLWidth=celw, &
-          computationalEdgeUWidth=ceuw, &
           rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1558,8 +1532,6 @@ program ESMF_GridCreateUTest
   if ((distgridToArrayMap(1) .ne. 1) .or. &
       (distgridToArrayMap(2) .ne. 0)) correct=.false. 
 
-  if (celw(1) .ne. -2) correct=.false.
-  if (ceuw(1) .ne. -4) correct=.false.
   if ((undistLBound(1) .ne. 2) .or. (undistLBound(2) .ne. 3)) correct=.false.
   if ((undistUBound(1) .ne. 7) .or. (undistUBound(2) .ne. 6)) correct=.false.
 
@@ -1569,8 +1541,6 @@ program ESMF_GridCreateUTest
           gridToFieldMap=(/1,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
           distgridToArrayMap=distgridToArrayMap, &
           undistLBound=undistLBound, undistUBound=undistUBound, &
-          computationalEdgeLWidth=celw, &
-          computationalEdgeUWidth=ceuw, &
           rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1578,8 +1548,6 @@ program ESMF_GridCreateUTest
   if ((distgridToArrayMap(1) .ne. 0) .or. &
       (distgridToArrayMap(2) .ne. 1)) correct=.false. 
 
-  if (celw(1) .ne. -1) correct=.false.
-  if (ceuw(1) .ne. -3) correct=.false.
   if ((undistLBound(1) .ne. 2) .or. (undistLBound(2) .ne. 3)) correct=.false.
   if ((undistUBound(1) .ne. 7) .or. (undistUBound(2) .ne. 6)) correct=.false.
 
@@ -1812,79 +1780,6 @@ print *, ' '
   call ESMF_Test((((rc.eq.ESMF_SUCCESS).and.correct) .or. xercesNotPresent), &
                     name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-
-
-#if 0
-  ! Get rid of the below
-  !-----------------------------------------------------------------------------
-  !
-  write(name, *) "Creating a 2D  Grid with non-default minIndex and non-default 2D regDecomp with CreateShapeTileReg"
-  write(failMsg, *) "Incorrect result"
-
-  ! create grid with nondefault parameter
-  rc=ESMF_SUCCESS
-  grid=ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,10/), regDecomp=(/2,1/), &
-       gridEdgeUWidth=(/0,0/),gridEdgeLWidth=(/0,0/), indexflag=ESMF_INDEX_GLOBAL, &
-       rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-
-  ! Allocate Center Coords
-  call ESMF_GridAddCoord(grid, &
-               staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
- 
-  ! Get number of local DEs
-  call ESMF_GridGet(grid, localDECount=localDECount, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-! XXX
-  ! Get memory and set coords
-  do lDE=0,localDECount-1
- 
-     !! get coord 1
-     call ESMF_GridGetCoord(grid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr2D, rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
-
-     !! set coord 1  
-     do i1=clbnd(1),cubnd(1)
-     do i2=clbnd(2),cubnd(2)
-        fptr2D(i1,i2)=REAL(i1,ESMF_KIND_R8)
-     enddo
-     enddo
-
-     !! get coord 2
-     call ESMF_GridGetCoord(grid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr2D, rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
-
-     !! set coord 2  
-     do i1=clbnd(1),cubnd(1)
-     do i2=clbnd(2),cubnd(2)
-        fptr2D(i1,i2)=REAL(i2,ESMF_KIND_R8)
-     enddo
-     enddo
-  enddo    
-
-
-  !! Check that validate returns true
-  call ESMF_GridValidate(grid,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) correct=.false.
-  
-  ! destroy grid
-  call ESMF_GridDestroy(grid,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-  ! destroy distgrid (created at the beginning of the file)
-  call ESMF_DistGridDestroy(distgrid,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-#endif
 
 
   !-----------------------------------------------------------------------------

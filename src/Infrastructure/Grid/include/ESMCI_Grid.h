@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.63 2009/09/30 03:19:00 theurich Exp $
+// $Id: ESMCI_Grid.h,v 1.64 2009/10/21 18:00:13 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -165,8 +165,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
 
   ESMC_IndexFlag indexflag;
-  DistGrid *distgrid;
+  DistGrid *distgrid; // Main stagger loc (Cells) 
 
+  DistGrid **staggerDistgridList; // [staggerloc]
 
   // Private methods:
   // Set internal array
@@ -233,15 +234,14 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
        bool destroyDELayout
        );
 
-  // set information about a stagger location
-  int setStaggerInfo(
-		    int _staggerloc, // (in)
-		    int *staggerAlign,  // (in)
-		    int *staggerEdgeLWidth,  // (in)
-		    int *staggerEdgeUWidth,  // (in)
-		    int *staggerMemLBound  // (in)
-		    );
 
+  int setStaggerInfo(
+		     int staggerloc,             // (in) optional
+		     InterfaceInt *staggerEdgeLWidthArg, // (in) optional
+		     InterfaceInt *staggerEdgeUWidthArg, // (in) optional
+		     InterfaceInt *staggerAlignArg,   // (in) optional 
+		     InterfaceInt *staggerMemLBoundArg   // (in) optional 
+		     );
 
  public:
 
@@ -302,6 +302,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
   // Temporary create sphere until I have topology setting worked out 
   void setSphere() {connL[0]=ESMC_GRIDCONN_PERIODIC; connU[0]=ESMC_GRIDCONN_PERIODIC; connL[1]=ESMC_GRIDCONN_POLE; connU[1]=ESMC_GRIDCONN_POLE;}
+
+  // Get stagger distgrid
+  int getStaggerDistgrid(int staggerloc, DistGrid **distgrid);
 
 
   // detect if a given staggerloc has coordinates
@@ -399,9 +402,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
   // Grid Destruct
  private:
-  void destruct(bool followCreator=true);
+  void destruct();
  public:
-  ~Grid(){destruct(false);}
+  ~Grid(){destruct();}
 
   // get lower stagger offset for a particular localDe and staggerloc
   int getLDEStaggerUOffset(
@@ -430,15 +433,18 @@ int getDistExclusiveUBound(
                            );
 
 int getExclusiveLBound(
+                       int staggerloc,
                        int localDEArg, 
                        int *lBndArg    
                        );
 
 int getExclusiveUBound(
+                       int staggerloc,
                        int localDEArg, 
                        int *uBndArg    
                        );
 
+#if 0
 int getComputationalLBound(
                            int staggerloc, 
                            int localDEArg, 
@@ -450,7 +456,7 @@ int getComputationalUBound(
                            int localDEArg, 
                            int *uBndArg    
                            );
-
+#endif
 
  int setItemArray(
                    int *_staggerloc,
@@ -475,7 +481,8 @@ int getComputationalUBound(
 		     ESMC_TypeKind *typekind,          
                      InterfaceInt *_staggerEdgeLWidthArg,
                      InterfaceInt *_staggerEdgeUWidthArg,
-                     InterfaceInt *_staggerAlign
+                     InterfaceInt *_staggerAlign,
+                     InterfaceInt *_staggerMemLBound
                      );
 
  // Allocate item Arrays for a staggerloc
@@ -634,6 +641,7 @@ int getComputationalUBound(
   private:
     Grid *grid;     // grid being iterated through
     int staggerloc; // staggerloc in grid being iterated through
+    DistGrid *staggerDistgrid;
 
     const ESMC_GridConn *connL;
     const ESMC_GridConn *connU;
@@ -692,6 +700,7 @@ int getComputationalUBound(
   private:
     Grid *grid;     // grid being iterated through
     int staggerloc; // staggerloc in grid being iterated through
+    DistGrid *staggerDistgrid;
 
     const ESMC_GridConn *connL;
     const ESMC_GridConn *connU;

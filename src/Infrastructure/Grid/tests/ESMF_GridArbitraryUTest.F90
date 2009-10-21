@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.9 2009/09/08 18:52:54 oehmke Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.10 2009/10/21 18:00:16 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.9 2009/09/08 18:52:54 oehmke Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.10 2009/10/21 18:00:16 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -68,7 +68,6 @@ program ESMF_GridArbitraryUTest
   type(ESMF_IndexFlag) :: indexflag
   integer :: distgridToGridMap(3), coordDimCount(3), distDim(2)
   integer :: distgridToArrayMap(2)
-  integer :: lwidth(3), uwidth(3)
   real(ESMF_KIND_R8), pointer :: fptr2D(:,:)
   integer :: rank
   integer :: localCount2(1), deList(1), deCount
@@ -84,7 +83,6 @@ program ESMF_GridArbitraryUTest
   type(ESMF_LocalArray) :: larray
   REAL(ESMF_KIND_R8)  :: coord3(3)
   integer :: badcount
-  integer :: celw(3), ceuw(3)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -201,7 +199,7 @@ program ESMF_GridArbitraryUTest
 
   ! get bounds for stagger location
   call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, minIndex=minIndex1, maxIndex=maxIndex1, &
-	computationalEdgeLWidth=lwidth, computationalEdgeUWidth=uwidth, rc=localrc)
+	rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check that defaults are as expected
@@ -214,8 +212,6 @@ program ESMF_GridArbitraryUTest
   if (localCount .ne. localCount1) correct = .false.
   if ((minIndex1(1) .ne. 1) .and. (minIndex1(2) .ne. 1)) correct = .false. 
   if ((maxIndex1(1) .ne. xdim) .and. (maxIndex1(2) .ne. ydim)) correct = .false. 
-  if ((lwidth(1) .ne. 0) .and. (lwidth(2) .ne. 0)) correct = .false.
-  if ((uwidth(1) .ne. 0) .and. (uwidth(2) .ne. 0)) correct = .false.
   deallocate(minIndex1, maxIndex1)
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
@@ -474,8 +470,6 @@ program ESMF_GridArbitraryUTest
           gridToFieldMap=(/2,1,3/), ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
           distgridToArrayMap=distgridToArrayMap, &
           undistLBound=undistLBound, undistUBound=undistUBound, &
-          computationalEdgeLWidth=celw, &
-          computationalEdgeUWidth=ceuw, &
           rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -484,8 +478,6 @@ program ESMF_GridArbitraryUTest
 !  print *, 'computationaledgewidths', celw, ceuw
 
   if ((undistLBound(1) .ne. 1) .or. (undistUBound(1) .ne. 10)) correct=.false.
-  if ((celw(1) .ne. 0) .or. (celw(2) .ne. 0)) correct=.false.
-  if ((ceuw(1) .ne. 0) .or. (ceuw(2) .ne. 0)) correct=.false.
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
