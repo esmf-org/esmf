@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.139 2009/10/20 05:53:07 eschwab Exp $'
+      '$Id: ESMF_Grid.F90,v 1.140 2009/10/21 14:52:59 eschwab Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2862,6 +2862,7 @@ end subroutine ESMF_GridConvertIndex
 !      The purpose of a grid Attribute package.    [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      Equals {\tt ESMF\_RC\_LIB\_NOT\_PRESENT} if Xerces is not present.
 ! \end{description}
 !
 !EOP
