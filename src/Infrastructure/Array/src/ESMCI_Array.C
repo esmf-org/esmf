@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.71 2009/10/20 05:31:34 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.72 2009/10/21 05:34:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.71 2009/10/20 05:31:34 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.72 2009/10/21 05:34:22 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -537,7 +537,7 @@ Array *Array::create(
   // delayout -> deCount, localDeCount, localDeList
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
-  if (localDeCount != larrayCount){
+  if ((localDeCount > 0) && (localDeCount != larrayCount)){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- Mismatch in localDeCount between larrayList argument and DELayout", 
       rc);
@@ -7975,6 +7975,9 @@ int Array::sparseMatMulRelease(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+printf("gjt made it into Array::sparseMatMulRelease()\n");
+  
 
   try{
   
