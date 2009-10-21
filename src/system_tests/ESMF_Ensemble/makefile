@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2009/10/20 23:10:18 svasquez Exp $ 
+# $Id: makefile,v 1.3 2009/10/21 01:14:10 svasquez Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -31,11 +31,10 @@ CLOBBERDIRS =
 RUN_Ensemble:
 	-@cd $(ESMF_TESTDIR) ; \
 	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 ${ESMF_MPIRUN} -n 8 ./ESMF_EnsembleSTest > ./ESMF_EnsembleConcurrentSTest.stdout ; \
-	cat ./PET*EnsembleSTest.Log > ./ESMF_EnsembleSTest.tmpLog ; \
+	cat ./PET*EnsembleSTest.Log > ./ESMF_EnsembleSTest.Log ; \
 	$(ESMF_RM) ./PET*EnsembleSTest.Log ; \
 	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 ${ESMF_MPIRUN} -n 4 ./ESMF_EnsembleSTest > ./ESMF_EnsembleSequentialSTest.stdout ; \
-	cat ./PET*EnsembleSTest.Log > ./ESMF_EnsembleSTest.Log ; \
+	cat ./PET*EnsembleSTest.Log >> ./ESMF_EnsembleSTest.Log ; \
 	cat ./ESMF_EnsembleSTest.tmpLog >> ./ESMF_EnsembleSTest.Log ; \
-	$(ESMF_RM) ./PET*EnsembleSTest.Log ; \
-	$(ESMF_RM) ./ESMF_EnsembleSTest.tmpLog
+	$(ESMF_RM) ./PET*EnsembleSTest.Log 
 
