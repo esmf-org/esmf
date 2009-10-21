@@ -1,4 +1,4 @@
-! $Id: ESMF_GeomBase.F90,v 1.16 2009/09/28 20:30:51 oehmke Exp $
+! $Id: ESMF_GeomBase.F90,v 1.17 2009/10/21 18:01:20 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -148,7 +148,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.16 2009/09/28 20:30:51 oehmke Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.17 2009/10/21 18:01:20 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -227,10 +227,9 @@ end interface
 ! !IROUTINE: ESMF_GeomBaseGetArrayInfo" - get information to make an Array from a GeomBase
 
 ! !INTERFACE:
-      subroutine ESMF_GeomBaseGetArrayInfo(gridbase,                         &
+      subroutine ESMF_GeomBaseGetArrayInfo(gridbase, &
                            gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-                           distgridToArrayMap, undistLBound, undistUBound,   &
-                           computationalEdgeLWidth, computationalEdgeUWidth, &
+                           distgrid, distgridToArrayMap, undistLBound, undistUBound,   &
                            rc)
 !
 ! !ARGUMENTS:
@@ -238,11 +237,10 @@ end interface
        integer,               intent(in),  optional :: gridToFieldMap(:)
        integer,               intent(in),  optional :: ungriddedLBound(:)
        integer,               intent(in),  optional :: ungriddedUBound(:)
+       type(ESMF_DIstGrid),   intent(out), optional :: distgrid
        integer,               intent(out)           :: distgridToArrayMap(:)
        integer,               intent(out)           :: undistLBound(:)
        integer,               intent(out)           :: undistUBound(:)
-       integer,               intent(out)           :: computationalEdgeLWidth(:)
-       integer,               intent(out)           :: computationalEdgeUWidth(:)
        integer,               intent(out), optional :: rc
 
 !
@@ -254,9 +252,8 @@ end interface
 ! mapped to. It also takes {\tt ungriddedLBound} and {\tt ungriddedUBound} which
 ! describes the dimensions of the Array not associated with the gridbase object. 
 ! From these it produces a mapping from the distgrid to the Array, the undistributed
-! bounds of the Array in the correct order and the computationalEdgeWidths in
-! the correct order. (For everything besides {\tt Grid} the computationalEdgeWidths
-! will be 0, and the gridToFieldMap and distgridToArrayMap will be single element
+! bounds of the Array in the correct order. (For everything besides {\tt Grid}  the 
+! gridToFieldMap and distgridToArrayMap will be single element
 ! arrays describing which dimension in the Array the gridbase object (e.g. Mesh)
 ! is mapped to.
 !
@@ -264,6 +261,8 @@ end interface
 ! \begin{description}
 !\item[{gridbase}]
 !     The gridbase to get the information from to create the Array.
+!\item[{[distgrid]}]
+!     The distgrid to create the Array on
 !\item[{[gridToFieldMap]}]
 !     Indicates where each grid dimension goes in the newly created Array.
 !     {\tt The array gridToFieldMap} should be at least of size equal to the gridbase object's
@@ -300,10 +299,9 @@ end interface
     ! Get info depending on type
     select case(gbcp%type%type)
        case (ESMF_GEOMTYPE_GRID%type) ! Grid 
-         call ESMF_GridGetArrayInfo(gbcp%grid, gbcp%staggerloc,     &
-                           gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-                           distgridToArrayMap, undistLBound, undistUBound,       &
-                           computationalEdgeLWidth, computationalEdgeUWidth, &
+         call ESMF_GridGetArrayInfo(gbcp%grid, gbcp%staggerloc, &
+                           gridToFieldMap, ungriddedLBound, ungriddedUBound,  &
+                           distgrid, distgridToArrayMap, undistLBound, undistUBound,       &
                            rc=localrc)
          if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -323,8 +321,16 @@ end interface
               if (size(ungriddedUBound) .gt. 0) undistUBound = ungriddedUBound
           endif
 
-          computationalEdgeLWidth = 0
-          computationalEdgeUWidth = 0
+           ! Distgrid
+	   if (present(distgrid)) then
+               call ESMF_MeshGet(mesh=gbcp%mesh, &
+                                 nodalDistgrid=distgrid, &
+                                  rc=localrc)
+               if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+            endif
+
 
        case (ESMF_GEOMTYPE_LOCSTREAM%type) ! LocStream
           if (present(gridToFieldMap)) then
@@ -340,8 +346,14 @@ end interface
               if (size(ungriddedUBound) .gt. 0) undistUBound = ungriddedUBound
           endif
 
-          computationalEdgeLWidth = 0
-          computationalEdgeUWidth = 0
+          ! Get distgrid
+	  if (present(distgrid)) then
+               call ESMF_LocStreamGet(gbcp%locstream, distgrid=distgrid, &
+                       rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+           endif
 
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
@@ -735,12 +747,16 @@ end interface
        case (ESMF_GEOMTYPE_GRID%type) ! Grid 
             call ESMF_GridGet(grid=gbcp%grid,  &
                       dimCount=dimCount,  localDECount=localDECount, &
-                      distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
+                      distgridToGridMap=distgridToGridMap, &
                       indexflag=indexFlag, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
-
+            call ESMF_GridGet(grid=gbcp%grid, staggerloc=gbcp%staggerloc, &
+                      staggerDistgrid=distgrid, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
 
        case (ESMF_GEOMTYPE_MESH%type) ! Mesh
             if (present(dimCount)) dimCount = 1
@@ -785,8 +801,7 @@ end subroutine ESMF_GeomBaseGet
 
 ! !INTERFACE:
       subroutine ESMF_GeomBaseGetPLocalDe(gridbase, localDe, &
-          exclusiveLBound, exclusiveUBound, exclusiveCount,  &
-          computationalLBound, computationalUBound, computationalCount, rc)
+          exclusiveLBound, exclusiveUBound, exclusiveCount,  rc)
 
 !
 ! !ARGUMENTS:
@@ -795,9 +810,6 @@ end subroutine ESMF_GeomBaseGet
        integer,                intent(out), optional :: exclusiveLBound(:)
       integer,                intent(out), optional :: exclusiveUBound(:)
       integer,                intent(out), optional :: exclusiveCount(:)
-      integer,                intent(out), optional :: computationalLBound(:)
-      integer,                intent(out), optional :: computationalUBound(:)
-      integer,                intent(out), optional :: computationalCount(:)
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -826,22 +838,6 @@ end subroutine ESMF_GeomBaseGet
 !      be allocated to be of size equal to the Grid dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
-!\item[{[computationalLBound]}]
-!     Upon return this holds the lower bounds of the computational region.
-!     {\tt computationalLBound} must be allocated to be of size equal to the Grid dimCount.
-!     Please see Section~\ref{sec:grid:usage:bounds} for a description
-!     of the regions and their associated bounds and counts. 
-!\item[{[computationalUBound]}]
-!     Upon return this holds the upper bounds of the computational region.
-!     {\tt computationalUBound} must be allocated to be of size equal to the Grid dimCount.
-!     Please see Section~\ref{sec:grid:usage:bounds} for a description
-!     of the regions and their associated bounds and counts. 
-!\item[{[computationalCount]}]
-!     Upon return this holds the number of items in the computational region per dimension.
-!     (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount} must
-!      be allocated to be of size equal to the Grid dimCount.
-!     Please see Section~\ref{sec:grid:usage:bounds} for a description
-!     of the regions and their associated bounds and counts. 
 !\item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -867,10 +863,7 @@ end subroutine ESMF_GeomBaseGet
           call ESMF_GridGet(grid=gbcp%grid, localDE=localDE, &
           staggerloc=gbcp%staggerloc,  &
           exclusiveLBound=exclusiveLBound, exclusiveUBound=exclusiveUBound, &
-          exclusiveCount=exclusiveCount,  &
-          computationalLBound=computationalLBound, &
-          computationalUBound=computationalUBound, &
-          computationalCount=computationalCount, rc=localrc)
+          exclusiveCount=exclusiveCount, rc=localrc) 
           if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -889,30 +882,12 @@ end subroutine ESMF_GeomBaseGet
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
           endif
-          if (present(computationalLBound)) computationalLBound(1) = 1
-
-          if (present(computationalUBound)) then
-             call ESMF_MeshGet(gbcp%mesh, numOwnedNodes=computationalUBound(1), rc=localrc)
-             if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
-          endif
-
-          if (present(computationalCount)) then
-             call ESMF_MeshGet(gbcp%mesh, numOwnedNodes=computationalCount(1), rc=localrc)
-             if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
-          endif
 
        case  (ESMF_GEOMTYPE_LOCSTREAM%type) ! LocStream
           call ESMF_LocStreamGet(gbcp%locstream, localDE, &   
                exclusiveLBound=el, &
                exclusiveUBound=eu, &
                exclusiveCount=ec,  &
-               computationalLBound=cl, &
-               computationalUBound=cu, &
-               computationalCount=cc, &
                rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -920,9 +895,6 @@ end subroutine ESMF_GeomBaseGet
           if (present(exclusiveLBound)) exclusiveLBound(1)=el
           if (present(exclusiveUBound)) exclusiveUBound(1)=eu
           if (present(exclusiveCount)) exclusiveCount(1)=ec
-          if (present(computationalLBound)) computationalLBound(1)=cl
-          if (present(computationalUBound)) computationalUBound(1)=cu
-          if (present(computationalCount)) computationalCount(1)=cc
 
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
