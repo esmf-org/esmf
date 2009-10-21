@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReadWriteEx.F90,v 1.3 2009/10/20 05:52:13 eschwab Exp $
+! $Id: ESMF_StateReadWriteEx.F90,v 1.4 2009/10/21 14:51:55 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -17,6 +17,7 @@
 !-------------------------------------------------------------------------
 !BOE
 !\subsubsection{State Read/Write from/to a NetCDF file}
+! \label{example:StateRdWr}
 !EOE
 
 #include "ESMF.h"

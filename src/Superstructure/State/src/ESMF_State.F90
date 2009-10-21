@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.176 2009/09/24 17:15:27 theurich Exp $
+! $Id: ESMF_State.F90,v 1.177 2009/10/21 14:51:52 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.176 2009/09/24 17:15:27 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.177 2009/10/21 14:51:52 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -3472,7 +3472,7 @@ module ESMF_StateMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateRead"
 !BOP
-! !IROUTINE: ESMF_StateRead -- Read Arrays from a file into a State.
+! !IROUTINE: ESMF_StateRead -- Read Arrays from a file into a State
 !
 ! !INTERFACE:
       subroutine ESMF_StateRead(state, fileName, fileFormat, rc)
@@ -3488,6 +3488,18 @@ module ESMF_StateMod
 !     to a State object.  Future releases will enable more items of a State
 !     to be read from a file of various formats.
 !
+!     Only PET 0 reads the file; the States in other PETs remain empty.
+!     Currently, the data is not decomposed or distributed; each PET
+!     has only 1 DE and only PET 0 contains data after reading the file.
+!     Future versions of ESMF will support data decomposition and distribution
+!     upon reading a file.  See Section~\ref{example:StateRdWr} for
+!     an example.
+!
+!     Note that the third party NetCDF library must be installed.  For more
+!     details, see the "ESMF Users Guide",
+!     "Building and Installing the ESMF, Third Party Libraries, NetCDF" and
+!     the website http://www.unidata.ucar.edu/software/netcdf.
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
@@ -3499,6 +3511,7 @@ module ESMF_StateMod
 !       is supported, which is the default. Future releases will support others.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       Equals {\tt ESMF\_RC\_LIB\_NOT\_PRESENT} if NetCDF is not present.
 !     \end{description}
 !
 !EOP
@@ -3670,7 +3683,7 @@ module ESMF_StateMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateWrite"
 !BOP
-! !IROUTINE: ESMF_StateWrite -- Write all Arrays from a State to file.
+! !IROUTINE: ESMF_StateWrite -- Write all Arrays from a State to file
 !
 ! !INTERFACE:
       subroutine ESMF_StateWrite(state, fileName, fileFormat, rc)
@@ -3686,6 +3699,16 @@ module ESMF_StateMod
 !     netCDF file.  Future releases will enable more items of a State to be
 !     written to files of various formats.
 !
+!     Currently writing is limited to PET 0; future versions of ESMF will allow
+!     parallel writing, as well as parallel reading.
+!
+!     See Section~\ref{example:StateRdWr} for an example.
+!
+!     Note that the third party NetCDF library must be installed.  For more
+!     details, see the "ESMF Users Guide",
+!     "Building and Installing the ESMF, Third Party Libraries, NetCDF" and
+!     the website http://www.unidata.ucar.edu/software/netcdf.
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
@@ -3697,6 +3720,7 @@ module ESMF_StateMod
 !       is supported, which is the default. Future releases will support others.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       Equals {\tt ESMF\_RC\_LIB\_NOT\_PRESENT} if NetCDF is not present.
 !     \end{description}
 !
 !EOP
