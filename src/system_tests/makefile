@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.80 2009/10/21 22:29:57 feiliu Exp $ 
+# $Id: makefile,v 1.81 2009/10/22 03:22:49 svasquez Exp $ 
 
 ALL: build_system_tests
 
@@ -9,7 +9,6 @@ include $(ESMF_DIR)/makefile
 # arranged roughly in order of complexity
 DIRS      = ESMF_CompCreate \
             ESMF_CompFortranAndC \
-	    ESMF_Ensemble \
             ESMF_RecursiveComponent \
             ESMF_ArrayScatterGather \
             ESMF_Attribute \
@@ -37,7 +36,9 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldRegridOverlap \
             ESMF_FieldLSSMM \
             ESMF_FieldMeshSMM \
-	    ESMF_ArrayRedistOpenMP
+	    ESMF_SequentialEnsemble \
+	    ESMF_ConcurrentEnsemble \
+	    ESMF_ArrayRedistOpenMP 
 # Tests temporarily disabled
 # Tests not yet ready
 #           ESMF_RowReduce \        gjt: currently the code depends on DELayout comms, but it should be covered/converted to newArray
