@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.52 2009/10/22 00:19:23 w6ws Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.53 2009/10/22 17:29:04 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -6446,6 +6446,7 @@ contains
         type(ESMF_Array)    :: array
         type(ESMF_Grid)     :: grid
         type(ESMF_DistGrid) :: distgrid
+        type(ESMF_DistGrid) :: staggerDistgrid
         integer             :: localrc
         integer             :: flb(7), fub(7)
 
@@ -6494,6 +6495,11 @@ contains
             distgridToGridMap=distgridToGridMap, &
             gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
             rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+       call ESMF_GridGet(grid,staggerloc,staggerdistgrid=staggerdistgrid,rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -6574,7 +6580,8 @@ contains
             distgridToArrayMap(i) = l_g2fm(l_dg2gm(i))
         enddo
         ! create array
-        array = ESMF_ArrayCreate(farray, distgrid, ESMF_INDEX_DELOCAL, copyflag, distgridToArrayMap, &
+        array = ESMF_ArrayCreate(farray, staggerdistgrid, ESMF_INDEX_DELOCAL, copyflag, &
+            distgridToArrayMap, &
             undistLBound = ungriddedLBound, undistUBound = ungriddedUBound, &
             totalLWidth=maxHaloLWidth, totalUWidth=maxHaloUWidth, & 
             rc=localrc)
