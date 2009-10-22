@@ -1525,7 +1525,7 @@
           ! regrid run
           !---------------------------------------------------------------------
           print*,'field regrid run'
-          call ESMF_FieldRegridRun(srcField, dstField, routeHandle, localrc)
+          call ESMF_FieldRegridRun(srcField, dstField, routeHandle, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc,"Field Regrid run failed for " //  &
                   " forward failed ", rcToReturn=rc)) return
 
