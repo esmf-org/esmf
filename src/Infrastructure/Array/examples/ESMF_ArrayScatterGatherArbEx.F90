@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherArbEx.F90,v 1.1 2009/10/21 05:54:17 theurich Exp $
+! $Id: ESMF_ArrayScatterGatherArbEx.F90,v 1.2 2009/10/22 21:37:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@ program ESMF_ArrayScatterGatherArbEx
   type(ESMF_DistGrid):: distgrid, distgridAux
   type(ESMF_ArraySpec):: arrayspec
   type(ESMF_Array):: array, arrayAux
-  type(ESMF_RouteHandle):: redistHandle
+  type(ESMF_RouteHandle):: scatterHandle, gatherHandle
 
   
 ! ------------------------------------------------------------------------------
@@ -55,19 +55,20 @@ program ESMF_ArrayScatterGatherArbEx
 ! The {\tt ESMF\_ArrayScatter()} and {\tt ESMF\_ArrayGather()} calls, 
 ! introduced in section \ref{Array:ScatterGather}, provide a convenient
 ! way of communicating data between a Fortran array and all of the DEs of
-! a single Array patch. A key requirement for {\tt ESMF\_ArrayScatter()}
+! a single Array patch. A key requirement of {\tt ESMF\_ArrayScatter()}
 ! and {\tt ESMF\_ArrayGather()} is that the {\em shape} of the Fortran array
 ! and the Array patch must match. This means that the {\tt dimCount} must be
 ! equal, and that the size of each dimension must match. Element reordering
-! during Scatter() and Gather() is only supported on a per dimension level,
-! based on the {\tt decompflag} option used during DistGrid creation.
+! during scatter and gather is only supported on a per dimension level,
+! based on the {\tt decompflag} option available during DistGrid creation.
 !
 ! While the {\tt ESMF\_ArrayScatter()} and {\tt ESMF\_ArrayGather()} methods
 ! cover a broad, and important spectrum of cases, there are situations that
 ! require a different set of rules to scatter and gather data between a
 ! Fortran array and an ESMF Array object. For instance, it is often convenient
 ! to create an Array on a DistGrid that was created with arbitrary,
-! user-supplied sequence indices. 
+! user-supplied sequence indices. See section \ref{DistGrid:ArbitrarySeqInd}
+! for more background on DistGrids with arbitrary sequence indices.
 !EOE
 
 !BOC
@@ -91,60 +92,180 @@ program ESMF_ArrayScatterGatherArbEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+!BOE
+! This {\tt array} object holds 10 elements on each DE, and there is one DE
+! per PET, for a total element count of 10 x {\tt petCount}. The
+! {\tt arbSeqIndexList}, used during DistGrid creation, was constructed cyclic
+! across all DEs. DE 0, for example, on a 4 PET run, would hold sequence
+! indices 1, 5, 9, ... . DE 1 would hold 2, 6, 10, ..., and so on.
+!
+! The usefulness of the user-specified arbitrary sequence indices becomes
+! clear when they are interpreted as global element ids. The ArrayRedist()
+! and ArraySMM() communication methods are based on sequence index mapping
+! between source and destination Arrays. Other than providing a canonical
+! sequence index order via the default sequence scheme, outlined in
+! \ref{Array:SparseMatMul}, ESMF does not place any restrictions on the
+! sequence indices. Objects that were not created with user supplied
+! sequence indices default to the ESMF sequence index order.
+!
+! A common, and useful interpretation of the arbitrary sequence indices, 
+! specified during DistGrid creation, is that of relating them to the 
+! canonical ESMF sequence index order of another data object. Within this
+! interpretation the {\tt array} object created above could be viewed as an
+! arbitrary distribution of a ({\tt petCount} x 10) 2D array. 
+!
+!EOE
+
 !BOC
   if (localPet == 0) then
-    allocate(farray(10,petCount)) ! allocate 2D Fortran array 10 x petCount
-    do j=1, petCount
-      do i=1, 10
-        farray(i,j) = 100 + (j-1)*10 + i    ! initialize to something
+    allocate(farray(petCount,10)) ! allocate 2D Fortran array petCount x 10
+    do j=1, 10
+      do i=1, petCount
+        farray(i,j) = 100 + (j-1)*petCount + i    ! initialize to something
       enddo
     enddo
   else
-    allocate(farray(0,0)) ! must allocate an array of size 0
+    allocate(farray(0,0)) ! must allocate an array of size 0 on all other PETs
   endif
+!EOC
+!BOE
+! For a 4 PET run, {\tt farray} on PET 0 now holds the following data.
+! \begin{verbatim}
+!   -----1----2----3------------10-----> j
+!   |
+!   1   101, 105, 109, ....  , 137
+!   |
+!   2   102, 106, 110, ....  , 138
+!   |
+!   3   103, 107, 111, ....  , 139
+!   |
+!   4   104, 108, 112, ....  , 140
+!   |
+!   |
+!   v
+!  i
+! \end{verbatim}
+!
+! On all other PETs {\tt farray} has a zero size allocation.
+!
+! Following the sequence index interpretation from above, scattering the data
+! contained in {\tt farray} on PET 0 across the {\tt array} object created
+! further up, seems like a well defined operation. Looking at it a bit closer,
+! it becomes clear that it is in fact more of a redistribution than a simple
+! scatter operation. The general rule for such a "redist-scatter"  operation,
+! of a Fortran array, located on a single PET, into an ESMF Array, is to 
+! use the canonical ESMF sequence index scheme to label the elements of the
+! Fortran array, and to send the data to the Array element with the same
+! sequence index.
+!
+! The just described "redist-scatter" operation is much more general than
+! the standard {\tt ESMF\_ArrayScatter()} method. It does not require shape
+! matching, and supports full element reordering based on the sequence indices.
+! Before {\tt farray} can be scattered across {\tt array} in the described way,
+! it must be wrapped into an ESMF Array object itself, essentially labeling the
+! array elements according to the canonical sequence index scheme.
+! 
+!EOE
   
-  ! want to scatter farray defined on root across Array
-  ! cannot use ArrayScatter() b/c shape doesn't match, and arb seq indices!
-  
-  distgridAux = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,petCount/), &
+!BOC  
+  distgridAux = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/petCount,10/), &
     regDecomp=(/1,1/), rc=rc)  ! DistGrid with only 1 DE
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! The first step is to create a DistGrid object with only a single DE. This
+! DE must be located on the PET on which the Fortran data array resides.
+! In this example {\tt farray} holds data on PET 0, which is where the default
+! DELayout will place the single DE defined in the DistGrid. If the {\tt farray}
+! was setup on a different PET, an explicit DELayout would need to be created
+! first, mapping the only DE to the PET on which the data is defined.
+!
+! Next the Array wrapper object can be created from the {\tt farray} and the
+! just created DistGrid object.
+!EOE
+
 !BOC
-
-!  call ESMF_DistGridPrint(distgridAux)
-
-  
   arrayAux = ESMF_ArrayCreate(farray=farray, distgrid=distgridAux, &
     indexflag=ESMF_INDEX_DELOCAL, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
- !call ESMF_ArrayPrint(array)
- !call ESMF_ArrayPrint(arrayAux)
- 
+
+!BOE
+! At this point all of the pieces are in place to use {\tt ESMF\_ArrayRedist()}
+! to do the "redist-scatter" operation. The typical store/execute/release
+! pattern must be followed.
+!EOE  
  
 !BOC
   call ESMF_ArrayRedistStore(srcArray=arrayAux, dstArray=array, &
-    routehandle=redistHandle, rc=rc)
+    routehandle=scatterHandle, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
  
 !BOC
   call ESMF_ArrayRedist(srcArray=arrayAux, dstArray=array, &
-    routehandle=redistHandle, rc=rc)
+    routehandle=scatterHandle, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+!BOE
+! In this example, after {\tt ESMF\_ArrayRedist()} was called, the content
+! of {\tt array} on a 4 PET run would look like this:
+! \begin{verbatim}
+!  PET 0:   101, 105, 109, ....  , 137
+!  PET 1:   102, 106, 110, ....  , 138
+!  PET 2:   103, 107, 111, ....  , 139
+!  PET 3:   104, 108, 112, ....  , 140
+! \end{verbatim}
+!
+! Once set up, {\tt scatterHandle} can be used repeatedly to scatter data
+! from {\tt farray} on PET 0 to all the DEs of {\tt array}. All of the
+! resources should be released once {\tt scatterHandle} is no longer needed.
+!EOE  
+
+!BOC
+  call ESMF_ArrayRedistRelease(routehandle=scatterHandle, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+!BOE
+! The opposite operation, i.e. {\em gathering} of the {\tt array} data
+! into {\tt farray} on PET 0, follows a very similar setup. In fact, the
+! {\tt arrayAux} object already constructed for the scatter direction, can
+! directly be re-used. The only thing that is different for the "redist-gather",
+! are the {\tt srcArray} and {\tt dstArray} argument assignments, reflecting
+! the opposite direction of data movement.
+!EOE  
+
+!BOC
+  call ESMF_ArrayRedistStore(srcArray=array, dstArray=arrayAux, &
+    routehandle=gatherHandle, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+ 
+!BOC
+  call ESMF_ArrayRedist(srcArray=array, dstArray=arrayAux, &
+    routehandle=gatherHandle, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+!BOE
+! Just as for the scatter case, the {\tt gatherHandle} can be used repeatedly
+! to gather data from {\tt array} into {\tt farray} on PET 0. All of the
+! resources should be released once {\tt gatherHandle} is no longer needed.
+!EOE  
+
 !BOC
-  call ESMF_ArrayRedistRelease(routehandle=redistHandle, rc=rc)
+  call ESMF_ArrayRedistRelease(routehandle=gatherHandle, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
- 
- 
-  !call ESMF_ArrayPrint(array)
- 
- 
+  
+!BOE
+! Finally the wrapper Array {\tt arrayAux} and the associated DistGrid object
+! can also be destroyed.
+!EOE  
+  
 !BOC
   call ESMF_ArrayDestroy(arrayAux, rc=rc)
 !EOC
@@ -154,12 +275,14 @@ program ESMF_ArrayScatterGatherArbEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
+!BOE
+! Further, the primary data objects of this example must be deallocated
+! and destroyed.
+!EOE  
+  
 !BOC  
   deallocate(farray)
-!EOC
-
-
-!BOC
+  
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
