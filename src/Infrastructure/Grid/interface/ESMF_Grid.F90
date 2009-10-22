@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.141 2009/10/21 18:00:13 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.142 2009/10/22 01:14:09 w6ws Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -11777,7 +11777,7 @@ endif
         linquireflag = ESMF_NOINQUIRE
       end if
 
-      call c_ESMC_GridSerialize(grid, buffer(1), length, offset, &
+      call c_ESMC_GridSerialize(grid, buffer, length, offset, &
                                  lattreconflag, linquireflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -11846,7 +11846,7 @@ endif
       endif
 
       ! Call into C++ to Deserialize the Grid
-      call c_ESMC_GridDeserialize(grid%this, buffer(1), offset, &
+      call c_ESMC_GridDeserialize(grid%this, buffer, offset, &
         lattreconflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
