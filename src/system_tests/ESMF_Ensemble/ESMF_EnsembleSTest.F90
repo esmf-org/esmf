@@ -1,7 +1,7 @@
-! $Id: ESMF_EnsembleSTest.F90,v 1.3 2009/10/20 18:33:22 peggyli Exp $
+! $Id: ESMF_EnsembleSTest.F90,v 1.4 2009/10/22 03:23:33 svasquez Exp $
 !
 !-------------------------------------------------------------------------
-!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_MULTI_PROC_DISABLED_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
