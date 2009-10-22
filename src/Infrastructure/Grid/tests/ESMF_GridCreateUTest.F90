@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.94 2009/10/22 01:15:44 w6ws Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.95 2009/10/22 20:36:31 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.94 2009/10/22 01:15:44 w6ws Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.95 2009/10/22 20:36:31 w6ws Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -1574,10 +1574,13 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! create a buffer to put the grid in
+  bufCount = 1
+  allocate (buf(bufCount))
   offset=0
   call ESMF_GridSerialize(grid, buf, bufCount, offset,  &
     inquireflag=ESMF_INQUIREONLY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  deallocate (buf)
 
   bufCount=offset
   print *, 'ESMF_GridCreateUTest: serialization buffer size =', bufCount

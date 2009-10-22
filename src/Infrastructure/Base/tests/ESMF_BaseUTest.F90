@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseUTest.F90,v 1.32 2009/10/07 21:16:21 w6ws Exp $
+! $Id: ESMF_BaseUTest.F90,v 1.33 2009/10/22 20:36:31 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BaseUTest.F90,v 1.32 2009/10/07 21:16:21 w6ws Exp $'
+      '$Id: ESMF_BaseUTest.F90,v 1.33 2009/10/22 20:36:31 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -63,7 +63,7 @@
       type(ESMF_Base) :: base1
       type(ESMF_AttReconcileFlag) :: attreconflag
       character, allocatable   :: buffer(:)
-      integer :: buffer_l
+      integer :: buff_size
       integer :: offset
 #endif
 
@@ -219,23 +219,26 @@
       ! WARNING: This is testing an INTERNAL method.  It is NOT
       ! part of the supported ESMF user API!
       attreconflag = ESMF_ATTRECONCILE_OFF
+      buff_size = 1
+      allocate (buffer(buff_size))
       offset = 0
-      call c_ESMC_BaseSerialize (base, buffer, 0, offset, &
+      call c_ESMC_BaseSerialize (base, buffer, buff_size, offset, &
         attreconflag, ESMF_INQUIREONLY, rc)
       write(name, *) "c_ESMC_BaseSerialize - inquire only option"
       write(failMsg, *) "rc =", rc, ", offset =", offset
       call ESMF_Test((rc == ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       print *, '  offset returned =', offset, ' bytes'
+      deallocate (buffer)
 
       !EX_UTest
       ! test doing a serialize
       ! WARNING: This is testing an INTERNAL method.  It is NOT
       ! part of the supported ESMF user API!
-      buffer_l = offset ! from previous inquiry
-      allocate (buffer(buffer_l))
+      buff_size = offset ! from previous inquiry
+      allocate (buffer(buff_size))
       offset = 0
-      call c_ESMC_BaseSerialize (base, buffer, buffer_l, offset, &
+      call c_ESMC_BaseSerialize (base, buffer, buff_size, offset, &
         attreconflag, ESMF_NOINQUIRE, rc)
       write(name, *) "c_ESMC_BaseSerialize - perform serialization"
       write(failMsg, *) "rc =", rc, ", offset =", offset

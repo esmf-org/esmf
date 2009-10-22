@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataUTest.F90,v 1.16 2009/10/12 23:52:35 w6ws Exp $
+! $Id: ESMF_ArrayDataUTest.F90,v 1.17 2009/10/22 20:36:30 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayDataUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayDataUTest.F90,v 1.16 2009/10/12 23:52:35 w6ws Exp $'
+    '$Id: ESMF_ArrayDataUTest.F90,v 1.17 2009/10/22 20:36:30 w6ws Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -469,7 +469,8 @@ program ESMF_ArrayDataUTest
   ! part of the supported ESMF user API!
   write(name, *) "Computing space for serialization buffer"
   write(failMsg, *) "Size could not be determined"
-  buff_len = 0
+  buff_len = 1
+  allocate (buffer(buff_len))
   offset = 0
   attreconflag = ESMF_ATTRECONCILE_OFF
   inquireflag  = ESMF_INQUIREONLY
@@ -477,6 +478,7 @@ program ESMF_ArrayDataUTest
       attreconflag, inquireflag, rc)
   print *, 'computed serialization buffer length =', offset, ' bytes'
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate (buffer)
   !-----------------------------------------------------------------------------
  
   !-----------------------------------------------------------------------------

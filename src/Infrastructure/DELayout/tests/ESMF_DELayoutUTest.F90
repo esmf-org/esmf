@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.25 2009/10/21 00:07:15 w6ws Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.26 2009/10/22 20:36:31 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.25 2009/10/21 00:07:15 w6ws Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.26 2009/10/22 20:36:31 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -384,13 +384,15 @@
   !EX_UTest
   write(name, *) "Computing space for serialization buffer"
   write(failMsg, *) "Size could not be determined"
-  buff_len = 0
+  buff_len = 1
+  allocate (buffer(buff_len))
   offset = 0
   inquireflag  = ESMF_INQUIREONLY
   call ESMF_DELayoutSerialize (delayout, buffer, buff_len, offset,  &
       inquireflag, rc)
   print *, 'computed serialization buffer length =', offset, ' bytes'
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate (buffer)
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------

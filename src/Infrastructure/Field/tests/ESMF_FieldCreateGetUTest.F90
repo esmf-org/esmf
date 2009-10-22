@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.53 2009/10/22 17:29:04 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.54 2009/10/22 20:36:31 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -6664,12 +6664,15 @@ contains
 
             ! Allocate serialization buffer
 
+            buff_length = 1
+            allocate (buffer(buff_length))
             offset = 0
             call ESMF_FieldSerialize(field, buffer, buff_length, offset, &
                 inquireflag=ESMF_INQUIREONLY, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
+            deallocate (buffer)
 
             buff_length = offset
             allocate (buffer(buff_length))
