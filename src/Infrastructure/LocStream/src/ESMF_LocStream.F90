@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.22 2009/10/14 22:31:20 oehmke Exp $
+! $Id: ESMF_LocStream.F90,v 1.23 2009/10/22 04:42:24 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -124,7 +124,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.22 2009/10/14 22:31:20 oehmke Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.23 2009/10/22 04:42:24 w6ws Exp $'
 
 !==============================================================================
 !
@@ -2682,14 +2682,14 @@ end subroutine ESMF_LocStreamGetBounds
 
      ! Serialize Base
      attreconflag = ESMF_ATTRECONCILE_OFF
-     call c_ESMC_BaseSerialize(lstypep%base, buffer(1), length, offset, &
+     call c_ESMC_BaseSerialize(lstypep%base, buffer, length, offset, &
       attreconflag, linquireflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
      ! Serialize Distgrid
-     call c_ESMC_DistgridSerialize(lstypep%distgrid, buffer(1), length, offset, &
+     call c_ESMC_DistgridSerialize(lstypep%distgrid, buffer, length, offset, &
                                  linquireflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -2697,7 +2697,7 @@ end subroutine ESMF_LocStreamGetBounds
 
       ! Serialize other locstream items
       call c_ESMC_LocStreamSerialize(lstypep%indexflag, lstypep%keyCount, &
-              buffer(1), length, offset, linquireflag, localrc)
+              buffer, length, offset, linquireflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -2709,13 +2709,13 @@ end subroutine ESMF_LocStreamGetBounds
                   len_trim(lstypep%keyNames(i)), lstypep%keyNames(i), &
                   len_trim(lstypep%keyUnits(i)), lstypep%keyUnits(i), &
                   len_trim(lstypep%keyLongNames(i)), lstypep%keyLongNames(i), &
-                 buffer(1), length, offset, linquireflag, localrc)
+                 buffer, length, offset, linquireflag, localrc)
          if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
          ! Serialize key Array
-         call c_ESMC_ArraySerialize(lstypep%keys(i), buffer(1), length, offset, &
+         call c_ESMC_ArraySerialize(lstypep%keys(i), buffer, length, offset, &
           attreconflag, linquireflag, localrc)
          if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -2782,7 +2782,7 @@ end subroutine ESMF_LocStreamGetBounds
 
      ! Deserialize Base
      attreconflag = ESMF_ATTRECONCILE_OFF
-     call c_ESMC_BaseDeserialize(lstypep%base, buffer(1),  offset, &
+     call c_ESMC_BaseDeserialize(lstypep%base, buffer,  offset, &
       attreconflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -2795,7 +2795,7 @@ end subroutine ESMF_LocStreamGetBounds
 
 
      ! Deserialize Distgrid
-     call c_ESMC_DistGridDeserialize(lstypep%distgrid, buffer(1), offset, localrc)
+     call c_ESMC_DistGridDeserialize(lstypep%distgrid, buffer, offset, localrc)
      if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -2808,7 +2808,7 @@ end subroutine ESMF_LocStreamGetBounds
 
       ! Deserialize other locstream items
       call c_ESMC_LocStreamDeserialize(lstypep%indexflag, lstypep%keyCount, &
-              buffer(1), offset, localrc)
+              buffer, offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -2838,13 +2838,13 @@ end subroutine ESMF_LocStreamGetBounds
                   lstypep%keyNames(i), &
                   lstypep%keyUnits(i), &
                   lstypep%keyLongNames(i), &
-                 buffer(1), offset, localrc)
+                 buffer, offset, localrc)
          if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
          ! Deserialize key Array
-         call c_ESMC_ArrayDeserialize(lstypep%keys(i), buffer(1), offset, &
+         call c_ESMC_ArrayDeserialize(lstypep%keys(i), buffer, offset, &
           attreconflag, localrc)
          if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
