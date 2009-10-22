@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.51 2009/10/21 19:12:52 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.52 2009/10/22 00:19:23 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -6477,14 +6477,10 @@ contains
 
         type(ESMF_Field)                            :: field1
         integer(ESMF_KIND_I4), pointer              :: buffer(:)
-        integer                                     :: length, offset
+        integer                                     :: buff_length, offset
 
         localrc = ESMF_SUCCESS
         rc = ESMF_SUCCESS
-
-        length = 102400
-        offset = 0
-        allocate(buffer(length))
 
         ! create distgrid
         distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
@@ -6659,8 +6655,22 @@ contains
                     ESMF_CONTEXT, rc)) return
             endif
 
+            ! Allocate serialization buffer
+
+            offset = 0
+            call ESMF_FieldSerialize(field, buffer, buff_length, offset, &
+                inquireflag=ESMF_INQUIREONLY, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+
+            buff_length = offset
+            allocate (buffer(buff_length))
+
             ! call serialize and deserialize and verify again
-            call ESMF_FieldSerialize(field, buffer, length, offset, rc=localrc)
+
+            offset = 0
+            call ESMF_FieldSerialize(field, buffer, buff_length, offset, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -6816,7 +6826,7 @@ contains
             ESMF_CONTEXT, rc)) return
 
         deallocate(farray)
-        deallocate(buffer)
+        if (associated (buffer)) deallocate(buffer)
 
 
     end subroutine test7d4_generic
