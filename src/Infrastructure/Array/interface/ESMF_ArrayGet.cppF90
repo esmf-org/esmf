@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.42 2009/09/21 22:05:58 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.43 2009/10/22 22:51:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -68,7 +68,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.42 2009/09/21 22:05:58 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.43 2009/10/22 22:51:41 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -119,7 +119,7 @@ contains
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayGetDefault()"
 !BOP
-! !IROUTINE: ESMF_ArrayGet - Get Array internals
+! !IROUTINE: ESMF_ArrayGet - Access to Array internals
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
@@ -502,7 +502,7 @@ contains
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayGetPLocalDePDim()"
 !BOP
-! !IROUTINE: ESMF_ArrayGet - Get Array internals per dim per local DE
+! !IROUTINE: ESMF_ArrayGet - Access to Array internals per dim per local DE
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
@@ -630,7 +630,7 @@ contains
 #define ArrayGetFPtrDoc() \
 ! -------------------------- ESMF-public method ----------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayGet - Get access to PET-local Array patch via Fortran array pointer @\
+! !IROUTINE: ESMF_ArrayGet - Access to PET-local Array patch via Fortran array pointer @\
 @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayGet() @\
@@ -643,8 +643,8 @@ contains
 !   integer,                    intent(out), optional   :: rc  @\
 ! @\
 ! !DESCRIPTION: @\
-!   Get Fortran pointer to the DE-local memory regions in Array object for @\
-!   the specified local DE. @\
+!   Access Fortran array pointer to the specified DE-local memory allocation of @\
+!   the Array object. @\
 ! @\
 !   The arguments are: @\
 !   \begin{description} @\
@@ -655,8 +655,11 @@ contains
 !     For {\tt localDeCount==1} the {\tt localDe} argument may be omitted, @\
 !     in which case it will default to {\tt localDe=0}. @\
 !   \item[farrayPtr] @\
-!     Upon return {\tt farrayPtr} points to the DE-local data allocation of @\
-!     {\tt array}. @\
+!     Upon return, {\tt farrayPtr} points to the DE-local data allocation of @\
+!     {\tt localDe} in {\tt array}. It depends on the specific entry point @\
+!     of {\tt ESMF\_ArrayCreate()} used during {\tt array} creation, which @\
+!     Fortran operations are supported on the returned {\tt farrayPtr}. See @\
+!     \ref{Array:rest} for more details. @\
 !   \item[{[rc]}] @\
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !   \end{description} @\
@@ -728,7 +731,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayGetLarray()"
 !BOP
-! !IROUTINE: ESMF_ArrayGet - Get access to PET-local Array patch via LocalArray object.
+! !IROUTINE: ESMF_ArrayGet - Access to PET-local Array patch via LocalArray object.
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
