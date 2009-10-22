@@ -1,4 +1,4 @@
-! $Id: ESMF_GeomBase.F90,v 1.17 2009/10/21 18:01:20 oehmke Exp $
+! $Id: ESMF_GeomBase.F90,v 1.18 2009/10/22 01:22:16 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -148,7 +148,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.17 2009/10/21 18:01:20 oehmke Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.18 2009/10/22 01:22:16 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -987,7 +987,7 @@ end subroutine ESMF_GeomBaseGet
     ! serialize GeomBase info
     call c_ESMC_GeomBaseSerialize(gbcp%type%type, &
                                   gbcp%staggerloc%staggerloc, &
-                                  buffer(1), length, offset, linquireflag, &
+                                  buffer, length, offset, linquireflag, &
                                   localrc)
     if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -1093,7 +1093,7 @@ end subroutine ESMF_GeomBaseGet
     ! serialize GeomBase info
     call c_ESMC_GeomBaseDeserialize(gbcp%type%type, &
                                                         gbcp%staggerloc%staggerloc, &
-                                                        buffer(1), offset, localrc)
+                                                        buffer, offset, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
