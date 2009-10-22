@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.25 2009/10/21 21:09:21 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.26 2009/10/22 22:08:32 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.25 2009/10/21 21:09:21 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.26 2009/10/22 22:08:32 oehmke Exp $'
 
 !==============================================================================
 !
@@ -314,6 +314,7 @@ contains
         type(ESMF_Mesh)      :: srcMesh
         type(ESMF_Mesh)      :: dstMesh
         type(ESMF_StaggerLoc) :: srcStaggerLoc,dstStaggerLoc
+	type(ESMF_GridDecompType) :: srcDecompType, dstDecompType
 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -359,7 +360,21 @@ contains
 
           isSphere = 0
           if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) isSphere = 1
+	
+          ! check decomp type
+          call ESMF_GridGetDecompType(srcGrid, srcDecompType, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
+          ! Error if decompType is ARBITRARY
+          if (srcDecompType .eq. ESMF_GRID_ARBITRARY) then
+	      call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 "- can't regrid an arbitrary Grid", & 
+                 ESMF_CONTEXT, rc) 
+              return
+	  endif        
+
+          ! Convert Grid to Mesh
           srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLoc, isSphere, &
                       srcMaskValues, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -380,6 +395,20 @@ contains
           isSphere = 0
           if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) isSphere = 1
 
+          ! check decomp type
+          call ESMF_GridGetDecompType(dstGrid, dstDecompType, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! Error if decompType is ARBITRARY
+          if (dstDecompType .eq. ESMF_GRID_ARBITRARY) then
+	      call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 "- can't regrid an arbitrary Grid", & 
+                 ESMF_CONTEXT, rc) 
+              return
+	  endif        
+
+          ! Convert Grid to Mesh
           dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLoc, isSphere, &
                       dstMaskValues, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
