@@ -1,14 +1,9 @@
-% $Id: ArrayBundle_rest.tex,v 1.2 2008/05/08 02:27:12 theurich Exp $
+% $Id: ArrayBundle_rest.tex,v 1.3 2009/10/22 22:54:13 theurich Exp $
 
 %\subsubsection{Restrictions and Future Work}
 \begin{itemize}
-\item Adding Arrays to an existing ArrayBundle is currently not supported. In
-the future this functionality will be provided via the
+
+\item {\bf Adding Arrays} to an existing ArrayBundle is currently not supported. In the future this functionality will be provided via the
 {\tt ESMF\_ArrayBundleAdd()} method.
-\item The current implementation of the ArrayBundle communication methods only
-support ArrayBundles that contain congruent Arrays of the same type, kind and
-rank. Congruent Arrays are defined on matching DistGrids and the shape of the
-DE-local tiles matches for each DE.
-\item The current implementation of the ArrayBundle communication methods have
-not been optimized for performance or memory usage.
+
 \end{itemize}
