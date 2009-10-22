@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.28 2009/10/20 18:52:49 theurich Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.29 2009/10/22 21:36:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -791,6 +791,7 @@ program ESMF_DistGridEx
 
 !BOE
 ! \subsubsection{Arbitrary DistGrids with user-supplied sequence indices}
+! \label{DistGrid:ArbitrarySeqInd}
 !
 ! The DistGrid class supports the communication methods of higher classes, 
 ! like Array and Field, by associating a unique {\em sequence index} with each
