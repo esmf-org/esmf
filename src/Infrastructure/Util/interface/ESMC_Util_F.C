@@ -1,4 +1,4 @@
-// $Id: ESMC_Util_F.C,v 1.10 2009/08/21 18:16:37 w6ws Exp $
+// $Id: ESMC_Util_F.C,v 1.11 2009/10/23 20:19:26 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util_F.C,v 1.10 2009/08/21 18:16:37 w6ws Exp $";
+ static const char *const version = "$Id: ESMC_Util_F.C,v 1.11 2009/10/23 20:19:26 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -74,7 +74,8 @@ extern "C" {
   }
 
   int fixedpart = clen + 1;
-  if ((*length - *offset) < fixedpart) {
+  if (*inquireflag != ESMF_INQUIREONLY) {
+    if ((*length - *offset) < fixedpart) {
          
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                              "Buffer too short to add a String object", rc);
@@ -83,6 +84,7 @@ extern "C" {
       //buffer = (char *)realloc((void *)buffer,
       //                         *length + 2*fixedpart + byte_count);
       //*length += 2 * fixedpart;
+    }
   }
 
   cp = buf + *offset;
