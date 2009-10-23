@@ -1,3 +1,4 @@
+// $Id: ESMC_Field.h,v 1.16 2009/10/23 21:17:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -6,9 +7,19 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-
-//
 //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// This file is part of the pure C public ESMC API
+//-----------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
+
 #ifndef ESMC_Field_h
 #define ESMC_Field_h
 
@@ -25,7 +36,6 @@
 //EOP
 //-----------------------------------------------------------------------------
 
-
 #if defined (__cplusplus)
 extern "C" {
 #endif
@@ -34,13 +44,20 @@ extern "C" {
 #include "ESMC_ArraySpec.h"
 #include "ESMC_Interface.h"
 
+// Class declaration type
 typedef void * ESMC_Field;
 
-ESMC_Field ESMC_FieldCreate(ESMC_Mesh mesh, ESMC_ArraySpec arrayspec, ESMC_InterfaceInt gridToFieldMap, ESMC_InterfaceInt ungriddedLBound, ESMC_InterfaceInt ungriddedUBound, const char *name, int *rc);
+// Class API
+ESMC_Field ESMC_FieldCreate(ESMC_Mesh mesh, ESMC_ArraySpec arrayspec,
+  ESMC_InterfaceInt gridToFieldMap, ESMC_InterfaceInt ungriddedLBound,
+  ESMC_InterfaceInt ungriddedUBound, const char *name, int *rc);
 
-int ESMC_FieldGet(ESMC_Field field, ESMC_Mesh *mesh, int *rc);
+int ESMC_FieldDestroy(ESMC_Field *field);
 
-int ESMC_FieldDestroy(ESMC_Field field, int *rc);
+int ESMC_FieldPrint(ESMC_Field field);
+
+ESMC_Mesh ESMC_FieldGetMesh(ESMC_Field field, int *rc);
+
 
 #if defined (__cplusplus)
 } // extern "C"

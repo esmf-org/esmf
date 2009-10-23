@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.16 2009/10/20 18:45:46 feiliu Exp $
+// $Id: ESMC_Field.C,v 1.17 2009/10/23 21:17:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -16,7 +16,8 @@
 //BOP
 // !DESCRIPTION:
 //
-// This file contains the C interfaces' code for the {\tt Field} class functions.
+// This file contains the C interfaces' code for the {\tt Field} class
+// functions.
 //
 //EOP
 //------------------------------------------------------------------------------
@@ -33,85 +34,100 @@ using namespace ESMCI;
 
 extern "C" {
 
+//--------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldCreate()"
-ESMC_Field ESMC_FieldCreate(ESMC_Mesh mesh, ESMC_ArraySpec arrayspec, ESMC_InterfaceInt gridToFieldMap, 
-    ESMC_InterfaceInt ungriddedLBound, ESMC_InterfaceInt ungriddedUBound, const char *name, int *rc){
-    int localrc;
-
+  ESMC_Field ESMC_FieldCreate(ESMC_Mesh mesh, ESMC_ArraySpec arrayspec,
+    ESMC_InterfaceInt gridToFieldMap, ESMC_InterfaceInt ungriddedLBound,
+    ESMC_InterfaceInt ungriddedUBound, const char *name, int *rc){
     // Initialize return code. Assume routine not implemented
     if (rc) *rc = ESMF_RC_NOT_IMPL;
-    localrc = ESMF_RC_NOT_IMPL;
+    int localrc = ESMF_RC_NOT_IMPL;
 
     ESMC_Field field = NULL;  // initialize
 
     // Invoque the C++ interface
-    field = reinterpret_cast<void *>(ESMCI::Field::create(mesh, arrayspec, gridToFieldMap, ungriddedLBound, ungriddedUBound, name, &localrc));
+    field = reinterpret_cast<void *>(ESMCI::Field::create(mesh, arrayspec,
+      gridToFieldMap, ungriddedLBound, ungriddedUBound, name, &localrc));
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return field; // bail out
 
     if(rc) *rc = localrc;
     return field;
-}
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FieldGet()"
-int ESMC_FieldGet(ESMC_Field field, ESMC_Mesh *mesh, int *rc){
-
-    int localrc;
-   
-    // Initialize return code; assume routine not implemented
-    if(rc) *rc = ESMC_RC_NOT_IMPL;
-    localrc = ESMC_RC_NOT_IMPL;
-    
-    // typecase into ESMCI type
-    ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field);
-
-    // Invoque the C++ interface
-    localrc = fieldp->getMesh(mesh);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
-      return localrc;
-
-    // invalidate pointer
-    field = NULL;
-
-    // return successfully
-    if(rc) *rc = ESMF_SUCCESS;
-    return localrc;
-
-}
-
-
+  }
 //--------------------------------------------------------------------------
-// !BOP
-// !IROUTINE: ESMC_FieldDestroy
-//
-// !EOP
+
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldDestroy()"
-int ESMC_FieldDestroy(ESMC_Field field, int *rc){
-    int localrc;
-   
+  int ESMC_FieldDestroy(ESMC_Field *field){
     // Initialize return code; assume routine not implemented
-    if(rc) *rc = ESMC_RC_NOT_IMPL;
-    localrc = ESMC_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    // typecase into ESMCI type
+    ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(*field);
+
+    // Invoque the C++ interface
+    localrc = ESMCI::Field::destroy(fieldp);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
+
+    // invalidate pointer
+    *field = NULL;
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//--------------------------------------------------------------------------
+  
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldPrint()"
+  int ESMC_FieldPrint(ESMC_Field field){
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
     
     // typecase into ESMCI type
     ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field);
 
     // Invoque the C++ interface
-    localrc = ESMCI::Field::destroy(fieldp);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
-      return localrc;
+    localrc = fieldp->print();
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
 
-    // invalidate pointer
-    field = NULL;
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//--------------------------------------------------------------------------
+  
+
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldGetMesh()"
+  ESMC_Mesh ESMC_FieldGetMesh(ESMC_Field field, int *rc){
+    // Initialize return code; assume routine not implemented
+    if(rc) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    // typecase into ESMCI type
+    ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field);
+
+    // Invoque the C++ interface
+    ESMC_Mesh mesh = fieldp->getMesh(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      return mesh;
 
     // return successfully
     if(rc) *rc = ESMF_SUCCESS;
-    return localrc;
+    return mesh;
+  }
+//--------------------------------------------------------------------------
 
-}
 
 }

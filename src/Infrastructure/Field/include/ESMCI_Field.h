@@ -1,5 +1,5 @@
 
-// $Id: ESMCI_Field.h,v 1.1 2009/10/20 18:45:46 feiliu Exp $
+// $Id: ESMCI_Field.h,v 1.2 2009/10/23 21:17:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -54,14 +54,14 @@ namespace ESMCI{
     // pointer to fortran derived type
     F90ClassHolder fortranclass;
     // methods
-    public:
-    static Field* create(ESMC_Mesh mesh, ESMC_ArraySpec arrayspec, ESMC_InterfaceInt gridToFieldMap, 
-    ESMC_InterfaceInt ungriddedLBound, ESMC_InterfaceInt ungriddedUBound, const char *name, int *rc); 
+   public:
+    static Field* create(ESMC_Mesh mesh, ESMC_ArraySpec arrayspec,
+      ESMC_InterfaceInt gridToFieldMap, ESMC_InterfaceInt ungriddedLBound,
+      ESMC_InterfaceInt ungriddedUBound, const char *name, int *rc); 
     static int destroy(Field *field);
-    int getMesh(ESMC_Mesh *mesh);
-
+    int print();
+    ESMC_Mesh getMesh(int *rc);
   }; 
 }
-
 
 #endif  // ESMCI_Field_H

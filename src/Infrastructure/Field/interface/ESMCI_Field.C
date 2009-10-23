@@ -49,7 +49,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.1 2009/10/20 18:45:46 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.2 2009/10/23 21:17:37 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -70,9 +70,11 @@ void FTN(f_esmf_fieldcreate)(ESMCI::Field *fieldp, void *mesh_pointer, ESMC_Arra
     int *rc,
     ESMCI_FortranStrLenArg nlen);
 
-void FTN(f_esmf_fieldget)(ESMCI::Field *fieldp, void *mesh_pointer, int *rc);
-
 void FTN(f_esmf_fielddestroy)(ESMCI::Field *fieldp, int *rc);
+
+void FTN(f_esmf_fieldprint)(ESMCI::Field *fieldp, int *rc);
+
+void FTN(f_esmf_fieldget)(ESMCI::Field *fieldp, void *mesh_pointer, int *rc);
 
 }
 
@@ -113,11 +115,8 @@ namespace ESMCI {
 //      (see declaration in ESMC\_Field.h)
 //
 //EOP
-    //Local variables
-    int localrc;
-  
     // Initialize return code. Assume routine not implemented
-    localrc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
   
     ESMCI::InterfaceInt *gtfm = (ESMCI::InterfaceInt *)(gridToFieldMap.ptr);
@@ -200,9 +199,8 @@ namespace ESMCI {
 //EOP
 // !REQUIREMENTS:  
 
-    int localrc;
     // Initialize return code. Assume routine not implemented
-    localrc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
     
     FTN(f_esmf_fielddestroy)(field, &localrc);
 
@@ -221,30 +219,65 @@ namespace ESMCI {
 //             in this Field
 //
 // !INTERFACE:
-      int Field::getMesh(
+  ESMC_Mesh Field::getMesh(
 //
 // !RETURN VALUE:
-//     return code rc.
+//     ESMC_Mesh object
 //
 // !ARGUMENTS:
-      ESMC_Mesh * mesh){             // out - Mesh
+    int *rc) {           // out - return code
 //
 // !DESCRIPTION:
 //      Get the number of items contained in an existing Field
 //
 //EOP
-      //local variables
-     int localrc;
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
 
-     // Initialize return code. Assume routine not implemented
-     localrc = ESMC_RC_NOT_IMPL;
-
-     mesh->ptr = malloc(sizeof(void *));
-     FTN(f_esmf_fieldget)(this, mesh->ptr, &localrc);
- 
-     return localrc;
-
-   }
-
+    ESMC_Mesh mesh;
+    mesh.ptr = NULL; // initialize
+    FTN(f_esmf_fieldget)(this, &(mesh.ptr), &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      return mesh;
+    
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+    return mesh;
+  }
 //-----------------------------------------------------------------------------
+  
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::print()"
+//BOP
+// !IROUTINE:  ESMCI::Field::print - print the internal data for a field
+
+// !INTERFACE:
+  int Field::print(){
+
+// !RETURN VALUE:
+//    int error return code
+  
+// !ARGUMENTS:
+//   none
+
+//  !DESCRIPTION
+//    Prints information about the {\tt field} to {\tt stdout}.
+
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+    int rc=ESMC_RC_NOT_IMPL;
+
+    // Invoque the fortran interface through the F90-C++ "glue" code
+    FTN(f_esmf_fieldprint)(this, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//-----------------------------------------------------------------------------
+  
+  
 } // namespace ESMCI
