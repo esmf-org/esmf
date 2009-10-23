@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.54 2009/10/22 20:36:31 w6ws Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.55 2009/10/23 07:20:28 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -6499,10 +6499,21 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-       call ESMF_GridGet(grid,staggerloc,staggerdistgrid=staggerdistgrid,rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+        ! get distgrid for staggerloc
+        if (present(staggerloc)) then
+           call ESMF_GridGet(grid,staggerloc, &
+                  staggerdistgrid=staggerdistgrid,rc=localrc)
+           if (ESMF_LogMsgFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rc)) return
+        else 
+           call ESMF_GridGet(grid,ESMF_STAGGERLOC_CENTER, &
+                  staggerdistgrid=staggerdistgrid,rc=localrc)
+           if (ESMF_LogMsgFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rc)) return
+        endif
+
 
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=staggerloc,&
