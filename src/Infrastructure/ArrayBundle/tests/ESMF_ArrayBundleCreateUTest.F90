@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleCreateUTest.F90,v 1.4 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_ArrayBundleCreateUTest.F90,v 1.5 2009/10/23 02:55:51 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_ArrayBundleCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayBundleCreateUTest.F90,v 1.4 2009/01/21 21:37:58 cdeluca Exp $'
+    '$Id: ESMF_ArrayBundleCreateUTest.F90,v 1.5 2009/10/23 02:55:51 w6ws Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -57,6 +57,11 @@ program ESMF_ArrayBundleCreateUTest
   type(ESMF_ArrayBundle):: arraybundle
   character (len=80)      :: arrayName
   
+  integer(ESMF_KIND_I4), allocatable :: buffer(:)
+  integer :: buff_len, offset
+  integer :: alloc_err
+  type(ESMF_AttReconcileFlag) :: attreconflag
+  type(ESMF_InquireFlag) :: inquireflag
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -131,6 +136,56 @@ program ESMF_ArrayBundleCreateUTest
 
   print *,"arrayCount=", arrayCount
 
+  ! BEGIN tests of INTERNAL serialization methods.  They are subject
+  ! to change and are NOT part of the ESMF user API.
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! test the serialize inquire-only option
+  ! WARNING: This is testing an INTERNAL method.  It is NOT
+  ! part of the supported ESMF user API!
+  write(name, *) "Computing space for serialization buffer"
+  write(failMsg, *) "Size could not be determined"
+  buff_len = 1
+  allocate (buffer(buff_len))
+  offset = 0
+  attreconflag = ESMF_ATTRECONCILE_OFF
+  inquireflag  = ESMF_INQUIREONLY
+  call c_esmc_arraybundleserialize (arraybundle, buffer, buff_len, offset,  &
+      attreconflag, inquireflag, rc)
+  print *, 'computed serialization buffer length =', offset, ' bytes'
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate (buffer)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Allocate serialization buffer"
+  write(failMsg, *) "Size was illegal"
+  buff_len = offset
+  allocate (buffer(buff_len), stat=alloc_err)
+  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, alloc_err == 0)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! test actually doing the serialization
+  ! WARNING: This is testing an INTERNAL method.  It is NOT
+  ! part of the supported ESMF user API!
+  write(name, *) "Serialization Arraybundle data"
+  write(failMsg, *) "Serialization failed"
+  buff_len = size (buffer)
+  offset = 0
+  attreconflag = ESMF_ATTRECONCILE_OFF
+  inquireflag  = ESMF_NOINQUIRE
+  call c_esmc_arraybundleserialize (arraybundle, buffer, buff_len, offset,  &
+      attreconflag, inquireflag, rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  ! END tests of INTERNAL serialization methods.  They are subject
+  ! to change and are NOT part of the ESMF user API.
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleDestroy Test"
@@ -152,7 +207,7 @@ program ESMF_ArrayBundleCreateUTest
   call ESMF_ArrayGet(arrayOut(1), name=arrayName, rc=rc)
   print *, "Array name: ",arrayname
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayDestroy Test"

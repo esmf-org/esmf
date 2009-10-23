@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.17 2009/09/29 16:56:16 feiliu Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.18 2009/10/23 02:54:46 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -451,17 +451,29 @@ contains
         type(ESMF_FieldBundle)                      :: bundle1
 
         integer(ESMF_KIND_I4), pointer              :: buffer(:)
-        integer                                     :: length, offset, localrc
+        integer                                     :: buff_size, offset, localrc
 
         localrc = ESMF_SUCCESS
         rc = ESMF_SUCCESS
 
-        length = 102400
+        ! Inquire for buffer size
+        buff_size = 1
         offset = 0
-        allocate(buffer(length))
+        allocate (buffer(buff_size))
+        call ESMF_FieldBundleSerialize(bundle, buffer, buff_size, offset, &
+            inquireflag=ESMF_INQUIREONLY, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        deallocate (buffer)
+
 
         ! call serialize and deserialize and verify again
-        call ESMF_FieldBundleSerialize(bundle, buffer, length, offset, rc=localrc)
+        buff_size = offset
+        print *, 'ESMF_FieldBundleCrGetUTest: computed serialization buffer size =', buff_size
+        allocate (buffer(buff_size))
+        offset = 0
+        call ESMF_FieldBundleSerialize(bundle, buffer, buff_size, offset, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
