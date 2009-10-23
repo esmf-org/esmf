@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.7 2009/10/23 02:22:43 oehmke Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.8 2009/10/23 03:02:51 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -5263,7 +5263,7 @@ contains
 
      ! Allocate and fill the element id array.
      allocate(elemIds(numElems))
-     elemIds=(/1,2,3,4,5/) 
+     elemIds=(/1,2,3,4/) 
 
      ! Allocate and fill the element topology type array.
      allocate(elemTypes(numElems))
