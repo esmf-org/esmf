@@ -1,4 +1,4 @@
-% $Id: Array_rest.tex,v 1.7 2009/10/22 22:51:41 theurich Exp $
+% $Id: Array_rest.tex,v 1.8 2009/10/23 04:51:44 theurich Exp $
 
 %\subsubsection{Restrictions and Future Work}
 \begin{itemize}
@@ -6,5 +6,10 @@
 
 \item {\bf CAUTION:} It depends on the specific entry point of {\tt ESMF\_ArrayCreate()} used during Array creation, which Fortran operations are supported on the Fortran array pointer {\tt farrayPtr}, returned by {\tt ESMF\_ArrayGet()}. Only if the {\tt ESMF\_ArrayCreate()} {\em from pointer} variant was used, will the returned {\tt farrayPtr} variable contain the original bounds information, and be suitable for the Fortran {\tt deallocate()} call. This limitation is a direct consequence of the Fortran 95 standard relating to the passing of array arguments.
 
+\item {\bf 1D limit:} ArrayRedist() and ArraySMM() operations on Arrays based on DistGrids with arbitrary sequence indices are currently limited to 1D arbitrary DistGrids.
+
 \item {\bf Non-blocking communications}, PET-based or DE-based, have not been formulated or implemented.
+
+
+
 \end{itemize}
