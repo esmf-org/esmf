@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.10 2009/10/23 20:29:49 theurich Exp $
+! $Id: ESMF_FieldPr.F90,v 1.11 2009/10/23 20:47:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -171,34 +171,33 @@ contains
 
 
         call ESMF_StatusString(fp%gridstatus, str, localrc)
-      !jw  write(msgbuf, *)  "Grid status = ", trim(str)
-      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "Grid status = ", trim(str)
-! TODO:FIELDINTEGRATION Write ESMF_GridPrint() method.
-!        if (fp%gridstatus .eq. ESMF_STATUS_READY) then 
+        if (fp%gridstatus .eq. ESMF_STATUS_READY) then 
 !           call ESMF_GeomBasePrint(fp%geombase, "", localrc)
-!        endif
+!          if (ESMF_LogMsgFoundError(localrc, &
+!            ESMF_ERR_PASSTHRU, &
+!            ESMF_CONTEXT, rc)) return
+          call ESMF_GeomBaseGet(fp%geombase, dimCount=gridrank, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+          write(*, *) "gridrank = ", gridrank
+        endif
 
         call ESMF_StatusString(fp%datastatus, str, localrc)
-      !jw  write(msgbuf, *)  "Data status = ", trim(str)
-      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "Data status = ", trim(str)
-        !TODO: add code here to print more info
         if (fp%datastatus .eq. ESMF_STATUS_READY) then 
-           call c_ESMC_ArrayPrint(fp%array, localrc)
+          call ESMF_ArrayPrint(fp%array, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+          call ESMF_ArrayGet(fp%array, rank=arrayrank, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+          write(*, *) "arrayrank = ", arrayrank
         endif
-!        call ESMF_StaggerLocPrint(fp%staggerloc, localrc)
 
-        call ESMF_GeomBaseGet(fp%geombase, dimCount=gridrank, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-        call ESMF_ArrayGet(fp%array, rank=arrayrank, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        write(*, *) "gridrank = ", gridrank, "arrayrank = ", arrayrank
         write(*, *) "gridToFieldMap ungriddedLBound ungriddedUBound maxHaloLWidth", &
             " maxHaloUWidth"
         do i = 1, ESMF_MAXDIM
