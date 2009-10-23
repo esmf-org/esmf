@@ -1,4 +1,4 @@
-// $Id: ESMCI_State_F.C,v 1.4 2009/09/24 17:15:26 theurich Exp $
+// $Id: ESMCI_State_F.C,v 1.5 2009/10/23 04:39:22 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_State_F.C,v 1.4 2009/09/24 17:15:26 theurich Exp $";
+             "$Id: ESMCI_State_F.C,v 1.5 2009/10/23 04:39:22 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -65,7 +65,7 @@ void FTN(c_esmc_stateserialize)(
 
     // TODO: verify length > needed, else realloc longer
     int fixedpart = 10 * sizeof (int *);
-    if ((*length - *offset) < fixedpart) {
+    if ((*inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < fixedpart) {
          
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                              "Buffer too short to add a State object", localrc);
