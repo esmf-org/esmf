@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.9 2009/10/21 15:53:27 feiliu Exp $
+! $Id: ESMF_FieldPr.F90,v 1.10 2009/10/23 20:29:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -125,8 +125,21 @@ contains
         ! print option is not implemented, but it has to pass to c_ESMC_BasePrint()
         defaultopts = "brief"
 
+        fp => field%ftypep
+
+        call ESMF_BaseGetStatus(fp%base, fieldstatus, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rc)) return
+
         !nsc call ESMF_LogWrite("Field Print:", ESMF_LOG_INFO)
         write(*,*) "Field Print Starts ====>"
+
+        call ESMF_StatusString(fieldstatus, str, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        write(*, *)  "Field status = ", trim(str)
 
         if (fieldstatus .ne. ESMF_STATUS_READY) then
           write(*,*) "Empty or Uninitialized Field"
@@ -135,9 +148,6 @@ contains
           return
         endif
         
-        call ESMF_StatusString(fieldstatus, str, localrc)
-        write(*, *)  "Field status = ", trim(str)
-
         if (.not. associated(field%ftypep)) then
         !jw  call ESMF_LogWrite("Empty or Uninitialized Field", ESMF_LOG_INFO)
           write(*,*) "Empty or Uninitialized Field"
@@ -145,13 +155,6 @@ contains
           if (present(rc)) rc = ESMF_SUCCESS
           return
         endif
-
-        fp => field%ftypep
-
-        call ESMF_BaseGetStatus(fp%base, fieldstatus, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rc)) return
 
         call c_ESMC_GetName(fp%base, name, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
