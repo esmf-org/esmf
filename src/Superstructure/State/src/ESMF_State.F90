@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.177 2009/10/21 14:51:52 eschwab Exp $
+! $Id: ESMF_State.F90,v 1.178 2009/10/23 05:36:05 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.177 2009/10/21 14:51:52 eschwab Exp $'
+      '$Id: ESMF_State.F90,v 1.178 2009/10/23 05:36:05 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -3699,7 +3699,7 @@ module ESMF_StateMod
 !     netCDF file.  Future releases will enable more items of a State to be
 !     written to files of various formats.
 !
-!     Currently writing is limited to PET 0; future versions of ESMF will allow
+!     Writing is currently limited to PET 0; future versions of ESMF will allow
 !     parallel writing, as well as parallel reading.
 !
 !     See Section~\ref{example:StateRdWr} for an example.
