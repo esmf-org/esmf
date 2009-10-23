@@ -1,99 +1,135 @@
-// $Id: user_CComponent.C,v 1.9 2009/03/17 05:34:59 theurich Exp $
-//==============================================================================
+// $Id: user_CComponent.C,v 1.10 2009/10/23 17:44:41 theurich Exp $
+//
+// Example/test code which shows User Component calls.
 
+//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 
+// standard C headers
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
-// ESMF header
+// ESMF header -- provides access to the entire public ESMF C API
 #include "ESMC.h"
+
+//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 
 void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   ESMC_State exportState, ESMC_Clock *clock, int *rc){
 
-  int localrc;
   ESMC_Array retrievedArray;
+  double *ptr;
+  int i, j, ij;
+    
+  // initialize return code
+  *rc = ESMF_SUCCESS;
+    
+  printf("In myInitInC()\n");
 
-  printf("I am in myInitInC()\n");
+  // get Array from export State
+  *rc=ESMC_StateGetArray(exportState, "array1", &retrievedArray);
+  if (*rc!=ESMF_SUCCESS) return;  // bail out
+  
+  // obtain access to Array data
+  ptr = (double *)ESMC_ArrayGetPtr(retrievedArray, 0, rc);
+  if (*rc!=ESMF_SUCCESS) return;  // bail out
 
-  localrc=ESMC_StateGetArray(exportState, "array1", &retrievedArray);
-  
-  double *ptr = (double *)ESMC_ArrayGetPtr(retrievedArray, 0, &localrc);
-  
+  // test accesibility of Array data via print
   printf("local ptr[0] = %g\n", ptr[0]);
   printf("local ptr[1] = %g\n", ptr[1]);
 
-
-   for (int j=0; j<2; j++){
-     for (int i=0; i<5; i++){
-       int ij= j*5 +i;
-       ptr[ij] = j;
-     }
-   }
-    
+  // modify Array data
+  for (j=0; j<2; j++){
+    for (i=0; i<5; i++){
+      // interpret as 2D array with contiguous, column-major storage
+      ij= j*5 +i;
+      ptr[ij] = j;
+    }
+  }
+  
+  // print a modified value
   printf("local ptr[0] = %g\n", ptr[0]);
-
-  printf("Reset farray values to farray(i,j)=j \n");
-  printf("Leaving myInitInC()\n");
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
+
 
 void myRunInC(ESMC_GridComp gcomp, ESMC_State importState,
   ESMC_State exportState, ESMC_Clock *clock, int *rc){
 
-  // local data
   ESMC_Array retrievedArray;
-  int localrc;
-  printf("I am in myRunInC()\n");
+  double *ptr;
+  int i, j, ij;
+    
+  // initialize return code
+  *rc = ESMF_SUCCESS;
+    
+  printf("In myRunInC()\n");
 
-
-    localrc=ESMC_StateGetArray(exportState, "array1", &retrievedArray);
-    double *ptr = (double *)ESMC_ArrayGetPtr(retrievedArray, 0, &localrc);
+  // get Array from export State
+  *rc=ESMC_StateGetArray(exportState, "array1", &retrievedArray);
+  if (*rc!=ESMF_SUCCESS) return;  // bail out
+  
+  // obtain access to Array data
+  ptr = (double *)ESMC_ArrayGetPtr(retrievedArray, 0, rc);
+  if (*rc!=ESMF_SUCCESS) return;  // bail out
 
   // verify data values
-     for (int j=0; j<2; j++){
-       for (int i=0; i<5; i++){
-         int ij= j*5 +i;
-         if ( fabs(ptr[ij]-float((j+1)*10+i+1)) > 1.e-8 ){
-           printf("ptr has wrong values at i=%d,j=%d,ij=%d\n", i,j,ij);
-           *rc = ESMC_Finalize();
-         }
-       }
-     }
-     printf("Data values in exp state correct in myRunInC\n");
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  for (j=0; j<2; j++){
+    for (i=0; i<5; i++){
+      ij= j*5 +i;
+      if ( fabs(ptr[ij]-float((j+1)*10+i+1)) > 1.e-8 ){
+        printf("Array has wrong values at i=%d, j=%d, ij=%d\n", i, j, ij);
+        *rc = ESMF_FAILURE; // indicate failure in return code
+        return; // bail out
+      }
+    }
+  }
 }
+
 
 void myFinalInC(ESMC_GridComp gcomp, ESMC_State importState,
   ESMC_State exportState, ESMC_Clock *clock, int *rc){
-  // do something here
-  printf("I am in myFinalizeInC()\n");
 
-  ESMC_StatePrint(importState);
-  ESMC_ClockPrint(*clock);
+  // initialize return code
+  *rc = ESMF_SUCCESS;
+    
+  printf("In myFinalInC()\n");
 
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  *rc = ESMC_StatePrint(importState);
+  if (*rc!=ESMF_SUCCESS) return;  // bail out
+  
+  *rc = ESMC_ClockPrint(*clock);
+  if (*rc!=ESMF_SUCCESS) return;  // bail out
 }
+
+//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 
 extern "C" {
-void FTN(my_registrationinc)(ESMC_GridComp gcomp, int *rc){
-  // register Init(), Run(), Finalize()
-  printf("I am in myRegistrationInC()\n");
-  ESMC_GridCompPrint(gcomp, "");
+  // The SetServices entry point must ensure to have external C linkage,
+  // so it can be called from Fortran.
+  
+  void FTN(my_setservicesinc)(ESMC_GridComp gcomp, int *rc){
+    // set entry points for standard Component methods Init(), Run(), Finalize()
+    
+    // initialize return code
+    *rc = ESMF_SUCCESS;
+    
+    printf("In mySetServicesInC()\n");
+    
+    *rc = ESMC_GridCompPrint(gcomp, "");
+    if (*rc!=ESMF_SUCCESS) return;  // bail out
 
-  ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, myInitInC, 1);
-  ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, myRunInC, 1);
-  ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, myFinalInC, 1);
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-}
-
+    *rc = ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, myInitInC, 1);
+    if (*rc!=ESMF_SUCCESS) return;  // bail out
+    *rc = ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, myRunInC, 1);
+    if (*rc!=ESMF_SUCCESS) return;  // bail out
+    *rc = ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, myFinalInC, 1);
+    if (*rc!=ESMF_SUCCESS) return;  // bail out
+  }
 } //extern "C"
+
+//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
