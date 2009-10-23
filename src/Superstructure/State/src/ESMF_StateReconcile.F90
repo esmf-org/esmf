@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.64 2009/09/22 14:22:33 feiliu Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.65 2009/10/23 05:23:48 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.64 2009/09/22 14:22:33 feiliu Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.65 2009/10/23 05:23:48 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -292,6 +292,10 @@
     integer :: offset, mypet
     type(ESMF_VMId) :: VMdummyID
 
+    type(ESMF_InquireFlag) :: inqflag
+    integer :: lbufsize, maxbufsize
+    integer :: pass
+
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
@@ -350,11 +354,33 @@
         if (ESMF_LogMsgFoundAllocError(localrc, &
                                    "Allocating buffer for local obj list", &
                                        ESMF_CONTEXT, rc)) return
+        ! allocate(si%blindsend(bufsize, si%mycount), stat=localrc)
+        ! if (ESMF_LogMsgFoundAllocError(localrc, &
+        !                            "Allocating buffer for local buf list", &
+        !                                ESMF_CONTEXT, rc)) return
+    endif
+
+    do, pass=1,2
+
+      if (pass == 1) then
+        ! inquire to find the size of the largest serialization buffer
+        ! needed.
+        inqflag = ESMF_INQUIREONLY
+        maxbufsize = 0
+        allocate (si%blindsend(1,si%mycount))
+        lbufsize = 1
+      else
+        ! Allocate the buffer, and do the serialization for real
+        deallocate (si%blindsend)
+!DEBUG        print *, 'ESMF_StateInfoBuild: leading buffer dimension =', maxbufsize
+        ! allocate(si%blindsend(maxbufsize, si%mycount), stat=localrc)
         allocate(si%blindsend(bufsize, si%mycount), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, &
-                                   "Allocating buffer for local buf list", &
-                                       ESMF_CONTEXT, rc)) return
-    endif
+                                 "Allocating buffer for local buf list", &
+                                     ESMF_CONTEXT, rc)) return
+        inqflag = ESMF_NOINQUIRE
+        lbufsize = maxbufsize
+      end if
 
     ! (+1) to allow top level State space to reconcile Attributes
     if (attreconflag%value == ESMF_ATTRECONCILE_ON%value) then
@@ -372,8 +398,8 @@
 
       si%objsend(1) = ESMF_ID_BASE%objectID
       bptr => si%blindsend(:,1)
-      call c_ESMC_BaseSerialize(state%statep%base, bptr(1), bufsize, offset, &
-        attreconflag, ESMF_NOINQUIRE, localrc)
+      call c_ESMC_BaseSerialize(state%statep%base, bptr(1), lbufsize, offset, &
+        attreconflag, inqflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                              "Top level Base serialize", &
                              ESMF_CONTEXT, rc)) return
@@ -407,9 +433,9 @@
 
              si%objsend(i) = ESMF_ID_FIELDBUNDLE%objectID
              bptr => si%blindsend(:,i)
-             call ESMF_FieldBundleSerialize(stateitem%datap%fbp, bptr, bufsize, &
+             call ESMF_FieldBundleSerialize(stateitem%datap%fbp, bptr, lbufsize, &
                                        offset, attreconflag=attreconflag, &
-                                       inquireflag=ESMF_NOINQUIRE, rc=localrc)
+                                       inquireflag=inqflag, rc=localrc)
              if (ESMF_LogMsgFoundError(localrc, &
                              "nested fieldbundle serialize", &
                              ESMF_CONTEXT, rc)) return
@@ -429,9 +455,9 @@
 
              si%objsend(i) = ESMF_ID_FIELD%objectID
              bptr => si%blindsend(:,i)
-             call ESMF_FieldSerialize(stateitem%datap%fp, bptr, bufsize, &
+             call ESMF_FieldSerialize(stateitem%datap%fp, bptr, lbufsize, &
                                        offset, attreconflag=attreconflag, &
-                                       inquireflag=ESMF_NOINQUIRE, rc=localrc)
+                                       inquireflag=inqflag, rc=localrc)
              if (ESMF_LogMsgFoundError(localrc, &
                              "nested Field serialize", &
                              ESMF_CONTEXT, rc)) return
@@ -452,8 +478,8 @@
              si%objsend(i) = ESMF_ID_ARRAY%objectID
              bptr => si%blindsend(:,i)
              call c_ESMC_ArraySerialize(stateitem%datap%ap, bptr(1), &
-                                       bufsize, offset, attreconflag, &
-                                       ESMF_NOINQUIRE, localrc)
+                                       lbufsize, offset, attreconflag, &
+                                       inqflag, localrc)
              if (ESMF_LogMsgFoundError(localrc, &
                              "nested Array serialize", &
                              ESMF_CONTEXT, rc)) return
@@ -474,8 +500,8 @@
              si%objsend(i) = ESMF_ID_ARRAYBUNDLE%objectID
              bptr => si%blindsend(:,i)
              call c_ESMC_ArrayBundleSerialize(stateitem%datap%abp, bptr(1), &
-                                       bufsize, offset, attreconflag, &
-                                       ESMF_NOINQUIRE, localrc)
+                                       lbufsize, offset, attreconflag, &
+                                       inqflag, localrc)
              if (ESMF_LogMsgFoundError(localrc, &
                              "nested Arraybundle serialize", &
                              ESMF_CONTEXT, rc)) return
@@ -497,8 +523,8 @@
              bptr => si%blindsend(:,i)
              wrapper%statep => stateitem%datap%spp
              ESMF_INIT_SET_CREATED(wrapper)
-             call ESMF_StateSerialize(wrapper, bptr, bufsize, offset, &
-              attreconflag=attreconflag, inquireflag=ESMF_NOINQUIRE, rc=localrc)
+             call ESMF_StateSerialize(wrapper, bptr, lbufsize, offset, &
+              attreconflag=attreconflag, inquireflag=inqflag, rc=localrc)
              if (ESMF_LogMsgFoundError(localrc, &
                              "nested State serialize", &
                              ESMF_CONTEXT, rc)) return
@@ -511,8 +537,8 @@
              si%vmidsend(i) = VMdummyID
              si%objsend(i) = ESMF_STATEITEM_NAME%ot
              bptr => si%blindsend(:,i)
-             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, &
-               ESMF_NOINQUIRE, localrc)
+             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), lbufsize, offset, &
+               inqflag, localrc)
              if (ESMF_LogMsgFoundError(localrc, &
                              "nested string serialize", &
                              ESMF_CONTEXT, rc)) return
@@ -525,8 +551,8 @@
              si%vmidsend(i) = VMdummyID
              si%objsend(i) = ESMF_STATEITEM_NAME%ot
              bptr => si%blindsend(:,i)
-             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, &
-               ESMF_NOINQUIRE, localrc)
+             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), lbufsize, offset, &
+               inqflag, localrc)
              if (ESMF_LogMsgFoundError(localrc, &
                              "nested string serialize (indirect)", &
                              ESMF_CONTEXT, rc)) return
@@ -539,8 +565,8 @@
              si%vmidsend(i) = VMdummyID
              si%objsend(i) = ESMF_STATEITEM_NAME%ot
              bptr => si%blindsend(:,i)
-             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, &
-               ESMF_NOINQUIRE, localrc)
+             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), lbufsize, offset, &
+               inqflag, localrc)
              if (ESMF_LogMsgFoundError(localrc, &
                              "nested unknown type serialize", &
                              ESMF_CONTEXT, rc)) return
@@ -553,12 +579,12 @@
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) then
         
-!!DEBUG "error -- i, offset, bufsize = ", i, offset, bufsize
+!!DEBUG "error -- i, offset, lbufsize = ", i, offset, lbufsize
 
            ! TODO: this is a bit too late; if offset has moved past the end
            ! of the buffer, we've already written over memory that is not ours.
            ! but better late than never??
-           if (offset > bufsize) then
+           if (offset > lbufsize) then
                call ESMF_LogMsgSetError(ESMF_RC_INTNRL_INCONS, &
                          "Too many objects in State for Reconcile to handle", &
                                         ESMF_CONTEXT, rc)
@@ -567,9 +593,11 @@
         return
         endif
 
-!!DEUBG "i, offset, bufsize = ", i, offset, bufsize
-    enddo
-       
+!!DEBUG        print *, "ESMF_StateInfoBuild: i, offset, lbufsize = ", i, offset, lbufsize
+        maxbufsize = max (maxbufsize, offset)
+      end do
+    end do ! pass
+ 
     if (present(rc)) rc = ESMF_SUCCESS
     end subroutine ESMF_StateInfoBuild
 
