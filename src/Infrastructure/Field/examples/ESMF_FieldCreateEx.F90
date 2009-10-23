@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.87 2009/10/15 18:51:31 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.88 2009/10/23 16:22:46 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -512,17 +512,14 @@
 ! 
 ! In this example, an {\tt ESMF\_Field} is created from an {\tt ESMF\_LocStream} 
 ! and an {\tt ESMF\_Arrayspec}.
-! The location stream object is created from a distgrid uniformly distributed
+! The location stream object is uniformly distributed
 ! in a 1 dimensional space on 4 DEs. The arrayspec is 1 dimensional. 
+! Please refer to LocStream examples section for more information on LocStream creation.
 !
 !EOE  
 !BOC
-    distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/16/), &
-        regDecomp=(/4/), &
-        rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    locs = ESMF_LocStreamCreate(distgrid=distgrid, rc=rc)
+    locs = ESMF_LocStreamCreate(minIndex=1, maxIndex=16, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
@@ -538,8 +535,6 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_LocStreamDestroy(locs,rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    call ESMF_DistGridDestroy(distgrid,rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
@@ -550,9 +545,10 @@
 ! In this example, an {\tt ESMF\_Field} is created from an {\tt ESMF\_Mesh} 
 ! and an {\tt ESMF\_Arrayspec}.
 ! The mesh object is on a Euclidean surface that maps to a 2x2 rectangular
-! grid with 4 elements and 9 vertices. The nodal space is represented by
-! a distgrid with 9 indices and the element space is represented by a
-! distgrid with 4 indices internally.
+! grid with 4 elements and 9 nodes. The nodal space is represented by
+! a distgrid with 9 indices. The mesh object can be represented by the picture
+! below. For more information on Mesh creation, user can go to the Mesh
+! examples section in the developer's guide.
 ! \begin{verbatim}
 !              Mesh Ids
 !
@@ -771,6 +767,10 @@
 !EOE  
 
 !BOC
+    call ESMF_MeshGet(mesh, nodalDistgrid=distgrid, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    array = ESMF_ArrayCreate(distgrid=distgrid, arrayspec=arrayspec, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     ! query the array from the previous example
     call ESMF_FieldGet(field, array=array, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -783,6 +783,8 @@
     call ESMF_FieldDestroy(field1,rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_FieldDestroy(field,rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_ArrayDestroy(array, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
