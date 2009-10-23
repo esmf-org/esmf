@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshUTest.C,v 1.10 2009/10/12 22:00:00 oehmke Exp $
+// $Id: ESMC_MeshUTest.C,v 1.11 2009/10/23 21:13:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -20,7 +20,6 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
-#include "ESMC_Mesh.h"
 //==============================================================================
 //BOP
 // !PROGRAM: ESMC_MeshUTest - Check ESMC_Mesh functionality
@@ -29,7 +28,6 @@
 //
 //EOP
 //-----------------------------------------------------------------------------
-
 
 int main(void){
 
@@ -95,17 +93,17 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-    // VTKBody returns zero based elemConn, so make them 1 based
-    for (int i = 0; i < conn_size; i++){
-      elemConn[i] = elemConn[i]+1;
-    }
+  // VTKBody returns zero based elemConn, so make them 1 based
+  for (int i = 0; i < conn_size; i++){
+    elemConn[i] = elemConn[i]+1;
+  }
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
   // Add node information to the mesh
   strcpy(name, "MeshAddNodes");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshAddNodes(&mesh, &num_node, nodeId, nodeCoord, nodeOwner);
+  rc = ESMC_MeshAddNodes(mesh, &num_node, nodeId, nodeCoord, nodeOwner);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -114,26 +112,26 @@ int main(void){
   // Add element information to the mesh
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshAddElements(&mesh, &num_elem, elemId, elemType, elemConn);
+  rc = ESMC_MeshAddElements(mesh, &num_elem, elemId, elemType, elemConn);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //X_UTest_Multi_Proc_Only
+  //NEX_disabled_UTest_Multi_Proc_Only
   // Create DisGrids for the nodes and elements of the mesh
-//  strcpy(name, "MeshCreateDistGrid");
-//  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-//  rc = ESMC_MeshCreateDistGrids(&mesh, nodeDistG, elemDistG, &num_node, &num_elem);
-//  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+//strcpy(name, "MeshCreateDistGrid");
+//strcpy(failMsg, "Did not return ESMF_SUCCESS");
+//rc = ESMC_MeshCreateDistGrids(mesh, nodeDistG, elemDistG, &num_node,
+//&num_elem);
+//ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
   // Write out the internal mesh data
   strcpy(name, "MeshWrite");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshWrite(&mesh, "MeshOutput");
+  rc = ESMC_MeshWrite(mesh, "MeshOutput");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -142,7 +140,7 @@ int main(void){
   // Get the number of local nodes
   strcpy(name, "MeshGetNumNodes");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshGetNumNodes(&mesh, &num_nodes);
+  rc = ESMC_MeshGetNumNodes(mesh, &num_nodes);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -151,7 +149,7 @@ int main(void){
   // Get the number of local elements
   strcpy(name, "MeshGetNumElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshGetNumElements(&mesh, &num_elements);
+  rc = ESMC_MeshGetNumElements(mesh, &num_elements);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -160,7 +158,7 @@ int main(void){
   // Free internal mesh memory
   strcpy(name, "MeshFreeMemory");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshFreeMemory(&mesh);
+  rc = ESMC_MeshFreeMemory(mesh);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
