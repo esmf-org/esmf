@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldUTest.C,v 1.10 2009/10/20 18:46:45 feiliu Exp $
+// $Id: ESMC_FieldUTest.C,v 1.11 2009/10/23 21:18:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -99,17 +99,17 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-    // VTKBody returns zero based elemConn, so make them 1 based
-    for (int i = 0; i < conn_size; i++){
-      elemConn[i] = elemConn[i]+1;
-    }
+  // VTKBody returns zero based elemConn, so make them 1 based
+  for (int i = 0; i < conn_size; i++){
+    elemConn[i] = elemConn[i]+1;
+  }
 
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Add node information to the mesh
   strcpy(name, "MeshAddNodes");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshAddNodes(&mesh, &num_node, nodeId, nodeCoord, nodeOwner);
+  rc = ESMC_MeshAddNodes(mesh, &num_node, nodeId, nodeCoord, nodeOwner);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -118,7 +118,7 @@ int main(void){
   // Add element information to the mesh
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshAddElements(&mesh, &num_elem, elemId, elemType, elemConn);
+  rc = ESMC_MeshAddElements(mesh, &num_elem, elemId, elemType, elemConn);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   
   //----------------------------------------------------------------------------
@@ -166,7 +166,8 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  field = ESMC_FieldCreate(mesh, arrayspec, i_gridToFieldMap, i_ungriddedLBound, i_ungriddedUBound, "field1", &rc);
+  field = ESMC_FieldCreate(mesh, arrayspec, i_gridToFieldMap, i_ungriddedLBound,
+    i_ungriddedUBound, "field1", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -174,7 +175,15 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Get an ESMC_Mesh object from ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_FieldGet(field, &mesh1, &rc);
+  mesh1 = ESMC_FieldGetMesh(field, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Print an ESMC_Field object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_FieldPrint(field);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -182,7 +191,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Destroy ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_FieldDestroy(field, &rc);
+  rc = ESMC_FieldDestroy(&field);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
