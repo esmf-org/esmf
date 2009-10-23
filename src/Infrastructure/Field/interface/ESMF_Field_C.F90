@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.17 2009/10/14 16:12:40 feiliu Exp $
+!  $Id: ESMF_Field_C.F90,v 1.18 2009/10/23 21:16:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.17 2009/10/14 16:12:40 feiliu Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.18 2009/10/23 21:16:37 theurich Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -66,6 +66,33 @@
     rc = ESMF_SUCCESS
   
   end subroutine f_esmf_fieldcreate
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_fieldprint"
+  subroutine f_esmf_fieldprint(field, rc)
+
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_ArraySpecMod
+    use ESMF_FieldMod
+    use ESMF_FieldPrMod
+
+    type(ESMF_Field),intent(inout) :: field
+    integer, intent(out)           :: rc              
+
+    integer :: localrc
+
+    localrc = ESMF_RC_NOT_IMPL
+
+    call ESMF_FieldPrint(field, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    rc = ESMF_SUCCESS
+  
+  end subroutine f_esmf_fieldprint
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_fieldget"
