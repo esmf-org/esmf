@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.12 2009/10/23 21:13:17 theurich Exp $
+// $Id: ESMC_Mesh.C,v 1.13 2009/10/23 21:30:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -257,7 +257,7 @@ int ESMC_MeshVTKHeader(char *fname, int *num_elem, int *num_node,
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_MeshVTKHeader()"
+#define ESMC_METHOD "ESMC_MeshVTKBody()"
 int ESMC_MeshVTKBody(char *fname, int *nodeId, double *nodeCoord,
   int *nodeOwner, int *elemId, int *elemType, int *elemConn){
   
