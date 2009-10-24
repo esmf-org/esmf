@@ -1,4 +1,4 @@
-// $Id: ESMC_State.C,v 1.28 2009/10/23 17:56:28 theurich Exp $
+// $Id: ESMC_State.C,v 1.29 2009/10/24 05:24:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_State.C,v 1.28 2009/10/23 17:56:28 theurich Exp $";
+static const char *const version = "$Id: ESMC_State.C,v 1.29 2009/10/24 05:24:51 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -136,6 +136,43 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_StateAddField()"
+//BOP
+// !IROUTINE:  ESMC_StateAddField - Add a field to this state
+//
+// !INTERFACE:
+      int ESMC_StateAddField(
+//
+// !RETURN VALUE:
+//     return code rc.
+//
+// !ARGUMENTS:
+      ESMC_State state,     // in - state
+      ESMC_Field field){    // in - field being added
+//
+// !DESCRIPTION:
+//      Add a Field to an existing state
+//
+//EOP
+      //local variables
+      int rc;
+      int localrc;
+
+      //Initialize return code
+      rc = ESMF_RC_NOT_IMPL;
+      localrc = ESMF_RC_NOT_IMPL;
+      
+      localrc = ((ESMCI::State*)state)->addField((ESMCI::Field*)field);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,&rc))
+        return localrc;
+
+      rc = localrc;
+      return rc;
+
+   } // end ESMC_StateAddField
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_StateGetArray()"
 //BOP
 // !IROUTINE:  ESMC_StateGetArray - Get an array to this state
@@ -165,6 +202,45 @@ extern "C" {
 
       localrc = ((ESMCI::State*)state)->getArray(arrayName,
         (ESMCI::Array**)&(array->ptr));
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,&rc))
+        return localrc;
+
+      rc = localrc;
+      return rc;
+
+   } // end ESMC_StateGetArray
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_StateGetField()"
+//BOP
+// !IROUTINE:  ESMC_StateGetField - Get an Field to this state
+//
+// !INTERFACE:
+      int ESMC_StateGetField(
+//
+// !RETURN VALUE:
+//     return code rc.
+//
+// !ARGUMENTS:
+      ESMC_State state,    // in - state
+      char* fieldName,     // in - name of Field to get
+      ESMC_Field *field){       // out - Field to get
+//
+// !DESCRIPTION:
+//      Get a Field to an existing state
+//
+//EOP
+      //local variables
+      int rc;
+      int localrc;
+
+      //Initialize return code
+      rc = ESMF_RC_NOT_IMPL;
+      localrc = ESMF_RC_NOT_IMPL;
+
+      localrc = ((ESMCI::State*)state)->getField(fieldName,
+        (ESMCI::Field**)field);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,&rc))
         return localrc;
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.27 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMC_State.h,v 1.28 2009/10/24 05:24:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -35,6 +35,7 @@
 //-----------------------------------------------------------------------------
 
 #include "ESMC_Array.h"
+#include "ESMC_Field.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,7 +49,9 @@ ESMC_State ESMC_StateCreate(char *name, int *rc);
 int ESMC_StateDestroy(ESMC_State *state);
 int ESMC_StatePrint(ESMC_State state);
 int ESMC_StateAddArray(ESMC_State state, ESMC_Array array);
+int ESMC_StateAddField(ESMC_State state, ESMC_Field field);
 int ESMC_StateGetArray(ESMC_State state, char *name, ESMC_Array *array);
+int ESMC_StateGetField(ESMC_State state, char *name, ESMC_Field *field);
 
 #ifdef __cplusplus
 } // extern "C"

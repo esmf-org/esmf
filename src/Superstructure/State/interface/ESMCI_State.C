@@ -47,7 +47,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_State.C,v 1.15 2009/08/20 23:20:04 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_State.C,v 1.16 2009/10/24 05:24:51 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -66,12 +66,19 @@ extern "C" {
   void FTN(f_esmf_stateaddarray)(ESMCI::State* state, ESMCI::Array** array, 
                                  int* rc);
 
+  void FTN(f_esmf_stateaddfield)(ESMCI::State* state, ESMCI::Field* field,
+                                 int* rc);
+  
   void FTN(f_esmf_stateprint)(ESMCI::State* state, int* rc);
 
   void FTN(f_esmf_stategetarray)(ESMCI::State* state, char* name, 
                                  ESMCI::Array** array, int* rc, 
                                  ESMCI_FortranStrLenArg nlen);
 
+  void FTN(f_esmf_stategetfield)(ESMCI::State* state, char* name, 
+                                 ESMCI::Field* field, int* rc, 
+                                 ESMCI_FortranStrLenArg nlen);
+  
   void FTN(f_esmf_statedestroy)(ESMCI::State* state, int* rc);
 
   void FTN(f_esmf_stategetnumitems)(ESMCI::State* state, 
@@ -202,6 +209,45 @@ namespace ESMCI {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::State::addField()"
+//BOP
+// !IROUTINE:  ESMCI::State::addField - Add a Field to this state
+//
+// !INTERFACE:
+      int State::addField(
+//
+// !RETURN VALUE:
+//     return code rc.
+//
+// !ARGUMENTS:
+     Field *field){       // in - Field being added
+//
+// !DESCRIPTION:
+//      Add a Field to an existing state
+//
+//EOP
+     //local variables
+     int rc;
+     int localrc;
+
+     //Initialize return code
+     rc = ESMF_RC_NOT_IMPL;
+     localrc = ESMF_RC_NOT_IMPL;
+  
+      
+    // Invoque the fortran interface through the F90-C++ "glue" code
+     FTN(f_esmf_stateaddfield)(this, field, &localrc);
+     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+       return localrc;
+
+     rc = localrc;
+
+     return rc;
+
+   } // end ESMC_StateAddField
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::State::getArray()"
 //BOP
 // !IROUTINE:  ESMCI::State::getArray - Get an array from this state
@@ -246,6 +292,64 @@ namespace ESMCI {
       return localrc;
     }
 
+
+    //  printf("In ESMC_StateGetArray, after  calling the glue \n");
+
+    delete[] fName;
+    rc = localrc;
+    return rc;
+
+   } // end ESMC_StateGetArray
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::State::getField()"
+//BOP
+// !IROUTINE:  ESMCI::State::getField - Get a Field from this state
+//
+// !INTERFACE:
+      int State::getField(
+//
+// !RETURN VALUE:
+//     return code rc.
+//
+// !ARGUMENTS:
+      char  *name,         // in - Field name
+      Field **field){      // out - Field being geted
+//
+// !DESCRIPTION:
+//      Get a Field from an existing state
+//
+//EOP
+    //local variables
+    int rc;
+    int localrc;
+    int nlen;
+    char* fName;
+
+    //Initialize return code
+    rc = ESMF_RC_NOT_IMPL;
+    localrc = ESMF_RC_NOT_IMPL;
+
+    // convert file name to fortran string
+    nlen = strlen(name);
+    fName = new char[nlen];
+    localrc = ESMC_CtoF90string(name, fName, nlen);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
+      delete[] fName;
+      return localrc;
+    }
+    
+    //TODO: this leaves a memory leak!!!
+    Field *fieldMem = new Field;
+    *field = fieldMem;  // point to this new allocation
+
+    // Invoque the fortran interface through the F90-C++ "glue" code
+    FTN(f_esmf_stategetfield)(this, fName, fieldMem, &localrc, nlen);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
+      delete[] fName;
+      return localrc;
+    }
 
     //  printf("In ESMC_StateGetArray, after  calling the glue \n");
 

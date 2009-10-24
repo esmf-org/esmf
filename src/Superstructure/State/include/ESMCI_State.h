@@ -1,4 +1,4 @@
-// $Id: ESMCI_State.h,v 1.16 2009/05/29 23:51:00 w6ws Exp $
+// $Id: ESMCI_State.h,v 1.17 2009/10/24 05:24:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -35,6 +35,7 @@
 // 
 // !USES:
 #include "ESMCI_Array.h"
+#include "ESMCI_Field.h"
 #include "ESMCI_F90Interface.h"
 
 
@@ -67,8 +68,10 @@ namespace ESMCI{
     public:
     static State* create(char* name, int *rc);
     int addArray(Array *array);
+    int addField(Field *field);
     int print();
     int getArray(char* name, Array **array);
+    int getField(char* name, Field **field);
     static int destroy(State *state);
 
     int getNumItems(int* numItems);

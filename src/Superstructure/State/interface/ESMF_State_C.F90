@@ -1,4 +1,4 @@
-! $Id: ESMF_State_C.F90,v 1.23 2009/10/01 16:42:17 theurich Exp $
+! $Id: ESMF_State_C.F90,v 1.24 2009/10/24 05:24:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.23 2009/10/01 16:42:17 theurich Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.24 2009/10/24 05:24:51 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -94,6 +94,24 @@
    end subroutine f_esmf_stateaddarray
 
 !------------------------------------------------------------------------------
+   subroutine f_esmf_stateaddfield(state, field, rc)
+
+       use ESMF_UtilTypesMod
+      !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_StateMod
+       use ESMF_FieldMod
+       implicit none
+
+       type(ESMF_State) :: state        !inout
+       type(ESMF_Field) :: field        !in
+      integer, intent(out) :: rc        !out
+
+       ! field is directly usable - it is a deep class implemented in Fortran
+       call ESMF_StateAdd(state=state, field=field, rc=rc)
+
+   end subroutine f_esmf_stateaddfield
+
+!------------------------------------------------------------------------------
    subroutine f_esmf_stategetarray(state, arrayName, array, rc)
 
        use ESMF_UtilTypesMod
@@ -122,6 +140,29 @@
 
 
    end subroutine f_esmf_stategetarray
+
+!------------------------------------------------------------------------------
+
+   subroutine f_esmf_stategetfield(state, fieldName, field, rc)
+
+       use ESMF_UtilTypesMod
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_StateMod
+       use ESMF_FieldMod
+       implicit none
+
+       type(ESMF_State) :: state        !in
+       character(len=*) :: fieldName    !in
+       type(ESMF_Field) :: field        !out
+      integer, intent(out) :: rc        !out
+
+       ! Initialize return code; assume routine not implemented
+       rc = ESMF_RC_NOT_IMPL
+
+       call ESMF_StateGet(state=state, itemName=fieldName, &
+                               field=field, rc=rc)
+
+   end subroutine f_esmf_stategetfield
 
 !------------------------------------------------------------------------------
 
