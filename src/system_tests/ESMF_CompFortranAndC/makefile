@@ -1,9 +1,10 @@
-# $Id: makefile,v 1.2 2008/09/26 04:05:32 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2009/10/24 05:35:18 theurich Exp $ 
 
 
 ALL: tree_build_system_tests
 
 run: tree_run_system_tests
+run_uni: tree_run_system_tests_uni
 
 LOCDIR	  = src/system_tests/ESMF_CompInFortranAndC
 
@@ -33,11 +34,12 @@ CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 RUN_CompFortranAndC:
-	$(MAKE) TNAME=CompFortranAndC NP=4 stest
+	cp -r data $(ESMF_TESTDIR)
+	chmod u+rw $(ESMF_TESTDIR)/data/*
+	$(MAKE) TNAME=CompFortranAndC NP=6 stest
 
 RUN_CompFortranAndCUNI:
+	cp -r data $(ESMF_TESTDIR)
+	chmod u+rw $(ESMF_TESTDIR)/data/*
 	$(MAKE) TNAME=CompFortranAndC NP=1 stest
-
-
-
 

@@ -1,4 +1,4 @@
-! $Id: user_FortranComponent.F90,v 1.14 2009/10/23 17:44:42 theurich Exp $
+! $Id: user_FortranComponent.F90,v 1.15 2009/10/24 05:35:18 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -165,6 +165,7 @@ module user_FortranComponent
     type(ESMF_Array)                            :: array
     real(ESMF_KIND_R8), pointer, dimension(:,:) :: farrayPtr
     integer                                     :: i,j
+    type(ESMF_Field)                            :: field
 
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -175,10 +176,12 @@ module user_FortranComponent
     print *, "In Fortran Component Run, farray= ", farray
 
     ! get Array object from export State    
-    call ESMF_StateGet(exportState,"array1", array, rc=rc)
+    call ESMF_StateGet(exportState, "array1", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
+    ! access Array data through farrayPtr
     call ESMF_ArrayGet(array, 0, farrayPtr=farrayPtr, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! values must be as set in "myInitInC"
     do j=1,2
@@ -191,12 +194,20 @@ module user_FortranComponent
       end do
     end do 
 
-    ! modify the data again 
+    ! modify the Array data again 
     do j=1,2
       do i=1,5
         farrayPtr(i,j) = float(j*10+i)
       end do
     end do 
+    
+    ! get Field object from import State    
+    call ESMF_StateGet(importState, "Field from C", field, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    ! print Field object to test its health
+    call ESMF_FieldPrint(field, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine myRunInFortran
 
