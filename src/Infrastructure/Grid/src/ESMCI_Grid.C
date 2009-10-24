@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.101 2009/10/21 18:00:13 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.102 2009/10/24 02:56:39 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.101 2009/10/21 18:00:13 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.102 2009/10/24 02:56:39 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -3614,6 +3614,7 @@ Grid::Grid(
   staggerMemLBoundList = ESMC_NULL_POINTER;
   coordDidIAllocList = ESMC_NULL_POINTER;
   
+  staggerDistgridList =ESMC_NULL_POINTER;
 
   itemArrayList = ESMC_NULL_POINTER;
   itemDidIAllocList = ESMC_NULL_POINTER;
@@ -3801,7 +3802,8 @@ void Grid::destruct(void){
        DistGrid::destroy(&staggerDistgridList[i]);
      }
    }   
-   if (staggerDistgridList != ESMC_NULL_POINTER) delete staggerDistgridList;
+
+   if (staggerDistgridList != ESMC_NULL_POINTER) delete[] staggerDistgridList;
 
    // If present delete ProtoGrid
    if (proto != ESMC_NULL_POINTER) delete proto;
@@ -3857,6 +3859,7 @@ void Grid::destruct(void){
   if (localArbIndexCount) {
     _free2D<int>(&localArbIndex);
   }
+
  }
 }
 
