@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.49 2009/09/21 23:12:35 theurich Exp $
+// $Id: ESMCI_Attribute.C,v 1.50 2009/10/24 01:14:40 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.49 2009/09/21 23:12:35 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.50 2009/10/24 01:14:40 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -5213,12 +5213,12 @@ namespace ESMCI {
     // Initialize local return code; assume routine not implemented
     localrc = ESMC_RC_NOT_IMPL;
     cc = false;
-    localrc = ESMC_SerializeCC(buffer,length,loffset,cc);
+    localrc = ESMC_SerializeCC(buffer,length,loffset,cc,inquireflag);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &localrc)) return localrc;
     if (inquireflag != ESMF_INQUIREONLY) {
       cc = true;
-      localrc = ESMC_SerializeCC(buffer,length,*offset,cc);
+      localrc = ESMC_SerializeCC(buffer,length,*offset,cc,inquireflag);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
     } else
@@ -5244,7 +5244,8 @@ namespace ESMCI {
       char *buffer,          // inout - byte stream to fill
       int *length,           // inout - buf length; realloc'd here if needed
       int &offset,           // inout - original offset, updated throughout
-      bool cc) const {       // in - to tell whether in count or copy mode 
+      bool cc,               // in - to tell whether in count or copy mode 
+      ESMC_InquireFlag inquireflag) const { // in - inquire flag
 //
 // !DESCRIPTION:
 //    Turn an {\tt Attribute} into a stream of bytes.
@@ -5340,23 +5341,25 @@ namespace ESMCI {
     
       // Serialize the Attribute hierarchy
       for (i=0; i<attrList.size(); i++)
-          attrList.at(i)->ESMC_SerializeCC(buffer,length,offset,cc);
+          attrList.at(i)->ESMC_SerializeCC(buffer,length,offset,cc,inquireflag);
   
       for (i=0; i<packList.size(); i++)
-          packList.at(i)->ESMC_SerializeCC(buffer,length,offset,cc);
+          packList.at(i)->ESMC_SerializeCC(buffer,length,offset,cc,inquireflag);
   
 /*      for (i=0; i<linkList.size(); i++)
-          linkList.at(i)->ESMC_SerializeCC(buffer,length,offset,cc); */
+          linkList.at(i)->ESMC_SerializeCC(buffer,length,offset,cc,inquireflag); */
   
       // make sure offset is aligned correctly
       nbytes=offset%8;
       if (nbytes!=0) offset += 8-nbytes;
       
       // check if buffer has enough free memory, expand?
-      if (*length < offset){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_MEM_ALLOCATE, 
-          "Buffer too short to add an Attribute hierarchy", &localrc);
-        return localrc;
+      if (inquireflag != ESMF_INQUIREONLY) {
+        if (*length < offset){
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_MEM_ALLOCATE, 
+            "Buffer too short to add an Attribute hierarchy", &localrc);
+          return localrc;
+        }
       }
       
     // Undefine serialization macros, so they don't cause troubles elsewhere
