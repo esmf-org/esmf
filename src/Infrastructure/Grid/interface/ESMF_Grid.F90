@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.142 2009/10/22 01:14:09 w6ws Exp $'
+      '$Id: ESMF_Grid.F90,v 1.143 2009/10/25 05:58:30 eschwab Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2863,7 +2863,10 @@ end subroutine ESMF_GridConvertIndex
 
     grid = ESMF_GridCreateEmpty(rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) return
+                              ESMF_CONTEXT, rcToReturn=rc)) then
+      call ESMF_GridDestroy(grid)
+      return
+    endif
 
     ! Read the attribute file; place attributes onto grid base
     ! TODO: use convention, purpose
@@ -2874,7 +2877,10 @@ end subroutine ESMF_GridConvertIndex
     if (localrc==ESMF_RC_LIB_NOT_PRESENT) xercesPresent = .false.
     if (localrc .ne. ESMF_SUCCESS .and. xercesPresent) localrc = ESMF_FAILURE
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) return
+                              ESMF_CONTEXT, rcToReturn=rc)) then
+      call ESMF_GridDestroy(grid)
+      return
+    endif
 
     ! Get the GridSpec "NX" and "NY" Attributes set from file
     ! (required, for maxIndex in GriCreate())
@@ -2883,24 +2889,34 @@ end subroutine ESMF_GridConvertIndex
     call c_ESMC_AttPackGetChar(grid, 'NX', attrValue, &
                                'GridSpec', 'General', 'grid', localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) return
+                              ESMF_CONTEXT, rcToReturn=rc)) then
+      call ESMF_GridDestroy(grid)
+      return
+    endif
+
     ! convert from character to integer
     read(attrValue, *, iostat=localrc) maxIndex(1)
     if (localrc.ne.0) then
       call ESMF_LogMsgSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rcToReturn=rc)
+      call ESMF_GridDestroy(grid)
       return
     end if
 
     call c_ESMC_AttPackGetChar(grid, 'NY', attrValue, &
                                'GridSpec', 'General', 'grid', localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) return
+                              ESMF_CONTEXT, rcToReturn=rc)) then
+      call ESMF_GridDestroy(grid)
+      return
+    endif
+
     ! convert from character to integer
     read(attrValue, *, iostat=localrc) maxIndex(2)
     if (localrc.ne.0) then
       call ESMF_LogMsgSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rcToReturn=rc)
+      call ESMF_GridDestroy(grid)
       return
     end if
 
@@ -2911,24 +2927,34 @@ end subroutine ESMF_GridConvertIndex
     call c_ESMC_AttPackGetChar(grid, 'RegDecompX', attrValue, &
                                'ESMF', 'General', 'grid', localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) return
+                              ESMF_CONTEXT, rcToReturn=rc)) then
+      call ESMF_GridDestroy(grid)
+      return
+    endif
+
     ! convert from character to integer
     read(attrValue, *, iostat=localrc) regDecomp(1)
     if (localrc.ne.0) then
       call ESMF_LogMsgSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rcToReturn=rc)
+      call ESMF_GridDestroy(grid)
       return
     end if
 
     call c_ESMC_AttPackGetChar(grid, 'RegDecompY', attrValue, &
                                'ESMF', 'General', 'grid', localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) return
+                              ESMF_CONTEXT, rcToReturn=rc)) then
+      call ESMF_GridDestroy(grid)
+      return
+    endif
+
     ! convert from character to integer
     read(attrValue, *, iostat=localrc) regDecomp(2)
     if (localrc.ne.0) then
       call ESMF_LogMsgSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rcToReturn=rc)
+      call ESMF_GridDestroy(grid)
       return
     end if
 
@@ -2939,7 +2965,10 @@ end subroutine ESMF_GridConvertIndex
                                      regDecomp=regDecomp, &
                                      indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) return
+                              ESMF_CONTEXT, rcToReturn=rc)) then
+      call ESMF_GridDestroy(grid)
+      return
+    endif
 
     ! TODO: Add coordinates
     ! call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
