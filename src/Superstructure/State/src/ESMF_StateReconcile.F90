@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.65 2009/10/23 05:23:48 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.66 2009/10/26 05:58:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.65 2009/10/23 05:23:48 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.66 2009/10/26 05:58:48 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -379,7 +379,8 @@
                                  "Allocating buffer for local buf list", &
                                      ESMF_CONTEXT, rc)) return
         inqflag = ESMF_NOINQUIRE
-        lbufsize = maxbufsize
+!gjt        lbufsize = maxbufsize
+        lbufsize = bufsize  !gjt workaround for maxbufsize==0 issue
       end if
 
     ! (+1) to allow top level State space to reconcile Attributes
