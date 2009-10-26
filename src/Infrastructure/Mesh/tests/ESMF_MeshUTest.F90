@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshUTest.F90,v 1.17 2009/10/15 21:12:51 oehmke Exp $
+! $Id: ESMF_MeshUTest.F90,v 1.18 2009/10/26 17:21:45 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_MeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshUTest.F90,v 1.17 2009/10/15 21:12:51 oehmke Exp $'
+    '$Id: ESMF_MeshUTest.F90,v 1.18 2009/10/26 17:21:45 oehmke Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -52,7 +52,7 @@ program ESMF_MeshUTest
   character(ESMF_MAXSTR) :: name
 
   !LOCAL VARIABLES:
-  type(ESMF_Mesh) :: mesh
+  type(ESMF_Mesh) :: mesh,mesh2
   type(ESMF_VM) :: vm
   type(ESMF_DistGrid) :: nodeDistgrid, elemDistgrid
   logical :: correct
@@ -64,6 +64,8 @@ program ESMF_MeshUTest
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_Field)  ::  field
   logical :: isMemFreed
+  integer :: bufCount, offset
+  integer(ESMF_KIND_I4), pointer :: buf(:)
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -806,6 +808,149 @@ program ESMF_MeshUTest
   endif 
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
+
+  !-----------------------------------------------------------------------------
+  ! NOTE THAT SERIALIZE/DESERIALIZE IS AN INTERNAL INTERFACE AND NOT INTENDED FOR PUBLIC USE
+  !NEX_UTest
+  write(name, *) "Test Mesh Serialize/Deserialize"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Create Mesh
+  ! Only do this if we have 1 processor
+  if (petCount .eq. 1) then
+
+  ! Create Mesh structure
+  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Fill in node data
+  numNodes=9
+
+  !! node ids
+  allocate(nodeIds(numNodes))
+  nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+  !! node Coords
+  allocate(nodeCoords(numNodes*2))
+  nodeCoords=(/0.0,0.0, &
+               1.0,0.0, &
+               2.0,0.0, &
+               0.0,1.0, &
+               1.0,1.0, &
+               2.0,1.0, &
+               0.0,2.0, &
+               1.0,2.0, &
+               2.0,2.0 /)
+
+  !! node owners
+  allocate(nodeOwners(numNodes))
+  nodeOwners=0 ! everything on proc 0
+
+  ! Add nodes
+  call ESMF_MeshAddNodes(mesh,nodeIds,nodeCoords,nodeOwners,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! deallocate node data
+  deallocate(nodeIds)
+  deallocate(nodeCoords)
+  deallocate(nodeOwners)
+
+  ! Fill in elem data
+  numElems=4
+
+  !! elem ids
+  allocate(elemIds(numElems))
+  elemIds=(/1,2,3,4/) 
+
+  !! elem types
+  allocate(elemTypes(numElems))
+  elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+  !! elem conn
+  allocate(elemConn(numElems*4))
+  elemConn=(/1,2,5,4, & 
+             2,3,6,5, & 
+             4,5,8,7, & 
+             5,6,9,8/)
+
+  ! Add Elements
+  call ESMF_MeshAddElements(mesh,elemIds,elemTypes,elemConn,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! deallocate elem data
+  deallocate(elemIds)
+  deallocate(elemTypes)
+  deallocate(elemConn)
+
+  !! Write mesh for debugging
+  ! call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
+  !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Create a buffer to put the locstream in
+  offset=0
+  allocate (buf(1))
+  call ESMF_MeshSerialize(mesh, buf, bufCount, offset,  &
+    inquireflag=ESMF_INQUIREONLY, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE                            
+
+  deallocate (buf)
+  bufCount=2*offset ! a little more room
+  print *, 'ESMF_MeshUTest: serialization buffer size =', bufCount
+  allocate(buf(bufCount))
+
+  ! Serialize
+  offset=0
+  call ESMF_MeshSerialize(mesh, buf, bufCount, offset, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Deserialize
+  offset=0
+  mesh2=ESMF_MeshDeserialize(buf, offset, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+write(*,*) "E1"
+  ! Check loc stream info
+  ! Test Mesh Get
+  call ESMF_MeshGet(mesh2, nodalDistgrid=nodeDistgrid, elementDistgrid=elemDistgrid, &
+                   numOwnedNodes=numOwnedNodesTst, numOwnedElements=numOwnedElemsTst, &
+                   isMemFreed=isMemFreed, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+write(*,*) "E2",rc,correct
+  ! check results
+  if (numOwnedNodesTst .ne. 0) correct=.false.
+  if (numOwnedElemsTst .ne. 0) correct=.false.
+  if (isMemFreed) correct=.false. 
+
+  ! Make sure node distgrid is ok
+  call ESMF_DistGridValidate(nodeDistgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+write(*,*) "E3",rc,correct
+  ! Make sure element distgrid is ok
+  call ESMF_DistGridValidate(elemDistgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+write(*,*) "E4",rc,correct
+  ! Get rid of buffer
+  deallocate(buf)
+write(*,*) "E5",rc,correct
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh2, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+write(*,*) "E6",rc,correct
+  ! endif for skip for >1 proc
+  endif 
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
 
   !------------------------------------------------------------------------

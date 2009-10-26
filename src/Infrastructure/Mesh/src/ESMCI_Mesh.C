@@ -1401,7 +1401,7 @@ void Mesh::Commit() {
 
   if (committed)
     Throw() << "Mesh is already committed!";
-
+  
   // Create sides/edges, if requested
   if (use_sides) {
     CreateAllSides();
@@ -1411,7 +1411,8 @@ void Mesh::Commit() {
   }
   
   ResolvePendingCreate();
-
+  
+  
   FieldReg::CreateDBFields();
   FieldReg::Commit(*this);
 
@@ -1422,6 +1423,66 @@ void Mesh::Commit() {
 
   committed = true;
 }
+
+
+#if 0
+void Mesh::GetImprintContexts(std::vector<UInt> nvalSet, std::vector<UInt> nvalSetObj) {
+  Trace __trace("Mesh::GetImprintContexts()");
+
+  FieldReg::GetImprintContexts(*this, nvalSet,nvalSetObj);
+
+}
+
+
+
+void FieldReg::GetImprints(
+			   int numSetsArg,
+			   std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
+			   std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg) {
+
+void FieldReg::GetImprints(
+			   int numSetsArg,
+			   std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
+			   std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg) {
+}
+#endif
+
+void Mesh::ProxyCommit(int numSetsArg,
+		       std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
+		       std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg) {    
+  Trace __trace("Mesh::ProxyCommit()");
+
+  if (committed)
+    Throw() << "Mesh is already committed!";
+
+    // Create sides/edges, if requested
+    if (use_sides) {
+      CreateAllSides();
+    }
+    if (use_edges && side_type() != MeshObj::EDGE) {
+      CreateAllEdges();
+    }
+    
+#if 0
+    ResolvePendingCreate();
+#endif
+  
+  FieldReg::CreateDBFields();
+
+  FieldReg::ProxyCommit(*this,
+			numSetsArg,
+			nvalSetSizesArg, nvalSetValsArg,
+			nvalSetObjSizesArg, nvalSetObjValsArg);
+
+  MeshDB::Commit(FieldReg::NumFields(), FieldReg::ListOfFields(), Numfields(), FieldReg::ListOffields());
+
+  FieldReg::PopulateDBFields(*this);
+  FieldReg::ReleaseDBFields();
+
+  committed = true;
+}
+
+
 
 void Mesh::CreateGhost() {
   if (sghost) return; // must already be scratched
@@ -1566,6 +1627,71 @@ void Mesh::build_sym_comm_rel(UInt obj_type) {
   }
 
 }
+
+
+
+
+void Mesh::proxy_build_sym_comm_rel(UInt obj_type) {
+  Trace __trace("Mesh::build_sym_comm_rel(UInt obj_type)");
+
+   CommRel &ncom = GetCommRel(obj_type);
+
+  // Loop the mesh; find shared nodes and add
+   std::vector<CommRel::CommNode> snodes;
+ 
+   // Ok, now the trick.  Loop through nodes, if _OWNER != rank, then node is owned
+   MeshDB::iterator ni = obj_begin_all(obj_type), ne = obj_end_all(obj_type);
+   if (Par::Size() > 1)
+   for (; ni != ne; ++ni) {
+     MeshObj &node = *ni;
+     UInt oproc = node.get_owner();
+     if (oproc != (UInt) Par::Rank()) {
+ //Par::Out() << "proc:" << Par::Rank() << ", shared obj:" << MeshObjTypeString(obj_type) << ", id=" << node.get_id() << ", owner=" << node.get_owner() << std::endl;
+       snodes.push_back(CommRel::CommNode(&node, oproc));
+     }
+
+     if (oproc >= Par::Size()) {
+       Par::Out() << "Error! rank is greater than nproc:obj:" << node;
+       Throw() << "Bad processor number!";
+     }
+   }
+   ncom.BuildFromOwner(*this, snodes);
+   std::vector<CommRel::CommNode>().swap(snodes);
+ 
+   // We now know all the shared objs, so loop through and mark them.  Also,
+   // update the locally_owned attr;
+   CommRel::MapType::iterator sni = ncom.domain_begin(), sne = ncom.domain_end();
+   std::vector<MeshObj*> psnodes;
+ 
+   for (; sni != sne; ++sni) {
+   
+     psnodes.push_back(sni->obj);
+   }
+ 
+   std::sort(psnodes.begin(), psnodes.end());
+   psnodes.erase(std::unique(psnodes.begin(), psnodes.end()), psnodes.end());
+ 
+   // snodes now contains the shared node list.  Loop through and update nodes;
+   std::vector<MeshObj*>::iterator spi = psnodes.begin(), spe = psnodes.end();
+   for (; spi != spe; ++spi) {
+     MeshObj *node = *spi;
+     UInt oproc = node->get_owner();
+     bool lowned = (oproc == (UInt) Par::Rank());
+     const Context &ctxt = GetMeshObjContext(*node);
+     Context newctxt(ctxt);
+     newctxt.set(Attr::SHARED_ID);
+     if (lowned)
+       newctxt.set(Attr::OWNED_ID);
+     else
+       newctxt.clear(Attr::OWNED_ID);
+     if (newctxt != ctxt) {
+       Attr attr(GetAttr(*node), newctxt);
+       update_obj(node, attr);
+     }
+  }
+
+}
+
 
 void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
   CommRel &crel = GetCommRel(obj_type);

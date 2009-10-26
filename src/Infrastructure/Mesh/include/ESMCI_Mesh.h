@@ -50,10 +50,18 @@ Mesh();
  */
 void Commit();
 
-bool is_committed() const { return committed; }
+#if 0
+ void GetImprintContexts(std::vector<UInt> nvalSet, std::vector<UInt> nvalSetObj);
+#endif 
 
-bool IsParallel() const { return true;}
-
+ void ProxyCommit(int numSetsArg,
+		  std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
+		  std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg);
+ 
+ bool is_committed() const { return committed; }
+ 
+ bool IsParallel() const { return true;}
+ 
 /**
  * Objects are deleted on the local, serial mesh.  This function performs
  * a parallel resolution to see if the objects should be deleted, or if
@@ -80,6 +88,8 @@ CommReg &GhostComm() { ThrowRequire(sghost); return *sghost; }
 
 // Create the sym rel
 void build_sym_comm_rel(UInt obj_type);
+
+void proxy_build_sym_comm_rel(UInt obj_type);
 
 /*
  * When shared objects are marked to delete, we must find a new owner

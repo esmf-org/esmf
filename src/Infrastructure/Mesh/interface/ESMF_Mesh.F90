@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.25 2009/10/15 21:12:42 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.26 2009/10/26 17:21:45 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -127,6 +127,8 @@ module ESMF_MeshMod
   public ESMF_MeshGetInit
   public ESMF_MeshGet
   public ESMF_MeshMatch
+  public ESMF_MeshSerialize
+  public ESMF_MeshDeserialize
 
 
 !EOPI
@@ -135,7 +137,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.25 2009/10/15 21:12:42 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.26 2009/10/26 17:21:45 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -263,6 +265,9 @@ module ESMF_MeshMod
 
     !call ESMF_DistGridPrint(mesh%nodal_distgrid)
     !ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, mesh%nodal_distgrid, rc)
+
+    ! Go to next stage 
+    mesh%createStage=3
 
     ! Set as fully created 
     mesh%isFullyCreated=.true.
@@ -953,6 +958,224 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshSerialize"
+
+!BOPI
+! !IROUTINE: ESMF_MeshSerialize - Serialize mesh info into a byte stream
+!
+! !INTERFACE:
+      subroutine ESMF_MeshSerialize(mesh, buffer, length, offset, inquireflag, rc) 
+!
+! !ARGUMENTS:
+      type(ESMF_Mesh), intent(inout) :: mesh
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: length
+      integer, intent(inout) :: offset
+      type(ESMF_InquireFlag), intent(in), optional :: inquireflag
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes an {\tt ESMF\_Mesh} object and adds all the information needed
+!      to  recreate the object based on this information.  
+!      Expected to be used by {\tt ESMF\_StateReconcile()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [mesh]
+!           {\tt ESMF\_Mesh} object to be serialized.
+!     \item [buffer]
+!           Data buffer which will hold the serialized information.
+!     \item [length]
+!           Current length of buffer, in bytes.  If the serialization
+!           process needs more space it will allocate it and update
+!           this length.
+!     \item [offset]
+!           Current write offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           available byte in the buffer.
+!     \item [inquireflag]
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+      integer :: i,localrc
+      type(ESMF_AttReconcileFlag) :: attreconflag
+      type(ESMF_InquireFlag) :: linquireflag
+      integer :: intMeshFreed,intFullyCreated
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,mesh,rc)
+
+
+    ! If mesh has not been fully created
+    if (.not. mesh%isFullyCreated) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh has not been fully created", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+
+      if (present (inquireflag)) then
+        linquireflag = inquireflag
+      else
+        linquireflag = ESMF_NOINQUIRE
+      end if
+
+     ! Serialize Node Distgrid
+     call c_ESMC_DistgridSerialize(mesh%nodal_distgrid, buffer, length, offset, &
+                                 linquireflag, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+     ! Serialize Element Distgrid
+     call c_ESMC_DistgridSerialize(mesh%element_distgrid, buffer, length, offset, &
+                                 linquireflag, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      ! Convert logicals to ints
+      if (mesh%isCMeshFreed) then
+        intMeshFreed=1
+      else
+        intMeshFreed=0
+      endif
+
+      ! Serialize other Mesh items
+      call c_ESMC_MeshInfoSerialize(intMeshFreed, &
+              buffer, length, offset,linquireflag, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      ! If exists serialize mesh
+      if (.not. mesh%isCMeshFreed) then
+         call c_ESMC_MeshSerialize(mesh%this, buffer, length, offset, &
+                                 linquireflag, localrc)
+         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+
+      ! return success
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_MeshSerialize
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshDeserialize"
+
+!BOPI
+! !IROUTINE: ESMF_MeshDeserialize - Deserialize a byte stream into a Mesh
+!
+! !INTERFACE:
+      function ESMF_MeshDeserialize(buffer, offset, rc) 
+!
+! !RETURN VALUE:
+      type(ESMF_Mesh) :: ESMF_MeshDeserialize   
+!
+! !ARGUMENTS:
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes a byte-stream buffer and reads the information needed to
+!      recreate a Mesh object.  Recursively calls the deserialize routines
+!      needed to recreate the subobjects.
+!      Expected to be used by {\tt ESMF\_StateReconcile()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [buffer]
+!           Data buffer which holds the serialized information.
+!     \item [offset]
+!           Current read offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           unread byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc
+      integer :: i
+      type(ESMF_AttReconcileFlag) :: attreconflag
+      integer :: intMeshFreed
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if  (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+
+     ! Deserialize node Distgrid
+     call c_ESMC_DistGridDeserialize(ESMF_MeshDeserialize%nodal_distgrid, buffer, offset, localrc)
+     if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call ESMF_DistGridSetInitCreated(ESMF_MeshDeserialize%nodal_distgrid, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+     ! Deserialize element Distgrid
+     call c_ESMC_DistGridDeserialize(ESMF_MeshDeserialize%element_distgrid, buffer, offset, localrc)
+     if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call ESMF_DistGridSetInitCreated(ESMF_MeshDeserialize%element_distgrid, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      ! Deserialize other ESMF_MeshDeserialize items
+      call c_ESMC_MeshInfoDeserialize(intMeshFreed, buffer, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      ! Convert ints to logicals
+      if (intMeshFreed .eq. 1) then
+         ESMF_MeshDeserialize%isCMeshFreed=.true.
+      else
+         ESMF_MeshDeserialize%isCMeshFreed=.false.
+      endif
+
+      ! Set values who's values are implied by the fact 
+      ! that this is a proxy mesh
+      ESMF_MeshDeserialize%isFullyCreated=.true.
+      ESMF_MeshDeserialize%createStage=3
+      ESMF_MeshDeserialize%numOwnedNodes=0
+      ESMF_MeshDeserialize%numOwnedElements=0
+
+      ! If exists serialize mesh
+      if (.not. ESMF_MeshDeserialize%isCMeshFreed) then
+         call c_ESMC_MeshDeserialize(ESMF_MeshDeserialize%this, buffer, &
+                                     offset, localrc)
+         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+   
+     ! Set init status
+     ESMF_INIT_SET_CREATED(ESMF_MeshDeserialize)
+
+     if  (present(rc)) rc = ESMF_SUCCESS
+
+     end function ESMF_MeshDeserialize
+
+
+!------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshWrite()"
@@ -1015,6 +1238,9 @@ module ESMF_MeshMod
     
   end subroutine ESMF_MeshWrite
 !------------------------------------------------------------------------------
+
+
+
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef ESMF_METHOD

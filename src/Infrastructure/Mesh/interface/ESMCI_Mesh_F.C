@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.31 2009/09/30 05:09:26 theurich Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.32 2009/10/26 17:21:45 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -72,7 +72,19 @@ extern "C" void FTN(c_esmc_meshcreate)(Mesh **meshpp,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshcreate()"
 
+
+
    try {
+
+  // Initialize the parallel environment for mesh (if not already done)
+{
+ int localrc;
+ int rc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+   throw localrc;  // bail out with exception
+}
+
      // Some error checking of input
     if (*pdim > *sdim) {
       int localrc;
@@ -130,6 +142,15 @@ extern "C" void FTN(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *nod
     Mesh *meshp = *meshpp;
     ThrowRequire(meshp);
     Mesh &mesh = *meshp;
+
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+ int localrc;
+ int rc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+   throw localrc;  // bail out with exception
+    }
 
     // Get petCount for error checking
     int localrc;
@@ -207,6 +228,15 @@ extern "C" void FTN(c_esmc_meshwrite)(Mesh **meshpp, char *fname, int *rc, int n
 
   try {
 
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+ int localrc;
+ int rc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+   throw localrc;  // bail out with exception
+    }
+
     char *filename = ESMC_F90toCstring(fname, nlen);
 
     WriteMesh(**meshpp, filename);
@@ -249,6 +279,15 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
     ThrowRequire(meshp);
 
     Mesh &mesh = *meshp;
+
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+ int localrc;
+ int rc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+   throw localrc;  // bail out with exception
+    }
 
     // Get parametric dimension
     int parametric_dim=mesh.parametric_dim();
@@ -516,6 +555,16 @@ extern "C" void FTN(c_esmc_meshvtkbody)(char *filename, int *nodeId, double *nod
 extern "C" void FTN(c_esmc_meshdestroy)(Mesh **meshpp, int *rc) {
 
   try {
+
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+ int localrc;
+ int rc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+   throw localrc;  // bail out with exception
+    }
+
     Mesh *meshp = *meshpp;
     
     delete meshp;
@@ -549,6 +598,16 @@ extern "C" void FTN(c_esmc_meshdestroy)(Mesh **meshpp, int *rc) {
 extern "C" void FTN(c_esmc_meshfreememory)(Mesh **meshpp, int *rc) {
 
   try {
+
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+ int localrc;
+ int rc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+   throw localrc;  // bail out with exception
+    }
+
     Mesh *meshp = *meshpp;
 
     delete meshp;
@@ -632,6 +691,16 @@ extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *
   
  
   try {
+
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+ int localrc;
+ int rc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+   throw localrc;  // bail out with exception
+    }
+
     Mesh *meshp = *meshpp;
     
     // The nodal map.  First get the set of owned nodal ids
@@ -710,3 +779,303 @@ extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *
 }
 
 
+extern "C" void FTN(c_esmc_meshinfoserialize)(int *intMeshFreed,
+	        void *buffer, int *length, int *offset,
+                ESMC_InquireFlag *inquireflag, int *localrc){
+
+    int *ip;
+
+    // Initialize return code; assume routine not implemented
+    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+
+    // TODO: verify length > vars.
+    int size = sizeof(int);
+    if (*inquireflag != ESMF_INQUIREONLY) {
+      if ((*length - *offset) < size) {         
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "Buffer too short to add a Mesh object", localrc);
+         return;
+      }
+    }
+
+    // Save keyCount
+    ip= (int *)((char *)(buffer) + *offset);
+    if (*inquireflag != ESMF_INQUIREONLY) {
+      *ip++ = *intMeshFreed;
+    }
+
+    // Adjust offset
+    *offset += size;
+
+    // return success
+    if (localrc) *localrc = ESMF_SUCCESS;
+
+    return;
+} 
+
+
+extern "C" void FTN(c_esmc_meshinfodeserialize)(int *intMeshFreed, 
+                                 void *buffer, int *offset, int *localrc){
+
+    int *ip;
+
+    // Initialize return code; assume routine not implemented
+    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+
+    // Get pointer
+    ip= (int *)((char *)(buffer) + *offset);
+
+    // Get values
+    *intMeshFreed=*ip++;
+
+    // Adjust offset
+    *offset += sizeof(int);
+
+    // return success
+    if (localrc) *localrc = ESMF_SUCCESS;
+
+    return;
+} 
+
+
+extern "C" void FTN(c_esmc_meshserialize)(Mesh **meshpp,
+	        void *buffer, int *length, int *offset,
+                ESMC_InquireFlag *inquireflag, int *rc){
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshserialize()"
+
+   try {
+    Mesh *meshp = *meshpp;
+    ThrowRequire(meshp);
+    Mesh &mesh = *meshp;
+    int *ip;
+    UInt *uip;
+
+    // Initialize return code; assume routine not implemented
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+    // Get Some Mesh info
+    int numSets;
+    UInt *nvalSetSizes;
+    UInt *nvalSetVals;
+    UInt *nvalSetObjSizes; 
+    UInt *nvalSetObjVals;
+
+    mesh.GetImprints(&numSets, &nvalSetSizes, &nvalSetVals, &nvalSetObjSizes, &nvalSetObjVals);
+
+    // Calc Size
+    int size = 3*sizeof(int)+2*numSets*sizeof(UInt);
+
+      for (int i=0; i<numSets; i++) {
+	size +=nvalSetSizes[i]*sizeof(UInt);
+      }
+
+      for (int i=0; i<numSets; i++) {
+	size +=nvalSetObjSizes[i]*sizeof(UInt);
+      }
+
+    // TODO: verify length > vars.
+    if (*inquireflag != ESMF_INQUIREONLY) {
+      if ((*length - *offset) < size) {         
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "Buffer too short to add Mesh object", rc);
+         return;
+      }
+    }
+
+    // Save integers
+    ip= (int *)((char *)(buffer) + *offset);
+    if (*inquireflag != ESMF_INQUIREONLY) {
+      *ip++ = mesh.spatial_dim();
+      *ip++ = mesh.parametric_dim();
+      *ip++ = numSets;
+    }
+
+    // Save UInt data
+    uip=(UInt *)ip;
+    if (*inquireflag != ESMF_INQUIREONLY) {
+
+      // Save set sizes and values
+      for (int i=0; i<numSets; i++) {
+	*uip++=nvalSetSizes[i];
+      }
+
+      int k=0;
+      for (int i=0; i<numSets; i++) {
+	for (int j=0; j<nvalSetSizes[i]; j++) {
+	  *uip++=nvalSetVals[k];
+	  k++;
+	}
+      }
+
+      // Save set obj sizes and values
+      for (int i=0; i<numSets; i++) {
+	*uip++=nvalSetObjSizes[i];
+      }
+
+      k=0;
+      for (int i=0; i<numSets; i++) {
+	for (int j=0; j<nvalSetObjSizes[i]; j++) {
+	  *uip++=nvalSetObjVals[k];
+	  k++;
+
+	}
+      }
+
+    }
+
+    // Adjust offset
+    *offset += size;
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", rc);
+    return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+    return;
+} 
+
+
+extern "C" void FTN(c_esmc_meshdeserialize)(Mesh **meshpp, 
+                                 void *buffer, int *offset, int *rc){
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshdeserialize()"
+
+   try {
+
+  // Initialize the parallel environment for mesh (if not already done)
+     {
+ int localrc;
+ int rc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+   throw localrc;  // bail out with exception
+     }
+
+    int *ip;
+    UInt *uip;
+
+    // Initialize return code; assume routine not implemented
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+    // Get pointer
+    ip= (int *)((char *)(buffer) + *offset);
+
+    // Get values
+    int spatial_dim=*ip++;
+    int parametric_dim=*ip++;
+
+    // Get Some Mesh info
+    int numSets;
+    std::vector<UInt> nvalSetSizes;
+    std::vector<UInt> nvalSetVals;
+    std::vector<UInt> nvalSetObjSizes; 
+    std::vector<UInt> nvalSetObjVals;
+
+    numSets=*ip++;
+
+    // convert pointer
+    uip=(UInt *)ip;
+
+      // Retrieve sizes and values
+      nvalSetSizes.resize(numSets,0);
+      for (int i=0; i<numSets; i++) {
+	nvalSetSizes[i]=*uip++;
+      }
+
+      int k=0;
+      for (int i=0; i<numSets; i++) {
+	nvalSetVals.resize(k+nvalSetSizes[i],0);
+	for (int j=0; j<nvalSetSizes[i]; j++) {
+	  nvalSetVals[k]=*uip++;
+	  k++;
+	}
+      }
+
+      // Save set obj sizes and value
+      nvalSetObjSizes.resize(numSets,0);
+      for (int i=0; i<numSets; i++) {
+	nvalSetObjSizes[i]=*uip++;
+      }
+
+      k=0;
+      for (int i=0; i<numSets; i++) {
+	nvalSetObjVals.resize(k+nvalSetObjSizes[i],0);
+	for (int j=0; j<nvalSetObjSizes[i]; j++) {
+	  nvalSetObjVals[k]=*uip++;
+	  k++;
+	}
+      }
+
+    // Adjust offset
+    *offset += 3*sizeof(int)+
+      nvalSetSizes.size()*sizeof(UInt)+nvalSetVals.size()*sizeof(UInt)+
+      nvalSetObjSizes.size()*sizeof(UInt)+nvalSetObjVals.size()*sizeof(UInt);
+
+
+    // Create Mesh
+    Mesh *meshp = new Mesh();
+
+    // Set dimensions
+    meshp->set_spatial_dimension(spatial_dim);
+    meshp->set_parametric_dimension(parametric_dim);
+    
+    
+    // Register the nodal coordinate field.
+    meshp->RegisterNodalField(*meshp, "coordinates", spatial_dim);
+    
+    // Setup the Mesh
+    //    meshp->build_sym_comm_rel(MeshObj::NODE);
+    meshp->ProxyCommit(numSets,
+		       nvalSetSizes, nvalSetVals,
+		       nvalSetObjSizes, nvalSetObjVals);
+    // Output mesh
+    *meshpp=meshp;
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", rc);
+    return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+    return;
+} 

@@ -308,6 +308,15 @@ static void parallel_union_field_info(std::vector<UInt> &nvalSet, std::vector<UI
 void FieldReg::Commit(MeshDB &mesh) {
   Trace __trace("FieldReg::Commit(MeshDB &mesh)");
 
+  numSets=0;
+  int nvalSetPos=0;
+  nvalSetSizes.clear();
+  nvalSetVals.clear();
+  int nvalSetObjPos=0;
+  nvalSetObjSizes.clear();
+  nvalSetObjVals.clear();
+
+
   // Step 0: Get the imprint contexts that will be used; share in parallel
   // and define these contexts.
   {
@@ -347,6 +356,39 @@ void FieldReg::Commit(MeshDB &mesh) {
 
       // Must parallel union nvalSet and nvalSetObj
       parallel_union_field_info(nvalSet, nvalSetObj);
+
+
+#if 0
+      if (Par::Rank() == 0) {
+	printf("C nvalset.size()=%d \n",nvalSet.size());
+        for (int i=0; i<nvalSet.size(); i++) {
+	  printf("C [%d]= %d \n",i,nvalSet[i]);
+	}
+
+	printf("C nvalsetobj.size()=%d \n",nvalSetObj.size());
+        for (int i=0; i<nvalSetObj.size(); i++) {
+	  printf("C [%d]= %d \n",i,nvalSetObj[i]);
+	}
+      }
+#endif
+
+      // Save values for creation of proxy Meshes
+      nvalSetSizes.push_back(nvalSet.size());
+      nvalSetVals.resize(nvalSetPos+nvalSet.size(),0);
+      for (int i=0; i<nvalSet.size(); i++) {
+	nvalSetVals[nvalSetPos]=nvalSet[i];
+        nvalSetPos++;
+      }
+
+      nvalSetObjSizes.push_back(nvalSetObj.size());
+      nvalSetObjVals.resize(nvalSetObjPos+nvalSetObj.size(),0);
+      for (int i=0; i<nvalSetObj.size(); i++) {
+	nvalSetObjVals[nvalSetObjPos]=nvalSetObj[i];
+        nvalSetObjPos++;
+      }
+
+      numSets++;
+
 
       // Register low level fields and define the contexts
       for (UInt i = 0; i < nvalSet.size(); i++) {
@@ -452,6 +494,194 @@ void FieldReg::Commit(MeshDB &mesh) {
 
   is_committed = true;
 }
+
+
+void FieldReg::ProxyCommit(MeshDB &mesh,
+			   int numSetsArg,
+			   std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
+			   std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg) {
+  Trace __trace("FieldReg::ProxyCommit(MeshDB &mesh)");
+
+  int setPos=0;
+  int nvalSetPos=0;
+  int nvalSetObjPos=0;
+
+
+  // Step 0: Get the imprint contexts that will be used; share in parallel
+  // and define these contexts.
+  {
+    FMapType::iterator fi = fmap.begin(), fe = fmap.end();
+    UInt ord = 0; // number MEFields
+    for ( ;fi !=fe; ++fi) {
+      MEField<> &f = *fi->second;
+
+//std::cout << "Imprinting MEField:" << f.name() << std::endl;
+      f.ordinal = ord++;
+
+      // Fill values into Sets
+      std::vector<UInt> nvalSet; // keep track of sizes of _fields
+      std::vector<UInt> nvalSetObj; // keep track of sizes of _fields
+
+
+      // Load values from deserialize
+      nvalSet.resize(nvalSetSizesArg[setPos],0);
+      for (int i=0; i<nvalSetSizesArg[setPos]; i++) {
+	nvalSet[i]=nvalSetValsArg[nvalSetPos];
+        nvalSetPos++;
+      }
+
+      nvalSetObj.resize(nvalSetObjSizesArg[setPos],0);
+      for (int i=0; i<nvalSetObjSizesArg[setPos]; i++) {
+	nvalSetObj[i]=nvalSetObjValsArg[nvalSetObjPos];
+        nvalSetObjPos++;
+      }
+
+      setPos++;
+
+#if 0
+      //      if (Par::Rank() == 0) {
+	printf("P nvalset.size()=%d \n",nvalSet.size());
+        for (int i=0; i<nvalSet.size(); i++) {
+	  printf("P [%d]= %d \n",i,nvalSet[i]);
+	}
+
+	printf("P nvalsetobj.size()=%d \n",nvalSetObj.size());
+        for (int i=0; i<nvalSetObj.size(); i++) {
+	  printf("P [%d]= %d \n",i,nvalSetObj[i]);
+	}
+	//      }
+#endif
+
+
+      // Register low level fields and define the contexts
+      for (UInt i = 0; i < nvalSet.size(); i++) {
+        UInt nval = nvalSet[i];
+        Context ctxt;
+        char buf[1024];
+        std::sprintf(buf, "%s_%d", f.name().c_str(), nval);
+        UInt c_id = mesh.DefineContext(buf);
+        ctxt.set(c_id);
+        Attr fatt(nvalSetObj[nval], ctxt);
+        f.Addfield(Registerfield(buf, fatt, f.FType(), nval*f.dim()), nval);
+//std::cout << "Creating subfield:" << buf << std::endl;
+      }
+      
+      // If field is to be interpolated, register an interpolant field.  This should be parallel
+      // safe.
+      if (f.has_interp()) {
+        
+        // IF the field is nodal, we will simply use the nodal field for interpolations,
+        // otherwise we must create a special field for interpolation.
+        if (!f.is_nodal()) {
+          char buf[1024];
+          std::sprintf(buf, "_interp_%s", f.name().c_str());
+          UInt c_id = mesh.DefineContext(buf);
+          Context ctxt;
+          ctxt.set(c_id);
+          Attr fatt(MeshObj::NODE | MeshObj::INTERP, ctxt);
+          f.SetInterp(Registerfield(buf, fatt, f.FType(), f.dim()));
+        } else {
+          f.SetInterp(f.GetNodalfield());
+        }
+      }
+      
+    } // for fi
+   }
+
+
+
+
+  // Step 1: Imprint the objects for low level fields
+  {
+    FMapType::iterator fi = fmap.begin(), fe = fmap.end();
+    for ( ;fi !=fe; ++fi) {
+      MEField<> &f = *fi->second;
+//std::cout << "Imprinting MEField:" << f.name() << std::endl;
+      // Loop obj type
+      KernelList::iterator ki = mesh.set_begin(), ke = mesh.set_end(), kn;
+      for (; ki != ke; ) {
+        kn = ki; ++kn; // manage iterators in case imprint changes kernel list
+        Kernel &ker = *ki;
+        // if kernel wrong type or context doesnt match, move on
+        if (ker.type() == f.GetType() && ker.GetContext().any(f.GetContext())) {
+  
+          const MeshObjTopo *otopo = ker.GetTopo();
+          if (!otopo)
+            Throw() << "Field " << f.name() << " has no topo on matching kernel";
+          const MEFamily &mef = f.GetMEFamily();
+          MasterElement<> &me = *mef.getME(otopo->name, METraits<>());
+  //std::cout << "topo:" << otopo->name << " yields me:" << me.name << std::endl;
+          // loop objects, imprint
+          Kernel::obj_iterator oi = ker.obj_begin(), oe = ker.obj_end(), on;
+          for (; oi != oe; ) {
+            on = oi; ++on;
+            MEImprint(f.name(), *oi, me);
+            oi = on;
+          } // oi
+        }
+  
+        ki = kn;
+      } // for k
+
+    } // for f
+   }
+
+  // Linearize fields.  Use the ordering implied by MEField, since this is the order
+  // kernel commit uses later.
+ for (UInt i = 0; i < Fields.size(); i++) {
+    MEField<> *meF = static_cast<MEField<>*>(Fields[i]);
+    meF->Getfields(fields); // will be unique fields
+ }
+
+ nfields = fields.size();
+ {
+   for (UInt i = 0; i < nfields; i++) 
+     fields[i]->set_ordinal(i);
+ }
+ 
+ // Loop through _fields; there may be some that are not associated with MEFields,
+ // so we need to count and number these.
+ {
+  fMapType::iterator fi = _fmap.begin(), fe = _fmap.end();
+  
+  for (; fi != fe; ++fi) {
+    _field *_f = fi->second;
+    
+    if (_f->GetOrdinal() < 0) {
+      _f->set_ordinal(nfields++);
+      fields.push_back(_f);
+    }
+  }
+  
+ }
+
+  is_committed = true;
+}
+
+
+void FieldReg::GetImprints(
+			   int *numSetsArg,
+			   UInt **nvalSetSizesArg, UInt **nvalSetValsArg,
+			   UInt **nvalSetObjSizesArg, UInt **nvalSetObjValsArg) {
+  Trace __trace("FieldReg::getImprints()");
+
+  // Copy Info
+  *numSetsArg=numSets;
+
+  if (nvalSetSizes.size()) *nvalSetSizesArg=&nvalSetSizes[0];
+  else *nvalSetSizesArg=NULL;
+
+  if (nvalSetVals.size()) *nvalSetValsArg=&nvalSetVals[0];
+  else *nvalSetValsArg=NULL;
+
+  if (nvalSetObjSizes.size()) *nvalSetObjSizesArg=&nvalSetObjSizes[0];
+  else *nvalSetObjSizesArg=NULL;
+
+  if (nvalSetObjVals.size()) *nvalSetObjValsArg=&nvalSetObjVals[0];
+  else *nvalSetObjValsArg=NULL;
+  
+}
+
 
 
 IOField<NodalField> *FieldReg::RegisterNodalField(const MeshDB &mesh, const std::string &name, UInt dim) {

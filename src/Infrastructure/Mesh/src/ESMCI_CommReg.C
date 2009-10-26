@@ -84,7 +84,6 @@ void CommReg::SendFields(UInt nfields, MEField<> *const *sfields, MEField<> *con
   for (UInt j = 0; j < sf.size(); j++)
     obj_type |= sf[j]->GetAttr().GetType();
 
-
 /*
 std::cout << "sf size=" << sf.size() << ". _fields are:";
 for (UInt i = 0; i < sf.size(); i++) {

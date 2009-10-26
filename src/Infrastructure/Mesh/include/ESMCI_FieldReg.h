@@ -77,6 +77,24 @@ void ReleaseDBFields();
 // Commit the registry
 void Commit(MeshDB &);
 
+
+ void ProxyCommit(MeshDB &mesh,
+		  int numSetsArg,
+		  std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
+		  std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg);
+ 
+#if 0
+ void GetImprints(
+		  int *numSetsArg,
+		  std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
+		  std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg);
+#endif
+ 
+void GetImprints(
+		 int *numSetsArg,
+		 UInt **nvalSetSizesArg, UInt **nvalSetValsArg,
+		 UInt **nvalSetObjSizesArg, UInt **nvalSetObjValsArg);
+ 
 UInt NumFields() const { return Fields.size();}
 MEFieldBase **ListOfFields() { 
 // Note that if Fields is empty, most STLs seem to return a NULL pointer
@@ -115,6 +133,15 @@ protected:
 friend void LoadExMesh(Mesh &mesh, const std::string &filename, int nstep);
 
 private:
+
+
+
+ int numSets;
+ std::vector<UInt> nvalSetSizes;
+ std::vector<UInt> nvalSetVals;
+ std::vector<UInt> nvalSetObjSizes;
+ std::vector<UInt> nvalSetObjVals;
+
 
 bool is_committed;
 FMapType fmap;
