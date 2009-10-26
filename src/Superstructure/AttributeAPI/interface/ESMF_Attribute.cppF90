@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.55 2009/09/08 18:49:22 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.56 2009/10/26 05:55:38 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.55 2009/09/08 18:49:22 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.56 2009/10/26 05:55:38 eschwab Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -550,7 +550,10 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Add an ESMF standard Attribute package.  
+!     Add an ESMF standard Attribute package.  See Section~\ref{desc:AttPacks}
+!     for a description of Attribute packages and their conventions, purposes,
+!     and object types.
+!
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -602,6 +605,9 @@ contains
 !
 ! !DESCRIPTION:
 !     Add a custom Attribute package to <object>.  
+!     See Section~\ref{desc:AttPacks} for a description of Attribute packages
+!     and their conventions, purposes, and object types.
+!
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -726,7 +732,10 @@ contains
 !     Return an Attribute value from the <object>, or from the Attribute package
 !     specified by {\tt convention} and {\tt purpose}.  A default value 
 !     argument may be given if a return code is not desired when the 
-!     Attribute is not found.  
+!     Attribute is not found.  See Section~\ref{desc:AttPacks} for a
+!     description of Attribute packages and their conventions, purposes,
+!     and object types.
+!
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -801,7 +810,10 @@ contains
 !     Return an Attribute value from the <object>, or from the Attribute package
 !     specified by {\tt convention} and {\tt purpose}.  A default value 
 !     argument may be given if a return code is not desired when the 
-!     Attribute is not found.  
+!     Attribute is not found.  See Section~\ref{desc:AttPacks} for a
+!     description of Attribute packages and their conventions, purposes,
+!     and object types.
+!
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -1367,7 +1379,14 @@ contains
 !     Read Attributes for <object>.  If present, the convention and purpose
 !     specify an Attribute package which is used to filter the reading to just
 !     those attributes belonging to the Attribute package.  The file format
-!     is XML.
+!     is XML.  See Section~\ref{desc:AttPacks} for a description of Attribute
+!     packages and their conventions, purposes, and object types.
+!
+!     Requires the third party Xerces C++ XML Parser library to be installed.
+!     For more details, see the "ESMF Users Guide",
+!     "Building and Installing the ESMF, Third Party Libraries, Xerces" and
+!     the website "http://xerces.apache.org/xerces-c".
+!
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array             ! not yet implemented
@@ -1410,7 +1429,10 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Remove an Attribute, or Attribute package on <object>.  
+!     Remove an Attribute, or Attribute package on <object>.
+!     See Section~\ref{desc:AttPacks} for a description of Attribute packages
+!     and their conventions, purposes, and object types.
+!
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -1467,6 +1489,9 @@ contains
 !     Attach an Attribute to <object>, or set an Attribute in an 
 !     Attribute package.  The Attribute has a {\tt name} and either 
 !     a {\tt value}, and a {\tt convention} and {\tt purpose}.  
+!     See Section~\ref{desc:AttPacks} for a description of Attribute packages
+!     and their conventions, purposes, and object types.
+!
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -1528,7 +1553,9 @@ contains
 !     Attach an Attribute to <object>, or set an Attribute in an 
 !     Attribute package.  The Attribute has a {\tt name} and a 
 !     {\tt valueList}, with an {\tt itemCount}, and a {\tt convention}
-!     and {\tt purpose}.  
+!     and {\tt purpose}.  See Section~\ref{desc:AttPacks} for a description
+!     of Attribute packages and their conventions, purposes, and object types.
+!
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -1630,6 +1657,27 @@ contains
 !     Write the Attribute package for <object>.  The Attribute package defines 
 !     the convention, purpose, and object type of the associated Attributes.  Either
 !     tab-delimited or xml format is acheived by using {\tt attwriteflag}.  
+!     See Section~\ref{desc:AttPacks} for a description of Attribute packages
+!     and their conventions, purposes, and object types.
+!
+!     Note:  For an object type of {\tt ESMF\_GridComp}, convention='WaterML',
+!     purpose='TimeSeries', and attwriteflag=ESMF\_ATTWRITE\_XML, an XML file
+!     conforming to a hydrologic standard called WaterML will be written.  See
+!     the following for more information:
+!    
+!     \begin{description}
+!     \item{"http://his.cuahsi.org/wofws.html"}
+!     \item{"http://www.earthsystemcurator.org/projects/waterml.shtml"}
+!     \end{description}
+!
+!     An ESMF Use Test Case is available which showcases an example of how
+!     to write a WaterML file; please see
+!
+!     \begin{description}
+!     \item{"http://esmf.cvs.sourceforge.net/viewvc/esmf/use\_test\_cases/ESMF\_WaterML"}
+!     \item{"http://esmf.cvs.sourceforge.net/viewvc/esmf/use\_test\_cases/README"}
+!     \end{description}
+!
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array

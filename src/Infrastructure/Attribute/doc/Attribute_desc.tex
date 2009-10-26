@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.28 2009/08/11 05:24:17 eschwab Exp $
+% $Id: Attribute_desc.tex,v 1.29 2009/10/26 05:55:39 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -49,6 +49,7 @@ The most common use for this capability is for linking the Attributes of a Field
 Attribute hierarchies are linked in a ``shallow" manner, meaning that the Attributes belonging to an external object are not copied, they are merely referenced by a pointer.  This is important to ensure that the Attribute hierarchy has a one-to-one correspondence with the object hierarchy.  
 
 \subsubsection{Attribute Packages}
+ \label{desc:AttPacks}
 
 At this time, all ESMF objects which are enabled to contain Attributes can also contain Attribute packages.  Every Attribute package is specified by a {\bf convention} and a {\bf purpose}, hereafter called {\bf specifiers}, such as ``CF" (see below) and ``general".  These specifiers are used to validate ESMF Attribute packages against existing metadata conventions.  One can use an ESMF supplied standard Attribute package, specify their own Attribute packages, or add customized Attributes to the ESMF supplied Attribute packages.  Currently, working with Attribute packages is quite involved, but future development with IO will allow for a more automated approach to populating Attribute packages from a file.
 
