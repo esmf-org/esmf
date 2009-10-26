@@ -1,4 +1,4 @@
-// $Id: user_CComponent.C,v 1.11 2009/10/24 05:35:18 theurich Exp $
+// $Id: user_CComponent.C,v 1.12 2009/10/26 23:15:26 theurich Exp $
 //
 // Example/test code which shows User Component calls.
 
@@ -104,7 +104,16 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   *rc = ESMC_MeshAddElements(mesh, &num_elem, elemId, elemType, elemConn);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
   
+  // garbage collection of temporary variables used to create Mesh object
+  free(nodeId);
+  free(nodeCoord);
+  free(nodeOwner);
+  free(elemId);
+  free(elemType);
+  free(elemConn);
+  
   // Create a Field from Mesh
+  
   // Setup arrayspec
   *rc = ESMC_ArraySpecSet(&arrayspec, 3, ESMC_TYPEKIND_I4);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
@@ -138,8 +147,16 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   *rc = ESMC_StateAddField(exportState, field);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
 
-  // TODO: make sure all of the malloc() calls have matching free() call
-  // TODO: not sure this can be done here, while the Mesh/Field persists
+  // garbage collection of temporary variables used to create Field object
+  *rc = ESMC_InterfaceIntDestroy(&i_gridToFieldMap);
+  if (*rc!=ESMF_SUCCESS) return;  // bail out
+  free(gridToFieldMap);
+  *rc = ESMC_InterfaceIntDestroy(&i_ungriddedLBound);
+  if (*rc!=ESMF_SUCCESS) return;  // bail out
+  free(ungriddedLBound);
+  *rc = ESMC_InterfaceIntDestroy(&i_ungriddedUBound);
+  if (*rc!=ESMF_SUCCESS) return;  // bail out
+  free(ungriddedUBound);
 }
 
 
