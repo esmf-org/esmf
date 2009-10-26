@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.66 2009/10/26 05:58:48 theurich Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.67 2009/10/26 11:42:36 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -52,7 +52,9 @@
       use ESMF_InitMacrosMod
       implicit none
 
-      integer :: bufsize = 102400   ! 100 kB buffer
+#if defined FIXED_BUFFER
+      integer,parameter :: BUFSIZE = 102400   ! 100 kB buffer
+#endif
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
@@ -113,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.66 2009/10/26 05:58:48 theurich Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.67 2009/10/26 11:42:36 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -354,10 +356,6 @@
         if (ESMF_LogMsgFoundAllocError(localrc, &
                                    "Allocating buffer for local obj list", &
                                        ESMF_CONTEXT, rc)) return
-        ! allocate(si%blindsend(bufsize, si%mycount), stat=localrc)
-        ! if (ESMF_LogMsgFoundAllocError(localrc, &
-        !                            "Allocating buffer for local buf list", &
-        !                                ESMF_CONTEXT, rc)) return
     endif
 
     do, pass=1,2
@@ -367,21 +365,23 @@
         ! needed.
         inqflag = ESMF_INQUIREONLY
         maxbufsize = 0
-        allocate (si%blindsend(1,si%mycount))
         lbufsize = 1
       else
         ! Allocate the buffer, and do the serialization for real
         deallocate (si%blindsend)
-!DEBUG        print *, 'ESMF_StateInfoBuild: leading buffer dimension =', maxbufsize
-        ! allocate(si%blindsend(maxbufsize, si%mycount), stat=localrc)
-        allocate(si%blindsend(bufsize, si%mycount), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
-                                 "Allocating buffer for local buf list", &
-                                     ESMF_CONTEXT, rc)) return
         inqflag = ESMF_NOINQUIRE
-!gjt        lbufsize = maxbufsize
-        lbufsize = bufsize  !gjt workaround for maxbufsize==0 issue
+!DEBUG        print *, 'ESMF_StateInfoBuild: leading buffer dimension =', maxbufsize
+#if defined (FIXED_BUFFER)
+        lbufsize = BUFSIZE
+#else
+        lbufsize = maxbufsize
+#endif
       end if
+
+      allocate(si%blindsend(lbufsize, si%mycount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, &
+                               "Allocating buffer for local buf list", &
+                                   ESMF_CONTEXT, rc)) return
 
     ! (+1) to allow top level State space to reconcile Attributes
     if (attreconflag%value == ESMF_ATTRECONCILE_ON%value) then
@@ -405,6 +405,7 @@
                              "Top level Base serialize", &
                              ESMF_CONTEXT, rc)) return
 
+      maxbufsize = offset
       attreconstart = 2
     else
       si%mycount = state%statep%datacount
@@ -730,6 +731,7 @@
 !EOPI
     integer :: pets, mypet, i, j, k, l, m, localrc, attreconstart
     integer(ESMF_KIND_I4) :: count(1)
+    integer(ESMF_KIND_I4) :: lrbufsize(1), lsbufsize(1)
     type(ESMF_State) :: substate
     type(ESMF_Base) :: base
     type(ESMF_FieldBundle) :: bundle
@@ -760,6 +762,14 @@
            "VMGet call", &
            ESMF_CONTEXT, rc)) return
 
+#if defined (FIXED_BUFFER)
+    lsbufsize = BUFSIZE
+    lrbufsize = 0
+#else
+    lsbufsize = size (si%blindsend, 1)
+    lrbufsize = -1
+#endif
+
     ! for i=0, npets-1, except us, send object count to each
     do j = 0, pets-1
 !!DEBUG "Outer loop, j = ", j
@@ -789,7 +799,6 @@
                !           si%mycount, " .ne. ", si%theircount
                !endif
                ! at this point i know how many objects they have
-
         
                ! TODO:
                ! this code goes ahead and sends everything preemptively.
@@ -797,6 +806,16 @@
                ! object numbers which appear in my list and not in theirs.
 
                if (si%mycount .gt. 0) then
+
+#if !defined (FIXED_BUFFER)
+               ! Send size of blindsend array, so a blindrecv can be
+               ! allocated on the other side.
+                   call ESMF_VMSend (vm, lsbufsize, 1, i, rc=localrc)
+                   if (ESMF_LogMsgFoundError(localrc, &
+                                             ESMF_ERR_PASSTHRU, &
+                                             ESMF_CONTEXT, rc)) return
+#endif
+
 !!DEBUG "i have ", si%mycount, "objects to send now"
                    call ESMF_VMSend(vm, si%idsend, si%mycount, i, rc=localrc)
                    if (ESMF_LogMsgFoundError(localrc, &
@@ -820,7 +839,7 @@
 
                    do m = 1, si%mycount
                      bptr => si%blindsend(:,m)
-                     call ESMF_VMSend(vm, bptr, bufsize, i, rc=localrc)
+                     call ESMF_VMSend(vm, bptr, lsbufsize(1), i, rc=localrc)
                      if (ESMF_LogMsgFoundError(localrc, &
                                                ESMF_ERR_PASSTHRU, &
                                                ESMF_CONTEXT, rc)) return
@@ -858,6 +877,15 @@
            ! missing objects.
 
            if (si%theircount .gt. 0) then
+
+#if !defined (FIXED_BUFFER)
+               ! Receive size of blindsend array,
+               call ESMF_VMRecv (vm, lrbufsize, 1, j, rc=localrc)
+               if (ESMF_LogMsgFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rc)) return
+#endif
+
 !!DEBUG "pet ", j, " has ", si%theircount, " objs to send me"
                allocate(si%idrecv(si%theircount), stat=localrc)
                if (ESMF_LogMsgFoundAllocError(localrc, &
@@ -872,7 +900,7 @@
                                    "Allocating buffer for local obj list", &
                                    ESMF_CONTEXT, rc)) return
     
-               allocate(si%blindrecv(bufsize, si%theircount), stat=localrc)
+               allocate(si%blindrecv(lrbufsize(1), si%theircount), stat=localrc)
                if (ESMF_LogMsgFoundAllocError(localrc, &
                                    "Allocating buffer for local buf list", &
                                    ESMF_CONTEXT, rc)) return
@@ -903,7 +931,7 @@
 !!DEBUG "ready to start receive loop for serialized object buffers from ", j
                do m = 1, si%theircount
                    bptr => si%blindrecv(:,m)
-                   call ESMF_VMRecv(vm, bptr, bufsize, j, rc=localrc)
+                   call ESMF_VMRecv(vm, bptr, lrbufsize(1), j, rc=localrc)
                    if (ESMF_LogMsgFoundError(localrc, &
                                              ESMF_ERR_PASSTHRU, &
                                              ESMF_CONTEXT, rc)) return
