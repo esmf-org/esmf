@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.111 2009/10/02 23:34:08 w6ws Exp $
+! $Id: ESMF_VM.F90,v 1.112 2009/10/26 20:01:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.111 2009/10/02 23:34:08 w6ws Exp $"
+      "$Id: ESMF_VM.F90,v 1.112 2009/10/26 20:01:23 theurich Exp $"
 
 !==============================================================================
 
@@ -3306,21 +3306,24 @@ module ESMF_VMMod
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
-    size = count * 4 ! 4 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
-    if (blocking) then
-      call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Check if we need to pass back the commhandle
-      if (present(commhandle)) then
-        commhandle = localcommhandle  ! copy the commhandle pointer back
-        ! Set init code
-        ESMF_INIT_SET_CREATED(commhandle)
+    if (count > 0) then
+      ! There is data to be received
+      size = count * 4 ! 4 bytes
+      ! Call into the C++ interface, which will sort out optional arguments.
+      if (blocking) then
+        call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Check if we need to pass back the commhandle
+        if (present(commhandle)) then
+          commhandle = localcommhandle  ! copy the commhandle pointer back
+          ! Set init code
+          ESMF_INIT_SET_CREATED(commhandle)
+        endif
       endif
     endif
 
@@ -3374,21 +3377,24 @@ module ESMF_VMMod
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
-    size = count * 4 ! 4 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
-    if (blocking) then
-      call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
+    if (count > 0) then
+      ! There is data to be received
+      size = count * 4 ! 4 bytes
+      ! Call into the C++ interface, which will sort out optional arguments.
+      if (blocking) then
+        call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Check if we need to pass back the commhandle
-      if (present(commhandle)) then
-        commhandle = localcommhandle  ! copy the commhandle pointer back
-        ! Set init code
-        ESMF_INIT_SET_CREATED(commhandle)
+      else
+        call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Check if we need to pass back the commhandle
+        if (present(commhandle)) then
+          commhandle = localcommhandle  ! copy the commhandle pointer back
+          ! Set init code
+          ESMF_INIT_SET_CREATED(commhandle)
+        endif
       endif
     endif
 
@@ -3442,21 +3448,24 @@ module ESMF_VMMod
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
-    size = count * 8 ! 8 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
-    if (blocking) then
-      call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Check if we need to pass back the commhandle
-      if (present(commhandle)) then
-        commhandle = localcommhandle  ! copy the commhandle pointer back
-        ! Set init code
-        ESMF_INIT_SET_CREATED(commhandle)
+    if (count > 0) then
+      ! There is data to be received
+      size = count * 8 ! 8 bytes
+      ! Call into the C++ interface, which will sort out optional arguments.
+      if (blocking) then
+        call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Check if we need to pass back the commhandle
+        if (present(commhandle)) then
+          commhandle = localcommhandle  ! copy the commhandle pointer back
+          ! Set init code
+          ESMF_INIT_SET_CREATED(commhandle)
+        endif
       endif
     endif
 
@@ -3510,21 +3519,24 @@ module ESMF_VMMod
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
-    size = count * 4 ! 4 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
-    if (blocking) then
-      call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Check if we need to pass back the commhandle
-      if (present(commhandle)) then
-        commhandle = localcommhandle  ! copy the commhandle pointer back
-        ! Set init code
-        ESMF_INIT_SET_CREATED(commhandle)
+    if (count > 0) then
+      ! There is data to be received
+      size = count * 4 ! 4 bytes
+      ! Call into the C++ interface, which will sort out optional arguments.
+      if (blocking) then
+        call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Check if we need to pass back the commhandle
+        if (present(commhandle)) then
+          commhandle = localcommhandle  ! copy the commhandle pointer back
+          ! Set init code
+          ESMF_INIT_SET_CREATED(commhandle)
+        endif
       endif
     endif
 
@@ -3578,21 +3590,24 @@ module ESMF_VMMod
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
-    size = count * 1 ! 1 byte
-    ! Call into the C++ interface, which will sort out optional arguments.
-    if (blocking) then
-      call c_ESMC_VMRecv(vm, recvData, size, src, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      call c_ESMC_VMRecvNB(vm, recvData, size, src, localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Check if we need to pass back the commhandle
-      if (present(commhandle)) then
-        commhandle = localcommhandle  ! copy the commhandle pointer back
-        ! Set init code
-        ESMF_INIT_SET_CREATED(commhandle)
+    if (count > 0) then
+      ! There is data to be received
+      size = count * 1 ! 1 byte
+      ! Call into the C++ interface, which will sort out optional arguments.
+      if (blocking) then
+        call c_ESMC_VMRecv(vm, recvData, size, src, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call c_ESMC_VMRecvNB(vm, recvData, size, src, localcommhandle, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Check if we need to pass back the commhandle
+        if (present(commhandle)) then
+          commhandle = localcommhandle  ! copy the commhandle pointer back
+          ! Set init code
+          ESMF_INIT_SET_CREATED(commhandle)
+        endif
       endif
     endif
 
@@ -3646,21 +3661,24 @@ module ESMF_VMMod
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
 
-    size = count * 1 ! 1 byte
-    ! Call into the C++ interface, which will sort out optional arguments.
-    if (blocking) then
-      call c_ESMC_VMRecv(vm, recvData, size, src, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      call c_ESMC_VMRecvNB(vm, recvData, size, src, localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Check if we need to pass back the commhandle
-      if (present(commhandle)) then
-        commhandle = localcommhandle  ! copy the commhandle pointer back
-        ! Set init code
-        ESMF_INIT_SET_CREATED(commhandle)
+    if (count > 0) then
+      ! There is data to be received
+      size = count * 1 ! 1 byte
+      ! Call into the C++ interface, which will sort out optional arguments.
+      if (blocking) then
+        call c_ESMC_VMRecv(vm, recvData, size, src, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call c_ESMC_VMRecvNB(vm, recvData, size, src, localcommhandle, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Check if we need to pass back the commhandle
+        if (present(commhandle)) then
+          commhandle = localcommhandle  ! copy the commhandle pointer back
+          ! Set init code
+          ESMF_INIT_SET_CREATED(commhandle)
+        endif
       endif
     endif
 
@@ -4567,21 +4585,24 @@ module ESMF_VMMod
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
-    size = count * 4 ! 4 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
-    if (blocking) then
-      call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Check if we need to pass back the commhandle
-      if (present(commhandle)) then
-        commhandle = localcommhandle  ! copy the commhandle pointer back
-        ! Set init code
-        ESMF_INIT_SET_CREATED(commhandle)
+    if (count > 0) then
+      ! There is data to be received
+      size = count * 4 ! 4 bytes
+      ! Call into the C++ interface, which will sort out optional arguments.
+      if (blocking) then
+        call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Check if we need to pass back the commhandle
+        if (present(commhandle)) then
+          commhandle = localcommhandle  ! copy the commhandle pointer back
+          ! Set init code
+          ESMF_INIT_SET_CREATED(commhandle)
+        endif
       endif
     endif
 
@@ -4635,21 +4656,24 @@ module ESMF_VMMod
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
-    size = count * 4 ! 4 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
-    if (blocking) then
-      call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Check if we need to pass back the commhandle
-      if (present(commhandle)) then
-        commhandle = localcommhandle  ! copy the commhandle pointer back
-        ! Set init code
-        ESMF_INIT_SET_CREATED(commhandle)
+    if (count > 0) then
+      ! There is data to be received
+      size = count * 4 ! 4 bytes
+      ! Call into the C++ interface, which will sort out optional arguments.
+      if (blocking) then
+        call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Check if we need to pass back the commhandle
+        if (present(commhandle)) then
+          commhandle = localcommhandle  ! copy the commhandle pointer back
+          ! Set init code
+          ESMF_INIT_SET_CREATED(commhandle)
+        endif
       endif
     endif
 
@@ -4703,21 +4727,24 @@ module ESMF_VMMod
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
-    size = count * 8 ! 8 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
-    if (blocking) then
-      call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Check if we need to pass back the commhandle
-      if (present(commhandle)) then
-        commhandle = localcommhandle  ! copy the commhandle pointer back
-        ! Set init code
-        ESMF_INIT_SET_CREATED(commhandle)
+    if (count > 0) then
+      ! There is data to be received
+      size = count * 8 ! 8 bytes
+      ! Call into the C++ interface, which will sort out optional arguments.
+      if (blocking) then
+        call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Check if we need to pass back the commhandle
+        if (present(commhandle)) then
+          commhandle = localcommhandle  ! copy the commhandle pointer back
+          ! Set init code
+          ESMF_INIT_SET_CREATED(commhandle)
+        endif
       endif
     endif
 
@@ -4771,21 +4798,24 @@ module ESMF_VMMod
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
-    size = count * 4 ! 4 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
-    if (blocking) then
-      call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Check if we need to pass back the commhandle
-      if (present(commhandle)) then
-        commhandle = localcommhandle  ! copy the commhandle pointer back
-        ! Set init code
-        ESMF_INIT_SET_CREATED(commhandle)
+    if (count > 0) then
+      ! There is data to be received
+      size = count * 4 ! 4 bytes
+      ! Call into the C++ interface, which will sort out optional arguments.
+      if (blocking) then
+        call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Check if we need to pass back the commhandle
+        if (present(commhandle)) then
+          commhandle = localcommhandle  ! copy the commhandle pointer back
+          ! Set init code
+          ESMF_INIT_SET_CREATED(commhandle)
+        endif
       endif
     endif
 
@@ -4839,21 +4869,24 @@ module ESMF_VMMod
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
-    size = count ! 1 byte
-    ! Call into the C++ interface, which will sort out optional arguments.
-    if (blocking) then
-      call c_ESMC_VMSend(vm, sendData, size, dst, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      call c_ESMC_VMSendNB(vm, sendData, size, dst, localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Check if we need to pass back the commhandle
-      if (present(commhandle)) then
-        commhandle = localcommhandle  ! copy the commhandle pointer back
-        ! Set init code
-        ESMF_INIT_SET_CREATED(commhandle)
+    if (count > 0) then
+      ! There is data to be received
+      size = count ! 1 byte
+      ! Call into the C++ interface, which will sort out optional arguments.
+      if (blocking) then
+        call c_ESMC_VMSend(vm, sendData, size, dst, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call c_ESMC_VMSendNB(vm, sendData, size, dst, localcommhandle, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Check if we need to pass back the commhandle
+        if (present(commhandle)) then
+          commhandle = localcommhandle  ! copy the commhandle pointer back
+          ! Set init code
+          ESMF_INIT_SET_CREATED(commhandle)
+        endif
       endif
     endif
 
@@ -4907,21 +4940,24 @@ module ESMF_VMMod
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
 
-    size = count ! 1 byte
-    ! Call into the C++ interface, which will sort out optional arguments.
-    if (blocking) then
-      call c_ESMC_VMSend(vm, sendData, size, dst, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      call c_ESMC_VMSendNB(vm, sendData, size, dst, localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Check if we need to pass back the commhandle
-      if (present(commhandle)) then
-        commhandle = localcommhandle  ! copy the commhandle pointer back
-        ! Set init code
-        ESMF_INIT_SET_CREATED(commhandle)
+    if (count > 0) then
+      ! There is data to be received
+      size = count ! 1 byte
+      ! Call into the C++ interface, which will sort out optional arguments.
+      if (blocking) then
+        call c_ESMC_VMSend(vm, sendData, size, dst, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call c_ESMC_VMSendNB(vm, sendData, size, dst, localcommhandle, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Check if we need to pass back the commhandle
+        if (present(commhandle)) then
+          commhandle = localcommhandle  ! copy the commhandle pointer back
+          ! Set init code
+          ESMF_INIT_SET_CREATED(commhandle)
+        endif
       endif
     endif
 
