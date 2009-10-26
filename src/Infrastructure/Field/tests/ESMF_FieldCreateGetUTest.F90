@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.55 2009/10/23 07:20:28 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.56 2009/10/26 13:40:05 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -6703,6 +6703,8 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
 
+            deallocate (buffer)
+
             call ESMF_FieldGet(field1, grid=grid2, array=array2, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
@@ -6847,8 +6849,6 @@ contains
             ESMF_CONTEXT, rc)) return
 
         deallocate(farray)
-        if (associated (buffer)) deallocate(buffer)
-
 
     end subroutine test7d4_generic
 
