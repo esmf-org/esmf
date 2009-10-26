@@ -1,4 +1,4 @@
-! $Id: ESMF_GeomBase.F90,v 1.18 2009/10/22 01:22:16 w6ws Exp $
+! $Id: ESMF_GeomBase.F90,v 1.19 2009/10/26 17:19:10 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -148,7 +148,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.18 2009/10/22 01:22:16 w6ws Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.19 2009/10/26 17:19:10 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1006,9 +1006,13 @@ end subroutine ESMF_GeomBaseGet
                                  ESMF_CONTEXT, rc)) return
 
        case  (ESMF_GEOMTYPE_MESH%type)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                               " Mesh serialize not implemented", &
-                               ESMF_CONTEXT, rc)) return
+          call ESMF_MeshSerialize(mesh=gbcp%mesh, buffer=buffer, &
+                     length=length, offset=offset, &
+                     inquireflag=linquireflag, &
+                     rc=localrc) 
+          if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
 
        case  (ESMF_GEOMTYPE_LOCSTREAM%type)
           call ESMF_LocStreamSerialize(locstream=gbcp%locstream, &
@@ -1109,9 +1113,12 @@ end subroutine ESMF_GeomBaseGet
                                  ESMF_CONTEXT, rc)) return  
 
        case  (ESMF_GEOMTYPE_MESH%type)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                               " Mesh deserialize not implemented", &
-                               ESMF_CONTEXT, rc)) return
+          gbcp%mesh=ESMF_MeshDeserialize(buffer=buffer, &
+              offset=offset, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return  
+
 
        case  (ESMF_GEOMTYPE_LOCSTREAM%type)
           gbcp%locstream=ESMF_LocStreamDeserialize(buffer=buffer, &

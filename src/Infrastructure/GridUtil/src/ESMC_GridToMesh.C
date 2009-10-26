@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.39 2009/09/01 22:25:26 oehmke Exp $
+// $Id: ESMC_GridToMesh.C,v 1.40 2009/10/26 17:19:10 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -86,8 +86,13 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
 #define ESMC_METHOD "GridToMesh()" 
   Trace __trace("GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh)");
 
+ int localrc;
+ int rc;
+
   // Initialize the parallel environment for mesh (if not already done)
-  ESMCI::Par::Init("MESHLOG", false /* use log */);
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+   throw localrc;  // bail out with exception
 
   Grid &grid = const_cast<Grid&>(grid_);
 
@@ -148,8 +153,6 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
  
  
  // Set the id of this processor here (me)
- int localrc;
- int rc;
  int me = VM::getCurrent(&localrc)->getLocalPet();
  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
    throw localrc;  // bail out with exception
