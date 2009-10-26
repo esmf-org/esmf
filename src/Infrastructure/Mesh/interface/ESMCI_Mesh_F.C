@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.32 2009/10/26 17:21:45 oehmke Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.33 2009/10/26 20:46:42 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -274,11 +274,6 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
                int *elemType, int *num_elemConn, int *elemConn, int *rc) 
 {
    try {
-    Mesh *meshp = *meshpp;
-
-    ThrowRequire(meshp);
-
-    Mesh &mesh = *meshp;
 
   // Initialize the parallel environment for mesh (if not already done)
     {
@@ -288,6 +283,14 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
  if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
    throw localrc;  // bail out with exception
     }
+
+
+    Mesh *meshp = *meshpp;
+
+    ThrowRequire(meshp);
+
+    Mesh &mesh = *meshp;
+
 
     // Get parametric dimension
     int parametric_dim=mesh.parametric_dim();
@@ -448,6 +451,14 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
 extern "C" void FTN(c_esmc_meshvtkheader)(char *filename, int *num_elem, int *num_node, int *conn_size, int *rc, int nlen) {
 
   try {
+ 
+{
+ int localrc;
+ int rc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+   throw localrc;  // bail out with exception
+}
 
     char *fname = ESMC_F90toCstring(filename, nlen);
 
@@ -502,6 +513,15 @@ extern "C" void FTN(c_esmc_meshvtkbody)(char *filename, int *nodeId, double *nod
                     int *nodeOwner, int *elemId, int *elemType, int *elemConn, int *rc, int nlen) {
 
   try {
+
+{
+ int localrc;
+ int rc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+   throw localrc;  // bail out with exception
+}
+
 
     char *fname = ESMC_F90toCstring(filename, nlen);
 
@@ -673,6 +693,14 @@ void getNodeGIDS(Mesh &mesh, std::vector<int> &ngid) {
 }
 
 extern "C" void FTN(c_esmc_meshget)(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc){
+
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+ int localrc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
+   return;  // bail out with exception
+    }
 
     Mesh *meshp = *meshpp;
 
@@ -846,6 +874,15 @@ extern "C" void FTN(c_esmc_meshserialize)(Mesh **meshpp,
 #define ESMC_METHOD "c_esmc_meshserialize()"
 
    try {
+
+  // Initialize the parallel environment for mesh (if not already done)
+     {
+ int localrc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+   throw localrc;  // bail out with exception
+     }
+
     Mesh *meshp = *meshpp;
     ThrowRequire(meshp);
     Mesh &mesh = *meshp;
@@ -967,7 +1004,6 @@ extern "C" void FTN(c_esmc_meshdeserialize)(Mesh **meshpp,
   // Initialize the parallel environment for mesh (if not already done)
      {
  int localrc;
- int rc;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
  if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
    throw localrc;  // bail out with exception
