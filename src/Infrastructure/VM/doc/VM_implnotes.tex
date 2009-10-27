@@ -1,4 +1,4 @@
-% $Id: VM_implnotes.tex,v 1.5 2006/02/07 20:29:21 nscollins Exp $
+% $Id: VM_implnotes.tex,v 1.6 2009/10/27 22:36:22 theurich Exp $
 
 %\subsection{Design and Implementation Notes}
 
@@ -27,7 +27,7 @@ The VM class provides an additional layer of abstraction on top of the POSIX mac
 
 \item PE: A processing element (PE) is an alias for the smallest physical processing unit available on a particular hardware platform. In the language of today's microprocessor architecture technology a PE is identical to a core, however, if future microprocessor designs change the smallest physical processing unit the mapping of the PE to actual hardware will change accordingly. Thus the PE layer separates the hardware specific part of the VM from the hardware-independent part. Each PE is labeled with an id number which identifies it uniquely within all of the VM instances of an ESMF application.
 
-\item Core: A Core is the smallest physical processing unit which typically comprises a register set, an integer arithmetic unit, a floating-point unit and various control units. Traditionally there was one core per CPU, however, today some dual-core CPUs are available and  multi-core CPU designs are on most manufacturers' road-maps. Each Core is labeled with an id number which identifies it uniquely within all of the VM instances of an ESMF application.
+\item Core: A Core is the smallest physical processing unit which typically comprises a register set, an integer arithmetic unit, a floating-point unit and various control units. Each Core is labeled with an id number which identifies it uniquely within all of the VM instances of an ESMF application.
 
 \item CPU: The central processing unit (CPU) houses single or multiple cores, providing them with the interface to system memory, interconnects and IO. Typically the CPU provides some level of caching for the instruction and data streams in and out of the Cores. Cores in a multi-core CPU typically share some caches. Each CPU is labeled with an id number which identifies it uniquely within all of the VM instances of an ESMF application.
 
