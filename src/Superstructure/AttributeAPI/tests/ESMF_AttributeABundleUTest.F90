@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeABundleUTest.F90,v 1.22 2009/10/06 23:02:16 rokuingh Exp $
+! $Id: ESMF_AttributeABundleUTest.F90,v 1.23 2009/10/27 23:04:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeABundleUTest.F90,v 1.22 2009/10/06 23:02:16 rokuingh Exp $'
+      '$Id: ESMF_AttributeABundleUTest.F90,v 1.23 2009/10/27 23:04:17 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -526,6 +526,7 @@ program ESMF_AttributeArrayBundleUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      defaultR8lWrong = (/6,7,8,9/)
       !NEX_UTest
       ! Get a R8 list default Attribute on a ArrayBundle Test
       call ESMF_AttributeGet(arraybundle, name="AttrR8l", &
@@ -589,6 +590,10 @@ program ESMF_AttributeArrayBundleUTest
       defaultCharl(1) = "Character String 5"
       defaultCharl(2) = "Character String 6"
       defaultCharl(3) = "Character String 7"
+      defaultCharlWrong(1) = "Character String 5"
+      defaultCharlWrong(2) = "Character String 6"
+      defaultCharlWrong(3) = "Character String 7"
+      defaultCharlWrong(4) = "Character String 8"
 
       !EX_UTest
       ! Set a char list Attribute on an ArrayBundle Test
@@ -724,8 +729,8 @@ program ESMF_AttributeArrayBundleUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
   
-      dfltoutLogl = .false.
-      defaultLogl = .true.
+      dfltoutLogl = (/.false.,.false.,.false./)
+      defaultLogl = (/.true.,.true.,.true./)
       !EX_UTest
       ! Get a logical attribute - arraybundle version
       call ESMF_AttributeGet(arraybundle, name=attrname, &
@@ -736,6 +741,7 @@ program ESMF_AttributeArrayBundleUTest
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      defaultLoglWrong = (/.true.,.true.,.true.,.true./)
       !EX_UTest
       ! Get a logical list default Attribute on a ArrayBundle Test
       call ESMF_AttributeGet(arraybundle, name="Logl", &

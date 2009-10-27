@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFieldUTest.F90,v 1.26 2009/10/06 23:02:17 rokuingh Exp $
+! $Id: ESMF_AttributeFieldUTest.F90,v 1.27 2009/10/27 23:04:24 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFieldUTest.F90,v 1.26 2009/10/06 23:02:17 rokuingh Exp $'
+      '$Id: ESMF_AttributeFieldUTest.F90,v 1.27 2009/10/27 23:04:24 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -519,6 +519,7 @@ program ESMF_AttributeFieldUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      defaultR8lWrong = (/6,7,8,9/)
       !NEX_UTest
       ! Get a R8 list default Attribute on a Field Test
       call ESMF_AttributeGet(field, name="AttrR8l", &
@@ -582,6 +583,10 @@ program ESMF_AttributeFieldUTest
       defaultCharl(1) = "Character String 5"
       defaultCharl(2) = "Character String 6"
       defaultCharl(3) = "Character String 7"
+      defaultCharlWrong(1) = "Character String 5"
+      defaultCharlWrong(2) = "Character String 6"
+      defaultCharlWrong(3) = "Character String 7"
+      defaultCharlWrong(4) = "Character String 8"
 
       !EX_UTest
       ! Set a char list Attribute on a Field Test
@@ -717,8 +722,8 @@ program ESMF_AttributeFieldUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
   
-      dfltoutLogl = .false.
-      defaultLogl = .true.
+      dfltoutLogl = (/.false.,.false.,.false./)
+      defaultLogl = (/.true.,.true.,.true./)
       !EX_UTest
       ! Get a logical attribute - field version
       call ESMF_AttributeGet(field, name=attrname, &
@@ -729,6 +734,7 @@ program ESMF_AttributeFieldUTest
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      defaultLoglWrong = (/.true.,.true.,.true.,.true./)
       !EX_UTest
       ! Get a logical list default Attribute on a Field Test
       call ESMF_AttributeGet(field, name="Logl", &
