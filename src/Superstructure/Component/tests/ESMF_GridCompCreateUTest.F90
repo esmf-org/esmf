@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.27 2009/10/15 05:52:05 theurich Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.28 2009/10/27 22:37:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -54,7 +54,7 @@
 
 #ifdef ESMF_TESTEXHAUSTIVE
     character(ESMF_MAXSTR) :: bname
-    type (dataWrapper) :: wrap1, wrap2, wrap3, wrap4
+    type (dataWrapper) :: wrap1, wrap2, wrap3, wrap4, wrap5, wrap6
 #endif
 
 !-------------------------------------------------------------------------------
@@ -219,8 +219,38 @@
     call ESMF_Test((wrap4%p%testnumber.eq.1234), name, failMsg, result, ESMF_SRCLINE)
     print *, "wrap4%p%testnumber = ", wrap4%p%testnumber
     
+!-------------------------------------------------------------------------
+!   !  Set Internal State
+    !EX_UTest
+    allocate(wrap5%p)
+    wrap3%p%testnumber=9182
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set Internal State 3rd time Test"
+    call ESMF_GridCompSetInternalState(comp1, wrap5, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+!   !  Get Internal State
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Get Internal State 3rd time Test"
+    call ESMF_GridCompGetInternalState(comp1, wrap6, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+!   !  Verify Internal State
+    !EX_UTest
+    write(failMsg, *) "Did not return correct data"
+    write(name, *) "Verify Internal State 3rd time Test"
+    call ESMF_Test((wrap4%p%testnumber.eq.9182), name, failMsg, result, ESMF_SRCLINE)
+    print *, "wrap4%p%testnumber = ", wrap6%p%testnumber
+    
     deallocate(wrap1%p)
     deallocate(wrap3%p)
+    deallocate(wrap5%p)
 
 !-------------------------------------------------------------------------
 !   !
