@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.68 2009/10/26 23:52:43 theurich Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.69 2009/10/27 18:21:41 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -52,10 +52,8 @@
       use ESMF_InitMacrosMod
       implicit none
 
-#define FIXED_BUFFER
-
 #if defined FIXED_BUFFER
-      integer,parameter :: BUFSIZE = 102400   ! 100 kB buffer
+      integer,parameter :: BUFSIZE = 102400   ! 100 k element buffer
 #endif
 
 !------------------------------------------------------------------------------
@@ -117,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.68 2009/10/26 23:52:43 theurich Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.69 2009/10/27 18:21:41 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -360,6 +358,17 @@
                                        ESMF_CONTEXT, rc)) return
     endif
 
+#if defined (FIXED_BUFFER)
+    lbufsize = BUFSIZE
+    inqflag = ESMF_NOINQUIRE
+    maxbufsize = BUFSIZE
+    if (si%mycount > 0) then
+      allocate(si%blindsend(lbufsize, si%mycount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, &
+                           "Allocating buffer for local buf list", &
+                               ESMF_CONTEXT, rc)) return
+    end if
+#else
     do, pass=1,2
 
       if (pass == 1) then
@@ -368,22 +377,25 @@
         inqflag = ESMF_INQUIREONLY
         maxbufsize = 0
         lbufsize = 1
+        allocate (si%blindsend(1,si%mycount), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+                                 "Allocating buffer for local buf inquiry", &
+                                     ESMF_CONTEXT, rc)) return
       else
         ! Allocate the buffer, and do the serialization for real
         deallocate (si%blindsend)
         inqflag = ESMF_NOINQUIRE
 !DEBUG        print *, 'ESMF_StateInfoBuild: leading buffer dimension =', maxbufsize
-#if defined (FIXED_BUFFER)
-        lbufsize = BUFSIZE
-#else
         lbufsize = maxbufsize
-#endif
-      end if
 
-      allocate(si%blindsend(lbufsize, si%mycount), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, &
+        if (si%mycount > 0) then
+          allocate(si%blindsend(lbufsize, si%mycount), stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, &
                                "Allocating buffer for local buf list", &
                                    ESMF_CONTEXT, rc)) return
+        end if
+      end if
+#endif
 
     ! (+1) to allow top level State space to reconcile Attributes
     if (attreconflag%value == ESMF_ATTRECONCILE_ON%value) then
@@ -600,7 +612,9 @@
 !!DEBUG        print *, "ESMF_StateInfoBuild: i, offset, lbufsize = ", i, offset, lbufsize
         maxbufsize = max (maxbufsize, offset)
       end do
+#if !defined (FIXED_BUFFER)
     end do ! pass
+#endif
  
     if (present(rc)) rc = ESMF_SUCCESS
     end subroutine ESMF_StateInfoBuild
