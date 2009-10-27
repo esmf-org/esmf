@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.26 2009/10/26 17:21:45 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.27 2009/10/27 19:54:37 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -137,7 +137,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.26 2009/10/26 17:21:45 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.27 2009/10/27 19:54:37 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -969,7 +969,7 @@ module ESMF_MeshMod
 !
 ! !ARGUMENTS:
       type(ESMF_Mesh), intent(inout) :: mesh
-      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      character, pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
       type(ESMF_InquireFlag), intent(in), optional :: inquireflag
@@ -1083,7 +1083,7 @@ module ESMF_MeshMod
       type(ESMF_Mesh) :: ESMF_MeshDeserialize   
 !
 ! !ARGUMENTS:
-      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      character, pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       integer, intent(out), optional :: rc 
 !

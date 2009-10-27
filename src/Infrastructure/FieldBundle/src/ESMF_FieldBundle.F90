@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.32 2009/10/20 03:16:39 theurich Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.33 2009/10/27 19:51:38 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -3027,7 +3027,7 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: bundle 
-      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      character, pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
       type(ESMF_AttReconcileFlag), intent(in), optional :: attreconflag
@@ -3094,7 +3094,7 @@ end function
       ! shortcut to internals
       bp => bundle%btypep
       
-      call c_ESMC_BaseSerialize(bp%base, buffer(1), length, offset, &
+      call c_ESMC_BaseSerialize(bp%base, buffer, length, offset, &
                                  lattreconflag, linquireflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -3104,7 +3104,7 @@ end function
                                  bp%iostatus, &
                                  bp%field_count, bp%pack_flag, &
                                  bp%isCongruent, bp%hasPattern, &
-                                 buffer(1), length, offset, linquireflag, localrc)
+                                 buffer, length, offset, linquireflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -3148,7 +3148,7 @@ end function
       type(ESMF_FieldBundle) :: ESMF_FieldBundleDeserialize   
 !
 ! !ARGUMENTS:
-      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      character, pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       type(ESMF_AttReconcileFlag), optional :: attreconflag
       integer, intent(out), optional :: rc 

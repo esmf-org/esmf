@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.56 2009/10/26 13:40:05 w6ws Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.57 2009/10/27 19:50:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -6477,7 +6477,7 @@ contains
         integer, dimension(:), allocatable          :: l_mhlw, l_mhuw, celw, ceuw
 
         type(ESMF_Field)                            :: field1
-        integer(ESMF_KIND_I4), pointer              :: buffer(:)
+        character, pointer                          :: buffer(:)
         integer                                     :: buff_length, offset
 
         localrc = ESMF_SUCCESS

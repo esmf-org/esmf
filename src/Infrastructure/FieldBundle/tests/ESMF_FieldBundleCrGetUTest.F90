@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.18 2009/10/23 02:54:46 w6ws Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.19 2009/10/27 19:51:41 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -450,7 +450,7 @@ contains
         ! local variables
         type(ESMF_FieldBundle)                      :: bundle1
 
-        integer(ESMF_KIND_I4), pointer              :: buffer(:)
+        character, pointer                          :: buffer(:)
         integer                                     :: buff_size, offset, localrc
 
         localrc = ESMF_SUCCESS

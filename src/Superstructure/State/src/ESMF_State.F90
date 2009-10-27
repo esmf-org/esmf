@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.178 2009/10/23 05:36:05 eschwab Exp $
+! $Id: ESMF_State.F90,v 1.179 2009/10/27 19:59:08 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.178 2009/10/23 05:36:05 eschwab Exp $'
+      '$Id: ESMF_State.F90,v 1.179 2009/10/27 19:59:08 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -5937,7 +5937,7 @@ module ESMF_StateMod
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state 
-      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      character, pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
       type(ESMF_AttReconcileFlag), intent(in), optional :: attreconflag
@@ -6010,7 +6010,7 @@ module ESMF_StateMod
 
       sp => state%statep
 
-      call c_ESMC_BaseSerialize(sp%base, buffer(1), length, offset, lattreconflag,  &
+      call c_ESMC_BaseSerialize(sp%base, buffer, length, offset, lattreconflag,  &
                                  linquireflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -6020,7 +6020,7 @@ module ESMF_StateMod
                                  sp%ready_default, sp%stvalid_default, &
                                  sp%reqrestart_default, &
                                  sp%alloccount, sp%datacount, &
-                                 buffer(1), length, offset, linquireflag, &
+                                 buffer, length, offset, linquireflag, &
                                  localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -6032,7 +6032,7 @@ module ESMF_StateMod
           call c_ESMC_StateItemSerialize(sip%otype, sip%namep, &
                                          sip%indirect_index, sip%needed, &
                                          sip%ready, sip%valid, sip%reqrestart, &
-                                         buffer(1), length, offset, &
+                                         buffer, length, offset, &
                                          linquireflag, localrc)
 
           select case (sip%otype%ot)
@@ -6096,7 +6096,7 @@ module ESMF_StateMod
 !
 ! !ARGUMENTS:
       type(ESMF_VM), intent(in) :: vm
-      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      character, pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       type(ESMF_AttReconcileFlag), optional :: attreconflag
       integer, intent(out), optional :: rc 
@@ -6153,7 +6153,7 @@ module ESMF_StateMod
                                      "space for new State object", &
                                      ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_BaseDeserialize(sp%base, buffer(1), offset, lattreconflag, localrc)
+      call c_ESMC_BaseDeserialize(sp%base, buffer, offset, lattreconflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -6166,7 +6166,7 @@ module ESMF_StateMod
                                  sp%ready_default, sp%stvalid_default, &
                                  sp%reqrestart_default, &
                                  sp%alloccount, sp%datacount, &
-                                 buffer(1), offset, localrc)
+                                 buffer, offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -6181,7 +6181,7 @@ module ESMF_StateMod
           call c_ESMC_StateItemDeserialize(sip%otype, sip%namep, &
                                          sip%indirect_index, sip%needed, &
                                          sip%ready, sip%valid, sip%reqrestart, &
-                                         buffer(1), offset, localrc)
+                                         buffer, offset, localrc)
 
           select case (sip%otype%ot)
             case (ESMF_STATEITEM_FIELDBUNDLE%ot)

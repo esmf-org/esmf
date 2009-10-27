@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.26 2009/10/22 20:36:31 w6ws Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.27 2009/10/27 19:48:40 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.26 2009/10/22 20:36:31 w6ws Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.27 2009/10/27 19:48:40 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -63,7 +63,7 @@
       integer:: i, ndes, n, nsum, isum, rc_loop
       type(ESMF_DELayout):: delayout1, delayout2
 
-      integer(ESMF_KIND_I4), pointer :: buffer(:)
+      character, pointer :: buffer(:)
       integer :: buff_len, offset
       integer :: alloc_err
       type(ESMF_InquireFlag) :: inquireflag

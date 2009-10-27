@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.143 2009/10/25 05:58:30 eschwab Exp $'
+      '$Id: ESMF_Grid.F90,v 1.144 2009/10/27 19:52:19 w6ws Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -11745,7 +11745,7 @@ endif
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid 
-      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      character, pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
       type(ESMF_AttReconcileFlag), intent(in), optional :: attreconflag
@@ -11832,7 +11832,7 @@ endif
       type(ESMF_Grid) :: ESMF_GridDeserialize   
 !
 ! !ARGUMENTS:
-      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      character, pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       type(ESMF_AttReconcileFlag), optional :: attreconflag
       integer, intent(out), optional :: rc 

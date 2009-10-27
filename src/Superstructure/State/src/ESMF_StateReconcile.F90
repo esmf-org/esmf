@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.69 2009/10/27 18:21:41 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.70 2009/10/27 19:57:51 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@
         integer(ESMF_KIND_I4), pointer, dimension(:) :: idsend, idrecv
         type(ESMF_VMId), pointer, dimension(:) :: vmidsend, vmidrecv
         integer(ESMF_KIND_I4), pointer, dimension(:) :: objsend, objrecv
-        integer(ESMF_KIND_I4), pointer, dimension(:,:) :: blindsend, blindrecv
+        character, pointer, dimension(:,:) :: blindsend, blindrecv
         ! TODO: longer term, build a linked list or tree of objects.
         !type(ESMF_StateItemInfo), pointer :: originalObject
         !integer :: blockType   ! new obj, dup, or end marker
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.69 2009/10/27 18:21:41 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.70 2009/10/27 19:57:51 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -290,7 +290,7 @@
     type(ESMF_StateItem), pointer :: stateitem
     type(ESMF_StateItemInfo), pointer :: si
     type(ESMF_State) :: wrapper
-    integer(ESMF_KIND_I4), pointer, dimension(:) :: bptr
+    character, pointer, dimension(:) :: bptr
     integer :: offset, mypet
     type(ESMF_VMId) :: VMdummyID
 
@@ -755,7 +755,7 @@
     type(ESMF_Array) :: array
     type(ESMF_ArrayBundle) :: arraybundle
     character(len=ESMF_MAXSTR) :: thisname
-    integer(ESMF_KIND_I4), pointer, dimension(:) :: bptr
+    character, pointer, dimension(:) :: bptr
     logical :: ihave
     type(ESMF_VMId) :: temp_vmid
     type(ESMF_StateItemInfo), pointer :: si

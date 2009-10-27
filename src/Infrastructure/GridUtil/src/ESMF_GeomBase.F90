@@ -1,4 +1,4 @@
-! $Id: ESMF_GeomBase.F90,v 1.19 2009/10/26 17:19:10 oehmke Exp $
+! $Id: ESMF_GeomBase.F90,v 1.20 2009/10/27 19:52:54 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -148,7 +148,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.19 2009/10/26 17:19:10 oehmke Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.20 2009/10/27 19:52:54 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -921,7 +921,7 @@ end subroutine ESMF_GeomBaseGet
 !
 ! !ARGUMENTS:
       type(ESMF_GeomBase), intent(inout) :: gridbase 
-      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      character, pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
       type(ESMF_AttReconcileFlag), intent(in), optional :: attreconflag
@@ -1049,7 +1049,7 @@ end subroutine ESMF_GeomBaseGet
       type(ESMF_GeomBase) :: ESMF_GeomBaseDeserialize   
 !
 ! !ARGUMENTS:
-      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      character, pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       type(ESMF_AttReconcileFlag), optional :: attreconflag
       integer, intent(out), optional :: rc 

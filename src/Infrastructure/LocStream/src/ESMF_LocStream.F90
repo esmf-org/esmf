@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.23 2009/10/22 04:42:24 w6ws Exp $
+! $Id: ESMF_LocStream.F90,v 1.24 2009/10/27 19:53:46 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -124,7 +124,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.23 2009/10/22 04:42:24 w6ws Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.24 2009/10/27 19:53:46 w6ws Exp $'
 
 !==============================================================================
 !
@@ -2628,7 +2628,7 @@ end subroutine ESMF_LocStreamGetBounds
 !
 ! !ARGUMENTS:
       type(ESMF_LocStream), intent(inout) :: locstream
-      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      character, pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
       type(ESMF_InquireFlag), intent(in), optional :: inquireflag
@@ -2742,7 +2742,7 @@ end subroutine ESMF_LocStreamGetBounds
       type(ESMF_LocStream) :: ESMF_LocStreamDeserialize   
 !
 ! !ARGUMENTS:
-      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      character, pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       integer, intent(out), optional :: rc 
 !

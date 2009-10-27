@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshUTest.F90,v 1.18 2009/10/26 17:21:45 oehmke Exp $
+! $Id: ESMF_MeshUTest.F90,v 1.19 2009/10/27 19:54:37 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_MeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshUTest.F90,v 1.18 2009/10/26 17:21:45 oehmke Exp $'
+    '$Id: ESMF_MeshUTest.F90,v 1.19 2009/10/27 19:54:37 w6ws Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -65,7 +65,7 @@ program ESMF_MeshUTest
   type(ESMF_Field)  ::  field
   logical :: isMemFreed
   integer :: bufCount, offset
-  integer(ESMF_KIND_I4), pointer :: buf(:)
+  character, pointer :: buf(:)
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are

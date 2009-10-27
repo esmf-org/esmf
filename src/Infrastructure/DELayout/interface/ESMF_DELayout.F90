@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.78 2009/09/14 21:42:59 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.79 2009/10/27 19:48:39 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.78 2009/09/14 21:42:59 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.79 2009/10/27 19:48:39 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1611,7 +1611,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout), intent(in) :: delayout 
-    integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+    character, pointer, dimension(:) :: buffer
     integer, intent(inout) :: length
     integer, intent(inout) :: offset
     type(ESMF_InquireFlag), intent(in), optional :: inquireflag
@@ -1663,7 +1663,7 @@ contains
     end if
  
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DELayoutSerialize(delayout, buffer(1), length, offset, &
+    call c_ESMC_DELayoutSerialize(delayout, buffer, length, offset, &
                                   linquireflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1689,7 +1689,7 @@ contains
     type(ESMF_DELayout) :: ESMF_DELayoutDeserialize   
 !
 ! !ARGUMENTS:
-    integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+    character, pointer, dimension(:) :: buffer
     integer, intent(inout) :: offset
     integer, intent(out), optional :: rc 
 !
@@ -1721,7 +1721,7 @@ contains
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DELayoutDeserialize(ESMF_DELayoutDeserialize%this, buffer(1), &
+    call c_ESMC_DELayoutDeserialize(ESMF_DELayoutDeserialize%this, buffer, &
       offset, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
