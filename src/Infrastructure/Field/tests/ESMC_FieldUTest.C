@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldUTest.C,v 1.11 2009/10/23 21:18:38 theurich Exp $
+// $Id: ESMC_FieldUTest.C,v 1.12 2009/10/27 20:26:07 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -42,7 +42,6 @@ int main(void){
   ESMC_Field field;
 
   int num_elem, num_node, conn_size;
-  int num_elements, num_nodes;
   ESMC_Mesh mesh, mesh1;
   int pdim=2;
   int sdim=3;
@@ -54,9 +53,6 @@ int main(void){
   int *elemId;
   int *elemType;
   int *elemConn;
-
-  int *nodeDistG;
-  int *elemDistG;
 
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
@@ -203,6 +199,14 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
+  free(nodeId);
+  free(nodeCoord);
+  free(nodeOwner);
+
+  free(elemId);
+  free(elemType);
+  free(elemConn);
+
   free(gridToFieldMap);
   ESMC_InterfaceIntDestroy(&i_gridToFieldMap);
   free(ungriddedLBound);
