@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.29 2008/11/14 04:39:17 theurich Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.30 2009/10/28 02:05:36 theurich Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -54,7 +54,7 @@
     type(ESMF_Time) :: stopTime
 
     ! cumulative result: count failures; no failures equals "all pass"
-    integer :: testresult = 0
+    integer :: result = 0
 
     ! individual test name
     character(ESMF_MAXSTR) :: testname
@@ -286,9 +286,6 @@
       write(failMsg, *)  "System Test failure"
       write(testname, *) "System Test FlowWithCoupling: Coupled Fluid Flow"
   
-      call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), &
-        testname, failMsg, testresult, ESMF_SRCLINE)
-
       if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
         ! Separate message to console, for quick confirmation of success/failure
         if (rc .eq. ESMF_SUCCESS) then
@@ -303,6 +300,10 @@
 
       endif
     
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
       call ESMF_Finalize(rc=rc)
 
       end program ESMF_CoupledFlowDemo

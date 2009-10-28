@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.20 2008/11/14 04:39:17 theurich Exp $
+! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.21 2009/10/28 02:05:35 theurich Exp $
 !
 ! System test code FieldRegridOrder
 !  Description on Sourceforge under System Test #xxxxxx
@@ -56,7 +56,7 @@
     type(ESMF_Time) :: stopTime
 
     ! cumulative result: count failures; no failures equals "all pass"
-    integer :: testresult = 0
+    integer :: result = 0
 
     ! individual test name
     character(ESMF_MAXSTR) :: testname
@@ -264,9 +264,6 @@
     write(failMsg, *) "System Test failure"
     write(testname, *) "System Test FieldRegridOrder: Field Regrid w/ different IGrid Orders"
 
-    call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), &
-      testname, failMsg, testresult, ESMF_SRCLINE)
-
     ! Only on PET 0 or any PET with an error. 
     if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
       ! Separate message to console, for quick confirmation of success/failure
@@ -282,6 +279,10 @@
 
     endif
   
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
     call ESMF_Finalize(rc=rc) 
 
     end program FieldRegridOrder

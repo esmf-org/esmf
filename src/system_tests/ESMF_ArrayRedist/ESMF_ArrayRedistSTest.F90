@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.30 2009/10/16 21:07:08 svasquez Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.31 2009/10/28 02:05:34 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -68,8 +68,8 @@ program ESMF_ArrayRedistSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  write(failMsg, *) "System Test failure"
   write(testname, *) "System Test ESMF_ArrayRedistSTest"
+  write(failMsg, *) "System Test failure"
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -282,7 +282,6 @@ program ESMF_ArrayRedistSTest
 
   ! Normal ESMF Test output
   print *, testname, " complete."
-
 
   if (rc .eq. ESMF_SUCCESS) then
     ! Separate message to console, for quick confirmation of success/failure

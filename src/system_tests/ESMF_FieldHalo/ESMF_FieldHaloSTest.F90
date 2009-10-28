@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.55 2009/09/22 14:56:33 feiliu Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.56 2009/10/28 02:05:34 theurich Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -40,7 +40,7 @@
     !integer, parameter :: halo_width = 2
 
     ! cumulative result: count failures; no failures equals "all pass"
-    integer :: testresult = 0
+    integer :: result = 0
 
     ! individual test name
     character(ESMF_MAXSTR) :: testname
@@ -133,9 +133,6 @@
     write(failMsg, *) "System Test failure"
     write(testname, *) "System Test FieldHalo: Field Halo Test"
 
-    call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), &
-      testname, failMsg, testresult, ESMF_SRCLINE)
-
     if ((my_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
       ! Separate message to console, for quick confirmation of success/failure
       if (rc .eq. ESMF_SUCCESS) then
@@ -151,6 +148,10 @@
 
     endif
     
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+  
     call ESMF_Finalize(rc=rc)  
     
     end program FieldHalo

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistBlk2BlkSTest.F90,v 1.5 2009/10/15 17:12:20 svasquez Exp $
+! $Id: ESMF_FieldBundleRedistBlk2BlkSTest.F90,v 1.6 2009/10/28 02:05:34 theurich Exp $
 !
 ! System test FieldBundleRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -25,7 +25,7 @@
 !
 !\begin{verbatim}
 
-     program Blk2BlkBunRedist
+program Blk2BlkBunRedist
 
 #include "ESMF_Macros.inc"
 #include "ESMF_Conf.inc"
@@ -57,7 +57,6 @@
     type(ESMF_VM):: vm
 
     ! cumulative result: count failures; no failures equals "all pass"
-    integer :: testresult = 0
     integer :: result = 0
 
     ! individual test name
@@ -69,10 +68,21 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    print *, "System Test FieldBundleRedistBlk2Blk:"
+  write(testname, *) "System Test FieldBundleRedistBlk2Blk"
+  write(failMsg, *) "System Test failure"
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  print *, "--------------------------------------- "
+  print *, "Start of ", trim(testname)
+  print *, "--------------------------------------- "
+
+!-------------------------------------------------------------------------
+
     rc = ESMF_SUCCESS
     localrc = ESMF_SUCCESS
-!
+    
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !  Create section
@@ -389,38 +399,32 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-    print *, "System Test FieldBundleRedistBlk2Blk complete."
 
-    write(failMsg, *)  "Redistribution back not same as original"
-    write(testname, *) "System Test FieldBundleRedistBlk2Blk: FieldBundle Redistribute"
+10 continue
 
-    call ESMF_TestGlobal(((miscount.eq.0).and.(rc.eq.ESMF_SUCCESS)), &
-      testname, failMsg, testresult, ESMF_SRCLINE)
+  ! Normal ESMF Test output
+  print *, testname, " complete."
 
-    if ((my_pet .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
-      ! Separate message to console, for quick confirmation of success/failure
-      if ((miscount.eq.0) .and. (rc .eq. ESMF_SUCCESS)) then
-        write(finalMsg, *) "SUCCESS: Data redistributed twice same as original."
-      else
-        write(finalMsg, *) "System Test did not succeed. ", &
-        "Data redistribution does not match expected values, or error code", &
-        " set ",rc 
-      endif
-      write(0, *) ""
-      write(0, *) trim(testname)
-      write(0, *) trim(finalMsg)
-      write(0, *) ""
+  if (rc .eq. ESMF_SUCCESS) then
+    ! Separate message to console, for quick confirmation of success/failure
+    write(finalMsg, *) "SUCCESS: ",trim(testname)," finished correctly."
+    write(0, *) ""
+    write(0, *) trim(testname)
+    write(0, *) trim(finalMsg)
+    write(0, *) ""
+  endif
+  
+  print *, "------------------------------------------------------------"
+  print *, "------------------------------------------------------------"
+  print *, "Test finished, localPet = ", localPet
+  print *, "------------------------------------------------------------"
+  print *, "------------------------------------------------------------"
 
-    endif
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
 
-    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
-    ! file that the scripts grep for.
-    call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
-
-    
-    call ESMF_Finalize(rc=rc)
-
-    end program Blk2BlkBunRedist
+end program Blk2BlkBunRedist
     
 !\end{verbatim}
