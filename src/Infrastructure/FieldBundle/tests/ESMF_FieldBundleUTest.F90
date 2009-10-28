@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.20 2009/10/15 03:08:32 oehmke Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.21 2009/10/28 23:03:34 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.20 2009/10/15 03:08:32 oehmke Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.21 2009/10/28 23:03:34 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -112,8 +112,11 @@
 
 #ifdef ESMF_TESTEXHAUSTIVE
 
+#if 0
+      ! Remove test until better GridMatch functionality is in place
+
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_REMOVE_UTest
 
       ! init rc
       rc=ESMF_SUCCESS
@@ -159,6 +162,7 @@
       write(failMsg, *) "Test not successful"
       write(name, *) "Make sure FieldBundleCreate fails when fields created on different Grids"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
       !------------------------------------------------------------------------
       !EX_UTest
