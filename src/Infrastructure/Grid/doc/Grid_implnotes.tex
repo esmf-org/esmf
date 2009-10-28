@@ -18,36 +18,5 @@ implementation of subroutines to generate standard grid shapes
 topology generation subroutines be implemented (e.g. {\tt ESMF\_DistGridGenSphere}) for users who want to create a standard topology, but a custom geometry.
 
 
-\subsubsection{Storage and Distribution of Stagger Locations in Grid}
-
- The primarily complication in the storage of multiple stagger locations in a Grid is 
- that different variables in a symmetric stagger can require a different amount of 
- storage depending on the underlying grid type.  For example while h,u, and v on an 
- A-grid all require n x m arrays, on a B-grid u and v require n+1 x m+1. On a C or D
- grid one vector component requires n+1 x m and the other n x m+1. To handle this 
- complication the natural approach would be to define each stagger's storage to what 
- is necessary for that grid type. This approach introduces a problem when the arrays
- are distributed, because they are different sizes. It is non-trivial to guarantee 
- that the (i,j) element of all three of arrays ends up on the same processor. It is 
- simpler to guarantee a consistent distribution of the arrays when using the same 
- distGrid if they are the same size.
-
- This may sound like a contradiction, but to be more precise we choose the exclusive 
- region of each array to be the same size (say n x m), and pad the arrays that need 
- it with additional memory from the computational region of the Array class. Recall
- that the exclusive region is defined as the cells for which the DE claims exclusive
- ownership. These are the cells updated by computations local to that DE. The
- exclusive region is a subset of the computation region. The computational region
- contains all the cells kept locally on the DE in addition to the exclusive cells.
- By using the computational region as padding we are able to guarantee a consistent
- distribution of the arrays and at the same time impose a symmetric stagger. This
- approach extends naturally to the connected/periodic cases because the padding can
- be used to hold the values across the branch cut.
-
- The biased configuration (where each stagger location has the same number of
- elements) falls out trivially by setting an optional padding argument 
-({\tt staggerWidth}) to zero. This argument can also be used to adjust where 
- the stagger padding is located or to add extra for halos. 
-
 
 

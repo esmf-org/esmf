@@ -1,4 +1,4 @@
-% $Id: Mesh_options.tex,v 1.2 2009/10/05 23:10:39 oehmke Exp $
+% $Id: Mesh_options.tex,v 1.3 2009/10/28 00:40:37 oehmke Exp $
 
 \subsubsection{ESMF\_MeshElemType}
 \label{sec:mesh:opt:elemtype}
@@ -72,7 +72,7 @@ For a Mesh with parametric dimension of 3 the valid element types (illustrated a
 \hline
 Element Type & Number of Nodes & Description \\
 \hline
-ESMF\_MESHELEMTYPE\_TETRA & 4 & A tetrahedron \\
+ESMF\_MESHELEMTYPE\_TETRA & 4 & A tetrahedron (CAN'T BE USED IN REGRID) \\
 ESMF\_MESHELEMTYPE\_HEX  & 8 & A hexahedron (e.g. a cube) \\
 \hline
 \end{tabular}

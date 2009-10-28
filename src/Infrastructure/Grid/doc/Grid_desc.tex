@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.48 2009/02/26 23:47:13 peggyli Exp $
+% $Id: Grid_desc.tex,v 1.49 2009/10/28 00:40:36 oehmke Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -77,7 +77,13 @@ the user to define the complex edge relationships of tripole and other
 grids.  The DistGrid can be created explicitly and passed into a Grid
 creation routine, or it can be created implicitly if the user takes
 a Grid creation shortcut.  Options for grid creation are described in 
-more detail in section \ref{sec:gridcreateoptions}.
+more detail in section \ref{sec:gridcreateoptions}. The DistGrid used
+in Grid creation describes the properties of the Grid cells. In addition
+to this one, the Grid internally creates DistGrids for each stagger location. 
+These stagger DistGrids are related to the original DistGrid, but may 
+contain extra padding to represent the extent of the index space of
+the stagger. These DistGrids are what are used when a Field is created 
+on a Grid. 
 
 \subsubsection{Supported Grids}
 
@@ -109,7 +115,7 @@ The table below shows the ESMF\_GridConn settings used to create
 standard shapes in 2D using the ESMF\_GridCreateShapeTile() call.  Two values
 are specified for each dimension, one for the low end and one for 
 the high end of the dimension's index values.  Note that connectivities
-have not been implemented as of v3.1.0 and default to aperiodic bounds.
+have not been implemented as of v4.0.0 and default to aperiodic bounds.
 
 \medskip
 \begin{tabular}{|l|c|c||c|c||}
@@ -180,7 +186,7 @@ does not affect the computations performed on an ocean model grid.  Figure
 
 Any of these logically rectangular grid types can be combined through edge
 connections to form a mosaic.  Cubed sphere and yin-yang grids are examples
-of mosaic grids.  Note that as of v3.1.0 multi-tile grids have not yet been
+of mosaic grids.  Note that as of v4.0.0 multi-tile grids have not yet been
 implemented.
  
 \begin{figure}
