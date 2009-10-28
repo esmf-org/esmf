@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.13 2009/09/25 22:14:42 theurich Exp $
+// $Id: ESMCI_VM.C,v 1.14 2009/10/28 16:00:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.13 2009/09/25 22:14:42 theurich Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.14 2009/10/28 16:00:30 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -1343,8 +1343,6 @@ void VM::finalize(
     return;
   }
 
-  // clean-up matchTable
-  matchTableBound = 0;
   // delete the VM association table
   VMIdDestroy(&(matchTable_vmID[0]), &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
@@ -1405,6 +1403,9 @@ void VM::finalize(
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception", rc);
     return;
   }
+  
+  // clean-up matchTable
+  matchTableBound = 0;
 
 //gjtNotYet  delete [] matchTable_tid;
 //gjtNotYet  delete [] matchTable_vm;
