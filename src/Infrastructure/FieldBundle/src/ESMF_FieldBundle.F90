@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.33 2009/10/27 19:51:38 w6ws Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.34 2009/10/28 23:02:53 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -2628,7 +2628,12 @@ end function
                         ESMF_CONTEXT, rc)) return
                
                ! make sure this fields grid matches the rest in the bundle
-               theyMatch=ESMF_GridMatch(grid,gridToCheck,status)
+
+
+               ! NOTE: ALL GRIDS MATCH RIGHT NOW UNTIL WE HAVE A MORE IN DEPTH
+               !       GRID MATCH FUNCTION
+               ! theyMatch=ESMF_GridMatch(grid,gridToCheck,status)
+               theyMatch=.true.
                if (ESMF_LogMsgFoundAllocError(status, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
 
