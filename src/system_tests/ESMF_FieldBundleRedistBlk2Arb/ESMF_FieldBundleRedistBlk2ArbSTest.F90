@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistBlk2ArbSTest.F90,v 1.7 2009/10/28 02:05:34 theurich Exp $
+! $Id: ESMF_FieldBundleRedistBlk2ArbSTest.F90,v 1.8 2009/10/28 03:05:27 theurich Exp $
 !
 ! System test ESMF_FieldBundleRedistBlk2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -39,7 +39,7 @@ program Blk2ArbBunRedist
      integer :: status
      integer :: i, j, j1, add
      integer :: counts(2), localCounts(2), miscount, localCount
-     integer :: npets, myDE
+     integer :: npets, localPet
      integer, dimension(:,:), allocatable :: myIndices
      logical :: match
      real(ESMF_KIND_R8) :: min(2), max(2), compval
@@ -87,7 +87,7 @@ program Blk2ArbBunRedist
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Get the PET count and our PET number
-     call ESMF_VMGet(vm, localPet=myDE, petCount=npets, rc=status)
+     call ESMF_VMGet(vm, localPet=localPet, petCount=npets, rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
      miscount = 0
@@ -129,9 +129,9 @@ program Blk2ArbBunRedist
      allocate (myIndices(localCount,2))
 
      ! calculate myIndices based on DE number
-     ! for now, start at point (1,1+myDE) and go up in the j-direction first
+     ! for now, start at point (1,1+localPet) and go up in the j-direction first
      ! to create a semi-regular distribution of points
-     j1  = 1 + myDE
+     j1  = 1 + localPet
      add = 0
      do i = 1,counts(1)
        do j = j1,counts(2),npets
@@ -258,7 +258,7 @@ program Blk2ArbBunRedist
 
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
-    print *, "Result from DE number ", myDE
+    print *, "Result from PET number ", localPet
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
 
@@ -273,7 +273,7 @@ program Blk2ArbBunRedist
         if ((srcdata(i,j) .ne. resdata(i,j)) .OR. &
             (abs(resdata(i,j)-compval).ge.1.0d-12)) then
           print *, "array contents do not match at: (", i,j, ") on DE ", &
-                   myDE, ".  src=", srcdata(i,j), "dst=", &
+                   localPet, ".  src=", srcdata(i,j), "dst=", &
                    resdata(i,j), "realval=", compval
           match = .false.
           miscount = miscount + 1
@@ -284,7 +284,7 @@ program Blk2ArbBunRedist
         endif
       enddo
     enddo
-    if (match) print *, "Array contents matched correctly!! DE = ", myDE
+    if (match) print *, "Array contents matched correctly!! PET = ", localPet
 10  continue
 
     print *, "Finalize section finished"
@@ -329,7 +329,7 @@ program Blk2ArbBunRedist
   ! Normal ESMF Test output
   print *, testname, " complete."
 
-  if (rc .eq. ESMF_SUCCESS) then
+  if (status .eq. ESMF_SUCCESS) then
     ! Separate message to console, for quick confirmation of success/failure
     write(finalMsg, *) "SUCCESS: ",trim(testname)," finished correctly."
     write(0, *) ""
@@ -346,7 +346,7 @@ program Blk2ArbBunRedist
 
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
   ! file that the scripts grep for.
-  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+  call ESMF_STest((status.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_Finalize()
 

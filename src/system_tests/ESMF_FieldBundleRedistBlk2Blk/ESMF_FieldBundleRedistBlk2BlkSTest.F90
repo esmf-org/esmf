@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistBlk2BlkSTest.F90,v 1.6 2009/10/28 02:05:34 theurich Exp $
+! $Id: ESMF_FieldBundleRedistBlk2BlkSTest.F90,v 1.7 2009/10/28 03:05:27 theurich Exp $
 !
 ! System test FieldBundleRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -40,7 +40,7 @@ program Blk2BlkBunRedist
     
     ! Local variables
     integer :: i, j, rc, localrc
-    integer :: npets, my_pet
+    integer :: npets, localPet
     integer :: miscount
     integer, dimension(2) :: counts
     logical :: match
@@ -97,7 +97,7 @@ program Blk2BlkBunRedist
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     ! Get the PET count and our PET number
-    call ESMF_VMGet(vm, localPet=my_pet, petCount=npets, rc=localrc)
+    call ESMF_VMGet(vm, localPet=localPet, petCount=npets, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
@@ -307,7 +307,7 @@ program Blk2BlkBunRedist
 
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
-    print *, "Result from PET number ", my_pet
+    print *, "Result from PET number ", localPet
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
 
@@ -321,7 +321,7 @@ program Blk2BlkBunRedist
         if ((srcdata(i,j) .ne. resdata(i,j)) .OR. &
             (abs(resdata(i,j)-compval).ge.1.0d-12)) then
           print *, "array contents do not match at: (", i,j, ") on PET ", &
-                   my_pet, ".  src=", srcdata(i,j), "dst=", &
+                   localPet, ".  src=", srcdata(i,j), "dst=", &
                    resdata(i,j), "realval=", compval
           match = .false.
           miscount = miscount + 1
@@ -332,7 +332,7 @@ program Blk2BlkBunRedist
         endif
       enddo
     enddo
-    if (match) print *, "Array contents matched correctly!! PET = ", my_pet
+    if (match) print *, "Array contents matched correctly!! PET = ", localPet
 10  continue
 
     print *, "Finalize section finished"
@@ -400,7 +400,7 @@ program Blk2BlkBunRedist
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-10 continue
+20 continue
 
   ! Normal ESMF Test output
   print *, testname, " complete."
@@ -423,7 +423,8 @@ program Blk2BlkBunRedist
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
   ! file that the scripts grep for.
   call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
-
+  
+  call ESMF_Finalize(rc=rc)
 
 end program Blk2BlkBunRedist
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistArb2ArbSTest.F90,v 1.17 2009/10/19 17:23:46 svasquez Exp $
+! $Id: ESMF_FieldRedistArb2ArbSTest.F90,v 1.18 2009/10/28 03:05:28 theurich Exp $
 !
 ! System test FieldRedistArb2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -39,7 +39,7 @@
      integer :: status
      integer :: i, j, j1, i1, add
      integer :: counts(2), localCounts(2), miscount, localCount
-     integer :: npets, myDE
+     integer :: npets, localPet
      integer, dimension(:,:), allocatable :: myIndices1, myIndices2
      logical :: match
      real(ESMF_KIND_R8) :: min(2), max(2), compval
@@ -78,7 +78,7 @@
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Get the PET count and our PET number
-     call ESMF_VMGet(vm, localPet=myDE, petCount=npets, rc=status)
+     call ESMF_VMGet(vm, localPet=localPet, petCount=npets, rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
      miscount = 0
@@ -109,9 +109,9 @@
      localCount = int((counts(1)*counts(2) + npets -1)/npets)
      allocate (myIndices1(localCount,2))
      ! calculate myIndices based on DE number
-     ! for now, start at point (1,1+myDE) and go up in the j-direction first
+     ! for now, start at point (1,1+localPet) and go up in the j-direction first
      ! to create a semi-regular distribution of points
-     i1  = 1 + myDE
+     i1  = 1 + localPet
      add = 0
      do j = 1,counts(2)
        do i = i1,counts(1),npets
@@ -134,9 +134,9 @@
      localCount = int((counts(1)*counts(2) + npets -1)/npets)
      allocate (myIndices2(localCount,2))
      ! calculate myIndices based on DE number
-     ! for now, start at point (1,1+myDE) and go up in the j-direction first
+     ! for now, start at point (1,1+localPet) and go up in the j-direction first
      ! to create a semi-regular distribution of points
-     j1  = 1 + myDE
+     j1  = 1 + localPet
      add = 0
      do i = 1,counts(1)
        do j = j1,counts(2),npets
@@ -246,7 +246,7 @@
 
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
-    print *, "Result from DE number ", myDE
+    print *, "Result from PET number ", localPet
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
 
@@ -260,7 +260,7 @@
         if ((srcdata(i) .ne. resdata(i)) .OR. &
             (abs(resdata(i)-compval).ge.1.0d-12)) then
           print *, "array contents do not match at: (", i , ") on DE ", &
-                   myDE, ".  src=", srcdata(i), "dst=", &
+                   localPet, ".  src=", srcdata(i), "dst=", &
                    resdata(i), "realval=", compval
           match = .false.
           miscount = miscount + 1
@@ -270,7 +270,7 @@
           endif
         endif
     enddo
-    if (match) print *, "Array contents matched correctly!! DE = ", myDE
+    if (match) print *, "Array contents matched correctly!! PET = ", localPet
 10  continue
 
     print *, "Finalize section finished"
