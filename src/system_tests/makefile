@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.82 2009/10/26 17:25:58 oehmke Exp $ 
+# $Id: makefile,v 1.83 2009/10/28 01:41:02 theurich Exp $ 
 
 ALL: build_system_tests
 
@@ -40,17 +40,12 @@ DIRS      = ESMF_CompCreate \
 	    ESMF_SequentialEnsemble \
 	    ESMF_ConcurrentEnsemble \
 	    ESMF_ArrayRedistOpenMP 
-# Tests temporarily disabled
-# Tests not yet ready
-#           ESMF_RowReduce \        gjt: currently the code depends on DELayout comms, but it should be covered/converted to newArray
+# Tests temporarily disabled, re-enable once capability is implemented
+#           ESMF_RowReduce \          cover by Array comms
 #           ESMF_MergeCoupling \
-#           ESMF_CplOnExclDEs \
-# Removed for new Regrid construction. cmd 8/07.
-#           ESMF_FieldRegridConserv \
-#           ESMF_FieldRegridMulti \
-#           ESMF_FieldRegridOrder \
-#           ESMF_FieldExcl \
-# TODO:FIELDINTEGRATION Restore when Field and FieldBundle comms are restored. 
+#           ESMF_FieldRegridConserv \ cover by Regrid
+#           ESMF_FieldRegridMulti \   cover by Regrid
+#           ESMF_FieldRegridOrder \   cover by Regrid
 #           ESMF_FlowWithCoupling \
 #           ESMF_FlowComp \
 #           ESMF_FieldHalo \
