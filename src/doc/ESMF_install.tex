@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.77 2009/10/21 05:53:54 eschwab Exp $
+% $Id: ESMF_install.tex,v 1.78 2009/10/29 05:59:55 theurich Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -27,6 +27,7 @@ these dependencies and the associated environment settings
 that allow the user to control them.
 
 \subsubsection{LAPACK}
+\label{sec:lapack}
 The LAPACK library is optionally used in the Mesh class to
 compute Patch Recovery regridding weights.  This regridding method requires
 solving local least squares problems, and uses the LAPACK {\it DGELSY} solver.
@@ -69,13 +70,14 @@ must be explicitly set in the user environment.
 Specifies the path where the LAPACK library is located.
 
 \item[ESMF\_LAPACK\_LIBS] Typical value: "-llapack -lblas" (default is system
-dependant)
+dependent)
 
 Specifies the linker directive needed to link the LAPACK library to
 the application.  On some systems, the BLAS library must also be included.
 \end{description}
 
 \subsubsection{NETCDF}
+\label{sec:netcdf}
 ESMF provides the ability to read grid and mesh data in NETCDF form.  The
 following environment variables enable, and specify the name and location
 of the desired NETCDF library and associated header files:
@@ -126,6 +128,7 @@ is set to "-lnetcdf\_c++ -lnetcdf".  When {\tt ESMF\_NETCDF} is set to "split",
 \end{description}
 
 \subsubsection{PNETCDF}
+\label{sec:pnetcdf}
 ESMF provides the ability to write mesh weights in PNETCDF form.  The
 following environment variables enable, and specify the name and location
 of the desired PNETCDF library and associated header files:
@@ -160,6 +163,7 @@ application.
 \end{description}
 
 \subsubsection{XERCES}
+\label{sec:xerces}
 ESMF provides the ability to read Attribute data in XML file format.  The
 following environment variables enable, and specify the name and location
 of the desired XERCES library and associated header files:
@@ -446,6 +450,15 @@ Location into which to install the F90 module files during installation. This
 location can be specified as absolute path or relative to
 {\tt ESMF\_INSTALL\_PREFIX}.
 
+\item[ESMF\_LAPACK]
+See \ref{sec:lapack}
+
+\item[ESMF\_LAPACK\_LIBPATH]
+See \ref{sec:lapack}
+
+\item[ESMF\_LAPACK\_LIBS]
+See \ref{sec:lapack}
+
 \item[ESMF\_MACHINE]
 Possible value: output of {\tt uname -m} where available.
 
@@ -489,15 +502,17 @@ Variable used to pass system-specific options to the first level MPI script
 accessed by ESMF.
 See section \ref{ESMFRunSetting} for a discussion of this option.
 
-\item[ESMF\_NETCDF\_INCLUDE]
-Possible value: {\em absolute path}
+\item[ESMF\_NETCDF]
+See \ref{sec:netcdf}
 
-This variable can be used to point to the desired NETCDF header files.
+\item[ESMF\_NETCDF\_INCLUDE]
+See \ref{sec:netcdf}
 
 \item[ESMF\_NETCDF\_LIBPATH]
-Possible value: {\em absolute path}
+See \ref{sec:netcdf}
 
-This variable can be used to point to the desired NETCDF library files.
+\item[ESMF\_NETCDF\_LIBS]
+See \ref{sec:netcdf}
 
 \item[ESMF\_NO\_INTEGER\_1\_BYTE]
 Possible value: {\tt TRUE}, {\tt FALSE} (default)
@@ -509,6 +524,11 @@ from generating data array interfaces for data types of 1-byte integers.
 Possible value: {\tt TRUE}, {\tt FALSE} (default)
 
 Same as {\tt ESMF\_NO\_INTEGER\_1\_BYTE} but for 2-byte integers.
+
+\item[ESMF\_OPENMP] 
+Possible value: {\tt ON}, {\tt OFF} (default is system dependent)
+
+Compiles and links the ESMF library with OpenMP compiler flags.
 
 \item[ESMF\_OPTLEVEL] 
 Possible value: {\em numerical value}
@@ -528,6 +548,18 @@ compiling for the Cray X1 on an interactive X1 node {\tt ESMF\_OS} will be set
 automatically. However, when ESMF is being cross-compiled for the X1 on a Linux
 host the user must set {\tt ESMF\_OS} to {\tt Unicos} manually in order to
 indicate the intended target platform.
+
+\item[ESMF\_PNETCDF]
+See \ref{sec:pnetcdf}
+
+\item[ESMF\_PNETCDF\_INCLUDE]
+See \ref{sec:pnetcdf}
+
+\item[ESMF\_PNETCDF\_LIBPATH]
+See \ref{sec:pnetcdf}
+
+\item[ESMF\_PNETCDF\_LIBS]
+See \ref{sec:pnetcdf}
 
 \item[ESMF\_PTHREADS]
 Possible value: {\tt ON} (default on most platforms), {\tt OFF}
@@ -569,11 +601,21 @@ run.  If unset or set to any other value, only a subset of the unit tests
 will be included to verify basic functions. Note that this is a compile-time
 selection, not a run-time option.
 
+\item[ESMF\_TESTFORCEOPENMP] 
+Possible value: {\tt ON}, {\tt OFF} (default)
+
+The {\tt ON} setting enforces usage of OpenMP compiler flags when building ESMF test applications. This allows testing of user-level OpenMP usage even with {\tt ESMF\_OPENMP} set to {\tt OFF}.
+
 \item[ESMF\_TESTMPMD] 
 Possible value: {\tt ON}, {\tt OFF} (default)
 
 Variable specifying whether to run MPMD-style tests, i.e. test applications
 that start up as multiple separate executables.
+
+\item[ESMF\_TESTSHAREDOBJ]
+Possible value: {\tt ON}, {\tt OFF} (default)
+
+Variable specifying whether to run shared object tests. This requires that the compute environment supports shared objects, and that the ESMF library is available in form of a shared library.
 
 \item[ESMF\_TESTWITHTHREADS]
 Possible value: {\tt ON}, {\tt OFF} (default)
@@ -589,6 +631,18 @@ ESMF library that was compiled with disabled Pthread features (via the {\tt
 ESMF\_PTHREADS} variable) will produce ESMF error messages during system test
 execution if the system tests were compiled with {\tt ESMF\_TESTWITHTHREADS}
 set to {\tt ON}.
+
+\item[ESMF\_XERCES]
+See \ref{sec:xerces}
+
+\item[ESMF\_XERCES\_INCLUDE]
+See \ref{sec:xerces}
+
+\item[ESMF\_XERCES\_LIBPATH]
+See \ref{sec:xerces}
+
+\item[ESMF\_XERCES\_LIBS]
+See \ref{sec:xerces}
 
 \end{description}
 
