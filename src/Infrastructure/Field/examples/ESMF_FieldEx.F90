@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.16 2009/10/21 18:02:43 oehmke Exp $
+! $Id: ESMF_FieldEx.F90,v 1.17 2009/10/30 01:05:00 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -122,7 +122,8 @@
                             regDecomp=(/2,2,1/), name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridGet(grid=grid3d, distgrid=distgrid3d, rc=rc)
+    call ESMF_GridGet(grid=grid3d, staggerloc=ESMF_STAGGERLOC_CENTER, &
+           staggerDistgrid=distgrid3d, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_FieldGet(grid=grid3d, localDe=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
@@ -133,8 +134,7 @@
 
     ! create an Array 
     array3d = ESMF_ArrayCreate(farray, distgrid=distgrid3d, indexflag=ESMF_INDEX_DELOCAL, &
-        computationalEdgeLWidth=(/0,0,0/), &
-        computationalEdgeUWidth=(/-1,-1,-1/), rc=rc) 
+                 rc=rc) 
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! create a Field
@@ -230,10 +230,6 @@
     grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
           regDecomp=(/2,2/), name="atmgrid", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    ! retrieve distgrid from the Grid
-    !call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
-    !if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! setup arrayspec
     call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc)

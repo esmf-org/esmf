@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetEx.F90,v 1.11 2009/06/19 17:42:23 feiliu Exp $
+! $Id: ESMF_FieldGetEx.F90,v 1.12 2009/10/30 01:05:00 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -93,7 +93,8 @@
                               regDecomp=(/2,2,1/), name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridGet(grid3d, distgrid=distgrid3d, rc=rc)
+    call ESMF_GridGet(grid3d, staggerloc=ESMF_STAGGERLOC_CENTER, &
+           distgrid=distgrid3d, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_FieldGet(grid3d, localDe=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
@@ -104,8 +105,7 @@
 
     ! create an Array 
     array3d = ESMF_ArrayCreate(farray, distgrid=distgrid3d, &
-        staggerloc=0, computationalEdgeLWidth=(/0,0,0/), &
-        computationalEdgeUWidth=(/-1,-1,-1/), rc=rc) 
+                 rc=rc) 
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! create a Field

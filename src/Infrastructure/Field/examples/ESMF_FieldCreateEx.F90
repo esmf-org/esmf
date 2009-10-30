@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.88 2009/10/23 16:22:46 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.89 2009/10/30 01:04:58 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -32,8 +32,7 @@
     real(ESMF_KIND_R8), dimension(:,:), allocatable     :: farray
     real(ESMF_KIND_R8), dimension(:,:), pointer         :: farrayPtr, farrayPtr2
     real(ESMF_KIND_R8), dimension(:,:,:), allocatable   :: farray3d
-    integer, dimension(3)                     :: gcc, gec, fa_shape
-
+    integer, dimension(3)                                :: gec, fa_shape
     integer, dimension(2)           :: gridToFieldMap2d
     integer, dimension(2)           :: maxHaloLWidth2d, maxHaloUWidth2d
     type(ESMF_VM)                   :: vm
@@ -80,22 +79,21 @@
 !  Fortran data array. This interface is overloaded for typekind and rank
 !  of the Fortran data array.  
 !
-!  In the following example, each dimension size of the Fortran array must be no greater 
-!  than the maximum value of the computational and exclusive bounds of its corresponding 
+!  In the following example, each dimension size of the Fortran array is equal to the 
+!  exclusive bounds of its corresponding 
 !  Grid dimension queried from the Grid through {\tt ESMF\_GridGet()} public interface.
 !
 !  Formally let fa\_shape(i) be the shape of i-th dimension of user supplied Fortran array,
 !  then rule 1 states:  
 !  \begin{verbatim}
 ! 
-!  (1) fa_shape(i) = max(computationalCount(i), exclusiveCount(i))         
+!  (1) fa_shape(i) = exclusiveCount(i)         
 !                i = 1...GridDimCount
 ! 
 !  \end{verbatim}
 ! 
-!  fa\_shape(i) defines the shape of i-th dimension of the Fortran array. computationalCount and 
-!  exclusiveCount are the number of data elements of i-th dimension in the computational and 
-!  exclusive regions queried
+!  fa\_shape(i) defines the shape of i-th dimension of the Fortran array.
+!  ExclusiveCount are the number of data elements of i-th dimension in the exclusive region queried
 !  from {\tt ESMF\_GridGet} interface. {\em Rule 1 assumes that the Grid and the Fortran intrinsic
 !  array have same number of dimensions; and optional arguments
 !  of FieldCreate from Fortran array are left unspecified using default setup}. These assumptions 
@@ -118,7 +116,7 @@
 !  data array in most scenarios. It extends to higher dimension count, 3D, 4D, etc...
 !  Typically, as the code example demonstrates, a user first creates a Grid 
 !  , then uses {\tt ESMF\_GridGet()}
-!  to retrieve the computational and exclusive counts.  Next the user calculates the shape
+!  to retrieve the exclusive counts.  Next the user calculates the shape
 !  of each Fortran array dimension according to rule 1. The Fortran data array is allocated
 !  and initialized based on the computed shape.  A Field can either be created in one shot
 !  created empty and finished using {\tt ESMF\_FieldSetCommit}.
@@ -139,10 +137,10 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_GridGet(grid, localDE=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
-        computationalCount=gcc, exclusiveCount=gec, rc=rc)
+        exclusiveCount=gec, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    allocate(farray(max(gec(1), gcc(1)), max(gec(2), gcc(2))) )
+    allocate(farray(gec(1), gec(2)) )
 
     field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -169,7 +167,7 @@
 !EOE
 
 !BOC
-    allocate(farrayPtr(max(gec(1), gcc(1)), max(gec(2), gcc(2))) )
+    allocate(farrayPtr(gec(1), gec(2)) )
 
     field = ESMF_FieldCreate(grid, farrayPtr, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -265,13 +263,13 @@
 !  Field dimension is ungridded, ungriddedLBound=(/3/), ungriddedUBound=(/9/).
 !  First we use rule 1 to compute shapes of the gridded Fortran array dimension,
 !  then we use rule 2 to compute shapes of the ungridded Fortran array dimension.
-!  In this example, we used the computational and exclusive bounds obtained in previous
+!  In this example, we used the exclusive bounds obtained in the previous
 !  example.
 !EOE
 
 !BOC
-    fa_shape(1) = max(gec(1), gcc(1)) ! rule 1
-    fa_shape(2) = max(gec(2), gcc(2))
+    fa_shape(1) = gec(1) ! rule 1
+    fa_shape(2) = gec(2)
     fa_shape(3) = 7 ! rule 2 9-3+1
     allocate(farray3d(fa_shape(1), fa_shape(2), fa_shape(3)))
     field = ESMF_FieldCreate(grid, farray3d, ESMF_INDEX_DELOCAL, &
@@ -304,7 +302,7 @@
 !  We apply the mapping gridToFieldMap on rule 1 to create rule 3:
 !  \begin{verbatim}
 ! 
-!  (3) fa_shape(gridToFieldMap(i)) = max(computationalCount(i), exclusiveCount(i)        
+!  (3) fa_shape(gridToFieldMap(i)) = exclusiveCount(i)        
 !                                i = 1,..GridDimCount.
 ! 
 !  \end{verbatim}
@@ -316,14 +314,14 @@
 !
 !  First we use rule 3 to compute shapes of the gridded Fortran array dimension,
 !  then we use rule 2 to compute shapes of the ungridded Fortran array dimension.
-!  In this example, we used the computational and exclusive bounds obtained in the previous
+!  In this example, we use the exclusive bounds obtained in the previous
 !  example.
 !EOE
 !BOC
     gridToFieldMap2d(1) = 3
     gridToFieldMap2d(2) = 1
     do i = 1, 2
-        fa_shape(gridToFieldMap2d(i)) = max(gec(i), gcc(i))
+        fa_shape(gridToFieldMap2d(i)) = gec(i)
     end do
     fa_shape(2) = 7
     allocate(farray3d(fa_shape(1), fa_shape(2), fa_shape(3)))
@@ -362,7 +360,7 @@
 !  The {\tt ESMF\_FieldCreate()} interface supports creating a Field from a Grid and a
 !  Fortran array padded with halos on the distributed dimensions of the Fortran
 !  array. Using this technique one can avoid passing non-contiguous Fortran array
-!  slice to FieldCreate. It guarantees the same computational region,
+!  slice to FieldCreate. It guarantees the same exclusive region,
 !  and by using halos, it also defines a bigger total region to contain 
 !  the entire contiguous memory block of the Fortran array.
 !
@@ -388,9 +386,8 @@
 ! 
 !  \begin{verbatim}
 !
-!  (4) fa_shape(mhw2fa(k)) = max((exclusiveCount(fa2g(mhw2fa(k))), 
-!                            computationalCount(fa2g(mhw2fa(k))) +
-!                            maxHaloUWidth(k) + maxHaloLWidth(k))
+!  (4) fa_shape(mhw2fa(k)) = exclusiveCount(fa2g(mhw2fa(k)) + 
+!                            maxHaloUWidth(k) + maxHaloLWidth(k)
 !                        k = 1...size(maxHaloWidth) 
 !
 !  \end{verbatim}
@@ -403,9 +400,8 @@
 !  fa_index = 1
 !  do i = 1, farray_rank
 !     if i-th dimension of Fortran array is distributed
-!         fa_shape(i) = max(exclusiveCount(fa2g(i)), 
-!                       computationalCount(fa2g(i)) +
-!                       maxHaloUWidth(fa_index) + maxHaloLWidth(fa_index))
+!         fa_shape(i) = exclusiveCount(fa2g(i)) + 
+!                       maxHaloUWidth(fa_index) + maxHaloLWidth(fa_index)
 !         fa_index = fa_index + 1
 !     endif
 !  enddo
@@ -429,8 +425,8 @@
 !
 !  \begin{verbatim}
 !
-!  (5) fa_shape(k) = max(exclusiveCount(k), computationalCount(k) + 
-!                    maxHaloUWidth(k) + maxHaloLWidth(k)) 
+!  (5) fa_shape(k) = exclusiveCount(k) + 
+!                    maxHaloUWidth(k) + maxHaloLWidth(k) 
 !                k = 1...size(maxHaloWidth)
 !
 !  \end{verbatim}
@@ -446,7 +442,7 @@
 !  \begin{verbatim}
 !
 !  do k = 1, 3
-!      fa_shape(k) = max(exclusiveCount(k), computationalCount(k) + 
+!      fa_shape(k) = exclusiveCount(k) + 
 !                    maxHaloUWidth(k) + maxHaloLWidth(k)) 
 !  enddo
 !
@@ -460,8 +456,8 @@
 !
 !  \begin{verbatim}
 !
-!  (6) fa_shape(k+first_distdim_index-1) = max(exclusiveCount(k),
-!                 computationalCount(k)) +  maxHaloUWidth(k) + maxHaloLWidth(k) )
+!  (6) fa_shape(k+first_distdim_index-1) = exclusiveCount(k) +
+!                                          maxHaloUWidth(k) + maxHaloLWidth(k)
 !                                      k = 1...size(maxHaloWidth)
 !
 !  \end{verbatim}
@@ -487,7 +483,7 @@
     maxHaloUWidth2d(1) = 3
     maxHaloUWidth2d(2) = 5
     do k = 1, 2
-        fa_shape(k) = max(gec(k), gcc(k)+maxHaloLWidth2d(k)+maxHaloUWidth2d(k) )
+        fa_shape(k) = gec(k) + maxHaloLWidth2d(k) + maxHaloUWidth2d(k)
     end do
     fa_shape(3) = 7          ! 9-3+1
     allocate(farray3d(fa_shape(1), fa_shape(2), fa_shape(3)))
