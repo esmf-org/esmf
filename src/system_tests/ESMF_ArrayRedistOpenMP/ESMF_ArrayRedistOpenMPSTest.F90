@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistOpenMPSTest.F90,v 1.5 2009/10/16 18:43:20 theurich Exp $
+! $Id: ESMF_ArrayRedistOpenMPSTest.F90,v 1.6 2009/10/30 15:47:14 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST   String used by test script to count system tests.
@@ -10,19 +10,24 @@
 ! System test ArrayRedistOpenMP.  
 !    Two gridded components and one coupler component, one-way coupling.
 !
-!    First gridded component runs on 4 PETs and defines a 2D source Array 
-!    100x1500. Second gridded component defines a destination Array also 
+!    First gridded component receives 8 PETs from the driver. However, using
+!    GridCompSetVM calls in its SetVM routine it requests 2PEs to be provided
+!    to each of its PETs. If this request can be accommodated the component will
+!    execute on 4 PETs with 2PEs each. If the request cannot be accommodated the
+!    component will execute with 8PETs. In either case it defines a 2D source
+!    Array 100x1500. Second gridded component defines a destination Array also 
 !    100x1500 but runs on only 2 PETs. Both gridded components use DELayouts 
 !    with 1 DE per PET. The decomposition of the source Array is defined as 
-!    (petCount x 1) = (4 x 1) while the destination Array is decomposed as 
-!    (1 x petCount) = (1 x 2).
+!    (petCount x 1) = (4 x 1) or (8 x 1), depending on whether each PET received
+!    2PEs or not. The destination Array is decomposed as (1 x petCount) = 
+!    (1 x 2).
 !
-!    Using OpenMP directives the first component initializes the source 
-!    Array to a geometric function:
+!    Using OpenMP directives for loop-parallelization the first component
+!    initializes the source Array to a geometric function:
 !
 !       10.0 + 5.0*sin((I/Imax)*pi) + 2.0*sin((J/Jmax)*pi)
 !
-!    The coupler component runs on all 6 PETs and reconciles import and export
+!    The coupler component runs on all 8 PETs and reconciles import and export
 !    states which contain source and destination Array, respectively. The 
 !    coupler component then calls ArrayRedist() to redistribute the source
 !    Array data onto the destination Array.
