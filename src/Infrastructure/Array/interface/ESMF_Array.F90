@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.103 2009/09/09 03:45:17 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.104 2009/10/30 05:42:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.103 2009/09/09 03:45:17 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.104 2009/10/30 05:42:50 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -823,6 +823,16 @@ contains
 !   integer,                    intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
+! \label{ArraySMMStoreTK}
+! {\tt ESMF\_ArraySMMStore()} is a collective method across all PETs of the
+! current Component. The interface of the method is overloaded, allowing 
+! -- in principle -- each PET to call into {\tt ESMF\_ArraySMMStore()}
+! through a different entry point. Restrictions apply as to which combinations
+! are sensible. All other combinations result in ESMF run time errors. The
+! complete semantics of the {\tt ESMF\_ArraySMMStore()} method, as provided
+! through the separate entry points shown in \ref{ArraySMMStoreTK} and
+! \ref{ArraySMMStoreNF}, is described in the following paragraphs as a whole.
+!
 !   Store an Array sparse matrix multiplication operation from {\tt srcArray}
 !   to {\tt dstArray}. PETs that specify non-zero matrix coefficients must use
 !   the <type><kind> overloaded interface and provide the {\tt factorList} and
@@ -1183,6 +1193,16 @@ contains
     integer,                    intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
+! \label{ArraySMMStoreNF}
+! {\tt ESMF\_ArraySMMStore()} is a collective method across all PETs of the
+! current Component. The interface of the method is overloaded, allowing 
+! -- in principle -- each PET to call into {\tt ESMF\_ArraySMMStore()}
+! through a different entry point. Restrictions apply as to which combinations
+! are sensible. All other combinations result in ESMF run time errors. The
+! complete semantics of the {\tt ESMF\_ArraySMMStore()} method, as provided
+! through the separate entry points shown in \ref{ArraySMMStoreTK} and
+! \ref{ArraySMMStoreNF}, is described in the following paragraphs as a whole.
+!
 !   Store an Array sparse matrix multiplication operation from {\tt srcArray}
 !   to {\tt dstArray}. PETs that specify non-zero matrix coefficients must use
 !   the <type><kind> overloaded interface and provide the {\tt factorList} and
@@ -1211,10 +1231,6 @@ contains
 !   and typekind conform with the {\tt srcArray}, {\tt dstArray} pair. 
 !   Congruent Arrays possess matching DistGrids and the shape of the local
 !   array tiles matches between the Arrays for every DE.
-!
-!   This method is overloaded for:\newline
-!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
-!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
 !   \newline
 !
 !   This call is {\em collective} across the current VM.
