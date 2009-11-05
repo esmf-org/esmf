@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.8 2009/06/03 23:52:00 theurich Exp $
+# $Id: build_rules.mk,v 1.9 2009/11/05 23:28:34 w6ws Exp $
 #
 # Cygwin.g95.default
 #
@@ -148,12 +148,14 @@ ESMF_CXXLINKRPATHS += \
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lstdc++
+ESMF_F90LINKLIBS += -lstdc++ -lgcc_s
+ESMF_F90LINKOPTS += -Wl,--enable-auto-import
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
 ESMF_CXXLINKLIBS += -lf95
+ESMF_CXXLINKOPTS += -Wl,--enable-auto-import
 
 ############################################################
 # Blank out shared library options
