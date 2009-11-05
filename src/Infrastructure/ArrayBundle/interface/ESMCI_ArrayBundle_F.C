@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.12 2009/09/04 19:09:19 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.13 2009/11/05 19:05:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,8 @@ extern "C" {
 
   void FTN(c_esmc_arraybundlecreate)(ESMCI::ArrayBundle **ptr, 
     ESMCI::Array **arrayList, int *arrayCount, char *name, int *len_name,
-    int *rc){
+    int *rc,
+    ESMCI_FortranStrLenArg name_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlecreate()"
     // Initialize return code; assume routine not implemented
@@ -258,7 +259,8 @@ extern "C" {
 
   void FTN(c_esmc_arraybundleserialize)(ESMCI::ArrayBundle **arraybundle, 
     char *buf, int *length, int *offset, ESMC_AttReconcileFlag *attreconflag,
-    ESMC_InquireFlag *inquireflag, int *rc){
+    ESMC_InquireFlag *inquireflag, int *rc,
+    ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundleserialize()"
     // Initialize return code; assume routine not implemented
@@ -271,7 +273,8 @@ extern "C" {
   }
 
   void FTN(c_esmc_arraybundledeserialize)(ESMCI::ArrayBundle **arraybundle,
-    char *buf, int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc){
+    char *buf, int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc,
+    ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundledeserialize()"
     // Initialize return code; assume routine not implemented

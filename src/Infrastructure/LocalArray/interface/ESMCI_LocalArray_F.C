@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray_F.C,v 1.10 2009/09/21 21:05:03 theurich Exp $
+// $Id: ESMCI_LocalArray_F.C,v 1.11 2009/11/05 19:05:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -369,7 +369,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_localarrayprint)(ESMCI::LocalArray **ptr, char *opts, int *rc,
-    int clen){
+    ESMCI_FortranStrLenArg clen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarrayprint()"
     // Initialize return code; assume routine not implemented
@@ -398,7 +398,9 @@ extern "C" {
   }
 
   void FTN(c_esmc_localarraywrite)(ESMCI::LocalArray **ptr, char *opts,
-    char *fname, int *rc, int optlen, int flen){
+    char *fname, int *rc,
+    ESMCI_FortranStrLenArg optlen,
+    ESMCI_FortranStrLenArg flen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarraywrite()"
     // Initialize return code; assume routine not implemented
@@ -433,7 +435,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmf_f90ptrsizeprint)(char *p1, char *p2, int *rank, int *rc){
+  void FTN(c_esmf_f90ptrsizeprint)(char *p1, char *p2, int *rank, int *rc,
+    ESMCI_FortranStrLenArg p1_l,
+    ESMCI_FortranStrLenArg p2_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmf_f90ptrsizeprint()"
     // Initialize return code; assume routine not implemented

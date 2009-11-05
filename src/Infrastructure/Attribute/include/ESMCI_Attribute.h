@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.25 2009/10/24 01:14:40 w6ws Exp $
+// $Id: ESMCI_Attribute.h,v 1.26 2009/11/05 19:07:29 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -269,78 +269,141 @@ class Attribute
 // fortran interface functions to attribute objects
 extern "C" {
   void FTN(c_esmc_attpackaddattribute)(ESMC_Base **base, char *name, char *convention, char *purpose, 
-                                 char *object, int *rc, int nlen, 
-                                 int clen, int plen, int olen);
+                                 char *object, int *rc,
+                                 ESMCI_FortranStrLenArg nlen, 
+                                 ESMCI_FortranStrLenArg clen,
+                                 ESMCI_FortranStrLenArg plen,
+                                 ESMCI_FortranStrLenArg olen);
   void FTN(c_esmc_attpackcreatecustom)(ESMC_Base **base, char *convention, char *purpose, 
                                  char *object, int *rc, 
-                                 int clen, int plen, int olen);
+                                 ESMCI_FortranStrLenArg clen, 
+                                 ESMCI_FortranStrLenArg plen,
+                                 ESMCI_FortranStrLenArg olen);
   void FTN(c_esmc_attpackcreatestandard)(ESMC_Base **base, char *convention, char *purpose, 
                                  char *object, int *rc, 
-                                 int clen, int plen, int olen);
+                                 ESMCI_FortranStrLenArg clen, 
+                                 ESMCI_FortranStrLenArg plen, 
+                                 ESMCI_FortranStrLenArg olen);
   void FTN(c_esmc_attpacknest)(ESMC_Base **base, char *convention, char *purpose, 
                                  char *object, char *nestConvention, char *nestPurpose, 
-                                 int *rc, int clen, int plen, int olen, int nclen, int nplen);
+                                 int *rc, 
+                                 ESMCI_FortranStrLenArg clen, 
+                                 ESMCI_FortranStrLenArg plen, 
+                                 ESMCI_FortranStrLenArg olen, 
+                                 ESMCI_FortranStrLenArg nclen, 
+                                 ESMCI_FortranStrLenArg nplen);
   void FTN(c_esmc_attpackdestroy)(ESMC_Base **base, char *name, char *convention, char *purpose,
-                                    char *object, int *rc, int nlen, int clen, int plen, int olen);
+                                  char *object, int *rc, 
+                                  ESMCI_FortranStrLenArg nlen, 
+                                  ESMCI_FortranStrLenArg clen, 
+                                  ESMCI_FortranStrLenArg plen, 
+                                  ESMCI_FortranStrLenArg olen);
   void FTN(c_esmc_attpackgetchar)(ESMC_Base **base, char *name, char *value, 
-                                  char *convention, char *purpose, char *object, int *rc, int nlen, 
-                                  int vlen, int clen, int plen, int olen);
+                                  char *convention, char *purpose, char *object, int *rc, 
+                                  ESMCI_FortranStrLenArg nlen, 
+                                  ESMCI_FortranStrLenArg vlen, 
+                                  ESMCI_FortranStrLenArg clen, 
+                                  ESMCI_FortranStrLenArg plen, 
+                                  ESMCI_FortranStrLenArg olen);
   void FTN(c_esmc_attpackgetcharlist)(ESMC_Base **base, char *name, ESMC_TypeKind *tk, int *count,
                                   int *lens, char *valueList, char *convention, char *purpose, 
-                                  char *object, int *rc, int nlen, int vlen, int clen, int plen, 
-                                  int olen);
+                                  char *object, int *rc, 
+                                  ESMCI_FortranStrLenArg nlen, 
+                                  ESMCI_FortranStrLenArg vlen, 
+                                  ESMCI_FortranStrLenArg clen, 
+                                  ESMCI_FortranStrLenArg plen, 
+                                  ESMCI_FortranStrLenArg olen);
   void FTN(c_esmc_attpackgetvalue)(ESMC_Base **base, char *name, ESMC_TypeKind *tk, int *count,
                                   void *value, char *convention, char *purpose, char *object, 
-                                  int *rc, int nlen, int clen, int plen, int olen);
+                                  int *rc, 
+                                  ESMCI_FortranStrLenArg nlen, 
+                                  ESMCI_FortranStrLenArg clen, 
+                                  ESMCI_FortranStrLenArg plen, 
+                                  ESMCI_FortranStrLenArg olen);
   void FTN(c_esmc_attpackispresent)(ESMC_Base **base, char *name, char *convention, char *purpose, 
-                                  char *object, ESMC_Logical *present, int *rc, int nlen, 
-                                  int clen, int plen, int olen);
+                                  char *object, ESMC_Logical *present, int *rc, 
+                                  ESMCI_FortranStrLenArg nlen, 
+                                  ESMCI_FortranStrLenArg clen, 
+                                  ESMCI_FortranStrLenArg plen, 
+                                  ESMCI_FortranStrLenArg olen);
   void FTN(c_esmc_attpacksetchar)(ESMC_Base **base, char *name, char *value, ESMC_TypeKind *tk, 
-                                  char *convention, char *purpose, char *object, int *rc, int nlen, 
-                                  int vlen, int clen, int plen, int olen);
+                                  char *convention, char *purpose, char *object, int *rc, 
+                                  ESMCI_FortranStrLenArg nlen, 
+                                  ESMCI_FortranStrLenArg vlen, 
+                                  ESMCI_FortranStrLenArg clen, 
+                                  ESMCI_FortranStrLenArg plen, 
+                                  ESMCI_FortranStrLenArg olen);
   void FTN(c_esmc_attpacksetcharlist)(ESMC_Base **base, char *name, ESMC_TypeKind *tk, int *count,
                                    char *valueList, int *lens, char *convention, char *purpose, 
-                                   char *object, int *rc, int nlen, int vlen, int clen, int plen, 
-                                   int olen);
+                                   char *object, int *rc, 
+                                  ESMCI_FortranStrLenArg nlen, 
+                                  ESMCI_FortranStrLenArg vlen, 
+                                  ESMCI_FortranStrLenArg clen, 
+                                  ESMCI_FortranStrLenArg plen, 
+                                  ESMCI_FortranStrLenArg olen);
   void FTN(c_esmc_attpacksetvalue)(ESMC_Base **base, char *name, ESMC_TypeKind *tk, int *count,
                                   void *value, char *convention, char *purpose, char *object, 
-                                  int *rc, int nlen, int clen, int plen, int olen);
+                                  int *rc, 
+                                  ESMCI_FortranStrLenArg nlen, 
+                                  ESMCI_FortranStrLenArg clen, 
+                                  ESMCI_FortranStrLenArg plen, 
+                                  ESMCI_FortranStrLenArg olen);
   void FTN(c_esmc_attributewritetab)(ESMC_Base **base, char *convention, char *purpose,
-                                  char *object, char *targetobj, int *rc, int clen, int plen, 
-                                  int olen, int tlen);
+                                  char *object, char *targetobj, int *rc, 
+                                  ESMCI_FortranStrLenArg clen, 
+                                  ESMCI_FortranStrLenArg plen, 
+                                  ESMCI_FortranStrLenArg olen, 
+                                  ESMCI_FortranStrLenArg tlen);
   void FTN(c_esmc_attributewritexml)(ESMC_Base **base, char *convention, char *purpose,
                                   char *object, char *targetobj, int *rc, 
-                                  int clen, int plen, int olen, int tlen);
+                                  ESMCI_FortranStrLenArg clen, 
+                                  ESMCI_FortranStrLenArg plen, 
+                                  ESMCI_FortranStrLenArg olen, 
+                                  ESMCI_FortranStrLenArg tlen);
   void FTN(c_esmc_attributecopy)(ESMC_Base **source, ESMC_Base **destination, 
                                 ESMC_AttCopyFlag *attcopyflag, ESMC_AttTreeFlag *atttreeflag, int *rc);
-  void FTN(c_esmc_attributedestroy)(ESMC_Base **base, char *name, int *rc, int nlen);
+  void FTN(c_esmc_attributedestroy)(ESMC_Base **base, char *name, int *rc, 
+                                  ESMCI_FortranStrLenArg nlen);
   void FTN(c_esmc_attributegetcount)(ESMC_Base **base, int *count, ESMC_AttGetCountFlag *flag, int *rc);
   void FTN(c_esmc_attributegetinfoname)(ESMC_Base **base, char *name, 
                                         ESMC_TypeKind *tk,
-                                        int *count, int *rc, int nlen);
+                                        int *count, int *rc, 
+                                        ESMCI_FortranStrLenArg nlen);
   void FTN(c_esmc_attributegetinfonum)(ESMC_Base **base, int *num, 
                                       char *name,
                                       ESMC_TypeKind *tk, int *count, 
-                                      int *rc, int nlen);
+                                      int *rc, 
+                                      ESMCI_FortranStrLenArg nlen);
   void FTN(c_esmc_attributegetchar)(ESMC_Base **base, char *name, char *value, 
-                                    int *rc, int nlen, int vlen);
+                                    int *rc, 
+                                    ESMCI_FortranStrLenArg nlen, 
+                                    ESMCI_FortranStrLenArg vlen);
   void FTN(c_esmc_attributegetvalue)(ESMC_Base **base, char *name, 
                                     ESMC_TypeKind *tk,
-                                    int *count, void *value, int *rc, int nlen);
+                                    int *count, void *value, int *rc, 
+                                    ESMCI_FortranStrLenArg nlen);
   void FTN(c_esmc_attributeispresent)(ESMC_Base **base, char *name, ESMC_Logical *present, 
-                                    int *rc, int nlen);
+                                    int *rc, 
+                                    ESMCI_FortranStrLenArg nlen);
   void FTN(c_esmc_attributelink)(ESMC_Base **source, ESMC_Base **destination, int *rc);
   void FTN(c_esmc_attributelinkremove)(ESMC_Base **source, ESMC_Base **destination, int *rc);
   void FTN(c_esmc_attributemove)(ESMC_Base **source, ESMC_Base **destination, int *rc);
   void FTN(c_esmc_attributesetchar)(ESMC_Base **base, char *name, char *value, 
-                                    int *rc, int nlen, int vlen);
+                                    int *rc, 
+                                    ESMCI_FortranStrLenArg nlen, 
+                                    ESMCI_FortranStrLenArg vlen);
   void FTN(c_esmc_attributesetcharlist)(ESMC_Base **base, char *name, ESMC_TypeKind *tk,
-                                        int *count, char *valueList, int *lens, int *rc, int nlen);
+                                        int *count, char *valueList, int *lens, int *rc, 
+                                        ESMCI_FortranStrLenArg nlen,
+                                        ESMCI_FortranStrLenArg vllen);
   void FTN(c_esmc_attributesetvalue)(ESMC_Base **base, char *name, ESMC_TypeKind *tk,
-                                    int *count, void *value, int *rc, int nlen);
+                                    int *count, void *value, int *rc, 
+                                    ESMCI_FortranStrLenArg nlen);
   void FTN(c_esmc_attributesetobjsintree)(ESMC_Base **base, char *object, char *name, 
                                           ESMC_TypeKind *tk, int *count, void *value, 
-                                          int *rc, int olen, int nlen);
+                                          int *rc, 
+                                          ESMCI_FortranStrLenArg olen, 
+                                          ESMCI_FortranStrLenArg nlen);
   void FTN(c_esmc_attributeupdate)(ESMC_Base **base, ESMCI::VM **vm, int *rootList,
                                     int *count, int *rc);
   void FTN(c_esmc_attributeupdatereset)(ESMC_Base **base, int *rc);

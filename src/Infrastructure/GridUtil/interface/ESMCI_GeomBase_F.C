@@ -1,4 +1,4 @@
-// $Id: ESMCI_GeomBase_F.C,v 1.4 2009/10/06 11:43:35 w6ws Exp $
+// $Id: ESMCI_GeomBase_F.C,v 1.5 2009/11/05 19:05:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_GeomBase_F.C,v 1.4 2009/10/06 11:43:35 w6ws Exp $";
+             "$Id: ESMCI_GeomBase_F.C,v 1.5 2009/11/05 19:05:21 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -44,8 +44,9 @@ extern "C" {
 
 // non-method functions
   void FTN(c_esmc_geombaseserialize)(int *geomtype, int * staggerloc,
-		    void *buffer, int *length, int *offset,
-                    ESMC_InquireFlag *inquireflag, int *localrc){
+		    char *buffer, int *length, int *offset,
+                    ESMC_InquireFlag *inquireflag, int *localrc,
+                    ESMCI_FortranStrLenArg buffer_l){
     int *ip;
 
     // Initialize return code; assume routine not implemented
@@ -63,7 +64,7 @@ extern "C" {
 
 
     // Fill in data
-    ip = (int *)((char *)(buffer) + *offset);
+    ip = (int *)(buffer + *offset);
     if (*inquireflag != ESMF_INQUIREONLY) {
       *ip++ = *geomtype;
       *ip++ = *staggerloc; 
@@ -80,7 +81,8 @@ extern "C" {
 
 
   void FTN(c_esmc_geombasedeserialize)(int *geomtype, int * staggerloc,
-	       void *buffer, int *offset, int *localrc){
+	       char *buffer, int *offset, int *localrc,
+               ESMCI_FortranStrLenArg buffer_l){
 
     int *ip;
 
@@ -88,7 +90,7 @@ extern "C" {
     if (localrc) *localrc = ESMC_RC_NOT_IMPL;
 
     // Get data out
-    ip = (int *)((char *)(buffer) + *offset);
+    ip = (int *)(buffer + *offset);
     *geomtype = *ip++;
     *staggerloc = *ip++; 
 

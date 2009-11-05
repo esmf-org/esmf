@@ -97,7 +97,8 @@ extern "C" {
 					  ESMC_IndexFlag *indexflag,
                                           int *destroyDistgridArg, 
                                           int *destroyDELayoutArg, 
-					  int *rc){
+					  int *rc,
+                                          ESMCI_FortranStrLenArg name_l){
     int localrc;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridcreatefromdistgrid()"
@@ -149,7 +150,8 @@ extern "C" {
 					  int *localArbIndexCount, 
                                           int *destroyDistgridArg, 
                                           int *destroyDELayoutArg, 
-					  int *rc){
+					  int *rc,
+                                          ESMCI_FortranStrLenArg name_l){
     int localrc;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridcreatedistgridarb()"
@@ -801,7 +803,8 @@ extern "C" {
 					  ESMC_IndexFlag *indexflag,
                                           int *destroyDistgridArg, 
                                           int *destroyDELayoutArg, 
-					  int *rc){
+					  int *rc,
+                                          ESMCI_FortranStrLenArg name_l){
     int localrc;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridsetfromdistgrid()"
@@ -2288,7 +2291,8 @@ extern "C" {
 
   void FTN(c_esmc_gridserialize)(ESMCI::Grid **grid, char *buf, int *length,
     int *offset, ESMC_AttReconcileFlag *attreconflag,
-    ESMC_InquireFlag *inquireflag, int *rc){
+    ESMC_InquireFlag *inquireflag, int *rc,
+    ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridserialize()"
     // Initialize return code; assume routine not implemented
@@ -2301,7 +2305,8 @@ extern "C" {
   }
 
   void FTN(c_esmc_griddeserialize)(ESMCI::Grid **grid, char *buf,
-    int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc){
+    int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc,
+    ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_griddeserialize()"
     // Initialize return code; assume routine not implemented

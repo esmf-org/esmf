@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.33 2009/10/26 20:46:42 oehmke Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.34 2009/11/05 19:05:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -55,7 +55,8 @@ using namespace ESMCI;
  *----------------------------------------------------------------------------*/
 
 
-extern "C" void FTN(c_esmc_meshinit)(char *logfile, int *use_log, int nlen) {
+extern "C" void FTN(c_esmc_meshinit)(char *logfile, int *use_log,
+   ESMCI_FortranStrLenArg nlen) {
 
   char *lname = ESMC_F90toCstring(logfile, nlen);
 
@@ -224,7 +225,8 @@ extern "C" void FTN(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *nod
 
 } 
 
-extern "C" void FTN(c_esmc_meshwrite)(Mesh **meshpp, char *fname, int *rc, int nlen) {
+extern "C" void FTN(c_esmc_meshwrite)(Mesh **meshpp, char *fname, int *rc,
+    ESMCI_FortranStrLenArg nlen) {
 
   try {
 
@@ -448,7 +450,8 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
 /**
  * Routines for reading in a test VTK mesh to fortran arrays (for testing the array interface)
  */
-extern "C" void FTN(c_esmc_meshvtkheader)(char *filename, int *num_elem, int *num_node, int *conn_size, int *rc, int nlen) {
+extern "C" void FTN(c_esmc_meshvtkheader)(char *filename, int *num_elem, int *num_node, int *conn_size, int *rc,
+    ESMCI_FortranStrLenArg nlen) {
 
   try {
  
@@ -510,7 +513,8 @@ extern "C" void FTN(c_esmc_meshvtkheader)(char *filename, int *num_elem, int *nu
 }
 
 extern "C" void FTN(c_esmc_meshvtkbody)(char *filename, int *nodeId, double *nodeCoord,
-                    int *nodeOwner, int *elemId, int *elemType, int *elemConn, int *rc, int nlen) {
+                    int *nodeOwner, int *elemId, int *elemType, int *elemConn, int *rc,
+    ESMCI_FortranStrLenArg nlen) {
 
   try {
 
@@ -808,8 +812,9 @@ extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *
 
 
 extern "C" void FTN(c_esmc_meshinfoserialize)(int *intMeshFreed,
-	        void *buffer, int *length, int *offset,
-                ESMC_InquireFlag *inquireflag, int *localrc){
+	        char *buffer, int *length, int *offset,
+                ESMC_InquireFlag *inquireflag, int *localrc,
+                ESMCI_FortranStrLenArg buffer_l){
 
     int *ip;
 
@@ -827,7 +832,7 @@ extern "C" void FTN(c_esmc_meshinfoserialize)(int *intMeshFreed,
     }
 
     // Save keyCount
-    ip= (int *)((char *)(buffer) + *offset);
+    ip= (int *)(buffer + *offset);
     if (*inquireflag != ESMF_INQUIREONLY) {
       *ip++ = *intMeshFreed;
     }
@@ -843,7 +848,8 @@ extern "C" void FTN(c_esmc_meshinfoserialize)(int *intMeshFreed,
 
 
 extern "C" void FTN(c_esmc_meshinfodeserialize)(int *intMeshFreed, 
-                                 void *buffer, int *offset, int *localrc){
+                                 char *buffer, int *offset, int *localrc,
+                                 ESMCI_FortranStrLenArg buffer_l){
 
     int *ip;
 
@@ -851,7 +857,7 @@ extern "C" void FTN(c_esmc_meshinfodeserialize)(int *intMeshFreed,
     if (localrc) *localrc = ESMC_RC_NOT_IMPL;
 
     // Get pointer
-    ip= (int *)((char *)(buffer) + *offset);
+    ip= (int *)(buffer + *offset);
 
     // Get values
     *intMeshFreed=*ip++;
@@ -867,8 +873,9 @@ extern "C" void FTN(c_esmc_meshinfodeserialize)(int *intMeshFreed,
 
 
 extern "C" void FTN(c_esmc_meshserialize)(Mesh **meshpp,
-	        void *buffer, int *length, int *offset,
-                ESMC_InquireFlag *inquireflag, int *rc){
+	        char *buffer, int *length, int *offset,
+                ESMC_InquireFlag *inquireflag, int *rc,
+                ESMCI_FortranStrLenArg buffer_l){
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshserialize()"
@@ -922,7 +929,7 @@ extern "C" void FTN(c_esmc_meshserialize)(Mesh **meshpp,
     }
 
     // Save integers
-    ip= (int *)((char *)(buffer) + *offset);
+    ip= (int *)(buffer + *offset);
     if (*inquireflag != ESMF_INQUIREONLY) {
       *ip++ = mesh.spatial_dim();
       *ip++ = mesh.parametric_dim();
@@ -994,7 +1001,8 @@ extern "C" void FTN(c_esmc_meshserialize)(Mesh **meshpp,
 
 
 extern "C" void FTN(c_esmc_meshdeserialize)(Mesh **meshpp, 
-                                 void *buffer, int *offset, int *rc){
+                                 char *buffer, int *offset, int *rc,
+                                 ESMCI_FortranStrLenArg buffer_l){
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshdeserialize()"
@@ -1016,7 +1024,7 @@ extern "C" void FTN(c_esmc_meshdeserialize)(Mesh **meshpp,
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     // Get pointer
-    ip= (int *)((char *)(buffer) + *offset);
+    ip= (int *)(buffer + *offset);
 
     // Get values
     int spatial_dim=*ip++;

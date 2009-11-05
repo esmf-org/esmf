@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.20 2009/10/06 05:25:57 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.21 2009/11/05 19:05:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -690,7 +690,8 @@ extern "C" {
 
 
   void FTN(c_esmc_distgridserialize)(ESMCI::DistGrid **distgrid, char *buf, int *length,
-    int *offset, ESMC_InquireFlag *inquireflag, int *rc){
+    int *offset, ESMC_InquireFlag *inquireflag, int *rc,
+    ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridserialize()"
 
@@ -705,7 +706,8 @@ extern "C" {
   }
 
   void FTN(c_esmc_distgriddeserialize)(ESMCI::DistGrid **distgrid, char *buf,
-    int *offset, int *rc){
+    int *offset, int *rc,
+    ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgriddeserialize()"
 

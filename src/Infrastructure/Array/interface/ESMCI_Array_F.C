@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.27 2009/09/09 03:45:17 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.28 2009/11/05 19:05:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -57,7 +57,8 @@ extern "C" {
     ESMCI::InterfaceInt **totalLWidthArg, ESMCI::InterfaceInt **totalUWidthArg,
     ESMC_IndexFlag *indexflag, ESMCI::InterfaceInt **undistLBoundArg,
     ESMCI::InterfaceInt **undistUBoundArg,
-    char *name, int *len_name, int *rc){
+    char *name, int *len_name, int *rc,
+    ESMCI_FortranStrLenArg name_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraycreatelocalarray()"
     // Initialize return code; assume routine not implemented
@@ -94,7 +95,8 @@ extern "C" {
     ESMCI::InterfaceInt **totalLWidthArg, ESMCI::InterfaceInt **totalUWidthArg,
     ESMC_IndexFlag *indexflag, ESMCI::InterfaceInt **undistLBoundArg,
     ESMCI::InterfaceInt **undistUBoundArg,
-    char *name, int *len_name, int *rc){
+    char *name, int *len_name, int *rc,
+    ESMCI_FortranStrLenArg name_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraycreateallocate()"
     // Initialize return code; assume routine not implemented
@@ -837,7 +839,8 @@ extern "C" {
   
   void FTN(c_esmc_arrayserialize)(ESMCI::Array **array, char *buf, int *length,
     int *offset, ESMC_AttReconcileFlag *attreconflag,
-    ESMC_InquireFlag *inquireflag, int *rc){
+    ESMC_InquireFlag *inquireflag, int *rc,
+    ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayserialize()"
     // Initialize return code; assume routine not implemented
@@ -850,7 +853,8 @@ extern "C" {
   }
 
   void FTN(c_esmc_arraydeserialize)(ESMCI::Array **array, char *buf,
-    int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc){
+    int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc,
+    ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraydeserialize()"
     // Initialize return code; assume routine not implemented

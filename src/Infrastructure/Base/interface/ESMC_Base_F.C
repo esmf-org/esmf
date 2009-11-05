@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.76 2009/09/23 22:53:38 theurich Exp $
+// $Id: ESMC_Base_F.C,v 1.77 2009/11/05 19:05:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.76 2009/09/23 22:53:38 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.77 2009/11/05 19:05:21 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -208,7 +208,8 @@ extern "C" {
       int *offset,              // in/out - current offset in the stream
       ESMC_AttReconcileFlag *attreconflag, // in - attreconcile flag
       ESMC_InquireFlag *inquireflag,       // in - inquire-only flag
-      int *rc) {                // out - return code
+      int *rc,                  // out - return code
+      ESMCI_FortranStrLenArg buf_l) { // hidden/in - buffer length
 // 
 // !DESCRIPTION:
 //     Serialize the contents of a base object.
@@ -248,7 +249,8 @@ extern "C" {
       char *buf,                // in/out - really a byte stream
       int *offset,              // in/out - current offset in the stream
       ESMC_AttReconcileFlag *attreconflag, // in - attreconcile flag
-      int *rc) {                // out - return code
+      int *rc,                  // out - return code
+      ESMCI_FortranStrLenArg buf_l) { // hidden/in - buffer length
 // 
 // !DESCRIPTION:
 //     Deserialize the contents of a base object.

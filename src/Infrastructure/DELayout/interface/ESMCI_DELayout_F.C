@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout_F.C,v 1.6 2009/08/21 17:46:28 w6ws Exp $
+// $Id: ESMCI_DELayout_F.C,v 1.7 2009/11/05 19:05:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -350,7 +350,8 @@ extern "C" {
   }
   
   void FTN(c_esmc_delayoutserialize)(ESMCI::DELayout **delayout, char *buf,
-    int *length, int *offset, ESMC_InquireFlag *inquireflag, int *rc){
+    int *length, int *offset, ESMC_InquireFlag *inquireflag, int *rc,
+    ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutserialize"
     // Initialize return code; assume routine not implemented
@@ -365,7 +366,8 @@ extern "C" {
   }
 
   void FTN(c_esmc_delayoutdeserialize)(ESMCI::DELayout **delayout, char *buf,
-    int *offset, int *rc){
+    int *offset, int *rc,
+    ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutdeserialize"
     // Initialize return code; assume routine not implemented

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.25 2009/09/01 22:01:04 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.26 2009/11/05 19:05:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.25 2009/09/01 22:01:04 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.26 2009/11/05 19:05:21 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -71,10 +71,10 @@ extern "C" {
       char *purpose,             // in - purpose
       char *object,              // in - object type
       int *rc,                   // in - return code
-      int nlen,                  // hidden/in - strlen count for name
-      int clen,                  // hidden/in - strlen count for convention
-      int plen,                  // hidden/in - strlen count for purpose           
-      int olen) {                // hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen) { // hidden/in - strlen count for object
 // 
 // !DESCRIPTION:
 //     Associate a convention, purpose, and object type with an attribute package
@@ -188,9 +188,9 @@ extern "C" {
       char *purpose,             // in - purpose
       char *object,              // in - object type
       int *rc,                   // in - return code
-      int clen,                  // hidden/in - strlen count for convention
-      int plen,                  // hidden/in - strlen count for purpose           
-      int olen) {                // hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen) { // hidden/in - strlen count for object
 // 
 // !DESCRIPTION:
 //     Associate a convention, purpose, and object type with an attribute package
@@ -287,9 +287,9 @@ extern "C" {
       char *purpose,             // in - purpose
       char *object,              // in - object type
       int *rc,                   // in - return code
-      int clen,                  // hidden/in - strlen count for convention
-      int plen,                  // hidden/in - strlen count for purpose           
-      int olen) {                // hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen) { // hidden/in - strlen count for object
 // 
 // !DESCRIPTION:
 //     Associate a convention, purpose, and object type with an attribute package
@@ -388,11 +388,11 @@ extern "C" {
       char *nestConvention,      // in - convention
       char *nestPurpose,         // in - purpose
       int *rc,                   // in - return code
-      int clen,                  // hidden/in - strlen count for convention
-      int plen,                  // hidden/in - strlen count for purpose           
-      int olen,                  // hidden/in - strlen count for object
-      int nclen,                  // hidden/in - strlen count for nestConvention           
-      int nplen) {                // hidden/in - strlen count for nestPurpose
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen,// hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg nclen,// hidden/in - strlen count for nestConvention
+      ESMCI_FortranStrLenArg nplen) { // hidden/in - strlen count for nestPurpose
 // 
 // !DESCRIPTION:
 //     Associate a convention, purpose, and object type with an attribute package
@@ -624,10 +624,10 @@ extern "C" {
       char *purpose,             // in - purpose
       char *object,              // in - object type
       int *rc,                   // in - return code
-      int nlen,                  // hidden/in - strlen count for name
-      int clen,                  // hidden/in - strlen count for convention
-      int plen,                  // hidden/in - strlen count for purpose           
-      int olen) {                // hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen) { // hidden/in - strlen count for object
 // 
 // !DESCRIPTION:
 //    Remove an attribute package
@@ -743,11 +743,11 @@ extern "C" {
       char *purpose,            // in - purpose
       char *object,             // in - object
       int *rc,                  // in - return code
-      int nlen,                 // hidden/in - strlen count for name
-      int vlen,                 // hidden/in - strlen count for value
-      int clen,                 // hidden/in - strlen count for convention
-      int plen,                 // hidden/in - strlen count for purpose
-      int olen) {               // hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg vlen,// hidden/in - strlen count for value
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen) { // hidden/in - strlen count for object
 // 
 // !DESCRIPTION:
 //     Retrieve a (name,value) pair from any object type in the system.
@@ -904,11 +904,11 @@ extern "C" {
       char *purpose,            // in - purpose
       char *object,             // in - object
       int *rc,                  // in - return code
-      int nlen,                 // hidden/in - strlen count for name
-      int vlen,                 // hidden/in - strlen count for value
-      int clen,                 // hidden/in - strlen count for convention
-      int plen,                 // hidden/in - strlen count for purpose
-      int olen) {               // hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg vlen,// hidden/in - strlen count for value
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen) { // hidden/in - strlen count for object
 // 
 // !DESCRIPTION:
 //     Retrieve a (name,value) pair from any object type in the system.
@@ -1109,10 +1109,10 @@ extern "C" {
       char *purpose,            // in - purpose
       char *object,             // in - object
       int *rc,                  // in - return code
-      int nlen,                 // hidden/in - strlen count for name
-      int clen,                 // hidden/in - strlen count for convention
-      int plen,                 // hidden/in - strlen count for purpose
-      int olen) {               // hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen) { // hidden/in - strlen count for object
 // 
 // !DESCRIPTION:
 //     Return the (name,value) pair from any object type in the system.
@@ -1323,10 +1323,10 @@ extern "C" {
       char *object,              // in - object type
       ESMC_Logical *present,     // out/out - present flag 
       int *rc,                   // in/out - return code
-      int nlen,                  // hidden/in - strlen count for name
-      int clen,                  // hidden/in - strlen count for convention
-      int plen,                  // hidden/in - strlen count for purpose           
-      int olen) {                // hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen) { // hidden/in - strlen count for object
 // 
 // !DESCRIPTION:
 //     Query an Attribute package for the presence of an Attribute.
@@ -1491,11 +1491,11 @@ extern "C" {
       char *purpose,             // in - purpose
       char *object,              // in - object type
       int *rc,                   // in - return code
-      int nlen,                  // hidden/in - strlen count for name
-      int vlen,                  // hidden/in - strlen count for value
-      int clen,                  // hidden/in - strlen count for convention
-      int plen,                  // hidden/in - strlen count for purpose           
-      int olen) {                // hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg vlen,// hidden/in - strlen count for value
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen) { // hidden/in - strlen count for object
 // 
 // !DESCRIPTION:
 //     Set the convention, purpose, and object type on an attribute package
@@ -1602,11 +1602,11 @@ extern "C" {
       char *purpose,             // in - purpose
       char *object,              // in - object type
       int *rc,                   // in - return code
-      int nlen,                  // hidden/in - strlen count for name
-      int vlen,                  // hidden/in - strlen count for value
-      int clen,                  // hidden/in - strlen count for convention
-      int plen,                  // hidden/in - strlen count for purpose           
-      int olen) {                // hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg vlen,// hidden/in - strlen count for value
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen) { // hidden/in - strlen count for object
 // 
 // !DESCRIPTION:
 //     Set the convention, purpose, and object type on an attribute package
@@ -1724,10 +1724,10 @@ extern "C" {
       char *purpose,             // in - purpose
       char *object,              // in - object type
       int *rc,                   // in - return code
-      int nlen,                  // hidden/in - strlen count for name
-      int clen,                  // hidden/in - strlen count for convention
-      int plen,                  // hidden/in - strlen count for purpose           
-      int olen) {                // hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen) { // hidden/in - strlen count for object
 // 
 // !DESCRIPTION:
 //     Set the convention, purpose, and object type on an attribute package
@@ -1879,7 +1879,8 @@ extern "C" {
       void FTN(c_esmc_attributeread)(ESMC_Base **base,
                                      int *fileNameLen,
                                      const char *fileName,
-                                     int *status) {
+                                     int *status,
+                                     ESMCI_FortranStrLenArg fileName_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributeread()"
 
@@ -1916,10 +1917,10 @@ extern "C" {
       char *object,              // in - object type
       char *targetobj,           // in - target object for writing
       int *rc,                   // in - return code
-      int clen,                  // hidden/in - strlen count for convention
-      int plen,                  // hidden/in - strlen count for purpose           
-      int olen,                  // hidden/in - strlen count for object
-      int tlen) {                // hidden/in - strlen count for target object
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen,// hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg tlen) { // hidden/in - strlen count for target object
 // 
 // !DESCRIPTION:
 //     Associate a convention, purpose, and object type with an attribute package
@@ -2035,10 +2036,10 @@ extern "C" {
       char *object,              // in - object type
       char *targetobj,           // in - target object for writing
       int *rc,                   // in - return code
-      int clen,                  // hidden/in - strlen count for convention
-      int plen,                  // hidden/in - strlen count for purpose           
-      int olen,                  // hidden/in - strlen count for object
-      int tlen) {                // hidden/in - strlen count for target object
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen,// hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg tlen) { // hidden/in - strlen count for target object
 // 
 // !DESCRIPTION:
 //     Associate a convention, purpose, and object type with an attribute package
@@ -2234,8 +2235,8 @@ extern "C" {
       char *name,               // in - F90, non-null terminated string
       char *value,              // out - character value
       int *rc,                  // in - return code
-      int nlen,                 // hidden/in - strlen count for name
-      int vlen) {               // hidden/in - strlen count for value
+      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg vlen) { // hidden/in - strlen count for value
 // 
 // !DESCRIPTION:
 //     Retrieve a (name,value) pair from any object type in the system.
@@ -2336,7 +2337,7 @@ extern "C" {
       int *lens,                // in/out - length of strings
       char *valueList,          // out - character values
       int *rc,                  // in - return code
-      int nlen) {               // hidden/in - strlen count for value
+      ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for value
 // 
 // !DESCRIPTION:
 //     Retrieve a (name,value) pair from any object type in the system.
@@ -2475,7 +2476,7 @@ extern "C" {
       int *items,               // in - must match actual length
       void *value,              // out - value
       int *rc,                  // in - return code
-      int nlen) {               // hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for name
 // 
 // !DESCRIPTION:
 //     Return the (name,value) pair from any object type in the system.
@@ -2624,7 +2625,7 @@ extern "C" {
       ESMC_TypeKind *tk,        // out - typekind
       int *count,               // out - item count
       int *rc,                  // in - return code
-      int nlen) {               // hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for name
 // 
 // !DESCRIPTION:
 //   Return the typekind, count of items in the (name,value) pair from any 
@@ -2702,7 +2703,7 @@ extern "C" {
       ESMC_TypeKind *tk,        // out - typekind
       int *count,               // out - item count
       int *rc,                  // in - return code
-      int nlen) {               // hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for name
 // 
 // !DESCRIPTION:
 //   Return the name, type, count of items in the (name,value) pair from any 
@@ -2852,7 +2853,7 @@ extern "C" {
       char *name,                // in - F90, non-null terminated string
       ESMC_Logical *present,     // out/out - present flag 
       int *rc,                   // in/out - return code
-      int nlen) {                // hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for name
 // 
 // !DESCRIPTION:
 //     Query for the presence of an Attribute.
@@ -3017,7 +3018,7 @@ extern "C" {
       ESMC_Base **base,          // in/out - base object
       char *name,                // in - F90, non-null terminated string
       int *rc,                   // in - return code     
-      int nlen) {                // hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for name
 // 
 // !DESCRIPTION:
 //    Remove an attribute package
@@ -3079,8 +3080,8 @@ extern "C" {
       char *name,               // in - F90, non-null terminated string
       char *value,              // in - char string
       int *rc,                  // in - return code
-      int nlen,                 // hidden/in - strlen count for name
-      int vlen) {               // hidden/in - strlen count for value
+      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg vlen) { // hidden/in - strlen count for value
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any object type in the system.
@@ -3156,7 +3157,8 @@ extern "C" {
       char *valueList,          // in - char string
       int *lens,                // in - lengths
       int *rc,                  // in - return code
-      int nlen) {               // hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg vllen) { // hidden/in - strlen count for valueList
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any object type in the system.
@@ -3242,7 +3244,7 @@ extern "C" {
       int *count,               // in - number of value(s)
       void *value,              // in - any value or list of values
       int *rc,                  // in - return code
-      int nlen) {               // hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for name
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any object type in the system.
@@ -3376,8 +3378,8 @@ extern "C" {
       int *count,               // in - items
       void *value,              // in - value
       int *rc,                  // in - return code
-      int olen,                 // hidden/in - strlen count for object
-      int nlen) {               // hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg olen,// hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for name
 // 
 // !DESCRIPTION:
 //     Change the Attribute values for Attribute <name> on all <object>s.

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time_F.C,v 1.3 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMCI_Time_F.C,v 1.4 2009/11/05 19:05:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -113,7 +113,9 @@ extern "C" {
                               ESMC_I4 *dayOfYear,
                               ESMC_R8 *dayOfYear_r8,
                               TimeInterval *dayOfYear_intvl,
-                              int *status) {
+                              int *status,
+                              ESMCI_FortranStrLenArg tempTime_l,
+                              ESMCI_FortranStrLenArg tempTimeISOFrac_l) {
           int rc = (ptr)->Time::get(
                        ESMC_NOT_PRESENT_FILTER(yy),
                        ESMC_NOT_PRESENT_FILTER(yy_i8),
@@ -200,7 +202,8 @@ extern "C" {
        void FTN(c_esmc_timereadrestart)(Time *ptr, int *nameLen,
                                         const char *name,
                                         ESMC_IOSpec *iospec,   
-                                        int *status) {
+                                        int *status,
+                                        ESMCI_FortranStrLenArg name_l) {
           int rc = (ptr)->Time::readRestart(
                                                *nameLen,  // always present 
                                                           //  internal argument.
@@ -218,14 +221,16 @@ extern "C" {
        }
 
        void FTN(c_esmc_timevalidate)(Time *ptr, const char *options,
-                                     int *status) {
+                                     int *status,
+                                     ESMCI_FortranStrLenArg options_l) {
           int rc = (ptr)->Time::validate(
                     ESMC_NOT_PRESENT_FILTER(options) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
        void FTN(c_esmc_timeprint)(Time *ptr, const char *options,
-                                  int *status) {
+                                  int *status,
+                                  ESMCI_FortranStrLenArg options_l) {
           int rc = (ptr)->Time::print(
                  ESMC_NOT_PRESENT_FILTER(options) );
           if (ESMC_PRESENT(status)) *status = rc;

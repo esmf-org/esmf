@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocStream_F.C,v 1.8 2009/10/06 11:48:41 w6ws Exp $
+// $Id: ESMCI_LocStream_F.C,v 1.9 2009/11/05 19:05:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_LocStream_F.C,v 1.8 2009/10/06 11:48:41 w6ws Exp $";
+             "$Id: ESMCI_LocStream_F.C,v 1.9 2009/11/05 19:05:21 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -279,8 +279,9 @@ void FTN(c_esmc_locstreamgeteubnd)(ESMCI::DistGrid **_distgrid,
 // non-method functions
 void FTN(c_esmc_locstreamserialize)(ESMC_IndexFlag *indexflag, 
                 int *keyCount,
-	        void *buffer, int *length, int *offset,
-                ESMC_InquireFlag *inquireflag, int *localrc){
+	        char *buffer, int *length, int *offset,
+                ESMC_InquireFlag *inquireflag, int *localrc,
+                ESMCI_FortranStrLenArg buffer_l){
 
     ESMC_IndexFlag *ifp;
     int *ip;
@@ -301,7 +302,7 @@ void FTN(c_esmc_locstreamserialize)(ESMC_IndexFlag *indexflag,
 
 
     // Save indexflag
-    ifp = (ESMC_IndexFlag *)((char *)(buffer) + *offset);
+    ifp = (ESMC_IndexFlag *)(buffer + *offset);
     if (*inquireflag != ESMF_INQUIREONLY)
       *ifp++ = *indexflag;
 
@@ -321,7 +322,8 @@ void FTN(c_esmc_locstreamserialize)(ESMC_IndexFlag *indexflag,
 
 
 void FTN(c_esmc_locstreamdeserialize)(ESMC_IndexFlag *indexflag, 
-                int *keyCount, void *buffer, int *offset, int *localrc){
+                int *keyCount, char *buffer, int *offset, int *localrc,
+                ESMCI_FortranStrLenArg buffer_l){
 
     ESMC_IndexFlag *ifp;
     int *ip;
@@ -330,7 +332,7 @@ void FTN(c_esmc_locstreamdeserialize)(ESMC_IndexFlag *indexflag,
     if (localrc) *localrc = ESMC_RC_NOT_IMPL;
 
     // Get indexflag
-    ifp = (ESMC_IndexFlag *)((char *)(buffer) + *offset);
+    ifp = (ESMC_IndexFlag *)(buffer + *offset);
     *indexflag=*ifp++; 
 
     // Get keyCount
@@ -351,8 +353,12 @@ void FTN(c_esmc_locstreamkeyserialize)(
 				       int *keyNameLen, char *keyName,
 				       int *unitsLen, char *units,
 				       int *longNameLen, char *longName,
-	        void *buffer, int *length, int *offset, 
-                ESMC_InquireFlag *inquireflag, int *localrc){
+	        char *buffer, int *length, int *offset, 
+                ESMC_InquireFlag *inquireflag, int *localrc,
+                ESMCI_FortranStrLenArg keyName_l,
+                ESMCI_FortranStrLenArg units_l,
+                ESMCI_FortranStrLenArg longName_l,
+                ESMCI_FortranStrLenArg buffer_l) {
 
   ESMC_InquireFlag linquireflag = *inquireflag;
   int *ip;
@@ -373,7 +379,7 @@ void FTN(c_esmc_locstreamkeyserialize)(
   }
 
   // Get pointer to memory
-  ip = (int *)((char *)(buffer) + *offset);
+  ip = (int *)(buffer + *offset);
 
   // Save string lengths
   if (linquireflag != ESMF_INQUIREONLY) {
@@ -418,7 +424,11 @@ void FTN(c_esmc_locstreamkeydeserialize)(
 					 char *keyName,
 					 char *units,
 					 char *longName,
-					 void *buffer, int *offset, int *localrc){
+					 char *buffer, int *offset, int *localrc,
+                                         ESMCI_FortranStrLenArg keyName_l,
+                                         ESMCI_FortranStrLenArg units_l,
+                                         ESMCI_FortranStrLenArg longName_l,
+                                         ESMCI_FortranStrLenArg buffer_l) {
 
   int *ip;
   char *cp;
@@ -428,7 +438,7 @@ void FTN(c_esmc_locstreamkeydeserialize)(
   if (localrc) *localrc = ESMC_RC_NOT_IMPL;
 
   // Get pointer to memory
-  ip = (int *)((char *)(buffer) + *offset);
+  ip = (int *)(buffer + *offset);
 
   // Save string lengths
   keyNameLen = *ip++; 

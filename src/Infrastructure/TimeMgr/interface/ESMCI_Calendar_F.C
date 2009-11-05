@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar_F.C,v 1.2 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMCI_Calendar_F.C,v 1.3 2009/11/05 19:05:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -53,7 +53,8 @@ extern "C" {
                                               int               *nameLen,
                                               const char        *name,
                                               ESMC_CalendarType *calendarType, 
-                                              int *status) {
+                                              int *status,
+                                              ESMCI_FortranStrLenArg name_l) {
           *ptr = ESMCI_CalendarCreate(
                                            *nameLen,      // always present 
                                                           //  internal argument.
@@ -71,7 +72,8 @@ extern "C" {
                                     ESMC_I4 *secondsPerDay,
                                     ESMC_I4 *daysPerYear,
                                     ESMC_I4 *daysPerYearDn,
-                                    ESMC_I4 *daysPerYearDd, int *status) {
+                                    ESMC_I4 *daysPerYearDd, int *status,
+                                    ESMCI_FortranStrLenArg name_l) {
            *ptr = ESMCI_CalendarCreate(
                                            *nameLen,    // always present
                                                         //   internal argument.
@@ -95,7 +97,8 @@ extern "C" {
                                     ESMC_I4 *secondsPerDay,
                                     ESMC_I4 *daysPerYear,
                                     ESMC_I4 *daysPerYearDn,
-                                    ESMC_I4 *daysPerYearDd, int *status) {
+                                    ESMC_I4 *daysPerYearDd, int *status,
+                                    ESMCI_FortranStrLenArg name_l) {
            *ptr = ESMCI_CalendarCreate(
                                            *nameLen,    // always present
                                                         //   internal argument.
@@ -128,7 +131,8 @@ extern "C" {
                                            int *nameLen,
                                            const char *name,
                                            ESMC_CalendarType *calendarType, 
-                                           int *status) {
+                                           int *status,
+                                           ESMCI_FortranStrLenArg name_l) {
            ESMF_CHECK_POINTER(*ptr, status)
            int rc = (*ptr)->Calendar::set(
                                              *nameLen,   // always present
@@ -163,7 +167,8 @@ extern "C" {
                                     ESMC_I4 *secondsPerDay,
                                     ESMC_I4 *daysPerYear,
                                     ESMC_I4 *daysPerYearDn,
-                                    ESMC_I4 *daysPerYearDd, int *status) {
+                                    ESMC_I4 *daysPerYearDd, int *status,
+                                    ESMCI_FortranStrLenArg name_l) {
            ESMF_CHECK_POINTER(*ptr, status)
            int rc = (*ptr)->Calendar::set(
                                             *nameLen,    // always present
@@ -188,7 +193,8 @@ extern "C" {
                                     ESMC_I4 *secondsPerDay,
                                     ESMC_I4 *daysPerYear,
                                     ESMC_I4 *daysPerYearDn,
-                                    ESMC_I4 *daysPerYearDd, int *status) {
+                                    ESMC_I4 *daysPerYearDd, int *status,
+                                    ESMCI_FortranStrLenArg name_l) {
            ESMF_CHECK_POINTER(*ptr, status)
            int rc = (*ptr)->Calendar::set(
                                             *nameLen,    // always present
@@ -219,7 +225,8 @@ extern "C" {
                                     ESMC_I4 *daysPerYear,
                                     ESMC_I4 *daysPerYearDn,
                                     ESMC_I4 *daysPerYearDd,
-                                    int *status) {
+                                    int *status,
+                                    ESMCI_FortranStrLenArg tempName_l) {
            ESMF_CHECK_POINTER(*ptr, status)
            int rc = (*ptr)->Calendar::get(
 			                 // always present internal arguments.
@@ -255,7 +262,8 @@ extern "C" {
                                     ESMC_I4 *daysPerYear,
                                     ESMC_I4 *daysPerYearDn,
                                     ESMC_I4 *daysPerYearDd,
-                                    int *status) {
+                                    int *status,
+                                    ESMCI_FortranStrLenArg tempName_l) {
            ESMF_CHECK_POINTER(*ptr, status)
            int rc = (*ptr)->Calendar::get(
 			                 // always present interval arguments.
@@ -363,7 +371,8 @@ extern "C" {
        void FTN(c_esmc_calendarreadrestart)(Calendar **ptr, int *nameLen,
                                             const char *name,
                                             ESMC_IOSpec *iospec,
-                                            int *status) {
+                                            int *status,
+                                            ESMCI_FortranStrLenArg name_l) {
            *ptr = ESMCI_CalendarReadRestart(
                                           *nameLen,  // always present
                                                     //   internal argument.
@@ -383,7 +392,8 @@ extern "C" {
 
        void FTN(c_esmc_calendarvalidate)(Calendar **ptr,
                                          const char *options,
-                                         int *status) {
+                                         int *status,
+                                         ESMCI_FortranStrLenArg options_l) {
            ESMF_CHECK_POINTER(*ptr, status)
            int rc = (*ptr)->Calendar::validate(
                           ESMC_NOT_PRESENT_FILTER(options) );
@@ -391,7 +401,8 @@ extern "C" {
        }
 
        void FTN(c_esmc_calendarprint)(Calendar **ptr, const char *options,
-                                      int *status) {
+                                      int *status,
+                                      ESMCI_FortranStrLenArg options_l) {
            ESMF_CHECK_POINTER(*ptr, status)
            int rc = (*ptr)->Calendar::print(
                        ESMC_NOT_PRESENT_FILTER(options) );

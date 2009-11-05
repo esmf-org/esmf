@@ -1,4 +1,4 @@
-// $Id: ESMCI_Fraction_F.C,v 1.2 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMCI_Fraction_F.C,v 1.3 2009/11/05 19:05:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -63,7 +63,8 @@ extern "C" {
        void FTN(c_esmc_fractionreadrestart)(Fraction *ptr, int *nameLen,
                                             const char *name,
                                             ESMC_IOSpec *iospec,
-                                            int *status) {
+                                            int *status,
+                                            ESMCI_FortranStrLenArg name_l) {
           int rc = (ptr)->readRestart(*nameLen,  // always present
                                                  //   internal
                                                  //   argument.
@@ -82,13 +83,15 @@ extern "C" {
 
        void FTN(c_esmc_fractionvalidate)(Fraction *ptr,
                                          const char *options,
-                                         int *status) {
+                                         int *status,
+                                         ESMCI_FortranStrLenArg options_l) {
           int rc = (ptr)->validate(ESMC_NOT_PRESENT_FILTER(options) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
        void FTN(c_esmc_fractionprint)(Fraction *ptr, const char *options,
-                                      int *status) {
+                                      int *status,
+                                      ESMCI_FortranStrLenArg options_l) {
           int rc = (ptr)->print(ESMC_NOT_PRESENT_FILTER(options) );
           if (ESMC_PRESENT(status)) *status = rc;
        }

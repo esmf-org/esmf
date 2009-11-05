@@ -1,4 +1,4 @@
-// $Id: ESMCI_RHandle_F.C,v 1.2 2009/07/28 23:08:08 theurich Exp $
+// $Id: ESMCI_RHandle_F.C,v 1.3 2009/11/05 19:05:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -87,7 +87,8 @@ extern "C" {
   }
 
   void FTN(c_esmc_routehandlevalidate)(ESMCI::RouteHandle **ptr, char *opts,
-    int *rc){
+    int *rc,
+    ESMCI_FortranStrLenArg opts_l) {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -100,7 +101,8 @@ extern "C" {
   }
 
   void FTN(c_esmc_routehandleprint)(ESMCI::RouteHandle **ptr, char *opts, 
-    int *rc){
+    int *rc,
+    ESMCI_FortranStrLenArg opts_l) {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
