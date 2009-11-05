@@ -1,4 +1,4 @@
-! $Id: ESMF_FortranWordsize.cppF90,v 1.8 2009/08/27 05:29:39 theurich Exp $
+! $Id: ESMF_FortranWordsize.cppF90,v 1.8.2.1 2009/11/05 19:19:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -85,7 +85,11 @@ contains
       integer :: i, j, k
     end type
     type(simple_udt), pointer :: udt_ptr1, udt_ptr2
+    type(simple_udt), target :: udt
     common /udtcom/ udt_ptr1, udt_ptr2
+    
+    udt_ptr1 => udt
+    udt_ptr2 => udt
     
     call ESMF_PointerDifference(ESMC_POINTER_SIZE, udt_ptr1, udt_ptr2, size)
     ! because of compiler introduced padding size may actually overestimate the
