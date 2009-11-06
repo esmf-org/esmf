@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.59 2009/08/27 23:29:59 w6ws Exp $
+! $Id: ESMF_Config.F90,v 1.60 2009/11/06 16:41:30 w6ws Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -2832,7 +2832,7 @@
 !
 ! !DESCRIPTION: 
 !
-!    Removes blanks and TABS from begenning of string. 
+!    Removes blanks and TABS from beginning of string. 
 !    This is a low level i90 routine.
 ! 
 ! !CALLING SEQUENCE: 
@@ -2841,29 +2841,28 @@
 !
 ! !INPUT PARAMETERS: 
 !
-      character*256 string    ! the input string
+      character(*), intent(inout) :: string    ! the input string
 !
 ! !OUTPUT PARAMETERS:
 !
-!     character*256 string    ! the modified string
+!     character(*), intent(inout) :: string    ! the modified string
 !
 !
 !-------------------------------------------------------------------------
 
       integer :: ib, i
 
-!     Get rid of leading blanks
-!     -------------------------
+!     Find first non-blank/non-tab character
+!     --------------------------------------
       ib = 1
-      do i = 1, 255
+      do i = 1, len (string)-1
          if ( string(i:i) .ne. ' ' .and. &
-            string(i:i) .ne. TAB ) go to 21
+            string(i:i) .ne. TAB ) exit
          ib = ib + 1
       end do
- 21   continue
 
-!     String without trailling blanks
-!     -------------------------------
+!     String without leading blanks/tabs
+!     ----------------------------------
       string = string(ib:)
 
       return
@@ -2890,11 +2889,11 @@
 !
 ! !INPUT PARAMETERS: 
 !
-       character*256 string       ! input string
+       character(*), intent(inout) :: string       ! input string
 
 ! !OUTPUT PARAMETERS:            ! modified string
 !
-!      character*256 string
+!      character(*), intent(inout) :: string
 !
 ! !BUGS:  
 !
@@ -2910,20 +2909,18 @@
 
 !     Pad end of string with #
 !     ------------------------
-      do i = 256, 1, -1 
+      do i = len (string), 1, -1 
          if ( string(i:i) .ne. ' ' .and. &
-            string(i:i) .ne. '$' ) go to 11
+            string(i:i) .ne. '$' ) exit
          string(i:i) = '#'
       end do
- 11   continue
 
 !     Replace TAB's with blanks
 !     -------------------------
-      do i = 1, 256
+      do i = 1, len (string)
          if ( string(i:i) .eq. TAB ) string(i:i) = BLK
-         if ( string(i:i) .eq. '#' ) go to 21
+         if ( string(i:i) .eq. '#' ) exit
       end do
- 21   continue
 
       return
       end subroutine ESMF_Config_pad
@@ -2933,7 +2930,7 @@
 
 
 !-----------------------------------------------------------------------
-! !IROUTINE: opntext - portablly open a text file
+! !IROUTINE: opntext - portably open a text file
 !
 ! !DESCRIPTION:
 !
@@ -2946,7 +2943,7 @@
       implicit none
 
       integer,         intent(in) :: lu     ! logical unit number
-      character(len=*),intent(in) :: filename  ! filename to be opended
+      character(len=*),intent(in) :: filename  ! filename to be opened
       character(len=*),intent(in) :: status ! the value for STATUS=<>
       integer,         intent(out):: localrc ! the status
 
@@ -2955,12 +2952,7 @@
 
                 ! local parameter
 
-        integer,parameter :: iA=ichar('a')
-        integer,parameter :: mA=ichar('A')
-        integer,parameter :: iZ=ichar('z')
-
         character(len=len(status)) :: Ustat
-        integer :: i,ic
         integer :: ier
 
 
@@ -2969,13 +2961,8 @@
         if(localrc .ne. ESMF_SUCCESS) return  ! let the parent handle it
 #endif
 
-        do i=1,len(status)
-          ic=ichar(status(i:i))
-          if(ic .ge. iA .and. ic .le. iZ) ic=ic+(mA-iA)
-          Ustat(i:i)=char(ic)
-        end do
-
-
+        Ustat = status
+        call ESMF_StringUpperCase (string=Ustat)
         select case(Ustat)
 
         case ('APPEND')
