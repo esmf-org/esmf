@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.33 2009/10/27 22:37:44 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.34 2009/11/06 14:05:53 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.33 2009/10/27 22:37:44 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.34 2009/11/06 14:05:53 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -176,7 +176,8 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_ftablesetinternalstate"
   void FTN(c_esmc_ftablesetinternalstate)(ESMCI::FTable ***ptr,
-    char const *type, void **data, enum ESMCI::dtype *dtype, int *rc, int slen){
+    char const *type, void **data, enum ESMCI::dtype *dtype, int *rc,
+    ESMCI_FortranStrLenArg slen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
@@ -198,7 +199,8 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_ftablegetinternalstate"
   void FTN(c_esmc_ftablegetinternalstate)(ESMCI::FTable ***ptr,
-    char const *type, void **data, enum ESMCI::dtype *dtype, int *rc, int slen){
+    char const *type, void **data, enum ESMCI::dtype *dtype, int *rc,
+      ESMCI_FortranStrLenArg slen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
@@ -471,7 +473,8 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_usercompsetinternalstate"
   void FTN(esmf_usercompsetinternalstate)(ESMCI::FTable ***ptr,
-    char const *name, void **datap, int *rc, int slen){
+    char const *name, void **datap, int *rc,
+    ESMCI_FortranStrLenArg slen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
@@ -499,7 +502,8 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_usercompgetinternalstate"
   void FTN(esmf_usercompgetinternalstate)(ESMCI::FTable ***ptr,
-    char const *name, void **datap, int *rc, int slen){
+    char const *name, void **datap, int *rc,
+    ESMCI_FortranStrLenArg slen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
