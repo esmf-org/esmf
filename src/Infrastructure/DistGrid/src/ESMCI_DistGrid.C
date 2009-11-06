@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.33.2.2 2009/11/06 02:48:43 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.33.2.3 2009/11/06 17:25:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.33.2.2 2009/11/06 02:48:43 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.33.2.3 2009/11/06 17:25:48 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -58,9 +58,9 @@ namespace ESMCI {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid:create()"
+#define ESMC_METHOD "ESMCI::DistGrid::create()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid:create
+// !IROUTINE:  ESMCI::DistGrid::create
 //
 // !INTERFACE:
 DistGrid *DistGrid::create(
@@ -335,9 +335,9 @@ DistGrid *DistGrid::create(
   
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid:create()"
+#define ESMC_METHOD "ESMCI::DistGrid::create()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid:create
+// !IROUTINE:  ESMCI::DistGrid::create
 //
 // !INTERFACE:
 DistGrid *DistGrid::create(
@@ -792,9 +792,9 @@ DistGrid *DistGrid::create(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid:create()"
+#define ESMC_METHOD "ESMCI::DistGrid::create()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid:create
+// !IROUTINE:  ESMCI::DistGrid::create
 //
 // !INTERFACE:
 DistGrid *DistGrid::create(
@@ -1048,9 +1048,9 @@ DistGrid *DistGrid::create(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid:create()"
+#define ESMC_METHOD "ESMCI::DistGrid::create()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid:create
+// !IROUTINE:  ESMCI::DistGrid::create
 //
 // !INTERFACE:
 DistGrid *DistGrid::create(
@@ -1107,9 +1107,9 @@ DistGrid *DistGrid::create(
   
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid:create()"
+#define ESMC_METHOD "ESMCI::DistGrid::create()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid:create
+// !IROUTINE:  ESMCI::DistGrid::create
 //
 // !INTERFACE:
 DistGrid *DistGrid::create(
