@@ -14,6 +14,7 @@
 #include <Mesh/include/ESMCI_MasterElement.h>
 
 #include <map>
+#include <cstdio>
 
 namespace ESMCI {
 
