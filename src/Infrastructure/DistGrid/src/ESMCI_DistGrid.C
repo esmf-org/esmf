@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.33 2009/10/07 16:13:23 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.34 2009/11/12 22:38:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.33 2009/10/07 16:13:23 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.34 2009/11/12 22:38:27 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -58,9 +58,9 @@ namespace ESMCI {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid:create()"
+#define ESMC_METHOD "ESMCI::DistGrid::create()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid:create
+// !IROUTINE:  ESMCI::DistGrid::create
 //
 // !INTERFACE:
 DistGrid *DistGrid::create(
@@ -94,10 +94,30 @@ DistGrid *DistGrid::create(
   
   if (firstExtra || lastExtra || indexflag){
     // prepare for internal InterfaceInt usage
-    int dimInterfaceInt = 1;  // default
-    if (dg->patchCount > 1)
+    int dimInterfaceInt;
+    int *dimCountInterfaceInt = new int[2];
+    // prepare connectionList
+    //TODO: connectionList may need to be modified according to
+    // firstExtra and lastExtra arguments
+    InterfaceInt *connectionList = NULL;  // default
+    int *connectionListAlloc = NULL; // default
+    if (dg->connectionCount){
       dimInterfaceInt = 2;
-    int *dimCountInterfaceInt = new int(dimInterfaceInt);
+      int elementSize = 3*dg->dimCount+2;
+      dimCountInterfaceInt[0] = elementSize;
+      dimCountInterfaceInt[1] = dg->connectionCount;
+      connectionListAlloc = new int[elementSize * dg->connectionCount];
+      for (int i=0; i<dg->connectionCount; i++){
+        memcpy(&(connectionListAlloc[elementSize*i]), dg->connectionList[i],
+          sizeof(int)*elementSize);
+      }
+      connectionList = new InterfaceInt(dg->maxIndexPDimPPatch,
+        dimInterfaceInt, dimCountInterfaceInt);
+    }
+    // prepare for single- vs. multi-patch case
+    dimInterfaceInt = 1;  // default single-patch
+    if (dg->patchCount > 1)
+      dimInterfaceInt = 2;  // multi-patch
     dimCountInterfaceInt[0] = dg->dimCount;
     if (dimInterfaceInt==2)
       dimCountInterfaceInt[1] = dg->patchCount;
@@ -127,24 +147,6 @@ DistGrid *DistGrid::create(
         sizeof(int)*totalCountInterfaceInt);
     InterfaceInt *maxIndex = new InterfaceInt(maxIndexAlloc,
       dimInterfaceInt, dimCountInterfaceInt);
-    // prepare connectionList
-    //TODO: connectionList may need to be modified according to
-    // firstExtra and lastExtra arguments
-    InterfaceInt *connectionList = NULL;  // default
-    int *connectionListAlloc = NULL; // default
-    if (dg->connectionCount){
-      dimInterfaceInt = 2;
-      int elementSize = 3*dg->dimCount+2;
-      dimCountInterfaceInt[0] = elementSize;
-      dimCountInterfaceInt[1] = dg->connectionCount;
-      connectionListAlloc = new int[elementSize * dg->connectionCount];
-      for (int i=0; i<dg->connectionCount; i++){
-        memcpy(&(connectionListAlloc[elementSize*i]), dg->connectionList[i],
-          sizeof(int)*elementSize);
-      }
-      connectionList = new InterfaceInt(dg->maxIndexPDimPPatch,
-        dimInterfaceInt, dimCountInterfaceInt);
-    }
     //TODO: decompflag needs to be kept in DistGrid so it can be used here!
     //TODO: indexflag needs to be kept in DistGrid so it can be used here as def
     
@@ -333,9 +335,9 @@ DistGrid *DistGrid::create(
   
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid:create()"
+#define ESMC_METHOD "ESMCI::DistGrid::create()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid:create
+// !IROUTINE:  ESMCI::DistGrid::create
 //
 // !INTERFACE:
 DistGrid *DistGrid::create(
@@ -790,9 +792,9 @@ DistGrid *DistGrid::create(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid:create()"
+#define ESMC_METHOD "ESMCI::DistGrid::create()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid:create
+// !IROUTINE:  ESMCI::DistGrid::create
 //
 // !INTERFACE:
 DistGrid *DistGrid::create(
@@ -1046,9 +1048,9 @@ DistGrid *DistGrid::create(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid:create()"
+#define ESMC_METHOD "ESMCI::DistGrid::create()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid:create
+// !IROUTINE:  ESMCI::DistGrid::create
 //
 // !INTERFACE:
 DistGrid *DistGrid::create(
@@ -1105,9 +1107,9 @@ DistGrid *DistGrid::create(
   
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid:create()"
+#define ESMC_METHOD "ESMCI::DistGrid::create()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid:create
+// !IROUTINE:  ESMCI::DistGrid::create
 //
 // !INTERFACE:
 DistGrid *DistGrid::create(
