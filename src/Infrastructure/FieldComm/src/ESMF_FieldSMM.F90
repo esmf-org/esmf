@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.7 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.8 2009/11/16 22:01:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.7 2009/01/21 21:37:59 cdeluca Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.8 2009/11/16 22:01:29 theurich Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -172,8 +172,9 @@ contains
         endif
         
         ! perform Field sparse matrix multiplication through internal array
-        call ESMF_ArraySMM(l_srcArray, l_dstArray, routehandle, &
-          zeroflag, checkflag, localrc)
+        call ESMF_ArraySMM(srcArray=l_srcArray, dstArray=l_dstArray, &
+          routehandle=routehandle, zeroflag=zeroflag, checkflag=checkflag, &
+          rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         
@@ -379,8 +380,9 @@ contains
         ! perform sparse matrix multiplication through array 
         ! For performance consideration: 
         ! Rely on ArraySMM to perform sanity checking of the other parameters 
-        call ESMF_ArraySMMStore(srcArray, dstArray, routehandle, factorList, & 
-            factorIndexList, rc=localrc) 
+        call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
+          routehandle=routehandle, factorList=factorList, &
+          factorIndexList=factorIndexList, rc=localrc) 
         if (ESMF_LogMsgFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
@@ -436,8 +438,9 @@ contains
         ! perform sparse matrix multiplication through array 
         ! For performance consideration: 
         ! Rely on ArraySMM to perform sanity checking of the other parameters 
-        call ESMF_ArraySMMStore(srcArray, dstArray, routehandle, factorList, & 
-            factorIndexList, rc=localrc) 
+        call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
+          routehandle=routehandle, factorList=factorList, & 
+          factorIndexList=factorIndexList, rc=localrc) 
         if (ESMF_LogMsgFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
@@ -493,8 +496,9 @@ contains
         ! perform sparse matrix multiplication through array 
         ! For performance consideration: 
         ! Rely on ArraySMM to perform sanity checking of the other parameters 
-        call ESMF_ArraySMMStore(srcArray, dstArray, routehandle, factorList, & 
-            factorIndexList, rc=localrc) 
+        call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
+          routehandle=routehandle, factorList=factorList, & 
+          factorIndexList=factorIndexList, rc=localrc) 
         if (ESMF_LogMsgFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
@@ -550,8 +554,9 @@ contains
         ! perform sparse matrix multiplication through array 
         ! For performance consideration: 
         ! Rely on ArraySMM to perform sanity checking of the other parameters 
-        call ESMF_ArraySMMStore(srcArray, dstArray, routehandle, factorList, & 
-            factorIndexList, rc=localrc) 
+        call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
+          routehandle=routehandle, factorList=factorList, & 
+          factorIndexList=factorIndexList, rc=localrc) 
         if (ESMF_LogMsgFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
@@ -677,8 +682,8 @@ contains
         ! perform sparse matrix multiplication through array 
         ! For performance consideration: 
         ! Rely on ArraySMM to perform sanity checking of the other parameters 
-        call ESMF_ArraySMMStore(srcArray, dstArray, routehandle, & 
-            rc=localrc) 
+        call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
+          routehandle=routehandle, rc=localrc) 
         if (ESMF_LogMsgFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
