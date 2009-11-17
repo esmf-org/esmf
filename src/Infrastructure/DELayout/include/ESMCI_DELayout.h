@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.18 2009/11/12 22:42:43 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.19 2009/11/17 00:13:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -244,8 +244,11 @@ class XXE{
       int predicateBitField;  // predicate bit field to control conditional exec
       char opInfo[12*8];      // 12 x 8-byte to hold info associated with op
     };
-    static int const filterBitRegionTotalZero  = 0x1;
-    static int const filterBitRegionSelectZero = 0x2;
+    static int const filterBitRegionTotalZero   = 0x1;
+    static int const filterBitRegionSelectZero  = 0x2;
+    
+    static int const filterBitNbStart           = 0x4;
+    static int const filterBitNbWaitFinish      = 0x8;
     
   public:
     VM *vm;

@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.104 2009/10/30 05:42:50 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.105 2009/11/17 00:13:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.104 2009/10/30 05:42:50 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.105 2009/11/17 00:13:33 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -652,13 +652,14 @@ contains
 ! !IROUTINE: ESMF_ArraySMM - Execute an Array sparse matrix multiplication
 !
 ! !INTERFACE:
-  subroutine ESMF_ArraySMM(srcArray, dstArray, routehandle, zeroflag, &
-    checkflag, rc)
+  subroutine ESMF_ArraySMM(srcArray, dstArray, routehandle, commflag, &
+    zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in),   optional  :: srcArray
     type(ESMF_Array),       intent(inout),optional  :: dstArray
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_CommFlag),    intent(in),   optional  :: commflag
     type(ESMF_RegionFlag),  intent(in),   optional  :: zeroflag
     logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
@@ -687,6 +688,10 @@ contains
 !     {\tt ESMF\_Array} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
+!   \item [{[commflag]}]
+!     Indicate communication option. Default is {\tt ESMF\_COMM\_BLOCKING},
+!     resulting in a blocking operation.
+!     See section \ref{opt:commflag} for a complete list of valid settings.
 !   \item [{[zeroflag]}]
 !     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of
 !     all DEs in {\tt dstArray} will be initialized to zero before updating the 
@@ -711,6 +716,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_CommFlag)     :: opt_commflag ! helper variable
     type(ESMF_RegionFlag)   :: opt_zeroflag ! helper variable
     type(ESMF_Logical)      :: opt_checkflag! helper variable
     type(ESMF_Array)        :: opt_srcArray ! helper variable
@@ -740,6 +746,8 @@ contains
     endif
     
     ! Set default flags
+    opt_commflag = ESMF_COMM_BLOCKING
+    if (present(commflag)) opt_commflag = commflag
     opt_zeroflag = ESMF_REGION_TOTAL
     if (present(zeroflag)) opt_zeroflag = zeroflag
     opt_checkflag = ESMF_FALSE
@@ -747,7 +755,7 @@ contains
         
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMM(opt_srcArray, opt_dstArray, routehandle, &
-      opt_zeroflag, opt_checkflag, localrc)
+      opt_commflag, opt_zeroflag, opt_checkflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     

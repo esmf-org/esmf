@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.36 2009/10/08 17:14:47 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.37 2009/11/17 00:13:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -250,7 +250,7 @@ namespace ESMCI {
     static int sparseMatMulStore(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, vector<SparseMatrix> const &sparseMatrix);
     static int sparseMatMul(Array *srcArray, Array *dstArray,
-      RouteHandle **routehandle,
+      RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,
       ESMC_RegionFlag zeroflag=ESMF_REGION_TOTAL,
       ESMC_Logical checkflag=ESMF_FALSE);
     static int sparseMatMulRelease(RouteHandle *routehandle);

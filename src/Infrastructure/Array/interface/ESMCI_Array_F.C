@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.28 2009/11/05 19:05:21 w6ws Exp $
+// $Id: ESMCI_Array_F.C,v 1.29 2009/11/17 00:13:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -732,14 +732,15 @@ extern "C" {
 
   void FTN(c_esmc_arraysmm)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
-    ESMC_RegionFlag *zeroflag, ESMC_Logical *checkflag, int *rc){
+    ESMC_CommFlag *commflag, ESMC_RegionFlag *zeroflag,
+    ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysmm()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMul(
-      *srcArray, *dstArray, routehandle, *zeroflag, *checkflag),
+      *srcArray, *dstArray, routehandle, *commflag, *zeroflag, *checkflag),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
