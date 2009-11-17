@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.86 2009/11/02 18:05:31 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.87 2009/11/17 00:13:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -404,6 +404,22 @@
         ESMF_REGION_EMPTY = ESMF_RegionFlag(2)
 
 !------------------------------------------------------------------------------
+!     ! ESMF_CommFlag
+!
+!     ! Interface flag for setting communication options
+
+      type ESMF_CommFlag
+      sequence
+      private
+        integer :: i_type
+      end type
+
+      type(ESMF_CommFlag), parameter ::  &
+        ESMF_COMM_BLOCKING        = ESMF_CommFlag(0), &
+        ESMF_COMM_NBSTART         = ESMF_CommFlag(1), &
+        ESMF_COMM_NBWAITFINISH    = ESMF_CommFlag(2)
+
+!------------------------------------------------------------------------------
 !     ! ESMF_AttWriteFlag
 !
 !     ! Interface flag for Attribute write methods
@@ -541,6 +557,8 @@
       public ESMF_INDEX_DELOCAL, ESMF_INDEX_GLOBAL, ESMF_INDEX_USER
       public ESMF_RegionFlag, &
              ESMF_REGION_TOTAL, ESMF_REGION_SELECT, ESMF_REGION_EMPTY
+      public ESMF_CommFlag, &
+             ESMF_COMM_BLOCKING, ESMF_COMM_NBSTART, ESMF_COMM_NBWAITFINISH
 
       public ESMF_ReduceFlag, ESMF_SUM, ESMF_MIN, ESMF_MAX
       public ESMF_BlockingFlag, ESMF_BLOCKING, ESMF_VASBLOCKING, &
