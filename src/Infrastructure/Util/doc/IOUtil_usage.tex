@@ -1,4 +1,4 @@
-% $Id: IOUtil_usage.tex,v 1.2 2009/05/04 20:44:32 w6ws Exp $
+% $Id: IOUtil_usage.tex,v 1.3 2009/11/17 00:01:37 w6ws Exp $
 
 %\subsection{Usage and Examples}
 
@@ -47,7 +47,7 @@ This is a common occurance when debugging a program, and inserting {\tt WRITE} s
 to track down the bad area of code.  If the program crashes before the output
 buffer has been flushed, the desired debugging output may never be seen --- giving
 a misleading indication of where the problem occurred.  It would be desirable
-to ensure that the output buffer is flushed at predicatable
+to ensure that the output buffer is flushed at predictable
 points in the program in order to get the needed results.
 Likewise, in parallel code, predictable flushing of output buffers is a common
 requirement, often in conjunction with {\tt ESMF\_VMBarrier()} calls.  
