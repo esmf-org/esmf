@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.17 2009/08/12 17:02:36 svasquez Exp $
+! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.18 2009/11/17 00:09:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.17 2009/08/12 17:02:36 svasquez Exp $'
+    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.18 2009/11/17 00:09:52 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -448,6 +448,111 @@ program ESMF_ArrayArbIdxSMMUTest
   endif
 
 #ifdef ESMF_TESTEXHAUSTIVE
+
+!------------------------------------------------------------------------
+
+  farrayPtr = -99 ! reset to something that would be caught during verification
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySMM: srcArray -> dstArray BLOCKING Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=routehandle, commflag=ESMF_COMM_BLOCKING, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  ! The expected result of the sparse matrix multiplication in dstArray is:
+  ! (note: by default ArraySMM() initializes _all_ destination elements
+  ! to zero before adding in sparse matrix terms.)
+  !
+  ! PET   localDE   DE    dstArray contents
+  ! 0     0         0     2x35 - 3x11 = 37, 0
+  ! 1     0         1     0, 1x2 - 4x59 + 2x49 = -136
+  ! 2     0         2     7x34 = 238, -2x43 = -86
+  ! 3     0         3     1x12 + 1x23 + 1x46 - 4x58 = -151, 0
+  ! 4     0         4     100x42 - 2x62 - 5x31 + 22x26 = 4493, -11x37 = -407
+  ! 5     0         5     5x51 = 255, -1x1 = 1
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Verify results in dstArray BLOCKING Test"
+  write(failMsg, *) "Wrong results" 
+  if (localPet == 0) then
+    call ESMF_Test(((farrayPtr(1).eq.37).and.(farrayPtr(2).eq.0)), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 1) then
+    call ESMF_Test(((farrayPtr(1).eq.0).and.(farrayPtr(2).eq.-136)), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 2) then
+    call ESMF_Test(((farrayPtr(1).eq.238).and.(farrayPtr(2).eq.-86)), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 3) then
+    call ESMF_Test(((farrayPtr(1).eq.-151).and.(farrayPtr(2).eq.0)), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 4) then
+    call ESMF_Test(((farrayPtr(1).eq.4493).and.(farrayPtr(2).eq.-407)), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 5) then
+    call ESMF_Test(((farrayPtr(1).eq.255).and.(farrayPtr(2).eq.-1)), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  endif
+
+!------------------------------------------------------------------------
+
+  farrayPtr = -99 ! reset to something that would be caught during verification
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySMM: srcArray -> dstArray NBSTART Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=routehandle, commflag=ESMF_COMM_NBSTART, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySMM: srcArray -> dstArray NBWAITFINISH Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=routehandle, commflag=ESMF_COMM_NBWAITFINISH, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  ! The expected result of the sparse matrix multiplication in dstArray is:
+  ! (note: by default ArraySMM() initializes _all_ destination elements
+  ! to zero before adding in sparse matrix terms.)
+  !
+  ! PET   localDE   DE    dstArray contents
+  ! 0     0         0     2x35 - 3x11 = 37, 0
+  ! 1     0         1     0, 1x2 - 4x59 + 2x49 = -136
+  ! 2     0         2     7x34 = 238, -2x43 = -86
+  ! 3     0         3     1x12 + 1x23 + 1x46 - 4x58 = -151, 0
+  ! 4     0         4     100x42 - 2x62 - 5x31 + 22x26 = 4493, -11x37 = -407
+  ! 5     0         5     5x51 = 255, -1x1 = 1
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Verify results in dstArray NON-BLOCKING Test"
+  write(failMsg, *) "Wrong results" 
+  if (localPet == 0) then
+    call ESMF_Test(((farrayPtr(1).eq.37).and.(farrayPtr(2).eq.0)), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 1) then
+    call ESMF_Test(((farrayPtr(1).eq.0).and.(farrayPtr(2).eq.-136)), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 2) then
+    call ESMF_Test(((farrayPtr(1).eq.238).and.(farrayPtr(2).eq.-86)), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 3) then
+    call ESMF_Test(((farrayPtr(1).eq.-151).and.(farrayPtr(2).eq.0)), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 4) then
+    call ESMF_Test(((farrayPtr(1).eq.4493).and.(farrayPtr(2).eq.-407)), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 5) then
+    call ESMF_Test(((farrayPtr(1).eq.255).and.(farrayPtr(2).eq.-1)), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  endif
+
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "ArraySMM: srcArray2 -> dstArray2 (RRA) Test"
