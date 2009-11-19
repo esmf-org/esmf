@@ -1,3 +1,4 @@
+// $Id: ESMCI_Interp.C,v 1.14 2009/11/19 18:46:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -27,6 +28,9 @@
 
 //#define CHECK_SENS
 
+
+// prototypes of Fortran interfaces used in this source file
+extern "C" void FTN(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
 
 
 namespace ESMCI {
