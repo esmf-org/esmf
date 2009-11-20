@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.14 2009/11/19 18:46:39 theurich Exp $
+// $Id: ESMCI_Interp.C,v 1.15 2009/11/20 16:57:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -25,6 +25,8 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+
+#include "ESMC_Start.h"
 
 //#define CHECK_SENS
 
