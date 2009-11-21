@@ -1,3 +1,4 @@
+// $Id: ESMCI_MeshVTK.C,v 1.4 2009/11/21 23:44:14 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -19,6 +20,12 @@
 #include <fstream>
 #include <map>
 #include <stdio.h>
+
+//-----------------------------------------------------------------------------
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_MeshVTK.C,v 1.4 2009/11/21 23:44:14 rokuingh Exp $";
+//-----------------------------------------------------------------------------
 
 namespace ESMCI {
 

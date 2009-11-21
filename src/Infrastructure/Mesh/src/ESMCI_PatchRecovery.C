@@ -1,3 +1,5 @@
+// $Id: ESMCI_PatchRecovery.C,v 1.7 2009/11/21 23:44:14 rokuingh Exp $
+//
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -28,8 +30,11 @@
 #include <Mesh/include/sacado/Sacado.hpp>
 #include <cstdlib>
 
-
-
+//-----------------------------------------------------------------------------
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_PatchRecovery.C,v 1.7 2009/11/21 23:44:14 rokuingh Exp $";
+//-----------------------------------------------------------------------------
 
 #ifdef ESMF_LAPACK
 extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);

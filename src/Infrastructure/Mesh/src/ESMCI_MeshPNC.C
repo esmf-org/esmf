@@ -1,3 +1,4 @@
+// $Id: ESMCI_MeshPNC.C,v 1.4 2009/11/21 23:44:14 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -20,6 +21,12 @@
 #include <Mesh/include/ESMCI_ParEnv.h>
 #include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_MeshUtils.h>
+
+//-----------------------------------------------------------------------------
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_MeshPNC.C,v 1.4 2009/11/21 23:44:14 rokuingh Exp $";
+//-----------------------------------------------------------------------------
 
 #ifdef ESMF_PNETCDF
 #include <pnetcdf.h>

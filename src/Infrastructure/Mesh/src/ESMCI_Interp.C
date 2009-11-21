@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.15 2009/11/20 16:57:39 theurich Exp $
+// $Id: ESMCI_Interp.C,v 1.16 2009/11/21 23:44:14 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -29,6 +29,12 @@
 #include "ESMC_Start.h"
 
 //#define CHECK_SENS
+
+//-----------------------------------------------------------------------------
+ // leave the following line as-is; it will insert the cvs ident string
+ // into the object file for tracking purposes.
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.16 2009/11/21 23:44:14 rokuingh Exp $";
+//-----------------------------------------------------------------------------
 
 
 // prototypes of Fortran interfaces used in this source file

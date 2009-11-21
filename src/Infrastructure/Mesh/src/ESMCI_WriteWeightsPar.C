@@ -1,3 +1,4 @@
+// $Id: ESMCI_WriteWeightsPar.C,v 1.5 2009/11/21 23:44:14 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -29,6 +30,12 @@ typedef long long MPI_OffType;
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
+
+//-----------------------------------------------------------------------------
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_WriteWeightsPar.C,v 1.5 2009/11/21 23:44:14 rokuingh Exp $";
+//-----------------------------------------------------------------------------
 
 namespace ESMCI {
 
