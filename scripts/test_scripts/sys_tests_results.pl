@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.15 2009/10/16 19:50:45 svasquez Exp $
+# $Id: sys_tests_results.pl,v 1.15.2.1 2009/12/01 21:48:37 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -213,6 +213,9 @@ use File::Find
                         }
                         close ($file);
 			$pet_count=grep ( /NUMBER_OF_PROCESSORS/, @file_lines);
+                        if ($pet_count == "") {
+                                $pet_count =0;
+                        }
                         $count=grep ( /PASS/, @file_lines);
 			if (($count == $pet_count) and ($pet_count ne 0)){
                                 push (pass_tests, $file);
