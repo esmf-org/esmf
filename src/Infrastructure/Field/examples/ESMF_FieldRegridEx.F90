@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.28 2009/10/28 00:40:34 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.29 2009/12/01 23:16:25 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.28 2009/10/28 00:40:34 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.29 2009/12/01 23:16:25 oehmke Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -247,9 +247,11 @@ program ESMF_FieldRegridEx
 ! the regrid operation. This matrix may be either retrieved in a factor and index raw form, or may be retrieved in the form
 ! of a routeHandle which contains an internal representation of the communication and mathermatical operations necessary to 
 ! perform the regrid. The routeHandle can then be used in an {\tt ESMF\_FieldRegrid()} call to perform the interpolation
-! between two Fields. Note that the operation can be multiple times using the same routeHandle, and may be performed between
-! any two fields which lie on the same Grids as were used to generate the routeHandle. When its no longer needed the routeHandle
-! should be destroyed by using {\tt ESMF\_FieldRegridRelease()} to free the memory it's using.  
+! between the two Fields. Note that the routeHandle depends just on the coordinates in the Grids upon which the Fields are built, so 
+! as long as the coordinates stay the same, the operation can be performed multiple times using the same routeHandle. This is true
+! even if the Field data changes. The same routeHandle may also be used to interpolate between any source and destination Field 
+! which lie on the same stagger location and Grid as the original Fields. 
+! When it's no longer needed the routeHandle should be destroyed by using {\tt ESMF\_FieldRegridRelease()} to free the memory it's using.  
 !
 ! There are two options for accessing ESMF regridding functionality: online and offline.  Online regridding means that the 
 ! weights are generated via subroutine calls during the execution of the users code. This is the method described in the following 
