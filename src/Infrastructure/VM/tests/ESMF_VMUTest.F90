@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.31 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_VMUTest.F90,v 1.32 2009/12/09 14:53:36 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -733,6 +733,25 @@
       write(name, *) "Verify All Reduce ESMF_SUM Results Test"
       call ESMF_Test((isum.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      ! Scalar version
+      ! ==============
+      ! EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Reduce scalar ESMF_SUM Test"
+      i = npets
+      j = -1
+      call ESMF_VMAllReduce (vm, sendData=i, recvData=j,  &
+                             reduceflag=ESMF_SUM, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Reduce scalar ESMF_SUM Results Test"
+      call ESMF_Test(j == npets*npets, name, failMsg, result, ESMF_SRCLINE)
+
+
       !Test with ESMF_KIND_R8  arguments
       !=================================
       !------------------------------------------------------------------------
@@ -805,6 +824,25 @@
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_MIN Results Test"
       call ESMF_Test((isum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Scalar version
+      ! ==============
+      ! EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Reduce scalar ESMF_MIN Test"
+      i = localPet
+      j = -1
+      call ESMF_VMAllReduce (vm, sendData=i, recvData=j,  &
+                             reduceflag=ESMF_MIN, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Reduce scalar ESMF_MIN Results Test"
+      call ESMF_Test(j == 0, name, failMsg, result, ESMF_SRCLINE)
+
 
       !Test with ESMF_KIND_R8 arguments
       !================================
@@ -880,6 +918,24 @@
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_MAX Results Test"
       call ESMF_Test((isum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Scalar version
+      ! ==============
+      ! EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Reduce scalar ESMF_MAX Test"
+      i = localPet
+      j = -1
+      call ESMF_VMAllReduce (vm, sendData=i, recvData=j,  &
+                             reduceflag=ESMF_MAX, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Reduce scalar ESMF_MAX Results Test"
+      call ESMF_Test(j+1 == npets, name, failMsg, result, ESMF_SRCLINE)
 
 
       !Tests using ESMF_KIND_R8 arguments
@@ -964,7 +1020,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.31 2009/01/21 21:38:02 cdeluca Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.32 2009/12/09 14:53:36 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
