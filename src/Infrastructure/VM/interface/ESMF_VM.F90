@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.112 2009/10/26 20:01:23 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.113 2009/12/09 14:52:52 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.112 2009/10/26 20:01:23 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.113 2009/12/09 14:52:52 w6ws Exp $"
 
 !==============================================================================
 
@@ -261,6 +261,7 @@ module ESMF_VMMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_VMAllReduceI4
+      module procedure ESMF_VMAllReduceI4S
       module procedure ESMF_VMAllReduceR4
       module procedure ESMF_VMAllReduceR8
 
@@ -1457,6 +1458,62 @@ module ESMF_VMMod
 
   end subroutine ESMF_VMAllReduceI4
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllReduceI4S()"
+!BOPI
+! !IROUTINE: ESMF_VMAllReduce - AllReduce 4-byte integers, scalar version
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllReduce()
+  subroutine ESMF_VMAllReduceI4S(vm, sendData, recvData, reduceflag, &
+    blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Not implemented features
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+          "- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMAllReduce(vm, sendData, recvData, 1, ESMF_TYPEKIND_I4, &
+      reduceflag, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMAllReduceI4S
 
 
 ! -------------------------- ESMF-public method -------------------------------
