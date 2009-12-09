@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.19 2009/11/17 00:13:33 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.20 2009/12/09 21:56:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -30,6 +30,8 @@
 //
 //EOPI
 //-------------------------------------------------------------------------
+
+#include <stdio.h>
 
 #include "ESMC_Base.h"      // Base is superclass to DELayout
 #include "ESMCI_VM.h"
@@ -322,7 +324,7 @@ class XXE{
       double *dTime=NULL, int indexStart=-1, int indexStop=-1);
     int print(int rraCount=0, char **rraList=NULL, int filterBitField=0x0,
       int indexStart=-1, int indexStop=-1);
-    int printProfile();
+    int printProfile(FILE *fp);
     int execReady();
     int optimize();
     int optimizeElement(int index);

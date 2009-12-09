@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.76 2009/11/17 00:13:33 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.77 2009/12/09 21:56:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.76 2009/11/17 00:13:33 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.77 2009/12/09 21:56:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4393,7 +4393,8 @@ namespace ArrayHelper{
 #ifdef ASMMPROFILE
     char *tempString = new char[80];
     sprintf(tempString, "Wt: pSSRRA %d", k);
-    localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count, xxe->count);
+    localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
+      xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     delete [] tempString;
@@ -7300,6 +7301,16 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   double dtMin;           // to find minimum time
   
 #define ASMMSTOREOPTPRINT___disable
+  
+#ifdef ASMMSTOREOPTPRINT
+  char asmmstoreprintfile[160];
+  sprintf(asmmstoreprintfile, "asmmstoreoptprint.%05d", localPet);
+  FILE *asmmsotreprintfp = fopen(asmmstoreprintfile, "a");
+  fprintf(asmmsotreprintfp, "\n========================================"
+    "========================================\n");
+  fprintf(asmmsotreprintfp, "========================================"
+    "========================================\n\n");
+#endif
 
   // optimize srcTermProcessing
   int pipelineDepth = 4;  // safe value during srcTermProcessing optimization
@@ -7343,7 +7354,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     }
     dtAverage /= dtCount;
 #ifdef ASMMSTOREOPTPRINT
-    printf("localPet: %d, srcTermProcessing=%d -> dtAverage=%gs\n", 
+    fprintf(asmmsotreprintfp, "localPet: %d, srcTermProcessing=%d -> dtAverage=%gs\n", 
       localPet, srcTermProcessing, dtAverage);
 #endif
     // determine optimum srcTermProcessing  
@@ -7362,7 +7373,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   } // srcTermProcessing
 
 #ifdef ASMMSTOREOPTPRINT
-  printf("localPet: %d, srcTermProcessingOpt=%d -> dtMin=%gs\n", 
+  fprintf(asmmsotreprintfp, "localPet: %d, srcTermProcessingOpt=%d -> dtMin=%gs\n", 
     localPet, srcTermProcessingOpt, dtMin);
 #endif
     
@@ -7394,7 +7405,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   }
   
 #ifdef ASMMSTOREOPTPRINT
-  printf("localPet: %d, srcTermProcessingOpt=%d -> dtMin=%gs (after vote)\n", 
+  fprintf(asmmsotreprintfp, "localPet: %d, srcTermProcessingOpt=%d -> dtMin=%gs (after vote)\n", 
     localPet, srcTermProcessingOpt, dtMin);
 #endif
     
@@ -7440,7 +7451,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     }
     dtAverage /= dtCount;
 #ifdef ASMMSTOREOPTPRINT
-    printf("localPet: %d, pipelineDepth=%d -> dtAverage=%gs\n", 
+    fprintf(asmmsotreprintfp, "localPet: %d, pipelineDepth=%d -> dtAverage=%gs\n", 
       localPet, pipelineDepth, dtAverage);
 #endif
     // determine optimum pipelineDepth  
@@ -7459,7 +7470,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   } // pipelineDepth
   
 #ifdef ASMMSTOREOPTPRINT
-  printf("localPet: %d, pipelineDepthOpt=%d -> dtMin=%gs\n", 
+  fprintf(asmmsotreprintfp, "localPet: %d, pipelineDepthOpt=%d -> dtMin=%gs\n", 
     localPet, pipelineDepthOpt, dtMin);
 #endif
     
@@ -7490,8 +7501,9 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   }
 
 #ifdef ASMMSTOREOPTPRINT
-  printf("localPet: %d, pipelineDepthOpt=%d -> dtMin=%gs (after vote)\n", 
+  fprintf(asmmsotreprintfp, "localPet: %d, pipelineDepthOpt=%d -> dtMin=%gs (after vote)\n", 
     localPet, pipelineDepthOpt, dtMin);
+  fclose(asmmsotreprintfp);
 #endif
       
 #ifdef ASMMSTORETIMING
@@ -7849,11 +7861,22 @@ int Array::sparseMatMul(
   try{
 
 #define ASMMTIMING___disable
-
+    
 #ifdef ASMMTIMING
-  double t0, t1, t2, t3, t4, t5, t6;            //gjt - profile
-  VMK::wtime(&t0);      //gjt - profile
-#endif
+    double t0, t1, t2, t3, t4, t5, t6;            //gjt - profile
+    VMK::wtime(&t0);      //gjt - profile
+    VM *vm = VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
+    int localPet = vm->getLocalPet();
+    char file[160];
+    sprintf(file, "asmmtiming.%05d", localPet);
+    FILE *fp = fopen(file, "a");
+    fprintf(fp, "\n=================================================="
+      "==============================\n");
+    fprintf(fp, "=================================================="
+      "==============================\n\n");
+#endif    
 
   // basic input checking
   bool srcArrayFlag = false;
@@ -7962,10 +7985,15 @@ int Array::sparseMatMul(
   
 #ifdef ASMMTIMING
   VMK::wtime(&t6);      //gjt - profile
-  int localPet = 999;   // for now in order to save on overhead
-  printf("gjt - exec() profile for PET %d: "
-    "dt1 = %g\tdt2 = %g\tdt3 = %g\tdt4 = %g\tdt5 = %g\tdt6 = %g\n",
+  fprintf(fp, "gjt - exec() profile for PET %d:\n"
+    "\tdt1 = %g\n"
+    "\tdt2 = %g\n"
+    "\tdt3 = %g\n"
+    "\tdt4 = %g\n"
+    "\tdt5 = %g\n"
+    "\tdt6 = %g\n",
     localPet, t1-t0, t2-t0, t3-t0, t4-t0, t5-t0, t6-t0);
+  fclose(fp);
 #endif
   
   }catch(int localrc){
@@ -8024,9 +8052,16 @@ int Array::sparseMatMulRelease(
       return rc;
     int localPet = vm->getLocalPet();
     int petCount = vm->getPetCount();
+    char file[160];
+    sprintf(file, "asmmprofile.%05d", localPet);
+    FILE *fp = fopen(file, "a");
+    fprintf(fp, "\n=================================================="
+      "==============================\n");
+    fprintf(fp, "=================================================="
+      "==============================\n\n");
     for (int pet=0; pet<petCount; pet++){
       if (pet==localPet){
-        localrc = xxe->printProfile();
+        localrc = xxe->printProfile(fp);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc))
         return rc;
@@ -8034,6 +8069,7 @@ int Array::sparseMatMulRelease(
       }
       vm->barrier();
     }
+    fclose(fp);
 #endif
   
     // delete xxe

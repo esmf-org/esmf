@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.23 2009/10/06 11:29:49 w6ws Exp $
+// $Id: ESMCI_DELayout.C,v 1.24 2009/12/09 21:56:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.23 2009/10/06 11:29:49 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.24 2009/12/09 21:56:38 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -4103,7 +4103,7 @@ int XXE::printProfile(
 //
 // !ARGUMENTS:
 //
-  ){
+  FILE *fp){
 //
 // !DESCRIPTION:
 //  Print profile data collected during the XXE stream execution.
@@ -4133,17 +4133,17 @@ int XXE::printProfile(
     switch(stream[i].opId){
     case xxeSub:
       xxeSubInfo = (XxeSubInfo *)xxeElement;
-      xxeSubInfo->xxe->printProfile(); // recursive call
+      xxeSubInfo->xxe->printProfile(fp); // recursive call
       break;
     case xxeSubMulti:
       xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
       for (int k=0; k<xxeSubMultiInfo->count; k++)
-        xxeSubMultiInfo->xxe[k]->printProfile(); // recursive call
+        xxeSubMultiInfo->xxe[k]->printProfile(fp); // recursive call
       break;
     case waitOnAnyIndexSub:
       xxeWaitOnAnyIndexSubInfo = (WaitOnAnyIndexSubInfo *)xxeElement;
       for (int k=0; k<xxeWaitOnAnyIndexSubInfo->count; k++)
-        xxeWaitOnAnyIndexSubInfo->xxe[k]->printProfile(); // recursive call
+        xxeWaitOnAnyIndexSubInfo->xxe[k]->printProfile(fp); // recursive call
       break;
     case wtimer:
       {
@@ -4151,7 +4151,7 @@ int XXE::printProfile(
         int index = xxeWtimerInfo->actualWtimerIndex;
         if (index == i){
           // this is an actual wtimer element -> print
-          printf("localPet %d - XXE profile wtimer - id: %04d  "
+          fprintf(fp, "localPet %d - XXE profile wtimer - id: %04d  "
             "element: %04d\t%s\t wtime = %gs\t wtimeSum = %gs\t"
             "sumTermCount: %d\n", 
             localPet, xxeWtimerInfo->timerId, i, xxeWtimerInfo->timerString,
@@ -4163,7 +4163,7 @@ int XXE::printProfile(
     case profileMessage:
       {
         xxeProfileMessageInfo = (ProfileMessageInfo *)xxeElement;
-        printf("localPet %d - XXE profileMessage: %s\n",
+        fprintf(fp, "localPet %d - XXE profileMessage: %s\n",
           localPet, xxeProfileMessageInfo->messageString);
       }
       break;
