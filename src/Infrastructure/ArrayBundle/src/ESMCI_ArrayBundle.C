@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.20 2009/11/17 00:13:33 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.21 2009/12/09 22:33:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.20 2009/11/17 00:13:33 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.21 2009/12/09 22:33:47 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -961,21 +961,30 @@ int ArrayBundle::sparseMatMulRelease(
   
 #define XXEPROFILEPRINT
 #ifdef XXEPROFILEPRINT
-  // print XXE stream profile
-  VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-  int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
-  for (int pet=0; pet<petCount; pet++){
-    if (pet==localPet){
-      localrc = xxe->printProfile();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-        &rc))
+    // print XXE stream profile
+    VM *vm = VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
+    int localPet = vm->getLocalPet();
+    int petCount = vm->getPetCount();
+    char file[160];
+    sprintf(file, "asmmprofile.%05d", localPet);
+    FILE *fp = fopen(file, "a");
+    fprintf(fp, "\n=================================================="
+      "==============================\n");
+    fprintf(fp, "=================================================="
+      "==============================\n\n");
+    for (int pet=0; pet<petCount; pet++){
+      if (pet==localPet){
+        localrc = xxe->printProfile(fp);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          &rc))
+        return rc;
+        fflush(stdout);
+      }
+      vm->barrier();
     }
-    vm->barrier();
-  }
+    fclose(fp);
 #endif
   
   // delete xxe
