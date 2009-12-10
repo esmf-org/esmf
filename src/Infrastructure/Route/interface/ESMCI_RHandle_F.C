@@ -1,4 +1,4 @@
-// $Id: ESMCI_RHandle_F.C,v 1.3 2009/11/05 19:05:21 w6ws Exp $
+// $Id: ESMCI_RHandle_F.C,v 1.4 2009/12/10 06:02:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -52,6 +52,8 @@ extern "C" {
   }
 
   void FTN(c_esmc_routehandledestroy)(ESMCI::RouteHandle **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandledestroy()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -65,6 +67,8 @@ extern "C" {
 
   void FTN(c_esmc_routehandlegettype)(ESMCI::RouteHandle **ptr, int *htype,
     int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandlegettype()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // call into C++
@@ -75,6 +79,8 @@ extern "C" {
 
   void FTN(c_esmc_routehandlesettype)(ESMCI::RouteHandle **ptr, int *htype,
     int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandlesettype()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -87,8 +93,9 @@ extern "C" {
   }
 
   void FTN(c_esmc_routehandlevalidate)(ESMCI::RouteHandle **ptr, char *opts,
-    int *rc,
-    ESMCI_FortranStrLenArg opts_l) {
+    int *rc, ESMCI_FortranStrLenArg opts_l) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandlevalidate()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -101,8 +108,9 @@ extern "C" {
   }
 
   void FTN(c_esmc_routehandleprint)(ESMCI::RouteHandle **ptr, char *opts, 
-    int *rc,
-    ESMCI_FortranStrLenArg opts_l) {
+    int *rc, ESMCI_FortranStrLenArg opts_l) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandleprint()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
