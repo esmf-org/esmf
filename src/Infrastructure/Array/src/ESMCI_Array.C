@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.77 2009/12/09 21:56:34 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.78 2009/12/10 05:26:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.77 2009/12/09 21:56:34 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.78 2009/12/10 05:26:22 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -7865,17 +7865,6 @@ int Array::sparseMatMul(
 #ifdef ASMMTIMING
     double t0, t1, t2, t3, t4, t5, t6;            //gjt - profile
     VMK::wtime(&t0);      //gjt - profile
-    VM *vm = VM::getCurrent(&localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-      return rc;
-    int localPet = vm->getLocalPet();
-    char file[160];
-    sprintf(file, "asmmtiming.%05d", localPet);
-    FILE *fp = fopen(file, "a");
-    fprintf(fp, "\n=================================================="
-      "==============================\n");
-    fprintf(fp, "=================================================="
-      "==============================\n\n");
 #endif    
 
   // basic input checking
@@ -7985,6 +7974,17 @@ int Array::sparseMatMul(
   
 #ifdef ASMMTIMING
   VMK::wtime(&t6);      //gjt - profile
+  VM *vm = VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  int localPet = vm->getLocalPet();
+  char file[160];
+  sprintf(file, "asmmtiming.%05d", localPet);
+  FILE *fp = fopen(file, "a");
+  fprintf(fp, "\n=================================================="
+    "==============================\n");
+  fprintf(fp, "=================================================="
+    "==============================\n\n");
   fprintf(fp, "gjt - exec() profile for PET %d:\n"
     "\tdt1 = %g\n"
     "\tdt2 = %g\n"
