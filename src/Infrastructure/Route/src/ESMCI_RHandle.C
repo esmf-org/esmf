@@ -1,4 +1,4 @@
-// $Id: ESMCI_RHandle.C,v 1.4 2009/09/21 21:05:04 theurich Exp $
+// $Id: ESMCI_RHandle.C,v 1.5 2009/12/10 05:27:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -28,6 +28,7 @@
 
 // include higher level, 3rd party or system headers
 #include <cstdlib>
+#include <cstdio>
 
 // include ESMF headers
 #include "ESMC_Start.h"
@@ -43,7 +44,7 @@ using namespace std;
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version = 
-  "$Id: ESMCI_RHandle.C,v 1.4 2009/09/21 21:05:04 theurich Exp $";
+  "$Id: ESMCI_RHandle.C,v 1.5 2009/12/10 05:27:42 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -266,8 +267,50 @@ int RouteHandle::print(
 //EOP
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  try{
+  
+    // get XXE from routehandle
+    XXE *xxe = (XXE *)getStorage();
+  
+    // print XXE stream profile
+    VM *vm = VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
+    int localPet = vm->getLocalPet();
+    int petCount = vm->getPetCount();
+    char file[160];
+    sprintf(file, "xxeprofile.%05d", localPet);
+    FILE *fp = fopen(file, "a");
+    fprintf(fp, "\n=================================================="
+      "==============================\n");
+    fprintf(fp, "=================================================="
+      "==============================\n\n");
+    for (int pet=0; pet<petCount; pet++){
+      if (pet==localPet){
+        localrc = xxe->printProfile(fp);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          &rc))
+        return rc;
+        fflush(stdout);
+      }
+      vm->barrier();
+    }
+    fclose(fp);
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
+    return rc;
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", &rc);
+    return rc;
+  }
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
   return rc;
 }
 //-----------------------------------------------------------------------------
