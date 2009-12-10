@@ -1,4 +1,4 @@
-// $Id: ESMCI_RHandle.C,v 1.5 2009/12/10 05:27:42 theurich Exp $
+// $Id: ESMCI_RHandle.C,v 1.6 2009/12/10 06:02:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version = 
-  "$Id: ESMCI_RHandle.C,v 1.5 2009/12/10 05:27:42 theurich Exp $";
+  "$Id: ESMCI_RHandle.C,v 1.6 2009/12/10 06:02:59 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -294,7 +294,6 @@ int RouteHandle::print(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc))
         return rc;
-        fflush(stdout);
       }
       vm->barrier();
     }
