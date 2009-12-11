@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.17 2009/10/23 21:17:37 theurich Exp $
+// $Id: ESMC_Field.C,v 1.18 2009/12/11 21:25:47 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -129,5 +129,27 @@ extern "C" {
   }
 //--------------------------------------------------------------------------
 
+
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldGetArray()"
+  ESMC_Array ESMC_FieldGetArray(ESMC_Field field, int *rc){
+    // Initialize return code; assume routine not implemented
+    if(rc) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    // typecase into ESMCI type
+    ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field);
+
+    // Invoque the C++ interface
+    ESMC_Array array = fieldp->getArray(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      return array;
+
+    // return successfully
+    if(rc) *rc = ESMF_SUCCESS;
+    return array;
+  }
+//--------------------------------------------------------------------------
 
 }

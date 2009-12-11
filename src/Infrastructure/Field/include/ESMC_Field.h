@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.16 2009/10/23 21:17:37 theurich Exp $
+// $Id: ESMC_Field.h,v 1.17 2009/12/11 21:25:46 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -41,6 +41,7 @@ extern "C" {
 #endif
 
 #include "ESMC_Mesh.h"
+#include "ESMC_Array.h"
 #include "ESMC_ArraySpec.h"
 #include "ESMC_Interface.h"
 
@@ -57,6 +58,7 @@ int ESMC_FieldDestroy(ESMC_Field *field);
 int ESMC_FieldPrint(ESMC_Field field);
 
 ESMC_Mesh ESMC_FieldGetMesh(ESMC_Field field, int *rc);
+ESMC_Array ESMC_FieldGetArray(ESMC_Field field, int *rc);
 
 
 #if defined (__cplusplus)

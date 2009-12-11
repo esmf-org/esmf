@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.18 2009/10/23 21:16:37 theurich Exp $
+!  $Id: ESMF_Field_C.F90,v 1.19 2009/12/11 21:25:47 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.18 2009/10/23 21:16:37 theurich Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.19 2009/12/11 21:25:47 feiliu Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -123,6 +123,44 @@
     rc = ESMF_SUCCESS
   
   end subroutine f_esmf_fieldget
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_fieldgetarray"
+  subroutine f_esmf_fieldgetarray(field, array, rc)
+
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_ArraySpecMod
+    use ESMF_ArrayMod
+    use ESMF_FieldMod
+    use ESMF_FieldGetMod
+
+    ! arguments
+    type(ESMF_Field),intent(inout) :: field
+    type(ESMF_Array)               :: array
+    integer, intent(out)           :: rc              
+
+    ! local
+    type(ESMF_Array)               :: l_array
+
+    rc = ESMF_RC_NOT_IMPL
+
+    call ESMF_FieldGet(field, array=l_array, rc=rc)
+    if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! because ESMF_Array.this is private, it cannot be accessed directly
+    ! we use the public interface to do the ptr copy;
+    ! the array object returned to the C interface must consist only of the
+    ! this pointer. It must not contain the isInit member.
+    call ESMF_ArrayCopyThis(l_array, array, rc)
+    if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    rc = ESMF_SUCCESS
+  
+  end subroutine f_esmf_fieldgetarray
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_fielddestroy"

@@ -1,5 +1,5 @@
 
-// $Id: ESMCI_Field.h,v 1.2 2009/10/23 21:17:37 theurich Exp $
+// $Id: ESMCI_Field.h,v 1.3 2009/12/11 21:25:45 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -36,6 +36,7 @@
 // 
 // !USES:
 #include "ESMC_Mesh.h"
+#include "ESMC_Array.h"
 #include "ESMC_ArraySpec.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMC_Interface.h"
@@ -61,6 +62,7 @@ namespace ESMCI{
     static int destroy(Field *field);
     int print();
     ESMC_Mesh getMesh(int *rc);
+    ESMC_Array getArray(int *rc);
   }; 
 }
 

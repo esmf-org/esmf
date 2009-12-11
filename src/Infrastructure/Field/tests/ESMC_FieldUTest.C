@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldUTest.C,v 1.12 2009/10/27 20:26:07 feiliu Exp $
+// $Id: ESMC_FieldUTest.C,v 1.13 2009/12/11 21:25:47 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -43,6 +43,7 @@ int main(void){
 
   int num_elem, num_node, conn_size;
   ESMC_Mesh mesh, mesh1;
+  ESMC_Array array;
   int pdim=2;
   int sdim=3;
 
@@ -172,6 +173,14 @@ int main(void){
   strcpy(name, "Get an ESMC_Mesh object from ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   mesh1 = ESMC_FieldGetMesh(field, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Get an ESMC_Array object from ESMC_Field object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  array = ESMC_FieldGetArray(field, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

@@ -29,6 +29,7 @@
 // associated header file
 #include "ESMCI_Field.h"
 #include "ESMC_Field.h"
+#include "ESMCI_Array.h"
 
 //insert any higher level, 3rd party or system includes here
 #include <string.h>         // strlen()
@@ -49,7 +50,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.2 2009/10/23 21:17:37 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.3 2009/12/11 21:25:47 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -75,6 +76,8 @@ void FTN(f_esmf_fielddestroy)(ESMCI::Field *fieldp, int *rc);
 void FTN(f_esmf_fieldprint)(ESMCI::Field *fieldp, int *rc);
 
 void FTN(f_esmf_fieldget)(ESMCI::Field *fieldp, void *mesh_pointer, int *rc);
+
+void FTN(f_esmf_fieldgetarray)(ESMCI::Field *fieldp, void *array_pointer, int *rc);
 
 }
 
@@ -246,6 +249,41 @@ namespace ESMCI {
   }
 //-----------------------------------------------------------------------------
   
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::getArray()"
+//BOP
+// !IROUTINE:  ESMCI::Field::getArray - Get the number of items contained
+//             in this Field
+//
+// !INTERFACE:
+  ESMC_Array Field::getArray(
+//
+// !RETURN VALUE:
+//     ESMC_Array object
+//
+// !ARGUMENTS:
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//      Get the number of items contained in an existing Field
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    ESMC_Array array;
+    array.ptr = NULL; // initialize
+    FTN(f_esmf_fieldgetarray)(this, (ESMCI::Array **)&(array.ptr), &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      return array;
+    
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+    return array;
+  }
+//-----------------------------------------------------------------------------
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Field::print()"
