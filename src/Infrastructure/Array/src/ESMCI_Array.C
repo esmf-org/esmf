@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.78 2009/12/10 05:26:22 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.79 2009/12/14 18:40:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.78 2009/12/10 05:26:22 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.79 2009/12/14 18:40:02 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4012,6 +4012,9 @@ bool operator<(SeqIndex a, SeqIndex b){
 
 #define ASMMPROFILE___disable
 
+#define ASMMSTOREPRINT___disable
+
+
 namespace ArrayHelper{
   
 #define MSG_DST_CONTIG
@@ -4153,6 +4156,11 @@ namespace ArrayHelper{
     localrc = xxe->appendProfileMessage(predicateBitField, tempString);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
+    sprintf(tempString, "/Recvnb (%d/)", k);
+    localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
+      xxe->count);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     delete [] tempString;
 #endif
     // return successfully
@@ -4167,7 +4175,7 @@ namespace ArrayHelper{
     int rraIndex = srcLocalDeCount + j; // localDe index into dstArray shifted 
                                         // by srcArray localDeCount
 #ifdef ASMMPROFILE
-    localrc = xxe->appendWtimer(predicateBitField, "Wt: select zero",
+    localrc = xxe->appendWtimer(predicateBitField, "slct zero",
       xxe->count, xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -4187,7 +4195,7 @@ namespace ArrayHelper{
       ++k;
     }
 #ifdef ASMMPROFILE
-    localrc = xxe->appendWtimer(predicateBitField, "Wt: /select zero",
+    localrc = xxe->appendWtimer(predicateBitField, "/slct zero",
       xxe->count, xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -4392,7 +4400,7 @@ namespace ArrayHelper{
     int rc = ESMC_RC_NOT_IMPL;              // final return code
 #ifdef ASMMPROFILE
     char *tempString = new char[80];
-    sprintf(tempString, "Wt: pSSRRA %d", k);
+    sprintf(tempString, "WaitProductSum (%d/)", k);
     localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
       xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -4404,7 +4412,7 @@ namespace ArrayHelper{
       ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMPROFILE
     tempString = new char[80];
-    sprintf(tempString, "Wt: done WaitOnIndex: %d", recvnbIndex);
+    sprintf(tempString, "done WaitOnIndex: %d", recvnbIndex);
     localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
       xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -4417,10 +4425,13 @@ namespace ArrayHelper{
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMPROFILE
-    localrc = xxe->appendWtimer(predicateBitField, "Wt: /pSSRRA", xxe->count,
+    tempString = new char[80];
+    sprintf(tempString, "/WaitProductSum (%d/)", k);
+    localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
       xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
+    delete [] tempString;
 #endif
     // return successfully
     rc = ESMF_SUCCESS;
@@ -4501,11 +4512,11 @@ namespace ArrayHelper{
         XXE::MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo =
           (XXE::MemGatherSrcRRAInfo *) &(xxe->stream[xxeIndex]);
         // try typekind specific memGatherSrcRRA
-        for (int k=0; k<count; k++){
-          xxeMemGatherSrcRRAInfo->rraOffsetList[k] =
-            linIndexContigBlockList[k].linIndex * dataSizeSrc;
-          xxeMemGatherSrcRRAInfo->countList[k] =
-            linIndexContigBlockList[k].linIndexCount;
+        for (int kk=0; kk<count; kk++){
+          xxeMemGatherSrcRRAInfo->rraOffsetList[kk] =
+            linIndexContigBlockList[kk].linIndex * dataSizeSrc;
+          xxeMemGatherSrcRRAInfo->countList[kk] =
+            linIndexContigBlockList[kk].linIndexCount;
         }
         double dt_tk;
         localrc = xxe->exec(rraCount, rraList, 0x0, &dt_tk, xxeIndex, xxeIndex);
@@ -4513,8 +4524,8 @@ namespace ArrayHelper{
           &rc)) return rc;
         // try byte option for memGatherSrcRRA
         xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::BYTE;
-        for (int k=0; k<count; k++)
-          xxeMemGatherSrcRRAInfo->countList[k] *= dataSizeSrc;  // scale to byte
+        for (int kk=0; kk<count; kk++)
+          xxeMemGatherSrcRRAInfo->countList[kk] *= dataSizeSrc; // scale to byte
         double dt_byte;
         localrc = xxe->exec(rraCount, rraList, 0x0, &dt_byte, xxeIndex, 
           xxeIndex);
@@ -4536,6 +4547,15 @@ namespace ArrayHelper{
               linIndexContigBlockList[k].linIndexCount;
           }
         }
+#ifdef ASMMPROFILE
+        char *tempString = new char[80];
+        sprintf(tempString, "/MemGatherSrcRRA (%d/)", k);
+        localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
+          xxe->count);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+          ESMF_ERR_PASSTHRU, &rc)) return rc;
+        delete [] tempString;
+#endif
         // sendnb out of contiguous intermediate buffer
         sendnbIndex = xxe->count;  // store index for the associated wait
         localrc = xxe->appendSendnb(predicateBitField, buffer,
@@ -4545,7 +4565,7 @@ namespace ArrayHelper{
       }
     }else{
       // do some processing on the src side
-      // determine bufferItemCount according to srcTermProcessingS
+      // determine bufferItemCount according to srcTermProcessing
       int bufferItemCount = 0; // reset
       vector<ArrayHelper::SrcInfo>::iterator pp = srcInfoTable.begin();
       while (pp != srcInfoTable.end()){
@@ -4562,6 +4582,15 @@ namespace ArrayHelper{
         bufferItemCount * dataSizeSrc * vectorLength);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
+#ifdef ASMMPROFILE
+      char *tempString = new char[100];
+      sprintf(tempString, "/ZeroVector (%d/)", k);
+      localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
+        xxe->count);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
+      delete [] tempString;
+#endif
       // use super-scalar "+=*" operation containing all terms
       int xxeIndex = xxe->count;  // need this beyond the increment
       localrc = xxe->appendProductSumSuperScalarSrcRRA(predicateBitField,
@@ -4591,6 +4620,25 @@ namespace ArrayHelper{
         } // for srcTermProcessing
         ++bufferItem;
       }
+#ifdef ASMMPROFILE
+      tempString = new char[100];
+      sprintf(tempString, "use productSumSuperScalarSrcRRA for termCount=%d"
+        " -> reducing it to %d terms", partnerDeDataCount, bufferItem);
+      localrc = xxe->appendProfileMessage(predicateBitField, tempString);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
+      sprintf(tempString, "use productSumSuperScalarSrcRRA with "
+        "vectorLength=%d", vectorLength);
+      localrc = xxe->appendProfileMessage(predicateBitField, tempString);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
+      sprintf(tempString, "/PSSSSrcRRA (%d/)", k);
+      localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
+        xxe->count);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
+      delete [] tempString;
+#endif
       // sendnb out of contiguous intermediate buffer
       sendnbIndex = xxe->count;  // store index for the associated wait
       localrc = xxe->appendSendnb(predicateBitField, buffer,
@@ -4603,6 +4651,11 @@ namespace ArrayHelper{
     sprintf(tempString, "<(%04d/%04d)-Snb(%d/%d)-(%04d/%04d)> ",
       srcDe, localPet, k, sendnbIndex, dstDe, dstPet);
     localrc = xxe->appendProfileMessage(predicateBitField, tempString);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
+    sprintf(tempString, "/Sendnb (%d/)", k);
+    localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
+      xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     delete [] tempString;
@@ -7345,7 +7398,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     for (int i=0; i<dtCount; i++){
       vm->barrier();
       vm->wtime(&dtStart);
-        localrc = xxe->exec(rraCount, rraList, 0x0);
+        localrc = xxe->exec(rraCount, rraList,
+          0x0|XXE::filterBitRegionSelectZero);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
       vm->barrier();
@@ -7442,7 +7496,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     for (int i=0; i<dtCount; i++){
       vm->barrier();
       vm->wtime(&dtStart);
-        localrc = xxe->exec(rraCount, rraList, 0x0);
+        localrc = xxe->exec(rraCount, rraList,
+          0x0|XXE::filterBitRegionSelectZero);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
       vm->barrier();
@@ -7529,6 +7584,12 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     
   // get XXE ready for execution
   localrc = xxe->execReady();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // execute final XXE stream for consistent profile data
+  vm->barrier();  // ensure all PETs are present before profile run
+  localrc = xxe->exec(rraCount, rraList, 0x0|XXE::filterBitRegionSelectZero);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -7636,7 +7697,7 @@ int sparseMatMulStoreEncodeXXEStream(
     // append predicated zero operations for the total region
 #ifdef ASMMPROFILE
     localrc = xxe->appendWtimer(
-      XXE::filterBitRegionTotalZero|XXE::filterBitNbStart, "Wt: total zero",
+      XXE::filterBitRegionTotalZero|XXE::filterBitNbStart, "total zero",
       xxe->count, xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -7651,7 +7712,7 @@ int sparseMatMulStoreEncodeXXEStream(
 #ifdef ASMMPROFILE
     localrc = xxe->appendWtimer(
       XXE::filterBitRegionTotalZero|XXE::filterBitNbStart,
-      "Wt: /total zero", xxe->count, xxe->count);
+      "/total zero", xxe->count, xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
 #endif
@@ -7723,7 +7784,7 @@ int sparseMatMulStoreEncodeXXEStream(
             ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMPROFILE
           char *tempString = new char[80];
-          sprintf(tempString, "Wt: done WaitOnIndex: %d",
+          sprintf(tempString, "done WaitOnIndex: %d",
             pSendWait->sendnbIndex);
           localrc = xxe->appendWtimer(0x0|XXE::filterBitNbWaitFinish,
             tempString, xxe->count, xxe->count);
@@ -7774,7 +7835,7 @@ int sparseMatMulStoreEncodeXXEStream(
             ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMPROFILE
           char *tempString = new char[80];
-          sprintf(tempString, "Wt: done WaitOnIndex: %d",
+          sprintf(tempString, "done WaitOnIndex: %d",
             pSendWait->sendnbIndex);
           localrc = xxe->appendWtimer(0x0|XXE::filterBitNbWaitFinish,
             tempString, xxe->count, xxe->count);
@@ -8065,7 +8126,6 @@ int Array::sparseMatMulRelease(
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc))
         return rc;
-        fflush(stdout);
       }
       vm->barrier();
     }
