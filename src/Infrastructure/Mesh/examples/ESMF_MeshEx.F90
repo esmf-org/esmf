@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.19 2009/09/30 16:17:56 oehmke Exp $
+! $Id: ESMF_MeshEx.F90,v 1.20 2009/12/15 16:26:59 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_MeshEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshEx.F90,v 1.19 2009/09/30 16:17:56 oehmke Exp $'
+    '$Id: ESMF_MeshEx.F90,v 1.20 2009/12/15 16:26:59 feiliu Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -83,6 +83,7 @@ program ESMF_MeshEx
 ! Section~\ref{sec:field:usage:create_mesh_arrayspec}.
 !
 !\subsubsection{Mesh Creation}
+!\label{sec:mesh:usage:meshCreation}
 !
 ! To create a Mesh we need to set some properties of the Mesh as a whole,  some properties of each node in the mesh and 
 ! then some properties of each element which connects the nodes. 
