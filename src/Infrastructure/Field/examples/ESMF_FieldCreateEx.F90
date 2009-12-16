@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.90 2009/12/15 16:26:57 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.91 2009/12/16 21:17:39 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -543,8 +543,7 @@
 ! The mesh object is on a Euclidean surface that maps to a 2x2 rectangular
 ! grid with 4 elements and 9 nodes. The nodal space is represented by
 ! a distgrid with 9 indices. The mesh object can be represented by the picture
-! below. For more information on Mesh creation, please see Section 
-! \ref{sec:mesh:usage:meshCreation}
+! below. For more information on Mesh creation, please see Section~\ref{sec:mesh:usage:meshCreation}.
 ! \begin{verbatim}
 !              Mesh Ids
 !
