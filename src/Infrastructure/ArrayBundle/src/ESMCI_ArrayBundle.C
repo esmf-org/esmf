@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.22 2009/12/14 18:36:47 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.23 2009/12/17 06:14:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.22 2009/12/14 18:36:47 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.23 2009/12/17 06:14:09 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -442,6 +442,7 @@ int ArrayBundle::redistStore(
       &rc)) return rc;
     // use Array::redistStore() to determine the required XXE streams
     int rraShift = 0; // reset
+    int vectorLengthShift = 0;  // reset
     vector<XXE *> xxeSub(arrayCount);
     for (int i=0; i<arrayCount; i++){
       Array *srcArray = srcArraybundle->getArrayList()[i];
@@ -451,7 +452,8 @@ int ArrayBundle::redistStore(
 //        printf("localPet=%d, src/dst pair #%d does not require precompute\n",
 //          localPet, i);
         // append the xxeSub to the xxe object with RRA offset info
-        localrc = xxe->appendXxeSub(0x0, xxeSub[matchList[i]], rraShift);
+        localrc = xxe->appendXxeSub(0x0, xxeSub[matchList[i]], rraShift,
+          vectorLengthShift);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
       }else{
@@ -473,7 +475,8 @@ int ArrayBundle::redistStore(
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         // append the xxeSub to the xxe object with RRA offset info
-        localrc = xxe->appendXxeSub(0x0, xxeSub[i], rraShift);
+        localrc = xxe->appendXxeSub(0x0, xxeSub[i], rraShift,
+          vectorLengthShift);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         // keep track of xxeSub for xxe garbage collection
@@ -483,6 +486,7 @@ int ArrayBundle::redistStore(
       }
       rraShift += srcArray->getDELayout()->getLocalDeCount()
         + dstArray->getDELayout()->getLocalDeCount();
+      ++vectorLengthShift;
     }
     //TODO: consider calling an XXE optimization method here that could
     //TODO: re-arrange what is in all of the sub XXE streams for performance opt
@@ -706,6 +710,7 @@ int ArrayBundle::sparseMatMulStore(
       &rc)) return rc;
     // use Array::sparseMatMulStore() to determine the required XXE streams
     int rraShift = 0; // reset
+    int vectorLengthShift = 0;  // reset
     vector<XXE *> xxeSub(arrayCount);
     for (int i=0; i<arrayCount; i++){
       Array *srcArray = srcArraybundle->getArrayList()[i];
@@ -715,7 +720,8 @@ int ArrayBundle::sparseMatMulStore(
 //        printf("localPet=%d, src/dst pair #%d does not require precompute\n",
 //          localPet, i);
         // append the xxeSub to the xxe object with RRA offset info
-        localrc = xxe->appendXxeSub(0x0, xxeSub[matchList[i]], rraShift);
+        localrc = xxe->appendXxeSub(0x0, xxeSub[matchList[i]], rraShift,
+          vectorLengthShift);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
       }else{
@@ -723,7 +729,7 @@ int ArrayBundle::sparseMatMulStore(
 //        printf("localPet=%d, src/dst pair #%d requires precompute\n",
 //          localPet, i);
         RouteHandle *rh;
-        localrc = Array::sparseMatMulStore(srcArray, dstArray, &rh,
+        localrc = Array::sparseMatMulStore(srcArray, dstArray, &rh, 
           sparseMatrix);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
@@ -737,7 +743,8 @@ int ArrayBundle::sparseMatMulStore(
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         // append the xxeSub to the xxe object with RRA offset info
-        localrc = xxe->appendXxeSub(0x0, xxeSub[i], rraShift);
+        localrc = xxe->appendXxeSub(0x0, xxeSub[i], rraShift,
+          vectorLengthShift);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         // keep track of xxeSub for xxe garbage collection
@@ -747,6 +754,7 @@ int ArrayBundle::sparseMatMulStore(
       }
       rraShift += srcArray->getDELayout()->getLocalDeCount()
         + dstArray->getDELayout()->getLocalDeCount();
+      ++vectorLengthShift;
     }
     //TODO: consider calling an XXE optimization method here that could
     //TODO: re-arrange what is in all of the sub XXE streams for performance opt
@@ -848,7 +856,9 @@ int ArrayBundle::sparseMatMul(
     }else if(rhType == ESMC_ARRAYBUNDLEXXE){
       // prepare for relative run-time addressing (RRA)
       vector<char *> rraList;
+      vector<int> vectorLength;
       rraList.reserve(100); // optimize performance
+      vectorLength.reserve(100); // optimize performance
       if (srcArraybundle != NULL && dstArraybundle != NULL){
         if (srcArraybundle->getArrayCount() != dstArraybundle->getArrayCount()){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
@@ -869,6 +879,18 @@ int ArrayBundle::sparseMatMul(
             char *rraElement = (char *)larrayBaseAddrList[j];
             rraList.push_back(rraElement);
           }
+          int vectorL = 1;  // prime
+          int rank = srcArray->getRank();
+          for (int jj=0; jj<rank; jj++){
+            if (srcArray->getArrayToDistGridMap()[jj])
+              // decomposed dimension
+              break;
+            else
+              // tensor dimension
+              vectorL *= srcArray->getUndistUBound()[jj]
+                - srcArray->getUndistLBound()[jj] + 1;
+          }
+          vectorLength.push_back(vectorL);
         }
       }else if (srcArraybundle != NULL){
         for (int i=0; i<srcArraybundle->getArrayCount(); i++){
@@ -878,6 +900,18 @@ int ArrayBundle::sparseMatMul(
             char *rraElement = (char *)larrayBaseAddrList[j];
             rraList.push_back(rraElement);
           }
+          int vectorL = 1;  // prime
+          int rank = srcArray->getRank();
+          for (int jj=0; jj<rank; jj++){
+            if (srcArray->getArrayToDistGridMap()[jj])
+              // decomposed dimension
+              break;
+            else
+              // tensor dimension
+              vectorL *= srcArray->getUndistUBound()[jj]
+                - srcArray->getUndistLBound()[jj] + 1;
+          }
+          vectorLength.push_back(vectorL);
         }
       }else if (dstArraybundle != NULL){
         for (int i=0; i<dstArraybundle->getArrayCount(); i++){
@@ -887,6 +921,18 @@ int ArrayBundle::sparseMatMul(
             char *rraElement = (char *)larrayBaseAddrList[j];
             rraList.push_back(rraElement);
           }
+          int vectorL = 1;  // prime
+          int rank = dstArray->getRank();
+          for (int jj=0; jj<rank; jj++){
+            if (dstArray->getArrayToDistGridMap()[jj])
+              // decomposed dimension
+              break;
+            else
+              // tensor dimension
+              vectorL *= srcArray->getUndistUBound()[jj]
+                - srcArray->getUndistLBound()[jj] + 1;
+          }
+          vectorLength.push_back(vectorL);
         }
       }
       int rraCount = rraList.size();
@@ -903,7 +949,8 @@ int ArrayBundle::sparseMatMul(
       // get a handle on the XXE stored in routehandle
       XXE *xxe = (XXE *)(*routehandle)->getStorage();
       // execute XXE stream
-      localrc = xxe->exec(rraCount, &(rraList[0]), filterBitField);
+      localrc = xxe->exec(rraCount, &(rraList[0]), &(vectorLength[0]), 
+        filterBitField);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
       // return successfully

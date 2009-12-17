@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.20 2009/12/09 21:56:37 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.21 2009/12/17 06:14:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -224,7 +224,7 @@ class XXE{
       productSumSuperScalarDstRRA,
       productSumSuperScalarSrcRRA,
       productSumSuperScalarContigRRA,
-      zeroScalarRRA, zeroSuperScalarRRA, zeroVector, zeroVectorRRA,
+      zeroScalarRRA, zeroSuperScalarRRA, zeroMemset, zeroMemsetRRA,
       memCpy, memCpySrcRRA,
       memGatherSrcRRA,
       // --- subs
@@ -320,8 +320,9 @@ class XXE{
         xxeSubCount = xxeSubCountArg; // reset
       }
     }
-    int exec(int rraCount=0, char **rraList=NULL, int filterBitField=0x0,
-      double *dTime=NULL, int indexStart=-1, int indexStop=-1);
+    int exec(int rraCount=0, char **rraList=NULL, int *vectorLength=NULL,
+      int filterBitField=0x0, double *dTime=NULL, int indexStart=-1,
+      int indexStop=-1);
     int print(int rraCount=0, char **rraList=NULL, int filterBitField=0x0,
       int indexStart=-1, int indexStop=-1);
     int printProfile(FILE *fp);
@@ -342,27 +343,27 @@ class XXE{
     int storeStorage(char *storage);
     int storeCommhandle(VMK::commhandle **commhandle);
     int storeXxeSub(XXE *xxeSub);
-    int appendXxeSub(int predicateBitField, XXE *xxeSub, int rraShift);
+    int appendXxeSub(int predicateBitField, XXE *xxeSub, int rraShift,
+      int vectorLengthShift);
     int appendWtimer(int predicateBitField, char *string, int id, int actualId,
       int relativeId=0, XXE *relativeXXE=NULL);
     int appendRecvnb(int predicateBitField, void *buffer, int size, int srcPet,
-      int tag=-1);
+      int tag=-1, bool vectorFlag=false);
     int appendSendnb(int predicateBitField, void *buffer, int size, int dstPet,
-      int tag=-1);
+      int tag=-1, bool vectorFlag=false);
     int appendSendnbRRA(int predicateBitField, int rraOffset, int size,
-      int dstPet, int rraIndex, int tag=-1);
+      int dstPet, int rraIndex, int tag=-1, bool vectorFlag=false);
     int appendMemCpySrcRRA(int predicateBitField, int rraOffset, int size,
       void *dstMem, int rraIndex);
     int appendMemGatherSrcRRA(int predicateBitField, void *dstBase,
-      TKId dstBaseTK, int rraIndex, int chunkCount,
-      int vectorLength=1);
+      TKId dstBaseTK, int rraIndex, int chunkCount, bool vectorFlag=false);
     int appendZeroScalarRRA(int predicateBitField, TKId elementTK,
       int rraOffset, int rraIndex);
     int appendZeroSuperScalarRRA(int predicateBitField, TKId elementTK,
-      int rraIndex, int termCount,
-      int vectorLength=1);
-    int appendZeroVector(int predicateBitField, char *buffer, int byteCount);
-    int appendZeroVectorRRA(int predicateBitField, int byteCount, int rraIndex);
+      int rraIndex, int termCount, bool vectorFlag=false);
+    int appendZeroMemset(int predicateBitField, char *buffer, int byteCount);
+    int appendZeroMemsetRRA(int predicateBitField, int byteCount, int rraIndex,
+      bool vectorFlag=false);
     int appendProductSumScalarRRA(int predicateBitField, TKId elementTK,
       TKId valueTK, TKId factorTK, int rraOffset, void *factor, void *value,
       int rraIndex);
@@ -370,8 +371,8 @@ class XXE{
       TKId valueTK, int rraIndex, int termCount,
       int vectorLength=1);
     int appendProductSumSuperScalarDstRRA(int predicateBitField, TKId elementTK,
-      TKId valueTK, TKId factorTK, int rraIndex, int termCount,
-      int vectorLength=1);
+      TKId valueTK, TKId factorTK, int rraIndex, int termCount, void *valueBase,
+      bool vectorFlag=false);
     int appendProductSumSuperScalarSrcRRA(int predicateBitField, TKId elementTK,
       TKId valueTK, TKId factorTK, int rraIndex, int termCount,
       int vectorLength=1);
@@ -394,8 +395,8 @@ class XXE{
       int resolved);
     template<typename T, typename U, typename V>
     static void psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
-      U **factorList, TKId factorTK, V **valueList, TKId valueTK,
-      int termCount, int vectorLength, int resolved);
+      U **factorList, TKId factorTK, V *valueBase, int *valueOffsetList,
+      TKId valueTK, int termCount, int vectorLength, int resolved);
     template<typename T, typename U, typename V>
     static void psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
       U **factorList, TKId factorTK, V **elementList, TKId elementTK,
@@ -416,6 +417,7 @@ class XXE{
       int size;
       int dstPet;
       int tag;
+      bool vectorFlag;
     }SendnbInfo;
 
     typedef struct{
@@ -426,6 +428,7 @@ class XXE{
       int size;
       int srcPet;
       int tag;
+      bool vectorFlag;
     }RecvnbInfo;
 
     typedef struct{
@@ -437,6 +440,7 @@ class XXE{
       int dstPet;
       int rraIndex;
       int tag;
+      bool vectorFlag;
     }SendnbRRAInfo;
 
     typedef struct{
@@ -448,6 +452,7 @@ class XXE{
       int srcPet;
       int rraIndex;
       int tag;
+      bool vectorFlag;
     }RecvnbRRAInfo;
 
     typedef struct{
@@ -527,10 +532,11 @@ class XXE{
       TKId valueTK;
       int *rraOffsetList;
       void **factorList;
-      void **valueList;
+      void *valueBase;
       int rraIndex;
       int termCount;
-      int vectorLength;
+      bool vectorFlag;
+      int *valueOffsetList;
     }ProductSumSuperScalarDstRRAInfo;
 
     typedef struct{
@@ -558,7 +564,7 @@ class XXE{
       void *valueList;
       int rraIndex;
       int termCount;
-      int vectorLength;
+      bool vectorFlag;
     }ProductSumSuperScalarContigRRAInfo;
 
     typedef struct{
@@ -576,7 +582,7 @@ class XXE{
       int *rraOffsetList;
       int rraIndex;
       int termCount;
-      int vectorLength;
+      bool vectorFlag;
     }ZeroSuperScalarRRAInfo;
 
     typedef struct{
@@ -584,14 +590,15 @@ class XXE{
       int predicateBitField;
       char *buffer;
       int byteCount;
-    }ZeroVectorInfo;
+    }ZeroMemsetInfo;
 
     typedef struct{
       OpId opId;
       int predicateBitField;
       int byteCount;
       int rraIndex;
-    }ZeroVectorRRAInfo;
+      bool vectorFlag;
+    }ZeroMemsetRRAInfo;
 
     typedef struct{
       OpId opId;
@@ -619,7 +626,7 @@ class XXE{
       int *countList;
       int rraIndex;
       int chunkCount;
-      int vectorLength;
+      bool vectorFlag;
     }MemGatherSrcRRAInfo;
     
     // --- sub-streams
@@ -629,6 +636,7 @@ class XXE{
       int predicateBitField;
       XXE *xxe;
       int rraShift;
+      int vectorLengthShift;
     }XxeSubInfo;
     
     typedef struct{

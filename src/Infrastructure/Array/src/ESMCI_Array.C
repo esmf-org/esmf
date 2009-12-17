@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.79 2009/12/14 18:40:02 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.80 2009/12/17 06:14:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.79 2009/12/14 18:40:02 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.80 2009/12/17 06:14:09 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4091,7 +4091,7 @@ namespace ArrayHelper{
     char *buffer;
     int partnerDeDataCount;
     int recvnbIndex;
-    int vectorLength; // each element in dstInfoTable is a vector of this length
+    bool vectorFlag;  // control vectorization
     vector<DstInfo> dstInfoTable;
     int localPet;
     int petCount;
@@ -4146,11 +4146,15 @@ namespace ArrayHelper{
     }
     // append the recvnb operation
     localrc = xxe->appendRecvnb(predicateBitField, buffer, 
-      bufferItemCount * dataSizeSrc * vectorLength, srcPet, tag);
+      bufferItemCount * dataSizeSrc, srcPet, tag, vectorFlag);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMPROFILE
-    char *tempString = new char[100];
+    char *tempString = new char[160];
+    sprintf(tempString, "Recvnb: vectorFlag=%d", vectorFlag);
+    localrc = xxe->appendProfileMessage(predicateBitField, tempString);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     sprintf(tempString, "<(%04d/%04d)-Rnb(%d/%d)-(%04d/%04d)> ",
       srcDe, srcPet, k, recvnbIndex, dstDe, localPet);
     localrc = xxe->appendProfileMessage(predicateBitField, tempString);
@@ -4182,16 +4186,18 @@ namespace ArrayHelper{
 #endif
     int xxeIndex = xxe->count;  // need this beyond the increment
     localrc = xxe->appendZeroSuperScalarRRA(predicateBitField, elementTK,
-      rraIndex, dstInfoTable.size(), vectorLength);
+      rraIndex, dstInfoTable.size(), vectorFlag);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     XXE::ZeroSuperScalarRRAInfo *xxeZeroSuperScalarRRAInfo =
       (XXE::ZeroSuperScalarRRAInfo *)&(xxe->stream[xxeIndex]);
     // fill rraOffsetList[]
+    int vectorLength = dstInfoTable.begin()->vectorLength;  // store time vLen
     int k=0;  // reset
     for (vector<ArrayHelper::DstInfo>::iterator pp = dstInfoTable.begin();
       pp != dstInfoTable.end(); ++pp){
-      xxeZeroSuperScalarRRAInfo->rraOffsetList[k] = pp->linIndex;
+      int linIndex = pp->linIndex;
+      xxeZeroSuperScalarRRAInfo->rraOffsetList[k] = linIndex/vectorLength;
       ++k;
     }
 #ifdef ASMMPROFILE
@@ -4211,6 +4217,7 @@ namespace ArrayHelper{
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
     int rc = ESMC_RC_NOT_IMPL;              // final return code
     int j = dstLocalDe;
+    int vectorLength = dstInfoTable.begin()->vectorLength;  // store time vLen
     if (srcTermProcessing==0){
       // do all the processing on the dst side
       // use super-scalar "+=*" operation containing all terms
@@ -4219,21 +4226,23 @@ namespace ArrayHelper{
       int termCount = partnerDeDataCount;
       int xxeIndex = xxe->count;  // need this beyond the increment
       localrc = xxe->appendProductSumSuperScalarDstRRA(predicateBitField,
-        elementTK, valueTK, factorTK, rraIndex, termCount, vectorLength);
+        elementTK, valueTK, factorTK, rraIndex, termCount, (void *)buffer, 
+        vectorFlag);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       XXE::ProductSumSuperScalarDstRRAInfo *xxeProductSumSuperScalarDstRRAInfo =
         (XXE::ProductSumSuperScalarDstRRAInfo *)&(xxe->stream[xxeIndex]);
       int *rraOffsetList = xxeProductSumSuperScalarDstRRAInfo->rraOffsetList;
       void **factorList = xxeProductSumSuperScalarDstRRAInfo->factorList;
-      void **valueList = xxeProductSumSuperScalarDstRRAInfo->valueList;
-      // fill in rraOffsetList, factorList, valueList
+      int *valueOffsetList =
+        xxeProductSumSuperScalarDstRRAInfo->valueOffsetList;
+      // fill in rraOffsetList, factorList, valueOffsetList
       vector<ArrayHelper::DstInfo>::iterator pp = dstInfoTable.begin();
       for (int kk=0; kk<termCount; kk++){
         int linIndex = pp->linIndex;
-        rraOffsetList[kk] = linIndex * dataSizeDst;
+        rraOffsetList[kk] = linIndex/vectorLength * dataSizeDst;
         factorList[kk] = (void *)(pp->factor);
-        valueList[kk] = (void *)(buffer + kk * dataSizeSrc * vectorLength);
+        valueOffsetList[kk] = kk;
         ++pp;
       } // for kk - termCount
       // need to fill in sensible elements and values or timing will be bogus
@@ -4264,27 +4273,27 @@ namespace ArrayHelper{
       switch (valueTK){
       case XXE::R4:
         for (int kk=0; kk<termCount; kk++)
-          *(ESMC_R4 *)valueList[kk] = (ESMC_R4)0.01; // value
+          *((ESMC_R4 *)buffer + valueOffsetList[kk]) = (ESMC_R4)0.01; // value
         break;
       case XXE::R8:
         for (int kk=0; kk<termCount; kk++)
-          *(ESMC_R4 *)valueList[kk] = (ESMC_R8)0.01; // value
+          *((ESMC_R8 *)buffer + valueOffsetList[kk]) = (ESMC_R8)0.01; // value
         break;
       case XXE::I4:
         for (int kk=0; kk<termCount; kk++)
-          *(ESMC_R4 *)valueList[kk] = (ESMC_I4)0.01; // value
+          *((ESMC_I4 *)buffer + valueOffsetList[kk]) = (ESMC_I4)1; // value
         break;
       case XXE::I8:
         for (int kk=0; kk<termCount; kk++)
-          *(ESMC_R4 *)valueList[kk] = (ESMC_I8)0.01; // value
+          *((ESMC_I8 *)buffer + valueOffsetList[kk]) = (ESMC_I8)1; // value
         break;
       default:
         break;
       }
       xxe->optimizeElement(xxeIndex);
       double dt_sScalar;
-      localrc = xxe->exec(rraCount, rraList, 0x0, &dt_sScalar, xxeIndex,
-        xxeIndex);
+      localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, &dt_sScalar,
+        xxeIndex, xxeIndex);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
       // try super-scalar contig "+=*" operation in XXE stream
@@ -4296,12 +4305,12 @@ namespace ArrayHelper{
       xxeProductSumSuperScalarContigRRAInfo->valueList = (void *)(buffer);
       xxe->optimizeElement(xxeIndex);
       double dt_sScalarC;
-      localrc = xxe->exec(rraCount, rraList, 0x0, &dt_sScalarC, xxeIndex,
-        xxeIndex);
+      localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, &dt_sScalarC,
+        xxeIndex, xxeIndex);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
 #ifdef ASMMPROFILE
-      char *tempString = new char[80];
+      char *tempString = new char[160];
       vector<int> sortOffsetList(termCount);
       copy(rraOffsetList, rraOffsetList+termCount, sortOffsetList.begin());
       sort(sortOffsetList.begin(), sortOffsetList.end());
@@ -4310,19 +4319,22 @@ namespace ArrayHelper{
         if (sortOffsetList[i] != sortOffsetList[i-1]) ++diffElements;
 #endif
       // decide for the fastest option
+      
       if (dt_sScalar < dt_sScalarC){
         // use productSumSuperScalarDstRRA
 #ifdef ASMMPROFILE
         sprintf(tempString, "use productSumSuperScalarDstRRA for %d terms"
-          " (diffElements=%d)", termCount, diffElements);
+          " (diffElements=%d), vectorFlag=%d", termCount, diffElements,
+          vectorFlag);
 #endif
         xxe->stream[xxeIndex].opId = XXE::productSumSuperScalarDstRRA;
-        xxeProductSumSuperScalarDstRRAInfo->valueList = valueList;
+        xxeProductSumSuperScalarDstRRAInfo->valueBase = (void *)buffer;
       }else{
         // use productSumSuperScalarContigRRA
 #ifdef ASMMPROFILE
         sprintf(tempString, "use productSumSuperScalarContigRRA for %d terms"
-          " (diffElements=%d)", termCount, diffElements);
+          " (diffElements=%d), vectorFlag=%d", termCount, diffElements,
+          vectorFlag);
 #endif
         // nothing to be done -> already set from last trial
       }
@@ -4399,7 +4411,7 @@ namespace ArrayHelper{
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
     int rc = ESMC_RC_NOT_IMPL;              // final return code
 #ifdef ASMMPROFILE
-    char *tempString = new char[80];
+    char *tempString = new char[160];
     sprintf(tempString, "WaitProductSum (%d/)", k);
     localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
       xxe->count);
@@ -4411,7 +4423,7 @@ namespace ArrayHelper{
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMPROFILE
-    tempString = new char[80];
+    tempString = new char[160];
     sprintf(tempString, "done WaitOnIndex: %d", recvnbIndex);
     localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
       xxe->count);
@@ -4425,7 +4437,7 @@ namespace ArrayHelper{
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMPROFILE
-    tempString = new char[80];
+    tempString = new char[160];
     sprintf(tempString, "/WaitProductSum (%d/)", k);
     localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
       xxe->count);
@@ -4452,7 +4464,7 @@ namespace ArrayHelper{
     char *buffer;
     int partnerDeDataCount;
     int sendnbIndex;
-    int vectorLength; // each element in srcInfoTable is a vector of this length
+    bool vectorFlag;  // control vectorization
     vector<SrcInfo> srcInfoTable;
     vector<LinIndexContigBlock> linIndexContigBlockList;
     int localPet;
@@ -4480,6 +4492,7 @@ namespace ArrayHelper{
     int rc = ESMC_RC_NOT_IMPL;              // final return code
     int tag = 0;  // no need for special tags - messages are ordered to match
     int j = srcLocalDe;
+    int vectorLength = srcInfoTable.begin()->vectorLength;  // store time vLen
     if (srcTermProcessing==0){
       // do all the processing on the dst side
       int count = linIndexContigBlockList.size();
@@ -4493,10 +4506,18 @@ namespace ArrayHelper{
 #endif
         sendnbIndex = xxe->count;  // store index for the associated wait
         localrc = xxe->appendSendnbRRA(predicateBitField,
-          linIndexContigBlockList[0].linIndex * dataSizeSrc,
-          partnerDeDataCount * dataSizeSrc * vectorLength, dstPet, j, tag);
+          linIndexContigBlockList[0].linIndex/vectorLength * dataSizeSrc,
+          partnerDeDataCount * dataSizeSrc, dstPet, j, tag, vectorFlag);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
           ESMF_ERR_PASSTHRU, &rc)) return rc;
+#ifdef ASMMPROFILE
+        char *tempString = new char[160];
+        sprintf(tempString, "Contiguous send: vectorFlag=%d", vectorFlag);
+        localrc = xxe->appendProfileMessage(predicateBitField, tempString);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+          ESMF_ERR_PASSTHRU, &rc)) return rc;
+        delete [] tempString;
+#endif
       }else{
         // use intermediate buffer
 #ifdef ASMMSTOREPRINT
@@ -4506,7 +4527,7 @@ namespace ArrayHelper{
         // memGatherSrcRRA pieces into intermediate buffer
         int xxeIndex = xxe->count;  // need this beyond the increment
         localrc = xxe->appendMemGatherSrcRRA(predicateBitField, buffer, valueTK,
-          j, count, vectorLength);
+          j, count, vectorFlag);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
           ESMF_ERR_PASSTHRU, &rc)) return rc;
         XXE::MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo =
@@ -4514,12 +4535,13 @@ namespace ArrayHelper{
         // try typekind specific memGatherSrcRRA
         for (int kk=0; kk<count; kk++){
           xxeMemGatherSrcRRAInfo->rraOffsetList[kk] =
-            linIndexContigBlockList[kk].linIndex * dataSizeSrc;
+            linIndexContigBlockList[kk].linIndex/vectorLength * dataSizeSrc;
           xxeMemGatherSrcRRAInfo->countList[kk] =
             linIndexContigBlockList[kk].linIndexCount;
         }
         double dt_tk;
-        localrc = xxe->exec(rraCount, rraList, 0x0, &dt_tk, xxeIndex, xxeIndex);
+        localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, &dt_tk,
+          xxeIndex, xxeIndex);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         // try byte option for memGatherSrcRRA
@@ -4527,8 +4549,8 @@ namespace ArrayHelper{
         for (int kk=0; kk<count; kk++)
           xxeMemGatherSrcRRAInfo->countList[kk] *= dataSizeSrc; // scale to byte
         double dt_byte;
-        localrc = xxe->exec(rraCount, rraList, 0x0, &dt_byte, xxeIndex, 
-          xxeIndex);
+        localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, &dt_byte,
+          xxeIndex, xxeIndex);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
 #ifdef ASMMSTOREPRINT
@@ -4548,7 +4570,11 @@ namespace ArrayHelper{
           }
         }
 #ifdef ASMMPROFILE
-        char *tempString = new char[80];
+        char *tempString = new char[160];
+        sprintf(tempString, "MemGatherSrcRRA: vectorFlag=%d", vectorFlag);
+        localrc = xxe->appendProfileMessage(predicateBitField, tempString);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+          ESMF_ERR_PASSTHRU, &rc)) return rc;
         sprintf(tempString, "/MemGatherSrcRRA (%d/)", k);
         localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
           xxe->count);
@@ -4559,7 +4585,7 @@ namespace ArrayHelper{
         // sendnb out of contiguous intermediate buffer
         sendnbIndex = xxe->count;  // store index for the associated wait
         localrc = xxe->appendSendnb(predicateBitField, buffer,
-          partnerDeDataCount * dataSizeSrc * vectorLength, dstPet, tag);
+          partnerDeDataCount * dataSizeSrc, dstPet, tag, vectorFlag);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
           ESMF_ERR_PASSTHRU, &rc)) return rc;
       }
@@ -4578,12 +4604,12 @@ namespace ArrayHelper{
         ++bufferItemCount;
       }
       // zero out intermediate buffer
-      localrc = xxe->appendZeroVector(predicateBitField, buffer,
+      localrc = xxe->appendZeroMemset(predicateBitField, buffer,
         bufferItemCount * dataSizeSrc * vectorLength);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMPROFILE
-      char *tempString = new char[100];
+      char *tempString = new char[160];
       sprintf(tempString, "/ZeroVector (%d/)", k);
       localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
         xxe->count);
@@ -4621,14 +4647,14 @@ namespace ArrayHelper{
         ++bufferItem;
       }
 #ifdef ASMMPROFILE
-      tempString = new char[100];
+      tempString = new char[160];
       sprintf(tempString, "use productSumSuperScalarSrcRRA for termCount=%d"
         " -> reducing it to %d terms", partnerDeDataCount, bufferItem);
       localrc = xxe->appendProfileMessage(predicateBitField, tempString);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
-      sprintf(tempString, "use productSumSuperScalarSrcRRA with "
-        "vectorLength=%d", vectorLength);
+      sprintf(tempString, "productSumSuperScalarSrcRRA: vectorLength=%d",
+        vectorLength);
       localrc = xxe->appendProfileMessage(predicateBitField, tempString);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -4647,7 +4673,7 @@ namespace ArrayHelper{
         ESMF_ERR_PASSTHRU, &rc)) return rc;
     }
 #ifdef ASMMPROFILE
-    char *tempString = new char[100];
+    char *tempString = new char[160];
     sprintf(tempString, "<(%04d/%04d)-Snb(%d/%d)-(%04d/%04d)> ",
       srcDe, localPet, k, sendnbIndex, dstDe, dstPet);
     localrc = xxe->appendProfileMessage(predicateBitField, tempString);
@@ -6778,7 +6804,7 @@ int sparseMatMulStoreEncodeXXEStream(VM *vm,
   XXE::TKId valueTK, XXE::TKId factorTK,
   int dataSizeSrc, int dataSizeDst, int dataSizeFactors, int srcLocalDeCount,
   int dstLocalDeCount, const int *dstLocalDeTotalElementCount, char **rraList,
-  int rraCount, XXE *xxe);
+  int rraCount, int vectorLength, XXE *xxe);
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -7025,15 +7051,26 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     
 #ifdef ASMMSTORETIMING
     VMK::wtime(&t9c2);   //gjt - profile
-#endif    
+#endif  
+    
+    bool vectorFlag = false;  // default assume no vectorization
+    
     // sort each "recvnbDiffPartnerDeCount group" (opposite of src)
-    if (tensorMixFlag || (srcTensorContigLength != dstTensorContigLength) ||
-      (srcTensorContigLength == 1)){
+    if (tensorMixFlag || (srcTensorContigLength != dstTensorContigLength)){
+      // no vectorization possible -> sort for scalar optimization
+      for (int i=0; i<recvnbDiffPartnerDeCount; i++)
+        sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
+          ArrayHelper::scalarOrderDstInfo);
+    }else if (dstTensorContigLength == 1){
+      // support vectorization during execution, but nothing to deflate here
+      vectorFlag = true;
       // sort for scalar optimization
       for (int i=0; i<recvnbDiffPartnerDeCount; i++)
         sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
           ArrayHelper::scalarOrderDstInfo);
     }else{
+      // vectorization
+      vectorFlag = true;
       // sort vector optimization
       for (int i=0; i<recvnbDiffPartnerDeCount; i++){
         sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
@@ -7057,6 +7094,11 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
           }
           if ((rangeWrite != dstInfoTable[i].begin())
             && ((rangeWrite-1)->vectorLength != vectorLength)){
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_INCONS,
+            "- vectorization failed", &rc);
+            return rc;
+          }
+          if (vectorLength != dstTensorContigLength){
             ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_INCONS,
             "- vectorization failed", &rc);
             return rc;
@@ -7090,7 +7132,12 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     // construct recv elements
     for (int i=0; i<recvnbDiffPartnerDeCount; i++){
       // large contiguous 1st level receive buffer
-      char *buffer = new char[recvnbPartnerDeCount[i] * dataSizeSrc];
+//      char *buffer = new char[recvnbPartnerDeCount[i] * dataSizeSrc];
+//TODO: The factor of 10 in the next line provides enough memory in the
+//TODO: buffer for cases where the vectorLength during execution time is
+//TODO: 10 times greater than during store time. This needs to be replaced
+//TODO: by some kind of smart re-allocation during execution time.
+      char *buffer = new char[recvnbPartnerDeCount[i] * dataSizeSrc * 10];
       localrc = xxe->storeStorage(buffer); // XXE garbage collec.
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -7107,7 +7154,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       recvnbElement.dstLocalDe = j;
       recvnbElement.buffer = buffer;
       recvnbElement.partnerDeDataCount = dstInfoTable[i].size();
-      recvnbElement.vectorLength = dstInfoTable[i].begin()->vectorLength;
+      recvnbElement.vectorFlag = vectorFlag;
       recvnbElement.dstInfoTable = dstInfoTable[i];
       recvnbElement.localPet = localPet;
       recvnbElement.petCount = petCount;
@@ -7215,14 +7262,30 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     delete [] factorIndexRef;
     delete [] partnerDeRef;
     
+    bool vectorFlag = false;  // default assume no vectorization
+    
     // sort each "sendnbDiffPartnerDeCount group" (opposite of dst)
-    if (tensorMixFlag || (srcTensorContigLength != dstTensorContigLength) ||
-      (srcTensorContigLength == 1)){
+    if (tensorMixFlag || (srcTensorContigLength != dstTensorContigLength)){
+      // no vectorization possible -> sort for scalar optimization
+      if (vectorFlag != false){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_INCONS,
+          "- vectorFlag inconsistency", &rc);
+        return rc;
+      }
+      // sort for scalar optimization
+      for (int i=0; i<sendnbDiffPartnerDeCount; i++)
+        sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
+          ArrayHelper::scalarOrderSrcInfo);
+    }else if (srcTensorContigLength == 1){
+      // support vectorization during execution, but nothing to deflate here
+      vectorFlag = true;
       // sort for scalar optimization
       for (int i=0; i<sendnbDiffPartnerDeCount; i++)
         sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
           ArrayHelper::scalarOrderSrcInfo);
     }else{
+      // vectorization
+      vectorFlag = true;
       // sort vector optimization
       for (int i=0; i<sendnbDiffPartnerDeCount; i++){
         sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
@@ -7250,6 +7313,11 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
             "- vectorization failed", &rc);
             return rc;
           }
+          if (vectorLength != srcTensorContigLength){
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_INCONS,
+            "- vectorization failed", &rc);
+            return rc;
+          }
           *rangeWrite = *rangeStart;  // copy table element
           rangeWrite->vectorLength = vectorLength;
           rangeWrite++;
@@ -7273,6 +7341,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     
     // construct send elements
     for (int i=0; i<sendnbDiffPartnerDeCount; i++){
+      int vectorLength = srcInfoTable[i].begin()->vectorLength;
       // determine contiguous runs in linIndex to minimize memcpy overhead
       vector<ArrayHelper::LinIndexContigBlock> linIndexContigBlockList;
       // initialize linIndexContigBlockList[]
@@ -7281,7 +7350,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       block.linIndexCount = 1;
       linIndexContigBlockList.push_back(block);
       for (int k=1; k<srcInfoTable[i].size(); k++){
-        if (srcInfoTable[i][k-1].linIndex + 1 ==
+        if (srcInfoTable[i][k-1].linIndex + vectorLength ==
           srcInfoTable[i][k].linIndex){
           // contiguous step in linIndex
           ++(linIndexContigBlockList.back().linIndexCount);
@@ -7293,7 +7362,12 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         }
       }
       // intermediate buffer (in case it is needed)
-      char *buffer = new char[sendnbPartnerDeCount[i] * dataSizeSrc];
+//      char *buffer = new char[sendnbPartnerDeCount[i] * dataSizeSrc];
+//TODO: The factor of 10 in the next line provides enough memory in the
+//TODO: buffer for cases where the vectorLength during execution time is
+//TODO: 10 times greater than during store time. This needs to be replaced
+//TODO: by some kind of smart re-allocation during execution time.
+      char *buffer = new char[sendnbPartnerDeCount[i] * dataSizeSrc * 10];
       localrc = xxe->storeStorage(buffer); // XXE garbage collec.
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -7309,7 +7383,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       sendnbElement.srcDe = srcDe;
       sendnbElement.srcLocalDe = j;
       sendnbElement.partnerDeDataCount = srcInfoTable[i].size();
-      sendnbElement.vectorLength = srcInfoTable[i].begin()->vectorLength;
+      sendnbElement.vectorFlag = vectorFlag;
       sendnbElement.srcInfoTable = srcInfoTable[i];
       sendnbElement.linIndexContigBlockList = linIndexContigBlockList;
       sendnbElement.buffer = buffer;
@@ -7324,8 +7398,6 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     // garbage collection
     delete [] sendnbPartnerDeList;
     delete [] sendnbPartnerDeCount;
-    
-      
   } // for j - srcLocalDeCount
   
 #ifdef ASMMSTORETIMING
@@ -7364,11 +7436,20 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   fprintf(asmmsotreprintfp, "========================================"
     "========================================\n\n");
 #endif
+  
+  // Need correct setting of vectorLength for the XXE exec() calls.
+  int vectorLength = 0; // initialize
+  
+  // In case the vectorLength is relevant, i.e. the XXE stream will contain
+  // elements that use it, then srcTensorContigLength and dstTensorContigLength
+  // must be equivalent, and define the vectorLength.
+  if (srcTensorContigLength == dstTensorContigLength)
+    vectorLength = srcTensorContigLength; // consistent vectorLength
 
   // optimize srcTermProcessing
   int pipelineDepth = 4;  // safe value during srcTermProcessing optimization
   int srcTermProcessingOpt;
-  const int srcTermProcMax = 6;
+  const int srcTermProcMax = 1;
   const int srcTermProcList[] = {0, 1, 2, 3, 4, 20};  // settings to be tried
   for (int srcTermProc=0; srcTermProc<srcTermProcMax; srcTermProc++){
     int srcTermProcessing=srcTermProcList[srcTermProc];
@@ -7378,7 +7459,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
       srcTermProcessing, pipelineDepth, elementTK, valueTK, factorTK,
       dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount,
-      dstLocalDeCount, dstLocalDeTotalElementCount, rraList, rraCount, xxe);
+      dstLocalDeCount, dstLocalDeTotalElementCount, rraList, rraCount, 
+      vectorLength, xxe);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
 #if 0  
@@ -7398,10 +7480,10 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     for (int i=0; i<dtCount; i++){
       vm->barrier();
       vm->wtime(&dtStart);
-        localrc = xxe->exec(rraCount, rraList,
-          0x0|XXE::filterBitRegionSelectZero);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-          &rc)) return rc;
+      localrc = xxe->exec(rraCount, rraList, &vectorLength,
+        0x0|XXE::filterBitRegionSelectZero);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        &rc)) return rc;
       vm->barrier();
       vm->wtime(&dtEnd);
       dtAverage += dtEnd - dtStart;
@@ -7476,7 +7558,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
       srcTermProcessingOpt, pipelineDepth, elementTK, valueTK, factorTK,
       dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount,
-      dstLocalDeCount, dstLocalDeTotalElementCount, rraList, rraCount, xxe);
+      dstLocalDeCount, dstLocalDeTotalElementCount, rraList, rraCount, 
+      vectorLength, xxe);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
 #if 0  
@@ -7496,7 +7579,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     for (int i=0; i<dtCount; i++){
       vm->barrier();
       vm->wtime(&dtStart);
-        localrc = xxe->exec(rraCount, rraList,
+        localrc = xxe->exec(rraCount, rraList, &vectorLength,
           0x0|XXE::filterBitRegionSelectZero);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
@@ -7571,7 +7654,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
     srcTermProcessingOpt, pipelineDepthOpt, elementTK, valueTK, factorTK,
     dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount,
-    dstLocalDeCount, dstLocalDeTotalElementCount, rraList, rraCount, xxe);
+    dstLocalDeCount, dstLocalDeTotalElementCount, rraList, rraCount,
+    vectorLength, xxe);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -7589,7 +7673,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   
   // execute final XXE stream for consistent profile data
   vm->barrier();  // ensure all PETs are present before profile run
-  localrc = xxe->exec(rraCount, rraList, 0x0|XXE::filterBitRegionSelectZero);
+  localrc = xxe->exec(rraCount, rraList, &vectorLength, 
+    0x0|XXE::filterBitRegionSelectZero);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -7644,6 +7729,7 @@ int sparseMatMulStoreEncodeXXEStream(
   const int *dstLocalDeTotalElementCount, // in
   char **rraList,                         // in
   int rraCount,                           // in
+  int vectorLength,                       // in
   XXE *xxe                                // inout - XXE stream
   ){    
 //
@@ -7703,9 +7789,16 @@ int sparseMatMulStoreEncodeXXEStream(
       ESMF_ERR_PASSTHRU, &rc)) return rc;
 #endif
     for (int i=0; i<dstLocalDeCount; i++){
-      localrc = xxe->appendZeroVectorRRA(
+      int byteCount = dstLocalDeTotalElementCount[i] * dataSizeDst; // init
+      bool vectorFlag = false;  // init
+      if (vectorLength){
+        // vectorLength is consistent between src and dst Array -> can be used
+        byteCount /= vectorLength;  // scale with store time vectorLength
+        vectorFlag = true;
+      }
+      localrc = xxe->appendZeroMemsetRRA(
         XXE::filterBitRegionTotalZero|XXE::filterBitNbStart,
-        dstLocalDeTotalElementCount[i] * dataSizeDst, srcLocalDeCount + i);
+        byteCount, srcLocalDeCount + i, vectorFlag);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
     }
@@ -7783,7 +7876,7 @@ int sparseMatMulStoreEncodeXXEStream(
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMPROFILE
-          char *tempString = new char[80];
+          char *tempString = new char[160];
           sprintf(tempString, "done WaitOnIndex: %d",
             pSendWait->sendnbIndex);
           localrc = xxe->appendWtimer(0x0|XXE::filterBitNbWaitFinish,
@@ -7834,7 +7927,7 @@ int sparseMatMulStoreEncodeXXEStream(
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMPROFILE
-          char *tempString = new char[80];
+          char *tempString = new char[160];
           sprintf(tempString, "done WaitOnIndex: %d",
             pSendWait->sendnbIndex);
           localrc = xxe->appendWtimer(0x0|XXE::filterBitNbWaitFinish,
@@ -8021,8 +8114,61 @@ int Array::sparseMatMul(
   VMK::wtime(&t4);      //gjt - profile
 #endif
   
+  // set vectorLength
+  int vectorLength = 0; // initialize
+  
+  // The vectorLength argument passed into xxe->exec() provides support
+  // for flexible choice of vectorLength during execution time of the XXE
+  // stream. Vectorization in the XXE stream is handled on a per operation
+  // basis, i.e. it depends on each individual operation whether, and how the 
+  // vectorLength argument is used.
+  // On those PETs that don't call in with srcArray nor dstArray (unusual case,
+  // but possible and supported!), the vectorLenght will be left at 0. In the
+  // other cases (i.e. srcArray and/or dstArray are present) it is assumed that
+  // the vectorLength can be determined from which ever Array is present (first
+  // see about srcArray, and if not available then look at dstArray). This is
+  // consistent because vectorization in the XXE stream is only meaningful under
+  // the condition that the vectorLength determined from the srcArray equals
+  // that determined from the dstArray. There is not check performed here on
+  // whether srcArray and dstArray lead to the same vectorLength, because it
+  // is not know here whether the XXE stream actually uses vectorization or not.
+  // In the case that no vectorization is used there may well be inconsistencies
+  // on this level, and the vectorLength passed into xxe->exec() is bogus. 
+  // However, the vectorLength is irrelevant under this condition, and will be
+  // ignored by the XXE execution.
+
+  if (srcArrayFlag){
+    // use srcArray to determine vectorLenth
+    vectorLength = 1;  // prime
+    int rank = srcArray->rank;
+    for (int jj=0; jj<rank; jj++){
+      if (srcArray->arrayToDistGridMap[jj])
+        // decomposed dimension
+        break;
+      else
+        // tensor dimension
+        vectorLength *= srcArray->undistUBound[jj]
+          - srcArray->undistLBound[jj] + 1;
+    }
+  }else if (dstArrayFlag){
+    // use dstArray to determine vectorLenth
+    vectorLength = 1;  // prime
+    int rank = dstArray->rank;
+    for (int jj=0; jj<rank; jj++){
+      if (dstArray->arrayToDistGridMap[jj])
+        // decomposed dimension
+        break;
+      else
+        // tensor dimension
+        vectorLength *= dstArray->undistUBound[jj]
+          - dstArray->undistLBound[jj] + 1;
+    }
+  }
+  
+  printf("exec() vectorLength: %d\n", vectorLength);
+  
   // execute XXE stream
-  localrc = xxe->exec(rraCount, rraList, filterBitField);
+  localrc = xxe->exec(rraCount, rraList, &vectorLength, filterBitField);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
@@ -8105,8 +8251,10 @@ int Array::sparseMatMulRelease(
     // get XXE from routehandle
     XXE *xxe = (XXE *)routehandle->getStorage();
   
-#define XXEPROFILEPRINT
+#define XXEPROFILEPRINT___disable
+    
 #ifdef XXEPROFILEPRINT
+#ifdef ASMMPROFILE
     // print XXE stream profile
     VM *vm = VM::getCurrent(&localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
@@ -8130,6 +8278,7 @@ int Array::sparseMatMulRelease(
       vm->barrier();
     }
     fclose(fp);
+#endif
 #endif
   
     // delete xxe
