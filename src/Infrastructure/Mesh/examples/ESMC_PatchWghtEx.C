@@ -1,3 +1,4 @@
+// $Id: ESMC_PatchWghtEx.C,v 1.17 2009/12/17 19:06:26 rokuingh Exp $
 //==============================================================================
 //
 // Earth System Modeling Framework

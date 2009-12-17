@@ -1,3 +1,4 @@
+// $Id: ESMC_DCatEx.C,v 1.12 2009/12/17 19:06:21 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
