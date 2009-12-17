@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.20 2009/12/15 16:26:59 feiliu Exp $
+! $Id: ESMF_MeshEx.F90,v 1.21 2009/12/17 19:14:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -31,12 +31,6 @@ program ESMF_MeshEx
 
   implicit none
 
-!------------------------------------------------------------------------------
-! The following line turns the CVS identifier string into a printable variable.
-  character(*), parameter :: version = &
-    '$Id: ESMF_MeshEx.F90,v 1.20 2009/12/15 16:26:59 feiliu Exp $'
-!------------------------------------------------------------------------------
-    
 
   ! individual test result code
   integer :: finalrc, rc, petCount,localPet, localrc
