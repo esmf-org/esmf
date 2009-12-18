@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.21 2009/12/17 19:14:58 theurich Exp $
+! $Id: ESMF_MeshEx.F90,v 1.22 2009/12/18 20:52:28 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -84,11 +84,11 @@ program ESMF_MeshEx
 !
 ! For the Mesh as a whole we set its parametric dimension ({\tt parametricDim}) and spatial dimension ({\tt spatialDim}). 
 ! The parametric dimension of a Mesh is the dimension of the topology of the Mesh, this can be thought of as the dimension of 
-! the elements which make up the Mesh. For example, a Mesh composed of triangles would have a parametric dimesion of 2, whereas
+! the elements which make up the Mesh. For example, a Mesh composed of triangles would have a parametric dimension of 2, whereas
 ! a Mesh composed of tetrahedra would have a parametric dimension of 3. A Mesh's spatial dimension, on the other hand, is the 
-! dimension of the space the Mesh is embedded in, in other words the number of coordinate dimesnions needed to describe the 
+! dimension of the space the Mesh is embedded in, in other words the number of coordinate dimensions needed to describe the 
 ! location of the nodes making up the Mesh. For example, a Mesh constructed of squares on a plane would have a parametric 
-! dimension of 2 and a spatial dimesnion of 2, whereas if that same Mesh were used to represent the 2D surface of a sphere 
+! dimension of 2 and a spatial dimension of 2, whereas if that same Mesh were used to represent the 2D surface of a sphere 
 ! then the Mesh would still have a parametric dimension of 2, but now its spatial dimension would be 3. 
 !
 ! The structure of the per node and element information used to create a Mesh is influenced by the Mesh distribution strategy. 
