@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.91 2009/12/16 21:17:39 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.92 2009/12/21 18:50:33 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -73,7 +73,7 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Create 2D Field with 2D Grid and Fortran data array}
-!\label{sec:field:usage:create_2dptr}
+!\label{sec:field:usage:create_2darray}
 !
 !  A user can create an {\tt ESMF\_Field} directly from an {\tt ESMF\_Grid} and an intrinsic 
 !  Fortran data array. This interface is overloaded for typekind and rank

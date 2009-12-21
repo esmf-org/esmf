@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.65 2009/10/21 18:02:44 oehmke Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.66 2009/12/21 18:50:34 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.65 2009/10/21 18:02:44 oehmke Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.66 2009/12/21 18:50:34 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -2399,7 +2399,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
 ! the retrieved data pointer is not allowed. @\
 ! For examples and @\
 ! associated documentations using this method see Section  @\
-! \ref{sec:field:usage:create_2dptr}, @\
+! \ref{sec:field:usage:create_2darray}, @\
 ! \ref{sec:field:usage:create_2dgrid_3dptr}, @\
 ! \ref{sec:field:usage:create_2dgrid_3dptr_map}, @\
 ! \ref{sec:field:usage:create_2dgrid_3dptr_map_halo}, and @\
