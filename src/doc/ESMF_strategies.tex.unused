@@ -59,7 +59,7 @@ mediator is necessarily a serial bottleneck in a parallel code!}
 
 The ESMF is being implemented in the C++ and FORTRAN languages, both of which support 
 basic implementation of the OOP concepts outlined above (see the \htmladdnormallink{{\it ESMF 
-Implementation Report}}{http://www.esmf.ucar.edu/documents/IMPL_repdoc} \cite{bib:ESMFimplrep}
+Implementation Report}}{http://www.earthsystemmodeling.org/documents/IMPL_repdoc} \cite{bib:ESMFimplrep}
 and other references, e.g. ~\cite{decyk97, decyk00}).  
 
 The ESMF architecture is class-based, as described in Sections~\ref{sec:superclasses}, 
