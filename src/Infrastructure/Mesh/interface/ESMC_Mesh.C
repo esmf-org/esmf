@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.15 2009/11/21 23:44:13 rokuingh Exp $
+// $Id: ESMC_Mesh.C,v 1.16 2009/12/23 16:36:12 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Mesh.C,v 1.15 2009/11/21 23:44:13 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Mesh.C,v 1.16 2009/12/23 16:36:12 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -51,6 +51,7 @@ ESMC_Mesh ESMC_MeshCreate(int *parametricDim, int *spatialDim, int *rc){
   ESMC_Mesh mesh;
 
   // Initialize the parallel environment for mesh (if not already done)
+  mesh.ptr = NULL;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return mesh; // bail out
