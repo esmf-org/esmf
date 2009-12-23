@@ -1,4 +1,4 @@
-% $Id: ESMF.cbib,v 1.10 2009/04/15 21:33:03 oehmke Exp $
+% $Id: ESMF.cbib,v 1.10.2.1 2009/12/23 18:30:27 svasquez Exp $
 
 % abbreviations
 @String{BAMS = {Bull. Amer. Met. Soc.}}
@@ -17,7 +17,7 @@
 @misc{bib:ESMFimplrep,
         title = "{Earth System Modeling Framework Implementation Report}",
         author = "{Neckels, D.} and {C. DeLuca}",
-        howpublished= "http://www.esmf.ucar.edu/users/documentation.shtml",
+        howpublished= "http://www.earthsystemmodeling.org/users/documentation.shtml",
         year = "2002"}
 
 @book{WOM2002,
