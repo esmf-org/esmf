@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2009/06/17 19:00:34 theurich Exp $ 
+# $Id: makefile,v 1.17.2.1 2009/12/23 19:44:29 svasquez Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -50,7 +50,7 @@ RUN_ESMF_StringUTestUNI:
 #
 #  Fortran 90 array pointer size test.  This must pass before any of the
 #  ESMF LocalArray code can be assumed safe. If this test does not pass
-#  please report it to esmf_support@ucar.edu.
+#  please report it to esmf_support@list.woc.noaa.gov.
 #
 
 RUN_ESMF_F90ArrayPtrUTest:
