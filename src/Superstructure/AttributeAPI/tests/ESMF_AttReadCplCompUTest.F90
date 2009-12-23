@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadCplCompUTest.F90,v 1.4 2009/08/13 19:21:52 svasquez Exp $
+! $Id: ESMF_AttReadCplCompUTest.F90,v 1.4.2.1 2009/12/23 19:51:24 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_AttReadCplCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttReadCplCompUTest.F90,v 1.4 2009/08/13 19:21:52 svasquez Exp $'
+      '$Id: ESMF_AttReadCplCompUTest.F90,v 1.4.2.1 2009/12/23 19:51:24 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -308,7 +308,7 @@ print *, 'outChar = ', outChar
       !EX_UTest
       ! Get CF "References" Attribute from a CplComp Test
       attrname = 'References'
-      attrvalue = 'http://www.esmf.ucar.edu'
+      attrvalue = 'http://www.earthsystemmodeling.org'
       conv = 'CF'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
                              convention=conv, purpose=purp, rc=rc)
