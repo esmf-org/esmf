@@ -12,6 +12,6 @@
     <CodingLanguage>Fortran 90</CodingLanguage>
     <ModelComponentFramework>ESMF (Earth System Modeling Framework)</ModelComponentFramework>
     <Comment>ESMF CplComp Attribute IO Test</Comment>
-    <References>http://www.esmf.ucar.edu</References>
+    <References>http://www.earthsystemmodeling.org</References>
   </attribute_package>
 </model_component>

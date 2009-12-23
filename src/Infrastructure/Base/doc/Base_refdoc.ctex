@@ -1,4 +1,4 @@
-% $Id: Base_refdoc.ctex,v 1.10 2009/01/21 21:37:58 cdeluca Exp $ 
+% $Id: Base_refdoc.ctex,v 1.11 2009/12/23 17:48:45 svasquez Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@
 
 %\section{Installation and General Usage}
 %See the \htmladdnormallink{ESMF User Guide}
-%{http://www.esmf.ucar.edu/esmf_docs/ESMF_usrdoc/} for installation instructions and a discussion of overall 
+%{http://www.earthsystemmodeling.org/esmf_docs/ESMF_usrdoc/} for installation instructions and a discussion of overall 
 %usage of the ESMF libraries.
 
 %\section{Architecture}
