@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.50 2009/10/24 01:14:40 w6ws Exp $
+// $Id: ESMCI_Attribute.C,v 1.51 2009/12/23 17:46:55 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.50 2009/10/24 01:14:40 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.51 2009/12/23 17:46:55 svasquez Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3661,9 +3661,9 @@ namespace ESMCI {
     fprintf(xml,"%s",msgbuf);
     sprintf(msgbuf,"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
     fprintf(xml,"%s",msgbuf);
-    sprintf(msgbuf,"xsi:schemaLocation=\"http://www.esmf.ucar.edu file:/esmf_model_component.xsd\"\n");
+    sprintf(msgbuf,"xsi:schemaLocation=\"http://www.earthsystemmodeling.org file:/esmf_model_component.xsd\"\n");
     fprintf(xml,"%s",msgbuf);
-    sprintf(msgbuf,"xmlns=\"http://www.esmf.ucar.edu\">\n\n");
+    sprintf(msgbuf,"xmlns=\"http://www.earthsystemmodeling.org\">\n\n");
     fprintf(xml,"%s",msgbuf);
   }
 
