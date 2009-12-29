@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.283 2009/12/23 17:14:24 svasquez Exp $
+#  $Id: common.mk,v 1.284 2009/12/29 18:36:51 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1533,7 +1533,7 @@ clean_validate:
 # Targets for building and running system tests.
 #-------------------------------------------------------------------------------
 
-system_tests: chkdir_tests
+system_tests: chkdir_tests build_libs
 	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR); fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
