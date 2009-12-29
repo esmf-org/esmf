@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.284 2009/12/29 18:36:51 svasquez Exp $
+#  $Id: common.mk,v 1.285 2009/12/29 19:11:47 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1560,7 +1560,7 @@ tree_system_tests: tree_build_system_tests tree_run_system_tests
 #
 # system_tests_uni, build and run uni versions of the system tests
 #
-system_tests_uni: chkdir_tests
+system_tests_uni: chkdir_tests build_libs
 	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR); fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
