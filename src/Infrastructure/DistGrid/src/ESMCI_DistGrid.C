@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.33.2.3 2009/11/06 17:25:48 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.33.2.4 2010/01/06 22:42:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.33.2.3 2009/11/06 17:25:48 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.33.2.4 2010/01/06 22:42:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3291,7 +3291,7 @@ int DistGrid::serialize(
     for (int i=0; i<patchCount; i++)
       *ip++ = elementCountPPatch[i];
   } else
-    ip += 2 + (dimCount+1)*patchCount;
+    ip += 2 + 2*dimCount*patchCount + patchCount;
 
   int deCount = delayout->getDeCount();
   if (inquireflag != ESMF_INQUIREONLY) {
@@ -3312,7 +3312,7 @@ int DistGrid::serialize(
     }
     *ip++ = connectionCount;
   } else
-    ip += (dimCount+1)*deCount + 1 + dimCount;
+    ip += 4*dimCount*deCount + 2*deCount + 1 + 2*dimCount + 1;
   
   if (inquireflag != ESMF_INQUIREONLY){
     if (regDecomp){
