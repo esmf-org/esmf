@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.50 2010/01/05 20:32:56 svasquez Exp $
+# $Id: build_rules.mk,v 1.51 2010/01/09 00:32:12 svasquez Exp $
 #
 # Linux.pgi.default
 #
@@ -43,7 +43,7 @@ ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),mvapich2)
-# Mpich2 ---------------------------------------------------
+# Mvapich2 ---------------------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
