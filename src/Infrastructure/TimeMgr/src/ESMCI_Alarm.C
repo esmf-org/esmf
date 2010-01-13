@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.C,v 1.11 2009/09/15 04:39:26 eschwab Exp $
+// $Id: ESMCI_Alarm.C,v 1.11.2.1 2010/01/13 07:01:13 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Alarm.C,v 1.11 2009/09/15 04:39:26 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Alarm.C,v 1.11.2.1 2010/01/13 07:01:13 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -1170,6 +1170,30 @@ int Alarm::count=0;
       // count for how many clock time steps the alarm is ringing
       if (ringing) timeStepRingingCount++;
 
+      // ensure a sticky repeatable alarm's ringTime remains in ringable range,
+      // in case it is not turned off for a while or if
+      // clock->timeStep >= ringInterval
+      // TODO:  make work for ESMF_MODE_REVERSE ?
+      TimeInterval zeroTimeInterval(0,0,1,0,0,0);
+      if (sticky && ringInterval != zeroTimeInterval &&
+          clock->advanceCount != 0) {
+        !printf("ringTime before:\n");
+        !print("ringTime string");
+        while (positive ? (clock->prevTime >= ringTime ||
+                           clock->currTime >= ringTime) :
+                          (clock->prevTime <= ringTime ||
+                           clock->currTime <= ringTime) ) {
+          // works for positive and negative ringIntervals TODO: test negative
+          ringTime += ringInterval;
+          // TODO:  if in practice, users use a timeStep which is much, much
+          //        greater than ringInterval, then a single-step calculated
+          //        approach to updating the ringTime, rather than a loop
+          //        approach, may be more efficient.
+        }
+        !printf("ringTime after:\n");
+        !print("ringTime string");
+      }
+
     } else { // ESMF_MODE_REVERSE
 
       // TODO: Make more robust by removing the following simplifying
@@ -1598,6 +1622,9 @@ int Alarm::count=0;
           ringDuration.TimeInterval::print();
         }
       }
+      else if (strncmp(opts, "ringtimestepcount", 17) == 0) {
+        printf("ringTimeStepCount = %d\n", ringTimeStepCount);
+      }
       else if (strncmp(opts, "ringtime", 8) == 0) {
         printf("ringTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
@@ -1654,18 +1681,15 @@ int Alarm::count=0;
           refTime.Time::print();
         }
       }
-      else if (strncmp(opts, "ringtimestepcount", 17) == 0) {
-        printf("ringTimeStepCount = %d\n", ringTimeStepCount);
-      }
       else if (strncmp(opts, "timestepringingcount", 20) == 0) {
         printf("timeStepRingingCount = %d\n", timeStepRingingCount);
-      }
-      else if (strncmp(opts, "ringing", 7) == 0) {
-        printf("ringing = %s\n", ringing ? "true" : "false");
       }
       else if (strncmp(opts, "ringingonprevtimestep", 21) == 0) {
         printf("ringingOnPrevTimeStep = %s\n",
                 ringingOnPrevTimeStep ? "true" : "false");
+      }
+      else if (strncmp(opts, "ringing", 7) == 0) {
+        printf("ringing = %s\n", ringing ? "true" : "false");
       }
       else if (strncmp(opts, "enabled", 7) == 0) {
         printf("enabled = %s\n", enabled ? "true" : "false");
@@ -1910,8 +1934,7 @@ int Alarm::count=0;
     //  startTime
     // TODO:  assumes constant timeStep; allow for variable timeSteps
     TimeInterval zeroTimeInterval(0,0,1,0,0,0);
-    TimeInterval remainder =
-                               (ringTime - clock->startTime) % clock->timeStep;
+    TimeInterval remainder = (ringTime - clock->startTime) % clock->timeStep;
     if (remainder == zeroTimeInterval) {
       ringBegin = ringTime;  // ringBegin coincident with ringTime
     } else { // ringBegin is first timeStep beyond ringTime
