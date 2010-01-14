@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.21 2009/12/17 06:14:09 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.22 2010/01/14 20:40:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -215,6 +215,7 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
 class XXE{
   public:
     enum OpId{
+      // --- basic ops
       send, recv,
       sendnb, recvnb, sendnbRRA, recvnbRRA,
       waitOnIndex, waitOnAnyIndexSub, waitOnIndexRange,
@@ -242,38 +243,77 @@ class XXE{
       I4, I8, R4, R8, BYTE
     };
     struct StreamElement{
+      // Generic stream element that any stream element can be cast into. This
+      // permits access to the first two members, common to all stream elements.
       OpId opId;              // id of operation
       int predicateBitField;  // predicate bit field to control conditional exec
-      char opInfo[12*8];      // 12 x 8-byte to hold info associated with op
+      char opInfo[16*8];      // 16 x 8-byte padding to hold stream specific
+                              // members
     };
-    static int const filterBitRegionTotalZero   = 0x1;
-    static int const filterBitRegionSelectZero  = 0x2;
     
-    static int const filterBitNbStart           = 0x4;
-    static int const filterBitNbWaitFinish      = 0x8;
-    
+    // special predefined filter bits
+    static int const filterBitRegionTotalZero   = 0x1;  // total dst zero'ing
+    static int const filterBitRegionSelectZero  = 0x2;  // select dst element z.
+    static int const filterBitNbStart           = 0x4;  // non-block start
+    static int const filterBitNbWaitFinish      = 0x8;  // non-block wait&finish
+
+    struct BufferInfo{
+      // The BufferInfo provides an extra level of indirection to XXE managed
+      // communication buffers, allowing the resizing of buffers without having
+      // to rewrite XXE stream elements. The relevant size and scaling
+      // information is also provided to support buffer resizing during exec(),
+      // when the actual execution time vectorLength is known.
+      char *buffer;                 // buffer
+      int size;                     // size of buffer in byte
+      int vectorLengthMultiplier;   // multiplier that allows to determine size
+                                    // requirement depending on vectorLength
+                                    // during exec()
+      
+      BufferInfo(char *buffer_, int size_, int vectorLengthMultiplier_){
+        // constructor
+        buffer = buffer_;
+        size = size_;
+        vectorLengthMultiplier = vectorLengthMultiplier_;
+      }
+    };
+        
   public:
     VM *vm;
-    StreamElement *stream;
-    int count;
-    char **storage;
-    int storageCount;
-    VMK::commhandle ***commhandle;
-    int commhandleCount;
-    XXE **xxeSubList;
-    int xxeSubCount;
-    ESMC_TypeKind typekind[10];
+    StreamElement *stream;          // actual stream containing XXE elements
+    int count;                      // number of elements in the stream
+    char **storage;                 // list of (char *) entries to allocations
+                                    // for which this XXE object is responsible
+    int storageCount;               // number of elements in storage
+    VMK::commhandle ***commhandle;  // list of (commhandle **) entries for 
+                                    // which this XXE object is responsible
+    int commhandleCount;            // number of elements in commhandle
+    XXE **xxeSubList;               // list of (XXE *) entries for which this
+                                    // XXE object is responsible
+    int xxeSubCount;                // number of elements in xxeSubList
+    ESMC_TypeKind typekind[10];     // place the XXE can store TypeKind info
+    vector<BufferInfo *>bufferInfoList; // vector of (BufferInfo *) entries
+      // The bufferInfoList provides an extra level of indirection to XXE
+      // managed communication buffers, and associated size information.
+      // At the beginning of exec() the entries in the bufferInfoList are
+      // checked against the current exec() conditions (i.e. the vectorLength
+      // at execution time), and new, larger buffers are allocated if necessary.
+      // Actual XXE elements in the stream that go through the bufferInfoList
+      // entries have the "indirectionFlag" set, and thus support buffer
+      // updates during exec() through the bufferInfoList indirection, without
+      // the need for XXE stream rewrite (which would be far too expensive to
+      // do during exec())!    
   private:
-    int max;
-    int storageMaxCount;
-    int commhandleMaxCount;
-    int xxeSubMaxCount;
+    int max;                        // maximum number of elements in stream
+    int storageMaxCount;            // maximum number of elements in storage
+    int commhandleMaxCount;         // maximum number of elements in commhandle
+    int xxeSubMaxCount;             // maximum number of elements in xxeSubList
     
   public:
     XXE(VM *vmArg, int maxArg=1000, int storageMaxCountArg=1000,
       int commhandleMaxCountArg=1000, int xxeSubMaxCountArg=1000){
       // constructor
       vm = vmArg;
+      // -> set up internal stream and bookkeeping members
       stream = new StreamElement[maxArg]; count = 0; max = maxArg;
       storage = new char*[storageMaxCountArg];
       storageCount  = 0;
@@ -284,23 +324,37 @@ class XXE{
       xxeSubList = new XXE*[xxeSubMaxCountArg];
       xxeSubCount  = 0;
       xxeSubMaxCount = xxeSubMaxCountArg;
+      bufferInfoList.reserve(1000);  // initial preparation
     }
-    ~XXE(){     // destructor
+    ~XXE(){
+      // destructor
+      // -> clean-up all allocations for which this XXE object is responsible:
+      // stream of XXE elements
       delete [] stream;
+      // memory allocations held in storage
       for (int i=0; i<storageCount; i++)
         delete [] storage[i];
       delete [] storage;
+      // CommHandles held in commhandle
       for (int i=0; i<commhandleCount; i++){
         delete *commhandle[i];
         delete commhandle[i];
       }
       delete [] commhandle;
+      // XXE sub objects held in xxeSubList
       for (int i=0; i<xxeSubCount; i++)
         delete xxeSubList[i];
       delete [] xxeSubList;
+      // BufferInfo objects held in bufferInfoList
+      for (int i=0; i<bufferInfoList.size(); i++)
+        delete bufferInfoList[i];
+      bufferInfoList.clear();
     }
     void clearReset(int countArg, int storageCountArg=-1, 
-      int commhandleCountArg=-1, int xxeSubCountArg=-1){
+      int commhandleCountArg=-1, int xxeSubCountArg=-1, 
+      int bufferInfoListArg=-1){
+      // reset the stream back to a specified position, and clear all
+      // bookkeeping elements above specified positions
       count = countArg; // reset
       if (storageCountArg>0){
         for (int i=storageCountArg; i<storageCount; i++)
@@ -318,6 +372,14 @@ class XXE{
         for (int i=xxeSubCountArg; i<xxeSubCount; i++)
           delete xxeSubList[i];
         xxeSubCount = xxeSubCountArg; // reset
+      }
+      if (bufferInfoListArg>0){
+        vector<BufferInfo *>::iterator first =
+          bufferInfoList.begin() + bufferInfoListArg;
+        vector<BufferInfo *>::iterator last = bufferInfoList.end();
+        for (vector<BufferInfo *>::iterator bi=first; bi!=last; ++bi)
+          delete *bi;
+        bufferInfoList.erase(first, last);
       }
     }
     int exec(int rraCount=0, char **rraList=NULL, int *vectorLength=NULL,
@@ -343,25 +405,35 @@ class XXE{
     int storeStorage(char *storage);
     int storeCommhandle(VMK::commhandle **commhandle);
     int storeXxeSub(XXE *xxeSub);
+    int storeBufferInfo(char *buffer, int size, int vectorLengthMultiplier);
+    char *getBufferInfoPtr(){
+      int i=bufferInfoList.size();
+      if (i>0)
+        return (char *)bufferInfoList[i-1];
+      else
+        return NULL;
+    }
     int appendXxeSub(int predicateBitField, XXE *xxeSub, int rraShift,
       int vectorLengthShift);
     int appendWtimer(int predicateBitField, char *string, int id, int actualId,
       int relativeId=0, XXE *relativeXXE=NULL);
     int appendRecvnb(int predicateBitField, void *buffer, int size, int srcPet,
-      int tag=-1, bool vectorFlag=false);
+      int tag=-1, bool vectorFlag=false, bool indirectionFlag=false);
     int appendSendnb(int predicateBitField, void *buffer, int size, int dstPet,
-      int tag=-1, bool vectorFlag=false);
+      int tag=-1, bool vectorFlag=false, bool indirectionFlag=false);
     int appendSendnbRRA(int predicateBitField, int rraOffset, int size,
       int dstPet, int rraIndex, int tag=-1, bool vectorFlag=false);
     int appendMemCpySrcRRA(int predicateBitField, int rraOffset, int size,
       void *dstMem, int rraIndex);
     int appendMemGatherSrcRRA(int predicateBitField, void *dstBase,
-      TKId dstBaseTK, int rraIndex, int chunkCount, bool vectorFlag=false);
+      TKId dstBaseTK, int rraIndex, int chunkCount, bool vectorFlag=false,
+      bool indirectionFlag=false);
     int appendZeroScalarRRA(int predicateBitField, TKId elementTK,
       int rraOffset, int rraIndex);
     int appendZeroSuperScalarRRA(int predicateBitField, TKId elementTK,
       int rraIndex, int termCount, bool vectorFlag=false);
-    int appendZeroMemset(int predicateBitField, char *buffer, int byteCount);
+    int appendZeroMemset(int predicateBitField, void *buffer, int byteCount,
+      bool indirectionFlag=false);
     int appendZeroMemsetRRA(int predicateBitField, int byteCount, int rraIndex,
       bool vectorFlag=false);
     int appendProductSumScalarRRA(int predicateBitField, TKId elementTK,
@@ -372,7 +444,7 @@ class XXE{
       int vectorLength=1);
     int appendProductSumSuperScalarDstRRA(int predicateBitField, TKId elementTK,
       TKId valueTK, TKId factorTK, int rraIndex, int termCount, void *valueBase,
-      bool vectorFlag=false);
+      bool vectorFlag=false, bool indirectionFlag=false);
     int appendProductSumSuperScalarSrcRRA(int predicateBitField, TKId elementTK,
       TKId valueTK, TKId factorTK, int rraIndex, int termCount,
       int vectorLength=1);
@@ -406,8 +478,17 @@ class XXE{
       U **factorList, TKId factorTK, V *valueList, TKId valueTK,
       int termCount, int vectorLength, int resolved);
 
-  // types with which to interpret the StreamElement elements
   public:
+      
+    // specific stream element types, used to interpret the elements in stream
+    
+    // Common stream element members and their meaning:
+    //  opId                - operation id according to "enum OpId"
+    //  predicateBitField   - predicate bit field to control conditional exec
+    //  vectorFlag          - true:  scale with vectorLength during exec()
+    //                      - false: ignore vectorLength during exec()
+    //  indirectionFlag     - true:  interpret buffer as " *(char **)buffer"
+    //                        false: interpret buffer as " (char *)buffer"
       
     typedef struct{
       OpId opId;
@@ -418,6 +499,7 @@ class XXE{
       int dstPet;
       int tag;
       bool vectorFlag;
+      bool indirectionFlag;
     }SendnbInfo;
 
     typedef struct{
@@ -429,6 +511,7 @@ class XXE{
       int srcPet;
       int tag;
       bool vectorFlag;
+      bool indirectionFlag;
     }RecvnbInfo;
 
     typedef struct{
@@ -536,6 +619,7 @@ class XXE{
       int rraIndex;
       int termCount;
       bool vectorFlag;
+      bool indirectionFlag;
       int *valueOffsetList;
     }ProductSumSuperScalarDstRRAInfo;
 
@@ -565,6 +649,7 @@ class XXE{
       int rraIndex;
       int termCount;
       bool vectorFlag;
+      bool indirectionFlag;
     }ProductSumSuperScalarContigRRAInfo;
 
     typedef struct{
@@ -588,8 +673,9 @@ class XXE{
     typedef struct{
       OpId opId;
       int predicateBitField;
-      char *buffer;
+      void *buffer;
       int byteCount;
+      bool indirectionFlag;
     }ZeroMemsetInfo;
 
     typedef struct{
@@ -627,6 +713,7 @@ class XXE{
       int rraIndex;
       int chunkCount;
       bool vectorFlag;
+      bool indirectionFlag;
     }MemGatherSrcRRAInfo;
     
     // --- sub-streams

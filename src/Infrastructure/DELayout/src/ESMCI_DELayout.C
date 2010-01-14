@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.26 2009/12/17 06:14:09 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.27 2010/01/14 20:40:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.26 2009/12/17 06:14:09 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.27 2010/01/14 20:40:37 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2518,6 +2518,32 @@ int XXE::exec(
   if (dTime != NULL)
     VMK::wtime(&t0);
   
+  for (int i=0; i<bufferInfoList.size(); i++){
+    int currentSize = bufferInfoList[i]->vectorLengthMultiplier * *vectorLength;
+    if (bufferInfoList[i]->size < currentSize){
+      // allocate a new, larger buffer to accommodate currentSize
+      char *buffer = new char[currentSize];
+      localrc = storeStorage(buffer); // XXE garbage collec.
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
+      //TODO: It may make sense here to do a linear search for the old buffer
+      //TODO: entry in "storage", to deallocate the buffer that is now found
+      //TODO: too small, and to replace the entry with the newly allocated,
+      //TODO: larger buffer. Not doing this means that the old, too small buffer
+      //TODO: remains allocated until the XXE object is destroyed, so there is
+      //TODO: a certain amount of memory "wasted". However, for now I decided
+      //TODO: not to implement the above suggested deallocation and replacement
+      //TODO: of buffer in "storage", because I am worried about the potential
+      //TODO: performance hit if such a linear search, especially for large
+      //TODO: storage cases, right during the very performance critical exec()
+      //TODO: phase!
+      // 
+      // update the bufferInfoList entry with the newly allocated buffer
+      bufferInfoList[i]->buffer = buffer;
+      bufferInfoList[i]->size = currentSize;
+    }
+  }
+  
   for (int i=indexRangeStart; i<=indexRangeStop; i++){
     xxeElement = &(stream[i]);
     
@@ -2533,21 +2559,27 @@ int XXE::exec(
     case sendnb:
       {
         xxeSendnbInfo = (SendnbInfo *)xxeElement;
+        char *buffer = (char *)xxeSendnbInfo->buffer;
+        if (xxeSendnbInfo->indirectionFlag)
+          buffer = *(char **)xxeSendnbInfo->buffer;
         int size = xxeSendnbInfo->size;
         if (xxeSendnbInfo->vectorFlag)
           size *= *vectorLength;
-        vm->send(xxeSendnbInfo->buffer, size, xxeSendnbInfo->dstPet,
-          xxeSendnbInfo->commhandle, xxeSendnbInfo->tag);
+        vm->send(buffer, size, xxeSendnbInfo->dstPet, xxeSendnbInfo->commhandle,
+          xxeSendnbInfo->tag);
       }
       break;
     case recvnb:
       {
         xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
+        char *buffer = (char *)xxeRecvnbInfo->buffer;
+        if (xxeRecvnbInfo->indirectionFlag)
+          buffer = *(char **)xxeRecvnbInfo->buffer;
         int size = xxeRecvnbInfo->size;
         if (xxeRecvnbInfo->vectorFlag)
           size *= *vectorLength;
-        vm->recv(xxeRecvnbInfo->buffer, size, xxeRecvnbInfo->srcPet,
-          xxeRecvnbInfo->commhandle, xxeRecvnbInfo->tag);
+        vm->recv(buffer, size, xxeRecvnbInfo->srcPet, xxeRecvnbInfo->commhandle,
+          xxeRecvnbInfo->tag);
       }
       break;
     case sendnbRRA:
@@ -2702,6 +2734,8 @@ int XXE::exec(
           (char **)xxeProductSumSuperScalarDstRRAInfo->factorList;
         char *valueBase =
           (char *)xxeProductSumSuperScalarDstRRAInfo->valueBase;
+        if (xxeProductSumSuperScalarDstRRAInfo->indirectionFlag)
+          valueBase = *(char **)xxeProductSumSuperScalarDstRRAInfo->valueBase;
 #else
         int *rraBase =
           (int *)rraList[xxeProductSumSuperScalarDstRRAInfo->rraIndex];
@@ -2709,6 +2743,8 @@ int XXE::exec(
           (int **)xxeProductSumSuperScalarDstRRAInfo->factorList;
         int *valueBase =
           (int *)xxeProductSumSuperScalarDstRRAInfo->valueBase;
+        if (xxeProductSumSuperScalarDstRRAInfo->indirectionFlag)
+          valueBase = *(int **)xxeProductSumSuperScalarDstRRAInfo->valueBase;
 #endif
         // recursively resolve the TKs of the arguments and execute operation
         psssDstRra(rraBase, xxeProductSumSuperScalarDstRRAInfo->elementTK,
@@ -2768,6 +2804,9 @@ int XXE::exec(
           (char **)xxeProductSumSuperScalarContigRRAInfo->factorList;
         char *valueList =
           (char *)xxeProductSumSuperScalarContigRRAInfo->valueList;
+        if (xxeProductSumSuperScalarContigRRAInfo->indirectionFlag)
+          valueList =
+            *(char **)xxeProductSumSuperScalarContigRRAInfo->valueList;
 #else
         int *rraBase =
           (int *)rraList[xxeProductSumSuperScalarContigRRAInfo->rraIndex];
@@ -2775,6 +2814,9 @@ int XXE::exec(
           (int **)xxeProductSumSuperScalarContigRRAInfo->factorList;
         int *valueList =
           (int *)xxeProductSumSuperScalarContigRRAInfo->valueList;
+        if (xxeProductSumSuperScalarContigRRAInfo->indirectionFlag)
+          valueList =
+            *(int **)xxeProductSumSuperScalarContigRRAInfo->valueList;
 #endif
         // recursively resolve the TKs of the arguments and execute operation
         pssscRra(rraBase, xxeProductSumSuperScalarContigRRAInfo->elementTK,
@@ -2884,7 +2926,9 @@ int XXE::exec(
       {
         xxeZeroMemsetInfo =
           (ZeroMemsetInfo *)xxeElement;
-        char *buffer = xxeZeroMemsetInfo->buffer;
+        char *buffer = (char *)xxeZeroMemsetInfo->buffer;
+        if (xxeZeroMemsetInfo->indirectionFlag)
+          buffer = *(char **)xxeZeroMemsetInfo->buffer;
         int byteCount = xxeZeroMemsetInfo->byteCount;
         memset(buffer, 0, byteCount);
       }
@@ -2920,6 +2964,8 @@ int XXE::exec(
       {
         xxeMemGatherSrcRRAInfo = (MemGatherSrcRRAInfo *)xxeElement;
         char *dstBase = (char *)xxeMemGatherSrcRRAInfo->dstBase;
+        if (xxeMemGatherSrcRRAInfo->indirectionFlag)
+          dstBase = *(char **)xxeMemGatherSrcRRAInfo->dstBase;
         char *rraBase = rraList[xxeMemGatherSrcRRAInfo->rraIndex];
         int *rraOffsetList = xxeMemGatherSrcRRAInfo->rraOffsetList;
         int *countList = xxeMemGatherSrcRRAInfo->countList;
@@ -5563,6 +5609,42 @@ int XXE::storeXxeSub(
 }
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::storeBufferInfo()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::storeBufferInfo
+//
+// !INTERFACE:
+int XXE::storeBufferInfo(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  char *buffer, 
+  int size, 
+  int vectorLengthMultiplier
+  ){
+//
+// !DESCRIPTION:
+//  Append an xxeSub at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  BufferInfo *bufferInfo = new BufferInfo(buffer, size, vectorLengthMultiplier);
+  bufferInfoList.push_back(bufferInfo);
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -5683,7 +5765,8 @@ int XXE::appendRecvnb(
   int size,
   int srcPet,
   int tag,
-  bool vectorFlag
+  bool vectorFlag,
+  bool indirectionFlag
   ){
 //
 // !DESCRIPTION:
@@ -5702,6 +5785,7 @@ int XXE::appendRecvnb(
   xxeRecvnbInfo->srcPet = srcPet;
   xxeRecvnbInfo->tag = tag;
   xxeRecvnbInfo->vectorFlag = vectorFlag;
+  xxeRecvnbInfo->indirectionFlag = indirectionFlag;
   xxeRecvnbInfo->commhandle = new VMK::commhandle*;
   *(xxeRecvnbInfo->commhandle) = new VMK::commhandle;
   localrc = incCount();
@@ -5738,7 +5822,8 @@ int XXE::appendSendnb(
   int size,
   int dstPet,
   int tag,
-  bool vectorFlag
+  bool vectorFlag,
+  bool indirectionFlag
   ){
 //
 // !DESCRIPTION:
@@ -5757,6 +5842,7 @@ int XXE::appendSendnb(
   xxeSendnbInfo->dstPet = dstPet;
   xxeSendnbInfo->tag = tag;
   xxeSendnbInfo->vectorFlag = vectorFlag;
+  xxeSendnbInfo->indirectionFlag = indirectionFlag;
   xxeSendnbInfo->commhandle = new VMK::commhandle*;
   *(xxeSendnbInfo->commhandle) = new VMK::commhandle;
   localrc = incCount();
@@ -5897,7 +5983,8 @@ int XXE::appendMemGatherSrcRRA(
   TKId dstBaseTK,
   int rraIndex,
   int chunkCount,
-  bool vectorFlag
+  bool vectorFlag,
+  bool indirectionFlag
   ){
 //
 // !DESCRIPTION:
@@ -5917,6 +6004,7 @@ int XXE::appendMemGatherSrcRRA(
   xxeMemGatherSrcRRAInfo->rraIndex = rraIndex;
   xxeMemGatherSrcRRAInfo->chunkCount = chunkCount;
   xxeMemGatherSrcRRAInfo->vectorFlag = vectorFlag;
+  xxeMemGatherSrcRRAInfo->indirectionFlag = indirectionFlag;
   char *rraOffsetListChar = new char[chunkCount*sizeof(int)];
   xxeMemGatherSrcRRAInfo->rraOffsetList = (int *)rraOffsetListChar;
   char *countListChar = new char[chunkCount*sizeof(int)];
@@ -6054,8 +6142,9 @@ int XXE::appendZeroMemset(
 // !ARGUMENTS:
 //
   int predicateBitField,
-  char *buffer,
-  int byteCount
+  void *buffer,
+  int byteCount,
+  bool indirectionFlag
   ){
 //
 // !DESCRIPTION:
@@ -6072,6 +6161,7 @@ int XXE::appendZeroMemset(
     (ZeroMemsetInfo *)&(stream[count]);
   xxeZeroMemsetInfo->buffer = buffer;
   xxeZeroMemsetInfo->byteCount = byteCount;
+  xxeZeroMemsetInfo->indirectionFlag = indirectionFlag;
   localrc = incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -6265,7 +6355,8 @@ int XXE::appendProductSumSuperScalarDstRRA(
   int rraIndex,
   int termCount,
   void *valueBase,
-  bool vectorFlag
+  bool vectorFlag,
+  bool indirectionFlag
   ){
 //
 // !DESCRIPTION:
@@ -6287,6 +6378,7 @@ int XXE::appendProductSumSuperScalarDstRRA(
   xxeProductSumSuperScalarDstRRAInfo->termCount = termCount;
   xxeProductSumSuperScalarDstRRAInfo->valueBase = valueBase;
   xxeProductSumSuperScalarDstRRAInfo->vectorFlag = vectorFlag;
+  xxeProductSumSuperScalarDstRRAInfo->indirectionFlag = indirectionFlag;
   char *rraOffsetListChar = new char[termCount*sizeof(int)];
   xxeProductSumSuperScalarDstRRAInfo->rraOffsetList = (int *)rraOffsetListChar;
   char *factorListChar = new char[termCount*sizeof(void *)];

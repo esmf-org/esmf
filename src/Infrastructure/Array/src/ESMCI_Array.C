@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.80 2009/12/17 06:14:09 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.81 2010/01/14 20:40:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.80 2009/12/17 06:14:09 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.81 2010/01/14 20:40:35 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4084,11 +4084,12 @@ namespace ArrayHelper{
   
   struct RecvnbElement{
     int srcPet;
-    int srcDe;        // global DE index of src DE in src DELayout
-    int srcLocalDe;   // local enumeration of srcDe
-    int dstDe;        // global DE index of dst DE in local DELayout
-    int dstLocalDe;   // local enumeration of dstDe
-    char *buffer;
+    int srcDe;          // global DE index of src DE in src DELayout
+    int srcLocalDe;     // local enumeration of srcDe
+    int dstDe;          // global DE index of dst DE in local DELayout
+    int dstLocalDe;     // local enumeration of dstDe
+    char **bufferInfo;  // indirect buffer pointer to support buffer resize
+                        // during exec() via BufferInfo structure in XXE
     int partnerDeDataCount;
     int recvnbIndex;
     bool vectorFlag;  // control vectorization
@@ -4145,8 +4146,8 @@ namespace ArrayHelper{
       }
     }
     // append the recvnb operation
-    localrc = xxe->appendRecvnb(predicateBitField, buffer, 
-      bufferItemCount * dataSizeSrc, srcPet, tag, vectorFlag);
+    localrc = xxe->appendRecvnb(predicateBitField, bufferInfo, 
+      bufferItemCount * dataSizeSrc, srcPet, tag, vectorFlag, true);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMPROFILE
@@ -4226,8 +4227,8 @@ namespace ArrayHelper{
       int termCount = partnerDeDataCount;
       int xxeIndex = xxe->count;  // need this beyond the increment
       localrc = xxe->appendProductSumSuperScalarDstRRA(predicateBitField,
-        elementTK, valueTK, factorTK, rraIndex, termCount, (void *)buffer, 
-        vectorFlag);
+        elementTK, valueTK, factorTK, rraIndex, termCount, bufferInfo,
+        vectorFlag, true);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       XXE::ProductSumSuperScalarDstRRAInfo *xxeProductSumSuperScalarDstRRAInfo =
@@ -4246,6 +4247,7 @@ namespace ArrayHelper{
         ++pp;
       } // for kk - termCount
       // need to fill in sensible elements and values or timing will be bogus
+      char *buffer = *bufferInfo; // access buffer through layer of indirection
       switch (elementTK){
       case XXE::R4:
         for (int kk=0; kk<termCount; kk++)
@@ -4302,7 +4304,7 @@ namespace ArrayHelper{
         *xxeProductSumSuperScalarContigRRAInfo =
         (XXE::ProductSumSuperScalarContigRRAInfo *)&(xxe->stream[xxeIndex]);
       // only change members that are different wrt super-scalar operation
-      xxeProductSumSuperScalarContigRRAInfo->valueList = (void *)(buffer);
+      xxeProductSumSuperScalarContigRRAInfo->valueList = bufferInfo;
       xxe->optimizeElement(xxeIndex);
       double dt_sScalarC;
       localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, &dt_sScalarC,
@@ -4328,7 +4330,7 @@ namespace ArrayHelper{
           vectorFlag);
 #endif
         xxe->stream[xxeIndex].opId = XXE::productSumSuperScalarDstRRA;
-        xxeProductSumSuperScalarDstRRAInfo->valueBase = (void *)buffer;
+        xxeProductSumSuperScalarDstRRAInfo->valueBase = bufferInfo;
       }else{
         // use productSumSuperScalarContigRRA
 #ifdef ASMMPROFILE
@@ -4374,6 +4376,7 @@ namespace ArrayHelper{
       pp = dstInfoTable.begin();  // reset
       while (pp != dstInfoTable.end()){
         SeqIndex seqIndex = pp->seqIndex;
+        char *buffer = *bufferInfo; // access buffer through layer of indirect.
         for (int term=0; term<srcTermProcessing; term++){
           rraOffsetList[bufferItem] = pp->linIndex * dataSizeDst;
           valueList[bufferItem] = (void *)(buffer + bufferItem * dataSizeSrc
@@ -4457,11 +4460,12 @@ namespace ArrayHelper{
   };
   struct SendnbElement{
     int dstPet;
-    int dstDe;        // global DE index of dst DE in dst DELayout
-    int dstLocalDe;   // local enumeration of dstDe
-    int srcDe;        // global DE index of src DE in local DELayout
-    int srcLocalDe;   // local enumeration of srcDe
-    char *buffer;
+    int dstDe;          // global DE index of dst DE in dst DELayout
+    int dstLocalDe;     // local enumeration of dstDe
+    int srcDe;          // global DE index of src DE in local DELayout
+    int srcLocalDe;     // local enumeration of srcDe
+    char **bufferInfo;  // indirect buffer pointer to support buffer resize
+                        // during exec() via BufferInfo structure in XXE
     int partnerDeDataCount;
     int sendnbIndex;
     bool vectorFlag;  // control vectorization
@@ -4526,8 +4530,8 @@ namespace ArrayHelper{
         // use intermediate buffer
         // memGatherSrcRRA pieces into intermediate buffer
         int xxeIndex = xxe->count;  // need this beyond the increment
-        localrc = xxe->appendMemGatherSrcRRA(predicateBitField, buffer, valueTK,
-          j, count, vectorFlag);
+        localrc = xxe->appendMemGatherSrcRRA(predicateBitField, bufferInfo,
+          valueTK, j, count, vectorFlag, true);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
           ESMF_ERR_PASSTHRU, &rc)) return rc;
         XXE::MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo =
@@ -4584,8 +4588,8 @@ namespace ArrayHelper{
 #endif
         // sendnb out of contiguous intermediate buffer
         sendnbIndex = xxe->count;  // store index for the associated wait
-        localrc = xxe->appendSendnb(predicateBitField, buffer,
-          partnerDeDataCount * dataSizeSrc, dstPet, tag, vectorFlag);
+        localrc = xxe->appendSendnb(predicateBitField, bufferInfo,
+          partnerDeDataCount * dataSizeSrc, dstPet, tag, vectorFlag, true);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
           ESMF_ERR_PASSTHRU, &rc)) return rc;
       }
@@ -4604,8 +4608,8 @@ namespace ArrayHelper{
         ++bufferItemCount;
       }
       // zero out intermediate buffer
-      localrc = xxe->appendZeroMemset(predicateBitField, buffer,
-        bufferItemCount * dataSizeSrc * vectorLength);
+      localrc = xxe->appendZeroMemset(predicateBitField, bufferInfo,
+        bufferItemCount * dataSizeSrc * vectorLength, true);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMPROFILE
@@ -4637,8 +4641,8 @@ namespace ArrayHelper{
         for (int term=0; term<srcTermProcessing; term++){
           rraOffsetList[kk] = pp->linIndex * dataSizeSrc;
           factorList[kk] = (void *)(pp->factor);
-          elementList[kk] = (void *)(buffer + bufferItem * dataSizeSrc
-            * vectorLength);
+//TODO: buffer indirection fix          elementList[kk] = (void *)(buffer + bufferItem * dataSizeSrc
+//            * vectorLength);
           ++pp;
           ++kk;
           if ((pp == srcInfoTable.end()) ||
@@ -4667,8 +4671,8 @@ namespace ArrayHelper{
 #endif
       // sendnb out of contiguous intermediate buffer
       sendnbIndex = xxe->count;  // store index for the associated wait
-      localrc = xxe->appendSendnb(predicateBitField, buffer,
-        bufferItemCount * dataSizeSrc * vectorLength, dstPet, tag);
+      localrc = xxe->appendSendnb(predicateBitField, bufferInfo,
+        bufferItemCount * dataSizeSrc * vectorLength, dstPet, tag, true);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
     }
@@ -7131,16 +7135,19 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
 
     // construct recv elements
     for (int i=0; i<recvnbDiffPartnerDeCount; i++){
+      int vectorLength = dstInfoTable[i].begin()->vectorLength;
       // large contiguous 1st level receive buffer
-//      char *buffer = new char[recvnbPartnerDeCount[i] * dataSizeSrc];
-//TODO: The factor of 10 in the next line provides enough memory in the
-//TODO: buffer for cases where the vectorLength during execution time is
-//TODO: 10 times greater than during store time. This needs to be replaced
-//TODO: by some kind of smart re-allocation during execution time.
-      char *buffer = new char[recvnbPartnerDeCount[i] * dataSizeSrc * 10];
+      char *buffer = new char[recvnbPartnerDeCount[i] * dataSizeSrc];
       localrc = xxe->storeStorage(buffer); // XXE garbage collec.
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
+      // store buffer information in BufferInfo for XXE buffer control
+      localrc = xxe->storeBufferInfo(buffer,
+        recvnbPartnerDeCount[i] * dataSizeSrc,
+        recvnbPartnerDeCount[i] * dataSizeSrc / vectorLength);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
+      // prepare DE/PET info
       int srcDe = recvnbPartnerDeList[i];
       int srcPet;   //TODO: DE-based comms
       srcDelayout->getDEMatchPET(srcDe, *vm, NULL, &srcPet, 1);
@@ -7152,7 +7159,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       recvnbElement.srcLocalDe = i;
       recvnbElement.dstDe = dstDe;
       recvnbElement.dstLocalDe = j;
-      recvnbElement.buffer = buffer;
+      recvnbElement.bufferInfo = (char **)xxe->getBufferInfoPtr();
       recvnbElement.partnerDeDataCount = dstInfoTable[i].size();
       recvnbElement.vectorFlag = vectorFlag;
       recvnbElement.dstInfoTable = dstInfoTable[i];
@@ -7362,15 +7369,17 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         }
       }
       // intermediate buffer (in case it is needed)
-//      char *buffer = new char[sendnbPartnerDeCount[i] * dataSizeSrc];
-//TODO: The factor of 10 in the next line provides enough memory in the
-//TODO: buffer for cases where the vectorLength during execution time is
-//TODO: 10 times greater than during store time. This needs to be replaced
-//TODO: by some kind of smart re-allocation during execution time.
-      char *buffer = new char[sendnbPartnerDeCount[i] * dataSizeSrc * 10];
+      char *buffer = new char[sendnbPartnerDeCount[i] * dataSizeSrc];
       localrc = xxe->storeStorage(buffer); // XXE garbage collec.
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
+      // store buffer information in BufferInfo for XXE buffer control
+      localrc = xxe->storeBufferInfo(buffer,
+        sendnbPartnerDeCount[i] * dataSizeSrc,
+        sendnbPartnerDeCount[i] * dataSizeSrc / vectorLength);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
+      // prepare DE/PET info
       int srcDe = srcLocalDeList[j];
       int dstDe = sendnbPartnerDeList[i];
       int dstPet;   //TODO: DE-based comms
@@ -7386,7 +7395,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       sendnbElement.vectorFlag = vectorFlag;
       sendnbElement.srcInfoTable = srcInfoTable[i];
       sendnbElement.linIndexContigBlockList = linIndexContigBlockList;
-      sendnbElement.buffer = buffer;
+      sendnbElement.bufferInfo = (char **)xxe->getBufferInfoPtr();
       sendnbElement.localPet = localPet;
       sendnbElement.petCount = petCount;
       sendnbVector.push_back(sendnbElement);
@@ -7422,6 +7431,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   const int startStorageCount = xxe->storageCount;
   const int startCommhandleCount = xxe->commhandleCount;
   const int startXxeSubCount = xxe->xxeSubCount;
+  const int startBufferInfoListSize = xxe->bufferInfoList.size();
   
   double dtMin;           // to find minimum time
   
@@ -7449,13 +7459,14 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   // optimize srcTermProcessing
   int pipelineDepth = 4;  // safe value during srcTermProcessing optimization
   int srcTermProcessingOpt;
+  //const int srcTermProcMax = 6; //TODO: use this again once exec. time vect dn
   const int srcTermProcMax = 1;
   const int srcTermProcList[] = {0, 1, 2, 3, 4, 20};  // settings to be tried
   for (int srcTermProc=0; srcTermProc<srcTermProcMax; srcTermProc++){
     int srcTermProcessing=srcTermProcList[srcTermProc];
     // start writing a fresh XXE stream
     xxe->clearReset(startCount, startStorageCount, startCommhandleCount,
-      startXxeSubCount);
+      startXxeSubCount, startBufferInfoListSize);
     localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
       srcTermProcessing, pipelineDepth, elementTK, valueTK, factorTK,
       dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount,
@@ -7554,7 +7565,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   for (pipelineDepth=1; pipelineDepth<=petCount; pipelineDepth*=2){
     // start writing a fresh XXE stream
     xxe->clearReset(startCount, startStorageCount, startCommhandleCount,
-      startXxeSubCount);
+      startXxeSubCount, startBufferInfoListSize);
     localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
       srcTermProcessingOpt, pipelineDepth, elementTK, valueTK, factorTK,
       dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount,
@@ -7650,7 +7661,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
 
   // encode with the majority voted pipelineDepthOpt
   xxe->clearReset(startCount, startStorageCount, startCommhandleCount,
-    startXxeSubCount);
+    startXxeSubCount, startBufferInfoListSize);
   localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
     srcTermProcessingOpt, pipelineDepthOpt, elementTK, valueTK, factorTK,
     dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount,
@@ -8129,16 +8140,16 @@ int Array::sparseMatMul(
   // see about srcArray, and if not available then look at dstArray). This is
   // consistent because vectorization in the XXE stream is only meaningful under
   // the condition that the vectorLength determined from the srcArray equals
-  // that determined from the dstArray. There is not check performed here on
+  // that determined from the dstArray. There is no check performed here on
   // whether srcArray and dstArray lead to the same vectorLength, because it
-  // is not know here whether the XXE stream actually uses vectorization or not.
-  // In the case that no vectorization is used there may well be inconsistencies
-  // on this level, and the vectorLength passed into xxe->exec() is bogus. 
-  // However, the vectorLength is irrelevant under this condition, and will be
-  // ignored by the XXE execution.
+  // is not known here whether the XXE stream actually uses vectorization or
+  // not. In the case that no vectorization is used there may well be
+  // inconsistencies on this level, and the vectorLength passed into xxe->exec()
+  // is bogus. However, the vectorLength is irrelevant under this condition, and
+  // will be ignored by the XXE execution.
 
   if (srcArrayFlag){
-    // use srcArray to determine vectorLenth
+    // use srcArray to determine vectorLength
     vectorLength = 1;  // prime
     int rank = srcArray->rank;
     for (int jj=0; jj<rank; jj++){
@@ -8151,7 +8162,7 @@ int Array::sparseMatMul(
           - srcArray->undistLBound[jj] + 1;
     }
   }else if (dstArrayFlag){
-    // use dstArray to determine vectorLenth
+    // use dstArray to determine vectorLength
     vectorLength = 1;  // prime
     int rank = dstArray->rank;
     for (int jj=0; jj<rank; jj++){
@@ -8164,8 +8175,6 @@ int Array::sparseMatMul(
           - dstArray->undistLBound[jj] + 1;
     }
   }
-  
-  printf("exec() vectorLength: %d\n", vectorLength);
   
   // execute XXE stream
   localrc = xxe->exec(rraCount, rraList, &vectorLength, filterBitField);
