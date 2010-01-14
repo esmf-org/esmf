@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldUTest.C,v 1.13 2009/12/11 21:25:47 feiliu Exp $
+// $Id: ESMC_FieldUTest.C,v 1.14 2010/01/14 20:05:00 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -181,6 +181,14 @@ int main(void){
   strcpy(name, "Get an ESMC_Array object from ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   array = ESMC_FieldGetArray(field, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Get a void * C pointer to data from ESMC_Field object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  void * ptr = ESMC_FieldGetPtr(field, 0, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

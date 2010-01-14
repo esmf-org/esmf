@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.18 2009/12/11 21:25:47 feiliu Exp $
+// $Id: ESMC_Field.C,v 1.19 2010/01/14 20:04:59 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -150,6 +150,29 @@ extern "C" {
     if(rc) *rc = ESMF_SUCCESS;
     return array;
   }
+//--------------------------------------------------------------------------
+
+
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldGetPtr()"
+void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  ESMC_Array array = ESMC_FieldGetArray(field, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    rc)) return NULL;  // bail out
+
+  void *ptr = ESMC_ArrayGetPtr(array, localDe, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    rc)) return NULL;  // bail out
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return ptr;
+} 
 //--------------------------------------------------------------------------
 
 }
