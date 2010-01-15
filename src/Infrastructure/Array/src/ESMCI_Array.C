@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.82 2010/01/15 21:22:57 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.83 2010/01/15 22:32:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.82 2010/01/15 21:22:57 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.83 2010/01/15 22:32:30 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4240,7 +4240,7 @@ namespace ArrayHelper{
       // fill in rraOffsetList, factorList, valueOffsetList
       vector<ArrayHelper::DstInfo>::iterator pp = dstInfoTable.begin();
       for (int kk=0; kk<termCount; kk++){
-        rraOffsetList[kk] = pp->linIndex/vectorLength * dataSizeDst;
+        rraOffsetList[kk] = pp->linIndex/vectorLength;
         factorList[kk] = (void *)(pp->factor);
         valueOffsetList[kk] = kk;
         ++pp;
@@ -4374,7 +4374,7 @@ namespace ArrayHelper{
       int bufferItem = 0; // reset
       pp = dstInfoTable.begin();  // reset
       while (pp != dstInfoTable.end()){
-        rraOffsetList[bufferItem] = pp->linIndex/vectorLength * dataSizeDst;
+        rraOffsetList[bufferItem] = pp->linIndex/vectorLength;
         valueOffsetList[bufferItem] = bufferItem;
         // skip dstInfoTable elements that were summed up on the src side
         SeqIndex seqIndex = pp->seqIndex;
@@ -4537,7 +4537,7 @@ namespace ArrayHelper{
         // try typekind specific memGatherSrcRRA
         for (int kk=0; kk<count; kk++){
           xxeMemGatherSrcRRAInfo->rraOffsetList[kk] =
-            linIndexContigBlockList[kk].linIndex/vectorLength * dataSizeSrc;
+            linIndexContigBlockList[kk].linIndex/vectorLength;
           xxeMemGatherSrcRRAInfo->countList[kk] =
             linIndexContigBlockList[kk].linIndexCount;
         }
@@ -4548,8 +4548,11 @@ namespace ArrayHelper{
           &rc)) return rc;
         // try byte option for memGatherSrcRRA
         xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::BYTE;
-        for (int kk=0; kk<count; kk++)
-          xxeMemGatherSrcRRAInfo->countList[kk] *= dataSizeSrc; // scale to byte
+        for (int kk=0; kk<count; kk++){
+          // scale to byte
+          xxeMemGatherSrcRRAInfo->rraOffsetList[kk] *= dataSizeSrc;
+          xxeMemGatherSrcRRAInfo->countList[kk] *= dataSizeSrc;
+        }
         double dt_byte;
         localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, &dt_byte,
           xxeIndex, xxeIndex);
@@ -4567,6 +4570,9 @@ namespace ArrayHelper{
           // use typekind specific memGatherSrcRRA
           xxeMemGatherSrcRRAInfo->dstBaseTK = valueTK;
           for (int k=0; k<count; k++){
+            // return to element units
+            xxeMemGatherSrcRRAInfo->rraOffsetList[k] =
+              linIndexContigBlockList[k].linIndex/vectorLength;
             xxeMemGatherSrcRRAInfo->countList[k] =
               linIndexContigBlockList[k].linIndexCount;
           }
@@ -4639,7 +4645,7 @@ namespace ArrayHelper{
       while (pp != srcInfoTable.end()){
         SeqIndex partnerSeqIndex = pp->partnerSeqIndex;
         for (int term=0; term<srcTermProcessing; term++){
-          rraOffsetList[kk] = pp->linIndex/vectorLength * dataSizeSrc;
+          rraOffsetList[kk] = pp->linIndex/vectorLength;
           factorList[kk] = (void *)(pp->factor);
           elementOffsetList[kk] = bufferItem;
           ++pp;
@@ -6847,8 +6853,8 @@ int sparseMatMulStoreEncodeXXE(
   ){    
 //
 // !DESCRIPTION:
-//    Take the incoming sparse matrix information in "work distribution" and
-//    use it to encode an XXE stream for the sparseMatMul. 
+//    Take the incoming sparse matrix information in "run distribution" and
+//    use it to encode an XXE stream for the sparseMatMul routehandle.
 //
 //EOPI
 //-----------------------------------------------------------------------------

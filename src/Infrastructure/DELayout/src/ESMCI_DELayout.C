@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.28 2010/01/15 21:23:32 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.29 2010/01/15 22:32:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.28 2010/01/15 21:23:32 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.29 2010/01/15 22:32:31 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3010,7 +3010,7 @@ int XXE::exec(
             ESMC_I4 *dstPointer = (ESMC_I4*)dstBase;
             ESMC_I4 *srcPointer;
             for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
-              srcPointer = (ESMC_I4*)(rraBase + rraOffsetList[k] * vectorL);
+              srcPointer = ((ESMC_I4*)rraBase) + rraOffsetList[k] * vectorL;
               for (int kk=0; kk<countList[k]*vectorL; kk++)
                 dstPointer[kk] = srcPointer[kk]; 
               dstPointer += countList[k] * vectorL;
@@ -3022,7 +3022,7 @@ int XXE::exec(
             ESMC_I8 *dstPointer = (ESMC_I8*)dstBase;
             ESMC_I8 *srcPointer;
             for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
-              srcPointer = (ESMC_I8*)(rraBase + rraOffsetList[k] * vectorL);
+              srcPointer = ((ESMC_I8*)rraBase) + rraOffsetList[k] * vectorL;
               for (int kk=0; kk<countList[k]*vectorL; kk++)
                 dstPointer[kk] = srcPointer[kk]; 
               dstPointer += countList[k] * vectorL;
@@ -3034,7 +3034,7 @@ int XXE::exec(
             ESMC_R4 *dstPointer = (ESMC_R4*)dstBase;
             ESMC_R4 *srcPointer;
             for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
-              srcPointer = (ESMC_R4*)(rraBase + rraOffsetList[k] * vectorL);
+              srcPointer = ((ESMC_R4*)rraBase) + rraOffsetList[k] * vectorL;
               for (int kk=0; kk<countList[k]*vectorL; kk++)
                 dstPointer[kk] = srcPointer[kk]; 
               dstPointer += countList[k] * vectorL;
@@ -3046,7 +3046,7 @@ int XXE::exec(
             ESMC_R8 *dstPointer = (ESMC_R8*)dstBase;
             ESMC_R8 *srcPointer;
             for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
-              srcPointer = (ESMC_R8*)(rraBase + rraOffsetList[k] * vectorL);
+              srcPointer = ((ESMC_R8*)rraBase) + rraOffsetList[k] * vectorL;
               for (int kk=0; kk<countList[k]*vectorL; kk++)
                 dstPointer[kk] = srcPointer[kk]; 
               dstPointer += countList[k] * vectorL;
@@ -3471,18 +3471,17 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
   printf("Arrived in sssDstRra kernel with %s, %s\n", typeid(T).name(), 
     typeid(V).name());
 #endif
-  char *rraBaseT = (char *)rraBase;
   if (vectorLength==1){
     // scalar elements
     for (int i=0; i<termCount; i++){  // super scalar loop
-      element = (T *)(rraBaseT + rraOffsetList[i]);
+      element = rraBase + rraOffsetList[i];
       value = valueBase + valueOffsetList[i];
       *element += *value;
     }
   }else{
     // vector elements
     for (int i=0; i<termCount; i++){  // super scalar loop
-      element = (T *)(rraBaseT + rraOffsetList[i] * vectorLength);
+      element = rraBase + rraOffsetList[i] * vectorLength;
       value = valueBase + valueOffsetList[i] * vectorLength;
       for (int k=0; k<vectorLength; k++)  // vector loop
         *(element+k) += *(value+k);
@@ -3625,11 +3624,10 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
   printf("Arrived in psssDstRra kernel with %s, %s, %s\n", typeid(T).name(), 
     typeid(U).name(), typeid(V).name());
 #endif
-  char *rraBaseT = (char *)rraBase;
   if (vectorLength==1){
     // scalar elements
     for (int i=0; i<termCount; i++){  // super scalar loop
-      element = (T *)(rraBaseT + rraOffsetList[i]);
+      element = rraBase + rraOffsetList[i];
       factor = factorList[i];
       value = valueBase + valueOffsetList[i];
       *element += *factor * *value;
@@ -3637,7 +3635,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
   }else{
     // vector elements
     for (int i=0; i<termCount; i++){  // super scalar loop
-      element = (T *)(rraBaseT + rraOffsetList[i] * vectorLength);
+      element = rraBase + rraOffsetList[i] * vectorLength;
       factor = factorList[i];
       value = valueBase + valueOffsetList[i] * vectorLength;
       for (int k=0; k<vectorLength; k++)  // vector loop
@@ -3785,11 +3783,10 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
   printf("Arrived in psssSrcRra kernel with %s, %s, %s\n", typeid(T).name(), 
     typeid(U).name(), typeid(V).name());
 #endif
-  char *rraBaseT = (char *)rraBase;
   if (vectorLength==1){
     // scalar elements
     for (int i=0; i<termCount; i++){  // super scalar loop
-      value = (T *)(rraBaseT + rraOffsetList[i]);
+      value = rraBase + rraOffsetList[i];
       factor = factorList[i];
       element = elementBase + elementOffsetList[i];
       *element += *factor * *value;
@@ -3797,7 +3794,7 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
   }else{
     // vector elements
     for (int i=0; i<termCount; i++){  // super scalar loop
-      value = (T *)(rraBaseT + rraOffsetList[i] * vectorLength);
+      value = rraBase + rraOffsetList[i] * vectorLength;
       factor = factorList[i];
       element = elementBase + elementOffsetList[i] * vectorLength;
       for (int k=0; k<vectorLength; k++)  // vector loop
@@ -3928,18 +3925,17 @@ void XXE::pssscRra(T *rraBase, TKId elementTK, int *rraOffsetList,
   printf("Arrived in pssscRra kernel with %s, %s, %s\n", typeid(T).name(), 
     typeid(U).name(), typeid(V).name());
 #endif
-  char *rraBaseT = (char *)rraBase;
   if (vectorLength==1){
     // scalar elements
     for (int i=0; i<termCount; i++){  // super scalar loop
-      element = (T *)(rraBaseT + rraOffsetList[i]);
+      element = rraBase + rraOffsetList[i];
       factor = factorList[i];
       *element += *factor * valueList[i];
     }
   }else{
     // vector elements
     for (int i=0; i<termCount; i++){  // super scalar loop
-      element = (T *)(rraBaseT + rraOffsetList[i] * vectorLength);
+      element = rraBase + rraOffsetList[i] * vectorLength;
       factor = factorList[i];
       for (int k=0; k<vectorLength; k++)  // vector loop
         *(element+k) += *factor * valueList[i*vectorLength+k];
