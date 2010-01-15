@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.27 2010/01/14 20:40:37 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.28 2010/01/15 21:23:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.27 2010/01/14 20:40:37 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.28 2010/01/15 21:23:32 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2534,7 +2534,7 @@ int XXE::exec(
       //TODO: a certain amount of memory "wasted". However, for now I decided
       //TODO: not to implement the above suggested deallocation and replacement
       //TODO: of buffer in "storage", because I am worried about the potential
-      //TODO: performance hit if such a linear search, especially for large
+      //TODO: performance hit of such a linear search, especially for large
       //TODO: storage cases, right during the very performance critical exec()
       //TODO: phase!
       // 
@@ -2698,20 +2698,28 @@ int XXE::exec(
         xxeSumSuperScalarDstRRAInfo =
           (SumSuperScalarDstRRAInfo *)xxeElement;
         int *rraOffsetList = xxeSumSuperScalarDstRRAInfo->rraOffsetList;
+        int *valueOffsetList = xxeSumSuperScalarDstRRAInfo->valueOffsetList;
         int termCount = xxeSumSuperScalarDstRRAInfo->termCount;
+        int vectorL = 1; // initialize
+        if (xxeSumSuperScalarDstRRAInfo->vectorFlag)
+          vectorL = *vectorLength;
         // the following typecasts are necessary to provide a valid TK
         // combination to call into the recursive function
 #ifdef BGLWORKAROUND
         char *rraBase = (char *)rraList[xxeSumSuperScalarDstRRAInfo->rraIndex];
-        char **valueList = (char **)xxeSumSuperScalarDstRRAInfo->valueList;
+        char *valueBase = (char *)xxeSumSuperScalarDstRRAInfo->valueBase;
+        if (xxeSumSuperScalarDstRRAInfo->indirectionFlag)
+          valueBase = *(char **)xxeSumSuperScalarDstRRAInfo->valueBase;
 #else
         int *rraBase = (int *)rraList[xxeSumSuperScalarDstRRAInfo->rraIndex];
-        int **valueList = (int **)xxeSumSuperScalarDstRRAInfo->valueList;
+        int *valueBase = (int *)xxeSumSuperScalarDstRRAInfo->valueBase;
+        if (xxeSumSuperScalarDstRRAInfo->indirectionFlag)
+          valueBase = *(int **)xxeSumSuperScalarDstRRAInfo->valueBase;
 #endif
         // recursively resolve the TKs of the arguments and execute operation
         sssDstRra(rraBase, xxeSumSuperScalarDstRRAInfo->elementTK,
-          rraOffsetList, valueList, xxeSumSuperScalarDstRRAInfo->valueTK,
-          termCount, xxeSumSuperScalarDstRRAInfo->vectorLength, 0);
+          rraOffsetList, valueBase, valueOffsetList, 
+          xxeSumSuperScalarDstRRAInfo->valueTK, termCount, vectorL, 0);
       }
       break;
     case productSumSuperScalarDstRRA:
@@ -2759,7 +2767,12 @@ int XXE::exec(
         xxeProductSumSuperScalarSrcRRAInfo =
           (ProductSumSuperScalarSrcRRAInfo *)xxeElement;
         int *rraOffsetList = xxeProductSumSuperScalarSrcRRAInfo->rraOffsetList;
+        int *elementOffsetList =
+          xxeProductSumSuperScalarSrcRRAInfo->elementOffsetList;
         int termCount = xxeProductSumSuperScalarSrcRRAInfo->termCount;
+        int vectorL = 1; // initialize
+        if (xxeProductSumSuperScalarSrcRRAInfo->vectorFlag)
+          vectorL = *vectorLength;
         // the following typecasts are necessary to provide a valid TK
         // combination to call into the recursive function
 #ifdef BGLWORKAROUND
@@ -2767,22 +2780,29 @@ int XXE::exec(
           (char *)rraList[xxeProductSumSuperScalarSrcRRAInfo->rraIndex];
         char **factorList =
           (char **)xxeProductSumSuperScalarSrcRRAInfo->factorList;
-        char **elementList =
-          (char **)xxeProductSumSuperScalarSrcRRAInfo->elementList;
+        char *elementBase =
+          (char *)xxeProductSumSuperScalarSrcRRAInfo->elementBase;
+        if (xxeProductSumSuperScalarSrcRRAInfo->indirectionFlag)
+          elementBase =
+            *(char **)xxeProductSumSuperScalarSrcRRAInfo->elementBase;
 #else
         int *rraBase =
           (int *)rraList[xxeProductSumSuperScalarSrcRRAInfo->rraIndex];
         int **factorList =
           (int **)xxeProductSumSuperScalarSrcRRAInfo->factorList;
-        int **elementList =
-          (int **)xxeProductSumSuperScalarSrcRRAInfo->elementList;
+        int *elementBase =
+          (int *)xxeProductSumSuperScalarSrcRRAInfo->elementBase;
+        if (xxeProductSumSuperScalarSrcRRAInfo->indirectionFlag)
+          elementBase =
+            *(int **)xxeProductSumSuperScalarSrcRRAInfo->elementBase;
 #endif
         // recursively resolve the TKs of the arguments and execute operation
         psssSrcRra(rraBase, xxeProductSumSuperScalarSrcRRAInfo->valueTK,
           rraOffsetList, factorList,
           xxeProductSumSuperScalarSrcRRAInfo->factorTK,
-          elementList, xxeProductSumSuperScalarSrcRRAInfo->elementTK, termCount,
-          xxeProductSumSuperScalarSrcRRAInfo->vectorLength, 0);
+          elementBase, elementOffsetList,
+          xxeProductSumSuperScalarSrcRRAInfo->elementTK, termCount,
+          vectorL, 0);
       }
       break;
     case productSumSuperScalarContigRRA:
@@ -2930,6 +2950,8 @@ int XXE::exec(
         if (xxeZeroMemsetInfo->indirectionFlag)
           buffer = *(char **)xxeZeroMemsetInfo->buffer;
         int byteCount = xxeZeroMemsetInfo->byteCount;
+        if(xxeZeroMemsetInfo->vectorFlag)
+          byteCount *= *vectorLength;
         memset(buffer, 0, byteCount);
       }
       break;
@@ -3363,7 +3385,8 @@ void XXE::pss(T *element, TKId elementTK, U *factor, TKId factorTK,
 
 template<typename T, typename V>
 void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
-  V **valueList, TKId valueTK, int termCount, int vectorLength, int resolved){
+  V *valueBase, int *valueOffsetList, TKId valueTK, int termCount,
+  int vectorLength, int resolved){
   // Recursively resolve the TKs and typecast the arguments appropriately
   // before executing sssDstRra operation on the data.
   T *element;
@@ -3378,29 +3401,29 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
     case I4:
       {
         ESMC_I4 *rraBaseT = (ESMC_I4 *)rraBase;
-        sssDstRra(rraBaseT, elementTK, rraOffsetList, valueList, valueTK,
-          termCount, vectorLength, resolved);
+        sssDstRra(rraBaseT, elementTK, rraOffsetList, valueBase,
+          valueOffsetList, valueTK, termCount, vectorLength, resolved);
       }
       break;
     case I8:
       {
         ESMC_I8 *rraBaseT = (ESMC_I8 *)rraBase;
-        sssDstRra(rraBaseT, elementTK, rraOffsetList, valueList, valueTK,
-          termCount, vectorLength, resolved);
+        sssDstRra(rraBaseT, elementTK, rraOffsetList, valueBase,
+          valueOffsetList, valueTK, termCount, vectorLength, resolved);
       }
       break;
     case R4:
       {
         ESMC_R4 *rraBaseT = (ESMC_R4 *)rraBase;
-        sssDstRra(rraBaseT, elementTK, rraOffsetList, valueList, valueTK,
-          termCount, vectorLength, resolved);
+        sssDstRra(rraBaseT, elementTK, rraOffsetList, valueBase,
+          valueOffsetList, valueTK, termCount, vectorLength, resolved);
       }
       break;
     case R8:
       {
         ESMC_R8 *rraBaseT = (ESMC_R8 *)rraBase;
-        sssDstRra(rraBaseT, elementTK, rraOffsetList, valueList, valueTK,
-          termCount, vectorLength, resolved);
+        sssDstRra(rraBaseT, elementTK, rraOffsetList, valueBase,
+          valueOffsetList, valueTK, termCount, vectorLength, resolved);
       }
       break;
     default:
@@ -3413,30 +3436,30 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
     switch (valueTK){
     case I4:
       {
-        ESMC_I4 **valueListT = (ESMC_I4 **)valueList;
-        sssDstRra(rraBase, elementTK, rraOffsetList, valueListT, valueTK,
-          termCount, vectorLength, resolved);
+        ESMC_I4 *valueBaseT = (ESMC_I4 *)valueBase;
+        sssDstRra(rraBase, elementTK, rraOffsetList, valueBaseT,
+          valueOffsetList, valueTK, termCount, vectorLength, resolved);
       }
       break;
     case I8:
       {
-        ESMC_I8 **valueListT = (ESMC_I8 **)valueList;
-        sssDstRra(rraBase, elementTK, rraOffsetList, valueListT, valueTK,
-          termCount, vectorLength, resolved);
+        ESMC_I8 *valueBaseT = (ESMC_I8 *)valueBase;
+        sssDstRra(rraBase, elementTK, rraOffsetList, valueBaseT,
+          valueOffsetList, valueTK, termCount, vectorLength, resolved);
       }
       break;
     case R4:
       {
-        ESMC_R4 **valueListT = (ESMC_R4 **)valueList;
-        sssDstRra(rraBase, elementTK, rraOffsetList, valueListT, valueTK,
-          termCount, vectorLength, resolved);
+        ESMC_R4 *valueBaseT = (ESMC_R4 *)valueBase;
+        sssDstRra(rraBase, elementTK, rraOffsetList, valueBaseT,
+          valueOffsetList, valueTK, termCount, vectorLength, resolved);
       }
       break;
     case R8:
       {
-        ESMC_R8 **valueListT = (ESMC_R8 **)valueList;
-        sssDstRra(rraBase, elementTK, rraOffsetList, valueListT, valueTK,
-          termCount, vectorLength, resolved);
+        ESMC_R8 *valueBaseT = (ESMC_R8 *)valueBase;
+        sssDstRra(rraBase, elementTK, rraOffsetList, valueBaseT,
+          valueOffsetList, valueTK, termCount, vectorLength, resolved);
       }
       break;
     default:
@@ -3453,14 +3476,14 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
     // scalar elements
     for (int i=0; i<termCount; i++){  // super scalar loop
       element = (T *)(rraBaseT + rraOffsetList[i]);
-      value = valueList[i];
+      value = valueBase + valueOffsetList[i];
       *element += *value;
     }
   }else{
     // vector elements
     for (int i=0; i<termCount; i++){  // super scalar loop
-      element = (T *)(rraBaseT + rraOffsetList[i]);
-      value = valueList[i];
+      element = (T *)(rraBaseT + rraOffsetList[i] * vectorLength);
+      value = valueBase + valueOffsetList[i] * vectorLength;
       for (int k=0; k<vectorLength; k++)  // vector loop
         *(element+k) += *(value+k);
     }    
@@ -3627,8 +3650,8 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
 
 template<typename T, typename U, typename V>
 void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
-  U **factorList, TKId factorTK, V **elementList, TKId elementTK,
-  int termCount, int vectorLength, int resolved){
+  U **factorList, TKId factorTK, V *elementBase, int *elementOffsetList,
+  TKId elementTK, int termCount, int vectorLength, int resolved){
   // Recursively resolve the TKs and typecast the arguments appropriately
   // before executing psssSrcRra operation on the data.
   T *value;
@@ -3645,28 +3668,32 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
       {
         ESMC_I4 *rraBaseT = (ESMC_I4 *)rraBase;
         psssSrcRra(rraBaseT, valueTK, rraOffsetList, factorList, factorTK,
-          elementList, elementTK, termCount, vectorLength, resolved);
+          elementBase, elementOffsetList, elementTK, termCount, vectorLength,
+          resolved);
       }
       break;
     case I8:
       {
         ESMC_I8 *rraBaseT = (ESMC_I8 *)rraBase;
         psssSrcRra(rraBaseT, valueTK, rraOffsetList, factorList, factorTK,
-          elementList, elementTK, termCount, vectorLength, resolved);
+          elementBase, elementOffsetList, elementTK, termCount, vectorLength,
+          resolved);
       }
       break;
     case R4:
       {
         ESMC_R4 *rraBaseT = (ESMC_R4 *)rraBase;
         psssSrcRra(rraBaseT, valueTK, rraOffsetList, factorList, factorTK,
-          elementList, elementTK, termCount, vectorLength, resolved);
+          elementBase, elementOffsetList, elementTK, termCount, vectorLength,
+          resolved);
       }
       break;
     case R8:
       {
         ESMC_R8 *rraBaseT = (ESMC_R8 *)rraBase;
         psssSrcRra(rraBaseT, valueTK, rraOffsetList, factorList, factorTK,
-          elementList, elementTK, termCount, vectorLength, resolved);
+          elementBase, elementOffsetList, elementTK, termCount, vectorLength,
+          resolved);
       }
       break;
     default:
@@ -3681,28 +3708,32 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
       {
         ESMC_I4 **factorListT = (ESMC_I4 **)factorList;
         psssSrcRra(rraBase, valueTK, rraOffsetList, factorListT, factorTK,
-          elementList, elementTK, termCount, vectorLength, resolved);
+          elementBase, elementOffsetList, elementTK, termCount, vectorLength,
+          resolved);
       }
       break;
     case I8:
       {
         ESMC_I8 **factorListT = (ESMC_I8 **)factorList;
         psssSrcRra(rraBase, valueTK, rraOffsetList, factorListT, factorTK,
-          elementList, elementTK, termCount, vectorLength, resolved);
+          elementBase, elementOffsetList, elementTK, termCount, vectorLength,
+          resolved);
       }
       break;
     case R4:
       {
         ESMC_R4 **factorListT = (ESMC_R4 **)factorList;
         psssSrcRra(rraBase, valueTK, rraOffsetList, factorListT, factorTK,
-          elementList, elementTK, termCount, vectorLength, resolved);
+          elementBase, elementOffsetList, elementTK, termCount, vectorLength,
+          resolved);
       }
       break;
     case R8:
       {
         ESMC_R8 **factorListT = (ESMC_R8 **)factorList;
         psssSrcRra(rraBase, valueTK, rraOffsetList, factorListT, factorTK,
-          elementList, elementTK, termCount, vectorLength, resolved);
+          elementBase, elementOffsetList, elementTK, termCount, vectorLength,
+          resolved);
       }
       break;
     default:
@@ -3715,30 +3746,34 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
     switch (elementTK){
     case I4:
       {
-        ESMC_I4 **elementListT = (ESMC_I4 **)elementList;
+        ESMC_I4 *elementBaseT = (ESMC_I4 *)elementBase;
         psssSrcRra(rraBase, valueTK, rraOffsetList, factorList, factorTK,
-          elementListT, elementTK,  termCount, vectorLength, resolved);
+          elementBaseT, elementOffsetList, elementTK,  termCount, vectorLength,
+          resolved);
       }
       break;
     case I8:
       {
-        ESMC_I8 **elementListT = (ESMC_I8 **)elementList;
+        ESMC_I8 *elementBaseT = (ESMC_I8 *)elementBase;
         psssSrcRra(rraBase, valueTK, rraOffsetList, factorList, factorTK,
-          elementListT, elementTK, termCount, vectorLength, resolved);
+          elementBaseT, elementOffsetList, elementTK,  termCount, vectorLength,
+          resolved);
       }
       break;
     case R4:
       {
-        ESMC_R4 **elementListT = (ESMC_R4 **)elementList;
+        ESMC_R4 *elementBaseT = (ESMC_R4 *)elementBase;
         psssSrcRra(rraBase, valueTK, rraOffsetList, factorList, factorTK,
-          elementListT, elementTK, termCount, vectorLength, resolved);
+          elementBaseT, elementOffsetList, elementTK,  termCount, vectorLength,
+          resolved);
       }
       break;
     case R8:
       {
-        ESMC_R8 **elementListT = (ESMC_R8 **)elementList;
+        ESMC_R8 *elementBaseT = (ESMC_R8 *)elementBase;
         psssSrcRra(rraBase, valueTK, rraOffsetList, factorList, factorTK,
-          elementListT, elementTK, termCount, vectorLength, resolved);
+          elementBaseT, elementOffsetList, elementTK,  termCount, vectorLength,
+          resolved);
       }
       break;
     default:
@@ -3756,15 +3791,15 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
     for (int i=0; i<termCount; i++){  // super scalar loop
       value = (T *)(rraBaseT + rraOffsetList[i]);
       factor = factorList[i];
-      element = elementList[i];
+      element = elementBase + elementOffsetList[i];
       *element += *factor * *value;
     }
   }else{
     // vector elements
     for (int i=0; i<termCount; i++){  // super scalar loop
-      value = (T *)(rraBaseT + rraOffsetList[i]);
+      value = (T *)(rraBaseT + rraOffsetList[i] * vectorLength);
       factor = factorList[i];
-      element = elementList[i];
+      element = elementBase + elementOffsetList[i] * vectorLength;
       for (int k=0; k<vectorLength; k++)  // vector loop
         *(element+k) += *factor * *(value+k);
     }
@@ -3977,6 +4012,10 @@ int XXE::print(
   ProductSumSuperScalarDstRRAInfo *xxeProductSumSuperScalarDstRRAInfo;
   ProductSumSuperScalarSrcRRAInfo *xxeProductSumSuperScalarSrcRRAInfo;
   ProductSumSuperScalarContigRRAInfo *xxeProductSumSuperScalarContigRRAInfo;
+  ZeroScalarRRAInfo *xxeZeroScalarRRAInfo;
+  ZeroSuperScalarRRAInfo *xxeZeroSuperScalarRRAInfo;
+  ZeroMemsetInfo *xxeZeroMemsetInfo;
+  ZeroMemsetRRAInfo *xxeZeroMemsetRRAInfo;
   MemCpyInfo *xxeMemCpyInfo;
   MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo;
   MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo;
@@ -3984,40 +4023,51 @@ int XXE::print(
   XxeSubMultiInfo *xxeSubMultiInfo;
   WtimerInfo *xxeWtimerInfo, *xxeWtimerInfoActual, *xxeWtimerInfoRelative;
   MessageInfo *xxeMessageInfo;
+  ProfileMessageInfo *xxeProfileMessageInfo;
   
   for (int i=indexRangeStart; i<=indexRangeStop; i++){
     xxeElement = &(stream[i]);
-    printf("XXE::print(): <localPet=%d> i=%d, xxeElement=%p, opId=%d\n", 
-      vm->getLocalPet(), i, xxeElement, stream[i].opId);
+    printf("XXE::print(): <localPet=%d> i=%d, xxeElement=%p, opId=%d, "
+      "predicateBitField=0x%08x\n", 
+      vm->getLocalPet(), i, xxeElement, stream[i].opId,
+      stream[i].predicateBitField);
     switch(stream[i].opId){
     case send:
+      {
+        printf("  XXE::send <localPet=%d>\n", vm->getLocalPet());
+      }
       break;
     case recv:
+      {
+        printf("  XXE::recv <localPet=%d>\n", vm->getLocalPet());
+      }
       break;
     case sendnb:
       {
         xxeSendnbInfo = (SendnbInfo *)xxeElement;
-        printf("XXE::sendnb: <localPet=%d> buffer=%p, size=%d, dst=%d, tag=%d, "
-          "vectorFlag=%d, commhandle=%p\n", vm->getLocalPet(),
+        printf("  XXE::sendnb: <localPet=%d> buffer=%p, size=%d, dst=%d, "
+          "tag=%d, vectorFlag=%d, indirectionFlag=%d, commhandle=%p\n",
+          vm->getLocalPet(),
           xxeSendnbInfo->buffer, xxeSendnbInfo->size, xxeSendnbInfo->dstPet,
           xxeSendnbInfo->tag, xxeSendnbInfo->vectorFlag,
-          xxeSendnbInfo->commhandle);
+          xxeSendnbInfo->indirectionFlag, xxeSendnbInfo->commhandle);
       }
       break;
     case recvnb:
       {
         xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
-        printf("XXE::recvnb: <localPet=%d> buffer=%p, size=%d, src=%d, tag=%d, "
-          "vectorFlag=%d, commhandle=%p\n", vm->getLocalPet(),
+        printf("  XXE::recvnb: <localPet=%d> buffer=%p, size=%d, src=%d, "
+          "tag=%d, vectorFlag=%d, indirectionFlag=%d, commhandle=%p\n",
+          vm->getLocalPet(),
           xxeRecvnbInfo->buffer, xxeRecvnbInfo->size, xxeRecvnbInfo->srcPet,
           xxeRecvnbInfo->tag, xxeRecvnbInfo->vectorFlag,
-          xxeRecvnbInfo->commhandle);
+          xxeRecvnbInfo->indirectionFlag, xxeRecvnbInfo->commhandle);
       }
       break;
     case sendnbRRA:
       {
         xxeSendnbRRAInfo = (SendnbRRAInfo *)xxeElement;
-        printf("XXE::sendnbRRA: <localPet=%d> rraOffset=%d, size=%d, dst=%d, "
+        printf("  XXE::sendnbRRA: <localPet=%d> rraOffset=%d, size=%d, dst=%d, "
           "rraIndex=%d, tag=%d, vectorFlag=%d, commhandle=%p\n",
           vm->getLocalPet(),
           xxeSendnbRRAInfo->rraOffset, xxeSendnbRRAInfo->size,
@@ -4029,7 +4079,7 @@ int XXE::print(
     case recvnbRRA:
       {
         xxeRecvnbRRAInfo = (RecvnbRRAInfo *)xxeElement;
-        printf("XXE::recvnbRRA: <localPet=%d> rraOffset=%d, size=%d, src=%d, "
+        printf("  XXE::recvnbRRA: <localPet=%d> rraOffset=%d, size=%d, src=%d, "
           "rraIndex=%d, tag=%d, vectorFlag=%d, commhandle=%p\n",
           vm->getLocalPet(),
           xxeRecvnbRRAInfo->rraOffset, xxeRecvnbRRAInfo->size,
@@ -4043,104 +4093,15 @@ int XXE::print(
         xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
         xxeIndexElement = &(stream[xxeWaitOnIndexInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
-        printf("XXE::waitOnIndex: <localPet=%d> index=%d, commhandle=%p\n",
+        printf("  XXE::waitOnIndex: <localPet=%d> index=%d, commhandle=%p\n",
           vm->getLocalPet(), xxeWaitOnIndexInfo->index,
           xxeCommhandleInfo->commhandle);
-      }
-      break;
-    case waitOnIndexRange:
-      {
-        xxeWaitOnIndexRangeInfo = (WaitOnIndexRangeInfo *)xxeElement;
-        printf("XXE::waitOnIndexRange <localPet=%d>\n", vm->getLocalPet());
-      }
-      break;
-    case productSumVector:
-      {
-        xxeProductSumVectorInfo = (ProductSumVectorInfo *)xxeElement;
-        printf("XXE::productSumVector <localPet=%d>\n", vm->getLocalPet());
-      }
-      break;
-    case productSumScalar:
-      {
-        xxeProductSumScalarInfo = (ProductSumScalarInfo *)xxeElement;
-        printf("XXE::productSumScalar <localPet=%d>\n", vm->getLocalPet());
-      }
-      break;
-    case productSumScalarRRA:
-      {
-        xxeProductSumScalarRRAInfo = (ProductSumScalarRRAInfo *)xxeElement;
-        printf("XXE::productSumScalarRRA <localPet=%d>\n", vm->getLocalPet());
-      }
-      break;
-    case sumSuperScalarDstRRA:
-      {
-        xxeSumSuperScalarDstRRAInfo =
-          (SumSuperScalarDstRRAInfo *)xxeElement;
-        printf("XXE::sumSuperScalarDstRRA <localPet=%d>\n",
-          vm->getLocalPet());
-      }
-      break;
-    case productSumSuperScalarDstRRA:
-      {
-        xxeProductSumSuperScalarDstRRAInfo =
-          (ProductSumSuperScalarDstRRAInfo *)xxeElement;
-        printf("XXE::productSumSuperScalarDstRRA <localPet=%d>\n",
-          vm->getLocalPet());
-      }
-      break;
-    case productSumSuperScalarSrcRRA:
-      {
-        xxeProductSumSuperScalarSrcRRAInfo =
-          (ProductSumSuperScalarSrcRRAInfo *)xxeElement;
-        printf("XXE::productSumSuperScalarSrcRRA <localPet=%d>\n",
-          vm->getLocalPet());
-      }
-      break;
-    case productSumSuperScalarContigRRA:
-      {
-        xxeProductSumSuperScalarContigRRAInfo =
-          (ProductSumSuperScalarContigRRAInfo *)xxeElement;
-        printf("XXE::productSumSuperScalarContigRRA <localPet=%d>\n",
-          vm->getLocalPet());
-      }
-      break;
-    case memCpy:
-      {
-        xxeMemCpyInfo = (MemCpyInfo *)xxeElement;
-        printf("XXE::memCpy <localPet=%d>\n", vm->getLocalPet());
-      }
-      break;
-    case memCpySrcRRA:
-      {
-        xxeMemCpySrcRRAInfo = (MemCpySrcRRAInfo *)xxeElement;
-        printf("XXE::memCpySrcRRA <localPet=%d>\n", vm->getLocalPet());
-      }
-      break;
-    case memGatherSrcRRA:
-      {
-        xxeMemGatherSrcRRAInfo = (MemGatherSrcRRAInfo *)xxeElement;
-        printf("XXE::memGatherSrcRRA <localPet=%d>\n", vm->getLocalPet());
-      }
-      break;
-    case xxeSub:
-      {
-        xxeSubInfo = (XxeSubInfo *)xxeElement;
-        printf("XXE::xxeSub <localPet=%d>\n", vm->getLocalPet());
-        xxeSubInfo->xxe->print(rraCount, rraList); // recursive call
-      }
-      break;
-    case xxeSubMulti:
-      {
-        xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
-        printf("XXE::xxeSubMulti <localPet=%d>\n", vm->getLocalPet());
-        for (int k=0; k<xxeSubMultiInfo->count; k++)
-          xxeSubMultiInfo->xxe[k]->print(rraCount, rraList); // recursive call
       }
       break;
     case waitOnAnyIndexSub:
       {
         xxeWaitOnAnyIndexSubInfo = (WaitOnAnyIndexSubInfo *)xxeElement;
-        printf("XXE::waitOnAnyIndexSub <localPet=%d>\n", vm->getLocalPet());
+        printf("  XXE::waitOnAnyIndexSub <localPet=%d>\n", vm->getLocalPet());
         int *completeFlag = xxeWaitOnAnyIndexSubInfo->completeFlag;
         int count = xxeWaitOnAnyIndexSubInfo->count;
         int completeTotal = 0;  // reset
@@ -4149,10 +4110,149 @@ int XXE::print(
           // recursive call
       }
       break;
+    case waitOnIndexRange:
+      {
+        xxeWaitOnIndexRangeInfo = (WaitOnIndexRangeInfo *)xxeElement;
+        printf("  XXE::waitOnIndexRange <localPet=%d>\n", vm->getLocalPet());
+      }
+      break;
+    case productSumVector:
+      {
+        xxeProductSumVectorInfo = (ProductSumVectorInfo *)xxeElement;
+        printf("  XXE::productSumVector <localPet=%d>\n", vm->getLocalPet());
+      }
+      break;
+    case productSumScalar:
+      {
+        xxeProductSumScalarInfo = (ProductSumScalarInfo *)xxeElement;
+        printf("  XXE::productSumScalar <localPet=%d>\n", vm->getLocalPet());
+      }
+      break;
+    case productSumScalarRRA:
+      {
+        xxeProductSumScalarRRAInfo = (ProductSumScalarRRAInfo *)xxeElement;
+        printf("  XXE::productSumScalarRRA <localPet=%d>\n", vm->getLocalPet());
+      }
+      break;
+    case sumSuperScalarDstRRA:
+      {
+        xxeSumSuperScalarDstRRAInfo =
+          (SumSuperScalarDstRRAInfo *)xxeElement;
+        printf("  XXE::sumSuperScalarDstRRA <localPet=%d> rraIndex=%d, "
+          "termCount=%d, vectorFlag=%d, indirectionFlag=%d\n",
+          vm->getLocalPet(), xxeSumSuperScalarDstRRAInfo->rraIndex,
+          xxeSumSuperScalarDstRRAInfo->termCount,
+          xxeSumSuperScalarDstRRAInfo->vectorFlag,
+          xxeSumSuperScalarDstRRAInfo->indirectionFlag);
+      }
+      break;
+    case productSumSuperScalarDstRRA:
+      {
+        xxeProductSumSuperScalarDstRRAInfo =
+          (ProductSumSuperScalarDstRRAInfo *)xxeElement;
+        printf("  XXE::productSumSuperScalarDstRRA <localPet=%d> "
+          "rraIndex=%d, termCount=%d, vectorFlag=%d, indirectionFlag=%d\n",
+          vm->getLocalPet(), xxeProductSumSuperScalarDstRRAInfo->rraIndex,
+          xxeProductSumSuperScalarDstRRAInfo->termCount,
+          xxeProductSumSuperScalarDstRRAInfo->vectorFlag,
+          xxeProductSumSuperScalarDstRRAInfo->indirectionFlag);
+      }
+      break;
+    case productSumSuperScalarSrcRRA:
+      {
+        xxeProductSumSuperScalarSrcRRAInfo =
+          (ProductSumSuperScalarSrcRRAInfo *)xxeElement;
+        printf("  XXE::productSumSuperScalarSrcRRA <localPet=%d> "
+          "rraIndex=%d, termCount=%d, vectorFlag=%d, indirectionFlag=%d\n",
+          vm->getLocalPet(), xxeProductSumSuperScalarSrcRRAInfo->rraIndex,
+          xxeProductSumSuperScalarSrcRRAInfo->termCount,
+          xxeProductSumSuperScalarSrcRRAInfo->vectorFlag,
+          xxeProductSumSuperScalarSrcRRAInfo->indirectionFlag);
+      }
+      break;
+    case productSumSuperScalarContigRRA:
+      {
+        xxeProductSumSuperScalarContigRRAInfo =
+          (ProductSumSuperScalarContigRRAInfo *)xxeElement;
+        printf("  XXE::productSumSuperScalarContigRRA <localPet=%d>\n",
+          vm->getLocalPet());
+      }
+      break;
+    case zeroScalarRRA:
+      {
+        xxeZeroScalarRRAInfo = (ZeroScalarRRAInfo *)xxeElement;
+        printf("  XXE::zeroScalarRRA <localPet=%d> rraOffset=%d, rraIndex=%d\n",
+          vm->getLocalPet(), xxeZeroScalarRRAInfo->rraOffset,
+          xxeZeroScalarRRAInfo->rraIndex);
+      }
+      break;
+    case zeroSuperScalarRRA:
+      {
+        xxeZeroSuperScalarRRAInfo = (ZeroSuperScalarRRAInfo *)xxeElement;
+        printf("  XXE::zeroSuperScalarRRA <localPet=%d> rraOffsetList=%p, "
+          "rraIndex=%d, termCount=%d, vectorFlag=%d\n", vm->getLocalPet(),
+          xxeZeroSuperScalarRRAInfo->rraOffsetList,
+          xxeZeroSuperScalarRRAInfo->rraIndex,
+          xxeZeroSuperScalarRRAInfo->termCount,
+          xxeZeroSuperScalarRRAInfo->vectorFlag);
+      }
+      break;
+    case zeroMemset:
+      {
+        xxeZeroMemsetInfo = (ZeroMemsetInfo *)xxeElement;
+        printf("  XXE::zeroMemset <localPet=%d> buffer=%p, byteCount=%d, "
+          "vectorFlag=%d, indirectionFlag=%d\n", 
+            vm->getLocalPet(), xxeZeroMemsetInfo->buffer,
+            xxeZeroMemsetInfo->byteCount, xxeZeroMemsetInfo->vectorFlag,
+            xxeZeroMemsetInfo->indirectionFlag);
+      }
+      break;
+    case zeroMemsetRRA:
+      {
+        xxeZeroMemsetRRAInfo = (ZeroMemsetRRAInfo *)xxeElement;
+        printf("  XXE::zeroMemsetRRA <localPet=%d> byteCount=%d, rraIndex=%d, "
+          "vectorFlag=%d\n", 
+          vm->getLocalPet(), xxeZeroMemsetRRAInfo->byteCount,
+          xxeZeroMemsetRRAInfo->rraIndex, xxeZeroMemsetRRAInfo->vectorFlag);
+      }
+      break;
+    case memCpy:
+      {
+        xxeMemCpyInfo = (MemCpyInfo *)xxeElement;
+        printf("  XXE::memCpy <localPet=%d>\n", vm->getLocalPet());
+      }
+      break;
+    case memCpySrcRRA:
+      {
+        xxeMemCpySrcRRAInfo = (MemCpySrcRRAInfo *)xxeElement;
+        printf("  XXE::memCpySrcRRA <localPet=%d>\n", vm->getLocalPet());
+      }
+      break;
+    case memGatherSrcRRA:
+      {
+        xxeMemGatherSrcRRAInfo = (MemGatherSrcRRAInfo *)xxeElement;
+        printf("  XXE::memGatherSrcRRA <localPet=%d>\n", vm->getLocalPet());
+      }
+      break;
+    case xxeSub:
+      {
+        xxeSubInfo = (XxeSubInfo *)xxeElement;
+        printf("  XXE::xxeSub <localPet=%d>\n", vm->getLocalPet());
+        xxeSubInfo->xxe->print(rraCount, rraList); // recursive call
+      }
+      break;
+    case xxeSubMulti:
+      {
+        xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
+        printf("  XXE::xxeSubMulti <localPet=%d>\n", vm->getLocalPet());
+        for (int k=0; k<xxeSubMultiInfo->count; k++)
+          xxeSubMultiInfo->xxe[k]->print(rraCount, rraList); // recursive call
+      }
+      break;
     case wtimer:
       {
         xxeWtimerInfo = (WtimerInfo *)xxeElement;
-        printf("XXE::wtimer <localPet=%d>\n", vm->getLocalPet());
+        printf("  XXE::wtimer <localPet=%d>\n", vm->getLocalPet());
         int index = xxeWtimerInfo->actualWtimerIndex;
         double *wtime = &(xxeWtimerInfo->wtime);
         *wtime = 0.;                      // initialize
@@ -4168,7 +4268,18 @@ int XXE::print(
     case message:
       {
         xxeMessageInfo = (MessageInfo *)xxeElement;
-        printf("XXE::message <localPet=%d>\n", vm->getLocalPet());
+        printf("  XXE::message <localPet=%d>\n", vm->getLocalPet());
+      }
+      break;
+    case profileMessage:
+      {
+        xxeProfileMessageInfo = (ProfileMessageInfo *)xxeElement;
+        printf("  XXE::profileMessage <localPet=%d>\n", vm->getLocalPet());
+      }
+      break;
+    case nop:
+      {
+        printf("  XXE::nop <localPet=%d>\n", vm->getLocalPet());
       }
       break;
     default:
@@ -6144,6 +6255,7 @@ int XXE::appendZeroMemset(
   int predicateBitField,
   void *buffer,
   int byteCount,
+  bool vectorFlag,
   bool indirectionFlag
   ){
 //
@@ -6161,6 +6273,7 @@ int XXE::appendZeroMemset(
     (ZeroMemsetInfo *)&(stream[count]);
   xxeZeroMemsetInfo->buffer = buffer;
   xxeZeroMemsetInfo->byteCount = byteCount;
+  xxeZeroMemsetInfo->vectorFlag = vectorFlag;
   xxeZeroMemsetInfo->indirectionFlag = indirectionFlag;
   localrc = incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
@@ -6292,7 +6405,9 @@ int XXE::appendSumSuperScalarDstRRA(
   TKId valueTK,
   int rraIndex,
   int termCount,
-  int vectorLength
+  void *valueBase,
+  bool vectorFlag,
+  bool indirectionFlag
   ){
 //
 // !DESCRIPTION:
@@ -6311,11 +6426,13 @@ int XXE::appendSumSuperScalarDstRRA(
   xxeSumSuperScalarDstRRAInfo->valueTK = valueTK;
   xxeSumSuperScalarDstRRAInfo->rraIndex = rraIndex;
   xxeSumSuperScalarDstRRAInfo->termCount = termCount;
-  xxeSumSuperScalarDstRRAInfo->vectorLength = vectorLength;
+  xxeSumSuperScalarDstRRAInfo->valueBase = valueBase;
+  xxeSumSuperScalarDstRRAInfo->vectorFlag = vectorFlag;
+  xxeSumSuperScalarDstRRAInfo->indirectionFlag = indirectionFlag;
   char *rraOffsetListChar = new char[termCount*sizeof(int)];
   xxeSumSuperScalarDstRRAInfo->rraOffsetList = (int *)rraOffsetListChar;
-  char *valueListChar = new char[termCount*sizeof(void *)];
-  xxeSumSuperScalarDstRRAInfo->valueList = (void **)valueListChar;
+  char *valueOffsetListChar = new char[termCount*sizeof(int)];
+  xxeSumSuperScalarDstRRAInfo->valueOffsetList = (int *)valueOffsetListChar;
   localrc = incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -6323,7 +6440,7 @@ int XXE::appendSumSuperScalarDstRRA(
   localrc = storeStorage(rraOffsetListChar);// for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
-  localrc = storeStorage(valueListChar);// for xxe garb. coll.
+  localrc = storeStorage(valueOffsetListChar);// for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   
@@ -6427,7 +6544,9 @@ int XXE::appendProductSumSuperScalarSrcRRA(
   TKId factorTK,
   int rraIndex,
   int termCount,
-  int vectorLength
+  void *elementBase,
+  bool vectorFlag,
+  bool indirectionFlag
   ){
 //
 // !DESCRIPTION:
@@ -6447,13 +6566,16 @@ int XXE::appendProductSumSuperScalarSrcRRA(
   xxeProductSumSuperScalarSrcRRAInfo->factorTK = factorTK;
   xxeProductSumSuperScalarSrcRRAInfo->rraIndex = rraIndex;
   xxeProductSumSuperScalarSrcRRAInfo->termCount = termCount;
-  xxeProductSumSuperScalarSrcRRAInfo->vectorLength = vectorLength;
+  xxeProductSumSuperScalarSrcRRAInfo->elementBase = elementBase;
+  xxeProductSumSuperScalarSrcRRAInfo->vectorFlag = vectorFlag;
+  xxeProductSumSuperScalarSrcRRAInfo->indirectionFlag = indirectionFlag;
   char *rraOffsetListChar = new char[termCount*sizeof(int)];
   xxeProductSumSuperScalarSrcRRAInfo->rraOffsetList = (int *)rraOffsetListChar;
   char *factorListChar = new char[termCount*sizeof(void *)];
   xxeProductSumSuperScalarSrcRRAInfo->factorList = (void **)factorListChar;
-  char *elementListChar = new char[termCount*sizeof(void *)];
-  xxeProductSumSuperScalarSrcRRAInfo->elementList = (void **)elementListChar;
+  char *elementOffsetListChar = new char[termCount*sizeof(int)];
+  xxeProductSumSuperScalarSrcRRAInfo->elementOffsetList =
+    (int *)elementOffsetListChar;
   localrc = incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -6464,7 +6586,7 @@ int XXE::appendProductSumSuperScalarSrcRRA(
   localrc = storeStorage(factorListChar);// for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
-  localrc = storeStorage(elementListChar);// for xxe garb. coll.
+  localrc = storeStorage(elementOffsetListChar);// for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   

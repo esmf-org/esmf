@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.22 2010/01/14 20:40:37 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.23 2010/01/15 21:23:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -433,21 +433,21 @@ class XXE{
     int appendZeroSuperScalarRRA(int predicateBitField, TKId elementTK,
       int rraIndex, int termCount, bool vectorFlag=false);
     int appendZeroMemset(int predicateBitField, void *buffer, int byteCount,
-      bool indirectionFlag=false);
+      bool vectorFlag=false, bool indirectionFlag=false);
     int appendZeroMemsetRRA(int predicateBitField, int byteCount, int rraIndex,
       bool vectorFlag=false);
     int appendProductSumScalarRRA(int predicateBitField, TKId elementTK,
       TKId valueTK, TKId factorTK, int rraOffset, void *factor, void *value,
       int rraIndex);
     int appendSumSuperScalarDstRRA(int predicateBitField, TKId elementTK,
-      TKId valueTK, int rraIndex, int termCount,
-      int vectorLength=1);
+      TKId valueTK, int rraIndex, int termCount, void *valueBase,
+      bool vectorFlag=false, bool indirectionFlag=false);
     int appendProductSumSuperScalarDstRRA(int predicateBitField, TKId elementTK,
       TKId valueTK, TKId factorTK, int rraIndex, int termCount, void *valueBase,
       bool vectorFlag=false, bool indirectionFlag=false);
     int appendProductSumSuperScalarSrcRRA(int predicateBitField, TKId elementTK,
       TKId valueTK, TKId factorTK, int rraIndex, int termCount,
-      int vectorLength=1);
+      void *elementBase, bool vectorFlag=false, bool indirectionFlag=false);
     int appendWaitOnIndex(int predicateBitField, int index);
     int appendWaitOnAnyIndexSub(int predicateBitField, int count);
     int appendWaitOnAllSendnb(int predicateBitField);
@@ -463,16 +463,16 @@ class XXE{
       V *value, TKId valueTK, int resolved);
     template<typename T, typename V>
     static void sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
-      V **valueList, TKId valueTK, int termCount, int vectorLength,
-      int resolved);
+      V *valueBase, int *valueOffsetList, TKId valueTK, int termCount,
+      int vectorLength, int resolved);
     template<typename T, typename U, typename V>
     static void psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       U **factorList, TKId factorTK, V *valueBase, int *valueOffsetList,
       TKId valueTK, int termCount, int vectorLength, int resolved);
     template<typename T, typename U, typename V>
     static void psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
-      U **factorList, TKId factorTK, V **elementList, TKId elementTK,
-      int termCount, int vectorLength, int resolved);
+      U **factorList, TKId factorTK, V *elementBase, int *elementOffsetList,
+      TKId elementTK, int termCount, int vectorLength, int resolved);
     template<typename T, typename U, typename V>
     static void pssscRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       U **factorList, TKId factorTK, V *valueList, TKId valueTK,
@@ -601,10 +601,12 @@ class XXE{
       TKId elementTK;
       TKId valueTK;
       int *rraOffsetList;
-      void **valueList;
+      void *valueBase;
       int rraIndex;
       int termCount;
-      int vectorLength;
+      bool vectorFlag;
+      bool indirectionFlag;
+      int *valueOffsetList;
     }SumSuperScalarDstRRAInfo;
 
     typedef struct{
@@ -631,10 +633,12 @@ class XXE{
       TKId valueTK;
       int *rraOffsetList;
       void **factorList;
-      void **elementList;
+      void *elementBase;
       int rraIndex;
       int termCount;
-      int vectorLength;
+      bool vectorFlag;
+      bool indirectionFlag;
+      int *elementOffsetList;
     }ProductSumSuperScalarSrcRRAInfo;
 
     typedef struct{
@@ -675,6 +679,7 @@ class XXE{
       int predicateBitField;
       void *buffer;
       int byteCount;
+      bool vectorFlag;
       bool indirectionFlag;
     }ZeroMemsetInfo;
 

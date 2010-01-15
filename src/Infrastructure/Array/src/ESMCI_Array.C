@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.81 2010/01/14 20:40:35 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.82 2010/01/15 21:22:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.81 2010/01/14 20:40:35 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.82 2010/01/15 21:22:57 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4240,14 +4240,12 @@ namespace ArrayHelper{
       // fill in rraOffsetList, factorList, valueOffsetList
       vector<ArrayHelper::DstInfo>::iterator pp = dstInfoTable.begin();
       for (int kk=0; kk<termCount; kk++){
-        int linIndex = pp->linIndex;
-        rraOffsetList[kk] = linIndex/vectorLength * dataSizeDst;
+        rraOffsetList[kk] = pp->linIndex/vectorLength * dataSizeDst;
         factorList[kk] = (void *)(pp->factor);
         valueOffsetList[kk] = kk;
         ++pp;
       } // for kk - termCount
       // need to fill in sensible elements and values or timing will be bogus
-      char *buffer = *bufferInfo; // access buffer through layer of indirection
       switch (elementTK){
       case XXE::R4:
         for (int kk=0; kk<termCount; kk++)
@@ -4272,6 +4270,7 @@ namespace ArrayHelper{
       default:
         break;
       }
+      char *buffer = *bufferInfo; // access buffer through layer of indirection
       switch (valueTK){
       case XXE::R4:
         for (int kk=0; kk<termCount; kk++)
@@ -4364,23 +4363,22 @@ namespace ArrayHelper{
       }
       int xxeIndex = xxe->count;  // need this beyond the increment
       localrc = xxe->appendSumSuperScalarDstRRA(predicateBitField, elementTK,
-        valueTK, rraIndex, bufferItemCount, vectorLength);
+        valueTK, rraIndex, bufferItemCount, bufferInfo, vectorFlag, true);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       XXE::SumSuperScalarDstRRAInfo *xxeSumSuperScalarDstRRAInfo =
         (XXE::SumSuperScalarDstRRAInfo *)&(xxe->stream[xxeIndex]);
       int *rraOffsetList = xxeSumSuperScalarDstRRAInfo->rraOffsetList;
-      void **valueList = xxeSumSuperScalarDstRRAInfo->valueList;
+      int *valueOffsetList = xxeSumSuperScalarDstRRAInfo->valueOffsetList;
       // fill in rraOffsetList, valueList
       int bufferItem = 0; // reset
       pp = dstInfoTable.begin();  // reset
       while (pp != dstInfoTable.end()){
+        rraOffsetList[bufferItem] = pp->linIndex/vectorLength * dataSizeDst;
+        valueOffsetList[bufferItem] = bufferItem;
+        // skip dstInfoTable elements that were summed up on the src side
         SeqIndex seqIndex = pp->seqIndex;
-        char *buffer = *bufferInfo; // access buffer through layer of indirect.
         for (int term=0; term<srcTermProcessing; term++){
-          rraOffsetList[bufferItem] = pp->linIndex * dataSizeDst;
-          valueList[bufferItem] = (void *)(buffer + bufferItem * dataSizeSrc
-            * vectorLength);
           ++pp;
           if ((pp == dstInfoTable.end()) || !(seqIndex == pp->seqIndex)) break;
         } // for srcTermProcessing
@@ -4609,7 +4607,7 @@ namespace ArrayHelper{
       }
       // zero out intermediate buffer
       localrc = xxe->appendZeroMemset(predicateBitField, bufferInfo,
-        bufferItemCount * dataSizeSrc * vectorLength, true);
+        bufferItemCount * dataSizeSrc, vectorFlag, true);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMPROFILE
@@ -4624,25 +4622,26 @@ namespace ArrayHelper{
       // use super-scalar "+=*" operation containing all terms
       int xxeIndex = xxe->count;  // need this beyond the increment
       localrc = xxe->appendProductSumSuperScalarSrcRRA(predicateBitField,
-        valueTK, valueTK, factorTK, j, partnerDeDataCount, vectorLength);
+        valueTK, valueTK, factorTK, j, partnerDeDataCount, bufferInfo, 
+        vectorFlag, true);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       XXE::ProductSumSuperScalarSrcRRAInfo *xxeProductSumSuperScalarSrcRRAInfo =
         (XXE::ProductSumSuperScalarSrcRRAInfo *)&(xxe->stream[xxeIndex]);
       int *rraOffsetList = xxeProductSumSuperScalarSrcRRAInfo->rraOffsetList;
       void **factorList = xxeProductSumSuperScalarSrcRRAInfo->factorList;
-      void **elementList = xxeProductSumSuperScalarSrcRRAInfo->elementList;
-      // fill in rraOffsetList, factorList, valueList
+      int *elementOffsetList =
+        xxeProductSumSuperScalarSrcRRAInfo->elementOffsetList;
+      // fill in rraOffsetList, factorList, elementOffsetList
       int bufferItem = 0; // reset
       int kk = 0; // reset
       pp = srcInfoTable.begin();  // reset
       while (pp != srcInfoTable.end()){
         SeqIndex partnerSeqIndex = pp->partnerSeqIndex;
         for (int term=0; term<srcTermProcessing; term++){
-          rraOffsetList[kk] = pp->linIndex * dataSizeSrc;
+          rraOffsetList[kk] = pp->linIndex/vectorLength * dataSizeSrc;
           factorList[kk] = (void *)(pp->factor);
-//TODO: buffer indirection fix          elementList[kk] = (void *)(buffer + bufferItem * dataSizeSrc
-//            * vectorLength);
+          elementOffsetList[kk] = bufferItem;
           ++pp;
           ++kk;
           if ((pp == srcInfoTable.end()) ||
@@ -4672,7 +4671,7 @@ namespace ArrayHelper{
       // sendnb out of contiguous intermediate buffer
       sendnbIndex = xxe->count;  // store index for the associated wait
       localrc = xxe->appendSendnb(predicateBitField, bufferInfo,
-        bufferItemCount * dataSizeSrc * vectorLength, dstPet, tag, true);
+        bufferItemCount * dataSizeSrc, dstPet, tag, vectorFlag, true);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
     }
@@ -7459,9 +7458,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   // optimize srcTermProcessing
   int pipelineDepth = 4;  // safe value during srcTermProcessing optimization
   int srcTermProcessingOpt;
-  //const int srcTermProcMax = 6; //TODO: use this again once exec. time vect dn
-  const int srcTermProcMax = 1;
-  const int srcTermProcList[] = {0, 1, 2, 3, 4, 20};  // settings to be tried
+  const int srcTermProcMax = 8;
+  const int srcTermProcList[] = {0, 1, 2, 3, 4, 6, 8, 20};  // trial settings
   for (int srcTermProc=0; srcTermProc<srcTermProcMax; srcTermProc++){
     int srcTermProcessing=srcTermProcList[srcTermProc];
     // start writing a fresh XXE stream
