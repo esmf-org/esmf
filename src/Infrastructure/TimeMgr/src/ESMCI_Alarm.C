@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.C,v 1.11.2.1 2010/01/13 07:01:13 eschwab Exp $
+// $Id: ESMCI_Alarm.C,v 1.11.2.2 2010/01/18 06:57:52 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Alarm.C,v 1.11.2.1 2010/01/13 07:01:13 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Alarm.C,v 1.11.2.2 2010/01/18 06:57:52 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -1177,8 +1177,8 @@ int Alarm::count=0;
       TimeInterval zeroTimeInterval(0,0,1,0,0,0);
       if (sticky && ringInterval != zeroTimeInterval &&
           clock->advanceCount != 0) {
-        !printf("ringTime before:\n");
-        !print("ringTime string");
+        //printf("ringTime before:\n");
+        //print("ringTime string");
         while (positive ? (clock->prevTime >= ringTime ||
                            clock->currTime >= ringTime) :
                           (clock->prevTime <= ringTime ||
@@ -1190,8 +1190,8 @@ int Alarm::count=0;
           //        approach to updating the ringTime, rather than a loop
           //        approach, may be more efficient.
         }
-        !printf("ringTime after:\n");
-        !print("ringTime string");
+        //printf("ringTime after:\n");
+        //print("ringTime string");
       }
 
     } else { // ESMF_MODE_REVERSE
