@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.70 2009/10/27 19:57:51 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.71 2010/01/20 19:09:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.70 2009/10/27 19:57:51 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.71 2010/01/20 19:09:39 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1134,7 +1134,7 @@
 !!DEBUG "created substate, ready to set id and add to local state"
                     call c_ESMC_SetVMId(substate%statep, si%vmidrecv(k), localrc)
                     if (ESMF_LogMsgFoundError(localrc, &
-                             "nested Arraybundle SetVMId call", &
+                             "nested Substate SetVMId call", &
                              ESMF_CONTEXT, rc)) return
 
                     call ESMF_StateAdd(state, substate, proxyflag=.true., &
