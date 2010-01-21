@@ -1,5 +1,5 @@
 #!/bin/ksh 
-# $Id: mpirun.sge.batch,v 1.5 2008/07/23 04:51:56 theurich Exp $
+# $Id: mpirun.sge.batch,v 1.6 2010/01/21 18:44:51 svasquez Exp $
 ################################################################################
 # This script abides to the ESMF script rules for executing the bundled test 
 # and example applications.
@@ -51,6 +51,10 @@ cat > $ESMF_DIR/scripts/esmf_script << THE_END_OF_BATCH_SCRIPT
 #
 #  The max walltime for this job is 30 minutes
 #$ -l h_rt=00:30:00
+#
+# Environment variables exported to job
+#$ -V 
+
 
 
 #source /usr/local/bin/setup-mpi.csh
