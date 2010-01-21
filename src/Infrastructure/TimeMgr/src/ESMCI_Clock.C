@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.C,v 1.12 2009/09/15 04:39:26 eschwab Exp $
+// $Id: ESMCI_Clock.C,v 1.12.2.1 2010/01/21 04:56:32 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.12 2009/09/15 04:39:26 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Clock.C,v 1.12.2.1 2010/01/21 04:56:32 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -356,7 +356,10 @@ int Clock::count=0;
 
     if (advanceCount != ESMC_NULL_POINTER) this->advanceCount = *advanceCount;
 
-    if (direction != ESMC_NULL_POINTER) this->direction = *direction;
+    if (direction != ESMC_NULL_POINTER) {
+      this->direction = *direction;
+      this->userChangedDirection = true;
+    }
 
     rc = Clock::validate();
     if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc)) {
@@ -608,7 +611,7 @@ int Clock::count=0;
     if (ringingAlarmCount != ESMC_NULL_POINTER) *ringingAlarmCount = 0;
 
     // Calculate element size of F90 array of Alarm pointers since we
-    // cannont depend on C++ element size to be the same as F90's across all
+    // cannot depend on C++ element size to be the same as F90's across all
     // platforms.  It is assumed that all F90 platforms allocate arrays
     // contiguously and uniformly in memory, in either ascending or descending
     // address order.
@@ -1356,17 +1359,18 @@ int Clock::count=0;
       alarmCount = clock.alarmCount;
 
       // copy all other members
-      strcpy(name,   clock.name);
-      timeStep     = clock.timeStep;
-      startTime    = clock.startTime;
-      stopTime     = clock.stopTime;
-      refTime      = clock.refTime;
-      currTime     = clock.currTime;
-      prevTime     = clock.prevTime;
-      advanceCount = clock.advanceCount;
-      direction    = clock.direction;
-      stopTimeEnabled = clock.stopTimeEnabled;
-      id           = clock.id;
+      strcpy(name,           clock.name);
+      timeStep             = clock.timeStep;
+      startTime            = clock.startTime;
+      stopTime             = clock.stopTime;
+      refTime              = clock.refTime;
+      currTime             = clock.currTime;
+      prevTime             = clock.prevTime;
+      advanceCount         = clock.advanceCount;
+      direction            = clock.direction;
+      userChangedDirection = clock.userChangedDirection;
+      stopTimeEnabled      = clock.stopTimeEnabled;
+      id                   = clock.id;
 
       // copy = true;   // TODO: Unique copy ? (id = ++count) (review operator==
                         //       and operator!=)  Must do same in assignment
@@ -1757,6 +1761,9 @@ int Clock::count=0;
           startTime.Time::print();
         }
       }
+      else if (strncmp(opts, "stoptimeenabled", 15) == 0) {
+        printf("stopTimeEnabled = %s\n", stopTimeEnabled ? "true" : "false");
+      }
       else if (strncmp(opts, "stoptime", 8) == 0) {
         printf("stopTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
@@ -1764,9 +1771,6 @@ int Clock::count=0;
         } else {
           stopTime.Time::print();
         }
-      }
-      else if (strncmp(opts, "stoptimeenabled", 15) == 0) {
-        printf("stopTimeEnabled = %s\n", stopTimeEnabled ? "true" : "false");
       }
       else if (strncmp(opts, "reftime", 7) == 0) {
         printf("refTime = \n");
@@ -1798,6 +1802,9 @@ int Clock::count=0;
       else if (strncmp(opts, "direction", 9) == 0) {
         printf("direction = %d\n", direction);
       }
+      else if (strncmp(opts, "userchangeddirection", 20) == 0) {
+        printf("direction = %d\n", direction);
+      }
       else if (strncmp(opts, "alarmcount", 10) == 0) {
         printf("alarmCount = %d\n", alarmCount);
       }
@@ -1825,6 +1832,8 @@ int Clock::count=0;
       printf("prevTime = \n");  prevTime.Time::print(options);
       printf("advanceCount = %lld\n", advanceCount);
       printf("direction = %d\n", direction);
+      printf("userChangedDirection = %s\n",
+                                     userChangedDirection ? "true" : "false");
       printf("alarmCount = %d\n", alarmCount);
       printf("alarmList = \n");
       for (int i=0; i<alarmCount; i++) {
@@ -1875,6 +1884,7 @@ int Clock::count=0;
     name[0] = '\0';
     advanceCount = 0;
     direction = ESMF_MODE_FORWARD;
+    userChangedDirection = false;
     stopTimeEnabled = false;
     id = ++count;  // TODO: inherit from ESMC_Base class
     // copy = false;  // TODO: see notes in constructors and destructor below
