@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.29 2010/01/15 22:32:31 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.30 2010/01/22 17:49:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.29 2010/01/15 22:32:31 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.30 2010/01/22 17:49:07 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2447,6 +2447,8 @@ int XXE::exec(
   char **rraList,     // in  - relative run-time addresses
   int *vectorLength,  // in  - run-time vectorLength
   int filterBitField, // in  - filter operations according to predicateBitField
+  bool *finished,     // out - TEST ops executed as per filterBitField are
+                      //       finished, or need additional FINISH calls 
   double *dTime,      // out - execution time, NULL to disable
   int indexStart,     // in  - start index, < 0 for default (full stream)
   int indexStop       // in  - stop index, < 0 for default (full stream)
@@ -2485,14 +2487,24 @@ int XXE::exec(
     return rc;
   }
   
+  // store filterBitField in XXE
+  lastFilterBitField = filterBitField;
+  
+  // initialize finished flag
+  if (finished) *finished = true; // assume all ops finished unless find otherw.
+  
+  // XXE element variables used below
   StreamElement *xxeElement, *xxeIndexElement;
   SendnbInfo *xxeSendnbInfo;
   RecvnbInfo *xxeRecvnbInfo;
   SendnbRRAInfo *xxeSendnbRRAInfo;
   RecvnbRRAInfo *xxeRecvnbRRAInfo;
   WaitOnIndexInfo *xxeWaitOnIndexInfo;
+  TestOnIndexInfo *xxeTestOnIndexInfo;
   WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo;
   WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
+  WaitOnIndexSubInfo *waitOnIndexSubInfo;
+  TestOnIndexSubInfo *testOnIndexSubInfo;
   CommhandleInfo *xxeCommhandleInfo;
   ProductSumVectorInfo *xxeProductSumVectorInfo;
   ProductSumScalarInfo *xxeProductSumScalarInfo;
@@ -2567,6 +2579,7 @@ int XXE::exec(
           size *= *vectorLength;
         vm->send(buffer, size, xxeSendnbInfo->dstPet, xxeSendnbInfo->commhandle,
           xxeSendnbInfo->tag);
+        xxeSendnbInfo->activeFlag = true; // set
       }
       break;
     case recvnb:
@@ -2580,6 +2593,7 @@ int XXE::exec(
           size *= *vectorLength;
         vm->recv(buffer, size, xxeRecvnbInfo->srcPet, xxeRecvnbInfo->commhandle,
           xxeRecvnbInfo->tag);
+        xxeRecvnbInfo->activeFlag = true; // set
       }
       break;
     case sendnbRRA:
@@ -2594,6 +2608,7 @@ int XXE::exec(
         vm->send(rraList[xxeSendnbRRAInfo->rraIndex]
           + rraOffset, size, xxeSendnbRRAInfo->dstPet,
           xxeSendnbRRAInfo->commhandle, xxeSendnbRRAInfo->tag);
+        xxeSendnbRRAInfo->activeFlag = true; // set
       }
       break;
     case recvnbRRA:
@@ -2608,6 +2623,7 @@ int XXE::exec(
         vm->recv(rraList[xxeRecvnbRRAInfo->rraIndex]
           + rraOffset, size, xxeRecvnbRRAInfo->srcPet,
           xxeRecvnbRRAInfo->commhandle, xxeRecvnbRRAInfo->tag);
+        xxeRecvnbRRAInfo->activeFlag = true; // set
       }
       break;
     case waitOnIndex:
@@ -2615,7 +2631,67 @@ int XXE::exec(
         xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
         xxeIndexElement = &(stream[xxeWaitOnIndexInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
-        vm->commwait(xxeCommhandleInfo->commhandle);
+        if (xxeCommhandleInfo->activeFlag){
+          // there is an outstanding active communication
+          vm->commwait(xxeCommhandleInfo->commhandle);
+          xxeCommhandleInfo->activeFlag = false;  // reset
+        }
+      }
+      break;
+    case testOnIndex:
+      {
+        xxeTestOnIndexInfo = (TestOnIndexInfo *)xxeElement;
+        xxeIndexElement = &(stream[xxeTestOnIndexInfo->index]);
+        xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
+        if (xxeCommhandleInfo->activeFlag){
+          // there is an outstanding active communication
+          int completeFlag;
+          vm->commtest(xxeCommhandleInfo->commhandle, &completeFlag);
+          if (completeFlag){
+            // comm finished
+            xxeCommhandleInfo->activeFlag = false;  // reset
+          }else
+            if (finished) *finished = false;  // comm not finished
+        }
+      }
+      break;
+    case waitOnAnyIndexSub:
+      {
+        xxeWaitOnAnyIndexSubInfo = (WaitOnAnyIndexSubInfo *)xxeElement;
+        int *completeFlag = xxeWaitOnAnyIndexSubInfo->completeFlag;
+        int count = xxeWaitOnAnyIndexSubInfo->count;
+        int completeTotal = 0;  // reset
+        for (int k=0; k<count; k++)
+          completeFlag[k] = 0;  // reset
+        while (completeTotal < count){
+          for (int k=0; k<count; k++){
+            if (!completeFlag[k]){
+              xxeIndexElement = &(stream[xxeWaitOnAnyIndexSubInfo->index[k]]);
+              xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
+              if (xxeCommhandleInfo->activeFlag){
+                // there is an outstanding active communication
+                vm->commtest(xxeCommhandleInfo->commhandle, &(completeFlag[k]));
+                if (completeFlag[k]){
+                  // comm finished -> recursive call into xxe execution
+                  xxeCommhandleInfo->activeFlag = false;  // reset
+                  bool localFinished;
+                  xxeWaitOnAnyIndexSubInfo->xxe[k]->
+                    exec(rraCount, rraList, vectorLength, filterBitField,
+                    &localFinished);
+                  if (!localFinished)
+                    if (finished) *finished = false;  // unfinished ops in sub
+                  ++completeTotal;
+                }else
+                  if (finished) *finished = false;  // comm not finished
+              }else{
+                // this communication is not active
+                completeFlag[k] = 1;
+                ++completeTotal;
+              }
+            }
+          }
+          if (completeTotal == count) break;
+        }
       }
       break;
     case waitOnIndexRange:
@@ -2625,7 +2701,55 @@ int XXE::exec(
           j<xxeWaitOnIndexRangeInfo->indexEnd; j++){
           xxeIndexElement = &(stream[j]);
           xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
+          if (xxeCommhandleInfo->activeFlag){
+            // there is an outstanding active communication
+            vm->commwait(xxeCommhandleInfo->commhandle);
+            xxeCommhandleInfo->activeFlag = false;  // reset
+          }
+        }
+      }
+      break;
+    case waitOnIndexSub:
+      {
+        waitOnIndexSubInfo = (WaitOnIndexSubInfo *)xxeElement;
+        xxeIndexElement = &(stream[waitOnIndexSubInfo->index]);
+        xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
+        if (xxeCommhandleInfo->activeFlag){
+          // there is an outstanding active communication
           vm->commwait(xxeCommhandleInfo->commhandle);
+          xxeCommhandleInfo->activeFlag = false;  // reset
+          // recursive call into xxe execution
+          bool localFinished;
+          waitOnIndexSubInfo->xxe->exec(rraCount,
+            rraList + waitOnIndexSubInfo->rraShift,
+            vectorLength + waitOnIndexSubInfo->vectorLengthShift,
+            filterBitField, &localFinished);
+          if (!localFinished)
+            if (finished) *finished = false;  // unfinished ops in sub
+        }
+      }
+      break;
+    case testOnIndexSub:
+      {
+        testOnIndexSubInfo = (TestOnIndexSubInfo *)xxeElement;
+        xxeIndexElement = &(stream[testOnIndexSubInfo->index]);
+        xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
+        if (xxeCommhandleInfo->activeFlag){
+          // there is an outstanding active communication
+          int completeFlag;
+          vm->commtest(xxeCommhandleInfo->commhandle, &completeFlag);
+          if (completeFlag){
+            // comm finished -> recursive call into xxe execution
+            xxeCommhandleInfo->activeFlag = false;  // reset
+            bool localFinished;
+            testOnIndexSubInfo->xxe->exec(rraCount,
+              rraList + testOnIndexSubInfo->rraShift,
+              vectorLength + testOnIndexSubInfo->vectorLengthShift,
+              filterBitField, &localFinished);
+            if (!localFinished)
+              if (finished) *finished = false;  // unfinished ops in sub
+          }else
+            if (finished) *finished = false;  // comm not finished
         }
       }
       break;
@@ -3060,42 +3184,24 @@ int XXE::exec(
       {
         xxeSubInfo = (XxeSubInfo *)xxeElement;
         // recursive call:
+        bool localFinished;
         xxeSubInfo->xxe->exec(rraCount, rraList + xxeSubInfo->rraShift,
-          vectorLength + xxeSubInfo->vectorLengthShift, filterBitField);
+          vectorLength + xxeSubInfo->vectorLengthShift, filterBitField,
+          &localFinished);
+        if (!localFinished)
+          if (finished) *finished = false;  // unfinished ops in sub
       }
       break;
     case xxeSubMulti:
       {
         xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
-        for (int k=0; k<xxeSubMultiInfo->count; k++)
+        for (int k=0; k<xxeSubMultiInfo->count; k++){
           // recursive call:
+          bool localFinished;
           xxeSubMultiInfo->xxe[k]->exec(rraCount, rraList, vectorLength,
-            filterBitField);
-      }
-      break;
-    case waitOnAnyIndexSub:
-      {
-        xxeWaitOnAnyIndexSubInfo = (WaitOnAnyIndexSubInfo *)xxeElement;
-        int *completeFlag = xxeWaitOnAnyIndexSubInfo->completeFlag;
-        int count = xxeWaitOnAnyIndexSubInfo->count;
-        int completeTotal = 0;  // reset
-        for (int k=0; k<count; k++)
-          completeFlag[k] = 0;  // reset
-        while (completeTotal < count){
-          for (int k=0; k<count; k++){
-            if (!completeFlag[k]){
-              xxeIndexElement = &(stream[xxeWaitOnAnyIndexSubInfo->index[k]]);
-              xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
-              vm->commtest(xxeCommhandleInfo->commhandle, &(completeFlag[k]));
-              if (completeFlag[k]){
-                // recursive call into xxe execution
-                xxeWaitOnAnyIndexSubInfo->xxe[k]->
-                  exec(rraCount, rraList, vectorLength, filterBitField);
-                ++completeTotal;
-              }
-            }
-          }
-          if (completeTotal == count) break;
+            filterBitField, &localFinished);
+          if (!localFinished)
+            if (finished) *finished = false;  // unfinished ops in sub
         }
       }
       break;
@@ -3992,14 +4098,17 @@ int XXE::print(
     return rc;
   }
   
-  void *xxeElement, *xxeIndexElement;
+  StreamElement *xxeElement, *xxeIndexElement;
   SendnbInfo *xxeSendnbInfo;
   RecvnbInfo *xxeRecvnbInfo;
   SendnbRRAInfo *xxeSendnbRRAInfo;
   RecvnbRRAInfo *xxeRecvnbRRAInfo;
   WaitOnIndexInfo *xxeWaitOnIndexInfo;
+  TestOnIndexInfo *xxeTestOnIndexInfo;
   WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo;
   WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
+  WaitOnIndexSubInfo *waitOnIndexSubInfo;
+  TestOnIndexSubInfo *testOnIndexSubInfo;
   CommhandleInfo *xxeCommhandleInfo;
   ProductSumVectorInfo *xxeProductSumVectorInfo;
   ProductSumScalarInfo *xxeProductSumScalarInfo;
@@ -4023,6 +4132,10 @@ int XXE::print(
   
   for (int i=indexRangeStart; i<=indexRangeStop; i++){
     xxeElement = &(stream[i]);
+    
+    if (xxeElement->predicateBitField & filterBitField)
+      continue; // filter out this operation
+    
     printf("XXE::print(): <localPet=%d> i=%d, xxeElement=%p, opId=%d, "
       "predicateBitField=0x%08x\n", 
       vm->getLocalPet(), i, xxeElement, stream[i].opId,
@@ -4094,6 +4207,16 @@ int XXE::print(
           xxeCommhandleInfo->commhandle);
       }
       break;
+    case testOnIndex:
+      {
+        xxeTestOnIndexInfo = (TestOnIndexInfo *)xxeElement;
+        xxeIndexElement = &(stream[xxeTestOnIndexInfo->index]);
+        xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
+        printf("  XXE::TestOnIndex: <localPet=%d> index=%d, commhandle=%p\n",
+          vm->getLocalPet(), xxeTestOnIndexInfo->index,
+          xxeCommhandleInfo->commhandle);
+      }
+      break;
     case waitOnAnyIndexSub:
       {
         xxeWaitOnAnyIndexSubInfo = (WaitOnAnyIndexSubInfo *)xxeElement;
@@ -4110,6 +4233,18 @@ int XXE::print(
       {
         xxeWaitOnIndexRangeInfo = (WaitOnIndexRangeInfo *)xxeElement;
         printf("  XXE::waitOnIndexRange <localPet=%d>\n", vm->getLocalPet());
+      }
+      break;
+    case waitOnIndexSub:
+      {
+        waitOnIndexSubInfo = (WaitOnIndexSubInfo *)xxeElement;
+        printf("  XXE::waitOnIndexSubInfo <localPet=%d>\n", vm->getLocalPet());
+      }
+      break;
+    case testOnIndexSub:
+      {
+        testOnIndexSubInfo = (TestOnIndexSubInfo *)xxeElement;
+        printf("  XXE::testOnIndexSubInfo <localPet=%d>\n", vm->getLocalPet());
       }
       break;
     case productSumVector:
@@ -4321,15 +4456,21 @@ int XXE::printProfile(
   
   int localPet = vm->getLocalPet();
   
-  void *xxeElement;
+  StreamElement *xxeElement;
   WtimerInfo *xxeWtimerInfo;
   XxeSubInfo *xxeSubInfo;
   XxeSubMultiInfo *xxeSubMultiInfo;
   WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo;
+  WaitOnIndexSubInfo *waitOnIndexSubInfo;
+  TestOnIndexSubInfo *testOnIndexSubInfo;
   ProfileMessageInfo *xxeProfileMessageInfo;
   
   for (int i=0; i<count; i++){
     xxeElement = &(stream[i]);
+    
+    if (xxeElement->predicateBitField & lastFilterBitField)
+      continue; // filter out this operation
+    
 //    printf("gjt: %d, opId=%d\n", i, stream[i].opId);
     switch(stream[i].opId){
     case xxeSub:
@@ -4345,6 +4486,14 @@ int XXE::printProfile(
       xxeWaitOnAnyIndexSubInfo = (WaitOnAnyIndexSubInfo *)xxeElement;
       for (int k=0; k<xxeWaitOnAnyIndexSubInfo->count; k++)
         xxeWaitOnAnyIndexSubInfo->xxe[k]->printProfile(fp); // recursive call
+      break;
+    case waitOnIndexSub:
+      waitOnIndexSubInfo = (WaitOnIndexSubInfo *)xxeElement;
+      waitOnIndexSubInfo->xxe->printProfile(fp); // recursive call
+      break;
+    case testOnIndexSub:
+      testOnIndexSubInfo = (TestOnIndexSubInfo *)xxeElement;
+      testOnIndexSubInfo->xxe->printProfile(fp); // recursive call
       break;
     case wtimer:
       {
@@ -4414,7 +4563,7 @@ int XXE::optimizeElement(
     return rc;
   }
     
-  void *xxeElement = &(stream[index]);
+  StreamElement *xxeElement = &(stream[index]);
   switch(stream[index].opId){
   case productSumSuperScalarDstRRA:
     ProductSumSuperScalarDstRRAInfo *xxeProductSumSuperScalarDstRRAInfo;
@@ -4529,10 +4678,12 @@ int XXE::execReady(
   int recvnbCount = 0;
   int recvnbLowerIndex = -1;  // prime lower index indicator blow 0
   
-  void *xxeElement, *xxeIndexElement, *xxeElement2;
+  StreamElement *xxeElement, *xxeIndexElement, *xxeElement2;
   WaitOnIndexInfo *xxeWaitOnIndexInfo;
   WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo;
   WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
+  TestOnIndexSubInfo *testOnIndexSubInfo;
+  WaitOnIndexSubInfo *waitOnIndexSubInfo;
   CommhandleInfo *xxeCommhandleInfo;
   ProductSumVectorInfo *xxeProductSumVectorInfo;
   WtimerInfo *xxeWtimerInfo, *xxeWtimerInfo2;
@@ -4572,6 +4723,18 @@ int XXE::execReady(
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &rc)) return rc;
         }
+        break;
+      case waitOnIndexSub:
+        waitOnIndexSubInfo = (WaitOnIndexSubInfo *)xxeElement;
+        localrc = waitOnIndexSubInfo->xxe->execReady(); // recursive call
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          &rc)) return rc;
+        break;
+      case testOnIndexSub:
+        testOnIndexSubInfo = (TestOnIndexSubInfo *)xxeElement;
+        localrc = testOnIndexSubInfo->xxe->execReady(); // recursive call
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          &rc)) return rc;
         break;
       case send:
         break;
@@ -4820,7 +4983,7 @@ int XXE::optimize(
     sizeof(StreamElement));
 #endif
 
-  void *xxeElement, *xxeIndexElement;
+  StreamElement *xxeElement, *xxeIndexElement;
   SendnbInfo *xxeSendnbInfo;
   RecvnbInfo *xxeRecvnbInfo;
   WaitOnIndexInfo *xxeWaitOnIndexInfo;
@@ -5893,6 +6056,7 @@ int XXE::appendRecvnb(
   xxeRecvnbInfo->tag = tag;
   xxeRecvnbInfo->vectorFlag = vectorFlag;
   xxeRecvnbInfo->indirectionFlag = indirectionFlag;
+  xxeRecvnbInfo->activeFlag = false;
   xxeRecvnbInfo->commhandle = new VMK::commhandle*;
   *(xxeRecvnbInfo->commhandle) = new VMK::commhandle;
   localrc = incCount();
@@ -5950,6 +6114,7 @@ int XXE::appendSendnb(
   xxeSendnbInfo->tag = tag;
   xxeSendnbInfo->vectorFlag = vectorFlag;
   xxeSendnbInfo->indirectionFlag = indirectionFlag;
+  xxeSendnbInfo->activeFlag = false;
   xxeSendnbInfo->commhandle = new VMK::commhandle*;
   *(xxeSendnbInfo->commhandle) = new VMK::commhandle;
   localrc = incCount();
@@ -6007,6 +6172,7 @@ int XXE::appendSendnbRRA(
   xxeSendnbRRAInfo->rraIndex = rraIndex;
   xxeSendnbRRAInfo->tag = tag;
   xxeSendnbRRAInfo->vectorFlag = vectorFlag;
+  xxeSendnbRRAInfo->activeFlag = false;
   xxeSendnbRRAInfo->commhandle = new VMK::commhandle*;
   *(xxeSendnbRRAInfo->commhandle) = new VMK::commhandle;
   localrc = incCount();
@@ -6637,6 +6803,48 @@ int XXE::appendWaitOnIndex(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendTestOnIndex()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendTestOnIndex
+//
+// !INTERFACE:
+int XXE::appendTestOnIndex(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  int index
+  ){
+//
+// !DESCRIPTION:
+//  Append a appendTestOnIndex element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  stream[count].opId = testOnIndex;
+  stream[count].predicateBitField = predicateBitField;
+  TestOnIndexInfo *xxeTestOnIndexInfo =
+    (TestOnIndexInfo *)&(stream[count]);
+  xxeTestOnIndexInfo->index = index;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::XXE::appendWaitOnAnyIndexSub()"
 //BOPI
 // !IROUTINE:  ESMCI::XXE::appendWaitOnAnyIndexSub
@@ -6722,6 +6930,104 @@ int XXE::appendWaitOnAllSendnb(
   stream[count].predicateBitField = predicateBitField;
   localrc = incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendWaitOnIndexSub()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendWaitOnIndexSub
+//
+// !INTERFACE:
+int XXE::appendWaitOnIndexSub(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  XXE *xxe,
+  int rraShift,
+  int vectorLengthShift,
+  int index
+  ){
+//
+// !DESCRIPTION:
+//  Append an xxeSub at the end of the XXE stream that is executed depending
+//  on test conditional
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  stream[count].opId = waitOnIndexSub;
+  stream[count].predicateBitField = predicateBitField;
+  WaitOnIndexSubInfo *waitOnIndexSubInfo =
+    (WaitOnIndexSubInfo *)&(stream[count]);
+  waitOnIndexSubInfo->xxe = xxe;
+  waitOnIndexSubInfo->rraShift = rraShift;
+  waitOnIndexSubInfo->vectorLengthShift = vectorLengthShift;
+  waitOnIndexSubInfo->index = index;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendTestOnIndexSub()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendTestOnIndexSub
+//
+// !INTERFACE:
+int XXE::appendTestOnIndexSub(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  XXE *xxe,
+  int rraShift,
+  int vectorLengthShift,
+  int index
+  ){
+//
+// !DESCRIPTION:
+//  Append an xxeSub at the end of the XXE stream that is executed depending
+//  on test conditional
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  stream[count].opId = testOnIndexSub;
+  stream[count].predicateBitField = predicateBitField;
+  TestOnIndexSubInfo *testOnIndexSubInfo =
+    (TestOnIndexSubInfo *)&(stream[count]);
+  testOnIndexSubInfo->xxe = xxe;
+  testOnIndexSubInfo->rraShift = rraShift;
+  testOnIndexSubInfo->vectorLengthShift = vectorLengthShift;
+  testOnIndexSubInfo->index = index;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   
   // return successfully

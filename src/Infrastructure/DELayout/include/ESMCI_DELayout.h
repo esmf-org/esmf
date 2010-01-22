@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.23 2010/01/15 21:23:27 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.24 2010/01/22 17:49:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -215,20 +215,26 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
 class XXE{
   public:
     enum OpId{
-      // --- basic ops
+      // --- send and recv
       send, recv,
       sendnb, recvnb, sendnbRRA, recvnbRRA,
-      waitOnIndex, waitOnAnyIndexSub, waitOnIndexRange,
+      // --- wait
+      waitOnIndex, waitOnAnyIndexSub, waitOnIndexRange, waitOnIndexSub,
+      // --- test
+      testOnIndex, testOnIndexSub,
+      // --- product and sum
       productSumVector,
       productSumScalar, productSumScalarRRA,
       sumSuperScalarDstRRA,
       productSumSuperScalarDstRRA,
       productSumSuperScalarSrcRRA,
       productSumSuperScalarContigRRA,
+      // -- zero
       zeroScalarRRA, zeroSuperScalarRRA, zeroMemset, zeroMemsetRRA,
+      // --- mem movement
       memCpy, memCpySrcRRA,
       memGatherSrcRRA,
-      // --- subs
+      // --- unconditional subs
       xxeSub, xxeSubMulti,
       // --- profiling
       wtimer,
@@ -255,7 +261,8 @@ class XXE{
     static int const filterBitRegionTotalZero   = 0x1;  // total dst zero'ing
     static int const filterBitRegionSelectZero  = 0x2;  // select dst element z.
     static int const filterBitNbStart           = 0x4;  // non-block start
-    static int const filterBitNbWaitFinish      = 0x8;  // non-block wait&finish
+    static int const filterBitNbTestFinish      = 0x8;  // non-block test&finish
+    static int const filterBitNbWaitFinish      = 0x10; // non-block wait&finish
 
     struct BufferInfo{
       // The BufferInfo provides an extra level of indirection to XXE managed
@@ -301,7 +308,8 @@ class XXE{
       // entries have the "indirectionFlag" set, and thus support buffer
       // updates during exec() through the bufferInfoList indirection, without
       // the need for XXE stream rewrite (which would be far too expensive to
-      // do during exec())!    
+      // do during exec())!
+    int lastFilterBitField;         // filterBitField during last exec() call
   private:
     int max;                        // maximum number of elements in stream
     int storageMaxCount;            // maximum number of elements in storage
@@ -325,6 +333,7 @@ class XXE{
       xxeSubCount  = 0;
       xxeSubMaxCount = xxeSubMaxCountArg;
       bufferInfoList.reserve(1000);  // initial preparation
+      lastFilterBitField = 0x0;
     }
     ~XXE(){
       // destructor
@@ -383,8 +392,8 @@ class XXE{
       }
     }
     int exec(int rraCount=0, char **rraList=NULL, int *vectorLength=NULL,
-      int filterBitField=0x0, double *dTime=NULL, int indexStart=-1,
-      int indexStop=-1);
+      int filterBitField=0x0, bool *finished=NULL, double *dTime=NULL,
+      int indexStart=-1, int indexStop=-1);
     int print(int rraCount=0, char **rraList=NULL, int filterBitField=0x0,
       int indexStart=-1, int indexStop=-1);
     int printProfile(FILE *fp);
@@ -449,8 +458,13 @@ class XXE{
       TKId valueTK, TKId factorTK, int rraIndex, int termCount,
       void *elementBase, bool vectorFlag=false, bool indirectionFlag=false);
     int appendWaitOnIndex(int predicateBitField, int index);
+    int appendTestOnIndex(int predicateBitField, int index);
     int appendWaitOnAnyIndexSub(int predicateBitField, int count);
     int appendWaitOnAllSendnb(int predicateBitField);
+    int appendWaitOnIndexSub(int predicateBitField, XXE *xxeSub, int rraShift,
+      int vectorLengthShift, int index);
+    int appendTestOnIndexSub(int predicateBitField, XXE *xxeSub, int rraShift,
+      int vectorLengthShift, int index);
     int appendProfileMessage(int predicateBitField, char *messageString);
     int appendMessage(int predicateBitField, char *messageString);
     
@@ -494,6 +508,7 @@ class XXE{
       OpId opId;
       int predicateBitField;
       VMK::commhandle **commhandle;
+      bool activeFlag;
       void *buffer;
       int size;
       int dstPet;
@@ -506,6 +521,7 @@ class XXE{
       OpId opId;
       int predicateBitField;
       VMK::commhandle **commhandle;
+      bool activeFlag;
       void *buffer;
       int size;
       int srcPet;
@@ -518,6 +534,7 @@ class XXE{
       OpId opId;
       int predicateBitField;
       VMK::commhandle **commhandle;
+      bool activeFlag;
       int rraOffset;
       int size;
       int dstPet;
@@ -530,6 +547,7 @@ class XXE{
       OpId opId;
       int predicateBitField;
       VMK::commhandle **commhandle;
+      bool activeFlag;
       int rraOffset;
       int size;
       int srcPet;
@@ -547,6 +565,12 @@ class XXE{
     typedef struct{
       OpId opId;
       int predicateBitField;
+      int index;
+    }TestOnIndexInfo;
+
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
       int count;
       XXE **xxe;
       int *index;
@@ -560,6 +584,24 @@ class XXE{
       int indexEnd;
     }WaitOnIndexRangeInfo;
 
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      XXE *xxe;
+      int rraShift;
+      int vectorLengthShift;
+      int index;
+    }WaitOnIndexSubInfo;
+    
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      XXE *xxe;
+      int rraShift;
+      int vectorLengthShift;
+      int index;
+    }TestOnIndexSubInfo;
+    
     typedef struct{
       OpId opId;
       int predicateBitField;
@@ -776,6 +818,7 @@ class XXE{
       OpId opId;
       int predicateBitField;
       VMK::commhandle **commhandle;
+      bool activeFlag;
     }CommhandleInfo;
 
 };  // class XXE
