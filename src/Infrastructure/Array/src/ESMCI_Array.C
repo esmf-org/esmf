@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.84 2010/01/15 23:11:50 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.85 2010/01/22 18:05:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.84 2010/01/15 23:11:50 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.85 2010/01/22 18:05:12 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3946,7 +3946,7 @@ int Array::redist(
 
   // implemented via sparseMatMul
   localrc = sparseMatMul(srcArray, dstArray, routehandle,
-    ESMF_COMM_BLOCKING, ESMF_REGION_TOTAL, checkflag);
+    ESMF_COMM_BLOCKING, NULL, ESMF_REGION_TOTAL, checkflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -4105,7 +4105,7 @@ namespace ArrayHelper{
       int srcLocalDeCount, XXE::TKId elementTK, XXE::TKId valueTK,
       XXE::TKId factorTK, int dataSizeDst, int dataSizeSrc, int dataSizeFactors,
       char **rraList, int rraCount);
-    int appendWaitProductSum(XXE *xxe, int predicateBitField,
+    int appendTestWaitProductSum(XXE *xxe, int predicateBitField,
       int srcTermProcessing, int srcLocalDeCount, XXE::TKId elementTK,
       XXE::TKId valueTK, XXE::TKId factorTK, int dataSizeDst, int dataSizeSrc,
       int dataSizeFactors, char **rraList, int rraCount, int k);
@@ -4293,8 +4293,8 @@ namespace ArrayHelper{
       }
       xxe->optimizeElement(xxeIndex);
       double dt_sScalar;
-      localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, &dt_sScalar,
-        xxeIndex, xxeIndex);
+      localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, NULL,
+        &dt_sScalar, xxeIndex, xxeIndex);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
       // try super-scalar contig "+=*" operation in XXE stream
@@ -4306,8 +4306,8 @@ namespace ArrayHelper{
       xxeProductSumSuperScalarContigRRAInfo->valueList = bufferInfo;
       xxe->optimizeElement(xxeIndex);
       double dt_sScalarC;
-      localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, &dt_sScalarC,
-        xxeIndex, xxeIndex);
+      localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, NULL,
+        &dt_sScalarC, xxeIndex, xxeIndex);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
 #ifdef ASMMPROFILE
@@ -4405,7 +4405,7 @@ namespace ArrayHelper{
     rc = ESMF_SUCCESS;
     return rc;
   }
-  int RecvnbElement::appendWaitProductSum(XXE *xxe, int predicateBitField,
+  int RecvnbElement::appendTestWaitProductSum(XXE *xxe, int predicateBitField,
     int srcTermProcessing, int srcLocalDeCount, XXE::TKId elementTK,
     XXE::TKId valueTK, XXE::TKId factorTK, int dataSizeDst, int dataSizeSrc,
     int dataSizeFactors, char **rraList, int rraCount, int k){
@@ -4414,34 +4414,43 @@ namespace ArrayHelper{
 #ifdef ASMMPROFILE
     char *tempString = new char[160];
     sprintf(tempString, "WaitProductSum (%d/)", k);
-    localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
-      xxe->count);
+    localrc = xxe->appendWtimer(predicateBitField|XXE::filterBitNbWaitFinish,
+      tempString, xxe->count, xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     delete [] tempString;
 #endif
-    localrc = xxe->appendWaitOnIndex(predicateBitField, recvnbIndex);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-#ifdef ASMMPROFILE
-    tempString = new char[160];
-    sprintf(tempString, "done WaitOnIndex: %d", recvnbIndex);
-    localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
-      xxe->count);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-    delete [] tempString;
-#endif
-    localrc = appendProductSum(xxe, predicateBitField, srcTermProcessing,
+    // use substream for doing the productSum
+    XXE *xxeSub;
+    try{
+      xxeSub = new XXE(xxe->vm, 10, 10, 10);
+    }catch (...){
+      ESMC_LogDefault.ESMC_LogAllocError(&rc);
+      return rc;
+    }
+    localrc = xxe->storeXxeSub(xxeSub); // for XXE garbage collection
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
+    localrc = appendProductSum(xxeSub, predicateBitField, srcTermProcessing,
       srcLocalDeCount, elementTK, valueTK, factorTK, dataSizeDst, dataSizeSrc,
       dataSizeFactors, rraList, rraCount);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
+    // attach to testOnIndexSub element with filterBitNbTestFinish
+    localrc = xxe->appendWaitOnIndexSub(
+      predicateBitField|XXE::filterBitNbTestFinish, xxeSub, 0, 0, recvnbIndex);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
+    // attach to waitOnIndexSub element with filterBitNbWaitFinish
+    localrc = xxe->appendWaitOnIndexSub(
+      predicateBitField|XXE::filterBitNbWaitFinish, xxeSub, 0, 0, recvnbIndex);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMPROFILE
     tempString = new char[160];
     sprintf(tempString, "/WaitProductSum (%d/)", k);
-    localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
-      xxe->count);
+    localrc = xxe->appendWtimer(predicateBitField|XXE::filterBitNbWaitFinish,
+      tempString, xxe->count, xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     delete [] tempString;
@@ -4542,8 +4551,8 @@ namespace ArrayHelper{
             linIndexContigBlockList[kk].linIndexCount;
         }
         double dt_tk;
-        localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, &dt_tk,
-          xxeIndex, xxeIndex);
+        localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, NULL,
+          &dt_tk, xxeIndex, xxeIndex);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         // try byte option for memGatherSrcRRA
@@ -4554,8 +4563,8 @@ namespace ArrayHelper{
           xxeMemGatherSrcRRAInfo->countList[kk] *= dataSizeSrc;
         }
         double dt_byte;
-        localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, &dt_byte,
-          xxeIndex, xxeIndex);
+        localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, NULL,
+          &dt_byte, xxeIndex, xxeIndex);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
 #ifdef ASMMSTOREPRINT
@@ -7890,8 +7899,8 @@ int sparseMatMulStoreEncodeXXEStream(
         if (recvnbStage < sendnbStage){
           // wait will not cause deadlock in the staggered Pet pattern
           int k = pRecvWait-recvnbVector.begin();
-          localrc = pRecvWait->appendWaitProductSum(xxe,
-            0x0|XXE::filterBitNbWaitFinish, srcTermProcessing,
+          localrc = pRecvWait->appendTestWaitProductSum(xxe,
+            0x0, srcTermProcessing,
             srcLocalDeCount, elementTK, valueTK, factorTK, dataSizeDst,
             dataSizeSrc, dataSizeFactors, rraList, rraCount, k);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -7911,6 +7920,10 @@ int sparseMatMulStoreEncodeXXEStream(
           recvnbStage = (localPet - pRecv->srcPet + petCount) % petCount;//actu.
         if (sendnbStage < recvnbStage){
           // wait will not cause deadlock in the staggered Pet pattern
+          localrc = xxe->appendTestOnIndex(0x0|XXE::filterBitNbTestFinish,
+            pSendWait->sendnbIndex);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+            ESMF_ERR_PASSTHRU, &rc)) return rc;
           localrc = xxe->appendWaitOnIndex(0x0|XXE::filterBitNbWaitFinish,
             pSendWait->sendnbIndex);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -7945,8 +7958,8 @@ int sparseMatMulStoreEncodeXXEStream(
         if (recvnbStage < sendnbStage){
           // wait will not cause deadlock in the staggered Pet pattern
           int k = pRecvWait-recvnbVector.begin();
-          localrc = pRecvWait->appendWaitProductSum(xxe,
-            0x0|XXE::filterBitNbWaitFinish, srcTermProcessing, srcLocalDeCount,
+          localrc = pRecvWait->appendTestWaitProductSum(xxe,
+            0x0, srcTermProcessing, srcLocalDeCount,
             elementTK, valueTK, factorTK, dataSizeDst, dataSizeSrc,
             dataSizeFactors, rraList, rraCount, k);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -7962,6 +7975,10 @@ int sparseMatMulStoreEncodeXXEStream(
           recvnbStage = (localPet - pRecv->srcPet + petCount) % petCount;//actu.
         if (sendnbStage < recvnbStage){
           // wait will not cause deadlock in the staggered Pet pattern
+          localrc = xxe->appendTestOnIndex(0x0|XXE::filterBitNbTestFinish,
+            pSendWait->sendnbIndex);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+            ESMF_ERR_PASSTHRU, &rc)) return rc;
           localrc = xxe->appendWaitOnIndex(0x0|XXE::filterBitNbWaitFinish,
             pSendWait->sendnbIndex);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -8033,6 +8050,7 @@ int Array::sparseMatMul(
   Array *dstArray,                      // inout - destination Array
   RouteHandle **routehandle,            // inout - handle to precomputed comm
   ESMC_CommFlag commflag,               // in    - communication options
+  bool *finishedflag,                   // out   - TEST ops finished or not
   ESMC_RegionFlag zeroflag,             // in    - ESMF_REGION_TOTAL:
                                         //          -> zero out total region
                                         //         ESMF_REGION_SELECT:
@@ -8136,13 +8154,24 @@ int Array::sparseMatMul(
   // set filterBitField  
   int filterBitField = 0x0; // init. to execute _all_ operations in XXE stream
   
-  //TODO: determine XXE filterBitField for XXE exec(),
-  
-  if (commflag!=ESMF_COMM_BLOCKING){
-    if (commflag!=ESMF_COMM_NBSTART)
-      filterBitField |= XXE::filterBitNbStart;        // set NbStart filter
-    if (commflag!=ESMF_COMM_NBWAITFINISH)
+  if (commflag==ESMF_COMM_BLOCKING){
+    // blocking mode
+    filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
+  }else{
+    // non-blocking mode
+    if (commflag==ESMF_COMM_NBSTART){
+      // start
       filterBitField |= XXE::filterBitNbWaitFinish;   // set NbWaitFinish filter
+      filterBitField |= XXE::filterBitNbTestFinish;   // set NbTestFinish filter
+    }else if(commflag==ESMF_COMM_NBWAITFINISH){
+      // wait and finish
+      filterBitField |= XXE::filterBitNbStart;        // set NbStart filter
+      filterBitField |= XXE::filterBitNbTestFinish;   // set NbTestFinish filter
+    }else if(commflag==ESMF_COMM_NBTESTFINISH){
+      // wait and finish
+      filterBitField |= XXE::filterBitNbStart;        // set NbStart filter
+      filterBitField |= XXE::filterBitNbWaitFinish;   // set NbWaitFinish filter
+    }
   }
   
   if (zeroflag!=ESMF_REGION_TOTAL)
@@ -8206,7 +8235,8 @@ int Array::sparseMatMul(
   }
   
   // execute XXE stream
-  localrc = xxe->exec(rraCount, rraList, &vectorLength, filterBitField);
+  localrc = xxe->exec(rraCount, rraList, &vectorLength, filterBitField,
+    finishedflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
