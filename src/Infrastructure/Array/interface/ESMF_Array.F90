@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.105 2009/11/17 00:13:33 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.106 2010/01/22 17:58:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.105 2009/11/17 00:13:33 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.106 2010/01/22 17:58:01 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -653,13 +653,14 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_ArraySMM(srcArray, dstArray, routehandle, commflag, &
-    zeroflag, checkflag, rc)
+    finishedflag, zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in),   optional  :: srcArray
     type(ESMF_Array),       intent(inout),optional  :: dstArray
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
     type(ESMF_CommFlag),    intent(in),   optional  :: commflag
+    logical,                intent(out),  optional  :: finishedflag
     type(ESMF_RegionFlag),  intent(in),   optional  :: zeroflag
     logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
@@ -692,6 +693,14 @@ contains
 !     Indicate communication option. Default is {\tt ESMF\_COMM\_BLOCKING},
 !     resulting in a blocking operation.
 !     See section \ref{opt:commflag} for a complete list of valid settings.
+!   \item [{[finishedflag]}]
+!     Used in combination with {\tt commflag = ESMF\_COMM\_NBTESTFINISH}.
+!     Returned {\tt finishedflag} equal to {\tt .true.} indicates that all
+!     operations have finished. A value of {\tt .false.} indicates that there
+!     are still unfinished operations that require additional calls with
+!     {\tt commflag = ESMF\_COMM\_NBTESTFINISH}, or a final call with
+!     {\tt commflag = ESMF\_COMM\_NBWAITFINISH}. For all other {\tt commflag}
+!     settings the returned value in {\tt finishedflag} is always {\tt .true.}.
 !   \item [{[zeroflag]}]
 !     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of
 !     all DEs in {\tt dstArray} will be initialized to zero before updating the 
@@ -721,6 +730,7 @@ contains
     type(ESMF_Logical)      :: opt_checkflag! helper variable
     type(ESMF_Array)        :: opt_srcArray ! helper variable
     type(ESMF_Array)        :: opt_dstArray ! helper variable
+    type(ESMF_Logical)      :: opt_finishedflag! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -755,9 +765,14 @@ contains
         
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMM(opt_srcArray, opt_dstArray, routehandle, &
-      opt_commflag, opt_zeroflag, opt_checkflag, localrc)
+      opt_commflag, opt_finishedflag, opt_zeroflag, opt_checkflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! copy finishedflag back
+    if (present(finishedflag)) then
+      finishedflag = opt_finishedflag
+    endif
     
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS

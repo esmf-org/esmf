@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.29 2009/11/17 00:13:33 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.30 2010/01/22 17:57:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -732,17 +732,25 @@ extern "C" {
 
   void FTN(c_esmc_arraysmm)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
-    ESMC_CommFlag *commflag, ESMC_RegionFlag *zeroflag,
-    ESMC_Logical *checkflag, int *rc){
+    ESMC_CommFlag *commflag, ESMC_Logical *finishedflag, 
+    ESMC_RegionFlag *zeroflag, ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysmm()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
+    bool finished;
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMul(
-      *srcArray, *dstArray, routehandle, *commflag, *zeroflag, *checkflag),
+      *srcArray, *dstArray, routehandle, *commflag, &finished, *zeroflag,
+      *checkflag),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
+    if (ESMC_NOT_PRESENT_FILTER(finishedflag) != ESMC_NULL_POINTER){
+      if (finished)
+        *finishedflag = ESMF_TRUE;
+      else
+        *finishedflag = ESMF_FALSE;
+    }
   }
   
   void FTN(c_esmc_arraygather)(ESMCI::Array **array, void *farray,
