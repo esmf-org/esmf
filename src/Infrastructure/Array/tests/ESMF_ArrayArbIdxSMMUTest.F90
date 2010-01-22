@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.18 2009/11/17 00:09:52 theurich Exp $
+! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.19 2010/01/22 18:06:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.18 2009/11/17 00:09:52 theurich Exp $'
+    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.19 2010/01/22 18:06:19 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -66,6 +66,7 @@ program ESMF_ArrayArbIdxSMMUTest
   integer(ESMF_KIND_I4), pointer :: farrayPtr2D(:,:)! matching Fortran array pointer
   integer(ESMF_KIND_I4) :: factorList2(1)
   integer               :: factorIndexList2(4,1), j
+  logical               :: finishedflag
 #endif
   integer               :: rc, i, petCount, localPet
   integer, allocatable  :: srcIndices(:)
@@ -511,11 +512,25 @@ program ESMF_ArrayArbIdxSMMUTest
   
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySMM: srcArray -> dstArray NBTESTFINISH Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=routehandle, commflag=ESMF_COMM_NBTESTFINISH, &
+    finishedflag=finishedflag, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  print *, "ESMF_COMM_NBTESTFINISH: finishedflag=", finishedflag
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "ArraySMM: srcArray -> dstArray NBWAITFINISH Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBWAITFINISH, rc=rc)
+    routehandle=routehandle, commflag=ESMF_COMM_NBWAITFINISH, &
+    finishedflag=finishedflag, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  print *, "ESMF_COMM_NBWAITFINISH: finishedflag=", finishedflag
   
   ! The expected result of the sparse matrix multiplication in dstArray is:
   ! (note: by default ArraySMM() initializes _all_ destination elements
