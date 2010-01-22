@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.23 2009/12/17 06:14:09 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.24 2010/01/22 18:07:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.23 2009/12/17 06:14:09 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.24 2010/01/22 18:07:06 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -829,7 +829,7 @@ int ArrayBundle::sparseMatMul(
           srcArray = srcArraybundle->getArrayList()[i];
           dstArray = dstArraybundle->getArrayList()[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
-            ESMF_COMM_BLOCKING, zeroflag, checkflag);
+            ESMF_COMM_BLOCKING, NULL, zeroflag, checkflag);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &rc)) return rc;
         }
@@ -837,7 +837,7 @@ int ArrayBundle::sparseMatMul(
         for (int i=0; i<srcArraybundle->getArrayCount(); i++){
           srcArray = srcArraybundle->getArrayList()[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
-            ESMF_COMM_BLOCKING, zeroflag, checkflag);
+            ESMF_COMM_BLOCKING, NULL, zeroflag, checkflag);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &rc)) return rc;
         }
@@ -845,7 +845,7 @@ int ArrayBundle::sparseMatMul(
         for (int i=0; i<dstArraybundle->getArrayCount(); i++){
           dstArray = dstArraybundle->getArrayList()[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
-            ESMF_COMM_BLOCKING, zeroflag, checkflag);
+            ESMF_COMM_BLOCKING, NULL, zeroflag, checkflag);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &rc)) return rc;
         }
