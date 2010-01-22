@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.88 2009/12/16 18:57:16 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.89 2010/01/22 17:36:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -417,7 +417,8 @@
       type(ESMF_CommFlag), parameter ::  &
         ESMF_COMM_BLOCKING        = ESMF_CommFlag(0), &
         ESMF_COMM_NBSTART         = ESMF_CommFlag(1), &
-        ESMF_COMM_NBWAITFINISH    = ESMF_CommFlag(2)
+        ESMF_COMM_NBTESTFINISH    = ESMF_CommFlag(2), &
+        ESMF_COMM_NBWAITFINISH    = ESMF_CommFlag(3)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_AttWriteFlag
@@ -558,7 +559,8 @@
       public ESMF_RegionFlag, &
              ESMF_REGION_TOTAL, ESMF_REGION_SELECT, ESMF_REGION_EMPTY
       public ESMF_CommFlag, &
-             ESMF_COMM_BLOCKING, ESMF_COMM_NBSTART, ESMF_COMM_NBWAITFINISH
+             ESMF_COMM_BLOCKING, ESMF_COMM_NBSTART, &
+             ESMF_COMM_NBTESTFINISH, ESMF_COMM_NBWAITFINISH
 
       public ESMF_ReduceFlag, ESMF_SUM, ESMF_MIN, ESMF_MAX
       public ESMF_BlockingFlag, ESMF_BLOCKING, ESMF_VASBLOCKING, &
