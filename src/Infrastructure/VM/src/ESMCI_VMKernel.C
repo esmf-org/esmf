@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.13 2009/08/24 18:18:32 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.14 2010/01/25 22:16:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -2528,8 +2528,8 @@ int VMK::commtest(commhandle **ch, int *completeFlag, status *status){
   // tree)
   // finally unlink the *ch container from the commqueue and delete the
   // container (only) if the *ch was part of the commqueue!
-//fprintf(stderr, "VMK::commwait: nhandles=%d\n", nhandles);
-//fprintf(stderr, "VMK::commwait: *ch=%p\n", *ch);
+//fprintf(stderr, "(%d)VMK::commtest: nhandles=%d\n", mypet, nhandles);
+//fprintf(stderr, "(%d)VMK::commtest: *ch=%p\n", mypet, *ch);
   int localrc=0;
   if ((ch!=NULL) && ((*ch)!=NULL)){
     // wait for all non-blocking requests in commhandle to complete
@@ -2552,7 +2552,8 @@ int VMK::commtest(commhandle **ch, int *completeFlag, status *status){
         mpi_s = MPI_STATUS_IGNORE;
       // TODO: status will only reflect the last communiction in the i-loop!
       for (int i=0; i<(*ch)->nelements; i++){
-//fprintf(stderr, "MPI_Wait: ch=%p\n", &((*ch)->mpireq[i]));
+//fprintf(stderr, "(%d)VMK::commtest: right before MPI_Test(): ch=%p\n",
+//    mypet, &((*ch)->mpireq[i]));
 #ifndef ESMF_NO_PTHREADS
         if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
 #endif
@@ -2561,6 +2562,7 @@ int VMK::commtest(commhandle **ch, int *completeFlag, status *status){
 #ifndef ESMF_NO_PTHREADS
         if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
 #endif
+//fprintf(stderr, "(%d)VMK::commtest: right after MPI_Test()\n", mypet);
         if (status){
           if (lpid[mpi_s->MPI_SOURCE] == mpi_s->MPI_SOURCE)
             status->srcPet = mpi_s->MPI_SOURCE;
@@ -2602,8 +2604,8 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
   // and delete all of the inside contents of *ch (even if it is a tree)
   // finally unlink the *ch container from the commqueue and delete the
   // container (only) if the *ch was part of the commqueue!
-//fprintf(stderr, "VMK::commwait: nhandles=%d\n", nhandles);
-//fprintf(stderr, "VMK::commwait: *ch=%p\n", *ch);
+//fprintf(stderr, "(%d)VMK::commwait: nhandles=%d\n", mypet, nhandles);
+//fprintf(stderr, "(%d)VMK::commwait: *ch=%p\n", mypet, *ch);
   int localrc=0;
   if ((ch!=NULL) && ((*ch)!=NULL)){
     // wait for all non-blocking requests in commhandle to complete
