@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.85 2010/01/22 18:05:12 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.86 2010/01/25 22:20:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.85 2010/01/22 18:05:12 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.86 2010/01/25 22:20:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4437,7 +4437,7 @@ namespace ArrayHelper{
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     // attach to testOnIndexSub element with filterBitNbTestFinish
-    localrc = xxe->appendWaitOnIndexSub(
+    localrc = xxe->appendTestOnIndexSub(
       predicateBitField|XXE::filterBitNbTestFinish, xxeSub, 0, 0, recvnbIndex);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -7528,7 +7528,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       vm->barrier();
       vm->wtime(&dtStart);
       localrc = xxe->exec(rraCount, rraList, &vectorLength,
-        0x0|XXE::filterBitRegionSelectZero);
+        0x0|XXE::filterBitRegionSelectZero|XXE::filterBitNbTestFinish);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
       vm->barrier();
@@ -7627,7 +7627,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       vm->barrier();
       vm->wtime(&dtStart);
         localrc = xxe->exec(rraCount, rraList, &vectorLength,
-          0x0|XXE::filterBitRegionSelectZero);
+          0x0|XXE::filterBitRegionSelectZero|XXE::filterBitNbTestFinish);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
       vm->barrier();
@@ -7721,7 +7721,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   // execute final XXE stream for consistent profile data
   vm->barrier();  // ensure all PETs are present before profile run
   localrc = xxe->exec(rraCount, rraList, &vectorLength, 
-    0x0|XXE::filterBitRegionSelectZero);
+    0x0|XXE::filterBitRegionSelectZero|XXE::filterBitNbTestFinish);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -8163,14 +8163,14 @@ int Array::sparseMatMul(
       // start
       filterBitField |= XXE::filterBitNbWaitFinish;   // set NbWaitFinish filter
       filterBitField |= XXE::filterBitNbTestFinish;   // set NbTestFinish filter
+    }else if(commflag==ESMF_COMM_NBTESTFINISH){
+      // test and finish
+      filterBitField |= XXE::filterBitNbStart;        // set NbStart filter
+      filterBitField |= XXE::filterBitNbWaitFinish;   // set NbWaitFinish filter
     }else if(commflag==ESMF_COMM_NBWAITFINISH){
       // wait and finish
       filterBitField |= XXE::filterBitNbStart;        // set NbStart filter
       filterBitField |= XXE::filterBitNbTestFinish;   // set NbTestFinish filter
-    }else if(commflag==ESMF_COMM_NBTESTFINISH){
-      // wait and finish
-      filterBitField |= XXE::filterBitNbStart;        // set NbStart filter
-      filterBitField |= XXE::filterBitNbWaitFinish;   // set NbWaitFinish filter
     }
   }
   
