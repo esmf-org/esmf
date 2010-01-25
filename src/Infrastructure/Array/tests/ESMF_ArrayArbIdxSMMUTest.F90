@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.19 2010/01/22 18:06:19 theurich Exp $
+! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.20 2010/01/25 22:21:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.19 2010/01/22 18:06:19 theurich Exp $'
+    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.20 2010/01/25 22:21:27 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -66,7 +66,7 @@ program ESMF_ArrayArbIdxSMMUTest
   integer(ESMF_KIND_I4), pointer :: farrayPtr2D(:,:)! matching Fortran array pointer
   integer(ESMF_KIND_I4) :: factorList2(1)
   integer               :: factorIndexList2(4,1), j
-  logical               :: finishedflag
+  logical               :: finishedflag, evalflag
 #endif
   integer               :: rc, i, petCount, localPet
   integer, allocatable  :: srcIndices(:)
@@ -322,64 +322,64 @@ program ESMF_ArrayArbIdxSMMUTest
 ! Initialize the factorList(:) and factorIndexList(:,:) arrays
   if (localPet == 0) then
     factorList(1) = 2
-    factorIndexList(1,1) = 76   ! src seq index
-    factorIndexList(2,1) = 1    ! dst seq index
+    factorIndexList(1,1) = 76   ! src seq index (PET 3)
+    factorIndexList(2,1) = 1    ! dst seq index (PET 0)
     factorList(2) = -3
-    factorIndexList(1,2) = 40   ! src seq index
-    factorIndexList(2,2) = 1    ! dst seq index
+    factorIndexList(1,2) = 40   ! src seq index (PET 1)
+    factorIndexList(2,2) = 1    ! dst seq index (PET 0)
     factorList(3) = 1
-    factorIndexList(1,3) = 19   ! src seq index
-    factorIndexList(2,3) = 4    ! dst seq index
+    factorIndexList(1,3) = 19   ! src seq index (PET 0)
+    factorIndexList(2,3) = 4    ! dst seq index (PET 1)
   else if (localPet == 1) then
     factorList(1) = -4
-    factorIndexList(1,1) = 112  ! src seq index
-    factorIndexList(2,1) = 4    ! dst seq index
+    factorIndexList(1,1) = 112  ! src seq index (PET 5)
+    factorIndexList(2,1) = 4    ! dst seq index (PET 1)
     factorList(2) = 2
-    factorIndexList(1,2) = 92   ! src seq index
-    factorIndexList(2,2) = 4    ! dst seq index
+    factorIndexList(1,2) = 92   ! src seq index (PET 4)
+    factorIndexList(2,2) = 4    ! dst seq index (PET 1)
     factorList(3) = 7
-    factorIndexList(1,3) = 77   ! src seq index
-    factorIndexList(2,3) = 5    ! dst seq index
+    factorIndexList(1,3) = 77   ! src seq index (PET 3)
+    factorIndexList(2,3) = 5    ! dst seq index (PET 2)
   else if (localPet == 2) then
-    factorList(1) = -2
-    factorIndexList(1,1) = 98   ! src seq index
-    factorIndexList(2,1) = 6    ! dst seq index
+    factorList(1) = -2  
+    factorIndexList(1,1) = 98   ! src seq index (PET 4)
+    factorIndexList(2,1) = 6    ! dst seq index (PET 2)
     factorList(2) = 1
-    factorIndexList(1,2) = 39   ! src seq index
-    factorIndexList(2,2) = 7    ! dst seq index
+    factorIndexList(1,2) = 39   ! src seq index (PET 1)
+    factorIndexList(2,2) = 7    ! dst seq index (PET 3)
     factorList(3) = 1
-    factorIndexList(1,3) = 58   ! src seq index
-    factorIndexList(2,3) = 7    ! dst seq index
+    factorIndexList(1,3) = 58   ! src seq index (PET 2)
+    factorIndexList(2,3) = 7    ! dst seq index (PET 3)
   else if (localPet == 3) then
     factorList(1) = 1 
-    factorIndexList(1,1) = 95   ! src seq index
-    factorIndexList(2,1) = 7    ! dst seq index
+    factorIndexList(1,1) = 95   ! src seq index (PET 4)
+    factorIndexList(2,1) = 7    ! dst seq index (PET 3)
     factorList(2) = -4
-    factorIndexList(1,2) = 113  ! src seq index
-    factorIndexList(2,2) = 7    ! dst seq index
+    factorIndexList(1,2) = 113  ! src seq index (PET 5)
+    factorIndexList(2,2) = 7    ! dst seq index (PET 3)
     factorList(3) = -1
-    factorIndexList(1,3) = 20   ! src seq index
-    factorIndexList(2,3) = 12   ! dst seq index
+    factorIndexList(1,3) = 20   ! src seq index (PET 0)
+    factorIndexList(2,3) = 12   ! dst seq index (PET 5)
   else if (localPet == 4) then
     factorList(1) = 100
-    factorIndexList(1,1) = 99   ! src seq index
-    factorIndexList(2,1) = 9    ! dst seq index
+    factorIndexList(1,1) = 99   ! src seq index (PET 4)
+    factorIndexList(2,1) = 9    ! dst seq index (PET 4)
     factorList(2) = -2
-    factorIndexList(1,2) = 109  ! src seq index
-    factorIndexList(2,2) = 9    ! dst seq index
+    factorIndexList(1,2) = 109  ! src seq index (PET 5)
+    factorIndexList(2,2) = 9    ! dst seq index (PET 4)
     factorList(3) = -5
-    factorIndexList(1,3) = 80   ! src seq index
-    factorIndexList(2,3) = 9    ! dst seq index
+    factorIndexList(1,3) = 80   ! src seq index (PET 3)
+    factorIndexList(2,3) = 9    ! dst seq index (PET 4)
   else if (localPet == 5) then
     factorList(1) = 22
-    factorIndexList(1,1) = 55   ! src seq index
-    factorIndexList(2,1) = 9    ! dst seq index
+    factorIndexList(1,1) = 55   ! src seq index (PET 2)
+    factorIndexList(2,1) = 9    ! dst seq index (PET 4)
     factorList(2) = 5
-    factorIndexList(1,2) = 120  ! src seq index
-    factorIndexList(2,2) = 11   ! dst seq index
+    factorIndexList(1,2) = 120  ! src seq index (PET 5)
+    factorIndexList(2,2) = 11   ! dst seq index (PET 5)
     factorList(3) = -11
-    factorIndexList(1,3) = 74 ! src seq index
-    factorIndexList(2,3) = 10   ! dst seq index
+    factorIndexList(1,3) = 74   ! src seq index (PET 3)
+    factorIndexList(2,3) = 10   ! dst seq index (PET 4)
   endif
   
   ! Each of the 6 PETs defines 3 different factors of the sparse matrix
@@ -499,8 +499,16 @@ program ESMF_ArrayArbIdxSMMUTest
   endif
 
 !------------------------------------------------------------------------
+  ! Do the same ESMF_ArraySMM() srcArray->dstArray again, but this time
+  ! using the non-blocking ArraySMM() paradigm.
 
   farrayPtr = -99 ! reset to something that would be caught during verification
+
+  ! The following barrier call holds up PET 0 from calling inte ArraySMM() 
+  ! until all other PETs have called in with ESMF_COMM_NBSTART, and have done
+  ! one round of calling in with ESMF_COMM_NBTESTFINISH. Doing this tests the
+  ! non-blocking mode of ArraySMM().
+  if (localPet==0) call ESMF_VMBarrier(vm)
 
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -519,8 +527,40 @@ program ESMF_ArrayArbIdxSMMUTest
     finishedflag=finishedflag, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  print *, "ESMF_COMM_NBTESTFINISH: finishedflag=", finishedflag
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySMM: srcArray -> dstArray NBTESTFINISH finishedflag Test"
+  write(failMsg, *) "Incorrect value of finishedflag"
+  evalflag = .true. ! assume success
+  if (localPet==0) then
+    ! PET 0 should return with finishedflag .true. because when it comes
+    ! into ArraySMM() with NBTESTFINISH all other PETs have already been here.
+    ! There is always a slight chance that finishedflag comes back with .false.
+    ! even at this point (execution effects). But under normal circumstances
+    ! one expects the exchange to be finished here.
+    if (.not. finishedflag) evalflag = .false.
+  else if (localPet==1 .or. localPet==5) then
+    ! PETs 1 and 5 depend on data from PET 0, and should return with 
+    ! finishedflag .false. because PET 0 is still blocked by the barrier,
+    ! not able to enter ArraySMM().
+    if (finishedflag) evalflag = .false.
+  endif
+  ! The status of finishedflag on PETs 2, 3, 4 is non-determanistic at this
+  ! point. None of them depend on PET 0, so they could in principle be done
+  ! with data exchange between PETs 1, 2, 3, 4, 5, however, the exact timing is
+  ! execution dependent and can vary. This test only checks the determanistic
+  ! results.
+  call ESMF_Test(evalflag, name, failMsg, result, ESMF_SRCLINE)
   
+  print *, "localPet=",localPet, &
+    "ESMF_COMM_NBTESTFINISH: finishedflag=", finishedflag
+  
+  ! The folling barrier call releases PET 0 which was waiting on the barrier
+  ! call before the first call to ArraySMM() above. Releasing PET 0 now will
+  ! allow the folling call with ESMF_COMM_NBWAITFINISH to finish up, where
+  ! the finishedflag on all PETs will be .true. on return.
+  if (localPet/=0) call ESMF_VMBarrier(vm)
+
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "ArraySMM: srcArray -> dstArray NBWAITFINISH Test"
@@ -530,7 +570,133 @@ program ESMF_ArrayArbIdxSMMUTest
     finishedflag=finishedflag, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  print *, "ESMF_COMM_NBWAITFINISH: finishedflag=", finishedflag
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySMM: srcArray -> dstArray NBWAITFINISH finishedflag Test"
+  write(failMsg, *) "Incorrect value of finishedflag"
+  ! Now all PETs should return with finishedflag .true.
+  call ESMF_Test(finishedflag, name, failMsg, result, ESMF_SRCLINE)
+  
+  print *, "localPet=",localPet, &
+    "ESMF_COMM_NBWAITFINISH: finishedflag=", finishedflag
+  
+  ! The expected result of the sparse matrix multiplication in dstArray is:
+  ! (note: by default ArraySMM() initializes _all_ destination elements
+  ! to zero before adding in sparse matrix terms.)
+  !
+  ! PET   localDE   DE    dstArray contents
+  ! 0     0         0     2x35 - 3x11 = 37, 0
+  ! 1     0         1     0, 1x2 - 4x59 + 2x49 = -136
+  ! 2     0         2     7x34 = 238, -2x43 = -86
+  ! 3     0         3     1x12 + 1x23 + 1x46 - 4x58 = -151, 0
+  ! 4     0         4     100x42 - 2x62 - 5x31 + 22x26 = 4493, -11x37 = -407
+  ! 5     0         5     5x51 = 255, -1x1 = 1
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Verify results in dstArray NON-BLOCKING Test"
+  write(failMsg, *) "Wrong results" 
+  if (localPet == 0) then
+    call ESMF_Test(((farrayPtr(1).eq.37).and.(farrayPtr(2).eq.0)), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 1) then
+    call ESMF_Test(((farrayPtr(1).eq.0).and.(farrayPtr(2).eq.-136)), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 2) then
+    call ESMF_Test(((farrayPtr(1).eq.238).and.(farrayPtr(2).eq.-86)), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 3) then
+    call ESMF_Test(((farrayPtr(1).eq.-151).and.(farrayPtr(2).eq.0)), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 4) then
+    call ESMF_Test(((farrayPtr(1).eq.4493).and.(farrayPtr(2).eq.-407)), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 5) then
+    call ESMF_Test(((farrayPtr(1).eq.255).and.(farrayPtr(2).eq.-1)), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  endif
+
+!------------------------------------------------------------------------
+  ! Do the same non-blocking ESMF_ArraySMM() srcArray->dstArray again, 
+  ! to test that everything is handled correctly wrt internal resetting.
+
+  farrayPtr = -99 ! reset to something that would be caught during verification
+
+  ! The following barrier call holds up PET 0 from calling inte ArraySMM() 
+  ! until all other PETs have called in with ESMF_COMM_NBSTART, and have done
+  ! one round of calling in with ESMF_COMM_NBTESTFINISH. Doing this tests the
+  ! non-blocking mode of ArraySMM().
+  if (localPet==0) call ESMF_VMBarrier(vm)
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySMM: srcArray -> dstArray NBSTART Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=routehandle, commflag=ESMF_COMM_NBSTART, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySMM: srcArray -> dstArray NBTESTFINISH Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=routehandle, commflag=ESMF_COMM_NBTESTFINISH, &
+    finishedflag=finishedflag, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySMM: srcArray -> dstArray NBTESTFINISH finishedflag Test"
+  write(failMsg, *) "Incorrect value of finishedflag"
+  evalflag = .true. ! assume success
+  if (localPet==0) then
+    ! PET 0 should return with finishedflag .true. because when it comes
+    ! into ArraySMM() with NBTESTFINISH all other PETs have already been here.
+    ! There is always a slight chance that finishedflag comes back with .false.
+    ! even at this point (execution effects). But under normal circumstances
+    ! one expects the exchange to be finished here.
+    if (.not. finishedflag) evalflag = .false.
+  else if (localPet==1 .or. localPet==5) then
+    ! PETs 1 and 5 depend on data from PET 0, and should return with 
+    ! finishedflag .false. because PET 0 is still blocked by the barrier,
+    ! not able to enter ArraySMM().
+    if (finishedflag) evalflag = .false.
+  endif
+  ! The status of finishedflag on PETs 2, 3, 4 is non-determanistic at this
+  ! point. None of them depend on PET 0, so they could in principle be done
+  ! with data exchange between PETs 1, 2, 3, 4, 5, however, the exact timing is
+  ! execution dependent and can vary. This test only checks the determanistic
+  ! results.
+  call ESMF_Test(evalflag, name, failMsg, result, ESMF_SRCLINE)
+  
+  print *, "localPet=",localPet, &
+    "ESMF_COMM_NBTESTFINISH: finishedflag=", finishedflag
+  
+  ! The folling barrier call releases PET 0 which was waiting on the barrier
+  ! call before the first call to ArraySMM() above. Releasing PET 0 now will
+  ! allow the folling call with ESMF_COMM_NBWAITFINISH to finish up, where
+  ! the finishedflag on all PETs will be .true. on return.
+  if (localPet/=0) call ESMF_VMBarrier(vm)
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySMM: srcArray -> dstArray NBWAITFINISH Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=routehandle, commflag=ESMF_COMM_NBWAITFINISH, &
+    finishedflag=finishedflag, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySMM: srcArray -> dstArray NBWAITFINISH finishedflag Test"
+  write(failMsg, *) "Incorrect value of finishedflag"
+  ! Now all PETs should return with finishedflag .true.
+  call ESMF_Test(finishedflag, name, failMsg, result, ESMF_SRCLINE)
+  
+  print *, "localPet=",localPet, &
+    "ESMF_COMM_NBWAITFINISH: finishedflag=", finishedflag
   
   ! The expected result of the sparse matrix multiplication in dstArray is:
   ! (note: by default ArraySMM() initializes _all_ destination elements
