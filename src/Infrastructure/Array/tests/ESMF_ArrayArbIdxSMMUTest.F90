@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.20 2010/01/25 22:21:27 theurich Exp $
+! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.21 2010/01/26 04:46:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.20 2010/01/25 22:21:27 theurich Exp $'
+    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.21 2010/01/26 04:46:42 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -400,7 +400,7 @@ program ESMF_ArrayArbIdxSMMUTest
   write(name, *) "ArraySMM: srcArray -> dstArray Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
-    routehandle=routehandle, rc=rc)
+    routehandle=routehandle, checkflag=.true., rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   ! The expected result of the sparse matrix multiplication in dstArray is:

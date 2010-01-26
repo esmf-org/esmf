@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.30 2010/01/22 17:57:59 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.31 2010/01/26 04:46:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -641,9 +641,13 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_arrayredist()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // convert to bool
+    bool checkflagOpt = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(checkflag) != ESMC_NULL_POINTER)
+      if (*checkflag == ESMF_TRUE) checkflagOpt = true;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::redist(
-      *srcArray, *dstArray, routehandle, *checkflag),
+      *srcArray, *dstArray, routehandle, checkflagOpt),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -738,11 +742,15 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_arraysmm()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // convert to bool
+    bool checkflagOpt = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(checkflag) != ESMC_NULL_POINTER)
+      if (*checkflag == ESMF_TRUE) checkflagOpt = true;
     // Call into the actual C++ method wrapped inside LogErr handling
     bool finished;
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMul(
       *srcArray, *dstArray, routehandle, *commflag, &finished, *zeroflag,
-      *checkflag),
+      checkflagOpt),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
     if (ESMC_NOT_PRESENT_FILTER(finishedflag) != ESMC_NULL_POINTER){

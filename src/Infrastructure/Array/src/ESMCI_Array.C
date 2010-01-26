@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.86 2010/01/25 22:20:34 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.87 2010/01/26 04:46:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.86 2010/01/25 22:20:34 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.87 2010/01/26 04:46:40 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3931,8 +3931,8 @@ int Array::redist(
   Array *srcArray,                      // in    - source Array
   Array *dstArray,                      // inout - destination Array
   RouteHandle **routehandle,            // inout - handle to precomputed comm
-  ESMC_Logical checkflag                // in    - ESMF_FALSE: (def.) bas. chcks
-                                        //         ESMF_TRUE: full input check
+  bool checkflag                        // in    - false: (def.) basic chcks
+                                        //         true:  full input check
   ){    
 //
 // !DESCRIPTION:
@@ -8057,8 +8057,8 @@ int Array::sparseMatMul(
                                         //          -> zero out target points
                                         //         ESMF_REGION_EMPTY:
                                         //          -> don't zero out any points
-  ESMC_Logical checkflag                // in    - ESMF_FALSE: (def.) bas. chcks
-                                        //         ESMF_TRUE: full input check
+  bool checkflag                        // in    - false: (def.) basic chcks
+                                        //         true:  full input check
   ){    
 //
 // !DESCRIPTION:
@@ -8102,7 +8102,7 @@ int Array::sparseMatMul(
   XXE *xxe = (XXE *)(*routehandle)->getStorage();
 
   // conditionally perform full input checks
-  if (checkflag==ESMF_TRUE){
+  if (checkflag){
     // check that srcArray's typekind matches
     if (srcArrayFlag && (xxe->typekind[1] != srcArray->getTypekind())){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
