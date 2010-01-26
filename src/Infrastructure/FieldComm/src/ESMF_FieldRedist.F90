@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.14 2009/03/09 19:36:02 theurich Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.15 2010/01/26 06:14:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.14 2009/03/09 19:36:02 theurich Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.15 2010/01/26 06:14:33 theurich Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -160,8 +160,8 @@ contains
         endif
         
         ! perform Field redist through internal array
-        call ESMF_ArrayRedist(l_srcArray, l_dstArray, routehandle, &
-          checkflag, localrc)
+        call ESMF_ArrayRedist(srcArray=l_srcArray, dstArray=l_dstArray, &
+          routehandle=routehandle, checkflag=checkflag, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         
