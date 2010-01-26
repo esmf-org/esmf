@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayPr.F90,v 1.8 2009/06/08 18:13:08 w6ws Exp $
+! $Id: ESMF_ArrayPr.F90,v 1.9 2010/01/26 06:12:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@ module ESMF_ArrayPrMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayPr.F90,v 1.8 2009/06/08 18:13:08 w6ws Exp $'
+    '$Id: ESMF_ArrayPr.F90,v 1.9 2010/01/26 06:12:34 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -172,12 +172,15 @@ contains
 ! !IROUTINE: ESMF_ArrayRedist - Execute an Array redistribution
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayRedist(srcArray, dstArray, routehandle, checkflag, rc)
+  subroutine ESMF_ArrayRedist(srcArray, dstArray, routehandle, commflag, &
+    finishedflag, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in),   optional  :: srcArray
     type(ESMF_Array),       intent(inout),optional  :: dstArray
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_CommFlag),    intent(in),   optional  :: commflag
+    logical,                intent(out),  optional  :: finishedflag
     logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
 !
@@ -204,6 +207,18 @@ contains
 !     {\tt ESMF\_Array} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
+!   \item [{[commflag]}]
+!     Indicate communication option. Default is {\tt ESMF\_COMM\_BLOCKING},
+!     resulting in a blocking operation.
+!     See section \ref{opt:commflag} for a complete list of valid settings.
+!   \item [{[finishedflag]}]
+!     Used in combination with {\tt commflag = ESMF\_COMM\_NBTESTFINISH}.
+!     Returned {\tt finishedflag} equal to {\tt .true.} indicates that all
+!     operations have finished. A value of {\tt .false.} indicates that there
+!     are still unfinished operations that require additional calls with
+!     {\tt commflag = ESMF\_COMM\_NBTESTFINISH}, or a final call with
+!     {\tt commflag = ESMF\_COMM\_NBWAITFINISH}. For all other {\tt commflag}
+!     settings the returned value in {\tt finishedflag} is always {\tt .true.}.
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input Array pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
@@ -217,9 +232,11 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    type(ESMF_Logical)      :: opt_checkflag! helper variable
     type(ESMF_Array)        :: opt_srcArray ! helper variable
     type(ESMF_Array)        :: opt_dstArray ! helper variable
+    type(ESMF_CommFlag)     :: opt_commflag ! helper variable
+    type(ESMF_Logical)      :: opt_finishedflag! helper variable
+    type(ESMF_Logical)      :: opt_checkflag! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -245,14 +262,21 @@ contains
     endif
     
     ! Set default flags
+    opt_commflag = ESMF_COMM_BLOCKING
+    if (present(commflag)) opt_commflag = commflag
     opt_checkflag = ESMF_FALSE
     if (present(checkflag)) opt_checkflag = checkflag
         
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayRedist(opt_srcArray, opt_dstArray, routehandle, &
-      opt_checkflag, localrc)
+      opt_commflag, opt_finishedflag, opt_checkflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! translate back finishedflag
+    if (present(finishedflag)) then
+      finishedflag = opt_finishedflag
+    endif
     
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS

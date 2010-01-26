@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.31 2010/01/26 04:46:40 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.32 2010/01/26 06:12:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -636,7 +636,8 @@ extern "C" {
   }
 
   void FTN(c_esmc_arrayredist)(ESMCI::Array **srcArray, ESMCI::Array **dstArray,
-    ESMCI::RouteHandle **routehandle, ESMC_Logical *checkflag, int *rc){
+    ESMCI::RouteHandle **routehandle, ESMC_CommFlag *commflag,
+    ESMC_Logical *finishedflag, ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayredist()"
     // Initialize return code; assume routine not implemented
@@ -646,10 +647,18 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(checkflag) != ESMC_NULL_POINTER)
       if (*checkflag == ESMF_TRUE) checkflagOpt = true;
     // Call into the actual C++ method wrapped inside LogErr handling
+    bool finished;
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::redist(
-      *srcArray, *dstArray, routehandle, checkflagOpt),
+      *srcArray, *dstArray, routehandle, *commflag, &finished, checkflagOpt),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
+    // translate back finishedflag
+    if (ESMC_NOT_PRESENT_FILTER(finishedflag) != ESMC_NULL_POINTER){
+      if (finished)
+        *finishedflag = ESMF_TRUE;
+      else
+        *finishedflag = ESMF_FALSE;
+    }
   }
   
   void FTN(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
@@ -736,7 +745,7 @@ extern "C" {
 
   void FTN(c_esmc_arraysmm)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
-    ESMC_CommFlag *commflag, ESMC_Logical *finishedflag, 
+    ESMC_CommFlag *commflag, ESMC_Logical *finishedflag,
     ESMC_RegionFlag *zeroflag, ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysmm()"
@@ -753,6 +762,7 @@ extern "C" {
       checkflagOpt),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
+    // translate back finishedflag
     if (ESMC_NOT_PRESENT_FILTER(finishedflag) != ESMC_NULL_POINTER){
       if (finished)
         *finishedflag = ESMF_TRUE;

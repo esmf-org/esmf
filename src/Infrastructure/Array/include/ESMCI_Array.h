@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.39 2010/01/26 04:46:37 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.40 2010/01/26 06:12:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -245,7 +245,8 @@ namespace ESMCI {
       RouteHandle **routehandle, InterfaceInt *srcToDstTransposeMap,
       ESMC_TypeKind typekindFactor = ESMF_NOKIND, void *factor = NULL);
     static int redist(Array *srcArray, Array *dstArray,
-      RouteHandle **routehandle, bool checkflag=false);
+      RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,
+      bool *finishedflag=NULL, bool checkflag=false);
     static int redistRelease(RouteHandle *routehandle);
     static int sparseMatMulStore(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, vector<SparseMatrix> const &sparseMatrix);
