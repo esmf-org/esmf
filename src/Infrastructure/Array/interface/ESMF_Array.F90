@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.106 2010/01/22 17:58:01 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.107 2010/01/26 06:11:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.106 2010/01/22 17:58:01 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.107 2010/01/26 06:11:25 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -725,12 +725,12 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    type(ESMF_CommFlag)     :: opt_commflag ! helper variable
-    type(ESMF_RegionFlag)   :: opt_zeroflag ! helper variable
-    type(ESMF_Logical)      :: opt_checkflag! helper variable
     type(ESMF_Array)        :: opt_srcArray ! helper variable
     type(ESMF_Array)        :: opt_dstArray ! helper variable
+    type(ESMF_CommFlag)     :: opt_commflag ! helper variable
     type(ESMF_Logical)      :: opt_finishedflag! helper variable
+    type(ESMF_RegionFlag)   :: opt_zeroflag ! helper variable
+    type(ESMF_Logical)      :: opt_checkflag! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -769,7 +769,7 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
-    ! copy finishedflag back
+    ! translate back finishedflag
     if (present(finishedflag)) then
       finishedflag = opt_finishedflag
     endif

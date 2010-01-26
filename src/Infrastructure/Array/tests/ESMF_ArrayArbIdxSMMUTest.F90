@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.21 2010/01/26 04:46:42 theurich Exp $
+! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.22 2010/01/26 06:10:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,13 +36,11 @@ program ESMF_ArrayArbIdxSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.21 2010/01/26 04:46:42 theurich Exp $'
+    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.22 2010/01/26 06:10:14 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
 !=========================================================================
-
-
 
   ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
@@ -504,7 +502,7 @@ program ESMF_ArrayArbIdxSMMUTest
 
   farrayPtr = -99 ! reset to something that would be caught during verification
 
-  ! The following barrier call holds up PET 0 from calling inte ArraySMM() 
+  ! The following barrier call holds up PET 0 from calling into ArraySMM() 
   ! until all other PETs have called in with ESMF_COMM_NBSTART, and have done
   ! one round of calling in with ESMF_COMM_NBTESTFINISH. Doing this tests the
   ! non-blocking mode of ArraySMM().
