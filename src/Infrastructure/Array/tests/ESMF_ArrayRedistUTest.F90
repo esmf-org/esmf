@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistUTest.F90,v 1.16 2010/01/26 04:46:42 theurich Exp $
+! $Id: ESMF_ArrayRedistUTest.F90,v 1.17 2010/01/26 06:13:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -33,13 +33,11 @@ program ESMF_ArrayRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayRedistUTest.F90,v 1.16 2010/01/26 04:46:42 theurich Exp $'
+    '$Id: ESMF_ArrayRedistUTest.F90,v 1.17 2010/01/26 06:13:18 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
 !=========================================================================
-
-
 
   ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
@@ -68,6 +66,7 @@ program ESMF_ArrayRedistUTest
   type(ESMF_RouteHandle):: routehandle66, routehandle66p
   integer(ESMF_KIND_I4), pointer :: farrayPtr2D(:,:)! matching Fortran array pointer
   integer               :: j
+  logical               :: finishedflag, evalflag
 #endif
   integer               :: rc, i, petCount, localPet
   integer, allocatable  :: srcIndices(:)
@@ -281,7 +280,7 @@ program ESMF_ArrayRedistUTest
   call ESMF_ArrayGet(dstArray, farrayPtr=farrayPtr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-call ESMF_ArrayPrint(dstArray)
+  call ESMF_ArrayPrint(dstArray)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -486,7 +485,7 @@ call ESMF_ArrayPrint(dstArray)
   call ESMF_ArrayGet(dstArray5, farrayPtr=farrayPtr5, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-call ESMF_ArrayPrint(dstArray5)
+  call ESMF_ArrayPrint(dstArray5)
   
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -965,6 +964,144 @@ call ESMF_ArrayPrint(dstArray5)
       (farrayPtr(6).eq.1).and.(farrayPtr(7).eq.0)), &
       name, failMsg, result, ESMF_SRCLINE)
   endif
+
+!------------------------------------------------------------------------
+  ! Do the same ESMF_ArrayRedist() srcArray2->dstArray2 again, but this time
+  ! using the non-blocking ArrayRedist() paradigm.
+
+  farrayPtr = -99 ! reset to something that would be caught during verification
+
+  ! The following barrier call holds up PET 0 from calling into ArrayRedist() 
+  ! until all other PETs have called in with ESMF_COMM_NBSTART, and have done
+  ! one round of calling in with ESMF_COMM_NBTESTFINISH. Doing this tests the
+  ! non-blocking mode of ArrayRedist().
+  if (localPet==0) call ESMF_VMBarrier(vm)
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayRedist: srcArray2 -> dstArray2 (RRA) ESMF_COMM_NBSTART Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
+    routehandle=routehandle, commflag=ESMF_COMM_NBSTART, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayRedist: srcArray2 -> dstArray2 (RRA) NBTESTFINISH Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
+    routehandle=routehandle, commflag=ESMF_COMM_NBTESTFINISH, &
+    finishedflag=finishedflag, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayRedist: srcArray2 -> dstArray2 (RRA) NBTESTFINISH finishedflag Test"
+  write(failMsg, *) "Incorrect value of finishedflag"
+  evalflag = .true. ! assume success
+  if (localPet==0) then
+    ! PET 0 should return with finishedflag .true. because when it comes
+    ! into ArrayRedist() with NBTESTFINISH all other PETs have already been here.
+    ! There is always a slight chance that finishedflag comes back with .false.
+    ! even at this point (execution effects). But under normal circumstances
+    ! one expects the exchange to be finished here.
+    if (.not. finishedflag) evalflag = .false.
+  else if (localPet==5) then
+    ! PET 5 depends on data from PET 0, and should return with 
+    ! finishedflag .false. because PET 0 is still blocked by the barrier,
+    ! not able to enter ArrayRedist().
+    if (finishedflag) evalflag = .false.
+  endif
+  ! The status of finishedflag on PETs 1, 2, 3, 4 is non-determanistic at this
+  ! point. None of them depend on PET 0, so they could in principle be done
+  ! with data exchange between PETs 1, 2, 3, 4, 5, however, the exact timing is
+  ! execution dependent and can vary. This test only checks the determanistic
+  ! results.
+  call ESMF_Test(evalflag, name, failMsg, result, ESMF_SRCLINE)
+  
+  print *, "localPet=",localPet, &
+    "ESMF_COMM_NBTESTFINISH: finishedflag=", finishedflag
+  
+  ! The folling barrier call releases PET 0 which was waiting on the barrier
+  ! call before the first call to ArrayRedist() above. Releasing PET 0 now will
+  ! allow the folling call with ESMF_COMM_NBWAITFINISH to finish up, where
+  ! the finishedflag on all PETs will be .true. on return.
+  if (localPet/=0) call ESMF_VMBarrier(vm)
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayRedist: srcArray2 -> dstArray2 (RRA) NBWAITFINISH Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
+    routehandle=routehandle, commflag=ESMF_COMM_NBWAITFINISH, &
+    finishedflag=finishedflag, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayRedist: srcArray2 -> dstArray2 (RRA) NBWAITFINISH finishedflag Test"
+  write(failMsg, *) "Incorrect value of finishedflag"
+  ! Now all PETs should return with finishedflag .true.
+  call ESMF_Test(finishedflag, name, failMsg, result, ESMF_SRCLINE)
+  
+  print *, "localPet=",localPet, &
+    "ESMF_COMM_NBWAITFINISH: finishedflag=", finishedflag
+  
+  ! The expected result of the redistribution of srcArray2 into dstArray2 is:
+  !
+  ! PET   localDE   DE    dstArray2 contents
+  ! 0     0         0     61, 60, 59, 58, 57, 56, 55
+  ! 1     0         1     54, 53, 52, 51, 50, 49, 48
+  ! 2     0         2     47, 46, 45, 44, 43, 42, 41
+  ! 3     0         3     40, 37, 36, 35, 34, 33, 32
+  ! 4     0         4     31, 30, 25, 24, 23, 22, 21
+  ! 5     0         5     20, 13, 12, 11, 10, 1, 0
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Verify results in dstArray2 (RRA) non-blocking Test"
+  write(failMsg, *) "Wrong results" 
+  if (localPet == 0) then
+    call ESMF_Test(((farrayPtr(1).eq.61).and. &
+      (farrayPtr(2).eq.60).and.(farrayPtr(3).eq.59).and. &
+      (farrayPtr(4).eq.58).and.(farrayPtr(5).eq.57).and. &
+      (farrayPtr(6).eq.56).and.(farrayPtr(7).eq.55)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 1) then
+    call ESMF_Test(((farrayPtr(1).eq.54).and. &
+      (farrayPtr(2).eq.53).and.(farrayPtr(3).eq.52).and. &
+      (farrayPtr(4).eq.51).and.(farrayPtr(5).eq.50).and. &
+      (farrayPtr(6).eq.49).and.(farrayPtr(7).eq.48)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 2) then
+    call ESMF_Test(((farrayPtr(1).eq.47).and. &
+      (farrayPtr(2).eq.46).and.(farrayPtr(3).eq.45).and. &
+      (farrayPtr(4).eq.44).and.(farrayPtr(5).eq.43).and. &
+      (farrayPtr(6).eq.42).and.(farrayPtr(7).eq.41)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 3) then
+    call ESMF_Test(((farrayPtr(1).eq.40).and. &
+      (farrayPtr(2).eq.37).and.(farrayPtr(3).eq.36).and. &
+      (farrayPtr(4).eq.35).and.(farrayPtr(5).eq.34).and. &
+      (farrayPtr(6).eq.33).and.(farrayPtr(7).eq.32)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 4) then
+    call ESMF_Test(((farrayPtr(1).eq.31).and. &
+      (farrayPtr(2).eq.30).and.(farrayPtr(3).eq.25).and. &
+      (farrayPtr(4).eq.24).and.(farrayPtr(5).eq.23).and. &
+      (farrayPtr(6).eq.22).and.(farrayPtr(7).eq.21)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 5) then
+    call ESMF_Test(((farrayPtr(1).eq.20).and. &
+      (farrayPtr(2).eq.13).and.(farrayPtr(3).eq.12).and. &
+      (farrayPtr(4).eq.11).and.(farrayPtr(5).eq.10).and. &
+      (farrayPtr(6).eq.1).and.(farrayPtr(7).eq.0)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  endif
+
+
+
+
 
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
