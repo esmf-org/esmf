@@ -1,3 +1,4 @@
+! $Id: ESMF_TestHarnessMod.F90,v 1.44 2010/01/27 23:11:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
