@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.46.2.5 2009/01/21 21:25:23 cdeluca Exp $
+// $Id: ESMC_Clock.h,v 1.46.2.6 2010/01/27 06:55:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -100,6 +100,9 @@
                                                 //   time steps taken so far)
 
     ESMC_Direction    direction;                // forward (default) or reverse
+    bool              userChangedDirection;     // used to determine whether
+                                                // to adjust alarm on 
+                                                // direction change
 
     int               alarmCount;               // number of defined alarms
     int               alarmListCapacity;        // max number of defined alarms
