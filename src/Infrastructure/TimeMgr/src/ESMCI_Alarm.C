@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.C,v 1.11.2.3 2010/01/21 05:01:46 eschwab Exp $
+// $Id: ESMCI_Alarm.C,v 1.11.2.4 2010/01/28 00:54:46 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Alarm.C,v 1.11.2.3 2010/01/21 05:01:46 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Alarm.C,v 1.11.2.4 2010/01/28 00:54:46 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -1145,6 +1145,7 @@ int Alarm::count=0;
                                ringTime <= (stopTime - ringInterval) ) break;
               }
               // otherwise increment it
+              prevRingTime = ringTime;
               ringTime += ringInterval;
             }
           }
@@ -1212,6 +1213,7 @@ int Alarm::count=0;
                            ringTime <= (stopTime - ringInterval) ) break;
           }
           // otherwise increment it
+          prevRingTime = ringTime;
           ringTime += ringInterval;
           // TODO:  if in practice, users use a timeStep which is much, much
           //        greater than ringInterval, then a single-step calculated
@@ -1273,7 +1275,7 @@ int Alarm::count=0;
                 !positive && ringEnd < clock->currTime) &&
                  ringTime != firstRingTime) {
           ringEnd      -= ringInterval;
-          ringTime     -= ringInterval;
+          ringTime      = prevRingTime;
           prevRingTime -= ringInterval;
         }
       }
@@ -1282,23 +1284,12 @@ int Alarm::count=0;
       if (clock->userChangedDirection) {
         clock->userChangedDirection = false; // reset changed flag
         if (!sticky) {
-          Time ringTimeEnd;
-          TimeInterval zeroTimeInterval(0,0,1,0,0,0);
-          if (ringTimeStepCount == 1 && 
-              ringDuration != zeroTimeInterval) { // use ringDuration ...
-            ringTimeEnd = ringTime + ringDuration; 
-          // ... otherwise use ringTimeStepCount
-          } else if (ringTimeStepCount >= 1) {
-            // TODO:  base on ringBegin rather than ringTime, to be consistent
-            //  with checkTurnOn() logic?
-            ringTimeEnd = ringTime + ringTimeStepCount * clock->timeStep;
-          } // TODO: else error, ringTimeStepCount <= 0 (ringing counter is
-            // always positive) Validate() ?
-          if ( (positive && ringTimeEnd > clock->currTime ||
-               !positive && ringTimeEnd < clock->currTime) &&
-                ringTime != firstRingTime) {
-            ringTime     -= ringInterval;
+          if ((positive && ringTime > (clock->currTime + clock->timeStep) ||
+              !positive && ringTime < (clock->currTime + clock->timeStep)) &&
+                   ringTime != firstRingTime) {
+            ringTime      = prevRingTime;
             prevRingTime -= ringInterval;
+            Alarm::resetRingBegin(positive);
           }
         }
       }
@@ -1312,12 +1303,10 @@ int Alarm::count=0;
           TimeInterval zeroTimeInterval(0,0,1,0,0,0);
           if (ringTimeStepCount == 1 && 
               ringDuration != zeroTimeInterval) { // use ringDuration ...
-            ringTimeEnd = ringTime + ringDuration; 
+            ringTimeEnd = ringBegin + ringDuration; 
           // ... otherwise use ringTimeStepCount
           } else if (ringTimeStepCount >= 1) {
-            // TODO:  base on ringBegin rather than ringTime, to be consistent
-            //  with checkTurnOn() logic?
-            ringTimeEnd = ringTime + ringTimeStepCount * clock->timeStep;
+            ringTimeEnd = ringBegin + ringTimeStepCount * clock->timeStep;
           } // TODO: else error, ringTimeStepCount <= 0 (ringing counter is
             // always positive) Validate() ?
         }
@@ -1329,7 +1318,6 @@ int Alarm::count=0;
           ringingOnCurrTimeStep = ringing = (clock->currTime == ringTimeEnd);
         } else {
           ringingOnCurrTimeStep = ringing = (positive) ?
-                    // TODO: <= && > (for positive), >= && < (for negative) ?
                     (clock->currTime < ringTimeEnd) &&
                       (clock->currTime + clock->timeStep) >= ringTimeEnd :
                                        // (negative)
@@ -1340,8 +1328,8 @@ int Alarm::count=0;
         // if just turned on, reconstruct the rest of the state of this
         //   alarm event
         if (ringing) {
-          // determine what ringBegin was for this alarm event
-          Alarm::resetRingBegin(positive);
+          // determine what ringBegin was for this alarm event TODO:sticky only?
+          //Alarm::resetRingBegin(positive);
 
           // determine what the ending timeStepRingingCount was
           //   for this alarm event
@@ -1353,27 +1341,7 @@ int Alarm::count=0;
       // reverse mode (user is responsible for turning off *sticky* alarms via
       // RingerOff())
       } else if (!sticky && ringing && enabled) {
-
-        bool turnAlarmOff = false;
-
-        TimeInterval zeroTimeInterval(0,0,1,0,0,0);
-        if (ringTimeStepCount == 1 && 
-            ringDuration != zeroTimeInterval) { // use ringDuration ...
-          if ((positive && clock->currTime < ringTime &&
-            (clock->currTime + ringDuration) >= ringTime) ||
-            (!positive && clock->currTime > ringTime &&
-            (clock->currTime + ringDuration) <= ringTime)) {
-              turnAlarmOff = true;
-          }
-        // ... otherwise use ringTimeStepCount
-        } else if (ringTimeStepCount >= 1) {
-          if (timeStepRingingCount <= 1) {  // if count down to last one
-              turnAlarmOff = true;
-          }
-        } // TODO: else error, ringTimeStepCount <= 0 (ringing counter is
-          // always positive) Validate() ?
-
-        if (turnAlarmOff) {
+        if (timeStepRingingCount <= 1) {  // if count down to last one
 
           // turn alarm off
           ringingOnCurrTimeStep = ringing = false;
@@ -1384,7 +1352,7 @@ int Alarm::count=0;
           // TODO: remove assumption of constant ringInterval; allow for
           //       variable ringIntervals
           if (ringTime != firstRingTime) { 
-            ringTime -= ringInterval;
+            ringTime      = prevRingTime;
             prevRingTime -= ringInterval; 
             TimeInterval zeroTimeInterval(0,0,1,0,0,0);
             if (ringTimeStepCount == 1 && 

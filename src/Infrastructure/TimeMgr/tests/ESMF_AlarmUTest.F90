@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.48.2.2 2010/01/21 05:01:46 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.48.2.3 2010/01/28 00:54:46 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.48.2.2 2010/01/21 05:01:46 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.48.2.3 2010/01/28 00:54:46 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1298,7 +1298,7 @@
 
       !EX_UTest
       !Test Non-Sticky Alarms 4
-      !  Test ringDuration precedence over ringTimeStepCount
+      !  Test ringTimeStepCount precedence over ringDuration
       write(failMsg, *) " Did not return nstep=18 and ESMF_SUCCESS"
       write(name, *) "Non-Sticky Alarm Test 4"
       call ESMF_TimeIntervalSet(timeStep, m=15, rc=rc)
@@ -1408,6 +1408,86 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !print *, "nstep = ", nstep, " nclock = ", nclock
+      !call ESMF_IOUnitFlush(ESMF_IOstdout)
+
+      call ESMF_AlarmDestroy(alarm4, rc=rc)
+      call ESMF_ClockDestroy(clock2, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      !Test Non-Sticky Alarms 6
+      !  Test reverse non-sticky alarm with negative timestep
+      write(failMsg, *) "Did not return nring=48, forwardCount=96, reverseCount=0, etc., and ESMF_SUCCESS"
+      write(name, *) "Non-Sticky Alarm Test 6"
+      call ESMF_TimeIntervalSet(timeStep, m=-15, rc=rc)
+      call ESMF_TimeSet(startTime, yy=2000, mm=1, dd=1, h=23, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=1999, mm=12, dd=31, h=23, &
+                        calendar=gregorianCalendar, rc=rc)
+      clock2 = ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      call ESMF_TimeSet(alarmTime, yy=2000, mm=1, dd=1, h=23, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(alarmStep, h=-2, rc=rc)
+      call ESMF_TimeIntervalSet(ringDuration, m=-30, rc=rc)
+      call ESMF_TimeSet(alarmStopTime, yy=1999, mm=12, dd=31, h=21, &
+                        calendar=gregorianCalendar, rc=rc)
+      alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=alarmTime, &
+                                ringInterval=alarmStep, &
+                                ringDuration=ringDuration, &
+                                stopTime=alarmStopTime, &
+                                sticky=.false., rc=rc)
+      ! number of clock time steps alarm rings for
+      nring = 0
+
+      ! number of times the clock has been run
+      nclock = 0
+
+      do while (nclock < 2)
+        ! run the clock
+        do while (.not. ESMF_ClockIsDone(clock2, rc=rc))
+          call ESMF_ClockGet(clock2, currTime=currentTime, rc=rc)
+          call ESMF_TimeGet(currentTime, yy=yy, mm=mm, dd=dd, h=h, m=m, rc=rc)
+          !print *, mm, "/", dd, "/", yy, " ", h, ":", m
+          !call ESMF_IOUnitFlush(ESMF_IOstdout)
+          if (ESMF_AlarmIsRinging(alarm4)) then
+            nring = nring + 1
+            !print *, "ringing!"
+            !call ESMF_IOUnitFlush(ESMF_IOstdout)
+          endif
+          !call ESMF_AlarmPrint(alarm4, "ringbegin string", rc)
+          !call ESMF_IOUnitFlush(ESMF_IOstdout)
+          !call ESMF_AlarmPrint(alarm4, "ringtime string", rc)
+          !call ESMF_IOUnitFlush(ESMF_IOstdout)
+          call ESMF_ClockAdvance(clock2, rc=rc)
+        enddo
+
+        if (nclock.eq.0) then
+          call ESMF_ClockGet(clock2, direction=forwardDirection, &
+                                     advanceCount=forwardCount, rc=rc)
+          !print *, "forwardCount = ", forwardCount
+        else
+          call ESMF_ClockGet(clock2, direction=reverseDirection, &
+                             advanceCount=reverseCount, rc=rc)
+          !print *, "reverseCount = ", reverseCount
+        endif
+
+        !print *, "Going in REVERSE ..."
+        !call ESMF_IOUnitFlush(ESMF_IOstdout)
+        call ESMF_ClockSet(clock2, direction=ESMF_MODE_REVERSE, rc=rc)
+        nclock = nclock + 1
+
+      enddo
+
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nring.eq.48).and. &
+                     (forwardCount.eq.96).and.(reverseCount.eq.0).and. &
+                     (forwardDirection.eq.ESMF_MODE_FORWARD).and. &
+                     (reverseDirection.eq.ESMF_MODE_REVERSE).and. &
+                     ESMF_ClockIsReverse(clock2), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !print *, "nring = ", nring, " nclock = ", nclock
+      !call ESMF_IOUnitFlush(ESMF_IOstdout)
 
       call ESMF_AlarmDestroy(alarm4, rc=rc)
       call ESMF_ClockDestroy(clock2, rc=rc)
@@ -2051,7 +2131,7 @@
       if (nring.eq.288 .and. iteration.eq.288) testPass = .true.
       call ESMF_Test(testPass.and.(rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_IOUnitFlush(ESMF_IOstdout)
+      !call ESMF_IOUnitFlush(ESMF_IOstdout)
 
       call ESMF_AlarmDestroy(alarm4, rc=rc)
       call ESMF_ClockDestroy(clock2, rc=rc)
@@ -2560,10 +2640,10 @@
           alarmCount = alarmCount + 1
           !print *, "alarm1 is ringing"
           !call ESMF_IOUnitFlush(ESMF_IOstdout)
-          !call ESMF_AlarmPrint(alarm1, "ringbegin string", rc)
-          !call ESMF_IOUnitFlush(ESMF_IOstdout)
           !call ESMF_AlarmRingerOff(alarm1, rc=rc)
         endif
+        !call ESMF_AlarmPrint(alarm1, "ringbegin string", rc)
+        !call ESMF_IOUnitFlush(ESMF_IOstdout)
         !call ESMF_AlarmPrint(alarm1, "ringtime string", rc)
         !call ESMF_IOUnitFlush(ESMF_IOstdout)
         !call ESMF_AlarmPrint(alarm1, "ringend string", rc)
@@ -2590,6 +2670,8 @@
           !call ESMF_IOUnitFlush(ESMF_IOstdout)
           !call ESMF_AlarmRingerOff(alarm1, rc=rc)
         endif
+        !call ESMF_AlarmPrint(alarm1, "ringbegin string", rc)
+        !call ESMF_IOUnitFlush(ESMF_IOstdout)
         !call ESMF_AlarmPrint(alarm1, "ringtime string", rc)
         !call ESMF_IOUnitFlush(ESMF_IOstdout)
         call ESMF_ClockAdvance(clock, rc=rc)
@@ -2613,6 +2695,8 @@
           !call ESMF_IOUnitFlush(ESMF_IOstdout)
           !call ESMF_AlarmRingerOff(alarm1, rc=rc)
         endif
+        !call ESMF_AlarmPrint(alarm1, "ringbegin string", rc)
+        !call ESMF_IOUnitFlush(ESMF_IOstdout)
         !call ESMF_AlarmPrint(alarm1, "ringtime string", rc)
         !call ESMF_IOUnitFlush(ESMF_IOstdout)
         call ESMF_ClockAdvance(clock, rc=rc)
