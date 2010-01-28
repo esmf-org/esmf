@@ -58,7 +58,7 @@ public:
     
     typedef UInt id_type;
     typedef char idx_type;
-    typedef float value_type;
+    typedef double value_type;
     
     id_type id;  // MeshObj id
     idx_type idx; // field index

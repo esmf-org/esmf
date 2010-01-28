@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: MeshCat,v 1.3 2009/01/21 21:38:00 cdeluca Exp $
+# $Id: MeshCat,v 1.4 2010/01/28 02:06:29 rokuingh Exp $
 #
 # Earth System Modeling Framework
 # Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ close(DIR);
 # Process the files, building a list of files to concat
 foreach $file (@allfilessorted) {
 
-  if ($file =~ m/(${file_stub}_[0-9]+)\.${nproc}\.0\.vtk/) {
+  if ($file =~ m/(${file_stub}_[0-9][0-9][0-9][0-9]+)\.${nproc}\.0\.vtk/) {
     $cfile = $1;
     print "Concatenate ${cfile}\n";
     `$concat $cfile $nproc`;
