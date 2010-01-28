@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.10 2009/10/20 02:59:49 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.11 2010/01/28 22:06:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.10 2009/10/20 02:59:49 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.11 2010/01/28 22:06:51 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -842,10 +842,15 @@ contains
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_ArrayBundleRedist()} on any pair of ArrayBundles that 
-!   are congruent and typekind conform with the Arrays contained in
+!   are weakly congruent and typekind conform with the Arrays contained in
 !   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
-!   Congruent Arrays possess matching DistGrids and the shape of the local
-!   array tiles matches between the Arrays for every DE.
+!   Congruent Arrays possess matching DistGrids, and the shape of the local
+!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   Arrays the sizes of the undistributed dimensions, that vary faster with
+!   memory than the first distributed dimension, are permitted to be different.
+!   This means that the same {\tt routehandle} can be applied to a large class
+!   of similar Arrays that differ in the number of elements in the left most
+!   undistributed dimensions.
 !
 !   This method is overloaded for:\newline
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
@@ -1163,10 +1168,16 @@ contains
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_ArrayBundleRedist()} on any pair of ArrayBundles that 
-!   are congruent and typekind conform with the Arrays contained in
+!   are weakly congruent and typekind conform with the Arrays contained in
 !   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
-!   Congruent Arrays possess matching DistGrids and the shape of the local
-!   array tiles matches between the Arrays for every DE.
+!   Congruent Arrays possess matching DistGrids, and the shape of the local
+!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   Arrays the sizes of the undistributed dimensions, that vary faster with
+!   memory than the first distributed dimension, are permitted to be different.
+!   This means that the same {\tt routehandle} can be applied to a large class
+!   of similar Arrays that differ in the number of elements in the left most
+!   undistributed dimensions.
+!   \newline
 !
 !   This call is {\em collective} across the current VM.
 !
@@ -1421,10 +1432,15 @@ contains
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_ArrayBundleSMM()} on any pair of ArrayBundles that 
-!   are congruent and typekind conform with the Arrays contained in
+!   are weakly congruent and typekind conform with the Arrays contained in
 !   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
-!   Congruent Arrays possess matching DistGrids and the shape of the local
-!   array tiles matches between the Arrays for every DE.
+!   Congruent Arrays possess matching DistGrids, and the shape of the local
+!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   Arrays the sizes of the undistributed dimensions, that vary faster with
+!   memory than the first distributed dimension, are permitted to be different.
+!   This means that the same {\tt routehandle} can be applied to a large class
+!   of similar Arrays that differ in the number of elements in the left most
+!   undistributed dimensions.
 !
 !   This method is overloaded for:\newline
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
@@ -1783,14 +1799,15 @@ contains
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_ArrayBundleSMM()} on any pair of ArrayBundles that 
-!   are congruent and typekind conform with the Arrays contained in
+!   are weakly congruent and typekind conform with the Arrays contained in
 !   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
-!   Congruent Arrays possess matching DistGrids and the shape of the local
-!   array tiles matches between the Arrays for every DE.
-!
-!   This method is overloaded for:\newline
-!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
-!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
+!   Congruent Arrays possess matching DistGrids, and the shape of the local
+!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   Arrays the sizes of the undistributed dimensions, that vary faster with
+!   memory than the first distributed dimension, are permitted to be different.
+!   This means that the same {\tt routehandle} can be applied to a large class
+!   of similar Arrays that differ in the number of elements in the left most
+!   undistributed dimensions.
 !   \newline
 !
 !   This call is {\em collective} across the current VM.

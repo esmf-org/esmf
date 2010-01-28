@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.107 2010/01/26 06:11:25 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.108 2010/01/28 22:06:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.107 2010/01/26 06:11:25 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.108 2010/01/28 22:06:50 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -667,11 +667,16 @@ contains
 !
 ! !DESCRIPTION:
 !   Execute a precomputed Array sparse matrix multiplication from {\tt srcArray}
-!   to {\tt dstArray}. Both {\tt srcArray} and {\tt dstArray} must be
-!   congruent and typekind conform with the respective Arrays used during 
-!   {\tt ESMF\_ArraySMMStore()}. Congruent Arrays possess
-!   matching DistGrids and the shape of the local array tiles matches between
-!   the Arrays for every DE.
+!   to {\tt dstArray}. Both {\tt srcArray} and {\tt dstArray} must be weakly
+!   congruent and typekind conform to the respective Arrays used during 
+!   {\tt ESMF\_ArraySMMStore()}.
+!   Congruent Arrays possess matching DistGrids, and the shape of the local
+!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   Arrays the size of the undistributed dimensions, that vary faster with
+!   memory than the first distributed dimension, is permitted to be different.
+!   This means that the same {\tt routehandle} can be applied to a large class
+!   of similar Arrays that differ in the number of elements in the left most
+!   undistributed dimensions.
 !
 !   It is erroneous to specify the identical Array object for {\tt srcArray} and
 !   {\tt dstArray} arguments.
@@ -880,10 +885,15 @@ contains
 !   {\tt dstArray} arguments.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArraySMM()} on any pair of Arrays that are congruent
+!   {\tt ESMF\_ArraySMM()} on any pair of Arrays that are weakly congruent
 !   and typekind conform with the {\tt srcArray}, {\tt dstArray} pair. 
-!   Congruent Arrays possess matching DistGrids and the shape of the local
-!   array tiles matches between the Arrays for every DE.
+!   Congruent Arrays possess matching DistGrids, and the shape of the local
+!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   Arrays the size of the undistributed dimensions, that vary faster with
+!   memory than the first distributed dimension, is permitted to be different.
+!   This means that the same {\tt routehandle} can be applied to a large class
+!   of similar Arrays that differ in the number of elements in the left most
+!   undistributed dimensions.
 !
 !   This method is overloaded for:\newline
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
@@ -1250,10 +1260,15 @@ contains
 !   {\tt dstArray} arguments.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArraySMM()} on any pair of Arrays that are congruent
+!   {\tt ESMF\_ArraySMM()} on any pair of Arrays that are weakly congruent
 !   and typekind conform with the {\tt srcArray}, {\tt dstArray} pair. 
-!   Congruent Arrays possess matching DistGrids and the shape of the local
-!   array tiles matches between the Arrays for every DE.
+!   Congruent Arrays possess matching DistGrids, and the shape of the local
+!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   Arrays the size of the undistributed dimensions, that vary faster with
+!   memory than the first distributed dimension, is permitted to be different.
+!   This means that the same {\tt routehandle} can be applied to a large class
+!   of similar Arrays that differ in the number of elements in the left most
+!   undistributed dimensions.
 !   \newline
 !
 !   This call is {\em collective} across the current VM.
