@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.24 2010/01/22 18:07:06 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.25 2010/01/28 22:02:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.24 2010/01/22 18:07:06 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.25 2010/01/28 22:02:57 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -395,7 +395,7 @@ int ArrayBundle::redistStore(
       matchList[i] = i; // initialize
       Array *srcArray = srcArraybundle->getArrayList()[i];
       Array *dstArray = dstArraybundle->getArrayList()[i];
-      // search if there was an earlier entry that matches
+      // search if there was an earlier entry that is weakly congruent
       for (int j=i-1; j>=0; j--){
         bool srcMatch = Array::match(srcArray,
           srcArraybundle->getArrayList()[j], &localrc);
@@ -663,7 +663,7 @@ int ArrayBundle::sparseMatMulStore(
       matchList[i] = i; // initialize
       Array *srcArray = srcArraybundle->getArrayList()[i];
       Array *dstArray = dstArraybundle->getArrayList()[i];
-      // search if there was an earlier entry that matches
+      // search if there was an earlier entry that is weakly congruent
       for (int j=i-1; j>=0; j--){
         bool srcMatch = Array::match(srcArray,
           srcArraybundle->getArrayList()[j], &localrc);
