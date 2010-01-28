@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.32.2.10 2010/01/27 06:55:41 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.32.2.11 2010/01/28 00:39:11 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.32.2.10 2010/01/27 06:55:41 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.32.2.11 2010/01/28 00:39:11 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1966,7 +1966,7 @@
       if (nring.eq.288 .and. iteration.eq.288) testPass = .true.
       call ESMF_Test(testPass.and.(rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      call flush(6)
+      !call flush(6)
 
       call ESMF_AlarmDestroy(alarm4, rc=rc)
       call ESMF_ClockDestroy(clock2, rc=rc)
@@ -2464,14 +2464,14 @@
           if (.not. testPass) print *, 'bad return codes discovered'
           write (failMsg,*) trim (failMsg), ', alarmCount = ', alarmCount, ', expected = ', expectedCount
           print *, 'The alarm ringTime may be stuck at:'
-          call flush(6)
+          !call flush(6)
           call ESMF_AlarmPrint (alarm1, "ringTime string")
-          call flush(6)
+          !call flush(6)
       end if
 
       call ESMF_Test (testPass .and. alarmCount == expectedCount, &
                      name, failMsg, result, ESMF_SRCLINE)
-      call flush(6)
+      !call flush(6)
 
       call ESMF_AlarmDestroy (alarm1, rc=rc)
       call ESMF_ClockDestroy (clock, rc=rc)
