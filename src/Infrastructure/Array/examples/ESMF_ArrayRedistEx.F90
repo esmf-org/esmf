@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistEx.F90,v 1.10 2009/09/08 21:25:31 theurich Exp $
+! $Id: ESMF_ArrayRedistEx.F90,v 1.11 2010/01/29 05:12:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -25,7 +25,9 @@ program ESMF_ArrayRedistEx
   type(ESMF_VM):: vm
   type(ESMF_DistGrid):: srcDistGrid, dstDistGrid
   type(ESMF_Array):: srcArray, dstArray
-  type(ESMF_ArraySpec):: arrayspec
+  type(ESMF_Array):: srcArray1, dstArray1
+  type(ESMF_Array):: srcArray2, dstArray2
+  type(ESMF_ArraySpec):: arrayspec, arrayspec3d
   type(ESMF_RouteHandle):: redistHandle
   integer :: finalrc
   
@@ -108,22 +110,93 @@ program ESMF_ArrayRedistEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
-! The use of the {\tt redistHandle} is {\em not} restricted to {\tt srcArray}
-! and {\tt dstArray}. The {\tt redistHandle} can be applied to redistribute data
-! between any Array pairs that are congruent to the Array pair used during
-! precomputation. Arrays are congruent if they are defined on matching DistGrids
-! and the shape of local array allocations match for all DEs.
-!
+! The use of the precomputed {\tt redistHandle} is {\em not} restricted to
+! {\tt srcArray} and {\tt dstArray}. The {\tt redistHandle} can be used to
+! redistribute data between any Array pairs that are weakly congruent to the
+! Array pair used during precomputation. Arrays are congruent if they are
+! defined on matching DistGrids and the shape of local array allocations match
+! for all DEs. For weakly congruent Arrays the sizes of the undistributed
+! dimensions, that vary faster with memory than the first distributed
+! dimension, are permitted to be different. This means that the same
+! {\tt redistHandle} can be applied to a large class of similar Arrays that
+! differ in the number of elements in the left most undistributed dimensions.
 !EOE
+
+  call ESMF_ArrayRedistRelease(routehandle=redistHandle, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
 !BOE
-! The resources held by {\tt redistHandle} need to be deallocated by the user
-! code before the handle becomes inaccessible.
+! Neither {\tt srcArray} nor {\tt dstArray} from above hold an undistributed
+! dimension. However, the following {\tt srcArray1} and {\tt dstArray1} objects
+! are constructed to have an undistributed dimension each, that varies fastest
+! with memory. There is only one element in the undistributed dimension in each
+! Array.
+!EOE
+!BOC
+  call ESMF_ArraySpecSet(arrayspec3d, typekind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  srcArray1 = ESMF_ArrayCreate(arrayspec=arrayspec3d, distgrid=srcDistgrid, &
+    distgridToArrayMap=(/2,3/), undistLBound=(/1/), undistUBound=(/1/), rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  dstArray1 = ESMF_ArrayCreate(arrayspec=arrayspec3d, distgrid=dstDistgrid, &
+    distgridToArrayMap=(/2,3/), undistLBound=(/1/), undistUBound=(/1/), rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+!BOC
+  call ESMF_ArrayRedistStore(srcArray=srcArray1, dstArray=dstArray1, &
+    routehandle=redistHandle, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! The weak congruency feature permits the {\tt redistHandle} to be used on Array
+! pairs that have the same arrangement of distributed and undistributed
+! dimensions, but where the first dimension is of different size, e.g. 10
+! elements instead of 1.
+!EOE
+
+!BOC
+  srcArray2 = ESMF_ArrayCreate(arrayspec=arrayspec3d, distgrid=srcDistgrid, &
+    distgridToArrayMap=(/2,3/), undistLBound=(/1/), undistUBound=(/10/), rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  dstArray2 = ESMF_ArrayCreate(arrayspec=arrayspec3d, distgrid=dstDistgrid, &
+    distgridToArrayMap=(/2,3/), undistLBound=(/1/), undistUBound=(/10/), rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+
+!BOC
+  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
+    routehandle=redistHandle, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! When done, the resources held by {\tt redistHandle} need to be deallocated
+! by the user code before the handle becomes inaccessible.
 !EOE
 !BOC
   call ESMF_ArrayRedistRelease(routehandle=redistHandle, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
+  call ESMF_ArrayDestroy(srcArray1, rc=rc) ! destroy the Array object
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_ArrayDestroy(dstArray1, rc=rc) ! destroy the Array object
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_ArrayDestroy(srcArray2, rc=rc) ! destroy the Array object
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_ArrayDestroy(dstArray2, rc=rc) ! destroy the Array object
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
   call ESMF_ArrayDestroy(dstArray, rc=rc) ! destroy the Array object
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_DistGridDestroy(dstDistgrid, rc=rc) ! destroy the DistGrid object

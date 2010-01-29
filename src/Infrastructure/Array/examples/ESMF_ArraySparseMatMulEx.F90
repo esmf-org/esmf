@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.13 2009/09/08 21:25:31 theurich Exp $
+! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.14 2010/01/29 05:12:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -296,6 +296,16 @@ program ESMF_ArraySparseMatMulEx
 !         combinedFactorList(n) * srcArray(combinedFactorIndexList(1, n)).
 !   enddo
 ! \end{verbatim}
+!
+! The {\tt ESMF\_RouteHandle} object returned by {\tt ESMF\_ArraySMMStore()}
+! can be applied to any src/dst Array pairs that are weakly congurent to the
+! Array pair used during precomputation. Arrays are congruent if they are
+! defined on matching DistGrids and the shape of local array allocations match
+! for all DEs. For weakly congruent Arrays the sizes of the undistributed
+! dimensions, that vary faster with memory than the first distributed
+! dimension, are permitted to be different. See section \ref{Array:Redist}
+! for an example of this feature demonstrated for the Redist case. The exact
+! same principle applies to the SMM case.
 !
 ! The resources held by {\tt sparseMatMulHandle} need to be deallocated by the
 ! user code before the handle becomes inaccessible.
