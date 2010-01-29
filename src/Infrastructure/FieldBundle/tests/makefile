@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1.2.2 2008/04/02 23:20:14 theurich Exp $ 
+# $Id: makefile,v 1.1.2.3 2010/01/29 21:30:13 svasquez Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -20,9 +20,10 @@ TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldBundleUTest \
 	$(ESMC_TESTDIR)/ESMF_FieldBundleCrGetUTest
 
 TESTS_RUN     = RUN_ESMF_FieldBundleUTest \
-	RUN_ESMF_FieldBundleCrGetUTest \
-	RUN_ESMF_FieldBundleHarness2UTest \
-	RUN_ESMF_FieldBundleHarness4UTest
+		RUN_ESMF_FieldBundleCrGetUTest
+# The following tests are disabled for ESMF_3_1_0rp3
+	#RUN_ESMF_FieldBundleHarness2UTest \
+	#RUN_ESMF_FieldBundleHarness4UTest
 
 TESTS_RUN_UNI = RUN_ESMF_FieldBundleUTestUNI 
 
