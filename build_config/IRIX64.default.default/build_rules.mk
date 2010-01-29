@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.35 2008/07/23 04:51:54 theurich Exp $
+# $Id: build_rules.mk,v 1.36 2010/01/29 22:28:06 w6ws Exp $
 # 
 # IRIX64.default.default
 #
@@ -82,6 +82,9 @@ ESMF_LAPACKDEFAULT         = scsl
 #
 # abide to C++ language standard; don't put libc into std name space
 ESMF_CXXCOMPILEOPTS       += -LANG:std=on
+#
+# defer template instantiation in the compiler front end
+ESMF_CXXCOMPILEOPTS       += -ptused
 #
 # allow for multi-processor code (important for shared objects!)
 ESMF_CXXCOMPILEOPTS       += -mp
