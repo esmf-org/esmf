@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.34 2009/10/01 15:41:01 oehmke Exp $
+% $Id: ESMF_options.tex,v 1.35 2010/01/29 05:08:40 theurich Exp $
 
 \section{Global Options, Flags and Parameters}
 
@@ -42,18 +42,19 @@ Valid values are:
 \subsubsection{ESMF\_BlockingFlag}
 \label{opt:blockingflag}
 {\sf DESCRIPTION:\\}  
-Indicates method blocking behavior and PET synchronization for communication
-calls as well as Component initialize, run and finalize methods.
+Indicates method blocking behavior and PET synchronization for VM communication
+methods, as well as for standard Component methods, such as Initialize(), Run() 
+and Finalize().
 
-For communication calls the {\tt ESMF\_BLOCKING} and {\tt ESMF\_NONBLOCKING}
+For VM communication calls the {\tt ESMF\_BLOCKING} and {\tt ESMF\_NONBLOCKING}
 modes provide behavior that is practically identical to the blocking and
-non-blocking communication calls familiar to MPI users.
+non-blocking communication calls familiar from MPI.
 
 The details of how the blocking mode setting affects Component methods are
-more complex as a consequence of the fact that ESMF Components can be run in
-threaded or non-threaded mode. However, in the default, non-threaded case, where
-an ESMF application runs as a pure MPI program, most of the complexity is
-removed.
+more complex. This is a consequence of the fact that ESMF Components can be
+executed in threaded or non-threaded mode. However, in the default,
+non-threaded case, where an ESMF application runs as a pure MPI or mpiuni
+program, most of the complexity is removed.
 
 See the {\bf VM} item in \ref{sec:spatialclasses} for an
 explanation of the PET and VAS concepts used in the following
@@ -141,10 +142,51 @@ Valid values are:
 
 \end{description}
 
+\subsubsection{ESMF\_CommFlag}
+\label{opt:commflag}
+{\sf DESCRIPTION:\\}  
+Switch between blocking and non-blocking execution of RouteHandle based
+communication calls. Every RouteHandle based communication method contains
+an optional argument {\tt commflag} that is of type {\tt ESMF\_CommFlag}.
+
+Valid values are:
+\begin{description}
+
+\item [ESMF\_COMM\_BLOCKING]
+         Execute a precomputed communication pattern in blocking mode. This
+         mode guarantees that when the method returns all PET-local data
+         transfers, both in-bound and out-bound, have finished. 
+\item [ESMF\_COMM\_NBSTART]
+         Start executing a precomputed communication pattern in non-blocking
+         mode. When a method returns from being called in this mode, it
+         guarantees that all PET-local out-bound data has been transferred.
+         It is now safe for the user to overwrite out-bound data elements.
+         No guarantees are made for in-bound data elements at this stage. It is
+         unsafe to access these elements until a call in
+         {\tt ESMF\_COMM\_NBTESTFINISH} mode has been issued and has returned
+         with {\tt finishedflag} equal to .true., or a call in
+         {\tt ESMF\_COMM\_NBWAITFINISH} mode has been issued and has returned.
+\item [ESMF\_COMM\_NBTESTFINISH]
+         Test whether the transfer of data of a precomputed communication
+         pattern, started with {\tt ESMF\_COMM\_NBSTART}, has completed.
+         Finish up as much as possible and set the {\tt finishedflag} to 
+         {\tt .true.} if {\em all} data operations have completed, or
+         {\tt .false.} if there are still outstanding transfers. Only after
+         a {\tt finishedflag} equal to {\tt .true.} has been returned is it
+         safe to access any of the in-bound data elements.
+\item [ESMF\_COMM\_NBWAITFINISH]
+         Wait (i.e. block) until the transfer of data of a precomputed
+         communication pattern, started with {\tt ESMF\_COMM\_NBSTART}, has
+         completed. Finish up {\em all} data operations and set the returned 
+         {\tt finishedflag} to {\tt .true.}. It is safe to access any of the
+         in-bound data elements once the call has returned.
+\end{description}
+
 \subsubsection{ESMF\_ContextFlag}
 \label{opt:contextflag}
 {\sf DESCRIPTION:\\}  
-Indicates the type of VM context in which a component is executing.
+Indicates the type of VM context in which a Component will be executing its
+standard methods.
 
 Valid values are:
 \begin{description}
