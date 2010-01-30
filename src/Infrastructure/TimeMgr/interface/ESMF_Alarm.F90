@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.82 2009/10/12 04:24:05 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.83 2010/01/30 01:35:04 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.82 2009/10/12 04:24:05 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.83 2010/01/30 01:35:04 eschwab Exp $'
 
 !==============================================================================
 !
@@ -280,15 +280,19 @@
 !          specified, an interval alarm will repeat forever.
 !     \item[{[ringDuration]}]
 !          The absolute ring duration.  If not sticky (see argument below),
-!          alarms rings for ringDuration, then turns itself off.  Mutually 
-!          exclusive with ringTimeStepCount (below); used only if
-!          ringTimeStepCount is zero.
+!          alarms rings for ringDuration, then turns itself off.  Default is
+!          zero (unused).  Mutually exclusive with ringTimeStepCount (below);
+!          used only if set to a non-zero duration and ringTimeStepCount is 1
+!          (see below).
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
 !     \item[{[ringTimeStepCount]}]
 !          The relative ring duration.  If not sticky (see argument below),
 !          alarms rings for ringTimeStepCount, then turns itself off.
-!          Mutually exclusive with ringDuration (above); used if non-zero,
-!          otherwise ringDuration is used.
+!          Default is 1: a non-sticky alarm will ring for one clock time step.
+!          Mutually exclusive with ringDuration (above); used if
+!          ringTimeStepCount > 1.  If ringTimeStepCount is 1 (default) and
+!          ringDuration is non-zero, ringDuration is used (see above), otherwise
+!          ringTimeStepCount is used.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
 !     \item[{[refTime]}]
 !          The reference (i.e. base) time for an interval alarm.
@@ -850,9 +854,14 @@
 !          The object instance to unset sticky.
 !     \item[{[ringDuration]}]
 !          If not sticky, alarms rings for ringDuration, then turns itself off.
+!          Mutually exclusive with ringTimeStepCount (see below and full
+!          description in method {\tt ESMF\_AlarmCreate()} or
+!          {\tt ESMF\_AlarmSet()}).
 !     \item[{[ringTimeStepCount]}]
 !          If not sticky, alarms rings for ringTimeStepCount, then turns
-!          itself off.
+!          itself off.  Mutually exclusive with ringDuration (see above and
+!          full description in method {\tt ESMF\_AlarmCreate()} or
+!          {\tt ESMF\_AlarmSet()}).
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1150,15 +1159,19 @@
 !          The stop time for repeating (interval) alarms.
 !     \item[{[ringDuration]}]
 !          The absolute ring duration.  If not sticky (see argument below),
-!          alarms rings for ringDuration, then turns itself off.  Mutually 
-!          exclusive with ringTimeStepCount (below); used only if
-!          ringTimeStepCount is zero.
+!          alarms rings for ringDuration, then turns itself off.  Default is
+!          zero (unused).  Mutually exclusive with ringTimeStepCount (below);
+!          used only if set to a non-zero duration and ringTimeStepCount is 1
+!          (see below).
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
 !     \item[{[ringTimeStepCount]}]
 !          The relative ring duration.  If not sticky (see argument below),
 !          alarms rings for ringTimeStepCount, then turns itself off.
-!          Mutually exclusive with ringDuration (above); used if non-zero,
-!          otherwise ringDuration is used.
+!          Default is 1: a non-sticky alarm will ring for one clock time step.
+!          Mutually exclusive with ringDuration (above); used if
+!          ringTimeStepCount > 1.  If ringTimeStepCount is 1 (default) and
+!          ringDuration is non-zero, ringDuration is used (see above), otherwise
+!          ringTimeStepCount is used.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
 !     \item[{[refTime]}]
 !          The reference (i.e. base) time for an interval alarm.
