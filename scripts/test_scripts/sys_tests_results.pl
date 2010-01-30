@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.16 2009/12/01 21:39:02 svasquez Exp $
+# $Id: sys_tests_results.pl,v 1.17 2010/01/30 04:31:15 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -212,16 +212,40 @@ use File::Find
                                 push(file_lines, $line);
                         }
                         close ($file);
-			$pet_count=grep ( /NUMBER_OF_PROCESSORS/, @file_lines);
-			if ($pet_count == "") {
-				$pet_count =0;
+			# Find # of processors string
+			$count=grep ( /NUMBER_OF_PROCESSORS/, @file_lines);
+			if (($count = "") or ($count = 0)){
+				# Did not find the # of processors string
+				goto DONE_CHECKING;
 			}
-                        $count=grep ( /PASS/, @file_lines);
-			if (($count == $pet_count) and ($pet_count ne 0)){
+			else {
+				# Create list of processor count strings
+				@num_procs = grep(/NUMBER_OF_PROCESSORS/, @file_lines); 
+				$pet_count_found = 0;
+				foreach (@num_procs){
+        				# remove all white spaces
+			        	s/ //g;
+        				$pet_count = 0;
+        				($test_string,$pet_count) = split(/NUMBER_OF_PROCESSORS/, $_);
+        				if ($pet_count != 0) {
+                				$pet_count_found = 1;
+                				goto CONT_CHECKING;
+                			}
+					else {
+						goto DONE_CHECKING;
+					}
+				}
+			}
+
+		
+            CONT_CHECKING:if ( $pet_count_found = 1) {
+				$count=grep ( /PASS/, @file_lines);
+				if ($count == $pet_count) {
                                 push (pass_tests, $file);
                                 $pass_count=$pass_count + 1;
+				}
                         }
-                        @file_lines=();
+       		DONE_CHECKING:   @file_lines=();
                 }
                 # Calculate fail_count
                 $fail_count = $st_count - $pass_count;
