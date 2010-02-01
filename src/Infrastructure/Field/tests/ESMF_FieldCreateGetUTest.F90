@@ -1,7 +1,7 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.59 2009/01/21 21:25:20 cdeluca Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.60 2010/02/01 20:50:33 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2009, University Corporation for Atmospheric Research,
+! Copyright 2002-2010, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

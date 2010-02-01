@@ -1,7 +1,7 @@
-! $Id: ESMF_InternDG.F90,v 1.13.2.3 2009/01/21 21:25:22 cdeluca Exp $
+! $Id: ESMF_InternDG.F90,v 1.13.2.4 2010/02/01 20:51:15 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2009, University Corporation for Atmospheric Research, 
+! Copyright 2002-2010, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -216,7 +216,7 @@ module ESMF_InternDGMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternDG.F90,v 1.13.2.3 2009/01/21 21:25:22 cdeluca Exp $'
+    '$Id: ESMF_InternDG.F90,v 1.13.2.4 2010/02/01 20:51:15 svasquez Exp $'
 
 !==============================================================================
 !

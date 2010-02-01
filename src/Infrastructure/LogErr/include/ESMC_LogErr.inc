@@ -1,8 +1,8 @@
 #if 0
-$Id: ESMC_LogErr.inc,v 1.9.2.2 2009/01/21 21:25:22 cdeluca Exp $
+$Id: ESMC_LogErr.inc,v 1.9.2.3 2010/02/01 20:51:32 svasquez Exp $
 
 Earth System Modeling Framework
-Copyright 2002-2009, University Corporation for Atmospheric Research,
+Copyright 2002-2010, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
