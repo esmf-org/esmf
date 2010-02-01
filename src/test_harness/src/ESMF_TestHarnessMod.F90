@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.44 2010/01/27 23:11:55 theurich Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.45 2010/02/01 17:11:49 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,6 +34,19 @@
 !  Expand on the type of routines included here
 !
 !-------------------------------------------------------------------------------
+!
+! modifications
+!   gblock 1/14/2010 bypass dead subroutine populate_grid
+!                    added default cases to generate error message in select statements for
+!                      fetures that are not implemented
+!                    generate error message for tensor case (feature not implemented yet)
+!                    generate error message for peak valley (feature not implemented yet)
+!                    implemented common check_value function to compare actual to expected
+!                      values within a tolerance
+!                    removed extraneous output & improved test progress display
+!                    implemented CheckError function to provide program trace feature to stdout
+!
+!
 ! !USES:
 
   use ESMF_TestHarnessReportMod
@@ -54,6 +67,11 @@
          field_regrid_test, field_redist_test
 
 !===============================================================================
+! debug trace switch
+logical                       :: checkpoint = .FALSE.
+
+! minimum error neighborhood for regrid interpolation
+real(ESMF_KIND_R8), parameter :: RegridMinNeighborhood = 1.0D-14
 
   contains 
 
@@ -169,15 +187,17 @@
     lfilename = trim(adjustL(rcrd(kfile)%filename))
 
     call ESMF_ConfigLoadFile(localcf, trim(adjustL(lfilename)), rc=localrc )
-    if( ESMF_LogMsgFoundError(localrc, "cannot load config file " //           &
+    if( CheckError(checkpoint, __LINE__, __FILE__, localrc, "cannot load config file " //           &
             trim(adjustL(lfilename)), rcToReturn=rc) ) return
+    !if( ESMF_LogMsgFoundError(localrc, "cannot load config file " //           &
+    !        trim(adjustL(lfilename)), rcToReturn=rc) ) return
 
     !---------------------------------------------------------------------------
     ! Search for the problem descriptor string table
     !---------------------------------------------------------------------------
     call ESMF_ConfigFindLabel(localcf, trim(adjustL(descriptor_label)),        &
              rc=localrc )
-    if( ESMF_LogMsgFoundError(localrc, "cannot find config label " //          &
+    if( CheckError(checkpoint, __LINE__, __FILE__, localrc, "cannot find config label " //          &
              trim(adjustL(descriptor_label)), rcToReturn=rc) ) return
 
     !---------------------------------------------------------------------------
@@ -185,7 +205,7 @@
     !---------------------------------------------------------------------------
     call ESMF_ConfigGetDim(localcf, nstrings(kfile), ntmp,                     &
              trim(adjustL(descriptor_label)), rc=localrc)
-    if( ESMF_LogMsgFoundError(localrc, "cannot get descriptor table size in "  &
+    if( CheckError(checkpoint, __LINE__, __FILE__, localrc, "cannot get descriptor table size in "  &
             // "file " // trim(adjustL(lfilename)), rcToReturn=rc) ) return
 
     !---------------------------------------------------------------------------
@@ -202,7 +222,7 @@
     !---------------------------------------------------------------------------
     call ESMF_ConfigFindLabel(localcf, trim(adjustL(descriptor_label)),        &
            rc=localrc )
-    if( ESMF_LogMsgFoundError(localrc, "cannot find config label" //           &
+    if( CheckError(checkpoint, __LINE__, __FILE__, localrc, "cannot find config label" //           &
            trim(adjustL(descriptor_label)), rcToReturn=rc) ) return
 
     allocate( ncolumns(nstrings(kfile)), stat=allocRcToTest )
@@ -216,7 +236,7 @@
 
     do kstr=1,nstrings(kfile)
       call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
-      if( ESMF_LogMsgFoundError(localrc, "cannot advance to the next line of"  &
+      if( CheckError(checkpoint, __LINE__, __FILE__, localrc, "cannot advance to the next line of"  &
               //" the table "// trim(adjustL(descriptor_label)) // " in file " &
               // trim(adjustL(lfilename)), rcToReturn=rc) ) return
 
@@ -245,7 +265,7 @@
     !---------------------------------------------------------------------------
     call ESMF_ConfigFindLabel(localcf, trim(adjustL(descriptor_label)),        &
              rc=localrc )
-    if( ESMF_LogMsgFoundError(localrc,                                         &
+    if( CheckError(checkpoint, __LINE__, __FILE__, localrc,                                         &
             "cannot find config label " // trim(adjustL(descriptor_label)),    &
             rcToReturn=rc) ) return
 
@@ -254,14 +274,14 @@
     ! copy the table into a character array
     !---------------------------------------------------------------------------
       call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
-      if( ESMF_LogMsgFoundError(localrc, "cannot advance to the next line " // &
+      if( CheckError(checkpoint, __LINE__, __FILE__, localrc, "cannot advance to the next line " // &
               "of table " // trim(adjustL(descriptor_label)) // " in file " // &
               trim(adjustL(lfilename)), rcToReturn=rc) ) return
 
       do kcol=1, ncolumns(kstr)
         call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
         write(lchar,"(i5)") kstr
-        if( ESMF_LogMsgFoundError(localrc, "cannot get table entry from line " &
+        if( CheckError(checkpoint, __LINE__, __FILE__, localrc, "cannot get table entry from line " &
                 // trim(adjustl(lchar)) //  " column " // char(kcol)  //       &
                 "of file " // trim(adjustL(lfilename)),                        &
                 rcToReturn=rc) ) return
@@ -600,7 +620,7 @@
     ! clean up CF
     !---------------------------------------------------------------------------
     call ESMF_ConfigDestroy(localcf, rc=localrc)
-    if( ESMF_LogMsgFoundError(localrc, "cannot destroy config file "  //       &
+    if( CheckError(checkpoint, __LINE__, __FILE__, localrc, "cannot destroy config file "  //       &
             trim(adjustL(lfilename)),  rcToReturn=rc) ) return
   enddo  ! file
 
@@ -699,7 +719,7 @@
   !-----------------------------------------------------------------------------
   lstring = trim(adjustL( pds%pds ) )
   call process_query(lstring, lname, tag, location, localrc)  
-  if( ESMF_LogMsgFoundError(localrc,"syntax error in problem descriptor" //    &
+  if( CheckError(checkpoint, __LINE__, __FILE__, localrc,"syntax error in problem descriptor" //    &
           " string " // trim(adjustL(lstring)),                                &
           rcToReturn=rc) ) return
 
@@ -715,7 +735,7 @@
   !-----------------------------------------------------------------------------
   call memory_topology(lstring, location, srcMulti, srcBlock,                  &
                        dstMulti, dstBlock, localrc)
-  if( ESMF_LogMsgFoundError(localrc,"syntax error in problem descriptor" //    &
+  if( CheckError(checkpoint, __LINE__, __FILE__, localrc,"syntax error in problem descriptor" //    &
           " string " // trim(adjustL(lstring)),                                &
           rcToReturn=rc) ) return
 
@@ -834,14 +854,14 @@
         ! grid and distribution descriptions.
         !-----------------------------------------------------------------------
         call memory_separate( src_string, src_mem_rank, lsrc, localrc) 
-        if( ESMF_LogMsgFoundError(localrc,"syntax error in SRC portion " //    &
+        if( CheckError(checkpoint, __LINE__, __FILE__, localrc,"syntax error in SRC portion " //    &
                 "of problem descriptor string - memory separate " //           &
                  trim(adjustL(lstring)), rcToReturn=rc) ) return
         call interpret_descriptor_string( lsrc, src_mem_rank,                  & 
                  grid_rank, grid_order, grid_type, grid_HaloL, grid_HaloR,     &
                  grid_StagLoc, dist_rank, dist_order, dist_type, localrc)
 
-        if( ESMF_LogMsgFoundError(localrc,"syntax error in SRC portion " //    &
+        if( CheckError(checkpoint, __LINE__, __FILE__, localrc,"syntax error in SRC portion " //    &
                 "of problem descriptor string - interpret string " //          &
                 trim(adjustL(lstring)), rcToReturn=rc) ) return
 
@@ -936,13 +956,13 @@
         ! for grid and distribution descriptions.
         !-----------------------------------------------------------------------
         call memory_separate( dst_string, dst_mem_rank, ldst, localrc) 
-        if( ESMF_LogMsgFoundError(localrc,"syntax error in SRC portion " //    &
+        if( CheckError(checkpoint, __LINE__, __FILE__, localrc,"syntax error in SRC portion " //    &
                 "of problem descriptor string - memory separate " //           &
                 trim(adjustL(lstring)), rcToReturn=rc) ) return
         call interpret_descriptor_string( ldst, dst_mem_rank,                  & 
                 grid_rank, grid_order, grid_type, grid_HaloL, grid_HaloR,      &
                 grid_StagLoc, dist_rank, dist_order, dist_type, localrc)
-        if( ESMF_LogMsgFoundError(localrc,"syntax error in SRC portion " //    &
+        if( CheckError(checkpoint, __LINE__, __FILE__, localrc,"syntax error in SRC portion " //    &
                 "of problem descriptor string - interpret string " //          &
                 trim(adjustL(lstring)), rcToReturn=rc) ) return
 
@@ -1017,6 +1037,7 @@
   integer :: localrc ! local error status
   integer :: iDfile, iGfile, iD, iG
   integer :: test_status
+
   integer :: localPET
 
   ! local characters
@@ -1038,24 +1059,41 @@
   ! initialize test counter
   test_failure = 0
 
+  call ESMF_VMGet(VM, localPet=localPET, rc=localrc)
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"can not get local pet ",          &
+                  rcToReturn=rc)) return
+
   !-----------------------------------------------------------------------------
   ! for a single problem descriptor string, loop through each specifier file
   ! combination
   !-----------------------------------------------------------------------------
-  print*,'-----------------======array redist test==========-----------------------'
+  if (localPet == 0) then
+    print*,'-----------------======array redist test==========-----------------------'
+  end if
 
   do iDfile=1,PDS%nDfiles         ! distribution specifier files
     do iGfile=1,PDS%nGfiles       ! grid specifier files
       do iD=1, PDS%Dfiles(iDfile)%nDspecs   ! entries in distribution specifier
         do iG=1, PDS%Gfiles(iGfile)%nGspecs ! entries in grid specifier file
+          write(liG,"(i5)") iG 
+          write(liD,"(i5)") iD
+
+          if (localPet == 0) then
+            print '(A)',"array redist test - "  &
+               // " with string "  // trim(adjustL(PDS%pds)) //                  &
+               " with entry "  // trim(adjustL(liD)) // " of file " //           &
+               trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
+               // " and entry " // trim(adjustL(liG)) // " of file " //          &
+               trim(adjustL(PDS%Gfiles(iGfile)%filename))
+          end if
+
           !---------------------------------------------------------------------
           ! create source and destination distributions
           !---------------------------------------------------------------------
           call create_distribution(PDS%SrcMem, PDS%Dfiles(iDfile)%src_dist(iD),&
                     PDS%Gfiles(iGfile)%src_grid(iG), src_distgrid, VM, localrc)
-          write(liG,"(i5)") iG 
-          write(liD,"(i5)") iD 
-          if (ESMF_LogMsgFoundError(localrc,"error creating source distgrid "  &
+
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating source distgrid "  &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
              trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
@@ -1068,7 +1106,7 @@
           !---------------------------------------------------------------------
           call create_array(src_array, src_distgrid, PDS%SrcMem,               &
                       PDS%Gfiles(iGfile)%src_grid(iG), localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error creating source array "     &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating source array "     &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
              trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
@@ -1081,7 +1119,7 @@
           !---------------------------------------------------------------------
           call populate_redist_array(src_array, src_distgrid, PDS%SrcMem,      &
                        PDS%Gfiles(iGfile)%src_grid(iG), localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error populating source array ",  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error populating source array ",  &
                   rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
@@ -1089,7 +1127,7 @@
           !---------------------------------------------------------------------
           call create_array(return_array, src_distgrid, PDS%SrcMem,            &
                       PDS%Gfiles(iGfile)%src_grid(iG), localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error creating return array "     &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating return array "     &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
              trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
@@ -1102,7 +1140,7 @@
           !---------------------------------------------------------------------
           call populate_array_value(return_array, initvalue, src_distgrid,     &
                   PDS%SrcMem, PDS%Gfiles(iGfile)%src_grid(iG), localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error initializing value in " //  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error initializing value in " //  &
              "return array ", rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
@@ -1112,7 +1150,7 @@
                     PDS%Gfiles(iGfile)%dst_grid(iG), dst_distgrid, VM, localrc)
           write(liG,"(i5)") iG 
           write(liD,"(i5)") iD 
-          if (ESMF_LogMsgFoundError(localrc,"error creating source distgrid "  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating source distgrid "  &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
              trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
@@ -1122,7 +1160,7 @@
 
           call create_array(dst_array, dst_distgrid, PDS%DstMem,               &
                       PDS%Gfiles(iGfile)%dst_grid(iG), localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error creating destinationarray " &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating destinationarray " &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
              trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
@@ -1135,7 +1173,7 @@
           !---------------------------------------------------------------------
           call populate_array_value(dst_array, initvalue, dst_distgrid,        &
                   PDS%DstMem, PDS%Gfiles(iGfile)%dst_grid(iG), localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error initializing value in " //  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error initializing value in " //  &
              "destination array ", rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
@@ -1150,7 +1188,7 @@
           !---------------------------------------------------------------------
           call ESMF_ArrayRedistStore(srcArray=src_array, dstArray=dst_array,   &
                    routehandle=redistHandle_forward, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"Array redist store failed for" // &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Array redist store failed for" // &
                   " forward direction", rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
@@ -1158,7 +1196,7 @@
           !---------------------------------------------------------------------
           call ESMF_ArrayRedist(srcArray=src_array, dstArray=dst_array,        &
                    routehandle=redistHandle_forward, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"Array redist run failed for " //  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Array redist run failed for " //  &
                   " forward failed ", rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
@@ -1166,7 +1204,7 @@
           !---------------------------------------------------------------------
           call ESMF_ArrayRedistRelease(routehandle=redistHandle_forward,       &
                    rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"redistribution release for" //    &
                   " forward failed ", rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
@@ -1174,7 +1212,7 @@
           !---------------------------------------------------------------------
           call ESMF_ArrayRedistStore(srcArray=dst_array, dstArray=return_array,&
                    routehandle=redistHandle_reverse, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"Array redist store failed for" // &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Array redist store failed for" // &
                   " reverse direction", rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
@@ -1182,7 +1220,7 @@
           !---------------------------------------------------------------------
           call ESMF_ArrayRedist(srcArray=dst_array, dstArray=return_array,     &
                    routehandle=redistHandle_reverse, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"Array redist run failed for " //  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Array redist run failed for " //  &
                   " reverse failed ", rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
@@ -1190,7 +1228,7 @@
           !---------------------------------------------------------------------
           call ESMF_ArrayRedistRelease(routehandle=redistHandle_reverse,       &
                    rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"redistribution release for" //    &
                   " reverse failed ", rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
@@ -1202,8 +1240,11 @@
           call compare_redist_array(test_status,                               & 
                   src_array, return_array, src_distgrid, src_distgrid,         &
                   PDS%SrcMem, PDS%Gfiles(iGfile)%src_grid(iG), localrc)
-          if (ESMF_LogMsgFoundError(localrc,"redistribution array " //         &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"redistribution array " //         &
                   " comparison failed ", rcToReturn=rc)) return
+
+! gblock - do we want to return on the compare failure?  How about internal ESMF error?
+!   suspect already HarnessTest_FAILURE reported on compare error, ESMF_xxx on ESMF error
 
           PDS%test_record(iDfile,iGfile)%test_status(iD,iG) = test_status
 
@@ -1211,13 +1252,9 @@
              test_failure = test_failure + 1
           endif
 
-          call ESMF_VMGet(VM, localPet=localPET, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"can not get local pet ",          &
-                  rcToReturn=rc)) return
-
           call report_descriptor_string(PDS, iG, iD, iGfile, iDfile,           &
                                         reportType, localPET, localrc)
-          if (ESMF_LogMsgFoundError(localrc,"redistribution array " //         &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"redistribution array " //         &
                   " test report failed ", rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
@@ -1227,26 +1264,26 @@
           ! Destroy Array objects before moving to next test
           !---------------------------------------------------------------------
           call ESMF_ArrayDestroy(src_array, rc=localrc) ! original source
-          if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_array",     &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"unable to destroy src_array",     &
              rcToReturn=rc)) return
 
           call ESMF_ArrayDestroy(return_array, rc=localrc) ! return to source
-          if (ESMF_LogMsgFoundError(localrc,"unable to destroy return_array",  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"unable to destroy return_array",  &
              rcToReturn=rc)) return
 
           call ESMF_ArrayDestroy(dst_array, rc=localrc) ! redistribution 
-          if (ESMF_LogMsgFoundError(localrc,"unable to destroy dst_array   ",  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"unable to destroy dst_array   ",  &
              rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
           ! Destroy DistGrid objects before running next test
           !---------------------------------------------------------------------
           call ESMF_DistGridDestroy(src_distgrid, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_distgrid",  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"unable to destroy src_distgrid",  &
              rcToReturn=rc)) return
 
           call ESMF_DistGridDestroy(dst_distgrid, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_distgrid",  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"unable to destroy src_distgrid",  &
              rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
@@ -1260,7 +1297,10 @@
   !-----------------------------------------------------------------------------
   rc = ESMF_SUCCESS
   
-  print*,'Redist Completed'
+  if (localPet == 0) then
+      print*,'Array Redist Completed'
+  end if
+
   !-----------------------------------------------------------------------------
   end subroutine array_redist_test
   !-----------------------------------------------------------------------------
@@ -1317,26 +1357,41 @@
   ! initialize test counter
   test_failure = 0
 
+  call ESMF_VMGet(VM, localPet=localPET, rc=localrc)
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"can not get local pet ", rcToReturn=rc)) return
+
   !-----------------------------------------------------------------------------
   ! for a single problem descriptor string, loop through each specifier file
   ! combination
   ! Create source and destination distributions, Fields and conduct regrid
   !-----------------------------------------------------------------------------
-  print*,'-----------------======field regrid test==========-----------------------'
+  if (localPet == 0) then
+      print*,'-----------------======field regrid test==========-----------------------'
+  end if
 
   do iDfile=1,PDS%nDfiles         ! distribution specifier files
     do iGfile=1,PDS%nGfiles       ! grid specifier files
       do iD=1, PDS%Dfiles(iDfile)%nDspecs   ! entries in distribution specifier
         do iG=1, PDS%Gfiles(iGfile)%nGspecs ! entries in grid specifier file
-          print*,'field regrid create source'
+          write(liG,"(i5)") iG 
+          write(liD,"(i5)") iD 
+
+          if (localPet == 0) then
+            print '(A)', "field regrid"  &
+               // " with string " // trim(adjustL(PDS%pds)) //                   &
+               " with entry "  // trim(adjustL(liD)) // " of file " //           &
+               trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
+               // " and entry " // trim(adjustL(liG)) // " of file " //          &
+               trim(adjustL(PDS%Gfiles(iGfile)%filename))
+          end if
+
           !---------------------------------------------------------------------
           ! create source distribution
           !---------------------------------------------------------------------
           call create_distribution(PDS%SrcMem, PDS%Dfiles(iDfile)%src_dist(iD),&
                     PDS%Gfiles(iGfile)%src_grid(iG), src_distgrid, VM, localrc)
-          write(liG,"(i5)") iG 
-          write(liD,"(i5)") iD 
-          if (ESMF_LogMsgFoundError(localrc,"error creating source distgrid "  &
+
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating source distgrid "  &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
              trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
@@ -1350,7 +1405,7 @@
           call create_grid_from_distgrid(gridSrc, src_distgrid, PDS%SrcMem,    &
                       PDS%Gfiles(iGfile)%src_grid(iG),  &
                       PDS%Dfiles(iDfile)%src_dist(iD), localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error creating source array "     &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating source array "     &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
              trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
@@ -1367,7 +1422,7 @@
           !---------------------------------------------------------------------
           call ESMF_ArraySpecSet(SrcArraySpec, typekind=ESMF_TYPEKIND_R8,      &
                          rank=PDS%SrcMem%memRank, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error creating ArraySpecSet",     &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating ArraySpecSet",     &
                          rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
@@ -1375,7 +1430,7 @@
           !---------------------------------------------------------------------
           srcField = ESMF_FieldCreate(grid=gridSrc, arrayspec=SrcArraySpec,    &
                   staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error creating source field",     &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating source field",     &
                   rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
@@ -1384,13 +1439,13 @@
           call populate_field(srcField, gridSrc, PDS%SrcMem,                   &
                    PDS%Gfiles(iGfile)%src_grid(iG),                            &
                    PDS%Gfiles(iGfile)%testfunction(iG), localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error initializing value in " //  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error initializing value in " //  &
              "source array ", rcToReturn=rc)) return
 
 !-------------------------------------------------------------------------------
 ! Destination
 !-------------------------------------------------------------------------------
-          print*,'field regrid create destination'
+          !print*,'field regrid create destination'
           !---------------------------------------------------------------------
           ! Create Destination distribution
           !---------------------------------------------------------------------
@@ -1398,7 +1453,7 @@
                     PDS%Gfiles(iGfile)%dst_grid(iG), dst_distgrid, VM, localrc)
           write(liG,"(i5)") iG 
           write(liD,"(i5)") iD 
-          if (ESMF_LogMsgFoundError(localrc,"error creating source distgrid "  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating source distgrid "  &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
              trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
@@ -1411,8 +1466,9 @@
           !---------------------------------------------------------------------
           call create_grid_from_distgrid(gridDst, dst_distgrid, PDS%DstMem,    &
                       PDS%Gfiles(iGfile)%dst_grid(iG),    &
-                      PDS%Dfiles(iDfile)%src_dist(iD), localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error creating source array "     &
+                      PDS%Dfiles(iDfile)%dst_dist(iD), localrc)
+! gblock 1/20/2009 - changed src_dist(iD) to %dst_dist(iD)
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating source array "     &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
              trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
@@ -1429,7 +1485,7 @@
           !---------------------------------------------------------------------
           call ESMF_ArraySpecSet(DstArraySpec, typekind=ESMF_TYPEKIND_R8,      &
                          rank=PDS%DstMem%memRank, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error creating dst ArraySpecSet", &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating dst ArraySpecSet", &
                          rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
@@ -1437,7 +1493,7 @@
           !---------------------------------------------------------------------
           dstField = ESMF_FieldCreate(gridDst, DstArraySpec,                   &
                   staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error creating dst field",        &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating dst field",        &
                   rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
@@ -1471,7 +1527,7 @@
   ! on a source grid onto a destination grid, and checking that the result 
   ! agrees with the analytical solution to within a set tolerance.
   !-----------------------------------------------------------------------------
-          print*,'field regrid store'
+          !print*,'field regrid store'
           !---------------------------------------------------------------------
           ! select the correct regridding method and do a Field Regrid store
           !---------------------------------------------------------------------
@@ -1479,7 +1535,7 @@
              case( Harness_BilinearRegrid )
                 call ESMF_FieldRegridStore(srcField, dstField=dstField, routeHandle=routeHandle,    &
                         regridMethod=ESMF_REGRID_METHOD_BILINEAR, rc=localrc)
-                if (ESMF_LogMsgFoundError(localrc,"Field Bilinear Regrid " //  &
+                if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Field Bilinear Regrid " //  &
                         "store failed", rcToReturn=rc)) return
 
              case( Harness_PatchRegrid )
@@ -1489,7 +1545,7 @@
                 libflag = 1  ! 
                 call ESMF_FieldRegridStore(srcField, dstField=dstField, routeHandle=routeHandle,    &
                         regridMethod=ESMF_REGRID_METHOD_PATCH, rc=localrc)
-                if (ESMF_LogMsgFoundError(localrc,"Field Patch Regrid " // &
+                if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Field Patch Regrid " // &
                         "store failed", rcToReturn=rc)) return
 #endif
 
@@ -1525,22 +1581,22 @@
           !---------------------------------------------------------------------
           ! regrid run
           !---------------------------------------------------------------------
-          print*,'field regrid run'
+          !print*,'field regrid run'
           call ESMF_FieldRegridRun(srcField, dstField, routeHandle, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"Field Regrid run failed for " //  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Field Regrid run failed for " //  &
                   " forward failed ", rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
   ! Check regrid     
   !-----------------------------------------------------------------------------
-          print*,'check field regrid'
+          !print*,'check field regrid'
           !---------------------------------------------------------------------
           ! compare interpolated array values with the exact solution
           !---------------------------------------------------------------------
           call check_field(test_status, dstField, gridDst,                     &
                            PDS%Gfiles(iGfile)%dst_grid(iG),                    &
                            PDS%Gfiles(iGfile)%testfunction(iG), localrc) 
-          if (ESMF_LogMsgFoundError(localrc,"redistribution array " //         &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"redistribution array " //         &
                   " comparison failed ", rcToReturn=rc)) return
 
           PDS%test_record(iDfile,iGfile)%test_status(iD,iG) = test_status
@@ -1549,13 +1605,9 @@
              test_failure = test_failure + 1
           endif
 
-          call ESMF_VMGet(VM, localPet=localPET, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"can not get local pet ",          &
-                  rcToReturn=rc)) return
-
           call report_descriptor_string(PDS, iG, iD, iGfile, iDfile,           &
                                         reportType, localPET, localrc)
-          if (ESMF_LogMsgFoundError(localrc,"redistribution array " //         &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"redistribution array " //         &
                   " test report failed ", rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
@@ -1565,40 +1617,40 @@
           ! release handles
           !---------------------------------------------------------------------
           call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"Regrid routehandle Release failed",&
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Regrid routehandle Release failed",&
                  rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
           ! release Fields
           !---------------------------------------------------------------------
           call ESMF_FieldDestroy(srcField, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"SRC Field Regrid Release failed", &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"SRC Field Regrid Release failed", &
                  rcToReturn=rc)) return
 
           call ESMF_FieldDestroy(dstField, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"DST Field Regrid Release failed", &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"DST Field Regrid Release failed", &
                  rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
           ! release Grids
           !---------------------------------------------------------------------
           call ESMF_GridDestroy(gridSrc, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"SRC grid Release failed",         &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"SRC grid Release failed",         &
                  rcToReturn=rc)) return
 
           call ESMF_GridDestroy(gridDst, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"DST Grid Release failed",         &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"DST Grid Release failed",         &
                  rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
           ! Destroy DistGrid objects before running next test
           !---------------------------------------------------------------------
           call ESMF_DistGridDestroy(src_distgrid, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_distgrid",  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"unable to destroy src_distgrid",  &
              rcToReturn=rc)) return
 
           call ESMF_DistGridDestroy(dst_distgrid, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_distgrid",  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"unable to destroy src_distgrid",  &
              rcToReturn=rc)) return
 
 
@@ -1613,7 +1665,10 @@
   !-----------------------------------------------------------------------------
   rc = ESMF_SUCCESS
   
-  print*,'Regrid Completed'
+  if (localPet == 0) then
+      print*,'Regrid Completed'
+  end if
+
   !-----------------------------------------------------------------------------
   end subroutine field_regrid_test
   !-----------------------------------------------------------------------------
@@ -1694,7 +1749,7 @@
                     PDS%Gfiles(iGfile)%src_grid(iG), src_distgrid, VM, localrc)
           write(liG,"(i5)") iG 
           write(liD,"(i5)") iD 
-          if (ESMF_LogMsgFoundError(localrc,"error creating source distgrid "  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating source distgrid "  &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
              trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
@@ -1708,7 +1763,7 @@
           call create_grid_from_distgrid(gridSrc, src_distgrid, PDS%SrcMem,    &
                       PDS%Gfiles(iGfile)%src_grid(iG),  &
                       PDS%Dfiles(iDfile)%src_dist(iD), localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error creating source array "     &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating source array "     &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
              trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
@@ -1725,7 +1780,7 @@
           !---------------------------------------------------------------------
           call ESMF_ArraySpecSet(SrcArraySpec, typekind=ESMF_TYPEKIND_R8,      &
                          rank=PDS%SrcMem%memRank, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error creating ArraySpecSet",     &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating ArraySpecSet",     &
                          rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
@@ -1733,7 +1788,7 @@
           !---------------------------------------------------------------------
           srcField = ESMF_FieldCreate(grid=gridSrc, arrayspec=SrcArraySpec,    &
                   staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error creating source field",     &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating source field",     &
                   rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
@@ -1746,7 +1801,7 @@
           !---------------------------------------------------------------------
           returnField = ESMF_FieldCreate(grid=gridReturn, arrayspec=SrcArraySpec, &
                   staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error creating source field",     &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating source field",     &
                   rcToReturn=rc)) return
 
 !-------------------------------------------------------------------------------
@@ -1759,7 +1814,7 @@
                     PDS%Gfiles(iGfile)%dst_grid(iG), dst_distgrid, VM, localrc)
           write(liG,"(i5)") iG 
           write(liD,"(i5)") iD 
-          if (ESMF_LogMsgFoundError(localrc,"error creating source distgrid "  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating source distgrid "  &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
              trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
@@ -1773,7 +1828,7 @@
           call create_grid_from_distgrid(gridDst, dst_distgrid, PDS%DstMem,    &
                       PDS%Gfiles(iGfile)%dst_grid(iG),    &
                       PDS%Dfiles(iDfile)%src_dist(iD), localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error creating source array "     &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating source array "     &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
              trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
@@ -1790,7 +1845,7 @@
           !---------------------------------------------------------------------
           call ESMF_ArraySpecSet(DstArraySpec, typekind=ESMF_TYPEKIND_R8,      &
                          rank=PDS%DstMem%memRank, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error creating dst ArraySpecSet", &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating dst ArraySpecSet", &
                          rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
@@ -1798,7 +1853,7 @@
           !---------------------------------------------------------------------
           dstField = ESMF_FieldCreate(gridDst, DstArraySpec,                   &
                   staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error creating dst field",        &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating dst field",        &
                   rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
@@ -1807,7 +1862,7 @@
           ! forward redist
           call ESMF_FieldRedistStore(srcField, dstField, routeHandle_forward,  &
                         rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"Field Redist " //                 &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Field Redist " //                 &
                         "store failed", rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
@@ -1815,7 +1870,7 @@
           !---------------------------------------------------------------------
           call ESMF_FieldRedist(srcField, dstField, routeHandle_forward,       &
                                 rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"Field Redist run failed for " //  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Field Redist run failed for " //  &
                   " forward failed ", rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
@@ -1823,7 +1878,7 @@
   !-----------------------------------------------------------------------------
           call ESMF_FieldRedistStore(dstField, returnField,                    &
                                      routeHandle_backward, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"Field Redist " //                 &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Field Redist " //                 &
                         "store failed", rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
@@ -1831,7 +1886,7 @@
           !---------------------------------------------------------------------
           call ESMF_FieldRedist(dstField, returnField, routeHandle_backward,   &
                                 rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"Field Redist run failed for " //  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Field Redist run failed for " //  &
                   " backward failed ", rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
@@ -1849,12 +1904,12 @@
           endif
 
           call ESMF_VMGet(VM, localPet=localPET, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"can not get local pet ",          &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"can not get local pet ",          &
                   rcToReturn=rc)) return
 
           call report_descriptor_string(PDS, iG, iD, iGfile, iDfile,           &
                                         reportType, localPET, localrc)
-          if (ESMF_LogMsgFoundError(localrc,"redistribution array " //         &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"redistribution array " //         &
                   " test report failed ", rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
@@ -1864,48 +1919,48 @@
           ! release handles
           !---------------------------------------------------------------------
           call ESMF_FieldRegridRelease(routeHandle_forward, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"Regrid routehandle Release failed",&
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Regrid routehandle Release failed",&
                  rcToReturn=rc)) return
 
           call ESMF_FieldRegridRelease(routeHandle_backward, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"Regrid routehandle Release failed",&
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Regrid routehandle Release failed",&
                  rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
           ! release Fields
           !---------------------------------------------------------------------
           call ESMF_FieldDestroy(srcField, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"SRC Field Regrid Release failed", &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"SRC Field Regrid Release failed", &
                  rcToReturn=rc)) return
 
           call ESMF_FieldDestroy(returnField, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"Return Field Regrid Release failed", &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Return Field Regrid Release failed", &
                  rcToReturn=rc)) return
 
           call ESMF_FieldDestroy(dstField, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"DST Field Regrid Release failed", &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"DST Field Regrid Release failed", &
                  rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
           ! release Grids
           !---------------------------------------------------------------------
           call ESMF_GridDestroy(gridSrc, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"SRC grid Release failed",         &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"SRC grid Release failed",         &
                  rcToReturn=rc)) return
 
           call ESMF_GridDestroy(gridDst, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"DST Grid Release failed",         &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"DST Grid Release failed",         &
                  rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
           ! Destroy DistGrid objects before running next test
           !---------------------------------------------------------------------
           call ESMF_DistGridDestroy(src_distgrid, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_distgrid",  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"unable to destroy src_distgrid",  &
              rcToReturn=rc)) return
 
           call ESMF_DistGridDestroy(dst_distgrid, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_distgrid",  &
+          if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"unable to destroy src_distgrid",  &
              rcToReturn=rc)) return
 
 
@@ -2097,7 +2152,7 @@
     distgrid = ESMF_DistGridCreate(minIndex=BIndx, maxIndex=EIndx,             &
                    regDecomp=decompOrder, decompflag=decompType,               &
                    vm=VM, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc,"error creating distgrid",               &
+    if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating distgrid",               &
        rcToReturn=rc)) return
 
     !---------------------------------------------------------------------------
@@ -2127,7 +2182,7 @@
                    regDecomp=decompOrder, decompflag=decompType,               &
                    connectionList=connectionList,rc=localrc)
 
-  if (ESMF_LogMsgFoundError(localrc,"error creating distgrid",                 &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating distgrid",                 &
              rcToReturn=rc)) return
     deallocate( repetitionVector )
     deallocate( positionVector,orientationVector )
@@ -2189,7 +2244,7 @@
   call ESMF_ArraySpecSet(ArraySpec, typekind=ESMF_TYPEKIND_R8,                 &
                          rank=Memory%memRank, rc=localrc)
 
-  if (ESMF_LogMsgFoundError(localrc,"error creating ArraySpecSet",             &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating ArraySpecSet",             &
                             rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
@@ -2234,7 +2289,7 @@
 !       print*,'Memory Rank = Grid Rank ',Memory%memRank, ' = ', Memory%GridRank
         Array = ESMF_ArrayCreate(arrayspec=ArraySpec, distgrid=DistGrid,       &
                   indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc,"error creating non-haloed ESMF " // &
+        if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating non-haloed ESMF " // &
            "Array with no tensor dimensions", rcToReturn=rc)) return
 
      elseif( Memory%memRank > Memory%GridRank ) then
@@ -2265,7 +2320,7 @@
         Array = ESMF_ArrayCreate(arrayspec=ArraySpec, distgrid=DistGrid,       &
                   indexflag=ESMF_INDEX_GLOBAL,                                 &
                   undistLBound=bottom, undistUBound=top, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc,"error creating non-haloed ESMF " // &
+        if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating non-haloed ESMF " // &
            "Array with tensor dimensions", rcToReturn=rc)) return
 
         deallocate( top, bottom )
@@ -2318,7 +2373,7 @@
                      totalLWidth=HaloL, totalUWidth=HaloR,                     &
                      indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
 
-        if (ESMF_LogMsgFoundError(localrc,"error creating non-haloed ESMF " // &
+        if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating non-haloed ESMF " // &
                  "Array with no tensor dimensions", rcToReturn=rc)) return
 
      elseif( Memory%memRank > Memory%GridRank ) then
@@ -2351,7 +2406,7 @@
                      indexflag=ESMF_INDEX_GLOBAL,                              &
                      undistLBound=bottom, undistUBound=top, rc=localrc)
 
-        if (ESMF_LogMsgFoundError(localrc,"error creating haloed ESMF " //     &
+        if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating haloed ESMF " //     &
                  "Array with tensor dimensions", rcToReturn=rc)) return
 
         deallocate( top, bottom )
@@ -2452,23 +2507,28 @@
                 gridEdgeLWidth=(/0,0,0/),                                      &
                 gridEdgeUWidth =(/0,0,0/),  rc=localrc)
       deallocate( maxI )
+
+    case default
+      call ESMF_LogMsgSetError(ESMF_FAILURE,"error in creating grid from distribution - unsupported rank", &
+                    rcToReturn=rc)
+      return
   end select
 
-  if (ESMF_LogMsgFoundError(localrc,"error creating grid from distribution",   &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating grid from distribution",   &
                             rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
   ! Get the number of local DEs
   !-----------------------------------------------------------------------------
   call ESMF_GridGet(grid=Grid, localDECount=localDECount, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from grid",  &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE count from grid",  &
                             rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
   ! Get the number of local DEs
   !-----------------------------------------------------------------------------
   call ESMF_GridGet(grid=Grid, dimCount=GridRank, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting Grid rank from grid",       &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting Grid rank from grid",       &
                             rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
@@ -2481,7 +2541,7 @@
   ! Allocate coordinates
   !-----------------------------------------------------------------------------
   call ESMF_GridAddCoord(Grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error adding coord to grid",              &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error adding coord to grid",              &
                             rcToReturn=rc)) return
 
   do lDE=0,localDECount-1
@@ -2503,14 +2563,14 @@
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
                    fptr=coordX2D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error getting grid=1 coordinates",    &
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=1 coordinates",    &
                             rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
                    fptr=coordY2D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error getting grid=2 coordinates",    &
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=2 coordinates",    &
                             rcToReturn=rc)) return
 
 
@@ -2520,11 +2580,11 @@
       do j=lbnd(2),ubnd(2)
          do i=lbnd(1),ubnd(1)
            coordX2D(i,j) = create_coord(i, Grid_info, 1, localrc)
-           if (ESMF_LogMsgFoundError(localrc,"error getting x coordinates",    &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting x coordinates",    &
                             rcToReturn=rc)) return
 
            coordY2D(i,j) = create_coord(j, Grid_info, 2, localrc)
-           if (ESMF_LogMsgFoundError(localrc,"error getting y coordinates",    &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting y coordinates",    &
                             rcToReturn=rc)) return
            !--------------------------------------------------------------------
            ! debug
@@ -2560,21 +2620,21 @@
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
                    fptr=coordX3D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error getting grid=1 coordinates",    &
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=1 coordinates",    &
                             rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
                    fptr=coordY3D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error getting grid=2 coordinates",    &
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=2 coordinates",    &
                             rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=3,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
                    fptr=coordZ3D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error getting grid=3 coordinates",    &
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=3 coordinates",    &
                             rcToReturn=rc)) return
 
       !-------------------------------------------------------------------------
@@ -2584,13 +2644,13 @@
          do j=lbnd(2),ubnd(2)
             do i=lbnd(1),ubnd(1)
               coordX3D(i,j,k) = create_coord(i, Grid_info, 1, localrc)
-              if (ESMF_LogMsgFoundError(localrc,"error getting x coordinates", &
+              if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting x coordinates", &
                             rcToReturn=rc)) return
               coordY3D(i,j,k) = create_coord(j, Grid_info, 2, localrc)
-              if (ESMF_LogMsgFoundError(localrc,"error getting y coordinates", &
+              if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting y coordinates", &
                             rcToReturn=rc)) return
               coordZ3D(i,j,k) = create_coord(k, Grid_info, 3, localrc)
-              if (ESMF_LogMsgFoundError(localrc,"error getting z coordinates", &
+              if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting z coordinates", &
                             rcToReturn=rc)) return
             enddo    ! i loop
          enddo    ! j loop
@@ -2699,14 +2759,14 @@
   ! Get the number of local DEs from the Grid
   !-----------------------------------------------------------------------------
   call ESMF_GridGet(grid=Grid, localDECount=localDECount, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from grid",  &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE count from grid",  &
                             rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
   ! Get the grid rank
   !-----------------------------------------------------------------------------
   call ESMF_GridGet(grid=Grid, dimCount=GridRank, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting Grid rank from grid",       &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting Grid rank from grid",       &
                             rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
@@ -2739,21 +2799,21 @@
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
                    fptr=coordX2D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error getting grid=1 coordinates",    &
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=1 coordinates",    &
                             rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
                    fptr=coordY2D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error getting grid=2 coordinates",    &
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=2 coordinates",    &
                             rcToReturn=rc)) return
 
       !-------------------------------------------------------------------------
       ! Get pointers to field array
       !-------------------------------------------------------------------------
       call ESMF_FieldGet(Field, lDE, exp2D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error field get", rcToReturn=rc)) return
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error field get", rcToReturn=rc)) return
 
       !-------------------------------------------------------------------------
       !  set coordinates
@@ -2782,9 +2842,14 @@
                exp2D(i,j) =  abs(a+b) +a*cos(pi2*kx*coordX2D(i,j)/lenk) +        &
                              b*sin(pi2*ly*coordY2D(i,j)/lenl) 
 
-             case("PEAK_VALLEY")
+             !case("PEAK_VALLEY")
              ! (1.-x*y)*sin(k*pi*x/Lx)*cos(l*pi*y)+2.
 
+             case default
+               ! error
+                call ESMF_LogMsgSetError( ESMF_FAILURE,"undefined case in select statement",    &
+                       rcToReturn=localrc)
+                return
            end select
            !-------------------------------------------------------------------
          enddo    ! i loop
@@ -2798,28 +2863,28 @@
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
                    fptr=coordX3D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error getting grid=1 coordinates",    &
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=1 coordinates",    &
                             rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
                    fptr=coordY3D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error getting grid=2 coordinates",    &
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=2 coordinates",    &
                             rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=3,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
                    fptr=coordZ3D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error getting grid=3 coordinates",    &
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=3 coordinates",    &
                             rcToReturn=rc)) return
 
       !-------------------------------------------------------------------------
       ! Get pointers to field array
       !-------------------------------------------------------------------------
-   !  call ESMF_FieldGet(Field, lDE, exp3D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error field get", rcToReturn=rc)) return
+     call ESMF_FieldGet(Field, lDE, exp3D, rc=localrc)
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error field get", rcToReturn=rc)) return
 
       !-------------------------------------------------------------------------
       !  set coordinates
@@ -2841,6 +2906,11 @@
              case("COORDINATEZ")
                exp3D(i,j,k) =  TestFunction%param(1)*coordZ3D(i,j,k) 
 
+             case default
+               ! error
+                call ESMF_LogMsgSetError( ESMF_FAILURE,"undefined case in select statement",    &
+                       rcToReturn=localrc)
+                return
            end select
            !-------------------------------------------------------------------
             ! coordX3D(i,j,k) 
@@ -2939,7 +3009,7 @@
   integer :: localrc ! local error status
 
   ! local real variables
-  real(ESMF_KIND_R8) :: eps, a, b, kx, ly, lenk, lenl, exact
+  real(ESMF_KIND_R8) :: a, b, kx, ly, lenk, lenl, exact
 
   real(ESMF_KIND_R8), pointer :: coordX2D(:,:), coordY2D(:,:)
   real(ESMF_KIND_R8), pointer :: interp2D(:,:)
@@ -2956,14 +3026,14 @@
   ! Get the number of local DEs from the Grid
   !-----------------------------------------------------------------------------
   call ESMF_GridGet(grid=Grid, localDECount=localDECount, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from grid",  &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE count from grid",  &
                             rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
   ! Get the grid rank
   !-----------------------------------------------------------------------------
   call ESMF_GridGet(grid=Grid, dimCount=GridRank, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting Grid rank from grid",       &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting Grid rank from grid",       &
                             rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
@@ -2996,21 +3066,21 @@
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
                    fptr=coordX2D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error getting grid=1 coordinates",    &
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=1 coordinates",    &
                             rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
                    fptr=coordY2D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error getting grid=2 coordinates",    &
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=2 coordinates",    &
                             rcToReturn=rc)) return
 
       !-------------------------------------------------------------------------
       ! Get pointers to field array
       !-------------------------------------------------------------------------
       call ESMF_FieldGet(Field, lDE, interp2D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error field get", rcToReturn=rc)) return
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error field get", rcToReturn=rc)) return
 
       !-------------------------------------------------------------------------
       !  compute relative error
@@ -3020,28 +3090,25 @@
            !-------------------------------------------------------------------
            select case( trim(TestFunction%string) )
              case("CONSTANT")
-               eps=(interp2D(i,j)-TestFunction%param(1) )/TestFunction%param(1)
-               if( abs(eps) > TestFunction%param(2) ) then
+               if (.not. check_value (TestFunction%param(1), interp2D(i,j), TestFunction%param(2))) then
                  test_status = HarnessTest_FAILURE
-                 print*,' fields disagree ',i,j,interp2D(i,j),                &
+                 print *,' fields disagree ',i,j,interp2D(i,j),                &
                           TestFunction%param(1)
                endif
 
              case("COORDINATEX")
-               eps=(interp2D(i,j)-TestFunction%param(1)*coordX2D(i,j) )/      &
-                                       ( TestFunction%param(1)*coordX2D(i,j))
-               if( abs(eps) > TestFunction%param(2) ) then
-                 test_status = HarnessTest_FAILURE
-                 print*,' fields disagree ',i,j,interp2D(i,j),                &
+               if (.not. check_value (TestFunction%param(1)*coordX2D(i,j), interp2D(i,j), &
+                 TestFunction%param(2))) then
+                   test_status = HarnessTest_FAILURE
+                   print*,' fields disagree ',i,j,interp2D(i,j),                &
                           TestFunction%param(1)*coordX2D(i,j)
                endif
 
              case("COORDINATEY")
-               eps=(interp2D(i,j)-TestFunction%param(1)*coordY2D(i,j) )/      &
-                                       ( TestFunction%param(1)*coordY2D(i,j))
-               if( abs(eps) > TestFunction%param(2) ) then
-                 test_status = HarnessTest_FAILURE
-                 print*,' fields disagree ',i,j,interp2D(i,j),                &
+               if (.not. check_value (TestFunction%param(1)*coordY2D(i,j), interp2D(i,j), &
+                 TestFunction%param(2))) then
+                   test_status = HarnessTest_FAILURE
+                   print*,' fields disagree ',i,j,interp2D(i,j),                &
                           TestFunction%param(1)*coordY2D(i,j)
                endif
 
@@ -3054,17 +3121,21 @@
               lenk = Grid_info%grange(1,2) - Grid_info%grange(1,1)
               lenl = Grid_info%grange(2,2) - Grid_info%grange(2,1)
               exact = abs(a+b) +a*cos(pi2*kx*coordX2D(i,j)/lenk) +        &
-                             b*sin(pi2*ly*coordY2D(i,j)/lenl)   
-              eps=(interp2D(i,j)-exact)/exact
-               if( abs(eps) > TestFunction%param(5) ) then
+                             b*sin(pi2*ly*coordY2D(i,j)/lenl) 
+
+              if (.not. check_value (exact, interp2D(i,j), TestFunction%param(5))) then
                  test_status = HarnessTest_FAILURE
-                 print*,' fields disagree ',i,j,interp2D(i,j),                &
-                         exact
+                 print*,' fields disagree ',i,j,interp2D(i,j), exact
                endif
 
-
              case("PEAK_VALLEY")
-             ! (1.-x*y)*sin(k*pi*x/Lx)*cos(l*pi*y)+2.
+                ! (1.-x*y)*sin(k*pi*x/Lx)*cos(l*pi*y)+2.
+               test_status = HarnessTest_FAILURE
+               print *, 'test function PEAK_VALLEY not implemented'
+
+             case default
+               test_status = HarnessTest_FAILURE
+               print *, 'undefined test function ',trim(TestFunction%string)
 
            end select
            !-------------------------------------------------------------------
@@ -3079,31 +3150,31 @@
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
                    fptr=coordX3D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error getting grid=1 coordinates",    &
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=1 coordinates",    &
                             rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
                    fptr=coordY3D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error getting grid=2 coordinates",    &
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=2 coordinates",    &
                             rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=3,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
                    fptr=coordZ3D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error getting grid=3 coordinates",    &
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=3 coordinates",    &
                             rcToReturn=rc)) return
 
       !-------------------------------------------------------------------------
       ! Get pointers to field array
       !-------------------------------------------------------------------------
       call ESMF_FieldGet(Field, lDE, interp3D, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc,"error field get", rcToReturn=rc)) return
+      if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error field get", rcToReturn=rc)) return
 
       !-------------------------------------------------------------------------
-      !  set coordinates
+      !  check all values
       !-------------------------------------------------------------------------
       do k=lbnd(3),ubnd(3)
          do j=lbnd(2),ubnd(2)
@@ -3111,40 +3182,39 @@
            !-------------------------------------------------------------------
            select case( trim(TestFunction%string) )
              case("CONSTANT")
-               eps=(interp3D(i,j,k)-TestFunction%param(1) )/                  &
-                                                        TestFunction%param(1)
-               if( abs(eps) > TestFunction%param(2) ) then
+               if (.not. check_value (TestFunction%param(1), interp3D(i,j,k), TestFunction%param(2))) then
                  test_status = HarnessTest_FAILURE
                  print*,' fields disagree ',i,j,k,interp3D(i,j,k),            &
                           TestFunction%param(1)
                endif
 
              case("COORDINATEX")
-               eps=(interp3D(i,j,k)-TestFunction%param(1)*coordX3D(i,j,k) )/  &
-                                    ( TestFunction%param(1)*coordX3D(i,j,k))
-               if( abs(eps) > TestFunction%param(2) ) then
-                 test_status = HarnessTest_FAILURE
-                 print*,' fields disagree ',i,j,k,interp3D(i,j,k),            &
+               if (.not. check_value (TestFunction%param(1)*coordX3D(i,j,k), interp3D(i,j,k), &
+                 TestFunction%param(2))) then
+                   test_status = HarnessTest_FAILURE
+                   print*,' fields disagree ',i,j,k,interp3D(i,j,k),            &
                         TestFunction%param(1)*coordX3D(i,j,k)
                endif
 
              case("COORDINATEY")
-               eps=(interp3D(i,j,k)-TestFunction%param(1)*coordY3D(i,j,k) )/  &
-                                    ( TestFunction%param(1)*coordY3D(i,j,k))
-               if( abs(eps) > TestFunction%param(2) ) then
-                 test_status = HarnessTest_FAILURE
-                 print*,' fields disagree ',i,j,k,interp3D(i,j,k),            &
+               if (.not. check_value (TestFunction%param(1)*coordY3D(i,j,k), interp3D(i,j,k), &
+                 TestFunction%param(2))) then
+                   test_status = HarnessTest_FAILURE
+                   print*,' fields disagree ',i,j,k,interp3D(i,j,k),            &
                         TestFunction%param(1)*coordY3D(i,j,k)
                endif
 
              case("COORDINATEZ")
-               eps=(interp3D(i,j,k)-TestFunction%param(1)*coordZ3D(i,j,k) )/  &
-                                       ( TestFunction%param(1)*coordZ3D(i,j,k))
-               if( abs(eps) > TestFunction%param(2) ) then
-                 test_status = HarnessTest_FAILURE
-                 print*,' fields disagree ',i,j,k,interp3D(i,j,k),            &
+               if (.not. check_value (TestFunction%param(1)*coordZ3D(i,j,k), interp3D(i,j,k), &
+                 TestFunction%param(2))) then
+                   test_status = HarnessTest_FAILURE
+                   print*,' fields disagree ',i,j,k,interp3D(i,j,k),            &
                         TestFunction%param(1)*coordZ3D(i,j,k)
                endif
+
+             case default
+               test_status = HarnessTest_FAILURE
+               print *, 'undefined test function ',trim(TestFunction%string)
 
            end select
            !-------------------------------------------------------------------
@@ -3264,7 +3334,7 @@
   ! get local array DE list
   !-----------------------------------------------------------------------------
   call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from array", &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE count from array", &
           rcToReturn=rc)) return
 
   allocate(localDeList(localDeCount), stat=allocRcToTest)
@@ -3272,7 +3342,7 @@
      " localDeList in populate_redist_array", rcToReturn=rc)) then
   endif
   call ESMF_ArrayGet(array, localDeList=localDeList, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local DE list from array",  &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE list from array",  &
           rcToReturn=rc)) return
 
   allocate(larrayList(localDeCount), stat=allocRcToTest)
@@ -3280,14 +3350,14 @@
      " larrayList in populate_redist_array", rcToReturn=rc)) then
   endif
   call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local array list",          &
           rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
   ! get dimcount to allocate bound arrays
   !-----------------------------------------------------------------------------
   call ESMF_DistGridGet(DistGrid, dimCount=dimCount, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting dimCount from distGrid",    &
           rcToReturn=rc)) return
   
   allocate(UBnd(dimCount, localDeCount), stat=allocRcToTest )
@@ -3301,7 +3371,7 @@
 
   call ESMF_ArrayGet(array, indexflag=indexflag,                               &
            exclusiveLBound=LBnd, exclusiveUBound=UBnd, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting exclusive bound range",     &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting exclusive bound range",     &
           rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
@@ -3321,7 +3391,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr1, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3335,7 +3405,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr2, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3351,7 +3421,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr3, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3370,7 +3440,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr4, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3391,7 +3461,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr5, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3414,7 +3484,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr6, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3440,7 +3510,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr7, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3476,6 +3546,11 @@
   !-----------------------------------------------------------------------------
   elseif( Memory%memRank >  Memory%GridRank ) then
 ! -----------
+      localrc = ESMF_FAILURE
+      call ESMF_LogMsgSetError(ESMF_FAILURE,"tensor dimensions not supported",      &
+                    rcToReturn=localrc)
+      return
+
   endif
 
   !-----------------------------------------------------------------------------
@@ -3541,7 +3616,7 @@
   ! get local array DE list
   !-----------------------------------------------------------------------------
   call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from array", &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE count from array", &
           rcToReturn=rc)) return
 
   allocate(localDeList(localDeCount), stat=allocRcToTest )
@@ -3549,7 +3624,7 @@
      " localDeList in populate_array_value", rcToReturn=rc)) then
   endif
   call ESMF_ArrayGet(array, localDeList=localDeList, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local DE list from array",  &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE list from array",  &
           rcToReturn=rc)) return
 
   allocate(larrayList(localDeCount), stat=allocRcToTest )
@@ -3557,14 +3632,14 @@
      " larrayList in populate_array_value", rcToReturn=rc)) then
   endif
   call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local array list",          &
           rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
   ! get dimcount to allocate bound arrays
   !-----------------------------------------------------------------------------
   call ESMF_DistGridGet(DistGrid, dimCount=dimCount, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting dimCount from distGrid",    &
           rcToReturn=rc)) return
   
   allocate(UBnd(dimCount, localDeCount), stat=allocRcToTest)
@@ -3578,7 +3653,7 @@
 
   call ESMF_ArrayGet(array, indexflag=indexflag,                               &
            exclusiveLBound=LBnd, exclusiveUBound=UBnd, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting exclusive bound range",     &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting exclusive bound range",     &
           rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
@@ -3598,7 +3673,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr1, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3612,7 +3687,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr2, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3628,7 +3703,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr3, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3646,7 +3721,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr4, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3666,7 +3741,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr5, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3688,7 +3763,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr6, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3712,7 +3787,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr7, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3764,7 +3839,8 @@
   !-----------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
-
+#if 0
+! gblock 1/14/2010 dead code
   !-----------------------------------------------------------------------------
   subroutine populate_grid(Array, value, DistGrid, Memory, Grid, rc)
   !-----------------------------------------------------------------------------
@@ -3816,7 +3892,7 @@
   ! get local array DE list
   !-----------------------------------------------------------------------------
   call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from array", &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE count from array", &
           rcToReturn=rc)) return
 
   allocate(localDeList(localDeCount), stat=allocRcToTest )
@@ -3824,7 +3900,7 @@
      " localDeList in populate_grid", rcToReturn=rc)) then
   endif
   call ESMF_ArrayGet(array, localDeList=localDeList, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local DE list from array",  &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE list from array",  &
           rcToReturn=rc)) return
 
   allocate(larrayList(localDeCount), stat=allocRcToTest )
@@ -3832,14 +3908,14 @@
      " larrayList in populate_grid", rcToReturn=rc)) then
   endif
   call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local array list",          &
           rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
   ! get dimcount to allocate bound arrays
   !-----------------------------------------------------------------------------
   call ESMF_DistGridGet(DistGrid, dimCount=dimCount, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting dimCount from distGrid",    &
           rcToReturn=rc)) return
   
   allocate(UBnd(dimCount, localDeCount), stat=allocRcToTest )
@@ -3853,7 +3929,7 @@
 
   call ESMF_ArrayGet(array, indexflag=indexflag,                               &
            exclusiveLBound=LBnd, exclusiveUBound=UBnd, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting exclusive bound range",     &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting exclusive bound range",     &
           rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
@@ -3873,7 +3949,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr1, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 ! test values, not to be kept
    Urange = 180.0
@@ -3891,7 +3967,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr2, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3907,7 +3983,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr3, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3925,7 +4001,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr4, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3945,7 +4021,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr5, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3967,7 +4043,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr6, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -3991,7 +4067,7 @@
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr7, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -4041,7 +4117,7 @@
   !-----------------------------------------------------------------------------
   end subroutine populate_grid 
   !-----------------------------------------------------------------------------
-
+#endif
 !-------------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
@@ -4108,7 +4184,7 @@
   ! get local array DE list from array1
   !-----------------------------------------------------------------------------
   call ESMF_ArrayGet(array1, localDeCount=localDeCount1, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from array", &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE count from array", &
           rcToReturn=rc)) return
 
   allocate(localDeList1(localDeCount1), stat=allocRcToTest )
@@ -4116,7 +4192,7 @@
      " localDeList1 in compare redist array", rcToReturn=rc)) then
   endif
   call ESMF_ArrayGet(array1, localDeList=localDeList1, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local DE list from array",  &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE list from array",  &
           rcToReturn=rc)) return
 
   allocate(larrayList1(localDeCount1), stat=allocRcToTest )
@@ -4124,18 +4200,18 @@
      " larrayList1 in compare redist array", rcToReturn=rc)) then
   endif
   call ESMF_ArrayGet(array1, larrayList=larrayList1, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local array list",          &
           rcToReturn=rc)) return
 
   call ESMF_DistGridGet(DistGrid1, dimCount=dimCount1, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting dimCount from distGrid",    &
           rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
   ! get local array DE list from array2
   !-----------------------------------------------------------------------------
   call ESMF_ArrayGet(array2, localDeCount=localDeCount2, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from array", &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE count from array", &
           rcToReturn=rc)) return
 
   ! check localDeCount for agreement
@@ -4151,7 +4227,7 @@
      " localDeList2 in compare redist array", rcToReturn=rc)) then
   endif
   call ESMF_ArrayGet(array2, localDeList=localDeList2, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local DE list from array",  &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE list from array",  &
           rcToReturn=rc)) return
 
   ! check localDeList for agreement
@@ -4170,14 +4246,14 @@
      " larrayList2 in compare redist array", rcToReturn=rc)) then
   endif
   call ESMF_ArrayGet(array2, larrayList=larrayList2, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local array list",          &
           rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
   ! compare dimcounts for both arrays 
   !-----------------------------------------------------------------------------
   call ESMF_DistGridGet(DistGrid2, dimCount=dimCount2, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting dimCount from distGrid",    &
           rcToReturn=rc)) return
   
   ! check localDeCount for agreement
@@ -4202,7 +4278,7 @@
 
   call ESMF_ArrayGet(array=array1, indexflag=indexflag,                        &
            exclusiveLBound=LBnd, exclusiveUBound=UBnd, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting exclusive bound range",     &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting exclusive bound range",     &
           rcToReturn=rc)) return
 
 
@@ -4217,7 +4293,7 @@
 
   call ESMF_ArrayGet(array=array2, indexflag=indexflag,                        &
            exclusiveLBound=LBnd2, exclusiveUBound=UBnd2, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting exclusive bound range",     &
+  if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting exclusive bound range",     &
           rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
@@ -4260,13 +4336,13 @@
            call ESMF_LocalArrayGet(larrayList1(de), fptr=farray1D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
            call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray1D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array2 list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -4285,13 +4361,13 @@
            call ESMF_LocalArrayGet(larrayList1(de), fptr=farray2D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
            call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray2D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array2 list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -4312,13 +4388,13 @@
            call ESMF_LocalArrayGet(larrayList1(de), fptr=farray3D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
            call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray3D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array2 list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -4341,13 +4417,13 @@
            call ESMF_LocalArrayGet(larrayList1(de), fptr=farray4D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
            call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray4D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array2 list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -4372,13 +4448,13 @@
            call ESMF_LocalArrayGet(larrayList1(de), fptr=farray5D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
            call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray5D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array2 list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -4407,13 +4483,13 @@
            call ESMF_LocalArrayGet(larrayList1(de), fptr=farray6D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
            call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray6D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array2 list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -4444,13 +4520,13 @@
            call ESMF_LocalArrayGet(larrayList1(de), fptr=farray7D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
            call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray7D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
-           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array2 list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
@@ -4487,8 +4563,18 @@
   !-----------------------------------------------------------------------------
   ! Memory Rank > Grid Rank, then there are MemRank-GridRank tensor dimensions
   !-----------------------------------------------------------------------------
-  elseif( Memory%memRank >  Memory%GridRank ) then
-! ---------
+  elseif (Memory%memRank >  Memory%GridRank) then
+    call ESMF_LogMsgSetError (ESMF_FAILURE, "tensor dimensions not supported", &
+         rcToReturn=rc)
+    return
+
+  !-----------------------------------------------------------------------------
+  ! Memory Rank < Grid Rank, then parameters don't make sense
+  !-----------------------------------------------------------------------------
+  else
+    call ESMF_LogMsgSetError (ESMF_FAILURE, "memory rank < grid rank", &
+         rcToReturn=rc)
+    return
   endif
 
   !-----------------------------------------------------------------------------
@@ -5067,6 +5153,74 @@
 
   !-----------------------------------------------------------------------------
       end subroutine legendre_roots
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !
+  ! check an actual value against and expected value within a (relative) tolerance
+  !
+  logical function check_value (exp_val, act_val, tol)
+    real(ESMF_KIND_R8), intent(in) :: exp_val
+    real(ESMF_KIND_R8), intent(in) :: act_val
+    real(ESMF_KIND_R8), intent(in) :: tol
+
+    real(ESMF_KIND_R8) :: abs_err
+    real(ESMF_KIND_R8) :: tol_band
+
+    abs_err  = abs(act_val - exp_val)
+    tol_band = abs(tol * exp_val) + RegridMinNeighborhood
+
+    check_value = abs_err .LT. tol_band
+
+#if 1
+    ! print error message if value rejected because its outside of the minimum tolerance band
+    if (.NOT. check_value) then
+      if (abs_err .GE. RegridMinNeighborhood) then
+        call ESMF_LogMsgSetError (ESMF_FAILURE, "regrid error - value outside of minimum tolerance band", &
+          __LINE__, __FILE__)
+      end if
+    end if
+#endif
+
+! debug
+#if 0
+    if (.NOT. check_value) then
+      print *, "check_value - value out of tolerance(debug)", exp_val, act_val, abs_err, tol_band
+    endif
+#endif
+
+    return
+  !-----------------------------------------------------------------------------
+  end function check_value
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !
+  ! check an ESMF return code, display file/line no of error location
+  !
+  logical function CheckError (checkpoint, line, file, rcValue, msg, rcToReturn)
+    logical,          intent(in)  :: checkpoint
+    integer,          intent(in)  :: line
+    character(len=*), intent(in)  :: file
+    character(len=*), intent(in)  :: msg
+    integer,          intent(in)  :: rcValue
+    integer,          intent(out) :: rcToReturn
+
+    if (checkpoint) then
+      print '("checkpoint at line ", I5, " in file ", A)', line, file
+    end if
+
+    CheckError = ESMF_LogMsgFoundError (rcValue, msg, rcToReturn=rcToReturn)
+
+    if (CheckError) then
+      print '("error detected at line ", I5, " in file ", A " - return code = ", I8)', &
+        line, file, rcToReturn
+      print '("     ", A)', msg
+    end if
+
+    return
+  !-----------------------------------------------------------------------------
+  end function CheckError
   !-----------------------------------------------------------------------------
 
 !-----------------------------------------------------------------------
