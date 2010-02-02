@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.28 2009/10/23 18:26:03 feiliu Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.29 2010/02/02 19:07:46 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -34,17 +34,19 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldRedistEx.F90,v 1.28 2009/10/23 18:26:03 feiliu Exp $'
+    '$Id: ESMF_FieldRedistEx.F90,v 1.29 2010/02/02 19:07:46 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
     integer :: rc, finalrc
     type(ESMF_Field)                            :: srcField, dstField
+    type(ESMF_Field)                            :: srcFieldA, dstFieldA
     type(ESMF_Grid)                             :: grid
     type(ESMF_DistGrid)                         :: distgrid
     type(ESMF_VM)                               :: vm
     type(ESMF_RouteHandle)                      :: routehandle
     type(ESMF_Array)                            :: srcArray, dstArray
+    type(ESMF_ArraySpec)                        :: arrayspec
     integer                                     :: localrc, localPet, i
 
     integer, allocatable                        :: src_farray(:), dst_farray(:)
@@ -52,7 +54,6 @@
     integer, pointer                            :: fptr(:)
 
     integer, pointer                            :: srcfptr(:), dstfptr(:)
-    type(ESMF_ArraySpec)                        :: arrayspec
     type(ESMF_Mesh)                             :: mesh
 
     integer, pointer :: nodeIds(:),nodeOwners(:)
@@ -152,10 +153,7 @@
         if(fptr(i) .ne. localPet) localrc = ESMF_FAILURE
     enddo
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    ! release route handle
-    call ESMF_FieldRedistRelease(routehandle, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!EOC
 
     ! destroy all objects created in this example to prevent memory leak
     call ESMF_FieldDestroy(srcField, rc=rc)
@@ -166,13 +164,53 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_ArrayDestroy(dstArray, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    deallocate(src_farray, dst_farray)
+!BOE
+! Field redistribution can also be performed between weakly congruent Fields.
+! In this case, source and destination Fields can have ungridded dimensions
+! with size different from the Field pair used to compute the routehandle. 
+!EOE
+!BOC
+    call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=2, rc=rc)
+!EOC
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOE
+! Create two fields with ungridded dimensions using the Grid created previously.
+! The new Field pair has matching number of elements. The ungridded dimension
+! is mapped to the first dimension of either Field.
+!EOE
+!BOC
+    srcFieldA = ESMF_FieldCreate(grid, arrayspec, gridToFieldMap=(/2/), &
+        ungriddedLBound=(/1/), ungriddedUBound=(/10/), rc=rc)
+!EOC
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+    dstFieldA = ESMF_FieldCreate(grid, arrayspec, gridToFieldMap=(/2/), &
+        ungriddedLBound=(/1/), ungriddedUBound=(/10/), rc=rc)
+!EOC
+
+!BOE
+! Using the previously computed routehandle, weakly congruent Fields can be
+! redistributed.
+!EOE
+!BOC
+    call ESMF_FieldRedist(srcfieldA, dstFieldA, routehandle, rc=rc)
+!EOC
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+    call ESMF_FieldRedistRelease(routehandle, rc=rc)
+!EOC
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_FieldDestroy(srcFieldA, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_FieldDestroy(dstFieldA, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_GridDestroy(grid, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_DistGridDestroy(distgrid, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    deallocate(src_farray, dst_farray)
-!EOC
-
 !------------------------------------------------------------------------------
 !BOE
 ! \subsubsection{Field redistribution as a form of scattering on arbitrarily distributed structures}

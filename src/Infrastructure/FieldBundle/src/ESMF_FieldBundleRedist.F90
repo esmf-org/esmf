@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedist.F90,v 1.9 2009/10/20 03:25:32 theurich Exp $
+! $Id: ESMF_FieldBundleRedist.F90,v 1.10 2010/02/02 19:08:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldBundleRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRedist.F90,v 1.9 2009/10/20 03:25:32 theurich Exp $'
+      '$Id: ESMF_FieldBundleRedist.F90,v 1.10 2010/02/02 19:08:17 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleRedistStore
@@ -90,10 +90,14 @@ contains
 ! !DESCRIPTION:
 !   Execute a precomputed FieldBundle redistribution from {\tt srcFieldBundle} to
 !   {\tt dstFieldBundle}. Both {\tt srcFieldBundle} and {\tt dstFieldBundle} must be
-!   congruent and typekind conform with the respective FieldBundles used during 
+!   weakly congruent and typekind conform with the respective FieldBundles used during 
 !   {\tt ESMF\_FieldBundleRedistStore()}. Congruent FieldBundles possess
 !   matching DistGrids and the shape of the local array tiles matches between
-!   the FieldBundles for every DE.
+!   the FieldBundles for every DE. For weakly congruent Fields the sizes of the 
+!   undistributed dimensions, that vary faster with memory than the first distributed 
+!   dimension, are permitted to be different. This means that the same {\tt routehandle} 
+!   can be applied to a large class of similar Fields that differ in the number of 
+!   elements in the left most undistributed dimensions. 
 !
 !   It is erroneous to specify the identical FieldBundle object for {\tt srcFieldBundle} and
 !   {\tt dstFieldBundle} arguments.
@@ -320,7 +324,12 @@ contains
 ! {\tt ESMF\_FieldBundleRedist()} on any pair of FieldBundles that are congruent and typekind 
 ! conform with the srcFieldBundle, dstFieldBundle pair. Congruent FieldBundles possess matching 
 ! DistGrids and the shape of the local array tiles matches between the FieldBundles for 
-! every DE. 
+! every DE. For weakly congruent Fields the sizes of the 
+!   undistributed dimensions, that vary faster with memory than the first distributed 
+!   dimension, are permitted to be different. This means that the same {\tt routehandle} 
+!   can be applied to a large class of similar Fields that differ in the number of 
+!   elements in the left most undistributed dimensions. 
+
 !
 ! This method is overloaded for:\newline
 ! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
@@ -783,7 +792,12 @@ contains
 ! {\tt ESMF\_FieldBundleRedist()} on any pair of Fields that are congruent and typekind 
 ! conform with the srcFieldBundle, dstFieldBundle pair. Congruent Fields possess matching 
 ! DistGrids and the shape of the local array tiles matches between the Fields for 
-! every DE. 
+! every DE. For weakly congruent Fields the sizes of the 
+!   undistributed dimensions, that vary faster with memory than the first distributed 
+!   dimension, are permitted to be different. This means that the same {\tt routehandle} 
+!   can be applied to a large class of similar Fields that differ in the number of 
+!   elements in the left most undistributed dimensions. 
+
 !  
 ! This method is overloaded for:\newline
 ! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
