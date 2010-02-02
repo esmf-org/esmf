@@ -226,8 +226,9 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
 
   } // done with rebalance
 
-  // So now to the job at hand of meshing on proc zero
 
+
+  // So now to the job at hand of meshing on proc zero
   std::set<MeshObj*> elems, nodes;
   if (rank == 0) {
     // Gather all the nodes and elements
@@ -269,6 +270,55 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
 
   } // rank = 0
 
+
+  // Get coordinate field
+  MEField<> &coords = *mesh.GetCoordField();
+
+  // If nodes are all identical around pole, then don't worry about creating one
+  int skip_pole=0;
+  if (rank ==0) {
+    
+    // init value
+    bool identical=true;
+
+    // only need to loop through if there is something...
+    if (!nodes.empty()) {    
+      std::set<MeshObj*>::iterator ni = nodes.begin(), ne = nodes.end();
+	
+      // Get first node value (has to be at least first because list isn't empty)
+      double *first_node_coord = coords.data(**ni);
+      ++ni; // move to next node
+      
+      // Compare rest of nodes to first node
+      for (; ni != ne; ++ni) {
+	
+	double *c = coords.data(**ni);
+	
+	if ((std::abs(c[0]-first_node_coord[0]) > 1.0e-10) ||
+	    (std::abs(c[1]-first_node_coord[1]) > 1.0e-10) ||
+	    (std::abs(c[2]-first_node_coord[2]) > 1.0e-10)) {
+	  identical=false;
+	  break;
+	}
+      }
+    }
+
+    // skip creating pole if all nodes surrounding it have identical coords
+    if (identical) {
+      skip_pole=1;
+    } else {
+      skip_pole=0;
+    }
+  }
+
+  // Broadcast skip_pole from 0 to everyone
+  MPI_Bcast(&skip_pole, 1, MPI_INT, 0, Par::Comm());
+    
+  // Skip if PET 0 says to
+  if (skip_pole) {
+    return;
+  }
+  
   // We need to get ids for the pole node and for the new triangles
   std::vector<long> new_ids;
   long pole_id;
@@ -297,7 +347,6 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
 
   }
 
-  MEField<> &coords = *mesh.GetCoordField();
 
   if (rank == 0) {
     
