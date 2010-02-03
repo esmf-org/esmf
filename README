@@ -30,7 +30,7 @@ If you are looking for more documentation, or higher-level information
 about the ESMF project itself, go to the "MORE HELP" section below.
 
 
-Please contact <esmf_support@ucar.edu> with any questions or problems.
+Please contact <esmf_support@list.woc.noaa.gov> with any questions or problems.
 
 ================================================================================
 ================================================================================
@@ -310,7 +310,7 @@ ESMF provides mpirun scripts for a wide range of system configurations. These
 are used by ESMF by default or can be set by the user via the ESMF_MPIRUN
 environment variable. The best way to see how the existing scripts are used
 on the supported platforms is to go to the "Supported Platforms" web page at
-http://www.esmf.ucar.edu/download/platforms/ and follow the link for the
+http://www.earthsystemmodeling.org/download/platforms/ and follow the link for the
 platform of interest. Each test report contains the output of "gmake info",
 which lists the settings of the ESMF_MPIxxx environment variables.
 
@@ -446,7 +446,7 @@ Adding a New Platform
    rebuild the entire library and test suite.
 
 5. Once it is working, post it back on the esmfcontrib sourceforge site and
-   email esmf_support@ucar.edu so we can include it in our next release.
+   email esmf_support@list.woc.noaa.gov so we can include it in our next release.
 
 
 Directories
@@ -490,13 +490,13 @@ MORE HELP:
 ---------
 
 Information about the ESMF project can be found at the ESMF web site:
-        http://www.esmf.ucar.edu
+        http://www.earthsystemmodeling.org
 
 Software documentation for the last public release is at:
-        http://www.esmf.ucar.edu -> Users -> Documentation
+        http://www.earthsystemmodeling.org -> Users -> Documentation
 
 Software documentation for all releases is at:
-        http://www.esmf.ucar.edu -> Download -> View All Releases
+        http://www.earthsystemmodeling.org -> Download -> View All Releases
 
 The ESMF User's Guide contains information on building and installing the ESMF.
 The ESMF Reference Manual contains information on the architecture of the ESMF,
@@ -512,13 +512,13 @@ the bugs, support, and task lists for ESMF.
 Use test cases demonstrating how ESMF can be used in realistic situations are
 available as a separate module through CVS. Please follow the instructions on 
 the ESMF web site:
-        http://www.esmf.ucar.edu -> Developers -> Test & Validation
+        http://www.earthsystemmodeling.org -> Developers -> Test & Validation
 
 Contributions from ESMF users are available at:
 	http://sourceforge.net/projects/esmfcontrib
 
-Please contact esmf_support@ucar.edu with any questions or problems.
+Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.88.2.15 2010/02/01 22:33:47 theurich Exp $
+ $Id: README,v 1.88.2.16 2010/02/03 21:32:35 svasquez Exp $
