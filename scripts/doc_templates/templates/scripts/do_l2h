@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the University of Illinois-NCSA License.
 #
-# $Id: do_l2h,v 1.8.2.3 2010/02/01 20:48:50 svasquez Exp $
+# $Id: do_l2h,v 1.8.2.4 2010/02/03 23:21:30 svasquez Exp $
 #
 #===============================================================================
 # do_l2h
@@ -65,7 +65,7 @@ latex2html  -white \
     -split +1 \
     -show_section_numbers \
     -local_icons \
-    -address "<A HREF="mailto:esmf@ucar.edu">esmf@ucar.edu</A>" \
+    -address "<A HREF="mailto:Esmf_support@list.woc.noaa.gov">Esmf_support@list.woc.noaa.gov</A>" \
     $1_$2doc.tex
 
 
