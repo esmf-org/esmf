@@ -1,4 +1,4 @@
-% $Id: README_DES,v 1.3 2002/10/11 22:51:51 eschwab Exp $
+% $Id: README_DES,v 1.3.16.1 2010/02/03 22:57:11 svasquez Exp $
 
 ================================================================================
                                  README_DES
@@ -108,4 +108,4 @@ The dvipdf tool can be used to produce a pdf:
 	dvipdf <comp>_desdoc.dvi
 
 ================================================================================
-C. DeLuca (cdeluca@ucar.edu)                                      March 13, 2000
+C. DeLuca (Cecelia.DeLuca@noaa.gov)                                      March 13, 2000

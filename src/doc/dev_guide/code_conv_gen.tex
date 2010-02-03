@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_gen.tex,v 1.13.2.5 2010/02/01 20:53:10 svasquez Exp $
+% CVS $Id: code_conv_gen.tex,v 1.13.2.6 2010/02/03 22:57:18 svasquez Exp $
 
 \subsection{Docs: Code and Documentation Templates and Associated Scripts}
 \label{sec:code_templates}
@@ -42,12 +42,12 @@ file (ESMC\_class.h) in the component include directory, if one does not exist.
 
 Software documentation for the last public release is at:
 \begin{verbatim}
-  http://www.esmf.ucar.edu -> Users -> Documentation
+  http://www.earthsystemmodeling.org -> Users -> Documentation
 \end{verbatim} 
 
 Software documentation for all releases is at:
 \begin{verbatim}
-  http://www.esmf.ucar.edu -> Download -> View All Releases
+  http://www.earthsystemmodeling.org -> Download -> View All Releases
 \end{verbatim}
 
 Documents are available to developers for editing through the
@@ -357,14 +357,14 @@ The first line of every file in ESMF
   must be its CVS version identification. For example, each \LaTeX
   file must begin:
 \begin{verbatim}
-% $Id: code_conv_gen.tex,v 1.13.2.5 2010/02/01 20:53:10 svasquez Exp $ 
+% $Id: code_conv_gen.tex,v 1.13.2.6 2010/02/03 22:57:18 svasquez Exp $ 
 \end{verbatim}
 
 In addition, for source code, the CVS identifier must have the 
 ability to be written to a variable for output to a configuration log.  
 Therefore each F90 module must contain a declaration:
 \begin{verbatim}
-character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.13.2.5 2010/02/01 20:53:10 svasquez Exp $'
+character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.13.2.6 2010/02/03 22:57:18 svasquez Exp $'
 \end{verbatim}
 
 \subsubsection{License and Copyright Information}

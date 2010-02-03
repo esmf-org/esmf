@@ -1,4 +1,4 @@
-% $Id: README_REF,v 1.2 2002/10/11 22:51:51 eschwab Exp $
+% $Id: README_REF,v 1.2.16.1 2010/02/03 22:57:13 svasquez Exp $
 
 ================================================================================
                                  README_REF
@@ -101,4 +101,4 @@ The dvipdf tool can be used to produce a pdf:
 	dvipdf <comp>_refdoc.dvi
 
 ================================================================================
-C. DeLuca (cdeluca@ucar.edu)                                      March 13, 2000
+C. DeLuca (Cecelia.DeLuca@noaa.gov)                                      March 13, 2000
