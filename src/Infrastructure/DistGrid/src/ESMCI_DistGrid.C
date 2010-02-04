@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.35 2009/12/16 19:48:57 w6ws Exp $
+// $Id: ESMCI_DistGrid.C,v 1.36 2010/02/04 06:21:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.35 2009/12/16 19:48:57 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.36 2010/02/04 06:21:38 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2455,7 +2455,7 @@ bool DistGrid::isLocalDeOnEdgeL(
       sizes.push_back(indexCountPDimPDe[de*dimCount+i]);
     MultiDimIndexLoop multiDimIndexLoop(sizes);
     multiDimIndexLoop.setSkipDim(dim-1);  // next() to skip dim
-    while(!multiDimIndexLoop.isPastLast()){
+    while(multiDimIndexLoop.isWithin()){
       // look at the entire interface spanned by all dimensions except dim
       int const *indexTuple = multiDimIndexLoop.getIndexTuple();
       for (int i=0; i<dimCount; i++)
@@ -2538,7 +2538,7 @@ bool DistGrid::isLocalDeOnEdgeU(
       sizes.push_back(indexCountPDimPDe[de*dimCount+i]);
     MultiDimIndexLoop multiDimIndexLoop(sizes);
     multiDimIndexLoop.setSkipDim(dim-1);  // next() to skip dim
-    while(!multiDimIndexLoop.isPastLast()){
+    while(multiDimIndexLoop.isWithin()){
       // look at the entire interface spanned by all dimensions except dim
       int const *indexTuple = multiDimIndexLoop.getIndexTuple();
       for (int i=0; i<dimCount; i++)
@@ -3760,5 +3760,134 @@ int DistGrid::setArbSeqIndex(
   return rc;
 }
 //-----------------------------------------------------------------------------
+
+
+  //============================================================================
+  // class MultiDimIndexLoop
+  // Iterator type through regular multidimensional structures.
+  MultiDimIndexLoop::MultiDimIndexLoop(){
+    // default initialize
+    indexTupleStart.resize(0);
+    indexTupleEnd.resize(0);
+    indexTuple.resize(0);
+    skipDim.resize(0);
+    indexTupleBlockStart.resize(0);
+    indexTupleBlockEnd.resize(0);
+  }
+  MultiDimIndexLoop::MultiDimIndexLoop(const vector<int> sizes){
+    indexTupleEnd = sizes;
+    // default initialize rest
+    int rank = sizes.size();
+    indexTupleStart.resize(rank);
+    indexTuple.resize(rank);
+    skipDim.resize(rank);
+    indexTupleBlockStart.resize(rank);
+    indexTupleBlockEnd.resize(rank);
+    for (int i=0; i<rank; i++){
+      indexTupleStart[i] = indexTuple[i] = 0; // reset
+      skipDim[i] = false;                     // reset
+      indexTupleBlockStart[i] = indexTupleBlockEnd[i] = 0;  // reset
+    }
+  }
+  MultiDimIndexLoop::MultiDimIndexLoop(const vector<int> offsets,
+    const vector<int> sizes){
+    indexTupleStart = offsets;
+    indexTupleEnd = sizes;
+    // default initialize rest
+    int rank = sizes.size();
+    // todo: check that vector size matches, and throw exception if not
+    indexTuple.resize(rank);
+    skipDim.resize(rank);
+    indexTupleBlockStart.resize(rank);
+    indexTupleBlockEnd.resize(rank);
+    for (int i=0; i<rank; i++){
+      indexTuple[i] = indexTupleStart[i];     // reset
+      indexTupleEnd[i] += indexTupleStart[i]; // shift end by offsets
+      skipDim[i] = false;                     // reset
+      indexTupleBlockStart[i] = indexTupleBlockEnd[i] = 0;  // reset
+    }
+  }
+  void MultiDimIndexLoop::setSkipDim(int dim){
+    // todo: check that dim is between 0...,size-1
+    skipDim[dim] = true;
+  }
+  void MultiDimIndexLoop::setBlockStart(const vector<int> blockStart){
+    // todo: check that size of incoming blockStart vector is equal to rank
+    indexTupleBlockStart = blockStart;
+  }
+  void MultiDimIndexLoop::setBlockEnd(const vector<int> blockEnd){
+    // todo: check that size of incoming blockStart vector is equal to rank
+    indexTupleBlockEnd = blockEnd;
+  }
+  void MultiDimIndexLoop::first(){
+    for (int i=0; i<indexTuple.size(); i++)
+      indexTuple[i] = indexTupleStart[i];  // reset
+  }
+  void MultiDimIndexLoop::last(){
+    for (int i=0; i<indexTuple.size(); i++)
+      indexTuple[i] = indexTupleEnd[i]-1;  // reset
+  }
+  void MultiDimIndexLoop::next(){
+    if (skipDim[0])
+      indexTuple[0] = indexTupleEnd[0]; // skip
+    else
+      ++indexTuple[0];                  // increment
+    bool skipBlockedRegionFlag;
+    do{
+      skipBlockedRegionFlag = true;  // init
+      int i;
+      for (i=0; i<indexTuple.size()-1; i++){
+        if (indexTuple[i] == indexTupleEnd[i]){
+          indexTuple[i] = indexTupleStart[i];  // reset
+          if (skipDim[i+1])
+            indexTuple[i+1] = indexTupleEnd[i+1]; // skip
+          else
+            ++indexTuple[i+1];                    // increment
+        }
+        if ((indexTuple[i] < indexTupleBlockStart[i]) ||
+          (indexTuple[i] >= indexTupleBlockEnd[i])){
+          skipBlockedRegionFlag = false;  // not within blocked region
+        }     
+      }
+      if ((indexTuple[i] < indexTupleBlockStart[i]) ||
+        (indexTuple[i] >= indexTupleBlockEnd[i])){
+        skipBlockedRegionFlag = false;  // not within blocked region
+      }     
+      if (skipBlockedRegionFlag){
+        indexTuple[0] = indexTupleBlockEnd[0];
+        printf("gjt skip the blocked region\n");     
+      }
+    }while(skipBlockedRegionFlag && (indexTuple[0] >= indexTupleEnd[0]));
+  }
+  bool MultiDimIndexLoop::isFirst(){
+    for (int i=0; i<indexTuple.size(); i++)
+      if (indexTuple[i] != indexTupleStart[i]) return false;
+    return true;
+  }
+  bool MultiDimIndexLoop::isLast(){
+    for (int i=0; i<indexTuple.size(); i++)
+      if (indexTuple[i] != indexTupleEnd[i]-1) return false;
+    return true;
+  }
+  bool MultiDimIndexLoop::isWithin(){
+    for (int i=0; i<indexTuple.size(); i++)
+      if (indexTupleStart[i] >= indexTupleEnd[i])
+        return false; // this means there are no elements to iterate over
+    if (indexTuple[indexTuple.size()-1] < indexTupleEnd[indexTuple.size()-1])
+      return true;
+    return false;
+  }
+  const int *MultiDimIndexLoop::getIndexTuple(){
+    return &indexTuple[0];
+  }
+  const int *MultiDimIndexLoop::getIndexTupleEnd(){
+    return &indexTupleEnd[0];
+  }
+  const int *MultiDimIndexLoop::getIndexTupleStart(){
+    return &indexTupleStart[0];
+  }
+  //============================================================================
+
+
 
 } // namespace ESMCI

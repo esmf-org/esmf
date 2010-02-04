@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.22 2009/10/07 16:13:23 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.23 2010/02/04 06:21:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -190,93 +190,36 @@ namespace ESMCI {
   };  // class DistGrid
 
   
+  
+  //============================================================================
   class MultiDimIndexLoop{
+    // Iterator type through regular multidimensional structures.
    protected:
     vector<int> indexTupleStart;
     vector<int> indexTupleEnd;
     vector<int> indexTuple;
-    vector<bool> skipMask;
+    vector<bool> skipDim;
+    vector<int> indexTupleBlockStart; // blocked region
+    vector<int> indexTupleBlockEnd;   // blocked region
    public:
-    MultiDimIndexLoop(){
-      indexTupleStart.resize(0);
-      indexTupleEnd.resize(0);
-      indexTuple.resize(0);
-      skipMask.resize(0);
-    }
-    MultiDimIndexLoop(const vector<int> sizes){
-      indexTupleEnd = sizes;
-      indexTupleStart.resize(sizes.size());
-      indexTuple.resize(sizes.size());
-      skipMask.resize(sizes.size());
-      for (int i=0; i<indexTuple.size(); i++){
-        indexTupleStart[i] = indexTuple[i] = 0; // reset
-        skipMask[i] = false;                    // reset
-      }
-    }
-    MultiDimIndexLoop(const vector<int> offsets, const vector<int> sizes){
-      indexTupleStart = offsets;
-      indexTupleEnd = sizes;
-      // todo: check that vector size matches, and throw exception if not
-      indexTuple.resize(sizes.size());
-      skipMask.resize(sizes.size());
-      for (int i=0; i<indexTuple.size(); i++){
-        indexTuple[i] = indexTupleStart[i];     // reset
-        indexTupleEnd[i] += indexTupleStart[i]; // shift end by offsets
-        skipMask[i] = false;                    // reset
-      }
-    }
-    void setSkipDim(int dim){
-      // todo: check that dim is between 0...,size-1
-      skipMask[dim] = true;
-    }
-    void first(){
-      for (int i=0; i<indexTuple.size(); i++)
-        indexTuple[i] = indexTupleStart[i];  // reset
-    }
-    void last(){
-      for (int i=0; i<indexTuple.size(); i++)
-        indexTuple[i] = indexTupleEnd[i]-1;  // reset
-    }
-    void next(){
-      if (skipMask[0])
-        indexTuple[0] = indexTupleEnd[0]; // skip
-      else
-        ++indexTuple[0];                  // increment
-      for (int i=0; i<indexTuple.size()-1; i++){
-        if (indexTuple[i] == indexTupleEnd[i]){
-          indexTuple[i] = indexTupleStart[i];  // reset
-          if (skipMask[i+1])
-            indexTuple[i+1] = indexTupleEnd[i+1]; // skip
-          else
-            ++indexTuple[i+1];                    // increment
-        }
-      }
-    }
-    bool isFirst(){
-      for (int i=0; i<indexTuple.size(); i++)
-        if (indexTuple[i] != indexTupleStart[i]) return false;
-      return true;
-    }
-    bool isLast(){
-      for (int i=0; i<indexTuple.size(); i++)
-        if (indexTuple[i] != indexTupleEnd[i]-1) return false;
-      return true;
-    }
-    bool isPastLast(){
-      if (indexTuple[indexTuple.size()-1] < indexTupleEnd[indexTuple.size()-1])
-        return false;
-      return true;
-    }
-    const int *getIndexTuple(){
-      return &indexTuple[0];
-    }
-    const int *getIndexTupleEnd(){
-      return &indexTupleEnd[0];
-    }
-    const int *getIndexTupleStart(){
-      return &indexTupleStart[0];
-    }
+    MultiDimIndexLoop();
+    MultiDimIndexLoop(const vector<int> sizes);
+    MultiDimIndexLoop(const vector<int> offsets, const vector<int> sizes);
+    void setSkipDim(int dim);
+    void setBlockStart(const vector<int> blockStart);
+    void setBlockEnd(const vector<int> blockEnd);
+    void first();
+    void last();
+    void next();
+    bool isFirst();
+    bool isLast();
+    bool isWithin();
+    const int *getIndexTuple();
+    const int *getIndexTupleEnd();
+    const int *getIndexTupleStart();
   };  // class MultiDimIndexLoop
+  //============================================================================
+
 
 } // namespace ESMCI
 
