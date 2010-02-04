@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.89 2010/01/28 22:08:12 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.90 2010/02/04 06:26:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.89 2010/01/28 22:08:12 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.90 2010/02/04 06:26:51 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2768,7 +2768,7 @@ int Array::gather(
       arrayElement.setSkipDim(0); // next() will skip ahead to next contig. line
       // loop over all elements in exclusive region for this DE and memcpy data
       int sendBufferIndex = 0;  // reset
-      while(arrayElement.isPastLast()==false){
+      while(arrayElement.isWithin()){
         // copy this element from excl. region into the contiguous sendBuffer
         int linearIndex = arrayElement.getLinearIndexExclusive();
         // contiguous data copy in 1st dim
@@ -2908,7 +2908,7 @@ int Array::gather(
           multiDimIndexLoop.setSkipDim(0); // contiguous data in first dimension
         // loop over all elements in exclusive region for this DE 
         int recvBufferIndex = 0;  // reset
-        while(!multiDimIndexLoop.isPastLast()){
+        while(multiDimIndexLoop.isWithin()){
           // determine linear index for this element into array
           int linearIndex = 0;  // reset
           for (int jj=rank-1; jj>=0; jj--){
@@ -3241,7 +3241,7 @@ int Array::scatter(
           multiDimIndexLoop.setSkipDim(0); // contiguous data in first dimension
         // loop over all elements in exclusive region for this DE 
         int sendBufferIndex = 0;  // reset
-        while(!multiDimIndexLoop.isPastLast()){
+        while(multiDimIndexLoop.isWithin()){
           // determine linear index for this element into array
           int linearIndex = 0;  // reset
           for (int jj=rank-1; jj>=0; jj--){
@@ -3381,7 +3381,7 @@ int Array::scatter(
       arrayElement.setSkipDim(0); // next() will skip ahead to next contig. line
       // loop over all elements in exclusive region for this DE and memcpy data
       int recvBufferIndex = 0;  // reset
-      while(arrayElement.isPastLast()==false){
+      while(arrayElement.isWithin()){
         // copy this element from the contiguous recvBuffer into excl. region
         int linearIndex = arrayElement.getLinearIndexExclusive();
         // since the data in the recvBuffer was constructed to be contiguous
@@ -3402,6 +3402,151 @@ int Array::scatter(
   delete commh;
   delete [] commhList;
   
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::haloStore()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::haloStore
+//
+// !INTERFACE:
+int Array::haloStore(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  Array *array,                         // in    - Array
+  RouteHandle **routehandle             // inout - handle to precomputed comm
+  ){    
+//
+// !DESCRIPTION:
+//  Precompute and store communication pattern for halo
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  try{
+    
+    // every Pet must provide array argument
+    if (array == NULL){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+        "- Not a valid pointer to array", &rc);
+      return rc;
+    }
+    
+    // get the current VM and VM releated information
+    VM *vm = VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
+    int localPet = vm->getLocalPet();
+    int petCount = vm->getPetCount();
+
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
+    return rc;
+  }catch(exception &x){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      x.what(), &rc);
+    return rc;
+  }catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", &rc);
+    return rc;
+  }
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+  //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::halo()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::halo
+//
+// !INTERFACE:
+int Array::halo(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  Array *array,                         // in    - Array
+  RouteHandle **routehandle,            // inout - handle to precomputed comm
+  ESMC_CommFlag commflag,               // in    - communication options
+  bool *finishedflag,                   // out   - TEST ops finished or not
+  bool checkflag                        // in    - false: (def.) basic chcks
+                                        //         true:  full input check
+  ){    
+//
+// !DESCRIPTION:
+//    Execute an Array halo
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // implemented via sparseMatMul
+  localrc = sparseMatMul(array, array, routehandle,
+    commflag, finishedflag, ESMF_REGION_TOTAL, checkflag);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::haloRelease()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::haloRelease
+//
+// !INTERFACE:
+int Array::haloRelease(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  RouteHandle *routehandle        // inout -
+  ){    
+//
+// !DESCRIPTION:
+//    Release information for an Array halo
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // implemented via sparseMatMul
+  localrc = sparseMatMulRelease(routehandle);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -3815,7 +3960,7 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
       }
       
       MultiDimIndexLoop multiDimIndexLoop(offsets, sizes);
-      while(!multiDimIndexLoop.isPastLast()){
+      while(multiDimIndexLoop.isWithin()){
         const int *srcTuple = multiDimIndexLoop.getIndexTuple();
         // redist is identity mapping, but must consider srcToDstTMap
         // srcTuple --(srcToDstTMap)--> dstTuple
@@ -5934,7 +6079,7 @@ int Array::sparseMatMulStore(
       ArrayElement arrayElement(srcArray, i);
       // loop over all elements in exclusive region for this DE
       int elementIndex = 0;  // reset
-      while(arrayElement.isPastLast()==false){
+      while(arrayElement.isWithin()){
         // determine the linear index for the current Array element
         int linIndex = arrayElement.getLinearIndexExclusive();
         // determine the sequentialized index for the current Array element
@@ -5987,7 +6132,7 @@ int Array::sparseMatMulStore(
       ArrayElement arrayElement(dstArray, i);
       // loop over all elements in exclusive region for this DE
       int elementIndex = 0;  // reset
-      while(arrayElement.isPastLast()==false){
+      while(arrayElement.isWithin()){
         // determine the linear index for the current Array element
         int linIndex = arrayElement.getLinearIndexExclusive();
         // determine the sequentialized index for the current Array element
@@ -8396,7 +8541,8 @@ ArrayElement::ArrayElement(
   ){    
 //
 // !DESCRIPTION:
-//    Constructor
+//    Constructor of ArrayElement iterator through Array elements in exclusive
+//    region.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -8420,18 +8566,23 @@ ArrayElement::ArrayElement(
   // set members
   array = arrayArg;
   localDe = localDeArg;
-  indexTupleStart.resize(array->getRank());
-  indexTupleEnd.resize(array->getRank());
-  indexTuple.resize(array->getRank());
-  skipMask.resize(array->getRank());
+  int rank = array->getRank();
+  indexTupleStart.resize(rank);
+  indexTupleEnd.resize(rank);
+  indexTuple.resize(rank);
+  skipDim.resize(rank);
+  indexTupleBlockStart.resize(rank);
+  indexTupleBlockEnd.resize(rank);
   
-  // initialize tuple variables
+  // initialize tuple variables for iteration through Array elements within
+  // exclusive region, with origin of exclusive region at tuple (0,0,..)
   int iOff = localDe * array->getDistGrid()->getDimCount();
   int iPacked = 0;    // reset
   int iTensor = 0;    // reset
-  for (int i=0; i<array->getRank(); i++){
+  for (int i=0; i<rank; i++){
     indexTupleStart[i] = indexTuple[i] = 0;   // reset
-    skipMask[i] = false;                      // reset
+    skipDim[i] = false;                       // reset
+    indexTupleBlockStart[i] = indexTupleBlockEnd[i] = 0;  // reset
     if (array->getArrayToDistGridMap()[i]){
       // decomposed dimension
       indexTupleEnd[i] = array->getExclusiveUBound()[iOff+iPacked]
@@ -8440,6 +8591,91 @@ ArrayElement::ArrayElement(
     }else{
       // tensor dimension
       indexTupleEnd[i] = array->getUndistUBound()[iTensor]
+        - array->getUndistLBound()[iTensor] + 1;
+      ++iTensor;
+    }   
+  }
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayElement::ArrayElement()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::ArrayElement
+//
+// !INTERFACE:
+ArrayElement::ArrayElement(
+//
+// !RETURN VALUE:
+//    ArrayElement*
+//
+// !ARGUMENTS:
+//
+  Array *arrayArg,
+  int localDeArg,
+  bool blockExclusiveFlag
+  ){    
+//
+// !DESCRIPTION:
+//    Constructor of ArrayElement iterator through Array elements in total
+//    region, with this option to block the elements of the exclusiver region.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input arguments
+  if (arrayArg == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- arrayArg must not be NULL", &rc);
+    throw rc;  // bail out with exception
+  }
+  if (localDeArg < 0 || 
+    localDeArg >= arrayArg->getDELayout()->getLocalDeCount()){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+      "- localDeArg out of range", &rc);
+    throw rc;  // bail out with exception
+  }
+  
+  // set members
+  array = arrayArg;
+  localDe = localDeArg;
+  int rank = array->getRank();
+  indexTupleStart.resize(rank);
+  indexTupleEnd.resize(rank);
+  indexTuple.resize(rank);
+  skipDim.resize(rank);
+  indexTupleBlockStart.resize(rank);
+  indexTupleBlockEnd.resize(rank);
+  
+  // initialize tuple variables for iteration through Array elements within
+  // total region, with origin of exclusive region at tuple (0,0,..)
+  int iOff = localDe * array->getDistGrid()->getDimCount();
+  int iPacked = 0;    // reset
+  int iTensor = 0;    // reset
+  for (int i=0; i<rank; i++){
+    skipDim[i] = false;                       // reset
+    indexTupleBlockStart[i] = indexTupleBlockEnd[i] = 0;  // reset
+    if (array->getArrayToDistGridMap()[i]){
+      // decomposed dimension
+      indexTupleStart[i] = indexTuple[i] =
+        array->getTotalLBound()[iOff+iPacked]
+        - array->getExclusiveLBound()[iOff+iPacked];
+      indexTupleEnd[i] = array->getTotalUBound()[iOff+iPacked]
+        - array->getExclusiveLBound()[iOff+iPacked] + 1;
+      indexTupleBlockEnd[i] = array->getExclusiveUBound()[iOff+iPacked]
+        - array->getExclusiveLBound()[iOff+iPacked] + 1;
+      ++iPacked;
+    }else{
+      // tensor dimension
+      indexTupleStart[i] = indexTuple[i] = 0;
+      indexTupleEnd[i] = array->getUndistUBound()[iTensor]
+        - array->getUndistLBound()[iTensor] + 1;
+      indexTupleBlockEnd[i] = array->getUndistUBound()[iTensor]
         - array->getUndistLBound()[iTensor] + 1;
       ++iTensor;
     }   

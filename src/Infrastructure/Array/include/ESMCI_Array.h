@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.40 2010/01/26 06:12:34 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.41 2010/02/04 06:27:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -50,6 +50,8 @@ namespace ESMCI {
   class SparseMatrix;
 
   // class definition
+  
+  //============================================================================
   class Array : public ESMC_Base {    // inherits from ESMC_Base class
   
    private:
@@ -241,6 +243,11 @@ namespace ESMCI {
       int *counts, int *patch, int rootPet, VM *vm);
     int scatter(void *array, ESMC_TypeKind typekind, int rank,
       int *counts, int *patch, int rootPet, VM *vm);
+    static int haloStore(Array *array, RouteHandle **routehandle);
+    static int halo(Array *array,
+      RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,
+      bool *finishedflag=NULL, bool checkflag=false);
+    static int haloRelease(RouteHandle *routehandle);
     static int redistStore(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, InterfaceInt *srcToDstTransposeMap,
       ESMC_TypeKind typekindFactor = ESMF_NOKIND, void *factor = NULL);
@@ -257,15 +264,19 @@ namespace ESMCI {
     static int sparseMatMulRelease(RouteHandle *routehandle);
     
   };  // class Array
-
+  //============================================================================
   
+  
+  //============================================================================
   struct SeqIndex{
     int decompSeqIndex;
     int tensorSeqIndex;
+    void print(){
+      printf("SeqIndex: (%d, %d)\n", decompSeqIndex, tensorSeqIndex);
+    }
   };  // struct seqIndex
   bool operator==(SeqIndex a, SeqIndex b);
   bool operator<(SeqIndex a, SeqIndex b);
-  
   
   class SeqInd{
     int n;  // number of components in sequence index
@@ -277,11 +288,20 @@ namespace ESMCI {
       index = index_;
     }
     int getIndex(int i)const{return index[i];}
+    void print(){
+      printf("SeqInd: (");
+      int i;
+      for (i=0; i<n-1; i++)
+        printf("%d, ", index[i]);
+      printf("%d)\n", index[i]);
+    }
   };
   
   //todo: try to unify SeqIndex and SeqInd structs!
+  //============================================================================
   
   
+  //============================================================================
   class SparseMatrix{
     ESMC_TypeKind typekind;
     void const *factorList;
@@ -305,20 +325,25 @@ namespace ESMCI {
     int getSrcN()const{return srcN;}
     int getDstN()const{return dstN;}
   };
+  //============================================================================
 
+  
+  //============================================================================
   class ArrayElement : public MultiDimIndexLoop{
+    // Iterator type through Array elements.
     Array *array;                     // associated Array object
     int localDe;                      // localDe index
    public:
     ArrayElement(Array *arrayArg, int localDeArg);
+    ArrayElement(Array *arrayArg, int localDeArg, bool blockExclusiveFlag);
     int getLinearIndexExclusive(){
       return array->getLinearIndexExclusive(localDe, &indexTuple[0]);
     }
     SeqIndex getSequenceIndexExclusive(){
-      // getSequenceIndexExclusive() expects basis 0 indexTuple in excl. region
       return array->getSequenceIndexExclusive(localDe, &indexTuple[0]);
     }
   };  // class ArrayElement 
+  //============================================================================
   
 } // namespace ESMCI
 
