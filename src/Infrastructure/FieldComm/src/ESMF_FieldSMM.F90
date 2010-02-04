@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.8 2009/11/16 22:01:29 theurich Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.9 2010/02/04 19:53:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.8 2009/11/16 22:01:29 theurich Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.9 2010/02/04 19:53:35 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -93,7 +93,14 @@ contains
 !   congruent and typekind conform with the respective Fields used during 
 !   {\tt ESMF\_FieldSMMStore()}. Congruent Fields possess
 !   matching DistGrids and the shape of the local array tiles matches between
-!   the Fields for every DE.
+!   the Fields for every DE. For weakly congruent
+!   Fields the sizes of the undistributed dimensions, that vary faster with
+!   memory than the first distributed dimension, are permitted to be different.
+!   This means that the same {\tt routehandle} can be applied to a large class
+!   of similar Fields that differ in the number of elements in the left most
+!   undistributed dimensions. Because Grid dimensions are mapped to Field in a
+!   sequence order, it's necessary to map the ungridded dimensions to the first
+!   set of dimensions in order to use the weakly congruent Field SMM feature.
 !
 !   It is erroneous to specify the identical Field object for {\tt srcField} and
 !   {\tt dstField} arguments.
@@ -272,14 +279,21 @@ contains
 ! must match. 
 !  
 ! It is erroneous to specify the identical Field object for srcField and dstField 
-! arguments. 
-!  
-! The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-! {\tt ESMF\_FieldSMM()} on any pair of Fields that are congruent and typekind 
-! conform with the srcField, dstField pair. Congruent Fields possess matching 
-! DistGrids and the shape of the local array tiles matches between the Fields for 
-! every DE. 
+! arguments.
 !
+!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
+!   {\tt ESMF\_FieldSMM()} on any pair of Fields that are weakly congruent
+!   and typekind conform with the {\tt srcField}, {\tt dstField} pair. 
+!   Congruent Fields possess matching DistGrids, and the shape of the local
+!   array tiles matches between the Fields for every DE. For weakly congruent
+!   Fields the sizes of the undistributed dimensions, that vary faster with
+!   memory than the first distributed dimension, are permitted to be different.
+!   This means that the same {\tt routehandle} can be applied to a large class
+!   of similar Fields that differ in the number of elements in the left most
+!   undistributed dimensions. Because Grid dimensions are mapped to Field in a
+!   sequence order, it's necessary to map the ungridded dimensions to the first
+!   set of dimensions in order to use the weakly congruent Field SMM feature.
+!  
 ! This method is overloaded for:\newline
 ! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
 ! {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
@@ -606,11 +620,19 @@ contains
 ! It is erroneous to specify the identical Field object for srcField and dstField 
 ! arguments. 
 !  
-! The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-! {\tt ESMF\_FieldSMM()} on any pair of Fields that are congruent and typekind 
-! conform with the srcField, dstField pair. Congruent Fields possess matching 
-! DistGrids and the shape of the local array tiles matches between the Fields for 
-! every DE. 
+!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
+!   {\tt ESMF\_FieldSMM()} on any pair of Fields that are weakly congruent
+!   and typekind conform with the {\tt srcField}, {\tt dstField} pair. 
+!   Congruent Fields possess matching DistGrids, and the shape of the local
+!   array tiles matches between the Fields for every DE. For weakly congruent
+!   Fields the sizes of the undistributed dimensions, that vary faster with
+!   memory than the first distributed dimension, are permitted to be different.
+!   This means that the same {\tt routehandle} can be applied to a large class
+!   of similar Fields that differ in the number of elements in the left most
+!   undistributed dimensions. Because Grid dimensions are mapped to Field in a
+!   sequence order, it's necessary to map the ungridded dimensions to the first
+!   set of dimensions in order to use the weakly congruent Field SMM feature.
+!  
 !  
 ! This method is overloaded for:\newline
 ! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 

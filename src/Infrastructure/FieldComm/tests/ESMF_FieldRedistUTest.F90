@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistUTest.F90,v 1.13 2010/02/02 19:07:46 feiliu Exp $
+! $Id: ESMF_FieldRedistUTest.F90,v 1.14 2010/02/04 19:53:36 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldRedistUTest.F90,v 1.13 2010/02/02 19:07:46 feiliu Exp $'
+    '$Id: ESMF_FieldRedistUTest.F90,v 1.14 2010/02/04 19:53:36 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -245,6 +245,7 @@ contains
         integer                                     :: localrc, lpe
 
         integer, allocatable                        :: src_farray(:), dst_farray(:)
+        integer, pointer                            :: f1(:,:), f2(:,:)
         integer                                     :: fa_shape(1)
 
         rc = ESMF_SUCCESS
@@ -305,6 +306,13 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
+        call ESMF_FieldGet(srcFieldA, farrayPtr=f1, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        f1 = lpe
+
         ! create dst_farray, dstArray, and dstField
         allocate(dst_farray(fa_shape(1)) )
         dst_farray = 0
@@ -325,6 +333,11 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
+        call ESMF_FieldGet(dstFieldA, farrayPtr=f2, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
         ! perform redist
         call ESMF_FieldRedistStore(srcField, dstField, routehandle, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -336,6 +349,8 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
+        !print *, lpe, lbound(f2,2), ubound(f2,2), f2
+
         ! release route handle
         call ESMF_FieldRedistRelease(routehandle, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -344,6 +359,8 @@ contains
 
         call ESMF_FieldDestroy(srcField)
         call ESMF_FieldDestroy(dstField)
+        call ESMF_FieldDestroy(srcFieldA)
+        call ESMF_FieldDestroy(dstFieldA)
         call ESMF_ArrayDestroy(srcArray)
         call ESMF_ArrayDestroy(dstArray)
         call ESMF_GridDestroy(grid)

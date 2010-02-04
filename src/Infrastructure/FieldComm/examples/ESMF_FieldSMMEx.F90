@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMEx.F90,v 1.9 2009/09/29 19:44:51 feiliu Exp $
+! $Id: ESMF_FieldSMMEx.F90,v 1.10 2010/02/04 19:53:33 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,17 +35,19 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMEx.F90,v 1.9 2009/09/29 19:44:51 feiliu Exp $'
+    '$Id: ESMF_FieldSMMEx.F90,v 1.10 2010/02/04 19:53:33 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
     integer :: rc, finalrc
     type(ESMF_Field)                            :: srcField, dstField
+    type(ESMF_Field)                            :: srcFieldA, dstFieldA
     type(ESMF_Grid)                             :: grid
     type(ESMF_DistGrid)                         :: distgrid
     type(ESMF_VM)                               :: vm
     type(ESMF_RouteHandle)                      :: routehandle
     type(ESMF_Array)                            :: srcArray, dstArray
+    type(ESMF_ArraySpec)                        :: arrayspec
     integer                                     :: localrc, lpe, i
 
     integer, allocatable                        :: src_farray(:), dst_farray(:)
@@ -170,16 +172,56 @@
     do i = lbound(fptr, 1), ubound(fptr, 1)
         if(fptr(i) .ne. i) localrc = ESMF_FAILURE
     enddo
+!EOC
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOE
+! Field sparse matrix matmul can also be performed between weakly congruent Fields.
+! In this case, source and destination Fields can have ungridded dimensions
+! with size different from the Field pair used to compute the routehandle. 
+!EOE
+!BOC
+    call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=2, rc=rc)
+!EOC
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOE
+! Create two fields with ungridded dimensions using the Grid created previously.
+! The new Field pair has matching number of elements. The ungridded dimension
+! is mapped to the first dimension of either Field.
+!EOE
+!BOC
+    srcFieldA = ESMF_FieldCreate(grid, arrayspec, gridToFieldMap=(/2/), &
+        ungriddedLBound=(/1/), ungriddedUBound=(/10/), rc=rc)
+!EOC
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+    dstFieldA = ESMF_FieldCreate(grid, arrayspec, gridToFieldMap=(/2/), &
+        ungriddedLBound=(/1/), ungriddedUBound=(/10/), rc=rc)
+!EOC
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOE
+! Using the previously computed routehandle, weakly congruent Fields can perform
+! sparse matrix matmul.
+!EOE
+!BOC
+    call ESMF_FieldSMM(srcfieldA, dstFieldA, routehandle, rc=rc)
+!EOC
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
     ! release route handle
     call ESMF_FieldSMMRelease(routehandle, rc=rc)
+!EOC
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! destroy all objects created in this example to prevent memory leak
     call ESMF_FieldDestroy(srcField, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_FieldDestroy(dstField, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_FieldDestroy(srcFieldA, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_FieldDestroy(dstFieldA, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_ArrayDestroy(srcArray, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -190,7 +232,6 @@
     call ESMF_DistGridDestroy(distgrid, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(src_farray, dst_farray, factorList, factorIndexList)
-!EOC
 
      call ESMF_Finalize(rc=rc)
 

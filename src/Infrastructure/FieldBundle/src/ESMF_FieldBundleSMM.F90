@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMM.F90,v 1.8 2009/10/20 03:25:32 theurich Exp $
+! $Id: ESMF_FieldBundleSMM.F90,v 1.9 2010/02/04 19:53:46 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldBundleSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleSMM.F90,v 1.8 2009/10/20 03:25:32 theurich Exp $'
+      '$Id: ESMF_FieldBundleSMM.F90,v 1.9 2010/02/04 19:53:46 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleSMMStore
@@ -94,7 +94,11 @@ contains
 !   congruent and typekind conform with the respective FieldBundles used during 
 !   {\tt ESMF\_FieldBundleSMMStore()}. Congruent FieldBundles possess
 !   matching DistGrids and the shape of the local array tiles matches between
-!   the FieldBundles for every DE.
+!   the FieldBundles for every DE. For weakly congruent Fields the sizes of the 
+!   undistributed dimensions, that vary faster with memory than the first distributed 
+!   dimension, are permitted to be different. This means that the same {\tt routehandle} 
+!   can be applied to a large class of similar Fields that differ in the number of 
+!   elements in the left most undistributed dimensions. 
 !
 !   It is erroneous to specify the identical FieldBundle object for {\tt srcFieldBundle} and
 !   {\tt dstFieldBundle} arguments.
@@ -210,7 +214,7 @@ contains
             dst_bundle = .false.
         endif
 
-        ! perform FieldBundle redistribution
+        ! perform FieldBundle SMM
         if(src_bundle .and. dst_bundle) &
             call ESMF_ArrayBundleSMM(srcab, dstab, routehandle, &
                 zeroflag=l_zeroflag, checkflag=l_checkflag, rc=localrc)
@@ -333,13 +337,17 @@ contains
 !  
 ! It is erroneous to specify the identical FieldBundle object for srcFieldBundle 
 ! and dstFieldBundle arguments. 
-!  
+!
 ! The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 ! {\tt ESMF\_FieldBundleSMM()} on any pair of FieldBundles that are congruent and typekind 
 ! conform with the srcFieldBundle, dstFieldBundle pair. Congruent FieldBundles possess matching 
 ! DistGrids and the shape of the local array tiles matches between the FieldBundles for 
-! every DE. 
-!
+! every DE. For weakly congruent Fields the sizes of the 
+!   undistributed dimensions, that vary faster with memory than the first distributed 
+!   dimension, are permitted to be different. This means that the same {\tt routehandle} 
+!   can be applied to a large class of similar Fields that differ in the number of 
+!   elements in the left most undistributed dimensions. 
+!  
 ! This method is overloaded for:\newline
 ! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
 ! {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
@@ -811,10 +819,14 @@ contains
 ! arguments. 
 !  
 ! The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-! {\tt ESMF\_FieldBundleSMM()} on any pair of Fields that are congruent and typekind 
-! conform with the srcFieldBundle, dstFieldBundle pair. Congruent Fields possess matching 
-! DistGrids and the shape of the local array tiles matches between the Fields for 
-! every DE. 
+! {\tt ESMF\_FieldBundleSMM()} on any pair of FieldBundles that are congruent and typekind 
+! conform with the srcFieldBundle, dstFieldBundle pair. Congruent FieldBundles possess matching 
+! DistGrids and the shape of the local array tiles matches between the FieldBundles for 
+! every DE. For weakly congruent Fields the sizes of the 
+!   undistributed dimensions, that vary faster with memory than the first distributed 
+!   dimension, are permitted to be different. This means that the same {\tt routehandle} 
+!   can be applied to a large class of similar Fields that differ in the number of 
+!   elements in the left most undistributed dimensions. 
 !  
 ! This method is overloaded for:\newline
 ! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 

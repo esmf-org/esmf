@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMUTest.F90,v 1.12 2009/09/29 19:44:03 feiliu Exp $
+! $Id: ESMF_FieldSMMUTest.F90,v 1.13 2010/02/04 19:53:36 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMUTest.F90,v 1.12 2009/09/29 19:44:03 feiliu Exp $'
+    '$Id: ESMF_FieldSMMUTest.F90,v 1.13 2010/02/04 19:53:36 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -69,6 +69,13 @@ program ESMF_FieldSMMUTest
         call test_smm_1d(rc)
         write(failMsg, *) ""
         write(name, *) "FieldSMM basic test"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        call test_smm_1dweak(rc)
+        write(failMsg, *) ""
+        write(name, *) "FieldSMM basic test with varying ungridded bounds"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
@@ -239,6 +246,151 @@ contains
         if(lpe == 0) deallocate(factorList, factorIndexList)
         rc = ESMF_SUCCESS
     end subroutine test_smm_1d
+
+#undef ESMF_METHOD
+#define ESMF_METHOD "test_smm_1dweak"
+    subroutine test_smm_1dweak(rc)
+        integer, intent(out)                        :: rc
+
+        ! local arguments used to create field etc
+        type(ESMF_Field)                            :: srcField, dstField
+        type(ESMF_Field)                            :: srcFieldA, dstFieldA
+        type(ESMF_Grid)                             :: grid
+        type(ESMF_DistGrid)                         :: distgrid
+        type(ESMF_VM)                               :: vm
+        type(ESMF_RouteHandle)                      :: routehandle
+        type(ESMF_Array)                            :: srcArray, dstArray
+        type(ESMF_ArraySpec)                        :: arrayspec
+        integer                                     :: localrc, lpe
+
+        integer, allocatable                        :: src_farray(:), dst_farray(:)
+        integer                                     :: fa_shape(1)
+        
+        integer(ESMF_KIND_I4), allocatable          :: factorList(:)
+        integer, allocatable                        :: factorIndexList(:,:)
+
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+
+        call ESMF_VMGetCurrent(vm, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! create distgrid and grid
+        distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/16/), &
+            regDecomp=(/4/), &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        grid = ESMF_GridCreate(distgrid=distgrid, &
+            gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), &
+            name="grid", rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldGet(grid, localDe=0, totalCount=fa_shape, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=2, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! create src_farray, srcArray, and srcField
+        allocate(src_farray(fa_shape(1)) )
+        src_farray = 1
+        srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        srcField = ESMF_FieldCreate(grid, srcArray, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        srcFieldA = ESMF_FieldCreate(grid, arrayspec, gridToFieldMap=(/2/), &
+            ungriddedLBound=(/1/), ungriddedUBound=(/5/), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! create dst_farray, dstArray, and dstField
+        allocate(dst_farray(fa_shape(1)) )
+        dst_farray = 0
+        dstArray = ESMF_ArrayCreate(dst_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        dstField = ESMF_FieldCreate(grid, dstArray, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        dstFieldA = ESMF_FieldCreate(grid, arrayspec, gridToFieldMap=(/2/), &
+            ungriddedLBound=(/1/), ungriddedUBound=(/5/), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! initialize factorList and factorIndexList
+        if(lpe == 0) then
+            allocate(factorList(1))
+            allocate(factorIndexList(2,1))
+            factorList = (/3/)
+            factorIndexList(1,:) = (/1/)
+            factorIndexList(2,:) = (/3/)
+            call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
+                factorList, factorIndexList, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+        else
+            call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
+                rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+        endif
+
+        ! perform smm with a different pair of Fields
+        call ESMF_FieldSMM(srcfieldA, dstFieldA, routehandle, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! release route handle
+        call ESMF_FieldSMMRelease(routehandle, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldDestroy(srcField)
+        call ESMF_FieldDestroy(dstField)
+        call ESMF_FieldDestroy(srcFieldA)
+        call ESMF_FieldDestroy(dstFieldA)
+        call ESMF_ArrayDestroy(srcArray)
+        call ESMF_ArrayDestroy(dstArray)
+        call ESMF_GridDestroy(grid)
+        call ESMF_DistGridDestroy(distgrid)
+        deallocate(src_farray, dst_farray)
+        if(lpe == 0) deallocate(factorList, factorIndexList)
+        rc = ESMF_SUCCESS
+    end subroutine test_smm_1dweak
 
 #undef ESMF_METHOD
 #define ESMF_METHOD "test_smm_1da"
