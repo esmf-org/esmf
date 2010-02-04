@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.108 2010/01/28 22:06:50 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.109 2010/02/04 06:28:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -75,8 +75,8 @@ module ESMF_ArrayMod
   public ESMF_ArrayGather           ! implemented in ESMF_ArrayGatherMod 
   public ESMF_ArrayGet              ! implemented in ESMF_ArrayGetMod 
   public ESMF_ArrayHalo
+  public ESMF_ArrayHaloRelease
   public ESMF_ArrayHaloStore
-  public ESMF_ArrayHaloRun
   public ESMF_ArrayPrint            ! implemented in ESMF_ArrayPrMod
   public ESMF_ArrayRedist           ! implemented in ESMF_ArrayPrMod
   public ESMF_ArrayRedistRelease    ! implemented in ESMF_ArrayPrMod
@@ -107,7 +107,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.108 2010/01/28 22:06:50 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.109 2010/02/04 06:28:23 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -133,21 +133,6 @@ module ESMF_ArrayMod
   end interface
 
 
-! -------------------------- ESMF-public method -------------------------------
-!BOPI
-! !IROUTINE: ESMF_ArrayHalo -- Generic interface
-
-! !INTERFACE:
-  interface ESMF_ArrayHalo
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-    module procedure ESMF_ArrayHalo
-!EOPI
-
-  end interface
-
-      
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
 ! !IROUTINE: ESMF_ArraySMMStore -- Generic interface
@@ -232,33 +217,28 @@ contains
 !==================== communication calls ===========================
 
 
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayHalo()"
 !BOPI
-! !IROUTINE: ESMF_ArrayHalo - Halo an Array
+! !IROUTINE: ESMF_ArrayHalo - Execute an ArrayHalo operation
 !
 ! !INTERFACE:
-    ! Private name; call using ESMF_ArrayHalo()
-    subroutine ESMF_ArrayHalo(array, regionflag, haloLDepth, haloUDepth, rc)
+  subroutine ESMF_ArrayHalo(array, routehandle, commflag, &
+    finishedflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),       intent(inout)          :: array
-    type(ESMF_RegionFlag),  intent(in),   optional :: regionflag
-    integer,                intent(in),   optional :: haloLDepth(:)
-    integer,                intent(in),   optional :: haloUDepth(:)
-    integer,                intent(out),  optional :: rc
+    type(ESMF_Array),       intent(inout)           :: array
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_CommFlag),    intent(in),   optional  :: commflag
+    logical,                intent(out),  optional  :: finishedflag
+    logical,                intent(in),   optional  :: checkflag
+    integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Perform a halo operation over the data in an {\tt ESMF\_Array} object.
-!
-!   The optional {\tt haloLDepth} and {\tt haloUDepth} arguments can be 
-!   provided to specified the exact shape of the halo region. By default 
-!   {\tt haloLDepth} and {\tt haloUDepth} are assumed relative to the 
-!   computational region of the Array object. The optional {\tt regionflag}
-!   may be used to change to the exclusive region as reference for the halo
-!   widths.
+!   Execute the halo operation stored in the Route referenced by 
+!   {\tt routehandle} over the data in {\tt array}. See the description for 
+!   {\tt ArrayHaloStore()} and {\tt ArrayHalo()} for details. 
 !
 !     This version of the interface 
 !     implements the PET-based blocking paradigm: Each PET of the VM must issue
@@ -268,20 +248,26 @@ contains
 !   \begin{description}
 !   \item [array]
 !         {\tt ESMF\_Array} containing data to be haloed.
-!   \item [{[regionflag]}]
-!         Specifies the reference for halo width arguments: 
-!         {\tt ESMF\_REGION\_EXCLUSIVE} or {\tt ESMF\_REGION\_COMPUTATIONAL}
-!         (default).
-!   \item[{[haloLDepth]}] 
-!      This vector argument must have dimCount elements, where dimCount is
-!      specified in distgrid. It specifies the lower corner of the total data
-!      region with respect to the lower corner of the computational region
-!      or exclusive region (depending on {\tt regionflag}.
-!   \item[{[haloUDepth]}] 
-!      This vector argument must have dimCount elements, where dimCount is
-!      specified in distgrid. It specifies the upper corner of the total data
-!      region with respect to the upper corner of the computational region
-!      or exclusive region (depending on {\tt regionflag}.
+!   \item [routehandle]
+!         Handle to the Route that stores the halo operation to be performed.
+!   \item [{[commflag]}]
+!     Indicate communication option. Default is {\tt ESMF\_COMM\_BLOCKING},
+!     resulting in a blocking operation.
+!     See section \ref{opt:commflag} for a complete list of valid settings.
+!   \item [{[finishedflag]}]
+!     Used in combination with {\tt commflag = ESMF\_COMM\_NBTESTFINISH}.
+!     Returned {\tt finishedflag} equal to {\tt .true.} indicates that all
+!     operations have finished. A value of {\tt .false.} indicates that there
+!     are still unfinished operations that require additional calls with
+!     {\tt commflag = ESMF\_COMM\_NBTESTFINISH}, or a final call with
+!     {\tt commflag = ESMF\_COMM\_NBWAITFINISH}. For all other {\tt commflag}
+!     settings the returned value in {\tt finishedflag} is always {\tt .true.}.
+!   \item [{[checkflag]}]
+!     If set to {\tt .TRUE.} the input Array pair will be checked for
+!     consistency with the precomputed operation provided by {\tt routehandle}.
+!     If set to {\tt .FALSE.} {\em (default)} only a very basic input check
+!     will be performed, leaving many inconsistencies undetected. Set
+!     {\tt checkflag} to {\tt .FALSE.} to achieve highest performance.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -289,12 +275,86 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_CommFlag)     :: opt_commflag ! helper variable
+    type(ESMF_Logical)      :: opt_finishedflag! helper variable
+    type(ESMF_Logical)      :: opt_checkflag! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
     
+    ! Set default flags
+    opt_commflag = ESMF_COMM_BLOCKING
+    if (present(commflag)) opt_commflag = commflag
+    opt_checkflag = ESMF_FALSE
+    if (present(checkflag)) opt_checkflag = checkflag
+    
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayHalo(array, routehandle, &
+      opt_commflag, opt_finishedflag, opt_checkflag, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! translate back finishedflag
+    if (present(finishedflag)) then
+      finishedflag = opt_finishedflag
+    endif
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
   end subroutine ESMF_ArrayHalo
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayHaloRelease()"
+!BOP
+! !IROUTINE: ESMF_ArrayHaloRelease - Release resources associated with Array halo operation
+!
+! !INTERFACE:
+  subroutine ESMF_ArrayHaloRelease(routehandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    integer,                intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!   Release resouces associated with an Array sparse matrix multiplication. 
+!   After this call {\tt routehandle} becomes invalid.
+!
+!   \begin{description}
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments, deal with optional Array args
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+        
+    ! Call into the RouteHandle code
+    call ESMF_RouteHandleRelease(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayHaloRelease
 !------------------------------------------------------------------------------
 
 
@@ -319,7 +379,7 @@ contains
 ! !DESCRIPTION:
 !   Store a halo operation over the data in an {\tt ESMF\_Array}. See the
 !   description for {\tt ArrayHalo()} for details. No actual halo operation
-!   is performed by this call, use {\tt ArrayHaloRun} to execute a stored
+!   is performed by this call, use {\tt ArrayHalo} to execute a stored
 !   halo operation.
 !
 !   The Route referenced by the returned {\tt ESMF\_RouteHandle} object can 
@@ -364,52 +424,25 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
+    
+    !TODO: deal with optional array arguments, but for now simplify implement.
+    
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayHaloStore(array, routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Mark routehandle object as being created
+    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
   end subroutine ESMF_ArrayHaloStore
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayHaloRun()"
-!BOPI
-! !IROUTINE: ESMF_ArrayHaloRun - Execute an ArrayHalo operation
-!
-! !INTERFACE:
-    subroutine ESMF_ArrayHaloRun(array, routehandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array),       intent(inout)         :: array
-    type(ESMF_RouteHandle), intent(inout)         :: routehandle
-    integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Execute the halo operation stored in the Route referenced by 
-!   {\tt routehandle} over the data in {\tt array}. See the description for 
-!   {\tt ArrayHaloStore()} and {\tt ArrayHalo()} for details. 
-!
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its DEs. The
-!     call will block until all PET-local data objects are accessible.
-!
-!   \begin{description}
-!   \item [array]
-!         {\tt ESMF\_Array} containing data to be haloed.
-!   \item [routehandle]
-!         Handle to the Route that stores the halo operation to be performed.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-  end subroutine ESMF_ArrayHaloRun
 !------------------------------------------------------------------------------
 
 

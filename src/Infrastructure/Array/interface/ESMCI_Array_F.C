@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.32 2010/01/26 06:12:34 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.33 2010/02/04 06:28:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -605,6 +605,45 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
+  void FTN(c_esmc_arrayhalostore)(ESMCI::Array **array,
+    ESMCI::RouteHandle **routehandle, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arrayhalostore()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.MsgFoundError(ESMCI::Array::haloStore(
+      *array, routehandle),
+      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_arrayhalo)(ESMCI::Array **array,
+    ESMCI::RouteHandle **routehandle, ESMC_CommFlag *commflag,
+    ESMC_Logical *finishedflag, ESMC_Logical *checkflag, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arrayhalo()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // convert to bool
+    bool checkflagOpt = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(checkflag) != ESMC_NULL_POINTER)
+      if (*checkflag == ESMF_TRUE) checkflagOpt = true;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    bool finished;
+    ESMC_LogDefault.MsgFoundError(ESMCI::Array::halo(
+      *array, routehandle, *commflag, &finished, checkflagOpt),
+      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
+    // translate back finishedflag
+    if (ESMC_NOT_PRESENT_FILTER(finishedflag) != ESMC_NULL_POINTER){
+      if (finished)
+        *finishedflag = ESMF_TRUE;
+      else
+        *finishedflag = ESMF_FALSE;
+    }
+  }
+  
   void FTN(c_esmc_arrayrediststore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
     ESMCI::InterfaceInt **srcToDstTransposeMap, ESMC_TypeKind *typekind,
