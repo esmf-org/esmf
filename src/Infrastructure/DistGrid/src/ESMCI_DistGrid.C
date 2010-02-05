@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.36 2010/02/04 06:21:38 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.37 2010/02/05 23:12:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.36 2010/02/04 06:21:38 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.37 2010/02/05 23:12:27 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3788,6 +3788,7 @@ int DistGrid::setArbSeqIndex(
       skipDim[i] = false;                     // reset
       indexTupleBlockStart[i] = indexTupleBlockEnd[i] = 0;  // reset
     }
+    adjust();
   }
   MultiDimIndexLoop::MultiDimIndexLoop(const vector<int> offsets,
     const vector<int> sizes){
@@ -3806,6 +3807,7 @@ int DistGrid::setArbSeqIndex(
       skipDim[i] = false;                     // reset
       indexTupleBlockStart[i] = indexTupleBlockEnd[i] = 0;  // reset
     }
+    adjust();
   }
   void MultiDimIndexLoop::setSkipDim(int dim){
     // todo: check that dim is between 0...,size-1
@@ -3814,10 +3816,12 @@ int DistGrid::setArbSeqIndex(
   void MultiDimIndexLoop::setBlockStart(const vector<int> blockStart){
     // todo: check that size of incoming blockStart vector is equal to rank
     indexTupleBlockStart = blockStart;
+    adjust();
   }
   void MultiDimIndexLoop::setBlockEnd(const vector<int> blockEnd){
     // todo: check that size of incoming blockStart vector is equal to rank
     indexTupleBlockEnd = blockEnd;
+    adjust();
   }
   void MultiDimIndexLoop::first(){
     for (int i=0; i<indexTuple.size(); i++)
@@ -3827,13 +3831,10 @@ int DistGrid::setArbSeqIndex(
     for (int i=0; i<indexTuple.size(); i++)
       indexTuple[i] = indexTupleEnd[i]-1;  // reset
   }
-  void MultiDimIndexLoop::next(){
-    if (skipDim[0])
-      indexTuple[0] = indexTupleEnd[0]; // skip
-    else
-      ++indexTuple[0];                  // increment
+  void MultiDimIndexLoop::adjust(){
     bool skipBlockedRegionFlag;
     do{
+      // adjust all tuples, if necessary skip blocked region
       skipBlockedRegionFlag = true;  // init
       int i;
       for (i=0; i<indexTuple.size()-1; i++){
@@ -3855,9 +3856,16 @@ int DistGrid::setArbSeqIndex(
       }     
       if (skipBlockedRegionFlag){
         indexTuple[0] = indexTupleBlockEnd[0];
-        printf("gjt skip the blocked region\n");     
+//        printf("gjt skip the blocked region\n");     
       }
     }while(skipBlockedRegionFlag && (indexTuple[0] >= indexTupleEnd[0]));
+  }
+  void MultiDimIndexLoop::next(){
+    if (skipDim[0])
+      indexTuple[0] = indexTupleEnd[0]; // skip
+    else
+      ++indexTuple[0];                  // increment
+    adjust();
   }
   bool MultiDimIndexLoop::isFirst(){
     for (int i=0; i<indexTuple.size(); i++)

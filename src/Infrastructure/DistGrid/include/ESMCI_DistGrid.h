@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.23 2010/02/04 06:21:37 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.24 2010/02/05 23:12:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -210,6 +210,7 @@ namespace ESMCI {
     void setBlockEnd(const vector<int> blockEnd);
     void first();
     void last();
+    void adjust();
     void next();
     bool isFirst();
     bool isLast();
