@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.41 2010/02/04 06:27:39 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.42 2010/02/05 23:16:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -98,6 +98,13 @@ namespace ESMCI {
                                       // Multiply with tensorElementCount to get
                                       // total number of elements in total
                                       // Array region.
+    vector<vector<SeqIndex> > rimSeqIndex;// elements in the rim between
+                                          // exclusive and total region
+                                          // [localDeCount][rimElementCount[]]
+    vector<vector<int> > rimLinIndex;     // elements in the rim between
+                                          // exclusive and total region
+                                          // [localDeCount][rimElementCount[]]
+    vector<int> rimElementCount;      // number of elements in rim for localDe
     // lower level object references
     DistGrid *distgrid;
     bool distgridCreator;
@@ -132,6 +139,9 @@ namespace ESMCI {
       tensorElementCount = 0;
       exclusiveElementCountPDe = NULL;
       totalElementCountPLocalDe = NULL;
+      rimSeqIndex.resize(0);
+      rimLinIndex.resize(0);
+      rimElementCount.resize(0);
       localDeCountAux = 0;  // auxiliary variable for garbage collection
     }
     Array(int baseID):ESMC_Base(baseID){  // prevent baseID counter increment
@@ -156,6 +166,9 @@ namespace ESMCI {
       tensorElementCount = 0;
       exclusiveElementCountPDe = NULL;
       totalElementCountPLocalDe = NULL;
+      rimSeqIndex.resize(0);
+      rimLinIndex.resize(0);
+      rimElementCount.resize(0);
       localDeCountAux = 0;  // auxiliary variable for garbage collection
     }
    private:
@@ -256,11 +269,12 @@ namespace ESMCI {
       bool *finishedflag=NULL, bool checkflag=false);
     static int redistRelease(RouteHandle *routehandle);
     static int sparseMatMulStore(Array *srcArray, Array *dstArray,
-      RouteHandle **routehandle, vector<SparseMatrix> const &sparseMatrix);
+      RouteHandle **routehandle, vector<SparseMatrix> const &sparseMatrix,
+      bool haloFlag=false);
     static int sparseMatMul(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,
       bool *finishedflag=NULL, ESMC_RegionFlag zeroflag=ESMF_REGION_TOTAL,
-      bool checkflag=false);
+      bool checkflag=false, bool haloFlag=false);
     static int sparseMatMulRelease(RouteHandle *routehandle);
     
   };  // class Array
@@ -273,6 +287,10 @@ namespace ESMCI {
     int tensorSeqIndex;
     void print(){
       printf("SeqIndex: (%d, %d)\n", decompSeqIndex, tensorSeqIndex);
+    }
+    bool valid(){
+      if (decompSeqIndex == -1) return false; // invalid seqIndex
+      return true;  // otherwise valid
     }
   };  // struct seqIndex
   bool operator==(SeqIndex a, SeqIndex b);
