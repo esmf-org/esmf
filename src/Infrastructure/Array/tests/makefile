@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.38 2008/10/07 21:36:51 donstark Exp $ 
+# $Id: makefile,v 1.39 2010/02/05 23:25:30 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -12,6 +12,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayCreateGetUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayGatherUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayArbIdxSMMUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayRedistUTest \
+                $(ESMF_TESTDIR)/ESMF_ArrayHaloUTest \
                 $(ESMF_TESTDIR)/ESMC_ArrayUTest 
 
 TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
@@ -20,6 +21,7 @@ TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayGatherUTest \
                 RUN_ESMF_ArrayArbIdxSMMUTest \
                 RUN_ESMF_ArrayRedistUTest \
+                RUN_ESMF_ArrayHaloUTest \
                 RUN_ESMC_ArrayUTest 
 
 ifeq ($(ESMF_TESTHARNESS), NONEXHAUSTIVE)
@@ -78,6 +80,11 @@ RUN_ESMF_ArrayArbIdxSMMUTest:
 
 RUN_ESMF_ArrayRedistUTest:
 	$(MAKE) TNAME=ArrayRedist NP=6 ftest
+
+# ---
+
+RUN_ESMF_ArrayHaloUTest:
+	$(MAKE) TNAME=ArrayHalo NP=4 ftest
 
 # ---
 
