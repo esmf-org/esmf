@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.30 2010/01/22 17:49:07 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.31 2010/02/05 23:10:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.30 2010/01/22 17:49:07 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.31 2010/02/05 23:10:05 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -4065,6 +4065,7 @@ int XXE::print(
 //
 // !ARGUMENTS:
 //
+  FILE *fp,           // in  - file pointer
   int rraCount,       // in  - number of relative run-time address in rraList
   char **rraList,     // in  - relative run-time addresses
   int filterBitField, // in  - filter operations according to predicateBitField
@@ -4136,25 +4137,25 @@ int XXE::print(
     if (xxeElement->predicateBitField & filterBitField)
       continue; // filter out this operation
     
-    printf("XXE::print(): <localPet=%d> i=%d, xxeElement=%p, opId=%d, "
+    fprintf(fp, "XXE::print(): <localPet=%d> i=%d, xxeElement=%p, opId=%d, "
       "predicateBitField=0x%08x\n", 
       vm->getLocalPet(), i, xxeElement, stream[i].opId,
       stream[i].predicateBitField);
     switch(stream[i].opId){
     case send:
       {
-        printf("  XXE::send <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::send <localPet=%d>\n", vm->getLocalPet());
       }
       break;
     case recv:
       {
-        printf("  XXE::recv <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::recv <localPet=%d>\n", vm->getLocalPet());
       }
       break;
     case sendnb:
       {
         xxeSendnbInfo = (SendnbInfo *)xxeElement;
-        printf("  XXE::sendnb: <localPet=%d> buffer=%p, size=%d, dst=%d, "
+        fprintf(fp, "  XXE::sendnb: <localPet=%d> buffer=%p, size=%d, dst=%d, "
           "tag=%d, vectorFlag=%d, indirectionFlag=%d, commhandle=%p\n",
           vm->getLocalPet(),
           xxeSendnbInfo->buffer, xxeSendnbInfo->size, xxeSendnbInfo->dstPet,
@@ -4165,7 +4166,7 @@ int XXE::print(
     case recvnb:
       {
         xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
-        printf("  XXE::recvnb: <localPet=%d> buffer=%p, size=%d, src=%d, "
+        fprintf(fp, "  XXE::recvnb: <localPet=%d> buffer=%p, size=%d, src=%d, "
           "tag=%d, vectorFlag=%d, indirectionFlag=%d, commhandle=%p\n",
           vm->getLocalPet(),
           xxeRecvnbInfo->buffer, xxeRecvnbInfo->size, xxeRecvnbInfo->srcPet,
@@ -4176,7 +4177,7 @@ int XXE::print(
     case sendnbRRA:
       {
         xxeSendnbRRAInfo = (SendnbRRAInfo *)xxeElement;
-        printf("  XXE::sendnbRRA: <localPet=%d> rraOffset=%d, size=%d, dst=%d, "
+        fprintf(fp, "  XXE::sendnbRRA: <localPet=%d> rraOffset=%d, size=%d, dst=%d, "
           "rraIndex=%d, tag=%d, vectorFlag=%d, commhandle=%p\n",
           vm->getLocalPet(),
           xxeSendnbRRAInfo->rraOffset, xxeSendnbRRAInfo->size,
@@ -4188,8 +4189,8 @@ int XXE::print(
     case recvnbRRA:
       {
         xxeRecvnbRRAInfo = (RecvnbRRAInfo *)xxeElement;
-        printf("  XXE::recvnbRRA: <localPet=%d> rraOffset=%d, size=%d, src=%d, "
-          "rraIndex=%d, tag=%d, vectorFlag=%d, commhandle=%p\n",
+        fprintf(fp, "  XXE::recvnbRRA: <localPet=%d> rraOffset=%d, size=%d, "
+          "src=%d, rraIndex=%d, tag=%d, vectorFlag=%d, commhandle=%p\n",
           vm->getLocalPet(),
           xxeRecvnbRRAInfo->rraOffset, xxeRecvnbRRAInfo->size,
           xxeRecvnbRRAInfo->srcPet, xxeRecvnbRRAInfo->rraIndex,
@@ -4202,8 +4203,8 @@ int XXE::print(
         xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
         xxeIndexElement = &(stream[xxeWaitOnIndexInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
-        printf("  XXE::waitOnIndex: <localPet=%d> index=%d, commhandle=%p\n",
-          vm->getLocalPet(), xxeWaitOnIndexInfo->index,
+        fprintf(fp, "  XXE::waitOnIndex: <localPet=%d> index=%d, "
+          " commhandle=%p\n", vm->getLocalPet(), xxeWaitOnIndexInfo->index,
           xxeCommhandleInfo->commhandle);
       }
       break;
@@ -4212,64 +4213,71 @@ int XXE::print(
         xxeTestOnIndexInfo = (TestOnIndexInfo *)xxeElement;
         xxeIndexElement = &(stream[xxeTestOnIndexInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
-        printf("  XXE::TestOnIndex: <localPet=%d> index=%d, commhandle=%p\n",
-          vm->getLocalPet(), xxeTestOnIndexInfo->index,
+        fprintf(fp, "  XXE::TestOnIndex: <localPet=%d> index=%d, "
+          " commhandle=%p\n", vm->getLocalPet(), xxeTestOnIndexInfo->index,
           xxeCommhandleInfo->commhandle);
       }
       break;
     case waitOnAnyIndexSub:
       {
         xxeWaitOnAnyIndexSubInfo = (WaitOnAnyIndexSubInfo *)xxeElement;
-        printf("  XXE::waitOnAnyIndexSub <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::waitOnAnyIndexSub <localPet=%d>\n",
+          vm->getLocalPet());
         int *completeFlag = xxeWaitOnAnyIndexSubInfo->completeFlag;
         int count = xxeWaitOnAnyIndexSubInfo->count;
         int completeTotal = 0;  // reset
         for (int k=0; k<count; k++)
-          xxeWaitOnAnyIndexSubInfo->xxe[k]->print(rraCount, rraList);
+          xxeWaitOnAnyIndexSubInfo->xxe[k]->print(fp, rraCount, rraList);
           // recursive call
       }
       break;
     case waitOnIndexRange:
       {
         xxeWaitOnIndexRangeInfo = (WaitOnIndexRangeInfo *)xxeElement;
-        printf("  XXE::waitOnIndexRange <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::waitOnIndexRange <localPet=%d>\n",
+          vm->getLocalPet());
       }
       break;
     case waitOnIndexSub:
       {
         waitOnIndexSubInfo = (WaitOnIndexSubInfo *)xxeElement;
-        printf("  XXE::waitOnIndexSubInfo <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::waitOnIndexSubInfo <localPet=%d>\n",
+          vm->getLocalPet());
       }
       break;
     case testOnIndexSub:
       {
         testOnIndexSubInfo = (TestOnIndexSubInfo *)xxeElement;
-        printf("  XXE::testOnIndexSubInfo <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::testOnIndexSubInfo <localPet=%d>\n",
+          vm->getLocalPet());
       }
       break;
     case productSumVector:
       {
         xxeProductSumVectorInfo = (ProductSumVectorInfo *)xxeElement;
-        printf("  XXE::productSumVector <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::productSumVector <localPet=%d>\n",
+          vm->getLocalPet());
       }
       break;
     case productSumScalar:
       {
         xxeProductSumScalarInfo = (ProductSumScalarInfo *)xxeElement;
-        printf("  XXE::productSumScalar <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::productSumScalar <localPet=%d>\n",
+          vm->getLocalPet());
       }
       break;
     case productSumScalarRRA:
       {
         xxeProductSumScalarRRAInfo = (ProductSumScalarRRAInfo *)xxeElement;
-        printf("  XXE::productSumScalarRRA <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::productSumScalarRRA <localPet=%d>\n",
+          vm->getLocalPet());
       }
       break;
     case sumSuperScalarDstRRA:
       {
         xxeSumSuperScalarDstRRAInfo =
           (SumSuperScalarDstRRAInfo *)xxeElement;
-        printf("  XXE::sumSuperScalarDstRRA <localPet=%d> rraIndex=%d, "
+        fprintf(fp, "  XXE::sumSuperScalarDstRRA <localPet=%d> rraIndex=%d, "
           "termCount=%d, vectorFlag=%d, indirectionFlag=%d\n",
           vm->getLocalPet(), xxeSumSuperScalarDstRRAInfo->rraIndex,
           xxeSumSuperScalarDstRRAInfo->termCount,
@@ -4281,7 +4289,7 @@ int XXE::print(
       {
         xxeProductSumSuperScalarDstRRAInfo =
           (ProductSumSuperScalarDstRRAInfo *)xxeElement;
-        printf("  XXE::productSumSuperScalarDstRRA <localPet=%d> "
+        fprintf(fp, "  XXE::productSumSuperScalarDstRRA <localPet=%d> "
           "rraIndex=%d, termCount=%d, vectorFlag=%d, indirectionFlag=%d\n",
           vm->getLocalPet(), xxeProductSumSuperScalarDstRRAInfo->rraIndex,
           xxeProductSumSuperScalarDstRRAInfo->termCount,
@@ -4293,7 +4301,7 @@ int XXE::print(
       {
         xxeProductSumSuperScalarSrcRRAInfo =
           (ProductSumSuperScalarSrcRRAInfo *)xxeElement;
-        printf("  XXE::productSumSuperScalarSrcRRA <localPet=%d> "
+        fprintf(fp, "  XXE::productSumSuperScalarSrcRRA <localPet=%d> "
           "rraIndex=%d, termCount=%d, vectorFlag=%d, indirectionFlag=%d\n",
           vm->getLocalPet(), xxeProductSumSuperScalarSrcRRAInfo->rraIndex,
           xxeProductSumSuperScalarSrcRRAInfo->termCount,
@@ -4305,22 +4313,22 @@ int XXE::print(
       {
         xxeProductSumSuperScalarContigRRAInfo =
           (ProductSumSuperScalarContigRRAInfo *)xxeElement;
-        printf("  XXE::productSumSuperScalarContigRRA <localPet=%d>\n",
+        fprintf(fp, "  XXE::productSumSuperScalarContigRRA <localPet=%d>\n",
           vm->getLocalPet());
       }
       break;
     case zeroScalarRRA:
       {
         xxeZeroScalarRRAInfo = (ZeroScalarRRAInfo *)xxeElement;
-        printf("  XXE::zeroScalarRRA <localPet=%d> rraOffset=%d, rraIndex=%d\n",
-          vm->getLocalPet(), xxeZeroScalarRRAInfo->rraOffset,
+        fprintf(fp, "  XXE::zeroScalarRRA <localPet=%d> rraOffset=%d, "
+          "rraIndex=%d\n", vm->getLocalPet(), xxeZeroScalarRRAInfo->rraOffset,
           xxeZeroScalarRRAInfo->rraIndex);
       }
       break;
     case zeroSuperScalarRRA:
       {
         xxeZeroSuperScalarRRAInfo = (ZeroSuperScalarRRAInfo *)xxeElement;
-        printf("  XXE::zeroSuperScalarRRA <localPet=%d> rraOffsetList=%p, "
+        fprintf(fp, "  XXE::zeroSuperScalarRRA <localPet=%d> rraOffsetList=%p, "
           "rraIndex=%d, termCount=%d, vectorFlag=%d\n", vm->getLocalPet(),
           xxeZeroSuperScalarRRAInfo->rraOffsetList,
           xxeZeroSuperScalarRRAInfo->rraIndex,
@@ -4331,7 +4339,7 @@ int XXE::print(
     case zeroMemset:
       {
         xxeZeroMemsetInfo = (ZeroMemsetInfo *)xxeElement;
-        printf("  XXE::zeroMemset <localPet=%d> buffer=%p, byteCount=%d, "
+        fprintf(fp, "  XXE::zeroMemset <localPet=%d> buffer=%p, byteCount=%d, "
           "vectorFlag=%d, indirectionFlag=%d\n", 
             vm->getLocalPet(), xxeZeroMemsetInfo->buffer,
             xxeZeroMemsetInfo->byteCount, xxeZeroMemsetInfo->vectorFlag,
@@ -4341,8 +4349,8 @@ int XXE::print(
     case zeroMemsetRRA:
       {
         xxeZeroMemsetRRAInfo = (ZeroMemsetRRAInfo *)xxeElement;
-        printf("  XXE::zeroMemsetRRA <localPet=%d> byteCount=%d, rraIndex=%d, "
-          "vectorFlag=%d\n", 
+        fprintf(fp, "  XXE::zeroMemsetRRA <localPet=%d> byteCount=%d, "   
+          "rraIndex=%d, vectorFlag=%d\n", 
           vm->getLocalPet(), xxeZeroMemsetRRAInfo->byteCount,
           xxeZeroMemsetRRAInfo->rraIndex, xxeZeroMemsetRRAInfo->vectorFlag);
       }
@@ -4350,40 +4358,41 @@ int XXE::print(
     case memCpy:
       {
         xxeMemCpyInfo = (MemCpyInfo *)xxeElement;
-        printf("  XXE::memCpy <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::memCpy <localPet=%d>\n", vm->getLocalPet());
       }
       break;
     case memCpySrcRRA:
       {
         xxeMemCpySrcRRAInfo = (MemCpySrcRRAInfo *)xxeElement;
-        printf("  XXE::memCpySrcRRA <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::memCpySrcRRA <localPet=%d>\n", vm->getLocalPet());
       }
       break;
     case memGatherSrcRRA:
       {
         xxeMemGatherSrcRRAInfo = (MemGatherSrcRRAInfo *)xxeElement;
-        printf("  XXE::memGatherSrcRRA <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::memGatherSrcRRA <localPet=%d>\n",
+          vm->getLocalPet());
       }
       break;
     case xxeSub:
       {
         xxeSubInfo = (XxeSubInfo *)xxeElement;
-        printf("  XXE::xxeSub <localPet=%d>\n", vm->getLocalPet());
-        xxeSubInfo->xxe->print(rraCount, rraList); // recursive call
+        fprintf(fp, "  XXE::xxeSub <localPet=%d>\n", vm->getLocalPet());
+        xxeSubInfo->xxe->print(fp, rraCount, rraList); // recursive call
       }
       break;
     case xxeSubMulti:
       {
         xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
-        printf("  XXE::xxeSubMulti <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::xxeSubMulti <localPet=%d>\n", vm->getLocalPet());
         for (int k=0; k<xxeSubMultiInfo->count; k++)
-          xxeSubMultiInfo->xxe[k]->print(rraCount, rraList); // recursive call
+          xxeSubMultiInfo->xxe[k]->print(fp, rraCount, rraList); // recurs. call
       }
       break;
     case wtimer:
       {
         xxeWtimerInfo = (WtimerInfo *)xxeElement;
-        printf("  XXE::wtimer <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::wtimer <localPet=%d>\n", vm->getLocalPet());
         int index = xxeWtimerInfo->actualWtimerIndex;
         double *wtime = &(xxeWtimerInfo->wtime);
         *wtime = 0.;                      // initialize
@@ -4399,18 +4408,18 @@ int XXE::print(
     case message:
       {
         xxeMessageInfo = (MessageInfo *)xxeElement;
-        printf("  XXE::message <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::message <localPet=%d>\n", vm->getLocalPet());
       }
       break;
     case profileMessage:
       {
         xxeProfileMessageInfo = (ProfileMessageInfo *)xxeElement;
-        printf("  XXE::profileMessage <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::profileMessage <localPet=%d>\n", vm->getLocalPet());
       }
       break;
     case nop:
       {
-        printf("  XXE::nop <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::nop <localPet=%d>\n", vm->getLocalPet());
       }
       break;
     default:

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.24 2010/01/22 17:49:05 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.25 2010/02/05 23:10:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -394,8 +394,8 @@ class XXE{
     int exec(int rraCount=0, char **rraList=NULL, int *vectorLength=NULL,
       int filterBitField=0x0, bool *finished=NULL, double *dTime=NULL,
       int indexStart=-1, int indexStop=-1);
-    int print(int rraCount=0, char **rraList=NULL, int filterBitField=0x0,
-      int indexStart=-1, int indexStop=-1);
+    int print(FILE *fp, int rraCount=0, char **rraList=NULL,
+      int filterBitField=0x0, int indexStart=-1, int indexStop=-1);
     int printProfile(FILE *fp);
     int execReady();
     int optimize();
