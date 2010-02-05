@@ -1,7 +1,7 @@
-// $Id: ESMCI_Regrid_F.C,v 1.40 2009/09/01 00:25:19 rokuingh Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.40.2.1 2010/02/05 19:59:55 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2009, University Corporation for Atmospheric Research, 
+// Copyright 2002-2010, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 

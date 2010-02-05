@@ -1,7 +1,7 @@
-// $Id: ESMC_IO_NetCDFUTest.C,v 1.2 2009/09/02 05:51:11 eschwab Exp $
+// $Id: ESMC_IO_NetCDFUTest.C,v 1.2.2.1 2010/02/05 19:58:03 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2009, University Corporation for Atmospheric Research,
+// Copyright 2002-2010, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

@@ -1,7 +1,7 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.28 2009/10/28 00:40:34 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.28.2.1 2010/02/05 19:55:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2009, University Corporation for Atmospheric Research,
+! Copyright 2002-2010, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.28 2009/10/28 00:40:34 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.28.2.1 2010/02/05 19:55:38 svasquez Exp $'
 !------------------------------------------------------------------------------
     
 

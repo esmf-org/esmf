@@ -1,7 +1,7 @@
-! $Id: ESMF_FieldRepDimEx.F90,v 1.5 2009/09/29 15:35:48 feiliu Exp $
+! $Id: ESMF_FieldRepDimEx.F90,v 1.5.2.1 2010/02/05 19:55:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2009, University Corporation for Atmospheric Research,
+! Copyright 2002-2010, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
