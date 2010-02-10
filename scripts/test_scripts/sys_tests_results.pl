@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.17 2010/01/30 04:31:15 svasquez Exp $
+# $Id: sys_tests_results.pl,v 1.18 2010/02/10 00:50:34 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -214,7 +214,7 @@ use File::Find
                         close ($file);
 			# Find # of processors string
 			$count=grep ( /NUMBER_OF_PROCESSORS/, @file_lines);
-			if (($count = "") or ($count = 0)){
+			if (($count == "") || ($count == 0)){
 				# Did not find the # of processors string
 				goto DONE_CHECKING;
 			}
