@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.15 2009/05/29 23:15:32 theurich Exp $
+# $Id: build_rules.mk,v 1.16 2010/02/11 21:24:14 svasquez Exp $
 #
 # Linux.gfortran.default
 #
@@ -41,6 +41,13 @@ ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
+ifeq ($(ESMF_COMM),mvapich2)
+# Mvapich2 ---------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpicxx
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
+else
 ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with gfortran) -----------------------
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
@@ -62,6 +69,7 @@ ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
 else
 $(error Invalid ESMF_COMM setting: $(ESMF_COMM))
+endif
 endif
 endif
 endif
