@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.52 2010/02/11 06:58:19 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.53 2010/02/11 14:13:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.52 2010/02/11 06:58:19 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.53 2010/02/11 14:13:57 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3228,20 +3228,24 @@ namespace ESMCI {
 
   // Initialize local return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
+  int rc = ESMF_SUCCESS;
 
   // instantiate IO object; initialize with pointer to this Attribute node, to
   // place file-read attributes into.
   IO_XML *io_xml = ESMCI_IO_XMLCreate(0, NULL, 0, NULL, this, &localrc);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  if (localrc != ESMF_SUCCESS) rc = localrc;
 
   // read the XML file, placing contents into this Attribute node
   localrc = io_xml->read(fileNameLen, fileName);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  if (localrc != ESMF_SUCCESS) rc = localrc;
 
   localrc = ESMCI_IO_XMLDestroy(&io_xml);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  if (localrc != ESMF_SUCCESS) rc = localrc;
 
-  return localrc;
+  return rc;
 
  } // end AttributeRead
 
