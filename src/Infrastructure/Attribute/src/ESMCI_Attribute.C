@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.53 2010/02/11 14:13:57 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.54 2010/02/11 14:18:18 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -34,13 +34,12 @@
 #include "ESMF_LogMacros.inc"
 //#include "ESMCI_VM.h"
 
-//#include <iostream>
 #include <sstream>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.53 2010/02/11 14:13:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.54 2010/02/11 14:18:18 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
