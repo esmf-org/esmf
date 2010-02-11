@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.C,v 1.4 2009/10/16 05:39:47 eschwab Exp $
+// $Id: ESMCI_IO_XML.C,v 1.5 2010/02/11 06:58:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -23,247 +23,31 @@
 
  // higher level, 3rd party or system includes here
  #include <stdio.h>
- #include <string.h>
- #include <ctype.h>
- #include <iostream>
+ #include <stdarg.h>
 
 #ifdef ESMF_XERCES
  #include <xercesc/sax2/SAX2XMLReader.hpp>
  #include <xercesc/sax2/XMLReaderFactory.hpp>
- #include <xercesc/sax2/DefaultHandler.hpp>
- #include <xercesc/sax2/Attributes.hpp>
- #include <xercesc/util/XMLString.hpp>
+ #include <xercesc/internal/VecAttributesImpl.hpp>
+ #include <xercesc/util/RefVectorOf.hpp>
 #endif
-
+ 
  #include <ESMCI_LogErr.h>
  #include <ESMF_LogMacros.inc>
 
- // associated class definition file
+ // associated class definition files
  #include <ESMCI_IO_XML.h>
+ #include <ESMCI_SAX2ReadHandler.h>
+ #include <ESMCI_SAX2WriteHandler.h>
 
  using namespace std; 
 
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.4 2009/10/16 05:39:47 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.5 2010/02/11 06:58:19 eschwab Exp $";
 //-------------------------------------------------------------------------
 
-#ifdef ESMF_XERCES
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "MySAX2Handler::MySAX2Handler()"
-
-// constructor
-MySAX2Handler::MySAX2Handler(ESMCI::Attribute *attr) : DefaultHandler()
-{
-  this->attr = attr;
-}
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "MySAX2Handler::startElement()"
-
-// startElement parse-event handler
-void MySAX2Handler::startElement(const XMLCh* const uri,
-                                 const XMLCh* const localname,
-                                 const XMLCh* const qname,
-                                 const Attributes&  attrs)
-{
-    int status;
-    char* msg1 = XMLString::transcode(uri);
-    char* msg2 = XMLString::transcode(localname);
-    char* msg3 = XMLString::transcode(qname);
-    //cout << "Start of element: "<< msg1 << ", " << msg2 << ", "
-    //                            << msg3 << ", " << endl;
-    // remember this name to associate with the subsequent value callback
-    //   to MySAX2Handler::characters()
-    // TODO:  qname better than localname?
-    string cqname(msg3, strlen(msg3));
-    cqname.resize(cqname.find_last_not_of(" ")+1);
-    if (cqname == "model_component") {
-      this->object = "comp";
-    } else if (cqname == "variable") {
-      this->object = "field";
-    } else if (cqname == "GridSpec") {
-      this->object = "grid";
-    // TODO:  state, grid, others
-    } else this->qname = cqname;
-
-    char* Qname=NULL;
-    char* URI=NULL;
-    char* local=NULL;
-    char* type=NULL;
-    char* value=NULL;
-
-    for (XMLSize_t i = 0; i < attrs.getLength(); i++) {
-      Qname = XMLString::transcode(attrs.getQName(i));
-      URI   = XMLString::transcode(attrs.getURI(i));
-      local = XMLString::transcode(attrs.getLocalName(i));
-      type  = XMLString::transcode(attrs.getType(i));
-      value = XMLString::transcode(attrs.getValue(i));
-      //cout <<"  Attributes: " << Qname << ", " << URI << ", " << local << ", "
-      //                         << type << ", " << value << endl;
-
-      string cname(Qname, strlen(Qname));
-      string cvalue(value, strlen(value));
-      cname.resize(cname.find_last_not_of(" ")+1);
-      cvalue.resize(cvalue.find_last_not_of(" ")+1);
-
-      if (cname.empty()) {
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                             "bad attribute name conversion", &status);
-          //if (rc) *rc = status;  TODO
-          return;
-      }
- 
-      if (cvalue.empty()) {
-          ESMC_LogDefault.Write("Attribute has an empty value argument",
-                                  ESMC_LOG_INFO);
-          cvalue = '\0';
-      }
-
-      if (cname == "convention") {
-        this->convention = value;
-      }
-      else if (cname == "purpose") {
-        this->purpose = value;
-      }
-      
-      // Set the attribute on the object, if neither convention nor purpose
-      if (cname != "convention" && cname != "purpose") {
-        if (!this->convention.empty() && !this->purpose.empty()) {
-          status = this->attr->AttPackSet(cname, ESMC_TYPEKIND_CHARACTER, 1,
-                                          &cvalue, this->convention,
-                                                   this->purpose, 
-                                                   this->object);
-        } else {
-          // TODO:  handle one or the other (xor) of conv, purp (error) ?
-          status = this->attr->AttributeSet(cname, &cvalue);
-        }
-        if (status != ESMF_SUCCESS) {
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                               "failed setting attribute value", &status);
-        }
-      }
-    }
-
-    // Create attribute package, if just now specified
-    if (cqname == "attribute_package" && 
-        !convention.empty() && !purpose.empty()) {
-      //cout << "creating attribute package, " << convention << ", "
-      //                                      << purpose << endl;
-      status = attr->AttPackCreateStandard(convention, purpose, object);
-      //cout << "AttPackCreateStandard() status = " << status << endl;
-      if (status != ESMF_SUCCESS) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                             "failed creating attribute package", &status);
-      }
-    }
-
-    if (value != NULL) XMLString::release(&value);
-    if (type  != NULL) XMLString::release(&type);
-    if (local != NULL) XMLString::release(&local);
-    if (URI   != NULL) XMLString::release(&URI);
-    if (Qname != NULL) XMLString::release(&Qname);
-
-    XMLString::release(&msg3);
-    XMLString::release(&msg2);
-    XMLString::release(&msg1);
-
-} // MySAX2Handler::startElement()
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "MySAX2Handler::characters()"
-
-void MySAX2Handler::characters(const XMLCh *const chars,
-                               const XMLSize_t length)
-{
-    int status;
-    char* msg = XMLString::transcode(chars);
-    if (msg[0] != '\n' &&
-        msg[0] != ' ') {  // TODO: can these callbacks be prevented?
-      //cout << "      characters: "<< msg << endl;
-      //cout << "      length: "<< length << " characters" << endl;
-
-      string cvalue(msg, length);
-      cvalue.resize(cvalue.find_last_not_of(" ")+1);
-
-      if (this->qname.empty()) {
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "no attribute name to associate value to", &status);
-          //if (rc) *rc = status;  TODO
-          return;
-      }
- 
-      if (cvalue.empty()) {
-          ESMC_LogDefault.Write("Attribute has an empty value argument",
-                                 ESMC_LOG_INFO);
-          cvalue = '\0';
-      }
-
-      // Set the attribute on the object
-      if (!this->convention.empty() && !this->purpose.empty()) {
-        status = this->attr->AttPackSet(this->qname, ESMC_TYPEKIND_CHARACTER, 1,
-                                        &cvalue, this->convention,
-                                                 this->purpose, 
-                                                 this->object);
-      } else {
-        // TODO:  handle one or the other (xor) of conv, purp (error) ?
-        status = this->attr->AttributeSet(this->qname, &cvalue);
-      }
-      if (status != ESMF_SUCCESS) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                             "failed setting attribute value", &status);
-      }
-    }
-    XMLString::release(&msg);
-
-} // MySAX2Handler::characters
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "MySAX2Handler::endElement()"
-
-void MySAX2Handler::endElement(const XMLCh* const uri,
-                               const XMLCh* const localname,
-                               const XMLCh* const qname)
-{
-    int status;
-    char* msg1 = XMLString::transcode(uri);
-    char* msg2 = XMLString::transcode(localname);
-    char* msg3 = XMLString::transcode(qname);
-    //cout << "End of element: "<< msg1 << ", " << msg2 << ", "
-    //                          << msg3 << ", " << endl;
-    // TODO:  qname better than localname?
-    this->qname.clear();
-
-    // if end of attribute package, clear convention, purpose and object type
-    if (strncmp(msg3, "attribute_package", 17) == 0) {
-      convention.clear();
-      purpose.clear();
-      object.clear();
-    }
-
-    XMLString::release(&msg3);
-    XMLString::release(&msg2);
-    XMLString::release(&msg1);
-
-} // MySAX2Handler::endElement()
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "MySAX2Handler::fatalError()"
-
-void MySAX2Handler::fatalError(const SAXParseException& exception)
-{
-    char* message = XMLString::transcode(exception.getMessage());
-    //cout << "SAX XML Fatal Error: " << message
-    //     << " at line: " << exception.getLineNumber()
-    //     << endl;
-    // TODO:  proper ESMC_Log* call
-    XMLString::release(&message);
-
-} // MySAX2Handler::fatalError()
-
-#endif
 
 namespace ESMCI{
 
@@ -288,6 +72,8 @@ namespace ESMCI{
 // !ARGUMENTS:
       int                nameLen,          // in
       const char        *name,             // in
+      int                fileNameLen,      // in
+      const char        *fileName,         // in
       Attribute         *attr,             // in
       int               *rc) {             // out - return code
 
@@ -325,11 +111,45 @@ namespace ESMCI{
     }
     ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
 
+    if (fileName != ESMC_NULL_POINTER) {
+      if (fileNameLen < ESMF_MAXSTR) {
+        strncpy(io_xml->fileName, fileName, fileNameLen);
+        io_xml->fileName[fileNameLen] = '\0';  // null terminate
+      } else {
+        // truncate
+        strncpy(io_xml->fileName, fileName, ESMF_MAXSTR-1);
+        io_xml->fileName[ESMF_MAXSTR-1] = '\0';  // null terminate
+
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "io_xml fileName %s, length >= ESMF_MAXSTR; truncated.",
+                fileName);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
+        // TODO: return ESMF_WARNING when defined
+        // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
+      }
+    }
+
     if (attr != ESMC_NULL_POINTER) io_xml->attr = attr;
 
     // TODO returnCode = io_xml->validate();
     returnCode = ESMF_SUCCESS;
     ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
+
+#ifdef ESMF_XERCES
+    try {
+        XMLPlatformUtils::Initialize();
+    }
+    catch (const XMLException& toCatch) {
+        char* message = XMLString::transcode(toCatch.getMessage());
+        //cout << "Error during Xerces initialization! :\n";
+        //cout << "Exception message is: \n"
+        //     << message << "\n";
+        XMLString::release(&message);
+        returnCode = ESMC_RC_LIB;
+        ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
+    }
+#endif
+
     return(io_xml);
 
  } // end ESMCI_IO_XMLCreate (new)
@@ -364,7 +184,7 @@ namespace ESMCI{
   }
 
   try{
-    // destruct Array object
+    // destruct IO object
     (*io_xml)->destruct();
     // mark as invalid object
     (*io_xml)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
@@ -378,9 +198,14 @@ namespace ESMCI{
     return rc;
   }
   
+#ifdef ESMF_XERCES
+  XMLPlatformUtils::Terminate();
+#endif
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
+
  } // end ESMCI_IO_XMLDestroy
 
 //-------------------------------------------------------------------------
@@ -437,31 +262,21 @@ namespace ESMCI{
     }
 
 #ifdef ESMF_XERCES
-    try {
-        XMLPlatformUtils::Initialize();
-    }
-    catch (const XMLException& toCatch) {
-        char* message = XMLString::transcode(toCatch.getMessage());
-        //cout << "Error during initialization! :\n";
-        //cout << "Exception message is: \n"
-        //     << message << "\n";
-        XMLString::release(&message);
-        return ESMF_FAILURE; // TODO: specific ESMF rc
-    }
-
+    // TODO:  move parser & readHandler instantiation to Create()/construct(),
+    //        if we need to do multiple reads per IO_XML object lifetime. ?
     SAX2XMLReader* parser = XMLReaderFactory::createXMLReader();
     parser->setFeature(XMLUni::fgSAX2CoreValidation, true);
     parser->setFeature(XMLUni::fgSAX2CoreNameSpaces, true);   // optional
 
-    MySAX2Handler* myHandler;
-    myHandler = new MySAX2Handler(attr);
-    parser->setContentHandler(myHandler);
-    parser->setErrorHandler(myHandler);
+    SAX2ReadHandler* readHandler = new SAX2ReadHandler(attr);
+    parser->setContentHandler(readHandler);
+    parser->setErrorHandler(readHandler);
 
     try {
         // Xerces C++ SAX2 API reads the XML file, producing callbacks to
-        //   MySAX2Handler::startElement(), MySAX2Handler::characters(), and
-        //   MySAX2Handler::endElement() for each XML element
+        //   SAX2ReadHandler::startElement(),
+        //   SAX2ReadHandler::characters(), and
+        //   SAX2ReadHandler::endElement() for each XML element
         parser->parse(this->fileName); 
     }
     catch (const XMLException& toCatch) {
@@ -469,24 +284,22 @@ namespace ESMCI{
         //cout << "Exception message is: \n"
         //     << message << "\n";
         XMLString::release(&message);
-        return ESMF_FAILURE; // TODO: specific ESMF rc
+        return ESMC_RC_FILE_READ;
     }
     catch (const SAXParseException& toCatch) {
         char* message = XMLString::transcode(toCatch.getMessage());
         //cout << "Exception message is: \n"
         //     << message << "\n";
         XMLString::release(&message);
-        return ESMF_FAILURE; // TODO: specific ESMF rc
+        return ESMC_RC_FILE_READ;
     }
     catch (...) {
         //cout << "Unexpected Exception \n" ;
-        return ESMF_FAILURE; // TODO: specific ESMF rc
+        return ESMC_RC_FILE_READ;
     }
 
-    delete myHandler;
+    delete readHandler;
     delete parser;
-
-    XMLPlatformUtils::Terminate();
 #else
     // xerces library not present
     rc = ESMF_RC_LIB_NOT_PRESENT;
@@ -495,6 +308,378 @@ namespace ESMCI{
     return (rc);
 
 }  // end IO_XML::read
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  IO_XML::writeStartElement - Performs a write on an IO object
+//
+// !INTERFACE:
+      int IO_XML::writeStartElement(
+//
+// !RETURN VALUE:
+//     int error return code
+//
+// !ARGUMENTS:
+      const string        &name,
+      const int            indentLevel,
+      const int            nPairs, ...) {
+      // nPairs of (const string &attrName, const string &attrValue)
+
+// !DESCRIPTION:
+//      Part of writing an {\tt ESMC\_IO\_XML} object to file.
+//      Maps to SAX2 startElement().
+//
+//EOP
+// !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMCI::IO_XML::writeStartElement()"
+
+    va_list ap;
+    int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
+    va_start(ap, nPairs);
+
+#ifdef ESMF_XERCES
+    // if first write() call, instantiate a writeHandler for this IO_XML.
+    // TODO:  move instantiation to Create()/construct(), if we ever
+    //      create "r,w,rw" flags in Create(), as well as move
+    //      readHandler/parser instantiation to Create()/construct().  ?
+    if (writeHandler == ESMC_NULL_POINTER) {
+      writeHandler = new SAX2WriteHandler(this->fileName, "LATIN1",
+                                          XMLFormatter::UnRep_CharRef, false);
+    }
+
+    char *attrName;
+    char *attrValue;
+    XMLAttr *attr   = NULL;
+    XMLSize_t attrCount=0;
+    RefVectorOf<XMLAttr> *attrList = NULL;
+    VecAttributesImpl fAttrList;  // empty if no attrs passed in (nPairs = 0)
+
+    // prep passed-in XML element attributes, if any
+    if (nPairs > 0) {
+      attrList = new RefVectorOf<XMLAttr>(nPairs, true); // adopt elems
+      for (int i=0; i < nPairs; i++) {
+        attrName  = va_arg(ap, char*);
+        attrValue = va_arg(ap, char*);
+        if (strlen(attrName) > 0) {
+          attr = new XMLAttr(0, XMLString::transcode(attrName),
+                                XMLUni::fgZeroLenString, 
+                                XMLString::transcode(attrValue)); 
+          attrList->addElement(attr);
+          attrCount++;
+        }
+      }
+      fAttrList.setVector(attrList, attrCount, NULL, true); // adopt elems
+      // The above containers attrList and fAttrlist are set to
+      // adopt their elements, so they will deallocate them upon their demise.
+      // This happens when attrList is deleted and fAttrList goes out of
+      // scope at the end of this method.  So attr does not need to be
+      // deleted explicitly here; multiple XMLAttr allocations can be done
+      // with it, each of which resides in (is adopted by) attrList.
+    }
+
+    // indent if needed
+    if (indentLevel > 0) {
+      string indentSpaces;
+      for(int i=0; i<indentLevel; i++) indentSpaces += "  ";
+      XMLCh* indent = XMLString::transcode(indentSpaces.c_str());
+      writeHandler->characters(indent, XMLString::stringLen(indent));
+      XMLString::release(&indent);
+    }
+ 
+    // write out the element's name and its attributes
+    //   <name attrName="attrValue" ... >
+    XMLCh* qname = XMLString::transcode(name.c_str());
+    writeHandler->startElement(XMLUni::fgZeroLenString,
+                               XMLUni::fgZeroLenString,
+                               qname, fAttrList);
+    XMLString::release(&qname);
+
+    // end of line
+    XMLCh* newLine = XMLString::transcode("\n");
+    writeHandler->characters(newLine, XMLString::stringLen(newLine));
+    XMLString::release(&newLine);
+
+    // delete attrList; // TODO: not necessary if adopted by fAttrList? NULL ok
+#else
+    // xerces library not present
+    rc = ESMF_RC_LIB_NOT_PRESENT;
+#endif
+
+    va_end(ap);
+    return (rc);
+
+}  // end IO_XML::writeStartElement
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  IO_XML::writeElement - Performs a write on an IO object
+//
+// !INTERFACE:
+      int IO_XML::writeElement(
+//
+// !RETURN VALUE:
+//     int error return code
+//
+// !ARGUMENTS:
+      const string        &name,
+      const string        &value,
+      const int           indentLevel) {
+
+// !DESCRIPTION:
+//      Part of writing an {\tt ESMC\_IO\_XML} object to file.
+//      Maps to SAX2 characters(), optionally to startElement() & endElement().
+//
+//EOP
+// !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMCI::IO_XML::writeElement()"
+
+    int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
+#ifdef ESMF_XERCES
+    // if first write() call, instantiate a writeHandler for this IO_XML.
+    // TODO:  move instantiation to Create()/construct(), if we ever
+    //      create "r,w,rw" flags in Create(), as well as move
+    //      readHandler/parser instantiation to Create()/construct().  ?
+    if (writeHandler == ESMC_NULL_POINTER) {
+      writeHandler = new SAX2WriteHandler(this->fileName, "LATIN1",
+                                          XMLFormatter::UnRep_CharRef, false);
+    }
+
+    // indent if needed
+    if (indentLevel > 0) {
+      string indentSpaces;
+      for(int i=0; i<indentLevel; i++) indentSpaces += "  ";
+      XMLCh* indent = XMLString::transcode(indentSpaces.c_str());
+      writeHandler->characters(indent, XMLString::stringLen(indent));
+      XMLString::release(&indent);
+    }
+ 
+    XMLCh* qname;
+    if (!(name.empty())) {
+      VecAttributesImpl fAttrList;  // empty attributes list
+      qname = XMLString::transcode(name.c_str());
+      // write out the start of the XML element <name>
+      writeHandler->startElement(XMLUni::fgZeroLenString,
+                                 XMLUni::fgZeroLenString,
+                                 qname, fAttrList);
+    }
+         
+    // write out element name's value <name>value</name>
+    XMLCh* outChars = XMLString::transcode(value.c_str());
+    writeHandler->characters(outChars, XMLString::stringLen(outChars));
+    XMLString::release(&outChars);
+         
+    if (!(name.empty())) {
+      // write out the end of the XML element </name>
+      writeHandler->endElement(XMLUni::fgZeroLenString,
+                               XMLUni::fgZeroLenString, qname);
+      XMLString::release(&qname);
+
+      // end of line
+      XMLCh* newLine = XMLString::transcode("\n");
+      writeHandler->characters(newLine, XMLString::stringLen(newLine));
+      XMLString::release(&newLine);
+    }
+#else
+    // xerces library not present
+    rc = ESMF_RC_LIB_NOT_PRESENT;
+#endif
+
+    return (rc);
+
+}  // end IO_XML::writeElement
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  IO_XML::writeEndElement - Performs a write on an IO object
+//
+// !INTERFACE:
+      int IO_XML::writeEndElement(
+//
+// !RETURN VALUE:
+//     int error return code
+//
+// !ARGUMENTS:
+      const string        &name,
+      const int            indentLevel) {
+
+// !DESCRIPTION:
+//      Part of writing an {\tt ESMC\_IO\_XML} object to file.
+//      Maps to SAX2 endElement()
+//
+//EOP
+// !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMCI::IO_XML::writeEndElement()"
+
+    int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
+#ifdef ESMF_XERCES
+    // if first write() call, instantiate a writeHandler for this IO_XML.
+    // TODO:  move instantiation to Create()/construct(), if we ever
+    //      create "r,w,rw" flags in Create(), as well as move
+    //      readHandler/parser instantiation to Create()/construct().  ?
+    if (writeHandler == ESMC_NULL_POINTER) {
+      writeHandler = new SAX2WriteHandler(this->fileName, "LATIN1",
+                                          XMLFormatter::UnRep_CharRef, false);
+    }
+
+    // indent if needed
+    if (indentLevel > 0) {
+      string indentSpaces;
+      for(int i=0; i<indentLevel; i++) indentSpaces += "  ";
+      XMLCh* indent = XMLString::transcode(indentSpaces.c_str());
+      writeHandler->characters(indent, XMLString::stringLen(indent));
+      XMLString::release(&indent);
+    }
+ 
+    // write out the end of the XML element </name>
+    XMLCh* qname = XMLString::transcode(name.c_str());
+    writeHandler->endElement(XMLUni::fgZeroLenString,
+                             XMLUni::fgZeroLenString, qname);
+    XMLString::release(&qname);
+
+    // end of line
+    XMLCh* newLine = XMLString::transcode("\n");
+    writeHandler->characters(newLine, XMLString::stringLen(newLine));
+    XMLString::release(&newLine);
+#else
+    // xerces library not present
+    rc = ESMF_RC_LIB_NOT_PRESENT;
+#endif
+
+    return (rc);
+
+}  // end IO_XML::writeEndElement
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  IO_XML::write - Performs a write on an IO object
+//
+// !INTERFACE:
+      int IO_XML::write(
+//
+// !RETURN VALUE:
+//     int error return code
+//
+// !ARGUMENTS:
+      int                fileNameLen,         // in
+      const char        *fileName,
+      const char        *outChars,
+      int                flag) {          // in
+
+// !DESCRIPTION:
+//      Writes an {\tt ESMC\_IO\_XML} object to file
+//
+//EOP
+// !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMCI::IO_XML::write()"
+
+    int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
+    if (fileName != ESMC_NULL_POINTER) {
+      // TODO: only use local of fileName this one time;
+      //   don't change set IO_XML member fileName
+      if (fileNameLen < ESMF_MAXSTR) {
+        strncpy(this->fileName, fileName, fileNameLen);
+        this->fileName[fileNameLen] = '\0';  // null terminate
+      } else {
+        // truncate
+        strncpy(this->fileName, fileName, ESMF_MAXSTR-1);
+        this->fileName[ESMF_MAXSTR-1] = '\0';  // null terminate
+
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "io_xml fileName %s, length >= ESMF_MAXSTR; truncated.",
+                fileName);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
+        // TODO: return ESMF_WARNING when defined
+        // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
+      }
+    } else {
+      // TODO use existing IO_XML fileName member
+    }
+
+#ifdef ESMF_XERCES
+    // if first write() call, instantiate a writeHandler for this IO_XML.
+    // TODO:  move instantiation to Create()/construct(), if we ever
+    //      create "r,w,rw" flags in Create(), as well as move
+    //      readHandler/parser instantiation to Create()/construct().  ?
+    if (writeHandler == ESMC_NULL_POINTER) {
+      writeHandler = new SAX2WriteHandler(this->fileName, "LATIN1",
+                                          XMLFormatter::UnRep_CharRef, false);
+    }
+
+    switch (flag)
+    {
+      case 1:
+        {
+          VecAttributesImpl fAttrList;
+          XMLCh* qname = XMLString::transcode(outChars);
+          writeHandler->startElement(XMLUni::fgZeroLenString,
+                                     XMLUni::fgZeroLenString,
+                                     qname, fAttrList);
+          XMLString::release(&qname);
+        }
+        break;
+      case 2:
+        {
+          XMLCh* chars = XMLString::transcode(outChars);
+          writeHandler->characters(chars, XMLString::stringLen(chars));
+          XMLString::release(&chars);
+        }
+        break;
+      case 3:
+        {
+          XMLCh* qname = XMLString::transcode(outChars);
+          writeHandler->endElement(XMLUni::fgZeroLenString,
+                                   XMLUni::fgZeroLenString, qname);
+          XMLString::release(&qname);
+        }
+        break;
+      default:
+        // todo:  report unknown flag
+        break;
+    }
+#else
+    // xerces library not present
+    rc = ESMF_RC_LIB_NOT_PRESENT;
+#endif
+
+    return (rc);
+
+}  // end IO_XML::write
 
 //-------------------------------------------------------------------------
 //BOP
@@ -526,6 +711,12 @@ namespace ESMCI{
     // create default name "IO_XML<ID>"
     ESMC_BaseSetName(ESMC_NULL_POINTER, "IO_XML");
     // copy = false;  // TODO: see notes in constructors and destructor below
+
+#ifdef ESMF_XERCES
+    writeHandler = ESMC_NULL_POINTER;
+    // readHandler = ESMC_NULL_POINTER;  // TODO:  ?
+    // parser = ESMC_NULL_POINTER;       // TODO:  ?
+#endif
 
  } // end IO_XML
 
@@ -561,6 +752,12 @@ namespace ESMCI{
     ESMC_BaseSetName(ESMC_NULL_POINTER, "IO_XML");
     // copy = false;  // TODO: see notes in constructors and destructor below
 
+#ifdef ESMF_XERCES
+    writeHandler = ESMC_NULL_POINTER;
+    // readHandler = ESMC_NULL_POINTER;  // TODO:  ?
+    // parser = ESMC_NULL_POINTER;       // TODO:  ?
+#endif
+
  } // end IO_XML
 
 //-------------------------------------------------------------------------
@@ -581,6 +778,17 @@ void IO_XML::destruct(void) {
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
+
+#ifdef ESMF_XERCES
+  delete writeHandler;  // NULL ok
+  writeHandler = ESMC_NULL_POINTER;
+
+  // delete readHandler;  // NULL ok  // TODO:
+  // readHandler = ESMC_NULL_POINTER;
+
+  // delete parser;  // NULL ok
+  // parser = ESMC_NULL_POINTER;
+#endif
 
  } // end destruct()
 

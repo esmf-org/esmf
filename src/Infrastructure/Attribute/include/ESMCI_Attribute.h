@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.26 2009/11/05 19:07:29 w6ws Exp $
+// $Id: ESMCI_Attribute.h,v 1.27 2010/02/11 06:58:18 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -51,6 +51,7 @@ namespace ESMCI {
 
   class Attribute;
   class VM;
+  class IO_XML;
 
 class Attribute 
 {
@@ -232,13 +233,13 @@ class Attribute
 
     int AttributeWriteXML(const string &convention, const string &purpose, 
       const string &object, const string &varobj, const string &basename) const;
-    int AttributeWriteXMLtraverse(FILE *xml, const string &convention,const string &purpose,
+    int AttributeWriteXMLtraverse(FILE *xml, IO_XML *io_xml, const string &convention,const string &purpose,
       const int &columns,bool &fielddone,bool &griddone,bool &compdone) const;
-    int AttributeWriteXMLbuffer(FILE *xml) const;
-    int AttributeWriteXMLbuffergrid(FILE *xml) const;
-    int AttributeWriteXMLbufferfield(FILE *xml, const string &convention, const string &purpose, 
+    int AttributeWriteXMLbuffer(FILE *xml, IO_XML *io_xml) const;
+    int AttributeWriteXMLbuffergrid(FILE *xml, IO_XML *io_xml) const;
+    int AttributeWriteXMLbufferfield(FILE *xml, IO_XML *io_xml, const string &convention, const string &purpose, 
       int &index, const int &columns) const;
-    int AttributeWriteXMLbufferfieldT(FILE *xml, int &index, const int &columns) const;
+    int AttributeWriteXMLbufferfieldT(FILE *xml, IO_XML *io_xml, int &index, const int &columns) const;
 
     int AttributeWriteWaterMLbuffieldT(FILE *xml, int &index, const int &columns) const;
 

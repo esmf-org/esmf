@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML_F.C,v 1.2 2009/11/05 19:05:21 w6ws Exp $
+// $Id: ESMCI_IO_XML_F.C,v 1.3 2010/02/11 06:58:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -40,6 +40,8 @@ extern "C" {
        void FTN(c_esmc_io_xmlcreate)(IO_XML **ptr,
                                     int *nameLen,
                                     const char *name,
+                                    int *fileNameLen,
+                                    const char *fileName,
                                     ESMC_Base **base,
                                     int *status,
                                     ESMCI_FortranStrLenArg name_l) {
@@ -48,6 +50,9 @@ extern "C" {
                                            *nameLen,   // always present 
                                                        //   internal argument.
                     ESMC_NOT_PRESENT_FILTER(name),
+                                           *fileNameLen,   // always present 
+                                                       //   internal argument.
+                    ESMC_NOT_PRESENT_FILTER(fileName),
                                          &((*base)->root),  // attributes
                     ESMC_NOT_PRESENT_FILTER(status) );
        }

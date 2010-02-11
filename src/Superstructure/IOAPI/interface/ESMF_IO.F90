@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.3 2009/10/14 22:42:48 eschwab Exp $
+! $Id: ESMF_IO.F90,v 1.4 2010/02/11 06:58:19 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -138,7 +138,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_IO.F90,v 1.3 2009/10/14 22:42:48 eschwab Exp $'
+      '$Id: ESMF_IO.F90,v 1.4 2010/02/11 06:58:19 eschwab Exp $'
 
 !==============================================================================
 !
@@ -303,7 +303,7 @@
       end if
 !
 !     invoke C to C++ entry point to allocate and initialize new io
-      call c_ESMC_IO_XMLCreate(ESMF_IOCreate, nameLen, name, &
+      call c_ESMC_IO_XMLCreate(ESMF_IOCreate, nameLen, name, 0, "", &
                                gridComp%compp%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return

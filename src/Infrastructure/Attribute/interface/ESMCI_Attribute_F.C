@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.26 2009/11/05 19:05:21 w6ws Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.27 2010/02/11 06:58:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.26 2009/11/05 19:05:21 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.27 2010/02/11 06:58:19 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -2008,7 +2008,7 @@ extern "C" {
       return;
   }
 
-  // Set the attribute on the object.
+  // Write the attributes from the object.
   status = (**base).root.AttributeWriteTab(cconv, cpurp, cobj, ctarobj,
     (*base)->ESMC_Base::ESMC_BaseGetName());
   ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
@@ -2127,7 +2127,7 @@ extern "C" {
       return;
   }
 
-  // Set the attribute on the object.
+  // Write the attributes from the object.
   status = (**base).root.AttributeWriteXML(cconv, cpurp, cobj, ctarobj, 
     (*base)->ESMC_Base::ESMC_BaseGetName());
   ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,

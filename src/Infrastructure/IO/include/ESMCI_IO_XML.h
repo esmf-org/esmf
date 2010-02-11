@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.h,v 1.2 2009/09/21 21:42:19 theurich Exp $
+// $Id: ESMCI_IO_XML.h,v 1.3 2010/02/11 06:58:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,52 +37,14 @@
 //
 // !USES:
 #include "ESMC_Base.h"           // inherited Base class
+#include <ESMCI_SAX2WriteHandler.h>
+// #include <ESMCI_SAX2ReadHandler.h>  // TODO: ?
 
-#ifdef ESMF_XERCES
- #include <xercesc/sax2/DefaultHandler.hpp>
-
- using namespace xercesc;
-
- // define class to handle sax2 parse events
- class MySAX2Handler : public DefaultHandler {
- private:
-    ESMCI::Attribute* attr;
-    string qname;
-    string convention;
-    string purpose;
-    string object;
-
- public:
-     void startElement(
-         const XMLCh* const uri,
-         const XMLCh* const localname,
-         const XMLCh* const qname,
-         const Attributes&  attrs
-     );
-
-     void characters(
-         const XMLCh* const chars,
-         const XMLSize_t    length
-     );
-
-     void endElement(
-         const XMLCh* const uri,
-         const XMLCh* const localname,
-         const XMLCh* const qname	 
-     ); 
-
-     void fatalError(
-         const SAXParseException&
-     );
-
-     MySAX2Handler(ESMCI::Attribute *attr);
- };
-#endif
-
- namespace ESMCI{
+namespace ESMCI{
 
 // !PUBLIC TYPES:
  class IO_XML;
+ class Attribute;
 
 // !PRIVATE TYPES:
 
@@ -91,14 +53,36 @@
   private:   // corresponds to F90 module 'type ESMF_IO_XML' members
     Attribute *attr;    // root node of associated object's attributes
     char       fileName[ESMF_MAXSTR];
+#ifdef ESMF_XERCES
+    SAX2WriteHandler* writeHandler;
+    // SAX2ReadHandler* readHandler;  // TODO:  multiple reads per
+    // SAX2XMLReader* parser;         //        IO_XML object lifetime ?
+#endif
 
 // !PUBLIC MEMBER FUNCTIONS:
 
   public:
     // accessor methods
 
-    // Read/Write to support the F90 optional arguments interface
+    // Read/Write (via SAX2 API)
     int read(int fileNameLen, const char* fileName);
+
+    // maps to SAX2 startElement() 
+    int writeStartElement(const string& name,
+                          const int     indentLevel,
+                          const int     nPairs, ...); // nPairs of
+                 // (char *attrName, char *attrValue)
+
+    // maps to SAX2 characters(), optionally to startElement() & endElement()
+    int writeElement(const string& name,
+                     const string& value,
+                     const int     indentLevel);
+    // maps to SAX2 endElement()
+    int writeEndElement(const string& name,
+                        const int     indentLevel);
+
+    int write(int fileNameLen, const char* fileName,
+              const char* outChars, int flag);
 
     // internal validation
     int validate(const char *options=0) const;
@@ -115,7 +99,8 @@
     void destruct();
 
     // friend function to allocate and initialize IO_XML object from heap
-    friend IO_XML *ESMCI_IO_XMLCreate(int, const char*, Attribute*, int*);
+    friend IO_XML *ESMCI_IO_XMLCreate(int, const char*, int, const char*,
+                                      Attribute*, int*);
 
     // friend function to copy an io_xml  TODO ?
     //friend IO_XML *ESMCI_IO_XML(IO_XML*, int*);
@@ -142,6 +127,7 @@
 
     // friend function to allocate and initialize io from heap
     IO_XML *ESMCI_IO_XMLCreate(int nameLen, const char* name=0,
+                               int fileNameLen=0, const char* fileName=0,
                                Attribute* attr=0, int* rc=0);
 
     // friend function to copy an io_xml  TODO ?
