@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFieldUTest.F90,v 1.27 2009/10/27 23:04:24 rokuingh Exp $
+! $Id: ESMF_AttributeFieldUTest.F90,v 1.28 2010/02/11 06:58:51 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFieldUTest.F90,v 1.27 2009/10/27 23:04:24 rokuingh Exp $'
+      '$Id: ESMF_AttributeFieldUTest.F90,v 1.28 2010/02/11 06:58:51 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -130,7 +130,7 @@ program ESMF_AttributeFieldUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Get an empty valFieldue character from a Field Test
+      ! Get an empty value Field character from a Field Test
       call ESMF_AttributeGet(field, name="EmptyValue", value=outEmpty, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an empty value character Attribute from a Field Test"
