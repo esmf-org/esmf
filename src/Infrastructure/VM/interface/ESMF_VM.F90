@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.114 2010/02/15 18:52:14 w6ws Exp $
+! $Id: ESMF_VM.F90,v 1.115 2010/02/15 19:48:18 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.114 2010/02/15 18:52:14 w6ws Exp $"
+      "$Id: ESMF_VM.F90,v 1.115 2010/02/15 19:48:18 w6ws Exp $"
 
 !==============================================================================
 
@@ -2491,74 +2491,6 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMBroadcastCharArray2D
-!------------------------------------------------------------------------------
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMBroadcastVMId ()"
-!BOPI
-! !IROUTINE: ESMF_VMBroadcast - Broadcast 2D ESMF_VMId array
-
-! !INTERFACE:
-  ! Private name; call using ESMF_VMBroadcast()
-  subroutine ESMF_VMBroadcastVMId (vm, bcstData, count, root, &
-    blockingflag, commhandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    type(ESMF_VMId), target,  intent(inout)           :: bcstData(:)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
-!         
-!EOPI
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    integer                 :: size
-    logical                 :: blocking
-    type(ESMF_CommHandle)   :: localcommhandle
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
-
-    ! Initialize commhandle to an invalid pointer
-    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
-
-    ! Decide whether this is blocking or non-blocking
-    blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
-    endif
-    
-    size = count
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    if (blocking) then
-      call c_ESMC_VMBroadcastVMId(vm, bcstData, size, root, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-!    else
-!      call c_ESMC_VMBroadcastVMIdNB(vm, bcstData, size, root, localcommhandle, &
-!        localrc)
-!      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Check if we need to pass back the commhandle
-!      if (present(commhandle)) then
-!        commhandle = localcommhandle  ! copy the commhandle pointer back
-        ! Set init code
-!        ESMF_INIT_SET_CREATED(commhandle)
-!      endif
-!    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_VMBroadcastVMId
 !------------------------------------------------------------------------------
 
 
@@ -7110,6 +7042,71 @@ module ESMF_VMMod
   end subroutine ESMF_VMIdDestroy
 !------------------------------------------------------------------------------
 
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMBroadcastVMId ()"
+!BOPI
+! !IROUTINE: ESMF_VMBroadcast - Broadcast 2D ESMF_VMId array
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMBroadcast()
+  subroutine ESMF_VMBroadcastVMId (vm, bcstData, count, root, &
+    blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    type(ESMF_VMId), target,  intent(inout)           :: bcstData(:)
+    integer,                  intent(in)              :: count
+    integer,                  intent(in)              :: root
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: mypet, npets
+    integer                 :: i, k
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    call ESMF_VMGet (vm, localPet=mypet, petCount=npets)
+
+    ! TODO: Implement broadcastVMId array at the C++ layer
+    if (mypet == root) then
+        do, i=0, npets-1
+            if (i == mypet) cycle
+            do, k=1, count
+                call ESMF_VMSendVMId (vm, bcstData(k), i, rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc, &
+                               ESMF_ERR_PASSTHRU, &
+                               ESMF_CONTEXT, rc)) return
+            end do
+        end do
+    else
+        do, k=1, count
+            call ESMF_VMIdCreate (bcstData(k))
+            call ESMF_VMRecvVMId (vm, bcstData(k), root, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                           ESMF_ERR_PASSTHRU, &
+                           ESMF_CONTEXT, rc)) return
+        end do
+    end if
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMBroadcastVMId
+!------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-internal method -----------------------------
