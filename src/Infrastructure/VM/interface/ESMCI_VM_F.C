@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM_F.C,v 1.7 2009/09/23 15:33:28 theurich Exp $
+// $Id: ESMCI_VM_F.C,v 1.8 2010/02/15 19:13:06 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -1166,7 +1166,23 @@ extern "C" {
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
-    
+
+  void FTN(c_esmc_vmbroadcastvmid)(ESMCI::VM **ptr, ESMCI::VMId **vmid, int *count, int *root,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmbroadcastvmid()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+#if 0
+    localrc = (*ptr)->broadcastVMId(*vmid, *count, *root);
+#endif
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // VM utilities
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
