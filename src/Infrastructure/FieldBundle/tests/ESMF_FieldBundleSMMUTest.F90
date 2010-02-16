@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMMUTest.F90,v 1.6 2010/02/05 21:23:43 feiliu Exp $
+! $Id: ESMF_FieldBundleSMMUTest.F90,v 1.7 2010/02/16 17:43:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldBundleSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleSMMUTest.F90,v 1.6 2010/02/05 21:23:43 feiliu Exp $'
+    '$Id: ESMF_FieldBundleSMMUTest.F90,v 1.7 2010/02/16 17:43:17 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -332,6 +332,7 @@ contains
             srcField(i) = ESMF_FieldCreate(grid, arrayspec, &
                 ungriddedLBound=(/1/), ungriddedUBound=(/8/), &
                 maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
+                gridToFieldMap=(/2/), &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -340,6 +341,7 @@ contains
             srcFieldA(i) = ESMF_FieldCreate(grid, arrayspec, &
                 ungriddedLBound=(/1/), ungriddedUBound=(/5/), &
                 maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
+                gridToFieldMap=(/2/), &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -365,6 +367,7 @@ contains
             dstField(i) = ESMF_FieldCreate(grid, arrayspec, &
                 ungriddedLBound=(/1/), ungriddedUBound=(/8/), &
                 maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
+                gridToFieldMap=(/2/), &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -373,6 +376,7 @@ contains
             dstFieldA(i) = ESMF_FieldCreate(grid, arrayspec, &
                 ungriddedLBound=(/1/), ungriddedUBound=(/5/), &
                 maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
+                gridToFieldMap=(/2/), &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -425,10 +429,10 @@ contains
             ! Verify that the smm data in dstField(l) is correct.
             ! Before the smm op, the dst Field contains all 0. 
             ! The smm op reset the values to the index value, verify this is the case.
-            !write(*, '(9I3)') l, lpe, fptr
+            ! write(*, '(9I3)') l, lpe, fptr
             do i = exlb(1), exub(1)
               do j = exlb(2), exub(2)
-                if(fptr(i,j) .ne. i) localrc = ESMF_FAILURE
+                if(fptr(i,j) .ne. j) localrc = ESMF_FAILURE
               enddo
             enddo
             if (ESMF_LogMsgFoundError(localrc, &
