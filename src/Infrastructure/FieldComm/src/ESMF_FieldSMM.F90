@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.9 2010/02/04 19:53:35 feiliu Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.10 2010/02/16 17:47:29 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.9 2010/02/04 19:53:35 feiliu Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.10 2010/02/16 17:47:29 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -101,6 +101,8 @@ contains
 !   undistributed dimensions. Because Grid dimensions are mapped to Field in a
 !   sequence order, it's necessary to map the ungridded dimensions to the first
 !   set of dimensions in order to use the weakly congruent Field SMM feature.
+!   Not providing a non-default gridToFieldMap during Field creation for
+!   weakly congruent Fields causes undefined behavior.
 !
 !   It is erroneous to specify the identical Field object for {\tt srcField} and
 !   {\tt dstField} arguments.
@@ -293,6 +295,8 @@ contains
 !   undistributed dimensions. Because Grid dimensions are mapped to Field in a
 !   sequence order, it's necessary to map the ungridded dimensions to the first
 !   set of dimensions in order to use the weakly congruent Field SMM feature.
+!   Not providing a non-default gridToFieldMap during Field creation for
+!   weakly congruent Fields causes undefined behavior.
 !  
 ! This method is overloaded for:\newline
 ! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
@@ -632,6 +636,8 @@ contains
 !   undistributed dimensions. Because Grid dimensions are mapped to Field in a
 !   sequence order, it's necessary to map the ungridded dimensions to the first
 !   set of dimensions in order to use the weakly congruent Field SMM feature.
+!   Not providing a non-default gridToFieldMap during Field creation for
+!   weakly congruent Fields causes undefined behavior.
 !  
 !  
 ! This method is overloaded for:\newline
