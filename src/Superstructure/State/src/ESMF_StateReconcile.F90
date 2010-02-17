@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.73 2010/02/17 02:47:07 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.74 2010/02/17 06:05:21 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.73 2010/02/17 02:47:07 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.74 2010/02/17 06:05:21 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -883,7 +883,7 @@
 
            ! Broadcast serialized object buffers
            if (i_send) then
-               call ESMF_VMBroadcast (vm, si%blindsend, size (si%blindsend), root=j, rc=localrc)
+               call ESMF_VMBroadcast (vm, si%blindsend, bsbufsize*si%mycount, root=j, rc=localrc)
 	   else
                allocate(si%blindrecv(bsbufsize, si%theircount), stat=localrc)
                if (ESMF_LogMsgFoundAllocError(localrc, &
