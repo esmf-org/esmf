@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.54 2010/02/11 14:18:18 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.55 2010/02/17 06:59:09 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.54 2010/02/11 14:18:18 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.55 2010/02/17 06:59:09 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3536,20 +3536,26 @@ namespace ESMCI {
 //EOPI
 
   int localrc = ESMC_RC_NOT_IMPL;
+  int rc = ESMF_SUCCESS;
 
   // instantiate IO object; initialize with pointer to this Attribute node, to
   // write from
   IO_XML *io_xml = ESMCI_IO_XMLCreate(0, NULL, 0, NULL, this, &localrc);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  if (localrc != ESMF_SUCCESS) rc = localrc;
 
   // write the XML file, from this Attribute node
+  // TODO:  single call to IO_XML::write(); assumes centralized attribute tree
+  //        traversal method, used from IO_XML::write().
   localrc = io_xml->write(fileNameLen, fileName);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  if (localrc != ESMF_SUCCESS) rc = localrc;
 
   localrc = ESMCI_IO_XMLDestroy(&io_xml);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  if (localrc != ESMF_SUCCESS) rc = localrc;
 
-  return localrc;
+  return rc;
 
  } // end AttributeWriteXML
 #endif
@@ -3607,7 +3613,8 @@ namespace ESMCI {
   } 
 
   // Instantiate IO object to do the actual writing
-  string fileName = basename + "1.xml";
+  string fileName = basename + "1.xml";  // TODO: remove "1" suffix when
+                                         //       WaterML migrated to io_xml
   IO_XML *io_xml = ESMCI_IO_XMLCreate(0, NULL, fileName.size(),fileName.c_str(),
                               (ESMCI::Attribute*)this, &localrc);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
@@ -3620,7 +3627,7 @@ namespace ESMCI {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       localrc = ESMCI_IO_XMLDestroy(&io_xml);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
-      fclose(xml);
+      fclose(xml); // TODO:  only used by WaterML; need to migrate to io_xml
       return ESMF_FAILURE;
     }
     if (presentflag == ESMF_TRUE) {
@@ -3632,7 +3639,7 @@ namespace ESMCI {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
         localrc = ESMCI_IO_XMLDestroy(&io_xml);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
-        fclose(xml);
+        fclose(xml); // TODO:  only used by WaterML; need to migrate to io_xml
         return ESMF_FAILURE;
       }
     }
@@ -3647,7 +3654,7 @@ namespace ESMCI {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       localrc = ESMCI_IO_XMLDestroy(&io_xml);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
-      fclose(xml);
+      fclose(xml); // TODO:  only used by WaterML; need to migrate to io_xml
       return ESMF_FAILURE;
     }
     if (presentflag == ESMF_TRUE) {
@@ -3659,7 +3666,7 @@ namespace ESMCI {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
         localrc = ESMCI_IO_XMLDestroy(&io_xml);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
-        fclose(xml);
+        fclose(xml); // TODO:  only used by WaterML; need to migrate to io_xml
         return ESMF_FAILURE;
       }
     }
@@ -3674,7 +3681,7 @@ namespace ESMCI {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       localrc = ESMCI_IO_XMLDestroy(&io_xml);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
-      fclose(xml);
+      fclose(xml); // TODO:  only used by WaterML; need to migrate to io_xml
       return ESMF_FAILURE;
     }
     if (presentflag == ESMF_TRUE) {
@@ -3686,7 +3693,7 @@ namespace ESMCI {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
         localrc = ESMCI_IO_XMLDestroy(&io_xml);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
-        fclose(xml);
+        fclose(xml); // TODO:  only used by WaterML; need to migrate to io_xml
         return ESMF_FAILURE;
       }
     }
@@ -3765,7 +3772,7 @@ namespace ESMCI {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     localrc = ESMCI_IO_XMLDestroy(&io_xml);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
-    fclose(xml);
+    fclose(xml); // TODO:  only used by WaterML; need to migrate to io_xml
     return ESMF_FAILURE;
   }
  
@@ -3781,7 +3788,7 @@ namespace ESMCI {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     localrc = ESMCI_IO_XMLDestroy(&io_xml);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
-    fclose(xml);
+    fclose(xml); // TODO:  only used by WaterML; need to migrate to io_xml
     return ESMF_FAILURE;
   }
 
@@ -3805,7 +3812,7 @@ namespace ESMCI {
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
 
   // close the file
-  fclose(xml);
+  fclose(xml); // TODO:  only used by WaterML; need to migrate to io_xml
 
   return localrc;
 
@@ -3960,45 +3967,52 @@ namespace ESMCI {
 
     for (i=0;  i<attrList.size(); ++i) { 
       if (attrList.at(i)->items == 1) {
+        string name = attrList.at(i)->attrName; 
+        ostringstream outstring;
         switch (attrList.at(i)->tk)
         {
           case ESMC_TYPEKIND_I4:
-            fprintf(xml, "    <%s>%d</%s>\n",attrList.at(i)->attrName.c_str(),
-                    attrList.at(i)->vi,attrList.at(i)->attrName.c_str());
+            outstring << attrList.at(i)->vi; 
+            localrc = io_xml->writeElement(name, outstring.str(), 2);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_I8:
-            fprintf(xml, "    <%s>%lld</%s>\n",attrList.at(i)->attrName.c_str(),
-                    attrList.at(i)->vl,attrList.at(i)->attrName.c_str());
+            outstring << attrList.at(i)->vl; 
+            localrc = io_xml->writeElement(name, outstring.str(), 2);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_R4:
-            fprintf(xml, "    <%s>%f</%s>\n",attrList.at(i)->attrName.c_str(),
-              attrList.at(i)->vf,attrList.at(i)->attrName.c_str());
+            outstring << attrList.at(i)->vf; 
+            localrc = io_xml->writeElement(name, outstring.str(), 2);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_R8:
-            fprintf(xml, "    <%s>%g</%s>\n",attrList.at(i)->attrName.c_str(),
-                    attrList.at(i)->vd,attrList.at(i)->attrName.c_str());
+            outstring << attrList.at(i)->vd; 
+            localrc = io_xml->writeElement(name, outstring.str(), 2);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_LOGICAL:
-            if (attrList.at(i)->vb == ESMF_TRUE) 
-              fprintf(xml, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
-                      "true",attrList.at(i)->attrName.c_str());
-            else if (attrList.at(i)->vb == ESMF_FALSE)
-              fprintf(xml, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
-                      "false",attrList.at(i)->attrName.c_str());
+            if (attrList.at(i)->vb == ESMF_TRUE) {
+              localrc = io_xml->writeElement(name, "true", 2);
+              ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            } else if (attrList.at(i)->vb == ESMF_FALSE) {
+              localrc = io_xml->writeElement(name, "false", 2);
+              ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            }
             break;
 
           case ESMC_TYPEKIND_CHARACTER:
-            fprintf(xml, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
-                  attrList.at(i)->vcp.c_str(),attrList.at(i)->attrName.c_str());
+            localrc = io_xml->writeElement(name, attrList.at(i)->vcp, 2);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
             break;
 
           default:
-            fprintf(xml, "    <%s>%s</%s>\n",attrList.at(i)->attrName.c_str(),
-                    "N/A",attrList.at(i)->attrName.c_str());
+            localrc = io_xml->writeElement(name, "N/A", 2);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
             break;
         }
       } else if (attrList.at(i)->items >1) { 
@@ -4282,8 +4296,6 @@ namespace ESMCI {
       } else if (attrList.at(i)->items > 1) { 
           sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
           ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
-          //fprintf(xml,"  %s= ITEMS>1", attrList.at(i)->attrName.c_str());
-          // TODO:             ^debug/warning stmt?
       } else {
         sprintf(msgbuf,"Items < 1, problem.");
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
