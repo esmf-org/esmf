@@ -1,6 +1,18 @@
+# $Id: field_1_dist_3D.rc,v 1.1 2010/02/17 20:14:09 garyblock Exp $
+
+#
+# revision history
+#    02/17/2010  gblock  renamed config files to have unique prefix for each test
+#                            to support multiple 'non-exhaustive' test suites
+#                        fixed several problems with non-exhaustive test case
+#                        implemented uniform/gaussian regirds in different combinations
+#                        implemented 3D test cases
+#
+
 #######################################################################################
 #
-#  NONEXHAUSTIVE DistGrid Specifier for 2D to 2D remapping
+#  NONEXHAUSTIVE DistGrid Specifier for 3D to 3D remapping
+#          reduced configuration for running with two PE
 #
 #######################################################################################
 #
@@ -47,38 +59,19 @@
 # string      |  tag   |  rank  |  & value |     tag     | rank | & value  | tag
 ##################################################
 
-# table specifing 2D to 2D distributions
-distgrid_block_2d2d::
+# table specifing 3D to 3D distributions
+distgrid_block_3d3d::
 
 # fixed distribution sizes
- '(1,1)-->(1,1)'      'SRC' 2  'D1==' 1  'D2==' 1     'DST' 2  'D1==' 1    'D2==' 1  'END'  
+ '(1,1,1)-->(1,1,1)'      'SRC' 3  'D1==' 1  'D2==' 1  'D3==' 1   'DST' 3  'D1==' 1    'D2==' 1  'D3==' 1 'END'  
 
 # 1x1 to 1D distribution (DEs = PETS)
- '(1,1)-->(1,n)'      'SRC' 2  'D1==' 1  'D2==' 1     'DST' 2  'D1==' 1    'D2=*' 1  'END'  
-
-# 1x1 to 1D distribution (DEs = PETS)
- '(1,1)-->(n,1)'      'SRC' 2  'D1==' 1  'D2==' 1     'DST' 2  'D1=*' 1    'D2==' 1  'END'  
+ '(1,1,1)-->(1,n,1)'      'SRC' 3  'D1==' 1  'D2==' 1  'D3==' 1   'DST' 3  'D1==' 1    'D2=*' 1  'D3==' 1 'END'  
 
 # 1x1 to 1D distribution (DEs > PETS)
- '(1,1)-->(1,2*n)'    'SRC' 2  'D1==' 1  'D2==' 1     'DST' 2  'D1==' 1    'D2=*' 2  'END'  
-
-# 1x1 to 1D distribution (DEs > PETS)
- '(1,1)-->(2*n,1)'    'SRC' 2  'D1==' 1  'D2==' 1     'DST' 2  'D1=*' 2    'D2==' 1  'END'  
+ '(1,1,1)-->(1,2*n,1)'    'SRC' 3  'D1==' 1  'D2==' 1  'D3==' 1   'DST' 3  'D1==' 1    'D2=*' 2  'D3==' 1 'END'  
 
 # 1D to 1D distribution (DEs = PETS)
- '(1,n)-->(1,n)'      'SRC' 2  'D1==' 1  'D2=*' 1     'DST' 2  'D1==' 1    'D2=*' 1  'END'  
-
-# reverse 1D to 1D distribution (DEs = PETS)
- '(1,n)-->(n,1)'      'SRC' 2  'D1==' 1  'D2=*' 1     'DST' 2  'D1=*' 1    'D2==' 1  'END'  
-
-# nD to nD distribution (DEs = PETS)
- '(n,n)-->(n,n)'      'SRC' 2  'D1=*' 1  'D2=*' 1     'DST' 2  'D1=*' 1    'D2=*' 1  'END'  
-
-# 1D to 1D distribution (DEs > PETS)
- '(1,2*n)-->(1,2*n)'  'SRC' 2  'D1==' 1  'D2=*' 2  'DST' 2  'D1==' 1  'D2=*' 2  'END'  
-
-# reverse 1D to 1D distribution (DEs > PETS)
- '(1,2*n)-->(2*n,1)'  'SRC' 2  'D1==' 1  'D2=*' 2  'DST' 2  'D1=*' 2  'D2==' 1  'END'  
-
+ '(1,n,1)-->(1,n,1)'      'SRC' 3  'D1==' 1  'D2=*' 1  'D3==' 1   'DST' 3  'D1==' 1    'D2=*' 1  'D3==' 1 'END'  
 ::
 

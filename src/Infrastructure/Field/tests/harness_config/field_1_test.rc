@@ -1,4 +1,4 @@
-# $Id: test_harness.rc,v 1.9 2010/02/17 20:13:10 garyblock Exp $
+# $Id: field_1_test.rc,v 1.1 2010/02/17 20:14:09 garyblock Exp $
 # Field test Harness Config file
 
 #
@@ -7,6 +7,7 @@
 #                            to support multiple 'non-exhaustive' test suites
 #                        fixed several problems with non-exhaustive test case
 #                        implemented uniform/gaussian regirds in different combinations
+#                        implemented 3D test cases
 #
 
 # test class

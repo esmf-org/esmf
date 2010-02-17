@@ -1,4 +1,14 @@
-# TestGrid3D.rc
+# $Id: field_1_grid_3D.rc,v 1.1 2010/02/17 20:14:09 garyblock Exp $
+
+#
+# revision history
+#    02/17/2010  gblock  renamed config files to have unique prefix for each test
+#                            to support multiple 'non-exhaustive' test suites
+#                        fixed several problems with non-exhaustive test case
+#                        implemented uniform/gaussian regirds in different combinations
+#                        implemented 3D test cases
+#
+
 #
 # This file contains the grid specifications for the Test Harness.
 # Requirements:
@@ -30,20 +40,20 @@ map_regrid::
 # example of 3D grids 
 #
 # rank 3 example in rads and meters
-2   SRC    UNIFORM_PERIODIC   120    -3.1415927  3.1415927    RADIANS   
-&          UNIFORM_POLE        90    -1.5707963  1.5707963    RADIANS   
-&          UNIFORM             40     0.0     4000            M
-&   DST    UNIFORM_PERIODIC   120    -3.0717     3.0717       RADIANS 
-&          GAUSSIAN_POLE       88    -1.43       1.43         RADIANS 
-&          UNIFORM             20     0.0     3000            M
+3   SRC    UNIFORM_PERIODIC    60    -3.1415927  3.1415927    RADIANS   
+&          UNIFORM_POLE        45    -1.5707963  1.5707963    RADIANS   
+&          UNIFORM             20     0.0     4000            M
+&   DST    UNIFORM             60    -3.0717     3.0717       RADIANS 
+&          UNIFORM             44    -1.43       1.43         RADIANS 
+&          UNIFORM             10     0.0     3000            M
 &   FUNCTION   COORDINATEX  5.0  0.1    END
 
 # rank 3 example in degreess and meters
-2   SRC    UNIFORM_PERIODIC   120    -180      180    DEG_E   
-&          UNIFORM_POLE        90     -90       90    DEG_N
+3   SRC    UNIFORM_PERIODIC    60    -180      180    DEG_E   
+&          UNIFORM_POLE        45     -90       90    DEG_N
 &          UNIFORM             30     0.0     4000    M
-&   DST    UNIFORM_PERIODIC   120    -170      170    DEG_E   
-&          GAUSSIAN_POLE       88     -88       88    DEG_N   
+&   DST    UNIFORM             60    -170      170    DEG_E   
+&          UNIFORM             44     -88       88    DEG_N   
 &          UNIFORM             20     0.0     2000    M
 &   FUNCTION   COORDINATEY  3.0  0.1    END
 ::

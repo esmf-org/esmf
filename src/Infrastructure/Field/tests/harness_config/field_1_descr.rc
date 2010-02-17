@@ -1,4 +1,15 @@
-# exhaustive_descriptor.rc
+# $Id: field_1_descr.rc,v 1.1 2010/02/17 20:14:09 garyblock Exp $
+# formerly nonexhaustive_descriptor.rc
+
+#
+# revision history
+#    02/17/2010  gblock  renamed config files to have unique prefix for each test
+#                            to support multiple 'non-exhaustive' test suites
+#                        fixed several problems with non-exhaustive test case
+#                        implemented uniform/gaussian regirds in different combinations
+#                        implemented 3D test cases
+#
+
 #
 # This file contains the regrid/redist problem descriptor strings for the testing harness.
 # Requirements:
@@ -27,7 +38,9 @@
 ########################################################################################
 problem_descriptor_string::
 # remap example
-'[B1G1;B2G2] =B=> [B1G1;B2G2]' -d DistGrid2D2D_exh.rc -g TestGrid2D.rc     
+'[B1G1;B2G2] =B=> [B1G1;B2G2]' -d field_1_dist_2D.rc -g field_1_grid_2D.rc 
+
+'[B1G1;B2G2;B3G3] =B=> [B1G1;B2G2;B3G3]' -d field_1_dist_3D.rc -g field_1_grid_3D.rc    
 ::   # end of list
 ~                     
 
