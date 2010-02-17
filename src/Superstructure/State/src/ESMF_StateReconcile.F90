@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.74 2010/02/17 06:05:21 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.75 2010/02/17 21:55:54 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.74 2010/02/17 06:05:21 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.75 2010/02/17 21:55:54 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -747,7 +747,7 @@
 !EOPI
     integer :: pets, mypet, i, j, k, l, m, localrc, attreconstart
     integer(ESMF_KIND_I4) :: objcount, bsbufsize
-    integer(ESMF_KIND_I4), allocatable :: comm_ints_send(:), comm_ints_recv(:)
+    integer(ESMF_KIND_I4) :: comm_ints(2)
     type(ESMF_State) :: substate
     type(ESMF_Base) :: base
     type(ESMF_FieldBundle) :: bundle
@@ -779,21 +779,6 @@
                    ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rc)) return
 
-    ! First, exchange object counts and blindsend buffer sizes.
-    allocate (comm_ints_send(0:2*pets-1), comm_ints_recv(0:2*pets-1), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, &
-                   ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rc)) return
-    comm_ints_send = 0
-    comm_ints_send(mypet*2)   = si%mycount
-    comm_ints_send(mypet*2+1) = size (si%blindsend, dim=1)
-    call ESMF_VMAllReduce (vm, sendData=comm_ints_send, recvData=comm_ints_recv,   &
-                           count=size (comm_ints_send), reduceflag=ESMF_SUM,  &
-                           rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-                   ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rc)) return
-
     do, j = 0, pets-1
 !!DEBUG "Outer loop, j = ", j
        ! each PET takes turns broadcasting to all
@@ -801,14 +786,23 @@
        i_send = mypet == j
        i_recv = mypet /= j
 
+       ! First, broadcast object count and blindsend buffer size.
+       comm_ints(1) = si%mycount
+       comm_ints(2) = size (si%blindsend, dim=1)
+       call ESMF_VMBroadcast (vm, comm_ints, count=size (comm_ints), &
+                      root=j, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, &
+                      ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rc)) return
+
+       objcount  = comm_ints(1)
        if (i_recv)  &
-           si%theircount = comm_ints_recv(j*2)
-       objcount  = comm_ints_recv(j*2)
-       bsbufsize = comm_ints_recv(j*2+1)
+           si%theircount = objcount
+       bsbufsize = comm_ints(2)
        
        if (objcount > 0) then
 
-           ! Send the local IDs of each object
+           ! Broadcast the local object IDs
            if (i_send) then
                call ESMF_VMBroadcast (vm, si%idsend, count=si%mycount, root=j, rc=localrc)
            else
@@ -823,7 +817,7 @@
                           ESMF_CONTEXT, rc)) return
 !!DEBUG "completed broadcast of id list"
 
-           ! Send the object type
+           ! Broadcast the object types
            if (i_send) then
                call ESMF_VMBroadcast (vm, si%objsend, count=si%mycount, root=j, rc=localrc)
            else
@@ -883,7 +877,7 @@
 
            ! Broadcast serialized object buffers
            if (i_send) then
-               call ESMF_VMBroadcast (vm, si%blindsend, bsbufsize*si%mycount, root=j, rc=localrc)
+               call ESMF_VMBroadcast (vm, si%blindsend, size (si%blindsend), root=j, rc=localrc)
 	   else
                allocate(si%blindrecv(bsbufsize, si%theircount), stat=localrc)
                if (ESMF_LogMsgFoundAllocError(localrc, &
@@ -1179,11 +1173,6 @@
        endif   ! receiver
 !!DEBUG "bottom of loop"
     enddo ! source PET number
-
-    deallocate (comm_ints_recv, comm_ints_send, stat=localrc)
-    if (ESMF_LogMsgFoundAllocError (localrc, &
-                        ESMF_ERR_PASSTHRU, &
-                        ESMF_CONTEXT, rc)) return
 
 !!DEBUG "end of state proxy create"
     if (present(rc)) rc = ESMF_SUCCESS
