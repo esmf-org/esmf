@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.h,v 1.6 2009/09/23 15:33:28 theurich Exp $
+// $Id: ESMCI_VM.h,v 1.7 2010/02/17 23:56:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -109,6 +109,7 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     int validate() const;
     int sendVMId(VMId *vmid, int dest);
     int recvVMId(VMId *vmid, int source);
+    int bcastVMId(VMId *vmid, int root);
 };  // class VM
 
 

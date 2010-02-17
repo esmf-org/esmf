@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.14 2009/10/28 16:00:30 theurich Exp $
+// $Id: ESMCI_VM.C,v 1.15 2010/02/17 23:56:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.14 2009/10/28 16:00:30 theurich Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.15 2010/02/17 23:56:20 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -852,6 +852,47 @@ int VM::recvVMId(
   recv(vmID->vmKey, vmKeyWidth, source);
   recv(&(vmID->localID), sizeof(int), source);
 
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::bcastVMId()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::bcastVMId
+//
+// !INTERFACE:
+int VM::bcastVMId(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  VMId *vmID,                   // in/out - VMId
+  int root                      // in  - root PET
+  ){
+//
+// !DESCRIPTION:
+//    Broadcast {\tt ESMCI::VMId}.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  if (vmID==ESMC_NULL_POINTER){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Invalid VMId", &rc);
+    return rc;
+  }
+  // broadcast vmKey
+  broadcast(vmID->vmKey, vmKeyWidth, root);
+  // braodcast localID
+  broadcast(&(vmID->localID), sizeof(int), root);
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
