@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.h,v 1.3 2009/09/21 21:42:19 theurich Exp $
+// $Id: ESMCI_IO_NetCDF.h,v 1.4 2010/02/17 00:19:31 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -53,7 +53,7 @@ namespace ESMCI
 // !PRIVATE TYPES:
 
  // class definition type
- class IO_NetCDF : ESMC_Base { // inherit ESMC_Base class
+ class IO_NetCDF : public ESMC_Base { // inherit ESMC_Base class
   private:   // corresponds to F90 module 'type ESMF_IO_NetCDF' members
     ESMC_Base   *base;    // associated object's base
     char         fileName[ESMF_MAXSTR];

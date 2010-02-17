@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.h,v 1.3 2010/02/11 06:58:19 eschwab Exp $
+// $Id: ESMCI_IO_XML.h,v 1.4 2010/02/17 00:18:51 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ namespace ESMCI{
 // !PRIVATE TYPES:
 
  // class definition type
- class IO_XML : ESMC_Base { // inherit from ESMC_Base class
+ class IO_XML : public ESMC_Base { // inherit from ESMC_Base class
   private:   // corresponds to F90 module 'type ESMF_IO_XML' members
     Attribute *attr;    // root node of associated object's attributes
     char       fileName[ESMF_MAXSTR];
