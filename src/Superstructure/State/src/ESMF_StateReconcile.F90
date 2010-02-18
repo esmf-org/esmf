@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.76 2010/02/17 23:59:21 theurich Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.77 2010/02/18 23:53:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.76 2010/02/17 23:59:21 theurich Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.77 2010/02/18 23:53:39 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -191,6 +191,15 @@
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
+      
+      
+    ! First remove all empty nested States from State
+    ! Doing this leads to much lower (factor petCount) complexity of the 
+    ! current ProxyCreate() code.
+    call ESMF_StateZapEmptyNests(state, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+                              ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rc)) return
 
 
     ! This turns off the fast option on Regrid; it is working now for
@@ -760,7 +769,7 @@
     type(ESMF_VMId) :: temp_vmid
     type(ESMF_StateItemInfo), pointer :: si
     integer :: offset, myOrigCount
-    logical :: i_send, i_recv
+    logical :: i_send, i_recv, llow
 
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -947,6 +956,9 @@
            do k=attreconstart, si%theircount
 !!DEBUG " checking remote id for object ", k, "value is ", si%idrecv(k)
              ihave = .false.
+             
+#define IHAVEOLD
+#ifdef IHAVEOLD
              do l=1, si%mycount
 !!DEBUG " checking local id for object ", l, "value is ", si%idsend(l)
                 ! cannot just print a vmid, have to call real print routine
@@ -959,6 +971,26 @@
                      exit
                  endif
              enddo
+#else
+             ! Only search back a fixed number of times (20), otherwise simply
+             ! add object. This prevents the following loop from becoming more
+             ! and more expensive.
+             
+             !gjt -> turning this fixed size search on does not really help
+             ! for the test code I was using. I believe that the complexity of
+             ! the StateAdd() calls is also O(si%mycount)! Consequently this
+             ! search here doesn't really matter much (from a complexity/
+             ! scaling standpoint). It just comes in as an extra bit of factor!
+             
+             llow = max(1, si%mycount - 20)
+             do l=si%mycount, llow, -1
+               if ((si%idrecv(k) .eq. si%idsend(l)) .and. & 
+     (ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l)) .eq. ESMF_TRUE) ) then
+                 ihave = .true.
+                 exit
+               endif
+             enddo
+#endif
              
 !!DEBUG "  end of match loop for remote object ", k, "ihave flag is ", ihave
              if (.not. ihave) then
@@ -1184,6 +1216,59 @@
 
     end subroutine ESMF_StateProxyCreate
 
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateZapEmptyNests"
+!BOPI
+! !IROUTINE: ESMF_StateZapEmptyNests -- Zap empty nested States from State
+!
+! !INTERFACE:
+    subroutine ESMF_StateZapEmptyNests(state, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state
+      integer, intent(out), optional :: rc               
+
+      integer :: localrc, i, iwrt, oldcount
+      type (ESMF_StateClass), pointer :: stypep
+      logical :: emptyNest
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      stypep => state%statep
+      
+      iwrt = 1 ! initialize
+      do i=1, stypep%datacount
+        emptyNest = .false. ! reset
+        if (stypep%datalist(i)%otype%ot == ESMF_STATEITEM_STATE%ot) then
+          ! found nested State
+          if (stypep%datalist(i)%datap%spp%datacount == 0) then
+            ! nested State is empty
+            emptyNest = .true.
+            call c_ESMC_AttributeLinkRemove(stypep%base, stypep%datalist(i)%datap%spp%base, &
+              localrc)
+           if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+          endif
+!print *, "gjt: zap empty nest in State"
+        endif
+        if (.not. emptyNest) then
+          if (iwrt < i) then
+            stypep%datalist(iwrt) = stypep%datalist(i)
+          endif
+          iwrt = iwrt + 1
+        endif
+      enddo
+!oldcount = stypep%datacount
+      stypep%datacount = iwrt-1
+!print *, "gjt: reduced objects in State from", oldcount, " to ", stypep%datacount
+      
+      if (present(rc)) rc = ESMF_SUCCESS
+    end subroutine ESMF_StateZapEmptyNests
 
 end module ESMF_StateReconcileMod
 
