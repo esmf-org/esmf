@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.17 2010/02/16 17:45:43 feiliu Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.18 2010/02/18 20:00:28 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.17 2010/02/16 17:45:43 feiliu Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.18 2010/02/18 20:00:28 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -100,8 +100,9 @@ contains
 !   undistributed dimensions. Because Grid dimensions are mapped to Field in a
 !   sequence order, it's necessary to map the ungridded dimensions to the first
 !   set of dimensions in order to use the weakly congruent Field redist feature.
-!   Not providing a non-default gridToFieldMap during Field creation for
-!   weakly congruent Fields causes undefined behavior.
+!   Not providing a non-default gridToFieldMap during Field creation and then
+!   using such Fields in a weakly congruent manner in Field communication methods
+!   leads to undefined behavior.
 !
 !   It is erroneous to specify the identical Field object for {\tt srcField} and
 !   {\tt dstField} arguments.
@@ -295,8 +296,9 @@ contains
 !   undistributed dimensions. Because Grid dimensions are mapped to Field in a
 !   sequence order, it's necessary to map the ungridded dimensions to the first
 !   set of dimensions in order to use the weakly congruent Field redist feature.
-!   Not providing a non-default gridToFieldMap during Field creation for
-!   weakly congruent Fields causes undefined behavior.
+!   Not providing a non-default gridToFieldMap during Field creation and then
+!   using such Fields in a weakly congruent manner in Field communication methods
+!   leads to undefined behavior.
 !
 ! This method is overloaded for:\newline
 ! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
@@ -629,8 +631,9 @@ contains
 !   undistributed dimensions. Because Grid dimensions are mapped to Field in a
 !   sequence order, it's necessary to map the ungridded dimensions to the first
 !   set of dimensions in order to use the weakly congruent Field redist feature.
-!   Not providing a non-default gridToFieldMap during Field creation for
-!   weakly congruent Fields causes undefined behavior.
+!   Not providing a non-default gridToFieldMap during Field creation and then
+!   using such Fields in a weakly congruent manner in Field communication methods
+!   leads to undefined behavior.
 !  
 ! This call is {\em collective} across the current VM.  
 ! 
