@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.14.2.1 2010/02/05 20:01:56 svasquez Exp $
+// $Id: ESMCI_VM.C,v 1.14.2.2 2010/02/19 04:55:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.14.2.1 2010/02/05 20:01:56 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.14.2.2 2010/02/19 04:55:14 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -852,6 +852,47 @@ int VM::recvVMId(
   recv(vmID->vmKey, vmKeyWidth, source);
   recv(&(vmID->localID), sizeof(int), source);
 
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::bcastVMId()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::bcastVMId
+//
+// !INTERFACE:
+int VM::bcastVMId(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  VMId *vmID,                   // in/out - VMId
+  int root                      // in  - root PET
+  ){
+//
+// !DESCRIPTION:
+//    Broadcast {\tt ESMCI::VMId}.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  if (vmID==ESMC_NULL_POINTER){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Invalid VMId", &rc);
+    return rc;
+  }
+  // broadcast vmKey
+  broadcast(vmID->vmKey, vmKeyWidth, root);
+  // braodcast localID
+  broadcast(&(vmID->localID), sizeof(int), root);
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
