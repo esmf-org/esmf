@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.70.2.1 2010/02/05 20:05:02 svasquez Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.70.2.2 2010/02/19 04:44:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.70.2.1 2010/02/05 20:05:02 svasquez Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.70.2.2 2010/02/19 04:44:33 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -191,6 +191,15 @@
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
+      
+      
+    ! First remove all empty nested States from State
+    ! Doing this leads to much lower (factor petCount) complexity of the 
+    ! current ProxyCreate() code.
+    call ESMF_StateZapEmptyNests(state, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+                              ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rc)) return
 
 
     ! This turns off the fast option on Regrid; it is working now for
@@ -746,8 +755,8 @@
 !
 !EOPI
     integer :: pets, mypet, i, j, k, l, m, localrc, attreconstart
-    integer(ESMF_KIND_I4) :: count(1)
-    integer(ESMF_KIND_I4) :: lrbufsize(1), lsbufsize(1)
+    integer(ESMF_KIND_I4) :: objcount, bsbufsize
+    integer(ESMF_KIND_I4) :: comm_ints(2)
     type(ESMF_State) :: substate
     type(ESMF_Base) :: base
     type(ESMF_FieldBundle) :: bundle
@@ -759,7 +768,8 @@
     logical :: ihave
     type(ESMF_VMId) :: temp_vmid
     type(ESMF_StateItemInfo), pointer :: si
-    integer :: offset
+    integer :: offset, myOrigCount
+    logical :: i_send, i_recv, llow
 
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -775,197 +785,140 @@
     ! get total num pets.
     call ESMF_VMGet(vm, localPet=mypet, petCount=pets, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
-           "VMGet call", &
-           ESMF_CONTEXT, rc)) return
+                   ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rc)) return
 
-#if defined (FIXED_BUFFER)
-    lsbufsize = BUFSIZE
-    lrbufsize = BUFSIZE
-#else
-    lsbufsize = size (si%blindsend, 1)
-    lrbufsize = -1
-#endif
+    myOrigCount = si%mycount  ! my original count on entering this routine
 
-    ! for i=0, npets-1, except us, send object count to each
-    do j = 0, pets-1
+    do, j = 0, pets-1
 !!DEBUG "Outer loop, j = ", j
-       ! each takes turns sending to all, everyone else receives
-       if (mypet .eq. j) then
-           ! i am the sender, send in turn to each other pet
-!!DEBUG "I am the sender this time, mypet = j"
-           do i = 0, pets-1
-               if (i .eq. j) cycle
-!!DEBUG "I am sending to ", i
-               ! count must be integer array
-               count(1) = si%mycount
-               call ESMF_VMSend(vm, count, 1, i, rc=localrc)
-               if (ESMF_LogMsgFoundError(localrc, &
-                                         ESMF_ERR_PASSTHRU, &
-                                         ESMF_CONTEXT, rc)) return
-!!DEBUG "completed send of obj count to ", i
+       ! each PET takes turns broadcasting to all
 
-               ! TODO: this can be removed.  
-               !call ESMF_VMRecv(vm, count, 1, i, rc=localrc)
-               !if (ESMF_LogMsgFoundError(localrc, &
-               !                          ESMF_ERR_PASSTHRU, &
-               !                          ESMF_CONTEXT, rc)) return
-               !si%theircount = count(1)
-               !if (si%theircount .ne. si%mycount) then
-               !   print *, "object counts not same; ", &
-               !           si%mycount, " .ne. ", si%theircount
-               !endif
-               ! at this point i know how many objects they have
-        
-               ! TODO:
-               ! this code goes ahead and sends everything preemptively.
-               ! once the code is working, change this so it only sends
-               ! object numbers which appear in my list and not in theirs.
+       i_send = mypet == j
+       i_recv = mypet /= j
 
-               if (si%mycount .gt. 0) then
+       ! First, broadcast object count and blindsend buffer size.
+       comm_ints(1) = myOrigCount
+       comm_ints(2) = size (si%blindsend, dim=1)
+       call ESMF_VMBroadcast (vm, comm_ints, count=size (comm_ints), &
+                      root=j, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, &
+                      ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rc)) return
 
-#if !defined (FIXED_BUFFER)
-               ! Send size of blindsend array, so a blindrecv can be
-               ! allocated on the other side.
-                   call ESMF_VMSend (vm, lsbufsize, 1, i, rc=localrc)
-                   if (ESMF_LogMsgFoundError(localrc, &
-                                             ESMF_ERR_PASSTHRU, &
-                                             ESMF_CONTEXT, rc)) return
-#endif
+       objcount  = comm_ints(1)
+       if (i_recv)  &
+           si%theircount = objcount
+       bsbufsize = comm_ints(2)
+       
+       if (objcount > 0) then
 
-!!DEBUG "i have ", si%mycount, "objects to send now"
-                   call ESMF_VMSend(vm, si%idsend, si%mycount, i, rc=localrc)
-                   if (ESMF_LogMsgFoundError(localrc, &
-                                             ESMF_ERR_PASSTHRU, &
-                                             ESMF_CONTEXT, rc)) return
-!!DEBUG "completed send of id list"
-                   call ESMF_VMSend(vm, si%objsend, si%mycount, i, rc=localrc)
-                   if (ESMF_LogMsgFoundError(localrc, &
-                                             ESMF_ERR_PASSTHRU, &
-                                             ESMF_CONTEXT, rc)) return
-!!DEBUG "completed send of obj type list"
-                   do k = 1, si%mycount
-                       temp_vmid = si%vmidsend(k)
-                       call ESMF_VMSendVMId(vm, temp_vmid, i, rc=localrc)
-                       if (ESMF_LogMsgFoundError(localrc, &
-                                                 ESMF_ERR_PASSTHRU, &
-                                                 ESMF_CONTEXT, rc)) return
-!!DEBUG "completed send of vmid ", k
-                   enddo
-!!DEBUG "completed send of all vmids"
-
-                   do m = 1, si%mycount
-                     bptr => si%blindsend(:,m)
-                     call ESMF_VMSend(vm, bptr, lsbufsize(1), i, rc=localrc)
-                     if (ESMF_LogMsgFoundError(localrc, &
-                                               ESMF_ERR_PASSTHRU, &
-                                               ESMF_CONTEXT, rc)) return
-!!DEBUG "completed send of serialized buffer ", m
-                   enddo
-!!DEBUG "completed send of all serialize buffers"
-               endif
-!!DEBUG "Done sending object information to ", i
-               ! done sending to the next pet
-           enddo
-       else  ! i was not the sender this time, so i am receiving
-!!DEBUG "I am receiving information from ", j
-           call ESMF_VMRecv(vm, count, 1, j, rc=localrc)
-           if (ESMF_LogMsgFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
-!!DEBUG "completed recv of object count from ", j, "cnt =", count(1)
-           si%theircount = count(1)
-
-           !count(1) = si%mycount
-           !call ESMF_VMSend(vm, count, 1, j, rc=localrc)
-           !if (ESMF_LogMsgFoundError(localrc, &
-           !                          ESMF_ERR_PASSTHRU, &
-           !                          ESMF_CONTEXT, rc)) return
-           ! 
-           ! if (si%theircount .ne. si%mycount) then
-           !     !print *, "object counts not same; ", &
-           !               si%mycount, " .ne. ", si%theircount
-           ! endif
-           ! at this point, i know how many objects they have.
-
-           ! TODO:
-           ! go ahead and receive all objects preemptively and then decide
-           ! if we need them.  once this code is working, only receive
-           ! missing objects.
-
-           if (si%theircount .gt. 0) then
-
-#if !defined (FIXED_BUFFER)
-               ! Receive size of blindsend array,
-               call ESMF_VMRecv (vm, lrbufsize, 1, j, rc=localrc)
-               if (ESMF_LogMsgFoundError(localrc, &
-                                   ESMF_ERR_PASSTHRU, &
-                                   ESMF_CONTEXT, rc)) return
-#endif
-
-!!DEBUG "pet ", j, " has ", si%theircount, " objs to send me"
+           ! Broadcast the local object IDs
+           if (i_send) then
+               call ESMF_VMBroadcast (vm, si%idsend, count=myOrigCount, root=j, rc=localrc)
+           else
                allocate(si%idrecv(si%theircount), stat=localrc)
                if (ESMF_LogMsgFoundAllocError(localrc, &
-                                   "Allocating buffer for local ID list", &
-                                   ESMF_CONTEXT, rc)) return
-               allocate(si%vmidrecv(si%theircount), stat=localrc)
-               if (ESMF_LogMsgFoundAllocError(localrc, &
-                                   "Allocating buffer for local VM ID list", &
-                                   ESMF_CONTEXT, rc)) return
+                              "Allocating buffer for local ID list", &
+                              ESMF_CONTEXT, rc)) return
+               call ESMF_VMBroadcast (vm, si%idrecv, count=si%theircount, root=j, rc=localrc)
+           end if
+           if (ESMF_LogMsgFoundError(localrc, &
+                          ESMF_ERR_PASSTHRU, &
+                          ESMF_CONTEXT, rc)) return
+!!DEBUG "completed broadcast of id list"
+
+           ! Broadcast the object types
+           if (i_send) then
+               call ESMF_VMBroadcast (vm, si%objsend, count=myOrigCount, root=j, rc=localrc)
+           else
                allocate(si%objrecv(si%theircount), stat=localrc)
                if (ESMF_LogMsgFoundAllocError(localrc, &
-                                   "Allocating buffer for local obj list", &
-                                   ESMF_CONTEXT, rc)) return
-    
-               allocate(si%blindrecv(lrbufsize(1), si%theircount), stat=localrc)
+                              "Allocating buffer for local obj list", &
+                              ESMF_CONTEXT, rc)) return
+               call ESMF_VMBroadcast (vm, si%objrecv, count=si%theircount, root=j, rc=localrc)
+           end if
+           if (ESMF_LogMsgFoundError(localrc, &
+                          ESMF_ERR_PASSTHRU, &
+                          ESMF_CONTEXT, rc)) return
+!!DEBUG "completed broadcast of object type list"
+
+           ! Broadcast VMIds
+#define NEWVMID
+#ifdef NEWVMID
+           if (i_send) then
+               call ESMF_VMBcastVMId(vm, si%vmidsend, count=myOrigCount, &
+                   root=j, rc=localrc)
+           else
+	       allocate(si%vmidrecv(si%theircount), stat=localrc)
                if (ESMF_LogMsgFoundAllocError(localrc, &
-                                   "Allocating buffer for local buf list", &
-                                   ESMF_CONTEXT, rc)) return
-!!DEBUG "allocated space to receive object information"
-   
-!!DEBUG "ready to receive id list from ", j
-               call ESMF_VMRecv(vm, si%idrecv, si%theircount, j, rc=localrc)
-               if (ESMF_LogMsgFoundError(localrc, &
-                                         ESMF_ERR_PASSTHRU, &
-                                         ESMF_CONTEXT, rc)) return
-!!DEBUG "ready to receive obj id list from ", j
-               call ESMF_VMRecv(vm, si%objrecv, si%theircount, j, rc=localrc)
-               if (ESMF_LogMsgFoundError(localrc, &
-                                         ESMF_ERR_PASSTHRU, &
-                                         ESMF_CONTEXT, rc)) return
-
-!!DEBUG "ready to start receive loop for vm ids"
-               do k = 1, si%theircount
-                   call ESMF_VMIdCreate(temp_vmid)
-                   call ESMF_VMRecvVMId(vm, temp_vmid, j, rc=localrc)
+                              "Allocating buffer for local VM ID list", &
+                              ESMF_CONTEXT, rc)) return
+               do, k=1, si%theircount
+                   call ESMF_VMIdCreate (si%vmidrecv(k))
+               enddo                              
+               call ESMF_VMBcastVMId(vm, si%vmidrecv, count=size (si%vmidrecv), &
+                   root=j, rc=localrc)
+           end if
+           if (ESMF_LogMsgFoundError(localrc, &
+                          ESMF_ERR_PASSTHRU, &
+                          ESMF_CONTEXT, rc)) return
+#else
+           if (i_send) then
+               do, i=0, pets-1
+                   if (j == i) cycle
+                   do, k=1, myOrigCount
+                       call ESMF_VMSendVMId (vm, si%vmidsend(k), i, rc=localrc)
+                       if (ESMF_LogMsgFoundError(localrc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+                   end do
+               end do
+           else
+               allocate(si%vmidrecv(si%theircount), stat=localrc)
+               if (ESMF_LogMsgFoundAllocError(localrc, &
+                              "Allocating buffer for local VM ID list", &
+                              ESMF_CONTEXT, rc)) return
+               do, k=1, si%theircount
+                   call ESMF_VMIdCreate (si%vmidrecv(k))
+                   call ESMF_VMRecvVMId (vm, si%vmidrecv(k), j, rc=localrc)
                    if (ESMF_LogMsgFoundError(localrc, &
-                                             ESMF_ERR_PASSTHRU, &
-                                             ESMF_CONTEXT, rc)) return
-!!DEBUG "received vm id ", k
-                   si%vmidrecv(k) = temp_vmid
-               enddo
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+               end do
+           end if
+#endif
 
-!!DEBUG "ready to start receive loop for serialized object buffers from ", j
-               do m = 1, si%theircount
-                   bptr => si%blindrecv(:,m)
-                   call ESMF_VMRecv(vm, bptr, lrbufsize(1), j, rc=localrc)
-                   if (ESMF_LogMsgFoundError(localrc, &
-                                             ESMF_ERR_PASSTHRU, &
-                                             ESMF_CONTEXT, rc)) return
-!!DEBUG "received serialized object buffer ", m, "from ", j
-               enddo
-           endif
-!!DEBUG "end of object receive loop, at this point we have all info from ", j
+           ! Broadcast serialized object buffers
+           if (i_send) then
+               call ESMF_VMBroadcast (vm, si%blindsend, bsbufsize*myOrigCount, root=j, rc=localrc)
+	   else
+               allocate(si%blindrecv(bsbufsize, si%theircount), stat=localrc)
+               if (ESMF_LogMsgFoundAllocError(localrc, &
+                              "Allocating buffer for local buf list", &
+                              ESMF_CONTEXT, rc)) return
+               call ESMF_VMBroadcast (vm, si%blindrecv, size (si%blindrecv), root=j, rc=localrc)
+           end if
+           if (ESMF_LogMsgFoundError(localrc, &
+                          ESMF_ERR_PASSTHRU, &
+                          ESMF_CONTEXT, rc)) return
+
+       end if ! objcount > 0
+
+       if (i_recv) then
 
            ! at this point we have all their objects here in our address
            ! space.  we just need to sort thru the lists and figure out
            ! if there are any which are missing from our list.
 
+#if defined (DEBUG)
            do k=1, si%mycount
 !!DEBUG  " num, send id and obj id", k, si%idsend(k), si%objsend(k)
            enddo
            do k=1, si%theircount
 !!DEBUG  " num, recv id and obj id", k, si%idrecv(k), si%objrecv(k)
            enddo
+#endif
 
         ! unpack the top level State Attributes first
         if (attreconflag%value == ESMF_ATTRECONCILE_ON%value) then
@@ -1003,6 +956,9 @@
            do k=attreconstart, si%theircount
 !!DEBUG " checking remote id for object ", k, "value is ", si%idrecv(k)
              ihave = .false.
+             
+#define IHAVEOLD
+#ifdef IHAVEOLD
              do l=1, si%mycount
 !!DEBUG " checking local id for object ", l, "value is ", si%idsend(l)
                 ! cannot just print a vmid, have to call real print routine
@@ -1015,6 +971,26 @@
                      exit
                  endif
              enddo
+#else
+             ! Only search back a fixed number of times (20), otherwise simply
+             ! add object. This prevents the following loop from becoming more
+             ! and more expensive.
+             
+             !gjt -> turning this fixed size search on does not really help
+             ! for the test code I was using. I believe that the complexity of
+             ! the StateAdd() calls is also O(si%mycount)! Consequently this
+             ! search here doesn't really matter much (from a complexity/
+             ! scaling standpoint). It just comes in as an extra bit of factor!
+             
+             llow = max(1, si%mycount - 20)
+             do l=si%mycount, llow, -1
+               if ((si%idrecv(k) .eq. si%idsend(l)) .and. & 
+     (ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l)) .eq. ESMF_TRUE) ) then
+                 ihave = .true.
+                 exit
+               endif
+             enddo
+#endif
              
 !!DEBUG "  end of match loop for remote object ", k, "ihave flag is ", ihave
              if (.not. ihave) then
@@ -1134,7 +1110,7 @@
 !!DEBUG "created substate, ready to set id and add to local state"
                     call c_ESMC_SetVMId(substate%statep, si%vmidrecv(k), localrc)
                     if (ESMF_LogMsgFoundError(localrc, &
-                             "nested Arraybundle SetVMId call", &
+                             "nested Substate SetVMId call", &
                              ESMF_CONTEXT, rc)) return
 
                     call ESMF_StateAdd(state, substate, proxyflag=.true., &
@@ -1231,16 +1207,68 @@
 !!DEBUG "reset pointer to state list"
            si => stateInfoList(1)
 
-       endif   ! sender vs receiver
+       endif   ! receiver
 !!DEBUG "bottom of loop"
-    enddo
-
+    enddo ! source PET number
 
 !!DEBUG "end of state proxy create"
     if (present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_StateProxyCreate
 
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateZapEmptyNests"
+!BOPI
+! !IROUTINE: ESMF_StateZapEmptyNests -- Zap empty nested States from State
+!
+! !INTERFACE:
+    subroutine ESMF_StateZapEmptyNests(state, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state
+      integer, intent(out), optional :: rc               
+
+      integer :: localrc, i, iwrt, oldcount
+      type (ESMF_StateClass), pointer :: stypep
+      logical :: emptyNest
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      stypep => state%statep
+      
+      iwrt = 1 ! initialize
+      do i=1, stypep%datacount
+        emptyNest = .false. ! reset
+        if (stypep%datalist(i)%otype%ot == ESMF_STATEITEM_STATE%ot) then
+          ! found nested State
+          if (stypep%datalist(i)%datap%spp%datacount == 0) then
+            ! nested State is empty
+            emptyNest = .true.
+            call c_ESMC_AttributeLinkRemove(stypep%base, stypep%datalist(i)%datap%spp%base, &
+              localrc)
+           if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+          endif
+!print *, "gjt: zap empty nest in State"
+        endif
+        if (.not. emptyNest) then
+          if (iwrt < i) then
+            stypep%datalist(iwrt) = stypep%datalist(i)
+          endif
+          iwrt = iwrt + 1
+        endif
+      enddo
+!oldcount = stypep%datacount
+      stypep%datacount = iwrt-1
+!print *, "gjt: reduced objects in State from", oldcount, " to ", stypep%datacount
+      
+      if (present(rc)) rc = ESMF_SUCCESS
+    end subroutine ESMF_StateZapEmptyNests
 
 end module ESMF_StateReconcileMod
 
