@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.C,v 1.5 2010/02/11 06:58:19 eschwab Exp $
+// $Id: ESMCI_IO_XML.C,v 1.6 2010/02/22 06:28:55 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.5 2010/02/11 06:58:19 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.6 2010/02/22 06:28:55 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 
@@ -356,9 +356,9 @@ namespace ESMCI{
                                           XMLFormatter::UnRep_CharRef, false);
     }
 
-    char *attrName;
-    char *attrValue;
-    XMLAttr *attr   = NULL;
+    char  *attrName,  *attrValue;
+    XMLCh *attrNameX, *attrValueX;
+    XMLAttr *attr = NULL;
     XMLSize_t attrCount=0;
     RefVectorOf<XMLAttr> *attrList = NULL;
     VecAttributesImpl fAttrList;  // empty if no attrs passed in (nPairs = 0)
@@ -370,20 +370,22 @@ namespace ESMCI{
         attrName  = va_arg(ap, char*);
         attrValue = va_arg(ap, char*);
         if (strlen(attrName) > 0) {
-          attr = new XMLAttr(0, XMLString::transcode(attrName),
-                                XMLUni::fgZeroLenString, 
-                                XMLString::transcode(attrValue)); 
+          attrNameX  = XMLString::transcode(attrName);
+          attrValueX = XMLString::transcode(attrValue);
+          attr = new XMLAttr(0, attrNameX, XMLUni::fgZeroLenString, attrValueX);
           attrList->addElement(attr);
           attrCount++;
+          XMLString::release(&attrNameX);
+          XMLString::release(&attrValueX);
         }
       }
       fAttrList.setVector(attrList, attrCount, NULL, true); // adopt elems
       // The above containers attrList and fAttrlist are set to
       // adopt their elements, so they will deallocate them upon their demise.
-      // This happens when attrList is deleted and fAttrList goes out of
-      // scope at the end of this method.  So attr does not need to be
-      // deleted explicitly here; multiple XMLAttr allocations can be done
-      // with it, each of which resides in (is adopted by) attrList.
+      // This happens when fAttrList goes out of scope at the end of this
+      // method.  So attrList and attr do not need to be deleted explicitly
+      // here.  Multiple XMLAttr allocations can be done with attr, each of
+      // which resides in (is adopted by) attrList.
     }
 
     // indent if needed
@@ -408,7 +410,6 @@ namespace ESMCI{
     writeHandler->characters(newLine, XMLString::stringLen(newLine));
     XMLString::release(&newLine);
 
-    // delete attrList; // TODO: not necessary if adopted by fAttrList? NULL ok
 #else
     // xerces library not present
     rc = ESMF_RC_LIB_NOT_PRESENT;
