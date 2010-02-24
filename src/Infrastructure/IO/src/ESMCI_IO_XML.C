@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.C,v 1.6 2010/02/22 06:28:55 eschwab Exp $
+// $Id: ESMCI_IO_XML.C,v 1.7 2010/02/24 06:57:51 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.6 2010/02/22 06:28:55 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.7 2010/02/24 06:57:51 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 
@@ -323,7 +323,7 @@ namespace ESMCI{
       const string        &name,
       const int            indentLevel,
       const int            nPairs, ...) {
-      // nPairs of (const string &attrName, const string &attrValue)
+      // nPairs of (char *attrName, char *attrValue) var args
 
 // !DESCRIPTION:
 //      Part of writing an {\tt ESMC\_IO\_XML} object to file.
