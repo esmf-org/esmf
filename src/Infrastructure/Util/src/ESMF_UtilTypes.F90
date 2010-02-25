@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.89 2010/01/22 17:36:32 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.90 2010/02/25 20:00:02 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -198,6 +198,10 @@
       private
           integer :: pad
       end type
+
+
+
+
 
 !------------------------------------------------------------------------------
 !
@@ -513,6 +517,19 @@
         ESMF_ATTTREE_OFF = ESMF_AttTreeFlag(0), &
         ESMF_ATTTREE_ON = ESMF_AttTreeFlag(1)
 
+
+      ! What to do when a point can't be mapped
+      type ESMF_UnmappedAction
+      sequence
+!  private
+         integer :: unmappedaction
+      end type
+
+      type(ESMF_UnmappedAction), parameter :: &
+           ESMF_UNMAPPEDACTION_ERROR    = ESMF_UnmappedAction(0), &
+           ESMF_UNMAPPEDACTION_IGNORE   = ESMF_UnmappedAction(1)
+
+
 !------------------------------------------------------------------------------
 !BOPI
 !
@@ -607,6 +624,10 @@
       public ESMF_DataValue
 
       public ESMF_PointerPrint
+
+       public ESMF_UnmappedAction, ESMF_UNMAPPEDACTION_ERROR, &
+                                   ESMF_UNMAPPEDACTION_IGNORE
+
       
 !  Overloaded = operator functions
       public operator(.eq.), operator(.ne.), assignment(=)
@@ -629,6 +650,7 @@ interface operator (.eq.)
   module procedure ESMF_freq
   module procedure ESMF_ifeq
   module procedure ESMF_rfeq
+  module procedure ESMF_unmappedActioneq
 end interface
 
 interface operator (.ne.)
@@ -640,6 +662,7 @@ interface operator (.ne.)
   module procedure ESMF_ctfne
   module procedure ESMF_tnfne
   module procedure ESMF_frne
+  module procedure ESMF_unmappedActionne
 end interface
 
 interface assignment (=)
@@ -981,6 +1004,25 @@ subroutine ESMF_PointerPrint(ptr)
 
   call c_pointerprint(ptr)
 end subroutine
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_UNMAPPEDACTION types
+
+function ESMF_unmappedActioneq(uma1, uma2)
+ logical ESMF_unmappedActioneq
+ type(ESMF_UNMAPPEDACTION), intent(in) :: uma1, uma2
+
+ ESMF_unmappedActioneq = (uma1%unmappedaction .eq. uma2%unmappedaction)
+end function
+
+function ESMF_unmappedActionne(uma1, uma2)
+ logical ESMF_unmappedActionne
+ type(ESMF_UNMAPPEDACTION), intent(in) :: uma1, uma2
+
+ ESMF_unmappedActionne = (uma1%unmappedaction .ne. uma2%unmappedaction)
+end function
+
+
 
 
       end module ESMF_UtilTypesMod

@@ -1,4 +1,4 @@
-// $Id: ESMCI_GeomBase_F.C,v 1.5 2009/11/05 19:05:21 w6ws Exp $
+// $Id: ESMCI_GeomBase_F.C,v 1.1 2010/02/25 19:59:50 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_GeomBase_F.C,v 1.5 2009/11/05 19:05:21 w6ws Exp $";
+             "$Id: ESMCI_GeomBase_F.C,v 1.1 2010/02/25 19:59:50 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {

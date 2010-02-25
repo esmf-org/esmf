@@ -17,6 +17,7 @@
 #include <Mesh/include/ESMCI_OTree.h>
 #include <Mesh/include/ESMCI_MeshTypes.h>
 #include <Mesh/include/ESMCI_MeshObj.h>
+#include <Mesh/include/ESMCI_SearchFlags.h>
 
 #include <vector>
 
@@ -24,10 +25,6 @@
 namespace ESMCI {
 
 class Mesh;
-
-// What to do if dest points aren't found
-#define ESMC_UNMAPPEDACTION_ERROR  0
-#define ESMC_UNMAPPEDACTION_IGNORE 1
 
 // The return type from search.  A list of source grid node to
 // destination grid element pairs

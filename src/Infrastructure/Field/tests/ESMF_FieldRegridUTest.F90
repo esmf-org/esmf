@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.8 2009/10/23 03:02:51 oehmke Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.9 2010/02/25 19:59:49 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -219,7 +219,6 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
 #endif
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
@@ -289,9 +288,7 @@ contains
             ESMF_CONTEXT, rc)) return
 
   ! Establish the resolution of the grids
-  !dst_nx = 284
-!  dst_nx = 154
-!  dst_ny = 100
+
   dst_nx = 90
   dst_ny = 50
 
@@ -646,14 +643,16 @@ contains
 
 
   ! Uncomment these calls to see some actual regrid results
-#if 0
+#if 1
   spherical_grid = 1
   call ESMF_MeshIO(vm, grid360, ESMF_STAGGERLOC_CENTER, &
                "srcmesh", srcArray360, dstArray360, errorArray, lonArray360, rc=localrc, &
                spherical=spherical_grid)
+write(*,*) "LOCALRC=",localrc
   call ESMF_MeshIO(vm, grid180, ESMF_STAGGERLOC_CENTER, &
                "dstmesh", array180, rc=localrc, &
                spherical=spherical_grid)
+write(*,*) "LOCALRC=",localrc
 #endif
 
 

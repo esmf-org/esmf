@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2008/09/26 21:11:38 cdeluca Exp $ 
+# $Id: makefile,v 1.4 2010/02/25 19:59:57 oehmke Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -6,12 +6,12 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR	  = src/Infrastructure/LocStream/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_LocStreamUTest \
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_LocStreamUTest
 
 
-TESTS_RUN     = RUN_ESMF_LocStreamUTest \
+TESTS_RUN     = RUN_ESMF_LocStreamUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_LocStreamUTestUNI \
+TESTS_RUN_UNI = RUN_ESMF_LocStreamUTestUNI 
 
 include ${ESMF_DIR}/makefile
 
@@ -32,6 +32,8 @@ RUN_ESMF_LocStreamUTest:
 
 RUN_ESMF_LocStreamUTestUNI:
 	$(MAKE) TNAME=LocStream NP=1 ftest
+
+
 
 
 

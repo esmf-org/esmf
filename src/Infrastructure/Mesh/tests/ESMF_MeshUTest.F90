@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshUTest.F90,v 1.19 2009/10/27 19:54:37 w6ws Exp $
+! $Id: ESMF_MeshUTest.F90,v 1.20 2010/02/25 19:59:58 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_MeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshUTest.F90,v 1.19 2009/10/27 19:54:37 w6ws Exp $'
+    '$Id: ESMF_MeshUTest.F90,v 1.20 2010/02/25 19:59:58 oehmke Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -66,6 +66,9 @@ program ESMF_MeshUTest
   logical :: isMemFreed
   integer :: bufCount, offset
   character, pointer :: buf(:)
+  integer :: i,pntCount
+  real(ESMF_KIND_R8), pointer :: pntList(:)
+  integer, pointer :: petList(:)
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -913,14 +916,13 @@ program ESMF_MeshUTest
   mesh2=ESMF_MeshDeserialize(buf, offset, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-write(*,*) "E1"
   ! Check loc stream info
   ! Test Mesh Get
   call ESMF_MeshGet(mesh2, nodalDistgrid=nodeDistgrid, elementDistgrid=elemDistgrid, &
                    numOwnedNodes=numOwnedNodesTst, numOwnedElements=numOwnedElemsTst, &
                    isMemFreed=isMemFreed, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-write(*,*) "E2",rc,correct
+
   ! check results
   if (numOwnedNodesTst .ne. 0) correct=.false.
   if (numOwnedElemsTst .ne. 0) correct=.false.
@@ -929,14 +931,14 @@ write(*,*) "E2",rc,correct
   ! Make sure node distgrid is ok
   call ESMF_DistGridValidate(nodeDistgrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
-write(*,*) "E3",rc,correct
+
   ! Make sure element distgrid is ok
   call ESMF_DistGridValidate(elemDistgrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
-write(*,*) "E4",rc,correct
+
   ! Get rid of buffer
   deallocate(buf)
-write(*,*) "E5",rc,correct
+
   ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -944,8 +946,250 @@ write(*,*) "E5",rc,correct
   ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-write(*,*) "E6",rc,correct
+
   ! endif for skip for >1 proc
+  endif 
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  ! NOTE THAT MeshFindPnt IS AN INTERNAL INTERFACE AND NOT INTENDED FOR PUBLIC USE
+  !NEX_UTest
+  write(name, *) "Test Mesh Find Point"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+
+  ! Create Mesh
+  ! Only do this if we have 4 PETs
+  if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+     if (localPet .eq. 0) then
+        ! Fill in node data
+        numNodes=4
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,4,5/) 
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/0.0,0.0, &
+                    1.0,0.0, &
+                    0.0,1.0, &
+                    1.0,1.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,0,0,0/) ! everything on proc 0
+
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/1/) 
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)
+     else if (localPet .eq. 1) then
+        ! Fill in node data
+        numNodes=4
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/2,3,5,6/) 
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/1.0,0.0, &
+                    2.0,0.0, &
+                    1.0,1.0, &
+                    2.0,1.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,1,0,1/) 
+
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/2/) 
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)
+     else if (localPet .eq. 2) then
+        ! Fill in node data
+        numNodes=4
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/4,5,7,8/) 
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/0.0,1.0, &
+                    1.0,1.0, &
+                    0.0,2.0, &
+                    1.0,2.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,0,2,2/) 
+
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/3/) 
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)  
+     else 
+        ! Fill in node data
+        numNodes=4
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/5,6,8,9/) 
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/1.0,1.0, &
+                    2.0,1.0, &
+                    1.0,2.0, &
+                    2.0,2.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,1,2,3/) 
+
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/4/) 
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)  
+     endif
+
+  ! Create Mesh structure in 1 step
+  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, elementIds=elemIds,&
+         elementTypes=elemTypes, elementConn=elemConn, &
+         rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! deallocate node data
+  deallocate(nodeIds)
+  deallocate(nodeCoords)
+  deallocate(nodeOwners)
+
+  ! deallocate elem data
+  deallocate(elemIds)
+  deallocate(elemTypes)
+  deallocate(elemConn)
+
+
+
+  ! Setup lists
+if (localPet .eq. 0) then
+
+  pntCount=1
+  allocate(pntList(2*pntCount))
+  allocate(petList(pntCount))
+
+  ! Set point coords
+  pntList(1)=1.0
+  pntList(2)=2.5
+
+
+else if (localPet .eq. 1) then
+
+  pntCount=1
+  allocate(pntList(2*pntCount))
+  allocate(petList(pntCount))
+
+  pntList(1)=1.0
+  pntList(2)=1.0
+
+
+else if (localPet .eq. 2) then
+
+  pntCount=2
+  allocate(pntList(2*pntCount))
+  allocate(petList(pntCount))
+
+  pntList(1)=1.5
+  pntList(2)=1.5
+  pntList(3)=0.5
+  pntList(4)=1.5
+
+
+else if (localPet .eq. 3) then
+
+  pntCount=0
+  allocate(pntList(2*pntCount))
+  allocate(petList(pntCount))
+
+endif
+
+  ! Get points
+  call ESMF_MeshFindPnt(mesh, unmappedAction=ESMF_UNMAPPEDACTION_IGNORE, &
+                        pntDim=2, pntCount=pntCount, pntList=pntList, &
+                        petList=petList, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! output 
+  do i=1,pntCount
+     write(*,*) i," :: ",pntList(2*i-1),pntList(2*i)," >>>> pet=",petList(i)
+  enddo
+
+
+  ! Deallocate
+  deallocate(pntList)
+  deallocate(petList)
+
+
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! endif for skip for ==4 proc
   endif 
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)

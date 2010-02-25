@@ -1,4 +1,4 @@
-// $Id: ESMCI_OTree.h,v 1.4 2009/10/04 02:59:48 oehmke Exp $
+// $Id: ESMCI_OTree.h,v 1.5 2010/02/25 19:59:57 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -75,6 +75,8 @@ class OTree {    // inherits from ESMC_Base class
   int max_size_mem;
   int curr_size_mem;
 
+  // committed
+  bool is_committed;
 
  public:
 

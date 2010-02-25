@@ -1,4 +1,4 @@
-// $Id: ESMCI_OTree.C,v 1.2 2009/10/04 02:59:48 oehmke Exp $
+// $Id: ESMCI_OTree.C,v 1.3 2010/02/25 19:59:58 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_OTree.C,v 1.2 2009/10/04 02:59:48 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_OTree.C,v 1.3 2010/02/25 19:59:58 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -84,6 +84,7 @@ OTree::OTree(
   max_size_mem=max_size;
   curr_size_mem=0;
   root=NULL;
+  is_committed=false;
 }
 //-----------------------------------------------------------------------------
 
@@ -265,7 +266,9 @@ void OTree::commit(
     //// Add
     _add_onode(root, mem+i);
   }
-  
+
+  // Record that we're now committed
+  is_committed=true;
 }
 //-----------------------------------------------------------------------------
 
@@ -361,12 +364,12 @@ int OTree::runon(
 
   RUNON_INFO ri;
 
+  // Make sure that this has been committed
+  if (!is_committed) Throw() << "Search tree hasn't been committed, so can't do runon()";
+
   // if tree empty return
-  if (root==NULL) {
-   return 0;
-  }
-
-
+  if (root==NULL) return 0;
+ 
   // Load search info
   ri.min[0]=min[0];
   ri.min[1]=min[1];

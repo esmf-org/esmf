@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.139 2009/09/28 20:31:19 oehmke Exp $
+! $Id: ESMF_Regrid.F90,v 1.140 2010/02/25 20:00:00 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -84,16 +84,6 @@
            ESMF_REGRID_MASSCONSERVE_ON      = ESMF_RegridMassConserve(1)
 
 
-      type ESMF_UnmappedAction
-      sequence
-!  private
-         integer :: unmappedaction
-      end type
-
-      type(ESMF_UnmappedAction), parameter :: &
-           ESMF_UNMAPPEDACTION_ERROR    = ESMF_UnmappedAction(0), &
-           ESMF_UNMAPPEDACTION_IGNORE   = ESMF_UnmappedAction(1)
-
       integer, parameter :: ESMF_REGRID_SCHEME_FULL3D = 0, &
                             ESMF_REGRID_SCHEME_NATIVE = 1
 
@@ -115,8 +105,6 @@
        public ESMF_RegridMassConserve, ESMF_REGRID_MASSCONSERVE_OFF, &
                                        ESMF_REGRID_MASSCONSERVE_ON
 
-       public ESMF_UnmappedAction, ESMF_UNMAPPEDACTION_ERROR, &
-                                   ESMF_UNMAPPEDACTION_IGNORE
 
        public ESMF_REGRID_SCHEME_FULL3D, &
               ESMF_REGRID_SCHEME_NATIVE
@@ -142,7 +130,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.139 2009/09/28 20:31:19 oehmke Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.140 2010/02/25 20:00:00 oehmke Exp $'
 
 !==============================================================================
 !

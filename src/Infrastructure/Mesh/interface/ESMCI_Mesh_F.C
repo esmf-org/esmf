@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.35 2009/11/21 23:44:13 rokuingh Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.36 2010/02/25 19:59:57 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -33,12 +33,12 @@
 #include "ESMCI_MeshUtils.h"
 #include "ESMCI_GlobalIds.h"
 #include "ESMCI_VM.h"
-
+#include "ESMCI_FindPnts.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.35 2009/11/21 23:44:13 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.36 2010/02/25 19:59:57 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1129,3 +1129,65 @@ extern "C" void FTN(c_esmc_meshdeserialize)(Mesh **meshpp,
 
     return;
 } 
+
+
+extern "C" void FTN(c_esmc_meshfindpnt)(Mesh **meshpp, int *unmappedaction, int *dimPnts, int *numPnts, 
+					double *pnts, int *pets, int *rc){
+
+   try {
+
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+ int localrc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
+   return;  // bail out with exception
+    }
+
+
+    // Find points
+    int fp_err=FindPnts(**meshpp, *unmappedaction, *dimPnts, *numPnts, pnts,
+             ESMC_NOT_PRESENT_FILTER(pets), (int *)NULL);
+    // Check error return
+    //// Temporary solution because exceptions aren't working in FindPnts()
+    if (fp_err != ESMCI_FINDPNT_SUCCESS) {
+      if (fp_err == ESMCI_FINDPNT_DIM_MISMATCH) {
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          " - point dimension doesn't match grid/mesh dimension", rc);
+         return;
+      } else if (fp_err == ESMCI_FINDPNT_PNT_NOT_FOUND) {
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          " - some points lie outside of grid/mesh ", rc);
+         return;
+      } else {
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   			     	  " - unknown error in findpnt", rc);
+         return;
+      }
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      					  x.what(), rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", rc);
+    }
+
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", rc);
+    return;
+  }
+
+  // Set return code 
+  if(rc != NULL) *rc = ESMF_SUCCESS;
+}

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Extrapolation.C,v 1.8 2009/11/21 23:44:14 rokuingh Exp $
+// $Id: ESMCI_Extrapolation.C,v 1.9 2010/02/25 19:59:57 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Extrapolation.C,v 1.8 2009/11/21 23:44:14 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Extrapolation.C,v 1.9 2010/02/25 19:59:57 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1140,6 +1140,338 @@ void MeshAddNorthPole(Mesh &mesh, UInt node_id,
 }
 
 */
+
+
+#if 0
+  // TODO: MeshAddPoleNPnts needs to be modified to use mask data, before
+  //       being hooked into the on-line regridding 
+  void MeshAddPoleTeeth(Mesh &mesh,  UInt node_id, 
+                  UInt constraint_id, IWeights &cweights)
+{
+
+  UInt rank = Par::Rank();
+
+  {
+
+  // First: Get the elements around the pole and ship them to processor zero
+  std::set<MeshObj*> elements;
+
+  // Loop the nodes with given node_id
+  KernelList::iterator ki = mesh.set_begin(), ke = mesh.set_end();
+  
+  for (; ki != ke; ++ki) {
+    
+    Kernel &ker = *ki;
+
+    bool lowned = ker.is_owned();
+
+    if (ker.type() == MeshObj::NODE && ker.key() == node_id) {
+
+      Kernel::obj_iterator oi = ker.obj_begin(), oe = ker.obj_end();
+      
+      for (; oi != oe; ++oi) {
+
+        MeshObj &node = *oi;
+
+        // Push all connected elements onto list
+        MeshObjRelationList::iterator ei = node.Relations.begin(), ee = node.Relations.end();
+        for (; ei != ee; ++ei) {
+
+          if (ei->type == MeshObj::USED_BY && ei->obj->get_type() == MeshObj::ELEMENT) {
+            elements.insert(ei->obj);
+          }
+
+        }
+
+
+      } // oi
+
+    } 
+
+  } // ki
+
+  // If there are no elements, go no further
+  {
+    int nfound = elements.size();
+    int gnfound;
+
+    MPI_Allreduce(&nfound, &gnfound, 1, MPI_INT, MPI_SUM, Par::Comm());
+
+    if (gnfound == 0) return;
+  }
+
+  // Form the migration comm to send elements to proc 0
+  CommReg mig("_rebalance_migration", mesh, mesh);
+
+
+
+  if (rank != 0) // don't ship elements on zero to zero (causes trouble)
+  {
+
+    CommRel &erel = mig.GetCommRel(MeshObj::ELEMENT);
+
+    std::set<MeshObj*>::iterator ei = elements.begin(), ee = elements.end();
+
+    std::vector<CommRel::CommNode> enodes;
+
+    for (; ei != ee; ++ei) {
+
+      enodes.push_back(CommRel::CommNode(*ei, 0));  
+
+    }
+
+    erel.add_domain(enodes);
+
+  }
+
+  // Now ship them back to proc zero
+  Rebalance(mesh, mig);
+
+  } // done with rebalance
+
+  // So now to the job at hand of meshing on proc zero
+
+  std::set<MeshObj*> elems, nodes;
+  if (rank == 0) {
+    // Gather all the nodes and elements
+
+    // Loop the nodes with given node_id
+    KernelList::iterator ki = mesh.set_begin(), ke = mesh.set_end();
+  
+    for (; ki != ke; ++ki) {
+    
+      Kernel &ker = *ki;
+
+
+      if (ker.type() == MeshObj::NODE && ker.key() == node_id) {
+
+        Kernel::obj_iterator oi = ker.obj_begin(), oe = ker.obj_end();
+      
+        for (; oi != oe; ++oi) {
+
+          MeshObj &node = *oi;
+
+          nodes.insert(&node);
+
+          // Push all connected elements onto list
+          MeshObjRelationList::iterator ei = node.Relations.begin(), ee = node.Relations.end();
+          for (; ei != ee; ++ei) {
+
+            if (ei->type == MeshObj::USED_BY && ei->obj->get_type() == MeshObj::ELEMENT) {
+              elems.insert(ei->obj);
+            }
+
+          }
+
+
+        } // oi
+
+      } 
+
+    } // ki
+
+  } // rank = 0
+
+  // We need to get ids for the pole node and for the new triangles
+  std::vector<long> new_ids;
+  long pole_id;
+  {
+    std::vector<long> cur_ids;
+
+    Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (; ei != ee; ++ei) cur_ids.push_back(ei->get_id());
+
+    // This MIGHT be getting a few extras think about it and fix, but
+    // for now a few extra won't hurt
+    new_ids.resize(elems.size(), 0);
+
+    GlobalIds(cur_ids, new_ids);
+
+  }
+
+
+  MEField<> &coords = *mesh.GetCoordField();
+
+  if (rank == 0) {
+       
+    // Loop the elements around the pole gap
+    std::set<MeshObj*>::iterator ei = elems.begin(), ee = elems.end();     
+
+    // number of elems around pole
+    // Note: this is also the number of nodes because of periodicity
+    int num_pole_elems=elems.size();
+
+    // Hold edges of the pole area 
+    EEdge_Map pole_edge_map;
+
+    for (; ei != ee; ++ei) {
+        
+      MeshObj &elem = **ei;
+        
+      // Get side nodes with poleward boundary
+      const MeshObjTopo *etopo = GetMeshObjTopo(elem);
+        
+      ThrowRequire(etopo->num_nodes == 4);
+        
+      int pole_side = -1;
+        
+      for (UInt s = 0; pole_side < 0 && s < etopo->num_sides; s++) {
+          
+        const int *side_nodes = etopo->get_side_nodes(s);
+          
+        // Check; if this is the side, all nodes on side should have the boundary context;
+        bool is_pole_side = true;
+        for (UInt sn = 0; is_pole_side && sn < (UInt) etopo->num_side_nodes; sn++) {
+            
+          is_pole_side = elem.Relations[side_nodes[sn]].obj->GetKernel()->key() == node_id;
+            
+        }
+          
+        if (is_pole_side) pole_side = s; 
+          
+      } // for s
+        
+      ThrowRequire(pole_side >= 0); // need to have found a side
+        
+      const int *side_nodes = etopo->get_side_nodes(pole_side);
+
+      // Get nodes in order of edge
+      MeshObj *node1 = elem.Relations[side_nodes[0]].obj;
+      MeshObj *node2 = elem.Relations[side_nodes[1]].obj;
+
+      // Insert edge information into map
+      pole_edge_map.insert(
+        EEdge_Map::value_type(node1->get_id(),
+			      EEdge(node1, node2, &elem, (MeshObj*)NULL))); 
+
+   
+    } // for ei
+ 
+
+         
+    // Create ordered list of nodes around pole
+    // plus associated edge structures
+    //// Allocate lists
+    std::vector<UInt> ordered_node_ids;
+    ordered_node_ids.reserve(num_pole_elems);
+    std::vector<MeshObj *> ordered_node_ptrs;
+    ordered_node_ptrs.reserve(num_pole_elems);
+    std::vector<EEdge *> ordered_eedge;
+    ordered_eedge.reserve(num_pole_elems);
+
+    //// Get map iterators
+    EEdge_Map::iterator pemi=pole_edge_map.begin();
+    EEdge_Map::iterator peme=pole_edge_map.end();
+
+    //// Get first node id
+    UInt curr_id=pemi->first;
+
+    //// Loop through putting nodes into order
+    for (int i=0; i<num_pole_elems; i++) {
+
+      ////// Get EEdge structure
+      pemi=pole_edge_map.find(curr_id);
+      
+      ////// Error if not found
+      ThrowRequire(pemi!=peme); // should be in map
+
+      ////// Add node gid and EEdge structures to the list
+      ordered_node_ids[i]=curr_id;
+      ordered_node_ptrs[i]=pemi->second.node1;
+      ordered_eedge[i]=&(pemi->second);
+
+      ////// Get next gid
+      curr_id=pemi->second.node2->get_id();
+    }    
+
+
+    // Get triangle topology
+    const MeshObjTopo *tri_topo = GetTopo("SHELL3");
+    ThrowRequire(tri_topo);
+ 
+    /// Loop around gap filling in gap with triangles
+    int s=0; // start node
+    int e=num_pole_elems-1; // end node 
+    UInt tri_num = 0; // count ids used
+    for (int i=0; i<num_pole_elems; i++) {
+      std::vector<MeshObj*> tri_nodes;
+      tri_nodes.resize(3,NULL);
+      MeshObj::id_type tri_id;
+      MeshObj *tri;
+
+      // Triangle from one side...
+
+      // Get id
+      ThrowRequire(tri_num < new_ids.size());
+      tri_id = new_ids[tri_num++];
+
+      // Create triangle object
+      tri = new MeshObj(MeshObj::ELEMENT, tri_id, 0, rank);
+        
+      // Order of triangle nodes is important,
+      // so normals point in the correct direction    
+      tri_nodes[0]=ordered_node_ptrs[e];
+      tri_nodes[1]=ordered_node_ptrs[s+1];
+      tri_nodes[2]=ordered_node_ptrs[s];
+      mesh.add_element(tri, tri_nodes, 2, tri_topo);
+
+      // Download the field contexts to this object
+      tri->GetKernel()->Imprint(*tri);
+
+      // Leave if we're done
+      if (e-1 == s+1) break;
+
+
+
+      // Triangle from the other...
+
+      // Get id
+      ThrowRequire(tri_num < new_ids.size());
+      tri_id = new_ids[tri_num++];
+
+      // Create triangle object
+      tri = new MeshObj(MeshObj::ELEMENT, tri_id, 0, rank);
+        
+      // Order of triangle nodes is important,
+      // so normals point in the correct direction    
+      tri_nodes[0]=ordered_node_ptrs[e-1];
+      tri_nodes[1]=ordered_node_ptrs[s+1];
+      tri_nodes[2]=ordered_node_ptrs[e];
+      mesh.add_element(tri, tri_nodes, 2, tri_topo);
+
+      // Download the field contexts to this object
+      tri->GetKernel()->Imprint(*tri);
+
+      // Leave if we're done
+      if (e-2 == s+1) break;
+
+      // Advance to next set 
+      s=s+1;
+      e=e-1;
+    }
+ 
+    // Remove boundary context from nodes around pole   
+    std::set<MeshObj*>::iterator bf_i = nodes.begin(), bf_e = nodes.end();
+      
+    for (; bf_i != bf_e; ++bf_i) {
+        
+      MeshObj &node = **bf_i;
+      
+      // Remove boundary context from node
+      const Attr &oattr = GetAttr(node);
+      const Context &ctxt = GetMeshObjContext(node);
+      Context newctxt(ctxt);
+      newctxt.clear(Attr::EXPOSED_BOUNDARY_ID);
+      Attr attr(oattr, newctxt);
+      mesh.update_obj(&node, attr);   
+    }
+
+    mesh.remove_unused_kernels();
+      
+  } // rank zero
+
+}
+#endif
 
 
 

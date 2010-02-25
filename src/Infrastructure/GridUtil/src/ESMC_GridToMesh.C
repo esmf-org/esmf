@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.40 2009/10/26 17:19:10 oehmke Exp $
+// $Id: ESMC_GridToMesh.C,v 1.41 2010/02/25 19:59:56 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -292,7 +292,6 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
 
    // Allocate vector to hold nodes for translation
    std::vector<MeshObj*> nodes(ctopo->num_nodes);
-
 
    // Loop Cells of the grid. 
    ESMCI::GridCellIter *gci=new ESMCI::GridCellIter(&grid,staggerLoc);

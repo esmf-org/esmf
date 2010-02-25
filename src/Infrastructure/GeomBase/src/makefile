@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.8 2010/02/25 19:59:56 oehmke Exp $
+# $Id: makefile,v 1.1 2010/02/25 19:59:50 oehmke Exp $
 
 ALL: build_here 
 
-SOURCEC	  = ESMC_GridToMesh.C
-SOURCEF	  =
+SOURCEC	  = 
+SOURCEF	  = ESMF_GeomBase.F90
 SOURCEH	  = 
 
 # List all .h files which should be copied to common include dir
@@ -13,7 +13,7 @@ OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
 LIBBASE	  = libesmf
-LOCDIR	  = src/Infrastructure/GridUtil/src
+LOCDIR	  = src/Infrastructure/GeomBase/src
 
 CLEANDIRS   =
 CLEANFILES  =

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.40 2009/09/01 00:25:19 rokuingh Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.41 2010/02/25 19:59:59 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -105,6 +105,7 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
         MeshAddPole(srcmesh, i, constraint_id, pole_constraints);
       }
     }
+
 
     // Get coordinate fields
     MEField<> &scoord = *srcmesh.GetCoordField();
