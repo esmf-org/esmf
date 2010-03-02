@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.80 2009/12/23 16:56:23 svasquez Exp $
+% $Id: ESMF_install.tex,v 1.81 2010/03/02 22:45:34 theurich Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -770,3 +770,13 @@ Check the ESMF installation with the command:
 \begin{verbatim}
   gmake installcheck
 \end{verbatim}
+
+{\em Advice to installers.} Complete the installation of ESMF by defining a single ESMF specific environment variable, named {\tt ESMFMKFILE}. This variable shall point to the {\tt esmf.mk} file that was generated during the installation process. Systems that support multiple ESMF installations via management software (e.g. {\em modules, softenv, ...}) shall set/reset variable {\tt ESMFMKFILE} as part of the configuration. 
+
+By default file {\tt esmf.mk} is located next to the ESMF library file in  directory {\tt ESMF\_INSTALL\_LIBDIR}. Consequently, unless {\tt esmf.mk} has been moved to a different location after the installation, the correct setting for {\tt ESMFMKFILE} is {\tt \$(ESMF\_INSTALL\_LIBDIR)/esmf.mk}.
+
+{\em Rationale.} To use an ESMF installation a single piece of information is required. This piece of information is the exact location of the associated {\tt esmf.mk} file. This file contains all of the relevant settings and flags that allow a user to build their application against the ESMF installation. (See section \ref{UsingLibrary} for details about {\tt esmf.mk}.) Standardizing the mechanism by which the location of {\tt esmf.mk} is made available to the user by the system will help users in the design of portable application build systems.
+
+ 
+
+
