@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.70 2009/06/17 21:37:18 w6ws Exp $
+// $Id: ESMC_LogErr.h,v 1.71 2010/03/03 04:27:07 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@ int ESMC_LogWrite(const char msg[], int msgtype);
 enum ESMC_MsgType{ESMC_LOG_INFO=1,ESMC_LOG_WARN=2,ESMC_LOG_ERROR=3};
 enum ESMC_LogType{ESMC_LOG_SINGLE=1,ESMC_LOG_MULTI=2,ESMC_LOG_NONE=3};
 int ESMC_LogFinalize();
-char *ESMC_LogGetErrMsg(int rc);
+const char *ESMC_LogGetErrMsg(int rc);
 int ESMC_LogSetFilename(char filename[]);
 void ESMC_TimeStamp(int *y,int* mn,int *d,int *h,int *m,int *s,int *ms);
 
