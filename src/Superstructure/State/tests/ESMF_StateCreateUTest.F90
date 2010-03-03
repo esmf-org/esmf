@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.18 2009/08/11 21:41:17 svasquez Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.19 2010/03/03 04:23:15 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ end module
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.18 2009/08/11 21:41:17 svasquez Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.19 2010/03/03 04:23:15 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -112,7 +112,7 @@ end module
       call ESMF_StateGet(state1, name=testName, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting name from an empty State Test"
-      print *,"testName: ",testName
+      print *,"testName: ", trim (testName)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
                       
@@ -300,7 +300,8 @@ end module
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+#if defined (ESMF_ENABLESTATENEEDED)
+      !EX_xUTest      
       ! Marking an item needed
       sname = "Downward wind"
       call ESMF_StateSetNeeded(state3, sname, ESMF_NEEDED, rc=rc)
@@ -309,14 +310,14 @@ end module
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_xUTest      
       ! Querying if an item is needed, using sname from above
       isNeeded =  ESMF_StateIsNeeded(state3, sname, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Querying if an item is needed"
       call ESMF_Test(((rc.eq.ESMF_SUCCESS) .or. (.not. isNeeded)), &
                       name, failMsg, result, ESMF_SRCLINE)
-
+#endif
       !------------------------------------------------------------------------
       !EX_UTest      
       ! Creating a FieldBundle to add to a State

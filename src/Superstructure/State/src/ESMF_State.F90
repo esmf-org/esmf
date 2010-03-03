@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.179 2009/10/27 19:59:08 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.180 2010/03/03 04:24:58 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -73,8 +73,10 @@ module ESMF_StateMod
       public ESMF_StateAdd
       public ESMF_StateGet
 
+#if defined (ESMF_ENABLESTATENEEDED)
       public ESMF_StateGetNeeded
       public ESMF_StateIsNeeded
+#endif
 
       public ESMF_StateWriteRestart
       public ESMF_StateReadRestart
@@ -92,7 +94,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.179 2009/10/27 19:59:08 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.180 2010/03/03 04:24:58 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2969,6 +2971,7 @@ module ESMF_StateMod
       end subroutine ESMF_StateGetItemInfo
 
 !------------------------------------------------------------------------------
+#if defined (ESMF_ENABLESTATENEEDED)
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetNeeded"
 !BOP
@@ -3031,7 +3034,7 @@ module ESMF_StateMod
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateGetNeeded
-
+#endif
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetRouteHandle"
@@ -3223,6 +3226,7 @@ module ESMF_StateMod
       end subroutine ESMF_StateGetState
 
 !------------------------------------------------------------------------------
+#if defined (ESMF_ENABLESTATENEEDED)
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateIsNeeded"
 !BOP
@@ -3292,7 +3296,7 @@ module ESMF_StateMod
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_StateIsNeeded
-
+#endif
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StatePrint"
