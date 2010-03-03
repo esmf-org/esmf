@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.30 2009/10/16 05:57:26 eschwab Exp $
+! $Id: ESMF_StateEx.F90,v 1.31 2010/03/03 15:21:16 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -153,6 +153,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !-------------------------------------------------------------------------
+#if defined (ESMF_ENABLESTATENEEDED)
 !BOE
 !\subsubsection{Marking an Item Needed}
 !   
@@ -210,9 +211,10 @@
         print *, "Data not marked as needed", trim(dataname)
     endif
 !EOC
+    print *, "State Example 5 finished"
+#endif
     call ESMF_StateDestroy(state3, rc)
     print *, "State Destroy returned", rc
-    print *, "State Example 5 finished"
 
 !-------------------------------------------------------------------------
 !   ! Similar flags exist for "Ready" and for "Valid" to mark each data
