@@ -40,7 +40,7 @@ public:
        REFINED_ID,
        CONSTRAINED_ID
      };
-  static char *reservedContextNames[];
+  static const char *reservedContextNames[];
   static const UInt numReservedContexts = 9;
 
 

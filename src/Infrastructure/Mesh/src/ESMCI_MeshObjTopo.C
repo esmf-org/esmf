@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshObjTopo.C,v 1.3 2009/11/21 23:44:14 rokuingh Exp $
+// $Id: ESMCI_MeshObjTopo.C,v 1.4 2010/03/03 04:29:06 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshObjTopo.C,v 1.3 2009/11/21 23:44:14 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_MeshObjTopo.C,v 1.4 2010/03/03 04:29:06 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -608,7 +608,7 @@ MeshObjTopo *GetTopo(const std::string &name) {
 MeshObjTopo *GetTopo(UInt t) {
 
   // This is 1 based in topo, so zero is no topo (nodes)
-  static char *tmap[] = {
+  static const char *tmap[] = {
     "NULL",
     "HEX",
     "HEX27",
