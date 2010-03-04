@@ -1,4 +1,4 @@
-%  $Id: ESMF_builddetail.tex,v 1.11 2009/06/17 19:00:34 theurich Exp $
+%  $Id: ESMF_builddetail.tex,v 1.11.2.1 2010/03/04 17:57:23 theurich Exp $
 
 % there is a separate copy of this under build/doc which is
 % now used only by the implementation report.  this was separated
@@ -369,4 +369,74 @@ If this macro is defined ESMF will not use the {\tt SEQUENCE} specifier
 inside Fortran derived types under certain circumstances.
 
 \end{description}
+
+
+\subsection{Shared Object Libraries}
+
+On some platforms, a shared object library is created in addition to the
+standard {\tt .a} archive library.
+Shared object libraries are libraries that are loaded by the first program 
+that uses them. All programs that start afterwards automatically use the 
+existing shared library. The library is kept in memory as long as any 
+active program is still using it. 
+
+Shared object libraries can be pre-linked to system libraries and using them
+can simplify dealing with ESMF's dependency on Fortran90 and C++ runtime 
+libraries. 
+
+\subsection{Customized SITE Files}
+
+In an effort to provide platform specific information for building ESMF 
+and linking the libraries with your application, a SourceForge 
+site, {\tt esmfcontrib}, has been created.
+To locate the platform makefiles for a specific institution, check out 
+the {\tt build\_config\_files} using the appropriate CVSROOT.
+The URL for the {\tt esmfcontrib} SourceForge site is:
+
+\begin{verbatim}
+        http://sourceforge.net/projects/esmfcontrib/
+\end{verbatim}
+
+Additionally, you may check out all the platform makefile fragments 
+for a particular institution from the {\tt esmfcontrib} site. For example, 
+to check out the available makefile fragments for platforms at the
+National Center for Atmospheric Research, {\tt ncar}, change directories to
+
+\begin{verbatim}
+ 	$ESMF_DIR/build_config
+\end{verbatim}
+
+and use the following CVS command:
+
+\begin{verbatim}
+	cvs -z3 -d:ext:$username@cvs.sourceforge.net:/cvsroot/esmfcontrib checkout ncar
+\end{verbatim}
+
+The following directories will be checked out:
+
+\begin{verbatim}
+	AIX.default.bluesky
+	Linux.lahey.longs
+\end{verbatim}
+
+To build using these makefiles you must set the environment 
+variable {\tt ESMF\_SITE} to {\tt bluesky}, or {\tt longs}.
+
+At the present time, we have files for the following institutions:
+
+\begin{verbatim}
+anl  - Argonne National Laboratory
+cola - Center for Ocean-Land-Atmosphere Studies
+gsfc - Goddard Space Flight Center
+mit  - Massachusetts Institute of Technology
+ncar - National Center for Atmospheric Research
+\end{verbatim}
+
+
+Users are encouraged to contribute pertinent information to the 
+{\tt esmfcontrib} respository.
+
+
+
+
 
