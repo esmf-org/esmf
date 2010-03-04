@@ -1,7 +1,7 @@
-// $Id: ESMCI_Field_F.C,v 1.12 2009/11/05 19:05:21 w6ws Exp $
+// $Id: ESMCI_Field_F.C,v 1.13 2010/03/04 18:57:42 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2009, University Corporation for Atmospheric Research, 
+// Copyright 2002-2010, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -30,7 +30,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_Field_F.C,v 1.12 2009/11/05 19:05:21 w6ws Exp $";
+             "$Id: ESMCI_Field_F.C,v 1.13 2010/03/04 18:57:42 svasquez Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {

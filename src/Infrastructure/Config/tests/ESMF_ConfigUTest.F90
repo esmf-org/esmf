@@ -1,8 +1,8 @@
-! $Id: ESMF_ConfigUTest.F90,v 1.37 2009/09/28 15:09:32 eschwab Exp $
+! $Id: ESMF_ConfigUTest.F90,v 1.38 2010/03/04 18:57:42 svasquez Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
-! Copyright 2002-2009, University Corporation for Atmospheric Research, 
+! Copyright 2002-2010, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1396,7 +1396,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.37 2009/09/28 15:09:32 eschwab Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.38 2010/03/04 18:57:42 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0

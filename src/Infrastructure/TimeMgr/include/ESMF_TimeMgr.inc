@@ -1,8 +1,8 @@
 #if 0
-$Id: ESMF_TimeMgr.inc,v 1.13 2009/09/22 05:50:14 eschwab Exp $
+$Id: ESMF_TimeMgr.inc,v 1.14 2010/03/04 18:57:45 svasquez Exp $
 
 Earth System Modeling Framework
-Copyright 2002-2009, University Corporation for Atmospheric Research,
+Copyright 2002-2010, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

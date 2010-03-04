@@ -1,7 +1,7 @@
-! $Id: ESMF_InternalStateEx.F90,v 1.18 2009/10/13 20:50:10 theurich Exp $
+! $Id: ESMF_InternalStateEx.F90,v 1.19 2010/03/04 18:57:45 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2009, University Corporation for Atmospheric Research,
+! Copyright 2002-2010, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

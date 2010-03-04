@@ -1,7 +1,7 @@
-// $Id: ESMC_LogErr_F.C,v 1.31 2009/11/05 19:05:21 w6ws Exp $
+// $Id: ESMC_LogErr_F.C,v 1.32 2010/03/04 18:57:44 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2009, University Corporation for Atmospheric Research,
+// Copyright 2002-2010, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.31 2009/11/05 19:05:21 w6ws Exp $";
+ static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.32 2010/03/04 18:57:44 svasquez Exp $";
 //-----------------------------------------------------------------------------
 
 //

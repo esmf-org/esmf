@@ -1,7 +1,7 @@
-! $Id: ESMF_StateReadWriteEx.F90,v 1.4 2009/10/21 14:51:55 eschwab Exp $
+! $Id: ESMF_StateReadWriteEx.F90,v 1.5 2010/03/04 18:57:46 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2009, University Corporation for Atmospheric Research,
+! Copyright 2002-2010, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

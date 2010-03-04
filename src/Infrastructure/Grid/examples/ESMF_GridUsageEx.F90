@@ -1,7 +1,7 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.66 2009/10/28 00:40:36 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.67 2010/03/04 18:57:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2009, University Corporation for Atmospheric Research,
+! Copyright 2002-2010, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

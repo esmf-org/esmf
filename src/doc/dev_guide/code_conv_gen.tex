@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_gen.tex,v 1.21 2009/12/22 21:09:40 svasquez Exp $
+% CVS $Id: code_conv_gen.tex,v 1.22 2010/03/04 18:57:46 svasquez Exp $
 
 \subsection{Docs: Code and Documentation Templates and Associated Scripts}
 \label{sec:code_templates}
@@ -362,14 +362,14 @@ The first line of every file in ESMF
   must be its CVS version identification. For example, each \LaTeX
   file must begin:
 \begin{verbatim}
-% $Id: code_conv_gen.tex,v 1.21 2009/12/22 21:09:40 svasquez Exp $ 
+% $Id: code_conv_gen.tex,v 1.22 2010/03/04 18:57:46 svasquez Exp $ 
 \end{verbatim}
 
 In addition, for source code, the CVS identifier must have the 
 ability to be written to a variable for output to a configuration log.  
 Therefore each F90 module must contain a declaration:
 \begin{verbatim}
-character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.21 2009/12/22 21:09:40 svasquez Exp $'
+character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.22 2010/03/04 18:57:46 svasquez Exp $'
 \end{verbatim}
 
 \subsubsection{License and Copyright Information}
@@ -379,7 +379,7 @@ copyright header:
 
 \begin{verbatim}
 ! Earth System Modeling Framework
-! Copyright 2002-2009, University Corporation for Atmospheric Research,
+! Copyright 2002-2010, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

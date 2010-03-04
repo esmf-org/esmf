@@ -1,7 +1,7 @@
-! $Id: ESMF_FieldMeshSMMUTest.F90,v 1.4 2009/10/19 23:34:23 feiliu Exp $
+! $Id: ESMF_FieldMeshSMMUTest.F90,v 1.5 2010/03/04 18:57:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2009, University Corporation for Atmospheric Research,
+! Copyright 2002-2010, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -36,7 +36,7 @@ program ESMF_FieldMeshSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldMeshSMMUTest.F90,v 1.4 2009/10/19 23:34:23 feiliu Exp $'
+    '$Id: ESMF_FieldMeshSMMUTest.F90,v 1.5 2010/03/04 18:57:43 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"

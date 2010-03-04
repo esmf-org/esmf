@@ -1,8 +1,8 @@
-// $Id: ESMC_RendEx.C,v 1.17 2009/12/17 19:06:28 rokuingh Exp $
+// $Id: ESMC_RendEx.C,v 1.18 2010/03/04 18:57:44 svasquez Exp $
 //==============================================================================
 //
 // Earth System Modeling Framework
-// Copyright 2002-2009, University Corporation for Atmospheric Research, 
+// Copyright 2002-2010, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
