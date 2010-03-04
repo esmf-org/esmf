@@ -1,4 +1,4 @@
-% $Id: ESMF_testing.tex,v 1.29 2009/12/22 20:52:52 svasquez Exp $
+% $Id: ESMF_testing.tex,v 1.30 2010/03/04 16:47:56 svasquez Exp $
 
 \subsection{Running ESMF Self-Tests}
 \label{testing}
@@ -164,8 +164,8 @@ a wide range of valid and non-valid arguments are evaluated for correct behavior
 The following commands are used to build and run the unit tests provided with 
 the ESMF:
 \begin{verbatim}
-        gmake [ESMF_TESTEXHAUSTIVE=<ON,OFF>] tests
-        gmake [ESMF_TESTEXHAUSTIVE=<ON,OFF>] tests_uni
+        gmake [ESMF_TESTEXHAUSTIVE=<ON,OFF>] unit_tests
+        gmake [ESMF_TESTEXHAUSTIVE=<ON,OFF>] unit_tests_uni
 \end{verbatim}
 
 The {\tt tests\_uni} target runs the tests on a single processor. 
