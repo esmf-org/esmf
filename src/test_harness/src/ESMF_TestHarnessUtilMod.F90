@@ -1,7 +1,7 @@
-! $Id: ESMF_TestHarnessUtilMod.F90,v 1.10 2010/01/27 23:11:56 theurich Exp $
+! $Id: ESMF_TestHarnessUtilMod.F90,v 1.11 2010/03/04 19:40:09 theurich Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2007, University Corporation for Atmospheric Research,
+! Copyright 2002-2010, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
