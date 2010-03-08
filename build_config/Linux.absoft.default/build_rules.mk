@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.35 2009/06/01 04:53:21 theurich Exp $
+# $Id: build_rules.mk,v 1.36 2010/03/08 23:31:15 svasquez Exp $
 #
 # Linux.absoft.default
 #
@@ -40,6 +40,13 @@ ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
+ifeq ($(ESMF_COMM),mvapich2)
+# Mvapich2 ---------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpicxx
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
+else
 ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with absoft f90) ----------------
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
@@ -60,6 +67,7 @@ ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
 else
 $(error Invalid ESMF_COMM setting: $(ESMF_COMM))
+endif
 endif
 endif
 endif
