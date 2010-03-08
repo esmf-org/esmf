@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.117 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_VM.F90,v 1.118 2010/03/08 23:09:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -184,7 +184,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.117 2010/03/04 18:57:45 svasquez Exp $"
+      "$Id: ESMF_VM.F90,v 1.118 2010/03/08 23:09:57 theurich Exp $"
 
 !==============================================================================
 
@@ -603,12 +603,14 @@ module ESMF_VMMod
         return
       endif
     endif
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, ESMF_TYPEKIND_I4, &
-      reduceflag, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    if (count > 0) then
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, &
+        ESMF_TYPEKIND_I4, reduceflag, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
       
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -662,11 +664,13 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, ESMF_TYPEKIND_R4, &
-      reduceflag, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (count > 0) then
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, &
+        ESMF_TYPEKIND_R4, reduceflag, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -720,11 +724,13 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, ESMF_TYPEKIND_R8, &
-      reduceflag, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (count > 0) then
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, &
+        ESMF_TYPEKIND_R8, reduceflag, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1200,8 +1206,8 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllGatherV(vm, sendData(1), sendCount, &
-      recvData(1), recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I4, localrc)
+    call c_ESMC_VMAllGatherV(vm, sendData, sendCount, &
+      recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I4, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1259,8 +1265,8 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllGatherV(vm, sendData(1), sendCount, &
-      recvData(1), recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R4, localrc)
+    call c_ESMC_VMAllGatherV(vm, sendData, sendCount, &
+      recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R4, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1318,8 +1324,8 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllGatherV(vm, sendData(1), sendCount, &
-      recvData(1), recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R8, localrc)
+    call c_ESMC_VMAllGatherV(vm, sendData, sendCount, &
+      recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R8, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1451,11 +1457,13 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, ESMF_TYPEKIND_I4, &
-      reduceflag, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (count > 0) then
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, &
+        ESMF_TYPEKIND_I4, reduceflag, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1565,11 +1573,13 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, ESMF_TYPEKIND_R4, &
-      reduceflag, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (count > 0) then
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, &
+        ESMF_TYPEKIND_R4, reduceflag, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1623,11 +1633,13 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, ESMF_TYPEKIND_R8, &
-      reduceflag, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (count > 0) then
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, &
+        ESMF_TYPEKIND_R8, reduceflag, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1767,8 +1779,8 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllToAllV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
-      recvData(1), recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I4, localrc)
+    call c_ESMC_VMAllToAllV(vm, sendData, sendCounts(1), sendOffsets(1), &
+      recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I4, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1827,8 +1839,8 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllToAllV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
-      recvData(1), recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R4, localrc)
+    call c_ESMC_VMAllToAllV(vm, sendData, sendCounts(1), sendOffsets(1), &
+      recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R4, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1887,8 +1899,8 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllToAllV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
-      recvData(1), recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R8, localrc)
+    call c_ESMC_VMAllToAllV(vm, sendData, sendCounts(1), sendOffsets(1), &
+      recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R8, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2953,7 +2965,7 @@ module ESMF_VMMod
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMGatherV(vm, sendData(1), sendCount, recvData(1), &
+    call c_ESMC_VMGatherV(vm, sendData, sendCount, recvData, &
       recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I4, root, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2998,7 +3010,7 @@ module ESMF_VMMod
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMGatherV(vm, sendData(1), sendCount, recvData(1), &
+    call c_ESMC_VMGatherV(vm, sendData, sendCount, recvData, &
       recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R4, root, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3043,7 +3055,7 @@ module ESMF_VMMod
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMGatherV(vm, sendData(1), sendCount, recvData(1), &
+    call c_ESMC_VMGatherV(vm, sendData, sendCount, recvData, &
       recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R8, root, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4094,11 +4106,13 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, ESMF_TYPEKIND_I4, &
-      reduceflag, root, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (count > 0) then
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, &
+        ESMF_TYPEKIND_I4, reduceflag, root, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -4153,11 +4167,13 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, ESMF_TYPEKIND_R4, &
-      reduceflag, root, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (count > 0) then
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, &
+        ESMF_TYPEKIND_R4, reduceflag, root, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -4212,11 +4228,13 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, ESMF_TYPEKIND_R8, &
-      reduceflag, root, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (count > 0) then
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, &
+        ESMF_TYPEKIND_R8, reduceflag, root, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
