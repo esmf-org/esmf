@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.102.2.1 2010/02/05 19:57:39 svasquez Exp $
+// $Id: ESMCI_Grid.C,v 1.102.2.2 2010/03/10 06:33:08 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.102.2.1 2010/02/05 19:57:39 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.102.2.2 2010/03/10 06:33:08 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -7133,8 +7133,14 @@ void GridCellIter::getDEBnds(
 
   // if cell iterator then expand bounds
   for (int i=0; i<rank; i++) {
-    //// Adjust to just do cell lower corners
-    if (grid->isUBnd(localDE,i)) uBnd[i]--;
+    //// Adjust based on alignment of each dimension
+    //// to just cover cell indices
+    if (align[i] <0) {
+      if (grid->isUBnd(localDE,i)) uBnd[i]--;
+    } else {
+      if (grid->isLBnd(localDE,i)) lBnd[i]++;
+    }
+
   }
 
 }
@@ -7237,6 +7243,17 @@ GridCellIter::GridCellIter(
   rank=grid->getDimCount();
   connL=grid->getConnL();
   connU=grid->getConnU();
+
+  // Get Alignment for staggerloc
+  const int *staggerAlign= grid->getStaggerAlign(staggerloc);
+
+  // Convert to -1,+1 alignment used in GridCellIter
+  // (i.e. make 0 the same as -1)
+  for (int i=0; i<rank; i++) {
+    if (staggerAlign[i] < 1) align[i]=-1;
+    else align[i]=1;
+  }
+
 
   // Get distgrid for this staggerloc 
   grid->getStaggerDistgrid(staggerloc, &staggerDistgrid);
@@ -7676,9 +7693,15 @@ void GridCellIter::getCornersCellNodeLocalID(
     // generate index value for corner
     for (int j=0; j<rank; j++) {
       ind[j]=curInd[j];
-      if (i & (0x1<<j)) {
-        ind[j]++;
-      }        
+      if (align[j] <0) { // center aligned with bottom of cell, so move upward
+	if (i & (0x1<<j)) {
+	  ind[j]++;
+	}        
+      } else {  // center aligned with top of cell, so move downward
+	if (!(i & (0x1<<j))) {
+	  ind[j]--;
+	}        
+      }
     }
 
     // compute Local IDs

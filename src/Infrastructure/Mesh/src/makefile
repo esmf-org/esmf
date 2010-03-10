@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2009/09/30 05:02:21 theurich Exp $
+# $Id: makefile,v 1.20.2.1 2010/03/10 06:33:08 oehmke Exp $
 
 # leave alone.
 ALL: build_here 
@@ -65,6 +65,8 @@ SOURCEC	  = \
            ESMCI_WMat.C \
            ESMCI_WriteWeights.C \
            ESMCI_WriteWeightsPar.C \
+	   ESMCI_SpaceDir.C \
+	   ESMCI_FindPnts.C \
            ESMCI_MeshCXX.C
 
 SOURCEF	  = \

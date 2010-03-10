@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.27.2.1 2010/02/05 19:59:43 svasquez Exp $
+! $Id: ESMF_Mesh.F90,v 1.27.2.2 2010/03/10 06:33:08 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@ module ESMF_MeshMod
   public ESMF_MeshMatch
   public ESMF_MeshSerialize
   public ESMF_MeshDeserialize
-
+  public ESMF_MeshFindPnt
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -137,7 +137,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.27.2.1 2010/02/05 19:59:43 svasquez Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.27.2.2 2010/03/10 06:33:08 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1240,6 +1240,99 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 
 
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshFindPnt()"
+!BOPI
+! !IROUTINE: ESMF_MeshFindPnt - Find points in a mesh
+!
+! !INTERFACE:
+    subroutine ESMF_MeshFindPnt(mesh, unmappedAction, &
+                                pntDim, pntCount, pntList, &
+                                petList, rc)
+
+
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)                     :: mesh
+    type(ESMF_UnmappedAction), intent(in), optional :: unmappedAction
+    integer, intent(in)                             :: pntDim
+    integer, intent(in)                             :: pntCount
+    real(ESMF_KIND_R8), pointer                     :: pntList(:)
+    integer, pointer                                :: petList(:)
+    integer, intent(out), optional                  :: rc
+!
+! !DESCRIPTION:
+!   Write a mesh to VTK file.
+!
+!   \begin{description}
+!   \item [mesh]
+!         The mesh.
+!   \item [{[unmappedDstAction]}]
+!           Specifies what should happen if there are destination points that
+!           can't be mapped to a source cell. Options are 
+!           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
+!           {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
+!           to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!   \item [pntDim]
+!         The dimension of the points in pntList.
+!   \item [pntNum]
+!         The number of points in pntList
+!   \item [petList]
+!         The generated list of pets for each point.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_UnmappedAction) :: localunmappedAction
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    ! If mesh has been freed then exit
+    if (mesh%isCMeshFreed) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh internals have been freed", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+    ! If mesh has been freed then exit
+    if (.not. mesh%isFullyCreated) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh has not been fully created", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+   ! Set default vale for unmappedAction
+   if (present(unmappedAction)) then
+      localunmappedAction=unmappedAction
+   else
+      localunmappedAction=ESMF_UNMAPPEDACTION_ERROR
+   endif
+
+   ! Call into mesh find point subroutine
+   ! TODO: ADD GIDS TO THIS INTERFACE AS THEY'RE AVAILABLE FROM C++ METHOD
+    call C_ESMC_MeshFindPnt(mesh%this, localunmappedAction, pntDim, pntCount, &
+			    pntList, petList, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! return success
+     if  (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_MeshFindPnt
+!------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-internal method -----------------------------
@@ -1277,5 +1370,7 @@ module ESMF_MeshMod
     end function ESMF_MeshGetInit
 
 !------------------------------------------------------------------------------
+
+
 
 end module ESMF_MeshMod

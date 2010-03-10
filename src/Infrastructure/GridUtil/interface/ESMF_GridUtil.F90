@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.13.2.1 2010/02/05 19:57:50 svasquez Exp $
+! $Id: ESMF_GridUtil.F90,v 1.13.2.2 2010/03/10 06:33:08 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.13.2.1 2010/02/05 19:57:50 svasquez Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.13.2.2 2010/03/10 06:33:08 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -194,7 +194,7 @@ module ESMF_GridUtilMod
     type(ESMF_Mesh)                               :: ESMF_GridToMesh
 !
 ! !ARGUMENTS:
-    type(ESMF_Grid), intent(inout)                :: grid
+    type(ESMF_Grid), intent(in)                :: grid
     type(ESMF_StaggerLoc),  intent(in)            :: staggerLoc
     integer,                intent(in)            :: isSphere
     integer(ESMF_KIND_I4), optional               :: maskValues(:)
@@ -243,36 +243,4 @@ module ESMF_GridUtilMod
 
 end module ESMF_GridUtilMod
 
-
-  subroutine f_esmf_geombasecollectgarbage(gb, rc)
-#undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_geombasecollectgarbage()"
-    use ESMF_UtilTypesMod
-    use ESMF_BaseMod
-    use ESMF_LogErrMod
-    use ESMF_GeomBaseMod
-
-    type(ESMF_GeomBase)  :: gb
-    integer, intent(out) :: rc     
-  
-    integer :: localrc              
-  
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    rc = ESMF_RC_NOT_IMPL
-    
-    !print *, "collecting GeomBase garbage"
-    
-    ! deallocate actual GeomBaseClass allocation      
-    if (associated(gb%gbcp)) then
-      deallocate(gb%gbcp, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Deallocating GeomBase", &
-        ESMF_CONTEXT, rc)) return
-    endif
-    nullify(gb%gbcp)
-
-    ! return successfully  
-    rc = ESMF_SUCCESS
-
-  end subroutine f_esmf_geombasecollectgarbage
 

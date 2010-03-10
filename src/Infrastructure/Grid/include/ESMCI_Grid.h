@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.64.2.1 2010/02/05 19:57:11 svasquez Exp $
+// $Id: ESMCI_Grid.h,v 1.64.2.2 2010/03/10 06:33:08 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -278,6 +278,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   const int   *getStaggerEdgeLWidth(int staggerloc) const {return staggerEdgeLWidthList[staggerloc];}
   const int   *getStaggerEdgeUWidth(int staggerloc) const {return staggerEdgeUWidthList[staggerloc];}
   const int   *getStaggerMemLBound(int staggerloc) const {return staggerMemLBoundList[staggerloc];}
+  const int   *getStaggerAlign(int staggerloc) const {return staggerAlignList[staggerloc];}
   const int   *getMinIndex(int tileno) const { return minIndex; }
   const int   *getMaxIndex(int tileno) const { return maxIndex; }
         int  **getLocalIndices(void) const { return localArbIndex;}
@@ -713,6 +714,9 @@ int getComputationalUBound(
     int exLBndInd[ESMF_MAXDIM]; // start position on exlusive region on this DE
 
     int dimOff[ESMF_MAXDIM]; // Offset for each dimension for computing lid
+
+    int align[ESMF_MAXDIM];  // current position in index space
+
     int lOff;                // lower bound offset
     
     int curDE; // current local DE
