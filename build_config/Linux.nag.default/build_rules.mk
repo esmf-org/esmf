@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.36 2010/03/03 20:58:26 svasquez Exp $
+# $Id: build_rules.mk,v 1.37 2010/03/10 05:14:24 w6ws Exp $
 #
 # Linux.nag.default
 #
@@ -108,10 +108,14 @@ ESMF_F90COMPILEFREENOCPP = -free
 ESMF_F90COMPILEFIXCPP    = -fixed -fpp
 
 ############################################################
-# Blank out variables to prevent rpath encoding
+# Determine where gcc's libraries are located
 #
-ESMF_F90LINKRPATHS      =
-ESMF_CXXLINKRPATHS      =
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.so)
+ifeq ($(ESMF_LIBSTDCXX),libstdc++.so)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.a)
+endif
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+ESMF_F90LINKRPATHS += -Wl,-Wl,,-rpath,,$(dir $(ESMF_LIBSTDCXX))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
@@ -124,7 +128,19 @@ ESMF_F90LINKLIBS += -lrt -lstdc++ -ldl
 ESMF_CXXLINKLIBS += -lrt -ldl $(shell $(ESMF_DIR)/scripts/libs.nag $(ESMF_F90COMPILER))
 
 ############################################################
-# Blank out shared library options
+# Shared library options
 #
-ESMF_SL_LIBS_TO_MAKE  =
+ESMF_SL_LIBOPTS  += -shared
+
+############################################################
+# Shared object options
+#
+ESMF_SO_F90COMPILEOPTS  = -pic
+ESMF_SO_F90LINKOPTS     =
+# -shared
+ESMF_SO_F90LINKOPTSEXE  =
+# -Wl,-export-dynamic
+ESMF_SO_CXXCOMPILEOPTS  = -fPIC
+# ESMF_SO_CXXLINKOPTS     = -shared
+# ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
 
