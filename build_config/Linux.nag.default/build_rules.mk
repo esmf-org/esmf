@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.37 2010/03/10 05:14:24 w6ws Exp $
+# $Id: build_rules.mk,v 1.38 2010/03/10 05:21:07 w6ws Exp $
 #
 # Linux.nag.default
 #
@@ -136,11 +136,4 @@ ESMF_SL_LIBOPTS  += -shared
 # Shared object options
 #
 ESMF_SO_F90COMPILEOPTS  = -pic
-ESMF_SO_F90LINKOPTS     =
-# -shared
-ESMF_SO_F90LINKOPTSEXE  =
-# -Wl,-export-dynamic
 ESMF_SO_CXXCOMPILEOPTS  = -fPIC
-# ESMF_SO_CXXLINKOPTS     = -shared
-# ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
-
