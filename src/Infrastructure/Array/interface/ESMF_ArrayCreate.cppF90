@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.44 2010/03/04 18:57:41 svasquez Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.45 2010/03/10 05:44:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.44 2010/03/04 18:57:41 svasquez Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.45 2010/03/10 05:44:12 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1011,13 +1011,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      specified in distgrid. It specifies the upper corner of the computational
 !      region with respect to the upper corner of the exclusive region.
 !      The default is a zero vector.
-! \item[{[totalMemoryLWidth]}]
+! \item[{[totalLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the total memory
 !      region with respect to the lower corner of the computational region.
 !      The default is to accommodate the union of exclusive and computational
 !      region.
-! \item[{[totalMemoryUWidth]}]
+! \item[{[totalUWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the upper corner of the total memory
 !      region with respect to the upper corner of the computational region.
