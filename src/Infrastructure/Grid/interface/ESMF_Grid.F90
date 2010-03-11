@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.145 2010/03/04 18:57:44 svasquez Exp $'
+      '$Id: ESMF_Grid.F90,v 1.146 2010/03/11 17:48:15 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1913,6 +1913,9 @@ end subroutine ESMF_GridConvertIndex
           enddo
        endif
 
+       ! Take out the below test to allow Fields that don't have a dim that maps
+       ! to the Grid. Take this code out for good after things have been tested for awhile.
+#if 0
        ! Make sure gridToFieldMap contains at least one non-zero entry
        if (present(gridToFieldMap)) then
           contains_nonzero=.false.
@@ -1928,6 +1931,7 @@ end subroutine ESMF_GridConvertIndex
                 return 
           endif
        endif
+#endif
 
        ! Check distgridToArrayMap
        if (size(distgridToArrayMap) < dimCount) then
@@ -3096,7 +3100,7 @@ end subroutine ESMF_GridConvertIndex
 ! The index of each array element corresponds to a DE number.  The 
 ! array value at the index is the number of grid cells on the DE in 
 ! that dimension.  The dimCount of the grid is equal to the number of 
-! countsPerDEDim<> arrays that are specified. 
+! countsPerDEDim arrays that are specified. 
 !
 ! Section \ref{example:2DIrregUniGrid} shows an example
 ! of using this method to create a 2D Grid with uniformly spaced 
@@ -12365,7 +12369,7 @@ endif
 ! The index of each array element corresponds to a DE number.  The 
 ! array value at the index is the number of grid cells on the DE in 
 ! that dimension.  The dimCount of the grid is equal to the number of 
-! countsPerDEDim<> arrays that are specified. 
+! countsPerDEDim arrays that are specified. 
 !
 ! Section \ref{example:2DIrregUniGrid} shows an example
 ! of using this method to create a 2D Grid with uniformly spaced 
