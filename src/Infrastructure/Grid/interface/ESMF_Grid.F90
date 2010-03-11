@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.144.2.1 2010/02/05 19:57:27 svasquez Exp $'
+      '$Id: ESMF_Grid.F90,v 1.144.2.2 2010/03/11 17:54:44 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1913,6 +1913,8 @@ end subroutine ESMF_GridConvertIndex
           enddo
        endif
 
+      ! Remove this check to allow Fields with no Grid dimensions
+#if 0
        ! Make sure gridToFieldMap contains at least one non-zero entry
        if (present(gridToFieldMap)) then
           contains_nonzero=.false.
@@ -1928,6 +1930,7 @@ end subroutine ESMF_GridConvertIndex
                 return 
           endif
        endif
+#endif
 
        ! Check distgridToArrayMap
        if (size(distgridToArrayMap) < dimCount) then
