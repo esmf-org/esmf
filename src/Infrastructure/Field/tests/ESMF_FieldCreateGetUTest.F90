@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.60 2010/03/11 18:30:19 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.61 2010/03/11 18:39:52 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -6932,7 +6932,7 @@ contains
         integer, intent(out)                :: rc
 
         real, allocatable                   :: fa(:)
-        type(ESMF_Field)                    :: field
+        type(ESMF_Field)                    :: field, field1
         type(ESMF_DistGrid)                 :: distgrid
         type(ESMF_Grid)                     :: grid
         integer                             :: localrc
@@ -6961,6 +6961,16 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
+        field1 = ESMF_FieldCreate(grid, fa, gridToFieldMap=(/0,0/), indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldDestroy(field1, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -6985,7 +6995,7 @@ contains
         integer, intent(out)                :: rc
 
         real, pointer                       :: fa(:)
-        type(ESMF_Field)                    :: field
+        type(ESMF_Field)                    :: field, field1
         type(ESMF_DistGrid)                 :: distgrid
         type(ESMF_Grid)                     :: grid
         integer                             :: localrc
@@ -7010,6 +7020,16 @@ contains
 
         allocate(fa(4))
         call ESMF_FieldSetCommit(field, grid, fa, gridToFieldMap=(/0,0/), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        field1 = ESMF_FieldCreate(grid, fa, gridToFieldMap=(/0,0/), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldDestroy(field1, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
