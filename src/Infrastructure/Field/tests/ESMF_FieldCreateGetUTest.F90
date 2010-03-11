@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.59 2010/03/11 14:15:41 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.60 2010/03/11 18:30:19 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -1962,9 +1962,17 @@
         !------------------------------------------------------------------------
         !NEX_UTest_Multi_Proc_Only
         ! Creating a field where gridToFieldMap are all 0 #2896114
-        call test_allrep(rc)
+        call test_allrep1(rc)
         write(failMsg, *) ""
-        write(name, *) "Testing field create when all entries in map are 0"
+        write(name, *) "Testing field create when all entries in map are 0 allocatable"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !NEX_UTest_Multi_Proc_Only
+        ! Creating a field where gridToFieldMap are all 0 #2896114
+        call test_allrep2(rc)
+        write(failMsg, *) ""
+        write(name, *) "Testing field create when all entries in map are 0 pointer"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     call ESMF_TestEnd(result, ESMF_SRCLINE)
@@ -6919,7 +6927,7 @@ contains
     end subroutine test_eric_klusek
 
 !----------------------------------------------------------------------------------
-    subroutine test_allrep(rc)
+    subroutine test_allrep1(rc)
 
         integer, intent(out)                :: rc
 
@@ -6970,7 +6978,60 @@ contains
 
         deallocate(fa)
 
-    end subroutine test_allrep
+    end subroutine test_allrep1
+!----------------------------------------------------------------------------------
+    subroutine test_allrep2(rc)
+
+        integer, intent(out)                :: rc
+
+        real, pointer                       :: fa(:)
+        type(ESMF_Field)                    :: field
+        type(ESMF_DistGrid)                 :: distgrid
+        type(ESMF_Grid)                     :: grid
+        integer                             :: localrc
+
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+
+        distgrid = ESMF_DistGridCreate(minIndex=(/1, 1/), maxIndex=(/16, 16/), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        
+        grid = ESMF_GridCreate(distgrid=distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        field = ESMF_FieldCreateEmpty(name="field", rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        allocate(fa(4))
+        call ESMF_FieldSetCommit(field, grid, fa, gridToFieldMap=(/0,0/), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        deallocate(fa)
+
+    end subroutine test_allrep2
 
 !----------------------------------------------------------------------------------
     subroutine test_uninit_array(rc)
