@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.23 2010/01/07 18:21:27 svasquez Exp $
+# $Id: build_rules.mk,v 1.24 2010/03/11 20:04:48 theurich Exp $
 #
 # Linux.g95.default
 #
@@ -182,6 +182,12 @@ ESMF_F90COMPILEFREENOCPP = -ffree-form
 ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
 
 ############################################################
+# Set rpath syntax
+#
+ESMF_F90RPATHPREFIX         = -Wl,-rpath,
+ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
+
+############################################################
 # Determine where gcc's libraries are located
 #
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.so)
@@ -189,7 +195,7 @@ ifeq ($(ESMF_LIBSTDCXX),libstdc++.so)
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
 endif
 ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
-ESMF_F90LINKRPATHS += -Wl,-rpath,$(dir $(ESMF_LIBSTDCXX))
+ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(dir $(ESMF_LIBSTDCXX))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end

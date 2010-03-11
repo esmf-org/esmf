@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.11 2009/11/05 23:29:59 w6ws Exp $
+# $Id: build_rules.mk,v 1.12 2010/03/11 20:04:34 theurich Exp $
 #
 # Cygwin.gfortran.default
 #
@@ -142,12 +142,18 @@ ESMF_F90COMPILEFREENOCPP = -ffree-form
 ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
 
 ############################################################
+# Set rpath syntax
+#
+ESMF_F90RPATHPREFIX         = -Wl,-rpath,
+ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
+
+############################################################
 # Determine where gcc's libraries are located
 #
 ESMF_F90LINKPATHS += \
   -L$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a))
 ESMF_F90LINKRPATHS += \
-  -Wl,-rpath,$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a))
+  $(ESMF_F90RPATHPREFIX)$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a))
 
 ############################################################
 # Determine where gfortran's libraries are located
@@ -155,7 +161,7 @@ ESMF_F90LINKRPATHS += \
 ESMF_CXXLINKPATHS += \
   -L$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.a))
 ESMF_CXXLINKRPATHS += \
-  -Wl,-rpath,$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.a))
+  $(ESMF_CXXRPATHPREFIX)$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.a))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end

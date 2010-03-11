@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.30 2010/01/05 21:35:07 svasquez Exp $
+# $Id: build_rules.mk,v 1.31 2010/03/11 20:04:56 theurich Exp $
 #
 # Linux.lahey.default
 #
@@ -111,17 +111,23 @@ ESMF_F90COMPILEFREENOCPP = --nfix
 ESMF_F90COMPILEFIXCPP    = --fix -Cpp
 
 ############################################################
+# Set rpath syntax
+#
+ESMF_F90RPATHPREFIX         = -Wl,-rpath,
+ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
+
+############################################################
 # Determine where lf95's libraries are located
 #
 ESMF_CXXLINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.lf95 "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)"))
-ESMF_RPATHPREFIXFIXED := $(ESMF_RPATHPREFIX)
+ESMF_RPATHPREFIXFIXED := $(ESMF_CXXRPATHPREFIX)
 ESMF_CXXLINKRPATHS += $(addprefix $(ESMF_RPATHPREFIXFIXED), $(shell $(ESMF_DIR)/scripts/libpath.lf95 "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)"))
 
 ############################################################
 # Determine where lf95's libraries are located as to find it during runtime
 #
 ESMF_F90LINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.lf95 "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)"))
-ESMF_RPATHPREFIXFIXED := $(ESMF_RPATHPREFIX)
+ESMF_RPATHPREFIXFIXED := $(ESMF_F90RPATHPREFIX)
 ESMF_F90LINKRPATHS += $(addprefix $(ESMF_RPATHPREFIXFIXED), $(shell $(ESMF_DIR)/scripts/libpath.lf95 "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)"))
 
 ############################################################

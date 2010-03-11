@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.9 2009/11/05 23:28:34 w6ws Exp $
+# $Id: build_rules.mk,v 1.10 2010/03/11 20:04:27 theurich Exp $
 #
 # Cygwin.g95.default
 #
@@ -130,12 +130,18 @@ ESMF_F90COMPILEFREENOCPP = -ffree-form
 ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
 
 ############################################################
+# Set rpath syntax
+#
+ESMF_F90RPATHPREFIX         = -Wl,-rpath,
+ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
+
+############################################################
 # Determine where gcc's libraries are located
 #
 ESMF_F90LINKPATHS += \
   -L$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a))
 ESMF_F90LINKRPATHS += \
-  -Wl,-rpath,$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a))
+  $(ESMF_F90RPATHPREFIX)$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a))
 
 ############################################################
 # Determine where g95's libraries are located
@@ -143,7 +149,7 @@ ESMF_F90LINKRPATHS += \
 ESMF_CXXLINKPATHS += \
   -L$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a))
 ESMF_CXXLINKRPATHS += \
-  -Wl,-rpath,$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a))
+  $(ESMF_CXXRPATHPREFIX)$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end

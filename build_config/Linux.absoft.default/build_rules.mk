@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.36 2010/03/08 23:31:15 svasquez Exp $
+# $Id: build_rules.mk,v 1.37 2010/03/11 20:04:48 theurich Exp $
 #
 # Linux.absoft.default
 #
@@ -163,10 +163,16 @@ ESMF_F90COMPILEFREENOCPP = -ffree
 ESMF_F90COMPILEFIXCPP    = -ffixed
 
 ############################################################
+# Set rpath syntax
+#
+ESMF_F90RPATHPREFIX         = -Wl,-rpath,
+ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
+
+############################################################
 # Determine where absoft f90's libraries are located
 #
 ESMF_CXXLINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.absoft $(ESMF_F90COMPILER)))
-ESMF_RPATHPREFIXFIXED := $(ESMF_RPATHPREFIX)
+ESMF_RPATHPREFIXFIXED := $(ESMF_CXXRPATHPREFIX)
 ESMF_CXXLINKRPATHS += $(addprefix $(ESMF_RPATHPREFIXFIXED), $(shell $(ESMF_DIR)/scripts/libpath.absoft $(ESMF_F90COMPILER)))
 
 ############################################################

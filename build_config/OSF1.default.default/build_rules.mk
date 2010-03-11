@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.33 2008/07/23 04:51:55 theurich Exp $
+# $Id: build_rules.mk,v 1.34 2010/03/11 20:04:56 theurich Exp $
 #
 # OSF1.default.default
 #
@@ -78,9 +78,10 @@ ESMF_F90COMPILEFIXCPP    = -cpp -extend_source
 ESMF_F90COMPILEFIXNOCPP  = -extend_source
 
 ############################################################
-# Prefix for rpath option
+# Set rpath syntax
 #
-ESMF_RPATHPREFIX      = -rpath 
+ESMF_F90RPATHPREFIX         = -rpath
+ESMF_CXXRPATHPREFIX         = -rpath
 
 ############################################################
 # Determine where f90's libraries are located

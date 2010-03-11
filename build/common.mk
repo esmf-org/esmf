@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.286 2010/03/10 05:12:21 w6ws Exp $
+#  $Id: common.mk,v 1.287 2010/03/11 20:03:45 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -566,12 +566,9 @@ ESMF_MV                     = mv -f
 ESMF_WC                     = wc 
 ESMF_GREPV                  = grep -v
 
-ifeq ($(ESMF_COMPILER),nag)
-ESMF_F90RPATHPREFIX         = -Wl,-Wl,,-rpath,,
-else
-ESMF_F90RPATHPREFIX         = -Wl,-rpath,
-endif
-ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
+# dummies here, expected to be overwritten in platform files if used
+ESMF_F90RPATHPREFIX         = -L
+ESMF_CXXRPATHPREFIX         = -L
 
 ESMF_F90OPTFLAG_X           =
 ESMF_CXXOPTFLAG_X           =

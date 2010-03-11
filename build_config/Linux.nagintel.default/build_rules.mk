@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.10 2009/06/04 00:11:20 theurich Exp $
+# $Id: build_rules.mk,v 1.11 2010/03/11 20:04:56 theurich Exp $
 #
 # Linux.nagintel.default
 #
@@ -108,10 +108,10 @@ ESMF_F90COMPILEFREENOCPP = -free
 ESMF_F90COMPILEFIXCPP    = -fixed -fpp
 
 ############################################################
-# Blank out variables to prevent rpath encoding
+# Set rpath syntax
 #
-ESMF_F90LINKRPATHS      =
-ESMF_CXXLINKRPATHS      =
+ESMF_F90RPATHPREFIX         = -Wl,-Wl,,-rpath,,
+ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
 
 ############################################################
 # Determine where icpc's libraries are located

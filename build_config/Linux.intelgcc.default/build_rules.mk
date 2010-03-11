@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.17 2009/05/29 19:32:26 theurich Exp $
+# $Id: build_rules.mk,v 1.18 2010/03/11 20:04:52 theurich Exp $
 #
 # Linux.intelgcc.default
 #
@@ -163,11 +163,17 @@ ESMF_F90COMPILEFREENOCPP = -fpp0 -FR
 ESMF_F90COMPILEFIXCPP    = -fpp
 
 ############################################################
+# Set rpath syntax
+#
+ESMF_F90RPATHPREFIX         = -Wl,-rpath,
+ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
+
+############################################################
 # Determine where ifort's libraries are located
 #
 ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
 ESMF_CXXLINKRPATHS += \
-  $(ESMF_RPATHPREFIX)$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
+  $(ESMF_CXXRPATHPREFIX)$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
 
 ############################################################
 # Link against GCC's stdc++ library (because g++ is used)

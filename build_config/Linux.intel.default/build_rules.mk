@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.84 2009/12/30 02:34:51 svasquez Exp $
+# $Id: build_rules.mk,v 1.85 2010/03/11 20:04:48 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -171,11 +171,17 @@ ESMF_OPENMP_F90LINKOPTS    += -openmp
 ESMF_OPENMP_CXXLINKOPTS    += -openmp
 
 ############################################################
+# Set rpath syntax
+#
+ESMF_F90RPATHPREFIX         = -Wl,-rpath,
+ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
+
+############################################################
 # Determine where ifort's libraries are located
 #
 ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
 ESMF_CXXLINKRPATHS += \
-  $(ESMF_RPATHPREFIX)$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
+  $(ESMF_CXXRPATHPREFIX)$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
 
 ############################################################
 # Determine where icpc's libraries are located
