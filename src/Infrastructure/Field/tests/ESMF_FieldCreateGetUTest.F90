@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.57.2.1 2010/02/05 19:56:13 svasquez Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.57.2.2 2010/03/11 18:15:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -1958,6 +1958,14 @@
         write(failMsg, *) ""
         write(name, *) "Testing field create from uninit array"
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !NEX_UTest_Multi_Proc_Only
+        ! Creating a field where gridToFieldMap are all 0 #2896114
+        call test_allrep(rc)
+        write(failMsg, *) ""
+        write(name, *) "Testing field create when all entries in map are 0"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
@@ -6909,6 +6917,60 @@ contains
             ESMF_CONTEXT, rc)) return
 
     end subroutine test_eric_klusek
+
+!----------------------------------------------------------------------------------
+    subroutine test_allrep(rc)
+
+        integer, intent(out)                :: rc
+
+        real, allocatable                   :: fa(:)
+        type(ESMF_Field)                    :: field
+        type(ESMF_DistGrid)                 :: distgrid
+        type(ESMF_Grid)                     :: grid
+        integer                             :: localrc
+
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+
+        distgrid = ESMF_DistGridCreate(minIndex=(/1, 1/), maxIndex=(/16, 16/), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        
+        grid = ESMF_GridCreate(distgrid=distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        field = ESMF_FieldCreateEmpty(name="field", rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        allocate(fa(4))
+        call ESMF_FieldSetCommit(field, grid, fa, gridToFieldMap=(/0,0/), indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_DistGridDestroy(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        deallocate(fa)
+
+    end subroutine test_allrep
 
 !----------------------------------------------------------------------------------
     subroutine test_uninit_array(rc)
