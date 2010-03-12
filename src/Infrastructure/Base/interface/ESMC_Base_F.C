@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.78 2010/03/04 18:57:42 svasquez Exp $
+// $Id: ESMC_Base_F.C,v 1.79 2010/03/12 21:16:48 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.78 2010/03/04 18:57:42 svasquez Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.79 2010/03/12 21:16:48 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -184,6 +184,7 @@ extern "C" {
   }
 
   *rc = (*base)->ESMC_Print(copts);
+  fflush (stdout);
 
   if (copts)
       delete [] copts;

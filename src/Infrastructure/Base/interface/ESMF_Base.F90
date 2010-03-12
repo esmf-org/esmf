@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.143 2010/03/04 18:57:42 svasquez Exp $
+! $Id: ESMF_Base.F90,v 1.144 2010/03/12 21:17:05 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -126,7 +126,7 @@ module ESMF_BaseMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.143 2010/03/04 18:57:42 svasquez Exp $'
+               '$Id: ESMF_Base.F90,v 1.144 2010/03/12 21:17:05 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -567,12 +567,6 @@ module ESMF_BaseMod
 ! !DESCRIPTION:
 !     Interface to call through to C++ and print base object values. \\
 !
-!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
-!     On some platforms/compilers there is a potential issue with interleaving
-!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
-!     the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-!     may be used on unit 6 to get coherent output.  \\
-!
 !     The arguments are:
 !     \begin{description}
 !     \item[base]
@@ -600,6 +594,10 @@ module ESMF_BaseMod
     else
         opts = ''
     endif
+
+    call ESMF_IOUnitFlush (unit=ESMF_IOstdout, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     call c_ESMC_BasePrint(base , opts, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
