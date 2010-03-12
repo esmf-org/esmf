@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.181 2010/03/04 18:57:46 svasquez Exp $
+! $Id: ESMF_State.F90,v 1.182 2010/03/12 01:31:18 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -51,6 +51,7 @@ module ESMF_StateMod
       use ESMF_StateVaMod
       use ESMF_InitMacrosMod
       use ESMF_IO_NetCDFMod
+      use ESMF_UtilMod
       
       implicit none
       
@@ -94,7 +95,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.181 2010/03/04 18:57:46 svasquez Exp $'
+      '$Id: ESMF_State.F90,v 1.182 2010/03/12 01:31:18 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -3327,7 +3328,7 @@ module ESMF_StateMod
 !     \item[{[options]}]
 !       Print options:
 !         " ", or "brief" - print names and types of the objects within the state
-!         "deep" - print contents of each object within the state
+!         "deep" - recursively print names and types of objects within nested states
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -3339,30 +3340,33 @@ module ESMF_StateMod
 ! TODO: this needs more code added to be complete
 !
        character (len=6) :: localopts
-       type(ESMF_StateClass), pointer :: sp
-       type(ESMF_StateItem), pointer :: dp
-       character(len=ESMF_MAXSTR) :: name
-       character (len=1024) :: outbuf
-       integer :: localrc                          ! local error status
-       integer :: i
-       character(len=ESMF_MAXSTR) :: msgbuf
+       integer :: localrc                    ! local error status
+       logical :: deepflag                   ! Print nested states flag
        
-       ! print option is not implemented, but it has to pass to c_ESMC_BasePrint()
+       ! Initialize return code; assume failure until success is certain
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+       ! check input variables
+       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+       ! Validate options arg
        localopts = "brief"
        if (present (options)) then
          if (options /= " ")  &
            localopts = options
        end if
-
-       ! Initialize return code; assume failure until success is certain
-       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-        ! check input variables
-        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-
-
-       ! TODO: Add code here
-       ! print num of states, state type, etc
+       
+       call ESMF_StringLowerCase (localopts)
+       select case (localopts)
+       case ("brief")
+           deepflag = .false.
+       case ("deep")
+           deepflag = .true.
+       case default
+           write (ESMF_IOstderr,*) "ESMF_StatePrint: Illegal options arg: ", &
+	       trim (options)
+	   return 
+       end select
 
        !nsc write(msgbuf,*) "StatePrint: "  
        !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
@@ -3371,25 +3375,48 @@ module ESMF_StateMod
            !nsc call ESMF_LogWrite("Uninitialized or already destroyed State", &
            !nsc                   ESMF_LOG_INFO)
            write (ESMF_IOstdout,*) "Uninitialized or already destroyed State"
-           rc = ESMF_SUCCESS
+           if (present (rc)) rc = ESMF_SUCCESS
            return
        endif
        if (state%statep%st .eq. ESMF_STATE_INVALID) then
            !nsc call ESMF_LogWrite("Uninitialized or already destroyed State", &
            !nsc                   ESMF_LOG_INFO)
            write (ESMF_IOstdout,*) "Uninitialized or already destroyed State"
-           rc = ESMF_SUCCESS
+           if (present (rc)) rc = ESMF_SUCCESS
            return
        endif
 
-       sp => state%statep
+       call ESMF_StatePrintWorker (state%statep, level=0)
+
+       ! Set return values 
+       if (present(rc)) rc = ESMF_SUCCESS
+       
+   contains
+
+     recursive subroutine ESMF_StatePrintWorker (sp, level)
+       type(ESMF_StateClass), pointer :: sp
+       integer, intent(in) :: level
+
+       type(ESMF_StateItem) , pointer :: dp
+
+       character(len=2*level+1) :: nestr
+       character(len=ESMF_MAXSTR) :: name
+       character(len=ESMF_MAXSTR) :: msgbuf
+       character(len=1024) :: outbuf
+
+       integer :: i
+
+       nestr = repeat("->", level) // " "
+
+       ! TODO: Add code here
+       ! print num of states, state type, etc
 
        call c_ESMC_GetName(sp%base, name, localrc)
        !call ESMF_BasePrint(sp%base, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-       write (ESMF_IOstdout,*) "  State name = ", trim(name)
+       write (ESMF_IOstdout,*) nestr, "State name = ", trim(name)
        if (sp%st == ESMF_STATE_IMPORT) then
          msgbuf = " Import State"
        else if (sp%st == ESMF_STATE_EXPORT) then
@@ -3399,7 +3426,7 @@ module ESMF_StateMod
        else if (sp%st == ESMF_STATE_INVALID) then
          call ESMF_LogWrite("Uninitialized or already destroyed State", &
                                 ESMF_LOG_INFO)
-         rc = ESMF_SUCCESS
+         if (present (rc)) rc = ESMF_SUCCESS
          return
        else
          call ESMF_LogWrite ("error: unknown state",  &
@@ -3407,24 +3434,24 @@ module ESMF_StateMod
        end if
 
        !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-       write (ESMF_IOstdout,*) trim(msgbuf)
+       write (ESMF_IOstdout,*) nestr, trim(msgbuf)
 
        !pli print attribute name/value pairs using c_esmc_baseprint() 
-       call c_ESMC_BasePrint(sp%base, localopts, localrc)
+       call c_ESMC_BasePrint(sp%base, "brief", localrc)
        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
        
        !nsc write(msgbuf, *) "  Number of members: ", sp%datacount
        !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-       write (ESMF_IOstdout,*) "  Number of members: ", sp%datacount
+       write (ESMF_IOstdout,*) nestr, "Number of members: ", sp%datacount
       
        do i=1, sp%datacount
          dp => sp%datalist(i)
 
          !nsc write(msgbuf, *) "  Item ", i, ":"
          !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-         write (ESMF_IOstdout,*) "  Item ", i, ":"
+         write (ESMF_IOstdout,*) nestr, "Item ", i, ":"
          outbuf = "    Name= " // trim(dp%namep) // ", "
 
          if      (dp%otype%ot == ESMF_STATEITEM_FIELDBUNDLE%ot) then
@@ -3453,24 +3480,22 @@ module ESMF_StateMod
          end select
 
         !nsc call ESMF_LogWrite(outbuf, ESMF_LOG_INFO)
-        write (ESMF_IOstdout,*) trim(outbuf)
+        write (ESMF_IOstdout,*) nestr, trim(outbuf)
 
-        ! TODO: finish printing more info here
-        write (ESMF_IOstdout,*) "ready flag = ", ", valid flag = " 
-        !type(ESMF_ReadyFlag) :: ready
-        !type(ESMF_ValidFlag) :: valid
+        write (ESMF_IOstdout,*) nestr, "proxy flag = ", dp%proxyFlag
 
         !type(ESMF_DataHolder), pointer :: datap
 
         !write(msgbuf, *) trim(outbuf)
 
+         if (deepflag .and. dp%otype%ot == ESMF_STATEITEM_STATE%ot) then
+             call ESMF_StatePrintWorker (dp%datap%spp, level=level+1)
+         end if
        enddo
 
+       end subroutine ESMF_StatePrintWorker
 
-       ! Set return values
-       if (present(rc)) rc = ESMF_SUCCESS
-
-       end subroutine ESMF_StatePrint
+     end subroutine ESMF_StatePrint
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
