@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.40.2.1 2010/02/05 19:57:50 svasquez Exp $
+// $Id: ESMC_GridToMesh.C,v 1.40.2.2 2010/03/12 04:35:15 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -102,7 +102,11 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
  // *** Grid error checking here ***
  if (!grid.hasCoordStaggerLoc(staggerLoc))
    Throw() << "Grid being used in Regrid call does not contain coordinates at appropriate staggerloc";
- 
+
+ if (grid.getIndexFlag() != ESMF_INDEX_GLOBAL) {
+   Throw() << "Currently the Grid must be created with indexflag=ESMF_INDEX_GLOBAL to use this functionality";
+  }
+
  
  // *** Set some meta-data ***
  // We set the topological dimension of the mesh (quad = 2, hex = 3, etc...)

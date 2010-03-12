@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.24.2.2 2010/03/10 06:33:08 oehmke Exp $
+! $Id: ESMF_LocStream.F90,v 1.24.2.3 2010/03/12 04:35:15 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -130,7 +130,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.24.2.2 2010/03/10 06:33:08 oehmke Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.24.2.3 2010/03/12 04:35:15 oehmke Exp $'
 
 !==============================================================================
 !
@@ -804,6 +804,8 @@ contains
 !          because this is the stagger location which fully contains the cell. A Grid must have coordinate
 !          data in this stagger location to be used in this subroutine. For a 2D Grid this stagger location
 !          is ESMF\_STAGGERLOC\_CORNER for a 3D Grid this stagger location is ESMF\_STAGGERLOC\_CORNER\_VFACE. 
+!          Note that currently the background Grid also needs to have been created with indexflag=ESMF\_INDEX\_GLOBAL
+!          to be usable here. 
 !     \item [{[maskValues]}]
 !           List of values that indicate a background grid point should be masked out. 
 !           If not specified, no masking will occur. 
@@ -839,7 +841,7 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,background,rc)
 
 
-      ! Get Grid dimension
+      ! Get Grid dimension and index flag
       call ESMF_GridGet(background, dimCount=gridDimCount, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
