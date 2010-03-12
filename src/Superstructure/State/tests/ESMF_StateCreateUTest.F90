@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.20 2010/03/04 18:57:46 svasquez Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.21 2010/03/12 01:34:17 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -49,9 +49,8 @@ end module
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.20 2010/03/04 18:57:46 svasquez Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.21 2010/03/12 01:34:17 w6ws Exp $'
 !------------------------------------------------------------------------------
-
 !   ! Local variables
     integer :: rc
     character(ESMF_MAXSTR) :: sname
@@ -399,6 +398,14 @@ end module
       call ESMF_StateAdd(state5, state2, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Add a second nested State into another State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Print the nested State
+      call ESMF_StatePrint (state5, options='deep', rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing a State with nesting"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
