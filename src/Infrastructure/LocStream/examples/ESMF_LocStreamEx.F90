@@ -33,11 +33,17 @@ program ESMF_LocStreamEx
 
       real(ESMF_KIND_R8), pointer :: lat(:), lon(:), temperature(:)
       type(ESMF_Field)            :: field_temperature
-    
-      type(ESMF_LocStream) :: locstream
+      type(ESMF_LocStream) :: locstream, newlocstream
       integer :: localPet, petCount
       integer,parameter :: numLocationsOnThisPet=20
       integer :: i
+      integer,parameter :: GridLatSize=20
+      integer,parameter :: GridLonSize=20
+      integer :: i1,i2
+      real(ESMF_KIND_R8), pointer :: fptrLonC(:,:)
+      real(ESMF_KIND_R8), pointer :: fptrLatC(:,:)
+      integer :: clbnd(2),cubnd(2)
+
 
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
@@ -47,7 +53,7 @@ program ESMF_LocStreamEx
 
 #if 1
 !BOE
-!\subsubsection{Creating A LocStream Employing User Allocated Memory}
+!\subsubsection{Creating a LocStream Employing User Allocated Memory}
 !
 ! The following is an example of creating a LocStream object.
 ! After creation, key data is added, and a Field is created to hold data
@@ -131,7 +137,7 @@ program ESMF_LocStreamEx
    deallocate(temperature)
 
 !BOE
-!\subsubsection{Creating A LocStream Employing Internally Allocated Memory}
+!\subsubsection{Creating a LocStream Employing Internally Allocated Memory}
 !
 ! The following is an example of creating a LocStream object.
 ! After creation, key data is internally allocated,
@@ -223,6 +229,140 @@ program ESMF_LocStreamEx
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
    deallocate(temperature)
+
+
+
+!BOE
+!\subsubsection{Creating a LocStream from a Background Grid}
+!
+! The following is an example of creating a LocStream object from another LocStream object 
+! using a background Grid. The new LocStream contains the data present in the old LocStream, 
+! but is redistributed so that entries with a given set of coordinates are on the same PET 
+! as the piece of the Grid which contains those coordinates. 
+!
+!EOE
+
+
+!BOC
+   !-------------------------------------------------------------------
+   ! Create the LocStream:  Allocate space for the LocStream object, 
+   ! define the number and distribution of the locations. 
+   !-------------------------------------------------------------------
+   locstream=ESMF_LocStreamCreate(name="Equatorial Measurements", &
+                                  localCount=numLocationsOnThisPet, &
+                                  rc=rc)
+   !-------------------------------------------------------------------
+   ! Add key data (internally allocating memory).
+   !-------------------------------------------------------------------
+   call ESMF_LocStreamAddKey(locstream,                    &
+                             keyName="Lat",                &
+                             KeyTypeKind=ESMF_TYPEKIND_R8, &
+                             keyUnits="Degrees",           &
+                             keyLongName="Latitude", rc=rc)
+
+   call ESMF_LocStreamAddKey(locstream,                    &
+                             keyName="Lon",                &
+                             KeyTypeKind=ESMF_TYPEKIND_R8, &
+                             keyUnits="Degrees",           &
+                             keyLongName="Longitude", rc=rc)
+
+
+   !-------------------------------------------------------------------
+   ! Get key data. 
+   !-------------------------------------------------------------------
+   call ESMF_LocStreamGetKey(locstream,                    &
+                             localDE=0,                    &
+                             keyName="Lat",                &
+                             farray=lat,                   &
+                             rc=rc)
+
+   call ESMF_LocStreamGetKey(locstream,                    &
+                             localDE=0,                    &
+                             keyName="Lon",                &
+                             farray=lon,                   &
+                             rc=rc)
+
+   !-------------------------------------------------------------------
+   ! Set the latitude and longitude coordinates of the points in the 
+   ! LocStream. Each PET contains points scattered across the globe. 
+   !-------------------------------------------------------------------
+   do i=1,numLocationsOnThisPet
+      lon(i)=0.5+REAL(i-1)*360.0/numLocationsOnThisPet
+      lat(i)=0.0
+   enddo
+
+   !-------------------------------------------------------------------
+   ! Create a Grid to use as the background. The Grid is 
+   ! GridLonSizexGridLatSize with the default distribution 
+   ! (The first dimension split across the PETs). The coordinate range
+   ! is  0 to 360 in longitude and -90 to 90 it latitude. Note that we 
+   ! use indexflag=ESMF_INDEX_GLOBAL for the Grid creation. At this time 
+   ! this is required for a Grid to be usable as a background Grid.
+   !-------------------------------------------------------------------
+   grid=ESMF_GridCreateShapeTile(maxIndex=(/GridLonSize,GridLatSize/),          &
+                                 indexflag=ESMF_INDEX_GLOBAL, &
+                                 rc=rc)
+
+   !-------------------------------------------------------------------
+   ! Allocate the corner stagger location to put coordinates in 
+   ! (The corner stagger must be used for the Grid to be usable as a
+   !  background Grid)
+   !-------------------------------------------------------------------
+   call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
+
+
+   !-------------------------------------------------------------------
+   ! Set Coordinates for Grid.
+   !-------------------------------------------------------------------
+   call ESMF_GridGetCoord(grid, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER,   &
+                          coordDim=1,                                           &
+                          computationalLBound=clbnd, computationalUBound=cubnd, & 
+                          fptr=fptrLonC, rc=rc)
+
+   call ESMF_GridGetCoord(grid, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
+                          coordDim=2,                                         &
+                          fptr=fptrLatC, rc=rc)
+
+   do i1=clbnd(1),cubnd(1)
+   do i2=clbnd(2),cubnd(2)
+      ! Set Grid longitude coordinates as 0 to 360
+      fptrLonC(i1,i2) = REAL(i1-1)*360.0/REAL(GridLonSize)
+
+      ! Set Grid latitude coordinates as -90 to 90
+      fptrLatC(i1,i2) = -90. + REAL(i2-1)*180.0/REAL(GridLatSize) + &
+                                      0.5*180.0/REAL(GridLatSize)
+   enddo
+   enddo
+
+
+   !-------------------------------------------------------------------
+   ! Create the location stream on the background Grid using the 
+   ! "Lon" and "Lat" keys as the coordinates for the entries in 
+   ! the LocStream. 
+   !-------------------------------------------------------------------
+   newLocstream=ESMF_LocStreamCreate(locstream, coordKeyNames="Lon:Lat", &
+                  background=grid, rc=rc)
+   if (rc /= ESMF_SUCCESS) go to 10
+
+   !-------------------------------------------------------------------
+   ! A Field can now be created on newLocStream and 
+   ! ESMF_FieldRedist() can be used to move data between Fields build 
+   ! on locstream and Fields built on newLocStream.
+   !-------------------------------------------------------------------
+
+
+!EOC
+   !-------------------------------------------------------------------
+   ! Clean up to prepare for the next example.
+   !-------------------------------------------------------------------
+   call ESMF_LocStreamDestroy(locstream, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+   call ESMF_LocStreamDestroy(newLocstream, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+   call ESMF_GridDestroy(grid, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 #endif
 

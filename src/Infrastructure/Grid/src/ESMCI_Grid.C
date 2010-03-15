@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.104 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMCI_Grid.C,v 1.105 2010/03/15 17:05:33 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.104 2010/03/04 18:57:44 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.105 2010/03/15 17:05:33 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -7795,6 +7795,287 @@ GridCellIter::~GridCellIter(
 }
 //-----------------------------------------------------------------------------
 
+
+
+#if 0
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::match()"
+//BOPI
+// !IROUTINE:  ESMCI::Grid::match
+//
+// !INTERFACE:
+bool Grid::match(
+//
+// !RETURN VALUE:
+//    bool according to match
+//
+// !ARGUMENTS:
+//
+  Grid *grid1,                          // in
+  Grid *grid2,                          // in
+  int *rc                               // (out) return code
+  ){
+//
+//
+// !DESCRIPTION:
+//    Determine if grid1 and grid2 match.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // return with errors for NULL pointer
+  if (grid1 == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to Grid", rc);
+    return false;
+  }
+  if (grid2 == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to Grid", rc);
+    return false;
+  }
+  
+  // check if Grid pointers are identical
+  if (grid1 == grid2){
+    // pointers are identical -> nothing more to check
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return true;
+  }
+  
+
+  // Don't look into Grid proto, if the grids are both empty then consider them to match
+  // Reason: no public interface for partially setting a grid right now
+  
+  // Check status
+  if (grid1->status != grid2-> status) {
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return false;
+  }
+
+  // if we're less then ready then leave, because this is all the valid items in Grid
+  // (Note at this point grids status are equal)
+  if (grid1->status < ESMC_GRIDSTATUS_SHAPE_READY) {
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return false;
+  }
+
+  // Check decomp type
+  if (grid1->decompType != grid2->decompType) {
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return false;
+  }
+
+  // Check typekind
+  if (grid1->typekind != grid2->typekind) {
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return false;
+  }
+
+  // Is the following still necessary???
+
+  // Check distDimCount
+  if (grid1->distDimCount != grid2->distDimCount) {
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return false;
+  }
+
+  // Check distgridToGridMap
+  for (int i=0; i<grid1->distDimCount; i++) {
+    if (grid1->distgridToGridMap[i] != grid2->distgridToGridMap[i]) {
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return false;
+    }
+  }
+
+  // NOTE: Don't check undistributed bounds because they aren't supported anymore
+
+  // Check dimCount
+  if (grid1->dimCount != grid2->dimCount) {
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return false;
+  }
+
+  // Check Grid min/max
+  for (int i=0; i<grid1->dimCount; i++) {
+    if (grid1->minIndex[i] != grid2->minIndex[i]) {
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return false;
+    }
+
+    if (grid1->maxIndex[i] != grid2->maxIndex[i]) {
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return false;
+    }
+  }
+
+
+  // DON'T CHECK TOPOLOGY INFO, BECAUSE IT'S NOT SET YET. ALSO THE setSphere() 
+  // WILL MESS THINGS UP
+  //  ESMC_GridConn *connL;  // size of Grid rank
+  //  ESMC_GridConn *connU;  // size of Grid rank
+
+
+  // DON'T CHECK GRIDALIGN, GRIDEDGEWIDTH INFO, INSTEAD CHECK STAGGERLOC PARTICUALR VERSIONS
+  // REASON: THESE ARE ONLY USED TO SET DEFAULTS, THE PARTICULAR STAGGER INFO IS WHAT IS ACTUALLY
+  //         USED IN THE GRID
+  //  int *gridEdgeLWidth; // size of grid dimCount
+  //  int *gridEdgeUWidth; // size of grid dimCount
+  //  int *gridAlign; // size of grid dimCount
+
+  
+  // Check Grid coordDimCount
+  for (int i=0; i<grid1->dimCount; i++) {
+    if (grid1->coordDimCount[i] != grid2->coordDimCount[i]) {
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return false;
+    }
+  }
+
+  // Check Grid coordDimCount
+  for (int i=0; i<grid1->dimCount; i++) {
+    for (int j=0; j<grid1->dimCount; j++) {
+      if (grid1->coordDimMap[i][j] != grid2->coordDimMap[i][j]) {
+	if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+	return matchResult;
+      }
+    }
+  }
+
+  // NOTE: SHOULD WE TRY TO MATCH THNGS THAT HAVE A DIFFERENT distgrid, but still match?????
+  //       NO! Distgrids need to match, otherwise ASMM won't be the same
+
+  // Index array for arbitrarily distributed grid
+  // Note equality of decompTypes is checked above, so can assume both are same
+  if (grid1->decompType == ESMC_GRID_ARBITRARY) {
+    if (grid1->localArbIndexCount != grid2->localArbIndexCount) {
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return false;
+    }
+
+    if (grid1->arbDim != grid2->arbDim) {
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return false;
+    }
+
+    // Check localArbIndex
+    for (int i=0; i<grid1->localArbIndexCount; i++) {
+      for (int j=0; j<grid1->distDimCount; j++) {
+	if (grid1->localArbIndex[i][j] != grid2->localArbIndex[i][j]) {
+	  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+	  return matchResult;
+	}
+      }
+    }
+  }
+
+  
+  // Check staggerLocCount
+  if (grid1->staggerLocCount != grid2->staggerLocCount) {
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return false;
+  }
+
+  // Don't check arrays right now because we want to support different factorizations
+  // Array ***coordArrayList; // size of coordArrayList = staggerLocCountxdimCount [staggerLoc][coord]
+
+  // Should we check this????
+  // int   **staggerMemLBoundList;     // hold memLBound info [staggerloc][dim]
+
+  // Check staggerAlignList
+  for (int i=0; i<grid1->staggerLocCount; i++) {
+    for (int j=0; j<grid1->dimCount; j++) {
+      if (grid1->staggerAlignList[i][j] != grid2->staggerAlignList[i][j]) {
+	if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+	return matchResult;
+      }
+    }
+  }
+
+  // Check staggerEdgeLWidthList
+  for (int i=0; i<grid1->staggerLocCount; i++) {
+    for (int j=0; j<grid1->dimCount; j++) {
+      if (grid1->staggerEdgeLWidthList[i][j] != grid2->staggerEdgeLWidthList[i][j]) {
+	if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+	return matchResult;
+      }
+    }
+  }
+
+  // Check staggerEdgeUWidthList
+  for (int i=0; i<grid1->staggerLocCount; i++) {
+    for (int j=0; j<grid1->dimCount; j++) {
+      if (grid1->staggerEdgeUWidthList[i][j] != grid2->staggerEdgeUWidthList[i][j]) {
+	if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+	return matchResult;
+      }
+    }
+  }
+
+  // Don't check this
+  //  bool  **coordDidIAllocList;        // if true, I allocated this Array [staggerloc][coord]
+
+
+  // TODO: SHOULD I CHECK THIS???
+  // Array ***itemArrayList; // holds item Arrays [staggerloc][GRIDITEM_COUNT]
+
+  // Don't check this:
+  // bool   **itemDidIAllocList; // holds item Arrays [staggerloc][GRIDITEM_COUNT]
+
+
+  // Don't check the below if we want to make match factorization agnostic
+#if 0 
+  // map grid dim to distgrid dim and grid bounds dim
+  bool *gridIsDist;  // size=dimCount [grid-dim]
+  int *gridMapDim;   // size=dimCount [grid-dim]
+
+  // map coord dim to distgrid dim and coord array bounds dim
+  bool **coordIsDist; // size=dimCountxdimCount [coord][coord-dim]
+  int **coordMapDim; // size=dimCountxdimCount [coord][coord-dim]
+#endif
+
+
+  // These should be implied by the distgrid
+#if 0
+  char *isDELBnd;
+  char *isDEUBnd;
+#endif
+  
+
+  // These shouldn't matter in match
+#if 0
+  bool destroyDistgrid;
+  bool destroyDELayout;
+#endif
+
+  // Check indexflag matching
+  if (grid1->indexflag != grid2->indexflag) {
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return false;
+  }
+
+
+  // Check main distgrid
+  if (!DistGrid::match(grid1->distgrid, grid2->distgrid)) {
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return false;
+  }
+
+  // STOPPED HERE
+
+  DistGrid **staggerDistgridList; // [staggerloc]
+
+
+  // return successfully indicating match
+  matchResult = true;
+  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+  return matchResult;
+}
+//-----------------------------------------------------------------------------
+#endif
 
 
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.66 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMCI_Grid.h,v 1.67 2010/03/15 17:05:25 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -108,8 +108,8 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   int dimCount;
 
   // global grid dimension
-  int *minIndex;
-  int *maxIndex;
+  int *minIndex;  // array is size of dimCount
+  int *maxIndex;  // array is size of dimCount
 
   // Topology information
   ESMC_GridConn *connL;  // size of Grid rank
@@ -286,6 +286,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
   bool isEmptyCoordArray(int staggerloc, int coord) {return (coordArrayList[staggerloc][coord]==ESMC_NULL_POINTER);}
 
+#if 0
+  bool Grid::match(Grid *grid1, Grid *grid2, int *rc);
+#endif
 
   // Use these when DistGrid topology stuff is in place
   // bool isLBnd(int localDE, int dim) {return (isDELBnd[localDE] & (0x1 << dim))?true:false;}

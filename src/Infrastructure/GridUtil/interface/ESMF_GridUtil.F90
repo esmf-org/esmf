@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.15 2010/03/04 18:57:44 svasquez Exp $
+! $Id: ESMF_GridUtil.F90,v 1.16 2010/03/15 17:05:43 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.15 2010/03/04 18:57:44 svasquez Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.16 2010/03/15 17:05:43 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -219,8 +219,21 @@ module ESMF_GridUtilMod
     integer :: localrc 
     type(ESMF_Pointer) :: theMesh
     type(ESMF_InterfaceInt) :: maskValuesArg
+    type(ESMF_IndexFlag) :: indexflag
 
     localrc = ESMF_SUCCESS
+
+    ! Error check Grid
+    call ESMF_GridGet(grid, indexflag=indexflag, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      	  ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Make sure indexflag is ESMF_INDEX_GLOBAL
+    if (.not. (indexflag .eq. ESMF_INDEX_GLOBAL)) then
+       if (ESMF_LogMsgFoundError(ESMF_RC_ARG_WRONG, &
+" - Currently the Grid must be created with indexflag=ESMF_INDEX_GLOBAL to use this functionality", &
+       ESMF_CONTEXT, rc)) return
+    endif 
 
     ! convert mask values 
     maskValuesArg = ESMF_InterfaceIntCreate(maskValues, rc=localrc)
