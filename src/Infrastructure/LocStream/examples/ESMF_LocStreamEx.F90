@@ -34,6 +34,7 @@ program ESMF_LocStreamEx
       real(ESMF_KIND_R8), pointer :: lat(:), lon(:), temperature(:)
       type(ESMF_Field)            :: field_temperature
       type(ESMF_LocStream) :: locstream, newlocstream
+      type(ESMF_Grid) :: grid
       integer :: localPet, petCount
       integer,parameter :: numLocationsOnThisPet=20
       integer :: i
