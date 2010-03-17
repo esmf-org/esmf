@@ -1,4 +1,4 @@
-// $Id: ESMCI_State.h,v 1.18 2010/03/04 18:57:46 svasquez Exp $
+// $Id: ESMCI_State.h,v 1.19 2010/03/17 05:54:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -37,6 +37,7 @@
 #include "ESMCI_Array.h"
 #include "ESMCI_Field.h"
 #include "ESMCI_F90Interface.h"
+#include "ESMC_IOSpec.h"
 
 
 //-----------------------------------------------------------------------------
@@ -82,6 +83,11 @@ namespace ESMCI{
 
     int getNumArrays(int* numArrays);
     vector<string>  getArrayNames();
+
+    int read(ESMC_Base* base, int fileNameLen, const char* fileName,
+             ESMC_IOFileFormat *fileFormat);
+    int write(ESMC_Base* base, int fileNameLen, const char* fileName,
+             ESMC_IOFileFormat *fileFormat);
 
   }; // class State
 };// namespace ESMCI

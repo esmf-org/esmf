@@ -1,4 +1,4 @@
-// $Id: ESMCI_State_F.C,v 1.7 2010/03/04 18:57:46 svasquez Exp $
+// $Id: ESMCI_State_F.C,v 1.8 2010/03/17 05:54:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -26,17 +26,18 @@
 
  // insert any higher level, 3rd party or system includes here
 #include "ESMC_Start.h"
-#include "ESMCI_LogErr.h"
 
  // associated class definition file
-#include "ESMC_State.h"
+#include "ESMCI_State.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_State_F.C,v 1.7 2010/03/04 18:57:46 svasquez Exp $";
+             "$Id: ESMCI_State_F.C,v 1.8 2010/03/17 05:54:38 eschwab Exp $";
 //-----------------------------------------------------------------------------
+
+namespace ESMCI {
 
 extern "C" {
 //
@@ -59,6 +60,9 @@ void FTN(c_esmc_stateserialize)(
                            char *buffer, int *length, int *offset,
                            ESMC_InquireFlag *inquireflag, int *localrc,
                            ESMCI_FortranStrLenArg buffer_l){
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_stateserialize()"
 
     int *ip;
 
@@ -231,5 +235,54 @@ void FTN(c_esmc_stateitemdeserialize)(int *otype,
     return;
 } 
 
+//-----------------------------------------------------------------------------
+
+void FTN(c_esmc_stateread)(State *ptr,
+                           ESMC_Base **base,
+                           int *fileNameLen,
+                           const char *fileName,
+                           ESMC_IOFileFormat *fileFormat,
+                           int *status,
+                           ESMCI_FortranStrLenArg fileName_l) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_stateread()"
+
+         ESMF_CHECK_POINTER(ptr, status)
+
+         // Read the items and attributes into the state object.
+         int rc = (ptr)->State::read(*base, // always present
+                          *fileNameLen, // always present internal argument.
+                          fileName,     // always present
+                          ESMC_NOT_PRESENT_FILTER(fileFormat));
+
+         if (ESMC_PRESENT(status)) *status = rc;
+}
+
+//-----------------------------------------------------------------------------
+
+void FTN(c_esmc_statewrite)(State *ptr,
+                           ESMC_Base **base,
+                           int *fileNameLen,
+                           const char *fileName,
+                           ESMC_IOFileFormat *fileFormat,
+                           int *status,
+                           ESMCI_FortranStrLenArg fileName_l) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_statewrite()"
+
+         ESMF_CHECK_POINTER(ptr, status)
+
+         // Read the items and attributes into the state object.
+         int rc = (ptr)->State::write(*base, // always present
+                          *fileNameLen, // always present internal argument.
+                          fileName,     // always present
+                          ESMC_NOT_PRESENT_FILTER(fileFormat));
+
+         if (ESMC_PRESENT(status)) *status = rc;
+}
+
+//-----------------------------------------------------------------------------
 
 } // extern "C"
+
+} // namespace ESMCI

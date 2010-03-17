@@ -27,6 +27,7 @@
 
 // associated header file
 #include "ESMCI_State.h"
+#include "ESMCI_IO_NetCDF.h"
 
 //insert any higher level, 3rd party or system includes here
 #include <string.h>         // strlen()
@@ -47,7 +48,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_State.C,v 1.17 2010/03/04 18:57:46 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_State.C,v 1.18 2010/03/17 05:54:38 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -991,4 +992,141 @@ namespace ESMCI {
    } // end ESMC_StateGetArrayNames
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::State::read()"
+//BOP
+// !IROUTINE:  ESMCI::State::read - Read data items from a file.
+//
+// !INTERFACE:
+      int State::read(
+//
+// !RETURN VALUE:
+//     return code rc.
+//
+// !ARGUMENTS:
+      ESMC_Base* base,                 //  in - location for read-in Attributes
+      int fileNameLen,                 //  in - file name length
+      const char* fileName,            //  in - file name
+      ESMC_IOFileFormat* fileFormat) { //  in - file format
+//
+// !DESCRIPTION:
+//      Read data items for the State from a file.  Currently limited to
+//      multiple Array items from a netCDF file.  Other item types and file
+//      types will be supported in future releases.
+//
+//EOP
+      // Initialize return code; assume routine not implemented
+      int rc = ESMF_SUCCESS;
+      int localrc = ESMC_RC_NOT_IMPL;
+      ESMC_IOFileFormat localFileFormat; 
+
+      // default file format is netCDF
+      localFileFormat = (fileFormat == ESMC_NULL_POINTER) ?
+                                    ESMF_IO_FILEFORMAT_NETCDF : *fileFormat;
+
+      // TODO:  move switch into an IO master class?  would be in one central
+      //        location, rather than replicated in each ESMF data class.
+      switch (localFileFormat) {
+        // TODO:  other file formats
+        case ESMF_IO_FILEFORMAT_NETCDF:
+        default:
+          // instantiate IO object; initialize with pointer to this State's
+          // base, to place file-read attributes into.
+          IO_NetCDF *io_netcdf = ESMCI_IO_NetCDFCreate(0, NULL, base, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+                                               &localrc);
+          if (localrc != ESMF_SUCCESS) rc = localrc;
+
+          // set this State object as the target for read-in data
+          io_netcdf->setState(this);
+
+          // read the NetCDF file, placing contents into this State object, with
+          // Attributes placed on the State's base node
+          localrc = io_netcdf->read(fileNameLen, fileName);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+                                               &localrc);
+          if (localrc != ESMF_SUCCESS) rc = localrc;
+
+          // done with io_netcdf object
+          localrc = ESMCI_IO_NetCDFDestroy(&io_netcdf);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+                                               &localrc);
+          if (localrc != ESMF_SUCCESS) rc = localrc;
+
+          break;
+      }
+
+      return rc;
+
+   } // end State::Read()
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::State::write()"
+//BOP
+// !IROUTINE:  ESMCI::State::write - Write data items to a file.
+//
+// !INTERFACE:
+      int State::write(
+//
+// !RETURN VALUE:
+//     return code rc.
+//
+// !ARGUMENTS:
+      ESMC_Base* base,               //  in - location to write Attributes from
+      int fileNameLen,                 //  in - file name length
+      const char* fileName,            //  in - file name
+      ESMC_IOFileFormat* fileFormat) { //  in - file format
+//
+// !DESCRIPTION:
+//      Write data items for the State from a file.  Currently limited to
+//      write multiple Array items to a netCDF file.  Other item types and file
+//      types will be supported in future releases.
+//
+//EOP
+      // Initialize return code; assume routine not implemented
+      int rc = ESMF_SUCCESS;
+      int localrc = ESMC_RC_NOT_IMPL;
+      ESMC_IOFileFormat localFileFormat; 
+
+      // default file format is netCDF
+      localFileFormat = (fileFormat == ESMC_NULL_POINTER) ?
+                                    ESMF_IO_FILEFORMAT_NETCDF : *fileFormat;
+
+      // TODO:  move switch into an IO master class?  would be in one central
+      //        location, rather than replicated in each ESMF data class.
+      switch (localFileFormat) {
+        // TODO:  other file formats
+        case ESMF_IO_FILEFORMAT_NETCDF:
+        default:
+          // instantiate IO object; initialize with pointer to this State's
+          // base, to write attributes from.
+          IO_NetCDF *io_netcdf = ESMCI_IO_NetCDFCreate(0, NULL, base, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+                                               &localrc);
+          if (localrc != ESMF_SUCCESS) rc = localrc;
+
+          // set this State object as the source of data to write out
+          io_netcdf->setState(this);
+
+          // write the NetCDF file, taking contents from this State object, with
+          // Attributes taken from the State's base node
+          localrc = io_netcdf->write(fileNameLen, fileName);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+                                               &localrc);
+          if (localrc != ESMF_SUCCESS) rc = localrc;
+
+          // done with io_netcdf object
+          localrc = ESMCI_IO_NetCDFDestroy(&io_netcdf);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+                                               &localrc);
+          if (localrc != ESMF_SUCCESS) rc = localrc;
+
+          break;
+      }
+
+      return rc;
+
+   } // end State::Write()
+
 } // namespace ESMCI
