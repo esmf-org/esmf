@@ -1,4 +1,4 @@
-// $Id: ESMC_IOSpec.h,v 1.9 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMC_IOSpec.h,v 1.10 2010/03/17 05:54:54 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -29,7 +29,8 @@
  // Predefined file formats
  enum ESMC_IOFileFormat {ESMF_IO_FILEFORMAT_UNSPECIFIED = 0,
                          ESMF_IO_FILEFORMAT_NETCDF,
-                         ESMF_IO_FILEFORMAT_HDF};
+                         ESMF_IO_FILEFORMAT_HDF,
+                         ESMF_IO_FILEFORMAT_XML};
 
  // What type of I/O - Read only, write only, R/W, append with truncation
  enum ESMC_IORWType {ESMF_IO_RWTYPE_UNSPECIFIED = 0,
