@@ -237,7 +237,7 @@ program ESMF_LocStreamEx
 ! The following is an example of creating a LocStream object from another LocStream object 
 ! using a background Grid. The new LocStream contains the data present in the old LocStream, 
 ! but is redistributed so that entries with a given set of coordinates are on the same PET 
-! as the piece of the Grid which contains those coordinates. 
+! as the piece of the background Grid which contains those coordinates. 
 !
 !EOE
 
@@ -337,7 +337,8 @@ program ESMF_LocStreamEx
    !-------------------------------------------------------------------
    ! Create the location stream on the background Grid using the 
    ! "Lon" and "Lat" keys as the coordinates for the entries in 
-   ! the LocStream. 
+   ! the LocStream. The entries in newLocstream with coordinates (lon,lat)
+   ! are on the same PET as the piece of grid which contains (lon,lat). 
    !-------------------------------------------------------------------
    newLocstream=ESMF_LocStreamCreate(locstream, coordKeyNames="Lon:Lat", &
                   background=grid, rc=rc)

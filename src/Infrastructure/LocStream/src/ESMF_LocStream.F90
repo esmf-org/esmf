@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.24.2.3 2010/03/12 04:35:15 oehmke Exp $
+! $Id: ESMF_LocStream.F90,v 1.24.2.4 2010/03/17 20:36:24 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -130,7 +130,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.24.2.3 2010/03/12 04:35:15 oehmke Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.24.2.4 2010/03/17 20:36:24 oehmke Exp $'
 
 !==============================================================================
 !
@@ -755,7 +755,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamCreateByBkgGrid"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream by projecting onto a Grid
 
 ! !INTERFACE:
@@ -799,13 +799,15 @@ contains
 !          Grid, the second key in this list matches up with the second coordinate
 !          of the Grid, and so on. The key names should be separated by the : character. 
 !      \item[background]
-!          Background Grid which determines the distribution by "overlaying". Note that this 
-!          subroutine uses the corner stagger location in the Grid for determining where a point lies, 
-!          because this is the stagger location which fully contains the cell. A Grid must have coordinate
-!          data in this stagger location to be used in this subroutine. For a 2D Grid this stagger location
-!          is ESMF\_STAGGERLOC\_CORNER for a 3D Grid this stagger location is ESMF\_STAGGERLOC\_CORNER\_VFACE. 
-!          Note that currently the background Grid also needs to have been created with indexflag=ESMF\_INDEX\_GLOBAL
-!          to be usable here. 
+!          Background Grid which determines the distribution of the entries in the new location stream.
+!          The background Grid 
+!          needs to have the same number of dimensions as the number of keys in {\tt coordKeyNames}.  
+!          Note also that this subroutine uses the corner stagger location in the Grid for determining 
+!          where a point lies, because this is the stagger location which fully contains the cell. 
+!          A Grid must have coordinate data in this stagger location to be used in this subroutine. 
+!          For a 2D Grid this stagger location is ESMF\_STAGGERLOC\_CORNER for a 3D Grid this 
+!          stagger location is ESMF\_STAGGERLOC\_CORNER\_VFACE. Note that currently the background 
+!          Grid also needs to have been created with indexflag=ESMF\_INDEX\_GLOBAL to be usable here. 
 !     \item [{[maskValues]}]
 !           List of values that indicate a background grid point should be masked out. 
 !           If not specified, no masking will occur. 
@@ -819,7 +821,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
       type(ESMF_LocStreamType), pointer :: oldLStypep, newLStypep
       type(ESMF_UnmappedAction) :: localunmappedAction
       type(ESMF_Mesh) :: mesh
@@ -881,11 +883,10 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamCreateByBkgMesh"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream by projecting onto a Mesh
 
 ! !INTERFACE:
-      ! NOT YET INTEGRATED
       ! Private name; call using ESMF_LocStreamCreate()
       function ESMF_LocStreamCreateByBkgMesh(locstream, name, coordKeyNames, &
                  background, unmappedAction, rc)
@@ -925,7 +926,9 @@ contains
 !          Mesh, the second key in this list matches up with the second coordinate
 !          of the Mesh, and so on. The key names should be separated by the : character. 
 !      \item[background]
-!          Background Mesh which determines the distribution by "overlaying"
+!          Background Mesh which determines the distribution of entries in the new locatiion stream.
+!          The Mesh must have the same spatial dimension as the number of keys in
+!          {\tt coordKeyNames}. 
 !      \item [{[unmappedAction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Options are 
@@ -936,7 +939,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
       type(ESMF_LocStreamType), pointer :: oldLStypep, newLStypep
       type(ESMF_UnmappedAction) :: localunmappedAction
       type(ESMF_DistGrid) :: newDistGrid
