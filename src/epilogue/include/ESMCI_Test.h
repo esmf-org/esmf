@@ -1,4 +1,4 @@
-// $Id: ESMCI_Test.h,v 1.5 2010/03/04 18:57:46 svasquez Exp $
+// $Id: ESMCI_Test.h,v 1.6 2010/03/18 12:50:08 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,10 +37,10 @@ namespace ESMCI {
 
 // TODO: These need an optional Log argument.
 int TestStart(char *file, int line, int only = 1);
-int TestEnd(int result, char *file, int line, int only = 1);
+int TestEnd(int result, const char *file, int line, int only = 1);
 
-int Test(int condition, char *name, char *failMsg, int *result, 
-  char *file, int line, int only = 1);
+int Test(int condition, const char *name, const char *failMsg, int *result, 
+  const char *file, int line, int only = 1);
 
 bool TestNumPETs(int petCount, char *file, int line, int only = 1);
 bool TestMinPETs(int petCount, char *file, int line, int only = 1);

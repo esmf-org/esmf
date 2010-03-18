@@ -1,4 +1,4 @@
-// $Id: ESMCI_Test.C,v 1.13 2010/03/04 18:57:46 svasquez Exp $
+// $Id: ESMCI_Test.C,v 1.14 2010/03/18 12:50:19 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,    
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Test.C,v 1.13 2010/03/04 18:57:46 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Test.C,v 1.14 2010/03/18 12:50:19 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -64,10 +64,10 @@ int Test(
 //
 // !ARGUMENTS:
   int condition,  // in - the test pass/fail condition
-  char *name,     // in - the test name
-  char *failMsg,  // in - optional message printed on test failure
+  const char *name,     // in - the test name
+  const char *failMsg,  // in - optional message printed on test failure
   int *result,    // in/out - cumulative failure count
-  char *file,     // in - test filename
+  const char *file,     // in - test filename
   int line,       // in - test line number in test filename
   int only) {     // in - if set to 0, print on stderr also
 // 
@@ -125,7 +125,7 @@ int TestEnd(
 //
 // !ARGUMENTS:
   int result,     // in - cumulative failure count
-  char *file,     // in - test filename
+  const char *file,     // in - test filename
   int line,       // in - test line number in test filename
   int only) {     // in - if set to 0, print on stderr also
 // 
