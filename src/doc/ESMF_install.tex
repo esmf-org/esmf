@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.78.2.3 2010/03/19 17:46:49 svasquez Exp $
+% $Id: ESMF_install.tex,v 1.78.2.4 2010/03/19 21:09:34 svasquez Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -413,15 +413,6 @@ Possible value: {\em flag}
 
 This variable can be used to override the default  Fortran90 optimization flag.
 
-\item[ESMF\_INSTALL\_PREFIX]
-Possible value: {\em relative or absolute path}
-
-This variable specifies the prefix of the installation path used during the
-installation process accessible thought the install target. Libraries, F90
-module files, header files and documentation all are installed relative to
-{\tt ESMF\_INSTALL\_PREFIX} by default. The {\tt ESMF\_INSTALL\_PREFIX} may be
-provided as absolute path or relative to {\tt ESMF\_DIR}.
-
 \item[ESMF\_INSTALL\_DOCDIR]
 Possible value: {\em relative or absolute path}
 
@@ -449,6 +440,15 @@ Possible value: {\em relative or absolute path}
 Location into which to install the F90 module files during installation. This
 location can be specified as absolute path or relative to
 {\tt ESMF\_INSTALL\_PREFIX}.
+
+\item[ESMF\_INSTALL\_PREFIX]
+Possible value: {\em relative or absolute path}
+
+This variable specifies the prefix of the installation path used during the
+installation process accessible thought the install target. Libraries, F90
+module files, header files and documentation all are installed relative to
+{\tt ESMF\_INSTALL\_PREFIX} by default. The {\tt ESMF\_INSTALL\_PREFIX} may be
+provided as absolute path or relative to {\tt ESMF\_DIR}.
 
 \item[ESMF\_LAPACK]
 See \ref{sec:lapack}
@@ -761,7 +761,8 @@ variables:
 \item {\tt ESMF\_INSTALL\_DOCDIR}
 \end{itemize}
 
-Section~\ref{EnvironmentVariables} describes how to set these variables.
+Section~\ref{EnvironmentVariables} describes what each of these 
+environment variables does and how to set them.
 
 Install ESMF with the command:
 \begin{verbatim}
