@@ -1,4 +1,4 @@
-% $Id: user_arch.tex,v 1.39.2.3 2010/03/17 22:30:00 theurich Exp $
+% $Id: user_arch.tex,v 1.39.2.4 2010/03/19 04:50:58 theurich Exp $
 
 % List of architectures supported.  This file is 
 % meant to be included in a user doc.
@@ -109,35 +109,35 @@ of {\tt ESMF\_MACHINE}, the default value is in {\bf bold}:
 AIX     &\tt default     &\tt mpiuni,{\bf mpi},user      &\tt 32, {\bf 64} \\
 Cygwin  &\tt g95         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64 \\
 Cygwin  &\tt gfortran    &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64 \\
-Darwin  &\tt absoft      &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
-Darwin  &\tt g95         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt {\bf 32}, 64 \\
-Darwin  &\tt gfortran    &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt {\bf 32}, 64 \\
-Darwin  &\tt intel       &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt {\bf 32}, 64 \\
-Darwin  &\tt intelgcc    &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt {\bf 32}, 64 \\
-Darwin  &\tt nag         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
+Darwin  &\tt absoft      &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64 \\
+Darwin  &\tt g95         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64 \\
+Darwin  &\tt gfortran    &\tt {\bf mpiuni},mpich,mpich2,mvapich2,lam,openmpi,user &\tt 32, 64 \\
+Darwin  &\tt intel       &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64 \\
+Darwin  &\tt intelgcc    &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64 \\
+Darwin  &\tt nag         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64 \\
 Darwin  &\tt xlf         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
 Darwin  &\tt xlfgcc      &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
 IRIX64  &\tt default     &\tt mpiuni,{\bf mpi},user     &\tt 32, {\bf 64} \\
-Linux   &\tt absoft      &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64 \\
+Linux   &\tt absoft      &\tt {\bf mpiuni},mpich,mpich2,mvapich2,lam,openmpi,user &\tt 32, 64 \\
 Linux   &\tt absoftintel &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64  \\
-Linux   &\tt g95         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64, ia64\_64, \\
+Linux   &\tt g95         &\tt {\bf mpiuni},mpich,mpich2,mvapich2,lam,openmpi,user &\tt 32, 64, ia64\_64, \\
         &                &                              &\tt x86\_64\_32, x86\_64\_small, \\
         &                &                              &\tt x86\_64\_medium \\
-Linux   &\tt gfortran    &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64, ia64\_64, \\
+Linux   &\tt gfortran    &\tt {\bf mpiuni},mpich,mpich2,mvapich2,lam,openmpi,user &\tt 32, 64, ia64\_64, \\
         &                &                              &\tt x86\_64\_32, x86\_64\_small, \\
         &                &                              &\tt x86\_64\_medium \\
-Linux   &\tt intel       &\tt {\bf mpiuni},mpi,mpich,mpich2,lam,openmpi,&\tt 32, 64, ia64\_64, \\
+Linux   &\tt intel       &\tt {\bf mpiuni},mpi,mpich,mpich2,mvapich2,lam,openmpi,&\tt 32, 64, ia64\_64, \\
         &                &\tt user,intelmpi,scalimpi    &\tt x86\_64\_32, x86\_64\_small, \\
         &                &                              &\tt x86\_64\_medium \\
 Linux   &\tt intelgcc    &\tt {\bf mpiuni},mpi,mpich,mpich2,lam,openmpi,&\tt 32, 64, ia64\_64, \\
         &                &\tt user,intelmpi             &\tt x86\_64\_32, x86\_64\_small, \\
         &                &                              &\tt x86\_64\_medium \\
-Linux   &\tt lahey       &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
-Linux   &\tt nag         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
+Linux   &\tt lahey       &\tt {\bf mpiuni},mpich,mpich2,mvapich2,lam,openmpi,user &\tt 32 \\
+Linux   &\tt nag         &\tt {\bf mpiuni},mpich,mpich2,mvapich2,lam,openmpi,user &\tt 32 \\
 Linux   &\tt nagintel    &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
 Linux   &\tt pathscale   &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64, x86\_64\_32, \\
         &                &                              &\tt x86\_64\_small, x86\_64\_medium \\
-Linux   &\tt pgi         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64, x86\_64\_32, \\
+Linux   &\tt pgi         &\tt {\bf mpiuni},mpich,mpich2,mvapich2,lam,openmpi,user &\tt 32, 64, x86\_64\_32, \\
         &                &\tt scalimpi                  &\tt x86\_64\_small, x86\_64\_medium \\
 Linux   &\tt pgigcc      &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
 Linux   &\tt xlf         &\tt mpiuni,{\bf mpi},user      &\tt 32  \\
