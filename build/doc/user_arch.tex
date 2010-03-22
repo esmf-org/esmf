@@ -1,4 +1,4 @@
-% $Id: user_arch.tex,v 1.39.2.4 2010/03/19 04:50:58 theurich Exp $
+% $Id: user_arch.tex,v 1.39.2.5 2010/03/22 22:18:51 theurich Exp $
 
 % List of architectures supported.  This file is 
 % meant to be included in a user doc.
@@ -77,20 +77,19 @@ PC Xeon (64) Cluster  &\tt Linux  &\tt gfortran     &\tt mvapich2   &\tt 64     
 PC Xeon (64) Cluster  &\tt Linux  &\tt intel        &\tt mpich2     &\tt 64              & ifort \footnotesize 11.1.059       & icpc \footnotesize 11.1.059     \\ % fusion
                       &           &                 &\tt mvapich2   &                    &                                    &                                 \\
 PC Xeon (64) Cluster  &\tt Linux  &\tt pgi          &\tt mpich      &\tt 64              & pgf90 \footnotesize 9.0-4          & pgCC \footnotesize 9.0-4        \\ % coral
-                      &           &                 &\tt mvapich2   &                    &                                    &                                 \\
 PC Xeon (64) Cluster  &\tt Linux  &\tt intel        &\tt mvapich2   &\tt 64              & ifort \footnotesize 11.1.038       & icpc \footnotesize 11.1.038     \\ % wjet
 PC Xeon (64) Cluster  &\tt Linux  &\tt pgi          &\tt mvapich2   &\tt 64              & pgf90 \footnotesize 7.1-3          & pgCC \footnotesize 7.1-3        \\ % wjet
 PC Xeon (64) Cluster  &\tt Linux  &\tt intel        &\tt scalimpi   &\tt 64              & ifort \footnotesize 10.1.021       & icpc \footnotesize 10.1.021     \\ % discover
                       &           &                 &\tt openmpi    &                    &                                    &                                 \\
                       &           &                 &\tt intelmpi   &                    &                                    &                                 \\
 PC Xeon (64) Cluster  &\tt Linux  &\tt nag          &\tt mpiuni     &\tt 64              & nagfor \footnotesize 5.2(638)      & g++  \footnotesize 4.1.2        \\ % discover
-PC Xeon (64) Cluster  &\tt Linux  &\tt pgi          &\tt scalimpi   &\tt 64              & pgf90 \footnotesize 7.1-6          & pgCC \footnotesize 7.1-6        \\ % discover
+PC Xeon (64) Cluster  &\tt Linux  &\tt pgi          &\tt scalimpi   &\tt 64              & pgf90 \footnotesize 7.2-1          & pgCC \footnotesize 7.2-1        \\ % discover
 SGI Altix (ia64)      &\tt Linux  &\tt intel        &\tt mpi        &\tt 64              & ifort \footnotesize 11.0.083       & icpc \footnotesize 11.0.083     \\ % columbia
 SGI Altix ICE         &\tt Linux  &\tt intel        &\tt mpi        &\tt 64              & ifort \footnotesize 10.1.021       & icpc \footnotesize 10.1.021     \\ % pleiades
-SGI Altix XE Cluster  &\tt Cygwin &\tt g95          &\tt mpiuni     &\tt 32              & g95 \footnotesize                  & g++  \footnotesize 4.3.4        \\ % SGI-NT
+SGI Altix XE Cluster  &\tt Cygwin &\tt g95          &\tt mpiuni     &\tt 32              & g95 \footnotesize 0.92             & g++  \footnotesize 4.3.4        \\ % SGI-NT
 SGI Altix XE Cluster  &\tt Cygwin &\tt gfortran     &\tt mpiuni     &\tt 32              & gfortran \footnotesize 4.3.4       & g++  \footnotesize 4.3.4        \\ % SGI-NT
-SGI Altix XE Cluster  &\tt MinGW  &\tt intel        &\tt msmpi      &\tt 64              & ifort \footnotesize 11.0.061       & icl  \footnotesize 11.0.072     \\ % SGI-NT
-SGI Altix XE Cluster  &\tt MinGW  &\tt intelcl      &\tt msmpi      &\tt 64              & ifort \footnotesize 11.0.061       & cl  \footnotesize 14.00.50727.762 \\ % SGI-NT
+SGI Altix XE Cluster  &\tt MinGW  &\tt intel        &\tt msmpi      &\tt 64              & ifort \footnotesize 11.1.060       & icl  \footnotesize 11.1.060     \\ % SGI-NT
+SGI Altix XE Cluster  &\tt MinGW  &\tt intelcl      &\tt msmpi      &\tt 64              & ifort \footnotesize 11.1.060       & cl  \footnotesize 14.00.50727.762 \\ % SGI-NT
 SGI Origin 3800       &\tt IRIX64 &\tt default      &\tt mpi        &\tt 32,64           & f90 \footnotesize 7.4.4m           & CC \footnotesize 7.4.4m         \\ % ferrari
 Sun SPARC             &\tt SunOS  &\tt default      &\tt mpi        &\tt 64              & f95 \footnotesize 8.3              & CC \footnotesize 5.9               % mdev890
 \end{tabular}
