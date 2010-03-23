@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.92 2010/03/04 18:57:41 svasquez Exp $
+// $Id: ESMCI_Array.C,v 1.93 2010/03/23 17:59:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.92 2010/03/04 18:57:41 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.93 2010/03/23 17:59:05 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -5015,16 +5015,24 @@ namespace DD{
     int count;
     int countEff;
   };
+  
   struct FactorElement{
     SeqIndex partnerSeqIndex;
     int partnerDe;
     int padding;    // padding for 8-byte alignment
     char factor[8]; // large enough for R8 and I8
   };
+  bool operator==(FactorElement a, FactorElement b){
+    return (a.partnerSeqIndex == b.partnerSeqIndex);
+  }
+  bool operator<(FactorElement a, FactorElement b){
+    return (a.partnerSeqIndex < b.partnerSeqIndex);
+  }
+
   struct SeqIndexFactorLookup{
     int de;
     int factorCount;
-    FactorElement *factorList;
+    vector<FactorElement> factorList;
   };
   
   // the following structs could be moved out of this namespace
@@ -5049,7 +5057,7 @@ namespace DD{
     const Interval *seqIndexIntervalIn;
     const Interval *seqIndexIntervalOut;
     const SeqIndexFactorLookup *seqIndexFactorLookupIn;
-    const SeqIndexFactorLookup *seqIndexFactorLookupOut;
+    SeqIndexFactorLookup *seqIndexFactorLookupOut;
     bool tensorMixFlag;
   };
 
@@ -5318,7 +5326,7 @@ void localClientServerExchange(FillLinSeqListInfo *fillLinSeqListInfo){
           linSeqList[j][k].factorList = (FactorElement *)
             memHelper->malloc(sizeof(FactorElement)*factorCount);
           memcpy(linSeqList[j][k].factorList, 
-            seqIndexFactorLookup[kk].factorList,
+            &(seqIndexFactorLookup[kk].factorList[0]),
             factorCount * sizeof(FactorElement));
         }
       }
@@ -5367,7 +5375,7 @@ void serverResponse(FillLinSeqListInfo *fillLinSeqListInfo, int count,
       *responseStreamInt++ = 0; // padding for 8-byte alignment
       responseStreamFactorElement = (FactorElement *)responseStreamInt;
       memcpy(responseStreamFactorElement,
-        seqIndexFactorLookup[lookupIndex].factorList,
+        &(seqIndexFactorLookup[lookupIndex].factorList[0]),
         factorCount * sizeof(FactorElement));
       responseStreamFactorElement += factorCount;
     }
@@ -5444,7 +5452,7 @@ void localClientServerExchange(FillPartnerDeInfo *fillPartnerDeInfo){
   const Interval *seqIndexIntervalOut = fillPartnerDeInfo->seqIndexIntervalOut;
   const SeqIndexFactorLookup *seqIndexFactorLookupIn =
     fillPartnerDeInfo->seqIndexFactorLookupIn;
-  const SeqIndexFactorLookup *seqIndexFactorLookupOut =
+  SeqIndexFactorLookup *seqIndexFactorLookupOut =
     fillPartnerDeInfo->seqIndexFactorLookupOut;
   const bool tensorMixFlag = fillPartnerDeInfo->tensorMixFlag;
   // localPet locally acts as server and client
@@ -5491,7 +5499,7 @@ void serverResponse(FillPartnerDeInfo *fillPartnerDeInfo, int count,
         
 void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
   char *responseStream, int responseStreamSize){
-  const SeqIndexFactorLookup *seqIndexFactorLookupOut =
+  SeqIndexFactorLookup *seqIndexFactorLookupOut =
     fillPartnerDeInfo->seqIndexFactorLookupOut;
   // process responseStream and complete seqIndexFactorLookupOut info
   int *responseStreamInt = (int *)responseStream;
@@ -5634,7 +5642,6 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
 
   // specialize SetupSeqIndexFactorLookup for DE info fill stage1
   class SetupSeqIndexFactorLookupStage1:public SetupSeqIndexFactorLookup{
-    ArrayHelper::MemHelper *memHelperFactorLookup;
    public:
     SetupSeqIndexFactorLookupStage1(
       SeqIndexFactorLookup *seqIndexFactorLookup_,
@@ -5647,8 +5654,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       vector<vector<int> > const &seqIntervFactorListIndex_,
       bool tensorMixFlag_,
       bool dstSetupFlag_,
-      ESMC_TypeKind typekindFactors_,
-      ArrayHelper::MemHelper *memHelperFactorLookup_
+      ESMC_TypeKind typekindFactors_
     ):SetupSeqIndexFactorLookup(
       sparseMatrix_,
       factorPetFlag_,
@@ -5665,7 +5671,6 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       for (int i=0; i<petCount; i++)
         totalFactorCount[i] = 0;  // reset
       typekindFactors = typekindFactors_;
-      memHelperFactorLookup = memHelperFactorLookup_;
     }
    private:
     int messageSizeCount(int srcPet, int dstPet)const{
@@ -5728,23 +5733,8 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       delete [] petFactorCountList;
     }
     void prepareSeqIndexFactorLookup(int *petFactorCountList){
-      for (int j=0; j<seqIndexInterval[localPet].countEff; j++){
-        if (int factorCount = petFactorCountList[j]){
-          int prevFactorCount = seqIndexFactorLookup[j].factorCount;
-          // allocate new factorList
-          DD::FactorElement *tempFactorList =
-            (DD::FactorElement*)memHelperFactorLookup->
-            malloc(sizeof(DD::FactorElement)*(prevFactorCount+factorCount));
-          if (prevFactorCount){
-            // copy previous factorList elements into new factorList
-            memcpy(tempFactorList, seqIndexFactorLookup[j].factorList,
-              prevFactorCount * sizeof(DD::FactorElement));
-          }
-          // place new factorList into look-up table and set new count
-          seqIndexFactorLookup[j].factorList = tempFactorList;
-          seqIndexFactorLookup[j].factorCount += factorCount;
-        }
-      }
+      for (int j=0; j<seqIndexInterval[localPet].countEff; j++)
+        seqIndexFactorLookup[j].factorCount += petFactorCountList[j];
     }
     friend class SetupSeqIndexFactorLookupStage2;
   };
@@ -5820,7 +5810,8 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       for (int i=0; i<totalFactorCount[srcPet]; i++){
         intStream = (int *)factorStream;
         int j=*intStream++;                 // index into lookup table
-        int k=seqIndexFactorLookup[j].de++; // counter during initialization
+        int k=seqIndexFactorLookup[j].factorList.size();
+        seqIndexFactorLookup[j].factorList.resize(k+1);
         seqIndexFactorLookup[j].factorList[k]
           .partnerSeqIndex.decompSeqIndex = *intStream++; // seqIndex
         seqIndexFactorLookup[j].factorList[k]
@@ -5877,7 +5868,8 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
         int k = seqIndex - seqIndexInterval[localPet].min;
         if (tensorMixFlag)
           k += (seqInd.getIndex(1)-1) * seqIndexInterval[localPet].count;
-        int kk = seqIndexFactorLookup[k].de++;// counter during init
+        int kk = seqIndexFactorLookup[k].factorList.size();
+        seqIndexFactorLookup[k].factorList.resize(kk+1);
         if (dstSetupFlag)
           seqInd = sparseMatrix->getSrcSeqIndex(j);
           // reverse b/c src side picks dst and rev.
@@ -6611,15 +6603,12 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t5a);   //gjt - profile
 #endif
   
-  ArrayHelper::MemHelper *memHelperFactorLookup =
-    new ArrayHelper::MemHelper();
-  
   // allocate local look-up table indexed by srcSeqIndex
   DD::SeqIndexFactorLookup *srcSeqIndexFactorLookup = 
     new DD::SeqIndexFactorLookup[srcSeqIndexInterval[localPet].countEff];
   for (int i=0; i<srcSeqIndexInterval[localPet].countEff; i++){
-    srcSeqIndexFactorLookup[i].de = 0; // use during initialization as counter
-    srcSeqIndexFactorLookup[i].factorCount = 0; // reset
+    srcSeqIndexFactorLookup[i].de = -1;         // invalidate
+    srcSeqIndexFactorLookup[i].factorCount = 0; // reset count
   }
   
   {
@@ -6634,8 +6623,7 @@ int Array::sparseMatMulStore(
       srcSeqIntervFactorListIndex,
       tensorMixFlag,
       false,
-      typekindFactors,
-      memHelperFactorLookup);
+      typekindFactors);
     
     setupSeqIndexFactorLookupStage1.totalExchange(vm);
     
@@ -6643,6 +6631,10 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t5b1);   //gjt - profile
 #endif
 
+    for (int i=0; i<srcSeqIndexInterval[localPet].countEff; i++)
+      srcSeqIndexFactorLookup[i].factorList.reserve(
+        srcSeqIndexFactorLookup[i].factorCount);  // obtain memory
+  
     DD::SetupSeqIndexFactorLookupStage2
       setupSeqIndexFactorLookupStage2(setupSeqIndexFactorLookupStage1);
 
@@ -6653,6 +6645,20 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t5b);   //gjt - profile
 #endif
 
+  if (haloFlag){
+    // eliminate duplicate sparse matrix entries in srcSeqIndexFactorLookup
+    for (int i=0; i<srcSeqIndexInterval[localPet].countEff; i++){
+      sort(srcSeqIndexFactorLookup[i].factorList.begin(),
+        srcSeqIndexFactorLookup[i].factorList.end());
+      srcSeqIndexFactorLookup[i].factorList.erase(
+        unique(srcSeqIndexFactorLookup[i].factorList.begin(),
+        srcSeqIndexFactorLookup[i].factorList.end()),
+        srcSeqIndexFactorLookup[i].factorList.end());
+      srcSeqIndexFactorLookup[i].factorCount =
+        srcSeqIndexFactorLookup[i].factorList.size();
+    }
+  }
+    
   // communicate between Pets to set up "de" member in srcSeqIndexFactorLookup[]
   {
     DD::FillSelfDeInfo fillSelfDeInfo(
@@ -6740,8 +6746,8 @@ int Array::sparseMatMulStore(
   DD::SeqIndexFactorLookup *dstSeqIndexFactorLookup = 
     new DD::SeqIndexFactorLookup[dstSeqIndexInterval[localPet].countEff];
   for (int i=0; i<dstSeqIndexInterval[localPet].countEff; i++){
-    dstSeqIndexFactorLookup[i].de = 0; // use during initialization as counter
-    dstSeqIndexFactorLookup[i].factorCount = 0; // reset
+    dstSeqIndexFactorLookup[i].de = -1;         // invalidate
+    dstSeqIndexFactorLookup[i].factorCount = 0; // reset count
   }
 
   {
@@ -6756,8 +6762,7 @@ int Array::sparseMatMulStore(
       dstSeqIntervFactorListIndex,
       tensorMixFlag,
       true,
-      typekindFactors,
-      memHelperFactorLookup);
+      typekindFactors);
     
     setupSeqIndexFactorLookupStage1.totalExchange(vm);
     
@@ -6765,6 +6770,10 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t5e1);   //gjt - profile
 #endif
 
+    for (int i=0; i<dstSeqIndexInterval[localPet].countEff; i++)
+      dstSeqIndexFactorLookup[i].factorList.reserve(
+        dstSeqIndexFactorLookup[i].factorCount);  // obtain memory
+    
     DD::SetupSeqIndexFactorLookupStage2
       setupSeqIndexFactorLookupStage2(setupSeqIndexFactorLookupStage1);
 
@@ -6774,6 +6783,20 @@ int Array::sparseMatMulStore(
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t5e);   //gjt - profile
 #endif
+  
+  if (haloFlag){
+    // eliminate duplicate sparse matrix entries in dstSeqIndexFactorLookup
+    for (int i=0; i<dstSeqIndexInterval[localPet].countEff; i++){
+      sort(dstSeqIndexFactorLookup[i].factorList.begin(),
+        dstSeqIndexFactorLookup[i].factorList.end());
+      dstSeqIndexFactorLookup[i].factorList.erase(
+        unique(dstSeqIndexFactorLookup[i].factorList.begin(),
+        dstSeqIndexFactorLookup[i].factorList.end()),
+        dstSeqIndexFactorLookup[i].factorList.end());
+      dstSeqIndexFactorLookup[i].factorCount =
+        dstSeqIndexFactorLookup[i].factorList.size();
+    }
+  }
   
   // communicate between Pets to set up "de" member in dstSeqIndexFactorLookup[]
   {
@@ -6883,17 +6906,25 @@ int Array::sparseMatMulStore(
   delete [] srcLocalPartnerIntervalPerPetCount;
 
 #ifdef ASMMSTOREPRINT
+  char asmmstoreprintfile[160];
+  sprintf(asmmstoreprintfile, "asmmstoreprint.%05d", localPet);
+  FILE *asmmsotreprintfp = fopen(asmmstoreprintfile, "a");
+  fprintf(asmmsotreprintfp, "\n========================================"
+    "========================================\n");
+  fprintf(asmmsotreprintfp, "========================================"
+    "========================================\n\n");
   // some serious printing for src info
   for (int i=0; i<srcSeqIndexInterval[localPet].count; i++){
-    printf("gjt srcDistDir: localPet %d, srcSeqIndex = %d, "
+    fprintf(asmmsotreprintfp, "gjt srcDistDir: localPet %d, srcSeqIndex = %d, "
       "srcSeqIndexFactorLookup[%d].factorCount = %d, .de = %d\n",
       localPet, i+srcSeqIndexInterval[localPet].min, i,
       srcSeqIndexFactorLookup[i].factorCount, 
       srcSeqIndexFactorLookup[i].de);
     for (int j=0; j<srcSeqIndexFactorLookup[i].factorCount; j++)
-      printf("gjt srcDistDir: localPet %d, srcSeqIndexFactorLookup[%d]."
-        "factorList[%d].partnerSeqIndex.decompSeqIndex = %d, "
-        ".partnerDe = %d, .factor = %d\n", localPet, i, j,
+      fprintf(asmmsotreprintfp, "\tfactorList[%d]\n"
+        "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
+        "\t\t.partnerDe = %d\n"
+        "\t\t.factor = %d\n", j,
         srcSeqIndexFactorLookup[i].factorList[j].partnerSeqIndex.decompSeqIndex,
         srcSeqIndexFactorLookup[i].factorList[j].partnerDe,
         *((int *)srcSeqIndexFactorLookup[i].factorList[j].factor));
@@ -6903,19 +6934,21 @@ int Array::sparseMatMulStore(
 #ifdef ASMMSTOREPRINT
   // some serious printing for dst info
   for (int i=0; i<dstSeqIndexInterval[localPet].count; i++){
-    printf("gjt dstDistDir: localPet %d, dstSeqIndex = %d, "
+    fprintf(asmmsotreprintfp, "gjt dstDistDir: localPet %d, dstSeqIndex = %d, "
       "dstSeqIndexFactorLookup[%d].factorCount = %d, .de = %d\n",
       localPet, i+dstSeqIndexInterval[localPet].min, i,
       dstSeqIndexFactorLookup[i].factorCount, 
       dstSeqIndexFactorLookup[i].de);
     for (int j=0; j<dstSeqIndexFactorLookup[i].factorCount; j++)
-      printf("gjt dstDistDir: localPet %d, dstSeqIndexFactorLookup[%d]."
-        "factorList[%d].partnerSeqIndex.decompSeqIndex = %d, "
-        ".partnerDe = %d, .factor = %d\n", localPet, i, j,
+      fprintf(asmmsotreprintfp, "\tfactorList[%d]\n"
+        "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
+        "\t\t.partnerDe = %d\n"
+        "\t\t.factor = %d\n", j,
         dstSeqIndexFactorLookup[i].factorList[j].partnerSeqIndex.decompSeqIndex,
         dstSeqIndexFactorLookup[i].factorList[j].partnerDe,
         *((int *)dstSeqIndexFactorLookup[i].factorList[j].factor));
   }
+  fclose(asmmsotreprintfp);
 #endif
   
 #ifdef ASMMSTORETIMING
@@ -7015,7 +7048,6 @@ int Array::sparseMatMulStore(
   delete [] srcSeqIndexInterval;
   delete [] dstSeqIndexFactorLookup;
   delete [] dstSeqIndexInterval;
-  delete memHelperFactorLookup;
   
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t7);   //gjt - profile
