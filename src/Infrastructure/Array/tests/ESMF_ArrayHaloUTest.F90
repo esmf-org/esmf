@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHaloUTest.F90,v 1.2 2010/03/04 18:57:41 svasquez Exp $
+! $Id: ESMF_ArrayHaloUTest.F90,v 1.3 2010/03/24 22:38:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayHaloUTest.F90,v 1.2 2010/03/04 18:57:41 svasquez Exp $'
+    '$Id: ESMF_ArrayHaloUTest.F90,v 1.3 2010/03/24 22:38:45 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -376,12 +376,8 @@ call ESMF_ArrayPrint(array)
   write(name, *) "Array Create Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-!    computationalLWidth=(/2,2/), computationalUWidth=(/2,2/), rc=rc)
-    computationalLWidth=(/0,0/), computationalUWidth=(/0,0/), rc=rc)
+    computationalLWidth=(/2,2/), computationalUWidth=(/2,2/), rc=rc)
 
-!TODO: turning halo on in this case will cause issues in SMMStore with
-!TODO: multiple src/dst elements - still needs to be fixed!
-    
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
