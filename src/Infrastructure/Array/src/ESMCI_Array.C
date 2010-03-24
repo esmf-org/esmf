@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.94 2010/03/24 05:58:47 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.95 2010/03/24 22:37:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.94 2010/03/24 05:58:47 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.95 2010/03/24 22:37:04 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -7038,6 +7038,16 @@ int Array::sparseMatMulStore(
     delete fillLinSeqListInfo;
   }
 
+  // garbage colletion
+  delete [] srcLocalElementsPerIntervalCount;
+  delete [] srcLocalIntervalPerPetCount;
+  delete [] dstLocalElementsPerIntervalCount;
+  delete [] dstLocalIntervalPerPetCount;
+  delete [] srcSeqIndexFactorLookup;
+  delete [] srcSeqIndexInterval;
+  delete [] dstSeqIndexFactorLookup;
+  delete [] dstSeqIndexInterval;
+
 #ifdef ASMMSTOREPRINT
   //char asmmstoreprintfile[160];
   //sprintf(asmmstoreprintfile, "asmmstoreprint.%05d", localPet);
@@ -7098,17 +7108,128 @@ int Array::sparseMatMulStore(
       }
     }
   }
+  fclose(asmmsotreprintfp);
 #endif
   
-  // garbage colletion
-  delete [] srcLocalElementsPerIntervalCount;
-  delete [] srcLocalIntervalPerPetCount;
-  delete [] dstLocalElementsPerIntervalCount;
-  delete [] dstLocalIntervalPerPetCount;
-  delete [] srcSeqIndexFactorLookup;
-  delete [] srcSeqIndexInterval;
-  delete [] dstSeqIndexFactorLookup;
-  delete [] dstSeqIndexInterval;
+  if (haloFlag){
+    // Replace FactorElements that have more than one partnerDe entry with
+    // separate FactorElements, each having only one partnerDe entry:
+    // Doing this for the src side supports forward HALO:
+    for (int j=0; j<srcLocalDeCount; j++){
+      for (int k=0; k<srcLocalDeElementCount[j]; k++){
+        for (int kk=0; kk<srcLinSeqList[j][k].factorCount; kk++){
+          if (srcLinSeqList[j][k].factorList[kk].partnerDe.size() > 1){
+            for (int jj=1;
+              jj<srcLinSeqList[j][k].factorList[kk].partnerDe.size(); jj++){
+              // construct factorElement with one partnerDe entry
+              DD::FactorElement factorElement =
+                srcLinSeqList[j][k].factorList[kk];
+              factorElement.partnerDe.resize(1);
+              factorElement.partnerDe[0] =
+                srcLinSeqList[j][k].factorList[kk].partnerDe[jj];
+              srcLinSeqList[j][k].factorList.push_back(factorElement);
+            }
+            // erase all of the replicated partnerDe entries
+            srcLinSeqList[j][k].factorList[kk].partnerDe.resize(1);
+          }
+        }
+        // set new factorCount
+        srcLinSeqList[j][k].factorCount = srcLinSeqList[j][k].factorList.size();
+      }
+    }
+    // Doing this for the dst side supports backward HALO:
+    for (int j=0; j<dstLocalDeCount; j++){
+      for (int k=0; k<dstLocalDeElementCount[j]; k++){
+        for (int kk=0; kk<dstLinSeqList[j][k].factorCount; kk++){
+          if (dstLinSeqList[j][k].factorList[kk].partnerDe.size() > 1){
+            for (int jj=1;
+              jj<dstLinSeqList[j][k].factorList[kk].partnerDe.size(); jj++){
+              // construct factorElement with one partnerDe entry
+              DD::FactorElement factorElement =
+                dstLinSeqList[j][k].factorList[kk];
+              factorElement.partnerDe.resize(1);
+              factorElement.partnerDe[0] =
+                dstLinSeqList[j][k].factorList[kk].partnerDe[jj];
+              //TODO: It's certainly not correct to add up all the entries
+              //TODO: from all of the halo elements in a backward HALO,
+              //TODO: instead the average over all elements makes more sense.
+              //TODO: However, this would require communication here in order
+              //TODO: to set an adjusted factor for these elements also on the 
+              //TODO: src side.
+              dstLinSeqList[j][k].factorList.push_back(factorElement);
+            }
+            // erase all of the replicated partnerDe entries
+            dstLinSeqList[j][k].factorList[kk].partnerDe.resize(1);
+          }
+        }
+        // set new factorCount
+        dstLinSeqList[j][k].factorCount = dstLinSeqList[j][k].factorList.size();
+      }
+    }
+  }
+  
+#ifdef ASMMSTOREPRINT
+  //char asmmstoreprintfile[160];
+  //sprintf(asmmstoreprintfile, "asmmstoreprint.%05d", localPet);
+  //FILE *asmmsotreprintfp = fopen(asmmstoreprintfile, "a");
+  asmmsotreprintfp = fopen(asmmstoreprintfile, "a");
+  fprintf(asmmsotreprintfp, "\n========================================"
+    "========================================\n");
+  fprintf(asmmsotreprintfp, "========================================"
+    "========================================\n\n");
+  // more serious printing
+  for (int j=0; j<srcLocalDeCount; j++){
+    for (int k=0; k<srcLocalDeElementCount[j]; k++){
+      fprintf(asmmsotreprintfp, "localPet: %d, "
+        "srcLinSeqList[%d][%d].linIndex = %d, "
+        ".seqIndex = %d, .factorCount = %d\n",
+        localPet, j, k, srcLinSeqList[j][k].linIndex,
+        srcLinSeqList[j][k].seqIndex.decompSeqIndex,
+        srcLinSeqList[j][k].factorCount);
+      for (int kk=0; kk<srcLinSeqList[j][k].factorCount; kk++){
+        fprintf(asmmsotreprintfp, "\tfactorList[%d]\n"
+          "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
+          "\t\t.partnerDe = ", kk,
+          srcLinSeqList[j][k].factorList[kk].partnerSeqIndex
+          .decompSeqIndex);
+        for (int jj=0;
+          jj<srcLinSeqList[j][k].factorList[kk].partnerDe.size(); jj++)
+          fprintf(asmmsotreprintfp, "%d, ",
+            srcLinSeqList[j][k].factorList[kk].partnerDe[jj]);
+        fprintf(asmmsotreprintfp, "\n");
+        fprintf(asmmsotreprintfp, "\t\t.factor = %d\n",
+          *((int *)srcLinSeqList[j][k].factorList[kk].factor));
+      }
+    }
+  }
+    
+  // more serious printing
+  for (int j=0; j<dstLocalDeCount; j++){
+    for (int k=0; k<dstLocalDeElementCount[j]; k++){
+      fprintf(asmmsotreprintfp, "localPet: %d, "
+        "dstLinSeqList[%d][%d].linIndex = %d, "
+        ".seqIndex = %d, .factorCount = %d\n",
+        localPet, j, k, dstLinSeqList[j][k].linIndex,
+        dstLinSeqList[j][k].seqIndex.decompSeqIndex,
+        dstLinSeqList[j][k].factorCount);
+      for (int kk=0; kk<dstLinSeqList[j][k].factorCount; kk++){
+        fprintf(asmmsotreprintfp, "\tfactorList[%d]\n"
+          "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
+          "\t\t.partnerDe = ", kk,
+          dstLinSeqList[j][k].factorList[kk].partnerSeqIndex
+          .decompSeqIndex);
+        for (int jj=0;
+          jj<dstLinSeqList[j][k].factorList[kk].partnerDe.size(); jj++)
+          fprintf(asmmsotreprintfp, "%d, ",
+            dstLinSeqList[j][k].factorList[kk].partnerDe[jj]);
+        fprintf(asmmsotreprintfp, "\n");
+        fprintf(asmmsotreprintfp, "\t\t.factor = %d\n",
+          *((int *)dstLinSeqList[j][k].factorList[kk].factor));
+      }
+    }
+  }
+  fclose(asmmsotreprintfp);
+#endif
   
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t7);   //gjt - profile
