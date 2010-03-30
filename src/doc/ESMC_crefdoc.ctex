@@ -1,0 +1,230 @@
+% $Id: ESMC_crefdoc.ctex,v 1.1 2010/03/30 19:47:08 svasquez Exp $
+
+\documentclass[english]{article}
+\usepackage{babel}
+\usepackage{supertabular}
+\usepackage{html}
+\usepackage{times}
+%\usepackage{subsections}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+
+\newcommand{\docmttype}{Reference Manual for C}
+\newcommand{\req}[1]{\section{\hspace{.2in}#1}}
+\newcommand{\sreq}[1]{\subsection{\hspace{.2in}#1}}
+\newcommand{\ssreq}[1]{\subsubsection{\hspace{.2in}#1}}
+\newcommand{\mytitle}{\longname \docmttype ~~}
+\newcommand{\myversion}{Version 4.0}
+
+\newenvironment
+{reqlist}
+{\begin{list} {} {} \rm \item[]}
+{\end{list}}
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+%\renewcommand\paragraph{%
+%\@startsection{paragraph}% section name
+%{4}% section level
+%{\z@}% indentation
+%{-3.25ex\@plus -1ex\@minus -.2ex}% before skip
+%{1.5ex\@plus .2ex}% afterskip
+%{\normalfont\normalsize\bfseries}}% font
+
+%===============================================================================
+% User-defined commands
+%-------------------------------------------------------------------------------
+\newcommand{\longname}{ESMF }
+\newcommand{\funcname}{ESMF }
+\newcommand{\shortname}{REF}
+\newcommand{\myauthors}{ESMF Joint Specification Team:  V. Balaji, Byron Boville, Samson Cheung, Nancy Collins, Tony Craig, Carlos Cruz, Arlindo da Silva, Cecelia DeLuca, Rosalinda de Fainchtein, Brian Eaton, Bob Hallberg, Tom Henderson, Chris Hill, Mark Iredell, Rob Jacob, Phil Jones, Erik Kluzek, Brian Kauffman, Jay Larson, Peggy Li, Fei Liu, John Michalakes, Sylvia Murphy, David Neckels, Ryan O Kuinghttons, Bob Oehmke, Chuck Panaccione, Jim Rosinski, Will Sawyer, Earl Schwab, Shepard Smithline, Walter Spector, Don Stark, Max Suarez, Spencer Swift, Gerhard Theurich, Atanas Trayanov, Silverio Vasquez, Jon Wolfe, Weiyu Yang, Mike Young, Leonid Zaslavsky}
+%===============================================================================
+\setlength{\textwidth}{6.5truein}
+\setlength{\textheight}{8.5truein}
+\setlength{\oddsidemargin}{0in}
+\setlength{\unitlength}{1truecm}
+
+% setting hbadness this high is supposed to suppress warnings about underfull 
+% boxes, which seems to work.  setting tolerance to 10000 was supposed to
+% suppress all the overfull box warnings but it seemed to have no effect  
+% so i took it back out.
+\hbadness = 10000
+\vbadness = 10000
+
+\begin{document}
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+% Title page
+
+\input{verstitle_alldoc}
+
+\newpage
+\input{ESMF_acknowledge.tex}
+
+\newpage
+\tableofcontents
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{ESMF Overview}
+\end{htmlonly}
+\part{ESMF Overview}
+
+\label{part:ESMFOverview}
+
+\newpage
+%\section{Introduction}
+\input{ESMF_whatisesmf}
+\input{ESMC_refintro}
+
+%\section{Support}
+%\input{ESMF_refsupport}
+
+%\section{Document Conventions}
+%\input{ESMF_conventions}
+
+\newpage
+%\section{API Overview}
+#\input{ESMF_api}
+
+%\section{Global Options and Parameters}
+#\input{ESMF_options}
+
+%\subsection{Overall Design and Implementation Notes}
+#\input{ESMF_implnotes}
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Superstructure}
+\end{htmlonly}
+\part{Superstructure}
+
+\label{part:Superstructure}
+
+\newpage
+
+%\section{Overview of Superstructure}
+\input{ESMF_superoverview.tex}
+
+#include "../Superstructure/AppDriver/doc/AppDriver_crefdoc.ctex"
+
+#include "../Superstructure/Component/doc/Component_crefdoc.ctex"
+
+#include "../Superstructure/State/doc/State_crefdoc.ctex"
+
+%+==============================================================================
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure:  Fields and Grids}
+\end{htmlonly}
+\part{Infrastructure:  Fields and Grids}
+
+\newpage
+
+%\section{Overview of Infrastructure Data Classes}
+\input{ESMF_infradataoverview.tex}
+
+%\section{Design and Implementation Notes}
+\input{ESMF_infradataimplnotes.tex}
+
+\newpage
+
+#include "../Infrastructure/FieldBundle/doc/FieldBundle_crefdoc.ctex"
+
+#include "../Infrastructure/Field/doc/Field_crefdoc.ctex"
+
+%#include "../Infrastructure/ArrayBundle/doc/ArrayBundle_crefdoc.ctex"
+
+#include "../Infrastructure/Array/doc/Array_crefdoc.ctex"
+
+%#include "../Infrastructure/LocalArray/doc/LocalArray_crefdoc.ctex"
+
+#include "../Infrastructure/ArraySpec/doc/ArraySpec_crefdoc.ctex"
+
+#include "../Infrastructure/Grid/doc/Grid_crefdoc.ctex"
+
+#include "../Infrastructure/LocStream/doc/LocStream_crefdoc.ctex"
+
+#include "../Infrastructure/Mesh/doc/Mesh_crefdoc.ctex"
+
+#include "../Infrastructure/DistGrid/doc/DistGrid_crefdoc.ctex"
+
+%#include "../Infrastructure/IO/doc/IO_crefdoc.ctex"
+
+%#include "../Infrastructure/IOSpec/doc/IOSpec_crefdoc.ctex"
+
+\newpage
+
+%\section{Overview of Distributed Data Methods}
+%\input{ESMF_inframethodoverview.tex}
+
+%#include "../Infrastructure/InternArrayComm/doc/InternArrayHalo_refdoc.ctex"
+
+%#include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
+
+%#include "../Infrastructure/InternArrayComm/doc/InternArrayRedist_refdoc.ctex"
+
+%===============================================================================
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure:  Utilities}
+\end{htmlonly}
+\part{Infrastructure:  Utilities}
+
+\newpage
+
+%\section{Overview of Infrastructure Utility Classes}
+\input{ESMF_infrautiloverview}
+
+\newpage
+
+%#include "../Infrastructure/Attribute/doc/Attribute_crefdoc.ctex"
+
+%#include "../Superstructure/State/doc/AttachMethods_crefdoc.ctex"
+
+#include "../Infrastructure/TimeMgr/doc/TimeMgr_crefdoc.ctex"
+
+#include "../Infrastructure/Config/doc/Config_crefdoc.ctex"
+
+#include "../Infrastructure/LogErr/doc/LogErr_crefdoc.ctex"
+
+#include "../Infrastructure/DELayout/doc/DELayout_crefdoc.ctex"
+
+#include "../Infrastructure/VM/doc/VM_crefdoc.ctex"
+
+%#include "../Infrastructure/Util/doc/IOUtil_crefdoc.ctex"
+
+
+\newpage
+\section{References}
+\bibliography{ESMC} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{References}
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Appendices}
+\end{htmlonly}
+\part{Appendices}
+
+\input{ESMF_appuml}
+\input{ESMF_apperr}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
