@@ -1,4 +1,4 @@
-% $Id: Grid_crefdoc.ctex,v 1.8 2010/03/04 18:57:44 svasquez Exp $
+% $Id: Grid_crefdoc.ctex,v 1.9 2010/03/30 21:54:02 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -9,19 +9,20 @@
 % Licensed under the University of Illinois-NCSA License.
 
 #ifdef STANDALONE
-\documentclass[]{article}
+\documentclass{article}
 
 \usepackage{epsf}
 \usepackage{html}
 \usepackage{times}
+\usepackage{subsections}
 \usepackage[T1]{fontenc}
 \usepackage[dvips]{graphics,color}
 
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{\bf Grid Design}
-\newcommand{\myauthors}{\it Phil Jones and Jon Wolfe}
+\newcommand{\mytitle}{\bf Grid Design (Draft 7)}
+\newcommand{\myauthors}{\it Bob Oehmke, Don Stark and Cecelia DeLuca}
 #endif
 
 #ifdef STANDALONE
@@ -47,28 +48,13 @@
 %\input{../Infrastructure/Grid/doc/Grid_syn}
 %#endif
 
-%\section{Algorithmic Description}
+%\section{Object Model}
 %#ifdef STANDALONE
-%\input{Grid_alg}
+%\input{Grid_obj}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Grid/doc/Grid_alg}
+%\input{../Infrastructure/Grid/doc/Grid_obj}
 %#endif
-
-\section{Object Model}
-#ifdef STANDALONE
-\input{Grid_obj}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Grid/doc/Grid_obj}
-#endif
-
-% \section{Global Parameters and Definitions}
-% #ifdef STANDALONE
-% \input{Grid_param}
-% #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Grid/doc/Grid_param}
-% #endif
-
-\section{Grid Design}
+\section{Grid Class}
 
 \subsection{Description}
 #ifdef STANDALONE
@@ -77,88 +63,71 @@
 \input{../Infrastructure/Grid/doc/Grid_desc}
 #endif
 
-\subsection{Design}
-#ifdef STANDALONE
-\input{Grid_design}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Grid/doc/Grid_design}
-#endif
-
-\subsubsection{Class Definition}
-#ifdef STANDALONE
-\input{Grid_def}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Grid/doc/Grid_def}
-#endif
-
-\subsubsection{Restrictions}
-#ifdef STANDALONE
-\input{Grid_rest}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Grid/doc/Grid_rest}
-#endif
-
-%\section{Grid Fortran Interface}
-
 %\subsection{Use and Examples}
-%#ifdef STANDALONE
-%\input{Gridex_fapi}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Grid/doc/Grid_fex}
-%#endif
-
-%\subsection{Parameters and Definitions}
-%#ifdef STANDALONE
-%\input{Grid_fparam}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Grid/doc/Grid_fparam}
-%#endif
-
-%\subsection{Class API}
 #ifdef STANDALONE
-\input{Grid_fapi}
+%\input{Grid_usage}
+%\input{ESMF_GridUsageEx_fapi}
+%\input{ESMF_GridCreateRegFromDGEx_fapi}
+%\input{ESMF_GridCreateTripoleEx_fapi}
+%\input{ESMF_GridCreateSph2Dplus1Ex_fapi}
+%\input{ESMF_GridCreateFromF90ArraysEx_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Grid/doc/ESMF_Grid_fapi}
+%\input{../Infrastructure/Grid/doc/Grid_usage}
+%\input{../Infrastructure/Grid/doc/ESMF_GridUsageEx_fapi}
+%\input{../Infrastructure/Grid/doc/ESMF_GridCreateRegFromDGEx_fapi}
+%\input{../Infrastructure/Grid/doc/ESMF_GridCreateTripoleEx_fapi}
+%\input{../Infrastructure/Grid/doc/ESMF_GridCreateSph2Dplus1Ex_fapi}
+%\input{../Infrastructure/Grid/doc/ESMF_GridCreateFromF90ArraysEx_fapi}
 #endif
 
-%\section{Grid C++ Interface}
-
-%\subsection{Use and Examples}
-%#ifdef STANDALONE
-%\input{Grid_ccex}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Grid/doc/Grid_ccex}
-%#endif
-
-%\subsection{Parameters and Definitions}
-%#ifdef STANDALONE
-%\input{Grid_ccparam}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Grid/doc/Grid_ccparam}
-%#endif
-
-% %\subsection{Class API}
-% #ifdef STANDALONE
-% \input{Grid_ccapi}
-% #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Grid/doc/Grid_ccapi}
-% #endif
-
+%\subsection{Restrictions and Future Work}
 #ifdef STANDALONE
-\section{Review Status}
-\input{Grid_desrev}
+%\input{Grid_rest}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Grid/doc/Grid_rest}
 #endif
 
+%\subsection{Design and Implementation Notes}
 #ifdef STANDALONE
-%\section{Glossary}
-\input{Grid_glos}
+%\input{Grid_implnotes}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Grid/doc/Grid_implnotes}
+#endif
+
+%\subsection{Grid Options}
+#ifdef STANDALONE
+%\input{Grid_options}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Grid/doc/Grid_options}
+#endif
+
+\subsection{Class API: General Grid Methods}
+#ifdef STANDALONE
+%\input{ESMF_Grid_fapi}
+\input{ESMC_Grid_chapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Grid/doc/ESMC_Grid_chapi}
+#endif
+
+%\subsection{Class API: GridGen Methods}
+%#ifdef STANDALONE
+%\input{ESMF_GridGen_fapi}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Grid/doc/ESMF_GridGen_fapi}
+%#endif
+
+%\subsection{Class API: StaggerLoc Methods}~\label{ref:stagsub}
+#ifdef STANDALONE
+%\input{ESMF_StaggerLoc_fapi}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Grid/doc/ESMF_StaggerLoc_fapi}
 #endif
 
 #ifdef STANDALONE
 %\section{Bibliography}
-\bibliography{comp} 
-\bibliographystyle{plain}
-\addcontentsline{toc}{section}{Bibliography}
+%\bibliography{Grid} 
+%\bibliographystyle{plain}
+%\addcontentsline{toc}{section}{Bibliography}
 #endif
 
 #ifdef STANDALONE
