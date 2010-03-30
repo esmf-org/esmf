@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.51 2008/09/26 21:11:40 cdeluca Exp $ 
+# $Id: makefile,v 1.52 2010/03/30 22:48:49 svasquez Exp $ 
 
 ALL: doc
 
@@ -11,12 +11,15 @@ ALL: doc
 LOCDIR	  = src/doc
 
 DVIFILES  =	ESMF_refdoc.dvi \
+		ESMC_crefdoc.dvi \
                 ESMF_usrdoc.dvi
 
 PDFFILES  =	${ESMC_DOCDIR}/ESMF_refdoc.pdf \
+		${ESMC_DOCDIR}/ESMC_crefdoc.pdf \
 		${ESMC_DOCDIR}/ESMF_usrdoc.pdf
 
 HTMLFILES =	${ESMC_DOCDIR}/ESMF_refdoc \
+		${ESMC_DOCDIR}/ESMC_crefdoc \
 		${ESMC_DOCDIR}/ESMF_usrdoc
 
 TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/demo/coupled_flow:" 
@@ -33,11 +36,12 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   = ESMF_refdoc $(HTMLFILES)
-CLEANFILES  = $(CLEAN_TEXFILES) ESMF.bib \
-	      ESMF_refdoc.tex ESMF_usrdoc.tex \
-	      ESMF_refdoc.pdf ESMF_usrdoc.pdf \
-	      ESMF_refdoc.bib ESMF_usrdoc.bib \
+CLEANDIRS   = ESMF_refdoc $(HTMLFILES) \
+	      ESMC_crefdoc $(HTMLFILES)
+CLEANFILES  = $(CLEAN_TEXFILES) ESMF.bib ESMC_bib\
+	      ESMF_refdoc.tex ESMC_crefdoc.tex ESMF_usrdoc.tex \
+	      ESMF_refdoc.pdf ESMC_crefdoc.pdf ESMF_usrdoc.pdf \
+	      ESMF_refdoc.bib ESMC_crefdoc.bib ESMF_usrdoc.bib \
 	      $(PDFFILES) $(DVIFILES)
 CLOBBERDIRS = 
 
@@ -52,6 +56,9 @@ ESMF_usrdoc.dvi: ESMF_usrdoc.ctex $(USRDOC_DEP_FILES)
 ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
 	${DO_LATEX} ESMF ref
 
+ESMC_crefdoc.dvi: ESMC_crefdoc.ctex $(REFDOC_DEP_FILES)
+	${DO_LATEX} ESMC cref
+
 
 #-------------------------------------------------------------------------------
 # pdf files postprocessed from the dvi files
@@ -65,6 +72,10 @@ ${ESMC_DOCDIR}/ESMF_usrdoc.pdf: ESMF_usrdoc.dvi
 ${ESMC_DOCDIR}/ESMF_refdoc.pdf: ESMF_refdoc.dvi
 	dvipdf ESMF_refdoc.dvi
 	mv -f ESMF_refdoc.pdf ${ESMC_DOCDIR}
+
+${ESMC_DOCDIR}/ESMC_crefdoc.pdf: ESMC_crefdoc.dvi
+	dvipdf ESMC_crefdoc.dvi
+	mv -f ESMC_crefdoc.pdf ${ESMC_DOCDIR}
 
 #-------------------------------------------------------------------------------
 # Html Files directly from the latex source
@@ -88,6 +99,15 @@ ${ESMC_DOCDIR}/ESMF_refdoc: ESMF_refdoc.ctex
 	${DO_L2H} ESMF ref
 	rm -f .latex2html-init
 	mv -f ESMF_refdoc ${ESMC_DOCDIR}
+
+${ESMC_DOCDIR}/ESMC_crefdoc: ESMC_crefdoc.ctex
+	-rm -rf $(ESMC_DOCDIR)/ESMC_crefdoc
+	if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
+	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
+	fi;
+	${DO_L2H} ESMC cref
+	rm -f .latex2html-init
+	mv -f ESMC_crefdoc ${ESMC_DOCDIR}
 
 
 
