@@ -1,4 +1,4 @@
-% $Id: Component_crefdoc.ctex,v 1.13 2010/03/04 18:57:45 svasquez Exp $
+% $Id: Component_crefdoc.ctex,v 1.14 2010/03/30 21:42:22 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -45,279 +45,87 @@
 \newpage
 #endif
 
-\section{Synopsis}
-#ifdef STANDALONE
-\input{Component_syn}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/Component_syn}
-#endif
-
-%
-% Component_obj.tex includes the graphic
-% comp_obj.eps.  When this file is processed
-% as constituent, that eps file cannot be found.
-%
-% \section{Object Model}
-% #ifdef STANDALONE
-% \input{Component_obj}
-% #elif defined(CONSTITUENT)
-% \input{../Superstructure/Component/doc/Component_obj}
-% #endif
-
-
-%%%%%%%%%%%%% Component Superclass %%%%%%%%%
-\section{Component Class}
-
-\subsection{Description}
-#ifdef STANDALONE
-\input{comp_desc}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/comp_desc}
-#endif
-
-\subsection{Design}
-#ifdef STANDALONE
-\input{comp_design}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/comp_design}
-#endif
-
-\subsubsection{Restrictions}
-#ifdef STANDALONE
-\input{comp_rest}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/comp_rest}
-#endif
-
-\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMF_Comp_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_Comp_fapi}
-#endif
-
-%\section{Component C++ Interface}
-
-%% \subsection{Use and Examples}
-%% #ifdef STANDALONE
-%% \input{ESMC_CompEx_ccapi}
-%% #elif defined(CONSTITUENT)
-%% \input{../Superstructure/Component/doc/ESMC_CompEx_ccapi}
-%% #endif
-
-%\subsection{Class API}
-%#ifdef STANDALONE
-%\input{ESMC_Comp_chapi}
-%#elif defined(CONSTITUENT)
-%\input{../Superstructure/Component/doc/ESMC_Comp_chapi}
-%#endif
-
-%%%%%%%%%%%%% Application Class %%%%%%%%%
-\section{Application Component Design}
-
-\subsection{Description}
-#ifdef STANDALONE
-\input{app_desc}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/app_desc}
-#endif
-
-\subsection{Design}
-#ifdef STANDALONE
-\input{app_design}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/app_design}
-#endif
-
-\subsubsection{Restrictions}
-#ifdef STANDALONE
-\input{app_rest}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/app_rest}
-#endif
-
-\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMF_AppComp_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_AppComp_fapi}
-#endif
-
-\subsection{Application F90 Use and Examples}
-#ifdef STANDALONE
-\input{ESMF_AppMainEx_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_AppMainEx_fapi}
-#endif
-
-%\subsection{Application C++ Use and Examples}
-%#ifdef STANDALONE
-%\input{ESMC_AppMainEx_ccapi}
-%#elif defined(CONSTITUENT)
-%\input{../Superstructure/Component/doc/ESMC_AppMainEx_ccapi}
-%#endif
-
-
-
-
 %%%%%%%%%%%%% Gridded Component Class %%%%%%%%%
-\section{Gridded Component Design}
+\section{GridComp Class}
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{gcomp_desc}
+\input{GridComp_desc}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/gcomp_desc}
+\input{../Superstructure/Component/doc/GridComp_desc}
 #endif
 
-\subsection{Design}
+%\subsection{GridComp Options}
 #ifdef STANDALONE
-\input{gcomp_design}
+#\input{GridComp_options}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/gcomp_design}
+#\input{../Superstructure/Component/doc/GridComp_options}
 #endif
-
-\subsubsection{Restrictions}
-#ifdef STANDALONE
-\input{gcomp_rest}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/gcomp_rest}
-#endif
-
-\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMF_GridComp_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_GridComp_fapi}
-#endif
-
-\subsection{Gridded Component F90 Use and Examples}
-#ifdef STANDALONE
-\input{ESMF_GCompEx_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_GCompEx_fapi}
-#endif
-
-%\subsection{Gridded Component C++ Use and Examples}
-%#ifdef STANDALONE
-%\input{ESMC_GCompEx_ccapi}
-%#elif defined(CONSTITUENT)
-%\input{../Superstructure/Component/doc/ESMC_GCompEx_ccapi}
-%#endif
-
-
-
-%%%%%%%%%%%%% Coupler Class %%%%%%%%%
-\section{Coupler Component Design}
-
-\subsection{Description}
-#ifdef STANDALONE
-\input{cpl_desc}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/cpl_desc}
-#endif
-
-\subsection{Design}
-#ifdef STANDALONE
-\input{cpl_design}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/cpl_design}
-#endif
-
-\subsubsection{Restrictions}
-#ifdef STANDALONE
-\input{cpl_rest}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/cpl_rest}
-#endif
-
-\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMF_CplComp_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_CplComp_fapi}
-#endif
-
-\subsection{Coupler F90 Use and Examples}
-#ifdef STANDALONE
-\input{ESMF_CplEx_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_CplEx_fapi}
-#endif
-
-%\subsection{Coupler C++ Use and Examples}
-%#ifdef STANDALONE
-%\input{ESMC_CplEx_ccapi}
-%#elif defined(CONSTITUENT)
-%\input{../Superstructure/Component/doc/ESMC_CplEx_ccapi}
-%#endif
-
-
-
-
-
-%%%%%%%%%%%%% State Class %%%%%%%%%
-\section{State Design}
-
-\subsection{Description}
-#ifdef STANDALONE
-\input{state_desc}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/state_desc}
-#endif
-
-\subsection{Design}
-#ifdef STANDALONE
-\input{state_design}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/state_design}
-#endif
-
-\subsubsection{Restrictions}
-#ifdef STANDALONE
-\input{state_rest}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/state_rest}
-#endif
-
-%\section{State Fortran Interface}
-
-\subsection{Use and Examples}
-#ifdef STANDALONE
-\input{ESMF_StateEx_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_StateEx_fapi}
-#endif
-
-\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMF_State_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_State_fapi}
-#endif
-
-%\section{State C++ Interface}
 
 %\subsection{Use and Examples}
 #ifdef STANDALONE
-%\input{ESMC_StateEx_ccapi}
+%\input{GridComp_usage}
+%\input{ESMF_GCompEx_fapi}
+%\input{ESMF_InternalStateEx_fapi}
+%\input{ESMF_InternalStateModEx_fapi}
+%\input{ESMCI_Comp_chapi}
 #elif defined(CONSTITUENT)
-%\input{../Superstructure/Component/doc/ESMC_StateEx_ccapi}
+\input{../Superstructure/Component/doc/GridComp_usage}
+%\input{../Superstructure/Component/doc/ESMF_GCompEx_fapi}
+%\input{../Superstructure/Component/doc/ESMF_InternalStateEx_fapi}
+%\input{../Superstructure/Component/doc/ESMF_InternalStateModEx_fapi} 
 #endif
 
-%%\subsection{Class API}
-%#ifdef STANDALONE
-%\input{ESMC_State_chapi}
-%#elif defined(CONSTITUENT)
-%\input{../Superstructure/Component/doc/ESMC_State_chapi}
-%#endif
+%\subsection{Restrictions and Future Work}
+#ifdef STANDALONE
+%\input{GridComp_rest}
+#elif defined(CONSTITUENT)
+%\input{../Superstructure/Component/doc/GridComp_rest}
+#endif
+
+\subsection{Class API}
+#ifdef STANDALONE
+%\input{ESMF_GridComp_fapi}
+\input{ESMC_Comp_chapi}
+#elif defined(CONSTITUENT)
+%\input{../Superstructure/Component/doc/ESMF_GridComp_fapi}
+\input{../Superstructure/Component/doc/ESMC_Comp_chapi}
+#endif
+
+%%%%%%%%%%%%% Coupler Class %%%%%%%%%
+\section{CplComp Class}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{CplComp_desc}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/Component/doc/CplComp_desc}
+#endif
+
+%\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{CplComp_usage}
+%\input{ESMF_CplEx_fapi}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/Component/doc/CplComp_usage}
+%\input{../Superstructure/Component/doc/ESMF_CplEx_fapi}
+#endif
+
+%\subsection{Restrictions and Future Work}
+#ifdef STANDALONE
+\input{CplComp_rest}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/Component/doc/CplComp_rest}
+#endif
+
+%\subsection{Class API}
+#ifdef STANDALONE
+%\input{ESMF_CplComp_fapi} 
+#elif defined(CONSTITUENT)
+%\input{../Superstructure/Component/doc/ESMF_CplComp_fapi}
+#endif
 
 %%%%%%% end class sections %%%%%%%%
-
-#ifdef STANDALONE
-\section{Review Status}
-\input{Component_desrev}
-#endif
 
 #ifdef STANDALONE
 %\section{Glossary}
