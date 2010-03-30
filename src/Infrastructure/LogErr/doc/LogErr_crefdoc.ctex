@@ -1,0 +1,111 @@
+% $Id: LogErr_crefdoc.ctex,v 1.1 2010/03/30 22:09:37 svasquez Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2009, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+#ifdef STANDALONE
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphics,color}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{\Large {\bf LogErr Reference}}
+\newcommand{\myauthors}{\large Shep Smithline,Erik Kluzek and Chuck Panaccione}
+#endif
+
+#ifdef STANDALONE
+\begin{document}
+#endif
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+#ifdef STANDALONE
+% Title page
+\input{../../../doc/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+#endif
+
+\section{LogErr Class}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{LogErr_desc}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/LogErr/doc/LogErr_desc}
+#endif
+
+%\subsection{LogErr Options}
+#ifdef STANDALONE
+%\input{LogErr_options}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/LogErr/doc/LogErr_options}
+#endif
+
+%\subsection{Use and Examples}
+#ifdef STANDALONE
+%\input{LogErr_usage}
+%\input{ESMF_LogErrEx_fapi}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/LogErr/doc/LogErr_usage}
+%\input{../Infrastructure/LogErr/doc/ESMF_LogErrEx_fapi}
+#endif
+
+%\subsection{Restrictions and Future Work}
+#ifdef STANDALONE
+%\input{LogErr_rest}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/LogErr/doc/LogErr_rest}
+#endif
+
+%%\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+%\input{LogErr_implnotes}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/LogErr/doc/LogErr_implnotes}
+#endif
+
+%\subsection{Object Model}
+#ifdef STANDALONE
+%\input{LogErr_obj.tex}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/LogErr/doc/LogErr_obj.tex}
+#endif
+
+\subsection{Class API}
+#ifdef STANDALONE
+%\input{../../Util/doc/ESMF_LogErr_fapi}
+\input{ESMC_LogErr_chapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/LogErr/doc/ESMC_LogErr_chapi}
+#endif
+
+%#ifdef STANDALONE
+%\section{Glossary}
+%\input{LogErr_glos}
+%#endif
+
+%#ifdef STANDALONE
+%\section{Bibliography}
+%\bibliography{comp} 
+%\bibliographystyle{plain}
+%\addcontentsline{toc}{section}{Bibliography}
+%#endif
+
+#ifdef STANDALONE
+\end{document}
+#endif

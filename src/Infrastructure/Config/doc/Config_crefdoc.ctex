@@ -1,0 +1,175 @@
+% $Id: Config_crefdoc.ctex,v 1.1 2010/03/30 22:08:34 svasquez Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2009, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+#ifdef STANDALONE
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphics,color}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{\bf Config Design}
+\newcommand{\myauthors}{\it Phil Jones and Jon Wolfe}
+#endif
+
+#ifdef STANDALONE
+\begin{document}
+#endif
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+#ifdef STANDALONE
+% Title page
+\input{../../../doc/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+#endif
+
+%\section{Synopsis}
+%#ifdef STANDALONE
+%\input{Config_syn}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Config/doc/Config_syn}
+%#endif
+
+%\section{Algorithmic Description}
+%#ifdef STANDALONE
+%\input{Config_alg}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Config/doc/Config_alg}
+%#endif
+
+%\section{Object Model}
+%#ifdef STANDALONE
+%\input{Config_obj}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Config/doc/Config_obj}
+%#endif
+
+% \section{Global Parameters and Definitions}
+% #ifdef STANDALONE
+% \input{Config_param}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Config/doc/Config_param}
+% #endif
+
+\section{Config Class}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{Config_desc}
+%\input{Config_usage}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Config/doc/Config_desc}
+%\input{../Infrastructure/Config/doc/Config_usage}
+#endif
+
+%\subsection{Use and Examples}
+#ifdef STANDALONE
+%\input{ESMC_ConfigOverviewEx_ccapi}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Config/doc/ESMC_ConfigOverviewEx_ccapi}
+#endif
+
+%\subsubsection{Class Definition}
+%#ifdef STANDALONE
+%\input{Config_def}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Config/doc/Config_def}
+%#endif
+
+%\subsubsection{Restrictions and Future Work}
+%#ifdef STANDALONE
+%\input{Config_rest}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Config/doc/Config_rest}
+%#endif
+
+%%\section{Config Fortran Interface}
+
+%\subsection{Use and Examples}
+%#ifdef STANDALONE
+%\input{Configex_fapi}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Config/doc/Config_fex}
+%#endif
+
+%\subsection{Parameters and Definitions}
+%#ifdef STANDALONE
+%\input{Config_fparam}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Config/doc/Config_fparam}
+%#endif
+
+\subsection{Class API}
+#ifdef STANDALONE
+\input{ESMC_Config_chapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Config/doc/ESMC_Config_chapi}
+#endif
+
+%\section{Config C++ Interface}
+
+%\subsection{Use and Examples}
+%#ifdef STANDALONE
+%\input{Config_ccex}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Config/doc/Config_ccex}
+%#endif
+
+%\subsection{Parameters and Definitions}
+%#ifdef STANDALONE
+%\input{Config_ccparam}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Config/doc/Config_ccparam}
+%#endif
+
+% %\subsection{Class API}
+% #ifdef STANDALONE
+% \input{Config_ccapi}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Config/doc/Config_ccapi}
+% #endif
+
+%#ifdef STANDALONE
+%\section{Review Status}
+%\input{Config_desrev}
+%#endif
+
+%#ifdef STANDALONE
+%%\section{Glossary}
+%\input{Config_glos}
+%#endif
+
+%#ifdef STANDALONE
+%\section{Bibliography}
+%\bibliography{comp} 
+%\bibliographystyle{plain}
+%\addcontentsline{toc}{section}{Bibliography}
+%#endif
+
+#ifdef STANDALONE
+\end{document}
+#endif
+
+
+
+
+
+
+
