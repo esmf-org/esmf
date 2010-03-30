@@ -1,0 +1,143 @@
+% $Id: Array_crefdoc.ctex,v 1.1 2010/03/30 21:50:27 svasquez Exp $ 
+%
+% Earth System Modeling Framework
+% Copyright 2002-2009, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+#ifdef STANDALONE
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage{times}
+\usepackage{alltt}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphics,color}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{\Large {\bf Array Reference}}
+\newcommand{\myauthors}{\large {\it Gerhard Theurich}}
+#endif
+
+#ifdef STANDALONE
+\begin{document}
+#endif
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+#ifdef STANDALONE
+% Title page
+\input{../../../doc/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+#endif
+
+
+%============================================================================
+% Array Class
+%============================================================================
+
+\section{Array Class}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{Array_desc}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Array/doc/Array_desc}
+#endif
+
+%\subsection{Array Options}
+%#ifdef STANDALONE
+%\input{Array_options}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Array/doc/Array_options}
+%#endif
+
+%\subsection{Use and Examples}
+#ifdef STANDALONE
+%\input{Array_usage}
+%\input{ESMF_ArrayFarrayEx_fapi}
+%\input{ESMF_ArrayFarrayHaloEx_fapi}
+%\input{ESMF_ArrayLarrayEx_fapi}
+%\input{ESMF_ArrayEx_fapi}
+%\input{ESMF_ArrayScatterGatherEx_fapi}
+%\input{ESMF_ArrayRedistEx_fapi}
+%\input{ESMF_ArraySparseMatMulEx_fapi}
+%\input{ESMF_ArrayScatterGatherArbEx_fapi}
+%\input{ESMF_ArrayCommNBEx_fapi}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Array/doc/Array_usage}
+%\input{../Infrastructure/Array/doc/ESMF_ArrayFarrayEx_fapi}
+%\input{../Infrastructure/Array/doc/ESMF_ArrayFarrayHaloEx_fapi}
+%\input{../Infrastructure/Array/doc/ESMF_ArrayLarrayEx_fapi}
+%\input{../Infrastructure/Array/doc/ESMF_ArrayEx_fapi}
+%\input{../Infrastructure/Array/doc/ESMF_ArrayScatterGatherEx_fapi}
+%\input{../Infrastructure/Array/doc/ESMF_ArrayRedistEx_fapi}
+%\input{../Infrastructure/Array/doc/ESMF_ArraySparseMatMulEx_fapi}
+%\input{../Infrastructure/Array/doc/ESMF_ArrayScatterGatherArbEx_fapi}
+%\input{../Infrastructure/Array/doc/ESMF_ArrayCommNBEx_fapi}
+#endif
+
+%\subsection{Restrictions and Future Work}
+#ifdef STANDALONE
+%\input{Array_rest}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Array/doc/Array_rest}
+#endif
+
+%\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+%\input{Array_implnotes}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Array/doc/Array_implnotes}
+#endif
+
+\subsection{Class API}
+#ifdef STANDALONE
+%\input{ESMF_ArrayCreate_fapi}
+%\mbox{}\hrulefill\
+%\input{ESMF_ArrayGather_fapi}
+%\mbox{}\hrulefill\
+%\input{ESMF_ArrayGet_fapi}
+%\mbox{}\hrulefill\
+%\input{ESMF_ArrayPr_fapi}
+%\mbox{}\hrulefill\
+%\input{ESMF_ArrayScatter_fapi}
+%\mbox{}\hrulefill\
+%\input{ESMF_Array_fapi}
+\input{ESMC_Array_chapi}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Array/doc/ESMF_ArrayCreate_fapi}
+%\mbox{}\hrulefill\
+%\input{../Infrastructure/Array/doc/ESMF_ArrayGather_fapi}
+%\mbox{}\hrulefill\
+%\input{../Infrastructure/Array/doc/ESMF_ArrayGet_fapi}
+%\mbox{}\hrulefill\
+%\input{../Infrastructure/Array/doc/ESMF_ArrayPr_fapi}
+%\mbox{}\hrulefill\
+%\input{../Infrastructure/Array/doc/ESMF_ArrayScatter_fapi}
+%\mbox{}\hrulefill\
+%\input{../Infrastructure/Array/doc/ESMF_Array_fapi}
+\input{../Infrastructure/Array/doc/ESMC_Array_chapi}
+#endif
+
+%#ifdef STANDALONE
+%\section{Bibliography}
+%\bibliography{comp} 
+%\bibliographystyle{plain}
+%\addcontentsline{toc}{section}{Bibliography}
+%#endif
+
+#ifdef STANDALONE
+\end{document}
+#endif
+

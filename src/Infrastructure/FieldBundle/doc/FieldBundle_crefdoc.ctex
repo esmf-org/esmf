@@ -1,0 +1,119 @@
+% $Id: FieldBundle_crefdoc.ctex,v 1.1 2010/03/30 21:46:25 svasquez Exp $
+
+#ifdef STANDALONE
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage{times}
+\usepackage{alltt}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphics,color}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{FieldBundles Design}
+\newcommand{\myauthors}{Nancy Collins}
+#endif
+
+#ifdef STANDALONE
+\begin{document}
+#endif
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+#ifdef STANDALONE
+% Title page
+\input{../../../doc/title_alldoc}
+
+\newpage
+\tableofcontents
+
+
+\section{FieldBundle Class}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{FieldBundle_desc}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/FieldBundle/doc/FieldBundle_desc}
+#endif
+
+%\subsection{FieldBundle Options}
+#ifdef STANDALONE
+%\input{FieldBundle_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/FieldBundle/doc/FieldBundle_options}
+#endif
+
+%\subsection{Use and Examples}
+#ifdef STANDALONE
+%\input{FieldBundle_usage}
+%\input{ESMF_FieldBundleCreateEx_fapi}
+%\input{ESMF_FieldBundleRedistEx_fapi}
+%\input{ESMF_FieldBundleSMMEx_fapi}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/FieldBundle/doc/FieldBundle_usage}
+%\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleCreateEx_fapi}
+%\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleRedistEx_fapi}
+%\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleSMMEx_fapi}
+#endif
+
+%\subsection{Restrictions and Future Work}
+#ifdef STANDALONE
+%\input{FieldBundle_rest}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/FieldBundle/doc/FieldBundle_rest}
+#endif
+
+%\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+%\input{FieldBundle_implnotes}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/FieldBundle/doc/FieldBundle_implnotes}
+#endif
+
+%\subsection{Global Parameters}
+%#ifdef STANDALONE
+%\input{FieldBundle_fparam}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/FieldBundle/doc/FieldBundle_fparam}
+%#endif
+
+\subsection{Class API: Basic FieldBundle Methods}
+#ifdef STANDALONE
+%\input{ESMF_FieldBundle_fapi}
+#elif defined(CONSTITUENT)
+%input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundle_fapi}
+#endif
+
+%TODO:FIELDINTEGRATION Restore FieldBundleGet methods
+%\subsection{Class API: FieldBundle Overloads for Fortran Arrays}
+%#ifdef STANDALONE
+%\input{ESMF_FieldBundleGet_fapi}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleGet_fapi}
+%#endif
+
+%\subsection{Class API: FieldBundle Communications}
+#ifdef STANDALONE
+%%\input{../../FieldBundleComm/doc/ESMF_FieldBundleComm_fapi}
+%\input{../../FieldBundleComm/doc/ESMF_FieldBundleRedist_fapi}
+%\input{../../FieldBundleComm/doc/ESMF_FieldBundleSMM_fapi} 
+#elif defined(CONSTITUENT)
+%%\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleComm_fapi}
+%\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleRedist_fapi}
+%\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleSMM_fapi}
+#endif
+
+#ifdef STANDALONE
+%\section{Bibliography}
+\bibliography{comp} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{Bibliography}
+#endif
+
+#ifdef STANDALONE
+\end{document}
+#endif

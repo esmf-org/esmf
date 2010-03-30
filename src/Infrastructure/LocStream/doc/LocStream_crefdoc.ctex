@@ -1,0 +1,173 @@
+% $Id: LocStream_crefdoc.ctex,v 1.1 2010/03/30 21:55:30 svasquez Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2009, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+#ifdef STANDALONE
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphics,color}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{\bf LocStream Design}
+\newcommand{\myauthors}{\it Bob Oehmke and William Sawyer}
+#endif
+
+#ifdef STANDALONE
+\begin{document}
+#endif
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+#ifdef STANDALONE
+% Title page
+\input{../../../doc/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+#endif
+
+%\section{Synopsis}
+%#ifdef STANDALONE
+%\input{LocStream_syn}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/LocStream/doc/LocStream_syn}
+%#endif
+
+%\section{Algorithmic Description}
+%#ifdef STANDALONE
+%\input{LocStream_alg}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/LocStream/doc/LocStream_alg}
+%#endif
+
+%\section{Object Model}
+%#ifdef STANDALONE
+%\input{LocStream_obj}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/LocStream/doc/LocStream_obj}
+%#endif
+
+% \section{Global Parameters and Definitions}
+% #ifdef STANDALONE
+% \input{LocStream_param}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/LocStream/doc/LocStream_param}
+% #endif
+
+\section{LocStream Class}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{LocStream_desc}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/LocStream/doc/LocStream_desc}
+#endif
+
+%\subsection{Design}
+%#ifdef STANDALONE
+%\input{LocStream_design}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/LocStream/doc/LocStream_design}
+%#endif
+
+%\subsubsection{Class Definition}
+%#ifdef STANDALONE
+%\input{LocStream_def}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/LocStream/doc/LocStream_def}
+%#endif
+
+%\subsubsection{Restrictions}
+%#ifdef STANDALONE
+%\input{LocStream_rest}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/LocStream/doc/LocStream_rest}
+%#endif
+
+%\section{LocStream Fortran Interface}
+
+%\subsection{Use and Examples}
+#ifdef STANDALONE
+%\input{ESMF_LocStreamEx_fapi}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/LocStream/doc/ESMF_LocStreamEx_fapi}
+#endif
+
+%\subsection{Parameters and Definitions}
+%#ifdef STANDALONE
+%\input{LocStream_fparam}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/LocStream/doc/LocStream_fparam}
+%#endif
+
+%\subsection{Class API}
+#ifdef STANDALONE
+%\input{LocStream_fapi}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/LocStream/doc/ESMF_LocStream_fapi}
+#endif
+
+%\section{LocStream C++ Interface}
+
+%\subsection{Use and Examples}
+%#ifdef STANDALONE
+%\input{LocStream_ccex}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/LocStream/doc/LocStream_ccex}
+%#endif
+
+%\subsection{Parameters and Definitions}
+%#ifdef STANDALONE
+%\input{LocStream_ccparam}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/LocStream/doc/LocStream_ccparam}
+%#endif
+
+% %\subsection{Class API}
+% #ifdef STANDALONE
+% \input{LocStream_ccapi}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/LocStream/doc/LocStream_ccapi}
+% #endif
+
+%#ifdef STANDALONE
+%\section{Review Status}
+%\input{LocStream_desrev}
+%#endif
+
+%#ifdef STANDALONE
+%\section{Glossary}
+%\input{LocStream_glos}
+%#endif
+
+%#ifdef STANDALONE
+%\section{Bibliography}
+%\bibliography{comp} 
+%\bibliographystyle{plain}
+%\addcontentsline{toc}{section}{Bibliography}
+%#endif
+
+#ifdef STANDALONE
+\end{document}
+#endif
+
+
+
+
+
+
+

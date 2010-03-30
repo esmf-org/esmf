@@ -1,0 +1,96 @@
+% $Id: ArraySpec_crefdoc.ctex,v 1.1 2010/03/30 21:52:37 svasquez Exp $
+
+#ifdef STANDALONE
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage{times}
+\usepackage{alltt}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphics,color}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{ArraySpec Design}
+\newcommand{\myauthors}{Nancy Collins}
+#endif
+
+#ifdef STANDALONE
+\begin{document}
+#endif
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+#ifdef STANDALONE
+% Title page
+\input{../../../doc/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+#endif
+
+\section{ArraySpec Class}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{ArraySpec_desc}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/ArraySpec/doc/ArraySpec_desc}
+#endif
+
+%\subsection{Use and Examples}
+#ifdef STANDALONE
+%\input{ArraySpec_usage}
+%\input{ESMF_ArraySpecEx_fapi}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/ArraySpec/doc/ArraySpec_usage}
+%\input{../Infrastructure/ArraySpec/doc/ESMF_ArraySpecEx_fapi}
+#endif
+
+%\subsection{Restrictions and Future Work}
+#ifdef STANDALONE
+%\input{ArraySpec_rest}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/ArraySpec/doc/ArraySpec_rest}
+#endif
+
+%\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+%\input{ArraySpec_implnotes}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/ArraySpec/doc/ArraySpec_implnotes}
+#endif
+
+\subsection{Class API}
+#ifdef STANDALONE
+%\input{ESMF_ArraySpec_fapi}
+\input{ESMC_ArraySpec_chapi}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/ArraySpec/doc/ESMF_ArraySpec_fapi}
+\input{../Infrastructure/ArraySpec/doc/ESMC_ArraySpec_chapi}
+#endif
+
+%#ifdef STANDALONE
+%\section{Review Status}
+%\input{ArraySpec_desrev}
+%#endif
+
+%#ifdef STANDALONE
+%\section{Glossary}
+%\input{ArraySpec_glos}
+%#endif
+
+%#ifdef STANDALONE
+%\section{Bibliography}
+%\bibliography{comp} 
+%\bibliographystyle{plain}
+%\addcontentsline{toc}{section}{Bibliography}
+%#endif
+
+#ifdef STANDALONE
+\end{document}
+#endif

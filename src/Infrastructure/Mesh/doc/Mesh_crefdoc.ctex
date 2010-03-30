@@ -1,0 +1,89 @@
+% $Id: Mesh_crefdoc.ctex,v 1.1 2010/03/30 21:56:48 svasquez Exp $
+
+#ifdef STANDALONE
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage{times}
+\usepackage{alltt}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphics,color}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{Mesh Design}
+\newcommand{\myauthors}{David Neckels}
+#endif
+
+#ifdef STANDALONE
+\begin{document}
+#endif
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+#ifdef STANDALONE
+% Title page
+\input{../../../doc/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+#endif
+
+\section{Mesh Class}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{Mesh_desc}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Mesh/doc/Mesh_desc}
+#endif
+
+%\subsection{Use and Examples}
+#ifdef STANDALONE
+%\input{ESMF_MeshEx_fapi}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Mesh/doc/ESMF_MeshEx_fapi}
+#endif
+
+%\subsection{Restrictions and Future Work}
+#ifdef STANDALONE
+%\input{Mesh_rest}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Mesh/doc/Mesh_rest}
+#endif
+
+%\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+%\input{Mesh_implnotes}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Mesh/doc/Mesh_implnotes}
+#endif
+
+%\subsection{Mesh Options}
+#ifdef STANDALONE
+%\input{Mesh_options}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Mesh/doc/Mesh_options}
+#endif
+
+\subsection{Class API}
+#ifdef STANDALONE
+%\input{ESMF_Mesh_fapi}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Mesh/doc/ESMF_Mesh_fapi}
+#endif
+
+#ifdef STANDALONE
+%\section{Bibliography}
+\bibliography{comp} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{Bibliography}
+#endif
+
+#ifdef STANDALONE
+\end{document}
+#endif
