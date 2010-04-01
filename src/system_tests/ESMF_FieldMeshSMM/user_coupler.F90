@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.3 2009/10/21 22:30:01 feiliu Exp $
+! $Id: user_coupler.F90,v 1.4 2010/04/01 19:48:19 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -114,13 +114,19 @@
       ! up the SMM structure
 
       ! initialize factorList and factorIndexList
-      ! the diagonal of the 9x9 diagonal matrix on 4 PETs is ((1 2 3) (1 2) (1 2) (1 2))
+      ! Nodal distribution of indices:
+      ! 1 3 1
+      ! 2 4 2
+      ! 1 2 1
+      ! src data = ((1 2 3 4) (1 2) (1 2) (1))
+      ! the diagonal of the 9x9 diagonal matrix on 4 PETs is ((1 2 3) (1 2) (1 2) (1 4))
+      ! result = ((1 4 9) (1 4) (1 4) (1 4))
       if (localPet == 0) then
           ! 4 -> 3
           allocate(factorList(3))
           allocate(factorIndexList(2,3))
           factorList = (/1,2,3/)
-          factorIndexList(1,:) = (/1, 1, 1/)
+          factorIndexList(1,:) = (/1, 2, 4/)
           factorIndexList(2,:) = (/1, 2, 3/)
           call ESMF_FieldSMMStore(humidity1, humidity2, routehandle, &
               factorList, factorIndexList, rc=rc)
@@ -131,7 +137,7 @@
           allocate(factorList(2))
           allocate(factorIndexList(2,2))
           factorList = (/1,2/)
-          factorIndexList(1,:) = (/5, 6/)
+          factorIndexList(1,:) = (/3, 6/)
           factorIndexList(2,:) = (/4, 5/)
           call ESMF_FieldSMMStore(humidity1, humidity2, routehandle, &
               factorList, factorIndexList, rc=rc)
@@ -152,7 +158,7 @@
           ! 1 -> 2
           allocate(factorList(2))
           allocate(factorIndexList(2,2))
-          factorList = (/1,2/)
+          factorList = (/1,4/)
           factorIndexList(1,:) = (/9,9/)
           factorIndexList(2,:) = (/8,9/)
           call ESMF_FieldSMMStore(humidity1, humidity2, routehandle, &

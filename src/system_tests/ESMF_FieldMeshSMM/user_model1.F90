@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.5 2009/10/21 22:30:01 feiliu Exp $
+! $Id: user_model1.F90,v 1.6 2010/04/01 19:48:19 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -68,7 +68,7 @@
         type(ESMF_VM) :: vm
         type(ESMF_ArraySpec) :: arrayspec
         integer(ESMF_KIND_I4), dimension(:), pointer :: srcfptr
-        integer :: npets, localPet
+        integer :: npets, localPet, i
 
         integer, pointer :: nodeIds(:),nodeOwners(:)
         real(ESMF_KIND_R8), pointer :: nodeCoords(:)
@@ -238,7 +238,9 @@
         call ESMF_FieldGet(humidity, localDe=0, farrayPtr=srcfptr, rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
 
-        srcfptr = 1
+        do i = lbound(srcfptr, 1), ubound(srcfptr, 1)
+            srcfptr(i) = i
+        enddo
 
         call ESMF_StateAdd(exportState, humidity, rc=rc)
         if (rc .ne. ESMF_SUCCESS) return

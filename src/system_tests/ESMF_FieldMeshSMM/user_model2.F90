@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.3 2009/09/29 16:53:07 feiliu Exp $
+! $Id: user_model2.F90,v 1.4 2010/04/01 19:48:19 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -85,8 +85,7 @@
       distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/9/), rc=rc)
       if(rc/=ESMF_SUCCESS) return
 
-      grid = ESMF_GridCreate(distgrid=distgrid, gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), &
-            destroyDistGrid=.true., rc=rc)
+      grid = ESMF_GridCreate(distgrid=distgrid, destroyDistGrid=.true., rc=rc)
       if(rc/=ESMF_SUCCESS) return
       call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
       if(rc/=ESMF_SUCCESS) return
@@ -140,7 +139,7 @@
       ! The smm op reset the values to the index value, verify this is the case.
       !write(*, '(9I3)') l, lpe, fptr
       do i = exlb(1), exub(1)
-          if(fptr(i) .ne. i) rc = ESMF_FAILURE
+          if(fptr(i) .ne. i*i) rc = ESMF_FAILURE
       enddo
 
       print *, "User Comp Run returning"
