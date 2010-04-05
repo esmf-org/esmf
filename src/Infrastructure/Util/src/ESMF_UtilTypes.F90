@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.91 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.92 2010/04/05 21:34:31 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -392,6 +392,21 @@
                                ESMF_INDEX_USER = ESMF_IndexFlag(2)
 
 !------------------------------------------------------------------------------
+!     ! ESMF_NestedFlag
+!
+!     ! Interface flag for whether to process nested objects or not.
+
+      type ESMF_NestedFlag
+        sequence
+        private
+        integer :: value
+      end type
+
+      type(ESMF_NestedFlag), parameter ::  &
+        ESMF_NESTED_OFF = ESMF_NestedFlag(0),  &
+        ESMF_NESTED_ON  = ESMF_NestedFlag(1)
+
+!------------------------------------------------------------------------------
 !     ! ESMF_RegionFlag
 !
 !     ! Interface flag for setting index bounds
@@ -573,6 +588,10 @@
 
       public ESMF_IndexFlag
       public ESMF_INDEX_DELOCAL, ESMF_INDEX_GLOBAL, ESMF_INDEX_USER
+
+      public ESMF_NestedFlag
+      public ESMF_NESTED_OFF, ESMF_NESTED_ON
+
       public ESMF_RegionFlag, &
              ESMF_REGION_TOTAL, ESMF_REGION_SELECT, ESMF_REGION_EMPTY
       public ESMF_CommFlag, &
@@ -649,6 +668,7 @@ interface operator (.eq.)
   module procedure ESMF_tnfeq
   module procedure ESMF_freq
   module procedure ESMF_ifeq
+  module procedure ESMF_nfeq
   module procedure ESMF_rfeq
   module procedure ESMF_unmappedActioneq
 end interface
@@ -983,6 +1003,15 @@ function ESMF_ifeq(if1, if2)
   ESMF_ifeq = (if1%i_type .eq. if2%i_type)
 end function
 
+!------------------------------------------------------------------------------
+! function to compare two ESMF_NestedFlag types
+
+function ESMF_nfeq (nf1, nf2)
+  logical :: ESMF_nfeq
+  type(ESMF_NestedFlag), intent(in) :: nf1, nf2
+
+  ESMF_nfeq = nf1%value == nf2%value
+end function ESMF_nfeq
 
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_RegionFlag types
