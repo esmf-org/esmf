@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.69 2010/03/12 01:32:57 w6ws Exp $
+! $Id: ESMF_StateUTest.F90,v 1.70 2010/04/05 21:38:44 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.69 2010/03/12 01:32:57 w6ws Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.70 2010/04/05 21:38:44 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -422,10 +422,27 @@
 
   !------------------------------------------------------------------------
   !EX_removeUTest
-  ! Test printing of State - deep option
-  call  ESMF_StatePrint(state1, options='deep', rc=rc)
+  ! Test printing of State - long print option
+  call  ESMF_StatePrint(state1, options='long', rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Printing of a State Test - long option"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_removeUTest
+  ! Test printing of State - nested option
+  call  ESMF_StatePrint(state1, nestedFlag=ESMF_NESTED_ON, rc=rc)
   write(failMsg, *) ""
   write(name, *) "Printing of a State Test - deep option"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_removeUTest
+  ! Test printing of State - nested and long options
+  call  ESMF_StatePrint(state1,  &
+      nestedFlag=ESMF_NESTED_ON, options='long', rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Printing of a State Test - nested and long options"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------

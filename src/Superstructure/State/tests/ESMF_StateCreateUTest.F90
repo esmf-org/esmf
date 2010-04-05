@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.21 2010/03/12 01:34:17 w6ws Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.22 2010/04/05 21:38:44 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ end module
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.21 2010/03/12 01:34:17 w6ws Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.22 2010/04/05 21:38:44 w6ws Exp $'
 !------------------------------------------------------------------------------
 !   ! Local variables
     integer :: rc
@@ -72,8 +72,15 @@ end module
 #ifdef ESMF_TESTEXHAUSTIVE
     character(ESMF_MAXSTR) :: bname
     type(ESMF_State) :: state2, state3, state4, state5
-    type(ESMF_FieldBundle) :: bundle1, bundle2, qbundle
+    type(ESMF_State) :: state6
+    type(ESMF_FieldBundle) :: bundle1, bundle2, bundle3, qbundle
+    type(ESMF_VM) :: vm
     logical :: isNeeded
+
+    integer :: i
+    integer :: itemcount
+    character(ESMF_MAXSTR), allocatable :: itemlist(:)
+    type(ESMF_StateItemType), allocatable :: itemtypelist(:)
 #endif
 
 !-------------------------------------------------------------------------------
@@ -376,6 +383,23 @@ end module
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+      !EX_UTest 
+      ! Create a bundle to use in the subsequent tests
+      bname="Temperature"
+      bundle2 = ESMF_FieldBundleCreate(name=bname, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating an empty bundle for nested State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Add the Fieldbundle to the State
+      call ESMF_StateAdd(state1, bundle2, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Adding a FieldBundle to a nested State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
       !EX_UTest      
       ! Add a nested State to another
       call ESMF_StateAdd(state5, state1, rc=rc)
@@ -403,11 +427,82 @@ end module
       !------------------------------------------------------------------------
       !EX_UTest
       ! Print the nested State
-      call ESMF_StatePrint (state5, options='deep', rc=rc)
+call ESMF_VMGetGlobal(vm, rc=rc)
+call ESMF_IOUnitFlush (6)
+call ESMF_VMBarrier (vm)
+      call ESMF_StatePrint (state5, options='long', rc=rc)
       write(failMsg, *) ""
       write(name, *) "Printing a State with nesting"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+call ESMF_IOUnitFlush (6)
+call ESMF_VMBarrier (vm)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Test getting a nested State object
+      call ESMF_StateGet(state=state5,  &
+         itemname="Temperature",  &
+         nestedStatename="Atmosphere Import", FieldBundle=bundle3, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting a FieldBundle from a nested State"
+      print *,"testName: ", trim (testName)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Test getting a nested State object Info item count
+      call ESMF_StateGet(state=state5,  &
+         itemCount=itemcount, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting item count from a nested State"
+      print *,"item count: ", itemcount
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Test getting a nested State object Info item name list
+      allocate (itemlist(itemcount))
+      call ESMF_StateGet(state=state5,  &
+         itemNameList=itemlist, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting item name list from a nested State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Test getting a nested State object Info item type list
+      allocate (itemtypelist(itemcount))
+      call ESMF_StateGet(state=state5,  &
+         stateitemtypeList=itemtypelist, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting item type list from a nested State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      do, i=1, itemcount
+        select case (itemtypelist(i)%ot)
+	case (ESMF_STATEITEM_FIELD%ot)
+	  print *, 'ESMF_STATEITEM_FIELD:       ', trim (itemlist(i))
+	case (ESMF_STATEITEM_FIELDBUNDLE%ot)
+	  print *, 'ESMF_STATEITEM_FIELDBUNDLE: ', trim (itemlist(i))
+	case (ESMF_STATEITEM_ARRAY%ot)
+	  print *, 'ESMF_STATEITEM_ARRAY:       ', trim (itemlist(i))
+	case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
+	  print *, 'ESMF_STATEITEM_ARRAYBUNDLE: ', trim (itemlist(i))
+	case (ESMF_STATEITEM_ROUTEHANDLE%ot)
+	  print *, 'ESMF_STATEITEM_ROUTEHANDLE: ', trim (itemlist(i))
+	case (ESMF_STATEITEM_STATE%ot)      
+	  print *, 'ESMF_STATEITEM_STATE:       ', trim (itemlist(i))
+	case (ESMF_STATEITEM_NAME%ot)       
+	  print *, 'ESMF_STATEITEM_NAME:        ', trim (itemlist(i))
+	case (ESMF_STATEITEM_INDIRECT%ot)   
+	  print *, 'ESMF_STATEITEM_INDIRECT:    ', trim (itemlist(i))
+	case (ESMF_STATEITEM_UNKNOWN%ot)    
+	  print *, 'ESMF_STATEITEM_UNKNOWN:     ', trim (itemlist(i))
+	case (ESMF_STATEITEM_NOTFOUND%ot)   
+	  print *, 'ESMF_STATEITEM_NOTFOUND:    ', trim (itemlist(i))
+	end select
+      end do
       !------------------------------------------------------------------------
       !EX_UTest      
       ! Destroying a State
