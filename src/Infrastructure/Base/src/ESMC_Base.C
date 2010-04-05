@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.129 2010/03/04 18:57:42 svasquez Exp $
+// $Id: ESMC_Base.C,v 1.130 2010/04/05 21:35:55 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.129 2010/03/04 18:57:42 svasquez Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.130 2010/04/05 21:35:55 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -617,7 +617,8 @@
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
-      const char *options) const {     //  in - print options
+      int level,                   // in - print level for recursive prints
+      const char *options) const { //  in - print options
 //
 // !DESCRIPTION:
 //    Print the contents of an {\tt ESMC\_Base} object.  Expected to be
@@ -642,14 +643,43 @@
     // ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     
   // root Attribute
-  sprintf(msgbuf, "   Root Attribute\n");
+  if (level > 0) {
+    printf (" ");
+    for (int i=0; i<level; i++)
+      printf ("->");
+  }
+  sprintf(msgbuf, "     Root Attribute\n");
   printf(msgbuf);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+  // ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   
   // traverse the Attribute hierarchy, printing as we go
   root.ESMC_Print();
 
   return ESMF_SUCCESS;
+
+ } // end ESMC_Print
+
+//-----------------------------------------------------------------------------
+
+//BOPI
+// !IROUTINE:  ESMC_Print - Print contents of a Base object
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_Print(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      const char *options) const { //  in - print options
+//
+// !DESCRIPTION:
+//    Print the contents of an {\tt ESMC\_Base} object.  Expected to be
+//    called internally from the object-specific print routines.
+//
+//EOPI
+
+  return ESMC_Print(0, options);
 
  } // end ESMC_Print
 

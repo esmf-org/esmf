@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.35 2010/03/04 18:57:43 svasquez Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.36 2010/04/05 21:36:28 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -1755,7 +1755,7 @@ end function
       write (*, *)  "  FieldBundle name = ", trim(bname)
 
     ! pli: print attributes 
-      call c_ESMC_BasePrint(btype%base, defaultopts, status)
+      call c_ESMC_BasePrint(btype%base, 0, defaultopts, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return

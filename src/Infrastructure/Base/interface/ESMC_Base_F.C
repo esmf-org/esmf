@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.79 2010/03/12 21:16:48 w6ws Exp $
+// $Id: ESMC_Base_F.C,v 1.80 2010/04/05 21:35:55 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.79 2010/03/12 21:16:48 w6ws Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.80 2010/04/05 21:35:55 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -152,6 +152,7 @@ extern "C" {
 // 
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
+      int *level,               // in - print level for recursive prints
       char *opts,               // in - F90, non-null terminated string
       int *rc,                  // out - return code
       ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for options
@@ -183,7 +184,7 @@ extern "C" {
       }
   }
 
-  *rc = (*base)->ESMC_Print(copts);
+  *rc = (*base)->ESMC_Print(*level, copts);
   fflush (stdout);
 
   if (copts)

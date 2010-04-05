@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.145 2010/03/17 13:08:51 w6ws Exp $
+! $Id: ESMF_Base.F90,v 1.146 2010/04/05 21:35:55 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -126,7 +126,7 @@ module ESMF_BaseMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.145 2010/03/17 13:08:51 w6ws Exp $'
+               '$Id: ESMF_Base.F90,v 1.146 2010/04/05 21:35:55 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -599,7 +599,7 @@ module ESMF_BaseMod
     ! Ignore localrc, because sometimes stdout is not open at this point
     ! and some compilers FLUSH statements will complain.
 
-    call c_ESMC_BasePrint(base , opts, localrc)
+    call c_ESMC_BasePrint(base , 0, opts, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

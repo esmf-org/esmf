@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.111 2010/03/04 18:57:42 svasquez Exp $
+// $Id: ESMC_Base.h,v 1.112 2010/04/05 21:35:55 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -125,6 +125,7 @@ class ESMC_Base
     //  (would be pure virtual =0; but some will be implemented in F90)
     virtual int ESMC_Validate(const char *options=0) const;
     virtual int ESMC_Print(const char *options=0) const;
+    virtual int ESMC_Print(int level, const char *options=0) const;
 
     // constructors/destructor
     ESMC_Base(void);    // default constructor
