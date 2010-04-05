@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.183 2010/03/17 05:54:05 eschwab Exp $
+! $Id: ESMF_State.F90,v 1.184 2010/04/05 21:37:46 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.183 2010/03/17 05:54:05 eschwab Exp $'
+      '$Id: ESMF_State.F90,v 1.184 2010/04/05 21:37:46 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -3305,11 +3305,12 @@ module ESMF_StateMod
 ! !IROUTINE: ESMF_StatePrint - Print the internal data for a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StatePrint(state, options, rc)
+      subroutine ESMF_StatePrint(state, options, nestedFlag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State) :: state
-      character (len = *), intent(in), optional :: options
+      character (len = *),   intent(in), optional :: options
+      type(ESMF_NestedFlag), intent(in), optional :: nestedFlag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -3327,8 +3328,11 @@ module ESMF_StateMod
 !       The {\tt ESMF\_State} to print.
 !     \item[{[options]}]
 !       Print options:
-!         " ", or "brief" - print names and types of the objects within the state
-!         "deep" - recursively print names and types of objects within nested states
+!         " ", or "brief" - print names and types of the objects within the state (default)
+!         "long" - print additional information, such as proxy flags
+!     \item[{[nestedFlag]}]
+!         ESMF_NESTED_OFF - print objects at the current State level only
+!         ESMF_NESTED_ON - recursively print nested State objects
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -3339,9 +3343,10 @@ module ESMF_StateMod
 !
 ! TODO: this needs more code added to be complete
 !
-       character (len=6) :: localopts
+       character (len=8) :: localopts
        integer :: localrc                    ! local error status
-       logical :: deepflag                   ! Print nested states flag
+       logical :: localnestedflag            ! Print nested states flag
+       logical :: longflag                   ! Extended output
        
        ! Initialize return code; assume failure until success is certain
        if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -3351,20 +3356,26 @@ module ESMF_StateMod
 
        ! Validate options arg
        localopts = "brief"
-       if (present (options)) then
-         if (options /= " ")  &
-           localopts = options
+       localnestedflag = .false.
+       longflag = .false.
+
+       if (present (nestedFlag)) then
+         localnestedflag = nestedFlag == ESMF_NESTED_ON
        end if
        
+       if (present (options)) then
+         if (options /= " ")  &
+           localopts = adjustl (options)
+       end if
+
        call ESMF_StringLowerCase (localopts)
        select case (localopts)
        case ("brief")
-           deepflag = .false.
-       case ("deep")
-           deepflag = .true.
+       case ("long")
+           longflag = .true.
        case default
            write (ESMF_IOstderr,*) "ESMF_StatePrint: Illegal options arg: ", &
-	       trim (options)
+	       trim (localopts)
 	   return 
        end select
 
@@ -3412,17 +3423,16 @@ module ESMF_StateMod
        ! print num of states, state type, etc
 
        call c_ESMC_GetName(sp%base, name, localrc)
-       !call ESMF_BasePrint(sp%base, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-       write (ESMF_IOstdout,*) nestr, "State name = ", trim(name)
+       write (ESMF_IOstdout,*) nestr, "State name: ", trim(name)
        if (sp%st == ESMF_STATE_IMPORT) then
-         msgbuf = " Import State"
+         msgbuf = "Import State"
        else if (sp%st == ESMF_STATE_EXPORT) then
-         msgbuf = " Export State"
+         msgbuf = "Export State"
        else if (sp%st == ESMF_STATE_UNSPECIFIED) then
-         msgbuf = " State Type Unspecified"
+         msgbuf = "Unspecified direction"
        else if (sp%st == ESMF_STATE_INVALID) then
          call ESMF_LogWrite("Uninitialized or already destroyed State", &
                                 ESMF_LOG_INFO)
@@ -3434,61 +3444,57 @@ module ESMF_StateMod
        end if
 
        !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-       write (ESMF_IOstdout,*) nestr, trim(msgbuf)
+       write (ESMF_IOstdout,'(1x,4a,i0)') nestr, "    status: ", trim(msgbuf),  &
+           ", object count: ", sp%datacount
 
        !pli print attribute name/value pairs using c_esmc_baseprint() 
-       call c_ESMC_BasePrint(sp%base, "brief", localrc)
+       call c_ESMC_BasePrint(sp%base, level, "brief", localrc)
        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
        
-       !nsc write(msgbuf, *) "  Number of members: ", sp%datacount
-       !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-       write (ESMF_IOstdout,*) nestr, "Number of members: ", sp%datacount
       
        do i=1, sp%datacount
          dp => sp%datalist(i)
 
-         !nsc write(msgbuf, *) "  Item ", i, ":"
-         !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-         write (ESMF_IOstdout,*) nestr, "Item ", i, ":"
-         outbuf = "    Name= " // trim(dp%namep) // ", "
+         write (ESMF_IOstdout,'(1x,2a,i0,2a)') nestr, "    object: ", i, &
+	     ", name: ", trim(dp%namep)
+         outbuf = "      type:"
 
-         if      (dp%otype%ot == ESMF_STATEITEM_FIELDBUNDLE%ot) then
-             outbuf = trim(outbuf) //  " type FieldBundle,"
-         else if (dp%otype%ot == ESMF_STATEITEM_FIELD%ot) then
-             outbuf = trim(outbuf) //  " type Field,"
-         else if (dp%otype%ot == ESMF_STATEITEM_ARRAY%ot) then
-             outbuf = trim(outbuf) //  " type Array,"
-         else if (dp%otype%ot == ESMF_STATEITEM_ARRAYBUNDLE%ot) then
-             outbuf = trim(outbuf) //  " type ArrayBundle,"
-         else if (dp%otype%ot == ESMF_STATEITEM_STATE%ot) then
-             outbuf = trim(outbuf) //  " type State,"
-         else if (dp%otype%ot == ESMF_STATEITEM_NAME%ot) then
-             outbuf = trim(outbuf) //  " placeholder name,"
-         else if (dp%otype%ot == ESMF_STATEITEM_INDIRECT%ot) then
-             outbuf = trim(outbuf) //  " field inside a bundle,"
-         else
-             outbuf = trim(outbuf) //  " unknown type,"
-         end if
-
-         select case (dp%needed%needed)
-           case (ESMF_NEEDED%needed)
-             outbuf = trim(outbuf) //  " marked as needed."
-           case (ESMF_NOTNEEDED%needed)
-             outbuf = trim(outbuf) //  " marked as NOT needed."
+         select case (dp%otype%ot)
+         case (ESMF_STATEITEM_FIELDBUNDLE%ot)
+             outbuf = trim(outbuf) //  " FieldBundle"
+         case (ESMF_STATEITEM_FIELD%ot)
+             outbuf = trim(outbuf) //  " Field"
+         case (ESMF_STATEITEM_ARRAY%ot)
+             outbuf = trim(outbuf) //  " Array"
+         case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
+             outbuf = trim(outbuf) //  " ArrayBundle"
+         case (ESMF_STATEITEM_STATE%ot)
+             outbuf = trim(outbuf) //  " State"
+         case (ESMF_STATEITEM_NAME%ot)
+             outbuf = trim(outbuf) //  " placeholder name"
+         case (ESMF_STATEITEM_INDIRECT%ot)
+             outbuf = trim(outbuf) //  " field inside a bundle"
+         case default
+             outbuf = trim(outbuf) //  " unknown"
          end select
 
-        !nsc call ESMF_LogWrite(outbuf, ESMF_LOG_INFO)
-        write (ESMF_IOstdout,*) nestr, trim(outbuf)
+         if (longflag) &
+           outbuf = trim (outbuf) // ", proxy: " // merge ("T", "F", dp%proxyFlag)
 
-        write (ESMF_IOstdout,*) nestr, "proxy flag = ", dp%proxyFlag
+#if defined (ESMF_ENABLESTATENEEDED)
+         select case (dp%needed%needed)
+           case (ESMF_NEEDED%needed)
+             outbuf = trim(outbuf) //  ", needed."
+           case (ESMF_NOTNEEDED%needed)
+             outbuf = trim(outbuf) //  ", marked as NOT needed."
+         end select
+#endif
 
-        !type(ESMF_DataHolder), pointer :: datap
+         write (ESMF_IOstdout,*) nestr, trim(outbuf)
 
-        !write(msgbuf, *) trim(outbuf)
-
-         if (deepflag .and. dp%otype%ot == ESMF_STATEITEM_STATE%ot) then
+         if (localnestedflag .and. dp%otype%ot == ESMF_STATEITEM_STATE%ot) then
              call ESMF_StatePrintWorker (dp%datap%spp, level=level+1)
          end if
        enddo
