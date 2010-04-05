@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.112 2010/04/05 21:46:41 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.113 2010/04/05 22:19:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@ module ESMF_ArrayMod
   use ESMF_ArrayCreateMod   ! contains the ESMF_Array derived type definition
   use ESMF_ArrayGatherMod
   use ESMF_ArrayGetMod
-  use ESMF_ArrayPrMod
+  use ESMF_ArrayHaMod
   use ESMF_ArrayScatterMod
   
   implicit none
@@ -74,13 +74,13 @@ module ESMF_ArrayMod
   public ESMF_ArrayDestroy          ! implemented in ESMF_ArrayCreateMod 
   public ESMF_ArrayGather           ! implemented in ESMF_ArrayGatherMod 
   public ESMF_ArrayGet              ! implemented in ESMF_ArrayGetMod 
-  public ESMF_ArrayHalo             ! implemented in ESMF_ArrayPrMod
-  public ESMF_ArrayHaloRelease      ! implemented in ESMF_ArrayPrMod
-  public ESMF_ArrayHaloStore        ! implemented in ESMF_ArrayPrMod
-  public ESMF_ArrayPrint            ! implemented in ESMF_ArrayPrMod
-  public ESMF_ArrayRedist           ! implemented in ESMF_ArrayPrMod
-  public ESMF_ArrayRedistRelease    ! implemented in ESMF_ArrayPrMod
-  public ESMF_ArrayRedistStore      ! implemented in ESMF_ArrayPrMod
+  public ESMF_ArrayHalo             ! implemented in ESMF_ArrayHaMod
+  public ESMF_ArrayHaloRelease      ! implemented in ESMF_ArrayHaMod
+  public ESMF_ArrayHaloStore        ! implemented in ESMF_ArrayHaMod
+  public ESMF_ArrayPrint            ! implemented in ESMF_ArrayHaMod
+  public ESMF_ArrayRedist           ! implemented in ESMF_ArrayHaMod
+  public ESMF_ArrayRedistRelease    ! implemented in ESMF_ArrayHaMod
+  public ESMF_ArrayRedistStore      ! implemented in ESMF_ArrayHaMod
   public ESMF_ArrayReduce
   public ESMF_ArrayScatter          ! implemented in ESMF_ArrayScatterMod 
   public ESMF_ArraySet
@@ -107,7 +107,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.112 2010/04/05 21:46:41 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.113 2010/04/05 22:19:47 theurich Exp $'
 
 !==============================================================================
 ! 
