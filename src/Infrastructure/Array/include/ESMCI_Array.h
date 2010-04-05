@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.43 2010/03/04 18:57:41 svasquez Exp $
+// $Id: ESMCI_Array.h,v 1.44 2010/04/05 19:06:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@ namespace ESMCI {
     vector<vector<int> > rimLinIndex;     // elements in the rim between
                                           // exclusive and total region
                                           // [localDeCount][rimElementCount[]]
-    vector<int> rimElementCount;      // number of elements in rim for localDe
+    vector<int> rimElementCount;      // numb. of elements in rim [localDeCount]
     // lower level object references
     DistGrid *distgrid;
     bool distgridCreator;
@@ -256,7 +256,9 @@ namespace ESMCI {
       int *counts, int *patch, int rootPet, VM *vm);
     int scatter(void *array, ESMC_TypeKind typekind, int rank,
       int *counts, int *patch, int rootPet, VM *vm);
-    static int haloStore(Array *array, RouteHandle **routehandle);
+    static int haloStore(Array *array, RouteHandle **routehandle,
+      ESMC_RegionFlag regionflag=ESMF_REGION_TOTAL,
+      InterfaceInt *haloLDepth=NULL, InterfaceInt *haloUDepth=NULL);
     static int halo(Array *array,
       RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,
       bool *finishedflag=NULL, bool checkflag=false);

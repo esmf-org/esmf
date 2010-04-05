@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.110 2010/03/04 18:57:41 svasquez Exp $
+! $Id: ESMF_Array.F90,v 1.111 2010/04/05 19:06:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.110 2010/03/04 18:57:41 svasquez Exp $'
+    '$Id: ESMF_Array.F90,v 1.111 2010/04/05 19:06:06 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -365,15 +365,15 @@ contains
 ! !IROUTINE: ESMF_ArrayHaloStore - Store an ArrayHalo operation
 !
 ! !INTERFACE:
-    subroutine ESMF_ArrayHaloStore(array, regionflag, haloLDepth, &
-      haloUDepth, routehandle, rc)
+    subroutine ESMF_ArrayHaloStore(array, routehandle, regionflag, haloLDepth, &
+      haloUDepth, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(inout)          :: array
+    type(ESMF_RouteHandle), intent(inout)          :: routehandle
     type(ESMF_RegionFlag),  intent(in),   optional :: regionflag
     integer,                intent(in),   optional :: haloLDepth(:)
     integer,                intent(in),   optional :: haloUDepth(:)
-    type(ESMF_RouteHandle), intent(inout)          :: routehandle
     integer,                intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
@@ -395,30 +395,33 @@ contains
 !
 !   \begin{description}
 !   \item [array]
-!         {\tt ESMF\_Array} containing data to be haloed.
-!   \item [{[regionflag]}]
-!         Specifies the reference for halo width arguments: 
-!         {\tt ESMF\_REGION\_EXCLUSIVE} or {\tt ESMF\_REGION\_COMPUTATIONAL}
-!         (default).
-!   \item[{[haloLDepth]}] 
-!      This vector argument must have dimCount elements, where dimCount is
-!      specified in distgrid. It specifies the lower corner of the total data
-!      region with respect to the lower corner of the computational region
-!      or exclusive region (depending on {\tt regionflag}.
-!   \item[{[haloUDepth]}] 
-!      This vector argument must have dimCount elements, where dimCount is
-!      specified in distgrid. It specifies the upper corner of the total data
-!      region with respect to the upper corner of the computational region
-!      or exclusive region (depending on {\tt regionflag}.
+!     {\tt ESMF\_Array} containing data to be haloed.
 !   \item [routehandle]
-!         Handle to the Route storing the precomputed halo operation.
+!     Handle to the precomputed Route.
+!   \item [{[regionflag]}]
+!     Specifies the reference for halo depth arguments: 
+!     {\tt ESMF\_REGION\_EXCLUSIVE} or {\tt ESMF\_REGION\_COMPUTATIONAL}
+!     (default).
+!   \item[{[haloLDepth]}] 
+!     This vector argument must have dimCount elements, where dimCount is
+!     specified in distgrid. It specifies the lower corner of the halo
+!     region with respect to the lower corner of the computational region
+!     or exclusive region, depending on {\tt regionflag}.
+!   \item[{[haloUDepth]}] 
+!     This vector argument must have dimCount elements, where dimCount is
+!     specified in distgrid. It specifies the upper corner of the halo
+!     region with respect to the upper corner of the computational region
+!     or exclusive region, depending on {\tt regionflag}.
 !   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
+    integer                 :: localrc        ! local return code
+    type(ESMF_RegionFlag)   :: opt_regionflag ! helper variable
+    type(ESMF_InterfaceInt) :: haloLDepthArg  ! helper variable
+    type(ESMF_InterfaceInt) :: haloUDepthArg  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -427,10 +430,21 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
     
-    !TODO: deal with optional array arguments, but for now simplify implement.
-    
+    ! Set default flags
+    opt_regionflag = ESMF_REGION_TOTAL  !TODO: this is not a valid setting here
+    if (present(regionflag)) opt_regionflag = regionflag
+
+    ! Deal with (optional) array arguments
+    haloLDepthArg = ESMF_InterfaceIntCreate(haloLDepth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    haloUDepthArg = ESMF_InterfaceIntCreate(haloUDepth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayHaloStore(array, routehandle, localrc)
+    call c_ESMC_ArrayHaloStore(array, routehandle, opt_regionflag, &
+      haloLDepthArg, haloUDepthArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
