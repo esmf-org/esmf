@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.22 2010/04/06 17:03:45 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.23 2010/04/06 23:22:03 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -87,7 +87,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.22 2010/04/06 17:03:45 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.23 2010/04/06 23:22:03 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -247,22 +247,34 @@
      
 #else
 ! Non-Standard.  But dates back to the original 7th Edition unix f77
-! compiler, so is implemented by many compilers.  No further error
-! checking, especially for bad character string lengths, is possible.
+! compiler, so is implemented by many compilers.  Error checking,
+! especially for bad character string lengths, is unreliable.
+
+    call getarg (argindex, localvalue)
+
+! If value is present, use the longer of value and localvalue
+! for the buffer.
 
     if (present (value)) then
       call getarg (argindex, value)
-      locallength = len_trim (value)
+      if (len (value) > len (localvalue)) then
+        locallength = len_trim (value)
+      else
+        locallength = len_trim (localvalue)
+      end if
+      if (len (value) >= locallength) then
+        localrc = ESMF_SUCCESS
+      else
+        localrc = ESMF_RC_ARG_SIZE
+      end if
     else
-      call getarg (argindex, localvalue)
       locallength = len_trim (localvalue)
+      localrc = ESMF_SUCCESS
     end if
 
     if (present (length)) then
       length = locallength
     end if
-
-    localrc = ESMF_SUCCESS
 
 #endif
 
