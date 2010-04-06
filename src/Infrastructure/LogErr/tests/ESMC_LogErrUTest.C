@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErrUTest.C,v 1.4 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMC_LogErrUTest.C,v 1.5 2010/04/06 00:11:50 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ int main(void){
   int result = 0;
   int trueFalseRc;
 
-  char *msg = "C LogErr Write Message";
+  const char *msg = "C LogErr Write Message";
   int msgtype = ESMC_LOG_INFO;
 
   //----------------------------------------------------------------------------
