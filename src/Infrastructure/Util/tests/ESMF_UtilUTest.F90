@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.17 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.18 2010/04/06 00:04:59 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.17 2010/03/04 18:57:45 svasquez Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.18 2010/04/06 00:04:59 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -68,6 +68,13 @@
       integer :: i
       integer :: funits(5)
       integer :: ioerr
+
+#ifdef ESMF_TESTEXHAUSTIVE
+      character(ESMF_MAXSTR) :: arg
+      character(2) :: argshort
+      integer :: arg_len
+      integer :: nargs
+#endif
 
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -199,7 +206,59 @@
 
 
 #ifdef ESMF_TESTEXHAUSTIVE
+!Command line arguments
+!====================
 
+    !
+    !EX_UTest
+    ! Get command line argument count
+    write (name, *) "Testing ESMF_UtilGetArgC, command line argument count"
+    write (failMsg, *) "Obtaining the command line argument count"
+    nargs = ESMF_UtilGetArgC ()
+    call ESMF_Test(nargs >= 0, name, failMsg, result, ESMF_SRCLINE)
+
+    !
+    !EX_UTest
+    ! Test bad command line argument index
+    write (name, *) "Testing ESMF_UtilGetArgC, argindex < 0"
+    write (failMsg, *) "wrong rc when argindex < 0"
+    call ESMF_UtilGetArg (argindex=-1, rc=rc)
+    call ESMF_Test(rc == ESMF_RC_ARG_VALUE, name, failMsg, result, ESMF_SRCLINE)
+
+    !
+    !EX_UTest
+    ! Get command name
+    write (name, *) "Testing ESMF_UtilGetArgC, get command name"
+    write (failMsg, *) "Obtaining the command name"
+    call ESMF_UtilGetArg (argindex=0, value=arg, rc=rc)
+    print *, 'command name = ', trim (arg)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !
+    !EX_UTest
+    ! Get command line arguments
+    write (name, *) "Testing ESMF_UtilGetArgC, get truncated command name"
+    write (failMsg, *) "Obtaining truncated command name"
+    call ESMF_UtilGetArg (argindex=0, value=argshort, rc=rc)
+    call ESMF_Test(rc == ESMF_RC_ARG_SIZE, name, failMsg, result, ESMF_SRCLINE)
+
+    !
+    !EX_UTest
+    ! Get command line arguments
+    write (name, *) "Testing ESMF_UtilGetArgC, compare arg lengths"
+    write (failMsg, *) "Returned arg length does not match actual arg length"
+    call ESMF_UtilGetArg (argindex=0, value=arg, length=arg_len, rc=rc)
+    print *, 'arg_len =', arg_len, ', len_trim (arg) =', len_trim (arg)
+    call ESMF_Test(rc == ESMF_SUCCESS .and. arg_len == len_trim (arg),  &
+        name, failMsg, result, ESMF_SRCLINE)
+
+    !
+    !EX_UTest
+    ! Test bad command line argument index
+    write (name, *) "Testing ESMF_UtilGetArgC, argindex > nargs"
+    write (failMsg, *) "wrong rc when argindex > nargs"
+    call ESMF_UtilGetArg (argindex=nargs+1, rc=rc)
+    call ESMF_Test(rc == ESMF_RC_ARG_VALUE, name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 
