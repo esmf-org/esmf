@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.2 2010/04/06 05:58:32 theurich Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.3 2010/04/06 17:15:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.2 2010/04/06 05:58:32 theurich Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.3 2010/04/06 17:15:49 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -279,17 +279,18 @@ contains
 ! !DESCRIPTION:
 !   Store an Array halo operation over the data in {\tt array}. By default,
 !   i.e. without specifying {\tt halostartregionflag}, {\tt haloLDepth} and
-!   {\tt haloUDepth}, all elements between the exclusive and total region of 
-!   the Array will be considered potential destination elements for halo.
-!   However, only those elements that correspond to an actual halo source
-!   element, will be updated under the halo operation. Elements that have no
-!   associated source remain unchanged under halo.
+!   {\tt haloUDepth}, all elements in the total Array region that lie outside
+!   the exclusive region will be considered potential destination elements for
+!   halo. However, only those elements that have a corresponding halo source
+!   element, i.e. an exclusive element on one of the DEs, will be updated under
+!   the halo operation. Elements that have no associated source remain 
+!   unchanged under halo.
 !
 !   Specifying {\tt halostartregionflag} allows to change the shape of the 
 !   effective halo region from the inside. Setting this flag to
 !   {\tt ESMF\_REGION\_COMPUTATIONAL} means that only elements outside 
 !   the computational region of the Array are considered for potential
-!   destination elements for halo.
+!   destination elements for halo. The default is {\tt ESMF\_REGION\_EXCLUSIVE}.
 !
 !   The {\tt haloLDepth} and {\tt haloUDepth} arguments allow to reduce
 !   the extent of the effective halo region. Starting at the region specified
@@ -297,8 +298,9 @@ contains
 !   define a halo depth in each direction. Note that the maximum halo region is
 !   limited by the total Array region, independent of the actual
 !   {\tt haloLDepth} and {\tt haloUDepth} setting. The total Array region is
-!   local DE specific, and {\tt haloLDepth} and {\tt haloUDepth} are interpreted
-!   as the maximum desired extent where possible.
+!   local DE specific. The {\tt haloLDepth} and {\tt haloUDepth} are interpreted
+!   as the maximum desired extent, reducing the potentially larger region
+!   available for halo.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_ArrayHalo()} on any Array that is weakly congruent
