@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.9 2010/03/04 18:57:41 svasquez Exp $
+$Id: ESMF_Conf.inc,v 1.10 2010/04/06 00:01:05 w6ws Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -22,6 +22,13 @@ be one of the following:
 
 #define ESMF_IOFlushMacro(unit,status) call flush (unit)
 
+#if 0
+Define the proper way to read the command line.  Use getarg for now.
+
+#endif
+
+#define ESMF_NEEDSGETARG
+`
 #if 0
 prevent use of esmf derived type initializers.  causes some compilers problems.
 #endif

@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.8 2010/03/04 18:57:41 svasquez Exp $
+$Id: ESMF_Conf.inc,v 1.9 2010/04/06 00:01:05 w6ws Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -21,6 +21,15 @@ be one of the following:
 #endif
 
 #define ESMF_IOFlushMacro(unit,status) call flush (unit)
+
+#if 0
+Define the proper way to read the command line.  Since PGI did not
+have the Fortran-2003 command line intrinsics until 10.0, nor
+does it have Posix calls, use use getarg for now.
+
+#endif
+
+#define ESMF_NEEDSGETARG
 
 #if 0
 the PGI compiler is strict F90, which does not allow members of a type

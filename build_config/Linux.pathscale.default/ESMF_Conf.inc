@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.7 2010/03/04 18:57:41 svasquez Exp $
+$Id: ESMF_Conf.inc,v 1.8 2010/04/06 00:01:05 w6ws Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -21,6 +21,14 @@ be one of the following:
 #endif
 
 #define ESMF_IOFlushMacro(unit,status) call flush (unit, status)
+
+#if 0
+Define the proper way to read the command line.  Absoft does not
+have the Fortran-2003 command line intrinsics.  So use Posix calls.  
+
+#endif
+
+#define ESMF_NEEDSPXFGETARG
 
 #if 0
 in theory absoft supports initializers, but in practice with the number

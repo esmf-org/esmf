@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.9 2010/03/04 18:57:41 svasquez Exp $
+$Id: ESMF_Conf.inc,v 1.10 2010/04/06 00:01:05 w6ws Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -32,4 +32,13 @@ Define the proper way to flush Fortran units.  Choices include:
 #endif
 
 #define ESMF_HAS_2ARG_FLUSH
+
+#if 0
+Define the proper way to read the command line.  IRIX does not
+have the Fortran-2003 command line intrinsics, so use POSIX calls
+instead.
+
+#endif
+
+#define ESMF_NEEDSPXFGETARG
 
