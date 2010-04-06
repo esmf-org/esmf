@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.97 2010/04/06 05:58:32 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.98 2010/04/06 17:17:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.97 2010/04/06 05:58:32 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.98 2010/04/06 17:17:00 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3638,19 +3638,19 @@ int Array::haloStore(
           int const *indexTuple = arrayElement.getIndexTuple();
           // check whether indexTuple is within halo bounds
           bool withinHalo = true;
+          bool insideFlag = true;
           for (int k=0; k<array->rank; k++){
             if (indexTuple[k] < haloOutsideLBound[i][k] ||
               indexTuple[k] > haloOutsideUBound[i][k]){
               withinHalo = false; // index outside halo region
               break;
             }
-//TODO: fix this check
-//            if (indexTuple[k] > haloInsideLBound[i][k] &&
-//              indexTuple[k] < haloInsideUBound[i][k]){
-//              withinHalo = false; // index outside halo region
-//              break;
-//            }
+            if (indexTuple[k] < haloInsideLBound[i][k] ||
+              indexTuple[k] > haloInsideUBound[i][k]){
+              insideFlag = false; // below halo start
+            }
           }
+          if (insideFlag) withinHalo = false; // element below halo start
           if (withinHalo){
             // add element to identity matrix
             factorIndexList.push_back(seqIndex.decompSeqIndex); // src
