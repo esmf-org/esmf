@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.92 2010/04/05 21:34:31 w6ws Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.93 2010/04/06 05:58:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -407,6 +407,21 @@
         ESMF_NESTED_ON  = ESMF_NestedFlag(1)
 
 !------------------------------------------------------------------------------
+!     ! ESMF_HaloStartRegionFlag
+!
+!     ! Interface flag for setting index bounds
+
+      type ESMF_HaloStartRegionFlag
+      sequence
+      private
+        integer :: i_type
+      end type
+
+      type(ESMF_HaloStartRegionFlag), parameter ::  &
+        ESMF_REGION_EXCLUSIVE = ESMF_HaloStartRegionFlag(0), &
+        ESMF_REGION_COMPUTATIONAL = ESMF_HaloStartRegionFlag(1)
+
+!------------------------------------------------------------------------------
 !     ! ESMF_RegionFlag
 !
 !     ! Interface flag for setting index bounds
@@ -588,10 +603,10 @@
 
       public ESMF_IndexFlag
       public ESMF_INDEX_DELOCAL, ESMF_INDEX_GLOBAL, ESMF_INDEX_USER
-
       public ESMF_NestedFlag
       public ESMF_NESTED_OFF, ESMF_NESTED_ON
-
+      public ESMF_HaloStartRegionFlag, &
+             ESMF_REGION_EXCLUSIVE, ESMF_REGION_COMPUTATIONAL
       public ESMF_RegionFlag, &
              ESMF_REGION_TOTAL, ESMF_REGION_SELECT, ESMF_REGION_EMPTY
       public ESMF_CommFlag, &

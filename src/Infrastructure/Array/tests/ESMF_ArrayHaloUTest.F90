@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHaloUTest.F90,v 1.4 2010/04/05 19:00:58 theurich Exp $
+! $Id: ESMF_ArrayHaloUTest.F90,v 1.5 2010/04/06 05:58:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayHaloUTest.F90,v 1.4 2010/04/05 19:00:58 theurich Exp $'
+    '$Id: ESMF_ArrayHaloUTest.F90,v 1.5 2010/04/06 05:58:33 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -53,6 +53,7 @@ program ESMF_ArrayRedistUTest
   integer               :: rc, i, k, verifyValue, petCount, localPet
   logical               :: verifyFlag
   integer               :: eLB(2,1), eUB(2,1)
+  integer               :: cLB(2,1), cUB(2,1)
   integer               :: tLB(2,1), tUB(2,1)
   integer               :: hLB(2,1), hUB(2,1)
 
@@ -89,7 +90,7 @@ program ESMF_ArrayRedistUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Distgrid Create Test"
+  write(name, *) "Distgrid Create Test-1"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,20/), &
     regDecomp=(/1,4/), rc=rc)
@@ -97,14 +98,14 @@ program ESMF_ArrayRedistUTest
       
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArraySpec Set Test"
+  write(name, *) "ArraySpec Set Test-1"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Array Create Test"
+  write(name, *) "Array Create Test-1"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     computationalLWidth=(/2,2/), computationalUWidth=(/2,2/), rc=rc)
@@ -112,7 +113,7 @@ program ESMF_ArrayRedistUTest
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Array Get Test"
+  write(name, *) "Array Get Test-1"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayGet(array, exclusiveLBound=eLB, exclusiveUBound=eUB, &
     totalLBound=tLB, totalUBound=tUB, rc=rc)
@@ -151,7 +152,7 @@ program ESMF_ArrayRedistUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Get farrayPtr from Array Test"
+  write(name, *) "Get farrayPtr from Array Test-1"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -163,14 +164,14 @@ program ESMF_ArrayRedistUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayHaloStore Test"
+  write(name, *) "ArrayHaloStore Test-1"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayHaloStore(array=array, routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayHalo Test"
+  write(name, *) "ArrayHalo Test-1"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayHalo(array=array, routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -182,7 +183,7 @@ call ESMF_ArrayPrint(array)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Verify Array elemens after Halo() Test"
+  write(name, *) "Verify Array elemens after Halo() Test-1"
   write(failMsg, *) "Wrong results" 
   
   verifyFlag = .true. ! assume all is correct until error is found
@@ -333,21 +334,21 @@ call ESMF_ArrayPrint(array)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "routehandle Release Test"
+  write(name, *) "routehandle Release Test-1"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayHaloRelease(routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Array Destroy Test"
+  write(name, *) "Array Destroy Test-1"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayDestroy(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Distgrid Destroy Test"
+  write(name, *) "Distgrid Destroy Test-1"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_DistGridDestroy(distGrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -359,7 +360,7 @@ call ESMF_ArrayPrint(array)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Distgrid Create Test"
+  write(name, *) "Distgrid Create Test-2"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,20/), &
     regDecomp=(/2,2/), rc=rc)
@@ -367,14 +368,14 @@ call ESMF_ArrayPrint(array)
       
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArraySpec Set Test"
+  write(name, *) "ArraySpec Set Test-2"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Array Create Test"
+  write(name, *) "Array Create Test-2"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     computationalLWidth=(/2,2/), computationalUWidth=(/2,2/), rc=rc)
@@ -383,7 +384,7 @@ call ESMF_ArrayPrint(array)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Array Get Test"
+  write(name, *) "Array Get Test-2"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayGet(array, exclusiveLBound=eLB, exclusiveUBound=eUB, &
     totalLBound=tLB, totalUBound=tUB, rc=rc)
@@ -434,7 +435,7 @@ call ESMF_ArrayPrint(array)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Get farrayPtr from Array Test"
+  write(name, *) "Get farrayPtr from Array Test-2"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -446,14 +447,14 @@ call ESMF_ArrayPrint(array)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayHaloStore Test"
+  write(name, *) "ArrayHaloStore Test-2"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayHaloStore(array=array, routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayHalo Test"
+  write(name, *) "ArrayHalo Test-2"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayHalo(array=array, routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -465,7 +466,7 @@ call ESMF_ArrayPrint(array)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Verify Array elemens after Halo() Test"
+  write(name, *) "Verify Array elemens after Halo() Test-2"
   write(failMsg, *) "Wrong results" 
   
   verifyFlag = .true. ! assume all is correct until error is found
@@ -664,21 +665,21 @@ call ESMF_ArrayPrint(array)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "routehandle Release Test"
+  write(name, *) "routehandle Release Test-2"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayHaloRelease(routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Array Destroy Test"
+  write(name, *) "Array Destroy Test-2"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayDestroy(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Distgrid Destroy Test"
+  write(name, *) "Distgrid Destroy Test-2"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_DistGridDestroy(distGrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -690,7 +691,7 @@ call ESMF_ArrayPrint(array)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Distgrid Create Test"
+  write(name, *) "Distgrid Create Test-3"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,20/), &
     regDecomp=(/2,2/), rc=rc)
@@ -698,14 +699,14 @@ call ESMF_ArrayPrint(array)
       
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArraySpec Set Test"
+  write(name, *) "ArraySpec Set Test-3"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Array Create Test"
+  write(name, *) "Array Create Test-3"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     computationalLWidth=(/2,2/), computationalUWidth=(/2,2/), rc=rc)
@@ -714,7 +715,7 @@ call ESMF_ArrayPrint(array)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Array Get Test"
+  write(name, *) "Array Get Test-3"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayGet(array, exclusiveLBound=eLB, exclusiveUBound=eUB, &
     totalLBound=tLB, totalUBound=tUB, rc=rc)
@@ -765,7 +766,7 @@ call ESMF_ArrayPrint(array)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Get farrayPtr from Array Test"
+  write(name, *) "Get farrayPtr from Array Test-3"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -777,7 +778,7 @@ call ESMF_ArrayPrint(array)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayHaloStore Test"
+  write(name, *) "ArrayHaloStore Test-3"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayHaloStore(array=array, routehandle=routehandle, &
     haloLDepth=(/0,1/), haloUDepth=(/2,3/), rc=rc)
@@ -790,7 +791,7 @@ call ESMF_ArrayPrint(array)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayHalo Test"
+  write(name, *) "ArrayHalo Test-3"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayHalo(array=array, routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -802,7 +803,7 @@ call ESMF_ArrayPrint(array)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Verify Array elemens after Halo() Test"
+  write(name, *) "Verify Array elemens after Halo() Test-3"
   write(failMsg, *) "Wrong results" 
   
   verifyFlag = .true. ! assume all is correct until error is found
@@ -1081,21 +1082,441 @@ call ESMF_ArrayPrint(array)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "routehandle Release Test"
+  write(name, *) "routehandle Release Test-3"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayHaloRelease(routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Array Destroy Test"
+  write(name, *) "Array Destroy Test-3"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayDestroy(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Distgrid Destroy Test"
+  write(name, *) "Distgrid Destroy Test-3"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_DistGridDestroy(distGrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+!------------------------------------------------------------------------
+!------------------------------------------------------------------------
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Distgrid Create Test-4"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,20/), &
+    regDecomp=(/2,2/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySpec Set Test-4"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=2, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Create Test-4"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    computationalLWidth=(/1,1/), computationalUWidth=(/1,1/), &
+    totalLWidth=(/2,2/), totalUWidth=(/2,2/), rc=rc)
+
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Get Test-4"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(array, exclusiveLBound=eLB, exclusiveUBound=eUB, &
+    computationalLBound=cLB, computationalUBound=cUB, &
+    totalLBound=tLB, totalUBound=tUB, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! The Array object is defined on a 10 x 20 index space which is regularily
+! decomposed into 2 x 2 = 4 DEs. This means that each DE holds a 5 x 10 
+! piece of the index space.
+! The unit test is set up to run on exactly 4 PETs. There are, therefore,
+! exactly one DE per PET.
+! The Array further defines a computational width of 2 elements in each
+! direction around the exclusive region. This area of 2 elements around
+! the exclusive region provides the destination elements for Halo operations
+! defined on the Array object.
+! 
+!          +-------------------+       +-------------------+
+!          | \       2       / |       | \       2       / |
+!          |  +-------------+  |       |  +-------------+  |
+!          |  |     DE 0    |  |       |  |     DE 2    |  |
+!          |  |             |  |       |  |             |  |
+!          |2 |    5 x 10   | 2|  <->  |2 |    5 x 10   | 2|
+!          |  |             |  |       |  |             |  |
+!          |  |             |  |       |  |             |  |
+!          |  +-------------+  |       |  +-------------+  |
+!          | /       2       \ |       | /       2       \ |
+!          +-------------------+       +-------------------+
+!
+!                    ^            \/             ^
+!                    |            /\             |
+!                    v                           v
+!
+!          +-------------------+       +-------------------+
+!          | \       2       / |       | \       2       / |
+!          |  +-------------+  |       |  +-------------+  |
+!          |  |     DE 1    |  |       |  |     DE 3    |  |
+!          |  |             |  |       |  |             |  |
+!          |2 |    5 x 10   | 2|  <->  |2 |    5 x 10   | 2|
+!          |  |             |  |       |  |             |  |
+!          |  |             |  |       |  |             |  |
+!          |  +-------------+  |       |  +-------------+  |
+!          | /       2       \ |       | /       2       \ |
+!          +-------------------+       +-------------------+
+!
+! Without the explicit definition of boundary conditions only the indicated
+! inner connections define valid Halo paths for the Array object.
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Get farrayPtr from Array Test-4"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! Initailize the entire Array piece on every PET to the localPet number
+!------------------------------------------------------------------------
+  farrayPtr = localPet
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayHaloStore Test-4"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayHaloStore(array=array, routehandle=routehandle, &
+    halostartregionflag=ESMF_REGION_EXCLUSIVE, &
+    haloLDepth=(/0,1/), haloUDepth=(/2,3/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  hLB(1,1) = max(eLB(1,1)-0, tLB(1,1))
+  hLB(2,1) = max(eLB(2,1)-1, tLB(2,1))
+  hUB(1,1) = min(eUB(1,1)+2, tUB(1,1))
+  hUB(2,1) = min(eUB(2,1)+3, tUB(2,1)) 
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayHalo Test-4"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayHalo(array=array, routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+! debugging ---------------  
+call ESMF_ArrayPrint(array)  
+!print *, farrayPtr  
+! debugging ---------------  
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Array elemens after Halo() Test-4"
+  write(failMsg, *) "Wrong results" 
+  
+  verifyFlag = .true. ! assume all is correct until error is found
+  
+  ! verify elements within exclusive region
+  do k=eLB(2,1), eUB(2,1)
+    do i=eLB(1,1), eUB(1,1)
+      if (farrayPtr(i,k) /= localPet) then
+        verifyFlag = .false.
+        exit
+      endif
+    enddo
+    if (.not. verifyFlag) exit
+  enddo
+  
+  ! verify all eight sections outside the exclusive region
+  ! section 1 staring in NW corner and going counter clock wise
+  ! verify section 1
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = 0
+  endif
+  if (verifyFlag) then
+    do k=tLB(2,1), hLB(2,1)-1
+      do i=tLB(1,1), hLB(1,1)-1
+        if (farrayPtr(i,k) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong outside value in section 1"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do k=hLB(2,1), eLB(2,1)-1
+      do i=hLB(1,1), eLB(1,1)-1
+        if (farrayPtr(i,k) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong inside value in section 1"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 2
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = 0
+  else if (localPet == 3) then
+    verifyValue = 1
+  endif
+  if (verifyFlag) then
+    do k=tLB(2,1), hLB(2,1)-1
+      do i=eLB(1,1), eUB(1,1)
+        if (farrayPtr(i,k) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong outside value in section 2"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do k=hLB(2,1), eLB(2,1)-1
+      do i=eLB(1,1), eUB(1,1)
+        if (farrayPtr(i,k) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong inside value in section 2"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 3
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = 1
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do k=tLB(2,1), hLB(2,1)-1
+      do i=hUB(1,1)+1, tUB(1,1)
+        if (farrayPtr(i,k) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong outside value in section 3"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do k=hLB(2,1), eLB(2,1)-1
+      do i=eUB(1,1)+1, hUB(1,1)
+        if (farrayPtr(i,k) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong inside value in section 3"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 4
+  if (localPet == 0) then
+    verifyValue = 1
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = 3
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do k=eLB(2,1), eUB(2,1)
+      do i=hUB(1,1)+1, tUB(1,1)
+        if (farrayPtr(i,k) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong outside value in section 4"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do k=eLB(2,1), eUB(2,1)
+      do i=eUB(1,1)+1, hUB(1,1)
+        if (farrayPtr(i,k) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong inside value in section 4"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 5
+  if (localPet == 0) then
+    verifyValue = 3
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do k=hUB(2,1)+1, tUB(2,1)
+      do i=hUB(1,1)+1, tUB(1,1)
+        if (farrayPtr(i,k) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong outside value in section 5"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do k=eUB(2,1)+1, hUB(2,1)
+      do i=eUB(1,1)+1, hUB(1,1)
+        if (farrayPtr(i,k) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong inside value in section 5"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 6
+  if (localPet == 0) then
+    verifyValue = 2
+  else if (localPet == 1) then
+    verifyValue = 3
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do k=hUB(2,1)+1, tUB(2,1)
+      do i=eLB(1,1), eUB(1,1)
+        if (farrayPtr(i,k) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong outside value in section 6"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do k=eUB(2,1)+1, hUB(2,1)
+      do i=eLB(1,1), eUB(1,1)
+        if (farrayPtr(i,k) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong inside value in section 6"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 7
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = 2
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do k=hUB(2,1)+1, tUB(2,1)
+      do i=tLB(1,1), hLB(1,1)-1
+        if (farrayPtr(i,k) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong outside value in section 7"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do k=eUB(2,1)+1, hUB(2,1)
+      do i=hLB(1,1), eLB(1,1)-1
+        if (farrayPtr(i,k) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong inside value in section 7"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 8
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = 0
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = 2
+  endif
+  if (verifyFlag) then
+    do k=eLB(2,1), eUB(2,1)
+      do i=tLB(1,1), hLB(1,1)-1
+        if (farrayPtr(i,k) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong outside value in section 8"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do k=eLB(2,1), eUB(2,1)
+      do i=hLB(1,1), eLB(1,1)-1
+        if (farrayPtr(i,k) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong inside value in section 8"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+    
+  call ESMF_Test(verifyFlag, name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "routehandle Release Test-4"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayHaloRelease(routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Destroy Test-4"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Distgrid Destroy Test-4"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_DistGridDestroy(distGrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

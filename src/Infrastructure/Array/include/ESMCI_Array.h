@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.44 2010/04/05 19:06:06 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.45 2010/04/06 05:58:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -257,7 +257,7 @@ namespace ESMCI {
     int scatter(void *array, ESMC_TypeKind typekind, int rank,
       int *counts, int *patch, int rootPet, VM *vm);
     static int haloStore(Array *array, RouteHandle **routehandle,
-      ESMC_RegionFlag regionflag=ESMF_REGION_TOTAL,
+      ESMC_HaloStartRegionFlag halostartregionflag=ESMF_REGION_EXCLUSIVE,
       InterfaceInt *haloLDepth=NULL, InterfaceInt *haloUDepth=NULL);
     static int halo(Array *array,
       RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,

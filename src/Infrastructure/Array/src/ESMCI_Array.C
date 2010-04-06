@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.96 2010/04/05 19:06:06 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.97 2010/04/06 05:58:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.96 2010/04/05 19:06:06 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.97 2010/04/06 05:58:32 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3448,7 +3448,7 @@ int Array::haloStore(
 //
   Array *array,                         // in    - Array
   RouteHandle **routehandle,            // inout - handle to precomputed comm
-  ESMC_RegionFlag regionflag,           // in    - indicate halo region
+  ESMC_HaloStartRegionFlag halostartregionflag, // in - start of halo region
   InterfaceInt *haloLDepth,             // in    - lower corner halo depth
   InterfaceInt *haloUDepth              // in    - upper corner halo depth
   ){    
@@ -3478,31 +3478,39 @@ int Array::haloStore(
     int localPet = vm->getLocalPet();
     int petCount = vm->getPetCount();
     
-    // prepare haloLBound and haloUBound arrays
+    // prepare haloOutsideLBound and haloInsideLBound arrays
     int localDeCount = array->getDELayout()->getLocalDeCount();
     int redDimCount = array->rank - array->tensorCount;
-    vector<vector<int> > haloLBound(localDeCount);
+    vector<vector<int> > haloInsideLBound(localDeCount);
+    vector<vector<int> > haloOutsideLBound(localDeCount);
     if (haloLDepth == NULL){
-      // haloLDepth was not provided -> default to full haloLBound
+      // haloLDepth was not provided
       for (int i=0; i<localDeCount; i++){
         int kOff = i * (array->rank - array->tensorCount);
         int kPacked = 0;    // reset
         int kTensor = 0;    // reset
-        haloLBound[i].resize(array->rank);
+        haloInsideLBound[i].resize(array->rank);
+        haloOutsideLBound[i].resize(array->rank);
         for (int k=0; k<array->rank; k++){
           if (array->getArrayToDistGridMap()[k]){
             // decomposed dimension
-            haloLBound[i][k] = array->totalLBound[kOff+kPacked]
+            if (halostartregionflag==ESMF_REGION_COMPUTATIONAL){
+              haloInsideLBound[i][k] = array->computationalLBound[kOff+kPacked]
+                - array->exclusiveLBound[kOff+kPacked];
+            }else{
+              haloInsideLBound[i][k] = 0;
+            }
+            haloOutsideLBound[i][k] = array->totalLBound[kOff+kPacked]
               - array->exclusiveLBound[kOff+kPacked];
             ++kPacked;
           }else{
             // tensor dimension
-            haloLBound[i][k] = 0;
+            haloOutsideLBound[i][k] = 0;
           }   
         }
       }
     }else{
-      // haloLDepth was provided -> check and use to construct haloLBound
+      // haloLDepth was provided -> check and use
       if (haloLDepth->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- haloLDepth array must be of rank 1", &rc);
@@ -3517,44 +3525,62 @@ int Array::haloStore(
         int kOff = i * (array->rank - array->tensorCount);
         int kPacked = 0;    // reset
         int kTensor = 0;    // reset
-        haloLBound[i].resize(array->rank);
+        haloInsideLBound[i].resize(array->rank);
+        haloOutsideLBound[i].resize(array->rank);
         for (int k=0; k<array->rank; k++){
           if (array->getArrayToDistGridMap()[k]){
             // decomposed dimension
-            haloLBound[i][k] = -haloLDepth->array[kPacked]; // relative to excl
-            //TODO: switch between relative to exclusive and total region
+            if (halostartregionflag==ESMF_REGION_COMPUTATIONAL){
+              haloInsideLBound[i][k] = array->computationalLBound[kOff+kPacked]
+                - array->exclusiveLBound[kOff+kPacked];
+              haloOutsideLBound[i][k] = haloInsideLBound[i][k]
+                - haloLDepth->array[kPacked];
+            }else{
+              haloInsideLBound[i][k] = 0;
+              haloOutsideLBound[i][k] = -haloLDepth->array[kPacked];
+            }
             ++kPacked;
           }else{
             // tensor dimension
-            haloLBound[i][k] = 0;
+            haloOutsideLBound[i][k] = 0;
           }   
         }
       }
     }
-    vector<vector<int> > haloUBound(localDeCount);
+    // prepare haloOutsideUBound and haloInsideUBound arrays
+    vector<vector<int> > haloInsideUBound(localDeCount);
+    vector<vector<int> > haloOutsideUBound(localDeCount);
     if (haloUDepth == NULL){
-      // haloUDepth was not provided -> default to full haloUBound
+      // haloUDepth was not provided
       for (int i=0; i<localDeCount; i++){
         int kOff = i * (array->rank - array->tensorCount);
         int kPacked = 0;    // reset
         int kTensor = 0;    // reset
-        haloUBound[i].resize(array->rank);
+        haloInsideUBound[i].resize(array->rank);
+        haloOutsideUBound[i].resize(array->rank);
         for (int k=0; k<array->rank; k++){
           if (array->getArrayToDistGridMap()[k]){
             // decomposed dimension
-            haloUBound[i][k] = array->totalUBound[kOff+kPacked]
+            if (halostartregionflag==ESMF_REGION_COMPUTATIONAL){
+              haloInsideUBound[i][k] = array->computationalUBound[kOff+kPacked]
+                - array->exclusiveLBound[kOff+kPacked];
+            }else{
+              haloInsideUBound[i][k] = array->exclusiveUBound[kOff+kPacked]
+              - array->exclusiveLBound[kOff+kPacked];
+            }
+            haloOutsideUBound[i][k] = array->totalUBound[kOff+kPacked]
               - array->exclusiveLBound[kOff+kPacked];
             ++kPacked;
           }else{
             // tensor dimension
-            haloUBound[i][k] = array->undistUBound[kTensor]
+            haloOutsideUBound[i][k] = array->undistUBound[kTensor]
               - array->undistLBound[kTensor] + 1;
             ++kTensor;
           }   
         }
       }
     }else{
-      // haloUDepth was provided -> check and use to construct haloUBound
+      // haloUDepth was provided -> check and use
       if (haloUDepth->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- haloUDepth array must be of rank 1", &rc);
@@ -3569,18 +3595,27 @@ int Array::haloStore(
         int kOff = i * (array->rank - array->tensorCount);
         int kPacked = 0;    // reset
         int kTensor = 0;    // reset
-        haloUBound[i].resize(array->rank);
+        haloInsideUBound[i].resize(array->rank);
+        haloOutsideUBound[i].resize(array->rank);
         for (int k=0; k<array->rank; k++){
           if (array->getArrayToDistGridMap()[k]){
             // decomposed dimension
-            haloUBound[i][k] = array->exclusiveUBound[kOff+kPacked]
-              - array->exclusiveLBound[kOff+kPacked]
-              + haloUDepth->array[kPacked]; // relative to excl
-            //TODO: switch between relative to exclusive and total region
+            if (halostartregionflag==ESMF_REGION_COMPUTATIONAL){
+              haloInsideUBound[i][k] = array->computationalUBound[kOff+kPacked]
+                - array->exclusiveLBound[kOff+kPacked];
+              haloOutsideUBound[i][k] = haloInsideUBound[i][k]
+                + haloUDepth->array[kPacked];
+            }else{
+              haloInsideUBound[i][k] = array->exclusiveUBound[kOff+kPacked]
+              - array->exclusiveLBound[kOff+kPacked];
+              haloOutsideUBound[i][k] = array->exclusiveUBound[kOff+kPacked]
+                - array->exclusiveLBound[kOff+kPacked]
+                + haloUDepth->array[kPacked];
+            }
             ++kPacked;
           }else{
             // tensor dimension
-            haloUBound[i][k] = array->undistUBound[kTensor]
+            haloOutsideUBound[i][k] = array->undistUBound[kTensor]
               - array->undistLBound[kTensor] + 1;
             ++kTensor;
           }   
@@ -3594,32 +3629,6 @@ int Array::haloStore(
     vector<vector<int> > rimMaskElement(localDeCount);
     vector<vector<SeqIndex> > rimMaskSeqIndex(localDeCount);
     for (int i=0; i<localDeCount; i++){
-      
-#define OLDHALOMAT_disable
-#ifdef OLDHALOMAT
-      
-      for (int k=0; k<array->rimElementCount[i]; k++){
-        SeqIndex seqIndex = array->rimSeqIndex[i][k];
-        
-//TODO: this is where the haloDepth parameters need to be considered!!!!
-//TODO: check inside of sparseMatMulStore() how subset of rim is looped over!!!
-        
-        
-//printf("haloStore() dumping rim element %d for localPet/localDe %d/%d: ", k, 
-//localPet, i);
-//seqIndex.print();
-        if (seqIndex.valid()){
-          // this rim element holds a valid seqIndex
-//printf("rim element holds valid seqIndex\n");
-          factorIndexList.push_back(seqIndex.decompSeqIndex); // src
-          factorIndexList.push_back(seqIndex.tensorSeqIndex); // src
-          factorIndexList.push_back(seqIndex.decompSeqIndex); // dst
-          factorIndexList.push_back(seqIndex.tensorSeqIndex); // dst
-          ++factorListCount;  // count this element
-        }
-      }
-
-#else
       ArrayElement arrayElement(array, 0, true);
       int element = 0;
       while(arrayElement.isWithin()){
@@ -3630,11 +3639,17 @@ int Array::haloStore(
           // check whether indexTuple is within halo bounds
           bool withinHalo = true;
           for (int k=0; k<array->rank; k++){
-            if (indexTuple[k] < haloLBound[i][k] ||
-              indexTuple[k] > haloUBound[i][k]){
+            if (indexTuple[k] < haloOutsideLBound[i][k] ||
+              indexTuple[k] > haloOutsideUBound[i][k]){
               withinHalo = false; // index outside halo region
               break;
             }
+//TODO: fix this check
+//            if (indexTuple[k] > haloInsideLBound[i][k] &&
+//              indexTuple[k] < haloInsideUBound[i][k]){
+//              withinHalo = false; // index outside halo region
+//              break;
+//            }
           }
           if (withinHalo){
             // add element to identity matrix
@@ -3655,9 +3670,6 @@ int Array::haloStore(
         arrayElement.next();  // next element
         ++element;
       } // multi dim index loop
-      
-#endif            
-      
     }    
     
     // load type specific factorList with "1" for the identity matrix

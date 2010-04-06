@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.35 2010/04/05 19:06:06 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.36 2010/04/06 05:58:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -606,7 +606,8 @@ extern "C" {
   }
 
   void FTN(c_esmc_arrayhalostore)(ESMCI::Array **array,
-    ESMCI::RouteHandle **routehandle, ESMC_RegionFlag *regionflag,
+    ESMCI::RouteHandle **routehandle,
+    ESMC_HaloStartRegionFlag *halostartregionflag,
     ESMCI::InterfaceInt **haloLDepth, ESMCI::InterfaceInt **haloUDepth,
     int *rc){
 #undef  ESMC_METHOD
@@ -615,7 +616,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::haloStore(
-      *array, routehandle, *regionflag, *haloLDepth, *haloUDepth),
+      *array, routehandle, *halostartregionflag, *haloLDepth, *haloUDepth),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.1 2010/04/05 22:19:47 theurich Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.2 2010/04/06 05:58:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.1 2010/04/05 22:19:47 theurich Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.2 2010/04/06 05:58:32 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -115,7 +115,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayHalo()"
 !BOP
-! !IROUTINE: ESMF_ArrayHalo - Execute an ArrayHalo operation
+! !IROUTINE: ESMF_ArrayHalo - Execute an Array halo operation
 !
 ! !INTERFACE:
   subroutine ESMF_ArrayHalo(array, routehandle, commflag, &
@@ -130,20 +130,26 @@ contains
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Execute the halo operation stored in the Route referenced by 
-!   {\tt routehandle} over the data in {\tt array}. See the description for 
-!   {\tt ArrayHaloStore()} and {\tt ArrayHalo()} for details. 
+!   Execute a precomputed Array halo operation for {\tt array}. The {\tt array}
+!   argument must be weakly congruent and typekind conform to the Array used
+!   during {\tt ESMF\_ArrayHaloStore()}.
+!   Congruent Arrays possess matching DistGrids, and the shape of the local
+!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   Arrays the sizes of the undistributed dimensions, that vary faster with
+!   memory than the first distributed dimension, are permitted to be different.
+!   This means that the same {\tt routehandle} can be applied to a large class
+!   of similar Arrays that differ in the number of elements in the left most
+!   undistributed dimensions.
 !
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its DEs. The
-!     call will block until all PET-local data objects are accessible.
+!   See {\tt ESMF\_ArrayHaloStore()} on how to precompute {\tt routehandle}.
+!
+!   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
 !   \item [array]
-!         {\tt ESMF\_Array} containing data to be haloed.
+!     {\tt ESMF\_Array} containing data to be haloed.
 !   \item [routehandle]
-!         Handle to the Route that stores the halo operation to be performed.
+!     Handle to the precomputed Route.
 !   \item [{[commflag]}]
 !     Indicate communication option. Default is {\tt ESMF\_COMM\_BLOCKING},
 !     resulting in a blocking operation.
@@ -163,7 +169,7 @@ contains
 !     will be performed, leaving many inconsistencies undetected. Set
 !     {\tt checkflag} to {\tt .FALSE.} to achieve highest performance.
 !   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
@@ -219,7 +225,7 @@ contains
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Release resouces associated with an Array sparse matrix multiplication. 
+!   Release resouces associated with an Array halo operation. 
 !   After this call {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -256,66 +262,88 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayHaloStore()"
 !BOP
-! !IROUTINE: ESMF_ArrayHaloStore - Store an ArrayHalo operation
+! !IROUTINE: ESMF_ArrayHaloStore - Precompute an Array halo operation
 !
 ! !INTERFACE:
-    subroutine ESMF_ArrayHaloStore(array, routehandle, regionflag, haloLDepth, &
-      haloUDepth, rc)
+    subroutine ESMF_ArrayHaloStore(array, routehandle, halostartregionflag, &
+      haloLDepth, haloUDepth, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),       intent(inout)          :: array
-    type(ESMF_RouteHandle), intent(inout)          :: routehandle
-    type(ESMF_RegionFlag),  intent(in),   optional :: regionflag
-    integer,                intent(in),   optional :: haloLDepth(:)
-    integer,                intent(in),   optional :: haloUDepth(:)
-    integer,                intent(out),  optional :: rc
+    type(ESMF_Array),       intent(inout)                :: array
+    type(ESMF_RouteHandle), intent(inout)                :: routehandle
+    type(ESMF_HaloStartRegionFlag), intent(in), optional :: halostartregionflag
+    integer,                intent(in),         optional :: haloLDepth(:)
+    integer,                intent(in),         optional :: haloUDepth(:)
+    integer,                intent(out),        optional :: rc
 !
 ! !DESCRIPTION:
-!   Store a halo operation over the data in an {\tt ESMF\_Array}. See the
-!   description for {\tt ArrayHalo()} for details. No actual halo operation
-!   is performed by this call, use {\tt ArrayHalo} to execute a stored
-!   halo operation.
+!   Store an Array halo operation over the data in {\tt array}. By default,
+!   i.e. without specifying {\tt halostartregionflag}, {\tt haloLDepth} and
+!   {\tt haloUDepth}, all elements between the exclusive and total region of 
+!   the Array will be considered potential destination elements for halo.
+!   However, only those elements that correspond to an actual halo source
+!   element, will be updated under the halo operation. Elements that have no
+!   associated source remain unchanged under halo.
 !
-!   The Route referenced by the returned {\tt ESMF\_RouteHandle} object can 
-!   be used with any {\tt ESMF\_Array} object that is {\em DistGrid conform}, 
-!   i.e. has been defined on a congruent DistGrid object. In particular it can
-!   be used for all Arrays in an ArrayBundle that are DistGrid conform with the
-!   Array used to precompute the Route.
+!   Specifying {\tt halostartregionflag} allows to change the shape of the 
+!   effective halo region from the inside. Setting this flag to
+!   {\tt ESMF\_REGION\_COMPUTATIONAL} means that only elements outside 
+!   the computational region of the Array are considered for potential
+!   destination elements for halo.
 !
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its DEs. The
-!     call will block until all PET-local data objects are accessible.
+!   The {\tt haloLDepth} and {\tt haloUDepth} arguments allow to reduce
+!   the extent of the effective halo region. Starting at the region specified
+!   by {\tt halostartregionflag}, the {\tt haloLDepth} and {\tt haloUDepth}
+!   define a halo depth in each direction. Note that the maximum halo region is
+!   limited by the total Array region, independent of the actual
+!   {\tt haloLDepth} and {\tt haloUDepth} setting. The total Array region is
+!   local DE specific, and {\tt haloLDepth} and {\tt haloUDepth} are interpreted
+!   as the maximum desired extent where possible.
+!
+!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
+!   {\tt ESMF\_ArrayHalo()} on any Array that is weakly congruent
+!   and typekind conform to {\tt array}.
+!   Congruent Arrays possess matching DistGrids, and the shape of the local
+!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   Arrays the sizes of the undistributed dimensions, that vary faster with
+!   memory than the first distributed dimension, are permitted to be different.
+!   This means that the same {\tt routehandle} can be applied to a large class
+!   of similar Arrays that differ in the number of elements in the left most
+!   undistributed dimensions.
+!  
+!   This call is {\em collective} across the current VM.  
 !
 !   \begin{description}
 !   \item [array]
 !     {\tt ESMF\_Array} containing data to be haloed.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-!   \item [{[regionflag]}]
-!     Specifies the reference for halo depth arguments: 
-!     {\tt ESMF\_REGION\_EXCLUSIVE} or {\tt ESMF\_REGION\_COMPUTATIONAL}
-!     (default).
+!   \item [{[halostartregionflag]}]
+!     The start of the effective halo region on every DE. The default
+!     setting is {\tt ESMF\_REGION\_EXCLUSIVE}, rendering all non-exclusive
+!     elements potential halo destination elments.
+!     See section \ref{opt:halostartregionflag} for a complete list of
+!     valid settings.
 !   \item[{[haloLDepth]}] 
-!     This vector argument must have dimCount elements, where dimCount is
-!     specified in distgrid. It specifies the lower corner of the halo
-!     region with respect to the lower corner of the computational region
-!     or exclusive region, depending on {\tt regionflag}.
+!     This vector specifies the lower corner of the effective halo
+!     region with respect to the lower corner of {\tt halostartregionflag}.
+!     The size of {\tt haloLDepth} must equal the number of distributed Array
+!     dimensions.
 !   \item[{[haloUDepth]}] 
-!     This vector argument must have dimCount elements, where dimCount is
-!     specified in distgrid. It specifies the upper corner of the halo
-!     region with respect to the upper corner of the computational region
-!     or exclusive region, depending on {\tt regionflag}.
+!     This vector specifies the upper corner of the effective halo
+!     region with respect to the upper corner of {\tt halostartregionflag}.
+!     The size of {\tt haloUDepth} must equal the number of distributed Array
+!     dimensions.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc        ! local return code
-    type(ESMF_RegionFlag)   :: opt_regionflag ! helper variable
-    type(ESMF_InterfaceInt) :: haloLDepthArg  ! helper variable
-    type(ESMF_InterfaceInt) :: haloUDepthArg  ! helper variable
+    integer                         :: localrc        ! local return code
+    type(ESMF_HaloStartRegionFlag)  :: opt_halostartregionflag ! helper variable
+    type(ESMF_InterfaceInt)         :: haloLDepthArg  ! helper variable
+    type(ESMF_InterfaceInt)         :: haloUDepthArg  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -325,8 +353,8 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
     
     ! Set default flags
-    opt_regionflag = ESMF_REGION_TOTAL  !TODO: this is not a valid setting here
-    if (present(regionflag)) opt_regionflag = regionflag
+    opt_halostartregionflag = ESMF_REGION_EXCLUSIVE
+    if (present(halostartregionflag)) opt_halostartregionflag = halostartregionflag
 
     ! Deal with (optional) array arguments
     haloLDepthArg = ESMF_InterfaceIntCreate(haloLDepth, rc=localrc)
@@ -337,7 +365,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayHaloStore(array, routehandle, opt_regionflag, &
+    call c_ESMC_ArrayHaloStore(array, routehandle, opt_halostartregionflag, &
       haloLDepthArg, haloUDepthArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
