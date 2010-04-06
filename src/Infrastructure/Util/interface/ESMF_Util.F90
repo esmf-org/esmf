@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.21 2010/04/06 16:04:14 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.22 2010/04/06 17:03:45 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -87,7 +87,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.21 2010/04/06 16:04:14 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.22 2010/04/06 17:03:45 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -125,15 +125,13 @@
 
     argc = ipxfargc ()
 
-#elif defined (ESMF_NEEDSGETARG)
+#else
 ! Non-Standard, but implemented by many compilers.
 
     integer, external :: iargc
 
     argc = iargc ()
 
-#else
-#error need arg count support
 #endif
 
     ESMF_UtilGetArgC = argc
@@ -247,7 +245,7 @@
       length = locallength
     end if
      
-#elif defined (ESMF_NEEDSGETARG)
+#else
 ! Non-Standard.  But dates back to the original 7th Edition unix f77
 ! compiler, so is implemented by many compilers.  No further error
 ! checking, especially for bad character string lengths, is possible.
@@ -266,8 +264,6 @@
 
     localrc = ESMF_SUCCESS
 
-#else
-#error need getarg support
 #endif
 
     if (ESMF_LogMsgFoundError ( localrc,  &
