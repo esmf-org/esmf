@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.19 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_Util.F90,v 1.20 2010/04/06 00:03:47 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -59,6 +59,10 @@
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 
+!  Command line argument methods
+      public ESMF_UtilGetArgC
+      public ESMF_UtilGetArg
+
 !  Misc methods
       public ESMF_StringLowerCase
       public ESMF_StringUpperCase
@@ -83,10 +87,198 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.19 2010/03/04 18:57:45 svasquez Exp $'
+               '$Id: ESMF_Util.F90,v 1.20 2010/04/06 00:03:47 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
+
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilGetArgC"
+!BOP
+! !IROUTINE:  ESMF_UtilGetArgC - Return number of command line arguments
+!
+! !INTERFACE:
+  integer function ESMF_UtilGetArgC ()
+!
+! !ARGUMENTS:
+!  none
+!
+! !Description:
+! This method returns the number of command line arguments specified
+! when the process was started.
+!
+! The number of arguments returned does not include the name of the
+! command itself - which is typically returned as argument zero.
+!EOP
+    integer :: argc
+
+#if !defined (ESMF_NEEDSPXFGETARG) && !defined (ESMF_NEEDSGETARG)
+! Fortran 2003 version (default and preferred)
+
+    argc = command_argument_count ()
+
+#elif defined (ESMF_NEEDSPXFGETARG)
+! POSIX Fortran bindings (1003.9-1992)
+
+    integer, external :: ipxfargc
+
+    argc = ipxfargc ()
+
+#elif defined (ESMF_NEEDSGETARG)
+! Non-Standard, but implemented by many compilers.
+
+    integer, external :: ipxf_argc
+
+    argc = iargc ()
+
+#else
+#error need arg count support
+#endif
+
+    ESMF_UtilGetArgC = argc
+
+  end function ESMF_UtilGetArgC
+
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilGetArg"
+!BOP
+! !IROUTINE:  ESMF_UtilGetArg - Return a command line argument
+!
+! !INTERFACE:
+  subroutine ESMF_UtilGetArg (argindex, value, length, rc)
+!
+! !ARGUMENTS:
+    integer, intent(in) :: argindex
+    character(*), intent(out), optional :: value
+    integer, intent(out), optional :: length
+    integer, intent(out), optional :: rc
+!
+! !Description:
+! This method returns a copy of a command line argument specified
+! when the process was started.  This argument is the same as an
+! equivalent C++ program would find in the argv array.
+!
+! The arguments are:
+! \begin{description}
+! \item [{argindex}]
+! A non-negative index into the command line argument {\tt argv} array.
+! If argindex is negative or greater than the number of user-specified
+! arguments, ESMF\_RC\_ARG\_VALUE is returned in the {\tt rc} argument.
+! \item [{[value]}]
+! Returns a copy of the desired command line argument.  If the provided
+! character string is longer than the command line argument, the string
+! will be blank padded.  If the string is too short, truncation will
+! occur and ESMF\_RC\_ARG\_SIZE is returned in the {\tt rc} argument.
+! \item [{[length]}]
+! Returns the length of the desired command line argument in characters.
+! The length result does not depend on the length of the {\tt value}
+! string.  It may be used to query the length of the argument.
+! \item [{[rc]}]
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOP
+!------------------------------------------------------------------------- 
+#if defined (ESMF_NEEDSPXFGETARG) || defined (ESMF_NEEDSGETARG)
+    character(4*ESMF_MAXSTR) :: localvalue
+    integer :: locallength
+#endif
+    integer :: localargc, localrc
+
+#if defined (ESMF_NEEDSPXFGETARG)
+    integer, external :: ipxfconst
+    integer :: ETRUNC, EINVAL
+#endif
+
+    ! assume failure until success
+    if (present (rc)) then
+      rc = ESMF_RC_NOT_IMPL
+    end if
+
+    localargc = ESMF_UtilGetArgc ()
+    if (present (value)) value = ""
+    if (present (length)) length = 0
+    localrc = merge (ESMF_SUCCESS, ESMF_RC_ARG_VALUE,  &
+        argindex >= 0 .and. argindex <= localargc)
+    if (ESMF_LogMsgFoundError ( localrc,  &
+        ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc))  &
+      return
+
+#if !defined (ESMF_NEEDSPXFGETARG) && !defined (ESMF_NEEDSGETARG)
+! Fortran 2003 version (default and preferred)
+
+    call get_command_argument (argindex, value, length, status=localrc)
+
+    select case (localrc)
+    case (0)
+      localrc = ESMF_SUCCESS
+    case (-1)
+      localrc = ESMF_RC_ARG_SIZE
+    case (1:)
+      localrc = ESMF_RC_ARG_VALUE
+    end select
+
+#elif defined (ESMF_NEEDSPXFGETARG)
+! POSIX Fortran bindings (1003.9-1992)
+! Has error checking comparable to F2003.  So when F2003 intrinsics
+! are not available and PXF is available (e.g., on IRIX), it is
+! preferable to calling 'getarg'.
+
+    ETRUNC = ipxfconst ("ETRUNC")
+    EINVAL = ipxfconst ("EINVAL")
+
+    if (present (value)) then
+      call pxfgetarg (argindex, value, locallength, localrc)
+    else
+      call pxfgetarg (argindex, localvalue, locallength, localrc)
+      if (localrc == ETRUNC) localrc = 0
+    end if
+
+    if (localrc == 0) then
+      localrc = ESMF_SUCCESS
+    else if (localrc == ETRUNC) then
+      localrc = ESMF_RC_ARG_SIZE
+    else if (localrc == EINVAL) then
+      localrc = ESMF_RC_ARG_VALUE
+    end if
+ 
+    if (present (length)) then
+      length = locallength
+    end if
+     
+#elif defined (ESMF_NEEDSGETARG)
+! Non-Standard.  But dates back to the original 7th Edition unix f77
+! compiler, so is implemented by many compilers.  No further error
+! checking, especially for bad character string lengths, is possible.
+
+    if (present (value)) then
+      call getarg (argindex, value)
+      locallength = len_trim (value)
+    else
+      call getarg (argindex, localvalue)
+      locallength = len_trim (localvalue)
+    end if
+
+    if (present (length)) then
+      length = locallength
+    end if
+
+    localrc = ESMF_SUCCESS
+
+#else
+#error need getarg support
+#endif
+
+    if (ESMF_LogMsgFoundError ( localrc,  &
+        ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc))  &
+      return
+
+    if (present (rc)) then
+      rc = localrc
+    end if
+
+  end subroutine ESMF_UtilGetArg
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
