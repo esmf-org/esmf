@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.20 2010/04/06 00:03:47 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.21 2010/04/06 16:04:14 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -87,7 +87,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.20 2010/04/06 00:03:47 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.21 2010/04/06 16:04:14 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -128,7 +128,7 @@
 #elif defined (ESMF_NEEDSGETARG)
 ! Non-Standard, but implemented by many compilers.
 
-    integer, external :: ipxf_argc
+    integer, external :: iargc
 
     argc = iargc ()
 
