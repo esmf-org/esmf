@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.38 2010/03/04 18:57:42 svasquez Exp $
+// $Id: ESMCI_DistGrid.C,v 1.39 2010/04/07 23:00:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.38 2010/03/04 18:57:42 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.39 2010/04/07 23:00:44 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2750,7 +2750,7 @@ int DistGrid::getSequenceIndexLocalDe(
           indexListPDimPLocalDe[localDe*dimCount+i][index[i]];
     }
     // get sequence index providing patch relative index tuple
-    seqindex = getSequenceIndexPatch(patch, patchIndexTuple, 0, &localrc);
+    seqindex = getSequenceIndexPatch(patch, patchIndexTuple, 3, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return -1;  //  bail out with invalid seqindex
     delete [] patchIndexTuple;
