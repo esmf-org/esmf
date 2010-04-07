@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHaloEx.F90,v 1.1 2010/04/07 05:42:07 theurich Exp $
+! $Id: ESMF_ArrayHaloEx.F90,v 1.2 2010/04/07 23:02:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -26,7 +26,7 @@ program ESMF_ArrayHaloEx
   type(ESMF_DistGrid):: distgrid
   type(ESMF_Array):: array
   type(ESMF_ArraySpec):: arrayspec
-  type(ESMF_RouteHandle):: haloHandle
+  type(ESMF_RouteHandle):: haloHandle, haloHandle2
   integer :: finalrc
   
   integer                     :: counter,i,j,step
@@ -36,6 +36,7 @@ program ESMF_ArrayHaloEx
   
   real(ESMF_KIND_R8)          :: farrayGather(10,20)
   real(ESMF_KIND_R8), allocatable :: farrayTemp(:,:)
+  integer, allocatable        :: connectionList(:,:)
   
 
 ! ------------------------------------------------------------------------------
@@ -135,7 +136,7 @@ program ESMF_ArrayHaloEx
 ! The exclusive region on each DE is of shape 5 x 10, while the total region
 ! on each DE is of shape (5+2+2) x (10+2+2) = 9 x 14. In a typical application
 ! the elements in the exclusive region are updated exclusively by the PET that
-! owns the DE. In this example the exlusive elements on every DE are
+! owns the DE. In this example the exclusive elements on every DE are
 ! initialized to the value $f(i,j)$ of the geometric function
 ! \begin{equation}
 ! f(i,j) = \sin(\alpha i)\cos(\beta j),
@@ -167,7 +168,7 @@ program ESMF_ArrayHaloEx
   
   do j=eLB(2,1), eUB(2,1)
     do i=eLB(1,1), eUB(1,1)
-      farrayPtr(i,j) = sin(a*i) * cos(b*j)
+      farrayPtr(i,j) = sin(a*i) * cos(b*j)  ! test function
     enddo
   enddo
 !EOC  
@@ -233,7 +234,6 @@ program ESMF_ArrayHaloEx
 ! quadratic differentiation kernel.
 !EOE
 !BOC
-
   allocate(farrayTemp(eLB(1,1):eUB(1,1), eLB(2,1):eUB(2,1)))
 
   do step=1, 4
@@ -265,28 +265,173 @@ program ESMF_ArrayHaloEx
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-
-!--- gather and output for plotting
-  call ESMF_ArrayGather(array, farray=farrayGather, rootPet=0, rc=rc)
-  if (localPet==0) then
-    do j=1,20
-      do i=1,10
-        print *, i, j, farrayGather(i,j)
-      enddo
-      print *
-    enddo
-  endif
-!----------------------------------
-
-
 !BOE
 ! The special treatment of the global edges in the above kernel is due to the 
 ! fact that the underlying DistGrid object does not define any special 
 ! boundary conditions. By default open global boundaries are assumed which
 ! means that the rim elements on the global edges are untouched during
 ! the halo operation, and cannot be used in the symmetric numerical derivative
-! formula.
+! formula. The kernel can be simplified (and the calculation is more precise)
+! with periodic boundary conditions along the first Array dimension.
 !
+! First destroy the current Array and DistGrid objects.
+!EOE
+!BOC
+  call ESMF_ArrayDestroy(array, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! Create a DistGrid with periodic boundary condition along the first dimension.
+!EOE
+!BOC
+  allocate(connectionList(3*2+2, 1))  ! (3*dimCount+2, number of connections)
+  call ESMF_DistGridConnection(connection=connectionList(:,1), &
+     patchIndexA=1, patchIndexB=1, &
+     positionVector=(/10, 0/), rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,20/), &
+    regDecomp=(/2,2/), connectionList=connectionList, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  deallocate(connectionList)
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    totalLWidth=(/2,2/), totalUWidth=(/2,2/), indexflag=ESMF_INDEX_GLOBAL, &
+    rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+!BOE
+! Initialize the exclusive elements to the same geometric function as before.
+!EOE
+!BOC
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC  
+  
+  call ESMF_ArrayGet(array, exclusiveLBound=eLB, exclusiveUBound=eUB, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC  
+  
+  do j=eLB(2,1), eUB(2,1)
+    do i=eLB(1,1), eUB(1,1)
+      farrayPtr(i,j) = sin(a*i) * cos(b*j)  ! test function
+    enddo
+  enddo
+!EOC  
+!BOE
+! The numerical kernel only operates along the first dimension. An
+! asymmetric halo depth can be used to take this fact into account.
+!EOE
+!BOC
+  call ESMF_ArrayHaloStore(array=array, routehandle=haloHandle, &
+    haloLDepth=(/1,0/), haloUDepth=(/1,0/), rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+!BOE
+! Now the same numerical kernel can be used without special treatment of
+! global edge elements. The symmetric derivative formula can be used for
+! all exclusive elements.
+!EOE
+!BOC
+  allocate(farrayTemp(eLB(1,1):eUB(1,1), eLB(2,1):eUB(2,1)))
+
+  do step=1, 4
+    call ESMF_ArrayHalo(array=array, routehandle=haloHandle, rc=rc)
+!EOC    
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+    do j=eLB(2,1), eUB(2,1)
+      do i=eLB(1,1), eUB(1,1)
+        farrayTemp(i,j) = 0.5 * (farrayPtr(i+1,j) - farrayPtr(i-1,j)) / a
+      enddo
+    enddo
+    farrayPtr(eLB(1,1):eUB(1,1), eLB(2,1):eUB(2,1)) = farrayTemp
+  enddo
+  
+!BOE
+! The precision of the above kernel can be improved by going to 
+! a higher order interpolation. Doing so requires that the halo depth must be
+! increased. The following code resets the exclusive Array elements
+! to the test function, precomputes a RouteHandle for a halo operation
+! with depth 2 along the first dimension, and finally uses the deeper halo
+! in the higher order kernel.
+!EOE
+!BOC  
+  
+  do j=eLB(2,1), eUB(2,1)
+    do i=eLB(1,1), eUB(1,1)
+      farrayPtr(i,j) = sin(a*i) * cos(b*j)  ! test function
+    enddo
+  enddo
+
+  call ESMF_ArrayHaloStore(array=array, routehandle=haloHandle2, &
+    haloLDepth=(/2,0/), haloUDepth=(/2,0/), rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOC  
+
+  do step=1, 4
+    call ESMF_ArrayHalo(array=array, routehandle=haloHandle2, rc=rc)
+!EOC    
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+    do j=eLB(2,1), eUB(2,1)
+      do i=eLB(1,1), eUB(1,1)
+        farrayTemp(i,j) = (-farrayPtr(i+2,j) + 8.*farrayPtr(i+1,j) &
+          - 8.*farrayPtr(i-1,j) + farrayPtr(i-2,j)) / (12.*a)
+      enddo
+    enddo
+    farrayPtr(eLB(1,1):eUB(1,1), eLB(2,1):eUB(2,1)) = farrayTemp
+  enddo
+  
+  deallocate(farrayTemp)
+
+!EOC
+!BOE
+! ESMF supports having multiple halo operations defined on the same Array
+! object at the same time. Each operation can be accessed through its unique
+! RouteHandle. The above kernel could have made {\tt ESMF\_ArrayHalo()} calls
+! with a depth of 1 along the first dimension using the previously precomputed
+! {\tt haloHandle} if it needed to. Both RouteHandles need to release their
+! resources when no longer used.
+!EOE
+!BOC
+  
+
+  call ESMF_ArrayHaloRelease(routehandle=haloHandle, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOC
+  call ESMF_ArrayHaloRelease(routehandle=haloHandle2, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+!--- gather and output for plotting
+  call ESMF_ArrayGather(array, farray=farrayGather, rootPet=0, rc=rc)
+  if (localPet==0) then
+    do j=1,20
+      do i=1,10
+        print *, i, j, farrayGather(i,j), sin(a*i) * cos(b*j)
+      enddo
+      print *
+    enddo
+  endif
+!----------------------------------
+  
+!BOE
 ! Finally the Array and DistGrid objects can be destroyed.
 !EOE
 !BOC
