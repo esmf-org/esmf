@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshSMMUTest.F90,v 1.5 2010/03/04 18:57:43 svasquez Exp $
+! $Id: ESMF_FieldMeshSMMUTest.F90,v 1.6 2010/04/07 15:11:30 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldMeshSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldMeshSMMUTest.F90,v 1.5 2010/03/04 18:57:43 svasquez Exp $'
+    '$Id: ESMF_FieldMeshSMMUTest.F90,v 1.6 2010/04/07 15:11:30 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -281,7 +281,9 @@ contains
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rc)) return
 
-          srcfptr = 1
+          do i = lbound(srcfptr, 1), ubound(srcfptr, 1)
+              srcfptr(i) = i
+          enddo
 
           ! a one dimensional grid whose index space is an isomorphism with the mesh's
           distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/9/), rc=rc)
@@ -289,13 +291,12 @@ contains
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rc)) return
 
-          grid = ESMF_GridCreate(distgrid=distgrid, gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), rc=rc)
+          grid = ESMF_GridCreate(distgrid=distgrid, rc=rc)
           if (ESMF_LogMsgFoundError(rc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rc)) return
 
-          dstField = ESMF_FieldCreate(grid, arrayspec, &
-              rc=rc)
+          dstField = ESMF_FieldCreate(grid, arrayspec, rc=rc)
           if (ESMF_LogMsgFoundError(rc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rc)) return
@@ -308,13 +309,19 @@ contains
           dstfptr = 0
 
           ! initialize factorList and factorIndexList
-          ! the diagonal of the 9x9 diagonal matrix on 3 PETs is ((1 2 3) (1 2) (1 2) (1 2))
+          ! Nodal distribution of indices:
+          ! 1 3 1
+          ! 2 4 2
+          ! 1 2 1
+          ! src data = ((1 2 3 4) (1 2) (1 2) (1))
+          ! the diagonal of the 9x9 diagonal matrix on 4 PETs is ((1 2 3) (1 2) (1 2) (1 4))
+          ! result = ((1 4 9) (1 4) (1 4) (1 4))
           if (localPet == 0) then
               ! 4 -> 3
               allocate(factorList(3))
               allocate(factorIndexList(2,3))
               factorList = (/1,2,3/)
-              factorIndexList(1,:) = (/1, 1, 1/)
+              factorIndexList(1,:) = (/1, 2, 4/)
               factorIndexList(2,:) = (/1, 2, 3/)
               call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
                   factorList, factorIndexList, rc=rc)
@@ -326,7 +333,7 @@ contains
               allocate(factorList(2))
               allocate(factorIndexList(2,2))
               factorList = (/1,2/)
-              factorIndexList(1,:) = (/5, 6/)
+              factorIndexList(1,:) = (/3, 6/)
               factorIndexList(2,:) = (/4, 5/)
               call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
                   factorList, factorIndexList, rc=rc)
@@ -349,7 +356,7 @@ contains
               ! 1 -> 2
               allocate(factorList(2))
               allocate(factorIndexList(2,2))
-              factorList = (/1,2/)
+              factorList = (/1,4/)
               factorIndexList(1,:) = (/9,9/)
               factorIndexList(2,:) = (/8,9/)
               call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
@@ -377,9 +384,9 @@ contains
           ! The smm op reset the values to the index value, verify this is the case.
           ! This is a result of the collapsing index and matrix multiplication with
           ! the diagonal matrix A and a column vector of all 1
-          !write(*, '(9I3)') l, localPet, fptr
+          !write(*, '(9I3)') localPet, fptr
           do i = exlb(1), exub(1)
-              if(fptr(i) .ne. i) finalrc = ESMF_FAILURE
+              if(fptr(i) .ne. i*i) finalrc = ESMF_FAILURE
           enddo
           if (ESMF_LogMsgFoundError(rc, &
               ESMF_ERR_PASSTHRU, &
