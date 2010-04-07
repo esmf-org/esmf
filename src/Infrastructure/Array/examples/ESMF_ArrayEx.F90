@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.51 2010/03/04 18:57:41 svasquez Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.52 2010/04/07 05:42:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -911,6 +911,7 @@ program ESMF_ArrayEx
 !
 !
 ! \subsubsection{Total region, memory padding and changing computational region}
+! \section{Array:padding}
 !
 ! The default total region during Array creation is chosen as to exactly
 ! accommodate the computational region. Once an Array object has been created 

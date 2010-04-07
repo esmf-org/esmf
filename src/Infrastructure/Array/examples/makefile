@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2010/01/29 21:37:53 theurich Exp $
+# $Id: makefile,v 1.21 2010/04/07 05:42:07 theurich Exp $
 
 ALL:      build_examples
 run:      run_examples
@@ -12,6 +12,7 @@ EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_ArrayFarrayEx \
                     $(ESMF_EXDIR)/ESMF_ArrayLarrayEx \
                     $(ESMF_EXDIR)/ESMF_ArrayEx \
                     $(ESMF_EXDIR)/ESMF_ArrayScatterGatherEx \
+                    $(ESMF_EXDIR)/ESMF_ArrayHaloEx \
                     $(ESMF_EXDIR)/ESMF_ArrayRedistEx \
                     $(ESMF_EXDIR)/ESMF_ArraySparseMatMulEx \
                     $(ESMF_EXDIR)/ESMF_ArrayScatterGatherArbEx \
@@ -22,6 +23,7 @@ EXAMPLES_RUN      = run_ESMF_ArrayFarrayEx \
                     run_ESMF_ArrayLarrayEx \
                     run_ESMF_ArrayEx \
                     run_ESMF_ArrayScatterGatherEx \
+                    run_ESMF_ArrayHaloEx \
                     run_ESMF_ArrayRedistEx \
                     run_ESMF_ArraySparseMatMulEx \
                     run_ESMF_ArrayScatterGatherArbEx \
@@ -59,6 +61,10 @@ run_ESMF_ArrayEx:
 
 run_ESMF_ArrayScatterGatherEx:
 	$(MAKE) EXNAME=ArrayScatterGather NP=4 exfrun
+
+
+run_ESMF_ArrayHaloEx:
+	$(MAKE) EXNAME=ArrayHalo NP=4 exfrun
 
 
 run_ESMF_ArrayRedistEx:
