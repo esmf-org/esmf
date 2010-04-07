@@ -22,6 +22,16 @@ class MeshObjTopo;
 // Generate a hyper cube on proc 0
 void HyperCube(Mesh &mesh, const MeshObjTopo *topo);
 
+// Generate a 2D non periodic cartesian mesh on proc 0
+void Cart2D(Mesh &mesh, const int X, const int Y,
+                        const double xA, const double xB,
+                        const double yA, const double yB);
+
+// Generate a 3D non periodic spherical shell mesh on proc 0
+void SphShell(Mesh &mesh, const int lat, const int lon,
+                        const double latA, const double latB,
+                        const double lonA, const double lonB);
+
 } // namespace
 
 #endif

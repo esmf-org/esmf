@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshGen.C,v 1.4 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_MeshGen.C,v 1.5 2010/04/07 20:33:09 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -22,7 +22,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshGen.C,v 1.4 2010/03/04 18:57:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_MeshGen.C,v 1.5 2010/04/07 20:33:09 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -341,6 +341,109 @@ void HyperCube(Mesh &mesh, const MeshObjTopo *topo) {
   }
   
   Skin(mesh);
+}
+
+void Cart2D(Mesh &mesh, const int X, const int Y,
+                        const double xA, const double xB,
+                        const double yA, const double yB) {
+
+    ThrowRequire(X>1&&Y>1);
+
+    const MeshObjTopo *topo = GetTopo("QUAD");
+    mesh.set_spatial_dimension(topo->spatial_dim);
+    mesh.set_parametric_dimension(topo->parametric_dim);
+
+    std::vector<MeshObj*> node(X*Y, (MeshObj*) 0);
+    std::vector<MeshObj*> nodes(4, (MeshObj*) 0);
+
+    for (UInt i=0; i<X*Y; ++i) {
+      node[i] = new MeshObj(MeshObj::NODE, i+1, i);
+      mesh.add_node(node[i], 0);
+      node[i]->set_owner(0);
+    }
+
+    int ind = 0;
+    for(UInt j=0; j<Y-1; ++j) {
+    for(UInt i=0; i<X-1; ++i) {
+      MeshObj *elem = new MeshObj(MeshObj::ELEMENT, ind+1, ind);
+      nodes[0] = node[i+1+(j*X)];
+      nodes[1] = node[i+(j*X)];
+      nodes[2] = node[i+((j+1)*X)];
+      nodes[3] = node[i+1+((j+1)*X)];
+      mesh.add_element(elem, nodes, 0, topo);
+      ++ind;
+      }
+    }
+
+    // Set up the coordinates to match the unit cube.
+    IOField<NodalField> *node_coord = mesh.RegisterNodalField(
+      mesh, "coordinates", mesh.spatial_dim());
+
+    const double hx = std::abs(xB-xA)/double(X-1);
+    const double hy = std::abs(yB-yA)/double(Y-1);
+    for (UInt i=0; i<X*Y; ++i) {
+      double *c = node_coord->data(*node[i]);
+      c[0] = xA+double(i%X)*hx; c[1] = yA+double(std::floor(double(i)/X))*hy;
+    }
+}
+
+void SphShell(Mesh &mesh, const int lat, const int lon,
+                        const double latA, const double latB,
+                        const double lonA, const double lonB) {
+
+    ThrowRequire(lat>1&&lon>1);
+
+    const MeshObjTopo *topo = GetTopo("SHELL");
+    mesh.set_spatial_dimension(3);
+    mesh.set_parametric_dimension(2);
+
+    std::vector<MeshObj*> node(lat*lon, (MeshObj*) 0);
+    std::vector<MeshObj*> nodes(4, (MeshObj*) 0);
+
+    for (UInt i=0; i<lat*lon; ++i) {
+      node[i] = new MeshObj(MeshObj::NODE, i+1, i);
+      mesh.add_node(node[i], 0);
+      node[i]->set_owner(0);
+    }
+
+    int ind = 0;
+    for(UInt j=0; j<lon-1; ++j) {
+    for(UInt i=0; i<lat-1; ++i) {
+      MeshObj *elem = new MeshObj(MeshObj::ELEMENT, ind+1, ind);
+      nodes[0] = node[i+1+(j*lat)];
+      nodes[1] = node[i+(j*lat)];
+      nodes[2] = node[i+((j+1)*lat)];
+      nodes[3] = node[i+1+((j+1)*lat)];
+      mesh.add_element(elem, nodes, 0, topo);
+      ++ind;
+      }
+    }
+
+    // Set up the coordinates to match the unit cube.
+    IOField<NodalField> *node_coord = mesh.RegisterNodalField(
+      mesh, "coordinates", mesh.spatial_dim());
+
+    double latAt = latA;
+    //double latAt = latA - 3.14159/2;
+    double latBt = latB;
+    //double latBt = latB - 3.14159/2;
+
+    const double hLat = std::abs(latBt-latAt)/double(lat-1);
+    const double hLon = std::abs(lonB-lonA)/double(lon-1);
+
+    for (UInt i=0; i<lat*lon; ++i) {
+      double *c = node_coord->data(*node[i]);
+      double phi = latAt+double(i%lat)*hLat;
+      double theta = lonA+double(std::floor(double(i)/double(lat)))*hLon;
+
+      c[0] = std::cos(theta)*std::sin(phi);
+      c[1] = std::sin(theta)*std::sin(phi);
+      c[2] = std::cos(phi);
+/*
+std::cout<<c[0]<<"  "<<c[1]<<"  "<<c[2]
+                            <<"  theta = "<<theta<<"  phi = "<<phi<<std::endl;
+*/
+    }
 }
 
 } // namespace

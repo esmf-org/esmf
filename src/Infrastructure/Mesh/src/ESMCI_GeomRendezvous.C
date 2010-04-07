@@ -1,4 +1,4 @@
-// $Id: ESMCI_GeomRendezvous.C,v 1.6 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_GeomRendezvous.C,v 1.7 2010/04/07 20:33:09 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_GeomRendezvous.C,v 1.6 2010/03/04 18:57:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_GeomRendezvous.C,v 1.7 2010/04/07 20:33:09 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -456,6 +456,12 @@ void GeomRend::prep_meshes() {
 		 MeshObj::ELEMENT, smask->GetContext(), smask->dim());
   }
   
+  MEField<> *src_iwts = srcmesh.GetField("iwts");
+  if (src_iwts != NULL) {
+    srcmesh_rend.RegisterField("iwts", src_iwts->GetMEFamily(),
+                 MeshObj::ELEMENT, src_iwts->GetContext(), src_iwts->dim());
+  }
+
   // Destination Mesh //
   
   // Mesh dims
@@ -487,8 +493,16 @@ void GeomRend::prep_meshes() {
     
       dstmesh_rend.Registerfield(mf->name(), mf->GetAttr(), dmptr->FType(), mf->dim());
     }
-  }
   
+    // Do integration weights
+    MEField<> *dwptr = dstmesh.GetField("iwts");
+    if (dwptr != NULL) {
+      _field *wf = dwptr->GetNodalfield();
+
+      dstmesh_rend.Registerfield(wf->name(), wf->GetAttr(), dwptr->FType(), wf->dim());
+    }
+  }
+
 }
 
 void GeomRend::migrate_meshes() { 
@@ -524,6 +538,17 @@ void GeomRend::migrate_meshes() {
       num_snd++;            
     }
 
+    // Do integration weights if necessary
+    MEField<> *sw = srcmesh.GetField("iwts");
+    if (sw != NULL) {
+      MEField<> *sw_r = srcmesh_rend.GetField("iwts");
+
+      // load mask fields
+      snd[num_snd]=sw;
+      rcv[num_snd]=sw_r;
+      num_snd++;
+    }
+
      srcmesh_rend.Commit();
   
      srcComm.SendFields(num_snd, snd, rcv);
@@ -544,6 +569,7 @@ void GeomRend::migrate_meshes() {
 
   MEField<> *dm = dstmesh.GetField("mask");
 
+  MEField<> *dw = dstmesh.GetField("iwts");
   
   dstmesh_rend.Commit();
   
@@ -554,7 +580,7 @@ void GeomRend::migrate_meshes() {
     
   } else {
     int num_snd=0;
-    _field *snd[2],*rcv[2];
+    _field *snd[3],*rcv[3];
 
     _field *dcf = dc->GetNodalfield();
     _field *dc_rf = dstmesh_rend.Getfield("coordinates_1");
@@ -574,6 +600,17 @@ void GeomRend::migrate_meshes() {
       snd[num_snd]=dmf;
       rcv[num_snd]=dm_rf;
       num_snd++;                
+    }
+
+    if (dw != NULL) {
+      _field *dwf = dw->GetNodalfield();
+      _field *dw_rf = dstmesh_rend.Getfield("iwts_1");
+      ThrowRequire(dw_rf);
+
+      // load mask fields
+      snd[num_snd]=dwf;
+      rcv[num_snd]=dw_rf;
+      num_snd++;
     }
 
     CommRel &dst_node = dstComm.GetCommRel(MeshObj::NODE);

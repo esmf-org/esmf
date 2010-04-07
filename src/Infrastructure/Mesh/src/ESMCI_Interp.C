@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.17 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_Interp.C,v 1.18 2010/04/07 20:33:09 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.17 2010/03/04 18:57:45 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.18 2010/04/07 20:33:09 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -966,6 +966,288 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw) {
   dst_node_rel.send_fields(1, &dfR, &df);
   
 }
+
+/*
+ * There is an ASSUMPTION here that the field is nodal, both sides
+ */
+void Interp::interpL2csrvM(const IWeights &iw, IWeights *iw2,
+                          MEField<> const * const src_iwts,
+                          MEField<> const * const dst_iwts) {
+  Trace __trace("Interp::interpL2csrvM()");
+
+  if (is_parallel)
+    interpL2csrvM_parallel(iw, iw2, dst_iwts);
+  else interpL2csrvM_serial(iw, iw2, src_iwts, dst_iwts);
+
+}
+
+void Interp::interpL2csrvM_serial(const IWeights &iw, IWeights *iw2,
+                          MEField<> const * const src_iwts,
+                          MEField<> const * const dst_iwts) {
+  Trace __trace("Interp::interpL2csrvM_serial");
+
+//!!!!!!!!!!!!!!! iw is the backward interpolation matrix
+
+  char idx = '0';
+
+  Mesh &smesh = dstmesh;
+  Mesh &dmesh = srcmesh;
+
+  // sparse matrix multiply transpose
+  IWeights::WeightMap::const_iterator wi = iw.begin_row(), we = iw.end_row();
+  for (; wi != we; ++wi) {
+    const IWeights::Entry &_row = wi->first;
+    const std::vector<IWeights::Entry> &_col = wi->second;
+    for (UInt c = 0; c < _col.size(); ++c) {
+      // look for destination node id matching _col[c].id
+      MeshDB::MeshObjIDMap::iterator ndi =
+        dmesh.map_find(MeshObj::NODE, _col[c].id);
+      ThrowRequire(ndi != dmesh.map_end(MeshObj::NODE));
+      // look for source node id matching _row.id
+      MeshDB::MeshObjIDMap::iterator nsi =
+        smesh.map_find(MeshObj::NODE, _row.id);
+      ThrowRequire(nsi != smesh.map_end(MeshObj::NODE));
+      // now we have the index and the data, multiply
+      double *Ddata = dst_iwts->data(*ndi);
+      double *Sdata = src_iwts->data(*nsi);
+      double value = ((1/(*Ddata))*(_col[c].value)*(*Sdata));
+
+      int rowT = _col[c].id;
+      int colT = _row.id;
+
+      // now we need to set this value in new weightyys matrix
+      bool found = false;
+      IWeights::WeightMap::iterator wi2 = iw2->begin_row(), we2 = iw2->end_row();
+      for (; wi2 != we2; ++wi2) {
+        // if the row for this value already exists
+        if ((wi2->first).id == rowT) {
+          std::vector<IWeights::Entry> &_col2 = wi2->second;
+          for (UInt c2 = 0; c2 < _col2.size(); ++c2) {
+            // if the column for this value already exits, add it in
+            if(_col2[c2].id == colT) {
+              _col2[c2].value += value;
+              found = true;
+              break;
+            }
+          }
+          // if this column doesn't exist, add a new entry to this row
+          if (found != true) {
+            IWeights::Entry newentry(colT, idx, value, rowT);
+            _col2.push_back(newentry);
+            // sort the row
+            std::sort(_col2.begin(), _col2.end());
+            found = true;
+          }
+        }
+      }
+      // if the row for this value doesn't exist
+      if (!found) {
+        // need element number, src_id of the rows is the element id that owns the node
+        //ESMCI::MeshObjRelationList::iterator fi = ESMCI::MeshObjConn::
+        //  find_relation(*ndi,ESMCI::MeshObj::ELEMENT,0,ESMCI::MeshObj::USED_BY);
+        //const MeshObj &elem = *((*fi).obj);
+        // make the row entry and column vector and column Entry -> insert row
+        //IWeights::Entry row(ndi->get_id(), idx, 0.0, elem.get_id());
+        IWeights::Entry row(rowT, idx, 0.0, 0.0);
+        std::vector<IWeights::Entry> col;
+        IWeights::Entry ent(colT, idx, value, rowT);
+        col.push_back(ent);
+        iw2->InsertRow(row,col);
+        found = true;
+      }
+      if (found != true) {
+        printf("Error, no value! dstid=%d  srcid=%d \n",
+                                int(ndi->get_id()), int(nsi->get_id()));
+      }
+    }
+  }
+
+/*
+  // print out id's of weight matrix
+  IWeights::WeightMap::iterator wit = iw2->begin_row(), wet = iw2->end_row();
+  for (; wit != wet; ++wit) {
+    const IWeights::Entry &_row = wit->first;
+    const std::vector<IWeights::Entry> &_col = wit->second;
+
+    std::cout<<_row.id<<"    ";
+    for (UInt c = 0; c < _col.size(); ++c)
+      std::cout<<std::setprecision(3)<<_col[c].value<<"  ";
+    std::cout<<std::endl;
+  }
+*/
+}
+
+void Interp::interpL2csrvM_parallel(const IWeights &iw, IWeights *iw2,
+                                    MEField<> const * const dst_iwts) {
+  Trace __trace("Interp::interpL2csrvM_parallel");
+
+//!!!!!!!!!!!!!!! iw is the backward interpolation matrix
+
+  char idx = '0';
+  int id;
+  MPI_Comm_rank(MPI_COMM_WORLD, &id);
+
+  Mesh &smesh = grend.GetDstRend();
+  Mesh &dmesh = grend.GetSrcRend();
+
+  _field *src_iwts = smesh.Getfield("iwts_1");
+
+  if(!src_iwts) {
+    std::cout<<"SOURCE ERROR!!"<<std::endl<<std::endl;
+    exit(1);
+  }
+
+  // sparse matrix multiply transpose
+  IWeights::WeightMap::const_iterator wi = iw.begin_row(), we = iw.end_row();
+  for (; wi != we; ++wi) {
+    const IWeights::Entry &_row = wi->first;
+    const std::vector<IWeights::Entry> &_col = wi->second;
+    for (UInt c = 0; c < _col.size(); ++c) {
+      // look for source node id matching _row.id
+      MeshDB::MeshObjIDMap::iterator nsi =
+        smesh.map_find(MeshObj::NODE, _row.id);
+      if (nsi == smesh.map_end(MeshObj::NODE))  break;
+      ThrowRequire(nsi != smesh.map_end(MeshObj::NODE));
+      // now we have the index and the data, multiply
+      double *Sdata = src_iwts->data(*nsi);
+      double value = (_col[c].value)*(*Sdata);
+      int rowT = _col[c].id;
+      int colT = _row.id;
+
+      // now we need to set this value in new matrix
+      bool found = false;
+      IWeights::WeightMap::iterator wi2 = iw2->begin_row(), we2 = iw2->end_row();
+      for (; wi2 != we2; ++wi2) {
+        // if the row for this value already exists
+        if ((wi2->first).id == rowT) {
+          std::vector<IWeights::Entry> &_col2 = wi2->second;
+          for (UInt c2 = 0; c2 < _col2.size(); ++c2) {
+            // if the column for this value already exits, add it in
+            if(_col2[c2].id == colT) {
+              _col2[c2].value += value;
+              found = true;
+              break;
+            }
+          }
+          // if this column doesn't exist, add a new entry to this row
+          if (found != true) {
+            IWeights::Entry newentry(colT, idx, value, rowT);
+            _col2.push_back(newentry);
+            // sort the row
+            std::sort(_col2.begin(), _col2.end());
+            found = true;
+          }
+        }
+      }
+      // if the row for this value doesn't exist
+      if (!found) {
+        /*  TODO:
+        // need element number, src_id of the rows is the element id that owns the node
+        ESMCI::MeshObjRelationList::iterator fi = ESMCI::MeshObjConn::
+          find_relation(*nsi,ESMCI::MeshObj::ELEMENT,0,ESMCI::MeshObj::USED_BY);
+        const MeshObj &elem = *((*fi).obj);
+        // make the row entry and column vector and column Entry -> insert row
+        IWeights::Entry row(rowT, idx, 0.0, elem.get_id());
+        */
+        IWeights::Entry row(rowT, idx, 0.0, id);
+        std::vector<IWeights::Entry> col;
+        IWeights::Entry ent(colT, idx, value, rowT);
+        col.push_back(ent);
+        iw2->InsertRow(row,col);
+        found = true;
+      }
+      if (found != true) {
+        printf("Error, no value! dstid=%d  srcid=%d \n",rowT,colT);
+      }
+    }
+  }
+
+  // now migrate to the destination mesh decomposition (srcmesh in here)
+  iw2->Migrate(srcmesh);
+
+  // OK, now we should have the weights matrix in the destination mesh decomposition
+  // combine the Entries of duplicate rows
+  IWeights::WeightMap::iterator mwi = iw2->begin_row(), mwe = iw2->end_row();
+  int lastid = mwi->first.id;
+  ++mwi;
+  for (; mwi != mwe; ++mwi) {
+    const IWeights::Entry &_row = mwi->first;
+    std::vector<IWeights::Entry> &_col = mwi->second;
+
+      int thisid = _row.id;
+      if (thisid == lastid) {
+        // get the last row
+        IWeights::WeightMap::iterator w_temp = mwi;
+        --w_temp;
+        const IWeights::Entry &lastrow = w_temp->first;
+        std::vector<IWeights::Entry> &lastcol = w_temp->second;
+
+        // move all cols to the last row
+        for (UInt c3 = 0; c3 < _col.size(); ++c3) {
+          lastcol.push_back(_col[c3]);
+        }
+
+        // erase this row, incrementing as a side effect
+        iw2->weights.erase(mwi--);
+
+      } else lastid = thisid;
+
+  }
+
+  // now we need to go through the rows themselves and look for duplicate Entries
+  mwi = iw2->begin_row(), mwe = iw2->end_row();
+  for (; mwi != mwe; ++mwi) {
+    const IWeights::Entry &_row = mwi->first;
+    std::vector<IWeights::Entry> &_col = mwi->second;
+    // go through the row
+    for (UInt c = 0; c < _col.size(); ++c) {
+      int lastid = _col[c].id;
+      std::vector<IWeights::Entry>::iterator ci = _col.begin()+c, ce = _col.end();
+      ++ci;
+      // go through the row from the position of c
+      for (; ci != ce; ++ci) {
+        int thisid = ci->id;
+        // if there is a match, add the value and release duplicat entry
+        if (thisid == lastid) {
+          std::vector<IWeights::Entry>::iterator c_temp = ci;
+          --c_temp;
+          c_temp->value += ci->value;
+          ci = _col.erase(ci);
+        }
+      }
+    }
+  }
+
+  // left multiply!
+  IWeights::WeightMap::iterator wi2 = iw2->begin_row(), we2 = iw2->end_row();
+  for(; wi2 != we2; ++wi2) {
+    const IWeights::Entry &_row = wi2->first;
+    std::vector<IWeights::Entry> &_col = wi2->second;
+    MeshDB::MeshObjIDMap::iterator nsi =
+      srcmesh.map_find(MeshObj::NODE, _row.id);
+    ThrowRequire(nsi != srcmesh.map_end(MeshObj::NODE));
+    double *Ddata = dst_iwts->data(*nsi);
+    for (UInt c = 0; c < _col.size(); ++c) _col[c].value = (_col[c].value)/(*Ddata);
+    // and finally sort the columns as well
+    std::sort(_col.begin(), _col.end());
+  }
+/*
+  // print out id's of weight matrix
+  std::cout<<"End  id="<<id<<std::endl;
+  IWeights::WeightMap::iterator wit = iw2->begin_row(), wet = iw2->end_row();
+  for (; wit != wet; ++wit) {
+    const IWeights::Entry &_row = wit->first;
+    const std::vector<IWeights::Entry> &_col = wit->second;
+
+    std::cout<<_row.id<<"    ";
+    for (UInt c = 0; c < _col.size(); ++c)
+      std::cout<<std::setprecision(3)<<_col[c].value<<"  ";
+    std::cout<<std::endl;
+  }
+  std::cout<<std::endl;
+*/
+}
+
 
 void DestrySearchResult(SearchResult &sres) {
   

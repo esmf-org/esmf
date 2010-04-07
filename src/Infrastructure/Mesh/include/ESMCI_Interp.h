@@ -154,17 +154,26 @@ public:
   
   // Form a matrix of the interpolant for the fpair_num field
   void operator()(int fpair_num, IWeights &iw);
+
+  // L2 conservative interpolation - generate conservative interpolation weights
+  // this routine will not work unless iwts is defined as a MEField<> on both meshes
+  void interpL2csrvM(const IWeights &, IWeights *, 
+                     MEField<> const * const, MEField<> const * const);
   
   private:
-  
+
+  // interpolation parallel?
   void transfer_serial();
-  
   void transfer_parallel();
-  
+
+  // interpolation type
   void mat_transfer_serial(int fpair_num, IWeights &);
-  
   void mat_transfer_parallel(int fpair_num, IWeights &);
-  
+
+  // L2 conservative interpolation matrix generation parallel?
+  void interpL2csrvM_serial(const IWeights &, IWeights *, MEField<> const * const, MEField<> const * const);
+  void interpL2csrvM_parallel(const IWeights &, IWeights *, MEField<> const * const);
+
   SearchResult sres;
   GeomRend grend;
   std::vector<FieldPair> fpairs;
@@ -179,8 +188,6 @@ public:
   Mesh &dstmesh;
 };
 
-
-  
 } // namespace
 
 #endif /*ESMC_INTERP_H_*/

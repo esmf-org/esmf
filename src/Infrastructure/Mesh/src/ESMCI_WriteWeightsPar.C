@@ -1,4 +1,4 @@
-// $Id: ESMCI_WriteWeightsPar.C,v 1.6 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_WriteWeightsPar.C,v 1.7 2010/04/07 20:33:09 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@ typedef long long MPI_OffType;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WriteWeightsPar.C,v 1.6 2010/03/04 18:57:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WriteWeightsPar.C,v 1.7 2010/04/07 20:33:09 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -567,7 +567,7 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
 
     // map method 
     // Note we are making this "Bilinear" because this is the closest equivalent to what we have
-    static char map_method[]="Bilinear remapping";
+    static char map_method[]="Conservative remapping";
     if ((retval = ncmpi_put_att_text(ncid, NC_GLOBAL, "map_method",std::strlen(map_method), map_method)))
       Throw() << "NC error:" << ncmpi_strerror(retval);
 
