@@ -1,4 +1,4 @@
-// $Id: ESMC_WordsizeSubr.C,v 1.11 2010/03/04 18:57:46 svasquez Exp $
+// $Id: ESMCI_WordsizeSubr.C,v 1.1 2010/04/08 17:09:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -17,7 +17,7 @@
 //
 //-------------------------------------------------------------------------
 //
-#define ESMC_FILENAME "ESMC_WordsizeSubr.C"
+#define ESMC_FILENAME "ESMCI_WordsizeSubr.C"
 
 #include <stdio.h>
 #include <string.h>

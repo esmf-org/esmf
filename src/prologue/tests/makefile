@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2009/12/23 17:41:37 svasquez Exp $ 
+# $Id: makefile,v 1.19 2010/04/08 17:09:04 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -37,8 +37,8 @@ CLOBBERDIRS =
 # Special for strings passed between C++ and F90
 #
 
-ESMF_UTEST_String_OBJS = ESMC_StringSubr.o
-ESMF_StringUTest.o : ESMC_StringSubr.o
+ESMF_UTEST_String_OBJS = ESMCI_StringSubr.o
+ESMF_StringUTest.o : ESMCI_StringSubr.o
 
 RUN_ESMF_StringUTest:
 	$(MAKE) TNAME=String NP=2 ftest
@@ -65,8 +65,8 @@ RUN_ESMF_F90ArrayPtrUTestUNI:
 # Special for testing wordsizes
 #
 
-ESMF_UTEST_Wordsize_OBJS = ESMC_WordsizeSubr.o
-ESMF_WordsizeUTest.o : ESMC_WordsizeSubr.o
+ESMF_UTEST_Wordsize_OBJS = ESMCI_WordsizeSubr.o
+ESMF_WordsizeUTest.o : ESMCI_WordsizeSubr.o
 
 RUN_ESMF_WordsizeUTest:
 	$(MAKE) TNAME=Wordsize NP=2 ftest
