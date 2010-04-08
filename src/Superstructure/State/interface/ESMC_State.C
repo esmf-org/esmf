@@ -1,4 +1,4 @@
-// $Id: ESMC_State.C,v 1.30 2010/03/04 18:57:46 svasquez Exp $
+// $Id: ESMC_State.C,v 1.31 2010/04/08 19:14:46 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_State.C,v 1.30 2010/03/04 18:57:46 svasquez Exp $";
+static const char *const version = "$Id: ESMC_State.C,v 1.31 2010/04/08 19:14:46 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -71,7 +71,7 @@ extern "C" {
 //     pointer to newly allocated ESMC_State
 //
 // !ARGUMENTS:
-      char *name,          // in - state name
+      const char *name,    // in - state name
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -185,7 +185,7 @@ extern "C" {
 //
 // !ARGUMENTS:
       ESMC_State state,    // in - state
-      char* arrayName,     // in - name of Array to get
+      const char* arrayName,    // in - name of Array to get
       ESMC_Array *array){       // out - array to get
 //
 // !DESCRIPTION:
@@ -224,7 +224,7 @@ extern "C" {
 //
 // !ARGUMENTS:
       ESMC_State state,    // in - state
-      char* fieldName,     // in - name of Field to get
+      const char* fieldName,    // in - name of Field to get
       ESMC_Field *field){       // out - Field to get
 //
 // !DESCRIPTION:

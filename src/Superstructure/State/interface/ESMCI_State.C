@@ -48,7 +48,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_State.C,v 1.18 2010/03/17 05:54:38 eschwab Exp $";
+static const char *const version = "$Id: ESMCI_State.C,v 1.19 2010/04/08 19:14:46 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -116,7 +116,7 @@ namespace ESMCI {
 //     pointer to newly allocated ESMCI::State object
 //
 // !ARGUMENTS:
-      char *name,          // in - state name
+      const char *name,    // in - state name
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -260,7 +260,7 @@ namespace ESMCI {
 //     return code rc.
 //
 // !ARGUMENTS:
-      char  *name,         // in - array name
+      const char  *name,   // in - array name
       Array **array){      // out - array being geted
 //
 // !DESCRIPTION:
@@ -315,7 +315,7 @@ namespace ESMCI {
 //     return code rc.
 //
 // !ARGUMENTS:
-      char  *name,         // in - Field name
+      const char  *name,   // in - Field name
       Field **field){      // out - Field being geted
 //
 // !DESCRIPTION:

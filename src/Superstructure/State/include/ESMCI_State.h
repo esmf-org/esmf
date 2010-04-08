@@ -1,4 +1,4 @@
-// $Id: ESMCI_State.h,v 1.19 2010/03/17 05:54:41 eschwab Exp $
+// $Id: ESMCI_State.h,v 1.20 2010/04/08 19:14:46 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -67,12 +67,12 @@ namespace ESMCI{
     F90ClassHolder fortranclass;
     // methods
     public:
-    static State* create(char* name, int *rc);
+    static State* create(const char* name, int *rc);
     int addArray(Array *array);
     int addField(Field *field);
     int print();
-    int getArray(char* name, Array **array);
-    int getField(char* name, Field **field);
+    int getArray(const char* name, Array **array);
+    int getField(const char* name, Field **field);
     static int destroy(State *state);
 
     int getNumItems(int* numItems);
