@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHalo.F90,v 1.1 2010/04/08 17:58:56 feiliu Exp $
+! $Id: ESMF_FieldHalo.F90,v 1.2 2010/04/08 19:40:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldHalo.F90,v 1.1 2010/04/08 17:58:56 feiliu Exp $'
+    '$Id: ESMF_FieldHalo.F90,v 1.2 2010/04/08 19:40:17 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -95,7 +95,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldHalo()"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldHalo - Execute an FieldHalo operation
 !
 ! !INTERFACE:
@@ -153,12 +153,9 @@ contains
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    type(ESMF_CommFlag)     :: opt_commflag ! helper variable
-    logical                 :: opt_finishedflag! helper variable
-    logical                 :: opt_checkflag! helper variable
 
     ! local variables
     type(ESMF_Array)        :: array
@@ -171,26 +168,15 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, field, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
     
-    ! Set default flags
-    opt_commflag = ESMF_COMM_BLOCKING
-    if (present(commflag)) opt_commflag = commflag
-    opt_checkflag = .false.
-    if (present(checkflag)) opt_checkflag = checkflag
-
     call ESMF_FieldGet(field, array=array, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Call into the array interface, which will sort out optional arguments
     call ESMF_ArrayHalo(array, routehandle, &
-      opt_commflag, opt_finishedflag, opt_checkflag, localrc)
+      commflag, finishedflag, checkflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! translate back finishedflag
-    if (present(finishedflag)) then
-      finishedflag = opt_finishedflag
-    endif
     
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -249,7 +235,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldHaloStore()"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldHaloStore - Store an FieldHalo operation
 !
 ! !INTERFACE:
@@ -331,7 +317,6 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer                         :: localrc        ! local return code
-    type(ESMF_HaloStartRegionFlag)  :: opt_halostartregionflag ! helper variable
 
     ! local variables
     type(ESMF_Array)                :: array
@@ -343,17 +328,13 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, field, rc)
     
-    ! Set default flags
-    opt_halostartregionflag = ESMF_REGION_EXCLUSIVE
-    if (present(halostartregionflag)) opt_halostartregionflag = halostartregionflag
-
     ! query the field for its internal array
     call ESMF_FieldGet(field, array=array, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the Array interface, which will sort out optional arguments
-    call ESMF_ArrayHaloStore(array, routehandle, opt_halostartregionflag, &
+    call ESMF_ArrayHaloStore(array, routehandle, halostartregionflag, &
       haloLDepth, haloUDepth, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

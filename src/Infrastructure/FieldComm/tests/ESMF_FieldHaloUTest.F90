@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloUTest.F90,v 1.1 2010/04/08 17:58:56 feiliu Exp $
+! $Id: ESMF_FieldHaloUTest.F90,v 1.2 2010/04/08 19:40:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_FieldHaloUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldHaloUTest.F90,v 1.1 2010/04/08 17:58:56 feiliu Exp $'
+    '$Id: ESMF_FieldHaloUTest.F90,v 1.2 2010/04/08 19:40:17 feiliu Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -53,9 +53,7 @@ program ESMF_FieldHaloUTest
   integer               :: rc, i, k, verifyValue, petCount, localPet
   logical               :: verifyFlag
   integer               :: eLB(2), eUB(2)
-  integer               :: cLB(2), cUB(2)
   integer               :: tLB(2), tUB(2)
-  integer               :: hLB(2), hUB(2)
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
