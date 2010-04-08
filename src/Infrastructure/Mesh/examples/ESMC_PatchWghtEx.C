@@ -1,4 +1,4 @@
-// $Id: ESMC_PatchWghtEx.C,v 1.19 2010/04/07 20:33:09 rokuingh Exp $
+// $Id: ESMC_PatchWghtEx.C,v 1.20 2010/04/08 16:47:57 theurich Exp $
 //==============================================================================
 //
 // Earth System Modeling Framework
@@ -31,6 +31,8 @@
 #include <ESMCI_Extrapolation.h>
 #include <ESMCI_WriteWeightsPar.h>
 
+#include <mpi.h>
+
 #include <iterator>
 #include <ostream>
 #include <stdlib.h>
@@ -54,6 +56,8 @@ int parseMethodString(char *methodStr, int *methodtype);
 int parsePoleString(char *poleStr, int *poletype, int *poleNPnts);
 
 int main(int argc, char *argv[]) {
+  
+  MPI_Init(&argc, &argv);
 
   Par::Init("PATCHLOG", false);
 

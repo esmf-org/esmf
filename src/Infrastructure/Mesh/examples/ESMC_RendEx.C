@@ -1,4 +1,4 @@
-// $Id: ESMC_RendEx.C,v 1.18 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMC_RendEx.C,v 1.19 2010/04/08 16:47:57 theurich Exp $
 //==============================================================================
 //
 // Earth System Modeling Framework
@@ -26,6 +26,8 @@
 #include <ESMCI_HAdapt.h>
 #include <ESMCI_Rebalance.h>
 #include <ESMCI_Interp.h>
+
+#include <mpi.h>
 
 #include <iterator>
 #include <ostream>
@@ -93,7 +95,7 @@ void set_dest_coords(const Mesh &mesh) {
 
 int main(int argc, char *argv[]) {
 
-
+  MPI_Init(&argc, &argv);
 
   Par::Init("RENDLOG");
   Par::Out() << "Rend, proc:" << Par::Rank() << ", starting..." << std::endl;

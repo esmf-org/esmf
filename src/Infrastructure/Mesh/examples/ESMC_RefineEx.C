@@ -1,4 +1,4 @@
-// $Id: ESMC_RefineEx.C,v 1.16 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMC_RefineEx.C,v 1.17 2010/04/08 16:47:57 theurich Exp $
 //==============================================================================
 //
 // Earth System Modeling Framework
@@ -26,6 +26,8 @@
 #include <ESMCI_HAdapt.h>
 #include <ESMCI_Rebalance.h>
 #include <ESMCI_MeshTypes.h>
+
+#include <mpi.h>
 
 #include <iterator>
 #include <ostream>
@@ -234,6 +236,8 @@ void test_adapt_wave_exec(HAdapt &hadapt, Mesh &mesh) {
 // Example Main.
 /*-------------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
+  
+  MPI_Init(&argc, &argv);
 
   // Initialize mpi, logfiles
   Par::Init("REFOUT");

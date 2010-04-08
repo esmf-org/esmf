@@ -1,4 +1,4 @@
-// $Id: ESMC_DPart.C,v 1.12 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMC_DPart.C,v 1.13 2010/04/08 16:47:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -13,6 +13,8 @@
 /*
  * Program splits a serial mesh into a set of meshes for parallel exection 
  */
+
+#include <mpi.h>
 
 #include <stdlib.h>
 //#include <ctype.h>
@@ -48,6 +50,8 @@ using namespace ESMCI::MESH;
 
 int main(int argc, char *argv[]) {
 
+  MPI_Init(&argc, &argv);
+  
   Par::Init("DPARTLOG");
 
   Mesh srcmesh;

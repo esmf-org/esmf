@@ -1,4 +1,4 @@
-// $Id: ESMC_DCatEx.C,v 1.13 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMC_DCatEx.C,v 1.14 2010/04/08 16:47:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -30,6 +30,8 @@
 #include <ESMCI_ParEnv.h>
 #include <ESMCI_MeshTypes.h>
 
+#include <mpi.h>
+
 #include <stdexcept>
 #include <stdlib.h>
 #include <stdio.h>
@@ -57,6 +59,7 @@ void usage(const std::string &pname) {
 /*---------------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
 
+  MPI_Init(&argc, &argv);
 
   Par::Init("CATLOG");
   std::cout << "size=" << Par::Size() << std::endl;
