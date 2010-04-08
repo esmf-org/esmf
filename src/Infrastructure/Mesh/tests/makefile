@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2010/04/07 20:33:09 rokuingh Exp $ 
+# $Id: makefile,v 1.11 2010/04/08 16:03:16 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -6,18 +6,18 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR    = src/Infrastructure/Mesh/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_IntegrateUTest \
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
  		$(ESMF_TESTDIR)/ESMC_MeshUTest \
  		$(ESMF_TESTDIR)/ESMF_MeshUTest 
 
 TESTS_OBJ = 
 
-TESTS_RUN     = RUN_ESMC_IntegrateUTest \
+TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
  		RUN_ESMC_MeshUTest \
  		RUN_ESMF_MeshUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_MeshUTestUNI \
-                RUN_ESMC_IntegrateUTestUNI
+TESTS_RUN_UNI = RUN_ESMCI_IntegrateUTestUNI \
+		RUN_ESMF_MeshUTestUNI
 
 
 
@@ -35,11 +35,11 @@ CLOBBERDIRS =
 
 # --- Mesh tests
 
-RUN_ESMC_IntegrateUTest:
-	$(MAKE) TNAME=Integrate NP=1 ctest
+RUN_ESMCI_IntegrateUTest:
+	$(MAKE) TNAME=Integrate NP=1 citest
 
-RUN_ESMC_IntegrateUTestUNI:
-	$(MAKE) TNAME=IntegrateUNI NP=1 ctest
+RUN_ESMCI_IntegrateUTestUNI:
+	$(MAKE) TNAME=IntegrateUNI NP=1 citest
 
 RUN_ESMF_MeshUTest:
 	$(MAKE) TNAME=Mesh NP=4 ftest

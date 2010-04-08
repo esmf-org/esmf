@@ -1,4 +1,4 @@
-// $Id: ESMC_IO_NetCDFUTest.C,v 1.3 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMCI_IO_NetCDFUTest.C,v 1.1 2010/04/08 16:03:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -15,10 +15,10 @@
 
 // ESMF header
 #include "ESMC.h"
+#include "ESMCI_IO_NetCDF.h"
 
 // ESMF Test header
-#include "ESMC_Test.h"
-#include <ESMCI_IO_NetCDF.h>
+#include "ESMCI_Test.h"
 
 using namespace ESMCI;
 
@@ -50,7 +50,7 @@ int main(void)
   IO_NetCDF* nctestIO;
 
   //----------------------------------------------------------------------------
-  ESMC_TestStart(__FILE__, __LINE__, 0);
+  TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -60,7 +60,7 @@ int main(void)
   nctestIO = ESMCI_IO_NetCDFCreate(strlen(dummy_nc_filename),
                                           dummy_nc_filename,
 				          ESMC_NULL_POINTER, &rc);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -68,7 +68,7 @@ int main(void)
   strcpy(name, "Create ESMCI_State object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   state = State::create("dummy_state_filename", &rc);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   nctestIO->setState(state);
@@ -80,7 +80,7 @@ int main(void)
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = nctestIO->read(strlen(input_nc_filename), input_nc_filename);
   if (rc==ESMF_RC_LIB_NOT_PRESENT) netcdfNotPresent = true;
-  ESMC_Test((rc==ESMF_SUCCESS || netcdfNotPresent), name, failMsg,
+  Test((rc==ESMF_SUCCESS || netcdfNotPresent), name, failMsg,
              &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -89,7 +89,7 @@ int main(void)
   strcpy(name, "write netcdf data from ESMCI_IO_NetCDF object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = nctestIO->write(strlen(output_nc_filename), output_nc_filename);
-  ESMC_Test((rc==ESMF_SUCCESS || netcdfNotPresent), name, failMsg,
+  Test((rc==ESMF_SUCCESS || netcdfNotPresent), name, failMsg,
              &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -98,7 +98,7 @@ int main(void)
   strcpy(name, "Destroy ESMCI_State object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = State::destroy(state);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -106,12 +106,12 @@ int main(void)
   strcpy(name, "Destroy ESMCI_IO_NetCDF object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMCI_IO_NetCDFDestroy(&nctestIO);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
-  ESMC_TestEnd(result, __FILE__, __LINE__, 0);
+  TestEnd(result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   return 0;

@@ -1,8 +1,8 @@
-// $Id: ESMC_IntegrateUTest.C,v 1.1 2010/04/07 20:33:09 rokuingh Exp $
+// $Id: ESMCI_IntegrateUTest.C,v 1.1 2010/04/08 16:03:16 theurich Exp $
 //==============================================================================
 //
 // Earth System Modeling Framework
-// Copyright 2002-2009, University Corporation for Atmospheric Research, 
+// Copyright 2002-2010, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -26,7 +26,7 @@
 #include "ESMC.h"
 
 // ESMF Test header
-#include "ESMC_Test.h"
+#include "ESMCI_Test.h"
 
 #if !defined (M_PI)
 // for Windows...
@@ -187,7 +187,7 @@ char failMsg[80];
 if (std::abs(analytic[0]-massg[0])/std::abs(analytic[0])>1e-14) pass=false;
 
   //----------------------------------------------------------------------------
-  ESMC_TestStart(__FILE__, __LINE__, 0);
+  TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -195,11 +195,11 @@ if (std::abs(analytic[0]-massg[0])/std::abs(analytic[0])>1e-14) pass=false;
   // Create a mesh
   strcpy(name, "Integrate");
   strcpy(failMsg, "Error in integral > 1e-14");
-  ESMC_Test((pass==true), name, failMsg, &result, __FILE__, __LINE__, 0);
+  Test((pass==true), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  ESMC_TestEnd(result, __FILE__, __LINE__, 0);
+  TestEnd(result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------f
 
   Par::End();
