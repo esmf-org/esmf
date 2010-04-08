@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.3 2010/04/06 17:15:49 theurich Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.4 2010/04/08 22:43:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.3 2010/04/06 17:15:49 theurich Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.4 2010/04/08 22:43:38 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -247,7 +247,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
         
     ! Call into the RouteHandle code
-    call ESMF_RouteHandleRelease(routehandle, localrc)
+    call ESMF_RouteHandleRelease(routehandle, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -373,7 +373,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark routehandle object as being created
-    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -602,7 +602,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
         
     ! Call into the RouteHandle code
-    call ESMF_RouteHandleRelease(routehandle, localrc)
+    call ESMF_RouteHandleRelease(routehandle, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -757,7 +757,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark routehandle object as being created
-    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -818,7 +818,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark routehandle object as being created
-    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -879,7 +879,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark routehandle object as being created
-    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -940,7 +940,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark routehandle object as being created
-    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1072,7 +1072,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark routehandle object as being created
-    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     

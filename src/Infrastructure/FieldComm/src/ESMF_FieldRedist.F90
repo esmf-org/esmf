@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.19 2010/03/04 18:57:43 svasquez Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.20 2010/04/08 22:43:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.19 2010/03/04 18:57:43 svasquez Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.20 2010/04/08 22:43:38 theurich Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -216,7 +216,7 @@ contains
         ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
             
         ! Call into the RouteHandle code
-        call ESMF_RouteHandleRelease(routehandle, localrc)
+        call ESMF_RouteHandleRelease(routehandle, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         

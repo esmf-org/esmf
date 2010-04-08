@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHalo.F90,v 1.2 2010/04/08 19:40:17 feiliu Exp $
+! $Id: ESMF_FieldHalo.F90,v 1.3 2010/04/08 22:43:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldHalo.F90,v 1.2 2010/04/08 19:40:17 feiliu Exp $'
+    '$Id: ESMF_FieldHalo.F90,v 1.3 2010/04/08 22:43:38 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -172,9 +172,9 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! Call into the array interface, which will sort out optional arguments
-    call ESMF_ArrayHalo(array, routehandle, &
-      commflag, finishedflag, checkflag, localrc)
+    ! Call into the Array interface, which will sort out optional arguments
+    call ESMF_ArrayHalo(array, routehandle=routehandle, commflag=commflag, &
+      finishedflag=finishedflag, checkflag=checkflag, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -221,7 +221,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
         
     ! Call into the RouteHandle code
-    call ESMF_RouteHandleRelease(routehandle, localrc)
+    call ESMF_RouteHandleRelease(routehandle, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -334,13 +334,9 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the Array interface, which will sort out optional arguments
-    call ESMF_ArrayHaloStore(array, routehandle, halostartregionflag, &
-      haloLDepth, haloUDepth, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! Mark routehandle object as being created
-    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    call ESMF_ArrayHaloStore(array, routehandle=routehandle, &
+      halostartregionflag=halostartregionflag, haloLDepth=haloLDepth, &
+      haloUDepth=haloUDepth, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
