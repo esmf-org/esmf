@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.12 2008/09/26 05:53:54 cdeluca Exp $
+# $Id: makefile,v 1.13 2010/04/08 17:58:56 feiliu Exp $
 
 ALL: build_here 
 
-AUTOGEN   = ESMF_FieldGather.F90 ESMF_FieldScatter.F90
+AUTOGEN   = ESMF_FieldGather.F90 ESMF_FieldScatter.F90 
 SOURCEC	  = 
-SOURCEF	  =  ESMF_FieldComm.F90 $(AUTOGEN) ESMF_FieldRedist.F90 ESMF_FieldSMM.F90
+SOURCEF	  =  ESMF_FieldComm.F90 $(AUTOGEN) ESMF_FieldRedist.F90 ESMF_FieldSMM.F90 ESMF_FieldHalo.F90
 SOURCEH	  = 
 
 # List all .h files which should be copied to common include dir

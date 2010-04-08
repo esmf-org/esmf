@@ -1,0 +1,372 @@
+! $Id: ESMF_FieldHalo.F90,v 1.1 2010/04/08 17:58:56 feiliu Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2010, University Corporation for Atmospheric Research, 
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+! Laboratory, University of Michigan, National Centers for Environmental 
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+#define ESMF_FILENAME "ESMF_FieldHalo.F90"
+!==============================================================================
+!
+! ESMF Field Halo Module
+module ESMF_FieldHaloMod
+!
+!==============================================================================
+!
+! This file contains the Fortran implementation of Field Halo methods.
+!
+!------------------------------------------------------------------------------
+! INCLUDES
+#include "ESMF.h"
+
+!==============================================================================
+!BOPI
+! !MODULE: ESMF_FieldHaloMod
+!
+
+!   Fortran API of Field Halo
+!
+!------------------------------------------------------------------------------
+
+! !USES:
+  use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_InitMacrosMod    ! ESMF initializer macros
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_ArrayMod
+  use ESMF_FieldMod
+  use ESMF_FieldGetMod
+  use ESMF_VMMod
+  use ESMF_DELayoutMod
+  use ESMF_RHandleMod
+  
+  implicit none
+
+!------------------------------------------------------------------------------
+! !PRIVATE TYPES:
+  private
+      
+!------------------------------------------------------------------------------
+! !PUBLIC TYPES:
+      
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!
+! !PUBLIC MEMBER FUNCTIONS:
+
+! - ESMF-public methods:
+  public ESMF_FieldHalo
+  public ESMF_FieldHaloRelease
+  public ESMF_FieldHaloStore
+
+!EOPI
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+  character(*), parameter, private :: version = &
+    '$Id: ESMF_FieldHalo.F90,v 1.1 2010/04/08 17:58:56 feiliu Exp $'
+
+!==============================================================================
+! 
+! INTERFACE BLOCKS
+!
+!==============================================================================
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+!==================== communication calls ===========================
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldHalo()"
+!BOPI
+! !IROUTINE: ESMF_FieldHalo - Execute an FieldHalo operation
+!
+! !INTERFACE:
+  subroutine ESMF_FieldHalo(field, routehandle, commflag, &
+    finishedflag, checkflag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Field),       intent(inout)           :: field
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_CommFlag),    intent(in),   optional  :: commflag
+    logical,                intent(out),  optional  :: finishedflag
+    logical,                intent(in),   optional  :: checkflag
+    integer,                intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!   Execute a precomputed Field halo operation for {\tt field}. The {\tt field}
+!   argument must be weakly congruent and typekind conform to the Field used
+!   during {\tt ESMF\_FieldHaloStore()}.
+!   Congruent Fields possess matching DistGrids, and the shape of the local
+!   array tiles matches between the Fields for every DE. For weakly congruent
+!   Fields the sizes of the undistributed dimensions, that vary faster with
+!   memory than the first distributed dimension, are permitted to be different.
+!   This means that the same {\tt routehandle} can be applied to a large class
+!   of similar Fields that differ in the number of elements in the left most
+!   undistributed dimensions.
+!
+!   See {\tt ESMF\_FieldHaloStore()} on how to precompute {\tt routehandle}.
+!
+!   This call is {\em collective} across the current VM.
+!
+!   \begin{description}
+!   \item [field]
+!     {\tt ESMF\_Field} containing data to be haloed.
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[commflag]}]
+!     Indicate communication option. Default is {\tt ESMF\_COMM\_BLOCKING},
+!     resulting in a blocking operation.
+!     See section \ref{opt:commflag} for a complete list of valid settings.
+!   \item [{[finishedflag]}]
+!     Used in combination with {\tt commflag = ESMF\_COMM\_NBTESTFINISH}.
+!     Returned {\tt finishedflag} equal to {\tt .true.} indicates that all
+!     operations have finished. A value of {\tt .false.} indicates that there
+!     are still unfinished operations that require additional calls with
+!     {\tt commflag = ESMF\_COMM\_NBTESTFINISH}, or a final call with
+!     {\tt commflag = ESMF\_COMM\_NBWAITFINISH}. For all other {\tt commflag}
+!     settings the returned value in {\tt finishedflag} is always {\tt .true.}.
+!   \item [{[checkflag]}]
+!     If set to {\tt .TRUE.} the input Field pair will be checked for
+!     consistency with the precomputed operation provided by {\tt routehandle}.
+!     If set to {\tt .FALSE.} {\em (default)} only a very basic input check
+!     will be performed, leaving many inconsistencies undetected. Set
+!     {\tt checkflag} to {\tt .FALSE.} to achieve highest performance.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_CommFlag)     :: opt_commflag ! helper variable
+    logical                 :: opt_finishedflag! helper variable
+    logical                 :: opt_checkflag! helper variable
+
+    ! local variables
+    type(ESMF_Array)        :: array
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, field, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+    
+    ! Set default flags
+    opt_commflag = ESMF_COMM_BLOCKING
+    if (present(commflag)) opt_commflag = commflag
+    opt_checkflag = .false.
+    if (present(checkflag)) opt_checkflag = checkflag
+
+    call ESMF_FieldGet(field, array=array, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Call into the array interface, which will sort out optional arguments
+    call ESMF_ArrayHalo(array, routehandle, &
+      opt_commflag, opt_finishedflag, opt_checkflag, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! translate back finishedflag
+    if (present(finishedflag)) then
+      finishedflag = opt_finishedflag
+    endif
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldHalo
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldHaloRelease()"
+!BOP
+! !IROUTINE: ESMF_FieldHaloRelease - Release resources associated with Field halo operation
+!
+! !INTERFACE:
+  subroutine ESMF_FieldHaloRelease(routehandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    integer,                intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!   Release resouces associated with an Field halo operation.
+!   After this call {\tt routehandle} becomes invalid.
+!
+!   \begin{description}
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments, deal with optional Array args
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+        
+    ! Call into the RouteHandle code
+    call ESMF_RouteHandleRelease(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldHaloRelease
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldHaloStore()"
+!BOPI
+! !IROUTINE: ESMF_FieldHaloStore - Store an FieldHalo operation
+!
+! !INTERFACE:
+    subroutine ESMF_FieldHaloStore(field, routehandle, halostartregionflag, &
+      haloLDepth, haloUDepth, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Field),       intent(inout)                :: field
+    type(ESMF_RouteHandle), intent(inout)                :: routehandle
+    type(ESMF_HaloStartRegionFlag), intent(in), optional :: halostartregionflag
+    integer,                intent(in),         optional :: haloLDepth(:)
+    integer,                intent(in),         optional :: haloUDepth(:)
+    integer,                intent(out),        optional :: rc
+!
+! !DESCRIPTION:
+!   Store an Field halo operation over the data in {\tt field}. By default,
+!   i.e. without specifying {\tt halostartregionflag}, {\tt haloLDepth} and
+!   {\tt haloUDepth}, all elements in the total Field region that lie outside
+!   the exclusive region will be considered potential destination elements for
+!   halo. However, only those elements that have a corresponding halo source
+!   element, i.e. an exclusive element on one of the DEs, will be updated under
+!   the halo operation. Elements that have no associated source remain 
+!   unchanged under halo.
+!
+!   Specifying {\tt halostartregionflag} allows to change the shape of the 
+!   effective halo region from the inside. Setting this flag to
+!   {\tt ESMF\_REGION\_COMPUTATIONAL} means that only elements outside 
+!   the computational region of the Field are considered for potential
+!   destination elements for halo. The default is {\tt ESMF\_REGION\_EXCLUSIVE}.
+!
+!   The {\tt haloLDepth} and {\tt haloUDepth} arguments allow to reduce
+!   the extent of the effective halo region. Starting at the region specified
+!   by {\tt halostartregionflag}, the {\tt haloLDepth} and {\tt haloUDepth}
+!   define a halo depth in each direction. Note that the maximum halo region is
+!   limited by the total Field region, independent of the actual
+!   {\tt haloLDepth} and {\tt haloUDepth} setting. The total Field region is
+!   local DE specific. The {\tt haloLDepth} and {\tt haloUDepth} are interpreted
+!   as the maximum desired extent, reducing the potentially larger region
+!   available for halo.
+!
+!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
+!   {\tt ESMF\_FieldHalo()} on any Field that is weakly congruent
+!   and typekind conform to {\tt field}.
+!   Congruent Fields possess matching DistGrids, and the shape of the local
+!   field tiles matches between the Fieldss for every DE. For weakly congruent
+!   Fieldss the sizes of the undistributed dimensions, that vary faster with
+!   memory than the first distributed dimension, are permitted to be different.
+!   This means that the same {\tt routehandle} can be applied to a large class
+!   of similar Fieldss that differ in the number of elements in the left most
+!   undistributed dimensions.
+!  
+!   This call is {\em collective} across the current VM.  
+!
+!   \begin{description}
+!   \item [field]
+!     {\tt ESMF\_Field} containing data to be haloed.
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[halostartregionflag]}]
+!     The start of the effective halo region on every DE. The default
+!     setting is {\tt ESMF\_REGION\_EXCLUSIVE}, rendering all non-exclusive
+!     elements potential halo destination elments.
+!     See section \ref{opt:halostartregionflag} for a complete list of
+!     valid settings.
+!   \item[{[haloLDepth]}] 
+!     This vector specifies the lower corner of the effective halo
+!     region with respect to the lower corner of {\tt halostartregionflag}.
+!     The size of {\tt haloLDepth} must equal the number of distributed Array
+!     dimensions.
+!   \item[{[haloUDepth]}] 
+!     This vector specifies the upper corner of the effective halo
+!     region with respect to the upper corner of {\tt halostartregionflag}.
+!     The size of {\tt haloUDepth} must equal the number of distributed Array
+!     dimensions.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                         :: localrc        ! local return code
+    type(ESMF_HaloStartRegionFlag)  :: opt_halostartregionflag ! helper variable
+
+    ! local variables
+    type(ESMF_Array)                :: array
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, field, rc)
+    
+    ! Set default flags
+    opt_halostartregionflag = ESMF_REGION_EXCLUSIVE
+    if (present(halostartregionflag)) opt_halostartregionflag = halostartregionflag
+
+    ! query the field for its internal array
+    call ESMF_FieldGet(field, array=array, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the Array interface, which will sort out optional arguments
+    call ESMF_ArrayHaloStore(array, routehandle, opt_halostartregionflag, &
+      haloLDepth, haloUDepth, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Mark routehandle object as being created
+    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldHaloStore
+!------------------------------------------------------------------------------
+
+end module ESMF_FieldHaloMod
