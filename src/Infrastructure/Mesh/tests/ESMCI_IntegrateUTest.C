@@ -1,4 +1,4 @@
-// $Id: ESMCI_IntegrateUTest.C,v 1.1 2010/04/08 16:03:16 theurich Exp $
+// $Id: ESMCI_IntegrateUTest.C,v 1.2 2010/04/08 16:38:21 theurich Exp $
 //==============================================================================
 //
 // Earth System Modeling Framework
@@ -16,6 +16,8 @@
 #include <ESMCI_Mesh.h>
 #include <ESMCI_MeshGen.h>
 #include <ESMCI_MeshPNC.h>
+
+#include <mpi.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -91,6 +93,8 @@ void set_Fval(const Mesh &mesh, MEField<> *f1, MEField<> *f2, MEField<> *f3) {
 
 int main(int argc, char *argv[]) {
 
+  MPI_Init(&argc, &argv);
+  
   Par::Init("PATCHLOG", false);
 
   Mesh mesh;
