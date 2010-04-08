@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHaloUTest.F90,v 1.6 2010/04/06 17:17:00 theurich Exp $
+! $Id: ESMF_ArrayHaloUTest.F90,v 1.7 2010/04/08 18:38:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-program ESMF_ArrayRedistUTest
+program ESMF_ArrayHaloUTest
 
 !------------------------------------------------------------------------------
 
@@ -19,7 +19,7 @@ program ESMF_ArrayRedistUTest
 
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_ArrayRedistUTest -  Tests ArrayRedist()
+! !PROGRAM: ESMF_ArrayHaloUTest -  Tests ArrayHalo()
 !
 ! !DESCRIPTION:
 !
@@ -33,7 +33,7 @@ program ESMF_ArrayRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayHaloUTest.F90,v 1.6 2010/04/06 17:17:00 theurich Exp $'
+    '$Id: ESMF_ArrayHaloUTest.F90,v 1.7 2010/04/08 18:38:46 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1615,4 +1615,4 @@ call ESMF_ArrayPrint(array)
   !------------------------------------------------------------------------
 
 
-end program ESMF_ArrayRedistUTest
+end program ESMF_ArrayHaloUTest
