@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.51 2009/05/07 22:46:23 oehmke Exp $
+% $Id: Field_refdoc.ctex,v 1.52 2010/04/09 22:45:30 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -105,12 +105,14 @@
 \subsection{Class API: Field Communications}
 #ifdef STANDALONE
 \input{../../FieldComm/doc/ESMF_FieldGather_fapi}
+\input{../../FieldComm/doc/ESMF_FieldHalo_fapi}
 \input{../../FieldComm/doc/ESMF_FieldRedist_fapi}
 \input{../../Field/doc/ESMF_FieldRegrid_fapi}
 \input{../../FieldComm/doc/ESMF_FieldScatter_fapi}
 \input{../../FieldComm/doc/ESMF_FieldSMM_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/FieldComm/doc/ESMF_FieldGather_fapi}
+\input{../Infrastructure/FieldComm/doc/ESMF_FieldHalo_fapi}
 \input{../Infrastructure/FieldComm/doc/ESMF_FieldRedist_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldRegrid_fapi}
 \input{../Infrastructure/FieldComm/doc/ESMF_FieldScatter_fapi}
