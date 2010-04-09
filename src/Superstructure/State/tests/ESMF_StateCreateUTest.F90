@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.22 2010/04/05 21:38:44 w6ws Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.23 2010/04/09 14:18:18 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ end module
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.22 2010/04/05 21:38:44 w6ws Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.23 2010/04/09 14:18:18 w6ws Exp $'
 !------------------------------------------------------------------------------
 !   ! Local variables
     integer :: rc
@@ -77,8 +77,7 @@ end module
     type(ESMF_VM) :: vm
     logical :: isNeeded
 
-    integer :: i
-    integer :: itemcount
+    integer :: itemcount, itemcountnested
     character(ESMF_MAXSTR), allocatable :: itemlist(:)
     type(ESMF_StateItemType), allocatable :: itemtypelist(:)
 #endif
@@ -427,16 +426,11 @@ end module
       !------------------------------------------------------------------------
       !EX_UTest
       ! Print the nested State
-call ESMF_VMGetGlobal(vm, rc=rc)
-call ESMF_IOUnitFlush (6)
-call ESMF_VMBarrier (vm)
-      call ESMF_StatePrint (state5, options='long', rc=rc)
+      call ESMF_StatePrint (state5, nestedFlag=ESMF_NESTED_OFF, options='long', rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Printing a State with nesting"
+      write(name, *) "Printing a nested State - single level"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-call ESMF_IOUnitFlush (6)
-call ESMF_VMBarrier (vm)
       !------------------------------------------------------------------------
       !EX_UTest      
       ! Test getting a nested State object
@@ -450,13 +444,13 @@ call ESMF_VMBarrier (vm)
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_UTest      
-      ! Test getting a nested State object Info item count
+      ! Test getting a nested State object Info item count at the current level
       call ESMF_StateGet(state=state5,  &
          itemCount=itemcount, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Getting item count from a nested State"
+      write(name, *) "Getting item count from a nested State - single level"
       print *,"item count: ", itemcount
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+      call ESMF_Test(rc == ESMF_SUCCESS .and. itemCount == 2, &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_UTest      
@@ -465,7 +459,7 @@ call ESMF_VMBarrier (vm)
       call ESMF_StateGet(state=state5,  &
          itemNameList=itemlist, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Getting item name list from a nested State"
+      write(name, *) "Getting item name list from a nested State - single level"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -475,34 +469,55 @@ call ESMF_VMBarrier (vm)
       call ESMF_StateGet(state=state5,  &
          stateitemtypeList=itemtypelist, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Getting item type list from a nested State"
+      write(name, *) "Getting item type list from a nested State - single level"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      do, i=1, itemcount
-        select case (itemtypelist(i)%ot)
-	case (ESMF_STATEITEM_FIELD%ot)
-	  print *, 'ESMF_STATEITEM_FIELD:       ', trim (itemlist(i))
-	case (ESMF_STATEITEM_FIELDBUNDLE%ot)
-	  print *, 'ESMF_STATEITEM_FIELDBUNDLE: ', trim (itemlist(i))
-	case (ESMF_STATEITEM_ARRAY%ot)
-	  print *, 'ESMF_STATEITEM_ARRAY:       ', trim (itemlist(i))
-	case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
-	  print *, 'ESMF_STATEITEM_ARRAYBUNDLE: ', trim (itemlist(i))
-	case (ESMF_STATEITEM_ROUTEHANDLE%ot)
-	  print *, 'ESMF_STATEITEM_ROUTEHANDLE: ', trim (itemlist(i))
-	case (ESMF_STATEITEM_STATE%ot)      
-	  print *, 'ESMF_STATEITEM_STATE:       ', trim (itemlist(i))
-	case (ESMF_STATEITEM_NAME%ot)       
-	  print *, 'ESMF_STATEITEM_NAME:        ', trim (itemlist(i))
-	case (ESMF_STATEITEM_INDIRECT%ot)   
-	  print *, 'ESMF_STATEITEM_INDIRECT:    ', trim (itemlist(i))
-	case (ESMF_STATEITEM_UNKNOWN%ot)    
-	  print *, 'ESMF_STATEITEM_UNKNOWN:     ', trim (itemlist(i))
-	case (ESMF_STATEITEM_NOTFOUND%ot)   
-	  print *, 'ESMF_STATEITEM_NOTFOUND:    ', trim (itemlist(i))
-	end select
-      end do
+      call print_itemlist (itemlist, itemtypelist)
+      deallocate (itemtypelist, itemlist)
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Print the nested State
+      call ESMF_StatePrint (state5, nestedFlag=ESMF_NESTED_ON, options='long', rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing a nested State - nested"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Test getting a nested State object Info item count - including nested
+      ! objects
+      call ESMF_StateGet(state=state5, nestedFlag=ESMF_NESTED_ON, &
+         itemCount=itemcountnested, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting item count from a nested State - nested"
+      print *,"nested item count: ", itemcountnested
+      call ESMF_Test(rc == ESMF_SUCCESS .and. itemCountNested == 3, &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Test getting a nested State object Info item name list
+      allocate (itemlist(itemcountnested))
+      itemlist = " "
+      call ESMF_StateGet(state=state5, nestedFlag=ESMF_NESTED_ON,  &
+         itemNameList=itemlist, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting item name list from a nested State - nested"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Test getting a nested State object Info item type list
+      allocate (itemtypelist(itemcountnested))
+      call ESMF_StateGet(state=state5, nestedFlag=ESMF_NESTED_ON,  &
+         stateitemtypeList=itemtypelist, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting item type list from a nested State - nested"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      call print_itemlist (itemlist, itemtypelist)
+      deallocate (itemtypelist, itemlist)
       !------------------------------------------------------------------------
       !EX_UTest      
       ! Destroying a State
@@ -567,7 +582,44 @@ call ESMF_VMBarrier (vm)
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
  
-  
+      contains
+
+        subroutine print_itemlist (names, types)
+          character(*), intent(in) :: names(:)
+          type(ESMF_StateItemType), intent(in) :: types(:)
+
+          integer :: i
+
+          print *, 'size(names) =', size (names)
+          do, i=1, size (names)
+            select case (types(i)%ot)
+            case (ESMF_STATEITEM_FIELD%ot)
+              print *, 'ESMF_STATEITEM_FIELD:       ', trim (names(i))
+            case (ESMF_STATEITEM_FIELDBUNDLE%ot)
+              print *, 'ESMF_STATEITEM_FIELDBUNDLE: ', trim (names(i))
+            case (ESMF_STATEITEM_ARRAY%ot)
+              print *, 'ESMF_STATEITEM_ARRAY:       ', trim (names(i))
+            case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
+              print *, 'ESMF_STATEITEM_ARRAYBUNDLE: ', trim (names(i))
+            case (ESMF_STATEITEM_ROUTEHANDLE%ot)
+              print *, 'ESMF_STATEITEM_ROUTEHANDLE: ', trim (names(i))
+            case (ESMF_STATEITEM_STATE%ot)      
+              print *, 'ESMF_STATEITEM_STATE:       ', trim (names(i))
+            case (ESMF_STATEITEM_NAME%ot)       
+              print *, 'ESMF_STATEITEM_NAME:        ', trim (names(i))
+            case (ESMF_STATEITEM_INDIRECT%ot)   
+              print *, 'ESMF_STATEITEM_INDIRECT:    ', trim (names(i))
+            case (ESMF_STATEITEM_UNKNOWN%ot)    
+              print *, 'ESMF_STATEITEM_UNKNOWN:     ', trim (names(i))
+            case (ESMF_STATEITEM_NOTFOUND%ot)   
+              print *, 'ESMF_STATEITEM_NOTFOUND:    ', trim (names(i))
+	    case default
+	      print *, '(unknown type):             ', trim (names(i))
+            end select
+          end do
+
+        end subroutine print_itemlist
+
       end program ESMF_StateCreateUTest
 
 !-------------------------------------------------------------------------
