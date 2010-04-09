@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.185 2010/04/06 06:57:42 theurich Exp $
+! $Id: ESMF_State.F90,v 1.186 2010/04/09 14:17:24 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.185 2010/04/06 06:57:42 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.186 2010/04/09 14:17:24 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2192,8 +2192,8 @@ module ESMF_StateMod
           call ESMF_StateConstruct(stypep, stateName, statetype, &
                    bundleList, fieldList, arrayList, nestedStateList, &
                    itemcount=itemCount, &
-		   neededflag=neededflag, readyflag=readyflag, &
-		   validflag=validflag, reqforrestartflag=reqforrestartflag, &
+                   neededflag=neededflag, readyflag=readyflag, &
+                   validflag=validflag, reqforrestartflag=reqforrestartflag, &
                    rc=localrc)
         endif
         if (ESMF_LogMsgFoundError(localrc, &
@@ -2293,11 +2293,12 @@ module ESMF_StateMod
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
-      subroutine ESMF_StateGetInfo(state, name, statetype, itemCount, &
+      subroutine ESMF_StateGetInfo(state, nestedFlag, name, statetype, itemCount, &
                                itemNameList, stateitemtypeList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
+      type(ESMF_NestedFlag), intent(in), optional :: nestedFlag
       character (len=*), intent(out), optional :: name
       type(ESMF_StateType), intent(out), optional :: statetype
       integer, intent(out), optional :: itemCount
@@ -2313,30 +2314,36 @@ module ESMF_StateMod
 !     \begin{description}     
 !     \item[state]
 !       An {\tt ESMF\_State} object to be queried.
-!      \item[{[name]}]
+!     \item[{[nestedFlag]}]
+!       {\tt ESMF\_NESTED\_OFF} - return information at the current State level only
+!       {\tt ESMF\_NESTED\_ON} - recursively return nested State information
+!     \item[{[name]}]
 !       Name of this {\tt ESMF\_State}.
-!      \item[{[statetype]}]
-!       Import or Export {\tt ESMF\_State}.  Possible values are 
+!     \item[{[statetype]}]
+!       Import or Export {\tt ESMF\_State}.  Possible values are
 !       listed in Section~\ref{opt:statetype}.
-!      \item[{[itemCount]}]
-!        Count of items in {\tt state}, including all objects
-!        as well as placeholder names.
-!      \item[{[itemNameList]}]
-!        Array of item names in {\tt state}, 
-!        including placeholder names.  {\tt itemNameList} must be at least
-!        {\tt itemCount} long.
-!      \item[{[stateitemtypeList]}]
-!        Array of possible item object types in {\tt state}, including 
-!        placeholder 
-!        names. Must be at least {\tt itemCount} long.  Options are
-!        listed in Section~\ref{opt:stateitemtype}.
-!      \item[{[rc]}]
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
+!     \item[{[itemCount]}]
+!       Count of items in {\tt state}, including all objects
+!       as well as placeholder names.
+!     \item[{[itemNameList]}]
+!       Array of item names in {\tt state},
+!       including placeholder names.  {\tt itemNameList} must be at least
+!       {\tt itemCount} long.
+!     \item[{[stateitemtypeList]}]  
+!       Array of possible item object types in {\tt state}, including
+!       placeholder
+!       names. Must be at least {\tt itemCount} long.  Options are
+!       listed in Section~\ref{opt:stateitemtype}.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !
 !EOP
-      integer :: i, localrc
+      integer :: i, ilpos
+      integer :: localrc
+      integer :: localitemcount
+      logical :: localnestedflag
       type(ESMF_StateClass), pointer :: stypep
       type(ESMF_StateItem), pointer :: nextitem
 
@@ -2348,6 +2355,10 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+      localnestedflag = .false.
+      if (present (nestedFlag)) then
+        localnestedflag = nestedFlag == ESMF_NESTED_ON
+      end if
 
       stypep => state%statep
 
@@ -2359,23 +2370,95 @@ module ESMF_StateMod
       !  total objects.  perhaps the state derived type needs to bookkeep
       !  both numbers.  For now, return entire raw count.
 
-      if (present(itemCount)) itemCount = stypep%datacount 
+      localitemcount = infoCountWorker (stypep)
+      if (present(itemCount))  &
+        itemCount = localitemcount 
 
       if (present(itemNameList)) then
-          do i=1, stypep%datacount
-              nextitem => stypep%datalist(i)
-              itemNameList(i) = nextitem%namep
-          enddo
+        ilpos = 1
+        call itemNameWorker (stypep, prefix="")
       endif
 
       if (present(stateitemtypeList)) then
-          do i=1, stypep%datacount
-              nextitem => stypep%datalist(i)
-              stateitemtypeList(i) = nextitem%otype
-          enddo
+        ilpos = 1
+        call itemTypeWorker (stypep)
       endif
 
-      if (present(rc)) rc = ESMF_SUCCESS
+      if (present(rc)) rc = localrc
+
+      contains
+      
+        recursive function infoCountWorker (sp) result (icount)
+          type(ESMF_StateClass), pointer :: sp
+          integer :: icount
+
+          integer :: i1
+          type(ESMF_StateItem) , pointer :: dp
+
+          icount = sp%datacount
+          if (localnestedflag) then
+            do, i1 = 1, sp%datacount
+              dp => sp%datalist(i1)
+              if (dp%otype%ot == ESMF_STATEITEM_STATE%ot) then
+                icount = icount + infoCountWorker (dp%datap%spp)
+              end if
+            end do
+          end if
+
+        end function infoCountWorker
+      
+        recursive subroutine itemNameWorker (sp, prefix)
+          type(ESMF_StateClass), pointer :: sp
+          character(*), intent(in) :: prefix
+
+        ! Copy as many names as will fit in the output array.
+
+          integer :: i1
+          type(ESMF_StateItem) , pointer :: dp
+
+          do, i1 = 1, sp%datacount
+            if (ilpos > size (itemNameList)) then
+              localrc = ESMF_RC_ARG_SIZE
+              exit
+            end if
+
+            dp => sp%datalist(i1)
+            itemNameList(ilpos) = prefix // dp%namep
+            ilpos = ilpos + 1
+
+            if (dp%otype%ot == ESMF_STATEITEM_STATE%ot  &
+                .and. localnestedflag) then
+              call itemNameWorker (dp%datap%spp, prefix=prefix // trim (dp%namep) // '/')
+            end if
+          end do
+
+        end subroutine itemNameWorker
+      
+        recursive subroutine itemTypeWorker (sp)
+          type(ESMF_StateClass), pointer :: sp
+
+        ! Copy as many type fields as will fit in the output array.
+
+          integer :: i1
+          type(ESMF_StateItem) , pointer :: dp
+
+          do, i1 = 1, sp%datacount
+            if (ilpos > size (stateitemtypeList)) then
+              localrc = ESMF_RC_ARG_SIZE
+              exit
+            end if
+
+            dp => sp%datalist(i1)
+            stateitemtypeList(ilpos) = dp%otype
+            ilpos = ilpos + 1
+
+            if (dp%otype%ot == ESMF_STATEITEM_STATE%ot  &
+                .and. localnestedflag) then
+              call itemTypeWorker (dp%datap%spp)
+            end if
+          end do
+
+        end subroutine itemTypeWorker
 
       end subroutine ESMF_StateGetInfo
 
@@ -3184,7 +3267,7 @@ module ESMF_StateMod
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI	
+!EOPI
 
       type(ESMF_StateItem), pointer :: dataitem
       character(len=ESMF_MAXSTR) :: errmsg
@@ -3355,19 +3438,19 @@ module ESMF_StateMod
        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
        ! Validate options arg
-       localopts = "brief"
-       localnestedflag = .false.
-       longflag = .false.
 
+       localnestedflag = .false.
        if (present (nestedFlag)) then
          localnestedflag = nestedFlag == ESMF_NESTED_ON
        end if
        
+       localopts = "brief"
        if (present (options)) then
          if (options /= " ")  &
            localopts = adjustl (options)
        end if
 
+       longflag = .false.
        call ESMF_StringLowerCase (localopts)
        select case (localopts)
        case ("brief")
@@ -3375,8 +3458,8 @@ module ESMF_StateMod
            longflag = .true.
        case default
            write (ESMF_IOstderr,*) "ESMF_StatePrint: Illegal options arg: ", &
-	       trim (localopts)
-	   return 
+               trim (localopts)
+           return 
        end select
 
        !nsc write(msgbuf,*) "StatePrint: "  
@@ -3458,7 +3541,7 @@ module ESMF_StateMod
          dp => sp%datalist(i)
 
          write (ESMF_IOstdout,'(1x,2a,i0,2a)') nestr, "    object: ", i, &
-	     ", name: ", trim(dp%namep)
+             ", name: ", trim(dp%namep)
          outbuf = "      type:"
 
          select case (dp%otype%ot)
