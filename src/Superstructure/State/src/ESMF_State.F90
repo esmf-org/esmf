@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.186 2010/04/09 14:17:24 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.187 2010/04/12 19:39:07 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.186 2010/04/09 14:17:24 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.187 2010/04/12 19:39:07 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -3480,14 +3480,14 @@ module ESMF_StateMod
            return
        endif
 
-       call ESMF_StatePrintWorker (state%statep, level=0)
+       call statePrintWorker (state%statep, level=0)
 
        ! Set return values 
        if (present(rc)) rc = ESMF_SUCCESS
        
    contains
 
-     recursive subroutine ESMF_StatePrintWorker (sp, level)
+     recursive subroutine statePrintWorker (sp, level)
        type(ESMF_StateClass), pointer :: sp
        integer, intent(in) :: level
 
@@ -3546,21 +3546,27 @@ module ESMF_StateMod
 
          select case (dp%otype%ot)
          case (ESMF_STATEITEM_FIELDBUNDLE%ot)
-             outbuf = trim(outbuf) //  " FieldBundle"
+             outbuf = trim (outbuf) // " FieldBundle"
          case (ESMF_STATEITEM_FIELD%ot)
-             outbuf = trim(outbuf) //  " Field"
+             outbuf = trim (outbuf) // " Field"
          case (ESMF_STATEITEM_ARRAY%ot)
-             outbuf = trim(outbuf) //  " Array"
+             outbuf = trim (outbuf) // " Array"
          case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
-             outbuf = trim(outbuf) //  " ArrayBundle"
+             outbuf = trim (outbuf) // " ArrayBundle"
+         case (ESMF_STATEITEM_ROUTEHANDLE%ot)
+             outbuf = trim (outbuf) // " Route handle"
          case (ESMF_STATEITEM_STATE%ot)
-             outbuf = trim(outbuf) //  " State"
+             outbuf = trim (outbuf) // " State"
          case (ESMF_STATEITEM_NAME%ot)
-             outbuf = trim(outbuf) //  " placeholder name"
+             outbuf = trim (outbuf) // " Placeholder name"
          case (ESMF_STATEITEM_INDIRECT%ot)
-             outbuf = trim(outbuf) //  " field inside a bundle"
+             outbuf = trim (outbuf) // " Indirect field inside a bundle"
+         case (ESMF_STATEITEM_UNKNOWN%ot)
+             outbuf = trim (outbuf) // " Unknown"
+         case (ESMF_STATEITEM_NOTFOUND%ot)
+             outbuf = trim (outbuf) // " Not found"
          case default
-             outbuf = trim(outbuf) //  " unknown"
+             outbuf = trim (outbuf) // " (bad type value)"
          end select
 
          if (longflag) &
@@ -3578,11 +3584,11 @@ module ESMF_StateMod
          write (ESMF_IOstdout,*) nestr, trim(outbuf)
 
          if (localnestedflag .and. dp%otype%ot == ESMF_STATEITEM_STATE%ot) then
-             call ESMF_StatePrintWorker (dp%datap%spp, level=level+1)
+             call statePrintWorker (dp%datap%spp, level=level+1)
          end if
        enddo
 
-       end subroutine ESMF_StatePrintWorker
+       end subroutine statePrintWorker
 
      end subroutine ESMF_StatePrint
 
@@ -5505,7 +5511,7 @@ module ESMF_StateMod
       ! For each state...
       do i=1, scount
 
-        call ESMF_StateValidate(states(i), "", status)
+        call ESMF_StateValidate(states(i), options="", rc=status)
         ! TODO: add state number to error msg
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
