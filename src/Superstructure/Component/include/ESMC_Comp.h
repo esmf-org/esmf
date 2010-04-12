@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.48 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMC_Comp.h,v 1.49 2010/04/12 21:41:56 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -53,8 +53,8 @@ enum ESMC_Method { ESMF_SETINIT=1, ESMF_SETRUN, ESMF_SETFINAL,
 typedef void* ESMC_GridComp;
 
 // Class API
-ESMC_GridComp ESMC_GridCompCreate(char *name, enum ESMC_GridCompType mtype,
-  char *configFile, ESMC_Clock clock, int *rc);
+ESMC_GridComp ESMC_GridCompCreate(const char *name, enum ESMC_GridCompType mtype,
+  const char *configFile, ESMC_Clock clock, int *rc);
 int ESMC_GridCompDestroy(ESMC_GridComp *comp);
 int ESMC_GridCompSetServices(ESMC_GridComp comp, 
   void (*func)(ESMC_GridComp, int *), int *userRc);
@@ -75,7 +75,7 @@ int ESMC_GridCompPrint(ESMC_GridComp comp, const char *options);
 typedef void* ESMC_CplComp;
 
 // Class API
-ESMC_CplComp ESMC_CplCompCreate(char *name, char *configFile, ESMC_Clock clock,
+ESMC_CplComp ESMC_CplCompCreate(const char *name, const char *configFile, ESMC_Clock clock,
   int *rc);
 int ESMC_CplCompDestroy(ESMC_CplComp *comp);
 int ESMC_CplCompSetServices(ESMC_CplComp comp, 

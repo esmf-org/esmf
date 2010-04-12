@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.47 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMC_Comp.C,v 1.48 2010/04/12 21:41:56 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Comp.C,v 1.47 2010/03/04 18:57:45 svasquez Exp $";
+static const char *const version = "$Id: ESMC_Comp.C,v 1.48 2010/04/12 21:41:56 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -46,8 +46,8 @@ extern "C" {
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCompCreate()"
-ESMC_GridComp ESMC_GridCompCreate(char *name, enum ESMC_GridCompType mtype,
-  char *configFile, ESMC_Clock clock, int *rc){
+ESMC_GridComp ESMC_GridCompCreate(const char *name, enum ESMC_GridCompType mtype,
+  const char *configFile, ESMC_Clock clock, int *rc){
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -312,7 +312,7 @@ int ESMC_GridCompPrint(ESMC_GridComp comp, const char *options){
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_CplCompCreate()"
-ESMC_CplComp ESMC_CplCompCreate(char *name, char *configFile, ESMC_Clock clock,
+ESMC_CplComp ESMC_CplCompCreate(const char *name, const char *configFile, ESMC_Clock clock,
   int *rc){
 
   // initialize return code; assume routine not implemented
