@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.48 2009/05/07 22:46:23 oehmke Exp $ 
+# $Id: makefile,v 1.49 2010/04/12 22:15:11 oehmke Exp $ 
 
 ALL:      build_examples
 run:      run_examples
@@ -75,8 +75,8 @@ run_ESMF_FieldSphereRegridEx:
 # ESMF_FieldMeshRegridEx
 #
 run_ESMF_FieldMeshRegridEx:
-	cp -rf  ESMF_FieldMeshRegridExData $(ESMF_EXDIR)
-	$(MAKE) EXNAME=FieldMeshRegrid NP=6 exfrun
+#	cp -rf  ESMF_FieldMeshRegridExData $(ESMF_EXDIR)
+	$(MAKE) EXNAME=FieldMeshRegrid NP=4 exfrun
 
 #
 # ESMF_FieldRepDimEx

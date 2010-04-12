@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.11 2010/03/04 18:57:42 svasquez Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.12 2010/04/12 22:15:11 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -206,6 +206,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
+
       !EX_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"

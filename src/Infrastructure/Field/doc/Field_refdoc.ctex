@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.52 2010/04/09 22:45:30 feiliu Exp $
+% $Id: Field_refdoc.ctex,v 1.53 2010/04/12 22:15:11 oehmke Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -53,6 +53,7 @@
 %\input{ESMF_FieldSetEx_fapi}
 \input{ESMF_FieldRegridEx_fapi}
 \input{ESMF_FieldRegridMaskEx_fapi}
+\input{ESMF_FieldMeshRegridEx_fapi}
 \input{../../FieldComm/doc/ESMF_FieldCommEx_fapi}
 \input{../../FieldComm/doc/ESMF_FieldRedistEx_fapi}
 \input{../../FieldComm/doc/ESMF_FieldSMMEx_fapi}
@@ -66,6 +67,7 @@
 %\input{../Infrastructure/Field/doc/ESMF_FieldSetEx_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldRegridEx_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldRegridMaskEx_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldMeshRegridEx_fapi}
 \input{../Infrastructure/FieldComm/doc/ESMF_FieldCommEx_fapi}
 \input{../Infrastructure/FieldComm/doc/ESMF_FieldRedistEx_fapi}
 \input{../Infrastructure/FieldComm/doc/ESMF_FieldSMMEx_fapi}

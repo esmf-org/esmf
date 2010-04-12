@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.30 2010/03/04 18:57:42 svasquez Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.31 2010/04/12 22:15:11 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.30 2010/03/04 18:57:42 svasquez Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.31 2010/04/12 22:15:11 oehmke Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -342,6 +342,7 @@ program ESMF_FieldRegridEx
 !EOC
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+#if 0
   ! Write results to a mesh
   num_arrays = 1
   spherical_grid = 0
@@ -354,12 +355,13 @@ program ESMF_FieldRegridEx
                "dstmesh", dstArray, &
                spherical=spherical_grid, rc=localrc)
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+#endif
 
   call ESMF_GridDestroy(gridSrc, rc=localrc)
 
   call ESMF_GridDestroy(gridDst, rc=localrc)
 
-
+#if 0
   ! Uncomment print statement to print the weights
   if (associated(indicies)) then
     do i1 = 1, size(indicies,1)
@@ -368,7 +370,7 @@ program ESMF_FieldRegridEx
     
     enddo
   endif
-
+#endif
 
 10   continue
   call ESMF_Finalize(rc=rc)
