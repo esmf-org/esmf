@@ -1,4 +1,4 @@
-// $Id: ESMCI_IntegrateUTest.C,v 1.3 2010/04/08 22:13:28 rokuingh Exp $
+// $Id: ESMCI_IntegrateUTest.C,v 1.4 2010/04/12 04:40:59 theurich Exp $
 //==============================================================================
 //
 // Earth System Modeling Framework
@@ -17,6 +17,9 @@
 #include <ESMCI_MeshGen.h>
 #include <ESMCI_MeshPNC.h>
 
+#ifndef MPICH_IGNORE_CXX_SEEK
+#define MPICH_IGNORE_CXX_SEEK
+#endif
 #include <mpi.h>
 
 #include <stdlib.h>
