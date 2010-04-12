@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.17 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMC_Mesh.C,v 1.18 2010/04/12 21:31:11 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Mesh.C,v 1.17 2010/03/04 18:57:45 svasquez Exp $";
+ static const char *const version = "$Id: ESMC_Mesh.C,v 1.18 2010/04/12 21:31:11 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -287,7 +287,7 @@ int ESMC_MeshGetNumElements(ESMC_Mesh mesh, int* num_elems){
   //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshVTKHeader()"
-int ESMC_MeshVTKHeader(char *fname, int *num_elem, int *num_node,
+int ESMC_MeshVTKHeader(const char *fname, int *num_elem, int *num_node,
   int *conn_size){
   
   // initialize return code; assume routine not implemented
@@ -314,7 +314,7 @@ int ESMC_MeshVTKHeader(char *fname, int *num_elem, int *num_node,
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshVTKBody()"
-int ESMC_MeshVTKBody(char *fname, int *nodeId, double *nodeCoord,
+int ESMC_MeshVTKBody(const char *fname, int *nodeId, double *nodeCoord,
   int *nodeOwner, int *elemId, int *elemType, int *elemConn){
   
   // initialize return code; assume routine not implemented
@@ -342,7 +342,7 @@ int ESMC_MeshVTKBody(char *fname, int *nodeId, double *nodeCoord,
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshWrite()"
-int ESMC_MeshWrite(ESMC_Mesh mesh, char* filename){
+int ESMC_MeshWrite(ESMC_Mesh mesh, const char* filename){
   
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code

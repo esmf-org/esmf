@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.h,v 1.9 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_MeshCXX.h,v 1.10 2010/04/12 21:31:11 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -16,8 +16,8 @@
 #include "ESMCI_Mesh.h"
 
 namespace ESMCI {
- int MeshVTKHeader(char*, int*, int*, int*);
- int MeshVTKBody(char*, int*, double*, int*, int*, int*, int*);
+ int MeshVTKHeader(const char*, int*, int*, int*);
+ int MeshVTKBody(const char*, int*, double*, int*, int*, int*, int*);
 
   class MeshCXX  {
 
@@ -30,14 +30,14 @@ namespace ESMCI {
     int addNodes(int*, int*, double*, int*);
     std::vector<int> getNodeGIDS();
     int createDistGrids(int*, int*, int*, int*);
-    int meshWrite(char*);
+    int meshWrite(const char*);
     int destroy();
     int freeMemory();
     int numNodes();
     int numElements();
 
-    friend int MeshVTKHeader(char*, int*, int*, int*);
-    friend int MeshVTKBody(char*, int*, double*, int*, int*, int*, int*);
+    friend int MeshVTKHeader(const char*, int*, int*, int*);
+    friend int MeshVTKBody(const char*, int*, double*, int*, int*, int*, int*);
 
     private:
     Mesh* meshPointer;

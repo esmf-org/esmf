@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.C,v 1.12 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_MeshCXX.C,v 1.13 2010/04/12 21:31:11 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -26,7 +26,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.12 2010/03/04 18:57:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.13 2010/04/12 21:31:11 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -336,7 +336,7 @@ int MeshCXX::freeMemory(){
 } // MeshCXX::freeMemory
 
 
-int MeshVTKHeader(char *fname, int *numElem, int *numNode, int *connSize){
+int MeshVTKHeader(const char *fname, int *numElem, int *numNode, int *connSize){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::MeshVTKHeader()"
 
@@ -368,7 +368,7 @@ int MeshVTKHeader(char *fname, int *numElem, int *numNode, int *connSize){
    return localrc;
 } // MeshVTKHeader
 
-int MeshVTKBody(char *fname, int *nodeId, double *nodeCoord, int *nodeOwner, 
+int MeshVTKBody(const char *fname, int *nodeId, double *nodeCoord, int *nodeOwner, 
                 int *elemId, int *elemType, int *elemConn){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::MeshVTKBody()"
@@ -423,7 +423,7 @@ int MeshCXX::numElements(){
    return numLElements;
 }
 
-int MeshCXX::meshWrite(char* fileName){
+int MeshCXX::meshWrite(const char* fileName){
 
   int localrc;
   //Initialize localrc; assume routine not implemented

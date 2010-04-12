@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.h,v 1.25 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMC_Mesh.h,v 1.26 2010/04/12 21:31:11 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ int ESMC_MeshAddElements(ESMC_Mesh mesh, int *num_elems, int *elementIds,
 
 int ESMC_MeshFreeMemory(ESMC_Mesh mesh);
 
-int ESMC_MeshWrite(ESMC_Mesh mesh, char* fname);
+int ESMC_MeshWrite(ESMC_Mesh mesh, const char* fname);
 
 int ESMC_MeshGetNumNodes(ESMC_Mesh mesh, int* num_nodes);
 
@@ -69,10 +69,10 @@ int ESMC_MeshGetNumElements(ESMC_Mesh mesh, int* num_elems);
 
 // Associated methods
 
-int ESMC_MeshVTKHeader(char *fname, int *num_elem, int *num_node,
+int ESMC_MeshVTKHeader(const char *fname, int *num_elem, int *num_node,
   int *conn_size);
 
-int ESMC_MeshVTKBody(char *fname, int *nodeId, double *nodeCoord,
+int ESMC_MeshVTKBody(const char *fname, int *nodeId, double *nodeCoord,
   int *nodeOwner, int *elemId, int *elemType, int *elemConn);
 
 // Associated enum types
