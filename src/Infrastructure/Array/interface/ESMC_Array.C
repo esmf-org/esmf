@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.19 2010/03/04 18:57:41 svasquez Exp $
+// $Id: ESMC_Array.C,v 1.20 2010/04/12 18:18:47 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.19 2010/03/04 18:57:41 svasquez Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.20 2010/04/12 18:18:47 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -45,7 +45,7 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_ArrayCreate()"
 ESMC_Array ESMC_ArrayCreate(ESMC_ArraySpec arrayspec, ESMC_DistGrid distgrid,
-  char* name, int *rc){ //TODO: complete this API
+  const char* name, int *rc){ //TODO: complete this API
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
