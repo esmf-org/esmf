@@ -1,4 +1,4 @@
-// $Id: ESMC_ConfigUTest.C,v 1.10 2010/03/04 18:57:42 svasquez Exp $
+// $Id: ESMC_ConfigUTest.C,v 1.11 2010/04/12 21:16:52 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -30,8 +30,8 @@
 int main(void){
 
   ESMC_Config cf;              // ESMC_Config object
-  char* fileName = "ESMF_Resource_File_Sample.rc";                // file name
-  char* fileName2= "ESMF_Resource_File_Sample2.rc";               // file name
+  const char* fileName = "ESMF_Resource_File_Sample.rc";   // file name
+  const char* fileName2= "ESMF_Resource_File_Sample2.rc";  // file name
   char name[80];
   char failMsg[80];
   int result = 0;
@@ -97,7 +97,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   //Find a label in the loaded resource file
-  char* label="Number_of_Members:";
+  const char* label="Number_of_Members:";
   strcpy(name, "ConfigFindLabel Unit test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_ConfigFindLabel(cf, label);

@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.17 2010/03/04 18:57:42 svasquez Exp $
+// $Id: ESMC_Config.h,v 1.18 2010/04/12 21:16:52 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -75,9 +75,9 @@ ESMC_Config ESMC_ConfigCreate(int* rc);
 
 int ESMC_ConfigDestroy(ESMC_Config* config);
 
-int ESMC_ConfigLoadFile(ESMC_Config config, char* fname, ...);
+int ESMC_ConfigLoadFile(ESMC_Config config, const char* fname, ...);
 
-int ESMC_ConfigFindLabel(ESMC_Config config, char* label);
+int ESMC_ConfigFindLabel(ESMC_Config config, const char* label);
 
 int ESMC_ConfigNextLine(ESMC_Config config, int tableEnd );
 
