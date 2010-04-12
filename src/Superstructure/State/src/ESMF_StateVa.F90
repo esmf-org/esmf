@@ -1,4 +1,4 @@
-! $Id: ESMF_StateVa.F90,v 1.4 2010/03/04 18:57:46 svasquez Exp $
+! $Id: ESMF_StateVa.F90,v 1.5 2010/04/12 19:41:04 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -35,6 +35,7 @@
       use ESMF_LogErrMod
       use ESMF_StateTypesMod
       use ESMF_InitMacrosMod
+      use ESMF_UtilMod
       
       implicit none
       
@@ -56,7 +57,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateVa.F90,v 1.4 2010/03/04 18:57:46 svasquez Exp $'
+      '$Id: ESMF_StateVa.F90,v 1.5 2010/04/12 19:41:04 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -78,11 +79,12 @@
 ! !IROUTINE: ESMF_StateValidate - Check validity of a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateValidate(state, options, rc)
+      subroutine ESMF_StateValidate(state, nestedflag, options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State) :: state
-      character (len = *), intent(in), optional :: options
+      character (len = *),   intent(in), optional :: options
+      type(ESMF_NestedFlag), intent(in), optional :: nestedFlag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -97,6 +99,9 @@
 !       The {\tt ESMF\_State} to validate.
 !     \item[{[options]}]
 !       Validation options are not yet supported.
+!     \item[{[nestedFlag]}]
+!       {\tt ESMF\_NESTED\_OFF} - validates at the current State level only
+!       {\tt ESMF\_NESTED\_ON} - recursively validates any nested States
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -108,9 +113,18 @@
 ! TODO: code goes here
 !
       character (len=6) :: localopts
+      logical :: localnestedflag
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+      localnestedflag = .false.
+      if (present (nestedFlag)) then
+        localnestedflag = nestedFlag == ESMF_NESTED_ON
+      end if
 
       localopts = "brief"
       if (present (options)) then
@@ -118,8 +132,16 @@
           localopts = options
       end if
 
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      call ESMF_StringLowerCase (localopts)
+      select case (localopts)
+      case ("brief")
+      case default
+          write (ESMF_IOstderr,*) "ESMF_StatePrint: unknown options arg: ", &
+              trim (localopts)
+          return 
+      end select
+
+      ! Validate the State
 
       if (.not.associated(state%statep)) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
