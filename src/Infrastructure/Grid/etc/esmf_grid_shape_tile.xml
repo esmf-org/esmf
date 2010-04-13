@@ -1,9 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <GridSpec>
+  <Mosaic>
     <attribute_package convention="ESMF" purpose="General">
       <NX>10</NX>
       <NY>20</NY>
-      <RegDecompX>2</RegDecompX>
-      <RegDecompY>3</RegDecompY>
     </attribute_package>
+    <RegDecompX>2</RegDecompX>
+    <RegDecompY>3</RegDecompY>
+  </Mosaic>
 </GridSpec>
