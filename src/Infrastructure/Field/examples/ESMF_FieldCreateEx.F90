@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.93 2010/03/04 18:57:42 svasquez Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.94 2010/04/13 21:35:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -540,9 +540,11 @@
 ! 
 ! In this example, an {\tt ESMF\_Field} is created from an {\tt ESMF\_Mesh} 
 ! and an {\tt ESMF\_Arrayspec}.
-! The mesh object is on a Euclidean surface that maps to a 2x2 rectangular
-! grid with 4 elements and 9 nodes. The nodal space is represented by
-! a distgrid with 9 indices. The mesh object can be represented by the picture
+! The mesh object is on a Euclidean surface that is partitioned to a 2x2 rectangular
+! space with 4 elements and 9 nodes. The nodal space is represented by
+! a distgrid with 9 indices. Field is created on locally owned nodes on each PET.
+! Therefore, the created Field has 9 data points globally.
+! The mesh object can be represented by the picture
 ! below. For more information on Mesh creation, please see Section~\ref{sec:mesh:usage:meshCreation}.
 ! \begin{verbatim}
 !              Mesh Ids
@@ -582,7 +584,6 @@
 !\end{verbatim} 
 !
 !EOE  
-!BOC
   ! Only do this if we have 4 PETs
    if (petCount .eq. 4) then
       ! Setup mesh data depending on PET
@@ -720,6 +721,7 @@
         elemConn=(/1,2,4,3/)  
       endif
 
+!BOC
       ! Create Mesh structure in 1 step
       mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
              nodeIds=nodeIds, nodeCoords=nodeCoords, &
@@ -727,6 +729,15 @@
              elementTypes=elemTypes, elementConn=elemConn, &
              rc=rc)
       if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+      call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
+      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+      ! Field is created on the 1 dimensinonal nodal distgrid. On
+      ! each PET, Field is created on the locally owned nodes.
+      field = ESMF_FieldCreate(mesh, arrayspec, rc=rc)
+      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!EOC
 
       ! deallocate node data
       deallocate(nodeIds)
@@ -737,15 +748,8 @@
       deallocate(elemIds)
       deallocate(elemTypes)
       deallocate(elemConn)
-      call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
-      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-      field = ESMF_FieldCreate(mesh, arrayspec, rc=rc)
-      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
     ! endif for skip for != 4 procs
     endif 
-!EOC
     print *, "Field Create from a Mesh and an Arrayspec returned"
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
