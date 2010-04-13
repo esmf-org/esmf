@@ -1,4 +1,4 @@
-// $Id: ESMCI_StringSubr.C,v 1.1 2010/04/08 17:09:04 theurich Exp $
+// $Id: ESMCI_StringSubr.C,v 1.2 2010/04/13 16:22:54 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -27,8 +27,8 @@ using namespace std;
 #include <ESMC_Conf.h>
 
 typedef void (*FUNC)(int *, int *, int *, int *, int *);
-typedef void (*FUNC2)(int *, int *, char *, int *, int *, int *, ESMCI_FortranStrLenArg);
-typedef void (*FUNC3)(int *, char *, int *, char *, int *, int *, int *, ESMCI_FortranStrLenArg, ESMCI_FortranStrLenArg);
+typedef void (*FUNC2)(int *, int *, const char *, int *, int *, int *, ESMCI_FortranStrLenArg);
+typedef void (*FUNC3)(int *, const char *, int *, const char *, int *, int *, int *, ESMCI_FortranStrLenArg, ESMCI_FortranStrLenArg);
 
 extern "C" {
 
@@ -38,8 +38,8 @@ void FTN(c_strings)(FUNC f90cb, FUNC2 f90cb2, FUNC3 f90cb3,
 
       int ni1, ni2, ni3, ni4;
       int clen, clen2;
-      static char *newstr = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      static char *newstr2 = "0123456789abcdefghijklmnopqrstuvwxyz";
+      static const char *newstr = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      static const char *newstr2 = "0123456789abcdefghijklmnopqrstuvwxyz";
       char tbuf[8192];
       int result = ESMF_SUCCESS;
       int local_rc;
