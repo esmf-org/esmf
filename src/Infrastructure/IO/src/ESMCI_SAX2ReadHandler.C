@@ -1,4 +1,4 @@
-// $Id: ESMCI_SAX2ReadHandler.C,v 1.2 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMCI_SAX2ReadHandler.C,v 1.3 2010/04/13 06:00:49 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -22,6 +22,9 @@
 //
 #define ESMC_FILENAME "ESMCI_SAX2ReadHandler.C"
 
+#include <exception>
+using std::exception;
+
 #include <ESMCI_LogErr.h>
 #include <ESMF_LogMacros.inc>
 
@@ -31,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_SAX2ReadHandler.C,v 1.2 2010/03/04 18:57:44 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_SAX2ReadHandler.C,v 1.3 2010/04/13 06:00:49 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -236,19 +239,128 @@ void SAX2ReadHandler::endElement(const XMLCh* const uri,
 
 } // SAX2ReadHandler::endElement()
 
-#undef  ESMC_METHOD
-#define ESMC_METHOD "SAX2ReadHandler::fatalError()"
 
-void SAX2ReadHandler::fatalError(const SAXParseException& exception)
+// constructor
+SAX2ErrorHandler::SAX2ErrorHandler(void) : ErrorHandler()
 {
-    char* message = XMLString::transcode(exception.getMessage());
-    //cout << "SAX XML Fatal Error: " << message
-    //     << " at line: " << exception.getLineNumber()
-    //     << endl;
-    // TODO:  proper ESMC_Log* call
-    XMLString::release(&message);
+  // need to do any more?
+}
 
-} // SAX2ReadHandler::fatalError()
+#undef  ESMC_METHOD
+#define ESMC_METHOD "SAX2ErrorHandler::warning()"
+
+void SAX2ErrorHandler::warning(const SAXParseException& exc)
+{
+    // TODO: Fix:  (...) is passed instead of valid reference to exc,
+    //       resulting in crash (shown by gdb).  However, a simple C++ test
+    //       program doing the same thing works!  Something about ESMF
+    //       F90/C/C++ mixed environment? platform specific? 
+    //       Occurs on at least gfortran 4.4.0 and intel 11.0.083
+
+#if 0
+    const XMLCh*  xid = exc.getPublicId();
+    if (xid == 0) xid = exc.getSystemId();
+
+    char* id  = XMLString::transcode(xid);    
+    char* msg = XMLString::transcode(exc.getMessage());
+
+    char logMsg[ESMF_MAXSTR];
+    sprintf(logMsg, "SAX2 parse warning in %s, line %d, column %d, "
+                    "message is: %s\n", id, exc.getLineNumber(),
+                                            exc.getColumnNumber(), msg);
+    ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN, ESMC_CONTEXT);
+
+    XMLString::release(&msg);
+    XMLString::release(&id);
+#else
+    char logMsg[ESMF_MAXSTR];
+    sprintf(logMsg, "SAX2 warning\n");
+    ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN, ESMC_CONTEXT);
+#endif
+
+} // SAX2ErrorHandler::warning()
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "SAX2ErrorHandler::error()"
+
+void SAX2ErrorHandler::error(const SAXParseException& exc)
+{
+    // TODO: Fix:  (...) is passed instead of valid reference to exc,
+    //       resulting in crash (shown by gdb).  However, a simple C++ test
+    //       program doing the same thing works!  Something about ESMF
+    //       F90/C/C++ mixed environment? platform specific? 
+    //       Occurs on at least gfortran 4.4.0 and intel 11.0.083.
+
+#if 0
+    const XMLCh*  xid = exc.getPublicId();
+    if (xid == 0) xid = exc.getSystemId();
+
+    char* id  = XMLString::transcode(xid);    
+    char* msg = XMLString::transcode(exc.getMessage());
+
+    char logMsg[ESMF_MAXSTR];
+    sprintf(logMsg, "SAX2 parse error in %s, line %d, column %d, "
+                    "message is: %s\n", id, exc.getLineNumber(),
+                                            exc.getColumnNumber(), msg);
+    ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
+
+    XMLString::release(&msg);
+    XMLString::release(&id);
+
+    throw exc;
+#else
+    char logMsg[ESMF_MAXSTR];
+    sprintf(logMsg, "SAX2 parse error\n");
+    ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
+    throw exception();
+#endif
+
+} // SAX2ErrorHandler::error()
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "SAX2ErrorHandler::fatalError()"
+
+void SAX2ErrorHandler::fatalError(const SAXParseException& exc)
+{
+    // TODO: Fix:  (...) is passed instead of valid reference to exc,
+    //       resulting in crash (shown by gdb).  However, a simple C++ test
+    //       program doing the same thing works!  Something about ESMF
+    //       F90/C/C++ mixed environment? platform specific? 
+    //       Occurs on at least gfortran 4.4.0 and intel 11.0.083.
+
+#if 0
+    const XMLCh*  xid = exc.getPublicId();
+    if (xid == 0) xid = exc.getSystemId();
+
+    char* id  = XMLString::transcode(xid);    
+    char* msg = XMLString::transcode(exc.getMessage());
+
+    char logMsg[ESMF_MAXSTR];
+    sprintf(logMsg, "SAX2 parse fatal error in %s, line %d, column %d, "
+                    "message is: %s\n", id, exc.getLineNumber(),
+                                            exc.getColumnNumber(), msg);
+    ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
+
+    XMLString::release(&msg);
+    XMLString::release(&id);
+
+    throw exc;
+#else
+    char logMsg[ESMF_MAXSTR];
+    sprintf(logMsg, "SAX2 parse fatal error\n");
+    ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
+    throw exception();
+#endif
+
+} // SAX2ErrorHandler::fatalError()
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "SAX2ErrorHandler::resetErrors()"
+
+void SAX2ErrorHandler::resetErrors(void)
+{
+  // TODO:  can reset a failed flag if needed
+}
 
 #endif // ESMF_XERCES
 

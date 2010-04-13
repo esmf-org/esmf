@@ -1,4 +1,4 @@
-// $Id: ESMCI_SAX2ReadHandler.h,v 1.2 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMCI_SAX2ReadHandler.h,v 1.3 2010/04/13 06:00:49 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,9 +35,19 @@
 //-------------------------------------------------------------------------
 //
 // !USES:
+
+ #include <string>
+
 #ifdef ESMF_XERCES
+ #include <xercesc/util/XMLUni.hpp>
+ #include <xercesc/util/XMLString.hpp>
+ #include <xercesc/util/PlatformUtils.hpp>
+ #include <xercesc/util/XercesVersion.hpp>
+
  #include <xercesc/sax2/DefaultHandler.hpp>
- #include <xercesc/framework/XMLFormatter.hpp>
+ #include <xercesc/sax/ErrorHandler.hpp>
+ #include <xercesc/sax/SAXParseException.hpp>
+// #include <xercesc/framework/XMLFormatter.hpp>
  #include <xercesc/sax2/Attributes.hpp>
  XERCES_CPP_NAMESPACE_USE
 #endif
@@ -75,12 +85,29 @@ namespace ESMCI{
         const XMLCh* const qname	 
     ); 
 
-    void fatalError(
-        const SAXParseException& exception
-    );
-
     SAX2ReadHandler(ESMCI::Attribute *attr);
  };
+
+ // define class to handle sax2 error events; supports io_xml::read()
+ class SAX2ErrorHandler : public ErrorHandler {
+ public:
+    virtual void warning(
+        const SAXParseException& exc
+    );
+
+    virtual void error(
+        const SAXParseException& exc
+    );
+
+    virtual void fatalError(
+        const SAXParseException& exc
+    );
+
+    virtual void resetErrors(void);
+
+    SAX2ErrorHandler(void);
+ };
+
 #endif // ESMF_XERCES
 
 } // namespace ESMCI
