@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 2009/10/13 05:46:58 eschwab Exp $ 
+# $Id: makefile,v 1.29 2010/04/13 05:58:58 eschwab Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -38,10 +38,12 @@ DIRS        =
 
 RUN_ESMF_GridCreateUTest:
 	cp -f $(ESMF_DIR)/src/Infrastructure/Grid/etc/esmf_grid_shape_tile.xml $(ESMF_TESTDIR)
+	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=GridCreate NP=4 ftest
 
 RUN_ESMF_GridCreateUTestUNI:
 	cp -f $(ESMF_DIR)/src/Infrastructure/Grid/etc/esmf_grid_shape_tile.xml $(ESMF_TESTDIR)
+	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=GridCreate NP=1 ftest
 
 

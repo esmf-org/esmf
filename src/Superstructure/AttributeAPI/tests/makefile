@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2009/04/22 05:50:37 eschwab Exp $ 
+# $Id: makefile,v 1.7 2010/04/13 05:58:58 eschwab Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -85,10 +85,12 @@ RUN_ESMF_AttributeCplCompUTestUNI:
 
 RUN_ESMF_AttReadCplCompUTest:
 	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_cplcomp.xml $(ESMF_TESTDIR)
+	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttReadCplComp NP=4 ftest
 
 RUN_ESMF_AttReadCplCompUTestUNI:
 	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_cplcomp.xml $(ESMF_TESTDIR)
+	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttReadCplComp NP=1 ftest
 
 # --- DistGrid
@@ -109,10 +111,12 @@ RUN_ESMF_AttributeFieldUTestUNI:
 
 RUN_ESMF_AttReadFieldUTest:
 	cp -f $(ESMF_DIR)/src/Infrastructure/Field/etc/esmf_field.xml $(ESMF_TESTDIR)
+	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttReadField NP=4 ftest
 
 RUN_ESMF_AttReadFieldUTestUNI:
 	cp -f $(ESMF_DIR)/src/Infrastructure/Field/etc/esmf_field.xml $(ESMF_TESTDIR)
+	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttReadField NP=1 ftest
 
 
@@ -134,10 +138,12 @@ RUN_ESMF_AttributeGridCompUTestUNI:
 
 RUN_ESMF_AttReadGridCompUTest:
 	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_TESTDIR)
+	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttReadGridComp NP=4 ftest
 
 RUN_ESMF_AttReadGridCompUTestUNI:
 	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_TESTDIR)
+	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttReadGridComp NP=1 ftest
 
 # --- Grid

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2009/04/30 05:01:01 eschwab Exp $
+# $Id: makefile,v 1.11 2010/04/13 05:58:58 eschwab Exp $
 
 ALL:      build_examples
 run:      run_examples
@@ -68,28 +68,34 @@ run_ESMF_AttributeUpdateEx:
 
 run_ESMF_AttReadGridCompEx:
 	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_EXDIR)
+	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_EXDIR)
 	$(MAKE) EXNAME=AttReadGridComp NP=4 exfrun
 
 run_ESMF_AttReadGridCompEx_uni:
 	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_EXDIR)
+	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_EXDIR)
 	$(MAKE) EXNAME=AttReadGridComp NP=1 exfrun
 
 # --- ESMF_AttReadFieldEx
 
 run_ESMF_AttReadFieldEx:
 	cp -f $(ESMF_DIR)/src/Infrastructure/Field/etc/esmf_field.xml $(ESMF_EXDIR)
+	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_EXDIR)
 	$(MAKE) EXNAME=AttReadField NP=4 exfrun
 
 run_ESMF_AttReadFieldEx_uni:
 	cp -f $(ESMF_DIR)/src/Infrastructure/Field/etc/esmf_field.xml $(ESMF_EXDIR)
+	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_EXDIR)
 	$(MAKE) EXNAME=AttReadField NP=1 exfrun
 
 # --- ESMF_AttReadGridEx
 
 run_ESMF_AttReadGridEx:
 	cp -f $(ESMF_DIR)/src/Infrastructure/Grid/etc/esmf_grid.xml $(ESMF_EXDIR)
+	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_EXDIR)
 	$(MAKE) EXNAME=AttReadGrid NP=4 exfrun
 
 run_ESMF_AttReadGridEx_uni:
 	cp -f $(ESMF_DIR)/src/Infrastructure/Grid/etc/esmf_grid.xml $(ESMF_EXDIR)
+	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_EXDIR)
 	$(MAKE) EXNAME=AttReadGrid NP=1 exfrun
