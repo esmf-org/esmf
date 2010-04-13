@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.67 2010/03/04 18:57:44 svasquez Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.68 2010/04/13 06:03:20 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -2746,15 +2746,17 @@ endif
 ! dimension, for a total of 6 DEs (2x3):
 !
 ! \begin{verbatim}
-! <?xml version="1.0" encoding="UTF-8"?>
-! <GridSpec>
+!<?xml version="1.0"?>
+!<GridSpec>
+!  <Mosaic>
 !    <attribute_package convention="ESMF" purpose="General">
 !      <NX>10</NX>
 !      <NY>20</NY>
-!      <RegDecompX>2</RegDecompX>
-!      <RegDecompY>3</RegDecompY>
 !    </attribute_package>
-! </GridSpec>
+!    <RegDecompX>2</RegDecompX>
+!    <RegDecompY>3</RegDecompY>
+!  </Mosaic>
+!</GridSpec>
 ! \end{verbatim}
 !EOE
 !!!!!!!!!!!!!!!!!!!!!!!

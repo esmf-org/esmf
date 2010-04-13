@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.146 2010/03/11 17:48:15 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.147 2010/04/13 06:03:20 eschwab Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2928,8 +2928,7 @@ end subroutine ESMF_GridConvertIndex
     ! TODO:  make optional
     ! use C calls rather than F90, to circumvent mutually dependency
     ! between Grid and Attribute
-    call c_ESMC_AttPackGetChar(grid, 'RegDecompX', attrValue, &
-                               'ESMF', 'General', 'grid', localrc)
+    call c_ESMC_AttributeGetChar(grid, 'RegDecompX', attrValue, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_GridDestroy(grid)
@@ -2945,8 +2944,7 @@ end subroutine ESMF_GridConvertIndex
       return
     end if
 
-    call c_ESMC_AttPackGetChar(grid, 'RegDecompY', attrValue, &
-                               'ESMF', 'General', 'grid', localrc)
+    call c_ESMC_AttributeGetChar(grid, 'RegDecompY', attrValue, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_GridDestroy(grid)
