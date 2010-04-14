@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.288 2010/04/01 20:05:20 theurich Exp $
+#  $Id: common.mk,v 1.289 2010/04/14 22:38:17 garyblock Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2255,6 +2255,62 @@ citest:
 	fi ; \
 	cat ./PET*$(TNAME)UTest.Log > ./ESMCI_$(TNAME)UTest.Log ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
+
+##########################
+# prepare to run test harness
+init_test_harness:
+	$(ESMF_RM) $(ESMF_TESTDIR)/test_harness.list
+	$(ESMF_RM) $(ESMF_TESTDIR)/test_harness.rc
+	$(ESMF_RM) $(ESMF_TESTDIR)/ESMF_TestHarness*UTest.stdout
+	$(ESMF_RM) $(ESMF_TESTDIR)/PET*.TestHarnessUTest.Log
+
+#
+# run test harness
+#    parameters
+#        TESTHARNESSCASE    test case name
+#        NP                 number of processors
+#
+#
+#    internal
+#        TNAME    test name (hardcoded TestHarness)
+#        RNAME    unique name base on suite and number of processors
+#
+#    environment
+#        MPIRUN        mpirun command
+#        ESMF_TESTDIR  test directory
+#
+# need UNI case, NP=UNI?
+#
+#
+run_test_harness: 
+	$(MAKE) TNAME=TestHarness RNAME=ESMF_$(TESTHARNESSCASE)_NP$(NP)UTest run_test_harness_sec
+
+# target with expanded parameters
+run_test_harness_sec:
+	@if [ -f $(ESMF_TESTDIR)/test_harness.list ] ; then \
+	  if ! grep $(RNAME) $(ESMF_TESTDIR)/test_harness.list ; then \
+	    echo $(RNAME) >> $(ESMF_TESTDIR)/test_harness.list ; \
+	  fi ; \
+	else \
+	  echo $(RNAME) > $(ESMF_TESTDIR)/test_harness.list ; \
+	fi ; \
+	if [ -d harness_config ] ; then \
+	  if [ -f harness_config/$(TESTHARNESSCASE)_test.rc ] ; then \
+	    cp -f harness_config/$(TESTHARNESSCASE)_*.rc $(ESMF_TESTDIR) ; \
+	    cp -f harness_config/$(TESTHARNESSCASE)_test.rc $(ESMF_TESTDIR)/test_harness.rc ; \
+	    pushd $(ESMF_TESTDIR) ; \
+	    $(ESMF_RM) ./PET*.TestHarnessUTest.Log ; \
+	    echo "$(ESMF_MPIRUN) -np $(NP) ESMF_TestHarnessUTest" ; \
+	    $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1> ./$(RNAME).stdout 2>&1 ; \
+	    cat ./PET*.$(TNAME)UTest.Log > ./$(RNAME).Log ; \
+	    $(ESMF_RM) ./PET*.$(TNAME)UTest.Log ; \
+	    popd ; \
+	  else \
+	    echo "FAIL: missing file - harness_config/$(TESTHARNESSCASE)_test.rc" ; \
+	  fi ; \
+	else \
+	  echo "FAIL: missing directory - harness_config" ; \
+	fi
 
 #-------------------------------------------------------------------------------
 #  Obsolete targets for building and running unit tests.  Echo an error
