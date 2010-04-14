@@ -172,7 +172,7 @@ public:
 
   // L2 conservative interpolation matrix generation parallel?
   void interpL2csrvM_serial(const IWeights &, IWeights *, MEField<> const * const, MEField<> const * const);
-  void interpL2csrvM_parallel(const IWeights &, IWeights *, MEField<> const * const);
+  void interpL2csrvM_parallel(IWeights &, IWeights *, MEField<> const * const, MEField<> const * const);
 
   SearchResult sres;
   GeomRend grend;
