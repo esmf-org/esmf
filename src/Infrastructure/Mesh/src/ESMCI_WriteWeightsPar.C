@@ -1,4 +1,4 @@
-// $Id: ESMCI_WriteWeightsPar.C,v 1.7 2010/04/07 20:33:09 rokuingh Exp $
+// $Id: ESMCI_WriteWeightsPar.C,v 1.8 2010/04/14 20:01:23 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@ typedef long long MPI_OffType;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WriteWeightsPar.C,v 1.7 2010/04/07 20:33:09 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_WriteWeightsPar.C,v 1.8 2010/04/14 20:01:23 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -776,7 +776,7 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
      } else Throw() << "Unknown ordering:" << ordering;
      
    }
-   
+//std::cout<<"  cnt  =  "<<cnt<<std::endl;   
    MPI_OffType starts[] = {local_start_n_s, 0};
    MPI_OffType counts[] = {ln_s, 0};
    
