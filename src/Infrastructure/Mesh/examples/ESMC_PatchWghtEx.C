@@ -1,4 +1,4 @@
-// $Id: ESMC_PatchWghtEx.C,v 1.20 2010/04/08 16:47:57 theurich Exp $
+// $Id: ESMC_PatchWghtEx.C,v 1.21 2010/04/14 19:59:41 rokuingh Exp $
 //==============================================================================
 //
 // Earth System Modeling Framework
@@ -31,8 +31,6 @@
 #include <ESMCI_Extrapolation.h>
 #include <ESMCI_WriteWeightsPar.h>
 
-#include <mpi.h>
-
 #include <iterator>
 #include <ostream>
 #include <stdlib.h>
@@ -44,7 +42,7 @@
 #include <cstring>
 
 /**
- * This program may be used to generate a patch-interpolation weight matrix from
+ * This program may be used to generate an interpolation weight matrix from
  * two SCRIP style input files.  The output is a SCRIP format matrix file.
  */
 
@@ -55,9 +53,10 @@ int parseCsrvString(char *csrvStr, int *csrvtype);
 int parseMethodString(char *methodStr, int *methodtype);
 int parsePoleString(char *poleStr, int *poletype, int *poleNPnts);
 
+int regrid(Mesh &, Mesh &, int, int, int, int, char *, char *, char *);
+int csrv(Mesh &, Mesh &, int, int, int, int, char *, char *, char *);
+
 int main(int argc, char *argv[]) {
-  
-  MPI_Init(&argc, &argv);
 
   Par::Init("PATCHLOG", false);
 
@@ -133,167 +132,26 @@ int main(int argc, char *argv[]) {
       Throw() << "Bye" << std::endl;
     }
 
-    //    printf(">>>> poleType=%d poleNPnts=%d src=%s dst=%s wghts=%s \n",
-    //	   poleType,poleNPnts,srcGridFile,dstGridFile,wghtFile);
+  //printf(">>>> csrvType=%d methodType=%d poleType=%d poleNPnts=%d src=%s dst=%s wghts=%s \n",
+  //  	 csrvType,methodType,poleType,poleNPnts,srcGridFile,dstGridFile,wghtFile);
 
     // Load files into Meshes
     if (Par::Rank() == 0) std::cout << "Loading " << srcGridFile << std::endl;
     LoadNCDualMeshPar(srcmesh, srcGridFile);
     if (Par::Rank() == 0) std::cout << "Loading " << dstGridFile << std::endl;
     LoadNCDualMeshPar(dstmesh, dstGridFile);
-    
-    // Add fields to mesh
-    Context ctxt; ctxt.flip();
-    MEField<> *src_iwts = srcmesh.RegisterField("iwts",
-      MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 
-    MEField<> *dst_iwts = dstmesh.RegisterField("iwts",
-      MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
-
-    // Commit the meshes
-    srcmesh.Commit();
-    dstmesh.Commit();
-    
-    // Pole constraints
-    IWeights pole_constraints;
-    IWeights pole_constraints2;
-    IWeights wts;
-    IWeights stw;
-
-    // Add poles if requested
-    UInt constraint_id = srcmesh.DefineContext("pole_constraints");
-    if (poleType==POLETYPE_ALL) {
-      MeshAddPole(srcmesh, 1, constraint_id, pole_constraints);
-      MeshAddPole(srcmesh, 2, constraint_id, pole_constraints);
-    } else if (poleType==POLETYPE_NPNT) {
-      MeshAddPoleNPnts(srcmesh, poleNPnts, 1, constraint_id, pole_constraints);
-      MeshAddPoleNPnts(srcmesh, poleNPnts, 2, constraint_id, pole_constraints);
+    // Conservative regridding
+    if (csrvType==CSRVTYPE_ON) {
+      if (!csrv(srcmesh, dstmesh, csrvType, methodType, poleType, poleNPnts,
+                srcGridFile, dstGridFile, wghtFile))
+        Throw() << "Conservative regridding error" << std::endl;
+    // NON Conservative regridding
+    } else if (csrvType==CSRVTYPE_OFF) {
+      if (!regrid(srcmesh, dstmesh, csrvType, methodType, poleType, poleNPnts,
+                  srcGridFile, dstGridFile, wghtFile))
+        Throw() << "Regridding error" << std::endl;
     }
-
-  if (csrvType==CSRVTYPE_ON) {
-    // Add poles if requested
-    UInt constraint_id2 = dstmesh.DefineContext("pole_constraints2");
-    if (poleType==POLETYPE_ALL) {
-      MeshAddPole(dstmesh, 1, constraint_id2, pole_constraints2);
-      MeshAddPole(dstmesh, 2, constraint_id2, pole_constraints2);
-    } else if (poleType==POLETYPE_NPNT) {
-      MeshAddPoleNPnts(dstmesh, poleNPnts, 1, constraint_id2, pole_constraints2);
-      MeshAddPoleNPnts(dstmesh, poleNPnts, 2, constraint_id2, pole_constraints2);
-    }
-
-    // Use the coordinate fields for interpolation purposes
-    MEField<> &scoord = *srcmesh.GetCoordField();
-    MEField<> &dcoord = *dstmesh.GetCoordField();
-
-    std::vector<Interp::FieldPair> fpairs;
-    if (methodType==METHODTYPE_BILINEAR) {
-      // make the field pairs for interpolation  -  BILINEAR
-      fpairs.push_back(Interp::FieldPair(&dcoord, &scoord, Interp::INTERP_STD));
-    } else if (methodType==METHODTYPE_PATCH) {
-      // make the field pairs for interpolation  -  PATCH
-      fpairs.push_back(Interp::FieldPair(&dcoord, &scoord, Interp::INTERP_PATCH));
-
-      // Ghost elements across parallel boundaries (needed by INTERP_PATCH)
-      MEField<> *psc = &scoord;
-      MEField<> *pdc = &dcoord;
-      srcmesh.CreateGhost();
-      srcmesh.GhostComm().SendFields(1, &psc, &psc);
-      dstmesh.CreateGhost();
-      dstmesh.GhostComm().SendFields(1, &pdc, &pdc);
-    }
-
-    // generate integration weights
-    Integrate sig(srcmesh), dig(dstmesh);
-    sig.intWeights(src_iwts);
-    dig.intWeights(dst_iwts);
-
-    // Build the rendezvous grids
-    Interp interp(dstmesh, srcmesh, fpairs);
-
-    // generate integration weights, BEFORE generating weights matrix
-    interp(0, stw);
-
-  // Factor out poles if they exist
-  if (poleType==POLETYPE_ALL) {
-    stw.GatherToCol(pole_constraints);
-    stw.AssimilateConstraints(pole_constraints);
-    stw.GatherToCol(pole_constraints2);
-    stw.AssimilateConstraints(pole_constraints2);
-  } else if (poleType==POLETYPE_NPNT) {
-    stw.GatherToRowSrc(pole_constraints);
-    stw.AssimilateConstraintsNPnts(pole_constraints);
-    stw.GatherToRowSrc(pole_constraints2);
-    stw.AssimilateConstraintsNPnts(pole_constraints2);
-  }
-
-    // L2 projection conservative interpolation
-    interp.interpL2csrvM(stw, &wts, src_iwts, dst_iwts);
-
-    // Remove non-locally owned weights (assuming destination mesh decomposition)
-    MEField<> *mask = dstmesh.GetField("MASK_IO");
-    ThrowRequire(mask);
-    wts.Prune(dstmesh, mask);
-
-    // Redistribute weights in an IO friendly decomposition
-    if (Par::Rank() == 0) std::cout << "Writing weights to " << wghtFile << std::endl;
-    GatherForWrite(wts);
-
-    // Write the weights
-    WriteNCMatFilePar(srcGridFile, dstGridFile, wghtFile, wts, NCMATPAR_ORDER_INTERLEAVE);
-
-  } else if (csrvType==CSRVTYPE_OFF) {
-
-    // Use the coordinate fields for interpolation purposes
-    MEField<> &scoord = *srcmesh.GetCoordField();
-    MEField<> &dcoord = *dstmesh.GetCoordField();
-
-    // make the field pairs for interpolation
-    std::vector<Interp::FieldPair> fpairs;
-    if (methodType==METHODTYPE_BILINEAR)
-      fpairs.push_back(Interp::FieldPair(&dcoord, &scoord, Interp::INTERP_STD));
-    else if (methodType==METHODTYPE_PATCH) {
-      fpairs.push_back(Interp::FieldPair(&dcoord, &scoord, Interp::INTERP_PATCH));
-
-      // Ghost elements across parallel boundaries (needed by INTERP_PATCH)
-      MEField<> *psc = &scoord;
-      srcmesh.CreateGhost();
-      srcmesh.GhostComm().SendFields(1, &psc, &psc);
-    }
-
-     // Build the rendezvous grids
-     if (Par::Rank() == 0) std::cout << "Building rendezvous grids..." << std::endl;
-     Interp interp(srcmesh, dstmesh, fpairs);
-
-     // Create the weight matrix
-     if (Par::Rank() == 0) std::cout << "Forming patch weights..." << std::endl;
-     interp(0, wts);
-
-     // Factor out poles if they exist
-     if (poleType==POLETYPE_ALL) {
-       // Get the pole matrix on the right processors
-       wts.GatherToCol(pole_constraints);
-       
-       // Take pole constraint out of matrix
-       wts.AssimilateConstraints(pole_constraints);
-     } else if (poleType==POLETYPE_NPNT) {
-       // Get the pole matrix on the right processors
-       wts.GatherToRowSrc(pole_constraints);
-
-       // Take pole constraint out of matrix
-       wts.AssimilateConstraintsNPnts(pole_constraints);
-     }
-     // Remove non-locally owned weights (assuming destination mesh decomposition)
-     MEField<> *mask = dstmesh.GetField("MASK_IO");
-     ThrowRequire(mask);
-     wts.Prune(dstmesh, mask);
-
-     // Redistribute weights in an IO friendly decomposition
-     if (Par::Rank() == 0) std::cout << "Writing weights to " << wghtFile << std::endl;
-     GatherForWrite(wts);
-
-     // Write the weights
-     WriteNCMatFilePar(srcGridFile, dstGridFile, wghtFile, wts, NCMATPAR_ORDER_SEQ);
-  } // conservative
 
   } // try
    catch (std::exception &x) {
@@ -315,7 +173,7 @@ int main(int argc, char *argv[]) {
     Par::Abort();
   }
 
-  std::cout << "Run has completed" << std::endl;
+  if (Par::Rank() == 0) std::cout << "Run has completed" << std::endl;
 
   Par::End();
 
@@ -323,27 +181,27 @@ int main(int argc, char *argv[]) {
   
 }
 
-int parseCsrvString(char *csrvStr, int *csrvType) {
+  int parseCsrvString(char *csrvStr, int *csrvType) {
       if (strcmp(csrvStr,"off")==0)
         *csrvType=CSRVTYPE_OFF;
       else if (strcmp(csrvStr,"on")==0)
         *csrvType=CSRVTYPE_ON;
       else return 0; // FAILURE
 
-  return 1; // SUCCESS
-}
+    return 1; // SUCCESS
+  }
 
-int parseMethodString(char *methodStr, int *methodType) {
+  int parseMethodString(char *methodStr, int *methodType) {
       if (strcmp(methodStr,"bilinear")==0)
         *methodType=METHODTYPE_BILINEAR;
       else if (strcmp(methodStr,"patch")==0)
         *methodType=METHODTYPE_PATCH;
       else return 0; // FAILURE
 
-  return 1; // SUCCESS
-}
+    return 1; // SUCCESS
+  }
 
-int parsePoleString(char *poleStr, int *poleType, int *poleNPnts) {
+  int parsePoleString(char *poleStr, int *poleType, int *poleNPnts) {
 
       if (strcmp(poleStr,"none")==0) {
 	*poleType=POLETYPE_NONE;
@@ -362,5 +220,203 @@ int parsePoleString(char *poleStr, int *poleType, int *poleNPnts) {
 	} 
       }
 
-  return 1; // Success
+    return 1; // Success
+  }
+
+
+  // regrid - Args are NON-COMMITTED meshes
+  int regrid(Mesh &srcmesh, Mesh &dstmesh, 
+             int csrvType, int methodType, int poleType, int poleNPnts, 
+             char *srcGridFile, char *dstGridFile, char *wghtFile) {
+
+    // Commit the meshes
+    srcmesh.Commit();
+    dstmesh.Commit();
+
+    // Pole constraints
+    IWeights pole_constraints;
+
+    // Add poles if requested
+    UInt constraint_id = srcmesh.DefineContext("pole_constraints");
+    if (poleType==POLETYPE_ALL) {
+      MeshAddPole(srcmesh, 1, constraint_id, pole_constraints);
+      MeshAddPole(srcmesh, 2, constraint_id, pole_constraints);
+    } else if (poleType==POLETYPE_NPNT) {
+      MeshAddPoleNPnts(srcmesh, poleNPnts, 1, constraint_id, pole_constraints);
+      MeshAddPoleNPnts(srcmesh, poleNPnts, 2, constraint_id, pole_constraints);
+    }
+
+    // Use the coordinate fields for interpolation purposes
+    MEField<> &scoord = *srcmesh.GetCoordField();
+    MEField<> &dcoord = *dstmesh.GetCoordField();
+
+    // make the field pairs for interpolation
+    std::vector<Interp::FieldPair> fpairs;
+    if (methodType==METHODTYPE_BILINEAR)
+      fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_STD));
+    else if (methodType==METHODTYPE_PATCH) {
+      fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_PATCH));
+
+      // Ghost elements across parallel boundaries (needed by INTERP_PATCH)
+      MEField<> *psc = &scoord;
+      srcmesh.CreateGhost();
+      srcmesh.GhostComm().SendFields(1, &psc, &psc);
+    }
+
+     // Build the rendezvous grids
+     if (Par::Rank() == 0) std::cout << "Building rendezvous grids..." << std::endl;
+     Interp interp(srcmesh, dstmesh, fpairs);
+
+     // Create the weight matrix
+     if (Par::Rank() == 0) std::cout << "Generating interpolation weights..." << std::endl;
+     IWeights wts;
+     interp(0, wts);
+
+     // Factor out poles if they exist
+     if (poleType==POLETYPE_ALL) {
+       // Get the pole matrix on the right processors
+       wts.GatherToCol(pole_constraints);
+       
+       // Take pole constraint out of matrix
+       wts.AssimilateConstraints(pole_constraints);
+     } else if (poleType==POLETYPE_NPNT) {
+       // Get the pole matrix on the right processors
+       wts.GatherToRowSrc(pole_constraints);
+
+       // Take pole constraint out of matrix
+       wts.AssimilateConstraintsNPnts(pole_constraints);
+     }
+
+     // Remove non-locally owned weights (assuming destination mesh decomposition)
+     MEField<> *mask = dstmesh.GetField("MASK_IO");
+     ThrowRequire(mask);
+     wts.Prune(dstmesh, mask);
+
+     // Redistribute weights in an IO friendly decomposition
+     if (Par::Rank() == 0) std::cout << "Writing weights to " << wghtFile << std::endl;
+     GatherForWrite(wts);
+
+     // Write the weights
+     WriteNCMatFilePar(srcGridFile, dstGridFile, wghtFile, wts, NCMATPAR_ORDER_SEQ);
+
+    return 1;
+  }
+
+  // csrv - Args are NON-COMMITTED meshes
+  int csrv(Mesh &srcmesh, Mesh &dstmesh, 
+             int csrvType, int methodType, int poleType, int poleNPnts, 
+             char *srcGridFile, char *dstGridFile, char *wghtFile) {
+    // Add fields to mesh
+    Context ctxt; ctxt.flip();
+    MEField<> *src_iwts = srcmesh.RegisterField("iwts",
+      MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    MEField<> *dst_iwts = dstmesh.RegisterField("iwts",
+      MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    // Commit the meshes
+    srcmesh.Commit();
+    dstmesh.Commit();
+    
+    // Pole constraints
+    IWeights pole_constraints;
+    IWeights pole_constraints2;
+    IWeights stw;
+    IWeights wts;
+/*
+    // Add poles if requested
+    UInt constraint_id = srcmesh.DefineContext("pole_constraints");
+    if (poleType==POLETYPE_ALL) {
+      MeshAddPole(srcmesh, 1, constraint_id, pole_constraints);
+      MeshAddPole(srcmesh, 2, constraint_id, pole_constraints);
+    } else if (poleType==POLETYPE_NPNT) {
+      MeshAddPoleNPnts(srcmesh, poleNPnts, 1, constraint_id, pole_constraints);
+      MeshAddPoleNPnts(srcmesh, poleNPnts, 2, constraint_id, pole_constraints);
+    }
+*/
+
+    UInt constraint_id = srcmesh.DefineContext("pole_constraints");
+    MeshAddPoleTeeth(srcmesh, 1, constraint_id, pole_constraints);
+    MeshAddPoleTeeth(srcmesh, 2, constraint_id, pole_constraints);
+ 
+/*
+    // Add poles if requested
+    UInt constraint_id2 = dstmesh.DefineContext("pole_constraints2");
+    if (poleType==POLETYPE_ALL) {
+      MeshAddPole(dstmesh, 1, constraint_id2, pole_constraints2);
+      MeshAddPole(dstmesh, 2, constraint_id2, pole_constraints2);
+    } else if (poleType==POLETYPE_NPNT) {
+      MeshAddPoleNPnts(dstmesh, poleNPnts, 1, constraint_id2, pole_constraints2);
+      MeshAddPoleNPnts(dstmesh, poleNPnts, 2, constraint_id2, pole_constraints2);
+    }
+*/
+    UInt constraint_id2 = dstmesh.DefineContext("pole_constraints2");
+    MeshAddPoleTeeth(dstmesh, 1, constraint_id2, pole_constraints2);
+    MeshAddPoleTeeth(dstmesh, 2, constraint_id2, pole_constraints2);
+
+
+    // Use the coordinate fields for interpolation purposes
+    MEField<> &scoord = *srcmesh.GetCoordField();
+    MEField<> &dcoord = *dstmesh.GetCoordField();
+
+    std::vector<Interp::FieldPair> fpairs;
+    if (methodType==METHODTYPE_BILINEAR) {
+      // make the field pairs for interpolation  -  BILINEAR
+      fpairs.push_back(Interp::FieldPair(&dcoord, &scoord, Interp::INTERP_STD));
+    } else if (methodType==METHODTYPE_PATCH) {
+      // make the field pairs for interpolation  -  PATCH
+      fpairs.push_back(Interp::FieldPair(&dcoord, &scoord, Interp::INTERP_PATCH));
+
+      // Ghost elements across parallel boundaries (needed by INTERP_PATCH)
+      MEField<> *psc = &scoord;
+      MEField<> *pdc = &dcoord;
+//      srcmesh.CreateGhost();
+//      srcmesh.GhostComm().SendFields(1, &psc, &psc);
+      dstmesh.CreateGhost();
+      dstmesh.GhostComm().SendFields(1, &pdc, &pdc);
+    }
+
+    // generate integration weights
+    if (Par::Rank() == 0) std::cout << "Generating integration weights..." << std::endl;
+    Integrate sig(srcmesh), dig(dstmesh);
+    sig.intWeights(src_iwts);
+    dig.intWeights(dst_iwts);
+
+    // Build the rendezvous grids
+    if (Par::Rank() == 0) std::cout << "Building rendezvous grids..." << std::endl;
+    Interp interp(dstmesh, srcmesh, fpairs);
+
+    // Generate the backwards interpolation matrix
+    if (Par::Rank() == 0) std::cout << "Generating interpolation weights..." << std::endl;
+    interp(0, stw);
+/*
+  // Factor out poles if they exist
+  if (poleType==POLETYPE_ALL) {
+    stw.GatherToCol(pole_constraints);
+    stw.AssimilateConstraints(pole_constraints);
+    stw.GatherToCol(pole_constraints2);
+    stw.AssimilateConstraints(pole_constraints2);
+  } else if (poleType==POLETYPE_NPNT) {
+    stw.GatherToRowSrc(pole_constraints);
+    stw.AssimilateConstraintsNPnts(pole_constraints);
+    stw.GatherToRowSrc(pole_constraints2);
+    stw.AssimilateConstraintsNPnts(pole_constraints2);
+  }
+*/
+    // L2 projection conservative interpolation
+    interp.interpL2csrvM(stw, &wts, src_iwts, dst_iwts);
+
+    // Remove non-locally owned weights (assuming destination mesh decomposition)
+    MEField<> *mask = dstmesh.GetField("MASK_IO");
+    ThrowRequire(mask);
+    wts.Prune(dstmesh, mask);
+
+    // Redistribute weights in an IO friendly decomposition
+    GatherForWrite(wts);
+
+    // Write the weights
+    if (Par::Rank() == 0) std::cout << "Writing weights to " << wghtFile << std::endl;
+    WriteNCMatFilePar(srcGridFile, dstGridFile, wghtFile, wts, NCMATPAR_ORDER_SEQ);
+
+  return 1;
 }
