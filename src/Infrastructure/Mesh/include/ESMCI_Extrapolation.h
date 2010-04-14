@@ -38,10 +38,8 @@ void MeshAddPoleNPnts(Mesh &mesh, int num_avg_pnts, UInt node_id,
                       UInt constraint_id, 
                       IWeights &cweights);
 
-#if 0
   void MeshAddPoleTeeth(Mesh &mesh, UInt node_id, 
 			UInt constraint_id, IWeights &cweights);
-#endif
 } // namespace
 
 #endif /*ESMC_EXTRAPOLATION_H_*/

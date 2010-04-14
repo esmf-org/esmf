@@ -1,4 +1,4 @@
-// $Id: ESMCI_Extrapolation.C,v 1.10 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_Extrapolation.C,v 1.11 2010/04/14 19:58:22 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Extrapolation.C,v 1.10 2010/03/04 18:57:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Extrapolation.C,v 1.11 2010/04/14 19:58:22 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1142,7 +1142,6 @@ void MeshAddNorthPole(Mesh &mesh, UInt node_id,
 */
 
 
-#if 0
   // TODO: MeshAddPoleNPnts needs to be modified to use mask data, before
   //       being hooked into the on-line regridding 
   void MeshAddPoleTeeth(Mesh &mesh,  UInt node_id, 
@@ -1471,7 +1470,6 @@ void MeshAddNorthPole(Mesh &mesh, UInt node_id,
   } // rank zero
 
 }
-#endif
 
 
 
