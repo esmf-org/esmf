@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.18 2010/04/07 20:33:09 rokuingh Exp $
+// $Id: ESMCI_Interp.C,v 1.19 2010/04/14 20:00:19 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.18 2010/04/07 20:33:09 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.19 2010/04/14 20:00:19 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -976,7 +976,7 @@ void Interp::interpL2csrvM(const IWeights &iw, IWeights *iw2,
   Trace __trace("Interp::interpL2csrvM()");
 
   if (is_parallel)
-    interpL2csrvM_parallel(iw, iw2, dst_iwts);
+    interpL2csrvM_parallel(const_cast<IWeights &> (iw), iw2, src_iwts, dst_iwts);
   else interpL2csrvM_serial(iw, iw2, src_iwts, dst_iwts);
 
 }
@@ -988,7 +988,7 @@ void Interp::interpL2csrvM_serial(const IWeights &iw, IWeights *iw2,
 
 //!!!!!!!!!!!!!!! iw is the backward interpolation matrix
 
-  char idx = '0';
+  int idx = 0;
 
   Mesh &smesh = dstmesh;
   Mesh &dmesh = srcmesh;
@@ -1014,6 +1014,7 @@ void Interp::interpL2csrvM_serial(const IWeights &iw, IWeights *iw2,
 
       int rowT = _col[c].id;
       int colT = _row.id;
+      int idx = _col[c].idx;
 
       // now we need to set this value in new weightyys matrix
       bool found = false;
@@ -1061,7 +1062,6 @@ void Interp::interpL2csrvM_serial(const IWeights &iw, IWeights *iw2,
       }
     }
   }
-
 /*
   // print out id's of weight matrix
   IWeights::WeightMap::iterator wit = iw2->begin_row(), wet = iw2->end_row();
@@ -1077,44 +1077,36 @@ void Interp::interpL2csrvM_serial(const IWeights &iw, IWeights *iw2,
 */
 }
 
-void Interp::interpL2csrvM_parallel(const IWeights &iw, IWeights *iw2,
+void Interp::interpL2csrvM_parallel(IWeights &iw, IWeights *iw2,
+                                    MEField<> const * const src_iwts,
                                     MEField<> const * const dst_iwts) {
   Trace __trace("Interp::interpL2csrvM_parallel");
 
 //!!!!!!!!!!!!!!! iw is the backward interpolation matrix
 
-  char idx = '0';
+  int idx = 0;
   int id;
   MPI_Comm_rank(MPI_COMM_WORLD, &id);
-
-  Mesh &smesh = grend.GetDstRend();
-  Mesh &dmesh = grend.GetSrcRend();
-
-  _field *src_iwts = smesh.Getfield("iwts_1");
-
-  if(!src_iwts) {
-    std::cout<<"SOURCE ERROR!!"<<std::endl<<std::endl;
-    exit(1);
-  }
 
   // sparse matrix multiply transpose
   IWeights::WeightMap::const_iterator wi = iw.begin_row(), we = iw.end_row();
   for (; wi != we; ++wi) {
     const IWeights::Entry &_row = wi->first;
     const std::vector<IWeights::Entry> &_col = wi->second;
+    // look for source node id matching _row.id
+    MeshDB::MeshObjIDMap::iterator nsi =
+      dstmesh.map_find(MeshObj::NODE, _row.id);
+    ThrowRequire(nsi != dstmesh.map_end(MeshObj::NODE));
+    double *Sdata = src_iwts->data(*nsi);
     for (UInt c = 0; c < _col.size(); ++c) {
-      // look for source node id matching _row.id
-      MeshDB::MeshObjIDMap::iterator nsi =
-        smesh.map_find(MeshObj::NODE, _row.id);
-      if (nsi == smesh.map_end(MeshObj::NODE))  break;
-      ThrowRequire(nsi != smesh.map_end(MeshObj::NODE));
       // now we have the index and the data, multiply
-      double *Sdata = src_iwts->data(*nsi);
       double value = (_col[c].value)*(*Sdata);
+
       int rowT = _col[c].id;
       int colT = _row.id;
+      int idx = _col[c].idx;
 
-      // now we need to set this value in new matrix
+      // now we need to set this value in new weightyys matrix
       bool found = false;
       IWeights::WeightMap::iterator wi2 = iw2->begin_row(), we2 = iw2->end_row();
       for (; wi2 != we2; ++wi2) {
@@ -1140,15 +1132,13 @@ void Interp::interpL2csrvM_parallel(const IWeights &iw, IWeights *iw2,
         }
       }
       // if the row for this value doesn't exist
-      if (!found) {
-        /*  TODO:
+      if (found != true) {
         // need element number, src_id of the rows is the element id that owns the node
-        ESMCI::MeshObjRelationList::iterator fi = ESMCI::MeshObjConn::
-          find_relation(*nsi,ESMCI::MeshObj::ELEMENT,0,ESMCI::MeshObj::USED_BY);
-        const MeshObj &elem = *((*fi).obj);
+        //ESMCI::MeshObjRelationList::iterator fi = ESMCI::MeshObjConn::
+        //  find_relation(*ndi,ESMCI::MeshObj::ELEMENT,0,ESMCI::MeshObj::USED_BY);
+        //const MeshObj &elem = *((*fi).obj);
         // make the row entry and column vector and column Entry -> insert row
-        IWeights::Entry row(rowT, idx, 0.0, elem.get_id());
-        */
+        //IWeights::Entry row(ndi->get_id(), idx, 0.0, elem.get_id());
         IWeights::Entry row(rowT, idx, 0.0, id);
         std::vector<IWeights::Entry> col;
         IWeights::Entry ent(colT, idx, value, rowT);
@@ -1157,7 +1147,8 @@ void Interp::interpL2csrvM_parallel(const IWeights &iw, IWeights *iw2,
         found = true;
       }
       if (found != true) {
-        printf("Error, no value! dstid=%d  srcid=%d \n",rowT,colT);
+        printf("Error, no value!  srcid=%d \n",
+                                int(nsi->get_id()));
       }
     }
   }
