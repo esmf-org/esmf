@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.2 2010/04/05 20:25:30 theurich Exp $
+# $Id: build_rules.mk,v 1.3 2010/04/15 22:21:02 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -28,10 +28,10 @@ ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
-ESMF_F90LINKLIBS       +=
-ESMF_CXXLINKLIBS       +=
+ESMF_F90LINKLIBS       += 
+ESMF_CXXLINKLIBS       += 
 ESMF_MPIRUNDEFAULT      = mpirun.unicos
-ESMF_MPIMPMDRUNDEFAULT  = 
+ESMF_MPIMPMDRUNDEFAULT  =
 else
 ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
@@ -48,63 +48,47 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
 
 ############################################################
-# Construct the ABISTRING
+# XT compute nodes do not have support for POSIX IPC (memory mapped files)
 #
-ifeq ($(ESMF_MACHINE),ia64)
-ifeq ($(ESMF_ABI),64)
-ESMF_ABISTRING := $(ESMF_MACHINE)_64
-else
-$(error Invalid ESMF_MACHINE / ESMF_ABI combination: $(ESMF_MACHINE) / $(ESMF_ABI))
-endif
-endif
-ifeq ($(ESMF_MACHINE),x86_64)
-ifeq ($(ESMF_ABI),32)
-ESMF_ABISTRING := $(ESMF_MACHINE)_32
-endif
-ifeq ($(ESMF_ABI),64)
-ESMF_ABISTRING := x86_64_small
-endif
-endif
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 
 ############################################################
-# Set memory model compiler flags according to ABISTRING
+# XT compute nodes do not have support for POSIX dynamic linking
 #
-ifeq ($(ESMF_ABISTRING),x86_64_32)
-ESMF_CXXCOMPILEOPTS       += -m32
-ESMF_CXXLINKOPTS          += -m32
-ESMF_F90COMPILEOPTS       += -m32
-ESMF_F90LINKOPTS          += -m32
-endif
-ifeq ($(ESMF_ABISTRING),x86_64_small)
-ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
-ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
-ESMF_F90COMPILEOPTS       += -m64 -mcmodel=small
-ESMF_F90LINKOPTS          += -m64 -mcmodel=small
-endif
-ifeq ($(ESMF_ABISTRING),x86_64_medium)
-ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
-ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
-ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
-ESMF_F90LINKOPTS          += -m64 -mcmodel=medium
-endif
-ifeq ($(ESMF_ABISTRING),ia64_64)
-ESMF_CXXCOMPILEOPTS       += -size_lp64
-ESMF_CXXLINKOPTS          += -size_lp64
-ESMF_F90COMPILEOPTS       += -size_lp64
-ESMF_F90LINKOPTS          += -size_lp64
-endif
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_DLFCN
 
 ############################################################
-# Conditionally add pthread compiler and linker flags
+# XT compute nodes do not have support for "gethostid()"
 #
-ifeq ($(ESMF_PTHREADS),ON)
-ESMF_F90COMPILEOPTS +=  -threads
-ESMF_CXXCOMPILEOPTS +=  -pthread
-ESMF_F90LINKOPTS    += -threads
-ESMF_CXXLINKOPTS    += -pthread
-endif
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_GETHOSTID
 
 ############################################################
+# XT compute nodes do not have support for signals
+#
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SIGNALS
+
+############################################################
+# XT compute nodes do not have support for system call
+#
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SYSTEMCALL
+
+############################################################
+# XT compute nodes do not have support for Pthreads
+#
+ESMF_PTHREADS := OFF
+
+############################################################
+# XT compute nodes do not have support for OpenMP
+#
+ESMF_OPENMP := OFF
+
+############################################################
+# Blank out variables to prevent rpath encoding
+#
+ESMF_F90LINKRPATHS      =
+ESMF_CXXLINKRPATHS      =
+
+###########################################################
 # Determine where ifort's libraries are located
 #
 ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
