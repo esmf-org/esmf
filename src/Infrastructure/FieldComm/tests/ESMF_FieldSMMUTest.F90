@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMUTest.F90,v 1.14 2010/03/04 18:57:43 svasquez Exp $
+! $Id: ESMF_FieldSMMUTest.F90,v 1.15 2010/04/15 17:48:03 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMUTest.F90,v 1.14 2010/03/04 18:57:43 svasquez Exp $'
+    '$Id: ESMF_FieldSMMUTest.F90,v 1.15 2010/04/15 17:48:03 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -147,9 +147,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        grid = ESMF_GridCreate(distgrid=distgrid, &
-            gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), &
-            name="grid", rc=localrc)
+        grid = ESMF_GridCreate(distgrid=distgrid, name="grid", rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -161,7 +159,7 @@ contains
 
         ! create src_farray, srcArray, and srcField
         allocate(src_farray(fa_shape(1)) )
-        src_farray = 1
+        src_farray = lpe+1
         srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -264,6 +262,7 @@ contains
         integer                                     :: localrc, lpe
 
         integer, allocatable                        :: src_farray(:), dst_farray(:)
+        integer, pointer                            :: fptr(:)
         integer                                     :: fa_shape(1)
         
         integer(ESMF_KIND_I4), allocatable          :: factorList(:)
@@ -290,9 +289,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        grid = ESMF_GridCreate(distgrid=distgrid, &
-            gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), &
-            name="grid", rc=localrc)
+        grid = ESMF_GridCreate(distgrid=distgrid, name="grid", rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -309,7 +306,7 @@ contains
 
         ! create src_farray, srcArray, and srcField
         allocate(src_farray(fa_shape(1)) )
-        src_farray = 1
+        src_farray = lpe+1
         srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -372,6 +369,23 @@ contains
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
+
+        ! verify smm
+        call ESMF_FieldGet(dstField, localDe=0, farrayPtr=fptr, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! Verify that the smm data in dstField is correct.
+        ! Before the smm op, the dst Field contains all 0. 
+        ! The smm op reset the values to the PE value, verify this is the case.
+        ! print *, lpe, fptr
+        if(lpe == 0) then
+            if(fptr(3) .ne. 3) localrc = ESMF_FAILURE
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+        endif
 
         ! release route handle
         call ESMF_FieldSMMRelease(routehandle, rc=localrc)
@@ -448,7 +462,7 @@ contains
 
         ! create src_farray, srcArray, and srcField
         allocate(src_farray(fa_shape(1)) )
-        src_farray = 1
+        src_farray = lpe+1
         srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -503,7 +517,7 @@ contains
         ! The smm op reset the values to the PE value, verify this is the case.
         ! print *, lpe, fptr
         do i = lbound(fptr, 1), ubound(fptr, 1)
-            if(fptr(i) .ne. i) localrc = ESMF_FAILURE
+            if(fptr(i) /= i) localrc = ESMF_FAILURE
         enddo
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -582,7 +596,7 @@ contains
 
         ! create src_farray, srcArray, and srcField
         allocate(src_farray(fa_shape(1)) )
-        src_farray = 1
+        src_farray = lpe+1
         srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -637,7 +651,7 @@ contains
         ! The smm op reset the values to the index value, verify this is the case.
         ! print *, lpe, fptr
         do i = lbound(fptr, 1), ubound(fptr, 1)
-            if(fptr(i) .ne. i) localrc = ESMF_FAILURE
+            if(fptr(i) .ne. i*(lpe+1)) localrc = ESMF_FAILURE
         enddo
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -716,7 +730,7 @@ contains
 
         ! create src_farray, srcArray, and srcField
         allocate(src_farray(fa_shape(1)) )
-        src_farray = 1
+        src_farray = lpe+1
         srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -774,7 +788,7 @@ contains
         ! The smm op reset the values to the index value, verify this is the case.
         ! print *, lpe, fptr
         do i = exlb(1), exub(1)
-            if(fptr(i) .ne. i) localrc = ESMF_FAILURE
+            if(fptr(i) /= i*(lpe+1)) localrc = ESMF_FAILURE
         enddo
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
