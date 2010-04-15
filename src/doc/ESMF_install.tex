@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.83 2010/03/24 22:48:54 theurich Exp $
+% $Id: ESMF_install.tex,v 1.84 2010/04/15 15:01:46 garyblock Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -605,6 +605,16 @@ selection, not a run-time option.
 Possible value: {\tt ON}, {\tt OFF} (default)
 
 The {\tt ON} setting enforces usage of OpenMP compiler flags when building ESMF test applications. This allows testing of user-level OpenMP usage even with {\tt ESMF\_OPENMP} set to {\tt OFF}.
+
+\item[ESMF\_TESTHARNESS\_ARRAY]
+Possible value: {\em test harness make target} (default not set)
+
+Variable specifying the test harness makefile target for the array class.  If this variable is not specified, a default test scenario will be run for the array class.  See the ESMF Software Developer's Guide for instructions for selecting other test harness scenarios.
+
+\item[ESMF\_TESTHARNESS\_FIELD]
+Possible value: {\em test harness make target} (default not set)
+
+Variable specifying the test harness makefile target for the field class.  If this variable is not specified, a default test scenario will be run for the field class.  See the ESMF Software Developer's Guide for instructions for selecting other test harness scenarios.
 
 \item[ESMF\_TESTMPMD] 
 Possible value: {\tt ON}, {\tt OFF} (default)
