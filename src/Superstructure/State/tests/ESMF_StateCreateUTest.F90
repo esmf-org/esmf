@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.23 2010/04/09 14:18:18 w6ws Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.24 2010/04/15 03:41:47 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ end module
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.23 2010/04/09 14:18:18 w6ws Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.24 2010/04/15 03:41:47 w6ws Exp $'
 !------------------------------------------------------------------------------
 !   ! Local variables
     integer :: rc
@@ -422,6 +422,22 @@ end module
       write(failMsg, *) ""
       write(name, *) "Add a second nested State into another State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Validate the nested State
+      call ESMF_StateValidate (state5, nestedFlag=ESMF_NESTED_OFF, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Validating a nested State - single level"
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Validate the nested State with full depth
+      call ESMF_StateValidate (state5, nestedFlag=ESMF_NESTED_ON, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Validating a nested State - nested"
+      call ESMF_Test((rc == ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_UTest
