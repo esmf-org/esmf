@@ -1,4 +1,4 @@
-// $Id: ESMCI_IntegrateUTest.C,v 1.4 2010/04/12 04:40:59 theurich Exp $
+// $Id: ESMCI_IntegrateUTest.C,v 1.5 2010/04/15 19:18:22 theurich Exp $
 //==============================================================================
 //
 // Earth System Modeling Framework
@@ -10,17 +10,17 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
+#ifndef MPICH_IGNORE_CXX_SEEK
+#define MPICH_IGNORE_CXX_SEEK
+#endif
+#include <mpi.h>
+
 #include <ESMCI_Extrapolation.h>
 #include <ESMCI_Interp.h>
 #include <ESMCI_Integrate.h>
 #include <ESMCI_Mesh.h>
 #include <ESMCI_MeshGen.h>
 #include <ESMCI_MeshPNC.h>
-
-#ifndef MPICH_IGNORE_CXX_SEEK
-#define MPICH_IGNORE_CXX_SEEK
-#endif
-#include <mpi.h>
 
 #include <stdlib.h>
 #include <stdio.h>
