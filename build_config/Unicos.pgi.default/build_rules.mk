@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.9 2010/03/11 23:20:20 theurich Exp $
+# $Id: build_rules.mk,v 1.10 2010/04/15 22:08:05 theurich Exp $
 #
 # Unicos.pgi.default
 #
@@ -48,32 +48,37 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v -c
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v -c
 
 ############################################################
-# XT3 compute nodes do not have support for POSIX IPC (memory mapped files)
+# XT compute nodes do not have support for POSIX IPC (memory mapped files)
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 
 ############################################################
-# XT3 compute nodes do not have support for "gethostid()"
+# XT compute nodes do not have support for POSIX dynamic linking
+#
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_DLFCN
+
+############################################################
+# XT compute nodes do not have support for "gethostid()"
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_GETHOSTID
 
 ############################################################
-# XT3 compute nodes do not have support for signals
+# XT compute nodes do not have support for signals
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SIGNALS
 
 ############################################################
-# XT3 compute nodes do not have support for system call
+# XT compute nodes do not have support for system call
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SYSTEMCALL
 
 ############################################################
-# XT3 compute nodes do not have support for Pthreads
+# XT compute nodes do not have support for Pthreads
 #
 ESMF_PTHREADS := OFF
 
 ############################################################
-# XT3 compute nodes do not have support for OpenMP
+# XT compute nodes do not have support for OpenMP
 #
 ESMF_OPENMP := OFF
 

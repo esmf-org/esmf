@@ -1,4 +1,4 @@
-Settings for Unicos/lc on Cray XT3, using the Portland Group PGI Fortran and C++ compilers.
+Settings for Unicos/lc on Cray XT, using the Portland Group PGI Fortran and C++ compilers.
 
 Requires the following environment settings:
 
