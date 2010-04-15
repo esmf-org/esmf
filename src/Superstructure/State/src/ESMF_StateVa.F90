@@ -1,4 +1,4 @@
-! $Id: ESMF_StateVa.F90,v 1.6 2010/04/15 03:41:17 w6ws Exp $
+! $Id: ESMF_StateVa.F90,v 1.7 2010/04/15 03:54:19 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateVa.F90,v 1.6 2010/04/15 03:41:17 w6ws Exp $'
+      '$Id: ESMF_StateVa.F90,v 1.7 2010/04/15 03:54:19 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -84,12 +84,12 @@
 ! !IROUTINE: ESMF_StateValidate - Check validity of a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateValidate(state, nestedflag, options, rc)
+      subroutine ESMF_StateValidate(state, options, nestedFlag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State) :: state
-      type(ESMF_NestedFlag), intent(in), optional :: nestedFlag
       character (len = *),   intent(in), optional :: options
+      type(ESMF_NestedFlag), intent(in), optional :: nestedFlag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
