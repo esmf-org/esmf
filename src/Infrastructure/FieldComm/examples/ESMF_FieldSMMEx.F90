@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMEx.F90,v 1.11 2010/03/04 18:57:43 svasquez Exp $
+! $Id: ESMF_FieldSMMEx.F90,v 1.12 2010/04/15 17:08:52 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMEx.F90,v 1.11 2010/03/04 18:57:43 svasquez Exp $'
+    '$Id: ESMF_FieldSMMEx.F90,v 1.12 2010/04/15 17:08:52 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -118,10 +118,10 @@
 
     ! create src_farray, srcArray, and srcField
     ! +--------+--------+--------+--------+
-    !      1        1        1        1            ! value
+    !      1        2        3        4            ! value
     ! 1        4        8        12       16       ! bounds
     allocate(src_farray(fa_shape(1)) )
-    src_farray = 1
+    src_farray = lpe+1
     srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
         rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -167,10 +167,10 @@
     ! Before the SMM op, the dst Field contains all 0. 
     ! The SMM op reset the values to the index value, verify this is the case.
     ! +--------+--------+--------+--------+
-    !  1 2 3 4  1 2 3 4  1 2 3 4  1 2 3 4          ! value
+    !  1 2 3 4  2 4 6 8  3 6 9 12  4 8 12 16       ! value
     ! 1        4        8        12       16       ! bounds
     do i = lbound(fptr, 1), ubound(fptr, 1)
-        if(fptr(i) .ne. i) localrc = ESMF_FAILURE
+        if(fptr(i) /= i*(lpe+1)) rc = ESMF_FAILURE
     enddo
 !EOC
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
