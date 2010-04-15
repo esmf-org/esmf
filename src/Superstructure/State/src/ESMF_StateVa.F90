@@ -1,4 +1,4 @@
-! $Id: ESMF_StateVa.F90,v 1.5 2010/04/12 19:41:04 w6ws Exp $
+! $Id: ESMF_StateVa.F90,v 1.6 2010/04/15 03:41:17 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -32,10 +32,15 @@
 !
 !
 ! !USES:
+      use ESMF_ArrayMod,       only: ESMF_ArrayValidate
+      use ESMF_ArrayBundleMod, only: ESMF_ArrayBundleValidate
+      use ESMF_FieldMod,       only: ESMF_FieldValidate
+      use ESMF_FieldBundleMod, only: ESMF_FieldBundleValidate
       use ESMF_LogErrMod
+      use ESMF_RHandleMod,     only: ESMF_RouteHandleValidate
       use ESMF_StateTypesMod
       use ESMF_InitMacrosMod
-      use ESMF_UtilMod
+      use ESMF_UtilMod,        only: ESMF_StringLowerCase
       
       implicit none
       
@@ -57,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateVa.F90,v 1.5 2010/04/12 19:41:04 w6ws Exp $'
+      '$Id: ESMF_StateVa.F90,v 1.6 2010/04/15 03:41:17 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -83,8 +88,8 @@
 !
 ! !ARGUMENTS:
       type(ESMF_State) :: state
-      character (len = *),   intent(in), optional :: options
       type(ESMF_NestedFlag), intent(in), optional :: nestedFlag
+      character (len = *),   intent(in), optional :: options
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -97,11 +102,11 @@
 !     \begin{description}
 !     \item[state]
 !       The {\tt ESMF\_State} to validate.
-!     \item[{[options]}]
-!       Validation options are not yet supported.
 !     \item[{[nestedFlag]}]
 !       {\tt ESMF\_NESTED\_OFF} - validates at the current State level only
 !       {\tt ESMF\_NESTED\_ON} - recursively validates any nested States
+!     \item[{[options]}]
+!       Validation options are not yet supported.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -112,11 +117,14 @@
 !
 ! TODO: code goes here
 !
-      character (len=6) :: localopts
+      character (len=16) :: localopts
+      integer :: localrc
       logical :: localnestedflag
+      type(ESMF_StateClass), pointer :: stypep
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_SUCCESS
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -135,27 +143,93 @@
       call ESMF_StringLowerCase (localopts)
       select case (localopts)
       case ("brief")
+      case ("collective")
+        write (ESMF_IOstderr,*)  &
+            "ESMF_StateValidate: warning: collective option is deferred"
       case default
-          write (ESMF_IOstderr,*) "ESMF_StatePrint: unknown options arg: ", &
-              trim (localopts)
-          return 
+        write (ESMF_IOstderr,*) "ESMF_StateValidate: unknown options arg: ", &
+            trim (localopts)
+        return 
       end select
 
       ! Validate the State
 
-      if (.not.associated(state%statep)) then
+      if (.not. associated (state%statep)) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                  "State uninitialized or already destroyed", &
                                   ESMF_CONTEXT, rc)) return
       endif
 
-      if (state%statep%st .eq. ESMF_STATE_INVALID) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+
+      if (localnestedflag) then
+        stypep => state%statep
+        call validateWorker (stypep, rc=localrc)
+      end if
+
+      if (present(rc)) rc = localrc
+
+      contains
+
+        recursive subroutine validateWorker (sp, rc)
+          type(ESMF_StateClass), pointer :: sp
+          integer, intent (out) :: rc
+
+          integer :: i1
+          integer :: local1rc
+          type(ESMF_StateItem) , pointer :: dp
+
+
+          rc = ESMF_SUCCESS
+
+          if (sp%st == ESMF_STATE_INVALID) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                  "State uninitialized or already destroyed", &
                                   ESMF_CONTEXT, rc)) return
-      endif
+          end if
 
-      if (present(rc)) rc = ESMF_SUCCESS
+          do, i1 = 1, sp%datacount
+            dp => sp%datalist(i1)
+            local1rc = ESMF_SUCCESS
+
+            select case (dp%otype%ot)
+            case (ESMF_STATEITEM_ARRAY%ot)
+              call ESMF_ArrayValidate (dp%datap%ap, rc=local1rc)
+
+            case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
+              call ESMF_ArrayBundleValidate (dp%datap%abp, rc=local1rc)
+
+            case (ESMF_STATEITEM_FIELD%ot)
+              call ESMF_FieldValidate (dp%datap%fp, rc=local1rc)
+
+            case (ESMF_STATEITEM_FIELDBUNDLE%ot)
+              call ESMF_FieldBundleValidate (dp%datap%fbp, rc=local1rc)
+
+            case (ESMF_STATEITEM_ROUTEHANDLE%ot)
+              call ESMF_RouteHandleValidate (dp%datap%rp, rc=local1rc)
+
+            case (ESMF_STATEITEM_STATE%ot)
+              if (localnestedflag)  &
+                call validateWorker (dp%datap%spp, rc=local1rc)
+
+            case (ESMF_STATEITEM_NAME%ot, ESMF_STATEITEM_INDIRECT%ot)
+              continue
+
+            case (ESMF_STATEITEM_UNKNOWN%ot, ESMF_STATEITEM_NOTFOUND%ot)
+              local1rc = ESMF_RC_OBJ_BAD
+
+            case default
+              local1rc = ESMF_RC_OBJ_BAD
+
+            end select
+
+            if (local1rc /= ESMF_SUCCESS) then
+              rc = ESMF_RC_OBJ_BAD
+              print *, 'ESMF_StateValidate: Invalid object: ', trim (dp%namep)
+            end if
+
+          end do
+
+        end subroutine validateWorker
 
       end subroutine ESMF_StateValidate
 
