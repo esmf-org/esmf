@@ -1,0 +1,34 @@
+# $Id: field_default_test.rc,v 1.1 2010/04/15 15:10:33 garyblock Exp $
+# Field test Harness Config file
+
+#
+# revision history
+#    03/31/2010  gblock  created default field test harness case
+#
+
+# test class
+test_class: FIELD
+
+# test description
+#test_descr_text: 'future??'
+
+# report a summary of the test configurations before actually conducting tests
+setup_report: TRUE
+
+# test result report - options are:
+# test_report: FULL  - full report presenting both success and failure configs
+# test_report: FAILURE - report only failure configurations
+# test_report: SUCCESS - report only successful configurations
+# test_report: NONE - no report
+test_report: FAILURE
+
+# descriptor file for this case
+nonexhaustive::
+    'field_default_descr.rc'
+::   # end of list
+
+# descriptor files for the exhaustive case
+#exhaustive::
+#   'exhaustive_descriptor.rc'
+#:: # end of list
+
