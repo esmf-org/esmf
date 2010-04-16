@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMEx.F90,v 1.12 2010/04/15 17:08:52 feiliu Exp $
+! $Id: ESMF_FieldSMMEx.F90,v 1.13 2010/04/16 16:25:51 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMEx.F90,v 1.12 2010/04/15 17:08:52 feiliu Exp $'
+    '$Id: ESMF_FieldSMMEx.F90,v 1.13 2010/04/16 16:25:51 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -79,13 +79,15 @@
 ! perform sparse matrix multiplication from source Field to destination Field.
 !
 ! The source and destination Field data are arranged such that each of the 4 PETs has 4
-! data elements. Moreover, the source Field has all its data elements initialized to 1 
-! uniformly. Then collectively on each PET, a SMM according to the following formula
+! data elements. Moreover, the source Field has all its data elements initialized to a linear
+! function based on local PET number. 
+! Then collectively on each PET, a SMM according to the following formula
 ! is preformed: \newline
 ! $dstField(i) = i * srcField(i), i = 1 ... 4$ \newline
 ! \newline
 !
-! Because source Field data are initialized to 1 uniformly, the formula predicts that
+! Because source Field data are initialized to a linear function based on local PET number, 
+! the formula predicts that
 ! the result destination Field data on each PET is {1,2,3,4}. This is verified in the
 ! example.
 !
