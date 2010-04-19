@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.3 2010/04/15 22:45:35 theurich Exp $
+$Id: ESMF_Conf.inc,v 1.4 2010/04/19 11:57:29 theurich Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -20,7 +20,11 @@ be one of the following:
 
 #endif
 
+#if (__INTEL_COMPILER >= 1000)
+#define ESMF_IOFlushMacro(unit,status) flush (unit, iostat=status)
+#else
 #define ESMF_IOFlushMacro(unit,status) call flush (unit)
+#endif
 
 #if 0
 Strict F90 compilers will not allow initializers.  Also, in the past when we 
