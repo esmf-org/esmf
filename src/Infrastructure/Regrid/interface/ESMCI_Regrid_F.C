@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.42 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.43 2010/04/19 22:31:02 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -29,6 +29,7 @@
 #include <Mesh/include/ESMCI_Mesh.h>
 #include <Mesh/include/ESMCI_MeshRead.h>
 #include <Mesh/include/ESMCI_Exception.h>
+#include <Mesh/include/ESMCI_Integrate.h>
 #include <Mesh/include/ESMCI_Interp.h>
 #include <Mesh/include/ESMCI_Extrapolation.h>
 
@@ -47,7 +48,7 @@ using namespace ESMCI;
 
 enum {ESMF_REGRID_SCHEME_FULL3D = 0, ESMF_REGRID_SCHEME_NATIVE = 1};
 enum {ESMF_REGRID_METHOD_BILINEAR = 0, ESMF_REGRID_METHOD_PATCH = 1};
-enum {ESMF_REGRID_MASSCONSERVE_OFF = 0, ESMF_REGRID_MASSCONSERVE_ON = 1};
+enum {ESMF_REGRID_CONSERVE_OFF = 0, ESMF_REGRID_CONSERVE_ON = 1};
 
 namespace ESMCI {
   struct TempWeights {
@@ -57,8 +58,11 @@ namespace ESMCI {
   };
 }
 
+// local functions
+int conservative_online(Mesh &, Mesh &, IWeights &, int *, int *, int *);
+int regrid_online(Mesh &, Mesh &, IWeights &, int *, int *, int *);
 
-
+// external C functions
 extern "C" void FTN(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
     ESMC_TypeKind *typekind, void *factorList, int *factorListCount,
@@ -67,7 +71,7 @@ extern "C" void FTN(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
 extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                    Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, int *srcstaggerLoc,
                    Mesh **meshdstpp, ESMCI::Array **arraydstpp, int *dststaggerLoc,
-		   int *regridMethod, int *regridMassConserve, 
+		   int *regridMethod, int *regridConserve, 
                    int *regridScheme, int *unmappedaction,
                    ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
                    int *nentries, ESMCI::TempWeights **tweights,
@@ -87,98 +91,26 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
   try {
 
-/*
-    if (*regridScheme == ESMF_REGRID_SCHEME_FULL3D) {
-      srcgrid.setSphere();
-      dstgrid.setSphere();
-      //std::cout << "Regrid setting sphere!!" << std::endl;
-    }
-*/
+    // Weights matrix
+    IWeights wts;
 
-    // If a spherical grid, mesh the poles, if they exist
-    IWeights pole_constraints;
-    if (*regridScheme == ESMF_REGRID_SCHEME_FULL3D) {
-      UInt constraint_id = srcmesh.DefineContext("pole_constraints");
-
-      // Why 7?  Ask Bob.
-      for (UInt i = 1; i <= 7; ++i) {
-        MeshAddPole(srcmesh, i, constraint_id, pole_constraints);
-      }
-    }
-
-
-    // Get coordinate fields
-    MEField<> &scoord = *srcmesh.GetCoordField();
-    MEField<> &dcoord = *dstmesh.GetCoordField();
-
-
-    // Create a layer of ghost elements since the patch method needs
-    // a larger stencil.
-    if (*regridMethod == ESMF_REGRID_METHOD_PATCH) {
-      int num_snd=0;
-      MEField<> *snd[2],*rcv[2];
-
-      // Load coord field
-      MEField<> *psc = &scoord;
-      snd[num_snd]=psc;
-      rcv[num_snd]=psc;
-      num_snd++;
-
-      // Load mask field
-      MEField<> *psm = srcmesh.GetField("mask");
-      if (psm != NULL) {
-	snd[num_snd]=psm;
-	rcv[num_snd]=psm;
-	num_snd++;
-      }
-
-      srcmesh.CreateGhost();
-      srcmesh.GhostComm().SendFields(num_snd, snd, rcv);
-    }
-
-/*
-    WriteMesh(srcmesh, "src_grid");
-    WriteMesh(dstmesh, "dst_grid");
-*/
-
-    // Now we have the meshes, so go ahead and calc bilinear weights.
-    // Since bilin needs a field, just do coords.
-    // bilinear is bilinear.
-    std::vector<Interp::FieldPair> fpairs;
-    
-    switch (*regridMethod) {
-
-      case ESMF_REGRID_METHOD_BILINEAR:
-        fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_STD));
+    // Conservative regridding
+    switch (*regridConserve) {
+    case (ESMF_REGRID_CONSERVE_ON):
+      if (!conservative_online(srcmesh, dstmesh, wts,
+                               regridMethod, regridScheme, unmappedaction))
+        Throw() << "Conservative regridding error" << std::endl;
       break;
-
-      case ESMF_REGRID_METHOD_PATCH:
-        fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_PATCH));
+    // NON Conservative regridding
+    case (ESMF_REGRID_CONSERVE_OFF):
+      if (!regrid_online(srcmesh, dstmesh, wts,
+                         regridMethod, regridScheme, unmappedaction))
+        Throw() << "Regridding error" << std::endl;
       break;
 
       default:
-        Throw() << "Regrid method:" << *regridMethod << " is not implemented";
+        Throw() << "Conservative regridding:" << *regridConserve << " is not implemented";
     }
-
-    Interp interp(srcmesh, dstmesh, fpairs, *unmappedaction);
-
-    IWeights wts;
- 
-    interp(0, wts);
-
-    // Remove pole constraint by condensing out
-    if (*regridScheme == ESMF_REGRID_SCHEME_FULL3D) {
-
-      // Get the pole matrix on the right processors
-      wts.GatherToCol(pole_constraints);
-
-      // Take pole constraint out of matrix
-      wts.AssimilateConstraints(pole_constraints);
-
-    }
-
-    // Remove non-locally owned weights (assuming destination mesh decomposition)
-    wts.Prune(dstmesh, 0);
 
     //wts.Print(Par::Out());
 
@@ -243,7 +175,6 @@ wts.Print(Par::Out());
     }
 
     *nentries = num_entries;
-
     // Clean up.  If has_iw, then we will use the arrays to
     // fill out the users pointers.  These will be deleted following a copy.
     if (*has_iw == 0) {
@@ -493,6 +424,215 @@ extern "C" void FTN(c_esmc_copy_tempweights)(ESMCI::TempWeights **_tw, int *ii, 
 
   delete *_tw;
 
+}
+
+int regrid_online(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts, 
+                        int *regridMethod, int *regridScheme, int *unmappedaction) {
+/*
+    if (*regridScheme == ESMF_REGRID_SCHEME_FULL3D) {
+      srcgrid.setSphere();
+      dstgrid.setSphere();
+      //std::cout << "Regrid setting sphere!!" << std::endl;
+    }
+*/
+
+    // If a spherical grid, mesh the poles, if they exist
+    IWeights pole_constraints;
+    if (*regridScheme == ESMF_REGRID_SCHEME_FULL3D) {
+      UInt constraint_id = srcmesh.DefineContext("pole_constraints");
+
+      // Why 7?  Ask Bob.
+      for (UInt i = 1; i <= 7; ++i) {
+        MeshAddPole(srcmesh, i, constraint_id, pole_constraints);
+      }
+    }
+
+    // Get coordinate fields
+    MEField<> &scoord = *srcmesh.GetCoordField();
+    MEField<> &dcoord = *dstmesh.GetCoordField();
+
+    // Create a layer of ghost elements since the patch method needs
+    // a larger stencil.
+    if (*regridMethod == ESMF_REGRID_METHOD_PATCH) {
+      int num_snd=0;
+      MEField<> *snd[2],*rcv[2];
+
+      // Load coord field
+      MEField<> *psc = &scoord;
+      snd[num_snd]=psc;
+      rcv[num_snd]=psc;
+      num_snd++;
+
+      // Load mask field
+      MEField<> *psm = srcmesh.GetField("mask");
+      if (psm != NULL) {
+	snd[num_snd]=psm;
+	rcv[num_snd]=psm;
+	num_snd++;
+      }
+
+      srcmesh.CreateGhost();
+      srcmesh.GhostComm().SendFields(num_snd, snd, rcv);
+    }
+
+/*
+    WriteMesh(srcmesh, "src_grid");
+    WriteMesh(dstmesh, "dst_grid");
+*/
+
+    // Now we have the meshes, so go ahead and calc bilinear weights.
+    // Since bilin needs a field, just do coords.
+    // bilinear is bilinear.
+    std::vector<Interp::FieldPair> fpairs;
+    
+    switch (*regridMethod) {
+
+      case ESMF_REGRID_METHOD_BILINEAR:
+        fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_STD));
+      break;
+
+      case ESMF_REGRID_METHOD_PATCH:
+        fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_PATCH));
+      break;
+
+      default:
+        Throw() << "Regrid method:" << *regridMethod << " is not implemented";
+    }
+
+    Interp interp(srcmesh, dstmesh, fpairs, *unmappedaction);
+
+    interp(0, wts);
+
+    // Remove pole constraint by condensing out
+    if (*regridScheme == ESMF_REGRID_SCHEME_FULL3D) {
+
+      // Get the pole matrix on the right processors
+      wts.GatherToCol(pole_constraints);
+
+      // Take pole constraint out of matrix
+      wts.AssimilateConstraints(pole_constraints);
+
+    }
+
+    // Remove non-locally owned weights (assuming destination mesh decomposition)
+    wts.Prune(dstmesh, 0);
+
+  return 1;  // SUCCESS
+}
+
+int conservative_online(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts, 
+                        int *regridMethod, int *regridScheme, int *unmappedaction) {
+
+    // Get the integration weights
+    MEField<> *src_iwts = srcmesh.GetField("iwts");
+    if (!src_iwts) Throw() << "Integration weights needed for conservative regridding." 
+                           <<std::endl;
+    MEField<> *dst_iwts = dstmesh.GetField("iwts");
+    if (!dst_iwts) Throw() << "Integration weights needed for conservative regridding." 
+                           <<std::endl;
+
+    // If a spherical grid, mesh the poles, if they exist
+    IWeights pole_constraints, pole_constraints2;
+    if (*regridScheme == ESMF_REGRID_SCHEME_FULL3D) {
+      UInt constraint_id = srcmesh.DefineContext("pole_constraints");
+      UInt constraint_id2 = dstmesh.DefineContext("pole_constraints2");
+
+      // Why 7?  Ask Bob.
+      for (UInt i = 1; i <= 7; ++i) {
+        MeshAddPoleTeeth(srcmesh, i, constraint_id, pole_constraints);
+        MeshAddPoleTeeth(dstmesh, i, constraint_id2, pole_constraints2);
+      }
+    }
+
+    // Get coordinate fields
+    MEField<> &scoord = *srcmesh.GetCoordField();
+    MEField<> &dcoord = *dstmesh.GetCoordField();
+
+    // Create a layer of ghost elements since the patch method needs
+    // a larger stencil.
+    if (*regridMethod == ESMF_REGRID_METHOD_PATCH) {
+      int num_snd=0;
+      MEField<> *snd[2],*rcv[2];
+
+      // Load coord field
+      MEField<> *psc = &scoord;
+      snd[num_snd]=psc;
+      rcv[num_snd]=psc;
+      num_snd++;
+
+      // Load mask field
+      MEField<> *psm = srcmesh.GetField("mask");
+      if (psm != NULL) {
+	snd[num_snd]=psm;
+	rcv[num_snd]=psm;
+	num_snd++;
+      }
+
+      srcmesh.CreateGhost();
+      srcmesh.GhostComm().SendFields(num_snd, snd, rcv);
+    }
+
+    // Now we have the meshes, so go ahead and calculate weights
+    std::vector<Interp::FieldPair> fpairs;
+    
+    switch (*regridMethod) {
+
+      case ESMF_REGRID_METHOD_BILINEAR:
+        fpairs.push_back(Interp::FieldPair(&dcoord, &scoord, Interp::INTERP_STD));
+      break;
+
+      case ESMF_REGRID_METHOD_PATCH:
+        fpairs.push_back(Interp::FieldPair(&dcoord, &scoord, Interp::INTERP_PATCH));
+      break;
+
+      default:
+        Throw() << "Regrid method:" << *regridMethod << " is not implemented";
+    }
+
+    // Generate the integration weights
+    Integrate sig(srcmesh), dig(dstmesh);
+    sig.intWeights(src_iwts);
+    dig.intWeights(dst_iwts);
+
+    // Build the rendezvous grids
+    Interp interp(dstmesh, srcmesh, fpairs, *unmappedaction);
+
+    // Generate the backwards interpolation matrix
+    IWeights stw;
+    interp(0, stw);
+
+/*
+  // Factor out poles if they exist
+  if (poleType==POLETYPE_ALL) {
+    stw.GatherToCol(pole_constraints);
+    stw.AssimilateConstraints(pole_constraints);
+    stw.GatherToCol(pole_constraints2);
+    stw.AssimilateConstraints(pole_constraints2);
+  } else if (poleType==POLETYPE_NPNT) {
+    stw.GatherToRowSrc(pole_constraints);
+    stw.AssimilateConstraintsNPnts(pole_constraints);
+    stw.GatherToRowSrc(pole_constraints2);
+    stw.AssimilateConstraintsNPnts(pole_constraints2);
+  }
+*/
+    // L2 projection conservative interpolation
+    interp.interpL2csrvM(stw, &wts, src_iwts, dst_iwts);
+/*
+    // Remove pole constraint by condensing out
+    if (*regridScheme == ESMF_REGRID_SCHEME_FULL3D) {
+
+      // Get the pole matrix on the right processors
+      wts.GatherToCol(pole_constraints);
+
+      // Take pole constraint out of matrix
+      wts.AssimilateConstraints(pole_constraints);
+
+    }
+*/
+    // Remove non-locally owned weights (assuming destination mesh decomposition)
+    wts.Prune(dstmesh, 0);
+
+  return 1;  // SUCCESS
 }
 
 #undef  ESMC_METHOD
