@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloEx.F90,v 1.1 2010/04/16 16:25:51 feiliu Exp $
+! $Id: ESMF_FieldHaloEx.F90,v 1.2 2010/04/19 13:24:55 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldHaloEx.F90,v 1.1 2010/04/16 16:25:51 feiliu Exp $'
+    '$Id: ESMF_FieldHaloEx.F90,v 1.2 2010/04/19 13:24:55 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -67,21 +67,21 @@
 ! \subsubsection{Field Halo solving a domain decomposed heat transfer problem}
 ! \label{sec:field:usage:halo}
 !
-! {\tt ESMF\_FieldHalo()} interface can be used to perform Halo update of a Field. This
-! greatly eases communication programming from a user perspective. By definition, user
+! {\tt ESMF\_FieldHalo()} interface can be used to perform halo update of a Field. This
+! eases communication programming from a user perspective. By definition, user
 ! program only needs to update locally owned exclusive region in each domain, then call
 ! FieldHalo to communicate the values in the halo region from/to neighboring domain elements.
 ! In this example, we solve a 1D heat transfer problem: $u_t = \alpha^2 u_{xx}$ with the
 ! initial condition $u(0, x) = 20$ and boundary conditions $u(t, 0) = 10, u(t, 1) = 40$.
-! The temperature Field $u$
-! is represented by a {\tt ESMF\_Field}. An explicit time steping scheme is employed.
+! The temperature field $u$
+! is represented by a {\tt ESMF\_Field}. A finite difference explicit time steping scheme is employed.
 ! During each time step, FieldHalo update is called to communicate values in the halo region
 ! to neighboring domain elements. The steady state (as $t \rightarrow \infty$) solution 
 ! is a linear temperature profile along $x$. The numerical solution is an approximation of
 ! the steady state solution. It can be verified to represent a linear temperature profile.
 ! 
 ! Section \ref{Array:Halo} provides a discussion of the 
-! Halo operation implemented in {\tt ESMF\_Array}.
+! halo operation implemented in {\tt ESMF\_Array}.
 ! 
 !EOE
 
@@ -139,7 +139,7 @@
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     endif
 
-    ! compute the Halo update routehandle of the decomposed temperature Field
+    ! compute the halo update routehandle of the decomposed temperature Field
     call ESMF_FieldHaloStore(field, routehandle=routehandle, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -151,12 +151,12 @@
     ! Solution converges after about 9000 steps based on apriori knowledge.
     ! The result is a linear temperature profile stored in field.
     do iter = 1, 9000
-        ! only elements in the exclusive region are locally updated on each domain
+        ! only elements in the exclusive region are updated locally in each domain
         do i = startx, endx
             tmp_farray(i) = fptr(i)+alpha*alpha*dt/dx/dx*(fptr(i+1)-2.*fptr(i)+fptr(i-1))
         enddo
         fptr = tmp_farray
-        ! call Halo update to communicate the values in the halo region to neighboring domains
+        ! call halo update to communicate the values in the halo region to neighboring domains
         call ESMF_FieldHalo(field, routehandle=routehandle, rc=rc)
     enddo
 
