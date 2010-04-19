@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.98 2010/04/06 17:17:00 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.99 2010/04/19 18:27:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.98 2010/04/06 17:17:00 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.99 2010/04/19 18:27:36 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -7712,7 +7712,10 @@ int sparseMatMulStoreEncodeXXE(
   
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
-    
+  
+  bool vectorFlag = !(tensorMixFlag || 
+    (srcTensorContigLength != dstTensorContigLength));
+
 #ifdef ASMMSTORETIMING
   double t9a, t9b, t9d, t9e; //gjt - profile
   double t9c1, t9c2; //gjt - profile
@@ -7823,25 +7826,21 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
 #ifdef ASMMSTORETIMING
     VMK::wtime(&t9c2);   //gjt - profile
 #endif  
-    
-    bool vectorFlag = false;  // default assume no vectorization
-    
+       
     // sort each "recvnbDiffPartnerDeCount group" (opposite of src)
-    if (tensorMixFlag || (srcTensorContigLength != dstTensorContigLength)){
+    if (!vectorFlag){
       // no vectorization possible -> sort for scalar optimization
       for (int i=0; i<recvnbDiffPartnerDeCount; i++)
         sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
           ArrayHelper::scalarOrderDstInfo);
     }else if (dstTensorContigLength == 1){
       // support vectorization during execution, but nothing to deflate here
-      vectorFlag = true;
       // sort for scalar optimization
       for (int i=0; i<recvnbDiffPartnerDeCount; i++)
         sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
           ArrayHelper::scalarOrderDstInfo);
     }else{
       // vectorization
-      vectorFlag = true;
       // sort vector optimization
       for (int i=0; i<recvnbDiffPartnerDeCount; i++){
         sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
@@ -8037,30 +8036,20 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     delete [] factorIndexRef;
     delete [] partnerDeRef;
     
-    bool vectorFlag = false;  // default assume no vectorization
-    
     // sort each "sendnbDiffPartnerDeCount group" (opposite of dst)
-    if (tensorMixFlag || (srcTensorContigLength != dstTensorContigLength)){
+    if (!vectorFlag){
       // no vectorization possible -> sort for scalar optimization
-      if (vectorFlag != false){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_INCONS,
-          "- vectorFlag inconsistency", &rc);
-        return rc;
-      }
-      // sort for scalar optimization
       for (int i=0; i<sendnbDiffPartnerDeCount; i++)
         sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
           ArrayHelper::scalarOrderSrcInfo);
     }else if (srcTensorContigLength == 1){
       // support vectorization during execution, but nothing to deflate here
-      vectorFlag = true;
       // sort for scalar optimization
       for (int i=0; i<sendnbDiffPartnerDeCount; i++)
         sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
           ArrayHelper::scalarOrderSrcInfo);
     }else{
       // vectorization
-      vectorFlag = true;
       // sort vector optimization
       for (int i=0; i<sendnbDiffPartnerDeCount; i++){
         sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
@@ -8218,10 +8207,11 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   // Need correct setting of vectorLength for the XXE exec() calls.
   int vectorLength = 0; // initialize
   
-  // In case the vectorLength is relevant, i.e. the XXE stream will contain
-  // elements that use it, then srcTensorContigLength and dstTensorContigLength
-  // must be equivalent, and define the vectorLength.
-  if (srcTensorContigLength == dstTensorContigLength)
+  // For the case that vectorLength is relevant, i.e. vectorFlag is set to
+  // true, and the XXE stream contains elements that are vectorized,
+  // srcTensorContigLength and dstTensorContigLength must be equivalent, and
+  // define the vectorLength.
+  if (vectorFlag)
     vectorLength = srcTensorContigLength; // consistent vectorLength
 
   // optimize srcTermProcessing
