@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.25 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.26 2010/04/19 18:58:39 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -114,6 +114,81 @@ void FTN(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *staggerLoc,
   *rc = ESMF_SUCCESS;
 
 }
+
+
+
+void FTN(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
+                    char*name, int *rc,
+                             ESMCI::Array **arraypp1,
+                             ESMCI::Array **arraypp2,
+                             ESMCI::Array **arraypp3,
+                             ESMCI::Array **arraypp4,
+                             ESMCI::Array **arraypp5,
+                             ESMCI::Array **arraypp6,
+                             int *spherical,
+                             ESMCI_FortranStrLenArg nlen
+			  ) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshio()" 
+  ESMCI::Grid &grid = **gridpp;
+
+  // Get VM
+  int localrc;
+  ESMCI::VM *vm = VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+   throw localrc;  // bail out with exception
+
+  // Get pet info
+  int localPet = vm->getLocalPet();
+  int petCount = vm->getPetCount();
+
+  std::vector<ESMCI::Array*> arrays;
+
+  // How to do this?? Any way I can think of is ugly:
+  ESMCI::Array **ar[] = {
+    arraypp1,
+    arraypp2,
+    arraypp3,
+    arraypp4,
+    arraypp5,
+    arraypp6
+  };
+
+
+  if (*spherical != 0) grid.setSphere();
+
+  for (UInt i = 0; i < *num_arrays; ++i)
+    arrays.push_back(*ar[i]);
+
+  Mesh mesh;
+
+  try {
+
+    ESMCI::GridToMesh(grid, *staggerLoc, mesh, arrays,NULL);
+
+    char *meshname = ESMC_F90toCstring(name, nlen);
+
+    WriteMesh(mesh, meshname);
+
+    delete [] meshname;
+
+  }
+  catch(std::exception &x) {
+    std::cout << "Error!!! Exception, P:" << localPet << ", <" << x.what() << ">" << std::endl;
+    *rc = ESMF_FAILURE;
+    return;
+  }
+  catch(...) {
+    std::cout << "Error, unknown exception" << std::endl;
+    *rc = ESMF_FAILURE;
+    return;
+  }
+
+  *rc = ESMF_SUCCESS;
+
+}
+
+
 
 
 

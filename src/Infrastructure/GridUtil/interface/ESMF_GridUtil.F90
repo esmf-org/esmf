@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.16 2010/03/15 17:05:43 oehmke Exp $
+! $Id: ESMF_GridUtil.F90,v 1.17 2010/04/19 18:58:39 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -65,6 +65,7 @@ module ESMF_GridUtilMod
 
 ! - ESMF-public methods:
   public ESMF_MeshIO
+  public ESMF_GridWriteVTK
   public ESMF_GridToMesh
 
 !EOPI
@@ -73,7 +74,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.16 2010/03/15 17:05:43 oehmke Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.17 2010/04/19 18:58:39 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -178,6 +179,130 @@ module ESMF_GridUtilMod
 
   end subroutine ESMF_MeshIO
 !------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridWriteVTK()"
+!BOPI
+! !IROUTINE: ESMF_GridWriteVTK -- Write Grid and associated Arrays
+!
+! !INTERFACE:
+    subroutine ESMF_GridWriteVTK(grid, staggerLoc, isSphere, filename, &
+                                 array1, array2, array3, array4, array5,&
+                                 array6, rc)
+!
+!
+! !ARGUMENTS:
+    type(ESMF_Grid), intent(inout)                :: grid
+    type(ESMF_StaggerLoc), intent(in),optional    :: staggerLoc
+    logical, intent(in), optional                 :: isSphere
+    character(len = *), intent(in)                :: filename 
+    type(ESMF_Array), intent(inout), optional     :: array1
+    type(ESMF_Array), intent(inout), optional     :: array2
+    type(ESMF_Array), intent(inout), optional     :: array3
+    type(ESMF_Array), intent(inout), optional     :: array4
+    type(ESMF_Array), intent(inout), optional     :: array5
+    type(ESMF_Array), intent(inout), optional     :: array6
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Write the fields out for purview.  This function overcomes certain
+!   difficulties in passing strings with an optional number of arguments.
+!
+!   \begin{description}
+!   \item [grid]
+!         grid to write
+!   \item[{[staggerLoc]}] 
+!         stagger of field
+!   \item [{[isSphere]}]
+!         If .true. then grid will be transformed to a 3d spherical manifold, if
+!         not specified defaults to false (not spherical). 
+!   \item[filename]
+!         File (stub) to write results to
+!   \item [{[array1-6]}]
+!         Arrays to write as data
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: minidx
+    integer                 :: lspherical
+    integer                 :: tmp_staggerloc
+    type(ESMF_Array)        :: arrayEmpty
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! set default spherical
+    lspherical = 0
+    if (present(isSphere)) then
+       if (isSphere) then
+         lspherical = 1
+       else 
+         lspherical = 0
+       endif
+    endif
+
+
+    ! Set default staggerloc
+    if (present(staggerloc)) then
+      tmp_staggerloc=staggerloc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
+    endif
+
+
+    minidx = 10
+
+    if (.not. present(array6)) minidx = 6
+    if (.not. present(array5)) minidx = 5
+    if (.not. present(array4)) minidx = 4
+    if (.not. present(array3)) minidx = 3
+    if (.not. present(array2)) minidx = 2
+    if (.not. present(array1)) minidx = 1
+
+    select case (minidx)
+      case (1)
+        call c_ESMC_GridIO(grid, tmp_staggerloc, 0, filename, localrc, &
+             arrayEmpty, arrayEmpty, arrayEmpty, arrayEmpty, arrayEmpty, &
+             arrayEmpty, lspherical)
+      case (2)
+        call c_ESMC_GridIO(grid, tmp_staggerloc, 1, filename, localrc, &
+             array1, arrayEmpty, arrayEmpty, arrayEmpty, arrayEmpty, &
+             arrayEmpty, lspherical)
+      case (3) 
+        call c_ESMC_GridIO(grid, tmp_staggerloc, 2, filename, localrc, &
+             array1, array2, arrayEmpty, arrayEmpty, arrayEmpty, &
+             arrayEmpty, lspherical)
+      case (4) 
+        call c_ESMC_GridIO(grid, tmp_staggerloc, 3, filename, localrc, &
+             array1, array2, array3, arrayEmpty, arrayEmpty, &
+             arrayEmpty, lspherical)
+      case (5) 
+        call c_ESMC_GridIO(grid, tmp_staggerloc, 4, filename, localrc, &
+             array1, array2, array3, array4, arrayEmpty, &
+             arrayEmpty, lspherical)
+      case (6) 
+        call c_ESMC_GridIO(grid, tmp_staggerloc, 5, filename, localrc, &
+             array1, array2, array3, array4, array5, &
+             arrayEmpty, lspherical)
+      case (10) 
+        call c_ESMC_GridIO(grid, tmp_staggerloc, 5, filename, localrc, &
+             array1, array2, array3, array4, array5, &
+             array6, lspherical)
+      case default
+        localrc = ESMF_RC_NOT_IMPL
+    end select
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_GridWriteVTK
+!------------------------------------------------------------------------------
+
 
 
 !------------------------------------------------------------------------------
