@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: testing.tex,v 1.23 2010/04/19 17:29:06 garyblock Exp $
+% CVS $Id: testing.tex,v 1.24 2010/04/19 19:29:26 svasquez Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/testing.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -313,7 +313,7 @@ When a system test is removed from the makefile, the "ESMF\_SYSTEM\_TEST" or
 tags must be modified so that the system test is not counted as failed. 
 The recommended way to modify these tags is to replace the first underscore with "\_disable\_", thus 
 ESMF\_SYSTEM\_TEST becomes 
-ESMF\_disable\_SYSTEM\_TEST
+ESMF\_disable\_SYSTEM\_TEST.
 
 \subsubsection{Test Harness}
 The Test Harness is a highly configurable test control system for conducting 
@@ -337,7 +337,7 @@ tests and as a separate stand-alone test.
 
 \paragraph{Running Test Harness Tests as Part of Unit Tests}
 When running as an integral part of the unit tests, the makefile contained in the
-\testtt{tests} directory of each supported class is executed through the run_unit_tests target.
+test{tests} directory of each supported class is executed through the run\_unit\_tests target.
 As part of this target, the makefile selects the desired test harness target using a class
 specific environment variable (e.g. ESMF\_TESTHARNESS\_FIELD).  A default case is provided in
 case the environment variable variable is not set.
@@ -355,8 +355,8 @@ The targets currently supported for the ESMF\_TESTHARNESS\_ARRAY variable are:
 
 The targets currently supported for the ESMF\_TESTHARNESS\_FIELD variable are:
 \begin{itemize}
-\item RUN_ESMF_TestHarnessField_default - Used to verify functionality of the test harness
-\item RUN_ESMF_TestHarnessField_1 - Basic test of 2D and 3D regrid
+\item RUN\_ESMF\_TestHarnessField\_default - Used to verify functionality of the test harness
+\item RUN\_ESMF\_TestHarnessField\_1 - Basic test of 2D and 3D regrid
 \end{itemize}
 
 Each target selects the desired sequence of test cases for that target.
@@ -371,27 +371,27 @@ RUN_ESMF_TestHarnessField_1:
 	\$(MAKE) TESTHARNESSCASE=field_1 NP=4 run_test_harness
 \end{verbatim}
 
-In this example, the test harness target is RUN_ESMF_TestHarnessField_1.  This target will execute a
+In this example, the test harness target is RUN\_ESMF\_TestHarnessField\_1.  This target will execute a
 single test harness test case. Additional lines can be added if additional steps are desired.
 The next section will describe the details of invoking a test case.
 
 \paragraph{Invoking a Single Test Harness Test Case}
 A single test harness test case can be invoked from the \texttt{<classdir>/tests}
 directory through the make command with the local parameters \texttt{TESTHARNESSCASE} and
-\testtt{NP} with the \testtt{run_test_harness} target.
+\texttt{NP} with the \texttt{run\_test\_harness} target.
 
 For example,
 \begin{verbatim}
 gmake TESTHARNESSCASE=field_1 NP=4 run_test_harness
 \end{verbatim}
-will run the test haress test case, \testtt{field_1} on 4 processors.
+will run the test haress test case, \texttt{field\_1} on 4 processors.
 
 Each test case is defeined by a series of configuration files in the
-\texttt{<classdir>/tests/harness_config} directory.  
+\texttt{<classdir>/tests/harness\_config} directory.  
 All of the configuration files for a particular test case will be prefixed with 
 \texttt{<casename>\_}.  The top level configuration file will have a suffix of \texttt{\_test.rc}.
-Thus, the top level configuration file for the \texttt{field_1} test case will be
-\testtt{field_1_test.rc}.
+Thus, the top level configuration file for the \texttt{field\_1} test case will be
+\texttt{field\_1\_test.rc}.
 
 The next section describes the format of the top level resource file.
 
