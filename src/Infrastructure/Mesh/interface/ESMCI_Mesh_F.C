@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.37 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.38 2010/04/19 22:32:17 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.37 2010/03/04 18:57:45 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.38 2010/04/19 22:32:17 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -419,6 +419,13 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
 	   "- there are nodes on this PET that were not used in the element connectivity list ", &localrc)) throw localrc;
     }
+
+    // Register the iwts field
+    // TODO:  This should be in a more standard location,
+    //        iwts should not be on every mesh, need a flag
+    Context ctxt; ctxt.flip();
+    MEField<> *iwts = mesh.RegisterField("iwts",
+      MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 
     // Perhaps commit will be a separate call, but for now commit the mesh here.
 

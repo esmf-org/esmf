@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.43 2010/03/15 17:05:45 oehmke Exp $
+// $Id: ESMC_GridToMesh.C,v 1.44 2010/04/19 22:32:17 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -344,6 +344,13 @@ Par::Out() << std::endl;
 
      // Now set up the nodal coordinates
    IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", sdim);
+
+    // Register the iwts field
+    // TODO:  This should be in a more standard location,
+    //        iwts should not be on every mesh, need a flag
+    Context ctxt; ctxt.flip();
+    MEField<> *iwts = mesh.RegisterField("iwts",
+      MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 
    // Create whatever fields the user wants
    std::vector<IOField<NodalField>*> nfields;
