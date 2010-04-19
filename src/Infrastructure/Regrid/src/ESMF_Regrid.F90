@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.142 2010/04/19 18:57:57 oehmke Exp $
+! $Id: ESMF_Regrid.F90,v 1.143 2010/04/19 22:29:07 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -68,16 +68,16 @@
            ESMF_REGRID_METHOD_PATCH       = ESMF_RegridMethod(1)
 
 
-      type ESMF_RegridMassConserve
+      type ESMF_RegridConserve
       sequence
 !  private
-         integer :: regridmassconserve
+         integer :: regridconserve
       end type
 
 
-      type(ESMF_RegridMassConserve), parameter :: &
-           ESMF_REGRID_MASSCONSERVE_OFF     = ESMF_RegridMassConserve(0), &
-           ESMF_REGRID_MASSCONSERVE_ON      = ESMF_RegridMassConserve(1)
+      type(ESMF_RegridConserve), parameter :: &
+           ESMF_REGRID_CONSERVE_OFF     = ESMF_RegridConserve(0), &
+           ESMF_REGRID_CONSERVE_ON      = ESMF_RegridConserve(1)
 
 
       integer, parameter :: ESMF_REGRID_SCHEME_FULL3D = 0, &
@@ -98,8 +98,8 @@
        public ESMF_RegridMethod,  ESMF_REGRID_METHOD_BILINEAR, &
                                   ESMF_REGRID_METHOD_PATCH
 
-       public ESMF_RegridMassConserve, ESMF_REGRID_MASSCONSERVE_OFF, &
-                                       ESMF_REGRID_MASSCONSERVE_ON
+       public ESMF_RegridConserve, ESMF_REGRID_CONSERVE_OFF, &
+                                       ESMF_REGRID_CONSERVE_ON
 
 
        public ESMF_REGRID_SCHEME_FULL3D, &
@@ -126,7 +126,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.142 2010/04/19 18:57:57 oehmke Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.143 2010/04/19 22:29:07 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -277,7 +277,7 @@ end function my_xor
 ! !INTERFACE:
       subroutine ESMF_RegridStore(srcMesh, srcArray, &
                  dstMesh, dstArray, &
-                 regridMethod, regridMassConserve, regridScheme, &
+                 regridMethod, regridConserve, regridScheme, &
                  unmappedDstAction, routehandle, &
                  indicies, weights, rc)
 !
@@ -287,7 +287,7 @@ end function my_xor
       type(ESMF_Mesh), intent(inout)         :: dstMesh
       type(ESMF_Array), intent(inout)        :: dstArray
       type(ESMF_RegridMethod), intent(in)    :: regridMethod
-      type(ESMF_RegridMassConserve), intent(in), optional :: regridMassConserve
+      type(ESMF_RegridConserve), intent(in), optional :: regridConserve
       integer, intent(in)                    :: regridScheme
       type(ESMF_UnmappedAction), intent(in), optional :: unmappedDstAction
       type(ESMF_RouteHandle),  intent(inout), optional :: routehandle
@@ -310,12 +310,12 @@ end function my_xor
 !          The interpolation method to use.
 !     \item[regridScheme]
 !          Whether to use 3d or native coordinates
-!     \item [{[regridMassConserve]}]
+!     \item [{[regridConserve]}]
 !           Specifies whether to implement the mass conservation 
 !           correction or not.  Options are 
-!           {\tt ESMF\_REGRID_MASSCONSERVE\_OFF} or 
-!           {\tt ESMF\_REGRID_MASSCONSERVE\_ON}. If not specified, defaults 
-!           to {\tt ESMF\_REGRID_MASSCONSERVE\_OFF}. 
+!           {\tt ESMF\_REGRID_CONSERVE\_OFF} or 
+!           {\tt ESMF\_REGRID_CONSERVE\_ON}. If not specified, defaults 
+!           to {\tt ESMF\_REGRID_CONSERVE\_OFF}. 
 !     \item [{[unmappedDstAction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Options are 
@@ -333,7 +333,7 @@ end function my_xor
        type(ESMF_VM)        :: vm
        integer :: has_rh, has_iw, nentries
        type(ESMF_TempWeights) :: tweights
-       type(ESMF_RegridMassConserve) :: localregridMassConserve
+       type(ESMF_RegridConserve) :: localregridConserve
        type(ESMF_UnmappedAction) :: localunmappedDstAction
        logical :: isMemFreed
 
@@ -380,10 +380,10 @@ end function my_xor
        if (present(routehandle)) has_rh = 1
        if (present(indicies)) has_iw = 1
 
-       if (present(regridMassConserve)) then
-          localregridMassConserve=regridMassConserve
+       if (present(regridConserve)) then
+          localregridConserve=regridConserve
        else
-          localregridMassConserve=ESMF_REGRID_MASSCONSERVE_OFF
+          localregridConserve=ESMF_REGRID_CONSERVE_OFF
        endif
 
        if (present(unmappedDstAction)) then
@@ -416,11 +416,10 @@ end function my_xor
           return 
        endif
 
-
        ! Call through to the C++ object that does the work
        call c_ESMC_regrid_create(vm, srcMesh%this, srcArray, staggerLoc,  &
                    dstMesh%this, dstArray, staggerLoc%staggerloc, &
-                   regridMethod, localregridMassConserve%regridmassconserve, &
+                   regridMethod, localregridConserve%regridconserve, &
                    regridScheme, localunmappedDstAction%unmappedaction, &
                    routehandle, has_rh, has_iw, &
                    nentries, tweights, &

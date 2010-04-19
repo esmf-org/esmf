@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.29 2010/03/04 18:57:42 svasquez Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.30 2010/04/19 22:29:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.29 2010/03/04 18:57:42 svasquez Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.30 2010/04/19 22:29:06 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -233,7 +233,7 @@ contains
                                        dstField, dstMaskValues,        &
                                        unmappedDstAction,              &
                                        routeHandle, indicies, weights, & 
-                                       regridMethod, regridMassConserve, &
+                                       regridMethod, regridConserve, &
                                        regridScheme, rc)
 !
 ! !RETURN VALUE:
@@ -248,7 +248,7 @@ contains
       integer(ESMF_KIND_I4), pointer, optional        :: indicies(:,:)
       real(ESMF_KIND_R8), pointer, optional           :: weights(:)
       type(ESMF_RegridMethod), intent(in)             :: regridMethod
-      type(ESMF_RegridMassConserve), intent(in), optional :: regridMassConserve
+      type(ESMF_RegridConserve), intent(in), optional :: regridConserve
       integer, intent(in), optional                   :: regridScheme
       integer, intent(out), optional                  :: rc 
 !
@@ -296,11 +296,11 @@ contains
 !           {\tt ESMF\_REGRID\_METHOD\_BILINEAR} or 
 !           {\tt ESMF\_REGRID\_METHOD\_PATCH}. If not specified, defaults 
 !           to {\tt ESMF\_REGRID\_METHOD\_BILINEAR}.
-!     \item [{[regridMassConserve]}]
+!     \item [{[regridConserve]}]
 !           The mass conservation correction, options are 
-!           {\tt ESMF\_REGRID\_MASSCONSERVE\_OFF} or 
-!           {\tt ESMF\_REGRID\_MASSCONSERVE\_ON}. If not specified, defaults 
-!           to {\tt ESMF\_REGRID\_MASSCONSERVE\_OFF}. 
+!           {\tt ESMF\_REGRID\_CONSERVE\_OFF} or 
+!           {\tt ESMF\_REGRID\_CONSERVE\_ON}. If not specified, defaults 
+!           to {\tt ESMF\_REGRID\_CONSERVE\_OFF}. 
 !           {\it NOTE:} this capability is not yet functional
 !     \item [{[regridScheme]}]
 !           Whether to convert to spherical coordinates 
@@ -314,7 +314,7 @@ contains
 !EOP
         integer :: localrc
         integer              :: lregridScheme
-        type(ESMF_RegridMassConserve) :: lregridMassConserve
+        type(ESMF_RegridConserve) :: lregridConserve
         integer              :: isSphere
         type(ESMF_GeomType)  :: srcgeomtype
         type(ESMF_GeomType)  :: dstgeomtype
@@ -348,10 +348,10 @@ contains
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if (present(regridMassConserve)) then
-           lregridMassConserve=regridMassConserve
+        if (present(regridConserve)) then
+           lregridConserve=regridConserve
         else     
-           lregridMassConserve=ESMF_REGRID_MASSCONSERVE_OFF
+           lregridConserve=ESMF_REGRID_CONSERVE_OFF
         endif
 
         ! Will eventually determine scheme either as a parameter or from properties
@@ -372,7 +372,7 @@ contains
 
           isSphere = 0
           if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) isSphere = 1
-	
+
           ! check grid
           call checkGrid(srcGrid,srcStaggerloc,rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -420,7 +420,7 @@ contains
 
         ! call into the Regrid mesh interface
         call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
-              regridMethod, lregridMassConserve, lregridScheme, &
+              regridMethod, lregridConserve, lregridScheme, &
               unmappedDstAction, routeHandle, &
               indicies, weights, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
