@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.72 2010/04/15 15:22:21 garyblock Exp $ 
+# $Id: makefile,v 1.73 2010/04/19 22:33:47 rokuingh Exp $ 
 #
 # 03/15/2010  gblock  removed exhaustive/non-exhaustive test harness logic
 #                     implemented test harness selection using taget based on ESMF_TESTHARNESS_FIELD variable
@@ -11,9 +11,11 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR	  = src/Infrastructure/Field/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldUTest \
+TESTS_BUILD   = \
+                $(ESMF_TESTDIR)/ESMF_FieldUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldCreateGetUTest \
+		$(ESMF_TESTDIR)/ESMF_FieldRegridCsrvUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldArbGridUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldStressUTest
@@ -21,6 +23,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldUTest \
 TESTS_RUN     = RUN_ESMF_FieldUTest \
 		RUN_ESMF_FieldCreateGetUTest \
 		RUN_ESMF_FieldRegridUTest \
+		RUN_ESMF_FieldRegridCsrvUTest \
 		RUN_ESMF_FieldArbGridUTest \
 		RUN_ESMF_FieldStressUTest \
 		RUN_ESMC_FieldUTest
@@ -36,6 +39,7 @@ endif
 
 TESTS_RUN_UNI = RUN_ESMF_FieldStressUTestUNI \
 	RUN_ESMF_FieldRegridUTestUNI \
+	RUN_ESMF_FieldRegridCsrvUTestUNI \
 	RUN_ESMF_FieldArbGridUTestUNI \
 	RUN_ESMC_FieldUTestUNI
 
@@ -73,6 +77,12 @@ RUN_ESMF_FieldRegridUTest:
 
 RUN_ESMF_FieldRegridUTestUNI:
 	$(MAKE) TNAME=FieldRegrid NP=1 ftest
+
+RUN_ESMF_FieldRegridCsrvUTest:
+	$(MAKE) TNAME=FieldRegridCsrv NP=4 ftest
+
+RUN_ESMF_FieldRegridCsrvUTestUNI:
+	$(MAKE) TNAME=FieldRegridCsrv NP=1 ftest
 
 RUN_ESMF_FieldArbGridUTest:
 	$(MAKE) TNAME=FieldArbGrid NP=4 ftest
