@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.10 2010/04/06 00:01:05 w6ws Exp $
+$Id: ESMF_Conf.inc,v 1.11 2010/04/20 16:13:16 theurich Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@ Define the proper way to read the command line.  Use getarg for now.
 #endif
 
 #define ESMF_NEEDSGETARG
-`
+
 #if 0
 prevent use of esmf derived type initializers.  causes some compilers problems.
 #endif
