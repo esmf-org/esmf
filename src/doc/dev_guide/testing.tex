@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: testing.tex,v 1.24 2010/04/19 19:29:26 svasquez Exp $
+% CVS $Id: testing.tex,v 1.25 2010/04/20 18:07:37 garyblock Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/testing.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -325,125 +325,9 @@ the Test Harness to be built and run as part of the Unit tests. The test results
 are reported to a single standard-out file which is located with the unit test 
 results.
 
-\paragraph{Specifying Test Harness tests}
-The test harness code consists of a single executable that runs along with the
-unit tests. The executable is augmented by a hierarchy of customizable configuration
-files which are located within the \texttt{tests/harness\_config} directory of each 
-supported class; currently only ESMF\_ARRAY and ESMF\_FIELD. These configuration files are 
-combined by the executable to generate specific test configurations.
+See section~\ref{sec:harness} for a complete discussion of the test harness.
 
-There are two primary ways to invoke the test harness, as an integral part of running unit
-tests and as a separate stand-alone test.
-
-\paragraph{Running Test Harness Tests as Part of Unit Tests}
-When running as an integral part of the unit tests, the makefile contained in the
-test{tests} directory of each supported class is executed through the run\_unit\_tests target.
-As part of this target, the makefile selects the desired test harness target using a class
-specific environment variable (e.g. ESMF\_TESTHARNESS\_FIELD).  A default case is provided in
-case the environment variable variable is not set.
-
-The environment variables currently defined are:
-\begin{itemize}
-\item ESMF\_TESTHARNESS\_ARRAY - set target for Array class tests
-\item ESMF\_TESTHARNESS\_FIELD - set target for Field class tests
-\end{itemize}
-
-The targets currently supported for the ESMF\_TESTHARNESS\_ARRAY variable are:
-\begin{itemize}
-\item (currently none supported.  Array class test is hardwired for basic redist test)
-\end{itemize}
-
-The targets currently supported for the ESMF\_TESTHARNESS\_FIELD variable are:
-\begin{itemize}
-\item RUN\_ESMF\_TestHarnessField\_default - Used to verify functionality of the test harness
-\item RUN\_ESMF\_TestHarnessField\_1 - Basic test of 2D and 3D regrid
-\end{itemize}
-
-Each target selects the desired sequence of test cases for that target.
-For example, a series of test cases could be developed to run on different days providing partial
-test coverage on a particular day, but complete coverage over a week.
-In this case, each day would have a separate target and the environment variable would be set for
-that day's test case.
-
-An example of a test harness appears below.
-\begin{verbatim}
-RUN_ESMF_TestHarnessField_1:
-	\$(MAKE) TESTHARNESSCASE=field_1 NP=4 run_test_harness
-\end{verbatim}
-
-In this example, the test harness target is RUN\_ESMF\_TestHarnessField\_1.  This target will execute a
-single test harness test case. Additional lines can be added if additional steps are desired.
-The next section will describe the details of invoking a test case.
-
-\paragraph{Invoking a Single Test Harness Test Case}
-A single test harness test case can be invoked from the \texttt{<classdir>/tests}
-directory through the make command with the local parameters \texttt{TESTHARNESSCASE} and
-\texttt{NP} with the \texttt{run\_test\_harness} target.
-
-For example,
-\begin{verbatim}
-gmake TESTHARNESSCASE=field_1 NP=4 run_test_harness
-\end{verbatim}
-will run the test haress test case, \texttt{field\_1} on 4 processors.
-
-Each test case is defeined by a series of configuration files in the
-\texttt{<classdir>/tests/harness\_config} directory.  
-All of the configuration files for a particular test case will be prefixed with 
-\texttt{<casename>\_}.  The top level configuration file will have a suffix of \texttt{\_test.rc}.
-Thus, the top level configuration file for the \texttt{field\_1} test case will be
-\texttt{field\_1\_test.rc}.
-
-The next section describes the format of the top level resource file.
-
-\paragraph{Top Level Configuration File}
-The top level configuration file is called \texttt{<casename>\_test.rc} and is located 
-in the \texttt{tests/harness\_config} directory of each class; e.g. 
-\texttt{esmf/src/Infrastructure/\$CLASS/tests/test\_harness}. 
-The top level configuration file specifies the test class, the 
-format for reporting the test results, and the location and file names containing 
-the \textit{problem descriptor files}. 
-
-The \textit{problem descriptor files} are the next level of configuration files
-used by the test harness routines. They contain a collection of 
-\textit{problem descriptor strings} which describe a family of problems with the 
-same memory topology, distribution, and grid association. The problem descriptor 
-strings employ the Field Taxonomy to describe an ensemble of tests. For instance, a
-\textit{problem descriptor string} might describe the ensemble of all 
-regriddings between a pair of two-dimensional blocks memory, each with a  specific
-type of distribution and grid association. One such configuration could look like
-
-\begin{center}
-\begin{verbatim}
-[ B1 G1; B2 G2 ] --> [ B1 G1; B2 G2 ] 
-[ B1 G1; B2 G2 ] =B=> [ B1 G1; B2 G2 ]
-\end{verbatim}
-\end{center}
-
-This pair of problem descriptor strings defines two types of regridding tests.
-The first describes an ensemble of redistributions between two block
-distributed grids. The second string describes
-an ensemble of first order bilinear remapping tests between the same two 
-distributed grids. See section~\ref{sec:harness} for a complete discussion of the 
-syntax and use of problem descriptor strings.
-
-The \textit{problem descriptor strings} are augmented by a collection of 
-\textit{specifier files} which complete the  description by defining specific 
-aspects of the configuration space such as the grid size, rank, and type, as well
-the nature of the distribution, its connectivity, etc. Both the problem descriptor
-files and the specifier files are located in the subdirectory 
-\texttt{tests/test\_config/} within the class directory.
-
-A complete description of the grid specifier files and their syntax is available
-in section~\ref{sec:harness_gridspecifier} of the developers guide. An equivalent 
-discussion of the distribution configuration files is available in 
-section~\ref{sec:harness_distributionsspecifier} of the developers guide.
-
-The motivation for employing such a hierarchy configuration files is to allow a 
-high degree of customization of the problem configuration by combining individual 
-specification files. In addition it was desired to make the specification files 
-as simple to read as is possible so that user is not forced to engage in complicated 
-encoding to specify a problem. The end result is that each class will have its own 
-collection of specification files tailored to the needs of that class.
+% the test harness documentation is found in /src/test_harness/doc
 
 \paragraph{Analyzing Test Harness results }
 When the Test Harness completes a run, the results from the ensemble of tests are
