@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.74 2010/04/21 21:10:27 garyblock Exp $ 
+# $Id: makefile,v 1.75 2010/04/21 23:09:41 theurich Exp $ 
 #
 
 ALL:      build_unit_tests
@@ -25,7 +25,8 @@ TESTS_RUN     = RUN_ESMF_FieldUTest \
 		RUN_ESMC_FieldUTest
 
 #
-# if ESMF_TESTHARNESS_FIELD not null, append test harness suite target, otherwise use default target
+# if ESMF_TESTHARNESS_FIELD not null, append test harness suite target,
+# otherwise use default target
 #
 ifneq ($(ESMF_TESTHARNESS_FIELD), )
         TESTS_RUN := $(TESTS_RUN) $(ESMF_TESTHARNESS_FIELD)
@@ -104,7 +105,3 @@ RUN_ESMF_TestHarnessField_default:
 #
 RUN_ESMF_TestHarnessField_1:
 	$(MAKE) TESTHARNESSCASE=field_1 NP=4 run_test_harness
-
-######
-
-
