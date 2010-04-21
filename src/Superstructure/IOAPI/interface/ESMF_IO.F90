@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.5 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_IO.F90,v 1.6 2010/04/21 06:04:09 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -138,7 +138,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_IO.F90,v 1.5 2010/03/04 18:57:45 svasquez Exp $'
+      '$Id: ESMF_IO.F90,v 1.6 2010/04/21 06:04:09 eschwab Exp $'
 
 !==============================================================================
 !
@@ -534,7 +534,8 @@
 !
 ! !INTERFACE:
 !     subroutine ESMF_IORead(io, <object>, fileFormat, fileName, &
-!                            readWriteType, convention, purpose, rc)
+!                            schemaFileName, readWriteType, &
+!                            convention, purpose, rc)
 !
 ! TODO derived types, other than <object>, need to be inout?
 ! !ARGUMENTS:
@@ -542,6 +543,7 @@
 !     <object>, see below for supported values
 !     type(ESMF_IOFileFormat), intent(in)            :: fileFormat
 !     character (len=*),       intent(in),  optional :: fileName
+!     character (len=*),       intent(in),  optional :: schemaFileName
 !     type (ESMF_IORWType),    intent(in),  optional :: readWriteType
 !     character (len=*),       intent(in),  optional :: convention
 !     character (len=*),       intent(in),  optional :: purpose
@@ -573,6 +575,8 @@
 !          The file format to be used during the read.
 !     \item[{[fileName]}]
 !          The file name to be read from.
+!     \item[{[schemaFileName]}]
+!          The file name of the schema used to validate fileName.
 !     \item[{[readWriteType]}]
 !          The read type to be used during the read.  Write types, other than
 !          {\tt ESMF\_IO\_RWTYPE\_READWRITE}, are invalid.           
@@ -599,7 +603,7 @@
 !     ESMF_INIT_CHECK_DEEP(ESMF_IOGetInit,io,rc)
 !
 !     invoke C to C++ entry point  TODO
-!     call c_ESMC_IORead(io, <object>, fileFormat, fileName, &
+!     call c_ESMC_IORead(io, <object>, fileFormat, fileName, schemaFileName, &
 !                       readWriteType, convention, purpose, localrc)
 !     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -615,12 +619,13 @@
 ! !IROUTINE: ESMF_IORead - Perform a read on an ESMF IO object
 !
 ! !INTERFACE:
-      subroutine ESMF_IORead(io, fileName, rc)
+      subroutine ESMF_IORead(io, fileName, schemaFileName, rc)
 !
 ! TODO derived types, other than <object>, need to be inout?
 ! !ARGUMENTS:
       type(ESMF_IO),           intent(in)            :: io
       character (len=*),       intent(in),  optional :: fileName
+      character (len=*),       intent(in),  optional :: schemaFileName
       integer,                 intent(out), optional :: rc
 !   
 ! !DESCRIPTION:
@@ -633,6 +638,8 @@
 !          The object instance to read.
 !     \item[{[fileName]}]
 !          The file name to be read from.
+!     \item[{[schemaFileName]}]
+!          The file name of the schema used to validate fileName.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -641,7 +648,7 @@
 !     IOx.y, IOx.y.z  TODO
 !
 !     ! initialize fileName length to zero for non-existent name
-      integer :: fileNameLen, localrc
+      integer :: fileNameLen, schemaFileNameLen, localrc
 !
 !     ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -651,14 +658,19 @@
 !     ESMF_INIT_CHECK_DEEP(ESMF_IOGetInit,io,rc)
 
       fileNameLen = 0
+      schemaFileNameLen = 0
 !
 !     ! get length of given fileName for C++ validation
       if (present(fileName)) then
         fileNameLen = len_trim(fileName)
       end if
+      if (present(schemaFileName)) then
+        schemaFileNameLen = len_trim(schemaFileName)
+      end if
 
 !     invoke C to C++ entry point  TODO
-      call c_ESMC_IO_XMLRead(io, fileNameLen, fileName, localrc)
+      call c_ESMC_IO_XMLRead(io, fileNameLen, fileName, &
+                             schemaFileNameLen, schemaFileName, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 !
