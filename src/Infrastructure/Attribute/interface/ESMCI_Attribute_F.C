@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.28 2010/03/04 18:57:42 svasquez Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.29 2010/04/21 05:56:55 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.28 2010/03/04 18:57:42 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.29 2010/04/21 05:56:55 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1879,6 +1879,8 @@ extern "C" {
       void FTN(c_esmc_attributeread)(ESMC_Base **base,
                                      int *fileNameLen,
                                      const char *fileName,
+                                     int *schemaFileNameLen,
+                                     const char *schemaFileName,
                                      int *status,
                                      ESMCI_FortranStrLenArg fileName_l) {
 #undef  ESMC_METHOD
@@ -1891,8 +1893,10 @@ extern "C" {
 
          // Read the attributes into the object.
          int rc = (*base)->root.AttributeRead(
-                          *fileNameLen, // always present internal argument.
-                          ESMC_NOT_PRESENT_FILTER(fileName));
+                          *fileNameLen, // always present internal arg.
+                          ESMC_NOT_PRESENT_FILTER(fileName),
+                          *schemaFileNameLen, // always present internal arg.
+                          ESMC_NOT_PRESENT_FILTER(schemaFileName));
                           
          if (ESMC_PRESENT(status)) *status = rc;
       }

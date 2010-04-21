@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.29 2010/03/04 18:57:42 svasquez Exp $
+// $Id: ESMCI_Attribute.h,v 1.30 2010/04/21 05:56:55 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -221,7 +221,8 @@ class Attribute
     int AttributeUpdateReset();
 
     // attribute read methods
-    int AttributeRead(int fileNameLen, const char* fileName);
+    int AttributeRead(int fileNameLen, const char* fileName,
+                      int schemaFileNameLen, const char* schemaFileName);
 
     // attribute write methods
     int AttributeWriteTab(const string &convention, const string &purpose, 
