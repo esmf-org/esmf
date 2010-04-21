@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.57 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.58 2010/04/21 06:03:08 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.57 2010/03/04 18:57:45 svasquez Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.58 2010/04/21 06:03:08 eschwab Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -1366,24 +1366,31 @@ contains
 ! !IROUTINE: ESMF_AttributeRead  - Read Attributes from an XML file
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeRead(<object>, fileName, convention, purpose, rc)
+!     subroutine ESMF_AttributeRead(<object>, fileName, schemaFileName, &
+!                                   convention, purpose, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len=*),   intent(in), optional :: fileName
+!     character (len=*),   intent(in), optional :: schemaFileName
 !     character (len = *), intent(in), optional :: convention
 !     character (len = *), intent(in), optional :: purpose
 !     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Read Attributes for <object>.  If present, the convention and purpose
+!     Read Attributes for <object> from fileName, whose format is XML. 
+!     schemaFileName format is XSD.  If present, the schemaFileName is used to
+!     validate the contents of fileName.  schemaFileName must be specified for
+!     a fileName containing custom, user-defined Attributes.  schemaFileName
+!     need not be specified for convention and purposes specifying a standard,
+!     ESMF-supplied Attribute package.  If present, the convention and purpose
 !     specify an Attribute package which is used to filter the reading to just
-!     those attributes belonging to the Attribute package.  The file format
-!     is XML.  See Section~\ref{desc:AttPacks} for a description of Attribute
-!     packages and their conventions, purposes, and object types.
+!     those attributes belonging to the Attribute package. 
+!     See Section~\ref{desc:AttPacks} for a description of Attribute packages
+!     and their conventions, purposes, and object types.
 !
-!     Requires the third party Xerces C++ XML Parser library to be installed.
-!     For more details, see the "ESMF Users Guide",
+!     Requires the third party Xerces C++ XML Parser library to be installed,
+!     v3.1.0 or better.  For more details, see the "ESMF Users Guide",
 !     "Building and Installing the ESMF, Third Party Libraries, Xerces" and
 !     the website "http://xerces.apache.org/xerces-c".
 !
@@ -1403,8 +1410,10 @@ contains
 !     \begin{description}
 !     \item [<object>]
 !           The {\tt ESMF} object onto which the read Attributes will be placed
-!     \item[{[fileName]}]
+!     \item [{[fileName]}]
 !           The name of the XML file to read
+!     \item [{[schemaFileName]}]
+!           The name of the XSD file to validate the contents of fileName
 !     \item [{[convention]}]
 !           The convention of the Attribute package to read
 !     \item [{[purpose]}]
@@ -3148,11 +3157,13 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeRead() @\
-      subroutine mclass##AttRead(mthis, fileName, convention, purpose, rc) @\
+      subroutine mclass##AttRead(mthis, fileName, schemaFileName, & @\
+                                 convention, purpose, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
       character (len=*),   intent(in), optional :: fileName @\
+      character (len=*),   intent(in), optional :: schemaFileName @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
       integer, intent(out), optional :: rc    @\
@@ -3167,8 +3178,10 @@ contains
 !     \begin{description} @\
 !     \item [mthis] @\
 !      An {\tt mclass} object. @\
-!     \item[{[fileName]}] @\
-!      The file name to be read from. @\
+!     \item [{[fileName]}] @\
+!      The file name to read from. @\
+!     \item [{[schemaFileName]}] @\
+!      The name of the XSD file to validate fileName. @\
 !     \item [convention] @\
 !      The convention of the Attribute package. @\
 !     \item [purpose] @\
@@ -3181,9 +3194,10 @@ contains
 !EOPI @\
  @\
       ! initialize fileName length to zero for non-existent name @\
-      integer :: fileNameLen, localrc @\
+      integer :: fileNameLen, schemaFileNameLen, localrc @\
  @\
       fileNameLen = 0 @\
+      schemaFileNameLen = 0 @\
  @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
@@ -3196,14 +3210,19 @@ contains
       !TODO: Remove the following dummy test when dummy argument actually used @\
       if (convention == convention .and. purpose==purpose) continue @\
  @\
-      ! get length of given fileName for C++ validation @\
+      ! get length of given fileNames for C++ validation @\
       if (present(fileName)) then @\
         fileNameLen = len_trim(fileName) @\
       end if @\
  @\
+      if (present(schemaFileName)) then @\
+        schemaFileNameLen = len_trim(schemaFileName) @\
+      end if @\
+ @\
       ! invoke C to C++ entry point @\
       ! TODO: convention, purpose @\
-      call c_ESMC_AttributeRead(mthisfield, fileNameLen, fileName, localrc) @\
+      call c_ESMC_AttributeRead(mthisfield, fileNameLen, fileName, & @\
+                                schemaFileNameLen, schemaFileName, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
