@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.h,v 1.5 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMCI_IO_XML.h,v 1.6 2010/04/21 05:58:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -53,6 +53,7 @@ namespace ESMCI{
   private:   // corresponds to F90 module 'type ESMF_IO_XML' members
     Attribute *attr;    // root node of associated object's attributes
     char       fileName[ESMF_MAXSTR];
+    char       schemaFileName[ESMF_MAXSTR];
 #ifdef ESMF_XERCES
     SAX2WriteHandler* writeHandler;
     // SAX2ReadHandler* readHandler;  // TODO:  multiple reads per
@@ -65,7 +66,8 @@ namespace ESMCI{
     // accessor methods
 
     // Read/Write (via SAX2 API)
-    int read(int fileNameLen, const char* fileName);
+    int read(int fileNameLen, const char* fileName,
+             int schemaFileNameLen, const char* schemaFileName);
 
     // maps to SAX2 startElement() 
     int writeStartElement(const string& name,

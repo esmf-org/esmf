@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.C,v 1.9 2010/04/13 06:00:49 eschwab Exp $
+// $Id: ESMCI_IO_XML.C,v 1.10 2010/04/21 05:58:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.9 2010/04/13 06:00:49 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.10 2010/04/21 05:58:38 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 
@@ -225,7 +225,9 @@ namespace ESMCI{
 //
 // !ARGUMENTS:
       int                fileNameLen,         // in
-      const char        *fileName) {          // in
+      const char        *fileName,            // in
+      int                schemaFileNameLen,   // in
+      const char        *schemaFileName) {    // in
 
 // !DESCRIPTION:
 //      Reads an {\tt ESMC\_IO\_XML} object from file
@@ -266,6 +268,27 @@ namespace ESMCI{
       // TODO use existing IO_XML fileName member
     }
 
+    // check if we need to use a user-supplied XSD file
+    if (schemaFileName != ESMC_NULL_POINTER) {
+      // TODO: only use local of schemaFileName this one time;
+      //   don't change set IO_XML member schemaFileName
+      if (schemaFileNameLen < ESMF_MAXSTR) {
+        strncpy(this->schemaFileName, schemaFileName, schemaFileNameLen);
+        this->schemaFileName[schemaFileNameLen] = '\0';  // null terminate
+      } else {
+        // truncate
+        strncpy(this->schemaFileName, schemaFileName, ESMF_MAXSTR-1);
+        this->schemaFileName[ESMF_MAXSTR-1] = '\0';  // null terminate
+
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "io_xml schemaFileName %s, length >= ESMF_MAXSTR; truncated.",
+                schemaFileName);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
+        // TODO: return ESMF_WARNING when defined
+        // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
+      }
+    }
+
 #ifdef ESMF_XERCES
     // TODO:  move parser & readHandler instantiation to Create()/construct(),
     //        if we need to do multiple reads per IO_XML object lifetime. ?
@@ -290,16 +313,19 @@ namespace ESMCI{
     // Use the loaded grammar during parsing.
     parser->setFeature (XMLUni::fgXercesUseCachedGrammarInParse, true);
 
-    // Don't load schemas from XML document's xsi:schemaLocation attributes
+    // Don't load schemas from XML document's xsi:schemaLocation attributes,
+    // which are only hints for the parser.  Prevents possible corruption of
+    // standard AttPack XSD's by users.
     parser->setFeature(XMLUni::fgXercesLoadSchema, false);
 
 #if _XERCES_VERSION >= 30100
-    // Allows all xsd's loaded into grammar pool to be searched automatically,
-    // for matching root element, when parsing an xml file. New in Xerces 3.1.0
+    // Among other things, allows all xsd's loaded into grammar pool to be
+    // searched automatically, for matching root element, when parsing an
+    // xml file. New feature in Xerces C++ v3.1.0.
     parser->setFeature (XMLUni::fgXercesHandleMultipleImports, true);
 #endif
 
-    // TODO: explore for future use
+    // TODO: explore for possible future use
     //parser->setFeature(XMLUni::fgXercesIdentityConstraintChecking, true);
     //parser->setFeature(XMLUni::fgXercesDynamic, false);
 
@@ -308,13 +334,14 @@ namespace ESMCI{
     SAX2ErrorHandler errorHandler;
     parser->setErrorHandler(&errorHandler);
 
-    // TODO: explore for future use
+    // TODO: explore for possible future use
     //DefaultHandler handler;
     //parser->setEntityResolver(&handler);
 
-    // Read-in the ESMF xsd files, into grammar pool, for xml file validation.
+    // Read-in the supplied ESMF xsd files, matching the standard
+    // ESMF-supplied AttPacks, into the grammar pool, for xml file validation.
     //   Order irrelevant with new XMLUni::fgXercesHandleMultipleImports 
-    //   feature in Xerces 3.1.0. (see above).
+    //   feature in Xerces 3.1.0 (see above)(finds match based on root element).
     if (!parser->loadGrammar ("esmf_comp.xsd",
                               Grammar::SchemaGrammarType, true))
     {
@@ -343,6 +370,20 @@ namespace ESMCI{
       return rc;
     }
 
+    // load user-supplied schema, if present 
+    // TODO:  check if already loaded
+    if (strlen(this->schemaFileName) > 0) {
+      if (!parser->loadGrammar (this->schemaFileName,
+                                Grammar::SchemaGrammarType, true))
+      {
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "Unable to load file %s\n", this->schemaFileName);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMF_ERR_PASSTHRU,&rc);
+        return rc;
+      }
+    }
+
     // Lock the grammar pool. This is necessary if we plan to use the
     // same grammar pool in multiple threads (this way we can reuse the
     // same grammar in multiple parsers). Locking the pool disallows any
@@ -350,6 +391,8 @@ namespace ESMCI{
     // to cache additional schemas.
     gpool->lockPool();
 
+    // TODO: check if we have a fileName to read (if optional, should have been
+    //       previously specified)
     try {
         // Xerces C++ SAX2 API reads the XML file, producing callbacks to
         //   SAX2ReadHandler::startElement(),

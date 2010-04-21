@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML_F.C,v 1.4 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMCI_IO_XML_F.C,v 1.5 2010/04/21 05:58:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -67,13 +67,18 @@ extern "C" {
        void FTN(c_esmc_io_xmlread)(IO_XML **ptr,
                                   int *fileNameLen,
                                   const char *fileName,
+                                  int *schemaFileNameLen,
+                                  const char *schemaFileName,
                                   int *status,
                                   ESMCI_FortranStrLenArg fileName_l) {
           ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->IO_XML::read(
-                                           *fileNameLen, // always present 
-                                                         // internal argument.
-                    ESMC_NOT_PRESENT_FILTER(fileName) );
+                                        *fileNameLen,      // always present 
+                                                           // internal argument.
+                 ESMC_NOT_PRESENT_FILTER(fileName),   
+                                        *schemaFileNameLen, // always present 
+                                                           // internal argument.
+                    ESMC_NOT_PRESENT_FILTER(schemaFileName) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
