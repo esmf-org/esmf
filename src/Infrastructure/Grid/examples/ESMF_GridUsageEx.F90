@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.68 2010/04/13 06:03:20 eschwab Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.69 2010/04/21 06:07:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -2737,8 +2737,14 @@ endif
 ! \label{example:GridCrFromFile}
 !
 ! This example shows how to read an ESMF GridSpec Attribute Package from an
-! XML file and use it to create a grid; see
-! ESMF\_DIR/src/Infrastructure/Grid/etc/esmf\_grid\_shape\_tile.xml.
+! XML file and use it to create a grid.  The XML file contains Attribute values
+! filled-in by the user.  The standard GridSpec Attribute Package is supplied
+! with ESMF and is defined in an XSD file, which is used to validate the
+! XML file. See
+! \begin{description}
+! \item ESMF\_DIR/src/Infrastructure/Grid/etc/esmf\_grid\_shape\_tile.xml (Attribute Package values) and
+! \item ESMF\_DIR/src/Infrastructure/Grid/etc/esmf\_grid.xsd (Attribute Package definition).
+! \end{description}
 !
 ! The following XML attributes, from the file mentioned above, specifies a
 ! two dimensional, 10x20 single-tile rectilinear grid that is regularly
@@ -2767,6 +2773,10 @@ endif
 !EOE
 
 !BOC
+   ! Read an XML file containing user-filled-in values for a GridSpec Attribute
+   ! package and use it to create a grid.  The file is validated against an
+   ! internal, ESMF-supplied XSD file defining the standard GridSpec Attribute
+   ! package (see file pathnames above).
    grid2D=ESMF_GridCreate("esmf_grid_shape_tile.xml", rc=rc)
 !EOC
    if (rc == ESMF_RC_LIB_NOT_PRESENT) goto 10  ! exit if Xerces not present
