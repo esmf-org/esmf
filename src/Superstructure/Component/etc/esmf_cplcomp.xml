@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<model_component>
+<component>
   <attribute_package convention="ESG" purpose="General">
     <Name>ESMF Example Coupler</Name>
     <FullName>Earth System Modeling Framework Example Coupler</FullName>
@@ -14,4 +14,4 @@
     <Comment>ESMF CplComp Attribute IO Test</Comment>
     <References>http://www.earthsystemmodeling.org</References>
   </attribute_package>
-</model_component>
+</component>

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<model_component>
+<component>
   <attribute_package convention="ESG" purpose="General">
     <Name>GEOS</Name>
     <FullName>Goddard Earth Observing System Model</FullName>
@@ -14,4 +14,4 @@
     <Comment>ESMF GridComp Attribute IO Test</Comment>
     <References>http://gmao.gsfc.nasa.gov/systems/geos5</References>
   </attribute_package>
-</model_component>
+</component>
