@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 
-  <xsd:element name="model_component">
+  <xsd:element name="component">
     <xsd:complexType>
       <xsd:sequence>
 
