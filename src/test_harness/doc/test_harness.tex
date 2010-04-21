@@ -21,7 +21,7 @@ high degree of customization of the test configurations by combining individual
 specification files. Complex combinations of test cases are easily specified in high level terms.
 Each class will have its own collection of specification files tailored to the needs of that class.
 
-\subsection{Specifying Test Harness tests}
+\subsection{Specifying Test Harness Tests}
 The test harness code consists of a single executable that uses a customizable configuration
 files which are located within the \texttt{<classdir>/tests/harness\_config} directory of each 
 supported class; currently only ESMF\_ARRAY and ESMF\_FIELD.
@@ -80,12 +80,12 @@ For example,
 \begin{verbatim}
 gmake TESTHARNESSCASE=field_1 NP=4 run_test_harness
 \end{verbatim}
-will run the test haress test case, \texttt{field\_1} on 4 processors.
+will run the test harness test case, \texttt{field\_1} on \texttt{4} processors.
 
 Each test case is defeined by a series of configuration files in the
 \texttt{<classdir>/tests/harness\_config} directory.  
 All of the configuration files for a particular test case will be prefixed with 
-\texttt{<casename>\_} where <classname> is a unique name for teh test. 
+\texttt{<casename>\_} where <classname> is a unique name for the test. 
 The top level configuration file will have a suffix of \texttt{\_test.rc}.
 Thus, the top level configuration file for the \texttt{field\_1} test case will be
 \texttt{field\_1\_test.rc}.
@@ -94,9 +94,9 @@ The next section describes the format of the top level resource file.
 
 \subsection{Top Level Configuration File}
 \label{sec:harness_toplevelfile}
-As mentioned above, the top level configuration file will be located 
-\texttt{<classdir>/tests/harness\_config} directory in the named \texttt{\_test.rc}.
-e.g. \texttt{esmf/src/Infrastructure/Field/tests/test\_harness/field_1_test.rc}.
+As mentioned above, the top level configuration file will be located in the 
+\texttt{<classdir>/tests/harness\_config} directory and named \texttt{<casename>\_test.rc}.
+e.g. \texttt{esmf/src/Infrastructure/Field/tests/harness\_config/field_1_test.rc}.
  
 The top level configuration file specifies the test class, the 
 format for reporting the test results, and the location and file names containing 
@@ -150,7 +150,7 @@ Here it is Field.The tag  \texttt{setup\_report:} specifies if a setup report is
 The tag  \texttt{test\_report:} specifies the style of report to be constructed. 
 This report is appended to the standard-out file which is located with the Unit test results. 
 The tag \texttt{nonexhaustive::} delimits a table which contains the file names of 
-problem descriptor files pertaining to a nonexhaustive test configuration. 
+problem descriptor files pertaining to the current test configuration. 
 
 The tag exhaustive is obsolete and will be removed when time permits.  It has been replaced with the Test Harness
 environment variables which can select the desired test case from the available portfolio.
@@ -158,8 +158,6 @@ environment variables which can select the desired test case from the available 
 %%%%%%%%%%%%%%%%%%
 \subsubsection{Problem descriptor file}
 \label{sec:harness_problemdescriptorfile}
-All of the problem descriptor files pertaining to a particular class live in the 
-local directory \texttt{tests/test\_config}.
 
 The problem descriptor files contain \textit{descriptor strings} that describe the family 
 of problems with the same memory topology, distribution, and grid association. 
