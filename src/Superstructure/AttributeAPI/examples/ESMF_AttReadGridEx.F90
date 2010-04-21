@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridEx.F90,v 1.7 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_AttReadGridEx.F90,v 1.8 2010/04/21 06:01:52 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -19,8 +19,14 @@ program ESMF_AttReadGridEx
 !BOE
 ! \subsubsection{Example: Reading an XML file-based GridSpec Attribute Package for a Grid}
 ! This example shows how to read a GridSpec Attribute Package from an
-! XML file; see
-! ESMF\_DIR/src/Infrastructure/Grid/etc/esmf\_grid.xml.
+! XML file.  The XML file contains Attribute values filled-in by the user.
+! The standard GridSpec Attribute Package is supplied with ESMF and is defined
+! in an XSD file, which is used to validate the XML file.  See
+! \begin{description}
+! \item ESMF\_DIR/src/Infrastructure/Grid/etc/esmf\_grid.xml (Attribute Package values) and
+! \item ESMF\_DIR/src/Infrastructure/Grid/etc/esmf\_grid.xsd (Attribute Package definition)
+! \end{description}
+
 !EOE
 
 #include "ESMF.h"
@@ -71,7 +77,10 @@ program ESMF_AttReadGridEx
       if (rc.ne.ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOC
-      ! Read an XML file to populate the GridSpec Attribute package of a Grid
+      ! Read an XML file to populate the GridSpec Attribute package of a Grid.
+      ! The file is validated against an internal, ESMF-supplied XSD file
+      ! defining the standard GridSpec Attribute package (see file pathnames
+      ! above).
       call ESMF_AttributeRead(grid=grid, fileName="esmf_grid.xml", rc=rc)
 !EOC
       if (rc==ESMF_RC_LIB_NOT_PRESENT) then

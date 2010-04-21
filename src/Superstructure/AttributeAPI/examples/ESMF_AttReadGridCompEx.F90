@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridCompEx.F90,v 1.7 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_AttReadGridCompEx.F90,v 1.8 2010/04/21 06:01:52 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -19,8 +19,14 @@ program ESMF_AttReadGridCompEx
 !BOE
 ! \subsubsection{Example: Reading an XML file-based ESG Attribute Package for a Gridded Component}
 ! This example shows how to read an ESG Attribute Package for a Gridded
-! Component from an XML file; see
-! ESMF\_DIR/src/Superstructure/Component/etc/esmf\_gridcomp.xml.
+! Component from an XML file.  The XML file contains Attribute values filled-in
+! by the user.  The standard ESG Component Attribute Package is supplied with
+! ESMF and is defined in an XSD file, which is used to validate the XML file.
+! See
+! \begin{description}
+! \item ESMF\_DIR/src/Superstructure/Component/etc/esmf\_gridcomp.xml (Attribute Package values) and
+! \item ESMF\_DIR/src/Superstructure/Component/etc/esmf\_comp.xsd (Attribute Package definition).
+! \end{description}
 !EOE
 
 #include "ESMF.h"
@@ -90,7 +96,10 @@ program ESMF_AttReadGridCompEx
       if (rc.ne.ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOC
-      ! Read an XML file to populate the ESG Attribute package of a GridComp
+      ! Read an XML file to populate the ESG Attribute package of a GridComp.
+      ! The file is validated against an internal, ESMF-supplied XSD file
+      ! defining the standard ESG Component Attribute package (see file
+      ! pathnames above).
       call ESMF_AttributeRead(comp=gridcomp, fileName="esmf_gridcomp.xml", rc=rc)
 !EOC
       if (rc==ESMF_RC_LIB_NOT_PRESENT) then
