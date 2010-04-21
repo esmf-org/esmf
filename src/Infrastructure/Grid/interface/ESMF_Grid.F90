@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.147 2010/04/13 06:03:20 eschwab Exp $'
+      '$Id: ESMF_Grid.F90,v 1.148 2010/04/21 06:08:25 eschwab Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2876,7 +2876,8 @@ end subroutine ESMF_GridConvertIndex
     ! TODO: use convention, purpose
     ! use C call rather than F90, to circumvent mutually dependency
     ! between Grid and Attribute
-    call c_ESMC_AttributeRead(grid, fileNameLen, fileName, localrc)
+    ! Do not pass a schema file; forces use of ESMF standard GridSpec schema
+    call c_ESMC_AttributeRead(grid, fileNameLen, fileName, 0, "", localrc)
 
     if (localrc==ESMF_RC_LIB_NOT_PRESENT) xercesPresent = .false.
     if (localrc .ne. ESMF_SUCCESS .and. xercesPresent) localrc = ESMF_FAILURE
