@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.20 2010/03/04 18:57:42 svasquez Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.21 2010/04/21 06:09:05 eschwab Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -70,6 +70,7 @@
 \input{AttReadGridCompEx_fapi}
 \input{AttReadFieldEx_fapi}
 \input{AttReadGridEx_fapi}
+\input{AttReadCustCplCompEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Attribute/doc/Attribute_usage} 
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributeEx_fapi}
@@ -79,6 +80,7 @@
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttReadGridCompEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttReadFieldEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttReadGridEx_fapi}
+\input{../Superstructure/AttributeAPI/doc/ESMF_AttReadCustCplCompEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
