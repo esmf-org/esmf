@@ -1,5 +1,6 @@
 #!/bin/sh
-# Copies all *.xsd files into target dir specified by $1 (e.g. $ESMF_TESTDIR)
+# Copies all ESMF-supplied AttPack *.xsd files into target dir specified by $1
+#   (e.g. $ESMF_TESTDIR)
 cp -f $ESMF_DIR/src/Superstructure/Component/etc/esmf_comp.xsd $1
 cp -f $ESMF_DIR/src/Infrastructure/Field/etc/esmf_field.xsd $1
 cp -f $ESMF_DIR/src/Infrastructure/Grid/etc/esmf_grid.xsd $1
