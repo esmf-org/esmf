@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.39 2010/03/11 20:04:56 theurich Exp $
+# $Id: build_rules.mk,v 1.40 2010/04/22 22:48:12 w6ws Exp $
 #
 # Linux.nag.default
 #
@@ -100,6 +100,14 @@ ESMF_F90COMPILEOPTS += -kind=byte
 # Set f95 to be more premissive and issue warning before error
 #
 ESMF_F90COMPILEOPTS += -dusty
+
+############################################################
+# Conditionally add pthread compiler and linker flags
+#
+ifeq ($(ESMF_PTHREADS),ON)
+ESMF_F90COMPILEOPTS += -thread_safe
+ESMF_F90LINKOPTS    += -thread_safe
+endif
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
