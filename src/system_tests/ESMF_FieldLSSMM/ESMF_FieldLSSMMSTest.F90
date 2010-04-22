@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldLSSMMSTest.F90,v 1.5 2009/10/19 17:37:03 svasquez Exp $
+! $Id: ESMF_FieldLSSMMSTest.F90,v 1.6 2010/04/22 15:48:29 rokuingh Exp $
 !
 ! System test code FieldLSSMM
 !  Description on Sourceforge under System Test #79497
@@ -60,6 +60,9 @@
     ! individual test failure message, and final status msg
     character(ESMF_MAXSTR) :: failMsg, finalMsg
 
+    ! set rc = ESMF_SUCCESS
+    rc = ESMF_SUCCESS
+        
         
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

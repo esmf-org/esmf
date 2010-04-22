@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMeshSTest.F90,v 1.1 2009/10/26 17:25:58 oehmke Exp $
+! $Id: ESMF_FieldRegridMeshSTest.F90,v 1.2 2010/04/22 15:48:29 rokuingh Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -59,6 +59,9 @@
     ! individual test failure message, and final status msg
     character(ESMF_MAXSTR) :: failMsg, finalMsg
 
+    ! set rc = ESMF_SUCCESS
+    rc = ESMF_SUCCESS
+        
         
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
