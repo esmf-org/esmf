@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubeSphereRegridEx.F90,v 1.2 2010/04/22 19:25:55 peggyli Exp $
+! $Id: ESMF_CubeSphereRegridEx.F90,v 1.3 2010/04/22 23:34:57 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -84,7 +84,7 @@ program ESMF_CubeSphereRegridEx
       real(ESMF_KIND_R8), pointer :: fptr(:), fptr1(:,:), fptr2(:,:)
       real(ESMF_KIND_R8), pointer :: array3(:,:)
       real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:)
-      real(ESMF_KIND_R8) :: val
+      real(ESMF_KIND_R8) :: val, error
       type(ESMF_Grid) :: dstgrid1
       type(ESMF_DistGrid):: nodeDG, elemDG
       type(ESMF_Array) :: darray, marray
@@ -100,7 +100,6 @@ program ESMF_CubeSphereRegridEx
       character(len=40) :: regrid_type, revflag
       integer :: numarg
       logical :: convert3D
-      integer*4 :: iargc
 
       !------------------------------------------------------------------------
       ! Initialize ESMF
@@ -121,7 +120,7 @@ program ESMF_CubeSphereRegridEx
       !------------------------------------------------------------------------
       ! Usage:  ESMF_CubeSphereRegrid input_grid output_grid weight_file regrid_method
       !
-      numarg = iargc()
+      numarg = ESMF_UtilGetArgC()
       if (numarg < 4) then
 	if (PetNo == 0) then
           print *, 'ERROR: insufficient arguments'
@@ -136,12 +135,12 @@ program ESMF_CubeSphereRegridEx
 	endif
         call ESMF_Finalize(terminationflag=ESMF_ABORT)
       endif
-      call getarg(1,srcfile)
-      call getarg(2,dstfile)
-      call getarg(3,wgtfile)
+      call ESMF_UtilGetArg(1,srcfile)
+      call ESMF_UtilGetArg(2,dstfile)
+      call ESMF_UtilGetArg(3,wgtfile)
       call getarg(4,regrid_type)
       if (numarg == 5) then
-	call getarg(5, revflag)
+	call ESMF_UtilGetArg(5, revflag)
         if (trim(revflag) .ne. 'rev') then
 	     print *, 'The fifth argument is not "rev".'
              call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -327,7 +326,12 @@ program ESMF_CubeSphereRegridEx
         count = 0
         do i=1,totalNodes
 	  val = COSD(VertexCoords(2,seqIndex(i)))
-          if (abs(fptr(i) - val) > 0.001) then
+	  if (val .ne. 0) then
+             error = abs((fptr(i)-val)/val)
+          else
+	     error = abs(fptr(i)-val)
+          endif
+          if (error > 0.01) then
    	     write(*,'(I2,2I6,4F9.4)') PetNo, i,seqIndex(i), VertexCoords(1,seqIndex(i)), &
 		VertexCoords(2,seqIndex(i)),fptr(i),val
 		 count = count+1
@@ -342,7 +346,12 @@ program ESMF_CubeSphereRegridEx
         do i=lbnd1(1),ubnd1(1)
           do j=lbnd1(2),ubnd1(2)
 	      val = COSD(fptr2(i,j))
-              if (abs(array3(i,j) - val) > 0.001) then
+	  if (val .ne. 0) then
+             error = abs((array3(i,j)-val)/val)
+          else
+	     error = abs(array3(i,j)-val)
+          endif
+              if (error > 0.01) then
   		 write(*,'(3I4,5F9.3)') PetNo, i,j,fptr1(i,j),fptr2(i,j),array3(i,j), val
 		 count = count+1
               endif
@@ -386,7 +395,8 @@ program ESMF_CubeSphereRegridEx
       end if
 
       ! halt the computer, display 0 on operator console lamps
-      STOP 0
+      call ESMF_Finalize()
+      STOP
 #endif
 
 ! error exit point
