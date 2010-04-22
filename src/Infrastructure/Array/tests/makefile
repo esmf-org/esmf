@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.39 2010/02/05 23:25:30 theurich Exp $ 
+# $Id: makefile,v 1.40 2010/04/22 18:50:33 garyblock Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -23,6 +23,15 @@ TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayRedistUTest \
                 RUN_ESMF_ArrayHaloUTest \
                 RUN_ESMC_ArrayUTest 
+
+#
+# if ESMF_TESTHARNESS_ARRAY not null, append test harness suite target, otherwise use default target
+#
+ifneq ($(ESMF_TESTHARNESS_ARRAY), )
+        TESTS_RUN := $(TESTS_RUN) $(ESMF_TESTHARNESS_ARRAY)
+else
+	TESTS_RUN := $(TESTS_RUN) RUN_ESMF_TestHarnessArray_default
+endif
 
 ifeq ($(ESMF_TESTHARNESS), NONEXHAUSTIVE)
   TESTS_RUN  := $(TESTS_RUN) \
@@ -95,67 +104,14 @@ RUN_ESMC_ArrayUTestUNI:
 	$(MAKE) TNAME=Array NP=1 ctest
 
 # ---
+#
+# FieldHarness
+#
+RUN_ESMF_TestHarnessArray_default:
+	$(MAKE) TESTHARNESSCASE=array_default NP=4 run_test_harness
 
-RUN_ESMF_ArrayHarness1UTest:
-	@if [ -f $(ESMF_TESTDIR)/test_harness.list ] ; then \
-	  if ! grep ArrayHarness1UTest $(ESMF_TESTDIR)/test_harness.list ; then \
-	    echo "ESMF_ArrayHarness1UTest" >> $(ESMF_TESTDIR)/test_harness.list ; \
-	  fi ; \
-	else \
-	  echo "ESMF_ArrayHarness1UTest" > $(ESMF_TESTDIR)/test_harness.list ; \
-	fi
-	cp -f test_harness.rc $(ESMF_TESTDIR)
-	cp -f harness_config/*.rc $(ESMF_TESTDIR)
-	rm -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout
-	$(MAKE) TNAME=TestHarness HNAME=ArrayHarness1 NP=1 htest
-	@if [ -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout ] ; then \
-	  cp -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout $(ESMF_TESTDIR)/ESMF_ArrayHarness1UTest.stdout ; \
-	fi
+#
+RUN_ESMF_TestHarnessArray_1:
+	$(MAKE) TESTHARNESSCASE=array_1 NP=4 run_test_harness
 
-RUN_ESMF_ArrayHarness2UTest:
-	@if [ -f $(ESMF_TESTDIR)/test_harness.list ] ; then \
-	  if ! grep ArrayHarness2UTest $(ESMF_TESTDIR)/test_harness.list ; then \
-	    echo "ESMF_ArrayHarness2UTest" >> $(ESMF_TESTDIR)/test_harness.list ; \
-	  fi ; \
-	else \
-	  echo "ESMF_ArrayHarness2UTest" > $(ESMF_TESTDIR)/test_harness.list ; \
-	fi
-	cp -f test_harness.rc $(ESMF_TESTDIR)
-	cp -f harness_config/*.rc $(ESMF_TESTDIR)
-	rm -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout
-	$(MAKE) TNAME=TestHarness HNAME=ArrayHarness2 NP=2 htest
-	@if [ -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout ] ; then \
-	  cp -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout $(ESMF_TESTDIR)/ESMF_ArrayHarness2UTest.stdout ; \
-	fi
-
-RUN_ESMF_ArrayHarness4UTest:
-	@if [ -f $(ESMF_TESTDIR)/test_harness.list ] ; then \
-	  if ! grep ArrayHarness4UTest $(ESMF_TESTDIR)/test_harness.list ; then \
-	    echo "ESMF_ArrayHarness4UTest" >> $(ESMF_TESTDIR)/test_harness.list ; \
-	  fi ; \
-	else \
-	  echo "ESMF_ArrayHarness4UTest" > $(ESMF_TESTDIR)/test_harness.list ; \
-	fi
-	cp -f test_harness.rc $(ESMF_TESTDIR)
-	cp -f harness_config/*.rc $(ESMF_TESTDIR)
-	rm -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout
-	$(MAKE) TNAME=TestHarness HNAME=ArrayHarness4 NP=4 htest
-	@if [ -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout ] ; then \
-	  cp -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout $(ESMF_TESTDIR)/ESMF_ArrayHarness4UTest.stdout ; \
-	fi
-
-RUN_ESMF_ArrayHarness8UTest:
-	@if [ -f $(ESMF_TESTDIR)/test_harness.list ] ; then \
-	  if ! grep ArrayHarness8UTest $(ESMF_TESTDIR)/test_harness.list ; then \
-	    echo "ESMF_ArrayHarness8UTest" >> $(ESMF_TESTDIR)/test_harness.list ; \
-	  fi ; \
-	else \
-	  echo "ESMF_ArrayHarness8UTest" > $(ESMF_TESTDIR)/test_harness.list ; \
-	fi
-	cp -f test_harness.rc $(ESMF_TESTDIR)
-	cp -f harness_config/*.rc $(ESMF_TESTDIR)
-	rm -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout
-	$(MAKE) TNAME=TestHarness HNAME=ArrayHarness8 NP=8 htest
-	@if [ -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout ] ; then \
-	  cp -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout $(ESMF_TESTDIR)/ESMF_ArrayHarness8UTest.stdout ; \
-	fi
+######
