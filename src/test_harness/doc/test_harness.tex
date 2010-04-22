@@ -46,7 +46,8 @@ The environment variables currently defined are:
 
 The targets currently supported for the ESMF\_TESTHARNESS\_ARRAY variable are:
 \begin{itemize}
-\item (currently none supported.  Array class test is hardwired for basic redist test)
+\item RUN\_ESMF\_TestHarnessArray\_default - Used to verify functionality of the test harness
+\item RUN\_ESMF\_TestHarnessArray\_1 - Basic test of 2D and 3D redistribution
 \end{itemize}
 
 The targets currently supported for the ESMF\_TESTHARNESS\_FIELD variable are:
@@ -96,7 +97,6 @@ The next section describes the format of the top level resource file.
 \label{sec:harness_toplevelfile}
 As mentioned above, the top level configuration file will be located in the 
 \texttt{<classdir>/tests/harness\_config} directory and named \texttt{<casename>\_test.rc}.
-e.g. \texttt{esmf/src/Infrastructure/Field/tests/harness\_config/field\_1\_test.rc}.
  
 The top level configuration file specifies the test class, the 
 format for reporting the test results, and the location and file names containing 
