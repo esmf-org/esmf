@@ -1,0 +1,14 @@
+
+##################################################
+# descriptive | source | source | operator | destination | dest | operator | end
+# string      |  tag   |  rank  |  & value |     tag     | rank | & value  | tag
+##################################################
+
+# table specifing 2D to 2D distributions
+distgrid_block_2d2d::
+
+# fixed distribution sizes
+ '(1,1)-->(1,1)'      'SRC' 2  'D1==' 1  'D2==' 1     'DST' 2  'D1==' 1    'D2==' 1  'END'
+
+::
+

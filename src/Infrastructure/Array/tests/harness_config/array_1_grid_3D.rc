@@ -1,0 +1,16 @@
+# RedistGrid3D.rc    
+#
+# This file contains the grid specifications for the Test Harness.
+# Requirements:
+# See documentation for further details of the descriptor syntax.
+#################################################################################
+
+map_type: REDISTRIBUTION
+
+# regular rectilinear Grid specification 
+map_redist::
+#rank spacing  size  range (min/max)  units
+#
+3  'UNIFORM'  160  -180   180  'DEG_E'  'GAUSSIAN'  80  -88   88   'DEG_N'  
+ &      'UNIFORM'  40  0  4000  'METERS'
+::

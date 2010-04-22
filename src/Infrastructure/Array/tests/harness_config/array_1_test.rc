@@ -1,0 +1,25 @@
+# test Harness Config file for Array
+
+# test class
+test_class: ARRAY 
+
+# report a summary of the test configurations before actually conducting tests
+setup_report: TRUE
+
+# test result report - options are:
+# test_report: FULL  - full report presenting both success and failure configs
+# test_report: FAILURE - report only failure configurations
+# test_report: SUCCESS - report only successful configurations
+# test_report: NONE - no report
+test_report: FAILURE
+
+# descriptor file for the nonexhaustive case
+nonexhaustive::
+   'array_1_descr.rc'
+::   # end of list
+
+# descriptor files for the exhaustive case
+exhaustive::
+   'exhaustive_descriptor.rc'
+:: # end of list
+

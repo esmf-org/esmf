@@ -1,0 +1,8 @@
+
+
+map_type: REDISTRIBUTION
+
+# regular rectilinear Grid specification 
+map_redist::
+2  'UNIFORM'  400  -180   180  'DEG_E'  'UNIFORM'  200 -88   88   'DEG_N'  
+::

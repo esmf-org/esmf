@@ -1,0 +1,8 @@
+# minimal redist test case for validating test harness & minimal redist functionality
+problem_descriptor_string::
+# 
+'[B1G1;B2G2] --> [B1G1;B2G2]' -d array_default_dist_2D.rc  -g array_default_grid_2D.rc        
+#
+::   # end of list
+
+
