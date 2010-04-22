@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubeSphereRegridEx.F90,v 1.1 2010/04/22 18:46:29 peggyli Exp $
+! $Id: ESMF_CubeSphereRegridEx.F90,v 1.2 2010/04/22 19:25:55 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !		cell_mask:_FillValue = -9999. ;
 !
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CubeSphereRegrid
+#define ESMF_METHOD "ESMF_CubeSphereRegrid"
 
 program ESMF_CubeSphereRegridEx
 
@@ -44,7 +44,7 @@ program ESMF_CubeSphereRegridEx
 #include <ESMF.h>
 
 ! !USES:
-      use ESMF_TestMod     ! test methods
+!      use ESMF_TestMod     ! test methods
       use ESMF_Mod
       use ESMF_LogErrMod
       use netcdf
@@ -100,12 +100,13 @@ program ESMF_CubeSphereRegridEx
       character(len=40) :: regrid_type, revflag
       integer :: numarg
       logical :: convert3D
+      integer*4 :: iargc
 
       !------------------------------------------------------------------------
       ! Initialize ESMF
       !
       call ESMF_Initialize (defaultCalendar=ESMF_CAL_GREGORIAN, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc)) goto 90
+      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) goto 90
 
       !------------------------------------------------------------------------
       ! get global vm information
@@ -161,8 +162,6 @@ program ESMF_CubeSphereRegridEx
       call CreateCSMesh(srcMesh, VertexCoords, CellConnect, CellNums, StartCell,convert3D, status)
       if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
-      deallocate (CellConnect, CellNums)
-
       ! check the MeshGet
       call ESMF_MeshGet(srcMesh, nodeDG, elemDG, totalNodes, totalCells, rc=status)
       if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
@@ -200,6 +199,9 @@ program ESMF_CubeSphereRegridEx
 
       call ESMF_FieldValidate(field1, rc=status)
       if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+      ! deallocate (VertexCoords)
+      deallocate (CellConnect)
 
       ! release data
       deallocate (NodeIds)
@@ -273,6 +275,7 @@ program ESMF_CubeSphereRegridEx
 	 call OutputWeightFile(wgtfile, indicies, weights, rc=status)
          if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
       endif
+      !!deallocate(VertexCoords)
 
       if (trim(revflag) .ne. 'rev') then
          call ESMF_FieldRegrid(field1, field3, rh1, rc=status)
@@ -348,7 +351,6 @@ program ESMF_CubeSphereRegridEx
       endif
       print*, 'PE', PetNo, ' Total bad items', count, ' out of', totalNodes
       if (count > 0) status = ESMF_FAILURE
-      deallocate(VertexCoords)
 
       ! *************************************************************
 90    continue
@@ -383,14 +385,13 @@ program ESMF_CubeSphereRegridEx
          end if
       end if
 
-      deallocate(array1, array2)
       ! halt the computer, display 0 on operator console lamps
       STOP 0
 #endif
 
 ! error exit point
 99    continue
-      print *, "FAIL: ESMF_CubeSphereRegridEx.F90"
+      print *, "FAIL: ESMF_LandersParMeshUnit.F90"
 
       call ESMF_Finalize()
       ! halt the computer, display 777 on operator console lamps
@@ -1221,7 +1222,6 @@ subroutine outputWeightFile(filename, indices, weights, SrcVertexCoords, &
 	end if
         call ESMF_VMBarrier(vm)
      end do
-     deallocate(allCounts)
 
 90  continue
 
