@@ -1,5 +1,4 @@
-# $Id: makefile,v 1.76 2010/04/23 00:44:38 theurich Exp $ 
-#
+# $Id: makefile,v 1.77 2010/04/23 01:05:24 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -24,21 +23,21 @@ TESTS_RUN     = RUN_ESMF_FieldUTest \
 		RUN_ESMF_FieldStressUTest \
 		RUN_ESMC_FieldUTest
 
-#
-# if ESMF_TESTHARNESS_FIELD not null, append test harness suite target,
-# otherwise use default target
-#
-ifneq ($(ESMF_TESTHARNESS_FIELD), )
-        TESTS_RUN := $(TESTS_RUN) $(ESMF_TESTHARNESS_FIELD)
-else
-	TESTS_RUN := $(TESTS_RUN) RUN_ESMF_TestHarnessField_default
-endif
-
 TESTS_RUN_UNI = RUN_ESMF_FieldStressUTestUNI \
-	RUN_ESMF_FieldRegridUTestUNI \
-	RUN_ESMF_FieldRegridCsrvUTestUNI \
-	RUN_ESMF_FieldArbGridUTestUNI \
-	RUN_ESMC_FieldUTestUNI
+                RUN_ESMF_FieldRegridUTestUNI \
+                RUN_ESMF_FieldRegridCsrvUTestUNI \
+                RUN_ESMF_FieldArbGridUTestUNI \
+                RUN_ESMC_FieldUTestUNI
+
+#
+# check ESMF_TESTHARNESS_FIELD for default, 
+# otherwise append test harness suite target
+#
+ifeq ($(ESMF_TESTHARNESS_FIELD), default)
+  TESTS_RUN := $(TESTS_RUN) RUN_ESMF_TestHarnessField_default
+else
+  TESTS_RUN := $(TESTS_RUN) $(ESMF_TESTHARNESS_FIELD)
+endif
 
 include ${ESMF_DIR}/makefile
 

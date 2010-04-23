@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.41 2010/04/23 00:44:17 theurich Exp $ 
+# $Id: makefile,v 1.42 2010/04/23 01:05:24 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -24,19 +24,18 @@ TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayHaloUTest \
                 RUN_ESMC_ArrayUTest 
 
-#
-# if ESMF_TESTHARNESS_ARRAY not null, append test harness suite target,
-# otherwise use default target
-#
-ifneq ($(ESMF_TESTHARNESS_ARRAY), )
-        TESTS_RUN := $(TESTS_RUN) $(ESMF_TESTHARNESS_ARRAY)
-else
-	TESTS_RUN := $(TESTS_RUN) RUN_ESMF_TestHarnessArray_default
-endif
-
 TESTS_RUN_UNI = RUN_ESMF_ArrayDataUTestUNI \
                 RUN_ESMC_ArrayUTestUNI
 
+#
+# check ESMF_TESTHARNESS_ARRAY for default, 
+# otherwise append test harness suite target
+#
+ifeq ($(ESMF_TESTHARNESS_ARRAY), default)
+  TESTS_RUN := $(TESTS_RUN) RUN_ESMF_TestHarnessArray_default
+else
+  TESTS_RUN := $(TESTS_RUN) $(ESMF_TESTHARNESS_ARRAY)
+endif
 
 include ${ESMF_DIR}/makefile
 

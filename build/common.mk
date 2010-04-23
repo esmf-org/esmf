@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.289 2010/04/14 22:38:17 garyblock Exp $
+#  $Id: common.mk,v 1.290 2010/04/23 01:05:24 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -116,6 +116,10 @@ ifeq ($(origin ESMF_MPIRUNOPTIONS), environment)
 $(error Obsolete environment variable ESMF_MPIRUNOPTIONS detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
+ifeq ($(origin ESMF_TESTHARNESS), environment)
+$(error Obsolete environment variable ESMF_TESTHARNESS detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
+endif
+
 #-------------------------------------------------------------------------------
 # Set defaults for environment variables that are not set
 #-------------------------------------------------------------------------------
@@ -204,8 +208,12 @@ ifndef ESMF_TESTFORCEOPENMP
 export ESMF_TESTFORCEOPENMP = default
 endif
 
-ifndef ESMF_TESTHARNESS
-export ESMF_TESTHARNESS = default
+ifndef ESMF_TESTHARNESS_ARRAY
+export ESMF_TESTHARNESS_ARRAY = default
+endif
+
+ifndef ESMF_TESTHARNESS_FIELD
+export ESMF_TESTHARNESS_FIELD = default
 endif
 
 ifndef ESMF_ETCDIR
@@ -370,10 +378,6 @@ endif
 
 ifneq ($(ESMF_TESTFORCEOPENMP),ON)
 export ESMF_TESTFORCEOPENMP = OFF
-endif
-
-ifeq ($(ESMF_TESTHARNESS),default)
-export ESMF_TESTHARNESS = NONEXHAUSTIVE
 endif
 
 ifeq ($(ESMF_ETCDIR),default)
