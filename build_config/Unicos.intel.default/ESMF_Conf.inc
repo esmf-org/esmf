@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.2.2.2 2010/04/05 20:27:15 theurich Exp $
+$Id: ESMF_Conf.inc,v 1.2.2.3 2010/04/23 19:02:32 theurich Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -10,6 +10,21 @@ NASA Goddard Space Flight Center.
 Licensed under the University of Illinois-NCSA License.
 #endif
 
+#if 0
+Define the proper way to flush Fortran units.  Typically this will
+be one of the following:
+
+  * Fortran-2003 FLUSH statement (preferred)
+  * Two argument FLUSH call
+  * One argument FLUSH call
+
+#endif
+
+#if (__INTEL_COMPILER >= 1000)
+#define ESMF_IOFlushMacro(unit,status) flush (unit, iostat=status)
+#else
+#define ESMF_IOFlushMacro(unit,status) call flush (unit)
+#endif
 
 #if 0
 Strict F90 compilers will not allow initializers.  Also, in the past when we 
