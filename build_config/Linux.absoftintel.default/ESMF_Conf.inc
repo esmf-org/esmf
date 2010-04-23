@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.8 2010/03/04 18:57:41 svasquez Exp $
+$Id: ESMF_Conf.inc,v 1.9 2010/04/23 13:22:53 w6ws Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@ Licensed under the University of Illinois-NCSA License.
 Define the proper way to flush Fortran units.  Typically this will
 be one of the following:
 
-  * Fortran-2003 FLUSH statement (preferred)
+  * Fortran-2003 FLUSH statement (default and preferred)
   * Two argument FLUSH call
   * One argument FLUSH call
 
