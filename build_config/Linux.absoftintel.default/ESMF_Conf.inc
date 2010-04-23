@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.9 2010/04/23 13:22:53 w6ws Exp $
+$Id: ESMF_Conf.inc,v 1.10 2010/04/23 17:37:24 w6ws Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -21,6 +21,15 @@ be one of the following:
 #endif
 
 #define ESMF_IOFlushMacro(unit,status) call flush (unit)
+
+#if 0
+Define the proper way to read the command line.  Absoft does not
+have the Fortran-2003 command line intrinsics, nor Posix calls.
+So use getarg.
+#endif
+
+#define ESMF_NEEDSGETARG
+
 
 #if 0
 Absoft up to version 9.0 does not seem to support F95 initializer feature
