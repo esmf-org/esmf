@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.40 2010/04/22 18:50:33 garyblock Exp $ 
+# $Id: makefile,v 1.41 2010/04/23 00:44:17 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -25,25 +25,13 @@ TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMC_ArrayUTest 
 
 #
-# if ESMF_TESTHARNESS_ARRAY not null, append test harness suite target, otherwise use default target
+# if ESMF_TESTHARNESS_ARRAY not null, append test harness suite target,
+# otherwise use default target
 #
 ifneq ($(ESMF_TESTHARNESS_ARRAY), )
         TESTS_RUN := $(TESTS_RUN) $(ESMF_TESTHARNESS_ARRAY)
 else
 	TESTS_RUN := $(TESTS_RUN) RUN_ESMF_TestHarnessArray_default
-endif
-
-ifeq ($(ESMF_TESTHARNESS), NONEXHAUSTIVE)
-  TESTS_RUN  := $(TESTS_RUN) \
-                RUN_ESMF_ArrayHarness2UTest
-else
-ifeq ($(ESMF_TESTHARNESS), EXHAUSTIVE)
-  TESTS_RUN  := $(TESTS_RUN) \
-                RUN_ESMF_ArrayHarness1UTest \
-                RUN_ESMF_ArrayHarness2UTest \
-                RUN_ESMF_ArrayHarness4UTest \
-                RUN_ESMF_ArrayHarness8UTest
-endif
 endif
 
 TESTS_RUN_UNI = RUN_ESMF_ArrayDataUTestUNI \
@@ -105,7 +93,7 @@ RUN_ESMC_ArrayUTestUNI:
 
 # ---
 #
-# FieldHarness
+# TestHarness tests
 #
 RUN_ESMF_TestHarnessArray_default:
 	$(MAKE) TESTHARNESSCASE=array_default NP=4 run_test_harness
@@ -113,5 +101,3 @@ RUN_ESMF_TestHarnessArray_default:
 #
 RUN_ESMF_TestHarnessArray_1:
 	$(MAKE) TESTHARNESSCASE=array_1 NP=4 run_test_harness
-
-######
