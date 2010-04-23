@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.75 2010/04/21 23:09:41 theurich Exp $ 
+# $Id: makefile,v 1.76 2010/04/23 00:44:38 theurich Exp $ 
 #
 
 ALL:      build_unit_tests
@@ -48,7 +48,6 @@ CLOBBERDIRS =
 
 DIRS        = 
 
-
 #
 # Field
 #
@@ -97,7 +96,7 @@ RUN_ESMF_FieldStressUTestUNI:
 	$(MAKE) TNAME=FieldStress NP=1 ftest
 
 #
-# FieldHarness
+# TestHarness tests
 #
 RUN_ESMF_TestHarnessField_default:
 	$(MAKE) TESTHARNESSCASE=field_default NP=4 run_test_harness
