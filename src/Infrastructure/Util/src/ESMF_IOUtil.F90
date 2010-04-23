@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUtil.F90,v 1.8 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_IOUtil.F90,v 1.9 2010/04/23 04:20:57 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -96,7 +96,7 @@ module ESMF_IOUtilMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version = &
-      '$Id: ESMF_IOUtil.F90,v 1.8 2010/03/04 18:57:45 svasquez Exp $'
+      '$Id: ESMF_IOUtil.F90,v 1.9 2010/04/23 04:20:57 w6ws Exp $'
 !------------------------------------------------------------------------------
 
   contains
@@ -127,17 +127,21 @@ module ESMF_IOUtilMod
 !       Return code; Returns either {\tt ESMF\_SUCCESS} or {\tt ESMF\_FAILURE}
 !     \end{description}
 !EOP
-    integer :: status
+    integer :: localrc
 
-!   Preset status in advance, since some library versions of FLUSH do
+#if !defined (ESMF_IOFlushMacro)
+    flush (unit, iostat=localrc)
+#else
+!   Preset localrc in advance, since some library versions of FLUSH do
 !   not support a status argument for detecting errors.
 
-    status = 0
+    localrc = 0
 
-ESMF_IOFlushMacro(unit,status)
+ESMF_IOFlushMacro(unit, localrc)
+#endif
 
     if (present(rc)) then
-      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, status == 0)
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, localrc == 0)
     end if
 
   end subroutine ESMF_IOUnitFlush
@@ -181,14 +185,14 @@ ESMF_IOFlushMacro(unit,status)
 !   the call to {\tt ESMF\_IOUnitGet()} to activate the unit.
 !EOP
 
-    integer :: i, status
+    integer :: i, localrc
     logical :: inuse
   
     if (present(rc)) rc = ESMF_FAILURE
   
     do, i=ESMF_IOUnitLower, ESMF_IOUnitUpper
-      inquire (unit=i, opened=inuse, iostat=status)
-      if (.not. inuse .and. status == 0) exit
+      inquire (unit=i, opened=inuse, iostat=localrc)
+      if (.not. inuse .and. localrc == 0) exit
     end do
   
     if (i <= ESMF_IOUnitUpper) then
