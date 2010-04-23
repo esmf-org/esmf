@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.7.2.1 2010/03/10 05:37:49 theurich Exp $
+# $Id: build_rules.mk,v 1.7.2.2 2010/04/23 05:42:40 theurich Exp $
 #
 # Unicos.pgi.default
 #
@@ -48,32 +48,37 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v -c
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v -c
 
 ############################################################
-# XT3 compute nodes do not have support for POSIX IPC (memory mapped files)
+# XT compute nodes do not have support for POSIX IPC (memory mapped files)
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 
 ############################################################
-# XT3 compute nodes do not have support for "gethostid()"
+# XT compute nodes do not have support for POSIX dynamic linking
+#
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_DLFCN
+
+############################################################
+# XT compute nodes do not have support for "gethostid()"
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_GETHOSTID
 
 ############################################################
-# XT3 compute nodes do not have support for signals
+# XT compute nodes do not have support for signals
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SIGNALS
 
 ############################################################
-# XT3 compute nodes do not have support for system call
+# XT compute nodes do not have support for system call
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SYSTEMCALL
 
 ############################################################
-# XT3 compute nodes do not have support for Pthreads
+# XT compute nodes do not have support for Pthreads
 #
 ESMF_PTHREADS := OFF
 
 ############################################################
-# XT3 compute nodes do not have support for OpenMP
+# XT compute nodes do not have support for OpenMP
 #
 ESMF_OPENMP := OFF
 
@@ -84,16 +89,20 @@ ESMF_F90COMPILEFREENOCPP = -Mfreeform
 ESMF_F90COMPILEFIXCPP    = -Mpreprocess -Mnofreeform
 
 ############################################################
+# Blank out variables to prevent rpath encoding
+#
+ESMF_F90LINKRPATHS      =
+ESMF_CXXLINKRPATHS      =
+
+############################################################
 # Determine where pgf90's libraries are located
 #
 ESMF_CXXLINKPATHS += -L$(shell $(ESMF_DIR)/scripts/libpath.pgf90 $(ESMF_F90COMPILER))
-ESMF_CXXLINKRPATHS += $(ESMF_RPATHPREFIX)$(shell $(ESMF_DIR)/scripts/libpath.pgf90 $(ESMF_F90COMPILER))
 
 ############################################################
 # Determine where pgCC's libraries are located
 #
 ESMF_F90LINKPATHS += -L$(shell $(ESMF_DIR)/scripts/libpath.pgCC $(ESMF_CXXCOMPILER))
-ESMF_F90LINKRPATHS += $(ESMF_RPATHPREFIX)$(shell $(ESMF_DIR)/scripts/libpath.pgCC $(ESMF_CXXCOMPILER))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
