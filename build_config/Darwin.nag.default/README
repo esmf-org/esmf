@@ -8,6 +8,6 @@ Requires the following environment settings:
 
 ESMF_COMPILER nag
 
-As of NAG 5.2, the compiler is invoked with the 'nagfor' command.  If you
-are using this level of the compiler, set the ESMF_F90COMPILER and
-ESMF_F90LINKER environment variables to 'nagfor'.
+Also if using a pre-5.2 compiler, you will need to enable the
+ESMF_NAG_UNIXIO_MODULE and ESMF_IOFlushMacro macros in the
+ESMF_Conf.inc file.
