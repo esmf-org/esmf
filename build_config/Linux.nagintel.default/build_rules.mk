@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.12 2010/04/22 22:48:12 w6ws Exp $
+# $Id: build_rules.mk,v 1.13 2010/04/23 01:22:20 theurich Exp $
 #
 # Linux.nagintel.default
 #
@@ -99,7 +99,7 @@ ESMF_F90COMPILEOPTS += -dusty
 ifeq ($(ESMF_PTHREADS),ON)
 ESMF_F90COMPILEOPTS += -thread_safe
 ESMF_F90LINKOPTS    += -thread_safe
-ESMF_CXXCOMPILEOPTS +=  -pthread
+ESMF_CXXCOMPILEOPTS += -pthread
 ESMF_CXXLINKOPTS    += -pthread
 endif
 
