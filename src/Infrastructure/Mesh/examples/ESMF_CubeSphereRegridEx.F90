@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubeSphereRegridEx.F90,v 1.3 2010/04/22 23:34:57 peggyli Exp $
+! $Id: ESMF_CubeSphereRegridEx.F90,v 1.4 2010/04/23 20:50:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 program ESMF_CubeSphereRegridEx
 
 !==============================================================================
-!ESMF_MULTI_PROC_EXAMPLE        String used by test script to count examples.
+!ESMF_disable_MULTI_PROC_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
 #include <ESMF.h>
@@ -47,7 +47,9 @@ program ESMF_CubeSphereRegridEx
 !      use ESMF_TestMod     ! test methods
       use ESMF_Mod
       use ESMF_LogErrMod
+#ifdef ESMF_NETCDF
       use netcdf
+#endif
 
 
       implicit none
@@ -138,7 +140,7 @@ program ESMF_CubeSphereRegridEx
       call ESMF_UtilGetArg(1,srcfile)
       call ESMF_UtilGetArg(2,dstfile)
       call ESMF_UtilGetArg(3,wgtfile)
-      call getarg(4,regrid_type)
+      call ESMF_UtilGetArg(4,regrid_type)
       if (numarg == 5) then
 	call ESMF_UtilGetArg(5, revflag)
         if (trim(revflag) .ne. 'rev') then
@@ -671,6 +673,7 @@ subroutine ReadCSMesh (filename, VertexCoords, CellConnect, CellNums, StartCell,
 
     integer :: VarNo
 
+#ifdef ESMF_NETCDF
     ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
     if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
@@ -756,6 +759,10 @@ subroutine ReadCSMesh (filename, VertexCoords, CellConnect, CellNums, StartCell,
 
 
     !status = (ncStatus .ne. nf_noerror)
+    
+#else
+    status = ESMF_RC_LIB_NOT_PRESENT
+#endif
 
     return
 end subroutine ReadCSMesh
@@ -772,6 +779,7 @@ subroutine ReadRegGrid(filename, dims, coordX, coordY, status)
     real(ESMF_KIND_R8),    pointer, intent(out) :: coordX(:), coordY(:)
     integer, intent(out):: status
 
+#ifdef ESMF_NETCDF
     integer :: ncid
     integer :: ncStatus
     integer :: totalpoints,totaldims
@@ -839,6 +847,10 @@ subroutine ReadRegGrid(filename, dims, coordX, coordY, status)
         status = ESMF_FAILURE
     end if
 
+#else
+    status = ESMF_RC_LIB_NOT_PRESENT
+#endif
+
     return
 end subroutine ReadRegGrid
 
@@ -893,6 +905,7 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, checkpoint)
     logical,          intent(in)  :: checkpoint
     logical                       :: CDFCheckError
 
+#ifdef ESMF_NETCDF
     CDFCheckError = ncStatus .ne. nf_noerror
 
     if (checkpoint) then
@@ -909,6 +922,9 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, checkpoint)
           module, lineNo, petNo, fileName, trim(nf90_strerror(ncStatus))
     end if
     return
+#else
+    CDFCheckError = .false.
+#endif
 
 end function CDFCheckError
 
@@ -1051,6 +1067,7 @@ subroutine outputWeightFile(filename, indices, weights, SrcVertexCoords, &
       integer(ESMF_KIND_I4), pointer:: colrow(:) 
       integer(ESMF_KIND_I4), pointer:: allCounts(:) 
 
+#ifdef ESMF_NETCDF
       ! write out the indices and weights table sequentially to the output file
       ! first find out the starting index of my portion of table
       ! Global reduce
@@ -1237,10 +1254,14 @@ subroutine outputWeightFile(filename, indices, weights, SrcVertexCoords, &
 
     ! return ESMF compatible status
     if (ncStatus .eq. nf_Noerror) then
-        status = ESMF_SUCCESS
+        rc = ESMF_SUCCESS
     else
-        status = ESMF_FAILURE
+        rc = ESMF_FAILURE
     end if
+
+#else
+    rc = ESMF_RC_LIB_NOT_PRESENT
+#endif
 
     return
 end subroutine OutputWeightFile
