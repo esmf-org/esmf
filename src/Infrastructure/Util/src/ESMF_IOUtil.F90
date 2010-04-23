@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUtil.F90,v 1.9 2010/04/23 04:20:57 w6ws Exp $
+! $Id: ESMF_IOUtil.F90,v 1.10 2010/04/23 17:49:51 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -96,7 +96,7 @@ module ESMF_IOUtilMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version = &
-      '$Id: ESMF_IOUtil.F90,v 1.9 2010/04/23 04:20:57 w6ws Exp $'
+      '$Id: ESMF_IOUtil.F90,v 1.10 2010/04/23 17:49:51 w6ws Exp $'
 !------------------------------------------------------------------------------
 
   contains
@@ -129,8 +129,15 @@ module ESMF_IOUtilMod
 !EOP
     integer :: localrc
 
+!   By default, use the F2003 FLUSH statement.  For older compilers,
+!   use a macro defined in the configuration-specific ESMF_Conf.inc
+!   include file.  This is needed because the name of the flush routine
+!   and exact number of its arguements vary between implementations.
+
 #if !defined (ESMF_IOFlushMacro)
+
     flush (unit, iostat=localrc)
+
 #else
 !   Preset localrc in advance, since some library versions of FLUSH do
 !   not support a status argument for detecting errors.
@@ -138,6 +145,7 @@ module ESMF_IOUtilMod
     localrc = 0
 
 ESMF_IOFlushMacro(unit, localrc)
+
 #endif
 
     if (present(rc)) then
