@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.19 2010/04/14 20:00:19 rokuingh Exp $
+// $Id: ESMCI_Interp.C,v 1.20 2010/04/25 20:04:20 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.19 2010/04/14 20:00:19 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.20 2010/04/25 20:04:20 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -66,6 +66,8 @@ IWeights &IWeights::operator=(const IWeights &rhs)
   
   return *this;
 }
+
+inline bool IDMatch(const IWeights::Entry &e1, const IWeights::Entry &e2) { return e1.value == e2.value; }
 
 void IWeights::ChangeCoords(const IWeights &src_uv, const IWeights &dst_uv) {
   Trace __trace("IWeights::ChangeCoords(const IWeights &src_uv, const IWeights &dst_uv)");
@@ -1153,43 +1155,47 @@ void Interp::interpL2csrvM_parallel(IWeights &iw, IWeights *iw2,
     }
   }
 
+
   // now migrate to the destination mesh decomposition (srcmesh in here)
   iw2->Migrate(srcmesh);
+  iw2->Prune(srcmesh, 0);
 
   // OK, now we should have the weights matrix in the destination mesh decomposition
   // combine the Entries of duplicate rows
   IWeights::WeightMap::iterator mwi = iw2->begin_row(), mwe = iw2->end_row();
-  int lastid = mwi->first.id;
-  ++mwi;
   for (; mwi != mwe; ++mwi) {
+    int lastid = mwi->first.id;
+
     const IWeights::Entry &_row = mwi->first;
     std::vector<IWeights::Entry> &_col = mwi->second;
 
-      int thisid = _row.id;
+    IWeights::WeightMap::iterator ri = mwi;
+    ++ri;
+
+    for (; ri != mwe;) {
+      int thisid = ri->first.id;
       if (thisid == lastid) {
         // get the last row
-        IWeights::WeightMap::iterator w_temp = mwi;
-        --w_temp;
-        const IWeights::Entry &lastrow = w_temp->first;
-        std::vector<IWeights::Entry> &lastcol = w_temp->second;
+        const IWeights::Entry &thisrow = ri->first;
+        std::vector<IWeights::Entry> &thiscol = ri->second;
 
         // move all cols to the last row
-        for (UInt c3 = 0; c3 < _col.size(); ++c3) {
-          lastcol.push_back(_col[c3]);
-        }
+        for (UInt c3 = 0; c3 < thiscol.size(); ++c3)
+          _col.push_back(thiscol[c3]);
 
-        // erase this row, incrementing as a side effect
-        iw2->weights.erase(mwi--);
-
-      } else lastid = thisid;
-
+        // erase this row
+        iw2->weights.erase(ri++);
+      } else ++ri;
+    }
   }
 
   // now we need to go through the rows themselves and look for duplicate Entries
   mwi = iw2->begin_row(), mwe = iw2->end_row();
   for (; mwi != mwe; ++mwi) {
-    const IWeights::Entry &_row = mwi->first;
     std::vector<IWeights::Entry> &_col = mwi->second;
+ 
+    // first traverse the row and compact values - don't erase yet
+    std::sort(_col.begin(), _col.end());
     // go through the row
     for (UInt c = 0; c < _col.size(); ++c) {
       int lastid = _col[c].id;
@@ -1198,15 +1204,18 @@ void Interp::interpL2csrvM_parallel(IWeights &iw, IWeights *iw2,
       // go through the row from the position of c
       for (; ci != ce; ++ci) {
         int thisid = ci->id;
-        // if there is a match, add the value and release duplicat entry
-        if (thisid == lastid) {
-          std::vector<IWeights::Entry>::iterator c_temp = ci;
-          --c_temp;
-          c_temp->value += ci->value;
-          ci = _col.erase(ci);
-        }
+        // if there is a match, add the value to the original
+        if (thisid == lastid)
+          _col[c].value += ci->value;
       }
     }
+    
+    // now remove the Entries with matching id
+    std::vector<IWeights::Entry>::iterator newend = 
+      unique(_col.begin(), _col.end(), IDMatch);
+
+    // now erase all Entries between newend and end
+    _col.erase(newend, _col.end());
   }
 
   // left multiply!
@@ -1222,6 +1231,7 @@ void Interp::interpL2csrvM_parallel(IWeights &iw, IWeights *iw2,
     // and finally sort the columns as well
     std::sort(_col.begin(), _col.end());
   }
+
 /*
   // print out id's of weight matrix
   std::cout<<"End  id="<<id<<std::endl;
@@ -1238,7 +1248,6 @@ void Interp::interpL2csrvM_parallel(IWeights &iw, IWeights *iw2,
   std::cout<<std::endl;
 */
 }
-
 
 void DestrySearchResult(SearchResult &sres) {
   

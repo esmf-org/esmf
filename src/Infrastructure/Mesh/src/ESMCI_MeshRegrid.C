@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.1 2010/04/21 22:30:37 rokuingh Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.2 2010/04/25 20:04:20 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.1 2010/04/21 22:30:37 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.2 2010/04/25 20:04:20 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -45,9 +45,6 @@ int online_regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
                 &regridPoleType, &regridPoleNPnts, unmappedaction))
         Throw() << "Conservative regridding error" << std::endl;
 
-      // Remove non-locally owned weights (assuming destination mesh decomposition)
-      wts.Prune(dstmesh,0);
-
     } break;
     // NON Conservative regridding
     case (ESMC_REGRID_CONSERVE_OFF): {
@@ -65,6 +62,7 @@ int online_regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
       Throw() << "Regridding method:" << *regridConserve << " is not implemented";
     }
 
+  return 1;
 }
 
 // Mesh are not committed yet
@@ -111,16 +109,17 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh,
       if (!regrid(srcmesh, dstmesh, wts, regridMethod, &regridScheme,
                   regridPoleType, regridPoleNPnts, &unmappedaction))
         Throw() << "Regridding error" << std::endl;
+
+      // the mask
+      MEField<> *mask = dstmesh.GetField("MASK_IO");
+      ThrowRequire(mask);
+      wts.Prune(dstmesh, mask);
+
     } break;
 
     default:
       Throw() << "Regridding method:" << *regridConserve << " is not implemented";
     }
-
-    // the mask stuff is only in the offline???
-    MEField<> *mask = dstmesh.GetField("MASK_IO");
-    ThrowRequire(mask);
-    wts.Prune(dstmesh, mask);
 
     // Redistribute weights in an IO friendly decomposition
     if (Par::Rank() == 0) std::cout << "Writing weights to " << wghtFile << std::endl;
@@ -327,6 +326,82 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
 */
     // L2 projection conservative interpolation
     interp.interpL2csrvM(stw, &wts, src_iwts, dst_iwts);
+/*
+  // print out info of the iwts
+  Mesh::iterator sni=srcmesh.node_begin(), sne=srcmesh.node_end();
+  Mesh::iterator dni=dstmesh.node_begin(), dne=dstmesh.node_end();
+
+  int snegcount = 0;
+  int stotalcount = 0;
+  for (; sni != sne; ++sni) {
+    double *Sdata = src_iwts->data(*sni);
+    stotalcount++;
+    if (*Sdata < 0) ++snegcount;
+  }
+
+  int dnegcount = 0;
+  int dtotalcount = 0;
+  for (; dni != dne; ++dni) {
+    double *Ddata = dst_iwts->data(*dni);
+    dtotalcount++;
+    if (*Ddata < 0) ++dnegcount;
+  }
+
+  // print out info of weight matrix
+  int negcount = 0;
+  int rowsum = 0;
+  int rowsumcount = 0;
+  int totalcount = 0;
+  int gt1count = 0;
+  double max = 0;
+  double min = 0;
+double badcolid = 0;
+double badrowid = 0;
+
+  IWeights::WeightMap::iterator wit = wts.begin_row(), wet = wts.end_row();
+  //IWeights::WeightMap::iterator wit = stw.begin_row(), wet = stw.end_row();
+  for (; wit != wet; ++wit) {
+    const IWeights::Entry &_row = wit->first;
+    const std::vector<IWeights::Entry> &_col = wit->second;
+
+    std::cout<<Par::Rank()<<"  "<<_row.id<<"    ";
+    rowsum = 0;
+    for (UInt c = 0; c < _col.size(); ++c) {
+      double value = _col[c].value;
+      if (value < 0) negcount++;
+      if (value > max) {
+        max = value;
+        badcolid = _col[c].id;
+        badrowid = _row.id;
+      }
+      if (value < min) min = value;
+      if (value > 1) gt1count++;
+      rowsum += value;
+
+      std::cout<<std::setprecision(3)<<_col[c].value<<"  ";
+    }
+    if (rowsum > 1.01 || rowsum < .99) rowsumcount++;
+    totalcount++;
+    std::cout<<std::endl;
+    for (UInt c = 0; c < _col.size(); ++c) {
+      double value = _col[c].value;
+      
+    }
+  }
+  std::cout<<std::endl<<"Negative weights count = "<<negcount
+           <<std::endl<<"Greater than 1 count = "<<gt1count
+           <<std::endl<<"Row sum not 1 count = "<<rowsumcount
+           <<std::endl<<"Total row count = "<<totalcount<<std::endl
+           <<std::endl<<"Max weight  = "<<max
+           <<std::endl<<"Min weight = "<<min<<std::endl;
+
+  std::cout<<std::setprecision(4)<<std::endl<<"Bad weight ["<<badrowid<<","<<badcolid<<"]"<<std::endl<<std::endl;
+
+  std::cout<<std::endl<<"Source iwts total count = "<<stotalcount
+                      <<"  and negcount = "<<snegcount<<std::endl;
+  std::cout<<std::endl<<"Destination iwts total count = "<<dtotalcount
+                      <<"  and negcount = "<<dnegcount<<std::endl<<std::endl;
+*/
 
     return 1;
   }
