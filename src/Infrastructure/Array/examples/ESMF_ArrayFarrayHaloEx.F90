@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.19 2010/04/07 05:42:07 theurich Exp $
+! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.20 2010/04/26 17:08:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -16,7 +16,7 @@
 
 !BOE
 ! \subsubsection{Array from native Fortran array with extra elements for halo or padding}
-! \section{Array:fpadding}
+! \label{Array:fpadding}
 !
 ! The example of the previous section showed how easy it is to create an Array
 ! object from existing PET-local Fortran arrays. The example did, however, not
