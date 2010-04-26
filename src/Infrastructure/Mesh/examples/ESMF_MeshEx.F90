@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.23 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_MeshEx.F90,v 1.24 2010/04/26 19:05:08 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -146,8 +146,8 @@ program ESMF_MeshEx
 !
 !       0.0       1.0        2.0 
 ! 
-!          Node Ids at corners
-!         Element Ids in centers
+!        Node Id labels at corners
+!       Element Id labels in centers
 !       (Everything owned by PET 0) 
 !
 !\end{verbatim}
@@ -220,7 +220,12 @@ program ESMF_MeshEx
   ! the order and number of entries for each element
   ! reflects that given in the Mesh options 
   ! section for the corresponding entry
-  ! in the elemTypes array.
+  ! in the elemTypes array. The number of 
+  ! entries in this elemConn array is the
+  ! number of nodes in a quad. (4) times the 
+  ! number of quad. elements plus the number
+  ! of nodes in a triangle (3) times the number
+  ! of triangle elements. 
   allocate(elemConn(4*numQuadElems+3*numTriElems))
   elemConn=(/1,2,5,4, &  ! elem id 1
              2,3,5,   &  ! elem id 2
@@ -248,12 +253,16 @@ program ESMF_MeshEx
 
 
   ! Set arrayspec for example field create
+  ! Use a dimension of 1, because Mesh data is linearized 
+  ! into a one dimensional array. 
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
 
   ! At this point the mesh is ready to use. For example, as is 
-  ! illustrated here, to have a field created on it.
+  ! illustrated here, to have a field created on it. Note that 
+  ! the Field only contains data for nodes owned by the current PET.
+  ! Please see Section "Create a Field from a Mesh" under Field
+  ! for more information on creating a Field on a Mesh. 
   field = ESMF_FieldCreate(mesh, arrayspec,  rc=localrc)
-
 
 !EOC
 
@@ -316,7 +325,13 @@ program ESMF_MeshEx
   call ESMF_MeshAddNodes(mesh, nodeIds=nodeIds, &
          nodeCoords=nodeCoords, nodeOwners=nodeOwners, rc=localrc)
 
-  ! Now that the nodes have been added we can deallocate the node lists
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! HERE IS THE POINT OF THE THREE STEP METHOD
+  ! WE CAN DELETE THESE NODE ARRAYS BEFORE 
+  ! ALLOCATING THE ELEMENT ARRAYS, THEREBY
+  ! REDUCING THE AMOUNT OF MEMORY NEEDED 
+  ! AT ONE TIME. 
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   deallocate(nodeIds)
   deallocate(nodeCoords)
   deallocate(nodeOwners)
@@ -346,7 +361,12 @@ program ESMF_MeshEx
   ! the order and number of entries for each element
   ! reflects that given in the Mesh options 
   ! section for the corresponding entry
-  ! in the elemTypes array.
+  ! in the elemTypes array. The number of 
+  ! entries in this elemConn array is the
+  ! number of nodes in a quad. (4) times the 
+  ! number of quad. elements plus the number
+  ! of nodes in a triangle (3) times the number
+  ! of triangle elements. 
   allocate(elemConn(4*numQuadElems+3*numTriElems))
   elemConn=(/1,2,5,4, &  ! elem id 1
              2,3,5,   &  ! elem id 2
@@ -368,13 +388,16 @@ program ESMF_MeshEx
 
 
   ! Set arrayspec for example field create
+  ! Use a dimension of 1, because Mesh data is linearized 
+  ! into a one dimensional array. 
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
 
   ! At this point the mesh is ready to use. For example, as is 
-  ! illustrated here, to have a field created on it.
+  ! illustrated here, to have a field created on it. Note that 
+  ! the Field only contains data for nodes owned by the current PET.
+  ! Please see Section "Create a Field from a Mesh" under Field
+  ! for more information on creating a Field on a Mesh. 
   field = ESMF_FieldCreate(mesh, arrayspec,  rc=localrc)
-
-
 
 !EOC
 
@@ -397,39 +420,39 @@ program ESMF_MeshEx
 !
 !\begin{verbatim}
 !
-!  2.0   7 ------- 8         * ------- 9          
+!  2.0   7 ------- 8        [8] ------ 9          
 !        |         |         |         |
 !        |    4    |         |    5    |
 !        |         |         |         |
-!  1.0   * ------- *         * ------- *
+!  1.0  [4] ----- [5]       [5] ----- [6]
 !        
 !       0.0       1.0       1.0       2.0
 !
 !           PET 2               PET 3
 !
 !
-!  1.0   4 ------- 5         * ------- 6
+!  1.0   4 ------- 5        [5] ------ 6
 !        |         |         |  \   3  |
 !        |    1    |         |    \    |
 !        |         |         | 2    \  |
-!  0.0   1 ------- 2         * ------- 3
+!  0.0   1 ------- 2        [2] ------ 3
 !
 !       0.0       1.0       1.0      2.0 
 ! 
 !           PET 0               PET 1
 !
-!                Node Ids at corners
-!               Element Ids in centers
+!               Node Id labels at corners
+!              Element Id labels in centers
 !
 !\end{verbatim}
 ! 
 ! This example is intended to illustrate the creation of a small Mesh on multiple PETs. This example creates the same small 2D Mesh as the 
 ! previous two examples (See Section~\ref{sec:mesh:1pet1step} for a diagram), however, in this case the Mesh is broken up across 4 PETs. 
 ! The figure above illustrates the distribution of the Mesh across the PETs. As in the previous diagram, the node ids are in
-! the corners of the elements and the element ids are in the centers. In this figure the '*' character indicates a node which
-! is owned by another PET. Note that the three step creation illustrated in Section~\ref{sec:mesh:1pet3step} could also be used 
-! in a parallel Mesh creation such as this by simply interleaving the three calls in the appropriate places between the node and
-! element array definitions. 
+! the corners of the elements and the element ids are in the centers. In this figure '[' and ']' around a character indicate a node which
+! is owned by another PET. The nodeOwner parameter indicates which PET owns the node.  Note that the three step creation 
+! illustrated in Section~\ref{sec:mesh:1pet3step} could also be used in a parallel Mesh creation such as this by simply interleaving 
+! the three calls in the appropriate places between the node and element array definitions. 
 !
 !EOE
 
@@ -629,12 +652,16 @@ program ESMF_MeshEx
 
 
   ! Set arrayspec for example field create
+  ! Use a dimension of 1, because Mesh data is linearized 
+  ! into a one dimensional array. 
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
 
   ! At this point the mesh is ready to use. For example, as is 
-  ! illustrated here, to have a field created on it.
+  ! illustrated here, to have a field created on it. Note that 
+  ! the Field only contains data for nodes owned by the current PET.
+  ! Please see Section "Create a Field from a Mesh" under Field
+  ! for more information on creating a Field on a Mesh. 
   field = ESMF_FieldCreate(mesh, arrayspec,  rc=localrc)
-
 
 !EOC
 
