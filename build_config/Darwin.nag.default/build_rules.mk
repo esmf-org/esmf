@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.25 2010/04/22 22:48:12 w6ws Exp $
+# $Id: build_rules.mk,v 1.26 2010/04/26 18:10:48 w6ws Exp $
 #
 # Darwin.nag.default
 #
@@ -6,7 +6,7 @@
 ############################################################
 # Default compiler setting.
 #
-ESMF_F90DEFAULT         = f95
+ESMF_F90DEFAULT         = nagfor
 ESMF_CXXDEFAULT         = g++
 
 ############################################################
