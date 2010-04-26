@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.52 2010/04/07 05:42:07 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.53 2010/04/26 17:27:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -295,14 +295,14 @@ program ESMF_ArrayEx
 ! \begin{verbatim}
 !
 ! computationalLWidth(:) = exclusiveLBound(:) - computationalLBound(:)
-! computationalUWidth(:) = computationalUBound(:) - exclusiveLBound(:)
+! computationalUWidth(:) = computationalUBound(:) - exclusiveUBound(:)
 !
 ! \end{verbatim}
 ! and
 ! \begin{verbatim}
 !
-! totalLWidth(:) = computationalLBound(:) - totalLBound(:)
-! totalUWidth(:) = totalUBound(:) - computationalUBound(:)
+! totalLWidth(:) = exclusiveLBound(:) - totalLBound(:)
+! totalUWidth(:) = totalUBound(:) - exclusiveUBound(:)
 !
 ! \end{verbatim}
 !
