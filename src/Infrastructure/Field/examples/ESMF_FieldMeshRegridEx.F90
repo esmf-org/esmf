@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshRegridEx.F90,v 1.13 2010/04/12 22:15:11 oehmke Exp $
+! $Id: ESMF_FieldMeshRegridEx.F90,v 1.14 2010/04/26 19:04:25 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_MeshEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.13 2010/04/12 22:15:11 oehmke Exp $'
+    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.14 2010/04/26 19:04:25 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -570,8 +570,9 @@ program ESMF_MeshEx
 !BOE
 !\subsubsection{Field Regrid Example: Mesh to Mesh}
 ! This example demonstrates the regridding process between Fields created on Meshes. First
-! the Meshes are created, next Fields are constructed on the Meshes, and then ESMF\_FieldRegridStore()
-! is called to construct a RouteHandle implementing the regrid operation. Finally, ESMF\_FieldRegrid() is
+! the Meshes are created. This example omits the setup of the arrays describing the Mesh, but please see
+! Section~\ref{sec:mesh:usage:meshCreation} for examples of this. After creation Fields are constructed on the Meshes, 
+! and then ESMF\_FieldRegridStore() is called to construct a RouteHandle implementing the regrid operation. Finally, ESMF\_FieldRegrid() is
 ! called with the Fields and the RouteHandle to do the interpolation between the source Field and 
 ! destination Field.
 ! 
@@ -579,11 +580,23 @@ program ESMF_MeshEx
 
 !BOC
 
-  !!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Create Source Mesh
-  !!!!!!!!!!!!!!!!!!!! 
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  ! Create Mesh structure in 1 step
+  ! Create the Mesh structure.
+  ! For brevity's sake, the code to fill the Mesh creation 
+  ! arrays is omitted from this example. However, here
+  ! is a brief description of the arrays:
+  ! srcNodeIds    - the global ids for the src nodes
+  ! srcNodeCoords - the coordinates for the src nodes
+  ! srcNodeOwners - which PET owns each src node
+  ! srcElemIds    - the global ids of the src elements
+  ! srcElemTypes  - the topological shape of each src element
+  ! srcElemConn   - how to connect the nodes to form the elements
+  !                 in the source mesh
+  ! Several examples of setting up these arrays can be seen in
+  ! the Mesh Section "Mesh Creation". 
   srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
          nodeIds=srcNodeIds, nodeCoords=srcNodeCoords, &
          nodeOwners=srcNodeOwners, elementIds=srcElemIds,&
@@ -591,9 +604,9 @@ program ESMF_MeshEx
 
 
 
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Create and Fill Source Field
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Set description of source Field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
@@ -625,21 +638,32 @@ program ESMF_MeshEx
   enddo
 
 
-  !!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Create Destination Mesh
-  !!!!!!!!!!!!!!!!!!!!!!!!! 
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  ! Create destination Mesh structure
+  ! Create the Mesh structure.
+  ! For brevity's sake, the code to fill the Mesh creation 
+  ! arrays is omitted from this example. However, here
+  ! is a brief description of the arrays:
+  ! dstNodeIds    - the global ids for the dst nodes
+  ! dstNodeCoords - the coordinates for the dst nodes
+  ! dstNodeOwners - which PET owns each dst node
+  ! dstElemIds    - the global ids of the dst elements
+  ! dstElemTypes  - the topological shape of each dst element
+  ! dstElemConn   - how to connect the nodes to form the elements
+  !                 in the destination mesh
+  ! Several examples of setting up these arrays can be seen in
+  ! the Mesh Section "Mesh Creation". 
   dstMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
          nodeIds=dstNodeIds, nodeCoords=dstNodeCoords, &
          nodeOwners=dstNodeOwners, elementIds=dstElemIds,&
          elementTypes=dstElemTypes, elementConn=dstElemConn, rc=rc)
 
 
-
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Create Destination Field
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Set description of source Field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc)
@@ -648,10 +672,9 @@ program ESMF_MeshEx
   dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
                         name="destination", rc=rc)
 
-
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Do Regrid
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Compute RouteHandle which contains the regrid operation
   call ESMF_FieldRegridStore( &
@@ -665,10 +688,34 @@ program ESMF_MeshEx
   call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=rc)
 
 
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! dstField now contains the interpolated data 
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! dstField now contains the interpolated data.
+  ! If the Meshes don't change, then routeHandle
+  ! may be used repeatedly to interpolate from 
+  ! srcField to dstField.  
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+   
+  ! User code to use the routeHandle, Fields, and
+  ! Meshes goes here before they are freed below.
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Free the objects created in the example.
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  ! Free the RouteHandle
+  call ESMF_FieldRegridRelease(routeHandle, rc=rc)
+
+  ! Free the Fields
+   call ESMF_FieldDestroy(srcField, rc=rc)
+
+   call ESMF_FieldDestroy(dstField, rc=rc)
+
+  ! Free the Meshes
+  call ESMF_MeshDestroy(dstMesh, rc=rc)
+
+  call ESMF_MeshDestroy(srcMesh, rc=rc)
  
   !EOC
 
@@ -695,23 +742,6 @@ program ESMF_MeshEx
    deallocate(dstElemTypes)
    deallocate(dstElemConn)
 
-
-  ! Free the RouteHandle
-  call ESMF_FieldRegridRelease(routeHandle, rc=rc)
-
-
-  ! Destroy the Fields
-   call ESMF_FieldDestroy(srcField, rc=rc)
-
-   call ESMF_FieldDestroy(dstField, rc=rc)
-
-  ! Free the Meshes
-  call ESMF_MeshDestroy(dstMesh, rc=rc)
-
-
-  call ESMF_MeshDestroy(srcMesh, rc=rc)
-
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   endif ! Only for petCount .eq. 1 
 
