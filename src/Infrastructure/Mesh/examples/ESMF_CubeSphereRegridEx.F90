@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubeSphereRegridEx.F90,v 1.4 2010/04/23 20:50:06 theurich Exp $
+! $Id: ESMF_CubeSphereRegridEx.F90,v 1.5 2010/04/26 23:23:47 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -64,10 +64,9 @@ program ESMF_CubeSphereRegridEx
       real(ESMF_KIND_R8),    pointer :: VertexCoords (:,:)
       integer(ESMF_KIND_I4), pointer :: CellConnect  (:,:)
       integer(ESMF_KIND_I4), pointer :: CellNums     (:)
-      real(ESMF_KIND_R8),    pointer :: VertexData   (:,:)
 
       ! ESMF mesh
-      type(ESMF_Mesh) :: srcMesh, destMesh
+      type(ESMF_Mesh) :: srcMesh
       type(ESMF_RouteHandle) :: rh, rh1
       ! test result status variables
       integer :: nlen, nsize
@@ -76,12 +75,11 @@ program ESMF_CubeSphereRegridEx
       integer :: StartCell
       logical, parameter :: checkpoint = .false.
       integer, parameter :: nf_noerror = 0
-      integer ncid
       integer totalNodes, totalCells, count
       integer :: i, j, k
       integer :: xdim, ydim
       integer, allocatable:: nodeIds(:)
-      integer :: lbnd1(2), lbnd2(2), lbnd3(2), ubnd1(2), ubnd2(2), ubnd3(2), lbnd(1), ubnd(1)
+      integer :: lbnd1(2), lbnd2(2), ubnd1(2), ubnd2(2)
       integer :: dims(2)
       real(ESMF_KIND_R8), pointer :: fptr(:), fptr1(:,:), fptr2(:,:)
       real(ESMF_KIND_R8), pointer :: array3(:,:)
@@ -89,14 +87,12 @@ program ESMF_CubeSphereRegridEx
       real(ESMF_KIND_R8) :: val, error
       type(ESMF_Grid) :: dstgrid1
       type(ESMF_DistGrid):: nodeDG, elemDG
-      type(ESMF_Array) :: darray, marray
+      type(ESMF_Array) :: darray
       type(ESMF_ArraySpec) :: arraySpec
-      type(ESMF_Field) :: field1, field2, field3
+      type(ESMF_Field) :: field1, field2
       type(ESMF_FieldBundle) :: bundle
       integer(ESMF_KIND_I4), pointer:: indicies(:,:), seqIndex(:)
       real(ESMF_KIND_R8), pointer :: weights(:)
-      real(ESMF_KIND_R8) :: xdelta, ydelta
-      real(ESMF_KIND_R8) :: xlow, xhigh, ylow, yhigh
       character(len=2) :: petstring     
       character(len=256) :: srcfile, dstfile, wgtfile
       character(len=40) :: regrid_type, revflag
@@ -107,7 +103,8 @@ program ESMF_CubeSphereRegridEx
       ! Initialize ESMF
       !
       call ESMF_Initialize (defaultCalendar=ESMF_CAL_GREGORIAN, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) goto 90
+      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+	  ESMF_CONTEXT, rcToReturn=rc)) goto 90
 
       !------------------------------------------------------------------------
       ! get global vm information
@@ -190,7 +187,7 @@ program ESMF_CubeSphereRegridEx
       ! fake the data array to use a linear function of its coordinates
       !!!!!!!
       do i=1,count
-	fptr(i) = COSD(VertexCoords(2,nodeIds(i)))
+	fptr(i) = COS(VertexCoords(2,nodeIds(i)))
       enddo
      !!!!!!!
 
@@ -217,7 +214,7 @@ program ESMF_CubeSphereRegridEx
        xdim = dims(1)
        ydim = dims(2)
 
-      call CreateRegGrid(xdim, ydim, coordX, coordY, dstgrid1, field3, status)
+      call CreateRegGrid(xdim, ydim, coordX, coordY, dstgrid1, field2, status)
       if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
       call ESMF_GridGetCoord(dstgrid1, localDE=0, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
@@ -232,14 +229,14 @@ program ESMF_CubeSphereRegridEx
 
       if (trim(regrid_type) .eq. 'bilinear') then
         if (trim(revflag) .ne. 'rev') then
-        call ESMF_FieldRegridStore(srcField=field1, dstField=field3, & 
+        call ESMF_FieldRegridStore(srcField=field1, dstField=field2, & 
 	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
 	    indicies=indicies, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_BILINEAR, &
 	    regridScheme = ESMF_REGRID_SCHEME_FULL3D, rc=status)
             if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 	else 
-          call ESMF_FieldRegridStore(srcField=field3, dstField=field1, & 
+          call ESMF_FieldRegridStore(srcField=field2, dstField=field1, & 
 	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
 	    indicies=indicies, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_BILINEAR, &
@@ -248,7 +245,7 @@ program ESMF_CubeSphereRegridEx
         endif
       else
         if (trim(revflag) .ne. 'rev') then
-          call ESMF_FieldRegridStore(srcField=field1, dstField=field3, & 
+          call ESMF_FieldRegridStore(srcField=field1, dstField=field2, & 
 	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
 	    indicies=indicies, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_BILINEAR, &
@@ -256,7 +253,7 @@ program ESMF_CubeSphereRegridEx
 	    regridScheme = ESMF_REGRID_SCHEME_FULL3D, rc=status)
             if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
         else
-          call ESMF_FieldRegridStore(srcField=field3, dstField=field1, & 
+          call ESMF_FieldRegridStore(srcField=field2, dstField=field1, & 
 	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
 	    indicies=indicies, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_BILINEAR, &
@@ -279,9 +276,9 @@ program ESMF_CubeSphereRegridEx
       !!deallocate(VertexCoords)
 
       if (trim(revflag) .ne. 'rev') then
-         call ESMF_FieldRegrid(field1, field3, rh1, rc=status)
+         call ESMF_FieldRegrid(field1, field2, rh1, rc=status)
       else
-         call ESMF_FieldRegrid(field3, field1, rh1, rc=status)
+         call ESMF_FieldRegrid(field2, field1, rh1, rc=status)
       endif
       if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
@@ -314,10 +311,6 @@ program ESMF_CubeSphereRegridEx
 #endif
 
       if (trim(revflag) .eq. 'rev') then     
-        ! now get the array and check if the value equal to cos(latitude) 
-        ! call ESMF_FieldGet(field1, localDe=0, farrayPtr=fptr, &
-	!  computationalLBound=lbnd, computationalUBound=ubnd, rc=status)
-	!if (status .ne. ESMF_SUCCESS)  call ESMF_Finalize(terminationflag=ESMF_ABORT)
         call ESMF_FieldGet(field1, localDe=0, farrayPtr=fptr, rc=status)
         ! Get Mesh's node distgrid and its seqIndex 
         call ESMF_MeshGet(srcMesh, nodalDistgrid=NodeDG, numOwnedNodes=totalNodes, rc=status)
@@ -327,7 +320,7 @@ program ESMF_CubeSphereRegridEx
 	if (status .ne. ESMF_SUCCESS)  call ESMF_Finalize(terminationflag=ESMF_ABORT)
         count = 0
         do i=1,totalNodes
-	  val = COSD(VertexCoords(2,seqIndex(i)))
+	  val = COS(VertexCoords(2,seqIndex(i)))
 	  if (val .ne. 0) then
              error = abs((fptr(i)-val)/val)
           else
@@ -342,12 +335,12 @@ program ESMF_CubeSphereRegridEx
         deallocate(seqIndex)
       else
         ! regrid from dstgrid to srcgrid 
-        call ESMF_FieldGet(field3, localDe=0, farrayPtr=array3, rc=status)
+        call ESMF_FieldGet(field2, localDe=0, farrayPtr=array3, rc=status)
         if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
         count = 0
         do i=lbnd1(1),ubnd1(1)
           do j=lbnd1(2),ubnd1(2)
-	      val = COSD(fptr2(i,j))
+	      val = COS(fptr2(i,j))
 	  if (val .ne. 0) then
              error = abs((array3(i,j)-val)/val)
           else
@@ -551,10 +544,10 @@ subroutine CreateCSMesh (Mesh, VertexCoords, CellConnect, CellNums, StartCell, c
 	   if (convert3Dlocal) then
               coorX = VertexCoords(1,NodeNo)
               coorY = 90.0-VertexCoords(2,NodeNo)
-              NodeCoords((i-1)*3+1) = COSD(coorX)*SIND(coorY)             
-              NodeCoords((i-1)*3+2) = SIND(coorX)*SIND(coorY)             
-              NodeCoords((i-1)*3+3) = COSD(coorY)
-           !   write (*,'(6F8.4)')VertexCoords(:,NodeNo), COSD(coorX),SIND(coorX),COSD(coorY),SIND(coorY)
+              NodeCoords((i-1)*3+1) = COS(coorX)*SIN(coorY)             
+              NodeCoords((i-1)*3+2) = SIN(coorX)*SIN(coorY)             
+              NodeCoords((i-1)*3+3) = COS(coorY)
+           !   write (*,'(6F8.4)')VertexCoords(:,NodeNo), COS(coorX),SIN(coorX),COS(coorY),SIN(coorY)
            else 
              do dim = 1, NodeDim
                NodeCoords ((i-1)*NodeDim+dim) = VertexCoords (dim, NodeNo)
@@ -1032,7 +1025,7 @@ subroutine CreateRegGrid (xdim, ydim, coordX, coordY, grid, field, rc)
     !!!!!!!
     do i=lbnd1(1),ubnd1(1)
        do j=lbnd1(2),ubnd1(2)
-          fptr(i,j) = COSD(fptr1(i,j))
+          fptr(i,j) = COS(fptr1(i,j))
        enddo
     enddo
       !!!!!!!
