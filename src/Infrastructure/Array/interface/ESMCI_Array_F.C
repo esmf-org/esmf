@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.36 2010/04/06 05:58:32 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.37 2010/04/26 21:33:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -549,7 +549,7 @@ extern "C" {
       for (int i=0; i<localDeCount; i++)
         for (int j=0; j<redDimCount; j++)
           (*totalLWidth)->array[i*(*totalLWidth)->extent[0]+j] =
-            ((*ptr)->getComputationalLBound())[i*redDimCount+j] -
+            ((*ptr)->getExclusiveLBound())[i*redDimCount+j] -
             ((*ptr)->getTotalLBound())[i*redDimCount+j];
     }
     // fill totalUWidth
@@ -577,7 +577,7 @@ extern "C" {
         for (int j=0; j<redDimCount; j++)
           (*totalUWidth)->array[i*(*totalUWidth)->extent[0]+j] =
             ((*ptr)->getTotalUBound())[i*redDimCount+j] -
-            ((*ptr)->getComputationalUBound())[i*redDimCount+j];
+            ((*ptr)->getExclusiveUBound())[i*redDimCount+j];
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;

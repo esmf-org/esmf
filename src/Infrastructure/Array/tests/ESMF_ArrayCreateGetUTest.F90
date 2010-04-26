@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.23 2010/03/04 18:57:41 svasquez Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.24 2010/04/26 21:33:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.23 2010/03/04 18:57:41 svasquez Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.24 2010/04/26 21:33:05 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -68,6 +68,7 @@ program ESMF_ArrayCreateGetUTest
   character (len=80)      :: arrayName
   integer, allocatable:: totalLWidth(:,:), totalUWidth(:,:)
   integer, allocatable:: totalLBound(:,:), totalUBound(:,:)
+  integer, allocatable:: computationalLWidth(:,:), computationalUWidth(:,:)
   
   integer:: count
   
@@ -326,6 +327,31 @@ program ESMF_ArrayCreateGetUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet 2D ESMF_TYPEKIND_R8 w/ computationalEdge widths Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(totalLWidth(2,1))
+  allocate(totalUWidth(2,1))
+  allocate(computationalLWidth(2,1))
+  allocate(computationalUWidth(2,1))
+  call ESMF_ArrayGet(array, totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
+    computationalLWidth=computationalLWidth, &
+    computationalUWidth=computationalUWidth, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Check total widths for 2D ESMF_TYPEKIND_R8 w/ computationalEdge widths Test"
+  write(failMsg, *) "Total widths are wrong"
+  call ESMF_Test((totalLWidth(1,1)==max(0,computationalLWidth(1,1))&
+    .and.totalLWidth(2,1)==max(0,computationalLWidth(2,1))&
+    .and.totalUWidth(1,1)==max(0,computationalUWidth(1,1))&
+    .and.totalUWidth(2,1)==max(0,computationalUWidth(2,1))), &
+    name, failMsg, result, ESMF_SRCLINE)
+  deallocate(totalLWidth, totalUWidth)
+  deallocate(computationalLWidth, computationalUWidth)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayDestroy Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
@@ -374,20 +400,20 @@ program ESMF_ArrayCreateGetUTest
   write(name, *) "Check total bounds for 2D ESMF_TYPEKIND_R8 w/ computationalEdge and total widths Test"
   write(failMsg, *) "Total bounds are wrong"
   if (localPet==0) then
-    call ESMF_Test((totalLBound(1,1)==0.and.totalLBound(2,1)==0.and.&
+    call ESMF_Test((totalLBound(1,1)==0.and.totalLBound(2,1)==-1.and.&
     totalUBound(1,1)==11.and.totalUBound(2,1)==16), &
       name, failMsg, result, ESMF_SRCLINE)
   else if (localPet==1) then
-    call ESMF_Test((totalLBound(1,1)==8.and.totalLBound(2,1)==0.and.&
-    totalUBound(1,1)==16.and.totalUBound(2,1)==16), &
+    call ESMF_Test((totalLBound(1,1)==8.and.totalLBound(2,1)==-1.and.&
+    totalUBound(1,1)==18.and.totalUBound(2,1)==16), &
       name, failMsg, result, ESMF_SRCLINE)
   else if (localPet==2) then
     call ESMF_Test((totalLBound(1,1)==0.and.totalLBound(2,1)==11.and.&
-    totalUBound(1,1)==11.and.totalUBound(2,1)==28), &
+    totalUBound(1,1)==11.and.totalUBound(2,1)==27), &
       name, failMsg, result, ESMF_SRCLINE)
   else if (localPet==3) then
     call ESMF_Test((totalLBound(1,1)==8.and.totalLBound(2,1)==11.and.&
-    totalUBound(1,1)==16.and.totalUBound(2,1)==28), &
+    totalUBound(1,1)==18.and.totalUBound(2,1)==27), &
       name, failMsg, result, ESMF_SRCLINE)
   endif  
   deallocate(totalLBound, totalUBound)

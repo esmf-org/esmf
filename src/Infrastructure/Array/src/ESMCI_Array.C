@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.99 2010/04/19 18:27:36 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.100 2010/04/26 21:33:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 #include "ESMC_Start.h"
 
 // LogErr headers
-#include "ESMCI_LogErr.h"                  // for LogErr
+#include "ESMCI_LogErr.h"                 // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
 
 using namespace std;
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.99 2010/04/19 18:27:36 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.100 2010/04/26 21:33:05 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -749,7 +749,7 @@ Array *Array::create(
         return ESMC_NULL_POINTER;
       }
       for (int j=0; j<localDeCount; j++){
-        totalLBound[j*redDimCount+i] = computationalLBound[j*redDimCount+i]
+        totalLBound[j*redDimCount+i] = exclusiveLBound[j*redDimCount+i]
           - totalLWidthArg->array[i];
       }
     }
@@ -777,7 +777,7 @@ Array *Array::create(
         return ESMC_NULL_POINTER;
       }
       for (int j=0; j<localDeCount; j++){
-        totalUBound[j*redDimCount+i] = computationalUBound[j*redDimCount+i]
+        totalUBound[j*redDimCount+i] = exclusiveUBound[j*redDimCount+i]
           + totalUWidthArg->array[i];
       }
     }
@@ -1435,7 +1435,7 @@ Array *Array::create(
         return ESMC_NULL_POINTER;
       }
       for (int j=0; j<localDeCount; j++){
-        totalLBound[j*redDimCount+i] = computationalLBound[j*redDimCount+i]
+        totalLBound[j*redDimCount+i] = exclusiveLBound[j*redDimCount+i]
           - totalLWidthArg->array[i];
       }
     }
@@ -1462,7 +1462,7 @@ Array *Array::create(
         return ESMC_NULL_POINTER;
       }
       for (int j=0; j<localDeCount; j++){
-        totalUBound[j*redDimCount+i] = computationalUBound[j*redDimCount+i]
+        totalUBound[j*redDimCount+i] = exclusiveUBound[j*redDimCount+i]
           + totalUWidthArg->array[i];
       }
     }
