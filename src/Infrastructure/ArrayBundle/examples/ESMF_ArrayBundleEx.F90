@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleEx.F90,v 1.6 2010/03/04 18:57:41 svasquez Exp $
+! $Id: ESMF_ArrayBundleEx.F90,v 1.7 2010/04/27 22:54:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -26,7 +26,6 @@ program ESMF_ArrayBundleEx
   type(ESMF_VM):: vm
   type(ESMF_DistGrid):: distgrid
   type(ESMF_ArraySpec):: arrayspec
-  type(ESMF_Array):: array(2)
   type(ESMF_Array), allocatable:: arrayList(:)
   type(ESMF_ArrayBundle):: arraybundle
 
@@ -47,7 +46,7 @@ program ESMF_ArrayBundleEx
 !BOE
 ! \subsubsection{ArrayBundle creation from a list of Arrays}
 !
-! First create an array of two {\tt ESMF\_Array} objects.
+! First create a Fortran array of two {\tt ESMF\_Array} objects.
 !EOE
 !BOC
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
@@ -59,23 +58,33 @@ program ESMF_ArrayBundleEx
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
-  array(1) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
+  allocate(arrayList(2))
+  arrayList(1) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
-  array(2) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
+  arrayList(2) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
-! Now the {\tt array} of Arrays can be used to create an ArrayBundle object.
+! Now the {\tt arrayList} of Arrays can be used to create an ArrayBundle object.
 !EOE
 
 !BOC
-  arraybundle = ESMF_ArrayBundleCreate(arrayList=array, &
+  arraybundle = ESMF_ArrayBundleCreate(arrayList=arrayList, &
     name="MyArrayBundle", rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+!BOE
+! The temporary {\tt arrayList} can be deallocated now. This will not affect
+! the ESMF Array objects. The Array objects must not be deallocated while 
+! the ArrayBundle refers to them!
+!EOE
+!BOC
+  deallocate(arrayList)
+!EOC
 
 !BOE
 ! The ArrayBundle object can be printed.
@@ -146,20 +155,23 @@ program ESMF_ArrayBundleEx
 
 
 !BOC
-  call ESMF_ArrayDestroy(array(1), rc=rc)
+  call ESMF_ArrayDestroy(arrayList(1), rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOC
-  call ESMF_ArrayDestroy(array(2), rc=rc)
+  call ESMF_ArrayDestroy(arrayList(2), rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOC
+  deallocate(arrayList)
+  
   call ESMF_DistGridDestroy(distgrid, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+  
 
 10 continue
   call ESMF_Finalize(rc=rc)
