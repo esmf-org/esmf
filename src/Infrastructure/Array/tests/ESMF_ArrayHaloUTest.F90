@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHaloUTest.F90,v 1.7 2010/04/08 18:38:46 theurich Exp $
+! $Id: ESMF_ArrayHaloUTest.F90,v 1.8 2010/04/27 07:47:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayHaloUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayHaloUTest.F90,v 1.7 2010/04/08 18:38:46 theurich Exp $'
+    '$Id: ESMF_ArrayHaloUTest.F90,v 1.8 2010/04/27 07:47:35 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -49,13 +49,16 @@ program ESMF_ArrayHaloUTest
   type(ESMF_Array)      :: array
   type(ESMF_ArraySpec)  :: arrayspec
   type(ESMF_RouteHandle):: routehandle
-  integer(ESMF_KIND_I4), pointer :: farrayPtr(:,:)  ! matching Fortran array pointer
-  integer               :: rc, i, k, verifyValue, petCount, localPet
+  integer(ESMF_KIND_I4), pointer :: farrayPtr(:,:)
+  integer(ESMF_KIND_I4), pointer :: farrayPtr3d(:,:,:)
+  integer               :: rc, i, j, m, verifyValue, petCount, localPet
   logical               :: verifyFlag
   integer               :: eLB(2,1), eUB(2,1)
   integer               :: cLB(2,1), cUB(2,1)
   integer               :: tLB(2,1), tUB(2,1)
   integer               :: hLB(2,1), hUB(2,1)
+  integer               :: uLB(1), uUB(1)
+  integer, allocatable  :: connectionList(:,:)
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -87,6 +90,7 @@ program ESMF_ArrayHaloUTest
 
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
+! Test-1: 1D decomposition, non-overlapping halo regions
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -158,7 +162,7 @@ program ESMF_ArrayHaloUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-! Initailize the entire Array piece on every PET to the localPet number
+! Initialize the entire Array piece on every PET to the localPet number
 !------------------------------------------------------------------------
   farrayPtr = localPet
 
@@ -176,23 +180,19 @@ program ESMF_ArrayHaloUTest
   call ESMF_ArrayHalo(array=array, routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-! debugging ---------------  
-call ESMF_ArrayPrint(array)  
-!print *, farrayPtr  
-! debugging ---------------  
-
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Verify Array elemens after Halo() Test-1"
+  write(name, *) "Verify Array elements after Halo() Test-1"
   write(failMsg, *) "Wrong results" 
   
   verifyFlag = .true. ! assume all is correct until error is found
   
   ! verify elements within exclusive region
-  do k=eLB(2,1), eUB(2,1)
+  do j=eLB(2,1), eUB(2,1)
     do i=eLB(1,1), eUB(1,1)
-      if (farrayPtr(i,k) /= localPet) then
+      if (farrayPtr(i,j) /= localPet) then
         verifyFlag = .false.
+        print *, "Found wrong exclusive element"
         exit
       endif
     enddo
@@ -204,9 +204,9 @@ call ESMF_ArrayPrint(array)
   ! verify section 1
   verifyValue = localPet
   if (verifyFlag) then
-    do k=tLB(2,1), eLB(2,1)-1
+    do j=tLB(2,1), eLB(2,1)-1
       do i=tLB(1,1), eLB(1,1)-1
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 1"
           exit
@@ -226,9 +226,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = 2
   endif
   if (verifyFlag) then
-    do k=tLB(2,1), eLB(2,1)-1
+    do j=tLB(2,1), eLB(2,1)-1
       do i=eLB(1,1), eUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 2"
           exit
@@ -240,9 +240,9 @@ call ESMF_ArrayPrint(array)
   ! verify section 3
   verifyValue = localPet
   if (verifyFlag) then
-    do k=tLB(2,1), eLB(2,1)-1
+    do j=tLB(2,1), eLB(2,1)-1
       do i=eUB(1,1)+1, tUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 3"
           exit
@@ -254,9 +254,9 @@ call ESMF_ArrayPrint(array)
   ! verify section 4
   verifyValue = localPet
   if (verifyFlag) then
-    do k=eLB(2,1), eUB(2,1)
+    do j=eLB(2,1), eUB(2,1)
       do i=eUB(1,1)+1, tUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 4"
           exit
@@ -268,9 +268,9 @@ call ESMF_ArrayPrint(array)
   ! verify section 5
   verifyValue = localPet
   if (verifyFlag) then
-    do k=eUB(2,1)+1, tUB(2,1)
+    do j=eUB(2,1)+1, tUB(2,1)
       do i=eUB(1,1)+1, tUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 5"
           exit
@@ -290,9 +290,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = localPet
   endif
   if (verifyFlag) then
-    do k=eUB(2,1)+1, tUB(2,1)
+    do j=eUB(2,1)+1, tUB(2,1)
       do i=eLB(1,1), eUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 6"
           exit
@@ -304,9 +304,9 @@ call ESMF_ArrayPrint(array)
   ! verify section 7
   verifyValue = localPet
   if (verifyFlag) then
-    do k=eUB(2,1)+1, tUB(2,1)
+    do j=eUB(2,1)+1, tUB(2,1)
       do i=tLB(1,1), eLB(1,1)-1
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 7"
           exit
@@ -318,9 +318,9 @@ call ESMF_ArrayPrint(array)
   ! verify section 8
   verifyValue = localPet
   if (verifyFlag) then
-    do k=eLB(2,1), eUB(2,1)
+    do j=eLB(2,1), eUB(2,1)
       do i=tLB(1,1), eLB(1,1)-1
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 8"
           exit
@@ -355,8 +355,7 @@ call ESMF_ArrayPrint(array)
 
 !------------------------------------------------------------------------
 !------------------------------------------------------------------------
-!------------------------------------------------------------------------
-!------------------------------------------------------------------------
+! Test-2: 2D decomposition, overlapping halo regions
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -441,7 +440,7 @@ call ESMF_ArrayPrint(array)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-! Initailize the entire Array piece on every PET to the localPet number
+! Initialize the entire Array piece on every PET to the localPet number
 !------------------------------------------------------------------------
   farrayPtr = localPet
 
@@ -459,23 +458,19 @@ call ESMF_ArrayPrint(array)
   call ESMF_ArrayHalo(array=array, routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-! debugging ---------------  
-call ESMF_ArrayPrint(array)  
-!print *, farrayPtr  
-! debugging ---------------  
-
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Verify Array elemens after Halo() Test-2"
+  write(name, *) "Verify Array elements after Halo() Test-2"
   write(failMsg, *) "Wrong results" 
   
   verifyFlag = .true. ! assume all is correct until error is found
   
   ! verify elements within exclusive region
-  do k=eLB(2,1), eUB(2,1)
+  do j=eLB(2,1), eUB(2,1)
     do i=eLB(1,1), eUB(1,1)
-      if (farrayPtr(i,k) /= localPet) then
+      if (farrayPtr(i,j) /= localPet) then
         verifyFlag = .false.
+        print *, "Found wrong exclusive element"
         exit
       endif
     enddo
@@ -495,9 +490,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = 0
   endif
   if (verifyFlag) then
-    do k=tLB(2,1), eLB(2,1)-1
+    do j=tLB(2,1), eLB(2,1)-1
       do i=tLB(1,1), eLB(1,1)-1
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 1"
           exit
@@ -517,9 +512,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = 1
   endif
   if (verifyFlag) then
-    do k=tLB(2,1), eLB(2,1)-1
+    do j=tLB(2,1), eLB(2,1)-1
       do i=eLB(1,1), eUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 2"
           exit
@@ -539,9 +534,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = localPet
   endif
   if (verifyFlag) then
-    do k=tLB(2,1), eLB(2,1)-1
+    do j=tLB(2,1), eLB(2,1)-1
       do i=eUB(1,1)+1, tUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 3"
           exit
@@ -561,9 +556,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = localPet
   endif
   if (verifyFlag) then
-    do k=eLB(2,1), eUB(2,1)
+    do j=eLB(2,1), eUB(2,1)
       do i=eUB(1,1)+1, tUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 4"
           exit
@@ -583,9 +578,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = localPet
   endif
   if (verifyFlag) then
-    do k=eUB(2,1)+1, tUB(2,1)
+    do j=eUB(2,1)+1, tUB(2,1)
       do i=eUB(1,1)+1, tUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 5"
           exit
@@ -605,9 +600,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = localPet
   endif
   if (verifyFlag) then
-    do k=eUB(2,1)+1, tUB(2,1)
+    do j=eUB(2,1)+1, tUB(2,1)
       do i=eLB(1,1), eUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 6"
           exit
@@ -627,9 +622,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = localPet
   endif
   if (verifyFlag) then
-    do k=eUB(2,1)+1, tUB(2,1)
+    do j=eUB(2,1)+1, tUB(2,1)
       do i=tLB(1,1), eLB(1,1)-1
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 7"
           exit
@@ -649,9 +644,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = 2
   endif
   if (verifyFlag) then
-    do k=eLB(2,1), eUB(2,1)
+    do j=eLB(2,1), eUB(2,1)
       do i=tLB(1,1), eLB(1,1)-1
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 8"
           exit
@@ -686,8 +681,7 @@ call ESMF_ArrayPrint(array)
 
 !------------------------------------------------------------------------
 !------------------------------------------------------------------------
-!------------------------------------------------------------------------
-!------------------------------------------------------------------------
+! Test-3: 2D decomposition, overlapping halo regions, asymmetric haloDepth
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -772,7 +766,7 @@ call ESMF_ArrayPrint(array)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-! Initailize the entire Array piece on every PET to the localPet number
+! Initialize the entire Array piece on every PET to the localPet number
 !------------------------------------------------------------------------
   farrayPtr = localPet
 
@@ -797,23 +791,19 @@ call ESMF_ArrayPrint(array)
   call ESMF_ArrayHalo(array=array, routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-! debugging ---------------  
-call ESMF_ArrayPrint(array)  
-!print *, farrayPtr  
-! debugging ---------------  
-
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Verify Array elemens after Halo() Test-3"
+  write(name, *) "Verify Array elements after Halo() Test-3"
   write(failMsg, *) "Wrong results" 
   
   verifyFlag = .true. ! assume all is correct until error is found
   
   ! verify elements within exclusive region
-  do k=eLB(2,1), eUB(2,1)
+  do j=eLB(2,1), eUB(2,1)
     do i=eLB(1,1), eUB(1,1)
-      if (farrayPtr(i,k) /= localPet) then
+      if (farrayPtr(i,j) /= localPet) then
         verifyFlag = .false.
+        print *, "Found wrong exclusive element"
         exit
       endif
     enddo
@@ -833,9 +823,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = 0
   endif
   if (verifyFlag) then
-    do k=tLB(2,1), hLB(2,1)-1
+    do j=tLB(2,1), hLB(2,1)-1
       do i=tLB(1,1), hLB(1,1)-1
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong outside value in section 1"
           exit
@@ -843,9 +833,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=hLB(2,1), eLB(2,1)-1
+    do j=hLB(2,1), eLB(2,1)-1
       do i=hLB(1,1), eLB(1,1)-1
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong halo value in section 1"
           exit
@@ -865,9 +855,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = 1
   endif
   if (verifyFlag) then
-    do k=tLB(2,1), hLB(2,1)-1
+    do j=tLB(2,1), hLB(2,1)-1
       do i=eLB(1,1), eUB(1,1)
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong outside value in section 2"
           exit
@@ -875,9 +865,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=hLB(2,1), eLB(2,1)-1
+    do j=hLB(2,1), eLB(2,1)-1
       do i=eLB(1,1), eUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong halo value in section 2"
           exit
@@ -897,9 +887,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = localPet
   endif
   if (verifyFlag) then
-    do k=tLB(2,1), hLB(2,1)-1
+    do j=tLB(2,1), hLB(2,1)-1
       do i=hUB(1,1)+1, tUB(1,1)
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong outside value in section 3"
           exit
@@ -907,9 +897,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=hLB(2,1), eLB(2,1)-1
+    do j=hLB(2,1), eLB(2,1)-1
       do i=eUB(1,1)+1, hUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong halo value in section 3"
           exit
@@ -929,9 +919,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = localPet
   endif
   if (verifyFlag) then
-    do k=eLB(2,1), eUB(2,1)
+    do j=eLB(2,1), eUB(2,1)
       do i=hUB(1,1)+1, tUB(1,1)
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong outside value in section 4"
           exit
@@ -939,9 +929,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=eLB(2,1), eUB(2,1)
+    do j=eLB(2,1), eUB(2,1)
       do i=eUB(1,1)+1, hUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong halo value in section 4"
           exit
@@ -961,9 +951,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = localPet
   endif
   if (verifyFlag) then
-    do k=hUB(2,1)+1, tUB(2,1)
+    do j=hUB(2,1)+1, tUB(2,1)
       do i=hUB(1,1)+1, tUB(1,1)
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong outside value in section 5"
           exit
@@ -971,9 +961,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=eUB(2,1)+1, hUB(2,1)
+    do j=eUB(2,1)+1, hUB(2,1)
       do i=eUB(1,1)+1, hUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong halo value in section 5"
           exit
@@ -993,9 +983,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = localPet
   endif
   if (verifyFlag) then
-    do k=hUB(2,1)+1, tUB(2,1)
+    do j=hUB(2,1)+1, tUB(2,1)
       do i=eLB(1,1), eUB(1,1)
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong outside value in section 6"
           exit
@@ -1003,9 +993,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=eUB(2,1)+1, hUB(2,1)
+    do j=eUB(2,1)+1, hUB(2,1)
       do i=eLB(1,1), eUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong halo value in section 6"
           exit
@@ -1025,9 +1015,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = localPet
   endif
   if (verifyFlag) then
-    do k=hUB(2,1)+1, tUB(2,1)
+    do j=hUB(2,1)+1, tUB(2,1)
       do i=tLB(1,1), hLB(1,1)-1
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong outside value in section 7"
           exit
@@ -1035,9 +1025,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=eUB(2,1)+1, hUB(2,1)
+    do j=eUB(2,1)+1, hUB(2,1)
       do i=hLB(1,1), eLB(1,1)-1
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong halo value in section 7"
           exit
@@ -1057,9 +1047,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = 2
   endif
   if (verifyFlag) then
-    do k=eLB(2,1), eUB(2,1)
+    do j=eLB(2,1), eUB(2,1)
       do i=tLB(1,1), hLB(1,1)-1
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong outside value in section 8"
           exit
@@ -1067,9 +1057,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=eLB(2,1), eUB(2,1)
+    do j=eLB(2,1), eUB(2,1)
       do i=hLB(1,1), eLB(1,1)-1
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong halo value in section 8"
           exit
@@ -1104,8 +1094,8 @@ call ESMF_ArrayPrint(array)
 
 !------------------------------------------------------------------------
 !------------------------------------------------------------------------
-!------------------------------------------------------------------------
-!------------------------------------------------------------------------
+! Test-4: 2D decomposition, overlapping halo regions, asymmetric haloDepth
+!         and use of halostartregionflag
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -1192,7 +1182,7 @@ call ESMF_ArrayPrint(array)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-! Initailize the entire Array piece on every PET to the localPet number
+! Initialize the entire Array piece on every PET to the localPet number
 !------------------------------------------------------------------------
   farrayPtr = localPet
 
@@ -1218,22 +1208,23 @@ call ESMF_ArrayPrint(array)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 ! debugging ---------------  
-call ESMF_ArrayPrint(array)  
+!call ESMF_ArrayPrint(array)  
 !print *, farrayPtr  
 ! debugging ---------------  
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Verify Array elemens after Halo() Test-4"
+  write(name, *) "Verify Array elements after Halo() Test-4"
   write(failMsg, *) "Wrong results" 
   
   verifyFlag = .true. ! assume all is correct until error is found
   
   ! verify elements within exclusive region
-  do k=eLB(2,1), eUB(2,1)
+  do j=eLB(2,1), eUB(2,1)
     do i=eLB(1,1), eUB(1,1)
-      if (farrayPtr(i,k) /= localPet) then
+      if (farrayPtr(i,j) /= localPet) then
         verifyFlag = .false.
+        print *, "Found wrong exclusive element"
         exit
       endif
     enddo
@@ -1253,9 +1244,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = 0
   endif
   if (verifyFlag) then
-    do k=tLB(2,1), hLB(2,1)-1
+    do j=tLB(2,1), hLB(2,1)-1
       do i=tLB(1,1), hLB(1,1)-1
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong outside value in section 1"
           exit
@@ -1263,9 +1254,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=hLB(2,1), cLB(2,1)-1
+    do j=hLB(2,1), cLB(2,1)-1
       do i=hLB(1,1), cLB(1,1)-1
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong halo value in section 1"
           exit
@@ -1273,9 +1264,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=cLB(2,1), eLB(2,1)-1
+    do j=cLB(2,1), eLB(2,1)-1
       do i=cLB(1,1), eLB(1,1)-1
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong inside value in section 1"
           exit
@@ -1295,9 +1286,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = 1
   endif
   if (verifyFlag) then
-    do k=tLB(2,1), hLB(2,1)-1
+    do j=tLB(2,1), hLB(2,1)-1
       do i=eLB(1,1), eUB(1,1)
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong outside value in section 2"
           exit
@@ -1305,9 +1296,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=hLB(2,1), cLB(2,1)-1
+    do j=hLB(2,1), cLB(2,1)-1
       do i=eLB(1,1), eUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong halo value in section 2"
           exit
@@ -1315,9 +1306,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=cLB(2,1), eLB(2,1)-1
+    do j=cLB(2,1), eLB(2,1)-1
       do i=eLB(1,1), eUB(1,1)
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong inside value in section 2"
           exit
@@ -1337,9 +1328,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = localPet
   endif
   if (verifyFlag) then
-    do k=tLB(2,1), hLB(2,1)-1
+    do j=tLB(2,1), hLB(2,1)-1
       do i=hUB(1,1)+1, tUB(1,1)
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong outside value in section 3"
           exit
@@ -1347,9 +1338,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=hLB(2,1), cLB(2,1)-1
+    do j=hLB(2,1), cLB(2,1)-1
       do i=cUB(1,1)+1, hUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong halo value in section 3"
           exit
@@ -1357,9 +1348,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=cLB(2,1), eLB(2,1)-1
+    do j=cLB(2,1), eLB(2,1)-1
       do i=eUB(1,1)+1, cUB(1,1)
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong inside value in section 3"
           exit
@@ -1379,9 +1370,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = localPet
   endif
   if (verifyFlag) then
-    do k=eLB(2,1), eUB(2,1)
+    do j=eLB(2,1), eUB(2,1)
       do i=hUB(1,1)+1, tUB(1,1)
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong outside value in section 4"
           exit
@@ -1389,9 +1380,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=eLB(2,1), eUB(2,1)
+    do j=eLB(2,1), eUB(2,1)
       do i=cUB(1,1)+1, hUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong halo value in section 4"
           exit
@@ -1399,9 +1390,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=eLB(2,1), eUB(2,1)
+    do j=eLB(2,1), eUB(2,1)
       do i=eUB(1,1)+1, cUB(1,1)
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong inside value in section 4"
           exit
@@ -1421,9 +1412,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = localPet
   endif
   if (verifyFlag) then
-    do k=hUB(2,1)+1, tUB(2,1)
+    do j=hUB(2,1)+1, tUB(2,1)
       do i=hUB(1,1)+1, tUB(1,1)
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong outside value in section 5"
           exit
@@ -1431,9 +1422,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=cUB(2,1)+1, hUB(2,1)
+    do j=cUB(2,1)+1, hUB(2,1)
       do i=cUB(1,1)+1, hUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong halo value in section 5"
           exit
@@ -1441,9 +1432,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=eUB(2,1)+1, cUB(2,1)
+    do j=eUB(2,1)+1, cUB(2,1)
       do i=eUB(1,1)+1, cUB(1,1)
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong inside value in section 5"
           exit
@@ -1463,9 +1454,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = localPet
   endif
   if (verifyFlag) then
-    do k=hUB(2,1)+1, tUB(2,1)
+    do j=hUB(2,1)+1, tUB(2,1)
       do i=eLB(1,1), eUB(1,1)
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong outside value in section 6"
           exit
@@ -1473,9 +1464,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=cUB(2,1)+1, hUB(2,1)
+    do j=cUB(2,1)+1, hUB(2,1)
       do i=eLB(1,1), eUB(1,1)
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong halo value in section 6"
           exit
@@ -1483,9 +1474,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=eUB(2,1)+1, cUB(2,1)
+    do j=eUB(2,1)+1, cUB(2,1)
       do i=eLB(1,1), eUB(1,1)
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong inside value in section 6"
           exit
@@ -1505,9 +1496,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = localPet
   endif
   if (verifyFlag) then
-    do k=hUB(2,1)+1, tUB(2,1)
+    do j=hUB(2,1)+1, tUB(2,1)
       do i=tLB(1,1), hLB(1,1)-1
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong outside value in section 7"
           exit
@@ -1515,9 +1506,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=cUB(2,1)+1, hUB(2,1)
+    do j=cUB(2,1)+1, hUB(2,1)
       do i=hLB(1,1), cLB(1,1)-1
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong halo value in section 7"
           exit
@@ -1525,9 +1516,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=eUB(2,1)+1, cUB(2,1)
+    do j=eUB(2,1)+1, cUB(2,1)
       do i=cLB(1,1), eLB(1,1)-1
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong inside value in section 7"
           exit
@@ -1547,9 +1538,9 @@ call ESMF_ArrayPrint(array)
     verifyValue = 2
   endif
   if (verifyFlag) then
-    do k=eLB(2,1), eUB(2,1)
+    do j=eLB(2,1), eUB(2,1)
       do i=tLB(1,1), hLB(1,1)-1
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong outside value in section 8"
           exit
@@ -1557,9 +1548,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=eLB(2,1), eUB(2,1)
+    do j=eLB(2,1), eUB(2,1)
       do i=hLB(1,1), cLB(1,1)-1
-        if (farrayPtr(i,k) /= verifyValue) then
+        if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong halo value in section 8"
           exit
@@ -1567,9 +1558,9 @@ call ESMF_ArrayPrint(array)
       enddo
       if (.not. verifyFlag) exit
     enddo
-    do k=eLB(2,1), eUB(2,1)
+    do j=eLB(2,1), eUB(2,1)
       do i=cLB(1,1), eLB(1,1)-1
-        if (farrayPtr(i,k) /= localPet) then
+        if (farrayPtr(i,j) /= localPet) then
           verifyFlag = .false.
           print *, "Found wrong inside value in section 8"
           exit
@@ -1602,12 +1593,1790 @@ call ESMF_ArrayPrint(array)
   call ESMF_DistGridDestroy(distGrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!-------------------------------------------------------------------------------
-!-------------------------------------------------------------------------------
+!------------------------------------------------------------------------
+!------------------------------------------------------------------------
+! Test-5: 2D decomposition with periodic boundary condition along 2nd dimension,
+!         overlapping halo regions, asymmetric haloDepth and
+!         use of halostartregionflag
 
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Distgrid Connection Test-5"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  allocate(connectionList(3*2+2, 1))  ! (3*dimCount+2, number of connections)
+  call ESMF_DistGridConnection(connection=connectionList(:,1), &
+     patchIndexA=1, patchIndexB=1, &
+     positionVector=(/0, 20/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!TODO: consider the same Arrays above, but with various boundary conditions
-!TODO: on the edges of the underlying DistGrid.
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Distgrid Create Test-5"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,20/), &
+    regDecomp=(/2,2/), connectionList=connectionList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate(connectionList)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySpec Set Test-5"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=2, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Create Test-5"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    computationalLWidth=(/1,1/), computationalUWidth=(/1,1/), &
+    totalLWidth=(/2,2/), totalUWidth=(/2,2/), rc=rc)
+
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Get Test-5"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(array, exclusiveLBound=eLB, exclusiveUBound=eUB, &
+    computationalLBound=cLB, computationalUBound=cUB, &
+    totalLBound=tLB, totalUBound=tUB, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! The Array object is defined on a 10 x 20 index space which is regularily
+! decomposed into 2 x 2 = 4 DEs. This means that each DE holds a 5 x 10 
+! piece of the index space.
+! The unit test is set up to run on exactly 4 PETs. There are, therefore,
+! exactly one DE per PET.
+! The Array further defines a computational width of 2 elements in each
+! direction around the exclusive region. This area of 2 elements around
+! the exclusive region provides the destination elements for Halo operations
+! defined on the Array object.
+! 
+!             +-------------------+       +-------------------+
+!             | \       2       / |       | \       2       / |
+!             |  +-------------+  |       |  +-------------+  |
+!             |  |     DE 0    |  |       |  |     DE 2    |  |
+!             |  |             |  |       |  |             |  |
+! periodic <- |2 |    5 x 10   | 2|  <->  |2 |    5 x 10   | 2| -> periodic
+!             |  |             |  |       |  |             |  |
+!             |  |             |  |       |  |             |  |
+!             |  +-------------+  |       |  +-------------+  |
+!             | /       2       \ |       | /       2       \ |
+!             +-------------------+       +-------------------+
+!
+!                       ^            \/             ^
+!                       |            /\             |
+!                       v                           v
+!
+!             +-------------------+       +-------------------+
+!             | \       2       / |       | \       2       / |
+!             |  +-------------+  |       |  +-------------+  |
+!             |  |     DE 1    |  |       |  |     DE 3    |  |
+!             |  |             |  |       |  |             |  |
+! periodic <- |2 |    5 x 10   | 2|  <->  |2 |    5 x 10   | 2| -> periodic
+!             |  |             |  |       |  |             |  |
+!             |  |             |  |       |  |             |  |
+!             |  +-------------+  |       |  +-------------+  |
+!             | /       2       \ |       | /       2       \ |
+!             +-------------------+       +-------------------+
+!
+! Explicitly set outer connections and implicit inner connections in the 
+! DistGrid define valid Halo paths for the Array object.
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Get farrayPtr from Array Test-5"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! Initialize the entire Array piece on every PET to the localPet number
+!------------------------------------------------------------------------
+  farrayPtr = localPet
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayHaloStore Test-5"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayHaloStore(array=array, routehandle=routehandle, &
+    halostartregionflag=ESMF_REGION_COMPUTATIONAL, &
+    haloLDepth=(/0,1/), haloUDepth=(/2,3/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  hLB(1,1) = max(cLB(1,1)-0, tLB(1,1))
+  hLB(2,1) = max(cLB(2,1)-1, tLB(2,1))
+  hUB(1,1) = min(cUB(1,1)+2, tUB(1,1))
+  hUB(2,1) = min(cUB(2,1)+3, tUB(2,1)) 
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayHalo Test-5"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayHalo(array=array, routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Array elements after Halo() Test-5"
+  write(failMsg, *) "Wrong results" 
+  
+  verifyFlag = .true. ! assume all is correct until error is found
+  
+  ! verify elements within exclusive region
+  do j=eLB(2,1), eUB(2,1)
+    do i=eLB(1,1), eUB(1,1)
+      if (farrayPtr(i,j) /= localPet) then
+        verifyFlag = .false.
+        print *, "Found wrong exclusive element"
+        exit
+      endif
+    enddo
+    if (.not. verifyFlag) exit
+  enddo
+  
+  ! verify all eight sections outside the exclusive region
+  ! section 1 staring in NW corner and going counter clock wise
+  ! verify section 1
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = 2
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = 0
+  endif
+  if (verifyFlag) then
+    do j=tLB(2,1), hLB(2,1)-1
+      do i=tLB(1,1), hLB(1,1)-1
+        if (farrayPtr(i,j) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong outside value in section 1"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=hLB(2,1), cLB(2,1)-1
+      do i=hLB(1,1), cLB(1,1)-1
+        if (farrayPtr(i,j) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong halo value in section 1"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=cLB(2,1), eLB(2,1)-1
+      do i=cLB(1,1), eLB(1,1)-1
+        if (farrayPtr(i,j) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong inside value in section 1"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 2
+  if (localPet == 0) then
+    verifyValue = 2
+  else if (localPet == 1) then
+    verifyValue = 3
+  else if (localPet == 2) then
+    verifyValue = 0
+  else if (localPet == 3) then
+    verifyValue = 1
+  endif
+  if (verifyFlag) then
+    do j=tLB(2,1), hLB(2,1)-1
+      do i=eLB(1,1), eUB(1,1)
+        if (farrayPtr(i,j) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong outside value in section 2"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=hLB(2,1), cLB(2,1)-1
+      do i=eLB(1,1), eUB(1,1)
+        if (farrayPtr(i,j) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong halo value in section 2"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=cLB(2,1), eLB(2,1)-1
+      do i=eLB(1,1), eUB(1,1)
+        if (farrayPtr(i,j) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong inside value in section 2"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 3
+  if (localPet == 0) then
+    verifyValue = 3
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = 1
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do j=tLB(2,1), hLB(2,1)-1
+      do i=hUB(1,1)+1, tUB(1,1)
+        if (farrayPtr(i,j) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong outside value in section 3"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=hLB(2,1), cLB(2,1)-1
+      do i=cUB(1,1)+1, hUB(1,1)
+        if (farrayPtr(i,j) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong halo value in section 3"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=cLB(2,1), eLB(2,1)-1
+      do i=eUB(1,1)+1, cUB(1,1)
+        if (farrayPtr(i,j) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong inside value in section 3"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 4
+  if (localPet == 0) then
+    verifyValue = 1
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = 3
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do j=eLB(2,1), eUB(2,1)
+      do i=hUB(1,1)+1, tUB(1,1)
+        if (farrayPtr(i,j) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong outside value in section 4"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eLB(2,1), eUB(2,1)
+      do i=cUB(1,1)+1, hUB(1,1)
+        if (farrayPtr(i,j) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong halo value in section 4"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eLB(2,1), eUB(2,1)
+      do i=eUB(1,1)+1, cUB(1,1)
+        if (farrayPtr(i,j) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong inside value in section 4"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 5
+  if (localPet == 0) then
+    verifyValue = 3
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = 1
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do j=hUB(2,1)+1, tUB(2,1)
+      do i=hUB(1,1)+1, tUB(1,1)
+        if (farrayPtr(i,j) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong outside value in section 5"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=cUB(2,1)+1, hUB(2,1)
+      do i=cUB(1,1)+1, hUB(1,1)
+        if (farrayPtr(i,j) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong halo value in section 5"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eUB(2,1)+1, cUB(2,1)
+      do i=eUB(1,1)+1, cUB(1,1)
+        if (farrayPtr(i,j) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong inside value in section 5"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 6
+  if (localPet == 0) then
+    verifyValue = 2
+  else if (localPet == 1) then
+    verifyValue = 3
+  else if (localPet == 2) then
+    verifyValue = 0
+  else if (localPet == 3) then
+    verifyValue = 1
+  endif
+  if (verifyFlag) then
+    do j=hUB(2,1)+1, tUB(2,1)
+      do i=eLB(1,1), eUB(1,1)
+        if (farrayPtr(i,j) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong outside value in section 6"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=cUB(2,1)+1, hUB(2,1)
+      do i=eLB(1,1), eUB(1,1)
+        if (farrayPtr(i,j) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong halo value in section 6"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eUB(2,1)+1, cUB(2,1)
+      do i=eLB(1,1), eUB(1,1)
+        if (farrayPtr(i,j) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong inside value in section 6"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 7
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = 2
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = 0
+  endif
+  if (verifyFlag) then
+    do j=hUB(2,1)+1, tUB(2,1)
+      do i=tLB(1,1), hLB(1,1)-1
+        if (farrayPtr(i,j) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong outside value in section 7"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=cUB(2,1)+1, hUB(2,1)
+      do i=hLB(1,1), cLB(1,1)-1
+        if (farrayPtr(i,j) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong halo value in section 7"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eUB(2,1)+1, cUB(2,1)
+      do i=cLB(1,1), eLB(1,1)-1
+        if (farrayPtr(i,j) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong inside value in section 7"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 8
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = 0
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = 2
+  endif
+  if (verifyFlag) then
+    do j=eLB(2,1), eUB(2,1)
+      do i=tLB(1,1), hLB(1,1)-1
+        if (farrayPtr(i,j) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong outside value in section 8"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eLB(2,1), eUB(2,1)
+      do i=hLB(1,1), cLB(1,1)-1
+        if (farrayPtr(i,j) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong halo value in section 8"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eLB(2,1), eUB(2,1)
+      do i=cLB(1,1), eLB(1,1)-1
+        if (farrayPtr(i,j) /= localPet) then
+          verifyFlag = .false.
+          print *, "Found wrong inside value in section 8"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+    
+  call ESMF_Test(verifyFlag, name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "routehandle Release Test-5"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayHaloRelease(routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Destroy Test-5"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Distgrid Destroy Test-5"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_DistGridDestroy(distGrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+!------------------------------------------------------------------------
+! Test-6: 2D decomposition, overlapping halo regions, asymmetric haloDepth,
+!         Array with undistributed dimension (last dim, not weakly congruent)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Distgrid Create Test-6"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,20/), &
+    regDecomp=(/2,2/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySpec Set Test-6"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=3, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Create Test-6"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    totalLWidth=(/2,2/), totalUWidth=(/2,2/), &
+    undistLBound=(/-3/), undistUBound=(/5/), rc=rc)
+
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Get Test-6"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(array, exclusiveLBound=eLB, exclusiveUBound=eUB, &
+    totalLBound=tLB, totalUBound=tUB, undistLBound=uLB, undistUBound=uUB, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! The Array object is defined on a 10 x 20 index space which is regularily
+! decomposed into 2 x 2 = 4 DEs. This means that each DE holds a 5 x 10 
+! piece of the index space.
+! The unit test is set up to run on exactly 4 PETs. There are, therefore,
+! exactly one DE per PET.
+! The Array further defines a computational width of 2 elements in each
+! direction around the exclusive region. This area of 2 elements around
+! the exclusive region provides the destination elements for Halo operations
+! defined on the Array object.
+! 
+!          +-------------------+       +-------------------+
+!          | \       2       / |       | \       2       / |
+!          |  +-------------+  |       |  +-------------+  |
+!          |  |     DE 0    |  |       |  |     DE 2    |  |
+!          |  |             |  |       |  |             |  |
+!          |2 |    5 x 10   | 2|  <->  |2 |    5 x 10   | 2|
+!          |  |             |  |       |  |             |  |
+!          |  |             |  |       |  |             |  |
+!          |  +-------------+  |       |  +-------------+  |
+!          | /       2       \ |       | /       2       \ |
+!          +-------------------+       +-------------------+
+!
+!                    ^            \/             ^
+!                    |            /\             |
+!                    v                           v
+!
+!          +-------------------+       +-------------------+
+!          | \       2       / |       | \       2       / |
+!          |  +-------------+  |       |  +-------------+  |
+!          |  |     DE 1    |  |       |  |     DE 3    |  |
+!          |  |             |  |       |  |             |  |
+!          |2 |    5 x 10   | 2|  <->  |2 |    5 x 10   | 2|
+!          |  |             |  |       |  |             |  |
+!          |  |             |  |       |  |             |  |
+!          |  +-------------+  |       |  +-------------+  |
+!          | /       2       \ |       | /       2       \ |
+!          +-------------------+       +-------------------+
+!
+! Without the explicit definition of boundary conditions only the indicated
+! inner connections define valid Halo paths for the Array object.
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Get farrayPtr from Array Test-6"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr3d, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! Initialize the entire Array piece on every PET to the localPet number
+!------------------------------------------------------------------------
+  do m=uLB(1), uUB(1)
+    farrayPtr3d(:,:,m) = localPet + 10*m
+  enddo
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayHaloStore Test-6"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayHaloStore(array=array, routehandle=routehandle, &
+    halostartregionflag=ESMF_REGION_COMPUTATIONAL, &
+    haloLDepth=(/0,1/), haloUDepth=(/2,3/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  hLB(1,1) = max(eLB(1,1)-0, tLB(1,1))
+  hLB(2,1) = max(eLB(2,1)-1, tLB(2,1))
+  hUB(1,1) = min(eUB(1,1)+2, tUB(1,1))
+  hUB(2,1) = min(eUB(2,1)+3, tUB(2,1)) 
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayHalo Test-6"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayHalo(array=array, routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+! debugging ---------------  
+!call ESMF_ArrayPrint(array)  
+!print *, farrayPtr  
+! debugging ---------------  
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Array elements after Halo() Test-6"
+  write(failMsg, *) "Wrong results" 
+  
+  verifyFlag = .true. ! assume all is correct until error is found
+  
+  ! verify elements within exclusive region
+  do j=eLB(2,1), eUB(2,1)
+    do i=eLB(1,1), eUB(1,1)
+      do m=uLB(1), uUB(1)
+        if (farrayPtr3d(i,j,m) /= localPet + 10*m) then
+          verifyFlag = .false.
+          print *, "Found wrong exclusive element"
+          exit
+        endif
+      enddo
+    enddo
+    if (.not. verifyFlag) exit
+  enddo
+  
+  ! verify all eight sections outside the exclusive region
+  ! section 1 staring in NW corner and going counter clock wise
+  ! verify section 1
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = 0
+  endif
+  if (verifyFlag) then
+    do j=tLB(2,1), hLB(2,1)-1
+      do i=tLB(1,1), hLB(1,1)-1
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(i,j,m) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 1"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=hLB(2,1), eLB(2,1)-1
+      do i=hLB(1,1), eLB(1,1)-1
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(i,j,m) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 1"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 2
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = 0
+  else if (localPet == 3) then
+    verifyValue = 1
+  endif
+  if (verifyFlag) then
+    do j=tLB(2,1), hLB(2,1)-1
+      do i=eLB(1,1), eUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(i,j,m) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 2"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=hLB(2,1), eLB(2,1)-1
+      do i=eLB(1,1), eUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(i,j,m) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 2"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 3
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = 1
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do j=tLB(2,1), hLB(2,1)-1
+      do i=hUB(1,1)+1, tUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(i,j,m) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 3"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=hLB(2,1), eLB(2,1)-1
+      do i=eUB(1,1)+1, hUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(i,j,m) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 3"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 4
+  if (localPet == 0) then
+    verifyValue = 1
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = 3
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do j=eLB(2,1), eUB(2,1)
+      do i=hUB(1,1)+1, tUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(i,j,m) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 4"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eLB(2,1), eUB(2,1)
+      do i=eUB(1,1)+1, hUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(i,j,m) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 4"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 5
+  if (localPet == 0) then
+    verifyValue = 3
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do j=hUB(2,1)+1, tUB(2,1)
+      do i=hUB(1,1)+1, tUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(i,j,m) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 5"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eUB(2,1)+1, hUB(2,1)
+      do i=eUB(1,1)+1, hUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(i,j,m) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 5"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 6
+  if (localPet == 0) then
+    verifyValue = 2
+  else if (localPet == 1) then
+    verifyValue = 3
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do j=hUB(2,1)+1, tUB(2,1)
+      do i=eLB(1,1), eUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(i,j,m) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 6"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eUB(2,1)+1, hUB(2,1)
+      do i=eLB(1,1), eUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(i,j,m) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 6"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 7
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = 2
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do j=hUB(2,1)+1, tUB(2,1)
+      do i=tLB(1,1), hLB(1,1)-1
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(i,j,m) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 7"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eUB(2,1)+1, hUB(2,1)
+      do i=hLB(1,1), eLB(1,1)-1
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(i,j,m) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 7"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 8
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = 0
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = 2
+  endif
+  if (verifyFlag) then
+    do j=eLB(2,1), eUB(2,1)
+      do i=tLB(1,1), hLB(1,1)-1
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(i,j,m) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 8"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eLB(2,1), eUB(2,1)
+      do i=hLB(1,1), eLB(1,1)-1
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(i,j,m) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 8"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+    
+  call ESMF_Test(verifyFlag, name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "routehandle Release Test-6"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayHaloRelease(routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Destroy Test-6"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Distgrid Destroy Test-6"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_DistGridDestroy(distGrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+!------------------------------------------------------------------------
+! Test-7: 2D decomposition, overlapping halo regions, asymmetric haloDepth,
+!         Array with undistributed dimension (first dim, weakly congruent)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Distgrid Create Test-7"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,20/), &
+    regDecomp=(/2,2/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySpec Set Test-7"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=3, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Create Test-7a"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    distgridToArrayMap=(/2,3/), &
+    undistLBound=(/-2/), undistUBound=(/5/), &
+    totalLWidth=(/2,2/), totalUWidth=(/2,2/), rc=rc)
+
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Get Test-7a"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(array, exclusiveLBound=eLB, exclusiveUBound=eUB, &
+    totalLBound=tLB, totalUBound=tUB, undistLBound=uLB, undistUBound=uUB, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! The Array object is defined on a 10 x 20 index space which is regularily
+! decomposed into 2 x 2 = 4 DEs. This means that each DE holds a 5 x 10 
+! piece of the index space.
+! The unit test is set up to run on exactly 4 PETs. There are, therefore,
+! exactly one DE per PET.
+! The Array further defines a computational width of 2 elements in each
+! direction around the exclusive region. This area of 2 elements around
+! the exclusive region provides the destination elements for Halo operations
+! defined on the Array object.
+! 
+!          +-------------------+       +-------------------+
+!          | \       2       / |       | \       2       / |
+!          |  +-------------+  |       |  +-------------+  |
+!          |  |     DE 0    |  |       |  |     DE 2    |  |
+!          |  |             |  |       |  |             |  |
+!          |2 |    5 x 10   | 2|  <->  |2 |    5 x 10   | 2|
+!          |  |             |  |       |  |             |  |
+!          |  |             |  |       |  |             |  |
+!          |  +-------------+  |       |  +-------------+  |
+!          | /       2       \ |       | /       2       \ |
+!          +-------------------+       +-------------------+
+!
+!                    ^            \/             ^
+!                    |            /\             |
+!                    v                           v
+!
+!          +-------------------+       +-------------------+
+!          | \       2       / |       | \       2       / |
+!          |  +-------------+  |       |  +-------------+  |
+!          |  |     DE 1    |  |       |  |     DE 3    |  |
+!          |  |             |  |       |  |             |  |
+!          |2 |    5 x 10   | 2|  <->  |2 |    5 x 10   | 2|
+!          |  |             |  |       |  |             |  |
+!          |  |             |  |       |  |             |  |
+!          |  +-------------+  |       |  +-------------+  |
+!          | /       2       \ |       | /       2       \ |
+!          +-------------------+       +-------------------+
+!
+! Without the explicit definition of boundary conditions only the indicated
+! inner connections define valid Halo paths for the Array object.
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Get farrayPtr from Array Test-7a"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr3d, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! Initialize the entire Array piece on every PET to the localPet number
+!------------------------------------------------------------------------
+  do m=uLB(1), uUB(1)
+    farrayPtr3d(m,:,:) = localPet + 10*m
+  enddo
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayHaloStore Test-7"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayHaloStore(array=array, routehandle=routehandle, &
+    halostartregionflag=ESMF_REGION_COMPUTATIONAL, &
+    haloLDepth=(/0,1/), haloUDepth=(/2,3/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  hLB(1,1) = max(eLB(1,1)-0, tLB(1,1))
+  hLB(2,1) = max(eLB(2,1)-1, tLB(2,1))
+  hUB(1,1) = min(eUB(1,1)+2, tUB(1,1))
+  hUB(2,1) = min(eUB(2,1)+3, tUB(2,1)) 
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayHalo Test-7a"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayHalo(array=array, routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Array elements after Halo() Test-7a"
+  write(failMsg, *) "Wrong results" 
+  
+  verifyFlag = .true. ! assume all is correct until error is found
+  
+  ! verify elements within exclusive region
+  do j=eLB(2,1), eUB(2,1)
+    do i=eLB(1,1), eUB(1,1)
+      do m=uLB(1), uUB(1)
+        if (farrayPtr3d(m,i,j) /= localPet + 10*m) then
+          verifyFlag = .false.
+          print *, "Found wrong exclusive element"
+          exit
+        endif
+      enddo
+    enddo
+    if (.not. verifyFlag) exit
+  enddo
+  
+  ! verify all eight sections outside the exclusive region
+  ! section 1 staring in NW corner and going counter clock wise
+  ! verify section 1
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = 0
+  endif
+  if (verifyFlag) then
+    do j=tLB(2,1), hLB(2,1)-1
+      do i=tLB(1,1), hLB(1,1)-1
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 1", localPet, m, i, j, farrayPtr3d(m,i,j)
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=hLB(2,1), eLB(2,1)-1
+      do i=hLB(1,1), eLB(1,1)-1
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 1"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 2
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = 0
+  else if (localPet == 3) then
+    verifyValue = 1
+  endif
+  if (verifyFlag) then
+    do j=tLB(2,1), hLB(2,1)-1
+      do i=eLB(1,1), eUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 2"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=hLB(2,1), eLB(2,1)-1
+      do i=eLB(1,1), eUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 2"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 3
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = 1
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do j=tLB(2,1), hLB(2,1)-1
+      do i=hUB(1,1)+1, tUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 3"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=hLB(2,1), eLB(2,1)-1
+      do i=eUB(1,1)+1, hUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 3"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 4
+  if (localPet == 0) then
+    verifyValue = 1
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = 3
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do j=eLB(2,1), eUB(2,1)
+      do i=hUB(1,1)+1, tUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 4"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eLB(2,1), eUB(2,1)
+      do i=eUB(1,1)+1, hUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 4"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 5
+  if (localPet == 0) then
+    verifyValue = 3
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do j=hUB(2,1)+1, tUB(2,1)
+      do i=hUB(1,1)+1, tUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 5"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eUB(2,1)+1, hUB(2,1)
+      do i=eUB(1,1)+1, hUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 5"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 6
+  if (localPet == 0) then
+    verifyValue = 2
+  else if (localPet == 1) then
+    verifyValue = 3
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do j=hUB(2,1)+1, tUB(2,1)
+      do i=eLB(1,1), eUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 6"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eUB(2,1)+1, hUB(2,1)
+      do i=eLB(1,1), eUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 6"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 7
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = 2
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do j=hUB(2,1)+1, tUB(2,1)
+      do i=tLB(1,1), hLB(1,1)-1
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 7"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eUB(2,1)+1, hUB(2,1)
+      do i=hLB(1,1), eLB(1,1)-1
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 7"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 8
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = 0
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = 2
+  endif
+  if (verifyFlag) then
+    do j=eLB(2,1), eUB(2,1)
+      do i=tLB(1,1), hLB(1,1)-1
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 8"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eLB(2,1), eUB(2,1)
+      do i=hLB(1,1), eLB(1,1)-1
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 8"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+    
+  call ESMF_Test(verifyFlag, name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Destroy Test-7a"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Create weakly congruent Test-7b"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    distgridToArrayMap=(/2,3/), &
+    undistLBound=(/1/), undistUBound=(/15/), &
+    totalLWidth=(/2,2/), totalUWidth=(/2,2/), rc=rc)
+
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Get Test-7b"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(array, exclusiveLBound=eLB, exclusiveUBound=eUB, &
+    totalLBound=tLB, totalUBound=tUB, undistLBound=uLB, undistUBound=uUB, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Get farrayPtr from Array Test-7b"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr3d, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! Initialize the entire Array piece on every PET to the localPet number
+!------------------------------------------------------------------------
+  do m=uLB(1), uUB(1)
+    farrayPtr3d(m,:,:) = localPet + 10*m
+  enddo
+
+  hLB(1,1) = max(eLB(1,1)-0, tLB(1,1))
+  hLB(2,1) = max(eLB(2,1)-1, tLB(2,1))
+  hUB(1,1) = min(eUB(1,1)+2, tUB(1,1))
+  hUB(2,1) = min(eUB(2,1)+3, tUB(2,1)) 
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayHalo weakly congruent Test-7b"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayHalo(array=array, routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Array elements after Halo() Test-7b"
+  write(failMsg, *) "Wrong results" 
+  
+  verifyFlag = .true. ! assume all is correct until error is found
+  
+  ! verify elements within exclusive region
+  do j=eLB(2,1), eUB(2,1)
+    do i=eLB(1,1), eUB(1,1)
+      do m=uLB(1), uUB(1)
+        if (farrayPtr3d(m,i,j) /= localPet + 10*m) then
+          verifyFlag = .false.
+          print *, "Found wrong exclusive element"
+          exit
+        endif
+      enddo
+    enddo
+    if (.not. verifyFlag) exit
+  enddo
+  
+  ! verify all eight sections outside the exclusive region
+  ! section 1 staring in NW corner and going counter clock wise
+  ! verify section 1
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = 0
+  endif
+  if (verifyFlag) then
+    do j=tLB(2,1), hLB(2,1)-1
+      do i=tLB(1,1), hLB(1,1)-1
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 1"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=hLB(2,1), eLB(2,1)-1
+      do i=hLB(1,1), eLB(1,1)-1
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 1"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 2
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = 0
+  else if (localPet == 3) then
+    verifyValue = 1
+  endif
+  if (verifyFlag) then
+    do j=tLB(2,1), hLB(2,1)-1
+      do i=eLB(1,1), eUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 2"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=hLB(2,1), eLB(2,1)-1
+      do i=eLB(1,1), eUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 2"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 3
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = 1
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do j=tLB(2,1), hLB(2,1)-1
+      do i=hUB(1,1)+1, tUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 3"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=hLB(2,1), eLB(2,1)-1
+      do i=eUB(1,1)+1, hUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 3"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 4
+  if (localPet == 0) then
+    verifyValue = 1
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = 3
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do j=eLB(2,1), eUB(2,1)
+      do i=hUB(1,1)+1, tUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 4"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eLB(2,1), eUB(2,1)
+      do i=eUB(1,1)+1, hUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 4"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 5
+  if (localPet == 0) then
+    verifyValue = 3
+  else if (localPet == 1) then
+    verifyValue = localPet
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do j=hUB(2,1)+1, tUB(2,1)
+      do i=hUB(1,1)+1, tUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 5"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eUB(2,1)+1, hUB(2,1)
+      do i=eUB(1,1)+1, hUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 5"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 6
+  if (localPet == 0) then
+    verifyValue = 2
+  else if (localPet == 1) then
+    verifyValue = 3
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do j=hUB(2,1)+1, tUB(2,1)
+      do i=eLB(1,1), eUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 6"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eUB(2,1)+1, hUB(2,1)
+      do i=eLB(1,1), eUB(1,1)
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 6"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 7
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = 2
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = localPet
+  endif
+  if (verifyFlag) then
+    do j=hUB(2,1)+1, tUB(2,1)
+      do i=tLB(1,1), hLB(1,1)-1
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 7"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eUB(2,1)+1, hUB(2,1)
+      do i=hLB(1,1), eLB(1,1)-1
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 7"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+  ! verify section 8
+  if (localPet == 0) then
+    verifyValue = localPet
+  else if (localPet == 1) then
+    verifyValue = 0
+  else if (localPet == 2) then
+    verifyValue = localPet
+  else if (localPet == 3) then
+    verifyValue = 2
+  endif
+  if (verifyFlag) then
+    do j=eLB(2,1), eUB(2,1)
+      do i=tLB(1,1), hLB(1,1)-1
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= localPet + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong outside value in section 8"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    do j=eLB(2,1), eUB(2,1)
+      do i=hLB(1,1), eLB(1,1)-1
+        do m=uLB(1), uUB(1)
+          if (farrayPtr3d(m,i,j) /= verifyValue + 10*m) then
+            verifyFlag = .false.
+            print *, "Found wrong halo value in section 8"
+            exit
+          endif
+        enddo
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  endif
+    
+  call ESMF_Test(verifyFlag, name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Destroy Test-7b"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "routehandle Release Test-7"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayHaloRelease(routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Distgrid Destroy Test-7"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_DistGridDestroy(distGrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+!------------------------------------------------------------------------
 
 10 continue
   !------------------------------------------------------------------------
