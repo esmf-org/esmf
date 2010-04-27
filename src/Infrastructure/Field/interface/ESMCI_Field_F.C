@@ -1,4 +1,4 @@
-// $Id: ESMCI_Field_F.C,v 1.11.2.1 2010/02/05 19:55:46 svasquez Exp $
+// $Id: ESMCI_Field_F.C,v 1.11.2.2 2010/04/27 20:49:31 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_Field_F.C,v 1.11.2.1 2010/02/05 19:55:46 svasquez Exp $";
+             "$Id: ESMCI_Field_F.C,v 1.11.2.2 2010/04/27 20:49:31 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -47,13 +47,13 @@ void FTN(c_esmc_fieldserialize)(
                 ESMC_Status *gridstatus, 
                 ESMC_Status *datastatus, 
                 ESMC_Status *iostatus,
-                int * staggerloc,
+                int * dimCount,
                 int * gridToFieldMap,
                 int * ungriddedLBound,
                 int * ungriddedUBound,
                 int * maxHaloLWidth,
                 int * maxHaloUWidth,
-		void *buffer, int *length, int *offset,
+                void *buffer, int *length, int *offset,
                 ESMC_InquireFlag *inquireflag, int *localrc){
 
     ESMC_InquireFlag linquireflag = *inquireflag;
@@ -93,7 +93,7 @@ void FTN(c_esmc_fieldserialize)(
     // depending on the size of Fortran-integer
     char * ptr = (char *)sp;
     if (linquireflag != ESMF_INQUIREONLY)
-      memcpy((void *)ptr, (const void *)staggerloc, sizeof(int));
+      memcpy((void *)ptr, (const void *)dimCount, sizeof(int));
     ptr += sizeof(int);
     if (linquireflag != ESMF_INQUIREONLY)
       memcpy((void *)ptr, (const void *)gridToFieldMap, ESMF_MAXDIM*sizeof(int));
@@ -123,7 +123,7 @@ void FTN(c_esmc_fielddeserialize)(
                 ESMC_Status *gridstatus, 
                 ESMC_Status *datastatus, 
                 ESMC_Status *iostatus, 
-                int * staggerloc,
+                int * dimCount,
                 int * gridToFieldMap,
                 int * ungriddedLBound,
                 int * ungriddedUBound,
@@ -144,7 +144,7 @@ void FTN(c_esmc_fielddeserialize)(
     *iostatus = *sp++;
 
     char * ptr = (char *)sp;
-    memcpy((void *)staggerloc, (const void *)ptr, sizeof(int));
+    memcpy((void *)dimCount, (const void *)ptr, sizeof(int));
     ptr += sizeof(int);
     memcpy((void *)gridToFieldMap, (const void *)ptr, ESMF_MAXDIM*sizeof(int));
     ptr += ESMF_MAXDIM*sizeof(int);
