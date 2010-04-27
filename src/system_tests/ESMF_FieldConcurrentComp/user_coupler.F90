@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.8 2009/05/29 19:24:42 theurich Exp $
+! $Id: user_coupler.F90,v 1.9 2010/04/27 20:30:20 feiliu Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -110,7 +110,7 @@
   
         ! Local variables
         integer :: status = ESMF_SUCCESS
-        integer :: itemcount
+        integer :: itemcount, dimCount
         type(ESMF_Field) :: sorted_data1, sorted_data2
         type(ESMF_VM) :: vm
         integer :: pet_id
@@ -165,6 +165,17 @@
         call ESMF_StateGet(exportState, "sorted_data2", sorted_data2, rc=status)       
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
+
+        ! check dimCount
+        call ESMF_FieldGet(sorted_data1, dimCount=dimCount, rc=status)
+        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        if(dimCount /= 1) then
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                "dimCount not properly reconciled", &
+                 ESMF_CONTEXT, rc)
+            return
+        endif
 
         ! precompute redist handle
         call ESMF_FieldRedistStore(srcField=sorted_data1, &
