@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.101 2010/04/27 07:42:41 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.102 2010/04/27 22:51:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.101 2010/04/27 07:42:41 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.102 2010/04/27 22:51:17 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -6339,11 +6339,10 @@ int Array::sparseMatMulStore(
   // garbage collection
   delete [] tensorMixFlagList;
   
-  // check that factorPetCount at least 1
+  // check for the special case of no factors provided on any PET
   if (factorPetCount < 1){
-//    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-//      "- at least one PET must provide a valid factorList", &rc);
-//    return rc;
+    // it is consistent to treat the factorless case as a special situation
+    // where no error is returned but the routehandle simply holds a nop
     // create and initialize the RouteHandle
     *routehandle = RouteHandle::create(&localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
