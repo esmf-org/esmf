@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.27 2010/04/27 17:55:22 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.28 2010/04/27 22:52:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.27 2010/04/27 17:55:22 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.28 2010/04/27 22:52:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -429,8 +429,8 @@ int ArrayBundle::haloStore(
       Array *array = arraybundle->getArrayList()[i];
       if (matchList[i] < i){
         // Array matches previous Array in ArrayBundle
-        printf("localPet=%d, Array #%d does not require precompute\n",
-          localPet, i);
+//        printf("localPet=%d, Array #%d does not require precompute, "
+//          "reuse xxe from #%d\n", localPet, i, matchList[i]);
         // append the xxeSub to the xxe object with RRA offset info
         localrc = xxe->appendXxeSub(0x0, xxeSub[matchList[i]], rraShift,
           vectorLengthShift);
@@ -438,8 +438,8 @@ int ArrayBundle::haloStore(
           &rc)) return rc;
       }else{
         // Array does _not_ match any previous Array in ArrayBundle
-        printf("localPet=%d, Array #%d requires precompute\n",
-          localPet, i);
+//        printf("localPet=%d, Array #%d requires precompute\n",
+//          localPet, i);
         RouteHandle *rh;
         localrc = Array::haloStore(array, &rh, halostartregionflag,
           haloLDepth, haloUDepth);
@@ -1258,7 +1258,7 @@ int ArrayBundle::sparseMatMulRelease(
   // get XXE from routehandle
   XXE *xxe = (XXE *)routehandle->getStorage();
   
-#define XXEPROFILEPRINT
+#define XXEPROFILEPRINT___disable
 #ifdef XXEPROFILEPRINT
     // print XXE stream profile
     VM *vm = VM::getCurrent(&localrc);
