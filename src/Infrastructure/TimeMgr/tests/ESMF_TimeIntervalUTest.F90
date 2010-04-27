@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.55.2.1 2010/02/05 20:00:48 svasquez Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.55.2.2 2010/04/27 20:15:35 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.55.2.1 2010/02/05 20:00:48 svasquez Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.55.2.2 2010/04/27 20:15:35 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -2562,6 +2562,79 @@
                       H==12 .and. M==17 .and. S==58 .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "360 Day Calendar Interval increment 3/1/2004 by d=-2 Test"
+      write(failMsg, *) " Did not return 2/29/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=1, h=12, m=17, s=58, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=-2, rc=rc)
+      startTime = startTime + timeStep  ! exercise Time + operator
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing ESMF_TimeOperator(+)(time, timestep)
+      ! From Brian Eaton/CCSM in #2992547
+      write(name, *) "360 Day Calendar Interval increment 1/1/1850 by d_r8=-1.0d0 Test"
+      write(failMsg, *) " Did not return 12/30/1849 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1850, mm=1, dd=1, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d_r8=-1.0d0, rc=rc)
+      startTime = startTime + timeStep  ! exercise Time + operator
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, rc=rc)
+      call ESMF_Test((YY==1849 .and. MM==12 .and. DD==30 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !print *, "YY=", YY, " MM=", MM, " DD=", DD
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "360 Day Calendar Interval increment 1/1/1850 by d_r8=-1.25d0 Test"
+      write(failMsg, *) " Did not return 12/29/1849 18:00:00 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1850, mm=1, dd=1, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d_r8=-1.25d0, rc=rc)
+      startTime = startTime + timeStep  ! exercise Time + operator
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1849 .and. MM==12 .and. DD==29 .and. &
+                      H==18 .and. M==0 .and. S==0 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !print *, "YY=", YY, " MM=", MM, " DD=", DD, " H=", H, " M=", M, " S=", S
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "360 Day Calendar Interval increment 3/1/2010 by d_r8=-1.1d0 Test"
+      write(failMsg, *) " Did not return 2/29/2010 21:36:00 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2010, mm=3, dd=1, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d_r8=-1.1d0, rc=rc)
+      startTime = startTime + timeStep  ! exercise Time + operator
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2010 .and. MM==2 .and. DD==29 .and. &
+                      H==21 .and. M==36 .and. S==0 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !print *, "YY=", YY, " MM=", MM, " DD=", DD, " H=", H, " M=", M, " S=", S
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "360 Day Calendar Interval increment 2/28/2010 by d_r8=(1.0+1.0/3.0) Test"
+      write(failMsg, *) " Did not return 2/29/2010 08:00:00 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2010, mm=2, dd=28, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d_r8=(1.0d0+1.0d0/3.0d0), rc=rc)
+      startTime = startTime + timeStep  ! exercise Time + operator
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2010 .and. MM==2 .and. DD==29 .and. &
+                      H==8 .and. M==0 .and. S==0 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !print *, "YY=", YY, " MM=", MM, " DD=", DD, " H=", H, " M=", M, " S=", S
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Testing ESMF_TimeOperator(+)(time, timestep)

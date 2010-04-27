@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.34.2.1 2010/02/05 20:00:54 svasquez Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.34.2.2 2010/04/27 20:15:35 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.34.2.1 2010/02/05 20:00:54 svasquez Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.34.2.2 2010/04/27 20:15:35 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -829,6 +829,41 @@
       ! Real fractional times tests
       ! ----------------------------------------------------------------------------
 
+      !EX_UTest
+      ! Test Setting/Getting with s_r8 on Julian Day calendar
+      write(failMsg, *) " Did not return Set values and ESMF_SUCCESS"
+      call ESMF_TimeSet(time1, s_r8=-37.25d0, &
+                        calendar=julianDayCalendar, rc=rc)
+      !call ESMF_TimePrint(time1, rc=rc)
+      call ESMF_TimeGet(time1, s_r8=S_r8, s=S, sN=SN, sD=SD, rc=rc)
+      write(name, *) "Set/Get Real (s_r8) Time on Julian Day calendar Test"
+      call ESMF_Test((abs(S_r8 + 37.25d0) < 1d-17) .and. &
+                      S .eq.-37 .and. &
+                      SN.eq.-1.and. &
+                      SD.eq.4.and. &
+                      rc.eq.ESMF_SUCCESS, &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !print *, S_r8, S, SN, SD
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Setting/Getting with m_r8 on Julian Day calendar
+      ! Test to verify fix for Brian Eaton/CCSM in #2992547
+      write(failMsg, *) " Did not return Set values and ESMF_SUCCESS"
+      call ESMF_TimeSet(time1, m_r8=-59.0d0, &
+                        calendar=julianDayCalendar, rc=rc)
+      !call ESMF_TimePrint(time1, rc=rc)
+      call ESMF_TimeGet(time1, m_r8=M_r8, m=M, sN=SN, sD=SD, rc=rc)
+      write(name, *) "Set/Get Real (m_r8) Time on Julian Day calendar Test"
+      call ESMF_Test((abs(M_r8 + 59.0d0) < 1d-17) .and. &
+                      M .eq.-59 .and. &
+                      SN.eq.0.and. &
+                      SD.eq.1.and. &
+                      rc.eq.ESMF_SUCCESS, &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !print *, M_r8, M, SN, SD
+
+      ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Test Setting/Getting with _r8's on Julian Day calendar
       write(failMsg, *) " Did not return Set values and ESMF_SUCCESS"
