@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.53 2010/04/26 17:27:49 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.54 2010/04/27 19:06:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -432,6 +432,7 @@ program ESMF_ArrayEx
 
 
 ! \subsubsection{Computational region and extra elements for halo or padding}
+! \label{Array:padding}
 !
 ! In the previous examples the computational region of {\tt array} was chosen 
 ! by default to be identical to the exclusive region defined by the DistGrid
@@ -911,7 +912,6 @@ program ESMF_ArrayEx
 !
 !
 ! \subsubsection{Total region, memory padding and changing computational region}
-! \section{Array:padding}
 !
 ! The default total region during Array creation is chosen as to exactly
 ! accommodate the computational region. Once an Array object has been created 
