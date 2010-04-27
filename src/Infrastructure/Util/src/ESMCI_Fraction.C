@@ -1,4 +1,4 @@
-// $Id: ESMCI_Fraction.C,v 1.6.2.1 2010/02/05 20:01:08 svasquez Exp $
+// $Id: ESMCI_Fraction.C,v 1.6.2.2 2010/04/27 20:13:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Fraction.C,v 1.6.2.1 2010/02/05 20:01:08 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.6.2.2 2010/04/27 20:13:41 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // TODO:  Use logarithms for checking if a multiplication or division is about
@@ -220,6 +220,8 @@
       w = (ESMC_I8) rabs;
       target -= (ESMC_R8)w;
       if (target < 1e-17) { // if given rin is an integer, we're done
+        // restore sign
+        if (sign == -1) w *= sign;
         return(ESMF_SUCCESS);
       }
     }
@@ -249,7 +251,7 @@
     // significant digits (at least DBL_DIG) is achieved.
     //   Worst case is 37 iterations for the
     //     golden ratio phi = (1 + sqrt(5))/2; the "most irrational number".
-int i=0; f=0.0;
+    int i=0; f=0.0;
     do {
       a = (ESMC_I8) r;            // Compute
       n = a * nprev + nprevprev;  //  next
