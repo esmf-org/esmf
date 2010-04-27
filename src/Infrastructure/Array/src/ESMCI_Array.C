@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.100 2010/04/26 21:33:05 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.101 2010/04/27 07:42:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.100 2010/04/26 21:33:05 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.101 2010/04/27 07:42:41 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3623,6 +3623,7 @@ int Array::haloStore(
       }
     }
     
+#define HALOTENSORMIX_disable
     // construct identity sparse matrix from rim elements with valid seqIndex
     vector<int> factorIndexList;
     int factorListCount = 0;  // init
@@ -3654,9 +3655,13 @@ int Array::haloStore(
           if (withinHalo){
             // add element to identity matrix
             factorIndexList.push_back(seqIndex.decompSeqIndex); // src
+#ifdef HALOTENSORMIX
             factorIndexList.push_back(seqIndex.tensorSeqIndex); // src
+#endif
             factorIndexList.push_back(seqIndex.decompSeqIndex); // dst
+#ifdef HALOTENSORMIX
             factorIndexList.push_back(seqIndex.tensorSeqIndex); // dst
+#endif
             ++factorListCount;  // count this element
           }else{
             // need to mask this element in the Array rim region in order to
@@ -3700,7 +3705,11 @@ int Array::haloStore(
     // prepare SparseMatrix vector with the constructed sparse matrix
     vector<SparseMatrix> sparseMatrix;
     sparseMatrix.push_back(SparseMatrix(typekindFactor, factorList,
+#ifdef HALOTENSORMIX
       factorListCount, 2, 2, &(factorIndexList[0])));
+#else
+      factorListCount, 1, 1, &(factorIndexList[0])));
+#endif
   
     // precompute sparse matrix multiplication
     localrc = sparseMatMulStore(array, array, routehandle, sparseMatrix, true);
@@ -4676,47 +4685,75 @@ namespace ArrayHelper{
         ++pp;
       } // for kk - termCount
       // need to fill in sensible elements and values or timing will be bogus
-      switch (elementTK){
+      switch (elementTK){ // elements in dstArray
       case XXE::R4:
-        for (int kk=0; kk<termCount; kk++)
-          *((ESMC_R4 *)rraList[srcLocalDeCount]+rraOffsetList[kk]) =
-            (ESMC_R4)0.; //element
+        for (int kk=0; kk<termCount; kk++){
+          ESMC_R4 *element =
+            (ESMC_R4 *)rraList[rraIndex] + rraOffsetList[kk] * vectorLength;
+          for (int k=0; k<vectorLength; k++)
+            *(element+k) = (ESMC_R4)0.;
+        }
         break;
       case XXE::R8:
-        for (int kk=0; kk<termCount; kk++)
-          *((ESMC_R8 *)rraList[srcLocalDeCount]+rraOffsetList[kk]) =
-            (ESMC_R8)0.; //element
+        for (int kk=0; kk<termCount; kk++){
+          ESMC_R8 *element =
+            (ESMC_R8 *)rraList[rraIndex] + rraOffsetList[kk] * vectorLength;
+          for (int k=0; k<vectorLength; k++)
+            *(element+k) = (ESMC_R8)0.;
+        }
         break;
       case XXE::I4:
-        for (int kk=0; kk<termCount; kk++)
-          *((ESMC_I4 *)rraList[srcLocalDeCount]+rraOffsetList[kk]) =
-            (ESMC_I4)0; //element
+        for (int kk=0; kk<termCount; kk++){
+          ESMC_I4 *element =
+            (ESMC_I4 *)rraList[rraIndex] + rraOffsetList[kk] * vectorLength;
+          for (int k=0; k<vectorLength; k++)
+            *(element+k) = (ESMC_I4)0;
+        }
         break;
       case XXE::I8:
-        for (int kk=0; kk<termCount; kk++)
-          *((ESMC_I8 *)rraList[srcLocalDeCount]+rraOffsetList[kk]) =
-            (ESMC_I8)0; //element
+        for (int kk=0; kk<termCount; kk++){
+          ESMC_I8 *element =
+            (ESMC_I8 *)rraList[rraIndex] + rraOffsetList[kk] * vectorLength;
+          for (int k=0; k<vectorLength; k++)
+            *(element+k) = (ESMC_I8)0;
+        }
         break;
       default:
         break;
       }
       char *buffer = *bufferInfo; // access buffer through layer of indirection
-      switch (valueTK){
+      switch (valueTK){ // values in buffer
       case XXE::R4:
-        for (int kk=0; kk<termCount; kk++)
-          *((ESMC_R4 *)buffer + valueOffsetList[kk]) = (ESMC_R4)0.01; // value
+        for (int kk=0; kk<termCount; kk++){
+          ESMC_R4 *value =
+            (ESMC_R4 *)buffer + valueOffsetList[kk] * vectorLength;
+          for (int k=0; k<vectorLength; k++)
+            *(value+k) = (ESMC_R4)0.01;
+        }
         break;
       case XXE::R8:
-        for (int kk=0; kk<termCount; kk++)
-          *((ESMC_R8 *)buffer + valueOffsetList[kk]) = (ESMC_R8)0.01; // value
+        for (int kk=0; kk<termCount; kk++){
+          ESMC_R8 *value =
+            (ESMC_R8 *)buffer + valueOffsetList[kk] * vectorLength;
+          for (int k=0; k<vectorLength; k++)
+            *(value+k) = (ESMC_R8)0.01;
+        }
         break;
       case XXE::I4:
-        for (int kk=0; kk<termCount; kk++)
-          *((ESMC_I4 *)buffer + valueOffsetList[kk]) = (ESMC_I4)1; // value
+        for (int kk=0; kk<termCount; kk++){
+          ESMC_I4 *value =
+            (ESMC_I4 *)buffer + valueOffsetList[kk] * vectorLength;
+          for (int k=0; k<vectorLength; k++)
+            *(value+k) = (ESMC_I4)1;
+        }
         break;
       case XXE::I8:
-        for (int kk=0; kk<termCount; kk++)
-          *((ESMC_I8 *)buffer + valueOffsetList[kk]) = (ESMC_I8)1; // value
+        for (int kk=0; kk<termCount; kk++){
+          ESMC_I8 *value =
+            (ESMC_I8 *)buffer + valueOffsetList[kk] * vectorLength;
+          for (int k=0; k<vectorLength; k++)
+            *(value+k) = (ESMC_I8)1;
+        }
         break;
       default:
         break;
@@ -5802,6 +5839,9 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       for (int jj=0; jj<count; jj++){
         int lookupIndex = bufferInt[2*jj];
         seqIndexFactorLookup[lookupIndex].de.push_back(bufferInt[2*jj+1]);
+        // this will lead to duplicate de entries for cases with tensor
+        // elements but no tensor mixing -> duplicates must be eliminated
+        // by the calling code
       }
     }
     virtual void localPrepareAndProcess(int localPet){
@@ -5819,6 +5859,9 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
                 * seqIndexCount;
             }
             seqIndexFactorLookup[lookupIndex].de.push_back(de);
+            // this will lead to duplicate de entries for cases with tensor
+            // elements but no tensor mixing -> duplicates must be eliminated
+            // by the calling code
           }
         }
       }
@@ -5853,7 +5896,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       seqIntervFactorListIndex(seqIntervFactorListIndex_){}
   };
 
-  // specialize SetupSeqIndexFactorLookup for DE info fill stage1
+  // specialize SetupSeqIndexFactorLookup for info fill stage1
   class SetupSeqIndexFactorLookupStage1:public SetupSeqIndexFactorLookup{
    public:
     SetupSeqIndexFactorLookupStage1(
@@ -5952,7 +5995,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     friend class SetupSeqIndexFactorLookupStage2;
   };
   
-  // specialize SetupSeqIndexFactorLookup for DE info fill stage2
+  // specialize SetupSeqIndexFactorLookup for info fill stage2
   class SetupSeqIndexFactorLookupStage2:public SetupSeqIndexFactorLookup{
    public:
     SetupSeqIndexFactorLookupStage2(SetupSeqIndexFactorLookupStage1 const &s1)
@@ -6887,6 +6930,16 @@ int Array::sparseMatMulStore(
     fillSelfDeInfo.totalExchange(vm);
   }
   
+  // eliminate duplicate de entries in srcSeqIndexFactorLookup
+  for (int i=0; i<srcSeqIndexInterval[localPet].countEff; i++){
+    sort(srcSeqIndexFactorLookup[i].de.begin(),
+      srcSeqIndexFactorLookup[i].de.end());
+    srcSeqIndexFactorLookup[i].de.erase(
+      unique(srcSeqIndexFactorLookup[i].de.begin(),
+      srcSeqIndexFactorLookup[i].de.end()),
+      srcSeqIndexFactorLookup[i].de.end());
+  }
+    
 //vm->barrier();  /// only for profiling tests
       
 #ifdef ASMMSTORETIMING
@@ -7024,6 +7077,16 @@ int Array::sparseMatMulStore(
     fillSelfDeInfo.totalExchange(vm);
   }
 
+  // eliminate duplicate de entries in dstSeqIndexFactorLookup
+  for (int i=0; i<dstSeqIndexInterval[localPet].countEff; i++){
+    sort(dstSeqIndexFactorLookup[i].de.begin(),
+      dstSeqIndexFactorLookup[i].de.end());
+    dstSeqIndexFactorLookup[i].de.erase(
+      unique(dstSeqIndexFactorLookup[i].de.begin(),
+      dstSeqIndexFactorLookup[i].de.end()),
+      dstSeqIndexFactorLookup[i].de.end());
+  }
+  
 //vm->barrier();  /// only for profiling tests
       
 #ifdef ASMMSTORETIMING
@@ -7175,7 +7238,7 @@ int Array::sparseMatMulStore(
   }
   fclose(asmmsotreprintfp);
 #endif
-  
+
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t6);   //gjt - profile
 #endif
@@ -7233,9 +7296,9 @@ int Array::sparseMatMulStore(
   delete [] dstSeqIndexInterval;
 
 #ifdef ASMMSTOREPRINT
-  //char asmmstoreprintfile[160];
-  //sprintf(asmmstoreprintfile, "asmmstoreprint.%05d", localPet);
-  //FILE *asmmsotreprintfp = fopen(asmmstoreprintfile, "a");
+  char asmmstoreprintfile[160];
+  sprintf(asmmstoreprintfile, "asmmstoreprint.%05d", localPet);
+  FILE *asmmsotreprintfp = fopen(asmmstoreprintfile, "a");
   asmmsotreprintfp = fopen(asmmstoreprintfile, "a");
   fprintf(asmmsotreprintfp, "\n========================================"
     "========================================\n");
@@ -7246,16 +7309,17 @@ int Array::sparseMatMulStore(
     for (int k=0; k<srcLocalDeElementCount[j]; k++){
       fprintf(asmmsotreprintfp, "localPet: %d, "
         "srcLinSeqList[%d][%d].linIndex = %d, "
-        ".seqIndex = %d, .factorCount = %d\n",
+        ".seqIndex = %d/%d, .factorCount = %d\n",
         localPet, j, k, srcLinSeqList[j][k].linIndex,
         srcLinSeqList[j][k].seqIndex.decompSeqIndex,
+        srcLinSeqList[j][k].seqIndex.tensorSeqIndex,
         srcLinSeqList[j][k].factorCount);
       for (int kk=0; kk<srcLinSeqList[j][k].factorCount; kk++){
         fprintf(asmmsotreprintfp, "\tfactorList[%d]\n"
-          "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
+          "\t\t.partnerSeqIndex = %d/%d\n"
           "\t\t.partnerDe = ", kk,
-          srcLinSeqList[j][k].factorList[kk].partnerSeqIndex
-          .decompSeqIndex);
+          srcLinSeqList[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
+          srcLinSeqList[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
         for (int jj=0;
           jj<srcLinSeqList[j][k].factorList[kk].partnerDe.size(); jj++)
           fprintf(asmmsotreprintfp, "%d, ",
@@ -7272,16 +7336,17 @@ int Array::sparseMatMulStore(
     for (int k=0; k<dstLocalDeElementCount[j]; k++){
       fprintf(asmmsotreprintfp, "localPet: %d, "
         "dstLinSeqList[%d][%d].linIndex = %d, "
-        ".seqIndex = %d, .factorCount = %d\n",
+        ".seqIndex = %d/%d, .factorCount = %d\n",
         localPet, j, k, dstLinSeqList[j][k].linIndex,
         dstLinSeqList[j][k].seqIndex.decompSeqIndex,
+        dstLinSeqList[j][k].seqIndex.tensorSeqIndex,
         dstLinSeqList[j][k].factorCount);
       for (int kk=0; kk<dstLinSeqList[j][k].factorCount; kk++){
         fprintf(asmmsotreprintfp, "\tfactorList[%d]\n"
-          "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
+          "\t\t.partnerSeqIndex = %d/%d\n"
           "\t\t.partnerDe = ", kk,
-          dstLinSeqList[j][k].factorList[kk].partnerSeqIndex
-          .decompSeqIndex);
+          dstLinSeqList[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
+          dstLinSeqList[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
         for (int jj=0;
           jj<dstLinSeqList[j][k].factorList[kk].partnerDe.size(); jj++)
           fprintf(asmmsotreprintfp, "%d, ",
@@ -7294,10 +7359,13 @@ int Array::sparseMatMulStore(
   }
   fclose(asmmsotreprintfp);
 #endif
-  
+    
   if (haloFlag){
-    // Replace FactorElements that have more than one partnerDe entry with
-    // separate FactorElements, each having only one partnerDe entry:
+    // Phase IV below expects each FactorElement inside of srcLinSeqList and
+    // dstLinSeqList to only reference a single partnerDe (- only partnerDe[0]
+    // will be looked at!). Therefore transform FactorElements that have more
+    // than one partnerDe entry into multiple FactorElements where each only
+    // has a single partnerDe entry:
     // Doing this for the src side supports forward HALO:
     for (int j=0; j<srcLocalDeCount; j++){
       for (int k=0; k<srcLocalDeElementCount[j]; k++){
@@ -7366,16 +7434,17 @@ int Array::sparseMatMulStore(
     for (int k=0; k<srcLocalDeElementCount[j]; k++){
       fprintf(asmmsotreprintfp, "localPet: %d, "
         "srcLinSeqList[%d][%d].linIndex = %d, "
-        ".seqIndex = %d, .factorCount = %d\n",
+        ".seqIndex = %d/%d, .factorCount = %d\n",
         localPet, j, k, srcLinSeqList[j][k].linIndex,
         srcLinSeqList[j][k].seqIndex.decompSeqIndex,
+        srcLinSeqList[j][k].seqIndex.tensorSeqIndex,
         srcLinSeqList[j][k].factorCount);
       for (int kk=0; kk<srcLinSeqList[j][k].factorCount; kk++){
         fprintf(asmmsotreprintfp, "\tfactorList[%d]\n"
-          "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
+          "\t\t.partnerSeqIndex = %d/%d\n"
           "\t\t.partnerDe = ", kk,
-          srcLinSeqList[j][k].factorList[kk].partnerSeqIndex
-          .decompSeqIndex);
+          srcLinSeqList[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
+          srcLinSeqList[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
         for (int jj=0;
           jj<srcLinSeqList[j][k].factorList[kk].partnerDe.size(); jj++)
           fprintf(asmmsotreprintfp, "%d, ",
@@ -7392,16 +7461,17 @@ int Array::sparseMatMulStore(
     for (int k=0; k<dstLocalDeElementCount[j]; k++){
       fprintf(asmmsotreprintfp, "localPet: %d, "
         "dstLinSeqList[%d][%d].linIndex = %d, "
-        ".seqIndex = %d, .factorCount = %d\n",
+        ".seqIndex = %d/%d, .factorCount = %d\n",
         localPet, j, k, dstLinSeqList[j][k].linIndex,
         dstLinSeqList[j][k].seqIndex.decompSeqIndex,
+        dstLinSeqList[j][k].seqIndex.tensorSeqIndex,
         dstLinSeqList[j][k].factorCount);
       for (int kk=0; kk<dstLinSeqList[j][k].factorCount; kk++){
         fprintf(asmmsotreprintfp, "\tfactorList[%d]\n"
-          "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
+          "\t\t.partnerSeqIndex = %d/%d\n"
           "\t\t.partnerDe = ", kk,
-          dstLinSeqList[j][k].factorList[kk].partnerSeqIndex
-          .decompSeqIndex);
+          dstLinSeqList[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
+          dstLinSeqList[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
         for (int jj=0;
           jj<dstLinSeqList[j][k].factorList[kk].partnerDe.size(); jj++)
           fprintf(asmmsotreprintfp, "%d, ",
