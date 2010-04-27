@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.46 2010/03/04 19:40:09 theurich Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.47 2010/04/27 16:23:07 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -5209,6 +5209,8 @@ real(ESMF_KIND_R8), parameter :: RegridMinNeighborhood = 1.0D-14
     if (checkpoint) then
       print '("checkpoint at line ", I5, " in file ", A)', line, file
     end if
+
+    rcToReturn = ESMF_SUCCESS
 
     CheckError = ESMF_LogMsgFoundError (rcValue, msg, rcToReturn=rcToReturn)
 
