@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubeSphereRegridEx.F90,v 1.5 2010/04/26 23:23:47 peggyli Exp $
+! $Id: ESMF_CubeSphereRegridEx.F90,v 1.6 2010/04/27 14:22:00 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -650,9 +650,9 @@ end subroutine CreateCSMesh
 subroutine ReadCSMesh (filename, VertexCoords, CellConnect, CellNums, StartCell, status)
     implicit none
     character(len=256), intent(in):: filename
-    real(ESMF_KIND_R8),    pointer, intent(out) :: VertexCoords (:,:)
-    integer(ESMF_KIND_I4), pointer, intent(out) :: CellConnect (:,:)
-    integer(ESMF_KIND_I4), pointer, intent(out) :: CellNums (:)
+    real(ESMF_KIND_R8),    pointer :: VertexCoords (:,:)
+    integer(ESMF_KIND_I4), pointer :: CellConnect (:,:)
+    integer(ESMF_KIND_I4), pointer :: CellNums (:)
     integer,                        intent(out) :: StartCell
     integer,                        intent(out) :: status
 
@@ -769,7 +769,7 @@ subroutine ReadRegGrid(filename, dims, coordX, coordY, status)
 
     character(len=256), intent(in) :: filename
     integer, intent(out):: dims(2)	
-    real(ESMF_KIND_R8),    pointer, intent(out) :: coordX(:), coordY(:)
+    real(ESMF_KIND_R8),    pointer :: coordX(:), coordY(:)
     integer, intent(out):: status
 
 #ifdef ESMF_NETCDF
@@ -1040,13 +1040,13 @@ subroutine outputWeightFile(filename, indices, weights, SrcVertexCoords, &
                             coordX, coordY, xdim,  ydim, SrcMasks, DstMasks, rc)
 
       character(len=256) :: filename
-      real(ESMF_KIND_R8) , pointer, intent(in):: weights(:)   
-      integer(ESMF_KIND_I4) , pointer, intent(in):: indices(:,:) 
-      real(ESMF_KIND_R8) , pointer, intent(in), optional:: SrcVertexCoords(:,:)    
-      real(ESMF_KIND_R8) , pointer, intent(in), optional:: coordX(:), coordY(:)
+      real(ESMF_KIND_R8) , pointer :: weights(:)   
+      integer(ESMF_KIND_I4) , pointer :: indices(:,:) 
+      real(ESMF_KIND_R8) , pointer, optional:: SrcVertexCoords(:,:)    
+      real(ESMF_KIND_R8) , pointer, optional:: coordX(:), coordY(:)
       integer, optional :: xdim, ydim
-      real(ESMF_KIND_R8) , pointer, intent(in), optional:: SrcMasks(:)    
-      real(ESMF_KIND_R8) , pointer, intent(in), optional:: DstMasks(:)
+      real(ESMF_KIND_R8) , pointer, optional:: SrcMasks(:)    
+      real(ESMF_KIND_R8) , pointer, optional:: DstMasks(:)
       integer, optional :: rc
 
       integer :: total, localCount(1)
