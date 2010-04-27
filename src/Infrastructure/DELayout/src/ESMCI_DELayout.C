@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.32 2010/03/04 18:57:42 svasquez Exp $
+// $Id: ESMCI_DELayout.C,v 1.33 2010/04/27 22:49:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.32 2010/03/04 18:57:42 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.33 2010/04/27 22:49:39 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2718,14 +2718,16 @@ int XXE::exec(
           // there is an outstanding active communication
           vm->commwait(xxeCommhandleInfo->commhandle);
           xxeCommhandleInfo->activeFlag = false;  // reset
-          // recursive call into xxe execution
-          bool localFinished;
-          waitOnIndexSubInfo->xxe->exec(rraCount,
-            rraList + waitOnIndexSubInfo->rraShift,
-            vectorLength + waitOnIndexSubInfo->vectorLengthShift,
-            filterBitField, &localFinished);
-          if (!localFinished)
-            if (finished) *finished = false;  // unfinished ops in sub
+          if (waitOnIndexSubInfo->xxe){
+            // recursive call into xxe execution
+            bool localFinished;
+            waitOnIndexSubInfo->xxe->exec(rraCount,
+              rraList + waitOnIndexSubInfo->rraShift,
+              vectorLength + waitOnIndexSubInfo->vectorLengthShift,
+              filterBitField, &localFinished);
+            if (!localFinished)
+              if (finished) *finished = false;  // unfinished ops in sub
+          }
         }
       }
       break;
@@ -2741,13 +2743,16 @@ int XXE::exec(
           if (completeFlag){
             // comm finished -> recursive call into xxe execution
             xxeCommhandleInfo->activeFlag = false;  // reset
-            bool localFinished;
-            testOnIndexSubInfo->xxe->exec(rraCount,
-              rraList + testOnIndexSubInfo->rraShift,
-              vectorLength + testOnIndexSubInfo->vectorLengthShift,
-              filterBitField, &localFinished);
-            if (!localFinished)
-              if (finished) *finished = false;  // unfinished ops in sub
+            if (testOnIndexSubInfo->xxe){
+              // recursive call into xxe execution
+              bool localFinished;
+              testOnIndexSubInfo->xxe->exec(rraCount,
+                rraList + testOnIndexSubInfo->rraShift,
+                vectorLength + testOnIndexSubInfo->vectorLengthShift,
+                filterBitField, &localFinished);
+              if (!localFinished)
+                if (finished) *finished = false;  // unfinished ops in sub
+            }
           }else
             if (finished) *finished = false;  // comm not finished
         }
@@ -3183,25 +3188,29 @@ int XXE::exec(
     case xxeSub:
       {
         xxeSubInfo = (XxeSubInfo *)xxeElement;
-        // recursive call:
-        bool localFinished;
-        xxeSubInfo->xxe->exec(rraCount, rraList + xxeSubInfo->rraShift,
-          vectorLength + xxeSubInfo->vectorLengthShift, filterBitField,
-          &localFinished);
-        if (!localFinished)
-          if (finished) *finished = false;  // unfinished ops in sub
+        if (xxeSubInfo->xxe){
+          // recursive call:
+          bool localFinished;
+          xxeSubInfo->xxe->exec(rraCount, rraList + xxeSubInfo->rraShift,
+            vectorLength + xxeSubInfo->vectorLengthShift, filterBitField,
+            &localFinished);
+          if (!localFinished)
+            if (finished) *finished = false;  // unfinished ops in sub
+        }
       }
       break;
     case xxeSubMulti:
       {
         xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
         for (int k=0; k<xxeSubMultiInfo->count; k++){
-          // recursive call:
-          bool localFinished;
-          xxeSubMultiInfo->xxe[k]->exec(rraCount, rraList, vectorLength,
-            filterBitField, &localFinished);
-          if (!localFinished)
-            if (finished) *finished = false;  // unfinished ops in sub
+          if (xxeSubMultiInfo->xxe[k]){
+            // recursive call:
+            bool localFinished;
+            xxeSubMultiInfo->xxe[k]->exec(rraCount, rraList, vectorLength,
+              filterBitField, &localFinished);
+            if (!localFinished)
+              if (finished) *finished = false;  // unfinished ops in sub
+          }
         }
       }
       break;
@@ -4378,7 +4387,8 @@ int XXE::print(
       {
         xxeSubInfo = (XxeSubInfo *)xxeElement;
         fprintf(fp, "  XXE::xxeSub <localPet=%d>\n", vm->getLocalPet());
-        xxeSubInfo->xxe->print(fp, rraCount, rraList); // recursive call
+        if (xxeSubInfo->xxe)
+          xxeSubInfo->xxe->print(fp, rraCount, rraList); // recursive call
       }
       break;
     case xxeSubMulti:
@@ -4484,7 +4494,8 @@ int XXE::printProfile(
     switch(stream[i].opId){
     case xxeSub:
       xxeSubInfo = (XxeSubInfo *)xxeElement;
-      xxeSubInfo->xxe->printProfile(fp); // recursive call
+      if (xxeSubInfo->xxe)
+        xxeSubInfo->xxe->printProfile(fp); // recursive call
       break;
     case xxeSubMulti:
       xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
@@ -4498,11 +4509,13 @@ int XXE::printProfile(
       break;
     case waitOnIndexSub:
       waitOnIndexSubInfo = (WaitOnIndexSubInfo *)xxeElement;
-      waitOnIndexSubInfo->xxe->printProfile(fp); // recursive call
+      if (waitOnIndexSubInfo->xxe)
+        waitOnIndexSubInfo->xxe->printProfile(fp); // recursive call
       break;
     case testOnIndexSub:
       testOnIndexSubInfo = (TestOnIndexSubInfo *)xxeElement;
-      testOnIndexSubInfo->xxe->printProfile(fp); // recursive call
+      if (testOnIndexSubInfo->xxe)
+        testOnIndexSubInfo->xxe->printProfile(fp); // recursive call
       break;
     case wtimer:
       {
@@ -4713,9 +4726,11 @@ int XXE::execReady(
       switch(stream[i].opId){
       case xxeSub:
         xxeSubInfo = (XxeSubInfo *)xxeElement;
-        localrc = xxeSubInfo->xxe->execReady(); // recursive call
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-          &rc)) return rc;
+        if (xxeSubInfo->xxe){
+          localrc = xxeSubInfo->xxe->execReady(); // recursive call
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+            &rc)) return rc;
+        }
         break;
       case xxeSubMulti:
         xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
@@ -4735,15 +4750,19 @@ int XXE::execReady(
         break;
       case waitOnIndexSub:
         waitOnIndexSubInfo = (WaitOnIndexSubInfo *)xxeElement;
-        localrc = waitOnIndexSubInfo->xxe->execReady(); // recursive call
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-          &rc)) return rc;
+        if (waitOnIndexSubInfo->xxe){
+          localrc = waitOnIndexSubInfo->xxe->execReady(); // recursive call
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+            &rc)) return rc;
+        }
         break;
       case testOnIndexSub:
         testOnIndexSubInfo = (TestOnIndexSubInfo *)xxeElement;
-        localrc = testOnIndexSubInfo->xxe->execReady(); // recursive call
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-          &rc)) return rc;
+        if (testOnIndexSubInfo->xxe){
+          localrc = testOnIndexSubInfo->xxe->execReady(); // recursive call
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+            &rc)) return rc;
+        }
         break;
       case send:
         break;
