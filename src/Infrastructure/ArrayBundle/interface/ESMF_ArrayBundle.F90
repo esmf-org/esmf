@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.12 2010/03/04 18:57:41 svasquez Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.13 2010/04/27 17:55:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -75,6 +75,9 @@ module ESMF_ArrayBundleMod
   public ESMF_ArrayBundleCreate
   public ESMF_ArrayBundleDestroy
   public ESMF_ArrayBundleGet
+  public ESMF_ArrayBundleHalo
+  public ESMF_ArrayBundleHaloRelease
+  public ESMF_ArrayBundleHaloStore
   public ESMF_ArrayBundlePrint
   public ESMF_ArrayBundleRedist
   public ESMF_ArrayBundleRedistStore
@@ -82,10 +85,6 @@ module ESMF_ArrayBundleMod
   public ESMF_ArrayBundleSMM
   public ESMF_ArrayBundleSMMRelease
   public ESMF_ArrayBundleSMMStore
-
-  public ESMF_ArrayBundleHalo
-  public ESMF_ArrayBundleHaloStore
-  public ESMF_ArrayBundleHaloRun
   public ESMF_ArrayBundleValidate
 
 ! - ESMF-internal methods:
@@ -100,7 +99,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.12 2010/03/04 18:57:41 svasquez Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.13 2010/04/27 17:55:22 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -435,6 +434,250 @@ contains
 !------------------------------------------------------------------------------
 
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleHalo()"
+!BOP
+! !IROUTINE: ESMF_ArrayBundleHalo - Execute an ArrayBundle halo operation
+!
+! !INTERFACE:
+  subroutine ESMF_ArrayBundleHalo(arraybundle, routehandle, &
+    checkflag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle), intent(inout)           :: arraybundle
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    logical,                intent(in),   optional  :: checkflag
+    integer,                intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!   Execute a precomputed ArrayBundle halo operation for the Arrays in
+!   {\tt arrayBundle}.
+!
+!   See {\tt ESMF\_ArrayBundleHaloStore()} on how to precompute 
+!   {\tt routehandle}.
+!
+!   This call is {\em collective} across the current VM.
+!
+!   \begin{description}
+!   \item [arraybundle]
+!     {\tt ESMF\_ArrayBundle} containing data to be haloed.
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[checkflag]}]
+!     If set to {\tt .TRUE.} the input Array pairs will be checked for
+!     consistency with the precomputed operation provided by {\tt routehandle}.
+!     If set to {\tt .FALSE.} {\em (default)} only a very basic input check
+!     will be performed, leaving many inconsistencies undetected. Set
+!     {\tt checkflag} to {\tt .FALSE.} to achieve highest performance.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_Logical)      :: opt_checkflag! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments, deal with optional ArrayBundle args
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit, routehandle, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
+    
+    ! Set default flags
+    opt_checkflag = ESMF_FALSE
+    if (present(checkflag)) opt_checkflag = checkflag
+    
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayBundleHalo(arraybundle, routehandle, opt_checkflag, &
+      localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayBundleHalo
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleHaloRelease()"
+!BOP
+! !IROUTINE: ESMF_ArrayBundleHaloRelease - Release resources associated with ArrayBundle halo operation
+!
+! !INTERFACE:
+  subroutine ESMF_ArrayBundleHaloRelease(routehandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    integer,                intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!   Release resouces associated with an ArrayBundle halo operation.
+!   After this call {\tt routehandle} becomes invalid.
+!
+!   \begin{description}
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments, deal with optional Array args
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit, routehandle, rc)
+        
+    ! Call into the RouteHandle code
+    call ESMF_RouteHandleRelease(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayBundleHaloRelease
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleHaloStore()"
+!BOP
+! !IROUTINE: ESMF_ArrayBundleHaloStore - Precompute an ArrayBundle halo operation
+!
+! !INTERFACE:
+    subroutine ESMF_ArrayBundleHaloStore(arraybundle, routehandle, &
+      halostartregionflag, haloLDepth, haloUDepth, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle), intent(inout)                :: arraybundle
+    type(ESMF_RouteHandle), intent(inout)                :: routehandle
+    type(ESMF_HaloStartRegionFlag), intent(in), optional :: halostartregionflag
+    integer,                intent(in),         optional :: haloLDepth(:)
+    integer,                intent(in),         optional :: haloUDepth(:)
+    integer,                intent(out),        optional :: rc
+!
+! !DESCRIPTION:
+!   Store an ArrayBundle halo operation over the data in {\tt arraybundle}. By 
+!   default, i.e. without specifying {\tt halostartregionflag}, {\tt haloLDepth}
+!   and {\tt haloUDepth}, all elements in the total Array regions that lie
+!   outside the exclusive regions will be considered potential destination
+!   elements for halo. However, only those elements that have a corresponding
+!   halo source element, i.e. an exclusive element on one of the DEs, will be
+!   updated under the halo operation. Elements that have no associated source
+!   remain unchanged under halo.
+!
+!   Specifying {\tt halostartregionflag} allows to change the shape of the 
+!   effective halo region from the inside. Setting this flag to
+!   {\tt ESMF\_REGION\_COMPUTATIONAL} means that only elements outside 
+!   the computational region for each Array are considered for potential
+!   destination elements for halo. The default is {\tt ESMF\_REGION\_EXCLUSIVE}.
+!
+!   The {\tt haloLDepth} and {\tt haloUDepth} arguments allow to reduce
+!   the extent of the effective halo region. Starting at the region specified
+!   by {\tt halostartregionflag}, the {\tt haloLDepth} and {\tt haloUDepth}
+!   define a halo depth in each direction. Note that the maximum halo region is
+!   limited by the total region for each Array, independent of the actual
+!   {\tt haloLDepth} and {\tt haloUDepth} setting. The total Array regions are
+!   local DE specific. The {\tt haloLDepth} and {\tt haloUDepth} are interpreted
+!   as the maximum desired extent, reducing the potentially larger region
+!   available for halo.
+!
+!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
+!   {\tt ESMF\_ArrayBundleHalo()} on any ArrayBundle that is weakly congruent
+!   and typekind conform to {\tt arraybundle}. Congruency for ArrayBundles is
+!   given by the congruency of its constituents.
+!   Congruent Arrays possess matching DistGrids, and the shape of the local
+!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   Arrays the sizes of the undistributed dimensions, that vary faster with
+!   memory than the first distributed dimension, are permitted to be different.
+!   This means that the same {\tt routehandle} can be applied to a large class
+!   of similar Arrays that differ in the number of elements in the left most
+!   undistributed dimensions.
+!  
+!   This call is {\em collective} across the current VM.  
+!
+!   \begin{description}
+!   \item [arraybundle]
+!     {\tt ESMF\_ArrayBundle} containing data to be haloed.
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[halostartregionflag]}]
+!     The start of the effective halo region on every DE. The default
+!     setting is {\tt ESMF\_REGION\_EXCLUSIVE}, rendering all non-exclusive
+!     elements potential halo destination elments.
+!     See section \ref{opt:halostartregionflag} for a complete list of
+!     valid settings.
+!   \item[{[haloLDepth]}] 
+!     This vector specifies the lower corner of the effective halo
+!     region with respect to the lower corner of {\tt halostartregionflag}.
+!     The size of {\tt haloLDepth} must equal the number of distributed Array
+!     dimensions.
+!   \item[{[haloUDepth]}] 
+!     This vector specifies the upper corner of the effective halo
+!     region with respect to the upper corner of {\tt halostartregionflag}.
+!     The size of {\tt haloUDepth} must equal the number of distributed Array
+!     dimensions.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                         :: localrc        ! local return code
+    type(ESMF_HaloStartRegionFlag)  :: opt_halostartregionflag ! helper variable
+    type(ESMF_InterfaceInt)         :: haloLDepthArg  ! helper variable
+    type(ESMF_InterfaceInt)         :: haloUDepthArg  ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
+    
+    ! Set default flags
+    opt_halostartregionflag = ESMF_REGION_EXCLUSIVE
+    if (present(halostartregionflag)) opt_halostartregionflag = halostartregionflag
+
+    ! Deal with (optional) array arguments
+    haloLDepthArg = ESMF_InterfaceIntCreate(haloLDepth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    haloUDepthArg = ESMF_InterfaceIntCreate(haloUDepth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayBundleHaloStore(arraybundle, routehandle, &
+      opt_halostartregionflag, haloLDepthArg, haloUDepthArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Mark routehandle object as being created
+    call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayBundleHaloStore
+!------------------------------------------------------------------------------
+
+
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundlePrint()"
@@ -492,190 +735,14 @@ contains
 !------------------------------------------------------------------------------
 
 
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleHalo()"
-!BOPI
-! !IROUTINE: ESMF_ArrayBundleHalo - Halo an ArrayBundle
-!
-! !INTERFACE:
-    ! Private name; call using ESMF_ArrayBundleHalo()
-    subroutine ESMF_ArrayBundleHalo(arraybundle, arrayIndex, regionflag, &
-      haloLDepth, haloUDepth, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(inout)           :: arraybundle
-    integer,                intent(in),   optional  :: arrayIndex
-    type(ESMF_RegionFlag),  intent(in),   optional  :: regionflag
-    integer,                intent(in),   optional  :: haloLDepth(:)
-    integer,                intent(in),   optional  :: haloUDepth(:)
-    integer,                intent(out),  optional  :: rc
-!
-! !DESCRIPTION:
-!   Perform a halo operation over the data in an {\tt ESMF\_ArrayBundle} object.
-!
-!   The optional {\tt haloLDepth} and {\tt haloUDepth} arguments can be 
-!   provided to specified the exact shape of the halo region. By default 
-!   {\tt haloLDepth} and {\tt haloUDepth} are assumed relative to the 
-!   computational region of the Array objects in ArrayBundle. The optional {\tt regionflag}
-!   may be used to change to the exclusive region as reference for the halo
-!   widths.
-!
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its DEs. The
-!     call will block until all PET-local data objects are accessible.
-!
-!   \begin{description}
-!   \item [arraybundle]
-!         {\tt ESMF\_ArrayBundle} containing data to be haloed.
-!   \item [{[arrayIndex]}]
-!         Index to indicate which Array in the ArrayBundle is to be haloed.
-!   \item [{[regionflag]}]
-!         Specifies the reference for halo width arguments: 
-!         {\tt ESMF\_REGION\_EXCLUSIVE} or {\tt ESMF\_REGION\_COMPUTATIONAL}
-!         (default).
-!   \item[{[haloLDepth]}] 
-!      This vector argument must have dimCount elements, where dimCount is
-!      specified in distgrid. It specifies the lower corner of the total data
-!      region with respect to the lower corner of the computational region
-!      or exclusive region (depending on {\tt regionflag}.
-!   \item[{[haloUDepth]}] 
-!      This vector argument must have dimCount elements, where dimCount is
-!      specified in distgrid. It specifies the upper corner of the total data
-!      region with respect to the upper corner of the computational region
-!      or exclusive region (depending on {\tt regionflag}.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-  ! Initialize return code
-  if (present(rc)) rc = ESMF_RC_NOT_IMPL
-  end subroutine ESMF_ArrayBundleHalo
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleHaloStore()"
-!BOPI
-! !IROUTINE: ESMF_ArrayBundleHaloStore - Store an ArrayBundleHalo operation
-!
-! !INTERFACE:
-    subroutine ESMF_ArrayBundleHaloStore(arraybundle, arrayIndex, &
-      regionflag, haloLDepth, haloUDepth, routehandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(inout)           :: arraybundle
-    integer,                intent(in),   optional  :: arrayIndex
-    type(ESMF_RegionFlag),  intent(in),   optional  :: regionflag
-    integer,                intent(in),   optional  :: haloLDepth(:)
-    integer,                intent(in),   optional  :: haloUDepth(:)
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    integer,                intent(out),  optional  :: rc
-!
-! !DESCRIPTION:
-!   Store a halo operation over the data in an {\tt ESMF\_ArrayBundle}. See the
-!   description for {\tt ArrayBundleHalo()} for details. No actual halo operation
-!   is performed by this call, use {\tt ArrayBundleHaloRun} to execute a stored
-!   halo operation.
-!
-!   The Route referenced by the returned {\tt ESMF\_RouteHandle} object can 
-!   be used with any {\tt ESMF\_ArrayBundle} object that holds {\em DistGrid conform}, 
-!   i.e. has been defined on a congruent DistGrid object. In particular it can
-!   be used for all Arrays in an ArrayBundle that are DistGrid conform with the
-!   Array used to precompute the Route.
-!
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its DEs. The
-!     call will block until all PET-local data objects are accessible.
-!
-!   \begin{description}
-!   \item [ArrayBundle]
-!         {\tt ESMF\_ArrayBundle} containing data to be haloed.
-!   \item [{[arrayIndex]}]
-!         Index to indicate which Array in the ArrayBundle is to be haloed.
-!   \item [{[regionflag]}]
-!         Specifies the reference for halo width arguments: 
-!         {\tt ESMF\_REGION\_EXCLUSIVE} or {\tt ESMF\_REGION\_COMPUTATIONAL}
-!         (default).
-!   \item[{[haloLDepth]}] 
-!      This vector argument must have dimCount elements, where dimCount is
-!      specified in distgrid. It specifies the lower corner of the total data
-!      region with respect to the lower corner of the computational region
-!      or exclusive region (depending on {\tt regionflag}.
-!   \item[{[haloUDepth]}] 
-!      This vector argument must have dimCount elements, where dimCount is
-!      specified in distgrid. It specifies the upper corner of the total data
-!      region with respect to the upper corner of the computational region
-!      or exclusive region (depending on {\tt regionflag}.
-!   \item [routehandle]
-!         Handle to the Route storing the precomputed halo operation.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-  ! Initialize return code
-  if (present(rc)) rc = ESMF_RC_NOT_IMPL
-  end subroutine ESMF_ArrayBundleHaloStore
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleHaloRun()"
-!BOPI
-! !IROUTINE: ESMF_ArrayBundleHaloRun - Execute an ArrayBundleHalo operation
-!
-! !INTERFACE:
-    subroutine ESMF_ArrayBundleHaloRun(arraybundle, routehandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(inout)          :: arraybundle
-    type(ESMF_RouteHandle), intent(inout)       :: routehandle
-    integer, intent(out), optional              :: rc
-!
-! !DESCRIPTION:
-!   Execute the halo operation stored in the Route referenced by 
-!   {\tt routehandle} over the data in {\tt ArrayBundle}. See the description for 
-!   {\tt ArrayBundleHaloStore()} and {\tt ArrayBundleHalo()} for details. 
-!
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its DEs. The
-!     call will block until all PET-local data objects are accessible.
-!
-!   \begin{description}
-!   \item [ArrayBundle]
-!         {\tt ESMF\_ArrayBundle} containing data to be haloed.
-!   \item [routehandle]
-!         Handle to the Route that stores the halo operation to be performed.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-  ! Initialize return code
-  if (present(rc)) rc = ESMF_RC_NOT_IMPL
-  end subroutine ESMF_ArrayBundleHaloRun
-!------------------------------------------------------------------------------
-
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRedist()"
 !BOP
 ! !IROUTINE: ESMF_ArrayBundleRedist - Execute an ArrayBundle redistribution
 ! !INTERFACE:
-    subroutine ESMF_ArrayBundleRedist(srcArrayBundle, dstArrayBundle, &
-      routehandle, checkflag, rc)
+  subroutine ESMF_ArrayBundleRedist(srcArrayBundle, dstArrayBundle, &
+    routehandle, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in),     optional  :: srcArrayBundle
@@ -803,7 +870,7 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution with local factor argument
+! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute an ArrayBundle redistribution with local factor argument
 !
 ! !INTERFACE:
 ! ! Private name; call using ESMF_ArrayBundleRedistStore()
@@ -886,7 +953,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRedistStoreI4()"
 !BOPI
-! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution
+! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute an ArrayBundle redistribution
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
@@ -947,7 +1014,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRedistStoreI8()"
 !BOPI
-! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution
+! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute an ArrayBundle redistribution
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
@@ -1008,7 +1075,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRedistStoreR4()"
 !BOPI
-! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution
+! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute an ArrayBundle redistribution
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
@@ -1069,7 +1136,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRedistStoreR8()"
 !BOPI
-! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution
+! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute an ArrayBundle redistribution
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
@@ -1130,7 +1197,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRedistStore()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution without local factor argument
+! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute an ArrayBundle redistribution without local factor argument
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
@@ -1391,7 +1458,7 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication with local factors
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute an ArrayBundle sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
 ! ! Private name; call using ESMF_ArrayBundleSMMStore()
@@ -1496,7 +1563,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleSMMStoreI4()"
 !BOPI
-! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication with local factors
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute an ArrayBundle sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
@@ -1562,7 +1629,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleSMMStoreI8()"
 !BOPI
-! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication with local factors
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute an ArrayBundle sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
@@ -1628,7 +1695,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleSMMStoreR4()"
 !BOPI
-! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication with local factors
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute an ArrayBundle sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
@@ -1694,7 +1761,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleSMMStoreR8()"
 !BOPI
-! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication with local factors
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute an ArrayBundle sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
@@ -1760,7 +1827,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleSMMStoreNF()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication without local factors
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute an ArrayBundle sparse matrix multiplication without local factors
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()

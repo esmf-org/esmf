@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.14 2010/03/04 18:57:41 svasquez Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.15 2010/04/27 17:55:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
 #include "ESMCI_ArrayBundle.h"
 
 #include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMC_LogMacros.inc"             // for LogErr
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -75,7 +75,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // call into C++
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::destroy(ptr),
-      ESMF_ERR_PASSTHRU,
+      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -105,6 +105,40 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
  
+  void FTN(c_esmc_arraybundlehalostore)(ESMCI::ArrayBundle **arraybundle,
+    ESMCI::RouteHandle **routehandle,
+    ESMC_HaloStartRegionFlag *halostartregionflag,
+    ESMCI::InterfaceInt **haloLDepth, ESMCI::InterfaceInt **haloUDepth,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraybundlehalostore()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::haloStore(
+      *arraybundle, routehandle, *halostartregionflag, *haloLDepth,
+      *haloUDepth),
+      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_arraybundlehalo)(ESMCI::ArrayBundle **arraybundle,
+    ESMCI::RouteHandle **routehandle, ESMC_Logical *checkflag, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arrayhalo()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // convert to bool
+    bool checkflagOpt = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(checkflag) != ESMC_NULL_POINTER)
+      if (*checkflag == ESMF_TRUE) checkflagOpt = true;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::halo(
+      *arraybundle, routehandle, checkflagOpt),
+      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
   void FTN(c_esmc_arraybundleprint)(ESMCI::ArrayBundle **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundleprint()"
@@ -112,7 +146,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->print(),
-      ESMF_ERR_PASSTHRU,
+      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -128,7 +162,7 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::redistStore(
       *srcArraybundle, *dstArraybundle, routehandle, *srcToDstTransposeMap,
       *typekind, factor),
-      ESMF_ERR_PASSTHRU,
+      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -142,7 +176,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::redistStore(
       *srcArraybundle, *dstArraybundle, routehandle, *srcToDstTransposeMap),
-      ESMF_ERR_PASSTHRU,
+      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -153,10 +187,14 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_arraybundleredist()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // convert to bool
+    bool checkflagOpt = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(checkflag) != ESMC_NULL_POINTER)
+      if (*checkflag == ESMF_TRUE) checkflagOpt = true;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::redist(
-      *srcArraybundle, *dstArraybundle, routehandle, *checkflag),
-      ESMF_ERR_PASSTHRU,
+      *srcArraybundle, *dstArraybundle, routehandle, checkflagOpt),
+      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -207,7 +245,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     if (ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::sparseMatMulStore(
       *srcArraybundle, *dstArraybundle, routehandle, sparseMatrix ),
-      ESMF_ERR_PASSTHRU,
+      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     
     }catch(int localrc){
@@ -239,7 +277,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::sparseMatMulStore(
       *srcArraybundle, *dstArraybundle, routehandle, sparseMatrix),
-      ESMF_ERR_PASSTHRU,
+      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -250,10 +288,14 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_arraybundlesmm()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // convert to bool
+    bool checkflagOpt = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(checkflag) != ESMC_NULL_POINTER)
+      if (*checkflag == ESMF_TRUE) checkflagOpt = true;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::sparseMatMul(
-      *srcArraybundle, *dstArraybundle, routehandle, *zeroflag, *checkflag),
-      ESMF_ERR_PASSTHRU,
+      *srcArraybundle, *dstArraybundle, routehandle, *zeroflag, checkflagOpt),
+      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -268,7 +310,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*arraybundle)->serialize(
       buf,length,offset,*attreconflag,*inquireflag),
-      ESMF_ERR_PASSTHRU,
+      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -283,7 +325,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*arraybundle)->deserialize(
       buf,offset,*attreconflag),
-      ESMF_ERR_PASSTHRU,
+      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
