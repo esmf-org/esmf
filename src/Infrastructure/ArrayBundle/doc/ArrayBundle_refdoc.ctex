@@ -1,4 +1,4 @@
-% $Id: ArrayBundle_refdoc.ctex,v 1.5 2010/03/04 18:57:41 svasquez Exp $ 
+% $Id: ArrayBundle_refdoc.ctex,v 1.6 2010/04/27 22:55:44 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -66,9 +66,11 @@
 #ifdef STANDALONE
 \input{ArrayBundle_usage}
 \input{ESMF_ArrayBundleEx_fapi}
+\input{ESMF_ArrayBundleHaloEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/ArrayBundle/doc/ArrayBundle_usage}
 \input{../Infrastructure/ArrayBundle/doc/ESMF_ArrayBundleEx_fapi}
+\input{../Infrastructure/ArrayBundle/doc/ESMF_ArrayBundleHaloEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
