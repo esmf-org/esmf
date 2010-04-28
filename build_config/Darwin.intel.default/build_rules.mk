@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.13 2009/05/29 19:32:25 theurich Exp $
+# $Id: build_rules.mk,v 1.14 2010/04/28 22:52:35 svasquez Exp $
 #
 # Darwin.intel.default
 #
@@ -40,6 +40,13 @@ ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
+ifeq ($(ESMF_COMM),mvapich2)
+# Mvapich2 ---------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpicxx
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
+else
 ifeq ($(ESMF_COMM),intelmpi)
 # IntelMPI -------------------------------------------------
 ESMF_F90DEFAULT         = mpiifort
@@ -68,6 +75,7 @@ ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
 else
 $(error Invalid ESMF_COMM setting: $(ESMF_COMM))
+endif
 endif
 endif
 endif
