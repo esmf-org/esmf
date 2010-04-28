@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.20 2010/04/25 20:04:20 rokuingh Exp $
+// $Id: ESMCI_Interp.C,v 1.21 2010/04/28 18:38:49 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -25,6 +25,7 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <algorithm>
 
 #include "ESMC_Start.h"
 
@@ -33,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.20 2010/04/25 20:04:20 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.21 2010/04/28 18:38:49 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
