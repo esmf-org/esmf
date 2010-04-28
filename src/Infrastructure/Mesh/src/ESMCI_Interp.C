@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.21 2010/04/28 18:38:49 rokuingh Exp $
+// $Id: ESMCI_Interp.C,v 1.22 2010/04/28 23:25:57 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.21 2010/04/28 18:38:49 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.22 2010/04/28 23:25:57 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1213,7 +1213,7 @@ void Interp::interpL2csrvM_parallel(IWeights &iw, IWeights *iw2,
     
     // now remove the Entries with matching id
     std::vector<IWeights::Entry>::iterator newend = 
-      unique(_col.begin(), _col.end(), IDMatch);
+      std::unique(_col.begin(), _col.end(), IDMatch);
 
     // now erase all Entries between newend and end
     _col.erase(newend, _col.end());
