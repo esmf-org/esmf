@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubeSphereRegridEx.F90,v 1.6 2010/04/27 14:22:00 w6ws Exp $
+! $Id: ESMF_CubeSphereRegridEx.F90,v 1.7 2010/04/28 23:29:41 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -84,7 +84,7 @@ program ESMF_CubeSphereRegridEx
       real(ESMF_KIND_R8), pointer :: fptr(:), fptr1(:,:), fptr2(:,:)
       real(ESMF_KIND_R8), pointer :: array3(:,:)
       real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:)
-      real(ESMF_KIND_R8) :: val, error
+      real(ESMF_KIND_R8) :: val, error, deg2rad
       type(ESMF_Grid) :: dstgrid1
       type(ESMF_DistGrid):: nodeDG, elemDG
       type(ESMF_Array) :: darray
@@ -186,8 +186,9 @@ program ESMF_CubeSphereRegridEx
 
       ! fake the data array to use a linear function of its coordinates
       !!!!!!!
+      deg2rad = 3.141592653589793238/180;
       do i=1,count
-	fptr(i) = COS(VertexCoords(2,nodeIds(i)))
+	fptr(i) = COS(deg2rad*VertexCoords(2,nodeIds(i)))
       enddo
      !!!!!!!
 
@@ -320,7 +321,7 @@ program ESMF_CubeSphereRegridEx
 	if (status .ne. ESMF_SUCCESS)  call ESMF_Finalize(terminationflag=ESMF_ABORT)
         count = 0
         do i=1,totalNodes
-	  val = COS(VertexCoords(2,seqIndex(i)))
+	  val = COS(deg2rad*VertexCoords(2,seqIndex(i)))
 	  if (val .ne. 0) then
              error = abs((fptr(i)-val)/val)
           else
@@ -340,7 +341,7 @@ program ESMF_CubeSphereRegridEx
         count = 0
         do i=lbnd1(1),ubnd1(1)
           do j=lbnd1(2),ubnd1(2)
-	      val = COS(fptr2(i,j))
+	      val = COS(deg2rad*fptr2(i,j))
 	  if (val .ne. 0) then
              error = abs((array3(i,j)-val)/val)
           else
@@ -440,7 +441,7 @@ subroutine CreateCSMesh (Mesh, VertexCoords, CellConnect, CellNums, StartCell, c
     integer, allocatable                :: NodeId(:)
     integer, allocatable                :: NodeUsed(:)
     real(ESMF_KIND_R8), allocatable     :: NodeCoords(:)
-    real(ESMF_KIND_R8)                  :: coorX, coorY
+    real(ESMF_KIND_R8)                  :: coorX, coorY, deg2rad
     integer, allocatable                :: NodeOwners(:)
     integer, allocatable                :: NodeOwners1(:)
 
@@ -458,6 +459,7 @@ subroutine CreateCSMesh (Mesh, VertexCoords, CellConnect, CellNums, StartCell, c
     ! Total number of nodes for the global mesh
     NodeCnt = ubound (VertexCoords, 2)
     NodeDim  = ubound (VertexCoords, 1)
+    deg2rad = 3.141592653589793238/180;
 
     ! create the mesh
     ! The spatialDim=3, we need to convert the 2D coordinate into 3D Cartisian in order
@@ -542,8 +544,8 @@ subroutine CreateCSMesh (Mesh, VertexCoords, CellConnect, CellNums, StartCell, c
         if (NodeUsed(NodeNo) > 0) then
 	   NodeId     (i) = NodeNo     
 	   if (convert3Dlocal) then
-              coorX = VertexCoords(1,NodeNo)
-              coorY = 90.0-VertexCoords(2,NodeNo)
+              coorX = VertexCoords(1,NodeNo)*deg2rad
+              coorY = (90.0-VertexCoords(2,NodeNo))*deg2rad
               NodeCoords((i-1)*3+1) = COS(coorX)*SIN(coorY)             
               NodeCoords((i-1)*3+2) = SIN(coorX)*SIN(coorY)             
               NodeCoords((i-1)*3+3) = COS(coorY)
