@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.3 2010/04/28 20:30:48 rokuingh Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.4 2010/04/28 21:05:28 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.3 2010/04/28 20:30:48 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.4 2010/04/28 21:05:28 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -77,8 +77,6 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh,
 
   IWeights wts;
 
-  MEField<> *src_iwts, *dst_iwts;
-
     switch (*regridConserve) {
 
     // Conservative regridding
@@ -86,10 +84,10 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh,
 
       // Add fields to mesh
       Context ctxt; ctxt.flip();
-      src_iwts = srcmesh.RegisterField("iwts",
+      MEField<> *src_iwts = srcmesh.RegisterField("iwts",
         MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 
-      dst_iwts = dstmesh.RegisterField("iwts",
+      MEField<> *dst_iwts = dstmesh.RegisterField("iwts",
         MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 
       // Commit the meshes
@@ -128,8 +126,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh,
     GatherForWrite(wts);
 
     // Write the weights
-    WriteNCMatFilePar(srcGridFile, dstGridFile, wghtFile, 
-                      wts, *src_iwts, *dst_iwts, srcmesh, dstmesh, NCMATPAR_ORDER_SEQ);
+    WriteNCMatFilePar(srcGridFile, dstGridFile, wghtFile, wts, NCMATPAR_ORDER_SEQ);
 
   return 1;
 
@@ -216,22 +213,10 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
        // Take pole constraint out of matrix
        wts.AssimilateConstraintsNPnts(pole_constraints);
      }
-/*
-  IWeights::WeightMap::iterator wit = wts.begin_row(), wet = wts.end_row();
-  //IWeights::WeightMap::iterator wit = stw.begin_row(), wet = stw.end_row();
-  for (; wit != wet; ++wit) {
-    const IWeights::Entry &_row = wit->first;
-    const std::vector<IWeights::Entry> &_col = wit->second;
 
-    for (UInt c = 0; c < _col.size(); ++c) {
-      double value = _col[c].value;
-      if (value > 1) std::cout<<"["<<_row.id<<","<<_col[c].id<<"] = "<<value<<std::endl;
-      if (value < 0) std::cout<<"["<<_row.id<<","<<_col[c].id<<"] = "<<value<<std::endl;
-    }
-  }
-*/
     return 1;
   }
+
   // csrv - Args are NON-COMMITTED meshes
   int csrv(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
            MEField<> *src_iwts, MEField<> *dst_iwts,
@@ -246,20 +231,32 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
 
     if (*regridScheme == ESMC_REGRID_SCHEME_FULL3D) {
       for (UInt i = 1; i <= 7; ++i) {
-        if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
-          MeshAddPole(srcmesh, i, constraint_id, pole_constraints);
-          MeshAddPole(dstmesh, i, constraint_id2, pole_constraints2);
-        } else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
-          MeshAddPoleNPnts(srcmesh, *regridPoleNPnts, i, constraint_id, pole_constraints);
-          MeshAddPoleNPnts(dstmesh, *regridPoleNPnts, i, constraint_id2, pole_constraints2);
-/*        } else if (*regridPoleType == ESMC_REGRID_POLETYPE_TEETH) {
-          MeshAddPoleTeeth(srcmesh, i, constraint_id, pole_constraints);
-          MeshAddPoleTeeth(dstmesh, i, constraint_id2, pole_constraints2);
-*/
-        }
+        MeshAddPoleTeeth(srcmesh, i, constraint_id, pole_constraints);
+        MeshAddPoleTeeth(dstmesh, i, constraint_id2, pole_constraints2);
       }
     }
 
+/*
+    // Add poles if requested
+    UInt constraint_id = srcmesh.DefineContext("pole_constraints");
+    if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
+      MeshAddPole(srcmesh, 1, constraint_id, pole_constraints);
+      MeshAddPole(srcmesh, 2, constraint_id, pole_constraints);
+    } else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
+      MeshAddPoleNPnts(srcmesh, *regridPoleNPnts, 1, constraint_id, pole_constraints);
+      MeshAddPoleNPnts(srcmesh, *regridPoleNPnts, 2, constraint_id, pole_constraints);
+    }
+
+    // Add poles if requested
+    UInt constraint_id2 = dstmesh.DefineContext("pole_constraints2");
+    if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
+      MeshAddPole(dstmesh, 1, constraint_id2, pole_constraints2);
+      MeshAddPole(dstmesh, 2, constraint_id2, pole_constraints2);
+    } else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
+      MeshAddPoleNPnts(dstmesh, *regridPoleNPnts, 1, constraint_id2, pole_constraints2);
+      MeshAddPoleNPnts(dstmesh, *regridPoleNPnts, 2, constraint_id2, pole_constraints2);
+    }
+*/
     // generate integration weights
     Integrate sig(srcmesh), dig(dstmesh);
     sig.intWeights(src_iwts);
@@ -313,38 +310,23 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
 
     // Generate the backwards interpolation matrix
     interp(0, stw);
-
-    // Factor out poles if they exist
-    if (*regridScheme == ESMC_REGRID_SCHEME_FULL3D) {
-      if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
-        stw.GatherToCol(pole_constraints);
-        stw.AssimilateConstraints(pole_constraints);
-        stw.GatherToCol(pole_constraints2);
-        stw.AssimilateConstraints(pole_constraints2);
-      } else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
-        stw.GatherToRowSrc(pole_constraints);
-        stw.AssimilateConstraintsNPnts(pole_constraints);
-        stw.GatherToRowSrc(pole_constraints2);
-        stw.AssimilateConstraintsNPnts(pole_constraints2);
-      }
-    }
-#ifdef DEBUG
-  IWeights::WeightMap::iterator sit = stw.begin_row(), set = stw.end_row();
-  //IWeights::WeightMap::iterator wit = stw.begin_row(), wet = stw.end_row();
-  for (; sit != set; ++sit) {
-    const IWeights::Entry &_row = sit->first;
-    const std::vector<IWeights::Entry> &_col = sit->second;
-
-    for (UInt c = 0; c < _col.size(); ++c) {
-      double value = _col[c].value;
-      if (value > 1) std::cout<<"["<<_row.id<<","<<_col[c].id<<"] = "<<value<<std::endl;
-//      if (value < 0) std::cout<<"["<<_row.id<<","<<_col[c].id<<"] = "<<value<<std::endl;
-    }
+/*
+  // Factor out poles if they exist
+  if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
+    stw.GatherToCol(pole_constraints);
+    stw.AssimilateConstraints(pole_constraints);
+    stw.GatherToCol(pole_constraints2);
+    stw.AssimilateConstraints(pole_constraints2);
+  } else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
+    stw.GatherToRowSrc(pole_constraints);
+    stw.AssimilateConstraintsNPnts(pole_constraints);
+    stw.GatherToRowSrc(pole_constraints2);
+    stw.AssimilateConstraintsNPnts(pole_constraints2);
   }
-#endif
+*/
     // L2 projection conservative interpolation
     interp.interpL2csrvM(stw, &wts, src_iwts, dst_iwts);
-#ifdef DEBUG
+/*
   // print out info of the iwts
   Mesh::iterator sni=srcmesh.node_begin(), sne=srcmesh.node_end();
   Mesh::iterator dni=dstmesh.node_begin(), dne=dstmesh.node_end();
@@ -419,8 +401,9 @@ double badrowid = 0;
                       <<"  and negcount = "<<snegcount<<std::endl;
   std::cout<<std::endl<<"Destination iwts total count = "<<dtotalcount
                       <<"  and negcount = "<<dnegcount<<std::endl<<std::endl;
-#endif
+*/
 
     return 1;
   }
+
 }
