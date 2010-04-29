@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.30 2010/04/19 22:29:06 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.31 2010/04/29 14:53:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.30 2010/04/19 22:29:06 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.31 2010/04/29 14:53:17 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -233,7 +233,8 @@ contains
                                        dstField, dstMaskValues,        &
                                        unmappedDstAction,              &
                                        routeHandle, indicies, weights, & 
-                                       regridMethod, regridConserve, &
+                                       srcIwts, dstIwts,               &
+                                       regridMethod, regridConserve,   &
                                        regridScheme, rc)
 !
 ! !RETURN VALUE:
@@ -247,7 +248,9 @@ contains
       type(ESMF_RouteHandle), intent(inout), optional :: routeHandle
       integer(ESMF_KIND_I4), pointer, optional        :: indicies(:,:)
       real(ESMF_KIND_R8), pointer, optional           :: weights(:)
-      type(ESMF_RegridMethod), intent(in)             :: regridMethod
+      real(ESMF_KIND_R8), pointer, optional           :: srcIwts(:)
+      real(ESMF_KIND_R8), pointer, optional           :: dstIwts(:)
+      type(ESMF_RegridMethod), intent(in), optional   :: regridMethod
       type(ESMF_RegridConserve), intent(in), optional :: regridConserve
       integer, intent(in), optional                   :: regridScheme
       integer, intent(out), optional                  :: rc 
@@ -314,6 +317,7 @@ contains
 !EOP
         integer :: localrc
         integer              :: lregridScheme
+        type(ESMF_RegridMethod) :: lregridMethod
         type(ESMF_RegridConserve) :: lregridConserve
         integer              :: isSphere
         type(ESMF_GeomType)  :: srcgeomtype
@@ -348,6 +352,14 @@ contains
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
+        ! Handle optional method argument
+        if (present(regridMethod)) then
+           lregridMethod=regridMethod
+        else     
+           lregridMethod=ESMF_REGRID_METHOD_BILINEAR
+        endif
+
+        ! Handle optional conserve argument
         if (present(regridConserve)) then
            lregridConserve=regridConserve
         else     
@@ -420,9 +432,9 @@ contains
 
         ! call into the Regrid mesh interface
         call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
-              regridMethod, lregridConserve, lregridScheme, &
+              lregridMethod, lregridConserve, lregridScheme, &
               unmappedDstAction, routeHandle, &
-              indicies, weights, localrc)
+              indicies, weights, srcIwts, dstIwts, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
