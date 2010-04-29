@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.48 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_RHandle.F90,v 1.49 2010/04/29 05:25:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -80,6 +80,9 @@ module ESMF_RHandleMod
   
   public ESMF_RouteHandleRelease
 
+  public ESMF_RouteHandlePrepXXE
+  public ESMF_RouteHandleAppendClear
+  
   public ESMF_RouteHandleGet
   public ESMF_RouteHandleSet
  
@@ -92,7 +95,7 @@ module ESMF_RHandleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_RHandle.F90,v 1.48 2010/03/04 18:57:45 svasquez Exp $'
+    '$Id: ESMF_RHandle.F90,v 1.49 2010/04/29 05:25:24 theurich Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -335,6 +338,107 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_RouteHandleRelease
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteHandlePrepXXE"
+!BOPI
+! !IROUTINE: ESMF_RouteHandlePrepXXE - Prepare RouteHandle for XXE based comms
+
+! !INTERFACE:
+  subroutine ESMF_RouteHandlePrepXXE(rhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_RouteHandle), intent(inout) :: rhandle
+    integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!   Set an {\tt ESMF\_RouteHandle} attribute with the given value.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[rhandle] 
+!     {\tt ESMF\_RouteHandle} to be prepared.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+    
+    call c_ESMC_RouteHandlePrepXXE(rhandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_RouteHandlePrepXXE
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteHandleAppendClear"
+!BOPI
+! !IROUTINE: ESMF_RouteHandleAppendClear - Append XXE based RouteHandle and clear
+
+! !INTERFACE:
+  subroutine ESMF_RouteHandleAppendClear(rhandle, appendRoutehandle, &
+    rraShift, vectorLengthShift, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_RouteHandle), intent(inout) :: rhandle
+    type(ESMF_RouteHandle), intent(inout) :: appendRoutehandle
+    integer, intent(in)                   :: rraShift
+    integer, intent(in)                   :: vectorLengthShift
+    integer, intent(out), optional        :: rc            
+
+!
+! !DESCRIPTION:
+!   Set an {\tt ESMF\_RouteHandle} attribute with the given value.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[rhandle] 
+!     {\tt ESMF\_RouteHandle} to be appended to.
+!   \item[appendRoutehandle] 
+!     {\tt ESMF\_RouteHandle} to be appended and cleared.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+    
+    call c_ESMC_RouteHandleAppendClear(rhandle, appendRoutehandle, &
+      rraShift, vectorLengthShift, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_RouteHandleAppendClear
 !------------------------------------------------------------------------------
 
 
