@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.290 2010/04/23 01:05:24 theurich Exp $
+#  $Id: common.mk,v 1.291 2010/04/29 16:01:56 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2277,7 +2277,7 @@ init_test_harness:
 #
 #    internal
 #        TNAME    test name (hardcoded TestHarness)
-#        RNAME    unique name base on suite and number of processors
+#        HNAME    unique name base on suite and number of processors
 #
 #    environment
 #        MPIRUN        mpirun command
@@ -2287,28 +2287,22 @@ init_test_harness:
 #
 #
 run_test_harness: 
-	$(MAKE) TNAME=TestHarness RNAME=ESMF_$(TESTHARNESSCASE)_NP$(NP)UTest run_test_harness_sec
+	$(MAKE) TNAME=TestHarness HNAME=$(TESTHARNESSCASE)_NP$(NP) run_test_harness_sec
 
 # target with expanded parameters
 run_test_harness_sec:
 	@if [ -f $(ESMF_TESTDIR)/test_harness.list ] ; then \
-	  if ! grep $(RNAME) $(ESMF_TESTDIR)/test_harness.list ; then \
-	    echo $(RNAME) >> $(ESMF_TESTDIR)/test_harness.list ; \
+	  if ! grep ESMF_$(HNAME)UTest $(ESMF_TESTDIR)/test_harness.list ; then \
+	    echo ESMF_$(HNAME)UTest >> $(ESMF_TESTDIR)/test_harness.list ; \
 	  fi ; \
 	else \
-	  echo $(RNAME) > $(ESMF_TESTDIR)/test_harness.list ; \
+	  echo ESMF_$(HNAME)UTest > $(ESMF_TESTDIR)/test_harness.list ; \
 	fi ; \
 	if [ -d harness_config ] ; then \
 	  if [ -f harness_config/$(TESTHARNESSCASE)_test.rc ] ; then \
 	    cp -f harness_config/$(TESTHARNESSCASE)_*.rc $(ESMF_TESTDIR) ; \
 	    cp -f harness_config/$(TESTHARNESSCASE)_test.rc $(ESMF_TESTDIR)/test_harness.rc ; \
-	    pushd $(ESMF_TESTDIR) ; \
-	    $(ESMF_RM) ./PET*.TestHarnessUTest.Log ; \
-	    echo "$(ESMF_MPIRUN) -np $(NP) ESMF_TestHarnessUTest" ; \
-	    $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1> ./$(RNAME).stdout 2>&1 ; \
-	    cat ./PET*.$(TNAME)UTest.Log > ./$(RNAME).Log ; \
-	    $(ESMF_RM) ./PET*.$(TNAME)UTest.Log ; \
-	    popd ; \
+            $(MAKE) htest ; \
 	  else \
 	    echo "FAIL: missing file - harness_config/$(TESTHARNESSCASE)_test.rc" ; \
 	  fi ; \
