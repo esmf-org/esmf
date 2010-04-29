@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.6 2010/04/29 13:47:16 rokuingh Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.7 2010/04/29 19:25:18 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.6 2010/04/29 13:47:16 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.7 2010/04/29 19:25:18 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -145,19 +145,16 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
 
     if (*regridScheme == ESMC_REGRID_SCHEME_FULL3D) {
       if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
-        for (UInt i = 1; i <= 7; ++i) {
+        for (UInt i = 1; i <= 7; ++i)
           MeshAddPole(srcmesh, i, constraint_id, pole_constraints);
-        }
       } else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
-        for (UInt i = 1; i <= 7; ++i) {
+        for (UInt i = 1; i <= 7; ++i)
           MeshAddPoleNPnts(srcmesh, *regridPoleNPnts, i, constraint_id, pole_constraints);
-/*        } else if (*regridPoleType == ESMC_REGRID_POLETYPE_TEETH) {
+      } else if (*regridPoleType == ESMC_REGRID_POLETYPE_TEETH) {
+        for (UInt i = 1; i <= 7; ++i)
           MeshAddPoleTeeth(srcmesh, i, constraint_id, pole_constraints);
-*/
-        }
       }
     }
-
 
     // Get coordinate fields
     MEField<> &scoord = *srcmesh.GetCoordField();
@@ -227,16 +224,14 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
 
     if (*regridScheme == ESMC_REGRID_SCHEME_FULL3D) {
       if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
-        for (UInt i = 1; i <= 7; ++i) {
+        for (UInt i = 1; i <= 7; ++i)
           MeshAddPole(dstmesh, i, constraint_id, pole_constraints);
-        }
       } else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
-        for (UInt i = 1; i <= 7; ++i) {
+        for (UInt i = 1; i <= 7; ++i)
           MeshAddPoleNPnts(dstmesh, *regridPoleNPnts, i, constraint_id, pole_constraints);
-/*        } else if (*regridPoleType == ESMC_REGRID_POLETYPE_TEETH) {
+      } else if (*regridPoleType == ESMC_REGRID_POLETYPE_TEETH) {
+        for (UInt i = 1; i <= 7; ++i)
           MeshAddPoleTeeth(dstmesh, i, constraint_id, pole_constraints);
-*/
-        }
       }
     }
 
@@ -307,7 +302,6 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
 
     // L2 projection conservative interpolation
     interp.interpL2csrvM(stw, &wts, src_iwts, dst_iwts);
-
 /*
   // print out info of the iwts
   Mesh::iterator sni=srcmesh.node_begin(), sne=srcmesh.node_end();
