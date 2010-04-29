@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.5 2010/04/28 21:55:58 rokuingh Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.6 2010/04/29 13:47:16 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.5 2010/04/28 21:55:58 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.6 2010/04/29 13:47:16 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -76,6 +76,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh,
   int unmappedaction = ESMC_UNMAPPEDACTION_ERROR;
 
   IWeights wts;
+  MEField<> *src_iwts, *dst_iwts;
 
     switch (*regridConserve) {
 
@@ -84,10 +85,10 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh,
 
       // Add fields to mesh
       Context ctxt; ctxt.flip();
-      MEField<> *src_iwts = srcmesh.RegisterField("iwts",
+      src_iwts = srcmesh.RegisterField("iwts",
         MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 
-      MEField<> *dst_iwts = dstmesh.RegisterField("iwts",
+      dst_iwts = dstmesh.RegisterField("iwts",
         MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 
       // Commit the meshes
@@ -126,7 +127,8 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh,
     GatherForWrite(wts);
 
     // Write the weights
-    WriteNCMatFilePar(srcGridFile, dstGridFile, wghtFile, wts, NCMATPAR_ORDER_SEQ);
+    WriteNCMatFilePar(srcGridFile, dstGridFile, wghtFile,
+                      wts, *src_iwts, *dst_iwts, srcmesh, dstmesh, NCMATPAR_ORDER_SEQ);
 
   return 1;
 

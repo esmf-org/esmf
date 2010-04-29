@@ -14,6 +14,9 @@
 
 #include <string>
 
+#include <Mesh/include/ESMCI_MEField.h>
+#include <Mesh/include/ESMCI_Mesh.h>
+
 namespace ESMCI {
 
 class IWeights;
@@ -36,6 +39,10 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
                     const std::string &dst_ncfile,
                     const std::string &outfile,
                     const IWeights &w,
+                    const MEField<> &src_iwts,
+                    const MEField<> &dst_iwts,
+                    Mesh &srcmesh,
+                    Mesh &dstmesh,
                     int ordering = NCMATPAR_ORDER_INTERLEAVE
                     );
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_WriteWeightsPar.C,v 1.10 2010/04/28 21:05:28 rokuingh Exp $
+// $Id: ESMCI_WriteWeightsPar.C,v 1.11 2010/04/29 13:47:16 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@ typedef long long MPI_OffType;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WriteWeightsPar.C,v 1.10 2010/04/28 21:05:28 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_WriteWeightsPar.C,v 1.11 2010/04/29 13:47:16 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -349,6 +349,10 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
                     const std::string &dst_ncfile,
                     const std::string &outfile,
                     const IWeights &w,
+                    const MEField<> &src_iwts,
+                    const MEField<> &dst_iwts,
+                    Mesh &srcmesh,
+                    Mesh &dstmesh,
                     int ordering)
 {
   Trace __trace("WriteNCMatFilePar(const std::string &src_ncfile, const std::string &dst_ncfile, const std::string &outfile, const IWeights &w, int ordering"); 
@@ -657,6 +661,15 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
      std::vector<double> area;
      
      area.resize(ncsrc.local_grid_size, 0.0);
+
+     UInt c = 0;
+     Mesh::iterator nsi = srcmesh.node_begin(), nse = srcmesh.node_end();
+     for (; nsi != nse; ++nsi) {
+       double *Sdata = src_iwts.data(*nsi);
+       area[c] = *Sdata;
+       ++c;
+     }
+
      if ((retval = ncmpi_put_vara_double_all(ncid, area_aid, startsa, countsa, &area[0])))
        Throw() << "NC error:" << ncmpi_strerror(retval);
      
@@ -715,6 +728,15 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
      std::vector<double> area;
      
      area.resize(ncdst.local_grid_size, 0.0);
+
+     UInt c = 0;
+     Mesh::iterator ndi = dstmesh.node_begin(), nde = dstmesh.node_end();
+     for (; ndi != nde; ++ndi) {
+       double *Ddata = dst_iwts.data(*ndi);
+       area[c] = *Ddata;
+       ++c;
+     }
+
      if ((retval = ncmpi_put_vara_double_all(ncid, area_bid, startsb, countsb, &area[0])))
         Throw() << "NC error:" << ncmpi_strerror(retval);
    }
