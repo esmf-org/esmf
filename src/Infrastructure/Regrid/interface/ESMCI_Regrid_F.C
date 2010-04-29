@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.44 2010/04/21 22:31:12 rokuingh Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.45 2010/04/29 14:54:32 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,11 +46,7 @@
 
 
 using namespace ESMCI;
-/*
-enum {ESMF_REGRID_SCHEME_FULL3D = 0, ESMF_REGRID_SCHEME_NATIVE = 1};
-enum {ESMF_REGRID_METHOD_BILINEAR = 0, ESMF_REGRID_METHOD_PATCH = 1};
-enum {ESMF_REGRID_CONSERVE_OFF = 0, ESMF_REGRID_CONSERVE_ON = 1};
-*/
+
 namespace ESMCI {
   struct TempWeights {
     int nentries;
@@ -58,10 +54,6 @@ namespace ESMCI {
     double *factors;
   };
 }
-
-// local functions
-//int conservative_online(Mesh &, Mesh &, IWeights &, int *, int *, int *);
-//int regrid_online(Mesh &, Mesh &, IWeights &, int *, int *, int *);
 
 // external C functions
 extern "C" void FTN(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
@@ -76,7 +68,9 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                    int *regridScheme, int *unmappedaction,
                    ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
                    int *nentries, ESMCI::TempWeights **tweights,
-                             int*rc) {
+                   int *nsrciwts, ESMCI::TempWeights **srciwts,
+                   int *ndstiwts, ESMCI::TempWeights **dstiwts,
+                   int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_create()" 
   Trace __trace(" FTN(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, int *srcstaggerLoc, ESMCI::Grid **griddstcpp, int *dststaggerLoc, int*rc");
@@ -100,6 +94,55 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
       Throw() << "Online regridding error" << std::endl;
 
     //wts.Print(Par::Out());
+
+    // Put the integration weights away before we play with the smm
+    if (*regridConserve == ESMC_REGRID_CONSERVE_ON) {
+      // Get the integration weights
+      MEField<> *src_iwts = srcmesh.GetField("iwts");
+      if (!src_iwts) Throw() << "Integration weights not found!"
+                             <<std::endl;
+      MEField<> *dst_iwts = dstmesh.GetField("iwts");
+      if (!dst_iwts) Throw() << "Integration weights not found!"
+                             <<std::endl;
+
+      // General objecs and info
+      UInt srciwts_size = srcmesh.num_nodes();
+      UInt dstiwts_size = dstmesh.num_nodes();
+
+      UInt srciwts_count = 0;
+      UInt dstiwts_count = 0;
+
+      *nsrciwts = srciwts_size;
+      *ndstiwts = dstiwts_size;
+
+      double *srcfactors = new double [srciwts_size];
+      double *dstfactors = new double [dstiwts_size];
+
+      // Setup the srciwts object
+      Mesh::iterator nsi = srcmesh.node_begin(), nse = srcmesh.node_end();
+      for (; nsi != nse; ++nsi) {
+        double *Sdata = src_iwts->data(*nsi);
+        srcfactors[srciwts_count] = *Sdata;
+        ++srciwts_count;
+      }
+      *srciwts = new ESMCI::TempWeights;
+      (*srciwts)->nentries = srciwts_size;
+      (*srciwts)->factors = srcfactors;
+
+      // Setup the dstiwts object
+      Mesh::iterator ndi = dstmesh.node_begin(), nde = dstmesh.node_end();
+      for (; ndi != nde; ++ndi) {
+        double *Ddata = dst_iwts->data(*ndi);
+        dstfactors[dstiwts_count] = *Ddata;
+        ++dstiwts_count;
+      }
+      *dstiwts = new ESMCI::TempWeights;
+      (*dstiwts)->nentries = dstiwts_size;
+      (*dstiwts)->factors = dstfactors;
+    } else {
+      *nsrciwts = 0;
+      *ndstiwts = 0;
+    }
 
     // We have the weights, now set up the sparsemm object
 
@@ -221,6 +264,26 @@ extern "C" void FTN(c_esmc_copy_tempweights)(ESMCI::TempWeights **_tw, int *ii, 
 
   delete [] tw.factors;
   delete [] tw.iientries;
+
+  delete *_tw;
+
+}
+
+// Copy the integration weights stored in the temporary tw into the fortran arrays.  Also,
+// delete the temp weights.
+extern "C" void FTN(c_esmc_copy_iweights)(ESMCI::TempWeights **_tw, double *w) {
+
+  ESMCI::TempWeights &tw = (**_tw);
+
+  for (int i = 0; i < tw.nentries; ++i) {
+
+    int two_i = i << 1;
+
+    w[i] = tw.factors[i];
+
+  }
+
+  delete [] tw.factors;
 
   delete *_tw;
 

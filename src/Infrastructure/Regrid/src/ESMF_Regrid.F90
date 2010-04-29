@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.143 2010/04/19 22:29:07 rokuingh Exp $
+! $Id: ESMF_Regrid.F90,v 1.144 2010/04/29 14:54:32 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -126,7 +126,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.143 2010/04/19 22:29:07 rokuingh Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.144 2010/04/29 14:54:32 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -279,7 +279,9 @@ end function my_xor
                  dstMesh, dstArray, &
                  regridMethod, regridConserve, regridScheme, &
                  unmappedDstAction, routehandle, &
-                 indicies, weights, rc)
+                 indicies, weights, &
+                 srcIwts, dstIwts, &
+                 rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Mesh), intent(inout)         :: srcMesh
@@ -293,6 +295,8 @@ end function my_xor
       type(ESMF_RouteHandle),  intent(inout), optional :: routehandle
       integer(ESMF_KIND_I4), pointer, optional         :: indicies(:,:)
       real(ESMF_KIND_R8), pointer, optional            :: weights(:)
+      real(ESMF_KIND_R8), pointer, optional            :: srcIwts(:)
+      real(ESMF_KIND_R8), pointer, optional            :: dstIwts(:)
       integer,                  intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -331,8 +335,8 @@ end function my_xor
        integer :: localrc
        type(ESMF_StaggerLoc) :: staggerLoc
        type(ESMF_VM)        :: vm
-       integer :: has_rh, has_iw, nentries
-       type(ESMF_TempWeights) :: tweights
+       integer :: has_rh, has_iw, nentries, nsrciwts, ndstiwts
+       type(ESMF_TempWeights) :: tweights, lsrciwts, ldstiwts
        type(ESMF_RegridConserve) :: localregridConserve
        type(ESMF_UnmappedAction) :: localunmappedDstAction
        logical :: isMemFreed
@@ -423,6 +427,8 @@ end function my_xor
                    regridScheme, localunmappedDstAction%unmappedaction, &
                    routehandle, has_rh, has_iw, &
                    nentries, tweights, &
+                   nsrciwts, lsrciwts, &
+                   ndstiwts, ldstiwts, &
                    localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -436,6 +442,23 @@ end function my_xor
 
        endif
 
+       ! Now we must allocate the F90 pointers for integration weights
+       if (present(srcIwts) .and. &
+       (localregridConserve%regridconserve == ESMF_REGRID_CONSERVE_ON%regridconserve)) then
+         allocate(srcIwts(nsrciwts))
+
+         call c_ESMC_Copy_IWeights(lsrciwts, srcIwts(1))
+
+       endif
+
+       ! Now we must allocate the F90 pointers for integration weights
+       if (present(dstIwts) .and. &
+       (localregridConserve%regridconserve == ESMF_REGRID_CONSERVE_ON%regridconserve)) then
+         allocate(dstIwts(ndstiwts))
+
+         call c_ESMC_Copy_IWeights(ldstiwts, dstIwts(1))
+
+       endif
 
        ! Mark route handle created
       if (present(routeHandle)) then 
