@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloEx.F90,v 1.2 2010/04/19 13:24:55 feiliu Exp $
+! $Id: ESMF_FieldHaloEx.F90,v 1.3 2010/04/29 19:18:55 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldHaloEx.F90,v 1.2 2010/04/19 13:24:55 feiliu Exp $'
+    '$Id: ESMF_FieldHaloEx.F90,v 1.3 2010/04/29 19:18:55 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -158,6 +158,7 @@
         fptr = tmp_farray
         ! call halo update to communicate the values in the halo region to neighboring domains
         call ESMF_FieldHalo(field, routehandle=routehandle, rc=rc)
+        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     enddo
 
     ! release the halo routehandle
