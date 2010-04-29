@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mapping.C,v 1.6 2010/04/27 21:41:53 oehmke Exp $
+// $Id: ESMCI_Mapping.C,v 1.7 2010/04/29 23:05:12 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -22,7 +22,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Mapping.C,v 1.6 2010/04/27 21:41:53 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Mapping.C,v 1.7 2010/04/29 23:05:12 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -278,6 +278,7 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
     if (!intersect_quad_with_line(mdata, point, center, p, &t)) {
       if (dist) *dist = std::numeric_limits<double>::max();
       pcoord[0]=0.0; pcoord[1]=0.0;
+      printf("QUAD CAN'T INVERT \n");
       return false;
     }
 
@@ -318,11 +319,15 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
     // Intersect quad with line from point to center of sphere
     if (!intersect_tri_with_line(mdata, point, center, p, &t)) {
       if (dist) *dist = std::numeric_limits<double>::max();
+      printf("TRI CAN'T INVERT \n");
       pcoord[0]=0.0; pcoord[1]=0.0;
       return false;
     }
 
-    // Don't need to transform tri parametric coords because tri shape func seems to use [0,1] 
+    // Don't need to transform tri parametric coords because tri shape func seems to use [0,1], but
+    // put into pcoord 
+    pcoord[0]=p[0];
+    pcoord[1]=p[1];
 
     // Calculate distance
     if (dist) {
