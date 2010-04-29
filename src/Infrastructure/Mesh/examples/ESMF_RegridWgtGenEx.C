@@ -1,4 +1,4 @@
-// $Id: ESMC_PatchWghtEx.C,v 1.22 2010/04/21 22:30:37 rokuingh Exp $
+// $Id: ESMF_RegridWgtGenEx.C,v 1.1 2010/04/29 21:55:40 rokuingh Exp $
 //==============================================================================
 //
 // Earth System Modeling Framework
