@@ -1,14 +1,12 @@
-# $Id: makefile,v 1.6 2008/09/26 05:53:54 cdeluca Exp $ 
+# $Id: makefile,v 1.7 2010/04/30 17:28:42 feiliu Exp $ 
 
 
 ALL: build_here 
 
 AUTOGEN   = 
-# TODO:FIELDINTEGRATION Restore FieldBundleGet
-# ESMF_FieldBundleGet.F90 
 
 SOURCEC	  = 
-SOURCEF	  = ESMF_FieldBundle.F90 ESMF_FieldBundleSMM.F90 ESMF_FieldBundleRedist.F90 $(AUTOGEN)
+SOURCEF	  = ESMF_FieldBundle.F90 ESMF_FieldBundleSMM.F90 ESMF_FieldBundleRedist.F90 ESMF_FieldBundleHalo.F90 $(AUTOGEN)
 SOURCEH	  = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

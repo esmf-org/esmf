@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2009/02/27 22:51:38 svasquez Exp $ 
+# $Id: makefile,v 1.6 2010/04/30 17:28:42 feiliu Exp $ 
 
 ALL: build_examples
 
@@ -8,11 +8,13 @@ LOCDIR    = src/Infrastructure/FieldBundle/examples
 
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldBundleCreateEx \
                  $(ESMF_EXDIR)/ESMF_FieldBundleRedistEx \
-                 $(ESMF_EXDIR)/ESMF_FieldBundleSMMEx 
+                 $(ESMF_EXDIR)/ESMF_FieldBundleSMMEx \
+                 $(ESMF_EXDIR)/ESMF_FieldBundleHaloEx 
 
 EXAMPLES_RUN = run_ESMF_FieldBundleCreateEx \
                run_ESMF_FieldBundleRedistEx \
-               run_ESMF_FieldBundleSMMEx 
+               run_ESMF_FieldBundleSMMEx \
+               run_ESMF_FieldBundleHaloEx
 
 EXAMPLES_RUN_UNI = run_ESMF_FieldBundleCreateEx_uni \
 
@@ -38,8 +40,8 @@ run_ESMF_FieldBundleCreateEx_uni:
 run_ESMF_FieldBundleRedistEx:
 	$(MAKE) EXNAME=FieldBundleRedist NP=4 exfrun
 
-
 run_ESMF_FieldBundleSMMEx:
 	$(MAKE) EXNAME=FieldBundleSMM NP=4 exfrun
 
-
+run_ESMF_FieldBundleHaloEx:
+	$(MAKE) EXNAME=FieldBundleHalo NP=4 exfrun

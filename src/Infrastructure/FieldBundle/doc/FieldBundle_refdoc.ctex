@@ -1,4 +1,4 @@
-% $Id: FieldBundle_refdoc.ctex,v 1.4 2008/09/26 23:28:37 cdeluca Exp $
+% $Id: FieldBundle_refdoc.ctex,v 1.5 2010/04/30 17:28:41 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -55,11 +55,13 @@
 \input{ESMF_FieldBundleCreateEx_fapi}
 \input{ESMF_FieldBundleRedistEx_fapi}
 \input{ESMF_FieldBundleSMMEx_fapi}
+\input{ESMF_FieldBundleHaloEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/FieldBundle/doc/FieldBundle_usage}
 \input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleCreateEx_fapi}
 \input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleRedistEx_fapi}
 \input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleSMMEx_fapi}
+\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleHaloEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
