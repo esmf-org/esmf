@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.291 2010/04/29 16:01:56 theurich Exp $
+#  $Id: common.mk,v 1.292 2010/04/30 20:31:41 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2226,9 +2226,15 @@ htest:
 	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
 	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest ; \
 	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest ; \
+	  if [ -f $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout ] ; then \
+		mv -f $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout $(ESMF_TESTDIR)/ESMF_$(HNAME)UTest.stdout ; \
+	  fi ; \
 	else \
 	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1\> ./ESMF_$(HNAME)UTest.stdout 2\>\&1 ; \
 	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1> ./ESMF_$(HNAME)UTest.stdout 2>&1 ; \
+	  if [ -f $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout ] ; then \
+		mv -f $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout $(ESMF_TESTDIR)/ESMF_$(HNAME)UTest.stdout ; \
+	   fi ; \
 	fi ; \
 	cat ./PET*$(TNAME)UTest.Log > ./ESMF_$(HNAME)UTest.Log ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
