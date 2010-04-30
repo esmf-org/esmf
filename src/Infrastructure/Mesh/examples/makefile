@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2010/04/29 21:55:40 rokuingh Exp $
+# $Id: makefile,v 1.19 2010/04/30 20:19:00 rokuingh Exp $
 
 ALL: build_examples
 run: run_examples
@@ -14,7 +14,7 @@ EXAMPLES_BUILD    = \
                       $(ESMF_EXDIR)/ESMC_RendEx \
                       $(ESMF_EXDIR)/ESMC_DCatEx \
                       $(ESMF_EXDIR)/ESMC_RefineEx \
-                      $(ESMF_EXDIR)/ESMF_RegridWgtGenEx \
+                      $(ESMF_EXDIR)/ESMC_RegridWgtGenEx \
                       $(ESMF_EXDIR)/ESMF_MeshEx \
                       $(ESMF_EXDIR)/ESMF_CubeSphereRegridEx
 #                      $(ESMF_EXDIR)/ESMC_BreckEx \
