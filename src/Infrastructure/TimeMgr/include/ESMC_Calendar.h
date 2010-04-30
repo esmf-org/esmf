@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.66 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMC_Calendar.h,v 1.67 2010/04/30 22:39:28 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -23,17 +23,6 @@
 #ifndef ESMC_Calendar_H
 #define ESMC_Calendar_H
 
-//-----------------------------------------------------------------------------
-//BOPI
-// !CLASS:  ESMC_Calendar - Public C interface to the ESMF Calendar class
-//
-// !DESCRIPTION:
-//
-// The code in this file defines the public C Calendar interfaces and declares
-// method signatures (prototypes).  The companion file {\tt ESMC\_Calendar.C}
-// contains the definitions (full code bodies) for the Calendar methods.
-//
-//EOPI
 //-----------------------------------------------------------------------------
 
 // TODO: these definitions need different home (shared with ESMCI_Calendar)
@@ -66,12 +55,54 @@ typedef struct {
 } ESMC_Calendar;
 
 // Class API
+//BOP
+// !IROUTINE: ESMC_CalendarCreate - Create a Calendar
+//
+// !INTERFACE:
 ESMC_Calendar ESMC_CalendarCreate(const char *name,
                                   enum ESMC_CalendarType calendarType, int *rc);  
 
+// ARGUMENTS :
+// 	char	name,		
+//	enum ESMC_CalendarType calendarType,
+//	int *rc
+//
+// 
+// !DESCRIPTION:
+//	Create a Calendar of calendar type.
+//EOP
+
+
+//BOP
+// !IROUTINE: ESMC_CalendarDestroy - Destroy a Calendar
+//
+// !INTERFACE:
 int ESMC_CalendarDestroy(ESMC_Calendar *calendar);
 
+// ARGUMENTS :
+//	ESMC_Calendar *calendar
+//
+//
+// !DESCRIPTION:
+//      Destroy a Calendar.
+//EOP
+
+
+//BOP
+// !IROUTINE: ESMC_CalendarPrint - Print a Calendar
+//
+// !INTERFACE:
 int ESMC_CalendarPrint(ESMC_Calendar calendar);
+
+// ARGUMENTS :
+//      ESMC_Calendar calendar
+//
+//
+// !DESCRIPTION:
+//      Print a Calendar.
+//EOP
+
+
 
 #ifdef __cplusplus
 } // extern "C"
