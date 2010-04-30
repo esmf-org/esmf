@@ -1,4 +1,4 @@
-// $Id: ESMCI_Integrate.C,v 1.1 2010/04/07 20:33:09 rokuingh Exp $
+// $Id: ESMCI_Integrate.C,v 1.2 2010/04/30 23:14:15 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Integrate.C,v 1.1 2010/04/07 20:33:09 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Integrate.C,v 1.2 2010/04/30 23:14:15 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -80,16 +80,11 @@ void Integrate::int_weights_serial(MEField<> *iwts) {
     for (ESMCI::UInt s = 0; s < topo->num_nodes; ++s, ++fi){
       weight = mev.GetJxW(s);
       const MeshObj &node = *((*fi).obj);
-      double *c = cfield->data(node);
       double *data = iwts->data(node);
-      double rho = std::sqrt(std::pow(c[0],2)+std::pow(c[1],2)+std::pow(c[2],2));
-      double phi = std::acos(c[2]/rho);
-      double metric = std::pow(rho,2)*std::sin(phi);
-      //*data += metric*weight;
+
       *data += weight;
     }
   }
-
 }
 
 void Integrate::int_weights_parallel(MEField<> *iwts) {
@@ -123,17 +118,15 @@ void Integrate::int_weights_parallel(MEField<> *iwts) {
       // get node and check that it's local
       //const MeshObj &node = *(elem.Relations[s].obj);
       const MeshObj &node = *((*fi).obj);
-      if (node.get_owner() == id) {
-      double weight = mev.GetJxW(s);
-      // get the data of src_iwts field that corresponds to this node
-      double *data = iwts->data(node);
-      *data += weight;
-      }
-      }
+        double weight = mev.GetJxW(s);
+        // get the data of src_iwts field that corresponds to this node
+        double *data = iwts->data(node);
+        *data += weight;
     }
+  }
 
   // swap_add both meshes
   mesh.SwapOp<double>(1,&iwts,CommRel::OP_SUM);
-}
 
+  }
 }
