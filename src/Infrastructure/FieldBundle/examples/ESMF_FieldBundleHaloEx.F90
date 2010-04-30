@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHaloEx.F90,v 1.1 2010/04/30 17:29:11 feiliu Exp $
+! $Id: ESMF_FieldBundleHaloEx.F90,v 1.2 2010/04/30 20:38:39 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleHaloEx.F90,v 1.1 2010/04/30 17:29:11 feiliu Exp $'
+    '$Id: ESMF_FieldBundleHaloEx.F90,v 1.2 2010/04/30 20:38:39 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -72,25 +72,26 @@
 ! In this example, we will set up a FieldBundle for a 2D viscous and compressible
 ! flow problem. We will illustrate the FieldBundle halo update operation but we will
 ! not solve the non-linear PDEs here. The emphasis here is to demonstrate
-! how to set up halo region, how a numerical scheme updates
-! the exclusive regions, and how halo update communicates data in the halo regions.
+! how to set up halo regions, how a numerical scheme updates
+! the exclusive regions, and how halo update communicates data in the halo regions. Here
+! are the governing equations:
 !
 !
 ! $u_t + u u_x + v u_y + \frac{1}{\rho} p_x = 0$ (conservation of momentum in x-direction)
 !
 !
-! $v_t + u v_x + v v_y + \frac{1}{\rho} p_y = 0$ (conservation of momentum in x-direction)
+! $v_t + u v_x + v v_y + \frac{1}{\rho} p_y = 0$ (conservation of momentum in y-direction)
 !
 !
 ! ${\rho}_t + {\rho u}_x + {\rho v}_y = 0$ (conservation of mass)
 !
 !
-! $\frac{\rho}{\rho^\gamma} + u {\frac{p}{\rho^\gamma}}_x + v {\frac{p}{\rho^\gamma}}_y = 0$ (conservation of energy)
+! $\frac{\rho}{\rho^\gamma} + u {(\frac{p}{\rho^\gamma})}_x + v {(\frac{p}{\rho^\gamma})}_y = 0$ (conservation of energy)
 !
 !
 ! The four unknowns are pressure $p$, density $\rho$, velocity ($u$, $v$). The grids
 ! are set up using Arakawa D stagger ($p$ on corner, $\rho$ at center, $u$ and $v$ on edges).
-! $p$, $\rho$, $u$, and $v$ are bounded by boundary conditions.
+! $p$, $\rho$, $u$, and $v$ are bounded by necessary boundary conditions and initial conditions.
 !
 !
 ! Section \ref{Array:Halo} provides a detailed discussion of the 
