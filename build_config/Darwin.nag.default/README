@@ -1,13 +1,15 @@
-Settings for Darwin (Mac OS X), using the commercial NAGware Fortran
-compiler and the GNU C++ compiler (g++).
-
-If you have problems with compiling files foo.F90, then change 
-the f95 to f90 in the makefile and use the f90 command in this directory.
+Settings for Darwin, using the commercial NAGware Fortran compiler and the
+GNU C++ compiler (g++).
 
 Requires the following environment settings:
 
 ESMF_COMPILER nag
 
 As of NAG 5.2, the compiler is invoked with the 'nagfor' command.  If you
-are using this level of the compiler, set the ESMF_F90COMPILER and
-ESMF_F90LINKER environment variables to 'nagfor'.
+are using an older level of the compiler, set the ESMF_F90COMPILER and
+ESMF_F90LINKER environment variables to 'f95' or whatever it is called on
+your system.
+
+Also if using a pre-5.2 compiler, you will need to enable the
+ESMF_NAG_UNIXIO_MODULE and ESMF_IOFlushMacro macros in the
+ESMF_Conf.inc file.

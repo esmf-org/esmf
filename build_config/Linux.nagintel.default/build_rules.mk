@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.10.2.1 2010/03/17 22:57:51 theurich Exp $
+# $Id: build_rules.mk,v 1.10.2.2 2010/04/30 22:09:09 theurich Exp $
 #
 # Linux.nagintel.default
 #
@@ -74,11 +74,6 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v -V -dryrun
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
 
 ############################################################
-# g95 runtime library is not currently thread-safe
-#
-ESMF_PTHREADS := OFF
-
-############################################################
 # nag currently does not support OpenMP
 #
 ESMF_OPENMP := OFF
@@ -102,7 +97,9 @@ ESMF_F90COMPILEOPTS += -dusty
 # Conditionally add pthread compiler and linker flags
 #
 ifeq ($(ESMF_PTHREADS),ON)
-ESMF_CXXCOMPILEOPTS +=  -pthread
+ESMF_F90COMPILEOPTS += -thread_safe
+ESMF_F90LINKOPTS    += -thread_safe
+ESMF_CXXCOMPILEOPTS += -pthread
 ESMF_CXXLINKOPTS    += -pthread
 endif
 

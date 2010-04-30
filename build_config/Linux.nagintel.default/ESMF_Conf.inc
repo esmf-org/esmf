@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.5.4.1 2010/02/05 20:22:37 svasquez Exp $
+$Id: ESMF_Conf.inc,v 1.5.4.2 2010/04/30 22:09:09 theurich Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -14,17 +14,15 @@ Licensed under the University of Illinois-NCSA License.
 Define the proper way to flush Fortran units.  Typically this will
 be one of the following:
 
-  * Fortran-2003 FLUSH statement (preferred)
+  * Fortran-2003 FLUSH statement (preferred and default)
   * Two argument FLUSH call
   * One argument FLUSH call
 
+  Use F2003 FLUSH statement from 5.2-onwards NAG, because
+  the library call has thread-safety problems.  If a pre-5.2
+  compiler is being used, enable the following macros.
 #endif
-
+#if 0
 #define ESMF_NAG_UNIXIO_MODULE
 #define ESMF_IOFlushMacro(unit,status) call flush (unit, status)
-
-#if 0
-currently an empty file.  available if #defines needed
-on a per-system basis for F90 code
 #endif
-

@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.35.2.2 2010/03/17 22:57:51 theurich Exp $
+# $Id: build_rules.mk,v 1.35.2.3 2010/04/30 22:09:09 theurich Exp $
 #
 # Linux.nag.default
 #
@@ -82,11 +82,6 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v -V -dryrun
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 
 ############################################################
-# nag runtime library is not currently thread-safe
-#
-ESMF_PTHREADS := OFF
-
-############################################################
 # nag currently does not support OpenMP
 #
 ESMF_OPENMP := OFF
@@ -107,16 +102,30 @@ ESMF_F90COMPILEOPTS += -kind=byte
 ESMF_F90COMPILEOPTS += -dusty
 
 ############################################################
+# Conditionally add pthread compiler and linker flags
+#
+ifeq ($(ESMF_PTHREADS),ON)
+ESMF_F90COMPILEOPTS += -thread_safe
+ESMF_F90LINKOPTS    += -thread_safe
+ESMF_CXXCOMPILEOPTS += -pthread
+ESMF_CXXLINKOPTS    += -pthread
+endif
+
+############################################################
 # Need this until the file convention is fixed (then remove these two lines)
 #
 ESMF_F90COMPILEFREENOCPP = -free
 ESMF_F90COMPILEFIXCPP    = -fixed -fpp
 
 ############################################################
-# Blank out variables to prevent rpath encoding
+# Determine where gcc's libraries are located
 #
-ESMF_F90LINKRPATHS      =
-ESMF_CXXLINKRPATHS      =
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.so)
+ifeq ($(ESMF_LIBSTDCXX),libstdc++.so)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.a)
+endif
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+ESMF_F90LINKRPATHS += -Wl,-Wl,,-rpath,,$(dir $(ESMF_LIBSTDCXX))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
@@ -129,7 +138,12 @@ ESMF_F90LINKLIBS += -lrt -lstdc++ -ldl
 ESMF_CXXLINKLIBS += -lrt -ldl $(shell $(ESMF_DIR)/scripts/libs.nag $(ESMF_F90COMPILER))
 
 ############################################################
-# Blank out shared library options
+# Shared library options
 #
-ESMF_SL_LIBS_TO_MAKE  =
+ESMF_SL_LIBOPTS  += -shared
 
+############################################################
+# Shared object options
+#
+ESMF_SO_F90COMPILEOPTS  = -pic
+ESMF_SO_CXXCOMPILEOPTS  = -fPIC
