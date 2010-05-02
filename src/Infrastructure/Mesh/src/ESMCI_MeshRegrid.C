@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.8 2010/04/30 04:49:52 oehmke Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.9 2010/05/02 03:27:15 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.8 2010/04/30 04:49:52 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.9 2010/05/02 03:27:15 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -128,7 +128,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh,
 
     // Write the weights
     WriteNCMatFilePar(srcGridFile, dstGridFile, wghtFile,
-                      wts, *src_iwts, *dst_iwts, srcmesh, dstmesh, NCMATPAR_ORDER_SEQ);
+                      wts, srcmesh, dstmesh, regridConserve, regridMethod, NCMATPAR_ORDER_SEQ);
 
   return 1;
 
