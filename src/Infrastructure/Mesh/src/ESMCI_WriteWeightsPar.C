@@ -1,4 +1,4 @@
-// $Id: ESMCI_WriteWeightsPar.C,v 1.12 2010/05/02 03:27:15 rokuingh Exp $
+// $Id: ESMCI_WriteWeightsPar.C,v 1.13 2010/05/03 18:47:49 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@ typedef long long MPI_OffType;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WriteWeightsPar.C,v 1.12 2010/05/02 03:27:15 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_WriteWeightsPar.C,v 1.13 2010/05/03 18:47:49 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -559,7 +559,21 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
     // eventually these should be optional with a flag
 
     // Title
-    static char title[]="ESMF Offline Regridding Weights";
+    // map method 
+    char title[128];
+    if (*regridConserve == ESMC_REGRID_CONSERVE_OFF &&
+        *regridMethod == ESMC_REGRID_METHOD_BILINEAR) {
+      sprintf(title, "ESMF Offline Bilinear Remapping");
+    } else if (*regridConserve == ESMC_REGRID_CONSERVE_ON &&
+        *regridMethod == ESMC_REGRID_METHOD_BILINEAR) {
+      sprintf(title, "ESMF Offline Conservative Bilinear Remapping");
+    } else if (*regridConserve == ESMC_REGRID_CONSERVE_OFF &&
+        *regridMethod == ESMC_REGRID_METHOD_PATCH) {
+      sprintf(title, "ESMF Offline Patch Remapping");
+    } else if (*regridConserve == ESMC_REGRID_CONSERVE_ON &&
+        *regridMethod == ESMC_REGRID_METHOD_PATCH) {
+      sprintf(title, "ESMF Offline Conservative Patch Remapping");
+    }
     if ((retval = ncmpi_put_att_text(ncid, NC_GLOBAL, "title",std::strlen(title), title)))
       Throw() << "NC error:" << ncmpi_strerror(retval);
 
@@ -575,13 +589,13 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
       sprintf(map_method, "Bilinear Remapping");
     } else if (*regridConserve == ESMC_REGRID_CONSERVE_ON &&
         *regridMethod == ESMC_REGRID_METHOD_BILINEAR) {
-      sprintf(map_method, "Conservative Bilinear Remapping");
+      sprintf(map_method, "Conservative Remapping");
     } else if (*regridConserve == ESMC_REGRID_CONSERVE_OFF &&
         *regridMethod == ESMC_REGRID_METHOD_PATCH) {
-      sprintf(map_method, "Patch Rendezvous Remapping");
+      sprintf(map_method, "Bilinear Remapping");
     } else if (*regridConserve == ESMC_REGRID_CONSERVE_ON &&
         *regridMethod == ESMC_REGRID_METHOD_PATCH) {
-      sprintf(map_method, "Conservative Patch Rendezvous Remapping");
+      sprintf(map_method, "Conservative Remapping");
     }
     if ((retval = ncmpi_put_att_text(ncid, NC_GLOBAL, "map_method",std::strlen(map_method), map_method)))
       Throw() << "NC error:" << ncmpi_strerror(retval);
