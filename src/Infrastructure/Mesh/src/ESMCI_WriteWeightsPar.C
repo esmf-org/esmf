@@ -1,4 +1,4 @@
-// $Id: ESMCI_WriteWeightsPar.C,v 1.13 2010/05/03 18:47:49 rokuingh Exp $
+// $Id: ESMCI_WriteWeightsPar.C,v 1.14 2010/05/03 19:37:03 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@ typedef long long MPI_OffType;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WriteWeightsPar.C,v 1.13 2010/05/03 18:47:49 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_WriteWeightsPar.C,v 1.14 2010/05/03 19:37:03 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -521,7 +521,6 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
     if ((retval = ncmpi_put_att_text(ncid, mask_bid, "units", std::strlen(units.c_str()), units.c_str())))
         Throw() << "NC error:" << ncmpi_strerror(retval);
    
- if (*regridConserve == ESMC_REGRID_CONSERVE_ON){ 
    if ((retval = ncmpi_def_var(ncid, "area_a", NC_DOUBLE, 1, &n_adimid, &area_aid)))
       Throw() << "NC error:" << ncmpi_strerror(retval);
    units = "unitless";
@@ -533,7 +532,7 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
     units = "unitless";
      if ((retval = ncmpi_put_att_text(ncid, area_bid, "units", std::strlen(units.c_str()), units.c_str())))
          Throw() << "NC error:" << ncmpi_strerror(retval);
- }   
+
     if ((retval = ncmpi_def_var(ncid, "frac_a", NC_DOUBLE, 1, &n_adimid, &frac_aid)))
       Throw() << "NC error:" << ncmpi_strerror(retval);
     units = "unitless";
@@ -682,11 +681,12 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
      Throw() << "NC error:" << ncmpi_strerror(retval);
 
    // Set Src Area
-   if (*regridConserve == ESMC_REGRID_CONSERVE_ON){ 
+   {
      std::vector<double> src_area;
      
      src_area.resize(ncsrc.local_grid_size, 0.0);
 
+   if (*regridConserve == ESMC_REGRID_CONSERVE_ON){ 
      MEField<> *src_iwts = srcmesh.GetField("iwts");
 
      UInt c = 0;
@@ -698,7 +698,7 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
        src_area[c] = *Sdata;
        ++c;
      }
-
+   }
      if ((retval = ncmpi_put_vara_double_all(ncid, area_aid, startsa, countsa, &src_area[0])))
        Throw() << "NC error:" << ncmpi_strerror(retval);
      
@@ -753,11 +753,12 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
      Throw() << "NC error:" << ncmpi_strerror(retval);
 
    // Set Dst Area
-   if (*regridConserve == ESMC_REGRID_CONSERVE_ON){ 
+   {
      std::vector<double> dst_area;
      
      dst_area.resize(ncdst.local_grid_size, 0.0);
 
+   if (*regridConserve == ESMC_REGRID_CONSERVE_ON){ 
      MEField<> *dst_iwts = dstmesh.GetField("iwts");
 
 // TODO: This routine does not write some weights, namely those belonging
@@ -772,7 +773,7 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
        dst_area[i] = *Ddata;
        ++i;
      }
-
+   }
      if ((retval = ncmpi_put_vara_double_all(ncid, area_bid, startsb, countsb, &dst_area[0])))
         Throw() << "NC error:" << ncmpi_strerror(retval);
    }
