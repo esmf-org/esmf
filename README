@@ -473,7 +473,7 @@ quick_start:     Contains skeleton application files to use as a template.
 
 test:            Contains unit and system test executables and output.
 
-examples:	 Contains examples executables and output.
+examples:        Contains examples executables and output.
 
 doc:             Contains documentation (if built).
 
@@ -496,7 +496,7 @@ The ESMF Reference Manual contains information on the architecture of the ESMF,
 example code, and details of the API (Application Programming Interface).
 
 The ESMF library source code is also available for download at:
-	http://sourceforge.net/projects/esmf
+        http://sourceforge.net/projects/esmf
 
 Follow the directions on that web page to download a tarball and for
 access to the ESMF CVS repository.  The Sourceforge site also contains 
@@ -508,10 +508,10 @@ the ESMF web site:
         http://www.earthsystemmodeling.org -> Developers -> Test & Validation
 
 Contributions from ESMF users are available at:
-	http://sourceforge.net/projects/esmfcontrib
+        http://sourceforge.net/projects/esmfcontrib
 
 Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.107 2010/03/04 18:57:40 svasquez Exp $
+ $Id: README,v 1.108 2010/05/03 03:07:40 eschwab Exp $
