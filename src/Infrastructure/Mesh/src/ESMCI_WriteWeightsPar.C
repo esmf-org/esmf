@@ -1,4 +1,4 @@
-// $Id: ESMCI_WriteWeightsPar.C,v 1.14 2010/05/03 19:37:03 rokuingh Exp $
+// $Id: ESMCI_WriteWeightsPar.C,v 1.15 2010/05/03 21:08:38 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@ typedef long long MPI_OffType;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WriteWeightsPar.C,v 1.14 2010/05/03 19:37:03 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_WriteWeightsPar.C,v 1.15 2010/05/03 21:08:38 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -585,16 +585,16 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
     char map_method[128];
     if (*regridConserve == ESMC_REGRID_CONSERVE_OFF &&
         *regridMethod == ESMC_REGRID_METHOD_BILINEAR) {
-      sprintf(map_method, "Bilinear Remapping");
+      sprintf(map_method, "Bilinear remapping");
     } else if (*regridConserve == ESMC_REGRID_CONSERVE_ON &&
         *regridMethod == ESMC_REGRID_METHOD_BILINEAR) {
-      sprintf(map_method, "Conservative Remapping");
+      sprintf(map_method, "Conservative remapping");
     } else if (*regridConserve == ESMC_REGRID_CONSERVE_OFF &&
         *regridMethod == ESMC_REGRID_METHOD_PATCH) {
-      sprintf(map_method, "Bilinear Remapping");
+      sprintf(map_method, "Bilinear remapping");
     } else if (*regridConserve == ESMC_REGRID_CONSERVE_ON &&
         *regridMethod == ESMC_REGRID_METHOD_PATCH) {
-      sprintf(map_method, "Conservative Remapping");
+      sprintf(map_method, "Conservative remapping");
     }
     if ((retval = ncmpi_put_att_text(ncid, NC_GLOBAL, "map_method",std::strlen(map_method), map_method)))
       Throw() << "NC error:" << ncmpi_strerror(retval);
