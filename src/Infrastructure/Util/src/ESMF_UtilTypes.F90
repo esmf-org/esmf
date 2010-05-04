@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.93 2010/04/06 05:58:33 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.94 2010/05/04 16:32:12 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -79,7 +79,8 @@
       integer, parameter :: ESMF_MINOR_VERSION = 0
       integer, parameter :: ESMF_REVISION      = 0
       integer, parameter :: ESMF_PATCHLEVEL    = 0
-      character(*), parameter :: ESMF_VERSION_STRING = "5.0.0 beta snapshot"
+      character(*), parameter :: ESMF_VERSION_STRING = &
+                                 "5.0.0 beta snapshot"
 
 !------------------------------------------------------------------------------
 !
@@ -548,6 +549,9 @@
         ESMF_ATTTREE_ON = ESMF_AttTreeFlag(1)
 
 
+!------------------------------------------------------------------------------
+!
+!
       ! What to do when a point can't be mapped
       type ESMF_UnmappedAction
       sequence
@@ -558,6 +562,34 @@
       type(ESMF_UnmappedAction), parameter :: &
            ESMF_UNMAPPEDACTION_ERROR    = ESMF_UnmappedAction(0), &
            ESMF_UNMAPPEDACTION_IGNORE   = ESMF_UnmappedAction(1)
+
+!------------------------------------------------------------------------------
+      type ESMF_RegridMethod
+      sequence
+!  private
+         integer :: regridmethod
+      end type
+
+
+      type(ESMF_RegridMethod), parameter :: &
+           ESMF_REGRID_METHOD_BILINEAR    = ESMF_RegridMethod(0), &
+           ESMF_REGRID_METHOD_PATCH       = ESMF_RegridMethod(1)
+
+!------------------------------------------------------------------------------
+!
+!
+      type ESMF_RegridConserve
+      sequence
+!  private
+         integer :: regridconserve
+      end type
+
+
+      type(ESMF_RegridConserve), parameter :: &
+           ESMF_REGRID_CONSERVE_OFF     = ESMF_RegridConserve(0), &
+           ESMF_REGRID_CONSERVE_ON      = ESMF_RegridConserve(1)
+
+
 
 
 !------------------------------------------------------------------------------
@@ -627,6 +659,11 @@
       public ESMF_AttReconcileFlag, ESMF_ATTRECONCILE_OFF, ESMF_ATTRECONCILE_ON
       public ESMF_AttTreeFlag, ESMF_ATTTREE_OFF, ESMF_ATTTREE_ON
       public ESMF_AttWriteFlag, ESMF_ATTWRITE_TAB, ESMF_ATTWRITE_XML
+
+       public ESMF_RegridMethod,   ESMF_REGRID_METHOD_BILINEAR, &
+                                   ESMF_REGRID_METHOD_PATCH
+       public ESMF_RegridConserve, ESMF_REGRID_CONSERVE_OFF, &
+                                   ESMF_REGRID_CONSERVE_ON
 
       public ESMF_FAILURE, ESMF_SUCCESS
       public ESMF_MAXSTR
