@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.13 2010/04/19 21:52:19 rokuingh Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.14 2010/05/04 16:34:05 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -1939,7 +1939,7 @@ write(*,*) "LOCALRC=",localrc
           dstField=fieldBPatch, &
 	  unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandlePatch, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridMethod=ESMF_REGRID_METHOD_PATCH, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -2389,7 +2389,7 @@ write(*,*) "LOCALRC=",localrc
           dstField=fieldBPatch, &
 	  unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandlePatch, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridMethod=ESMF_REGRID_METHOD_PATCH, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.17 2010/04/19 18:58:39 oehmke Exp $
+! $Id: ESMF_GridUtil.F90,v 1.18 2010/05/04 16:33:22 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.17 2010/04/19 18:58:39 oehmke Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.18 2010/05/04 16:33:22 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -312,7 +312,7 @@ module ESMF_GridUtilMod
 ! !IROUTINE: ESMF_GridToMesh -- return a mesh with same topo as mesh
 !
 ! !INTERFACE:
-   function ESMF_GridToMesh(grid, staggerLoc, isSphere, maskValues, rc)
+   function ESMF_GridToMesh(grid, staggerLoc, isSphere, maskValues, regridConserve, rc)
 !
 !
 ! !RETURN VALUE:
@@ -322,6 +322,7 @@ module ESMF_GridUtilMod
     type(ESMF_Grid), intent(in)                :: grid
     type(ESMF_StaggerLoc),  intent(in)            :: staggerLoc
     integer,                intent(in)            :: isSphere
+    type(ESMF_RegridConserve), intent(in), optional :: regridConserve
     integer(ESMF_KIND_I4), optional               :: maskValues(:)
     integer, intent(out) , optional               :: rc
 !
@@ -345,6 +346,7 @@ module ESMF_GridUtilMod
     type(ESMF_Pointer) :: theMesh
     type(ESMF_InterfaceInt) :: maskValuesArg
     type(ESMF_IndexFlag) :: indexflag
+    type(ESMF_RegridConserve) :: lregridConserve
 
     localrc = ESMF_SUCCESS
 
@@ -352,6 +354,13 @@ module ESMF_GridUtilMod
     call ESMF_GridGet(grid, indexflag=indexflag, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	  ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Handle optional conserve argument
+    if (present(regridConserve)) then
+       lregridConserve=regridConserve
+    else
+       lregridConserve=ESMF_REGRID_CONSERVE_OFF
+    endif
 
     ! Make sure indexflag is ESMF_INDEX_GLOBAL
     if (.not. (indexflag .eq. ESMF_INDEX_GLOBAL)) then
@@ -365,7 +374,7 @@ module ESMF_GridUtilMod
     	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	  ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call c_esmc_gridtomesh(grid, staggerLoc%staggerloc, isSphere, theMesh, maskValuesArg, localrc)
+    call c_esmc_gridtomesh(grid, staggerLoc%staggerloc, isSphere, theMesh, maskValuesArg, lregridConserve%regridconserve, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	    ESMF_CONTEXT, rcToReturn=rc)) return
 

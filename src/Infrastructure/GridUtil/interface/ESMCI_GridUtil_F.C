@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.26 2010/04/19 18:58:39 oehmke Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.27 2010/05/04 16:33:22 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -91,7 +91,7 @@ void FTN(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *staggerLoc,
 
   try {
 
-    ESMCI::GridToMesh(grid, *staggerLoc, mesh, arrays,NULL);
+    ESMCI::GridToMesh(grid, *staggerLoc, mesh, arrays, NULL, NULL);
 
     char *meshname = ESMC_F90toCstring(name, nlen);
 
@@ -164,7 +164,7 @@ void FTN(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
 
   try {
 
-    ESMCI::GridToMesh(grid, *staggerLoc, mesh, arrays,NULL);
+    ESMCI::GridToMesh(grid, *staggerLoc, mesh, arrays, NULL, NULL);
 
     char *meshname = ESMC_F90toCstring(name, nlen);
 
@@ -192,7 +192,7 @@ void FTN(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
 
 
 
-void FTN(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc, int *isSphere, Mesh **meshpp, 					  ESMCI::InterfaceInt **maskValuesArg, int *rc) {
+void FTN(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc, int *isSphere, Mesh **meshpp, 					  ESMCI::InterfaceInt **maskValuesArg, int *regridConserve, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridtomesh()" 
 
@@ -205,7 +205,7 @@ void FTN(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc, int *isSphere
   try {
 
     std::vector<ESMCI::Array*> arrays;
-    ESMCI::GridToMesh(grid, *staggerLoc, *meshp, arrays, *maskValuesArg);
+    ESMCI::GridToMesh(grid, *staggerLoc, *meshp, arrays, *maskValuesArg, regridConserve);
 //WriteMesh(*meshp, "gridtomesh");
 
     *meshpp = meshp;

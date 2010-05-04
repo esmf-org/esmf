@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.31 2010/04/29 14:53:17 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.32 2010/05/04 16:34:05 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.31 2010/04/29 14:53:17 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.32 2010/05/04 16:34:05 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -392,7 +392,7 @@ contains
 
           ! Convert Grid to Mesh
           srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLoc, isSphere, &
-                      srcMaskValues, rc=localrc)
+                      srcMaskValues, lregridConserve, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -418,7 +418,7 @@ contains
 
           ! Convert Grid to Mesh
           dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLoc, isSphere, &
-                      dstMaskValues, rc=localrc)
+                      dstMaskValues, lregridConserve, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
