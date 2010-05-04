@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.30 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_Mesh.F90,v 1.31 2010/05/04 16:35:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.30 2010/03/04 18:57:45 svasquez Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.31 2010/05/04 16:35:56 rokuingh Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -48,7 +48,7 @@ module ESMF_MeshMod
   use ESMF_DistGridMod
   use ESMF_RHandleMod
   use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
-  
+ 
   implicit none
 
 !------------------------------------------------------------------------------
@@ -142,7 +142,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.30 2010/03/04 18:57:45 svasquez Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.31 2010/05/04 16:35:56 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -228,6 +228,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: num_elems, num_elementConn
+    type(ESMF_RegridConserve) :: lregridConserve
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -244,6 +245,22 @@ module ESMF_MeshMod
        return 
     endif    
 
+    ! Handle optional conserve argument
+! Passing the regridConserve flag into add elements is a fix for source masking
+! with patch interpolation.  Right now the Regrid does not support source masking
+! on a Mesh.  So this option is defaulting to CONSERVE_ON to make things more simple
+! because of the mulitple entry points when creating a Mesh.  When this option is
+! added to the pulic API, (when mesh source masking is enabled) this flag will
+! need to be defaulted to CONSERVE_OFF, and documentation should be added to tell
+! the users that if they are doing conservative with a mesh created in the three
+! step process they should make sure to turn CONSERVE_ON in the add element call.
+
+!    if (present(regridConserve)) then
+!       lregridConserve=regridConserve
+!    else
+       lregridConserve=ESMF_REGRID_CONSERVE_ON
+!    endif
+
     ! If we're at the wrong stage then complain
     if (mesh%createStage .ne. 2) then
        call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
@@ -257,7 +274,8 @@ module ESMF_MeshMod
     num_elementConn = size(elementConn)
     call C_ESMC_MeshAddElements(mesh%this, num_elems, &
                              elementIds, elementTypes, &
-                             num_elementConn, elementConn, localrc)
+                             num_elementConn, elementConn, &
+                             lregridConserve%regridconserve, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -558,12 +576,29 @@ module ESMF_MeshMod
     integer                 :: localrc      ! local return code
     integer                 :: num_nodes
     integer                 :: num_elems, num_elementConn
+    type(ESMF_RegridConserve) :: lregridConserve
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ESMF_MeshCreate1Part%this = ESMF_NULL_POINTER
+
+    ! Handle optional conserve argument
+! Passing the regridConserve flag into add elements is a fix for source masking
+! with patch interpolation.  Right now the Regrid does not support source masking
+! on a Mesh.  So this option is defaulting to CONSERVE_ON to make things more simple
+! because of the mulitple entry points when creating a Mesh.  When this option is
+! added to the pulic API, (when mesh source masking is enabled) this flag will
+! need to be defaulted to CONSERVE_OFF, and documentation should be added to tell
+! the users that if they are doing conservative with a mesh created in the three
+! step process they should make sure to turn CONSERVE_ON in the add element call.
+
+!    if (present(regridConserve)) then
+!       lregridConserve=regridConserve
+!    else
+       lregridConserve=ESMF_REGRID_CONSERVE_ON
+!    endif
 
     call c_ESMC_meshcreate(ESMF_MeshCreate1Part%this, parametricDim, spatialDim, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -583,7 +618,8 @@ module ESMF_MeshMod
     num_elementConn = size(elementConn)
     call C_ESMC_MeshAddElements(ESMF_MeshCreate1Part%this, num_elems, &
                              elementIds, elementTypes, &
-                             num_elementConn, elementConn, localrc)
+                             num_elementConn, elementConn, &
+                             lregridConserve%regridconserve, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
