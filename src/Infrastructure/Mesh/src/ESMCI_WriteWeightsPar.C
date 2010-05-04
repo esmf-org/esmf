@@ -1,4 +1,4 @@
-// $Id: ESMCI_WriteWeightsPar.C,v 1.15 2010/05/03 21:08:38 oehmke Exp $
+// $Id: ESMCI_WriteWeightsPar.C,v 1.16 2010/05/04 16:43:26 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@ typedef long long MPI_OffType;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WriteWeightsPar.C,v 1.15 2010/05/03 21:08:38 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_WriteWeightsPar.C,v 1.16 2010/05/04 16:43:26 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -352,6 +352,7 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
                     const IWeights &w,
                     Mesh &srcmesh,
                     Mesh &dstmesh,
+                    Mesh &dstmeshcpy,
                     int *regridConserve,
                     int *regridMethod,
                     int ordering)
@@ -759,16 +760,20 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
      dst_area.resize(ncdst.local_grid_size, 0.0);
 
    if (*regridConserve == ESMC_REGRID_CONSERVE_ON){ 
-     MEField<> *dst_iwts = dstmesh.GetField("iwts");
+     MEField<> *dst_iwts = dstmeshcpy.GetField("iwts");
 
 // TODO: This routine does not write some weights, namely those belonging
 //       to the polar nodes.  This phenomenon only appears on destination
 //       with conservative turned on.  This points to pole generation.. 
-     Mesh::iterator ndi = dstmesh.node_begin(), nde = dstmesh.node_end();
+     Mesh::iterator ndi = dstmeshcpy.node_begin(), nde = dstmeshcpy.node_end();
+/*
      for (UInt i=0; i<dst_area.size(); ++ndi) {
 //       ThrowRequire(ndi != nde);
 //       ThrowRequire(i < dst_area.size());
        if (!(ndi != nde) || !(i < dst_area.size())) break;
+*/
+    UInt i = 0;
+     for (; ndi != nde; ++ndi) {
        double *Ddata = dst_iwts->data(*ndi);
        dst_area[i] = *Ddata;
        ++i;

@@ -1,4 +1,4 @@
-// $Id: ESMC_RegridWgtGenEx.C,v 1.1 2010/04/30 20:19:00 rokuingh Exp $
+// $Id: ESMC_RegridWgtGenEx.C,v 1.2 2010/05/04 16:43:26 rokuingh Exp $
 //==============================================================================
 //
 // Earth System Modeling Framework
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
 
   Par::Init("PATCHLOG", false);
 
-  Mesh srcmesh, dstmesh;
+  Mesh srcmesh, dstmesh, dstmeshcpy;
   char *srcGridFile,*dstGridFile,*wghtFile, *poleString;
   bool argsOk,addPole;
   int csrvType, methodType, poleType, poleNPnts;
@@ -128,8 +128,9 @@ int main(int argc, char *argv[]) {
     LoadNCDualMeshPar(srcmesh, srcGridFile);
     if (Par::Rank() == 0) std::cout << "Loading " << dstGridFile << std::endl;
     LoadNCDualMeshPar(dstmesh, dstGridFile);
+    LoadNCDualMeshPar(dstmeshcpy, dstGridFile);
 
-    if(!offline_regrid(srcmesh, dstmesh, &csrvType, &methodType, &poleType, &poleNPnts,
+    if(!offline_regrid(srcmesh, dstmesh, dstmeshcpy, &csrvType, &methodType, &poleType, &poleNPnts,
                        srcGridFile, dstGridFile, wghtFile))
       Throw() << "Offline regridding error" << std::endl;
 

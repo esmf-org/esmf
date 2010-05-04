@@ -32,7 +32,7 @@ int csrv(Mesh &, Mesh &, IWeights &, MEField<> *, MEField<> *,
          int *, int *, int *, int *, int *);
 
 // online
-int offline_regrid(Mesh &, Mesh &, int *, int *, int *, int *, char *, char *, char *);
+int offline_regrid(Mesh &, Mesh &, Mesh &, int *, int *, int *, int *, char *, char *, char *);
 int online_regrid(Mesh &, Mesh &, IWeights &, int *, int *, int *, int *);
 
 } // namespace

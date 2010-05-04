@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.9 2010/05/02 03:27:15 rokuingh Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.10 2010/05/04 16:43:26 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.9 2010/05/02 03:27:15 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.10 2010/05/04 16:43:26 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -66,7 +66,7 @@ int online_regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
 }
 
 // Mesh are not committed yet
-int offline_regrid(Mesh &srcmesh, Mesh &dstmesh,
+int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
              int *regridConserve, int *regridMethod, 
              int *regridPoleType, int *regridPoleNPnts,
              char *srcGridFile, char *dstGridFile, char *wghtFile) {
@@ -76,7 +76,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh,
   int unmappedaction = ESMC_UNMAPPEDACTION_ERROR;
 
   IWeights wts;
-  MEField<> *src_iwts, *dst_iwts;
+  MEField<> *src_iwts, *dst_iwts, *dst_iwtscpy;
 
     switch (*regridConserve) {
 
@@ -90,6 +90,15 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh,
 
       dst_iwts = dstmesh.RegisterField("iwts",
         MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+      // generate integration weights on the copy
+      // TODO: remove this (and the dstcpy mesh passed in) when the 
+      //       write bug with pole assimilation is fixed.
+      dst_iwtscpy = dstmeshcpy.RegisterField("iwts",
+        MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+      dstmeshcpy.Commit();
+      Integrate dig(dstmeshcpy);
+      dig.intWeights(dst_iwtscpy);
 
       // Commit the meshes
       srcmesh.Commit();
@@ -106,6 +115,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh,
       // Commit the meshes
       srcmesh.Commit();
       dstmesh.Commit();
+      dstmeshcpy.Commit();
 
       if (!regrid(srcmesh, dstmesh, wts, regridMethod, &regridScheme,
                   regridPoleType, regridPoleNPnts, &unmappedaction))
@@ -128,7 +138,8 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh,
 
     // Write the weights
     WriteNCMatFilePar(srcGridFile, dstGridFile, wghtFile,
-                      wts, srcmesh, dstmesh, regridConserve, regridMethod, NCMATPAR_ORDER_SEQ);
+                      wts, srcmesh, dstmesh, dstmeshcpy,
+                      regridConserve, regridMethod, NCMATPAR_ORDER_SEQ);
 
   return 1;
 

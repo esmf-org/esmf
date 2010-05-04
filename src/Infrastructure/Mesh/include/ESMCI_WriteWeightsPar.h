@@ -41,6 +41,7 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
                     const IWeights &w,
                     Mesh &srcmesh,
                     Mesh &dstmesh,
+                    Mesh &dstmeshcpy,
                     int *regridConserve,
                     int *regridMethod,
                     int ordering = NCMATPAR_ORDER_INTERLEAVE
