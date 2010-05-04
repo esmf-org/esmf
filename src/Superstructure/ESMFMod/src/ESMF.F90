@@ -1,4 +1,4 @@
-! $Id: ESMF.F90,v 1.75 2010/04/30 17:29:21 feiliu Exp $
+! $Id: ESMF.F90,v 1.76 2010/05/04 23:06:42 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -64,11 +64,6 @@ module ESMF_Mod
     use ESMF_FieldSetCoMod
     use ESMF_FieldCreateMod
     use ESMF_FieldRegridMod
-    use ESMF_FieldBundleMod
-    use ESMF_FieldBundleRedistMod
-    use ESMF_FieldBundleSMMMod
-    use ESMF_FieldBundleHaloMod
-
 !    use ESMF_RegridTypesMod
 !    use ESMF_RegridMod
 
@@ -77,6 +72,12 @@ module ESMF_Mod
     use ESMF_FieldRedistMod
     use ESMF_FieldSMMMod
     use ESMF_FieldHaloMod
+
+    use ESMF_FieldBundleMod
+    use ESMF_FieldBundleRedistMod
+    use ESMF_FieldBundleSMMMod
+    use ESMF_FieldBundleHaloMod
+    use ESMF_FieldBundleRegridMod
 
     use ESMF_StateTypesMod
     use ESMF_StateVaMod
