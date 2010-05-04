@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.144 2010/04/29 14:54:32 rokuingh Exp $
+! $Id: ESMF_Regrid.F90,v 1.145 2010/05/04 17:01:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -55,31 +55,6 @@
 ! !PRIVATE TYPES:
       private
 
-!------------------------------------------------------------------------------
-      type ESMF_RegridMethod
-      sequence
-!  private
-         integer :: regridmethod
-      end type
-
-
-      type(ESMF_RegridMethod), parameter :: &
-           ESMF_REGRID_METHOD_BILINEAR    = ESMF_RegridMethod(0), &
-           ESMF_REGRID_METHOD_PATCH       = ESMF_RegridMethod(1)
-
-
-      type ESMF_RegridConserve
-      sequence
-!  private
-         integer :: regridconserve
-      end type
-
-
-      type(ESMF_RegridConserve), parameter :: &
-           ESMF_REGRID_CONSERVE_OFF     = ESMF_RegridConserve(0), &
-           ESMF_REGRID_CONSERVE_ON      = ESMF_RegridConserve(1)
-
-
       integer, parameter :: ESMF_REGRID_SCHEME_FULL3D = 0, &
                             ESMF_REGRID_SCHEME_NATIVE = 1
 
@@ -94,13 +69,6 @@
 ! !PUBLIC TYPES:
 !
 !------------------------------------------------------------------------------
-
-       public ESMF_RegridMethod,  ESMF_REGRID_METHOD_BILINEAR, &
-                                  ESMF_REGRID_METHOD_PATCH
-
-       public ESMF_RegridConserve, ESMF_REGRID_CONSERVE_OFF, &
-                                       ESMF_REGRID_CONSERVE_ON
-
 
        public ESMF_REGRID_SCHEME_FULL3D, &
               ESMF_REGRID_SCHEME_NATIVE
@@ -126,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.144 2010/04/29 14:54:32 rokuingh Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.145 2010/05/04 17:01:56 rokuingh Exp $'
 
 !==============================================================================
 !
