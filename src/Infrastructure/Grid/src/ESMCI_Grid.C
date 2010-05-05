@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.105 2010/03/15 17:05:33 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.106 2010/05/05 21:26:59 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.105 2010/03/15 17:05:33 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.106 2010/05/05 21:26:59 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -7004,6 +7004,53 @@ void GridIter::getArrayData(
 template void GridIter::getArrayData(Array *array, ESMC_R8 *data);
 template void GridIter::getArrayData(Array *array, ESMC_R4 *data);
 template void GridIter::getArrayData(Array *array, ESMC_I4 *data);
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridIter::getArrayData()"
+//BOPI
+// !IROUTINE:  getArrayData
+//
+// !INTERFACE:
+template <class TYPE>
+void GridIter::setArrayData(
+//
+// !RETURN VALUE:
+//  void
+//
+// !ARGUMENTS:
+//   Data output
+// 
+                            Array *array,
+                            TYPE data 
+ ){
+//
+// !DESCRIPTION:
+// Set data to a passed in Array
+// TODO: Need to come up with a way to handle Arrays with more dimensions than the Grid
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+  LocalArray *localArray;
+  
+  // if done then leave
+  if (done) return;
+  
+  //// Get LocalArray cooresponding to staggerloc, coord and localDE
+  localArray=array->getLocalarrayList()[curDE];
+  
+  //// Get pointer to LocalArray data
+  localArray->setData(curInd, data);
+  
+}
+
+// Add more types here if necessary
+template void GridIter::setArrayData(Array *array, ESMC_R8 data);
+template void GridIter::setArrayData(Array *array, ESMC_R4 data);
+template void GridIter::setArrayData(Array *array, ESMC_I4 data);
 //-----------------------------------------------------------------------------
 
 

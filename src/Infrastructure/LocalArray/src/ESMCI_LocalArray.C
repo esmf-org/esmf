@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.C,v 1.15 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMCI_LocalArray.C,v 1.16 2010/05/05 21:26:59 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.15 2010/03/04 18:57:44 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.16 2010/05/05 21:26:59 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
   
@@ -847,6 +847,8 @@ template void LocalArray::getDataInternal(int *index, ESMC_I4 *data);
 //-----------------------------------------------------------------------------
 
 
+
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "getData"
@@ -897,6 +899,104 @@ template int LocalArray::getData(int *index, ESMC_R8 *data);
 template int LocalArray::getData(int *index, ESMC_R4 *data);
 template int LocalArray::getData(int *index, ESMC_I4 *data);
 //-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "setDataInternal"
+//BOPI
+// !IROUTINE:  setDataInternal - set the data at an index location without error checking
+//
+// !INTERFACE:
+template <class TYPE>
+void LocalArray::setDataInternal(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+  int *index,           // in - index location
+  TYPE data){           // in - data to set 
+//
+// !DESCRIPTION:
+//  Get the data at a particular index location in a LocalArray. For
+//  efficiency's sake this routine doesn't do error checking. It's assumed 
+//  that the error checking is occuring at a higher level. For error checking
+//  use setData.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int off;
+
+  // Loop through summing up offset for each dimension
+  off=-lOff;
+  for (int i=0; i<rank; i++)
+    off +=dimOff[i]*index[i];
+  
+  // Set Data 
+  *((TYPE *)((char *)base_addr+ESMC_TypeKindSize(typekind)*off))=data; 
+}
+//-----------------------------------------------------------------------------
+// Add more types here if necessary
+template void LocalArray::setDataInternal(int *index, ESMC_R8 data);
+template void LocalArray::setDataInternal(int *index, ESMC_R4 data);
+template void LocalArray::setDataInternal(int *index, ESMC_I4 data);
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "setData"
+//BOPI
+// !IROUTINE:  setData - get the data at an index location
+//
+// !INTERFACE:
+template <class TYPE>
+int LocalArray::setData(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+  int *index,           // in - index location
+  TYPE data){          //  in - data. 
+//
+// !DESCRIPTION:
+//  Set the data at a particular index location in a LocalArray. 
+//
+// TODO: This method should eventually be made more efficient by precalculating
+//        and storing the offsets per Dim. 
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // Make sure index is within bounds
+  for (int i=0; i<rank; i++) {   
+    if ((index[i] < lbound[i]) || (index[i] > ubound[i])) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+        "- index outside of LocalArray bounds", &rc);
+      return rc;
+    }
+  }
+
+  // Actually Get Data
+  this->setDataInternal(index,data);
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+// Add more types here if necessary
+template int LocalArray::setData(int *index, ESMC_R8 data);
+template int LocalArray::setData(int *index, ESMC_R4 data);
+template int LocalArray::setData(int *index, ESMC_I4 data);
+//-----------------------------------------------------------------------------
+
+
 
 
 //-----------------------------------------------------------------------------

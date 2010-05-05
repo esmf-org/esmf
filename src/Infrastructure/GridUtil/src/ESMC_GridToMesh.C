@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.45 2010/05/04 16:33:22 rokuingh Exp $
+// $Id: ESMC_GridToMesh.C,v 1.46 2010/05/05 21:26:59 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -561,6 +561,60 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
 
 }
 #undef  ESMC_METHOD
+
+
+  // Only works for scalar data right now, but would be pretty easy to add more dimensions 
+void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "CpMeshDataToArray()" 
+  Trace __trace("CpMeshDataToArray()");
+
+ int localrc;
+ int rc;
+
+  // Initialize the parallel environment for mesh (if not already done)
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+   throw localrc;  // bail out with exception
+
+ bool is_sphere = grid.isSphere();
+
+ if (grid.getIndexFlag() != ESMF_INDEX_GLOBAL) {
+   Throw() << "Currently the Grid must be created with indexflag=ESMF_INDEX_GLOBAL to use this functionality";
+  }
+ 
+ // Loop nodes of the grid.  Here we loop all nodes, both owned and not.
+   ESMCI::GridIter *gni=new ESMCI::GridIter(&grid,staggerLoc,false);
+
+   // loop through all nodes in the Grid
+   for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
+
+       // get the global id of this Grid node
+       int gid=gni->getGlobalID(); 
+
+       //  Find the corresponding Mesh node
+       Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::NODE, gid);
+       if (mi == mesh.map_end(MeshObj::NODE)) {
+	 Throw() << "Grid entry not in mesh";
+       }
+
+       // Get the node
+	const MeshObj &node = *mi; 
+
+       // Get the data 
+	double *data = dataToArray->data(node);
+
+       // Put it into the Array
+      gni->setArrayData(&array, *data);
+   }
+
+
+   // delete Grid Iters
+   delete gni;
+
+}
+#undef  ESMC_METHOD
+
 
 } // namespace
 

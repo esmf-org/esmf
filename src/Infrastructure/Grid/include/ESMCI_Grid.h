@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.67 2010/03/15 17:05:25 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.68 2010/05/05 21:26:59 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -696,6 +696,7 @@ int getComputationalUBound(
   template <class TYPE> void getCoord(TYPE *coord);
   template <class TYPE> void getItem(int item, TYPE *value);
   template <class TYPE> void getArrayData(Array *array, TYPE *data);
+  template <class TYPE> void setArrayData(Array *array, TYPE data);
   }; 
 
 
