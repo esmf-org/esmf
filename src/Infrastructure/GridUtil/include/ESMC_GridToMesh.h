@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.h,v 1.8 2010/05/04 16:33:22 rokuingh Exp $
+// $Id: ESMC_GridToMesh.h,v 1.9 2010/05/05 21:30:43 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <Grid/include/ESMCI_Grid.h>
+#include <Mesh/include/ESMCI_Mesh.h>
 
 
 namespace ESMCI {
@@ -32,6 +33,8 @@ class Array;
 
 // Create a mesh from the given grid.
  void GridToMesh(const ESMCI::Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, const std::vector<ESMCI::Array*> &arrays, ESMCI::InterfaceInt *maskValuesArg, int *regridConserve);
+
+ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray);
 
 } // namespace
 
