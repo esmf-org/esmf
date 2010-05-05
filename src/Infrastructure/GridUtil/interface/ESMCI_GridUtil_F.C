@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.27 2010/05/04 16:33:22 rokuingh Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.28 2010/05/05 17:41:20 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -31,6 +31,7 @@
 #include "ESMCI_Array.h"
 #include <Mesh/include/ESMCI_Mesh.h>
 #include <Mesh/include/ESMCI_MeshRead.h>
+#include <Mesh/include/ESMCI_MeshRegrid.h> // only for the REGRID flags
 #include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMCI_Interp.h>
 #include <Mesh/include/ESMCI_ParEnv.h>
@@ -91,7 +92,8 @@ void FTN(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *staggerLoc,
 
   try {
 
-    ESMCI::GridToMesh(grid, *staggerLoc, mesh, arrays, NULL, NULL);
+    int regridConserve = ESMC_REGRID_CONSERVE_OFF;
+    ESMCI::GridToMesh(grid, *staggerLoc, mesh, arrays, NULL, &regridConserve);
 
     char *meshname = ESMC_F90toCstring(name, nlen);
 
@@ -164,7 +166,8 @@ void FTN(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
 
   try {
 
-    ESMCI::GridToMesh(grid, *staggerLoc, mesh, arrays, NULL, NULL);
+    int regridConserve = ESMC_REGRID_CONSERVE_OFF;
+    ESMCI::GridToMesh(grid, *staggerLoc, mesh, arrays, NULL, &regridConserve);
 
     char *meshname = ESMC_F90toCstring(name, nlen);
 
