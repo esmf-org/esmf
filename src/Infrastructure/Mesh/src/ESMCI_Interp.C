@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.22 2010/04/28 23:25:57 rokuingh Exp $
+// $Id: ESMCI_Interp.C,v 1.23 2010/05/06 21:54:48 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.22 2010/04/28 23:25:57 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.23 2010/05/06 21:54:48 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -68,7 +68,7 @@ IWeights &IWeights::operator=(const IWeights &rhs)
   return *this;
 }
 
-inline bool IDMatch(const IWeights::Entry &e1, const IWeights::Entry &e2) { return e1.value == e2.value; }
+inline bool IDMatch(const IWeights::Entry &e1, const IWeights::Entry &e2) { return e1.id == e2.id; }
 
 void IWeights::ChangeCoords(const IWeights &src_uv, const IWeights &dst_uv) {
   Trace __trace("IWeights::ChangeCoords(const IWeights &src_uv, const IWeights &dst_uv)");
@@ -1197,6 +1197,8 @@ void Interp::interpL2csrvM_parallel(IWeights &iw, IWeights *iw2,
  
     // first traverse the row and compact values - don't erase yet
     std::sort(_col.begin(), _col.end());
+
+/*  // apparently this isn't necessary, but it's staying here for a bit until i'm sure..
     // go through the row
     for (UInt c = 0; c < _col.size(); ++c) {
       int lastid = _col[c].id;
@@ -1210,7 +1212,7 @@ void Interp::interpL2csrvM_parallel(IWeights &iw, IWeights *iw2,
           _col[c].value += ci->value;
       }
     }
-    
+*/  
     // now remove the Entries with matching id
     std::vector<IWeights::Entry>::iterator newend = 
       std::unique(_col.begin(), _col.end(), IDMatch);
@@ -1228,9 +1230,8 @@ void Interp::interpL2csrvM_parallel(IWeights &iw, IWeights *iw2,
       srcmesh.map_find(MeshObj::NODE, _row.id);
     ThrowRequire(nsi != srcmesh.map_end(MeshObj::NODE));
     double *Ddata = dst_iwts->data(*nsi);
-    for (UInt c = 0; c < _col.size(); ++c) _col[c].value = (_col[c].value)/(*Ddata);
-    // and finally sort the columns as well
-    std::sort(_col.begin(), _col.end());
+    for (UInt c = 0; c < _col.size(); ++c) 
+      _col[c].value = (_col[c].value)/(*Ddata);
   }
 
 /*
