@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.146 2010/05/06 19:02:55 rokuingh Exp $
+! $Id: ESMF_Regrid.F90,v 1.147 2010/05/06 21:38:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.146 2010/05/06 19:02:55 rokuingh Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.147 2010/05/06 21:38:21 oehmke Exp $'
 
 !==============================================================================
 !
@@ -477,7 +477,7 @@ end function my_xor
 
        ! Call through to the C++ object that does the work
        call c_ESMC_regrid_getiwts(vm, Grid, Mesh, Array, staggerLoc, &
-                                  regridScheme, rc=localrc)
+                                  regridScheme, localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
