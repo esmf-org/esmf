@@ -21,9 +21,13 @@ static std::vector<std::string> &get_traceBuf() {
 }
 
 TraceBack::~TraceBack() {
-  if (std::uncaught_exception()) {
-    get_traceBuf().push_back(std::string(funcName));
-  }
+// TODO: Temporary work-around until we find solution for exception handling:
+// gjt: Commented out the following lines because they were causing SEGV on
+// gjt: PGI 10.3 and 10.4 (suspect all PGI 10.x versions) in ESMF applications
+// gjt: that were linked following the current rules in Linux.pgi.default.  
+//  if (std::uncaught_exception()) {
+//    get_traceBuf().push_back(std::string(funcName));
+//  }
 }
 
 std::string TraceBack::StackTrace() {
