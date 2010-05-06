@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.8.4.1 2010/02/05 20:22:41 svasquez Exp $
+$Id: ESMF_Conf.inc,v 1.8.4.2 2010/05/06 05:49:52 theurich Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -20,7 +20,7 @@ be one of the following:
 
 #endif
 
-#define ESMF_IOFlushMacro(unit,status) call flush (unit)
+#define ESMF_IOFlushMacro(unit,status) flush (unit, iostat=status)
 
 #if 0
 prevent use of esmf derived type initializers.  causes some compilers problems.
