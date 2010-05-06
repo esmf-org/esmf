@@ -1,34 +1,59 @@
-# $Id: makefile,v 1.2 2009/10/26 19:59:36 theurich Exp $ 
+# $Id: makefile,v 1.3 2010/05/06 21:21:36 oehmke Exp $ 
 
-ALL: tree_build_system_tests
+ALL: build_system_tests
 
-run: tree_run_system_tests
-
-LOCDIR	  = src/system_tests/ESMF_FieldRegridMesh
-
-
-SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_FieldRegridMeshSTest
-
-# Object files other than SysTest%.o that the
-# system tests executable will depend on.
-# List objects files in the order that they
-# are to be compiled/created.
-SYSTEM_TESTS_OBJ      = user_model1.o user_model2.o user_coupler.o
-
-SYSTEM_TESTS_RUN      = RUN_FieldRegridMesh  
-
-SYSTEM_TESTS_RUN_UNI  =
-
-ESMF_FieldRegridMeshSTest.o : $(SYSTEM_TESTS_OBJ)
+LOCDIR   = src/system_tests
 
 include $(ESMF_DIR)/makefile
 
-DIRS = 
+# arranged roughly in order of complexity
+DIRS      = ESMF_CompCreate \
+            ESMF_CompFortranAndC \
+            ESMF_RecursiveComponent \
+            ESMF_ArrayScatterGather \
+            ESMF_Attribute \
+            ESMF_ArraySparseMatMul \
+            ESMF_ArrayRedist \
+            ESMF_ArrayRedistMPMD \
+            ESMF_ArrayRedistSharedObj \
+            ESMF_ArrayRedist3D \
+            ESMF_DirectCoupling \
+            ESMF_ArrayBundleSparseMatMul \
+            ESMF_ArrayBundleRedist \
+            ESMF_FieldSparseMatMul \
+            ESMF_ConcurrentComponent \
+            ESMF_FieldConcurrentComp \
+            ESMF_FieldBundleSMM \
+            ESMF_FieldRedist \
+            ESMF_FieldRedistBlk2Blk \
+            ESMF_FieldRedistBlk2Arb \
+            ESMF_FieldRedistArb2Arb \
+            ESMF_FieldBundleRedistBlk2Blk \
+            ESMF_FieldBundleRedistBlk2Arb \
+            ESMF_FieldBundleRedistArb2Arb \
+            ESMF_FieldRegrid \
+            ESMF_FieldRegridDisjoint \
+            ESMF_FieldRegridOverlap \
+            ESMF_FieldRegridMesh \
+            ESMF_FieldLSSMM \
+            ESMF_FieldMeshSMM \
+	    ESMF_SequentialEnsemble \
+	    ESMF_ConcurrentEnsemble \
+	    ESMF_ArrayRedistOpenMP 
+# Tests temporarily disabled, re-enable once capability is implemented
+#           ESMF_RowReduce \          cover by Array comms
+#           ESMF_MergeCoupling \
+#           ESMF_FieldRegridConserv \ cover by Regrid
+#           ESMF_FieldRegridMulti \   cover by Regrid
+#           ESMF_FieldRegridOrder \   cover by Regrid
+#           ESMF_FlowWithCoupling \
+#           ESMF_FlowComp \
+#           ESMF_FieldHalo \
+#           ESMF_FieldHaloPer \
+
 
 CLEANDIRS   =
-CLEANFILES  = $(SYSTEM_TESTS_BUILD)
+CLEANFILES  =
 CLOBBERDIRS =
 
-
-RUN_FieldRegridMesh:
-	$(MAKE) TNAME=FieldRegridMesh NP=4 stest
+# DO NOT DELETE
