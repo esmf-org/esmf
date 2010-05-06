@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.10 2010/05/04 16:43:26 rokuingh Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.11 2010/05/06 07:34:57 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.10 2010/05/04 16:43:26 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.11 2010/05/06 07:34:57 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -229,6 +229,44 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
            int *regridPoleType, int *regridPoleNPnts, 
            int *unmappedaction) {
 
+
+    // generate integration weights
+    Integrate sig(srcmesh), dig(dstmesh);
+    sig.intWeights(src_iwts);
+    dig.intWeights(dst_iwts);
+
+    // Add weights to meshes before poles
+    // so all the weights are on user data points
+    if (*regridScheme == ESMC_REGRID_SCHEME_FULL3D) {
+        for (UInt i = 1; i <= 7; ++i) {
+       	  AddPoleWeights(srcmesh,i,src_iwts);
+       	  AddPoleWeights(dstmesh,i,src_iwts);
+        }
+    }
+
+#if 0
+  // print out info of the iwts
+  Mesh::iterator sni=srcmesh.node_begin(), sne=srcmesh.node_end();
+  Mesh::iterator dni=dstmesh.node_begin(), dne=dstmesh.node_end();
+
+  double ssum=0.0;
+  for (; sni != sne; ++sni) {
+    double *Sdata = src_iwts->data(*sni);
+    ssum += *Sdata;
+  }
+  
+  double dsum=0.0;
+ for (; dni != dne; ++dni) {
+    double *Ddata = dst_iwts->data(*dni);
+
+    dsum += *Ddata;
+  }
+
+    printf("SW Sum=%20.17f \n",ssum);
+    printf("DW Sum=%20.17f \n",dsum);
+#endif
+
+
     // Pole constraints
     IWeights pole_constraints, stw;
     UInt constraint_id = dstmesh.DefineContext("pole_constraints");
@@ -246,10 +284,6 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
       }
     }
 
-    // generate integration weights
-    Integrate sig(srcmesh), dig(dstmesh);
-    sig.intWeights(src_iwts);
-    dig.intWeights(dst_iwts);
 
     // Get coordinate fields
     MEField<> &scoord = *srcmesh.GetCoordField();
@@ -300,6 +334,7 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
     // Generate the backwards interpolation matrix
     interp(0, stw);
 
+
      // Factor out poles if they exist
      if (*regridScheme == ESMC_REGRID_SCHEME_FULL3D) {
        if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
@@ -311,8 +346,11 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
        }
     }
 
+
     // L2 projection conservative interpolation
     interp.interpL2csrvM(stw, &wts, src_iwts, dst_iwts);
+
+
 /*
   // print out info of the iwts
   Mesh::iterator sni=srcmesh.node_begin(), sne=srcmesh.node_end();
