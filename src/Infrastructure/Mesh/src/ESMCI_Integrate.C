@@ -1,4 +1,4 @@
-// $Id: ESMCI_Integrate.C,v 1.3 2010/05/06 07:34:57 oehmke Exp $
+// $Id: ESMCI_Integrate.C,v 1.4 2010/05/06 16:13:58 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Integrate.C,v 1.3 2010/05/06 07:34:57 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Integrate.C,v 1.4 2010/05/06 16:13:58 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -298,7 +298,7 @@ void weights_great_circle_same(int n, double *pnts, double *weights) {
 
 
 // Version that doesn't move nodes around
-void AddPoleWeights(Mesh &mesh,  UInt node_id, 
+  void Integrate::AddPoleWeights(Mesh &mesh,  UInt node_id, 
 		    MEField<> *iwts)
 {
 

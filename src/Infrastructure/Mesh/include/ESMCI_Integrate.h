@@ -35,6 +35,8 @@ public:
   // Generate the integration weights on a specified mesh
   void intWeights(MEField<> *);
 
+  void AddPoleWeights(Mesh &mesh,  UInt node_id, MEField<> *iwts);
+
 private:
 
   // integration weights parallel?
@@ -47,7 +49,7 @@ private:
 
 };
 
-void AddPoleWeights(Mesh &mesh,  UInt node_id, MEField<> *iwts);
+
 
 } // namespace
 

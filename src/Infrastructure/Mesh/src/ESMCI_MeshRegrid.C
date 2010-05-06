@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.11 2010/05/06 07:34:57 oehmke Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.12 2010/05/06 16:13:58 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.11 2010/05/06 07:34:57 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.12 2010/05/06 16:13:58 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -230,7 +230,9 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
            int *unmappedaction) {
 
 
-    // generate integration weights
+    // generate integration weights before pole, so 
+    // they are distributed across non-pole nodes
+    // (the node is factored out in the end)
     Integrate sig(srcmesh), dig(dstmesh);
     sig.intWeights(src_iwts);
     dig.intWeights(dst_iwts);
@@ -239,8 +241,8 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
     // so all the weights are on user data points
     if (*regridScheme == ESMC_REGRID_SCHEME_FULL3D) {
         for (UInt i = 1; i <= 7; ++i) {
-       	  AddPoleWeights(srcmesh,i,src_iwts);
-       	  AddPoleWeights(dstmesh,i,src_iwts);
+       	  sig.AddPoleWeights(srcmesh,i,src_iwts);
+       	  dig.AddPoleWeights(dstmesh,i,dst_iwts);
         }
     }
 
