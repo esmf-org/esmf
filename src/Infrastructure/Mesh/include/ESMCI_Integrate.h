@@ -35,7 +35,8 @@ public:
   // Generate the integration weights on a specified mesh
   void intWeights(MEField<> *);
 
-  void AddPoleWeights(Mesh &mesh,  UInt node_id, MEField<> *iwts);
+  // Add weights to meshes before poles so they are on user data points
+  void AddPoleWeights(Mesh &, UInt, MEField<> *);
 
 private:
 

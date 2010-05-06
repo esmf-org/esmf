@@ -35,6 +35,9 @@ int csrv(Mesh &, Mesh &, IWeights &, MEField<> *, MEField<> *,
 int offline_regrid(Mesh &, Mesh &, Mesh &, int *, int *, int *, int *, char *, char *, char *);
 int online_regrid(Mesh &, Mesh &, IWeights &, int *, int *, int *, int *);
 
+// get the integration weights for one mesh
+int get_iwts(Mesh &, MEField<> *, int *);
+
 } // namespace
 
 #endif /*ESMC_MESHREGRID_H_*/

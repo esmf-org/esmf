@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.32 2010/05/04 16:34:05 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.33 2010/05/06 19:02:55 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -51,6 +51,8 @@ module ESMF_FieldRegridMod
    public ESMF_FieldRegridRun          ! apply a regrid operator
    public ESMF_FieldRegrid             ! apply a regrid operator
    public ESMF_FieldRegridRelease      ! apply a regrid operator
+   public ESMF_FieldRegridGetIwts      ! get integration weights
+   private checkGrid                   ! small subroutine to check the grid
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
@@ -73,7 +75,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.32 2010/05/04 16:34:05 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.33 2010/05/06 19:02:55 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -233,7 +235,6 @@ contains
                                        dstField, dstMaskValues,        &
                                        unmappedDstAction,              &
                                        routeHandle, indicies, weights, & 
-                                       srcIwts, dstIwts,               &
                                        regridMethod, regridConserve,   &
                                        regridScheme, rc)
 !
@@ -248,8 +249,6 @@ contains
       type(ESMF_RouteHandle), intent(inout), optional :: routeHandle
       integer(ESMF_KIND_I4), pointer, optional        :: indicies(:,:)
       real(ESMF_KIND_R8), pointer, optional           :: weights(:)
-      real(ESMF_KIND_R8), pointer, optional           :: srcIwts(:)
-      real(ESMF_KIND_R8), pointer, optional           :: dstIwts(:)
       type(ESMF_RegridMethod), intent(in), optional   :: regridMethod
       type(ESMF_RegridConserve), intent(in), optional :: regridConserve
       integer, intent(in), optional                   :: regridScheme
@@ -434,7 +433,7 @@ contains
         call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
               lregridMethod, lregridConserve, lregridScheme, &
               unmappedDstAction, routeHandle, &
-              indicies, weights, srcIwts, dstIwts, localrc)
+              indicies, weights, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
@@ -454,19 +453,138 @@ contains
                                      ESMF_CONTEXT, rc)) return
         endif
 
+        if(present(rc)) rc = ESMF_SUCCESS
+
+    end subroutine ESMF_FieldRegridStore
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRegridGetIwts"
+
+!BOPI
+! !IROUTINE: ESMF_FieldRegridGetIwts - Get the integration weights
+!
+! !INTERFACE:
+  !   Private name; call using ESMF_FieldRegridGetIwts()
+      subroutine ESMF_FieldRegridGetIwts(Field, Iwts, MaskValues, regridScheme, rc)
+!
+! !RETURN VALUE:
+!      
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout)                    :: Field
+      type(ESMF_Field), intent(inout)                 :: Iwts
+      integer(ESMF_KIND_I4), intent(in), optional     :: MaskValues(:)
+      integer, intent(in), optional                   :: regridScheme
+      integer, intent(out), optional                  :: rc 
+!
+! !DESCRIPTION:
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [Field]
+!           The Field.
+!     \item [{[regridScheme]}]
+!           Whether to convert to spherical coordinates 
+!           ({\tt ESMF\_REGRID\_SCHEME\_FULL3D}), 
+!           or to leave in native coordinates 
+!           ({\tt ESMF\_REGRID\_SCHEME\_NATIVE}). 
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+        integer :: localrc
+        integer              :: isSphere
+        integer              :: lregridScheme
+        type(ESMF_GeomType)  :: geomtype
+
+        type(ESMF_Grid)      :: Grid
+        type(ESMF_Array)     :: Array
+        type(ESMF_VM)        :: vm
+        type(ESMF_Mesh)      :: Mesh
+        type(ESMF_StaggerLoc) :: staggerLoc
+
+        ! Initialize return code; assume failure until success is certain
+        localrc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+        ! global vm for now
+        call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+  !  check Field and Iwts to make sure they are from the same grid
+
+        ! Now we go through the painful process of extracting the data members
+        ! that we need.
+        call ESMF_FieldGet(Iwts, geomtype=geomtype, array=Array, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Will eventually determine scheme either as a parameter or from properties
+        ! of the source grid
+        if (present(regridScheme)) then
+          lregridScheme = regridScheme
+        else
+          lregridScheme = ESMF_REGRID_SCHEME_NATIVE
+        endif
+
+        ! If grids, then convert to a mesh to do the regridding
+        if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
+          call ESMF_FieldGet(Iwts, grid=Grid, &
+                 staggerloc=staggerLoc, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+          isSphere = 0
+          if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) isSphere = 1
+
+          ! check grid
+          call checkGrid(Grid,staggerloc,rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! Convert Grid to Mesh
+          Mesh = ESMF_GridToMesh(Grid, staggerLoc, isSphere, &
+                      MaskValues, ESMF_REGRID_CONSERVE_ON, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        else
+          call ESMF_FieldGet(Iwts, mesh=Mesh, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+        ! call into the Regrid GetIwts interface
+        call ESMF_RegridGetIwts(Grid, Mesh, Array, staggerLoc, lregridScheme, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+
+        ! destroy Mesh, if they were created here
+        if (geomtype .ne. ESMF_GEOMTYPE_MESH) then
+        call ESMF_MeshDestroy(Mesh,rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+        endif
 
         if(present(rc)) rc = ESMF_SUCCESS
 
+    end subroutine ESMF_FieldRegridGetIwts
 
-    contains
-	! Small subroutine to make sure that Grid doesn't
-        ! contain some of the properties that aren't currently
-        ! allowed in regridding
-	subroutine checkGrid(grid,staggerloc,rc)
-	type (ESMF_Grid) :: grid
+!------------------------------------------------------------------------------
+
+    ! Small subroutine to make sure that Grid doesn't
+    ! contain some of the properties that aren't currently
+    ! allowed in regridding
+    subroutine checkGrid(grid,staggerloc,rc)
+        type (ESMF_Grid) :: grid
         type(ESMF_StaggerLoc) :: staggerloc
-	integer, intent(out), optional :: rc
-	type(ESMF_GridDecompType) :: decompType
+        integer, intent(out), optional :: rc
+        type(ESMF_GridDecompType) :: decompType
         integer :: localDECount, lDE, ec(ESMF_MAXDIM)
         integer :: localrc, i, dimCount
 
@@ -479,7 +597,7 @@ contains
 
        ! Error if decompType is ARBITRARY
        if (decompType .eq. ESMF_GRID_ARBITRARY) then
-	      call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+             call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
                  "- can't currently regrid an arbitrarily distributed Grid", & 
                  ESMF_CONTEXT, rc) 
               return
@@ -500,11 +618,11 @@ contains
            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
 
-	   ! loop and make sure they aren't too small in any dimension
+           ! loop and make sure they aren't too small in any dimension
            do i=1,dimCount
               if (ec(i) .lt. 2) then
-	         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
-                 "- can't currently regrid a grid that contains a DE of width less than 2", & 
+                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+              "- can't currently regrid a grid that contains a DE of width less than 2", & 
                  ESMF_CONTEXT, rc) 
               return
               endif
@@ -512,8 +630,7 @@ contains
        enddo
 
        if(present(rc)) rc = ESMF_SUCCESS
-       end subroutine checkGrid
-    end subroutine ESMF_FieldRegridStore
+   end subroutine checkGrid
 
 !------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.12 2010/05/06 16:13:58 oehmke Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.13 2010/05/06 19:02:55 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.12 2010/05/06 16:13:58 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.13 2010/05/06 19:02:55 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -429,6 +429,23 @@ double badrowid = 0;
   std::cout<<std::endl<<"Destination iwts total count = "<<dtotalcount
                       <<"  and negcount = "<<dnegcount<<std::endl<<std::endl;
 */
+
+    return 1;
+  }
+
+  // to generate the iwts again, and return to Fortran 
+  int get_iwts(Mesh &mesh, MEField<> *iwts, int *regridScheme) {
+
+    // generate integration weights
+    Integrate ig(mesh);
+    ig.intWeights(iwts);
+
+    // Add weights to meshes before poles
+    // so all the weights are on user data points
+    if (*regridScheme == ESMC_REGRID_SCHEME_FULL3D) {
+        for (UInt i = 1; i <= 7; ++i)
+          ig.AddPoleWeights(mesh,i,iwts);
+    }
 
     return 1;
   }

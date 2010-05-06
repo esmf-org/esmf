@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.1 2010/04/19 21:51:38 rokuingh Exp $
+! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.2 2010/05/06 19:02:55 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -30,6 +30,8 @@
     use ESMF_TestMod     ! test methods
     use ESMF_Mod
     use ESMF_GridUtilMod
+
+    use MPI
 
     implicit none
 
@@ -82,23 +84,25 @@ contains
   type(ESMF_Field) :: field180
   type(ESMF_Field) :: xfield180
   type(ESMF_Field) :: errorField
+  type(ESMF_Field) :: srciwts, dstiwts
   type(ESMF_Array) :: array180
   type(ESMF_Array) :: xarray180
   type(ESMF_Array) :: errorArray
   type(ESMF_Array) :: lonArray360
   type(ESMF_Array) :: srcArray360
+  type(ESMF_Array) :: srciwtsArray, dstiwtsArray
   type(ESMF_RouteHandle) :: routeHandle
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_VM) :: vm
   real(ESMF_KIND_R8), pointer :: fptrXC(:,:)
   real(ESMF_KIND_R8), pointer :: fptrYC(:,:)
-  real(ESMF_KIND_R8), pointer :: fptr(:,:),xfptr(:,:),errorfptr(:,:)
-  real(ESMF_KIND_R8) :: maxerror, minerror, error
+  real(ESMF_KIND_R8), pointer :: fptr(:,:),xfptr(:,:),errorfptr(:,:),iwtsptr(:,:)
+  real(ESMF_KIND_R8), pointer :: srciwtsptr(:,:), dstiwtsptr(:,:)
   integer :: petMap2D(2,2,1)
   integer :: clbnd(2),cubnd(2)
   integer :: fclbnd(2),fcubnd(2)
   integer :: i1,i2, index(2)
-  integer :: lDE, localDECount
+  integer :: lDE, localDECount, i
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   integer src_nx, src_ny, dst_nx, dst_ny
@@ -110,6 +114,10 @@ contains
   real(ESMF_KIND_R8) :: theta, d2rad, x, y, z
   real(ESMF_KIND_R8) :: DEG2RAD, a, lat, lon, phi
   real(ESMF_KIND_R8) :: xtmp, ytmp, ztmp
+  real(ESMF_KIND_R8) :: srcmass, dstmass, srcmassg, dstmassg
+  real(ESMF_KIND_R8) :: maxerror, minerror, error
+  real(ESMF_KIND_R8) :: maxerrorg, minerrorg, errorg
+  integer, parameter :: root = 0
 
   integer :: spherical_grid
 
@@ -135,8 +143,8 @@ contains
             ESMF_CONTEXT, rc)) return
 
   ! Establish the resolution of the grids
-  src_nx = 100
-  src_ny = 60
+  src_nx = 111
+  src_ny = 66
 
   dst_nx = 90
   dst_ny = 50
@@ -169,6 +177,13 @@ contains
     return
   endif
 
+   srciwts = ESMF_FieldCreate(grid360, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
    errorField = ESMF_FieldCreate(grid180, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -184,6 +199,13 @@ contains
   endif
 
    xfield180 = ESMF_FieldCreate(grid180, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+   dstiwts = ESMF_FieldCreate(grid180, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -234,6 +256,20 @@ contains
 
   ! errorArray
   call ESMF_FieldGet(errorField, array=errorArray, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! errorArray
+  call ESMF_FieldGet(srciwts, array=srciwtsArray, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! errorArray
+  call ESMF_FieldGet(dstiwts, array=dstiwtsArray, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -403,6 +439,22 @@ contains
       return
    endif
 
+  ! Get the integration weights
+  call ESMF_FieldRegridGetIwts(srcField360, srciwts, &
+          regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+  endif
+
+  ! Get the integration weights
+  call ESMF_FieldRegridGetIwts(field180, dstiwts, &
+          regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+  endif
+
   call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -434,9 +486,19 @@ contains
         return
      endif
 
+     ! get src Field
+     call ESMF_FieldGet(dstiwts, lDE, dstiwtsptr,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
      minerror = 100000.
      maxerror = 0.
      error = 0.
+     dstmass = 0.
+ 
+     ! destination grid
      !! check relative error
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
@@ -462,27 +524,93 @@ contains
         if (ABS(errorfptr(i1,i2)) .gt. 0.01) then
             correct=.false. 
         endif
-
+        dstmass = dstmass + dstiwtsptr(i1,i2)
      enddo
      enddo
 
   enddo    ! lDE
 
 #if 0
+  srcmass = 0.
+  do lDE=0,localDECount-1
+
+     ! get src pointer
+     call ESMF_FieldGet(srcField360, lDE, fptr, computationalLBound=clbnd, &
+                             computationalUBound=cubnd,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     ! get src Field
+     call ESMF_FieldGet(srciwts, lDE, srciwtsptr,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+        srcmass = srcmass + srciwtsptr(i1,i2)
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+  srcmassg = 0.
+  dstmassg = 0.
+  call MPI_Reduce(srcmass, srcmassg, 1, MPI_DOUBLE_PRECISION, MPI_SUM, root, &
+                  MPI_COMM_WORLD, localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  call MPI_Reduce(dstmass, dstmassg, 1, MPI_DOUBLE_PRECISION, MPI_SUM, root, &
+                  MPI_COMM_WORLD, localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  call MPI_Reduce(maxerror, maxerrorg, 1, MPI_DOUBLE_PRECISION, MPI_MAX, root, &
+                  MPI_COMM_WORLD, localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  call MPI_Reduce(minerror, minerrorg, 1, MPI_DOUBLE_PRECISION, MPI_MIN, root, &
+                  MPI_COMM_WORLD, localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
   ! Uncomment these calls to see some actual regrid results
-write(*,*) "Max Error = ", maxerror
-write(*,*) "Min Error = ", minerror
-write(*,*) "Avg Error = ", (maxerror + minerror)/2
+  if (localPet == 0) then
+
+    write(*,*) " "
+    write(*,*) "Conservation:"
+    write(*,*) "Rel Error = ", ABS(dstmassg-srcmassg)/srcmassg
+    write(*,*) "SRC mass = ", srcmassg
+    write(*,*) "DST mass = ", dstmassg
+    write(*,*) " "
+    write(*,*) "Interpolation:"
+    write(*,*) "Max Error = ", maxerrorg
+    write(*,*) "Min Error = ", minerrorg
+    write(*,*) "Avg Error = ", (maxerrorg + minerrorg)/2
+    write(*,*) " "
+
+  endif
 
   spherical_grid = 1
   call ESMF_MeshIO(vm, grid360, ESMF_STAGGERLOC_CENTER, &
-               "srcmesh", srcArray360, lonArray360, rc=localrc, &
+               "srcmesh", srcArray360, srciwtsarray, rc=localrc, &
                spherical=spherical_grid)
-write(*,*) "LOCALRC=",localrc
   call ESMF_MeshIO(vm, grid180, ESMF_STAGGERLOC_CENTER, &
-               "dstmesh", array180, xarray180, errorArray, rc=localrc, &
+               "dstmesh", array180, xarray180, errorArray, dstiwtsarray, rc=localrc, &
                spherical=spherical_grid)
-write(*,*) "LOCALRC=",localrc
 #endif
 
   ! Destroy the Fields

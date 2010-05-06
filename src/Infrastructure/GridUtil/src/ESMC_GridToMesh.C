@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.46 2010/05/05 21:26:59 oehmke Exp $
+// $Id: ESMC_GridToMesh.C,v 1.47 2010/05/06 19:02:55 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -584,10 +584,11 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
   }
  
  // Loop nodes of the grid.  Here we loop all nodes, both owned and not.
-   ESMCI::GridIter *gni=new ESMCI::GridIter(&grid,staggerLoc,false);
+   ESMCI::GridIter *gni=new ESMCI::GridIter(&grid,staggerLoc,true);
 
    // loop through all nodes in the Grid
    for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
+     if(!gni->isLocal()) continue;
 
        // get the global id of this Grid node
        int gid=gni->getGlobalID(); 
