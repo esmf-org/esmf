@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.31 2010/05/04 16:35:56 rokuingh Exp $
+! $Id: ESMF_Mesh.F90,v 1.32 2010/05/06 21:20:08 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.31 2010/05/04 16:35:56 rokuingh Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.32 2010/05/06 21:20:08 oehmke Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -71,6 +71,8 @@ module ESMF_MeshMod
     logical :: isFullyCreated ! Are the distgrids there and the numOwned X correct
     integer :: numOwnedNodes
     integer :: numOwnedElements
+    integer :: spatialDim
+    integer :: parametricDim
     ESMF_INIT_DECLARE
   end type
 
@@ -142,7 +144,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.31 2010/05/04 16:35:56 rokuingh Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.32 2010/05/06 21:20:08 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -458,6 +460,10 @@ module ESMF_MeshMod
     ! Set as not yet created
     ESMF_MeshCreate3Part%isFullyCreated=.false.
 
+    ! Set dimension information
+    ESMF_MeshCreate3Part%spatialDim=spatialDim
+    ESMF_MeshCreate3Part%parametricDim=parametricDim
+
     ! Check init status of arguments
     ESMF_INIT_SET_CREATED(ESMF_MeshCreate3Part)
 
@@ -636,6 +642,10 @@ module ESMF_MeshMod
 
     ! Set as fully created 
     ESMF_MeshCreate1Part%isFullyCreated=.true.
+
+    ! Set dimension information
+    ESMF_MeshCreate1Part%spatialDim=spatialDim
+    ESMF_MeshCreate1Part%parametricDim=parametricDim
 
     !call ESMF_DistGridPrint(ESMF_MeshCreate1Part%nodal_distgrid)
     !ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, ESMF_MeshCreate1Part%nodal_distgrid, rc)
@@ -837,19 +847,23 @@ module ESMF_MeshMod
 ! !IROUTINE: ESMF_MeshGet - Get information from a Mesh
 !
 ! !INTERFACE:
-      subroutine ESMF_MeshGet(mesh, nodalDistgrid, elementDistgrid, &
-                   numOwnedNodes, numOwnedElements, isMemFreed, rc)
+      subroutine ESMF_MeshGet(mesh, parametricDim, spatialDim, &
+                   nodalDistgrid, elementDistgrid, &
+                   numOwnedNodes, ownedNodeCoords, numOwnedElements, isMemFreed, rc)
 !
 ! !RETURN VALUE:
 !
 ! !ARGUMENTS:
-    type(ESMF_Mesh), intent(inout)             :: mesh
-    type(ESMF_DistGrid), intent(out), optional :: nodalDistgrid
-    type(ESMF_DistGrid), intent(out), optional :: elementDistgrid
-    integer,             intent(out), optional :: numOwnedNodes
-    integer,             intent(out), optional :: numOwnedElements
-    logical,             intent(out), optional :: isMemFreed
-    integer,             intent(out), optional :: rc
+    type(ESMF_Mesh), intent(inout)                           :: mesh
+    integer,             intent(out), optional               :: parametricDim
+    integer,             intent(out), optional               :: spatialDim
+    type(ESMF_DistGrid), intent(out), optional               :: nodalDistgrid
+    type(ESMF_DistGrid), intent(out), optional               :: elementDistgrid
+    integer,             intent(out), optional               :: numOwnedNodes
+    real(ESMF_KIND_R8), dimension(:), intent(out), optional  :: ownedNodeCoords
+    integer,             intent(out), optional               :: numOwnedElements
+    logical,             intent(out), optional               :: isMemFreed
+    integer,             intent(out), optional               :: rc
 !
 ! !DESCRIPTION:
 !   Get various information from a mesh.
@@ -858,6 +872,14 @@ module ESMF_MeshMod
 ! \begin{description}
 ! \item [mesh]
 ! Mesh object to retrieve information from.
+! \item [{[parametricDim]}]
+! Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
+! have a parametric dimension of 2, whereas a Mesh constructed of cubes would have one
+! of 3.)
+! \item[{[spatialDim]}] 
+! The number of coordinate dimensions needed to describe the locations of the nodes 
+! making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
+! parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
 ! \item [{[nodalDistgrid]}]
 ! A 1D arbitrary distgrid describing the distribution of the nodes across the PETs. Note that
 ! on each PET the distgrid will only contain entries for nodes owned by that PET.
@@ -869,6 +891,11 @@ module ESMF_MeshMod
 ! \item [{[numOwnedNodes]}]
 ! The number of local nodes which are owned by this PET. This is the number of PET local entries in
 ! the nodalDistgrid.
+! \item [{[ownedNodeCoords]}]
+! The coordinates for the local nodes. These coordinates will be in the proper order to correspond
+! with the nodes in the {\tt nodalDistgrid} returned by this call, and hence with a Field built on 
+! {\tt mesh}. The size of the input array should be the spatial dim of {\tt mesh} times 
+! {\tt numOwnedNodes}.
 ! \item [{[numOwnedElements]}]
 ! The number of local elements which are owned by this PET. Note that every element is owned by 
 ! the PET it resides on, so unlike for nodes, {\tt numOwnedElements} is identical to the number of elements on
@@ -895,7 +922,31 @@ module ESMF_MeshMod
        return 
     endif    
 
+    if (present(ownedNodeCoords)) then
+       ! If mesh has been freed then exit
+       if (mesh%isCMeshFreed) then
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                "- the mesh internals have been freed", & 
+                ESMF_CONTEXT, rc) 
+          return
+       endif
 
+       ! Check array size
+       if (size(ownedNodeCoords)<mesh%numOwnedNodes*mesh%spatialDim) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                "- owndedNodeCoords too small to hold coordinates", & 
+                ESMF_CONTEXT, rc) 
+          return
+       endif
+
+       ! Get coords from C
+       call C_ESMC_GetLocalCoords(mesh, ownedNodeCoords, localrc) 
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+      if (present(parametricDim)) parametricDim=mesh%parametricDim
+      if (present(spatialDim)) spatialDim=mesh%spatialDim
       if (present(nodalDistgrid)) nodalDistgrid = mesh%nodal_distgrid
       if (present(elementDistgrid)) elementDistgrid = mesh%element_distgrid
       if (present(numOwnedNodes)) numOwnedNodes =mesh%numOwnedNodes

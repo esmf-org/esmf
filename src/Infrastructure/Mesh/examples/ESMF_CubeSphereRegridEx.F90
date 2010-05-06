@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubeSphereRegridEx.F90,v 1.7 2010/04/28 23:29:41 peggyli Exp $
+! $Id: ESMF_CubeSphereRegridEx.F90,v 1.8 2010/05/06 21:20:08 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -161,7 +161,8 @@ program ESMF_CubeSphereRegridEx
       if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
       ! check the MeshGet
-      call ESMF_MeshGet(srcMesh, nodeDG, elemDG, totalNodes, totalCells, rc=status)
+      call ESMF_MeshGet(srcMesh, nodalDistgrid=nodeDG, elementDistgrid=elemDG, &
+            numOwnedNodes=totalNodes, numOwnedElements=totalCells, rc=status)
       if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
       ! print *, "PE nodeDG elemDG",PetNo, totalNodes, totalCells

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.39 2010/05/04 16:35:56 rokuingh Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.40 2010/05/06 21:20:08 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.39 2010/05/04 16:35:56 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.40 2010/05/06 21:20:08 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1199,3 +1199,85 @@ extern "C" void FTN(c_esmc_meshfindpnt)(Mesh **meshpp, int *unmappedaction, int 
   // Set return code 
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
+
+extern "C" void FTN(c_esmc_getlocalcoords)(Mesh **meshpp, double *nodeCoord, int *rc) 
+{
+   try {
+    Mesh *meshp = *meshpp;
+    ThrowRequire(meshp);
+    Mesh &mesh = *meshp;
+
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+ int localrc;
+ int rc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+   throw localrc;  // bail out with exception
+    }
+
+
+    // Get some info
+    int sdim=mesh.spatial_dim();
+    int num_nodes = mesh.num_nodes();
+    MEField<> *coords = mesh.GetCoordField();
+    
+    // Make a map between data index and associated node pointer
+    std::vector<std::pair<int,MeshObj *> > index_to_node;
+    index_to_node.reserve(num_nodes);
+
+    // iterate through local nodes collecting indices and node pointers
+    Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+    for (; ni != ne; ++ni) {
+      MeshObj &node = *ni;
+    
+      if (!GetAttr(node).is_locally_owned()) continue;
+
+      int idx = node.get_data_index();
+      index_to_node.push_back(std::make_pair(idx,&node));
+    }
+
+    // Sort by data index
+    std::sort(index_to_node.begin(), index_to_node.end());
+
+    // Load coords in order of index
+    int nodeCoordPos=0;
+    for (UInt i = 0; i < index_to_node.size(); ++i) {
+      MeshObj &node = *(index_to_node[i].second);      
+
+      // Copy coords into output array
+      double *c = coords->data(node);    
+      for (int j=0; j<sdim; j++) {
+	nodeCoord[nodeCoordPos]=c[j];
+	nodeCoordPos++;
+      } 
+    } 
+    
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", rc);
+    return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+} 
+
+

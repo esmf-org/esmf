@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshUTest.F90,v 1.21 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_MeshUTest.F90,v 1.22 2010/05/06 21:20:08 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_MeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshUTest.F90,v 1.21 2010/03/04 18:57:45 svasquez Exp $'
+    '$Id: ESMF_MeshUTest.F90,v 1.22 2010/05/06 21:20:08 oehmke Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -58,6 +58,7 @@ program ESMF_MeshUTest
   logical :: correct
   integer, pointer :: nodeIds(:),nodeOwners(:)
   real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  real(ESMF_KIND_R8), pointer :: ownedNodeCoords(:)
   integer :: numNodes, numOwnedNodes, numOwnedNodesTst
   integer :: numElems,numOwnedElemsTst
   integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
@@ -66,9 +67,10 @@ program ESMF_MeshUTest
   logical :: isMemFreed
   integer :: bufCount, offset
   character, pointer :: buf(:)
-  integer :: i,pntCount
+  integer :: i,j,pntCount
   real(ESMF_KIND_R8), pointer :: pntList(:)
   integer, pointer :: petList(:)
+  integer :: spatialDim, parametricDim
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -398,6 +400,34 @@ program ESMF_MeshUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
+  ! Allocate space for coords
+  allocate(ownedNodeCoords(2*numOwnedNodes))
+
+  ! Test Mesh Get
+  call ESMF_MeshGet(mesh, parametricDim=parametricDim, spatialDim=spatialDim, &
+                   nodalDistgrid=nodeDistgrid, elementDistgrid=elemDistgrid, &
+                   numOwnedNodes=numOwnedNodesTst, ownedNodeCoords=ownedNodeCoords, &
+                   numOwnedElements=numOwnedElemsTst, &
+                   isMemFreed=isMemFreed, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check results
+  if (spatialDim .ne. 2) correct=.false.
+  if (parametricDim .ne. 2) correct=.false.
+  if (numOwnedNodesTst .ne. numOwnedNodes) correct=.false.
+  if (numOwnedElemsTst .ne. numElems) correct=.false. ! all elements are owned
+  if (isMemFreed) correct=.false. ! Hasn't been freed yet
+
+  ! check coords
+  j=1
+  do i=1,numNodes
+     if (nodeOwners(i) .eq. localPet) then
+         if (nodeCoords(2*i-1) .ne. ownedNodeCoords(2*j-1)) correct=.false.    
+         if (nodeCoords(2*i) .ne. ownedNodeCoords(2*j)) correct=.false.    
+         j=j+1
+     endif
+  enddo
+
   ! deallocate node data
   deallocate(nodeIds)
   deallocate(nodeCoords)
@@ -408,16 +438,8 @@ program ESMF_MeshUTest
   deallocate(elemTypes)
   deallocate(elemConn)
 
-  ! Test Mesh Get
-  call ESMF_MeshGet(mesh, nodalDistgrid=nodeDistgrid, elementDistgrid=elemDistgrid, &
-                   numOwnedNodes=numOwnedNodesTst, numOwnedElements=numOwnedElemsTst, &
-                   isMemFreed=isMemFreed, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! check results
-  if (numOwnedNodesTst .ne. numOwnedNodes) correct=.false.
-  if (numOwnedElemsTst .ne. numElems) correct=.false. ! all elements are owned
-  if (isMemFreed) correct=.false. ! Hasn't been freed yet
+  ! deallocate owned node coords
+  deallocate(ownedNodeCoords)
 
   ! Make sure node distgrid is ok
   call ESMF_DistGridValidate(nodeDistgrid, rc=localrc)
@@ -1172,12 +1194,10 @@ endif
                         petList=petList, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-
-  ! output 
-  do i=1,pntCount
-     write(*,*) i," :: ",pntList(2*i-1),pntList(2*i)," >>>> pet=",petList(i)
-  enddo
-
+!  ! output 
+!  do i=1,pntCount
+!     write(*,*) i," :: ",pntList(2*i-1),pntList(2*i)," >>>> pet=",petList(i)
+!  enddo
 
   ! Deallocate
   deallocate(pntList)
