@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshRegridEx.F90,v 1.15 2010/04/26 19:18:44 oehmke Exp $
+! $Id: ESMF_FieldMeshRegridEx.F90,v 1.16 2010/05/06 21:20:57 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_MeshEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.15 2010/04/26 19:18:44 oehmke Exp $'
+    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.16 2010/05/06 21:20:57 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -57,7 +57,7 @@ program ESMF_MeshEx
   real(ESMF_KIND_R8), pointer :: fptr(:,:),fptr2(:,:)
   integer :: clbnd(2),cubnd(2)
   integer :: fclbnd(2),fcubnd(2)
-  integer :: i1,i2,i3, index(2)
+  integer :: i1,i2,i3, index(2), i
   integer :: lDE, localDECount
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
@@ -81,6 +81,8 @@ program ESMF_MeshEx
   integer, pointer :: dstElemIds(:),dstElemTypes(:),dstElemConn(:)
   integer :: dstNumNodes, dstNumElems
   integer :: dstNumQuadElems,dstNumTriElems, dstNumTotElems
+  integer :: spatialDim, numOwnedNodes
+  real(ESMF_KIND_R8), pointer :: ownedNodeCoords(:)
 
 
   ! result code
@@ -618,24 +620,31 @@ program ESMF_MeshEx
   ! Get source Field data pointer to put data into
   call ESMF_FieldGet(srcField, 0, fptr1D,  rc=rc)
 
+  ! Get number of local nodes to allocate space
+  ! to hold local node coordinates
+  call ESMF_MeshGet(srcMesh, &
+         numOwnedNodes=numOwnedNodes, rc=rc)
+
+  ! Allocate space to hold local node coordinates
+  ! (spatial dimension of Mesh*number of local nodes)
+  allocate(ownedNodeCoords(2*numOwnedNodes))
+
+  ! Get local node coordinates
+  call ESMF_MeshGet(srcMesh, &
+         ownedNodeCoords=ownedNodeCoords, rc=rc)
+
   ! Set the source Field to the function 20.0+x+y
-  i2=1
-  do i1=1,srcNumNodes
+  do i=1,numOwnedNodes
+    ! Get coordinates
+    x=ownedNodeCoords(2*i-1)
+    y=ownedNodeCoords(2*i)
 
-     ! Only set data into Field elements which reside on the 
-     ! local PET 
-     if (srcNodeOwners(i1) .eq. localPet) then
-        ! Get coordinates
-        x=srcNodeCoords(2*i1-1)
-        y=srcNodeCoords(2*i1)
-
-        ! Set source function
-        fptr1D(i2) = 20.0+x+y
-
-        ! Advance to next owner
-        i2=i2+1
-     endif
+   ! Set source function
+   fptr1D(i) = 20.0+x+y
   enddo
+
+  ! Deallocate local node coordinates
+  deallocate(ownedNodeCoords)
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
