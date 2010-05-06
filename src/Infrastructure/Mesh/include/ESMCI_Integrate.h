@@ -46,6 +46,9 @@ private:
   bool is_parallel;
 
 };
+
+void AddPoleWeights(Mesh &mesh,  UInt node_id, MEField<> *iwts);
+
 } // namespace
 
 #endif /*ESMC_INTEGRATE_H_*/
