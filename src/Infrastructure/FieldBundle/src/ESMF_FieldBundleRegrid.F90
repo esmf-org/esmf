@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegrid.F90,v 1.1 2010/05/04 23:06:30 feiliu Exp $
+! $Id: ESMF_FieldBundleRegrid.F90,v 1.2 2010/05/06 22:09:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -43,7 +43,10 @@ module ESMF_FieldBundleRegridMod
     use ESMF_FieldBundleSMMMod
     use ESMF_RHandleMod
     use ESMF_RegridMod
+    
     implicit none
+    private
+    
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
 !  <none>
@@ -60,7 +63,7 @@ module ESMF_FieldBundleRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRegrid.F90,v 1.1 2010/05/04 23:06:30 feiliu Exp $'
+      '$Id: ESMF_FieldBundleRegrid.F90,v 1.2 2010/05/06 22:09:30 theurich Exp $'
 
 !------------------------------------------------------------------------------
 contains

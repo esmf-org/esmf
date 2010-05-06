@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.36 2010/04/05 21:36:28 w6ws Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.37 2010/05/06 22:09:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -52,9 +52,10 @@
       use ESMF_MeshMod
 
       implicit none
+      private
+      
 !
 ! !PRIVATE TYPES:
-      private
 
 !------------------------------------------------------------------------------
 !! ESMF_PackFlag   
