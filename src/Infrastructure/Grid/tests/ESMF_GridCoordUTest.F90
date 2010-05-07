@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.42 2010/03/04 18:57:44 svasquez Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.43 2010/05/07 02:49:37 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.42 2010/03/04 18:57:44 svasquez Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.43 2010/05/07 02:49:37 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -48,12 +48,13 @@ program ESMF_GridCoordUTest
 
   logical :: correct
   type(ESMF_TypeKind) :: typekind
-  type(ESMF_Grid) :: grid2D,grid3D
+  type(ESMF_Grid) :: grid2D,grid3D, gridA, gridB
   type(ESMF_VM) :: vm
   type(ESMF_DistGrid) :: distgrid2D, distgrid3D,tmpDistgrid
   type(ESMF_Array) :: array, array2D, array2, array1D
   type(ESMF_ArraySpec) :: arrayspec2D,arrayspec1D
   type(ESMF_StaggerLoc) :: customStagger
+  real(ESMF_KIND_R8), pointer :: fptrX(:,:),fptrY(:,:)
   real(ESMF_KIND_R8), pointer :: fptr(:,:), fptr3D(:,:,:)
   real(kind=ESMF_KIND_R4), parameter :: var=1.0
   integer :: petMap2D(2,2,1)
@@ -102,6 +103,211 @@ program ESMF_GridCoordUTest
   ! set arrayspec
   call ESMF_ArraySpecSet(arrayspec1D, rank=1, typekind=ESMF_TYPEKIND_R8, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test ESMF_GridMatch() on Grids with the same coordinates"
+  write(failMsg, *) "Incorrect result"
+
+  ! init flags
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! Create Grid with globalXCountxglobalYCount cells
+  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/), &
+                                  indexflag=ESMF_INDEX_GLOBAL,         &
+                                  rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get number of local DEs
+  call ESMF_GridGet(gridA, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Allocate Center (e.g. Center) stagger
+  call ESMF_GridAddCoord(gridA, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Loop through DEs and set Centers as the average of the corners
+  do lDE=0,localDECount-1  
+
+     ! get and fill first coord array
+     call ESMF_GridGetCoord(gridA, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                         computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrX, &
+                         rc=localrc)           
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+    ! get and fill second coord array
+    call ESMF_GridGetCoord(gridA, localDE=lDE, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                           fptr=fptrY, rc=localrc)           
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+        fptrX(i1,i2)=REAL(i1,ESMF_KIND_R8)
+        fptrY(i1,i2)=REAL(i2,ESMF_KIND_R8)
+     enddo
+     enddo
+
+  enddo
+
+  ! Create Grid with globalXCountxglobalYCount cells
+  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/), &
+                                  indexflag=ESMF_INDEX_GLOBAL,         &
+                                  rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get number of local DEs
+  call ESMF_GridGet(gridB, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Allocate Center (e.g. Center) stagger
+  call ESMF_GridAddCoord(gridB, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Loop through DEs and set Centers as the average of the corners
+  do lDE=0,localDECount-1  
+
+     ! get and fill first coord array
+     call ESMF_GridGetCoord(gridB, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                         computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrX, &
+                         rc=localrc)           
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+    ! get and fill second coord array
+    call ESMF_GridGetCoord(gridB, localDE=lDE, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                           fptr=fptrY, rc=localrc)           
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+        fptrX(i1,i2)=REAL(i1,ESMF_KIND_R8)
+        fptrY(i1,i2)=REAL(i2,ESMF_KIND_R8)
+     enddo
+     enddo
+
+  enddo
+
+
+  ! Check Grid Match
+  ! (it should pass)
+  if (.not. ESMF_GridMatch(gridA, gridB, rc=localrc)) correct=.false.
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Destroy Test Grids
+  call ESMF_GridDestroy(gridA, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridDestroy(gridB, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test ESMF_GridMatch() on Grids with different coordinates"
+  write(failMsg, *) "Incorrect result"
+
+  ! init flags
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! Create Grid with globalXCountxglobalYCount cells
+  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/), &
+                                  indexflag=ESMF_INDEX_GLOBAL,         &
+                                  rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get number of local DEs
+  call ESMF_GridGet(gridA, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Allocate Center (e.g. Center) stagger
+  call ESMF_GridAddCoord(gridA, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Loop through DEs and set Centers as the average of the corners
+  do lDE=0,localDECount-1  
+
+     ! get and fill first coord array
+     call ESMF_GridGetCoord(gridA, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                         computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrX, &
+                         rc=localrc)           
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+    ! get and fill second coord array
+    call ESMF_GridGetCoord(gridA, localDE=lDE, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                           fptr=fptrY, rc=localrc)           
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+        fptrX(i1,i2)=REAL(i1,ESMF_KIND_R8)
+        fptrY(i1,i2)=REAL(i2,ESMF_KIND_R8)
+     enddo
+     enddo
+
+  enddo
+
+  ! Create Grid with globalXCountxglobalYCount cells
+  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/), &
+                                  indexflag=ESMF_INDEX_GLOBAL,         &
+                                  rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get number of local DEs
+  call ESMF_GridGet(gridB, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Allocate Center (e.g. Center) stagger
+  call ESMF_GridAddCoord(gridB, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Loop through DEs and set Centers as the average of the corners
+  do lDE=0,localDECount-1  
+
+     ! get and fill first coord array
+     call ESMF_GridGetCoord(gridB, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                         computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrX, &
+                         rc=localrc)           
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+    ! get and fill second coord array
+    call ESMF_GridGetCoord(gridB, localDE=lDE, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                           fptr=fptrY, rc=localrc)           
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+        fptrX(i1,i2)=REAL(i1,ESMF_KIND_R8)+1.0 ! Make coordinates for GridB different than GridA
+        fptrY(i1,i2)=REAL(i2,ESMF_KIND_R8)
+     enddo
+     enddo
+
+  enddo
+
+
+  ! Check Grid Match
+  ! (it shouldn't pass)
+  if (ESMF_GridMatch(gridA, gridB, rc=localrc)) correct=.false.
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Destroy Test Grids
+  call ESMF_GridDestroy(gridA, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridDestroy(gridB, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
 #if 1
   !-----------------------------------------------------------------------------

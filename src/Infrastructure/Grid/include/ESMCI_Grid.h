@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.68 2010/05/05 21:26:59 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.69 2010/05/07 02:49:37 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -243,6 +243,13 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 		     InterfaceInt *staggerMemLBoundArg   // (in) optional 
 		     );
 
+template <class TYPE>
+  static bool matchCoordInternal(Grid *grid1,Grid *grid2);
+
+template <class TYPE>
+  static bool matchItemInternal(int staggerloc, int item, Grid *grid1,Grid *grid2);
+
+
  public:
 
   // accessor methods
@@ -286,9 +293,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
   bool isEmptyCoordArray(int staggerloc, int coord) {return (coordArrayList[staggerloc][coord]==ESMC_NULL_POINTER);}
 
-#if 0
-  bool Grid::match(Grid *grid1, Grid *grid2, int *rc);
-#endif
+  static bool match(Grid *grid1, Grid *grid2, int *rc=NULL);
 
   // Use these when DistGrid topology stuff is in place
   // bool isLBnd(int localDE, int dim) {return (isDELBnd[localDE] & (0x1 << dim))?true:false;}

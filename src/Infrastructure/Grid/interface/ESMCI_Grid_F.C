@@ -2330,21 +2330,14 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
 
-    // if null return error
-    if ((ptr1==NULL) || (ptr2==NULL)) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
-          "- both grids must be present for comparison", ESMC_NOT_PRESENT_FILTER(rc));
-        return;
+    // Check if Grids match
+    bool match=ESMCI::Grid::match(*ptr1,*ptr2, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+					  ESMC_NOT_PRESENT_FILTER(rc));  
 
-    }
-
-    // match based on pointers
-    if (*ptr1 == *ptr2) {
-      *matchResult=1;
-    } else {
-      *matchResult=0;
-    }
-   
+    // Return result
+    if (match) *matchResult=1;
+    else *matchResult=0;
    
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;

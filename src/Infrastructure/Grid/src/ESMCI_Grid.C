@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.106 2010/05/05 21:26:59 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.107 2010/05/07 02:49:37 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.106 2010/05/05 21:26:59 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.107 2010/05/07 02:49:37 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -7844,7 +7844,183 @@ GridCellIter::~GridCellIter(
 
 
 
-#if 0
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::matchCoordInternal()"
+//BOPI
+// !IROUTINE:  Grid::matchCoordInternal()"
+//
+// !INTERFACE:
+template <class TYPE>
+bool Grid:: matchCoordInternal(
+//
+// !RETURN VALUE:
+//   void
+//
+// !ARGUMENTS:
+//
+				 Grid *grid1,
+				 Grid *grid2
+                                 ){
+//
+// !DESCRIPTION:
+//  This internal function returns true if all of the coords in grid1 and grid2 match. 
+// NOTE: This function assumes that other items in the grids (e.g. dimCount) match. 
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+  // Check that coordinates match
+  for (int s=0; s<grid1->staggerLocCount; s++) {
+
+    // Make sure that both grids have coordinates
+    // allocated for this staggerloc
+    bool grid1HasCoords=grid1->hasCoordStaggerLoc(s);
+    bool grid2HasCoords=grid2->hasCoordStaggerLoc(s);
+
+    if (grid1HasCoords != grid2HasCoords) {
+      return false;
+    }
+
+    // If no coords, then skip to next staggerloc
+    if (!grid1HasCoords) continue;
+
+    // Get number of DEs on the PET
+    int localDECount=grid1->staggerDistgridList[s]->getDELayout()->getLocalDeCount();
+    
+    // Loop over DEs
+    for (int lDE=0; lDE<localDECount; lDE++) {  
+      int i[ESMF_MAXDIM];
+      int lBnd[ESMF_MAXDIM]={0,0,0,0,0,0,0}; // Initialize loops ranges so that 
+      int uBnd[ESMF_MAXDIM]={0,0,0,0,0,0,0}; // loops outside of dimCount only go once
+      TYPE coord1[ESMF_MAXDIM];
+      TYPE coord2[ESMF_MAXDIM];
+      const int dimCount=grid1->dimCount;
+
+      // Loop through coordinates
+      // Set Bounds of iteration on this proc
+      grid1->getExclusiveUBound(s, lDE, uBnd);  
+      grid1->getExclusiveLBound(s, lDE, lBnd);        
+
+      // Loop through all dimensions although
+      // only valid ones will not be initialized 
+      // to 0,0 (and those won't be used in getCoordInternal call)
+      for (i[6]=lBnd[6]; i[6]<=uBnd[6]; i[6]++) {
+      for (i[5]=lBnd[5]; i[5]<=uBnd[5]; i[5]++) {
+      for (i[4]=lBnd[4]; i[4]<=uBnd[4]; i[4]++) {
+      for (i[3]=lBnd[3]; i[3]<=uBnd[3]; i[3]++) {
+      for (i[2]=lBnd[2]; i[2]<=uBnd[2]; i[2]++) {
+      for (i[1]=lBnd[1]; i[1]<=uBnd[1]; i[1]++) {
+      for (i[0]=lBnd[0]; i[0]<=uBnd[0]; i[0]++) {
+
+	// Get Coordinates for Grid 1
+	grid1->getCoordInternal(s,lDE, i, coord1);
+
+	// Get Coordinates for Grid 2
+	grid2->getCoordInternal(s,lDE, i, coord2);
+
+	// Check if coordinates match
+	for (int d=0; d< dimCount; d++) {
+	  if (coord1[d] != coord2[d]) {
+	    return false;
+	  }
+	}
+
+      } // 0
+      } // 1
+      } // 2
+      } // 3
+      } // 4
+      } // 5
+      } // 6
+    } //lDE
+  } // s
+
+  return true;
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::matchItemInternal()"
+//BOPI
+// !IROUTINE:  Grid::matchItemInternal()"
+//
+// !INTERFACE:
+template <class TYPE>
+bool Grid:: matchItemInternal(
+//
+// !RETURN VALUE:
+//   void
+//
+// !ARGUMENTS:
+//   
+                              int staggerloc,
+			      int item,
+			      Grid *grid1,
+			      Grid *grid2
+			      ){
+  //
+// !DESCRIPTION:
+//  This internal function returns true if all of the elements in item in grid1 and grid2 match. 
+// NOTE: This function assumes that other items in the grids (e.g. dimCount) match. 
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+
+    // Get number of DEs on the PET
+    int localDECount=grid1->staggerDistgridList[staggerloc]->getDELayout()->getLocalDeCount();
+    
+    // Loop over DEs
+    for (int lDE=0; lDE<localDECount; lDE++) {  
+      int i[ESMF_MAXDIM];
+      int lBnd[ESMF_MAXDIM]={0,0,0,0,0,0,0}; // Initialize loops ranges so that 
+      int uBnd[ESMF_MAXDIM]={0,0,0,0,0,0,0}; // loops outside of dimCount only go once
+      TYPE iv1;
+      TYPE iv2;
+      const int dimCount=grid1->dimCount;
+
+      // Loop through coordinates
+      // Set Bounds of iteration on this proc
+      grid1->getExclusiveUBound(staggerloc, lDE, uBnd);  
+      grid1->getExclusiveLBound(staggerloc, lDE, lBnd);        
+
+      // Loop through all dimensions although
+      // only valid ones will not be initialized 
+      // to 0,0 (and those won't be used in getCoordInternal call)
+      for (i[6]=lBnd[6]; i[6]<=uBnd[6]; i[6]++) {
+      for (i[5]=lBnd[5]; i[5]<=uBnd[5]; i[5]++) {
+      for (i[4]=lBnd[4]; i[4]<=uBnd[4]; i[4]++) {
+      for (i[3]=lBnd[3]; i[3]<=uBnd[3]; i[3]++) {
+      for (i[2]=lBnd[2]; i[2]<=uBnd[2]; i[2]++) {
+      for (i[1]=lBnd[1]; i[1]<=uBnd[1]; i[1]++) {
+      for (i[0]=lBnd[0]; i[0]<=uBnd[0]; i[0]++) {
+
+	// Get Item value for Grid 1
+	grid1->getItemInternal(staggerloc,item,lDE, i, &iv1);
+
+	// Get Item value for Grid 2
+	grid2->getItemInternal(staggerloc,item,lDE, i, &iv2);
+
+	// Check if item values match
+	if (iv1 != iv2) {
+	  return false;
+	}
+
+      } // 0
+      } // 1
+      } // 2
+      } // 3
+      } // 4
+      } // 5
+      } // 6
+    } //lDE
+
+  return true;
+}
+
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Grid::match()"
@@ -7910,16 +8086,17 @@ bool Grid::match(
     return false;
   }
 
+
   // Check decomp type
   if (grid1->decompType != grid2->decompType) {
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
-    return false;
+    return false;;
   }
 
   // Check typekind
   if (grid1->typekind != grid2->typekind) {
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
-    return false;
+    return false;;
   }
 
   // Is the following still necessary???
@@ -7927,7 +8104,7 @@ bool Grid::match(
   // Check distDimCount
   if (grid1->distDimCount != grid2->distDimCount) {
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
-    return false;
+    return false;;
   }
 
   // Check distgridToGridMap
@@ -7937,6 +8114,7 @@ bool Grid::match(
       return false;
     }
   }
+
 
   // NOTE: Don't check undistributed bounds because they aren't supported anymore
 
@@ -7987,7 +8165,7 @@ bool Grid::match(
     for (int j=0; j<grid1->dimCount; j++) {
       if (grid1->coordDimMap[i][j] != grid2->coordDimMap[i][j]) {
 	if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
-	return matchResult;
+	return false;
       }
     }
   }
@@ -8003,6 +8181,7 @@ bool Grid::match(
       return false;
     }
 
+
     if (grid1->arbDim != grid2->arbDim) {
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return false;
@@ -8013,7 +8192,7 @@ bool Grid::match(
       for (int j=0; j<grid1->distDimCount; j++) {
 	if (grid1->localArbIndex[i][j] != grid2->localArbIndex[i][j]) {
 	  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
-	  return matchResult;
+	  return false;
 	}
       }
     }
@@ -8026,18 +8205,58 @@ bool Grid::match(
     return false;
   }
 
-  // Don't check arrays right now because we want to support different factorizations
+  // Don't check arrays right now because we might want to support different factorizations
   // Array ***coordArrayList; // size of coordArrayList = staggerLocCountxdimCount [staggerLoc][coord]
 
-  // Should we check this????
-  // int   **staggerMemLBoundList;     // hold memLBound info [staggerloc][dim]
+
+  // Check coordArrayList
+  for (int i=0; i<grid1->staggerLocCount; i++) {
+    for (int j=0; j<grid1->dimCount; j++) {
+      if (grid1->coordArrayList[i][j] != ESMC_NULL_POINTER &&
+	  grid2->coordArrayList[i][j] != ESMC_NULL_POINTER) {
+	bool arraymatch=Array::match(grid1->coordArrayList[i][j], grid2->coordArrayList[i][j],&localrc);
+	if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+			        ESMF_ERR_PASSTHRU, rc)) return false;
+	if (!arraymatch) {
+	  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+	  return false;
+	}
+      }
+    }
+  }
+
+  // Don't check this
+  //  bool  **coordDidIAllocList;        // if true, I allocated this Array [staggerloc][coord]
+
+
+  // Check staggerMemLBoundList
+  for (int i=0; i<grid1->staggerLocCount; i++) {
+    for (int j=0; j<grid1->dimCount; j++) {
+      if (grid1->staggerMemLBoundList[i][j] != grid2->staggerMemLBoundList[i][j]) {
+	if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+	return false;
+      }
+    }
+  }
+
+
+  // Check staggerMemLBoundList
+  for (int i=0; i<grid1->staggerLocCount; i++) {
+    for (int j=0; j<grid1->dimCount; j++) {
+      if (grid1->staggerMemLBoundList[i][j] != grid2->staggerMemLBoundList[i][j]) {
+	if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+	return false;
+      }
+    }
+  }
+
 
   // Check staggerAlignList
   for (int i=0; i<grid1->staggerLocCount; i++) {
     for (int j=0; j<grid1->dimCount; j++) {
       if (grid1->staggerAlignList[i][j] != grid2->staggerAlignList[i][j]) {
 	if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
-	return matchResult;
+	return false;
       }
     }
   }
@@ -8047,7 +8266,7 @@ bool Grid::match(
     for (int j=0; j<grid1->dimCount; j++) {
       if (grid1->staggerEdgeLWidthList[i][j] != grid2->staggerEdgeLWidthList[i][j]) {
 	if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
-	return matchResult;
+	return false;
       }
     }
   }
@@ -8057,23 +8276,73 @@ bool Grid::match(
     for (int j=0; j<grid1->dimCount; j++) {
       if (grid1->staggerEdgeUWidthList[i][j] != grid2->staggerEdgeUWidthList[i][j]) {
 	if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
-	return matchResult;
+	return false;
       }
     }
   }
 
-  // Don't check this
-  //  bool  **coordDidIAllocList;        // if true, I allocated this Array [staggerloc][coord]
+
+  // Check itemArrayList
+  for (int i=0; i<grid1->staggerLocCount; i++) {
+    for (int j=0; j<ESMC_GRIDITEM_COUNT; j++) {
+      if (grid1->itemArrayList[i][j] != ESMC_NULL_POINTER &&
+	  grid2->itemArrayList[i][j] != ESMC_NULL_POINTER) {
+	bool arraymatch=Array::match(grid1->itemArrayList[i][j], grid2->itemArrayList[i][j],&localrc);
+	if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+			        ESMF_ERR_PASSTHRU, rc)) return false;
+	if (!arraymatch) {
+	  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+	  return false;
+	}
+      }
+    }
+  }
 
 
-  // TODO: SHOULD I CHECK THIS???
-  // Array ***itemArrayList; // holds item Arrays [staggerloc][GRIDITEM_COUNT]
+  // Check if item data matches
+  for (int i=0; i<grid1->staggerLocCount; i++) {
+    for (int j=0; j<ESMC_GRIDITEM_COUNT; j++) {
+      if (grid1->itemArrayList[i][j] != ESMC_NULL_POINTER &&
+	  grid2->itemArrayList[i][j] != ESMC_NULL_POINTER) {
+	if (grid1->itemArrayList[i][j]->getTypekind() != 
+            grid2->itemArrayList[i][j]->getTypekind()) {
+	  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+	  return false;
+	}
+
+	// Check coordinates
+	bool itemMatch=false;
+	switch(grid1->itemArrayList[i][j]->getTypekind()) {
+	case ESMC_TYPEKIND_R4:
+	  itemMatch=matchItemInternal<ESMC_R4>(i,j,grid1,grid2);
+	  break;
+	case ESMC_TYPEKIND_R8:
+	  itemMatch=matchItemInternal<ESMC_R8>(i,j,grid1,grid2);
+	  break;
+	case ESMC_TYPEKIND_I4:
+	  itemMatch=matchItemInternal<ESMC_I4>(i,j,grid1,grid2);
+	  break;
+	default:
+	  ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+	    "- Grid doesn't currently support this data type", rc);
+	  return false;
+	}
+	
+	// return coord match result
+	if (!itemMatch) {
+	  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+	  return false;
+	}
+	
+      }
+    }
+  }
 
   // Don't check this:
   // bool   **itemDidIAllocList; // holds item Arrays [staggerloc][GRIDITEM_COUNT]
 
 
-  // Don't check the below if we want to make match factorization agnostic
+  // These are implied by the coordDimMap and coordDimCount
 #if 0 
   // map grid dim to distgrid dim and grid bounds dim
   bool *gridIsDist;  // size=dimCount [grid-dim]
@@ -8111,18 +8380,50 @@ bool Grid::match(
     return false;
   }
 
-  // STOPPED HERE
 
-  DistGrid **staggerDistgridList; // [staggerloc]
+  // Check stagger distgrids
+  for (int i=0; i<grid1->staggerLocCount; i++) {
+    if (grid1->staggerDistgridList[i] != ESMC_NULL_POINTER &&
+	grid2->staggerDistgridList[i] != ESMC_NULL_POINTER) {
+      if (!DistGrid::match(grid1->staggerDistgridList[i], grid2->staggerDistgridList[i])) {
+	if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+	return false;
+      }
+    }
+  }
 
+
+  // Check coordinates
+  bool coordMatch=false;
+  switch(grid1->typekind) {
+  case ESMC_TYPEKIND_R4:
+    coordMatch=matchCoordInternal<ESMC_R4>(grid1,grid2);
+    break;
+  case ESMC_TYPEKIND_R8:
+    coordMatch=matchCoordInternal<ESMC_R8>(grid1,grid2);
+    break;
+  case ESMC_TYPEKIND_I4:
+    coordMatch=matchCoordInternal<ESMC_I4>(grid1,grid2);
+    break;
+  default:
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+     "- Grid doesn't currently support this data type", rc);
+    return false;
+  }
+  
+
+  // return coord match result
+  if (!coordMatch) {
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return false;
+  }
 
   // return successfully indicating match
-  matchResult = true;
   if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
-  return matchResult;
+  return true;
 }
 //-----------------------------------------------------------------------------
-#endif
+
 
 
 
