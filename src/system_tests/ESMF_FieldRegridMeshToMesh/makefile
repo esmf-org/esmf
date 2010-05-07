@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2010/05/06 21:56:13 oehmke Exp $ 
+# $Id: makefile,v 1.2 2010/05/07 04:28:48 oehmke Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -31,4 +31,4 @@ CLOBBERDIRS =
 
 
 RUN_FieldRegridMeshToMesh:
-	$(MAKE) TNAME=FieldRegridMesh NP=4 stest
+	$(MAKE) TNAME=FieldRegridMeshToMesh NP=4 stest

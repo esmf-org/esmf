@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMeshToMeshSTest.F90,v 1.1 2010/05/06 21:56:13 oehmke Exp $
+! $Id: ESMF_FieldRegridMeshToMeshSTest.F90,v 1.2 2010/05/07 04:28:48 oehmke Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -20,8 +20,8 @@
 !
 !\begin{verbatim}
 
-    program ESMF_FieldRegridMeshSTest
-#define ESMF_METHOD "program ESMF_FieldRegridMeshSTest"
+    program ESMF_FieldRegridMeshToMeshSTest
+#define ESMF_METHOD "program ESMF_FieldRegridMeshToMeshSTest"
 
 #include "ESMF.h"
 
@@ -343,12 +343,12 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10  print *, "System Test FieldMeshRegrid complete."
+10  print *, "System Test FieldRegridMeshToMesh complete."
 
 
     ! Normal ESMF Test output
     write(failMsg, *) "System Test failure"
-    write(testname, *) "System Test FieldMeshRegrid: Field Regrid"
+    write(testname, *) "System Test FieldRegridMeshToMesh: Field Regrid"
 
     if (rc .ne. ESMF_SUCCESS) then
       ! Separate message to console, for quick confirmation of success/failure
@@ -371,7 +371,7 @@
   
     call ESMF_Finalize(rc=rc) 
 
-    end program ESMF_FieldRegridMeshSTest
+    end program ESMF_FieldRegridMeshToMeshSTest
     
 !\end{verbatim}
     
