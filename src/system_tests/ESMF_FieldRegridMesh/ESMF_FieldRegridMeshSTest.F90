@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMeshSTest.F90,v 1.2 2010/04/22 15:48:29 rokuingh Exp $
+! $Id: ESMF_FieldRegridMeshSTest.F90,v 1.3 2010/05/07 05:34:27 oehmke Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -67,7 +67,7 @@
 !-------------------------------------------------------------------------
 
     print *, "-------------------------------- "
-    print *, "Start of System Test FieldMeshRegrid:"
+    print *, "Start of System Test FieldRegridMesh:"
     print *, "-------------------------------- "
 
 !-------------------------------------------------------------------------
