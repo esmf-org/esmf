@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.3 2010/05/07 12:42:30 theurich Exp $
+! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.4 2010/05/07 17:21:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -43,6 +43,8 @@
 
     ! individual test result code
     integer :: rc = 1
+    logical :: itrp = .false.
+    logical :: csrv = .false.
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -51,20 +53,34 @@
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
  
 #ifdef ESMF_TESTEXHAUSTIVE
+      ! do test
+      call test_csrvregrid(itrp, csrv, rc)
+
       !------------------------------------------------------------------------
-      !EXdisable_UTest
-      ! Test conservative regrid from 0 to 360 sphere to a -180 to 180 sphere
-      write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Conservative regrid between two spherical grids"
+      !EX_UTest
+      ! Test conservative regridding interpolation
+      write(failMsg, *) "Interpolation maximum error is greater than 10^-1"
+      write(name, *) "Conservative regridding interpolation error"
 
       ! initialize 
       rc=ESMF_SUCCESS
       
-      ! do test
-      call test_csrvregrid(rc)
-
       ! return result
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((itrp.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
+                      failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test conservative regridding conservation
+      write(failMsg, *) "Conservation relative error is greater than 10^-5"
+      write(name, *) "Conservative regridding conservation error"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+      
+      ! return result
+      call ESMF_Test((csrv.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
+                      failMsg, result, ESMF_SRCLINE)
 
 #endif
     call ESMF_TestEnd(result, ESMF_SRCLINE)
@@ -72,9 +88,10 @@
 contains 
 #define ESMF_METHOD "test_csrvregrid"
 
-      subroutine test_csrvregrid(rc)
+      subroutine test_csrvregrid(itrp, csrv, rc)
+        logical, intent(out)  :: itrp
+        logical, intent(out)  :: csrv
         integer, intent(out)  :: rc
-  logical :: correct
   integer :: localrc
   type(ESMF_Grid) :: grid360
   type(ESMF_Grid) :: grid180
@@ -115,7 +132,6 @@ contains
   real(ESMF_KIND_R8) :: srcmass(1), dstmass(1), srcmassg(1), dstmassg(1)
   real(ESMF_KIND_R8) :: maxerror(1), minerror(1), error
   real(ESMF_KIND_R8) :: maxerrorg(1), minerrorg(1), errorg
-  integer, parameter :: root = 0
 
   integer :: spherical_grid
 
@@ -126,7 +142,6 @@ contains
   integer :: finalrc
   
   ! init success flag
-  correct=.true.
   rc=ESMF_SUCCESS
 
   ! get pet info
@@ -141,8 +156,8 @@ contains
             ESMF_CONTEXT, rc)) return
 
   ! Establish the resolution of the grids
-  src_nx = 111
-  src_ny = 66
+  src_nx = 180
+  src_ny = 100
 
   dst_nx = 90
   dst_ny = 50
@@ -519,16 +534,12 @@ contains
              minerror(1) = errorfptr(i1,i2)
            endif
         endif
-        if (ABS(errorfptr(i1,i2)) .gt. 0.01) then
-            correct=.false. 
-        endif
         dstmass = dstmass + dstiwtsptr(i1,i2)
      enddo
      enddo
 
   enddo    ! lDE
 
-#if 0
   srcmass(1) = 0.
   do lDE=0,localDECount-1
 
@@ -558,29 +569,36 @@ contains
   srcmassg(1) = 0.
   dstmassg(1) = 0.
   
-  call ESMF_VMReduce(vm, srcmass, srcmassg, 1, ESMF_SUM, root, rc=localrc)
+  call ESMF_VMAllReduce(vm, srcmass, srcmassg, 1, ESMF_SUM, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
-  call ESMF_VMReduce(vm, dstmass, dstmassg, 1, ESMF_SUM, root, rc=localrc)
+  call ESMF_VMAllReduce(vm, dstmass, dstmassg, 1, ESMF_SUM, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
-  call ESMF_VMReduce(vm, maxerror, maxerrorg, 1, ESMF_MAX, root, rc=localrc)
+  call ESMF_VMAllReduce(vm, maxerror, maxerrorg, 1, ESMF_MAX, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
-  call ESMF_VMReduce(vm, minerror, minerrorg, 1, ESMF_MIN, root, rc=localrc)
+  call ESMF_VMAllReduce(vm, minerror, minerrorg, 1, ESMF_MIN, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
+
+  ! return answer based on correct flags
+  itrp = .false.
+  if (ABS(dstmassg(1)-srcmassg(1))/srcmassg(1) < 10E-5) itrp = .true.
+
+  csrv = .false.
+  if (maxerrorg(1) < 10E-1) csrv = .true.
 
   ! Uncomment these calls to see some actual regrid results
   if (localPet == 0) then
@@ -606,7 +624,6 @@ contains
   call ESMF_MeshIO(vm, grid180, ESMF_STAGGERLOC_CENTER, &
                "dstmesh", array180, xarray180, errorArray, dstiwtsarray, rc=localrc, &
                spherical=spherical_grid)
-#endif
 
   ! Destroy the Fields
    call ESMF_FieldDestroy(srcField360, rc=localrc)
@@ -645,13 +662,6 @@ contains
       rc=ESMF_FAILURE
       return
    endif
-
-  ! return answer based on correct flag
-  if (correct) then
-    rc=ESMF_SUCCESS
-  else
-    rc=ESMF_FAILURE
-  endif
 
       end subroutine test_csrvregrid
 
