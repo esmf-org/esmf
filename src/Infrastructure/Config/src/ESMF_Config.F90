@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.61 2010/03/04 18:57:42 svasquez Exp $
+! $Id: ESMF_Config.F90,v 1.62 2010/05/07 22:47:55 w6ws Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -37,6 +37,7 @@
       use ESMF_UtilMod
       use ESMF_BaseMod
       use ESMF_DELayoutMod
+      use ESMF_IOUtilMod
       use ESMF_LogErrMod 
       use ESMF_InitMacrosMod
 
@@ -2156,7 +2157,7 @@
 
 !     Open file
 !     ---------     
-      call ESMF_IOUnitGet (lu, localrc)
+      call ESMF_IOUnitGet (lu, rc=localrc)
       if ( localrc /= ESMF_SUCCESS ) then
          localrc = -97
          if ( present (rc )) then
