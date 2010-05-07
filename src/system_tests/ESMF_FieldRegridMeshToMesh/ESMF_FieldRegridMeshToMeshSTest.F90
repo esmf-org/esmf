@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMeshToMeshSTest.F90,v 1.2 2010/05/07 04:28:48 oehmke Exp $
+! $Id: ESMF_FieldRegridMeshToMeshSTest.F90,v 1.3 2010/05/07 05:15:30 oehmke Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -74,7 +74,7 @@
 !-------------------------------------------------------------------------
 !
     ! Initialize framework and get back default global VM
-    call ESMF_Initialize(vm=vm, defaultlogfilename="FieldRegridMeshSTest.Log", &
+    call ESMF_Initialize(vm=vm, defaultlogfilename="FieldRegridMeshToMeshSTest.Log", &
                         defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
