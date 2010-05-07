@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.14 2010/05/07 17:19:44 rokuingh Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.15 2010/05/07 19:28:16 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.14 2010/05/07 17:19:44 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.15 2010/05/07 19:28:16 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -98,11 +98,12 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
         MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
       dstmeshcpy.Commit();
       Integrate dig(dstmeshcpy);
-      dig.intWeights(dst_iwtscpy);
+      dig.clearWeights(dst_iwtscpy);
       if (regridScheme == ESMC_REGRID_SCHEME_FULL3D) {
         for (UInt i = 1; i <= 7; ++i)
           dig.AddPoleWeights(dstmeshcpy,i,dst_iwtscpy);
       }
+      dig.intWeights(dst_iwtscpy);
 
       // Commit the meshes
       srcmesh.Commit();
@@ -238,8 +239,10 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
     // they are distributed across non-pole nodes
     // (the node is factored out in the end)
     Integrate sig(srcmesh), dig(dstmesh);
-    sig.intWeights(src_iwts);
-    dig.intWeights(dst_iwts);
+
+    // Clear weights
+    sig.clearWeights(src_iwts);
+    dig.clearWeights(dst_iwts);
 
     // Add weights to meshes before poles
     // so all the weights are on user data points
@@ -249,6 +252,13 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
        	  dig.AddPoleWeights(dstmesh,i,dst_iwts);
         }
     }
+
+    // Add in other none-pole weights
+    // (and do cross processor sum)
+    sig.intWeights(src_iwts);
+    dig.intWeights(dst_iwts);
+
+
 
 #if 0
   // print out info of the iwts
@@ -442,7 +452,9 @@ double badrowid = 0;
 
     // generate integration weights
     Integrate ig(mesh);
-    ig.intWeights(iwts);
+
+    // Clear weights
+    ig.clearWeights(iwts);
 
     // Add weights to meshes before poles
     // so all the weights are on user data points
@@ -450,6 +462,11 @@ double badrowid = 0;
         for (UInt i = 1; i <= 7; ++i)
           ig.AddPoleWeights(mesh,i,iwts);
     }
+
+
+    // Add in other none-pole weights
+    // (and do cross processor sum)
+    ig.intWeights(iwts);
 
     return 1;
   }

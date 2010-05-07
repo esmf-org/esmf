@@ -38,6 +38,8 @@ public:
   // Add weights to meshes before poles so they are on user data points
   void AddPoleWeights(Mesh &, UInt, MEField<> *);
 
+  void clearWeights(MEField<> *iwts);
+
 private:
 
   // integration weights parallel?

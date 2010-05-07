@@ -1,4 +1,4 @@
-// $Id: ESMCI_Integrate.C,v 1.5 2010/05/06 19:02:55 rokuingh Exp $
+// $Id: ESMCI_Integrate.C,v 1.6 2010/05/07 19:28:16 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Integrate.C,v 1.5 2010/05/06 19:02:55 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Integrate.C,v 1.6 2010/05/07 19:28:16 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -53,6 +53,20 @@ void Integrate::intWeights(MEField<> *iwts) {
 
 }
 
+ void Integrate::clearWeights(MEField<> *iwts) {
+    Trace __trace("int_weights_serial()");
+    
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+// Initialize integration weights
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+  Mesh::iterator ni =mesh.node_begin(), ne = mesh.node_end();
+  for (; ni != ne; ++ni) {
+    double *data = iwts->data(*ni);
+    *data = 0;
+  }
+ }
+
+
   // Calculate weights based on great circle areas
   void weights_great_circle_same(int n, double *pnts, double *weights);
   
@@ -60,19 +74,11 @@ void Integrate::intWeights(MEField<> *iwts) {
     Trace __trace("int_weights_serial()");
     
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-// Initialize integration weights
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-  Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
-  for (; ni != ne; ++ni) {
-    double *data = iwts->data(*ni);
-    *data = 0;
-  }
-
-  MEField<> *cfield = mesh.GetCoordField();
-
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 // Generating integration weights
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+  // Get coord field
+  MEField<> *cfield = mesh.GetCoordField();
+
   // If we're on a sphere then calculate using spherical metric 
   // based on great circle areas
   if ((mesh.spatial_dim() == 3) && (mesh.parametric_dim() == 2)) { 
@@ -146,15 +152,6 @@ void Integrate::intWeights(MEField<> *iwts) {
 
 void Integrate::int_weights_parallel(MEField<> *iwts) {
   Trace __trace("int_weights_parallel()");
-
-  /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-  // Initialize integration weights
-  /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-  Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
-  for (; ni != ne; ++ni) {
-    double *data = iwts->data(*ni);
-    *data = 0;
-  }
 
   int id;
   MPI_Comm_rank(MPI_COMM_WORLD, &id);
@@ -314,7 +311,7 @@ void weights_great_circle_same(int n, double *pnts, double *weights) {
       Kernel &ker = *ki;
 
 
-      if (ker.type() == MeshObj::NODE && ker.key() == node_id) {
+      if (ker.type() == MeshObj::NODE && ker.key() == node_id && ker.is_owned()) {
 
         Kernel::obj_iterator oi = ker.obj_begin(), oe = ker.obj_end();
       
@@ -347,6 +344,7 @@ void weights_great_circle_same(int n, double *pnts, double *weights) {
   // Figure out global number of nodes, if none then leave
   int local_num_nodes = nodes.size();
   int num_nodes=0;
+
 
   MPI_Allreduce(&local_num_nodes, &num_nodes, 1, MPI_INT, MPI_SUM, Par::Comm());
   if (num_nodes == 0) return; // No nodes so exit
