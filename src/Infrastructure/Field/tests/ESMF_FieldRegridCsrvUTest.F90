@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.2 2010/05/06 19:02:55 rokuingh Exp $
+! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.3 2010/05/07 12:42:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -30,8 +30,6 @@
     use ESMF_TestMod     ! test methods
     use ESMF_Mod
     use ESMF_GridUtilMod
-
-    use MPI
 
     implicit none
 
@@ -72,7 +70,7 @@
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
 contains 
-#define ESMF_METHOD "ESMF_TESTS"
+#define ESMF_METHOD "test_csrvregrid"
 
       subroutine test_csrvregrid(rc)
         integer, intent(out)  :: rc
@@ -114,9 +112,9 @@ contains
   real(ESMF_KIND_R8) :: theta, d2rad, x, y, z
   real(ESMF_KIND_R8) :: DEG2RAD, a, lat, lon, phi
   real(ESMF_KIND_R8) :: xtmp, ytmp, ztmp
-  real(ESMF_KIND_R8) :: srcmass, dstmass, srcmassg, dstmassg
-  real(ESMF_KIND_R8) :: maxerror, minerror, error
-  real(ESMF_KIND_R8) :: maxerrorg, minerrorg, errorg
+  real(ESMF_KIND_R8) :: srcmass(1), dstmass(1), srcmassg(1), dstmassg(1)
+  real(ESMF_KIND_R8) :: maxerror(1), minerror(1), error
+  real(ESMF_KIND_R8) :: maxerrorg(1), minerrorg(1), errorg
   integer, parameter :: root = 0
 
   integer :: spherical_grid
@@ -493,8 +491,8 @@ contains
         return
      endif
 
-     minerror = 100000.
-     maxerror = 0.
+     minerror(1) = 100000.
+     maxerror(1) = 0.
      error = 0.
      dstmass = 0.
  
@@ -505,20 +503,20 @@ contains
         if (xfptr(i1,i2) .ne. 0.0) then
            errorfptr(i1,i2)=ABS(fptr(i1,i2) - xfptr(i1,i2))/ABS(fptr(i1,i2))
            error = error + errorfptr(i1,i2)
-           if (errorfptr(i1,i2) > maxerror) then
-             maxerror = errorfptr(i1,i2)
+           if (errorfptr(i1,i2) > maxerror(1)) then
+             maxerror(1) = errorfptr(i1,i2)
            endif
-           if (errorfptr(i1,i2) < minerror) then
-             minerror = errorfptr(i1,i2)
+           if (errorfptr(i1,i2) < minerror(1)) then
+             minerror(1) = errorfptr(i1,i2)
            endif
         else
            errorfptr(i1,i2)=ABS(fptr(i1,i2) - xfptr(i1,i2))
            error = error + errorfptr(i1,i2)
-           if (errorfptr(i1,i2) > maxerror) then
-             maxerror = errorfptr(i1,i2)
+           if (errorfptr(i1,i2) > maxerror(1)) then
+             maxerror(1) = errorfptr(i1,i2)
            endif
-           if (errorfptr(i1,i2) < minerror) then
-             minerror = errorfptr(i1,i2)
+           if (errorfptr(i1,i2) < minerror(1)) then
+             minerror(1) = errorfptr(i1,i2)
            endif
         endif
         if (ABS(errorfptr(i1,i2)) .gt. 0.01) then
@@ -531,7 +529,7 @@ contains
   enddo    ! lDE
 
 #if 0
-  srcmass = 0.
+  srcmass(1) = 0.
   do lDE=0,localDECount-1
 
      ! get src pointer
@@ -551,37 +549,34 @@ contains
 
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        srcmass = srcmass + srciwtsptr(i1,i2)
+        srcmass(1) = srcmass(1) + srciwtsptr(i1,i2)
      enddo
      enddo
 
   enddo    ! lDE
 
-  srcmassg = 0.
-  dstmassg = 0.
-  call MPI_Reduce(srcmass, srcmassg, 1, MPI_DOUBLE_PRECISION, MPI_SUM, root, &
-                  MPI_COMM_WORLD, localrc)
+  srcmassg(1) = 0.
+  dstmassg(1) = 0.
+  
+  call ESMF_VMReduce(vm, srcmass, srcmassg, 1, ESMF_SUM, root, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
-  call MPI_Reduce(dstmass, dstmassg, 1, MPI_DOUBLE_PRECISION, MPI_SUM, root, &
-                  MPI_COMM_WORLD, localrc)
+  call ESMF_VMReduce(vm, dstmass, dstmassg, 1, ESMF_SUM, root, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
-  call MPI_Reduce(maxerror, maxerrorg, 1, MPI_DOUBLE_PRECISION, MPI_MAX, root, &
-                  MPI_COMM_WORLD, localrc)
+  call ESMF_VMReduce(vm, maxerror, maxerrorg, 1, ESMF_MAX, root, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
-  call MPI_Reduce(minerror, minerrorg, 1, MPI_DOUBLE_PRECISION, MPI_MIN, root, &
-                  MPI_COMM_WORLD, localrc)
+  call ESMF_VMReduce(vm, minerror, minerrorg, 1, ESMF_MIN, root, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -592,14 +587,14 @@ contains
 
     write(*,*) " "
     write(*,*) "Conservation:"
-    write(*,*) "Rel Error = ", ABS(dstmassg-srcmassg)/srcmassg
-    write(*,*) "SRC mass = ", srcmassg
-    write(*,*) "DST mass = ", dstmassg
+    write(*,*) "Rel Error = ", ABS(dstmassg(1)-srcmassg(1))/srcmassg(1)
+    write(*,*) "SRC mass = ", srcmassg(1)
+    write(*,*) "DST mass = ", dstmassg(1)
     write(*,*) " "
     write(*,*) "Interpolation:"
-    write(*,*) "Max Error = ", maxerrorg
-    write(*,*) "Min Error = ", minerrorg
-    write(*,*) "Avg Error = ", (maxerrorg + minerrorg)/2
+    write(*,*) "Max Error = ", maxerrorg(1)
+    write(*,*) "Min Error = ", minerrorg(1)
+    write(*,*) "Avg Error = ", (maxerrorg(1) + minerrorg(1))/2
     write(*,*) " "
 
   endif
