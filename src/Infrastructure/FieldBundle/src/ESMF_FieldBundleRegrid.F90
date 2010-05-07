@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegrid.F90,v 1.2 2010/05/06 22:09:30 theurich Exp $
+! $Id: ESMF_FieldBundleRegrid.F90,v 1.3 2010/05/07 17:06:59 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,7 +46,6 @@ module ESMF_FieldBundleRegridMod
     
     implicit none
     private
-    
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
 !  <none>
@@ -63,7 +62,7 @@ module ESMF_FieldBundleRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRegrid.F90,v 1.2 2010/05/06 22:09:30 theurich Exp $'
+      '$Id: ESMF_FieldBundleRegrid.F90,v 1.3 2010/05/07 17:06:59 feiliu Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -210,12 +209,14 @@ contains
 ! !IROUTINE: ESMF_FieldBundleRegridStore - Precompute an FieldBundle Regrid operation
 !
 ! !INTERFACE:
-    subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, regridMethod, routehandle, rc)
+    subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, regridMethod, &
+        regridScheme, routehandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle), intent(inout)                :: srcFieldBundle
     type(ESMF_FieldBundle), intent(inout)                :: dstFieldBundle
     type(ESMF_RegridMethod), intent(in), optional        :: regridMethod
+    integer, intent(in), optional                        :: regridScheme
     type(ESMF_RouteHandle), intent(inout)                :: routehandle
     integer,                intent(out),        optional :: rc
 !
@@ -304,7 +305,8 @@ contains
           
           ! precompute regrid operation for this Field pair
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
-            routehandle=rh, regridMethod=regridMethod, rc=localrc)
+            routehandle=rh, regridMethod=regridMethod, regridScheme=regridScheme, &
+            rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
           
