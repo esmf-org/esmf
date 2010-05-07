@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.5 2010/05/07 20:04:41 rokuingh Exp $
+! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.6 2010/05/07 21:39:44 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -595,7 +595,7 @@ contains
 
   ! return answer based on correct flags
   itrp = .false.
-  if (ABS(dstmassg(1)-srcmassg(1))/srcmassg(1) < 10E-10) itrp = .true.
+  if (ABS(dstmassg(1)-srcmassg(1))/srcmassg(1) < 10E-7) itrp = .true.
 
   csrv = .false.
   if (maxerrorg(1) < 10E-1) csrv = .true.
