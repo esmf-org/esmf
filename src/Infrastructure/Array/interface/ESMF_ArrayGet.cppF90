@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.44 2010/03/04 18:57:41 svasquez Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.45 2010/05/07 22:45:15 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -53,6 +53,7 @@ module ESMF_ArrayGetMod
   use ESMF_ArrayCreateMod   ! contains the ESMF_Array derived type definition
 
   implicit none
+  private
 
 !------------------------------------------------------------------------------
 !
@@ -68,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.44 2010/03/04 18:57:41 svasquez Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.45 2010/05/07 22:45:15 w6ws Exp $'
 
 !==============================================================================
 ! 

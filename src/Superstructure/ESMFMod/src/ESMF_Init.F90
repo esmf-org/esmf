@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.59 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_Init.F90,v 1.60 2010/05/07 22:51:14 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -49,7 +49,7 @@
       use ESMF_CalendarMod
 
       implicit none
-
+      private
 
 !------------------------------------------------------------------------------
 !     ! Main program source

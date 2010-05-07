@@ -1,4 +1,4 @@
-! $Id: ESMF_Overloads.F90,v 1.16 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_Overloads.F90,v 1.17 2010/05/07 22:51:14 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -42,6 +42,7 @@
       use ESMF_BaseMod    ! ESMF base class
       use ESMF_FieldMod 
       implicit none
+      private
 
 !! COMMENTED OUT FOR NOW.
 #if 0
@@ -71,7 +72,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Overloads.F90,v 1.16 2010/03/04 18:57:45 svasquez Exp $'
+      '$Id: ESMF_Overloads.F90,v 1.17 2010/05/07 22:51:14 w6ws Exp $'
 
 !==============================================================================
 !
