@@ -1,4 +1,4 @@
-! $Id: ESMF_InitMacros.F90,v 1.15 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_InitMacros.F90,v 1.16 2010/05/07 22:40:30 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -30,8 +30,11 @@
     use ESMF_LogErrMod
     use ESMF_UtilTypesMod
 
+    implicit none
+    private
+
 ! !PUBLIC MEMBER FUNCTIONS:
-   public ESMF_IMErr
+    public ESMF_IMErr
 
 
 contains

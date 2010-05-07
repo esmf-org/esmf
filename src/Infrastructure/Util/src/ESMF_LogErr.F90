@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.58 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_LogErr.F90,v 1.59 2010/05/07 22:40:30 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -52,6 +52,7 @@
  !!                         in this module are shallow - Bob 1/9/2007.
 
 implicit none
+private
 
 integer, parameter :: MAX_FNAME_LEN = 64
 !
@@ -157,6 +158,8 @@ end type ESMF_LogPrivate
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
+    public ESMF_LogType
+
     public ESMF_LOG_INFO
     public ESMF_LOG_WARNING
     public ESMF_LOG_ERROR
@@ -1664,7 +1667,7 @@ end subroutine ESMF_LogMsgSetError
     endif
 
     ! find an available unit number
-    call ESMF_IOUnitGet (alog%unitNumber, status)
+    call ESMF_IOUnitGet (alog%unitNumber, rc=status)
     if (status /= 0) then
         if (present(rc)) then
             rc=ESMF_FAILURE
