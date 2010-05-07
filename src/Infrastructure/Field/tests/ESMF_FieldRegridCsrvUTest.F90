@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.4 2010/05/07 17:21:54 rokuingh Exp $
+! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.5 2010/05/07 20:04:41 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -93,26 +93,26 @@ contains
         logical, intent(out)  :: csrv
         integer, intent(out)  :: rc
   integer :: localrc
-  type(ESMF_Grid) :: grid360
-  type(ESMF_Grid) :: grid180
-  type(ESMF_Field) :: srcField360
-  type(ESMF_Field) :: field180
-  type(ESMF_Field) :: xfield180
+  type(ESMF_Grid) :: grid1
+  type(ESMF_Grid) :: grid2
+  type(ESMF_Field) :: srcField
+  type(ESMF_Field) :: dstField
+  type(ESMF_Field) :: xdstField
   type(ESMF_Field) :: errorField
-  type(ESMF_Field) :: srciwts, dstiwts
-  type(ESMF_Array) :: array180
-  type(ESMF_Array) :: xarray180
+  type(ESMF_Field) :: srcIwts, dstIwts
+  type(ESMF_Array) :: dstArray
+  type(ESMF_Array) :: xdstArray
   type(ESMF_Array) :: errorArray
-  type(ESMF_Array) :: lonArray360
-  type(ESMF_Array) :: srcArray360
-  type(ESMF_Array) :: srciwtsArray, dstiwtsArray
+  type(ESMF_Array) :: lonArray
+  type(ESMF_Array) :: srcArray
+  type(ESMF_Array) :: srcIwtsArray, dstIwtsArray
   type(ESMF_RouteHandle) :: routeHandle
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_VM) :: vm
   real(ESMF_KIND_R8), pointer :: fptrXC(:,:)
   real(ESMF_KIND_R8), pointer :: fptrYC(:,:)
   real(ESMF_KIND_R8), pointer :: fptr(:,:),xfptr(:,:),errorfptr(:,:),iwtsptr(:,:)
-  real(ESMF_KIND_R8), pointer :: srciwtsptr(:,:), dstiwtsptr(:,:)
+  real(ESMF_KIND_R8), pointer :: srcIwtsptr(:,:), dstIwtsptr(:,:)
   integer :: petMap2D(2,2,1)
   integer :: clbnd(2),cubnd(2)
   integer :: fclbnd(2),fcubnd(2)
@@ -163,7 +163,7 @@ contains
   dst_ny = 50
 
   ! setup source grid
-  grid360=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
+  grid1=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -172,7 +172,7 @@ contains
   endif
 
   ! setup dest. grid
-  grid180=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/1,petCount/), &
+  grid2=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/1,petCount/), &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -183,42 +183,42 @@ contains
   ! Create source/destination fields
   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
 
-   srcField360 = ESMF_FieldCreate(grid360, arrayspec, &
+   srcField = ESMF_FieldCreate(grid1, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
-   srciwts = ESMF_FieldCreate(grid360, arrayspec, &
+   srcIwts = ESMF_FieldCreate(grid1, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
-   errorField = ESMF_FieldCreate(grid180, arrayspec, &
+   errorField = ESMF_FieldCreate(grid2, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
-   field180 = ESMF_FieldCreate(grid180, arrayspec, &
+   dstField = ESMF_FieldCreate(grid2, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
-   xfield180 = ESMF_FieldCreate(grid180, arrayspec, &
+   xdstField = ESMF_FieldCreate(grid2, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
-   dstiwts = ESMF_FieldCreate(grid180, arrayspec, &
+   dstIwts = ESMF_FieldCreate(grid2, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -226,42 +226,42 @@ contains
   endif
 
   ! Allocate coordinates
-  call ESMF_GridAddCoord(grid360, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  call ESMF_GridAddCoord(grid1, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
-  call ESMF_GridAddCoord(grid180, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  call ESMF_GridAddCoord(grid2, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
   ! Get number of local DEs
-  call ESMF_GridGet(grid360, localDECount=localDECount, rc=localrc)
+  call ESMF_GridGet(grid1, localDECount=localDECount, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
   ! Get arrays
-  ! array180
-  call ESMF_FieldGet(field180, array=array180, rc=localrc)
+  ! dstArray
+  call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
-  ! srcArray360
-  call ESMF_FieldGet(srcField360, array=srcArray360, rc=localrc)
+  ! srcArray
+  call ESMF_FieldGet(srcField, array=srcArray, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
-  ! xarray180
-  call ESMF_FieldGet(xfield180, array=xarray180, rc=localrc)
+  ! xdstArray
+  call ESMF_FieldGet(xdstField, array=xdstArray, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -275,22 +275,22 @@ contains
   endif
 
   ! errorArray
-  call ESMF_FieldGet(srciwts, array=srciwtsArray, rc=localrc)
+  call ESMF_FieldGet(srcIwts, array=srcIwtsArray, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
   ! errorArray
-  call ESMF_FieldGet(dstiwts, array=dstiwtsArray, rc=localrc)
+  call ESMF_FieldGet(dstIwts, array=dstIwtsArray, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
   !! get longitude array
-  call ESMF_GridGetCoord(grid360, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-                         array=lonArray360, rc=localrc)
+  call ESMF_GridGetCoord(grid1, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                         array=lonArray, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -306,14 +306,14 @@ contains
   do lDE=0,localDECount-1
  
      !! get coord 1
-     call ESMF_GridGetCoord(grid360, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+     call ESMF_GridGetCoord(grid1, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
      endif
 
-     call ESMF_GridGetCoord(grid360, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+     call ESMF_GridGetCoord(grid1, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
                             computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
@@ -321,7 +321,7 @@ contains
      endif
 
      ! get src pointer
-     call ESMF_FieldGet(srcField360, lDE, fptr, computationalLBound=fclbnd, &
+     call ESMF_FieldGet(srcField, lDE, fptr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
@@ -371,28 +371,28 @@ contains
   do lDE=0,localDECount-1
  
      !! get coord 1
-     call ESMF_GridGetCoord(grid180, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+     call ESMF_GridGetCoord(grid2, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
      endif
 
-     call ESMF_GridGetCoord(grid180, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+     call ESMF_GridGetCoord(grid2, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
                             computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
      endif
 
-     call ESMF_FieldGet(field180, lDE, fptr, computationalLBound=fclbnd, &
+     call ESMF_FieldGet(dstField, lDE, fptr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
      endif
 
-     call ESMF_FieldGet(xfield180, lDE, xfptr, computationalLBound=fclbnd, &
+     call ESMF_FieldGet(xdstField, lDE, xfptr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
@@ -434,8 +434,24 @@ contains
 
   enddo    ! lDE
 
+  ! Get the integration weights
+  call ESMF_FieldRegridGetIwts(srcField, srcIwts, &
+          regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+  endif
+
+  ! Get the integration weights
+  call ESMF_FieldRegridGetIwts(dstField, dstIwts, &
+          regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+  endif
+
   ! Regrid store
-  call ESMF_FieldRegridStore(srcField360, dstField=field180, &
+  call ESMF_FieldRegridStore(srcField, dstField=dstField, &
           routeHandle=routeHandle, &
           regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
           regridConserve=ESMF_REGRID_CONSERVE_ON, &
@@ -446,27 +462,11 @@ contains
    endif
 
   ! Do regrid
-  call ESMF_FieldRegrid(srcField360, field180, routeHandle, rc=localrc)
+  call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
    endif
-
-  ! Get the integration weights
-  call ESMF_FieldRegridGetIwts(srcField360, srciwts, &
-          regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-      rc=ESMF_FAILURE
-      return
-  endif
-
-  ! Get the integration weights
-  call ESMF_FieldRegridGetIwts(field180, dstiwts, &
-          regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-      rc=ESMF_FAILURE
-      return
-  endif
 
   call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -478,7 +478,7 @@ contains
   do lDE=0,localDECount-1
 
      ! get src Field
-     call ESMF_FieldGet(field180, lDE, fptr, computationalLBound=clbnd, &
+     call ESMF_FieldGet(dstField, lDE, fptr, computationalLBound=clbnd, &
                              computationalUBound=cubnd,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
@@ -486,7 +486,7 @@ contains
      endif
 
      ! get src destination Field
-     call ESMF_FieldGet(xfield180, lDE, xfptr,  rc=localrc)
+     call ESMF_FieldGet(xdstField, lDE, xfptr,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -500,7 +500,7 @@ contains
      endif
 
      ! get src Field
-     call ESMF_FieldGet(dstiwts, lDE, dstiwtsptr,  rc=localrc)
+     call ESMF_FieldGet(dstIwts, lDE, dstIwtsptr,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -534,7 +534,7 @@ contains
              minerror(1) = errorfptr(i1,i2)
            endif
         endif
-        dstmass = dstmass + dstiwtsptr(i1,i2)
+        dstmass = dstmass + dstIwtsptr(i1,i2)
      enddo
      enddo
 
@@ -544,7 +544,7 @@ contains
   do lDE=0,localDECount-1
 
      ! get src pointer
-     call ESMF_FieldGet(srcField360, lDE, fptr, computationalLBound=clbnd, &
+     call ESMF_FieldGet(srcField, lDE, fptr, computationalLBound=clbnd, &
                              computationalUBound=cubnd,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
@@ -552,7 +552,7 @@ contains
      endif
 
      ! get src Field
-     call ESMF_FieldGet(srciwts, lDE, srciwtsptr,  rc=localrc)
+     call ESMF_FieldGet(srcIwts, lDE, srcIwtsptr,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -560,7 +560,7 @@ contains
 
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        srcmass(1) = srcmass(1) + srciwtsptr(i1,i2)
+        srcmass(1) = srcmass(1) + srcIwtsptr(i1,i2)
      enddo
      enddo
 
@@ -595,7 +595,7 @@ contains
 
   ! return answer based on correct flags
   itrp = .false.
-  if (ABS(dstmassg(1)-srcmassg(1))/srcmassg(1) < 10E-5) itrp = .true.
+  if (ABS(dstmassg(1)-srcmassg(1))/srcmassg(1) < 10E-10) itrp = .true.
 
   csrv = .false.
   if (maxerrorg(1) < 10E-1) csrv = .true.
@@ -618,15 +618,21 @@ contains
   endif
 
   spherical_grid = 1
-  call ESMF_MeshIO(vm, grid360, ESMF_STAGGERLOC_CENTER, &
-               "srcmesh", srcArray360, srciwtsarray, rc=localrc, &
+  call ESMF_MeshIO(vm, grid1, ESMF_STAGGERLOC_CENTER, &
+               "srcmesh", srcArray, srcIwtsarray, rc=localrc, &
                spherical=spherical_grid)
-  call ESMF_MeshIO(vm, grid180, ESMF_STAGGERLOC_CENTER, &
-               "dstmesh", array180, xarray180, errorArray, dstiwtsarray, rc=localrc, &
+  call ESMF_MeshIO(vm, grid2, ESMF_STAGGERLOC_CENTER, &
+               "dstmesh", dstArray, xdstArray, errorArray, dstIwtsarray, rc=localrc, &
                spherical=spherical_grid)
 
   ! Destroy the Fields
-   call ESMF_FieldDestroy(srcField360, rc=localrc)
+   call ESMF_FieldDestroy(srcField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(srcIwts, rc=localrc)
    if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return
@@ -638,26 +644,32 @@ contains
      return
    endif
 
-   call ESMF_FieldDestroy(field180, rc=localrc)
+   call ESMF_FieldDestroy(dstField, rc=localrc)
    if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return
    endif
 
-   call ESMF_FieldDestroy(xfield180, rc=localrc)
+   call ESMF_FieldDestroy(xdstField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(dstIwts, rc=localrc)
    if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return
    endif
 
   ! Free the grids
-  call ESMF_GridDestroy(grid360, rc=localrc)
+  call ESMF_GridDestroy(grid1, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
    endif
 
-  call ESMF_GridDestroy(grid180, rc=localrc)
+  call ESMF_GridDestroy(grid2, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
