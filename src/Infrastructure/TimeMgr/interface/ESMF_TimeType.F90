@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeType.F90,v 1.19 2010/05/07 22:38:06 w6ws Exp $
+! $Id: ESMF_TimeType.F90,v 1.20 2010/05/08 06:24:27 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -84,6 +84,7 @@
 !     The methods defined in this file are public and propagated up via 
 !     ESMF_TimeMod in ESMF_Time.F90      
 
+      public :: ESMF_TimeGetInit
       public :: ESMF_TimeInit
 
 !EOPI
@@ -91,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeType.F90,v 1.19 2010/05/07 22:38:06 w6ws Exp $'
+      '$Id: ESMF_TimeType.F90,v 1.20 2010/05/08 06:24:27 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
