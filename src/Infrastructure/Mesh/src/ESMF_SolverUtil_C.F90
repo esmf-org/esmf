@@ -1,4 +1,4 @@
-!  $Id: ESMF_SolverUtil_C.F90,v 1.6 2010/05/10 07:20:54 theurich Exp $
+!  $Id: ESMF_SolverUtil_C.F90,v 1.7 2010/05/10 16:36:27 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_SolverUtil_C.F90,v 1.6 2010/05/10 07:20:54 theurich Exp $'
+!      '$Id: ESMF_SolverUtil_C.F90,v 1.7 2010/05/10 16:36:27 w6ws Exp $'
 !==============================================================================
    subroutine f_esmf_lapack_iworksize(minmn,iworksize)
     
@@ -34,6 +34,8 @@
      integer, intent(out)             :: iworksize
 
 #if defined (ESMF_LAPACK)
+     integer, external :: ILAENV
+
      integer :: smlsiz              
      integer ::  nlvl
 #endif
