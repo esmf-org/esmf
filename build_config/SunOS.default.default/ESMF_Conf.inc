@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.11 2010/04/20 16:13:16 theurich Exp $
+$Id: ESMF_Conf.inc,v 1.12 2010/05/10 22:43:53 theurich Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -11,20 +11,7 @@ Licensed under the University of Illinois-NCSA License.
 #endif
 
 #if 0
-Define the proper way to flush Fortran units.  Typically this will
-be one of the following:
-
-  * Fortran-2003 FLUSH statement (preferred)
-  * Two argument FLUSH call
-  * One argument FLUSH call
-
-#endif
-
-#define ESMF_IOFlushMacro(unit,status) call flush (unit)
-
-#if 0
 Define the proper way to read the command line.  Use getarg for now.
-
 #endif
 
 #define ESMF_NEEDSGETARG
