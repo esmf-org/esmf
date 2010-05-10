@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.20 2010/03/04 18:57:42 svasquez Exp $
+!  $Id: ESMF_Field_C.F90,v 1.21 2010/05/10 07:20:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.20 2010/03/04 18:57:42 svasquez Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.21 2010/05/10 07:20:54 theurich Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -39,6 +39,8 @@
     use ESMF_MeshMod
     use ESMF_FieldMod
     use ESMF_FieldCreateMod
+
+    implicit none
 
     ! arguments
     type(ESMF_Field)               :: field
@@ -78,6 +80,8 @@
     use ESMF_FieldMod
     use ESMF_FieldPrMod
 
+    implicit none
+
     type(ESMF_Field),intent(inout) :: field
     integer, intent(out)           :: rc              
 
@@ -105,6 +109,8 @@
     use ESMF_MeshMod
     use ESMF_FieldMod
     use ESMF_FieldGetMod
+
+    implicit none
 
     type(ESMF_Field),intent(inout) :: field
     type(ESMF_Pointer)             :: meshp
@@ -135,6 +141,8 @@
     use ESMF_ArrayMod
     use ESMF_FieldMod
     use ESMF_FieldGetMod
+
+    implicit none
 
     ! arguments
     type(ESMF_Field),intent(inout) :: field
@@ -172,6 +180,8 @@
     use ESMF_FieldMod
     use ESMF_FieldCreateMod
 
+    implicit none
+
     type(ESMF_Field)               :: field
     integer, intent(out)           :: rc     
   
@@ -195,6 +205,8 @@
     use ESMF_LogErrMod
     use ESMF_FieldMod
     use ESMF_FieldCreateMod
+
+    implicit none
 
     type(ESMF_Field)      :: field
     integer, intent(out)  :: rc     

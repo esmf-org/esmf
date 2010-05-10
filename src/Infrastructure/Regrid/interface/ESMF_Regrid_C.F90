@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid_C.F90,v 1.8 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_Regrid_C.F90,v 1.9 2010/05/10 07:20:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 !==============================================================================
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Regrid_C.F90,v 1.8 2010/03/04 18:57:45 svasquez Exp $'
+      '$Id: ESMF_Regrid_C.F90,v 1.9 2010/05/10 07:20:54 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -51,6 +51,8 @@
       use ESMF_UtilTypesMod
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_RegridMod
+
+      implicit none
 
       type(ESMF_Regrid), pointer :: regridp
       integer, intent(in) :: arg1
@@ -72,9 +74,10 @@
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_RegridMod
 
+      implicit none
+
       type(ESMF_Regrid), pointer :: regridp
       integer, intent(out), :: rc
-
      
       call ESMF_RegridDestroy(regridp, rc)
     
@@ -89,6 +92,8 @@
       use ESMF_UtilTypesMod
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_RegridMod
+
+      implicit none
 
       type(ESMF_Regrid), pointer :: regridp
       integer, intent(in) :: arg1
@@ -108,10 +113,11 @@
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_RegridMod
 
+      implicit none
+
       type(ESMF_Regrid), pointer :: regridp
       type(ESMF_RegridConfig), pointer :: config
       integer, intent(out), :: rc
-     
 
       call ESMF_RegridGetConfig(regridp, config, rc)
     
@@ -123,10 +129,11 @@
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_RegridMod
 
+      implicit none
+
       type(ESMF_Regrid), pointer :: regridp
       type(ESMF_RegridConfig), pointer :: config
       integer, intent(out), :: rc
-     
 
       call ESMF_RegridSetConfig(regridp, config, rc)
     
@@ -138,10 +145,11 @@
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_RegridMod
 
+      implicit none
+
       type(ESMF_Regrid), pointer :: regridp
       type(ESMF_<Value>) :: <value>
       integer, intent(out), :: rc
-     
 
       call ESMF_RegridGet(regridp, <value>, rc)
     
@@ -152,6 +160,8 @@
       use ESMF_UtilTypesMod
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_RegridMod
+
+      implicit none
 
       type(ESMF_Regrid), pointer :: regridp
       type(ESMF_<Value>) :: <value>
@@ -168,11 +178,12 @@
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_RegridMod
 
+      implicit none
+
       type(ESMF_Regrid), pointer :: regridp
       character(len=*) :: options
       integer, intent(out), :: rc
      
-
       call ESMF_RegridValidate(regridp, options, rc)
     
     end subroutine f_esmf_regridvalidate
@@ -183,10 +194,11 @@
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_RegridMod
 
+      implicit none
+
       type(ESMF_Regrid), pointer :: regridp
       character(len=*) :: options
       integer, intent(out), :: rc
-     
 
       call ESMF_RegridPrint(regridp, options, rc)
     

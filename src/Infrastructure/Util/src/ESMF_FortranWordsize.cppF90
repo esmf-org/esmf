@@ -1,4 +1,4 @@
-! $Id: ESMF_FortranWordsize.cppF90,v 1.10 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_FortranWordsize.cppF90,v 1.11 2010/05/10 07:20:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -74,6 +74,7 @@ contains
 
 ! !INTERFACE:
   subroutine ESMF_FortranUDTPointerSize(size)
+    implicit none
 !
 ! !ARGUMENTS:
     integer, intent(out)  :: size
@@ -148,6 +149,7 @@ contains
 !define ESMF_METHOD to "ESMF_FortranWordsize##mtypekind" @\
 ^define ESMF_METHOD "ESMF_FortranWordsize" @\
     integer function ESMF_FortranWordsize##mtypekind(var, rc) @\
+     implicit none @\
 @\
      mtypename(ESMF_KIND_##mtypekind), intent(in) :: var @\
      integer, intent(out), optional :: rc @\

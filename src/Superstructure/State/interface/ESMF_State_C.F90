@@ -1,4 +1,4 @@
-! $Id: ESMF_State_C.F90,v 1.25 2010/03/04 18:57:46 svasquez Exp $
+! $Id: ESMF_State_C.F90,v 1.26 2010/05/10 07:20:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.25 2010/03/04 18:57:46 svasquez Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.26 2010/05/10 07:20:55 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -368,6 +368,8 @@
     use ESMF_LogErrMod
     use ESMF_StateTypesMod
     use ESMF_StateMod
+    
+    implicit none
     
     type(ESMF_State)     :: state
     integer, intent(out) :: rc

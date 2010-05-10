@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.118 2010/03/08 23:09:57 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.119 2010/05/10 07:20:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -184,7 +184,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.118 2010/03/08 23:09:57 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.119 2010/05/10 07:20:54 theurich Exp $"
 
 !==============================================================================
 
@@ -7371,6 +7371,9 @@ end module ESMF_VMMod
 
 subroutine f_ESMF_VMGlobalGet(localPet, petCount)
   use ESMF_VMMod
+  
+  implicit none
+  
   integer, intent(out), optional  :: localPet
   integer, intent(out), optional  :: petCount
     
@@ -7381,6 +7384,8 @@ end subroutine f_ESMF_VMGlobalGet
 
 subroutine f_ESMF_VMAbort()
   use ESMF_VMMod
+  
+  implicit none
     
   call ESMF_VMAbort()
   

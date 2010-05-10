@@ -1,3 +1,4 @@
+! $Id: ESMF_LocalArray_C.F90,v 1.3 2010/05/10 07:20:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -22,13 +23,15 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LocalArray_C.F90,v 1.2 2010/03/04 18:57:44 svasquez Exp $'
+!      '$Id: ESMF_LocalArray_C.F90,v 1.3 2010/05/10 07:20:54 theurich Exp $'
 !==============================================================================
 subroutine f_esmf_localarrayf90allocate(array, rank, kind, counts, &
   lbounds, ubounds, rc)
   use ESMF_UtilTypesMod     ! ESMF base class
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LocalArrayMod
+  
+  implicit none
 
   type(ESMF_LocalArray) :: array
   integer :: rank
@@ -49,6 +52,8 @@ subroutine f_esmf_localarrayf90deallocate(array, rank, kind, rc)
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LocalArrayMod
 
+  implicit none
+
   type(ESMF_LocalArray) :: array
   integer :: rank
   type(ESMF_TypeKind) :: kind
@@ -64,6 +69,8 @@ subroutine f_esmf_localarrayadjust(array, rank, kind, counts, &
   use ESMF_BaseMod    ! ESMF base class
   use ESMF_LocalArrayMod
   
+  implicit none
+
   type(ESMF_LocalArray) :: array
   integer :: rank
   type(ESMF_TypeKind) :: kind
@@ -82,6 +89,8 @@ subroutine f_esmf_localarraycopyf90ptr(arrayInArg, arrayOutArg, rc)
   use ESMF_BaseMod    ! ESMF base class
   use ESMF_LocalArrayMod
   
+  implicit none
+
   type(ESMF_LocalArray) :: arrayInArg
   type(ESMF_LocalArray) :: arrayOutArg
   integer :: rc

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.29 2010/05/07 22:47:20 w6ws Exp $
+! $Id: ESMF_LocStream.F90,v 1.30 2010/05/10 07:20:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.29 2010/05/07 22:47:20 w6ws Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.30 2010/05/10 07:20:54 theurich Exp $'
 
 !==============================================================================
 !
@@ -5327,6 +5327,8 @@ end module ESMF_LocStreamMod
     use ESMF_BaseMod
     use ESMF_LogErrMod
     use ESMF_LocStreamMod
+
+    implicit none
 
     type(ESMF_LocStream) :: ls
     integer, intent(out) :: rc     

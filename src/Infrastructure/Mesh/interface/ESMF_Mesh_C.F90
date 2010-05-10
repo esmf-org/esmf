@@ -1,4 +1,4 @@
-!  $Id: ESMF_Mesh_C.F90,v 1.6 2010/03/04 18:57:45 svasquez Exp $
+!  $Id: ESMF_Mesh_C.F90,v 1.7 2010/05/10 07:20:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -23,13 +23,15 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh_C.F90,v 1.6 2010/03/04 18:57:45 svasquez Exp $'
+!      '$Id: ESMF_Mesh_C.F90,v 1.7 2010/05/10 07:20:54 theurich Exp $'
 !==============================================================================
    subroutine f_esmf_getmeshdistgrid(dgrid, count, indices, rc)
-       use ESMF_UtilTypesMod    ! ESMF base class
-       use ESMF_BaseMod    ! ESMF base class
-       use ESMF_DistGridMod
+     use ESMF_UtilTypesMod    ! ESMF base class
+     use ESMF_BaseMod    ! ESMF base class
+     use ESMF_DistGridMod
+     
      implicit none
+     
      type(ESMF_DistGrid), intent(inout) :: dgrid
      integer, intent(in)               :: count
      integer, intent(inout)            :: indices(count)

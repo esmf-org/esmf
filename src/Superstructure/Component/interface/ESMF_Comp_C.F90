@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.62 2010/05/07 22:49:31 w6ws Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.63 2010/05/10 07:20:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.62 2010/05/07 22:49:31 w6ws Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.63 2010/05/10 07:20:55 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -89,6 +89,7 @@ recursive subroutine f_esmf_compgetvmparent(comp, vm_parent, rc)
   use ESMF_CompMod
   use ESMF_VMMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_CWrap) :: comp
@@ -115,6 +116,7 @@ recursive subroutine f_esmf_compgetvmplan(comp, vmplan, rc)
   use ESMF_CompMod
   use ESMF_VMMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_CWrap)   :: comp
@@ -144,6 +146,7 @@ recursive subroutine f_esmf_compinsertvm(comp, vm, rc)
   use ESMF_CompMod
   use ESMF_VMMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_CWrap) :: comp
@@ -170,6 +173,7 @@ recursive subroutine f_esmf_compgetctype(comp, ctype, rc)
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_CWrap) :: comp
@@ -191,6 +195,7 @@ recursive subroutine f_esmf_compreplicate(comp, comp_src, vm, rc)
   use ESMF_CompMod
   use ESMF_VMMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_CWrap) :: comp
@@ -235,6 +240,7 @@ recursive subroutine f_esmf_comprefcopy(comp, comp_src, rc)
   use ESMF_CompMod
   use ESMF_VMMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_CWrap) :: comp_src
@@ -258,6 +264,7 @@ recursive subroutine f_esmf_compdelete(comp, rc)
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_CWrap) :: comp
@@ -281,6 +288,8 @@ subroutine f_esmf_compcollectgarbage(comp, rc)
   use ESMF_BaseMod
   use ESMF_LogErrMod
   use ESMF_CompMod
+  
+  implicit none
 
   type(ESMF_CWrap)     :: comp
   integer, intent(out) :: rc     
@@ -327,6 +336,7 @@ subroutine f_esmf_gridcompcreate(gcomp, name, mtype, configFile, clock, rc)
   use ESMF_CompMod
   use ESMF_GridCompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_GridComp)       :: gcomp
@@ -359,6 +369,7 @@ subroutine f_esmf_gridcompdestroy(comp, rc)
   use ESMF_CompMod
   use ESMF_GridCompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_GridComp) :: comp
@@ -379,6 +390,7 @@ subroutine f_esmf_gridcompinitialize(comp, importState, exportState, clock, &
   use ESMF_CompMod
   use ESMF_GridCompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_GridComp)     :: comp      
@@ -417,6 +429,7 @@ subroutine f_esmf_gridcomprun(comp, importState, exportState, clock, phase, &
   use ESMF_CompMod
   use ESMF_GridCompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_GridComp)     :: comp      
@@ -455,6 +468,7 @@ subroutine f_esmf_gridcompfinalize(comp, importState, exportState, clock, &
   use ESMF_CompMod
   use ESMF_GridCompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_GridComp)     :: comp      
@@ -489,6 +503,7 @@ subroutine f_esmf_gridcompset(comp, rc)
   use ESMF_CompMod
   use ESMF_GridCompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_GridComp) :: comp      
@@ -510,6 +525,7 @@ subroutine f_esmf_gridcompget(comp, rc)
   use ESMF_CompMod
   use ESMF_GridCompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_GridComp) :: comp      
@@ -529,6 +545,7 @@ subroutine f_esmf_gridcompvalidate(comp, options, rc)
   use ESMF_CompMod
   use ESMF_GridCompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_GridComp) :: comp      
@@ -549,6 +566,7 @@ subroutine f_esmf_gridcompprint(comp, options, rc)
   use ESMF_CompMod
   use ESMF_GridCompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_GridComp) :: comp      
@@ -574,6 +592,7 @@ subroutine f_esmf_cplcompcreate(ccomp, name, configFile, clock, rc)
   use ESMF_ConfigMod
   use ESMF_CplCompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_CplComp) :: ccomp
@@ -605,6 +624,7 @@ subroutine f_esmf_cplcompdestroy(comp, rc)
   use ESMF_CompMod
   use ESMF_CplCompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_CplComp) :: comp
@@ -628,6 +648,7 @@ subroutine f_esmf_cplcompinitialize(comp, importState, exportState, clock, &
   use ESMF_CompMod
   use ESMF_CplCompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_CplComp)      :: comp      
@@ -666,6 +687,7 @@ subroutine f_esmf_cplcomprun(comp, importState, exportState, clock, phase, &
   use ESMF_CompMod
   use ESMF_CplCompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_CplComp)      :: comp      
@@ -704,6 +726,7 @@ subroutine f_esmf_cplcompfinalize(comp, importState, exportState, clock, &
   use ESMF_CompMod
   use ESMF_CplCompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_CplComp)      :: comp      
@@ -738,6 +761,7 @@ subroutine f_esmf_cplcompset(comp, rc)
   use ESMF_CompMod
   use ESMF_CplCompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_CplComp) :: comp      
@@ -759,6 +783,7 @@ subroutine f_esmf_cplcompget(comp, rc)
   use ESMF_CompMod
   use ESMF_CplCompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_CplComp) :: comp      
@@ -777,6 +802,7 @@ subroutine f_esmf_cplcompvalidate(comp, options, rc)
   use ESMF_CompMod
   use ESMF_CplCompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_CplComp) :: comp      
@@ -794,6 +820,7 @@ subroutine f_esmf_cplcompprint(comp, options, rc)
   use ESMF_CompMod
   use ESMF_CplCompMod
   use ESMF_InitMacrosMod
+  
   implicit none
 
   type(ESMF_CplComp) :: comp      
