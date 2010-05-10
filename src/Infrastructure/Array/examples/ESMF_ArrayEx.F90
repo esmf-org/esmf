@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.54 2010/04/27 19:06:35 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.55 2010/05/10 22:19:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -143,58 +143,63 @@ program ESMF_ArrayEx
 !
 ! \end{verbatim}
 
-! \subsubsection{Native language memory access -- the most general way}
+! \subsubsection{Native language memory access}
 !
-! The exact decomposition of the index space covered by 
-! the {\tt array} object into DEs is contained in the {\tt distgrid} object. 
-! Further, the layout of the DEs across the PETs of the component is stored in
-! the {\tt delayout} contained within the {\tt distgrid} object. In the 
-! above example a default DELayout was created during the 
-! {\tt ESMF\_DistGridCreate()} call (see the refDoc / proposal for 
-! {\tt ESMF\_DELayout} and {\tt ESMF\_DistGrid} for details).
+! Access to the data held inside an ESMF Array object is provided through
+! native language objects. Specifically, the {\tt farrayPtr} argument returned
+! by the {\tt ESMF\_ArrayGet()} method is a Fortran array pointer that can be
+! used do access the PET-local data inside the Array object.
 !
-! In order to use the {\tt array} object it is necessary to know the local DEs
-! located on each calling PET.
+! Many applications work in the 1 DE per PET mode, i.e. there is only
+! a single DE on each PET. The Array class does not assume this special
+! case, instead it supports multiple separate memory allocations on each PET.
+! The number of such PET-local allocations is given by the {\tt localDeCount}
+! of the underlying DistGrid. Access to the DE-local memory allocations in this
+! general case requires a loop over {\tt localDeCount}.
 !EOE
 !BOC
   call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=rc)
-  allocate(localDeList(localDeCount))
-  call ESMF_ArrayGet(array, localDeList=localDeList, rc=rc)
 !EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  do de=0, localDeCount-1
+    call ESMF_ArrayGet(array, farrayPtr=myFarray, localDe=de, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+    ! use myFarray to access local DE data
+  enddo
+!EOC
+!
 !BOE
-! In general it must be assumed that there may be multiple DEs associated with
-! the calling PET, i.e. {\tt localDeCount} >= 1. The situation where there is 
-! exactly one DE for each PET, i.e. {\tt localDeCount} = 1 on every PET, is 
-! merely a special case of the more general formulation.
-! 
-! Consequently, in order to gain access to the DE-local memory segments 
-! that have been allocated on each PET by the {\tt ArrayCreate()} call
-! the Array must be queried for a {\em list} of {\tt LocalArray} objects, 
-! each element corresponding to one PET-local DE.
-!EOE  
+! The 1 DE per PET case is so common that the ESMF Array provides simplified
+! support for it. In this case the {\tt ESMF\_ArrayGet()} can be called 
+! without specifying {\tt localDe} to access the unique PET-local
+! {\tt farrayPtr}. An error will be returned if {\tt localDe} was omitted
+! for an Array that holds multiple DEs per PET.
+!
+! Besides direct access to the DE-local memory allocation through the 
+! Fortran array pointer, the Array can also be queried for a list of PET-local
+! LocalArray objects. See section \ref{Array:LocalArray} for more on LocalArray
+! usage in Array. In most cases this approach is less convenient than the direct
+! {\tt farrayPtr} method, because it adds an extra object level between the
+! Array and the native language array. Further, the 1 DE per PET case is not
+! treated in a simplified manner.
+!EOE
 !BOC
   allocate(larrayList(localDeCount))
   call ESMF_ArrayGet(array, larrayList=larrayList, rc=rc)
-!EOC
-!BOE
-! Now each PET can loop through its local list of DEs and access the associated
-! memory through a suitable Fortran pointer. In the current example the native
-! pointer {\tt myFarray} must be declared as\newline
-! {\tt real(ESMF\_KIND\_R8), pointer:: myFarray(:,:)}\newline
-! in order to match the {\tt arrayspec} that was used to create the
-! {\tt array} object. The following loop uses the native language access to
-! initialize the entire memory chunks of all PET-local DEs to 0 using 
-! Fortran array syntax.
-!EOE
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
   do de=1, localDeCount
     call ESMF_LocalArrayGet(larrayList(de), myFarray, ESMF_DATA_REF, rc=rc)
-    myFarray = 0.
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+    ! use myFarray to access local DE data
   enddo
 !EOC
-
-!  call ESMF_ArrayPrint(array, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
 ! \subsubsection{Regions and default bounds}
@@ -464,7 +469,9 @@ program ESMF_ArrayEx
 ! Obtain the {\tt larrayList} on every PET.
 !EOE
 !BOC
-  call ESMF_ArrayGet(array, larrayList=larrayList, rc=rc)
+  allocate(localDeList(localDeCount))
+  call ESMF_ArrayGet(array, larrayList=larrayList, localDeList=localDeList, &
+    rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
@@ -613,143 +620,6 @@ program ESMF_ArrayEx
 ! defined in the corresponding DistGrid object.
 ! %Please see section 
 ! %\ref{ArrayEx_interiorRegion} for details.
-!
-!
-! \subsubsection{Halo communication}
-!
-! The {\tt array} variable created and used in the previous examples has the
-! following decomposition into DE exclusive regions.
-!
-! \begin{verbatim}
-! 
-!  +---------------------------------------> 2nd dimension
-!  |  (1,1)
-!  |    +-----------+-----------+------+
-!  |    | DE 0      | DE 2      | DE 4 |
-!  |    |  *    *   |  *    *   |  *   |
-!  |    |           |           |      |
-!  |    |  *    *   |  *    *   |  *   |
-!  |    |           |           |      |
-!  |    |  *    *   |  *    *   |  *   |
-!  |    +-----------+-----------+------+
-!  |    | DE 1      | DE 3      | DE 5 |
-!  |    |  *    *   |  *    *   |  *   |
-!  |    |           |           |      |
-!  |    |  *    *   |  *    *   |  *   |
-!  |    +-----------+-----------+------+
-!  |                                 (5,5)
-!  v 
-! 1st dimension
-!
-! \end{verbatim}
-!
-! The associated DistGrid does not define any extra connections so that the
-! global domain has open outside boundaries as is the case for regional models.
-! The {\tt array} was created with extra elements around each DE's exclusive 
-! region. The total of all DE-local elements make up each DE's total region. 
-! Within the total region some of the elements are carried as extra computational 
-! elements in the computational region. The exact situation has been illustrated
-! for this {\tt array} object in the previous sections.
-!
-! Now a simple halo operation shall be carried out for {\tt array} that updates
-! all the extra elements in the total region for each DE.
-!EOEI
-!BOCI
-  call ESMF_ArrayHalo(array, regionflag=ESMF_REGION_EXCLUSIVE, rc=rc)
-!EOCI
-!BOEI
-! The {\tt regionflag=ESMF\_REGION\_EXCLUSIVE} indicates that the halo operation 
-! is to be relative to the exclusive region, i.e. it includes computational 
-! elements as is the case during the spin up phase of some models.
-!
-! The above call to the ArrayHalo() method will have updated all of the extra 
-! elements in the DE-local regions that had source elements in one of the DEs of the
-! Array object. There are, however, as will be pointed out in the next section,
-! some extra elements that do not correspond to any DE's exclusive region. The
-! ArrayHalo() operation leaves those elements unchanged.
-!
-! Next only the elements outside the computational region shall be updated. This
-! is the default for ArrayHalo() and the number of arguments that need to be
-! specified is minimal.
-!EOEI
-!BOCI
-  call ESMF_ArrayHalo(array, rc=rc)
-!EOCI
-!BOEI
-! (The same could have been accomplished with calling ArrayHalo() with
-! {\tt regionflag=ESMF\_REGION\_COMPUTATIONAL}.)
-! 
-! The ArrayHalo() method allows the halo depth to be specified for each side
-! of the DE-local region. In the following example the {\tt haloLDepth} and 
-! {\tt haloUDepth} arguments are used to halo a maximum of 1 element around the
-! computational region of each DE.
-!EOEI
-!BOCI
-  call ESMF_ArrayHalo(array, haloLDepth=(/1,1/), haloUDepth=(/1,1/), rc=rc)
-!EOCI
-!BOEI
-! It is not an error to request a halo depth greater than some of the DE-local 
-! total regions can accommodate. This situation must be supported since it is 
-! possible to define different computational widths and/or total widths for each 
-! DE and a large halo depth may make sense for some DEs but not for others. A 
-! warning will be logged for the DEs that cannot fully fit the requested halo.
-!
-! The direct calls to ArrayHalo(), as used above, come with a significant 
-! overhead caused by the need to determine the exact data exchange necessary to 
-! perform the requested operation. For halo operations used 
-! repeatedly it is much more efficient to precompute the exchange patterns 
-! once, store this information and reuse it each time the operation is to 
-! be performed. The following call will precompute the pattern for the previous
-! ArrayHalo() call and store the information as a precomputed communication
-! pattern or {\em Route}. A handle to the Route is provided to the user via the 
-! {\tt routehandle} argument which accepts {\tt ESMF\_RouteHandle} objects.
-!EOEI
-!BOCI
-  call ESMF_ArrayHaloStore(array, haloLDepth=(/1,1/), haloUDepth=(/1,1/), &
-    routehandle=haloHandle, rc=rc)
-!EOCI
-!BOEI
-! The RouteHandle object {\tt haloHandle} can now be used to invoke the 
-! associated halo operation with a much reduced overhead. The only input 
-! ArrayHaloRun() needs is the Array object on which to perform the halo 
-! operation together with the RouteHandle object.
-!EOEI
-!BOCI
-  call ESMF_ArrayHaloRun(array, routehandle=haloHandle, rc=rc)
-!EOCI
-!BOEI
-! Multiple halo operations for the same Array object can be stored and are 
-! available to run when needed. For example a halo update for elements in positive
-! second dimension of {\tt array} may be stored without loosing the previously
-! precomputed operation by supplying a separate RouteHandle object.
-!EOEI
-!BOCI
-  call ESMF_ArrayHaloStore(array, haloLDepth=(/0,0/), haloUDepth=(/0,1/), &
-    routehandle=haloHandle2, rc=rc)
-!EOCI
-!BOEI
-! Details of stored halo operations, such as halo depths, are stored within the
-! Route object referenced by the RouteHandles. This information can be accessed
-! through the overloaded {\tt ESMF\_ArrayGet()} interface that accepts 
-! a RouteHandle object in addition to the Array object.
-!EOEI
-!BOCI
-  allocate(haloLDepth(2), haloUDepth(2))
-  call ESMF_ArrayGet(array, routehandle=haloHandle2, &
-    haloLDepth=haloLDepth, haloUDepth=haloUDepth, rc=rc)
-  print *, haloLDepth, haloUDepth
-  deallocate(haloLDepth, haloUDepth)
-!EOCI
-!BOEI
-! Finally the RouteHandles can be used to release the associated Routes.
-!EOEI
-!BOCI
-  call ESMF_RouteHandleRelease(routehandle=haloHandle, rc=rc)
-  call ESMF_RouteHandleRelease(routehandle=haloHandle2, rc=rc)
-!EOCI
-!BOEI
-! The Array object used to precompute the Routes can be destroyed before or 
-! after the Routes have been released.
 !
 !
 ! \subsubsection{Interior region and Array's total element mask}

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayLarrayEx.F90,v 1.17 2010/03/04 18:57:41 svasquez Exp $
+! $Id: ESMF_ArrayLarrayEx.F90,v 1.18 2010/05/10 22:19:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -16,7 +16,8 @@
 
 !BOE
 ! \subsubsection{Array from {\tt ESMF\_LocalArray}}
-! 
+! \label{Array:LocalArray}
+!
 ! Alternative to the direct usage of Fortran arrays during Array creation
 ! it is also possible to first create an {\tt ESMF\_LocalArray} and create the
 ! Array from it. While this may seem more burdensome for the 1 DE per PET cases
