@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegrid.F90,v 1.3 2010/05/07 17:06:59 feiliu Exp $
+! $Id: ESMF_FieldBundleRegrid.F90,v 1.4 2010/05/10 22:14:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldBundleRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRegrid.F90,v 1.3 2010/05/07 17:06:59 feiliu Exp $'
+      '$Id: ESMF_FieldBundleRegrid.F90,v 1.4 2010/05/10 22:14:41 theurich Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -245,8 +245,9 @@ contains
 !   \item [dstFieldbundle]
 !     Destination {\tt ESMF\_FieldBundle}.
 !   \item [{[regridMethod]}]
-!     The type of regrid. Options are ESMF_REGRID_METHOD_BILINEAR or 
-!     ESMF_REGRID_METHOD_PATCH. If not specified, defaults to ESMF_REGRID_METHOD_BILINEAR. 
+!     The type of regrid. Options are ESMF\_REGRID\_METHOD\_BILINEAR or 
+!     ESMF\_REGRID\_METHOD\_PATCH. If not specified, defaults to 
+!     ESMF\_REGRID\_METHOD\_BILINEAR. 
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[rc]}]
