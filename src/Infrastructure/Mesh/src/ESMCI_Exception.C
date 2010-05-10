@@ -1,4 +1,4 @@
-// $Id: ESMCI_Exception.C,v 1.4 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_Exception.C,v 1.5 2010/05/10 22:39:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -14,7 +14,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Exception.C,v 1.4 2010/03/04 18:57:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Exception.C,v 1.5 2010/05/10 22:39:30 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -28,9 +28,13 @@ static std::vector<std::string> &get_traceBuf() {
 }
 
 TraceBack::~TraceBack() {
-  if (std::uncaught_exception()) {
-    get_traceBuf().push_back(std::string(funcName));
-  }
+// TODO: Temporary work-around until we find solution for exception handling:
+// gjt: Commented out the following lines because they were causing SEGV on
+// gjt: PGI 10.3 and 10.4 (suspect all PGI 10.x versions) in ESMF applications
+// gjt: that were linked following the current rules in Linux.pgi.default.  
+//  if (std::uncaught_exception()) {
+//    get_traceBuf().push_back(std::string(funcName));
+//  }
 }
 
 std::string TraceBack::StackTrace() {
