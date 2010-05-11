@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.31 2010/04/12 22:15:11 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.32 2010/05/11 21:58:57 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.31 2010/04/12 22:15:11 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.32 2010/05/11 21:58:57 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -295,6 +295,42 @@ program ESMF_FieldRegridEx
 ! are currently 2nd degree 2D polynomials. One patch is constructed for each corner of the source cell, and the patch is constructed 
 ! by doing a least squared fit through the data in the cells surrounding the corner. The interpolated value at the destination point is 
 ! then a weighted average of the values of the patches at that point.
+!
+! The conservative regridding is applied as a modification to the original interpolation
+! matrix.  The conservative modification is computed using L2 projection.  The ESMF version
+! of the L2 projection method is based on a finite element method to constrain the 
+! interpolation for global first order conservation of mass.  The conservative option can be 
+! applied as a modification to either the patch or bilinear interpolation by setting the 
+! optional {\tt ESMF\_REGRID\_CONSERVE\_ON} flag in the {\tt ESMF\_FieldRegridStore()} call. 
+!
+!\begin{table}[ht]
+!\centering
+!\vspace{0.2cm}
+!\begin{tabular}{| l | l | c c |}
+!\hline
+!& & Online & Offline \\ [0.5ex]
+!\hline
+!2D Polygons & Triangles & $\surd$ & $\surd$ \\
+!& Quadrilaterals & $\surd$ & $\surd$ \\
+!\hline
+!3D Polygons & Hexahedrons & $\surd$ & \\
+!\hline
+!Regridding & Bilinear & $\surd$ & $\surd$ \\
+!& Patch & $\surd$ & $\surd$ \\
+!\hline
+!Conservative & L2 & $\surd$ & $\surd$ \\
+!\hline
+!Masking & Destination & $\surd$ & $\surd$ \\
+!& Source & $\surd$ &  \\
+!& Unmapped points & $\surd$ & \\
+!\hline
+!Pole Options & Full circle average & $\surd$ & $\surd$ \\
+!& N-point average & & $\surd$ \\[1ex]
+!\hline
+!\end{tabular}
+!\label{Regriddingcapabilities}
+!\caption{Comparison of the offline vs. online regridding capabilities of ESMF}
+!\end{table}
 !
 ! The following sections give examples of using the regridding functionality.
 !
