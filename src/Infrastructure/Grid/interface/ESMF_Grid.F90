@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.149 2010/05/10 22:51:42 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.150 2010/05/11 03:55:54 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -11915,13 +11915,13 @@ endif
 !
 ! !DESCRIPTION:
 !  Check if {\tt grid1} and {\tt grid2} match. Returns .true. if 
-!  Grid objects match, .false. otherwise. This method considers most internal pieces of
+!  Grid objects match, .false. otherwise. This method considers most parts of
 !  the Grids when testing for a match (coordinates, items, Distgrids, Arrays, etc). The 
-!  pieces which aren't considered for a match are the {\tt destroyDistgrid} and 
+!  parts which aren't considered for a match are the {\tt destroyDistgrid} and 
 !  the {\tt destroyDELayout} flags used in the {\tt ESMF\_GridCreateFromDistgrid()} call. 
-!  Please also note that this call returns the matching for the piece of the Grids on
-!  the local PET only. It's entirely possible for this call to return different matching
-!  on different PETs. The user is responsible for computing the global match across
+!  Please also note that this call returns the match for the piece of the Grids on
+!  the local PET only. It's entirely possible for this call to return a different match
+!  on different PETs for the same Grids. The user is responsible for computing the global match across
 !  the set of PETs. 
 !
 !     The arguments are:
