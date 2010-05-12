@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.293 2010/04/30 20:54:06 svasquez Exp $
+#  $Id: common.mk,v 1.294 2010/05/12 21:30:57 w6ws Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -295,10 +295,6 @@ endif
 ifeq ($(ESMF_OS),Cygwin)
 # default on Cygwin is 32-bit
 export ESMF_ABI = 32
-ifeq ($(ESMF_MACHINE),ia64)
-# except for IA64
-export ESMF_ABI = 64
-endif
 ifeq ($(ESMF_MACHINE),x86_64)
 # and x86_64
 export ESMF_ABI = 64
