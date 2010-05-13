@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.102 2010/04/27 22:51:17 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.103 2010/05/13 21:11:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.102 2010/04/27 22:51:17 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.103 2010/05/13 21:11:15 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3704,11 +3704,13 @@ int Array::haloStore(
     
     // prepare SparseMatrix vector with the constructed sparse matrix
     vector<SparseMatrix> sparseMatrix;
+    int *factorIndexListPtr = NULL; // initialize
+    if (factorListCount>0) factorIndexListPtr = &(factorIndexList[0]);
     sparseMatrix.push_back(SparseMatrix(typekindFactor, factorList,
 #ifdef HALOTENSORMIX
-      factorListCount, 2, 2, &(factorIndexList[0])));
+      factorListCount, 2, 2, factorIndexListPtr));
 #else
-      factorListCount, 1, 1, &(factorIndexList[0])));
+      factorListCount, 1, 1, factorIndexListPtr));
 #endif
   
     // precompute sparse matrix multiplication
