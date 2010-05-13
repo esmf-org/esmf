@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.294 2010/05/12 21:30:57 w6ws Exp $
+#  $Id: common.mk,v 1.295 2010/05/13 05:51:22 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -302,12 +302,8 @@ endif
 endif
 
 ifeq ($(ESMF_OS),MinGW)
-# default on MinGW is 32-bit
-export ESMF_ABI = 32
-ifeq ($(ESMF_MACHINE),x86_64)
-# except x86_64
+# default on MinGW is 64-bit
 export ESMF_ABI = 64
-endif
 endif
 
 endif
