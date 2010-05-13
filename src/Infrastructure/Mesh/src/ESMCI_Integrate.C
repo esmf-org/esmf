@@ -1,4 +1,4 @@
-// $Id: ESMCI_Integrate.C,v 1.6 2010/05/07 19:28:16 oehmke Exp $
+// $Id: ESMCI_Integrate.C,v 1.7 2010/05/13 18:51:55 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -23,8 +23,12 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Integrate.C,v 1.6 2010/05/07 19:28:16 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Integrate.C,v 1.7 2010/05/13 18:51:55 w6ws Exp $";
 //-----------------------------------------------------------------------------
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 namespace ESMCI {
 
