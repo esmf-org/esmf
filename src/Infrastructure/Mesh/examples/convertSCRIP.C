@@ -1,4 +1,4 @@
-// $Id: convertSCRIP.C,v 1.3 2010/05/14 23:07:46 theurich Exp $
+// $Id: convertSCRIP.C,v 1.4 2010/05/14 23:37:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -246,7 +246,7 @@ void FTN(c_convertscrip)(
   FIELD *curr, *tmppt;
   int noarea, nocenter, nomask;
   char *strbuf;
-  unsigned int starts[2], counts[2];
+  size_t starts[2], counts[2];
   time_t tloc;
   int maxconnection;
 
