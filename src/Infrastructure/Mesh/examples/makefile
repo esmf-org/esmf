@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2010/04/30 20:19:00 rokuingh Exp $
+# $Id: makefile,v 1.20 2010/05/14 22:50:19 theurich Exp $
 
 ALL: build_examples
 run: run_examples
@@ -18,6 +18,9 @@ EXAMPLES_BUILD    = \
                       $(ESMF_EXDIR)/ESMF_MeshEx \
                       $(ESMF_EXDIR)/ESMF_CubeSphereRegridEx
 #                      $(ESMF_EXDIR)/ESMC_BreckEx \
+
+ESMF_EXAMPLE_CubeSphereRegrid_OBJS = convertSCRIP.o
+ESMF_CubeSphereRegridEx.o: $(ESMF_EXAMPLE_CubeSphereRegrid_OBJS)
 
 EXAMPLES_RUN      = run_ESMF_MeshEx 
 

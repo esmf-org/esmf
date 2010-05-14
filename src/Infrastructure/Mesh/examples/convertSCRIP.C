@@ -1,4 +1,4 @@
-// $Id; Exp $
+// $Id: convertSCRIP.C,v 1.2 2010/05/14 22:50:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -9,21 +9,22 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-// convert a cubed sphere grid file in SCRIP format NetCDF file into a ESMF data format in NetCDF
-// and generate a dual mesh NetCDF file using the center coordiates.
+// convert a cubed sphere grid file in SCRIP format NetCDF file into a ESMF 
+// data format in NetCDF and generate a dual mesh NetCDF file using the center
+// coordiates.
 // Usage:
 //  convertSCRIP(input_scrip_file,esmf_mesh_file,dual_mesh_file)
 //
-// The proposednetcdf cubed_sphere data format contains:
+// The proposed netcdf cubed_sphere data format contains:
 // netcdf cubed_sphere{
-// dimensions:Å†Å†Å† 
-//     num_verts = 16189 ;Å†Å†Å† 
-//     num_cells = 82384 ;Å†Å†Å† 
-//     max_verts_per_cell = 6 ;Å†Å†Å† 
+// dimensions:
+//     num_verts = 16189 ;
+//     num_cells = 82384 ;
+//     max_verts_per_cell = 6 ;
 //     vert_dim = 2 ;
-// variables:Å†Å†Å† 
-//     double vert_coords(num_vertices, vert_dim) ;Å†Å†Å† 
-//     int cell_verts(num_cells, max_verts_per_cell) ;Å†Å†Å† 
+// variables:
+//     double vert_coords(num_vertices, vert_dim) ;
+//     int cell_verts(num_cells, max_verts_per_cell) ;
 //     byte num_cell_verts(num_cells); 
 //     double cell_center_lats(num_cells);
 //     double cell_center_longs(num_cells);
@@ -35,6 +36,8 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>
+
+#include "ESMC_Conf.h"
 
 #ifdef ESMC_NETCDF
 #include <netcdf.h>
@@ -211,8 +214,19 @@ void orderit(int index, double lon, double lat, int numedges, double *latlonbuf,
     }
   }
 }
-      
-int ConvertScrip(char* infile, char* outfile1, char* outfile2)
+     
+extern "C" { 
+void FTN(c_convertscrip)(
+  char *infile,
+  int *infileLen,
+  char *outfile1,
+  int *outfile1Len,
+  char *outfile2,
+  int *outfile2Len,
+  int *rc,
+  ESMCI_FortranStrLenArg name_l0,
+  ESMCI_FortranStrLenArg name_l1,
+  ESMCI_FortranStrLenArg name_l2)
 {
   int ncid1, ncid2;
   int gsdimid, gcdimid, grdimid;
@@ -237,6 +251,11 @@ int ConvertScrip(char* infile, char* outfile1, char* outfile2)
   int maxconnection;
 
 #ifdef ESMC_NETCDF
+  // ensure C conform string termination
+  infile[*infileLen] = '\0';
+  outfile1[*outfile1Len] = '\0';
+  outfile2[*outfile2Len] = '\0';
+  
   // Open intput SCRIP file
   status = nc_open(infile, NC_NOWRITE, &ncid1);  
   if (status != NC_NOERR) handle_error(status);
@@ -259,7 +278,8 @@ int ConvertScrip(char* infile, char* outfile1, char* outfile2)
 
   if (grdim > 1) {
     fprintf(stderr, "grid_rank is greater than 1.  This program only convert grids with grid_rank=1.\n");
-    return -1;
+    *rc = -1;
+    return; // bail out
   }
 
   noarea = 0;
@@ -272,8 +292,9 @@ int ConvertScrip(char* infile, char* outfile1, char* outfile2)
   if (status != NC_NOERR) nocenter = 1;
   status = nc_inq_varid(ncid1, "grid_center_lon", &ctlonid);
   if ((status != NC_NOERR && nocenter != 1) || (status == NC_NOERR && nocenter == 1)) {
-    fprintf(stderr, "Either grid_center_lat or grid_center_lon does not exist.\n");
-    return -1;
+    fprintf(stderr, "Either grid_center_lat or grid_center_lon does not exist.\n")
+    *rc = -1;
+    return; // bail out
   }
   status = nc_inq_varid(ncid1, "grid_corner_lat", &colatid);
   if (status != NC_NOERR) handle_error(status);
@@ -524,7 +545,8 @@ int ConvertScrip(char* infile, char* outfile1, char* outfile2)
       dualcellcounts[i1]++;
       if (dualcellcounts[i1] > maxconnection) {
 	printf("Vertex %d exceed maximal connections %d\n", i1, maxconnection);
-        return -1;
+        *rc = -1;
+        return; // bail out
       }
     }
   }
@@ -618,11 +640,13 @@ int ConvertScrip(char* infile, char* outfile1, char* outfile2)
   free(inbuf);
   nc_close(ncid2);
   nc_close(ncid1);
-  return 0;
+  *rc = 0;
+  return;
 
 #else
   fprintf(stderr, "Have to compile with ESMC_NETCDF environment variable defined\n");
-  return -1;
+  *rc = -1;
+  return;
 #endif
 }
-
+}

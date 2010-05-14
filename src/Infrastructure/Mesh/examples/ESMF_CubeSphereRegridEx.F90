@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubeSphereRegridEx.F90,v 1.11 2010/05/14 22:34:35 rokuingh Exp $
+! $Id: ESMF_CubeSphereRegridEx.F90,v 1.12 2010/05/14 22:50:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -95,6 +95,8 @@ program ESMF_CubeSphereRegridEx
       real(ESMF_KIND_R8), pointer :: weights(:)
       character(len=2) :: petstring     
       character(len=256) :: srcfile, dstfile, wgtfile
+      character(len=256) :: input_scrip_file, esmf_mesh_file, dual_mesh_file
+      integer :: input_scrip_file_len, esmf_mesh_file_len, dual_mesh_file_len
       character(len=40) :: regrid_type, revflag
       integer :: numarg
       logical :: convert3D
@@ -113,7 +115,7 @@ program ESMF_CubeSphereRegridEx
       if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 99
 
       ! set up local pet info
-      call ESMF_VMGet(vm, PetNo, petCount=PetCnt, rc=status)
+      call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=status)
       if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 99
 
       !------------------------------------------------------------------------
@@ -123,7 +125,7 @@ program ESMF_CubeSphereRegridEx
       if (numarg < 4) then
 	if (PetNo == 0) then
           print *, 'ERROR: insufficient arguments'
-	  print *, 'USAGE: ESMF_CubeSphereRegrid first_grid second_grid weight_file regrid_method [rev]'
+	  print *, 'USAGE: ESMF_CubeSphereRegridEx first_grid second_grid weight_file regrid_method [rev]'
           print *, 'the first_grid is a unstructured grid with the format defined in the ESMF'
           print *, 'unstructured grid NetCDF format and the second_grid is a rectangular 2D grid'
           print *, 'in SCRIP format.  The weight_file is the output weight file also in SCRIP'
@@ -148,6 +150,31 @@ program ESMF_CubeSphereRegridEx
       !Set finalrc to success
       rc = ESMF_SUCCESS
       failCnt = 0
+      
+#define SRC_IS_SCRIP_disable
+#ifdef SRC_IS_SCRIP
+      ! *************************************************************
+      ! convert a cubed sphere grid file from SCRIP NetCDF format
+      ! into ESMF NetCDF data format
+      ! *************************************************************
+      ! prepare file name strings
+      input_scrip_file = srcfile
+      esmf_mesh_file = "esmf--"//srcfile
+      dual_mesh_file = "dual--"//srcfile
+      srcfile = esmf_mesh_file
+      if (PetNo == 0) then
+        ! this is a serial call into C code for now
+        input_scrip_file_len = len_trim(input_scrip_file)
+        esmf_mesh_file_len = len_trim(esmf_mesh_file)
+        dual_mesh_file_len = len_trim(dual_mesh_file)
+        call c_ConvertSCRIP(input_scrip_file, input_scrip_file_len, &
+          esmf_mesh_file, esmf_mesh_file_len, &
+          dual_mesh_file, dual_mesh_file_len, status)
+        if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+      endif
+      call ESMF_VMBarrier(vm, rc=status)
+      if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+#endif
 
       ! *************************************************************
       ! read the mesh from the NetCDF file
