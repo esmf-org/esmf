@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubeSphereRegridEx.F90,v 1.8 2010/05/06 21:20:08 oehmke Exp $
+! $Id: ESMF_CubeSphereRegridEx.F90,v 1.9 2010/05/14 22:07:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -267,12 +267,12 @@ program ESMF_CubeSphereRegridEx
 
       !! Write the weight table into a SCRIP format NetCDF file
       if (PetNo == 0) then
-         call OutputWeightFile(wgtfile, indicies, weights, VertexCoords, &
+         call OutputWeightFile(wgtfile, srcfile, dstfile, indicies, weights, VertexCoords, &
 	      coordX, coordY, xdim, ydim, rc=status)
          if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 	 deallocate(coordX, coordY)
       else 
-	 call OutputWeightFile(wgtfile, indicies, weights, rc=status)
+	 call OutputWeightFile(wgtfile, srcfile, dstfile, indicies, weights, rc=status)
          if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
       endif
       !!deallocate(VertexCoords)
@@ -1039,10 +1039,12 @@ end subroutine CreateRegGrid
 ! output the weight and indices tables together with the source/dest vertex coordinates/masks to the
 ! SCRIP format NetCDF file
 !--------------------------------------------------------------------
-subroutine outputWeightFile(filename, indices, weights, SrcVertexCoords, &
+subroutine OutputWeightFile(filename, srcfile, dstfile, indices, weights, SrcVertexCoords, &
                             coordX, coordY, xdim,  ydim, SrcMasks, DstMasks, rc)
 
       character(len=256) :: filename
+      character(len=256) :: srcfile
+      character(len=256) :: dstfile
       real(ESMF_KIND_R8) , pointer :: weights(:)   
       integer(ESMF_KIND_I4) , pointer :: indices(:,:) 
       real(ESMF_KIND_R8) , pointer, optional:: SrcVertexCoords(:,:)    
@@ -1058,10 +1060,13 @@ subroutine outputWeightFile(filename, indices, weights, SrcVertexCoords, &
       integer :: status
       integer :: i,j, start
       integer :: srcDim, dstDim
-      integer:: naDimId, nbDimId, nsDimId, srankDimId, drankDimId, varId
+      integer :: naDimId, nbDimId, nsDimId, srankDimId, drankDimId, nwDimId 
+      integer :: naxVarId, nayVarId, nbxVarId, nbyVarId, srVarId, drVarId, rVarId, cVarId, svarId
       real(ESMF_KIND_R8), pointer   :: coords(:)
       integer(ESMF_KIND_I4), pointer:: colrow(:) 
       integer(ESMF_KIND_I4), pointer:: allCounts(:) 
+ 
+      character(len=128) :: title, norm, map_method, conventions
 
 #ifdef ESMF_NETCDF
       ! write out the indices and weights table sequentially to the output file
@@ -1070,7 +1075,8 @@ subroutine outputWeightFile(filename, indices, weights, SrcVertexCoords, &
       localCount(1)=size(weights,1)
       allocate(allCounts(PetCnt))
       call ESMF_VMAllGather(vm,localCount,allCounts,1,rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc)) goto 90
+      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) goto 90
 
       ! calculate the size of the global weight table
       total = 0
@@ -1097,6 +1103,40 @@ subroutine outputWeightFile(filename, indices, weights, SrcVertexCoords, &
          ncStatus = nf90_create(trim(filename), NF90_CLOBBER, ncid)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
          
+         ! global variables
+         title = "ESMF Offline Bilinear Remapping"
+         norm = "destarea"
+         map_method = "Bilinear remapping"
+         conventions = "NCAR-CSM"
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "title", trim(title))
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "normalization", trim(norm))
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "map_method", trim(map_method))
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "conventions", trim(conventions))
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "domain_a", trim(srcfile))
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "domain_b", trim(dstfile))
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "grid_file_src", trim(srcfile))
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "grid_file_dst", trim(dstfile))
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "CVS_revision", ESMF_VERSION_STRING)
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+
         ! define dimensions
          ncStatus = nf90_def_dim(ncid,"n_a",srcDim, naDimId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
@@ -1109,66 +1149,70 @@ subroutine outputWeightFile(filename, indices, weights, SrcVertexCoords, &
 
          ncStatus = nf90_def_dim(ncid,"src_grid_rank",1, srankDimId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
          ncStatus = nf90_def_dim(ncid,"dst_grid_rank",2, drankDimId)
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_def_dim(ncid,"num_wgts",1, nwDimId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
         ! define variables
         ! yc_a: source vertex coordinate (latitude)
-         ncStatus = nf90_def_var(ncid,"yc_a",NF90_DOUBLE, (/naDimId/),  VarId)
+         ncStatus = nf90_def_var(ncid,"yc_a",NF90_DOUBLE, (/naDimId/),  nayVarId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
-         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         ncStatus = nf90_put_att(ncid, nayVarId, "units", "degrees")
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
         ! yc_b: destination vertex coordinate (latitude)
-         ncStatus = nf90_def_var(ncid,"yc_b",NF90_DOUBLE, (/nbDimId/),  VarId)
+         ncStatus = nf90_def_var(ncid,"yc_b",NF90_DOUBLE, (/nbDimId/),  nbyVarId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
-         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         ncStatus = nf90_put_att(ncid, nbyVarId, "units", "degrees")
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
         ! xc_a: source vertex coordinate (longitude)
-         ncStatus = nf90_def_var(ncid,"xc_a",NF90_DOUBLE, (/naDimId/),  VarId)
+         ncStatus = nf90_def_var(ncid,"xc_a",NF90_DOUBLE, (/naDimId/),  naxVarId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
-         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         ncStatus = nf90_put_att(ncid, naxVarId, "units", "degrees")
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
         ! xc_b: dest. vertex coordinate (longitude)
-         ncStatus = nf90_def_var(ncid,"xc_b",NF90_DOUBLE, (/nbDimId/),  VarId)
+         ncStatus = nf90_def_var(ncid,"xc_b",NF90_DOUBLE, (/nbDimId/),  nbxVarId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
-         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
-         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
-
-         ncStatus = nf90_def_var(ncid,"src_grid_dims",NF90_INT, (/srankDimId/),  VarId)
-         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
-         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         ncStatus = nf90_put_att(ncid, nbxVarId, "units", "degrees")
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
-         ncStatus = nf90_def_var(ncid,"dst_grid_dims",NF90_INT, (/drankDimId/),  VarId)
+         ncStatus = nf90_def_var(ncid,"src_grid_dims",NF90_INT, (/srankDimId/),  srVarId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
-         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         ncStatus = nf90_put_att(ncid, srVarId, "units", "degrees")
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_def_var(ncid,"dst_grid_dims",NF90_INT, (/drankDimId/),  drVarId)
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         ncStatus = nf90_put_att(ncid, drVarId, "units", "degrees")
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
         ! col: sparse matrix weight table
-         ncStatus = nf90_def_var(ncid,"col",NF90_INT, (/nsDimId/),  VarId)
+         ncStatus = nf90_def_var(ncid,"col",NF90_INT, (/naDimId/),  cVarId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
         ! row: sparse matrix weight table
-         ncStatus = nf90_def_var(ncid,"row",NF90_INT, (/nsDimId/),  VarId)
+         ncStatus = nf90_def_var(ncid,"row",NF90_INT, (/nbDimId/),  rVarId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
         ! S: sparse matrix weight table
-         ncStatus = nf90_def_var(ncid,"S",NF90_DOUBLE, (/nsDimId/),  VarId)
+         ncStatus = nf90_def_var(ncid,"S",NF90_DOUBLE, (/nsDimId/),  sVarId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
          ncStatus=nf90_enddef(ncid) 
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
          ! Write the vertex information and rank information
-         ncStatus=nf90_inq_varid(ncid,"src_grid_dims",VarId)
-         ncStatus=nf90_put_var(ncid,VarId,1)          
+         ncStatus=nf90_inq_varid(ncid,"src_grid_dims",srVarId)
+         ncStatus=nf90_put_var(ncid,srVarId,1)          
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
-         ncStatus=nf90_inq_varid(ncid,"dst_grid_dims",VarId)
-         ncStatus=nf90_put_var(ncid,VarId, (/xdim, ydim/))          
+         ncStatus=nf90_inq_varid(ncid,"dst_grid_dims",drVarId)
+         ncStatus=nf90_put_var(ncid,drVarId, (/xdim, ydim/))          
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
          ! Write xc_a, xc_b, yc_a, yc_b
@@ -1177,27 +1221,27 @@ subroutine outputWeightFile(filename, indices, weights, SrcVertexCoords, &
 	 do i=1,srcDim
 	    coords(i)=SrcVertexCoords(1,i)
          end do
-         ncStatus=nf90_inq_varid(ncid,"xc_a",VarId)
-         ncStatus=nf90_put_var(ncid,VarId, coords)          
+         ncStatus=nf90_inq_varid(ncid,"xc_a",naxVarId)
+         ncStatus=nf90_put_var(ncid,naxVarId, coords)          
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
          ! get the latitude from SrcVertexCoords
 	 do i=1,srcDim
 	    coords(i)=SrcVertexCoords(2,i)
          end do
-         ncStatus=nf90_inq_varid(ncid,"yc_a",VarId)
-         ncStatus=nf90_put_var(ncid,VarId, coords)          
+         ncStatus=nf90_inq_varid(ncid,"yc_a",nayVarId)
+         ncStatus=nf90_put_var(ncid,nayVarId, coords)          
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
          deallocate(coords)
          
 	! get the longitude from DstVertexCoords
-         ncStatus=nf90_inq_varid(ncid,"xc_b",VarId)
-         ncStatus=nf90_put_var(ncid,VarId, coordX)          
+         ncStatus=nf90_inq_varid(ncid,"xc_b",nbxVarId)
+         ncStatus=nf90_put_var(ncid,nbxVarId, coordX)          
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
          ! get the latitude from DstVertexCoords
-         ncStatus=nf90_inq_varid(ncid,"yc_b",VarId)
-         ncStatus=nf90_put_var(ncid,VarId, coordY)          
+         ncStatus=nf90_inq_varid(ncid,"yc_b",nbyVarId)
+         ncStatus=nf90_put_var(ncid,nbyVarId, coordY)          
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
          ncStatus=nf90_close(ncid=ncid)
@@ -1225,18 +1269,18 @@ subroutine outputWeightFile(filename, indices, weights, SrcVertexCoords, &
             enddo
 	    ncStatus = nf90_open (path=trim(filename), mode=nf90_write, ncid=ncid)
 	    if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
-            ncStatus=nf90_inq_varid(ncid,"col",VarId)
-   	    ncStatus=nf90_put_var(ncid,VarId, colrow,(/start/),localCount)          
+            ncStatus=nf90_inq_varid(ncid,"col",cVarId)
+   	    ncStatus=nf90_put_var(ncid,cVarId, colrow,(/start/),localCount)          
             if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
             do j=1,localCount(1)
               colrow(j) = indicies(j,2)
             enddo
-            ncStatus=nf90_inq_varid(ncid,"row",VarId)
-   	    ncStatus=nf90_put_var(ncid,VarId, colrow,(/start/),localCount)          
+            ncStatus=nf90_inq_varid(ncid,"row",rVarId)
+   	    ncStatus=nf90_put_var(ncid,rVarId, colrow,(/start/),localCount)          
             if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
-            ncStatus=nf90_inq_varid(ncid,"S",VarId)
-            ncStatus=nf90_put_var(ncid,VarId, weights, (/start/),localCount)
+            ncStatus=nf90_inq_varid(ncid,"S",sVarId)
+            ncStatus=nf90_put_var(ncid,sVarId, weights, (/start/),localCount)
             if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
             
 	    ncStatus=nf90_close(ncid)
