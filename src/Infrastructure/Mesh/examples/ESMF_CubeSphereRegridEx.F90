@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubeSphereRegridEx.F90,v 1.10 2010/05/14 22:20:28 rokuingh Exp $
+! $Id: ESMF_CubeSphereRegridEx.F90,v 1.11 2010/05/14 22:34:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -267,12 +267,12 @@ program ESMF_CubeSphereRegridEx
 
       !! Write the weight table into a SCRIP format NetCDF file
       if (PetNo == 0) then
-         call OutputWeightFile(wgtfile, indicies, weights, VertexCoords, &
+         call OutputWeightFile(wgtfile, srcfile, dstfile, indicies, weights, VertexCoords, &
 	      coordX, coordY, xdim, ydim, rc=status)
          if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 	 deallocate(coordX, coordY)
       else 
-	 call OutputWeightFile(wgtfile, indicies, weights, rc=status)
+	 call OutputWeightFile(wgtfile, srcfile, dstfile, indicies, weights, rc=status)
          if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
       endif
       !!deallocate(VertexCoords)
@@ -1039,10 +1039,12 @@ end subroutine CreateRegGrid
 ! output the weight and indices tables together with the source/dest vertex coordinates/masks to the
 ! SCRIP format NetCDF file
 !--------------------------------------------------------------------
-subroutine outputWeightFile(filename, indices, weights, SrcVertexCoords, &
+subroutine OutputWeightFile(filename, srcfile, dstfile, indices, weights, SrcVertexCoords, &
                             coordX, coordY, xdim,  ydim, SrcMasks, DstMasks, rc)
 
       character(len=256) :: filename
+      character(len=256) :: srcfile
+      character(len=256) :: dstfile
       real(ESMF_KIND_R8) , pointer :: weights(:)   
       integer(ESMF_KIND_I4) , pointer :: indices(:,:) 
       real(ESMF_KIND_R8) , pointer, optional:: SrcVertexCoords(:,:)    
@@ -1062,6 +1064,8 @@ subroutine outputWeightFile(filename, indices, weights, SrcVertexCoords, &
       real(ESMF_KIND_R8), pointer   :: coords(:)
       integer(ESMF_KIND_I4), pointer:: colrow(:) 
       integer(ESMF_KIND_I4), pointer:: allCounts(:) 
+
+      character(len=128) :: title, norm, map_method, conventions
 
 #ifdef ESMF_NETCDF
       ! write out the indices and weights table sequentially to the output file
@@ -1098,6 +1102,39 @@ subroutine outputWeightFile(filename, indices, weights, SrcVertexCoords, &
          ncStatus = nf90_create(trim(filename), NF90_CLOBBER, ncid)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
          
+         ! global variables
+         title = "ESMF Offline Bilinear Remapping"
+         norm = "destarea"
+         map_method = "Bilinear remapping"
+         conventions = "NCAR-CSM"
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "title", trim(title))
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "normalization", trim(norm))
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "map_method", trim(map_method))
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "conventions", trim(conventions))
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "domain_a", trim(srcfile))
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "domain_b", trim(dstfile))
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "grid_file_src", trim(srcfile))
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "grid_file_dst", trim(dstfile))
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "CVS_revision", ESMF_VERSION_STRING)
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
         ! define dimensions
          ncStatus = nf90_def_dim(ncid,"n_a",srcDim, naDimId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
