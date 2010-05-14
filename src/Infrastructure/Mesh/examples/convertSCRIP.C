@@ -1,4 +1,4 @@
-// $Id: convertSCRIP.C,v 1.2 2010/05/14 22:50:19 theurich Exp $
+// $Id: convertSCRIP.C,v 1.3 2010/05/14 23:07:46 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 
 #include "ESMC_Conf.h"
 
-#ifdef ESMC_NETCDF
+#ifdef ESMF_NETCDF
 #include <netcdf.h>
 #endif
 
@@ -169,7 +169,7 @@ FIELD* search_bucket(double lon, double lat) {
 }
   
 void handle_error(int status) {
-#ifdef ESMC_NETCDF
+#ifdef ESMF_NETCDF
   if (status != NC_NOERR) {
     fprintf(stderr, "%s\n", nc_strerror(status));
     exit(-1);
@@ -250,7 +250,7 @@ void FTN(c_convertscrip)(
   time_t tloc;
   int maxconnection;
 
-#ifdef ESMC_NETCDF
+#ifdef ESMF_NETCDF
   // ensure C conform string termination
   infile[*infileLen] = '\0';
   outfile1[*outfile1Len] = '\0';
@@ -292,7 +292,7 @@ void FTN(c_convertscrip)(
   if (status != NC_NOERR) nocenter = 1;
   status = nc_inq_varid(ncid1, "grid_center_lon", &ctlonid);
   if ((status != NC_NOERR && nocenter != 1) || (status == NC_NOERR && nocenter == 1)) {
-    fprintf(stderr, "Either grid_center_lat or grid_center_lon does not exist.\n")
+    fprintf(stderr, "Either grid_center_lat or grid_center_lon does not exist.\n");
     *rc = -1;
     return; // bail out
   }
@@ -644,7 +644,7 @@ void FTN(c_convertscrip)(
   return;
 
 #else
-  fprintf(stderr, "Have to compile with ESMC_NETCDF environment variable defined\n");
+  fprintf(stderr, "Have to compile with ESMF_NETCDF environment variable defined\n");
   *rc = -1;
   return;
 #endif
