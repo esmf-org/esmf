@@ -1,4 +1,4 @@
-// $Id: convertSCRIP.C,v 1.4 2010/05/14 23:37:05 theurich Exp $
+// $Id: convertSCRIP.C,v 1.5 2010/05/15 04:47:49 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -215,6 +215,61 @@ void orderit(int index, double lon, double lat, int numedges, double *latlonbuf,
   }
 }
      
+void convert3D(double lon, double lat, double *x, double *y) {
+  double deg2rad = M_PI/180;
+  double lonrad, latrad;
+  lonrad = lon*deg2rad;
+  latrad = (90-lat)*deg2rad;
+  *x = cos(lonrad)*sin(latrad);
+  *y = sin(lonrad)*sin(latrad);
+}
+
+//If the latitude it above (or below) certain treshold (in the polar region), convert the
+// coordinates into a equatorial plane and calculate the angles
+void orderit2(int index, double lon, double lat, int numedges, double *latlonbuf, int *next) {
+  double *angles, temp;
+  int i, j, min, temp1;
+  double xcenter, ycenter;
+  double xcorner, ycorner;
+  
+  angles = (double*)malloc(sizeof(double)*numedges);
+  convert3D(lon, lat, &xcenter, &ycenter);
+
+  for (i=0; i< numedges; i++) {
+    j=*(next+i)-1;
+    convert3D(latlonbuf[j*2], latlonbuf[j*2+1], &xcorner, &ycorner);
+    angles[i] = atan2(ycorner-ycenter, xcorner-xcenter);
+    // change angle to 0 to 2PI degree
+    if (ycorner<ycenter) {
+      angles[i] = 2*M_PI+angles[i];
+    }
+  }
+  // if it is in the south pole, reverse the angle
+  if (lat < 0) {
+    for (i=0; i<numedges; i++) {
+      angles[i]=-angles[i];
+    }
+  }
+  // sort angles and keep the order of the index
+  // do it in stupid way, loop through the list and find
+  // the minimal, use insertion sort
+  for (i=0; i<numedges-1; i++) {
+    min=i;
+    for (j=i+1; j<numedges; j++) {
+      if (angles[j]<angles[min]) min=j;
+    }
+    // swap min and i
+    if (min != i) {
+      temp=angles[i];
+      angles[i]=angles[min];
+      angles[min]=temp;
+      temp1 = *(next+i);
+      *(next+i)=*(next+min);
+      *(next+min)=temp1;
+    }
+  }
+}
+      
 extern "C" { 
 void FTN(c_convertscrip)(
   char *infile,
@@ -560,14 +615,13 @@ void FTN(c_convertscrip)(
     // in the cell id in counter clockwise order
 
     next = &dualcells[i*maxconnection];
-    orderit(i+1, nodelatlon[i*2], nodelatlon[i*2+1], numedges, inbuf1,next);      
-    //    if (totalneighbors[i]==maxconnection) {
-    //  printf("max connection %d %f %f %d %d %d %d %d\n",i+1, nodelatlon[i*2],nodelatlon[i*2+1],
-    //	     *next, *(next+1), *(next+2),*(next+3), *(next+4));
-    //} 
+    if (abs(nodelatlon[i*2+1]) > 88.0) {
+      orderit2(i+1, nodelatlon[i*2], nodelatlon[i*2+1], numedges, inbuf1,next);      
+    } else {
+      orderit(i+1, nodelatlon[i*2], nodelatlon[i*2+1], numedges, inbuf1,next);      
+    }
   }
 
-  // free(celltbl);
   free(dualcellcounts);
   // now write out the dual mesh in a netcdf file
   // create the output netcdf file
