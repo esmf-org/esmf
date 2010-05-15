@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubeSphereRegridEx.F90,v 1.13 2010/05/15 05:39:37 theurich Exp $
+! $Id: ESMF_CubeSphereRegridEx.F90,v 1.14 2010/05/15 06:12:21 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -161,7 +161,7 @@ program ESMF_CubeSphereRegridEx
       input_scrip_file = srcfile
       esmf_mesh_file = ".esmf.nc"
       dual_mesh_file = ".dual.nc"
-      srcfile = esmf_mesh_file
+      srcfile = dual_mesh_file
       if (PetNo == 0) then
         ! this is a serial call into C code for now
         input_scrip_file_len = len_trim(input_scrip_file)
@@ -330,16 +330,27 @@ program ESMF_CubeSphereRegridEx
          write(petstring,'(I2)') PetNo
       endif
       open(10,FILE=trim(wgtfile)//'.'//trim(petstring))
-      do i=1,size(weights)
-	j=indicies(i,2)/xdim+1
-        k = indicies(i,2)-((j-1)*xdim)
-        write(10,'(2I7, 7F9.4)') indicies(i,1), indicies(i,2),  VertexCoords(1,indicies(i,1)), &
+      if (trim(revFlag) .eq. 'rev') then 
+        do i=1,size(weights)
+	  j=indicies(i,1)/xdim+1
+          k = indicies(i,1)-((j-1)*xdim)
+          write(10,'(2I7, 5F9.4)') indicies(i,1), indicies(i,2), fptr1(k,j), &
+	        fptr2(k,j), VertexCoords(1,indicies(i,2)), &
+		VertexCoords(2,indicies(i,2)), weights(i)
+        enddo
+      else
+        do i=1,size(weights)
+	  j=indicies(i,2)/xdim+1
+          k = indicies(i,2)-((j-1)*xdim)
+          write(10,'(2I7, 5F9.4)') indicies(i,1), indicies(i,2),  VertexCoords(1,indicies(i,1)), &
 		VertexCoords(2,indicies(i,1)), fptr1(k,j), fptr2(k,j), weights(i)
-      enddo
+        enddo
+      endif
       close(10)
 #endif
 
       if (trim(revflag) .eq. 'rev') then     
+        ! regrid from dstgrid to srcgrid
         call ESMF_FieldGet(field1, localDe=0, farrayPtr=fptr, rc=status)
         ! Get Mesh's node distgrid and its seqIndex 
         call ESMF_MeshGet(srcMesh, nodalDistgrid=NodeDG, numOwnedNodes=totalNodes, rc=status)
@@ -363,7 +374,6 @@ program ESMF_CubeSphereRegridEx
         enddo
         deallocate(seqIndex)
       else
-        ! regrid from dstgrid to srcgrid 
         call ESMF_FieldGet(field2, localDe=0, farrayPtr=array3, rc=status)
         if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
         count = 0
@@ -1067,7 +1077,7 @@ end subroutine CreateRegGrid
 ! SCRIP format NetCDF file
 !--------------------------------------------------------------------
 subroutine OutputWeightFile(filename, srcfile, dstfile, indices, weights, SrcVertexCoords, &
-                            coordX, coordY, xdim,  ydim, SrcMasks, DstMasks, rc)
+                            coordX, coordY, xdim,  ydim, rc)
 
       character(len=256) :: filename
       character(len=256) :: srcfile
@@ -1077,8 +1087,6 @@ subroutine OutputWeightFile(filename, srcfile, dstfile, indices, weights, SrcVer
       real(ESMF_KIND_R8) , pointer, optional:: SrcVertexCoords(:,:)    
       real(ESMF_KIND_R8) , pointer, optional:: coordX(:), coordY(:)
       integer, optional :: xdim, ydim
-      real(ESMF_KIND_R8) , pointer, optional:: SrcMasks(:)    
-      real(ESMF_KIND_R8) , pointer, optional:: DstMasks(:)
       integer, optional :: rc
 
       integer :: total, localCount(1)
