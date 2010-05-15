@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubeSphereRegridEx.F90,v 1.12 2010/05/14 22:50:19 theurich Exp $
+! $Id: ESMF_CubeSphereRegridEx.F90,v 1.13 2010/05/15 05:39:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -151,7 +151,7 @@ program ESMF_CubeSphereRegridEx
       rc = ESMF_SUCCESS
       failCnt = 0
       
-#define SRC_IS_SCRIP_disable
+#define SRC_IS_SCRIP
 #ifdef SRC_IS_SCRIP
       ! *************************************************************
       ! convert a cubed sphere grid file from SCRIP NetCDF format
@@ -159,8 +159,8 @@ program ESMF_CubeSphereRegridEx
       ! *************************************************************
       ! prepare file name strings
       input_scrip_file = srcfile
-      esmf_mesh_file = "esmf--"//srcfile
-      dual_mesh_file = "dual--"//srcfile
+      esmf_mesh_file = ".esmf.nc"
+      dual_mesh_file = ".dual.nc"
       srcfile = esmf_mesh_file
       if (PetNo == 0) then
         ! this is a serial call into C code for now
