@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubeSphereRegridEx.F90,v 1.14 2010/05/15 06:12:21 peggyli Exp $
+! $Id: ESMF_CubeSphereRegridEx.F90,v 1.15 2010/05/16 17:03:43 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -151,7 +151,6 @@ program ESMF_CubeSphereRegridEx
       rc = ESMF_SUCCESS
       failCnt = 0
       
-#define SRC_IS_SCRIP
 #ifdef SRC_IS_SCRIP
       ! *************************************************************
       ! convert a cubed sphere grid file from SCRIP NetCDF format
@@ -216,7 +215,10 @@ program ESMF_CubeSphereRegridEx
       !!!!!!!
       deg2rad = 3.141592653589793238/180;
       do i=1,count
-	fptr(i) = COS(deg2rad*VertexCoords(2,nodeIds(i)))
+!         The below can give misleading bigger errors if dest points are closer to pole than src points 
+!         Do constant for basic sanity check, until develop something more complex
+!	fptr(i) = COS(deg2rad*VertexCoords(2,nodeIds(i)))
+	fptr(i) = 1.0
       enddo
      !!!!!!!
 
@@ -272,7 +274,23 @@ program ESMF_CubeSphereRegridEx
 	    regridScheme = ESMF_REGRID_SCHEME_FULL3D, rc=status)
             if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
         endif
-      else
+      else if (trim(regrid_type) .eq. 'patch') then
+        if (trim(revflag) .ne. 'rev') then
+        call ESMF_FieldRegridStore(srcField=field1, dstField=field2, & 
+	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
+	    indicies=indicies, weights=weights, &
+            regridMethod = ESMF_REGRID_METHOD_PATCH, &
+	    regridScheme = ESMF_REGRID_SCHEME_FULL3D, rc=status)
+            if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+	else 
+          call ESMF_FieldRegridStore(srcField=field2, dstField=field1, & 
+	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
+	    indicies=indicies, weights=weights, &
+            regridMethod = ESMF_REGRID_METHOD_PATCH, &
+	    regridScheme = ESMF_REGRID_SCHEME_FULL3D, rc=status)
+            if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+        endif
+      else if (trim(regrid_type) .eq. 'conservative') then
         if (trim(revflag) .ne. 'rev') then
           call ESMF_FieldRegridStore(srcField=field1, dstField=field2, & 
 	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
@@ -290,6 +308,10 @@ program ESMF_CubeSphereRegridEx
 	    regridScheme = ESMF_REGRID_SCHEME_FULL3D, rc=status)
             if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 	endif
+ 
+      else ! nothing recognizable so report error
+	     print *, 'The fourth argument is not a recognized interpolation method.'
+             call ESMF_Finalize(terminationflag=ESMF_ABORT)
       endif
 
       !! Write the weight table into a SCRIP format NetCDF file
@@ -304,6 +326,7 @@ program ESMF_CubeSphereRegridEx
       endif
       !!deallocate(VertexCoords)
 
+#ifdef INTERNAL_INTERP_CHECK
       if (trim(revflag) .ne. 'rev') then
          call ESMF_FieldRegrid(field1, field2, rh1, rc=status)
       else
@@ -322,7 +345,7 @@ program ESMF_CubeSphereRegridEx
 	     fptr = fptr2, rc=status)
       if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
       !   print *, lbnd1(1), lbnd1(2), fptr1(lbnd1(1),lbnd1(2)), fptr2(lbnd2(1),lbnd2(2))
-#if 1
+#if 0
       !! write weight table into an ascii file, one file per PET
       if (PetNo < 10) then
          write(petstring,'(I1)') PetNo
@@ -360,7 +383,10 @@ program ESMF_CubeSphereRegridEx
 	if (status .ne. ESMF_SUCCESS)  call ESMF_Finalize(terminationflag=ESMF_ABORT)
         count = 0
         do i=1,totalNodes
-	  val = COS(deg2rad*VertexCoords(2,seqIndex(i)))
+!         The below can give bigger errors if dest points are closer to pole than src points 
+!         Do constant for basic sanity check for now
+!	  val = COS(deg2rad*VertexCoords(2,seqIndex(i)))
+	  val = 1.0
 	  if (val .ne. 0) then
              error = abs((fptr(i)-val)/val)
           else
@@ -379,7 +405,10 @@ program ESMF_CubeSphereRegridEx
         count = 0
         do i=lbnd1(1),ubnd1(1)
           do j=lbnd1(2),ubnd1(2)
-	      val = COS(deg2rad*fptr2(i,j))
+!         The below can give bigger errors if dest points are closer to pole than src points 
+!         Do constant for basic sanity check, until develop something more complex
+!	      val = COS(deg2rad*fptr2(i,j))
+              val=1.0
 	  if (val .ne. 0) then
              error = abs((array3(i,j)-val)/val)
           else
@@ -433,9 +462,24 @@ program ESMF_CubeSphereRegridEx
       STOP
 #endif
 
+#else
+
+90    continue
+      if (status .eq. ESMF_SUCCESS) then
+         print *, "ESMF_CubeSphereRegridEx executed successfully."
+      else
+         print *, "ERROR IN ESMF_CubeSphereRegridEx"
+      end if
+
+      ! halt the computer, display 0 on operator console lamps
+      call ESMF_Finalize()
+      STOP
+#endif
+
 ! error exit point
 99    continue
-      print *, "FAIL: ESMF_LandersParMeshUnit.F90"
+         print *, "ERROR IN ESMF_CubeSphereRegridEx."
+
 
       call ESMF_Finalize()
       ! halt the computer, display 777 on operator console lamps
@@ -1096,8 +1140,11 @@ subroutine OutputWeightFile(filename, srcfile, dstfile, indices, weights, SrcVer
       integer :: i,j, start
       integer :: srcDim, dstDim
       integer:: naDimId, nbDimId, nsDimId, srankDimId, drankDimId, varId
-      real(ESMF_KIND_R8), pointer   :: coords(:)
+      integer :: nvaDimId, nvbDimId
+      real(ESMF_KIND_R8), pointer   :: coords(:),area(:),frac(:)
+      real(ESMF_KIND_R8), pointer   :: cnr_coords(:,:)
       integer(ESMF_KIND_I4), pointer:: colrow(:) 
+      integer(ESMF_KIND_I4), pointer:: mask(:) 
       integer(ESMF_KIND_I4), pointer:: allCounts(:) 
 
       character(len=128) :: title, norm, map_method, conventions
@@ -1177,15 +1224,40 @@ subroutine OutputWeightFile(filename, srcfile, dstfile, indices, weights, SrcVer
          ncStatus = nf90_def_dim(ncid,"n_b",dstDim, nbDimId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
+
          ncStatus = nf90_def_dim(ncid,"n_s",total, nsDimId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
+        ! define max number of vertices
+         ncStatus = nf90_def_dim(ncid,"nv_a",4, nvaDimId)
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_def_dim(ncid,"nv_b",4, nvbDimId)
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+        ! define max number of vertices
+         ncStatus = nf90_def_dim(ncid,"num_wgts",1, VarId)
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ! define grid ranks
          ncStatus = nf90_def_dim(ncid,"src_grid_rank",1, srankDimId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
          ncStatus = nf90_def_dim(ncid,"dst_grid_rank",2, drankDimId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
         ! define variables
+
+         ! Grid Dims
+         ncStatus = nf90_def_var(ncid,"src_grid_dims",NF90_INT, (/srankDimId/),  VarId)
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus = nf90_def_var(ncid,"dst_grid_dims",NF90_INT, (/drankDimId/),  VarId)
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
         ! yc_a: source vertex coordinate (latitude)
          ncStatus = nf90_def_var(ncid,"yc_a",NF90_DOUBLE, (/naDimId/),  VarId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
@@ -1210,15 +1282,66 @@ subroutine OutputWeightFile(filename, srcfile, dstfile, indices, weights, SrcVer
          ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
-         ncStatus = nf90_def_var(ncid,"src_grid_dims",NF90_INT, (/srankDimId/),  VarId)
+        ! yv_a: source corner coordinate (latitude)
+         ncStatus = nf90_def_var(ncid,"yv_a",NF90_DOUBLE, (/nvaDimId,naDimId/),  VarId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
          ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
-         ncStatus = nf90_def_var(ncid,"dst_grid_dims",NF90_INT, (/drankDimId/),  VarId)
+        ! xv_a: source corner coordinate (longitude)
+         ncStatus = nf90_def_var(ncid,"xv_a",NF90_DOUBLE, (/nvaDimId,naDimId/),  VarId)
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
          ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+        ! yv_b: source corner coordinate (latitude)
+         ncStatus = nf90_def_var(ncid,"yv_b",NF90_DOUBLE, (/nvbDimId,nbDimId/),  VarId)
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+        ! xv_b: source corner coordinate (longitude)
+         ncStatus = nf90_def_var(ncid,"xv_b",NF90_DOUBLE, (/nvbDimId,nbDimId/),  VarId)
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+        ! mask_a
+         ncStatus = nf90_def_var(ncid,"mask_a",NF90_INT, (/naDimId/),  VarId)
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         ncStatus = nf90_put_att(ncid, VarId, "units", "unitless")
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+        ! mask_b
+         ncStatus = nf90_def_var(ncid,"mask_b",NF90_INT, (/nbDimId/),  VarId)
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+        ! area_a
+         ncStatus = nf90_def_var(ncid,"area_a",NF90_DOUBLE, (/naDimId/),  VarId)
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         ncStatus = nf90_put_att(ncid, VarId, "units", "square radians")
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+        ! area_b
+         ncStatus = nf90_def_var(ncid,"area_b",NF90_DOUBLE, (/nbDimId/),  VarId)
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         ncStatus = nf90_put_att(ncid, VarId, "units", "square radians")
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+        ! frac_a
+         ncStatus = nf90_def_var(ncid,"frac_a",NF90_DOUBLE, (/naDimId/),  VarId)
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         ncStatus = nf90_put_att(ncid, VarId, "units", "unitless")
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+        ! frac_b
+         ncStatus = nf90_def_var(ncid,"frac_b",NF90_DOUBLE, (/nbDimId/),  VarId)
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         ncStatus = nf90_put_att(ncid, VarId, "units", "unitless")
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
 
         ! col: sparse matrix weight table
          ncStatus = nf90_def_var(ncid,"col",NF90_INT, (/nsDimId/),  VarId)
@@ -1273,9 +1396,89 @@ subroutine OutputWeightFile(filename, srcfile, dstfile, indices, weights, SrcVer
          ncStatus=nf90_put_var(ncid,VarId, coordY)          
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
-         ncStatus=nf90_close(ncid=ncid)
+         ! Write xv_a, yv_a
+         ! Just set these to 0.0, because they don't seem to be used
+         allocate(cnr_coords(4,srcDim))         
+         cnr_coords=0.0
+         ncStatus=nf90_inq_varid(ncid,"yv_a",VarId)
+         ncStatus=nf90_put_var(ncid,VarId, cnr_coords)          
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
+         ncStatus=nf90_inq_varid(ncid,"xv_a",VarId)
+         ncStatus=nf90_put_var(ncid,VarId, cnr_coords)          
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         deallocate(cnr_coords)
+
+
+         ! Write xv_b, yv_b
+         ! Just set these to 0.0, because they don't seem to be used
+         allocate(cnr_coords(4,dstDim))         
+         cnr_coords=0.0
+         ncStatus=nf90_inq_varid(ncid,"yv_b",VarId)
+         ncStatus=nf90_put_var(ncid,VarId, cnr_coords)          
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+         ncStatus=nf90_inq_varid(ncid,"xv_b",VarId)
+         ncStatus=nf90_put_var(ncid,VarId, cnr_coords)          
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         deallocate(cnr_coords)
+
+         ! Write mask_a
+         ! Just set these to 0.0, because we don't support masks here yet
+         allocate(mask(srcDim))         
+         mask=1
+         ncStatus=nf90_inq_varid(ncid,"mask_a",VarId)
+         ncStatus=nf90_put_var(ncid,VarId, mask)          
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         deallocate(mask)
+
+         ! Write mask_b
+         ! Just set these to 0.0, because we don't support masks here yet
+         allocate(mask(dstDim))         
+         mask=1
+         ncStatus=nf90_inq_varid(ncid,"mask_b",VarId)
+         ncStatus=nf90_put_var(ncid,VarId, mask)          
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         deallocate(mask)
+
+         ! Write area_a
+         ! Just set these to 1.0, because not testing conservative yet
+         allocate(area(srcDim))         
+         area=1.0
+         ncStatus=nf90_inq_varid(ncid,"area_a",VarId)
+         ncStatus=nf90_put_var(ncid,VarId, area)          
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         deallocate(area)
+
+         ! Write area_b
+         ! Just set these to 1.0, because not testing conservative yet
+         allocate(area(dstDim))         
+         area=1.0
+         ncStatus=nf90_inq_varid(ncid,"area_b",VarId)
+         ncStatus=nf90_put_var(ncid,VarId, area)          
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         deallocate(area)
+
+
+         ! Write frac_a
+         allocate(frac(srcDim))         
+         frac=1.0
+         ncStatus=nf90_inq_varid(ncid,"frac_a",VarId)
+         ncStatus=nf90_put_var(ncid,VarId, frac)          
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         deallocate(frac)
+
+         ! Write frac_b
+         allocate(frac(dstDim))         
+         frac=1.0
+         ncStatus=nf90_inq_varid(ncid,"frac_b",VarId)
+         ncStatus=nf90_put_var(ncid,VarId, frac)          
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+         deallocate(frac)
+
+         ! Close netcdf file
+         ncStatus=nf90_close(ncid=ncid)
+         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
     end if
 
    ! Block all other PETs until the NetCDF file has been created
