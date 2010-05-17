@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubeSphereRegridEx.F90,v 1.16 2010/05/17 03:30:32 oehmke Exp $
+! $Id: ESMF_CubeSphereRegridEx.F90,v 1.17 2010/05/17 19:44:58 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -358,8 +358,8 @@ program ESMF_CubeSphereRegridEx
         do i=1,size(weights)
 	  j=indicies(i,1)/xdim+1
           k = indicies(i,1)-((j-1)*xdim)
-          write(10,'(2I7, 5F9.4)') indicies(i,1), indicies(i,2), fptr1(k,j), &
-	        fptr2(k,j), VertexCoords(1,indicies(i,2)), &
+          write(10,'(2I7, 3F9.4)') indicies(i,1), indicies(i,2), &
+	        VertexCoords(1,indicies(i,2)), &
 		VertexCoords(2,indicies(i,2)), weights(i)
         enddo
       else
@@ -1031,6 +1031,7 @@ subroutine CreateRegGrid (xdim, ydim, coordX, coordY, grid, field, rc)
     integer :: bigFac, nPetsX, nPetsY
     integer :: i
     real(ESMF_KIND_R8), pointer :: coord2D(:,:)
+    real(ESMF_KIND_R8) :: deg2rad
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: array
     integer :: localrc
@@ -1108,9 +1109,11 @@ subroutine CreateRegGrid (xdim, ydim, coordX, coordY, grid, field, rc)
 
     ! fake the data array to use a linear function of its coordinates
     !!!!!!!
+    deg2rad = 3.141592653589793238/180;
     do i=lbnd1(1),ubnd1(1)
        do j=lbnd1(2),ubnd1(2)
-          fptr(i,j) = COS(fptr1(i,j))
+!          fptr(i,j) = COS(deg2rad*fptr1(i,j))
+	   fptr(i,j) = 1.0
        enddo
     enddo
       !!!!!!!
@@ -1143,10 +1146,11 @@ subroutine OutputWeightFile(filename, srcfile, dstfile, indices, weights, SrcVer
       integer:: naDimId, nbDimId, nsDimId, srankDimId, drankDimId, varId
       integer :: nvaDimId, nvbDimId
       real(ESMF_KIND_R8), pointer   :: coords(:),area(:),frac(:)
-      real(ESMF_KIND_R8), pointer   :: cnr_coords(:,:)
-      integer(ESMF_KIND_I4), pointer:: colrow(:) 
+      real(ESMF_KIND_R8), pointer   :: cnr_coords(:,:), weightbuf(:)
+      integer(ESMF_KIND_I4), pointer:: indexbuf(:), next(:)
       integer(ESMF_KIND_I4), pointer:: mask(:) 
       integer(ESMF_KIND_I4), pointer:: allCounts(:) 
+      integer :: maxcount
 
       character(len=128) :: title, norm, map_method, conventions
 
@@ -1477,51 +1481,87 @@ subroutine OutputWeightFile(filename, srcfile, dstfile, indices, weights, SrcVer
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
          deallocate(frac)
 
-         ! Close netcdf file
-         ncStatus=nf90_close(ncid=ncid)
-         if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
     end if
 
-   ! Block all other PETs until the NetCDF file has been created
+    ! Block all other PETs until the NetCDF file has been created
     call ESMF_VMBarrier(vm)
 
-   ! Write out weight and indicies tables in parallel
-   ! Find out where to start
-    start=1
-    do i=1, PetNo
-	start=start+allCounts(i)
-    end do
+    ! find the max of allCounts(i) and allocate colrow
+    maxcount=0
+    do i=1,PetCnt
+	if (allCounts(i) > maxcount) maxcount = allCounts(i)
+    enddo
 
-    !print *, 'Weight table range ', PetNo, start, localCount(1), total
-    
-    do i=0, PetCnt-1
-	if (PetNo == i) then
-            allocate(colrow(localCount(1)))
-            do j=1,localCount(1)
-              colrow(j) = indicies(j,1)
-            enddo
-	    ncStatus = nf90_open (path=trim(filename), mode=nf90_write, ncid=ncid)
-	    if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+    if (PetNo == 0) then 
+	! First write out its own weight and indices, then receive the data from other PETs and write them out
+	start = 1
+        ! allocate indexbuf and weightbuf to receive data from other PETs
+        allocate(indexbuf(maxcount*2), weightbuf(maxcount))
+        do i=1, PetCnt
+          ! write the local weights and indices first
+          localCount(1)=allCounts(i)
+ 	  if (i==1) then 
+  	    !do j=1,localCount(1)
+            !    indexbuf(j) = indicies(j,1)
+            !enddo
+            next => indicies(:,1)
             ncStatus=nf90_inq_varid(ncid,"col",VarId)
-   	    ncStatus=nf90_put_var(ncid,VarId, colrow,(/start/),localCount)          
+   	    ncStatus=nf90_put_var(ncid,VarId, next,(/start/),localCount)          
             if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
-            do j=1,localCount(1)
-              colrow(j) = indicies(j,2)
-            enddo
+            !do j=1,localCount(1)
+            !  indexbuf(j) = indicies(j,2)
+            !enddo
+            next => indicies(:,2)
             ncStatus=nf90_inq_varid(ncid,"row",VarId)
-   	    ncStatus=nf90_put_var(ncid,VarId, colrow,(/start/),localCount)          
+   	    ncStatus=nf90_put_var(ncid,VarId, next,(/start/),localCount)          
             if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
             ncStatus=nf90_inq_varid(ncid,"S",VarId)
             ncStatus=nf90_put_var(ncid,VarId, weights, (/start/),localCount)
             if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
-            
-	    ncStatus=nf90_close(ncid)
+	  else 
+            ! receive the weight and indices
+            call ESMF_VMRecv(vm, indexbuf, localCount(1)*2, i-1, rc=status)
+ 	    if (status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            call ESMF_VMRecv(vm, weightbuf, localCount(1), i-1, rc=status)
+ 	    if (status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+            ncStatus=nf90_inq_varid(ncid,"col",VarId)
+     	    ncStatus=nf90_put_var(ncid,VarId, indexbuf,(/start/),localCount)          
             if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
-            deallocate(colrow)
-	end if
-        call ESMF_VMBarrier(vm)
-     end do
+            next => indexbuf(localCount(1)+1:localCount(1)*2)
+            ncStatus=nf90_inq_varid(ncid,"row",VarId)
+     	    ncStatus=nf90_put_var(ncid,VarId, next ,(/start/),localCount)          
+            if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+
+            ncStatus=nf90_inq_varid(ncid,"S",VarId)
+            ncStatus=nf90_put_var(ncid,VarId, weightbuf, (/start/),localCount)
+            if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+          end if
+          start = start + localCount(1)
+       end do
+    else
+       allocate(indexbuf(localcount(1)*2))
+       do j=1,localCount(1)
+           indexbuf(j) = indicies(j,1)
+           indexbuf(j+localCount(1)) = indicies(j,2)
+       enddo
+       ! a non-root PET, send the results to PET 0
+        call ESMF_VMSend(vm, indexbuf, localCount(1)*2, 0, rc=status)
+	if (status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+        call ESMF_VMSend(vm, weights, localCount(1), 0, rc=status)
+	if (status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+        ncStatus = nf_Noerror
+    end if
+       
+    call ESMF_VMBarrier(vm)
+    
+    if (PetNo == 0) then
+       ncStatus = nf90_close(ncid)                        
+       if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
+       deallocate(weightbuf)
+    end if
+    deallocate(indexbuf)
 
 90  continue
 
