@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubeSphereRegridEx.F90,v 1.15 2010/05/16 17:03:43 oehmke Exp $
+! $Id: ESMF_CubeSphereRegridEx.F90,v 1.16 2010/05/17 03:30:32 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -151,6 +151,7 @@ program ESMF_CubeSphereRegridEx
       rc = ESMF_SUCCESS
       failCnt = 0
       
+#define SRC_IS_SCRIP
 #ifdef SRC_IS_SCRIP
       ! *************************************************************
       ! convert a cubed sphere grid file from SCRIP NetCDF format
