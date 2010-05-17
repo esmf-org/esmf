@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.63 2010/05/17 05:20:52 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.64 2010/05/17 21:09:47 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -933,7 +933,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/) &
@@ -946,7 +946,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/) &
@@ -960,7 +960,7 @@
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
         ! fieldget is very expensive for 7D grid, only this test has it set true
-        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -974,7 +974,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -988,7 +988,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -1002,7 +1002,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -1063,7 +1063,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -1078,7 +1078,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -1093,7 +1093,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -1110,7 +1110,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -1127,7 +1127,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -1142,7 +1142,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -1157,7 +1157,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -1173,7 +1173,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -1189,9 +1189,9 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 4D grid and 3D ungridded bounds
-        call test7d_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+        call test7d_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
-            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,5,3/), &
+            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,2,3/), &
             maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
@@ -1205,9 +1205,9 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 4D grid and 3D ungridded bounds
-        call test7d2_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+        call test7d2_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
-            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,5,3/), &
+            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,2,3/), &
             maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
@@ -1223,7 +1223,7 @@
         ! Create a 7D field from a 1D grid and 6D ungridded bounds
         call test7d_generic(rc, minIndex=(/1/), maxIndex=(/6/), &
             regDecomp=(/4/), &
-            ungriddedLBound=(/1,2,1,2,1,2/), ungriddedUBound=(/4,5,3,3,5,4/), &
+            ungriddedLBound=(/1,2,1,2,1,2/), ungriddedUBound=(/4,2,3,3,2,4/), &
             maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
             fieldget=.true., &
             distgridToGridMap=(/1/), &
@@ -1239,7 +1239,7 @@
         ! Create a 7D field from a 1D grid and 6D ungridded bounds
         call test7d2_generic(rc, minIndex=(/1/), maxIndex=(/6/), &
             regDecomp=(/4/), &
-            ungriddedLBound=(/1,2,1,2,1,2/), ungriddedUBound=(/4,5,3,3,5,4/), &
+            ungriddedLBound=(/1,2,1,2,1,2/), ungriddedUBound=(/4,2,3,3,2,4/), &
             maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
             fieldget=.true., &
             distgridToGridMap=(/1/), &
@@ -1515,7 +1515,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d3_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d3_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/) &
@@ -1528,7 +1528,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d3_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d3_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -1542,7 +1542,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d3_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d3_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -1572,7 +1572,7 @@
         ! Create a 7D field from a 1D grid and 6D ungridded bounds
         call test7d3_generic(rc, minIndex=(/1/), maxIndex=(/6/), &
             regDecomp=(/4/), &
-            ungriddedLBound=(/1,2,1,2,1,2/), ungriddedUBound=(/4,5,3,3,5,4/), &
+            ungriddedLBound=(/1,2,1,2,1,2/), ungriddedUBound=(/4,2,3,3,2,4/), &
             maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
             fieldget=.true., &
             distgridToGridMap=(/1/), &
@@ -1586,9 +1586,9 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 4D grid and 3D ungridded bounds
-        call test7d3_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+        call test7d3_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
-            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,5,3/), &
+            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,2,3/), &
             maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
@@ -1602,7 +1602,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 7D grid
-        call test7d3_generic(rc, minIndex=(/1,1,1,1,1,1,1/), maxIndex=(/6,4,6,4,3,3,3/), &
+        call test7d3_generic(rc, minIndex=(/1,1,1,1,1,1,1/), maxIndex=(/3,4,3,4,3,3,3/), &
             regDecomp=(/2,1,2,1,1,1,1/), &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4,7,5,6/), &
@@ -1616,9 +1616,9 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 4D grid and 3D ungridded bounds
-        call test7d3_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+        call test7d3_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
-            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,5,3/), &
+            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,2,3/), &
             maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             fieldget=.true., &
@@ -1634,9 +1634,9 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 4D grid and 3D ungridded bounds
-        call test7d3_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+        call test7d3_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
-            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,5,3/), &
+            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,2,3/), &
             maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
@@ -1652,9 +1652,9 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 4D grid and 3D ungridded bounds
-        call test7d3_generic_repdim(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+        call test7d3_generic_repdim(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
-            ungriddedLBound=(/1,2,1,1/), ungriddedUBound=(/4,5,3,1/), &
+            ungriddedLBound=(/1,2,1,1/), ungriddedUBound=(/4,2,3,1/), &
             maxHaloLWidth=(/1,1,2/), maxHaloUWidth=(/1,4,5/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
@@ -1670,7 +1670,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 3D field from a 4D grid and 1D ungridded bounds
-        call test3d_generic_repdim(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+        call test3d_generic_repdim(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/4/), &
             maxHaloLWidth=(/1,1/), maxHaloUWidth=(/4,5/), &
@@ -1688,7 +1688,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 3D field from a 4D grid
-        call test3d_generic_repdim(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+        call test3d_generic_repdim(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
             maxHaloLWidth=(/1,1,0/), maxHaloUWidth=(/4,5,0/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
@@ -1706,9 +1706,9 @@
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 4D grid and 3D ungridded bounds
         call test7d3_generic_repdim_sct(rc, &
-            minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+            minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
-            ungriddedLBound=(/1,2,1,1/), ungriddedUBound=(/4,5,3,1/), &
+            ungriddedLBound=(/1,2,1,1/), ungriddedUBound=(/4,2,3,1/), &
             maxHaloLWidth=(/1,1,2/), maxHaloUWidth=(/1,4,5/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
@@ -1725,7 +1725,7 @@
         !EX_UTest_Multi_Proc_Only
         ! Create a 3D field from a 4D grid
         call test3d_generic_repdim_sct(rc, &
-            minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+            minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
             maxHaloLWidth=(/1,1,2/), maxHaloUWidth=(/1,4,5/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
@@ -1743,7 +1743,7 @@
         !EX_UTest_Multi_Proc_Only
         ! Create a 3D field from a 4D grid
         call test3d_generic_repdim_sct(rc, &
-            minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+            minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
             maxHaloLWidth=(/1,2/), maxHaloUWidth=(/1,4/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/2/), &
@@ -1762,7 +1762,7 @@
         !EX_UTest_Multi_Proc_Only
         ! Create a 3D field from a 4D grid
         call test3d_generic_sctptr(rc, &
-            minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+            minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
             maxHaloLWidth=(/1,2,1/), maxHaloUWidth=(/1,3,4/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
@@ -1780,7 +1780,7 @@
         !EX_UTest_Multi_Proc_Only
         ! Create a 2D field from a 3D grid
         call test2d_generic_sctptr(rc, &
-            minIndex=(/1,1,1/), maxIndex=(/4,6,4/), &
+            minIndex=(/1,1,1/), maxIndex=(/4,3,4/), &
             regDecomp=(/2,2,1/), &
             maxHaloLWidth=(/1,2/), maxHaloUWidth=(/3,4/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
@@ -1799,7 +1799,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d4_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d4_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/) &
@@ -1812,7 +1812,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d4_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d4_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             gridEdgeLWidth=(/0,0,0,0,0/), gridEdgeUWidth=(/0,0,0,0,0/), &
             fieldget=.true., &
@@ -1829,7 +1829,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d4_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d4_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             gridEdgeLWidth=(/0,0,0,0,0/), gridEdgeUWidth=(/1,1,1,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
@@ -1844,7 +1844,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d4_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d4_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -1874,7 +1874,7 @@
         ! Create a 7D field from a 1D grid and 6D ungridded bounds
         call test7d4_generic(rc, minIndex=(/1/), maxIndex=(/6/), &
             regDecomp=(/4/), &
-            ungriddedLBound=(/1,2,1,2,1,2/), ungriddedUBound=(/4,5,3,3,5,4/), &
+            ungriddedLBound=(/1,2,1,2,1,2/), ungriddedUBound=(/4,2,3,3,2,4/), &
             maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
             fieldget=.true., &
             distgridToGridMap=(/1/), &
@@ -1888,9 +1888,9 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 4D grid and 3D ungridded bounds
-        call test7d4_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+        call test7d4_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
-            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,5,3/), &
+            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,2,3/), &
             maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
@@ -1904,7 +1904,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 7D grid
-        call test7d4_generic(rc, minIndex=(/1,1,1,1,1,1,1/), maxIndex=(/6,4,6,4,3,3,3/), &
+        call test7d4_generic(rc, minIndex=(/1,1,1,1,1,1,1/), maxIndex=(/3,4,3,4,3,3,3/), &
             regDecomp=(/2,1,2,1,1,1,1/), &
             copyflag=ESMF_DATA_COPY, &
             fieldget=.true., &
@@ -1920,9 +1920,9 @@
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 4D grid and 3D ungridded bounds
         ! this test fails since grid padding is currently hardcoded in test7d4
-        call test7d4_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+        call test7d4_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
-            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,5,3/), &
+            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,2,3/), &
             maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
             copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
@@ -3873,7 +3873,7 @@ contains
         localrc = ESMF_SUCCESS
         rc = ESMF_SUCCESS
 
-        distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3940,7 +3940,7 @@ contains
         localrc = ESMF_SUCCESS
         rc = ESMF_SUCCESS
 
-        distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
