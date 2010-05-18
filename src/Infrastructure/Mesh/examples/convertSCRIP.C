@@ -1,4 +1,4 @@
-// $Id: convertSCRIP.C,v 1.5 2010/05/15 04:47:49 peggyli Exp $
+// $Id: convertSCRIP.C,v 1.6 2010/05/18 21:17:22 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -153,7 +153,7 @@ FIELD* insert_bucket(double lon, double lat) {
 // return a pointer to the FIELD if found a match
 FIELD* search_bucket(double lon, double lat) {
   int bid;
-  FIELD *me, *curr;
+  FIELD *curr;
   bid = (int)((lat + 90.0)*interval);
   curr = bucket[bid];
   while (!curr && curr->lon < lon) {
@@ -182,16 +182,27 @@ void handle_error(int status) {
 // in the center of the polygon).  We sort the angle of the vector from the anchor vertex
 // to each corner vertex in ascending order (assuming 0 to 2PI) 
 void orderit(int index, double lon, double lat, int numedges, double *latlonbuf, int *next) {
-  double *angles, temp;
+  double *angles, temp, clon, clat;
   int i, j, min, temp1;
   angles = (double*)malloc(sizeof(double)*numedges);
 
+  // When the corner vertices are cross the periodic boundary (0 degree longitude), need to
+  // convert the longitudes to be consistent with all the corners and the center 
   for (i=0; i< numedges; i++) {
     j=*(next+i)-1;
-    if (latlonbuf[j*2] >= 359.99999) latlonbuf[j*2]=latlonbuf[j*2]-360;
-    angles[i] = atan2(latlonbuf[j*2+1]-lat, latlonbuf[j*2]-lon);
+    clon = latlonbuf[j*2];
+    clat = latlonbuf[j*2+1];
+    if (abs(clon-lon) > 180) {
+      if (lon >= 180) {
+	clon = clon+360;
+      } else { 
+	clon = clon-360;
+      }
+    }
+    //if (latlonbuf[j*2] >= 359.99999) latlonbuf[j*2]=latlonbuf[j*2]-360;
+    angles[i] = atan2(clat-lat, clon-lon);
     // change angle to 0 to 2PI degree
-    if (latlonbuf[j*2+1]<lat) {
+    if (clat<lat) {
       angles[i] = 2*M_PI+angles[i];
     }
   }
@@ -286,14 +297,14 @@ void FTN(c_convertscrip)(
   int ncid1, ncid2;
   int gsdimid, gcdimid, grdimid;
   size_t  gsdim, gcdim, grdim;
-  int areaid, ctlatid, ctlonid, colatid, colonid, maskid, gdimid;
+  int areaid, ctlatid, ctlonid, colatid, colonid, maskid;
   int status;
   int vertexid, cellid, edgeid, ccoordid, caid, cmid;
   int vertdimid, vpcdimid, vdimid, celldimid;
   int dims[2];
   double *cornerlats, *cornerlons, *nodelatlon;
   double *inbuf, *inbuf1;
-  int *celltbl, *dualcells, *dualcellcounts;
+  int *dualcells, *dualcellcounts;
   int *cells, temp[16];
   int numedges, *next;
   unsigned char *edges, *totalneighbors;
