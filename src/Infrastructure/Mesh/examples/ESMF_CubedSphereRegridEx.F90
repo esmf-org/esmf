@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubedSphereRegridEx.F90,v 1.1 2010/05/17 23:36:33 peggyli Exp $
+! $Id: ESMF_CubedSphereRegridEx.F90,v 1.2 2010/05/19 22:56:11 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -1504,7 +1504,7 @@ subroutine OutputWeightFile(filename, file1, file2, indices, weights, revflag, &
          ! Write area_a
          ! Just set these to 1.0, because not testing conservative yet
          allocate(area(srcDim))         
-         area=1.0
+         area=0.0
          ncStatus=nf90_inq_varid(ncid,"area_a",VarId)
          ncStatus=nf90_put_var(ncid,VarId, area)          
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
@@ -1513,7 +1513,7 @@ subroutine OutputWeightFile(filename, file1, file2, indices, weights, revflag, &
          ! Write area_b
          ! Just set these to 1.0, because not testing conservative yet
          allocate(area(dstDim))         
-         area=1.0
+         area=0.0
          ncStatus=nf90_inq_varid(ncid,"area_b",VarId)
          ncStatus=nf90_put_var(ncid,VarId, area)          
          if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
