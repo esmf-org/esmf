@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mapping.C,v 1.7 2010/04/29 23:05:12 oehmke Exp $
+// $Id: ESMCI_Mapping.C,v 1.8 2010/05/19 22:58:54 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -22,7 +22,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Mapping.C,v 1.7 2010/04/29 23:05:12 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Mapping.C,v 1.8 2010/05/19 22:58:54 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -286,7 +286,7 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
     pcoord[0]=2*p[0]-1.0;
     pcoord[1]=2*p[1]-1.0;
 
-
+#if 0
     // Calculate distance
     if (dist) {
       double ipnt[3]; // intersection point
@@ -301,10 +301,14 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
 		      (point[1]-ipnt[1])*(point[1]-ipnt[1]) +
 		      (point[2]-ipnt[2])*(point[2]-ipnt[2]));
     }
+#endif
 
     // do is in
     double sdist;
     bool in_quad = SFUNC_TYPE::is_in(pcoord, &sdist);
+
+    // Distance to quad
+    if (dist) *dist=sdist;
 
     return in_quad;
   }
@@ -329,6 +333,7 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
     pcoord[0]=p[0];
     pcoord[1]=p[1];
 
+#if 0
     // Calculate distance
     if (dist) {
       double ipnt[3]; // intersection point
@@ -343,10 +348,15 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
 		      (point[1]-ipnt[1])*(point[1]-ipnt[1]) +
 		      (point[2]-ipnt[2])*(point[2]-ipnt[2]));
     }
+#endif
+
 
     // do is in
     double sdist;
     bool in_tri = SFUNC_TYPE::is_in(pcoord, &sdist);
+
+    // Distance to tri
+    if (dist) *dist=2.0*sdist;
 
     return in_tri;
   }
