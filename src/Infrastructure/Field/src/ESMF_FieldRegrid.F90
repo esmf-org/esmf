@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.34 2010/05/07 22:35:11 w6ws Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.35 2010/05/20 17:54:18 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.34 2010/05/07 22:35:11 w6ws Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.35 2010/05/20 17:54:18 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -304,7 +304,6 @@ contains
 !           {\tt ESMF\_REGRID\_CONSERVE\_OFF} or 
 !           {\tt ESMF\_REGRID\_CONSERVE\_ON}. If not specified, defaults 
 !           to {\tt ESMF\_REGRID\_CONSERVE\_OFF}. 
-!           {\it NOTE:} this capability is not yet functional
 !     \item [{[regridScheme]}]
 !           Whether to convert to spherical coordinates 
 !           ({\tt ESMF\_REGRID\_SCHEME\_FULL3D}), 
