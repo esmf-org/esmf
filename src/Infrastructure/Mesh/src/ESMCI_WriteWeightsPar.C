@@ -1,4 +1,4 @@
-// $Id: ESMCI_WriteWeightsPar.C,v 1.16 2010/05/04 16:43:26 rokuingh Exp $
+// $Id: ESMCI_WriteWeightsPar.C,v 1.17 2010/05/20 17:55:06 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@ typedef long long MPI_OffType;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WriteWeightsPar.C,v 1.16 2010/05/04 16:43:26 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_WriteWeightsPar.C,v 1.17 2010/05/20 17:55:06 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -690,15 +690,33 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
    if (*regridConserve == ESMC_REGRID_CONSERVE_ON){ 
      MEField<> *src_iwts = srcmesh.GetField("iwts");
 
-     UInt c = 0;
-     Mesh::iterator nsi = srcmesh.node_begin(), nse = srcmesh.node_end();
-     for (; nsi != nse; ++nsi) {
-       double *Sdata;
-       if (src_iwts) Sdata = src_iwts->data(*nsi);
-       else *Sdata = 0;
-       src_area[c] = *Sdata;
-       ++c;
-     }
+    // first sort by get_data_index
+    int num_nodes = srcmesh.num_nodes();
+
+    std::vector<MeshObj*> all_nodes;
+
+    all_nodes.resize(num_nodes, static_cast<MeshObj*>(0));
+
+    Mesh::iterator ni = srcmesh.node_begin(), ne = srcmesh.node_end();
+
+    for (; ni != ne; ++ni) {
+
+      int seq = ni->get_data_index();
+
+      ThrowRequire(seq < num_nodes);
+
+      all_nodes[seq] = &*ni;
+
+    }
+
+    // now load data into the vector to write
+    for (UInt i=0; i<all_nodes.size(); ++i) {
+      MeshObj *node = all_nodes.at(i);
+      double *Sdata = src_iwts->data(*node);
+      ThrowRequire(i<src_area.size());
+      src_area[i] = *Sdata;
+    }
+
    }
      if ((retval = ncmpi_put_vara_double_all(ncid, area_aid, startsa, countsa, &src_area[0])))
        Throw() << "NC error:" << ncmpi_strerror(retval);
@@ -759,25 +777,41 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
      
      dst_area.resize(ncdst.local_grid_size, 0.0);
 
+// TODO: This routine is writing the weights of a copy mesh
+//       when conservation is turned on because of the fact
+//       that some of the polar nodes are shipped to a different
+//       processor when adding poles in offline regridding.  -RO 5/20/10
+
    if (*regridConserve == ESMC_REGRID_CONSERVE_ON){ 
      MEField<> *dst_iwts = dstmeshcpy.GetField("iwts");
 
-// TODO: This routine does not write some weights, namely those belonging
-//       to the polar nodes.  This phenomenon only appears on destination
-//       with conservative turned on.  This points to pole generation.. 
-     Mesh::iterator ndi = dstmeshcpy.node_begin(), nde = dstmeshcpy.node_end();
-/*
-     for (UInt i=0; i<dst_area.size(); ++ndi) {
-//       ThrowRequire(ndi != nde);
-//       ThrowRequire(i < dst_area.size());
-       if (!(ndi != nde) || !(i < dst_area.size())) break;
-*/
-    UInt i = 0;
-     for (; ndi != nde; ++ndi) {
-       double *Ddata = dst_iwts->data(*ndi);
-       dst_area[i] = *Ddata;
-       ++i;
-     }
+    // first sort by get_data_index
+    int num_nodes = dstmeshcpy.num_nodes();
+
+    std::vector<MeshObj*> all_nodes;
+
+    all_nodes.resize(num_nodes, static_cast<MeshObj*>(0));
+
+    Mesh::iterator ni = dstmeshcpy.node_begin(), ne = dstmeshcpy.node_end();
+
+    for (; ni != ne; ++ni) {
+
+      int seq = ni->get_data_index();
+
+      ThrowRequire(seq < num_nodes);
+
+      all_nodes[seq] = &*ni;
+
+    }
+
+    // now load data into the vector to write
+    for (UInt i=0; i<all_nodes.size(); ++i) {
+      MeshObj *node = all_nodes.at(i);
+      double *Ddata = dst_iwts->data(*node);
+      ThrowRequire(i<dst_area.size());
+      dst_area[i] = *Ddata;
+    }
+
    }
      if ((retval = ncmpi_put_vara_double_all(ncid, area_bid, startsb, countsb, &dst_area[0])))
         Throw() << "NC error:" << ncmpi_strerror(retval);
