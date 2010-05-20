@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHalo.F90,v 1.3 2010/05/20 17:52:04 feiliu Exp $
+! $Id: ESMF_FieldBundleHalo.F90,v 1.4 2010/05/20 17:53:34 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -38,7 +38,6 @@ module ESMF_FieldBundleHaloMod
     use ESMF_VMMod
     use ESMF_FieldMod
     use ESMF_FieldGetMod
-    use ESMF_FieldHaloMod
     use ESMF_FieldBundleMod
     use ESMF_RHandleMod
     use ESMF_ArrayMod
@@ -63,7 +62,7 @@ module ESMF_FieldBundleHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleHalo.F90,v 1.3 2010/05/20 17:52:04 feiliu Exp $'
+      '$Id: ESMF_FieldBundleHalo.F90,v 1.4 2010/05/20 17:53:34 feiliu Exp $'
 
 !------------------------------------------------------------------------------
 contains
