@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegrid.F90,v 1.4 2010/05/10 22:14:41 theurich Exp $
+! $Id: ESMF_FieldBundleRegrid.F90,v 1.5 2010/05/20 17:52:04 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldBundleRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRegrid.F90,v 1.4 2010/05/10 22:14:41 theurich Exp $'
+      '$Id: ESMF_FieldBundleRegrid.F90,v 1.5 2010/05/20 17:52:04 feiliu Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -248,6 +248,9 @@ contains
 !     The type of regrid. Options are ESMF\_REGRID\_METHOD\_BILINEAR or 
 !     ESMF\_REGRID\_METHOD\_PATCH. If not specified, defaults to 
 !     ESMF\_REGRID\_METHOD\_BILINEAR. 
+!   \item [{[regridScheme]}]
+!     Whether to convert to spherical coordinates (ESMF\_REGRID\_SCHEME\_FULL3D), 
+!     or to leave in native coordinates (ESMF\_REGRID\_SCHEME\_NATIVE). 
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[rc]}]
