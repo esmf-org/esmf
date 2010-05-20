@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubedSphereRegridEx.F90,v 1.2 2010/05/19 22:56:11 oehmke Exp $
+! $Id: ESMF_CubedSphereRegridEx.F90,v 1.3 2010/05/20 19:18:52 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -130,7 +130,7 @@ program ESMF_CubedSphereRegridEx
           print *, 'unstructured grid NetCDF format and the second_grid is a rectangular 2D grid'
           print *, 'in SCRIP format.  The weight_file is the output weight file also in SCRIP'
           print *, 'format. regrid_method specifies the interpolation method, which can be'
-          print *, 'either "bilinear" or "conservative". "rev" is an optional argument. Without'
+          print *, 'either "bilinear" or "patch". "rev" is an optional argument. Without'
           print *, 'it, we regrid the first_grid into the second_grid.  With it set to "rev",'
           print *, 'we regrid the second_grid into the first_grid.'
 	endif
