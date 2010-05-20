@@ -1,4 +1,4 @@
-% $Id: ESMF_inframethodoverview.tex,v 1.30 2010/05/18 03:56:53 oehmke Exp $
+% $Id: ESMF_inframethodoverview.tex,v 1.31 2010/05/20 19:07:17 oehmke Exp $
 
 \section{Overview of Distributed Data Methods}
 
@@ -662,8 +662,8 @@ contains an exectuable for generating regridding weights between a cubed sphere 
 a structured grid. This tool reads in two grid files and outputs weights for interpolation
 between the two grids. The input and output files are all in netcdf format. The grid files are in 
 the same format as is used as an input to SCRIP~\cite{ref:SCRIP} and the weight file is the same format as is output 
-by SCRIP.  The interpolation weights can be generated with either the bilinear, patch, or
-conservative regridding. This application assumes that the source and destination grids
+by SCRIP.  The interpolation weights can be generated with either the bilinear or patch
+regridding methods. This application assumes that the source and destination grids
 are spherical and that the coordinates given in the files are latitude and longitude
 values. This file based regrid weight generation application generates the interpolation weights
 in parallel.
@@ -684,7 +684,7 @@ it, but moved in the z-direction to be at the same radius as the rest of the poi
 in the grid. The value at the pole to be the average of the values
 of all of the grid points surrounding the pole. 
 
- This regridding application can be used to generate bilinear, patch or conservative interpolation weights. The 
+ This regridding application can be used to generate either bilinear or patch interpolation weights. The 
 algorithm used by this application to generate the bilinear weights is the standard one found in
 many textbooks.  Each destination point is mapped to a location in the source Mesh, the position of the destination point relative 
 to the source points surrounding it is used to calculate the interpolation weights. 
@@ -713,15 +713,6 @@ To calculate the value at the destination point we do a weighted average of the 
 of each of the corner polynomials evaluated at that point. The weight for a corner's 
 polynomial is the bilinear weight of the destination point with regard to that corner.  
 
-Global first-order conservative interpolation weights are also available with the 
-file based regrid application. When this option is selected a conservative modification
-is applied to bilinear interpolation weights using the L2 method.  The L2 method in ESMF is based
-on a finite element method to constrain the interpolation for global conservation of 
-mass. Note that this method is still in beta and should only be used with extreme caution.
-It can have interpolation problems with certain combinations of source and destination grid. 
-Particularly those where a high resolution area in the destination aligns with a lower resolution 
-region in the source. 
-
 The file based weight generation tool is located in src/Infrastructure/Mesh/examples 
 directory and is called {\tt ESMF\_CubedSphereRegridEx}. To use this tool ESMF must be compiled 
 with the NETCDF third party library. If the user wishes to use patch interpolation, 
@@ -748,7 +739,6 @@ Where:
                  bilinear     - This option selects the standard bilinear interpolation.
                  patch        - This option selects the ESMF version of patch recovery 
                                 interpolation.
-                 conservative - This option selects conservative interpolation. 
 
   rev          - An optional flag that indicates the direction of the regridding. If not 
                  specified the <cubed_grid> is the source and the <struct_grid> is the 
