@@ -1,4 +1,4 @@
-// $Id: convertSCRIP.C,v 1.6 2010/05/18 21:17:22 peggyli Exp $
+// $Id: convertSCRIP.C,v 1.7 2010/05/21 18:40:12 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -41,6 +41,11 @@
 
 #ifdef ESMF_NETCDF
 #include <netcdf.h>
+#endif
+
+#if !defined (M_PI)
+// for Windows...
+#define M_PI 3.14159265358979323846
 #endif
 
 typedef struct field {
