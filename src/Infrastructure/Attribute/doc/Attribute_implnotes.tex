@@ -1,4 +1,4 @@
-% $Id: Attribute_implnotes.tex,v 1.20 2010/04/21 06:09:05 eschwab Exp $
+% $Id: Attribute_implnotes.tex,v 1.21 2010/05/21 18:57:10 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -8,7 +8,7 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-This section covers Attribute memory deallocation, the use of {\tt ESMF\_AttributeGet()}, Attribute package nesting capabilities, issues with Attributes in a distributed environment, and reading of Attributes via XML files.  Issues and procedures dealing with Attribute memory deallocation, using {\tt ESMF\_AttributeGet()} to retrieve Attribute lists, and nested Attribute package capabilities are discussed to help avoid misuse.  The limitations with Attributes in a distributed environment are also discussed, with an outline of the future work to be done in this area. 
+This section covers Attribute memory deallocation, the use of {\tt ESMF\_AttributeGet()}, Attribute package nesting capabilities, issues with Attributes in a distributed environment, and reading/writing of Attributes via XML files.  Issues and procedures dealing with Attribute memory deallocation, using {\tt ESMF\_AttributeGet()} to retrieve Attribute lists, and nested Attribute package capabilities are discussed to help avoid misuse.  The limitations with Attributes in a distributed environment are also discussed, with an outline of the future work to be done in this area. 
 
 \subsubsection{Attribute Memory Deallocation}
 
@@ -59,6 +59,6 @@ There are two flags in the {\tt ESMF\_AttributeCopy()} routine which specify whi
 
 The second available copy can be applied by setting the {\tt ESMF\_AttCopyFlag} to {\tt ESMF\_ATTCOPY\_HYBRID} and the {\tt ESMF\_AttTreeFlag} to {\tt ESMF\_ATTTREE\_ON}.  This copy is more of a hybrid approach of reference and value copies.  In this case the Attributes which {\it belong} to the object being copied are actually copied in full (by value), while the Attributes which are linked to the object being copied are referenced by a pointer (by reference).  This means that after copying an Attribute hierarchy from ESMF object A to ESMF object B with this approach, the changes made to the lower portion of either A or B's Attribute hierarchy will be reflected on {\it both} object A and object B.
 
-\subsubsection{Reading Attributes from XML files}
+\subsubsection{Reading/Writing Attributes from XML files}
 
-The Xerces C++ library, v3.1.0 or better, is used to read XML files.  More specifically, the SAX2 API is currently used, although future releases may also use the DOM API.  The Xerces C++ website is http://xerces.apache.org/xerces-c/.
+The Xerces C++ library, v3.1.0 or better, is used to read and write XML files.  More specifically, the SAX2 API is currently used, although future releases may also use the DOM API.  The Xerces C++ website is http://xerces.apache.org/xerces-c/.
