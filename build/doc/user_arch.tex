@@ -1,4 +1,4 @@
-% $Id: user_arch.tex,v 1.42 2010/05/10 22:37:01 theurich Exp $
+% $Id: user_arch.tex,v 1.43 2010/05/27 21:04:28 theurich Exp $
 
 % List of architectures supported.  This file is 
 % meant to be included in a user doc.
@@ -30,7 +30,7 @@ IBM Bluegene          &\tt Linux  &\tt xlf          &\tt mpi        &\tt 32     
 %                      &           &                 &               &\tt x86\_64\_medium &                                    &                                 \\
 %IBM Opteron           &\tt Linux  &\tt pgi          &\tt mpich      &\tt x86\_64\_small, & pgf90 \footnotesize 6.2-3          & pgCC \footnotesize 6.2-3        \\ % lightning
 %                      &           &                 &               &\tt x86\_64\_medium &                                    &                                 \\
-IBM SP                &\tt AIX    &\tt default      &\tt mpi        &\tt 32,64           & mpxlf90\_r \footnotesize 12.1.0.6  & mpCC\_r \footnotesize 10.1.0.5  \\ % bluefire
+IBM SP                &\tt AIX    &\tt default      &\tt mpi        &\tt 32,64           & mpxlf90\_r \footnotesize 12.1.0.7  & mpCC\_r \footnotesize 10.1.0.6  \\ % bluefire
 %Mac G5                &\tt Darwin &\tt absoft       &\tt lam,mpiuni &\tt 32              & f90 \footnotesize 9.0              & g++ \footnotesize 3.3           \\ % glass
 %Mac G5                &\tt Darwin &\tt absoft       &\tt lam,mpiuni &\tt 32              & f90 \footnotesize 8.2              & g++ \footnotesize 3.3           \\ % glass
 %Mac G5                &\tt Darwin &\tt nag          &\tt lam,mpiuni &\tt 32              & f95 \footnotesize 5.0(272)         & g++ \footnotesize 3.3           \\ % glass
@@ -47,7 +47,7 @@ Mac Xeon (64)         &\tt Darwin &\tt gfortran     &\tt mpich2     &\tt 64     
 %Mac Xeon (64)         &\tt Darwin &\tt absoft       &\tt openmpi    &\tt 64              & f90 \footnotesize                  & g++ \footnotesize 4.4.2         \\ % haumea
 %                      &           &                 &\tt mpich2     &                    &                                    &                                 \\
 %                      &           &                 &\tt mvapich2   &                    &                                    &                                 \\
-Mac Xeon (64)         &\tt Darwin &\tt nag          &\tt mpiuni     &\tt 64              & nagfor \footnotesize 5.2(711)       & g++ \footnotesize 4.4.1         \\ % haumea
+Mac Xeon (64)         &\tt Darwin &\tt nag          &\tt mpiuni     &\tt 64              & nagfor \footnotesize 5.2(711)       & g++ \footnotesize 4.2.1         \\ % haumea
 %                      &           &                 &\tt openmpi    &                    &                                    &                                 \\
 %                      &           &                 &\tt mpich2     &                    &                                    &                                 \\
 %                      &           &                 &\tt mvapich2   &                    &                                    &                                 \\
@@ -77,10 +77,9 @@ PC Xeon (64)          &\tt Linux  &\tt nag          &\tt mpiuni     &\tt 64     
 %PC Xeon (64)          &\tt Linux  &\tt lahey        &\tt openmpi    &\tt 64              & lf95 \footnotesize L8.10b          & g++  \footnotesize 4.4.0        \\ % pluto
 %                      &           &                 &\tt mpich2     &                    &                                    &                                 \\
 %                      &           &                 &\tt mvapich2   &                    &                                    &                                 \\
-PC Xeon (64) Cluster  &\tt Linux  &\tt g95          &\tt mvapich2   &\tt 64              & g95 \footnotesize 0.92(4.0.3)      & g++ \footnotesize 4.1.2         \\ % fusion
+%PC Xeon (64) Cluster  &\tt Linux  &\tt g95          &\tt mvapich2   &\tt 64              & g95 \footnotesize 0.92(4.0.3)      & g++ \footnotesize 4.1.2         \\ % fusion
 PC Xeon (64) Cluster  &\tt Linux  &\tt gfortran     &\tt mvapich2   &\tt 64              & gfortran \footnotesize 4.4.2       & g++ \footnotesize 4.4.2         \\ % fusion
-PC Xeon (64) Cluster  &\tt Linux  &\tt intel        &\tt mpich2     &\tt 64              & ifort \footnotesize 11.1.059       & icpc \footnotesize 11.1.059     \\ % fusion
-                      &           &                 &\tt mvapich2   &                    &                                    &                                 \\
+PC Xeon (64) Cluster  &\tt Linux  &\tt intel        &\tt mvapich2   &\tt 64              & ifort \footnotesize 11.1.059       & icpc \footnotesize 11.1.059     \\ % fusion
 PC Xeon (64) Cluster  &\tt Linux  &\tt pgi          &\tt mpich      &\tt 64              & pgf90 \footnotesize 9.0-4          & pgCC \footnotesize 9.0-4        \\ % coral
 PC Xeon (64) Cluster  &\tt Linux  &\tt intel        &\tt mvapich2   &\tt 64              & ifort \footnotesize 11.1.038       & icpc \footnotesize 11.1.038     \\ % wjet
 %PC Xeon (64) Cluster  &\tt Linux  &\tt lahey        &\tt mpiuni     &\tt 64              & lf95 \footnotesize L8.00a          & g++ \footnotesize 4.1.2         \\ % wjet
@@ -90,7 +89,7 @@ PC Xeon (64) Cluster  &\tt Linux  &\tt intel        &\tt intelmpi   &\tt 64     
                       &           &                 &\tt openmpi    &                    &                                    &                                 \\
                       &           &                 &\tt scalimpi   &                    &                                    &                                 \\
 PC Xeon (64) Cluster  &\tt Linux  &\tt nag          &\tt mpiuni     &\tt 64              & nagfor \footnotesize 5.2(638)      & g++  \footnotesize 4.1.2        \\ % discover
-PC Xeon (64) Cluster  &\tt Linux  &\tt pgi          &\tt scalimpi   &\tt 64              & pgf90 \footnotesize 7.2-1          & pgCC \footnotesize 7.2-1        \\ % discover
+PC Xeon (64) Cluster  &\tt Linux  &\tt pgi          &\tt scalimpi   &\tt 64              & pgf90 \footnotesize 7.1-6          & pgCC \footnotesize 7.1-6        \\ % discover
 SGI Altix (ia64)      &\tt Linux  &\tt intel        &\tt mpi        &\tt 64              & ifort \footnotesize 11.0.083       & icpc \footnotesize 11.0.083     \\ % columbia
 SGI Altix ICE         &\tt Linux  &\tt intel        &\tt mpi        &\tt 64              & ifort \footnotesize 10.1.021       & icpc \footnotesize 10.1.021     \\ % pleiades
 SGI Altix XE Cluster  &\tt Cygwin &\tt g95          &\tt mpiuni     &\tt 32              & g95 \footnotesize 0.92(4.1.1)      & g++  \footnotesize 4.3.4        \\ % SGI-NT
