@@ -1,4 +1,4 @@
-% $Id: Field_rest.tex,v 1.6 2009/10/22 22:51:41 theurich Exp $
+% $Id: Field_rest.tex,v 1.7 2010/05/27 16:56:48 rokuingh Exp $
 
 %\subsubsection{Restrictions and Future Work}
 
@@ -17,7 +17,23 @@ multiple vector Field components in the same Field component, although
 that support is planned.  At this time users need to create a 
 separate Field object to represent each vector component.
 
+\item {\bf Conservative Regridding} 
+The conservative regridding is not designed to 
+prevent diffusion of mass.  The L2 projection method is {\it globally} constrained
+for conservation of mass.  This means that the mass will be conserved to high precision
+over the entire regridding domain, but this conservation will not be restricted
+in a local sense, and mass may be diffused across a large stencil.  
+
+The conservative regridding can also have problems 
+with high interpolation error in regions where the destination grid is of higher 
+resolution than the source grid.  It is expected that this effect is seen in select
+sub domains of the regridding where the
+grid resolution difference is not constant throughout the entire domain.  In domains
+where the destination grid resolution is higher than the source grid resolution some
+points can be left out of the mapping or not mapped with the expected source point 
+contributions.  This is because the destination points depend on the source points 
+which lie in the {\it neighboring} destination cells.  Therefore, if there are 
+several destination cells contained within a single source cell, cases will arise
+where the destination points are incorrectly mapped, if they are mapped at all.
+
 \end{enumerate}
-
-
-
