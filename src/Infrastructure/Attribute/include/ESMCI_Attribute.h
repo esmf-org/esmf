@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.30 2010/04/21 05:56:55 eschwab Exp $
+// $Id: ESMCI_Attribute.h,v 1.31 2010/06/02 05:52:09 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -50,6 +50,7 @@ enum ESMC_AttUpdateRm{ESMC_ATTUPDATERM_ATTRIBUTE=-1,
 namespace ESMCI {
 
   class Attribute;
+  typedef Attribute* ESMCI_AttributePtr;
   class VM;
   class IO_XML;
 
@@ -67,6 +68,8 @@ class Attribute
     ESMC_Logical attrPack;             // an Attribute in an Attpack
     ESMC_Logical attrPackHead;         // the head of an Attpack
     ESMC_Logical attrNested;           // a nested Attpack
+    ESMC_Logical attrAttr;             // "Attribute of an Attribute";
+                                       // corresponds to XML element attribute
 
     ESMC_Logical linkChange;           // flag for link changes
     ESMC_Logical structChange;         // flag for structural changes
@@ -116,13 +119,16 @@ class Attribute
       const string &purpose, const string &object, ESMC_Logical *present) const;
     int AttPackNest(const string &convention, const string &purpose, const string &object, 
       const string &nestConvention, const string &nestPurpose);
+    int AttPackNest(const string &convention, const string &purpose, const string &object, 
+      int nestCount, const vector<string> &nestConvention,
+                     const vector<string> &nestPurpose);
     int AttPackRemove(const string &convention, 
       const string &purpose, const string &object);
     int AttPackRemoveAttribute(const string &name, const string &convention, 
       const string &purpose, const string &object);
     int AttPackSet(const string &name, const ESMC_TypeKind &tk, 
       int count, void *value, const string &convention, 
-      const string &purpose, const string &object);
+      const string &purpose, const string &object, ESMC_Logical *attrAttr);
     int AttPackSet(Attribute *attr);
     
     // copy and swap an attribute hierarchy
@@ -163,8 +169,10 @@ class Attribute
 
     // get attribute info
     int AttributeGet(const string &name, int *lens, int count) const;
-    int AttributeGet(const string &name, ESMC_TypeKind *tk, int *itemCount) const;
-    int AttributeGet(int num, string *name, ESMC_TypeKind *tk, int *itemCount) const;
+    int AttributeGet(const string &name, ESMC_TypeKind *tk, int *itemCount,
+                     ESMC_Logical *attrAttr) const;
+    int AttributeGet(int num, string *name, ESMC_TypeKind *tk, int *itemCount,
+                     ESMC_Logical *attrAttr) const;
     int AttributeGetCount(void) const;
     int AttributeGetCountPack(void) const;
     int AttributeGetCountLink(void) const;
@@ -237,6 +245,7 @@ class Attribute
     int AttributeWriteXMLtraverse(IO_XML *io_xml, const string &convention,const string &purpose,
       const int &columns,bool &fielddone,bool &griddone,bool &compdone) const;
     int AttributeWriteXMLbuffer(IO_XML *io_xml) const;
+    int AttributeWriteCIMbuffer(IO_XML *io_xml) const;
     int AttributeWriteXMLbuffergrid(IO_XML *io_xml) const;
     int AttributeWriteXMLbufferfield(IO_XML *io_xml, const string &convention, const string &purpose, 
       int &index, const int &columns) const;
@@ -256,7 +265,7 @@ class Attribute
     Attribute(const string &name, const ESMC_TypeKind &typekind, 
       int numitems, void *datap);
     int AttrModifyValue(const ESMC_TypeKind &typekind, int numitems, 
-      void *datap);
+      void *datap, ESMC_Logical *attrAttr);
     Attribute& operator=(const Attribute& source);
     ~Attribute(void);
     int ESMC_Deserialize(char *buffer, int *offset);
@@ -287,7 +296,9 @@ extern "C" {
                                  ESMCI_FortranStrLenArg plen, 
                                  ESMCI_FortranStrLenArg olen);
   void FTN(c_esmc_attpacknest)(ESMC_Base **base, char *convention, char *purpose, 
-                                 char *object, char *nestConvention, char *nestPurpose, 
+                                 char *object, int *nestCount,
+                                 char *nestConvention, char *nestPurpose, 
+                                 int *nestConvLens, int *nestPurpLens,
                                  int *rc, 
                                  ESMCI_FortranStrLenArg clen, 
                                  ESMCI_FortranStrLenArg plen, 
@@ -329,7 +340,7 @@ extern "C" {
                                   ESMCI_FortranStrLenArg plen, 
                                   ESMCI_FortranStrLenArg olen);
   void FTN(c_esmc_attpacksetchar)(ESMC_Base **base, char *name, char *value, ESMC_TypeKind *tk, 
-                                  char *convention, char *purpose, char *object, int *rc, 
+                                  char *convention, char *purpose, char *object, ESMC_Logical *attrAttr, int *rc,
                                   ESMCI_FortranStrLenArg nlen, 
                                   ESMCI_FortranStrLenArg vlen, 
                                   ESMCI_FortranStrLenArg clen, 
@@ -337,7 +348,7 @@ extern "C" {
                                   ESMCI_FortranStrLenArg olen);
   void FTN(c_esmc_attpacksetcharlist)(ESMC_Base **base, char *name, ESMC_TypeKind *tk, int *count,
                                    char *valueList, int *lens, char *convention, char *purpose, 
-                                   char *object, int *rc, 
+                                   char *object, ESMC_Logical *attrAttr, int *rc,
                                   ESMCI_FortranStrLenArg nlen, 
                                   ESMCI_FortranStrLenArg vlen, 
                                   ESMCI_FortranStrLenArg clen, 
@@ -345,7 +356,7 @@ extern "C" {
                                   ESMCI_FortranStrLenArg olen);
   void FTN(c_esmc_attpacksetvalue)(ESMC_Base **base, char *name, ESMC_TypeKind *tk, int *count,
                                   void *value, char *convention, char *purpose, char *object, 
-                                  int *rc, 
+                                   ESMC_Logical *attrAttr, int *rc,
                                   ESMCI_FortranStrLenArg nlen, 
                                   ESMCI_FortranStrLenArg clen, 
                                   ESMCI_FortranStrLenArg plen, 
@@ -369,11 +380,12 @@ extern "C" {
   void FTN(c_esmc_attributegetcount)(ESMC_Base **base, int *count, ESMC_AttGetCountFlag *flag, int *rc);
   void FTN(c_esmc_attributegetinfoname)(ESMC_Base **base, char *name, 
                                         ESMC_TypeKind *tk,
-                                        int *count, int *rc, 
-                                        ESMCI_FortranStrLenArg nlen);
+                                        int *count, ESMC_Logical *attrAttr,
+                                        int *rc, ESMCI_FortranStrLenArg nlen);
   void FTN(c_esmc_attributegetinfonum)(ESMC_Base **base, int *num, 
                                       char *name,
                                       ESMC_TypeKind *tk, int *count, 
+                                      ESMC_Logical *attrAttr,
                                       int *rc, 
                                       ESMCI_FortranStrLenArg nlen);
   void FTN(c_esmc_attributegetchar)(ESMC_Base **base, char *name, char *value, 

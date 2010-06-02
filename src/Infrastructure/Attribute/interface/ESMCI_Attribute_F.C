@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.29 2010/04/21 05:56:55 eschwab Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.30 2010/06/02 05:52:09 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.29 2010/04/21 05:56:55 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.30 2010/06/02 05:52:09 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -385,9 +385,12 @@ extern "C" {
       char *convention,          // in - convention
       char *purpose,             // in - purpose
       char *object,              // in - object type
-      char *nestConvention,      // in - convention
-      char *nestPurpose,         // in - purpose
-      int *rc,                   // in - return code
+      int  *nestCount,           // in - number of nested attpacks (child nodes)
+      char *nestConvention,      // in - nest convention list
+      char *nestPurpose,         // in - nest purpose list
+      int  *nestConvLens,        // in - length of each nestConvention
+      int  *nestPurpLens,        // in - length of each nestPurpose
+      int  *rc,                  // in - return code
       ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
       ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
       ESMCI_FortranStrLenArg olen,// hidden/in - strlen count for object
@@ -399,7 +402,7 @@ extern "C" {
 //
 //EOP
 
-  int status;
+  int j, k, status;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -436,9 +439,17 @@ extern "C" {
   }
 
   // simple sanity check before doing any more work
+  if (!nestCount) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute nestCount", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
   if ((!nestConvention) || (nclen <= 0) || (nestConvention[0] == '\0')) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention", &status);
+                         "bad attribute nestConvention", &status);
       if (rc) *rc = status;
       return;
   }
@@ -446,21 +457,33 @@ extern "C" {
   // simple sanity check before doing any more work
   if ((!nestPurpose) || (nplen <= 0) || (nestPurpose[0] == '\0')) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose", &status);
+                         "bad attribute nestPurpose", &status);
       if (rc) *rc = status;
       return;
   }
   
+  // simple sanity check before doing any more work
+  if (!nestConvLens) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute nestConvLens", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if (!nestPurpLens) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute nestPurpLens", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
   string cconv(convention, clen);
   string cpurp(purpose, plen);
   string cobj(object, olen);
-  string cnconv(nestConvention, nclen);
-  string cnpurp(nestPurpose, nplen);
   cconv.resize(cconv.find_last_not_of(" ")+1);
   cpurp.resize(cpurp.find_last_not_of(" ")+1);
   cobj.resize(cobj.find_last_not_of(" ")+1);
-  cnconv.resize(cnconv.find_last_not_of(" ")+1);
-  cnpurp.resize(cnpurp.find_last_not_of(" ")+1);
 
   if (cconv.empty()) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
@@ -483,22 +506,43 @@ extern "C" {
       return;
   }
 
-  if (cnconv.empty()) {
+  // allocate space for vector of strings
+  vector<string> cnconv, cnpurp;
+  cnconv.reserve(*nestCount);
+  cnpurp.reserve(*nestCount);
+
+  // loop through nestConvention, nestPurpose allocating space and copying
+  //   values to cnconv, cnpurp
+  j = 0;
+  k = 0;
+  for (unsigned int i=0; i<(*nestCount); i++) {
+    if (!(nestConvention[j])) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute nestConvention conversion", &status);
+                         "bad attribute nestConvention", &status);
       if (rc) *rc = status;
       return;
-  }
-  
-  if (cnpurp.empty()) {
+    }
+    if (!(nestPurpose[k])) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute nestPurpose conversion", &status);
+                         "bad attribute nestPurpose", &status);
       if (rc) *rc = status;
       return;
+    }
+
+    // copy and convert F90 strings to null terminated ones
+    string tempc((&nestConvention[j]), nestConvLens[i]);
+    string tempp((&nestPurpose[k]), nestPurpLens[i]);
+    tempc.resize(tempc.find_last_not_of(" ")+1);
+    tempp.resize(tempp.find_last_not_of(" ")+1);
+    cnconv.push_back(tempc);
+    cnpurp.push_back(tempp);
+    j += nestConvLens[i];
+    k += nestPurpLens[i];
   }
-  
+
   // Set the attribute on the object.
-  status = (**base).root.AttPackNest(cconv, cpurp, cobj, cnconv, cnpurp);
+  status = (**base).root.AttPackNest(cconv, cpurp, cobj,
+                                     *nestCount, cnconv, cnpurp);
   ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -1011,7 +1055,7 @@ extern "C" {
   }
 
   // get type of the Attribute from the attpack
-  status = attr->AttributeGet(cname, &attrTypeKind, NULL);
+  status = attr->AttributeGet(cname, &attrTypeKind, NULL, NULL);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc))) return;
   
@@ -1210,7 +1254,7 @@ extern "C" {
     return;
   }
 
-  status = attpack->AttributeGet(cname, &attrTk, &attrCount);
+  status = attpack->AttributeGet(cname, &attrTk, &attrCount, NULL);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc))) return;
 
@@ -1490,6 +1534,7 @@ extern "C" {
       char *convention,          // in - convention
       char *purpose,             // in - purpose
       char *object,              // in - object type
+      ESMC_Logical *attrAttr,    // in - attribute describing attpack
       int *rc,                   // in - return code
       ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
       ESMCI_FortranStrLenArg vlen,// hidden/in - strlen count for value
@@ -1553,6 +1598,9 @@ extern "C" {
       return;
   }
 
+  // don't sanity check attrAttr for NULL; ok to pass thru.  C++ side will set
+  // value if present (non-NULL), otherwise it will leave current value alone.
+
   string cname(name, nlen);
   string cvalue(value, vlen);
   string cconv(convention, clen);
@@ -1572,7 +1620,8 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackSet(cname, *tk, 1, &cvalue, cconv, cpurp, cobj);
+  status = (**base).root.AttPackSet(cname, *tk, 1, &cvalue, cconv, cpurp, cobj,
+                                    ESMC_NOT_PRESENT_FILTER(attrAttr));
   ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -1580,7 +1629,7 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_esmc_attpacksetcharlsit - Set attributes in the attribute package
+// !IROUTINE:  c_esmc_attpacksetcharlist - Set attributes in the attribute package
 //
 // !INTERFACE:
       void FTN(c_esmc_attpacksetcharlist)(
@@ -1601,6 +1650,7 @@ extern "C" {
       char *convention,          // in - convention
       char *purpose,             // in - purpose
       char *object,              // in - object type
+      ESMC_Logical *attrAttr,    // in - attribute describing attpack
       int *rc,                   // in - return code
       ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
       ESMCI_FortranStrLenArg vlen,// hidden/in - strlen count for value
@@ -1657,6 +1707,9 @@ extern "C" {
       return;
   }
 
+  // don't sanity check attrAttr for NULL; ok to pass thru.  C++ side will set
+  // value if present (non-NULL), otherwise it will leave current value alone.
+
   string cname(name, nlen);
   string cconv(convention, clen);
   string cpurp(purpose, plen);
@@ -1695,7 +1748,8 @@ extern "C" {
   }
   
   // Set the attribute on the object.
-  status = (**base).root.AttPackSet(cname, *tk, *count, &cvalue, cconv, cpurp, cobj);
+  status = (**base).root.AttPackSet(cname, *tk, *count, &cvalue, cconv, cpurp,
+                                    cobj, ESMC_NOT_PRESENT_FILTER(attrAttr));
   ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -1723,6 +1777,7 @@ extern "C" {
       char *convention,          // in - convention
       char *purpose,             // in - purpose
       char *object,              // in - object type
+      ESMC_Logical *attrAttr,    // in - attribute describing attpack
       int *rc,                   // in - return code
       ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
       ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
@@ -1778,6 +1833,9 @@ extern "C" {
       return;
   }
 
+  // don't sanity check attrAttr for NULL; ok to pass thru.  C++ side will set
+  // value if present (non-NULL), otherwise it will leave current value alone.
+
   string cname(name, nlen);
   string cconv(convention, clen);
   string cpurp(purpose, plen);
@@ -1798,19 +1856,24 @@ extern "C" {
     if (*count == 1) {
       if (*tk == ESMC_TYPEKIND_I4)
         status = (**base).root.AttPackSet(cname, *tk, *count,
-          (static_cast<ESMC_I4*> (value)), cconv, cpurp, cobj);  
+          (static_cast<ESMC_I4*> (value)), cconv, cpurp, cobj, 
+           ESMC_NOT_PRESENT_FILTER(attrAttr));
       else if (*tk == ESMC_TYPEKIND_I8)
         status = (**base).root.AttPackSet(cname, *tk, *count,
-          (static_cast<ESMC_I8*> (value)), cconv, cpurp, cobj);
+          (static_cast<ESMC_I8*> (value)), cconv, cpurp, cobj,
+           ESMC_NOT_PRESENT_FILTER(attrAttr));
       else if (*tk == ESMC_TYPEKIND_R4)
         status = (**base).root.AttPackSet(cname, *tk, *count,
-          (static_cast<ESMC_R4*> (value)), cconv, cpurp, cobj);
+          (static_cast<ESMC_R4*> (value)), cconv, cpurp, cobj,
+           ESMC_NOT_PRESENT_FILTER(attrAttr));
       else if (*tk == ESMC_TYPEKIND_R8)
         status = (**base).root.AttPackSet(cname, *tk, *count,
-          (static_cast<ESMC_R8*> (value)), cconv, cpurp, cobj);
+          (static_cast<ESMC_R8*> (value)), cconv, cpurp, cobj,
+           ESMC_NOT_PRESENT_FILTER(attrAttr));
       else if (*tk == ESMC_TYPEKIND_LOGICAL)
         status = (**base).root.AttPackSet(cname, *tk, *count,
-          (static_cast<ESMC_Logical*> (value)), cconv, cpurp, cobj);
+          (static_cast<ESMC_Logical*> (value)), cconv, cpurp, cobj,
+           ESMC_NOT_PRESENT_FILTER(attrAttr));
       else {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
                          "typekind was inappropriate for this routine", &status);
@@ -1824,35 +1887,40 @@ extern "C" {
         temp.reserve(*count);
         for (unsigned int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_I4*> (value))[i]);
-        status = (**base).root.AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
+        status = (**base).root.AttPackSet(cname, *tk, *count, &temp,
+                        cconv, cpurp, cobj, ESMC_NOT_PRESENT_FILTER(attrAttr));
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_I8) {
         vector<ESMC_I8> temp;
         temp.reserve(*count);
         for (unsigned int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_I8*> (value))[i]);
-        status = (**base).root.AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
+        status = (**base).root.AttPackSet(cname, *tk, *count, &temp,
+                        cconv, cpurp, cobj, ESMC_NOT_PRESENT_FILTER(attrAttr));
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R4) {
         vector<ESMC_R4> temp;
         temp.reserve(*count);
         for (unsigned int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_R4*> (value))[i]);
-        status = (**base).root.AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
+        status = (**base).root.AttPackSet(cname, *tk, *count, &temp,
+                        cconv, cpurp, cobj, ESMC_NOT_PRESENT_FILTER(attrAttr));
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R8) {
         vector<ESMC_R8> temp;
         temp.reserve(*count);
         for (unsigned int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_R8*> (value))[i]);
-        status = (**base).root.AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
+        status = (**base).root.AttPackSet(cname, *tk, *count, &temp,
+                        cconv, cpurp, cobj, ESMC_NOT_PRESENT_FILTER(attrAttr));
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
         vector<ESMC_Logical> temp;
         temp.reserve(*count);
         for (unsigned int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_Logical*> (value))[i]);
-        status = (**base).root.AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
+        status = (**base).root.AttPackSet(cname, *tk, *count, &temp,
+                        cconv, cpurp, cobj, ESMC_NOT_PRESENT_FILTER(attrAttr));
         temp.clear();
       } else {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
@@ -2384,7 +2452,7 @@ extern "C" {
   }
 
   // check the typekind, do not return error (default value possible)
-  status = (**base).root.AttributeGet(cname, &attrTypeKind, NULL);
+  status = (**base).root.AttributeGet(cname, &attrTypeKind, NULL, NULL);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc))) return;
   
@@ -2518,7 +2586,7 @@ extern "C" {
       return;
   }
 
-  status = (**base).root.AttributeGet(cname, &attrTk, &attrItems);
+  status = (**base).root.AttributeGet(cname, &attrTk, &attrItems, NULL);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc))) return;
 
@@ -2628,6 +2696,7 @@ extern "C" {
       char *name,               // in - F90, non-null terminated string
       ESMC_TypeKind *tk,        // out - typekind
       int *count,               // out - item count
+      ESMC_Logical *attrAttr,   // out - attribute describing attPack
       int *rc,                  // in - return code
       ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for name
 // 
@@ -2671,6 +2740,13 @@ extern "C" {
       return;
   }
 
+  if (!attrAttr) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute attribute", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
   string cname(name, nlen);
   cname.resize(cname.find_last_not_of(" ")+1);
 
@@ -2681,7 +2757,7 @@ extern "C" {
       return;
   }
 
-  status = (**base).root.AttributeGet(cname, tk, count);
+  status = (**base).root.AttributeGet(cname, tk, count, attrAttr);
   ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -2706,6 +2782,7 @@ extern "C" {
       char *name,               // out - F90, non-null terminated string
       ESMC_TypeKind *tk,        // out - typekind
       int *count,               // out - item count
+      ESMC_Logical *attrAttr,   // out - attribute describing attPack
       int *rc,                  // in - return code
       ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for name
 // 
@@ -2749,10 +2826,17 @@ extern "C" {
       return;
   }
 
+  if (!attrAttr) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute attribute", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
   // declare string for name
   string cname;
 
-  status = (**base).root.AttributeGet((*num)-1, &cname, tk, count);
+  status = (**base).root.AttributeGet((*num)-1, &cname, tk, count, attrAttr);
   ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 

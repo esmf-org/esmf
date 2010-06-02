@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.58 2010/04/21 06:03:08 eschwab Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.59 2010/06/02 05:52:09 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.58 2010/04/21 06:03:08 eschwab Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.59 2010/06/02 05:52:09 eschwab Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -130,22 +130,40 @@ module ESMF_AttributeMod
       interface ESMF_AttributeAdd
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_ArrayAttAddPackCstm
+        module procedure ESMF_ArrayAttAddPackCst
+        module procedure ESMF_ArrayAttAddPackCstN
+        module procedure ESMF_ArrayAttAddPackCstN1
         module procedure ESMF_ArrayAttAddPackStd
-        module procedure ESMF_ArrayBundleAttAddPackCstm
+        module procedure ESMF_ArrayBundleAttAddPackCst
+        module procedure ESMF_ArrayBundleAttAddPackCstN
+        module procedure ESMF_ArrayBundleAttAddPackCstN1
         module procedure ESMF_ArrayBundleAttAddPackStd
         module procedure ESMF_CplCompAttAddPackStd
-        module procedure ESMF_CplCompAttAddPackCstm
+        module procedure ESMF_CplCompAttAddPackCst
+        module procedure ESMF_CplCompAttAddPackCstN
+        module procedure ESMF_CplCompAttAddPackCstN1
         module procedure ESMF_GridCompAttAddPackStd
-        module procedure ESMF_GridCompAttAddPackCstm
-        module procedure ESMF_DistGridAttAddPackCstm
+        module procedure ESMF_GridCompAttAddPackCst
+        module procedure ESMF_GridCompAttAddPackCstN
+        module procedure ESMF_GridCompAttAddPackCstN1
+        module procedure ESMF_DistGridAttAddPackCst
+        module procedure ESMF_DistGridAttAddPackCstN
+        module procedure ESMF_DistGridAttAddPackCstN1
         module procedure ESMF_FieldAttAddPackStd
-        module procedure ESMF_FieldAttAddPackCstm
-        module procedure ESMF_FieldBundleAttAddPackCstm
+        module procedure ESMF_FieldAttAddPackCst
+        module procedure ESMF_FieldAttAddPackCstN
+        module procedure ESMF_FieldAttAddPackCstN1
+        module procedure ESMF_FieldBundleAttAddPackCst
+        module procedure ESMF_FieldBundleAttAddPackCstN
+        module procedure ESMF_FieldBundleAttAddPackCstN1
         module procedure ESMF_GridAttAddPackStd
-        module procedure ESMF_GridAttAddPackCstm
+        module procedure ESMF_GridAttAddPackCst
+        module procedure ESMF_GridAttAddPackCstN
+        module procedure ESMF_GridAttAddPackCstN1
         module procedure ESMF_StateAttAddPackStd
-        module procedure ESMF_StateAttAddPackCstm
+        module procedure ESMF_StateAttAddPackCst
+        module procedure ESMF_StateAttAddPackCstN
+        module procedure ESMF_StateAttAddPackCstN1
         
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that create
@@ -538,7 +556,7 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd() 
-!     subroutine ESMF_AttAddPackStandard(<object>, convention, purpose, nestConvention, &
+!     subroutine ESMF_AttAddPackStd(<object>, convention, purpose, nestConvention, &
 !                                nestPurpose, rc)
 !
 ! !ARGUMENTS:
@@ -590,17 +608,15 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd() 
-!     subroutine ESMF_AttAddPackCstm(<object>, convention, purpose, &
-!     attrList, count, nestConvention, nestPurpose, rc)
+!     subroutine ESMF_AttAddPackCstN1(<object>, convention, purpose, &
+!     attrList, count, nestConvention, nestPurpose, nestCount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
-!     character (len = *), intent(in), optional :: convention
-!     character (len = *), intent(in), optional :: purpose
+!     character (len = *), intent(in) :: convention
+!     character (len = *), intent(in) :: purpose
 !     character (len=*), dimension(:), intent(in) :: attrList
-!     integer, intent(in), optional :: count   
-!     character (len = *), intent(in), optional :: nestConvention
-!     character (len = *), intent(in), optional :: nestPurpose
+!     integer, intent(in), optional :: count
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -633,10 +649,132 @@ contains
 !           The list of Attribute names to specify the custom Attribute package
 !     \item [{[count]}]
 !           The number of Attributes to add to the custom Attribute package
-!     \item [{[nestConvention]}]
-!           The convention of the Attribute package around which to nest the
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with nested Attribute Packages or modify an existing Attribute package
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeAdd() 
+!     subroutine ESMF_AttAddPackCstN(<object>, convention, purpose, &
+!     attrList, count, nestConvention, nestPurpose, nestCount, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values  
+!     character (len = *), intent(in) :: convention
+!     character (len = *), intent(in) :: purpose
+!     character (len=*), dimension(:), intent(in), optional :: attrList
+!     integer, intent(in), optional :: count
+!     character (len = *), dimension(:), intent(in) :: nestConvention
+!     character (len = *), dimension(:), intent(in) :: nestPurpose
+!     integer, intent(in), optional :: nestCount
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Add a custom Attribute package, with nested Attribute packages,
+!     to <object>. 
+!     See Section~\ref{desc:AttPacks} for a description of Attribute packages
+!     and their conventions, purposes, and object types.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp), intent(inout) :: comp  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: distgrid
+!     \item type(ESMF\_Field), intent(inout) :: field  
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
+!     \item type(ESMF\_Grid), intent(inout) :: grid
+!     \item type(ESMF\_State), intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object
+!     \item [convention]
+!           The convention of the Attribute package
+!     \item [purpose]
+!           The purpose of the Attribute package
+!     \item [{[attrList]}]
+!           The list of Attribute names to specify the custom Attribute package
+!     \item [{[count]}]
+!           The number of Attributes to add to the custom Attribute package
+!     \item [nestConvention]
+!           The convention(s) of the Attribute package(s) around which to nest
+!           the new Attribute package
+!     \item [nestPurpose]
+!           The purpose(s) of the Attribute package(s) around which to nest the
 !           new Attribute package
-!     \item [{[nestPurpose]}]
+!     \item [{[nestCount]}]
+!           The number of nested Attribute packages to add to the custom
+!           Attribute package
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with a single nested Atrribute package, or modify an existing Attribute package
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeAdd() 
+!     subroutine ESMF_AttAddPackCstN1(<object>, convention, purpose, &
+!     attrList, count, nestConvention, nestPurpose, nestCount, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values  
+!     character (len = *), intent(in) :: convention
+!     character (len = *), intent(in) :: purpose
+!     character (len=*), dimension(:), intent(in), optional :: attrList
+!     integer, intent(in), optional :: count
+!     character (len = *), intent(in) :: nestConvention
+!     character (len = *), intent(in) :: nestPurpose
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Add a custom Attribute package, with a single nested Attribute
+!     package, to <object>.  
+!     See Section~\ref{desc:AttPacks} for a description of Attribute packages
+!     and their conventions, purposes, and object types.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp), intent(inout) :: comp  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: distgrid
+!     \item type(ESMF\_Field), intent(inout) :: field  
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
+!     \item type(ESMF\_Grid), intent(inout) :: grid
+!     \item type(ESMF\_State), intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object
+!     \item [convention]
+!           The convention of the Attribute package
+!     \item [purpose]
+!           The purpose of the Attribute package
+!     \item [{[attrList]}]
+!           The list of Attribute names to specify the custom Attribute package
+!     \item [{[count]}]
+!           The number of Attributes to add to the custom Attribute package
+!     \item [nestConvention]
+!           The convention of the Attribute package around which to nest
+!           the new Attribute package
+!     \item [nestPurpose]
 !           The purpose of the Attribute package around which to nest the
 !           new Attribute package
 !     \item [{[rc]}] 
@@ -928,13 +1066,14 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGet() 
-!     subroutine ESMF_AttributeGetInfoByNam(<object>, name, typekind, itemCount, rc)
+!     subroutine ESMF_AttributeGetInfoByNam(<object>, name, typekind, itemCount, attrAttribute, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
 !     character (len = *), intent(in) :: name
 !     type(ESMF_TypeKind), intent(out), optional :: typekind
 !     integer, intent(out), optional :: itemCount   
+!     logical, intent(out), optional :: attrAttribute   
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -963,6 +1102,9 @@ contains
 !           The typekind of the Attribute
 !     \item [{[itemCount]}]
 !           The number of items in this Attribute
+!     \item [{[attrAttribute]}]
+!           Whether this is an attribute describing a containing Attribute
+!           package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -976,7 +1118,7 @@ contains
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGet() 
 !     subroutine ESMF_AttributeGetInfoByNum(<object>, attributeIndex, name, &
-!       typekind, itemcount, rc)
+!       typekind, itemcount, attrAttribute, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
@@ -984,6 +1126,7 @@ contains
 !     character (len = *), intent(out) :: name
 !     type(ESMF_TypeKind), intent(out), optional :: typekind
 !     integer, intent(out), optional :: itemCount   
+!     logical, intent(out), optional :: attrAttribute   
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -1015,6 +1158,9 @@ contains
 !           The typekind of the Attribute
 !     \item [{[itemCount]}]
 !           The number of items in this Attribute
+!     \item [{[attrAttribute]}]
+!           Whether this is an attribute describing a containing Attribute
+!           package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -1484,7 +1630,7 @@ contains
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeSet(<object>, name, <value argument>, &
-!                                 convention, purpose, rc)
+!                                 convention, purpose, attrAttribute, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
@@ -1492,6 +1638,7 @@ contains
 !     <value argument>, see below for supported values
 !     character (len = *), intent(in), optional :: convention
 !     character (len = *), intent(in), optional :: purpose
+!     logical, intent(in), optional :: attrAttribute
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -1535,6 +1682,9 @@ contains
 !           The convention of the Attribute package
 !     \item [{[purpose]}]
 !           The purpose of the Attribute package
+!     \item [{[attrAttribute]}]
+!           Whether this is an attribute describing the Attribute package,
+!           default is .false.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -1547,7 +1697,8 @@ contains
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeSet(<object>, name, <valueList argument>, &
-!                                 convention, purpose, itemCount, rc)
+!                                 convention, purpose, attrAttribute, &
+!                                 itemCount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
@@ -1555,6 +1706,7 @@ contains
 !     <valueList argument>, see below for supported values
 !     character (len = *), intent(in), optional :: convention
 !     character (len = *), intent(in), optional :: purpose
+!     logical, intent(in), optional :: attrAttribute
 !     integer, intent(in), optional :: itemCount
 !     integer, intent(out), optional :: rc   
 !
@@ -1599,6 +1751,9 @@ contains
 !           The convention of the Attribute package
 !     \item [{[purpose]}]
 !           The purpose of the Attribute package
+!     \item [{[attrAttribute]}]
+!           Whether this is an attribute describing the Attribute package,
+!           default is .false.
 !     \item [{[itemCount]}]
 !           The number of items in a multi-valued Attribute
 !     \item [{[rc]}] 
@@ -1738,15 +1893,12 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeAdd() @\
-      subroutine mclass##AttAddPackStd(mthis, convention, purpose, & @\
-        nestConvention, nestPurpose, rc) @\
+      subroutine mclass##AttAddPackStd(mthis, convention, purpose, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
       character (len = *), intent(in) :: convention @\
       character (len = *), intent(in) :: purpose @\
-      character (len = *), intent(in), optional :: nestConvention @\
-      character (len = *), intent(in), optional :: nestPurpose @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -1761,11 +1913,6 @@ contains
 !      The convention of the new Attribute package. @\
 !     \item [purpose] @\
 !      The purpose of the new Attribute package. @\
-!     \item [nestConvention] @\
-!      The convention of the Attribute package around which to nest the @\
-!      new Attribute package. @\
-!     \item [nestPurpose] @\
-!      The purpose of the Attribute package around which to nest the @\
 !      new Attribute package. @\
 !     \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -1775,44 +1922,25 @@ contains
 !EOPI @\
  @\
       integer :: localrc                           ! Error status @\
-      type(ESMF_Logical) :: attpacknest @\
       character (len=*), parameter :: object=#mthis @\
  @\
       ! Initialize return code; assume failure until success is certain @\
-      attpacknest = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check input variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      if (convention .ne. "ESMF" .or. purpose .ne. "General") then @\
+      if (.not.((convention.eq."ESMF"   .and.purpose.eq."General").or. & @\
+                (convention.eq."CIM 1.0".and.purpose.eq."Model Component Simulation Description"))) then @\
         call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & @\
-          "Convention must be ESMF, and purpose must be General for ESMF standard Attribute packages", & @\
+          "See ESMF Reference Manual for ESMF standard Attribute package convention and purpose values", & @\
           ESMF_CONTEXT, rc) @\
         return @\
       endif @\
  @\
-      if (present(nestConvention).or.present(nestPurpose)) then @\
-        if (present(nestConvention).and..not.present(nestPurpose).or. & @\
-            present(nestPurpose).and..not.present(nestConvention)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
-            "both nestConvention and nestPurpose must be present or not", & @\
-            ESMF_CONTEXT, rc) @\
-          return @\
-        else @\
-          attpacknest = ESMF_TRUE; @\
-        endif @\
-      endif @\
+      call c_ESMC_AttPackCreateStandard(mthisfield, convention, & @\
+        purpose, object, localrc) @\
  @\
-      if (attpacknest == ESMF_FALSE) then @\
-        call c_ESMC_AttPackCreateStandard(mthisfield, convention, & @\
-          purpose, object, localrc) @\
-      else @\
-        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
-          "cannot nest an ESMF standard Attribute package onto a custom package", & @\
-          ESMF_CONTEXT, rc) @\
-        return @\
-      endif @\
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
          ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -1824,14 +1952,14 @@ contains
 
 #define AttAddPackCustomMacro(mclass, mthis, mthisfield) \
 ^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_AttAddPackCstm" @\
+^define ESMF_METHOD "ESMF_AttAddPackCst" @\
 !BOPI @\
-! !IROUTINE: AttAddPackCstm - Add a custom Attribute package @\
+! !IROUTINE: AttAddPackCst - Add a custom Attribute package @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeAdd() @\
-      subroutine mclass##AttAddPackCstm(mthis, convention, purpose, & @\
-      attrList, count, nestConvention, nestPurpose, rc) @\
+      subroutine mclass##AttAddPackCst(mthis, convention, purpose, & @\
+      attrList, count, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -1839,14 +1967,12 @@ contains
       character (len = *), intent(in) :: purpose @\
       character (len = *), dimension(:), intent(in) :: attrList @\
       integer, intent(in), optional :: count @\
-      character (len = *), intent(in), optional :: nestConvention @\
-      character (len = *), intent(in), optional :: nestPurpose @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
 ! !DESCRIPTION: @\
-!     Add a custom Attribute package for the object, or modify an  @\
-!     existing Attribute package. @\
+!     Add a custom Attribute package for the object, or modify an existing @\
+!     Attribute package. @\
 ! @\
 !     The arguments are: @\
 !     \begin{description} @\
@@ -1858,14 +1984,8 @@ contains
 !      The purpose of the new Attribute package. @\
 !     \item [attrList] @\
 !      An array of character strings specifying the names of the user defined Attributes @\
-!     \item [count] @\
+!     \item [{[count]}] @\
 !      The count of the number of Attributes to add to the package @\
-!     \item [nestConvention] @\
-!      The convention of the Attribute package around which to nest the @\
-!      new Attribute package. @\
-!     \item [nestPurpose] @\
-!      The purpose of the Attribute package around which to nest the @\
-!      new Attribute package. @\
 !     \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -1875,10 +1995,8 @@ contains
  @\
       integer :: localrc, i, localCount @\
       character(len=*), parameter :: object=#mthis @\
-      type(ESMF_Logical) :: attpacknest @\
 @\
       ! Initialize return code; assume failure until success is certain @\
-      attpacknest = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check input variables @\
@@ -1891,50 +2009,251 @@ contains
             ESMF_CONTEXT, rc) @\
           return @\
         endif @\
-	localCount = count @\
-      else @\
-	localCount = size(attrList) @\
-      end if @\
- @\
-      if (localCount .le. 0) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & @\
-                              "attrList is too small", & @\
-                              ESMF_CONTEXT, rc) @\
-        return @\
-      endif @\
- @\
-      if (present(nestConvention).or.present(nestPurpose)) then @\
-        if (present(nestConvention).and..not.present(nestPurpose).or. & @\
-            present(nestPurpose).and..not.present(nestConvention)) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
-            "both nestConvention and nestPurpose must be present or not", & @\
+        if (count .le. 0) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & @\
+            "count is <= 0", & @\
             ESMF_CONTEXT, rc) @\
           return @\
-        else @\
-          attpacknest = ESMF_TRUE @\
         endif @\
-      endif @\
- @\
-      if (attpacknest == ESMF_FALSE) then @\
-        call c_ESMC_AttPackCreateCustom(mthisfield, convention, & @\
-          purpose, object, localrc) @\
+        localCount = count @\
       else @\
-        call c_ESMC_AttPackNest(mthisfield, convention, & @\
-          purpose, object, nestConvention, nestPurpose, localrc) @\
-      endif @\
+        localCount = size(attrList) @\
+      end if @\
+ @\
+      call c_ESMC_AttPackCreateCustom(mthisfield, convention, & @\
+        purpose, object, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
          ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       do i = 1, localCount @\
-        call c_ESMC_AttPackAddAttribute(mthisfield, attrList(i), convention, & @\
-            purpose, object, localrc) @\
+        call c_ESMC_AttPackAddAttribute(mthisfield, attrList(i), & @\
+                           convention, purpose, object, localrc) @\
       end do @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+         ESMF_CONTEXT, rcToReturn=rc)) return @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass##AttAddPackCst
+
+!------------------------------------------------------------------------------
+
+#define AttAddPackCustomNMacro(mclass, mthis, mthisfield) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttAddPackCstN" @\
+!BOPI @\
+! !IROUTINE: AttAddPackCstN - Add a custom Attribute package with nested Attribute Packages @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeAdd() @\
+      subroutine mclass##AttAddPackCstN(mthis, convention, purpose, & @\
+      attrList, count, nestConvention, nestPurpose, nestCount, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(mclass), intent(inout) :: mthis   @\
+      character (len = *), intent(in) :: convention @\
+      character (len = *), intent(in) :: purpose @\
+      character (len = *), dimension(:), intent(in), optional :: attrList @\
+      integer, intent(in), optional :: count @\
+      character (len = *), dimension(:), intent(in) :: nestConvention @\
+      character (len = *), dimension(:), intent(in) :: nestPurpose @\
+      integer, intent(in), optional :: nestCount @\
+      integer, intent(out), optional :: rc    @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Add a custom Attribute package for the object, with nested @\
+!     Attribute packages, or modify an existing Attribute package. @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis] @\
+!      An ESMF object. @\
+!     \item [convention] @\
+!      The convention of the new Attribute package. @\
+!     \item [purpose] @\
+!      The purpose of the new Attribute package. @\
+!     \item [{[attrList]}] @\
+!      An array of character strings specifying the names of the user defined Attributes @\
+!     \item [{[count]}] @\
+!      The count of the number of Attributes to add to the package @\
+!     \item [nestConvention] @\
+!      The convention(s) of the Attribute package(s) around which to nest the @\
+!      new Attribute package. @\
+!     \item [nestPurpose] @\
+!      The purpose(s) of the Attribute package(s) around which to nest the @\
+!      new Attribute package. @\
+!     \item [{[nestCount]}] @\
+!      The count of the number of nested Attribute packages to add to the @\
+!      new Attribute package @\
+!     \item [{[rc]}]  @\
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc, i, j, k, localCount, localNestCount @\
+      character(len=*), parameter :: object=#mthis @\
+      integer, dimension(size(nestConvention)) :: nestConvLens @\
+      integer, dimension(size(nestPurpose)) :: nestPurpLens @\
+      character(len=(size(nestConvention)*len(nestConvention))) :: nestConvString @\
+      character(len=(size(nestPurpose)*len(nestPurpose))) :: nestPurpString @\
+@\
+      ! Initialize return code; assume failure until success is certain @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      localCount = 0 @\
+      if (present(attrList)) then @\
+        if (present(count)) then @\
+          if (count > size(attrList)) then @\
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & @\
+              "count cannot be larger than size(attrList)", & @\
+              ESMF_CONTEXT, rc) @\
+            return @\
+          endif @\
+          if (count .lt. 0) then @\
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & @\
+              "count is negative", & @\
+              ESMF_CONTEXT, rc) @\
+            return @\
+          endif @\
+          localCount = count @\
+        else @\
+          localCount = size(attrList) @\
+        end if @\
+      end if @\
+ @\
+      if (size(nestConvention).ne.size(nestPurpose)) then @\
+         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & @\
+           "number of items in nestConvention and nestPurpose must be the same", & @\
+           ESMF_CONTEXT, rc) @\
+         return @\
+      endif @\
+ @\
+      if (present(nestCount)) then @\
+        if (nestCount > size(nestConvention)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & @\
+            "nestCount cannot be larger than size(nestConvention)", & @\
+            ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
+        localNestCount = nestCount @\
+      else @\
+        localNestCount = size(nestConvention) @\
+      end if @\
+      if (localNestCount .le. 0) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & @\
+                   "size(nestConvention) and size(nestPurpose) or nestCount are <= 0", & @\
+                    ESMF_CONTEXT, rc) @\
+        return @\
+      endif @\
+ @\
+      j = 1 @\
+      k = 1 @\
+      do  i=1,localNestCount @\
+        nestConvLens(i) = len_trim(nestConvention(i)) @\
+        nestPurpLens(i) = len_trim(nestPurpose(i)) @\
+        nestConvString(j:(j+nestConvLens(i)-1)) = nestConvention(i) @\
+        nestPurpString(k:(k+nestPurpLens(i)-1)) = nestPurpose(i) @\
+        j = j + nestConvLens(i) @\
+        k = k + nestPurpLens(i) @\
+      enddo @\
+ @\
+      call c_ESMC_AttPackNest(mthisfield, convention, & @\
+        purpose, object, localNestCount, nestConvString, nestPurpString, & @\
+        nestConvLens, nestPurpLens, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+         ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+      if (localCount .gt. 0) then @\
+        do i = 1, localCount @\
+          call c_ESMC_AttPackAddAttribute(mthisfield, attrList(i), & @\
+                             convention, purpose, object, localrc) @\
+        end do @\
+      endif @\
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
          ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
-      end subroutine mclass##AttAddPackCstm @\
+      end subroutine mclass##AttAddPackCstN
+
+!------------------------------------------------------------------------------
+
+#define AttAddPackCustomN1Macro(mclass, mthis, mthisfield) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttAddPackCstN1" @\
+!BOPI @\
+! !IROUTINE: AttAddPackCstN1 - Add a custom Attribute package with a single nested Attribute package @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeAdd() @\
+      subroutine mclass##AttAddPackCstN1(mthis, convention, purpose, & @\
+      attrList, count, nestConvention, nestPurpose, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(mclass), intent(inout) :: mthis   @\
+      character (len = *), intent(in) :: convention @\
+      character (len = *), intent(in) :: purpose @\
+      character (len = *), dimension(:), intent(in), optional :: attrList @\
+      integer, intent(in), optional :: count @\
+      character (len = *), intent(in) :: nestConvention @\
+      character (len = *), intent(in) :: nestPurpose @\
+      integer, intent(out), optional :: rc    @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Add a custom Attribute package for the object, with a single @\
+!     nested Attribute package, or modify an existing Attribute package. @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis] @\
+!      An ESMF object. @\
+!     \item [convention] @\
+!      The convention of the new Attribute package. @\
+!     \item [purpose] @\
+!      The purpose of the new Attribute package. @\
+!     \item [{[attrList]}] @\
+!      An array of character strings specifying the names of the user defined Attributes @\
+!     \item [{[count]}] @\
+!      The count of the number of Attributes to add to the package @\
+!     \item [nestConventio] @\
+!      The convention of the Attribute package around which to nest the @\
+!      new Attribute package. @\
+!     \item [nestPurpose] @\
+!      The purpose of the Attribute package around which to nest the @\
+!      new Attribute package. @\
+!     \item [{[rc]}]  @\
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc @\
+      character(len=len(nestConvention)), dimension(1) :: nestConvString @\
+      character(len=len(nestPurpose)), dimension(1) :: nestPurpString @\
+@\
+      ! Initialize return code; assume failure until success is certain @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      nestConvString(1) = nestConvention @\
+      nestPurpString(1) = nestPurpose @\
+ @\
+      call mclass##AttAddPackCstN(mthis, convention, purpose, & @\
+              attrList, count, nestConvString, nestPurpString, 1, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+         ESMF_CONTEXT, rcToReturn=rc)) return @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass##AttAddPackCstN1
 
 !------------------------------------------------------------------------------ 
 
@@ -2834,17 +3153,19 @@ contains
 ^define ESMF_METHOD "ESMF_AttGetInfoByNam" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeGet - Query State Attributes by name @\
+! !IROUTINE: ESMF_AttributeGet - Query Attributes by name @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
-      subroutine mclass##AttGetInfoByNam(mthis, name, typekind, itemCount, rc) @\
+      subroutine mclass##AttGetInfoByNam(mthis, name, typekind, itemCount, & @\
+        attrAttribute, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character(len=*), intent(in) :: name @\
       type(ESMF_TypeKind), intent(out), optional :: typekind @\
       integer, intent(out), optional :: itemCount    @\
+      logical, intent(out), optional :: attrAttribute @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -2863,6 +3184,9 @@ contains
 !     \item [{[itemCount]}] @\
 !           The number of items in this Attribute.  For character types, @\
 !           the length of the character string. @\
+!     \item [{[attrAttribute]}] @\
+!           Whether this is an attribute describing a containing Attribute @\
+!           package. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -2873,6 +3197,7 @@ contains
       integer :: localrc              @\
       type(ESMF_TypeKind) :: localTk @\
       integer :: litemCount @\
+      type(ESMF_Logical) :: lattrAttr @\
  @\
       ! Initialize  @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -2882,12 +3207,13 @@ contains
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       call c_ESMC_AttributeGetInfoName(mthisfield, name, & @\
-        localTk, litemCount, localrc) @\
+        localTk, litemCount, lattrAttr, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(typekind)) typekind = localTk @\
       if (present(itemCount)) itemCount = litemCount @\
+      if (present(attrAttribute)) attrAttribute = lattrAttr @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -2898,12 +3224,12 @@ contains
 ^define ESMF_METHOD "ESMF_AttGetInfoByNum" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeGet - Query State Attributes by index number @\
+! !IROUTINE: ESMF_AttributeGet - Query Attributes by index number @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetInfoByNum(mthis, attributeIndex, name, & @\
-        typekind, itemCount, rc) @\
+        typekind, itemCount, attrAttribute, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -2911,6 +3237,7 @@ contains
       character(len=*), intent(out) :: name @\
       type(ESMF_TypeKind), intent(out), optional :: typekind @\
       integer, intent(out), optional :: itemCount @\
+      logical, intent(out), optional :: attrAttribute @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -2927,10 +3254,13 @@ contains
 !     \item [name] @\
 !           Returns the name of the Attribute. @\
 !     \item [{[typekind]}] @\
-!           The typekind of the Attribute. @\
+!           Returns the typekind of the Attribute. @\
 !     \item [{[itemCount]}] @\
-!           Returns the number of items in this Attribute.  For character types, @\
-!           this is the length of the character string. @\
+!           Returns the number of items in this Attribute.  For character @\
+!           types, this is the length of the character string. @\
+!     \item [{[attrAttribute]}] @\
+!           Whether this is an attribute describing a containing Attribute @\
+!           package. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -2942,6 +3272,7 @@ contains
       character(len=len(name)) :: localName @\
       type(ESMF_TypeKind) :: localTk @\
       integer :: litemCount @\
+      type(ESMF_Logical) :: lattrAttr @\
  @\
       ! Initialize  @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -2951,13 +3282,14 @@ contains
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       call c_ESMC_AttributeGetInfoNum(mthisfield, attributeIndex, & @\
-        localName, localTk, litemCount, localrc) @\
+        localName, localTk, litemCount, lattrAttr, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       name = localName @\
       if (present(typekind)) typekind = localTk @\
       if (present(itemCount)) itemCount = litemCount @\
+      if (present(attrAttribute)) attrAttribute = lattrAttr @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3326,7 +3658,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSet##mtypekind(mthis, name, value, convention, & @\
-        purpose, rc) @\
+        purpose, attrAttribute, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -3334,6 +3666,7 @@ contains
       mtype(ESMF_KIND_##mtypekind), intent(in) :: value @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
+      logical, intent(in), optional :: attrAttribute @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -3349,10 +3682,13 @@ contains
 !           The name of the Attribute to add. @\
 !     \item [value] @\
 !           The integer value of the Attribute to add. @\
-!     \item [convention] @\
+!     \item [{[convention]}] @\
 !           The convention of the Attribute package. @\
-!     \item [purpose] @\
+!     \item [{[purpose]}] @\
 !           The purpose of the Attribute package. @\
+!     \item [{[attrAttribute]}] @\
+!           Whether this is an attribute describing the Attribute package, @\
+!           default is .false. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -3386,7 +3722,7 @@ contains
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, 1, value, & @\
-          convention, purpose, fobject, localrc) @\
+          convention, purpose, fobject, attrAttribute, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, 1, value, localrc) @\
@@ -3408,7 +3744,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSet1D##mtypekind(mthis, name, valueList, & @\
-        convention, purpose, itemCount, rc) @\
+        convention, purpose, attrAttribute, itemCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -3416,6 +3752,7 @@ contains
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(in) :: valueList @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
+      logical, intent(in), optional :: attrAttribute    @\
       integer, intent(in), optional :: itemCount    @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -3434,11 +3771,14 @@ contains
 !           The name of the Attribute to add. @\
 !     \item [valueList] @\
 !           The integer values of the Attribute to add. @\
-!     \item [convention] @\
+!     \item [{[convention]}] @\
 !           The convention of the Attribute package. @\
-!     \item [purpose] @\
+!     \item [{[purpose]}] @\
 !           The purpose of the Attribute package. @\
-!     \item [itemCount] @\
+!     \item [{[attrAttribute]}] @\
+!           Whether this is an attribute describing the Attribute package, @\
+!           default is .false. @\
+!     \item [{[itemCount]}] @\
 !           The number of integers in the {\tt valueList}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -3492,7 +3832,7 @@ contains
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-          convention, purpose, fobject, localrc) @\
+          convention, purpose, fobject, attrAttribute, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, litemCount, valueList, localrc) @\
@@ -3516,7 +3856,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetLgcl(mthis, name, value, convention, & @\
-        purpose, rc) @\
+        purpose, attrAttribute, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -3524,6 +3864,7 @@ contains
       logical, intent(in) :: value @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
+      logical, intent(in), optional :: attrAttribute @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -3543,6 +3884,9 @@ contains
 !           The convention of the Attribute package. @\
 !     \item [purpose] @\
 !           The purpose of the Attribute package. @\
+!     \item [{[attrAttribute]}] @\
+!           Whether this is an attribute describing the Attribute package, @\
+!           default is .false. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -3578,7 +3922,7 @@ contains
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
-          convention, purpose, fobject, localrc) @\
+          convention, purpose, fobject, attrAttribute, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc) @\
@@ -3600,7 +3944,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetLgclList(mthis, name, valueList, & @\
-        convention, purpose, itemCount, rc) @\
+        convention, purpose, attrAttribute, itemCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -3608,6 +3952,7 @@ contains
       logical, dimension(:), intent(in) :: valueList @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
+      logical, intent(in), optional :: attrAttribute @\
       integer, intent(in), optional :: itemCount    @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -3626,11 +3971,14 @@ contains
 !           The name of the Attribute to add. @\
 !     \item [value] @\
 !           The logical true/false values of the Attribute. @\
-!     \item [convention] @\
+!     \item [{[convention]}] @\
 !           The convention of the Attribute package. @\
-!     \item [purpose] @\
+!     \item [{[purpose]}] @\
 !           The purpose of the Attribute package. @\
-!     \item [itemCount] @\
+!     \item [{[attrAttribute]}] @\
+!           Whether this is an attribute describing the Attribute package, @\
+!           default is .false. @\
+!     \item [{[itemCount]}] @\
 !           The number of logicals in the {\tt valueList}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -3684,7 +4032,7 @@ contains
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-          convention, purpose, fobject, localrc) @\
+          convention, purpose, fobject, attrAttribute, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, litemCount, valueList, localrc) @\
@@ -3708,7 +4056,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetChar(mthis, name, value, convention, & @\
-        purpose, rc) @\
+        purpose, attrAttribute, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -3716,6 +4064,7 @@ contains
       character (len = *), intent(in) :: value @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
+      logical, intent(in), optional :: attrAttribute @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -3731,10 +4080,13 @@ contains
 !           The name of the Attribute to add. @\
 !     \item [value] @\
 !           The character value of the Attribute to add. @\
-!     \item [convention] @\
+!     \item [{[convention]}] @\
 !           The convention of the Attribute package. @\
-!     \item [purpose] @\
+!     \item [{[purpose]}] @\
 !           The purpose of the Attribute package. @\
+!     \item [{[attrAttribute]}] @\
+!           Whether this is an attribute describing the Attribute package, @\
+!           default is .false. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -3767,7 +4119,8 @@ contains
  @\
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
-          ESMF_TYPEKIND_CHARACTER, convention, purpose, fobject, localrc) @\
+          ESMF_TYPEKIND_CHARACTER, convention, purpose, fobject, attrAttribute, & @\
+          localrc) @\
       else @\
         call c_ESMC_AttributeSetChar(mthisfield, name, value, localrc) @\
       endif @\
@@ -3788,7 +4141,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetCharList(mthis, name, valueList, & @\
-        convention, purpose, itemCount, rc) @\
+        convention, purpose, attrAttribute, itemCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
@@ -3796,6 +4149,7 @@ contains
       character (len = *), dimension(:), intent(in) :: valueList @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
+      logical, intent(in), optional :: attrAttribute @\
       integer, intent(in), optional :: itemCount @\
       integer, intent(out), optional :: rc @\
  @\
@@ -3812,10 +4166,13 @@ contains
 !           The name of the Attribute to add. @\
 !     \item [value] @\
 !           The character value of the Attribute to add. @\
-!     \item [convention] @\
+!     \item [{[convention]}] @\
 !           The convention of the Attribute package. @\
-!     \item [purpose] @\
+!     \item [{[purpose]}] @\
 !           The purpose of the Attribute package. @\
+!     \item [{[attrAttribute]}] @\
+!           Whether this is an attribute describing the Attribute package, @\
+!           default is .false. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -3876,7 +4233,8 @@ contains
  @\
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-          litemCount, valueString, lens, convention, purpose, fobject, localrc) @\
+          litemCount, valueString, lens, convention, purpose, fobject, attrAttribute, & @\
+          localrc) @\
       else @\
         call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           litemCount, valueString, lens, localrc) @\
@@ -4038,6 +4396,8 @@ contains
 !-------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_Array, array, array)
+AttAddPackCustomNMacro(ESMF_Array, array, array)
+AttAddPackCustomN1Macro(ESMF_Array, array, array)
 AttAddPackStandardMacro(ESMF_Array, array, array)
 AttRemoveMacro(ESMF_Array, array, array)
 
@@ -4059,6 +4419,8 @@ AttWriteMacro(ESMF_Array, array, array, array, array)
 !-------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+AttAddPackCustomNMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+AttAddPackCustomN1Macro(ESMF_ArrayBundle, arraybundle, arraybundle)
 AttAddPackStandardMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 AttRemoveMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 
@@ -4086,6 +4448,8 @@ AttWriteMacro(ESMF_ArrayBundle, arraybundle, arraybundle, arraybundle, array)
 
 AttAddPackStandardMacro(ESMF_CplComp, comp, comp%compp%base)
 AttAddPackCustomMacro(ESMF_CplComp, comp, comp%compp%base)
+AttAddPackCustomNMacro(ESMF_CplComp, comp, comp%compp%base)
+AttAddPackCustomN1Macro(ESMF_CplComp, comp, comp%compp%base)
 AttCopyMacro(ESMF_CplComp, ESMF_CplComp, comp1, comp2, comp1%compp%base, comp2%compp%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_CplComp, comp, comp%compp%base)
@@ -4124,6 +4488,8 @@ AttWriteMacro(ESMF_CplComp, comp, comp%compp%base, comp, field)
 
 AttAddPackStandardMacro(ESMF_GridComp, comp, comp%compp%base)
 AttAddPackCustomMacro(ESMF_GridComp, comp, comp%compp%base)
+AttAddPackCustomNMacro(ESMF_GridComp, comp, comp%compp%base)
+AttAddPackCustomN1Macro(ESMF_GridComp, comp, comp%compp%base)
 AttCopyMacro(ESMF_GridComp, ESMF_GridComp, comp1, comp2, comp1%compp%base, comp2%compp%base)
 AttRemoveMacro(ESMF_GridComp, comp, comp%compp%base)
 
@@ -4160,6 +4526,8 @@ AttWriteMacro(ESMF_GridComp, comp, comp%compp%base, comp, field)
 !-------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_DistGrid, distgrid, distgrid)
+AttAddPackCustomNMacro(ESMF_DistGrid, distgrid, distgrid)
+AttAddPackCustomN1Macro(ESMF_DistGrid, distgrid, distgrid)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_DistGrid, distgrid, distgrid)
 AttGetLogicalMacro(ESMF_DistGrid, distgrid, distgrid)
@@ -4179,6 +4547,8 @@ AttSetCharacterMacro(ESMF_DistGrid, distgrid, distgrid)
 
 AttAddPackStandardMacro(ESMF_Field, field, field%ftypep%base)
 AttAddPackCustomMacro(ESMF_Field, field, field%ftypep%base)
+AttAddPackCustomNMacro(ESMF_Field, field, field%ftypep%base)
+AttAddPackCustomN1Macro(ESMF_Field, field, field%ftypep%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_Field, field, field%ftypep%base)
 AttGetLogicalMacro(ESMF_Field, field, field%ftypep%base)
@@ -4207,6 +4577,8 @@ AttWriteMacro(ESMF_Field, field, field%ftypep%base, field, field)
 !-------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+AttAddPackCustomNMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+AttAddPackCustomN1Macro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 AttGetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
@@ -4240,6 +4612,8 @@ AttWriteMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base, fieldbundl
 
 AttAddPackStandardMacro(ESMF_Grid, grid, grid)
 AttAddPackCustomMacro(ESMF_Grid, grid, grid)
+AttAddPackCustomNMacro(ESMF_Grid, grid, grid)
+AttAddPackCustomN1Macro(ESMF_Grid, grid, grid)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_Grid, grid, grid)
 AttGetLogicalMacro(ESMF_Grid, grid, grid)
@@ -4261,6 +4635,8 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
 
 AttAddPackStandardMacro(ESMF_State, state, state%statep%base)
 AttAddPackCustomMacro(ESMF_State, state, state%statep%base)
+AttAddPackCustomNMacro(ESMF_State, state, state%statep%base)
+AttAddPackCustomN1Macro(ESMF_State, state, state%statep%base)
 AttCopyMacro(ESMF_State, ESMF_State, state1, state2, state1%statep%base, state2%statep%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_State, state, state%statep%base)
