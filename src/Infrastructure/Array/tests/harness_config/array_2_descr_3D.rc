@@ -1,0 +1,42 @@
+# exhaustive_descriptor.rc
+#
+# This file contains the regrid/redist problem descriptor strings for the testing harness.
+# Requirements:
+# This configuration file follows the Config class syntax. The problem descriptor strings
+# are stored as entries in a table and must follow the statement "problem_descriptor_string::"
+# and be terminated by double colons "::". The # sign signifies everything that follows it is a
+# comment, and should be ignored by the parser. 
+#
+# The descriptors must be enclosed by quotation marks " or '.
+# See documentation for further details of the descriptor syntax.
+#
+# Syntax Summary
+#       Process specification: --> (redist), =*=> (remap, *=B, C, S, N, ...)
+#       Chunks of memory are enclosed by [ ], and delineated by a semicolon ;
+#       Grid specification: G (tensor grid) and U (unstructured)
+#       Distribution specification: B (block), C (block cyclic), A (arbitrary)
+#       See the developer's guide for a complete description of the syntax.
+#
+# Specification files
+# Following the problem descriptor string are filename(s) with the complete problem specification.
+#       -c (optional) class specific file
+#	-d distgrid specification
+#	-g Grid Specification
+# Multiple filenames can be used to specify the respective parameter space.   
+#
+# ex.
+#	'[B1G1;B2G2] --> [B1G1;B2G2]' -d distgrid.rc otherdistgrid.rc -g grid.rc
+#
+# specifies that a redistribution test is to be conducted where the range of distributions 
+# is specified by two files and the range of grid types is specified by a single file.
+########################################################################################
+problem_descriptor_string::
+# simple block redistribution
+'[B1G1;B2G2;B3G3] --> [B1G1;B2G2;B3G3]' -d array_2_dist_3D.rc -g array_2_grid_3D.rc 
+'[B1G1;B2G2;B3G3] --> [B1G1;B3G3;B2G2]' -d array_2_dist_3D.rc -g array_2_grid_3D.rc 
+'[B1G1;B2G2;B3G3] --> [B2G2;B1G1;B3G3]' -d array_2_dist_3D.rc -g array_2_grid_3D.rc 
+'[B1G1;B2G2;B3G3] --> [B3G3;B1G1;B2G2]' -d array_2_dist_3D.rc -g array_2_grid_3D.rc 
+'[B1G1;B2G2;B3G3] --> [B2G2;B3G3;B1G1]' -d array_2_dist_3D.rc -g array_2_grid_3D.rc 
+'[B1G1;B2G2;B3G3] --> [B3G3;B2G2;B1G1]' -d array_2_dist_3D.rc -g array_2_grid_3D.rc 
+::   # end of list
+
