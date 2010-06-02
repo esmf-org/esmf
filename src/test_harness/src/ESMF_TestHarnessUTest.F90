@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUTest.F90,v 1.27 2010/03/04 19:40:09 theurich Exp $
+! $Id: ESMF_TestHarnessUTest.F90,v 1.28 2010/06/02 18:43:38 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -61,7 +61,13 @@
   ! logical :: localdebugflag = .false.
 
   ! top level test harness config file
-  character(ESMF_MAXSTR) :: test_harness_name = "test_harness.rc"
+  !character(ESMF_MAXSTR) :: test_harness_name = "test_harness.rc"
+
+  ! test harness config file path & top level config file name
+  integer                :: argc
+  character(ESMF_MAXSTR) :: srcPath
+  character(ESMF_MAXSTR) :: configFname
+  !character(ESMF_MAXSTR) :: ConfigFname
 
   ! -------- beginning of executable code below here -------
 
@@ -78,6 +84,25 @@
   if (rc /= ESMF_SUCCESS)                                                      &
                           call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+  ! get command line information
+  argc = ESMF_UtilGetArgC ()
+  if (argc < 2) then
+    ! missing command line arguments, use default
+    srcPath = "."
+    configFname = "test_harness.rc"
+  else
+    call ESMF_UtilGetArg (argindex=1, value=srcPath, rc=rc)
+!error check
+
+    call ESMF_UtilGetArg (argindex=2, value=configFname, rc=rc)
+!error check
+  end if
+
+  srcPath = adjustL(srcPath)
+  configFname = adjustL(configFname)
+
+  print '("Path = ", A)', trim(srcPath)
+  print '("File = ", A)', trim(configFname)
 
   !-----------------------------------------------------------------------------
   ! first stage of test
@@ -97,9 +122,9 @@
   ! variable "harness" and extract (1) the test class, (2) report type, (3)
   ! number of records or problem descriptor files.
   !-----------------------------------------------------------------------------
-  call Read_TestHarness_Config(rc)
+  call Read_TestHarness_Config(srcPath, configFname, rc)
   if (rc /= ESMF_SUCCESS)  then
-     print*,"Error reading file test_harness.rc - see log file"
+     print '("Error reading file ", A, " - see log file")', trim(configFname)
      call ESMF_Finalize(terminationflag=ESMF_ABORT)
      stop
   endif
@@ -122,7 +147,7 @@
   ! 3. Read the grid and distribution specifier files and store the configurations
   ! in the harness descriptor record.
   !-----------------------------------------------------------------------------
-  call Read_TestHarness_Specifier(rc)
+  call Read_TestHarness_Specifier(SrcPath, rc)
   if (rc /= ESMF_SUCCESS)  then
      print*,"Error reading descriptor and specifier files - see log"
      call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -179,10 +204,15 @@ contains
 ! !IROUTINE: Read_TestHarness_Config
 
 ! !INTERFACE:
-  subroutine Read_TestHarness_Config(returnrc)
+  subroutine Read_TestHarness_Config(srcPath, configFname, returnrc)
 !
 ! !ARGUMENTS:
-  integer, intent(inout) :: returnrc
+  character(len=*), intent(in)  :: srcPath
+  character(len=*), intent(in)  :: configFname
+  integer,          intent(out) :: returnrc
+
+! actual arguments through globals
+!    har structure
 
 !
 ! !DESCRIPTION:
@@ -209,6 +239,7 @@ contains
 
   ! local character strings
   character(ESMF_MAXSTR) :: ltag, ltmp
+  character(ESMF_MAXSTR) :: filename
 
   ! local integer variables
   integer :: kfile, ncolumns
@@ -228,11 +259,14 @@ contains
   localcf = ESMF_ConfigCreate(rc=localrc)
   if( ESMF_LogMsgFoundError(localrc, "cannot create config object",            &
                             rcToReturn=returnrc) ) return
-                            
-  call ESMF_ConfigLoadFile(localcf, trim(adjustL(test_harness_name)),          &
-           rc=localrc )
+
+  !call ESMF_ConfigLoadFile(localcf, trim(adjustL(test_harness_name)),          &
+  !         rc=localrc )
+
+  filename = trim(srcPath) // "/" // trim(configFname)
+  call ESMF_ConfigLoadFile (localcf, trim(filename), rc=localrc)
   if( ESMF_LogMsgFoundError(localrc, "cannot load config file " //             &
-      trim(adjustL(test_harness_name)), rcToReturn=returnrc) ) return
+      trim(configFname), rcToReturn=returnrc) ) return
   
   !-----------------------------------------------------------------------------
   ! find and read the test class 
@@ -355,10 +389,11 @@ contains
  
      ! retrieve the problem descriptor filenames 
      call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
-     har%rcrd(kfile)%filename  = trim(adjustL( ltmp ))
      if( ESMF_LogMsgFoundError(localrc, "cannot get descriptor filename in "// &
          trim(adjustL(ltag)), rcToReturn=returnrc) ) return
 
+     filename = trim(srcPath) // "/" // trim(adjustL(ltmp))
+     har%rcrd(kfile)%filename  = trim(filename)
   enddo   ! file
 
   !-----------------------------------------------------------------------------
@@ -366,7 +401,7 @@ contains
   !-----------------------------------------------------------------------------
   call ESMF_ConfigDestroy(localcf, rc=localrc)
   if( ESMF_LogMsgFoundError(localrc, "cannot destroy config file " //          &
-      trim(test_harness_name), rcToReturn=returnrc) ) return
+      trim(configFname), rcToReturn=returnrc) ) return
 
   ! if I've gotten this far without an error, then the routine has succeeded.
   returnrc = ESMF_SUCCESS
@@ -381,10 +416,11 @@ contains
 ! !IROUTINE: Read_TestHarness_Specifier
 
 ! !INTERFACE:
-  subroutine Read_TestHarness_Specifier(returnrc)
+  subroutine Read_TestHarness_Specifier(srcPath, returnrc)
 !
 ! !ARGUMENTS:
-  integer, intent(inout) :: returnrc
+  character(len=*), intent (in)   :: srcPath
+  integer,          intent(inout) :: returnrc
 
 !
 ! !DESCRIPTION:
@@ -424,7 +460,7 @@ contains
   ! and extract the problem descriptor strings and the accompanying specifier
   ! filenames.
   !-----------------------------------------------------------------------------
-  call read_descriptor_files(har%numRecords,har%rcrd,localrc)
+  call read_descriptor_files(srcPath, har%numRecords,har%rcrd,localrc)
   if (ESMF_LogMsgFoundError(localrc, "ERROR with read descriptor files",       &
      rcToReturn=returnrc)) return
 

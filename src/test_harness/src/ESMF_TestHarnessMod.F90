@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.47 2010/04/27 16:23:07 w6ws Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.48 2010/06/02 18:43:38 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,18 +34,6 @@
 !  Expand on the type of routines included here
 !
 !-------------------------------------------------------------------------------
-!
-! modifications
-!   gblock 1/14/2010 bypass dead subroutine populate_grid
-!                    added default cases to generate error message in select statements for
-!                      fetures that are not implemented
-!                    generate error message for tensor case (feature not implemented yet)
-!                    generate error message for peak valley (feature not implemented yet)
-!                    implemented common check_value function to compare actual to expected
-!                      values within a tolerance
-!                    removed extraneous output & improved test progress display
-!                    implemented CheckError function to provide program trace feature to stdout
-!
 !
 ! !USES:
 
@@ -85,13 +73,14 @@ real(ESMF_KIND_R8), parameter :: RegridMinNeighborhood = 1.0D-14
 !-------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
-  subroutine read_descriptor_files(numRecords,rcrd,rc)
+  subroutine read_descriptor_files(srcPath, numRecords,rcrd,rc)
 !-------------------------------------------------------------------------------
 !
 ! !ARGUMENTS:
-  integer, intent(inout) :: numRecords
-  type(problem_descriptor_records), pointer :: rcrd(:) 
-  integer, intent(inout) :: rc
+  character(len=*),                 intent(in)  :: srcPath
+  integer,                          intent(in)  :: numRecords
+  type(problem_descriptor_records), pointer     :: rcrd(:) 
+  integer,                          intent(out) :: rc
 
 !
 ! !DESCRIPTION:
@@ -160,6 +149,7 @@ real(ESMF_KIND_R8), parameter :: RegridMinNeighborhood = 1.0D-14
 ! local logical variable
   logical :: endflag = .false.
   logical :: cflag, dflag, gflag
+
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
   rc = ESMF_RC_NOT_IMPL
@@ -189,8 +179,6 @@ real(ESMF_KIND_R8), parameter :: RegridMinNeighborhood = 1.0D-14
     call ESMF_ConfigLoadFile(localcf, trim(adjustL(lfilename)), rc=localrc )
     if( CheckError(checkpoint, __LINE__, __FILE__, localrc, "cannot load config file " //           &
             trim(adjustL(lfilename)), rcToReturn=rc) ) return
-    !if( ESMF_LogMsgFoundError(localrc, "cannot load config file " //           &
-    !        trim(adjustL(lfilename)), rcToReturn=rc) ) return
 
     !---------------------------------------------------------------------------
     ! Search for the problem descriptor string table
@@ -542,8 +530,12 @@ real(ESMF_KIND_R8), parameter :: RegridMinNeighborhood = 1.0D-14
 
          rcrd(kfile)%str(k)%nDfiles = dsize
          do n=1,dsize
-           rcrd(kfile)%str(k)%Dfiles(n)%filename =                             &
-                               trim(adjustL( lstring(k)%tag(dpos+n)%string ))
+           ! build complete filename icluding source path
+           lfilename = trim(srcPath) // "/" // trim(adjustL(lstring(k)%tag(dpos+n)%string))
+           rcrd(kfile)%str(k)%Dfiles(n)%filename = lfilename
+
+           !rcrd(kfile)%str(k)%Dfiles(n)%filename =                             &
+                              ! trim(adjustL( lstring(k)%tag(dpos+n)%string ))
          enddo      ! n
          dflag = .true.
 
@@ -583,8 +575,12 @@ real(ESMF_KIND_R8), parameter :: RegridMinNeighborhood = 1.0D-14
 
          rcrd(kfile)%str(k)%nGfiles = gsize
          do n=1,gsize
-           rcrd(kfile)%str(k)%Gfiles(n)%filename =                             &
-                             trim(adjustL(lstring(k)%tag(gpos+n)%string))
+           ! build complete filename icluding source path
+           lfilename = trim(srcPath) // "/" // trim(adjustL(lstring(k)%tag(gpos+n)%string))
+           rcrd(kfile)%str(k)%Gfiles(n)%filename = lfilename
+
+           !rcrd(kfile)%str(k)%Gfiles(n)%filename =                             &
+                             !trim(adjustL(lstring(k)%tag(gpos+n)%string))
          enddo     ! n
          gflag = .true.
 
