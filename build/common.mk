@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.295 2010/05/13 05:51:22 theurich Exp $
+#  $Id: common.mk,v 1.296 2010/06/03 04:30:04 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -424,6 +424,11 @@ export ESMF_INSTALL_DOCDIR_ABSPATH = $(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTA
 else
 export ESMF_INSTALL_DOCDIR_ABSPATH = $(ESMF_INSTALL_DOCDIR)
 endif
+
+#-------------------------------------------------------------------------------
+# Set ESMFMKFILE here in order to be available for installcheck target
+#-------------------------------------------------------------------------------
+export ESMFMKFILE = $(ESMF_INSTALL_LIBDIR_ABSPATH)/esmf.mk
 
 #-------------------------------------------------------------------------------
 # TODO: in general ESMF_BUILD is respected - most generated files are created
@@ -1477,11 +1482,11 @@ ALLTEST_TARGETS_UNI = $(TEST_TARGETS_UNI) \
 
 # quick sanity check, defaulting to TESTEXHAUSTIVE OFF but respecting
 # the user setting if it already has a value.
-check:
+check: info
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-	  $(MAKE) info clean_check $(TEST_TARGETS_UNI) ;\
+	  $(MAKE) clean_check $(TEST_TARGETS_UNI) ;\
 	else \
-	  $(MAKE) info clean_check $(TEST_TARGETS) ;\
+	  $(MAKE) clean_check $(TEST_TARGETS) ;\
         fi
 
 
@@ -1502,11 +1507,11 @@ clean_check:
 
 
 # all tests, respecting user setting of TESTEXHAUSTIVE
-all_tests: 
+all_tests: info
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-	  $(MAKE) info $(ALLTEST_TARGETS_UNI) results_summary ;\
+	  $(MAKE) $(ALLTEST_TARGETS_UNI) results_summary ;\
 	else \
-	  $(MAKE) info $(ALLTEST_TARGETS) results_summary ;\
+	  $(MAKE) $(ALLTEST_TARGETS) results_summary ;\
         fi
 
 
