@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.23 2010/04/06 23:22:03 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.24 2010/06/03 20:55:15 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -62,6 +62,7 @@
 !  Command line argument methods
       public ESMF_UtilGetArgC
       public ESMF_UtilGetArg
+      public ESMF_UtilGetArgIndex
 
 !  Misc methods
       public ESMF_StringLowerCase
@@ -87,7 +88,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.23 2010/04/06 23:22:03 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.24 2010/06/03 20:55:15 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -287,6 +288,103 @@
     end if
 
   end subroutine ESMF_UtilGetArg
+
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilGetArgIndex"
+!BOP
+! !IROUTINE:  ESMF_UtilGetArg - Return the index of a command line argument
+!
+! !INTERFACE:
+  subroutine ESMF_UtilGetArgIndex (value, argindex, rc)
+!
+! !ARGUMENTS:
+    character(*), intent(in) :: value
+    integer, intent(out), optional :: argindex
+    integer, intent(out), optional :: rc
+!
+! !Description:
+! This method searches for, and returns the index of a desired command
+! line argument.  An example might be to find a specific keyword
+! (e.g., -esmf_path) so that its associated value argument could be
+! obtained by adding 1 to the argindex and calling ESMF\_UtilGetArg.
+!
+! The arguments are:
+! \begin{description}
+! \item [{[value]}]
+! A character string which will be searched for in the command line
+! argument list.
+! \item [{argindex}]
+! If the {\tt value} string is found, the position will be returned
+! as a non-negative integer.  If the string is not found, a negative
+! value will be returned.
+! A non-negative index into the command line argument {\tt argv} array.
+! If argindex is negative or greater than the number of user-specified
+! arguments, ESMF\_RC\_ARG\_VALUE is returned in the {\tt rc} argument.
+! \item [{[rc]}]
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOP
+!------------------------------------------------------------------------- 
+
+    integer :: argindex_local
+    integer :: i
+    integer :: len_local, len_max
+    integer :: localrc
+    integer :: nargs
+
+    ! assume failure until success
+    if (present (rc)) then
+      rc = ESMF_RC_NOT_FOUND
+    end if
+
+    nargs = ESMF_UtilGetArgC ()
+
+    ! Find the maximum string length of all command line arguments
+
+    len_max = 0
+    do, i=0, nargs
+      call ESMF_UtilGetArg (i, length=len_local)
+      len_max = max (len_max, len_local)
+    end do
+
+    ! Call subroutine so that a proper string length can be used for
+    ! comparison.
+
+    call arg_search_worker (len_max, argindex_local)
+    if (argindex_local >= 0)  &
+      localrc = ESMF_SUCCESS
+
+    if (present (argindex)) &
+      argindex = argindex_local
+
+    if (present (rc)) then
+      rc = localrc
+    end if
+
+  contains
+
+    subroutine arg_search_worker (len_max, argindex1)
+      integer, intent(in)  :: len_max
+      integer, intent(out) :: argindex1
+
+      character(len_max) :: string
+      integer :: i1
+
+      do, i1=0, nargs
+        call ESMF_UtilGetArg (i1, value=string)
+        if (string == value) exit
+      end do
+
+      if (i1 <= nargs) then
+        argindex1 = i1
+      else
+        argindex1 = -1
+      end if
+
+    end subroutine arg_search_worker
+
+  end subroutine ESMF_UtilGetArgIndex
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD

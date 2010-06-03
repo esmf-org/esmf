@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.18 2010/04/06 00:04:59 w6ws Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.19 2010/06/03 20:55:15 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.18 2010/04/06 00:04:59 w6ws Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.19 2010/06/03 20:55:15 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -74,6 +74,8 @@
       character(2) :: argshort
       integer :: arg_len
       integer :: nargs
+      character(ESMF_MAXSTR) :: program_path
+      integer :: argindex
 #endif
 
 !-------------------------------------------------------------------------------
@@ -252,6 +254,8 @@
     call ESMF_Test(rc == ESMF_SUCCESS .and. arg_len == len_trim (arg),  &
         name, failMsg, result, ESMF_SRCLINE)
 
+    program_path = arg
+
     !
     !EX_UTest
     ! Test bad command line argument index
@@ -259,6 +263,24 @@
     write (failMsg, *) "wrong rc when argindex > nargs"
     call ESMF_UtilGetArg (argindex=nargs+1, rc=rc)
     call ESMF_Test(rc == ESMF_RC_ARG_VALUE, name, failMsg, result, ESMF_SRCLINE)
+
+    !
+    !EX_UTest
+    ! Test command line argument index with the program name
+    write (name, *) "Testing ESMF_UtilGetArgIndex for program path"
+    write (failMsg, *) "did not find program path"
+    call ESMF_UtilGetArgIndex (value=program_path, argindex=argindex, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS .and. argindex == 0,  &
+      name, failMsg, result, ESMF_SRCLINE)
+
+    !
+    !EX_UTest
+    ! Test command line argument index with unknown value
+    write (name, *) "Testing ESMF_UtilGetArgIndex for program path"
+    write (failMsg, *) "did not return -1"
+    call ESMF_UtilGetArgIndex (value="esmf_xyzzy", argindex=argindex, rc=rc)
+    call ESMF_Test(rc /= ESMF_SUCCESS .and. argindex == -1,  &
+      name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 
