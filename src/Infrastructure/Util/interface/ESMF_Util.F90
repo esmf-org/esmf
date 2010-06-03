@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.24 2010/06/03 20:55:15 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.25 2010/06/03 21:06:31 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -88,7 +88,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.24 2010/06/03 20:55:15 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.25 2010/06/03 21:06:31 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -293,7 +293,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_UtilGetArgIndex"
 !BOP
-! !IROUTINE:  ESMF_UtilGetArg - Return the index of a command line argument
+! !IROUTINE:  ESMF_UtilGetArgIndex - Return the index of a command line argument
 !
 ! !INTERFACE:
   subroutine ESMF_UtilGetArgIndex (value, argindex, rc)
@@ -318,10 +318,6 @@
 ! If the {\tt value} string is found, the position will be returned
 ! as a non-negative integer.  If the string is not found, a negative
 ! value will be returned.
-! A non-negative index into the command line argument {\tt argv} array.
-! If argindex is negative or greater than the number of user-specified
-! arguments, ESMF\_RC\_ARG\_VALUE is returned in the {\tt rc} argument.
-! \item [{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !EOP
