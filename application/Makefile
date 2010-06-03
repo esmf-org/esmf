@@ -3,19 +3,26 @@
 ################################################################################
 ################################################################################
 ## This Makefile must be able to find the "esmf.mk" Makefile fragment in the  ##
-## 'include' line below. When this Makefile is used as an example the user    ##
-## must adjust the path in order to find the "esmf.mk" according to their     ##
-## situation!                                                                 ##
-## It is _not_ necessary to set and use the ESMF_INSTALL_LIBDIR_ABSPATH       ##
-## variable, it is perfectly fine to hardcode the path to "esmf.mk" directly  ##
-## into the 'include' line.                                                   ##
+## 'include' line below. Following the ESMF User's Guide, a complete ESMF     ##
+## installation should ensure that a single environment variable "ESMFMKFILE" ##
+## is made available on the system. This variable should point to the         ##
+## "esmf.mk" file.                                                            ##
+##                                                                            ##
+## This example Makefile uses the "ESMFMKFILE" environment variable.          ##
+##                                                                            ##
+## If you find that this Makefile cannot find variable ESMFMKFILE then please ##
+## contact the person responsible for the ESMF installation on your system.   ##
+## As a work-around you can simply hardcode the path to "esmf.mk" in the      ##
+## include line below. However, doing so will render this Makefile a lot less ##
+## flexible and non-portable.                                                 ##
 ################################################################################
-ifndef ESMF_INSTALL_LIBDIR_ABSPATH
-ESMF_INSTALL_LIBDIR_ABSPATH = /this/is/just/a/dummy/path
+
+ifneq ($(origin ESMFMKFILE), environment)
+$(error Environment variable ESMFMKFILE was not set.)
 endif
-################################################################################
-## This is the important statement: Make sure 'include' finds your "esmf.mk"!!!
-include $(ESMF_INSTALL_LIBDIR_ABSPATH)/esmf.mk
+
+include $(ESMFMKFILE)
+
 ################################################################################
 ################################################################################
 
