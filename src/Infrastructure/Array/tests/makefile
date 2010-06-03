@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.42 2010/04/23 01:05:24 theurich Exp $ 
+# $Id: makefile,v 1.43 2010/06/03 14:46:39 garyblock Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -100,3 +100,7 @@ RUN_ESMF_TestHarnessArray_default:
 #
 RUN_ESMF_TestHarnessArray_1:
 	$(MAKE) TESTHARNESSCASE=array_1 NP=4 run_test_harness
+
+#
+RUN_ESMF_TestHarnessArray_2:
+	$(MAKE) TESTHARNESSCASE=array_2 NP=4 run_test_harness
