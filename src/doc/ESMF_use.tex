@@ -1,11 +1,84 @@
-% $Id: ESMF_use.tex,v 1.26 2010/03/02 22:45:40 theurich Exp $
+% $Id: ESMF_use.tex,v 1.27 2010/06/04 18:03:25 theurich Exp $
 
 \label{UsingLibrary}
 
-Building a user application against an ESMF installation requires that the compiler and linker be able to find the appropriate ESMF header, module and library files. If this procedure has been documented by the installer of the ESMF library on your system then follow the directions given. Otherwise it is up to the user to determine and provide the required compiler and linker flags. Every ESMF installation provides a file named {\tt esmf.mk} that contains the relevant information.
+Building user applications against an ESMF installation requires that the compiler and linker be able to find the appropriate ESMF header, module and library files. If this procedure has been documented by the installer of the ESMF library on your system then follow the directions given. Otherwise it is up to the user to determine and provide the required compiler and linker flags. Every ESMF installation provides a file named {\tt esmf.mk} that contains the relevant information.
 
-The location of the {\tt esmf.mk} file should be documented by the party that installed ESMF on the system. We recommend that a single ESMF specific environment variable ESMFMKFILE be set to point to the {\tt esmf.mk} file. See section \ref{InstallESMF} for the related discussion.
+The location of the {\tt esmf.mk} file should be documented by the party that installed ESMF on the system. We recommend that a single ESMF specific environment variable ESMFMKFILE be provided by the system that points to the {\tt esmf.mk} file. See section \ref{InstallESMF} for the related discussion aimed at the person that installs ESMF on a system.
 
-The information in {\tt esmf.mk} is defined in form of variables. In fact, syntactically {\tt esmf.mk} is a makefile fragment and can be imported by an application specific makefile via the {\tt include} command. All the variables in {\tt esmf.mk} start with an "{\tt ESMF\_}" prefix to prevent conflicts. The information in {\tt esmf.mk} is fully specified and is not affected by any variables set in the user's environment.
+The information in {\tt esmf.mk} is defined in form of variables. In fact, syntactically {\tt esmf.mk} is a makefile fragment and can be imported by an application specific makefile via the {\tt include} command. All the variables in {\tt esmf.mk} start with the "{\tt ESMF\_}" prefix to prevent conflicts. The information in {\tt esmf.mk} is fully specified and is not affected by any variables set in the user's environment.
 
-The information defined in {\tt esmf.mk} includes Fortran compiler and linker, as well as C++ compiler and linker. It further includes the Fortran and C++ specific compiler and linker flags. One way of using the {\tt esmf.mk} is to glean the necessary information from it and use this information directly on the command line when compiling a user application, or to hardwire it into the application specific build system. However, the recommended use of {\tt esmf.mk} is to include this file in the application specific makefile directly via the {\tt include} command, and to use the defined variables to augment the application specific settings.
+The information defined in {\tt esmf.mk} includes Fortran compiler and linker, as well as C++ compiler and linker. It further includes the recommended Fortran and C++ specific compiler and linker flags for building ESMF applications. One way of using the {\tt esmf.mk} is to glean the necessary information from it. This information can then be used either directly on the command line when compiling a user application, or to hardwire the settings into the application specific build system. However, the recommended use of {\tt esmf.mk} is to include this file in the application specific makefile directly via the {\tt include} command.
+
+The {\tt Makefile} template below demonstrates how a user build system can be constructed to leverage the {\tt esmf.mk} file. In practice most user build systems will be more complex, however, the template does show that the added complexity introduced by using {\tt esmf.mk} is minimal. 
+
+The advantages of using {\tt esmf.mk}, over hard coding suitable compiler and linker flags into the user build system directly, are robustness and portability. Robustness is a consequence of the fact that everything defined in {\tt esmf.mk} corresponds to the exact settings used during the ESMF library build (consistency) and during the ESMF test suite build. Using {\tt esmf.mk} thus guarantees that the user application is build in the exact same manner as the ESMF test suite applications that undergo strict regression testing before every ESMF release. Portability means that a user build system, that uses {\tt esmf.mk} in the way the template Makefile demonstrates, will function as expected on any system where ESMF was successfully installed and tested, without the need of modifying anything. Every {\tt esmf.mk} is generated during ESMF installation specifically for this installation, using the ESMF tested settings for the host platform.
+
+\begin{verbatim}
+
+################################################################################
+### Makefile template for user ESMF application, leveraging esmf.mk mechanism ##
+################################################################################
+
+################################################################################
+### Finding and including esmf.mk ##############################################
+
+# Note: This fully portable Makefile template depends on finding environment
+#       variable "ESMFMKFILE" set to point to the appropriate "esmf.mk" file,
+#       as is discussed in the User's Guide.
+#       However, you can still use this Makefile template even if the person
+#       that installed ESMF on your system did not provide for a mechanism to
+#       automatically set the environment variable "ESMFMKFILE". In this case
+#       either manually set "ESMFMKFILE" in your environment or hard code the
+#       location of "esmf.mk" into the include statement below.
+#       Notice that the latter approach has negative impact on portability.
+
+ifneq ($(origin ESMFMKFILE), environment)
+$(error Environment variable ESMFMKFILE was not set.)
+endif
+
+include $(ESMFMKFILE)
+
+################################################################################
+### Compiler and linker rules using ESMF_ variables supplied by esmf.mk ########
+
+.SUFFIXES: .f90 .F90 .c .C
+
+.f90:
+	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) \
+          $(ESMF_F90COMPILEFREENOCPP) $<
+	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) \
+          $(ESMF_F90LINKRPATHS) -o $@ $*.o $(ESMF_F90ESMFLINKLIBS)        
+
+.F90:
+	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) \
+          $(ESMF_F90COMPILEFREECPP) $(ESMF_F90COMPILECPPFLAGS) $<
+	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) \
+          $(ESMF_F90LINKRPATHS) -o $@ $*.o $(ESMF_F90ESMFLINKLIBS)        
+        
+.c:
+	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) \
+          $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) \
+          $(ESMF_CXXCOMPILECPPFLAGS) $<
+	$(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) \
+          $(ESMF_CXXLINKRPATHS) -o $@ $*.o $(ESMF_CXXESMFLINKLIBS)
+
+.C:
+	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) \
+          $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) \
+          $(ESMF_CXXCOMPILECPPFLAGS) $<
+	$(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) \
+          $(ESMF_CXXLINKRPATHS) -o $@ $*.o $(ESMF_CXXESMFLINKLIBS)
+
+################################################################################
+### Sample targets for user ESMF applications ##################################
+
+all: esmf_UserApplication esmc_UserApplication
+
+esmf_UserApplication:
+
+esmc_UserApplication:
+
+################################################################################
+
+\end{verbatim}
