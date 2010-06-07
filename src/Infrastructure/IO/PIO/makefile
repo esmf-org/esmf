@@ -1,9 +1,13 @@
-# $Id: makefile,v 1.1 2010/06/04 23:24:15 theurich Exp $
+# $Id: makefile,v 1.2 2010/06/07 19:03:57 theurich Exp $
 
 ALL: build_here 
 
 ESMF_CXXCOMPILECPPFLAGS += -D_USEBOX
 ESMF_F90COMPILECPPFLAGS += -D_USEBOX
+
+#TODO: set following flag conditionally once ESMF build configs handle MPI2
+ESMF_CXXCOMPILECPPFLAGS += -DNO_MPI2
+ESMF_F90COMPILECPPFLAGS += -DNO_MPI2
 
 ifneq ($(ESMF_COMM),mpiuni)
 ESMF_CXXCOMPILECPPFLAGS += -DUSEMPIIO
