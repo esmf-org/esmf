@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.345 2010/04/27 20:30:30 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.346 2010/06/09 18:37:04 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -132,7 +132,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.345 2010/04/27 20:30:30 feiliu Exp $'
+    '$Id: ESMF_Field.F90,v 1.346 2010/06/09 18:37:04 feiliu Exp $'
 
 !==============================================================================
 !
@@ -427,8 +427,7 @@ contains
 ! !DESCRIPTION:
 !      Takes an {\tt ESMF\_Field} object and adds all the information needed
 !      to save the information to a file or recreate the object based on this
-!      information.   Expected to be used by {\tt ESMF\_StateReconcile()} and
-!      by {\tt ESMF\_FieldWrite()} and {\tt ESMF\_FieldRead()}.
+!      information.   Expected to be used by {\tt ESMF\_StateReconcile()}.
 !
 !     The arguments are:
 !     \begin{description}
