@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUTest.F90,v 1.28 2010/06/02 18:43:38 garyblock Exp $
+! $Id: ESMF_TestHarnessUTest.F90,v 1.29 2010/06/11 18:13:30 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -65,6 +65,7 @@
 
   ! test harness config file path & top level config file name
   integer                :: argc
+  integer                :: argindex
   character(ESMF_MAXSTR) :: srcPath
   character(ESMF_MAXSTR) :: configFname
   !character(ESMF_MAXSTR) :: ConfigFname
@@ -84,19 +85,31 @@
   if (rc /= ESMF_SUCCESS)                                                      &
                           call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  ! get command line information
+  ! -----------------------------------------
+  ! command arg processing
+  ! init defaults
+  srcPath = "."
+  configFname = "test_harness.rc"
+
+  ! get arg cnt
   argc = ESMF_UtilGetArgC ()
-  if (argc < 2) then
-    ! missing command line arguments, use default
-    srcPath = "."
-    configFname = "test_harness.rc"
-  else
-    call ESMF_UtilGetArg (argindex=1, value=srcPath, rc=rc)
+
+  ! get path info
+  call ESMF_UtilGetArgIndex (value="-path", argindex=argindex, rc=rc)
+  if ((argindex >= 0) .AND. (argindex < argc - 1)) then
+    call ESMF_UtilGetArg (argindex=argindex+1, value=srcPath, rc=rc)
+  end if
+
+  ! get test case info
+  call ESMF_UtilGetArgIndex (value="-case", argindex=argindex, rc=rc)
+  !print '("argindex = ", I4, ", argc = ", I4)', argindex, argc
+  if ((argindex >= 0) .AND. (argindex < argc)) then
+    call ESMF_UtilGetArg (argindex=argindex+1, value=configFname, rc=rc)
+  end if
+
+
 !error check
 
-    call ESMF_UtilGetArg (argindex=2, value=configFname, rc=rc)
-!error check
-  end if
 
   srcPath = adjustL(srcPath)
   configFname = adjustL(configFname)
