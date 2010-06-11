@@ -1,0 +1,12 @@
+PIO directory README
+====================
+
+The "./src/Infrastucture/IO/PIO" directory holds a copy of the PIO source files. These source files are based on PIO svn tag pio1_1_1. They were obtained via:
+
+svn checkout http://parallelio.googlecode.com/svn/trunk_tags/pio1_1_1
+
+Important things to note:
+
+- The PIO configure/make system was removed and replaced by a makefile that links into the ESMF build system.
+
+- Currently all modifications are made to the *.F90 files directly, effectively having them drift out of sync with the *.F90.in files.
