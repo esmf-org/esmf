@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2010/06/09 21:41:39 theurich Exp $
+# $Id: makefile,v 1.5 2010/06/11 01:37:58 theurich Exp $
 
 ALL: build_here 
 
@@ -19,10 +19,8 @@ ifdef ESMF_PNETCDF
 CPPFLAGS += -D_PNETCDF
 endif
 
-#TODO: Remove the following conditional that turns PIO compilation off for 
-#TODO: mpiuni, once we have a solution in place that allows us to compile the
-#TODO: PIO sources under ESMF with mpiuni.
-ifneq ($(ESMF_COMM),mpiuni)
+# - only turn internal PIO compilation on if that is requested
+ifeq ($(ESMF_PIO),internal)
 SOURCEC	  = pnetcdfversion.c topology.c
 SOURCEF	  = pio_kinds.F90 pio_types.F90 pio_support.F90 alloc_mod.F90 \
             pio_utils.F90 ionf_mod.F90 pionfread_mod.F90 nf_mod.F90 \
