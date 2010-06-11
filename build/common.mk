@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.296 2010/06/03 04:30:04 theurich Exp $
+#  $Id: common.mk,v 1.297 2010/06/11 01:35:44 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -990,6 +990,57 @@ ESMF_CXXLINKRPATHS += $(ESMF_CXXRPATHPREFIX)$(ESMF_XERCES_LIBPATH)
 endif
 ifneq ("$(ESMF_F90LINKRPATHS)", "")
 ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(ESMF_XERCES_LIBPATH)
+endif
+endif
+endif
+
+#-------------------------------------------------------------------------------
+# PIO
+#-------------------------------------------------------------------------------
+ifneq ($(origin ESMF_PIO), environment)
+ifdef ESMF_PIODEFAULT
+export ESMF_PIO = $(ESMF_PIODEFAULT)
+#TODO: This turns PIO off if it was set to internal from a default setting.
+#TODO: We need to do this while our internal PIO does not support mpiuni mode,
+#TODO: but want to allow external PIO or explicit ESMF_PIO setting for development.
+#TODO: Eventually this should become unnecessary.
+ifeq ($(ESMF_PIO),internal)
+ifeq ($(ESMF_COMM),mpiuni)
+ESMF_PIO = OFF
+endif
+endif
+#---TODO
+endif
+endif
+
+ifeq ($(ESMF_PIO),OFF)
+ESMF_PIO=
+endif
+
+ifeq ($(ESMF_PIO),external)
+ifneq ($(origin ESMF_PIO_LIBS), environment)
+ESMF_PIO_LIBS = -lpio
+endif
+endif
+
+ifdef ESMF_PIO
+CPPFLAGS                += -DESMF_PIO=$(ESMF_PIO)
+ifdef ESMF_PIO_INCLUDE
+ESMF_CXXCOMPILEPATHS    += -I$(ESMF_PIO_INCLUDE)
+ESMF_F90COMPILEPATHS    += -I$(ESMF_PIO_INCLUDE)
+endif
+ifdef ESMF_PIO_LIBS
+ESMF_CXXLINKLIBS        := $(ESMF_PIO_LIBS) $(ESMF_CXXLINKLIBS)
+ESMF_F90LINKLIBS        := $(ESMF_PIO_LIBS) $(ESMF_F90LINKLIBS)
+endif
+ifdef ESMF_PIO_LIBPATH
+ESMF_CXXLINKPATHS       += -L$(ESMF_PIO_LIBPATH)
+ESMF_F90LINKPATHS       += -L$(ESMF_PIO_LIBPATH)
+ifneq ($(ESMF_CXXLINKRPATHS), "")
+ESMF_CXXLINKRPATHS += $(ESMF_CXXRPATHPREFIX)$(ESMF_PIO_LIBPATH)
+endif
+ifneq ($(ESMF_F90LINKRPATHS), "")
+ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(ESMF_PIO_LIBPATH)
 endif
 endif
 endif

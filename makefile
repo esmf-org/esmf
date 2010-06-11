@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.109 2010/04/23 01:05:24 theurich Exp $
+# $Id: makefile,v 1.110 2010/06/11 01:35:44 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -155,6 +155,18 @@ script_info:
           fi; \
 	  if [ -n "$(ESMF_XERCES_LIBPATH)" ] ; then \
 	    echo "ESMF_XERCES_LIBPATH:    $(ESMF_XERCES_LIBPATH)" ; \
+          fi; \
+         fi
+	-@if [ -n "$(ESMF_PIO)" ] ; then \
+	  echo "ESMF_PIO:               $(ESMF_PIO)" ; \
+	  if [ -n "$(ESMF_PIO_INCLUDE)" ] ; then \
+	    echo "ESMF_PIO_INCLUDE:       $(ESMF_PIO_INCLUDE)" ; \
+          fi; \
+	  if [ -n "$(ESMF_PIO_LIBS)" ] ; then \
+	    echo "ESMF_PIO_LIBS:          $(ESMF_PIO_LIBS)" ; \
+          fi; \
+	  if [ -n "$(ESMF_PIO_LIBPATH)" ] ; then \
+	    echo "ESMF_PIO_LIBPATH:       $(ESMF_PIO_LIBPATH)" ; \
           fi; \
          fi
 	-@echo " "
@@ -342,6 +354,18 @@ info_mk: chkdir_lib
           fi; \
 	  if [ -n "$(ESMF_XERCES_LIBPATH)" ] ; then \
 	    echo "# ESMF_XERCES_LIBPATH:    $(ESMF_XERCES_LIBPATH)" >> $(MKINFO) ; \
+          fi; \
+         fi
+	-@if [ -n "$(ESMF_PIO)" ] ; then \
+	  echo "# ESMF_PIO:               $(ESMF_PIO)" >> $(MKINFO) ; \
+	  if [ -n "$(ESMF_PIO_INCLUDE)" ] ; then \
+	    echo "# ESMF_PIO_INCLUDE:       $(ESMF_PIO_INCLUDE)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_PIO_LIBS)" ] ; then \
+	    echo "# ESMF_PIO_LIBS:          $(ESMF_PIO_LIBS)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_PIO_LIBPATH)" ] ; then \
+	    echo "# ESMF_PIO_LIBPATH:       $(ESMF_PIO_LIBPATH)" >> $(MKINFO) ; \
           fi; \
          fi
 
