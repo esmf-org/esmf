@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.45 2010/05/07 22:45:15 w6ws Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.46 2010/06/11 23:14:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.45 2010/05/07 22:45:15 w6ws Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.46 2010/06/11 23:14:40 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -124,8 +124,8 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
-  subroutine ESMF_ArrayGetDefault(array, typekind, rank, larrayList, &
-    indexflag, distgridToArrayMap, distgridToPackedArrayMap, &
+  subroutine ESMF_ArrayGetDefault(array, arrayspec, typekind, rank, &
+    larrayList, indexflag, distgridToArrayMap, distgridToPackedArrayMap, &
     arrayToDistGridMap, undistLBound, undistUBound, exclusiveLBound, &
     exclusiveUBound, computationalLBound, computationalUBound, totalLBound, &
     totalUBound, computationalLWidth, computationalUWidth, totalLWidth, &
@@ -135,6 +135,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: array
+    type(ESMF_ArraySpec),          intent(out), optional :: arrayspec
     type(ESMF_TypeKind),           intent(out), optional :: typekind
     integer,                       intent(out), optional :: rank
     type(ESMF_LocalArray), target, intent(out), optional :: larrayList(:)
@@ -178,6 +179,9 @@ contains
 !   \begin{description}
 !   \item[array] 
 !     Queried {\tt ESMF\_Array} object.
+!   \item[{[arrayspec]}] 
+!     {\tt ESMF\_ArraySpec} object containing the type/kind/rank information
+!     of the Array object.
 !   \item[{[typekind]}]
 !     TypeKind of the Array object.
 !   \item[{[rank]}]
@@ -294,6 +298,8 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer                       :: localrc        ! local return code
+    type(ESMF_TypeKind)           :: opt_typekind           ! helper variable
+    integer                       :: opt_rank               ! helper variable
     type(ESMF_Pointer), pointer   :: opt_larrayPtrList(:)   ! helper variable
     integer                       :: len_larrayPtrList, i   ! helper variable
     type(ESMF_InterfaceInt)       :: distgridToArrayMapArg  ! helper variable
@@ -385,7 +391,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayGet(array, typekind, rank, opt_larrayPtrList, &
+    call c_ESMC_ArrayGet(array, opt_typekind, opt_rank, opt_larrayPtrList, &
       len_larrayPtrList, opt_distgrid, opt_delayout, indexflag, &
       distgridToArrayMapArg, distgridToPackedArrayMapArg, &
       arrayToDistGridMapArg, &
@@ -491,6 +497,16 @@ contains
       localDeCount=localDeCount, localDeList=localDeList, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Deal with option arrayspec, typekind, rank arguments
+    if (present(typekind)) typekind = opt_typekind
+    if (present(rank)) rank = opt_rank
+    if (present(arrayspec)) then
+      call ESMF_ArraySpecSet(arrayspec, typekind=opt_typekind, rank=opt_rank, &
+        rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.24 2010/04/26 21:33:05 theurich Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.25 2010/06/11 23:14:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.24 2010/04/26 21:33:05 theurich Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.25 2010/06/11 23:14:41 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -53,7 +53,7 @@ program ESMF_ArrayCreateGetUTest
   !LOCAL VARIABLES:
   type(ESMF_VM):: vm
   integer:: petCount, localPet
-  type(ESMF_ArraySpec):: arrayspec
+  type(ESMF_ArraySpec):: arrayspec, arrayspec2
   type(ESMF_Array):: array, arrayCpy
   type(ESMF_DistGrid):: distgrid, distgrid2
   real(ESMF_KIND_R8)      :: farray1D(10)
@@ -125,7 +125,7 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet name, 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, name=arrayName, rc=rc)
+  call ESMF_ArrayGet(array, arrayspec=arrayspec2, name=arrayName, rc=rc)
   print *, "Array name: ", arrayname
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
