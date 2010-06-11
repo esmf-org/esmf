@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.188 2010/05/07 22:50:12 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.189 2010/06/11 00:31:14 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.188 2010/05/07 22:50:12 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.189 2010/06/11 00:31:14 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2294,18 +2294,19 @@ module ESMF_StateMod
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
-      subroutine ESMF_StateGetInfo(state, nestedFlag, name, statetype, itemCount, &
+      subroutine ESMF_StateGetInfo(state, itemSearch, nestedFlag, name, statetype, itemCount, &
                                itemNameList, stateitemtypeList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state
-      type(ESMF_NestedFlag), intent(in), optional :: nestedFlag
-      character (len=*), intent(out), optional :: name
-      type(ESMF_StateType), intent(out), optional :: statetype
-      integer, intent(out), optional :: itemCount
-      character (len=*), intent(out), optional :: itemNameList(:)
+      type(ESMF_State),      intent(in) :: state
+      character (len=*),     intent(in),  optional :: itemSearch
+      type(ESMF_NestedFlag), intent(in),  optional :: nestedFlag
+      character (len=*),     intent(out), optional :: name
+      type(ESMF_StateType),  intent(out), optional :: statetype
+      integer,               intent(out), optional :: itemCount
+      character (len=*),     intent(out), optional :: itemNameList(:)
       type(ESMF_StateItemType), intent(out), optional :: stateitemtypeList(:)
-      integer, intent(out), optional :: rc             
+      integer,               intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -2315,6 +2316,9 @@ module ESMF_StateMod
 !     \begin{description}     
 !     \item[state]
 !       An {\tt ESMF\_State} object to be queried.
+!     \item[itemSearch]
+!       Query objects by name.  Use in conjunction with itemCount to obtain
+!       the number of objects with this name due to nested States.
 !     \item[{[nestedFlag]}]
 !       {\tt ESMF\_NESTED\_OFF} - return information at the current State level only
 !       {\tt ESMF\_NESTED\_ON} - recursively return nested State information
@@ -2346,7 +2350,7 @@ module ESMF_StateMod
       integer :: localitemcount
       logical :: localnestedflag
       type(ESMF_StateClass), pointer :: stypep
-      type(ESMF_StateItem), pointer :: nextitem
+      type(ESMF_StateItem),  pointer :: nextitem
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -2359,6 +2363,17 @@ module ESMF_StateMod
       localnestedflag = .false.
       if (present (nestedFlag)) then
         localnestedflag = nestedFlag == ESMF_NESTED_ON
+      end if
+
+      ! The following is temporary until itemSearches on nested
+      ! States are supported.
+      if (present (itemSearch) .and. present (nestedFlag)) then
+        if (localnestedflag) then
+          localrc = ESMF_FAILURE
+          if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        end if
       end if
 
       stypep => state%statep
@@ -2396,7 +2411,17 @@ module ESMF_StateMod
           integer :: i1
           type(ESMF_StateItem) , pointer :: dp
 
-          icount = sp%datacount
+          if (.not. present (itemSearch)) then
+	    icount = sp%datacount
+	  else
+	    do, i1 = 1, sp%datacount
+	      dp => sp%datalist(i1)
+	      if (dp%namep == itemSearch) then
+		icount = icount + 1
+	      end if
+	    end do
+	  end if
+
           if (localnestedflag) then
             do, i1 = 1, sp%datacount
               dp => sp%datalist(i1)
@@ -2424,8 +2449,15 @@ module ESMF_StateMod
             end if
 
             dp => sp%datalist(i1)
-            itemNameList(ilpos) = prefix // dp%namep
-            ilpos = ilpos + 1
+	    if (.not. present (itemSearch)) then
+	      itemNameList(ilpos) = prefix // dp%namep
+	      ilpos = ilpos + 1
+	    else
+	      if (dp%namep == itemSearch) then
+	      itemNameList(ilpos) = prefix // dp%namep
+	      ilpos = ilpos + 1
+	      end if
+	    end if
 
             if (dp%otype%ot == ESMF_STATEITEM_STATE%ot  &
                 .and. localnestedflag) then
@@ -2450,8 +2482,15 @@ module ESMF_StateMod
             end if
 
             dp => sp%datalist(i1)
-            stateitemtypeList(ilpos) = dp%otype
-            ilpos = ilpos + 1
+	    if (.not. present (itemSearch)) then
+	      stateitemtypeList(ilpos) = dp%otype
+	      ilpos = ilpos + 1
+	    else
+	      if (dp%namep == itemSearch) then
+	      stateitemtypeList(ilpos) = dp%otype
+	      ilpos = ilpos + 1
+	      end if
+	    end if
 
             if (dp%otype%ot == ESMF_STATEITEM_STATE%ot  &
                 .and. localnestedflag) then

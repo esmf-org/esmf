@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.71 2010/06/09 01:49:19 w6ws Exp $
+! $Id: ESMF_StateUTest.F90,v 1.72 2010/06/11 00:31:14 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.71 2010/06/09 01:49:19 w6ws Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.72 2010/06/11 00:31:14 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -54,6 +54,9 @@
       type(ESMF_DistGrid)   :: distgrid
       type(ESMF_Array)      :: array, array2, arrayGDP, testarray
 
+#if defined (ESMF_TESTEXHAUSTIVE)
+      integer :: itemcount
+#endif
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -240,6 +243,40 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest
+      ! Test Search for item name
+      call ESMF_StateGet (state1,  &
+          itemSearch="Temperature", itemCount=itemcount, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Searching for known item from State Test"
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test for correct count
+      write (failMsg, *) "Did not return itemcount == 1"
+      write (name, *) "Testing itemCount"
+      call ESMF_Test((itemcount == 1), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Search for item name that is not present
+      call ESMF_StateGet (state1,  &
+          itemSearch="unknownItem", itemCount=itemcount, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Searching for unknown item from State Test"
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test for correct count
+      write (failMsg, *) "Did not return itemcount == 0"
+      write (name, *) "Testing itemCount"
+      call ESMF_Test((itemcount == 0), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
       !EX_UTest 
       ! Test Get Item Info from State 
       call ESMF_StateGet(state1, name="Temperature", stateitemtype=stateItemType, rc=rc)
@@ -944,7 +981,6 @@
       call ESMF_DistGridDestroy(distgrid, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
-
 
 #endif
 
