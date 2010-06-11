@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.85 2010/03/11 20:04:48 theurich Exp $
+# $Id: build_rules.mk,v 1.86 2010/06/11 01:36:44 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -212,3 +212,8 @@ ESMF_SO_F90LINKOPTSEXE  = -Wl,-export-dynamic
 ESMF_SO_CXXCOMPILEOPTS  = -fPIC
 ESMF_SO_CXXLINKOPTS     = -shared
 ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
+
+############################################################
+# 3rd party code dependency: PIO
+#
+ESMF_PIODEFAULT = internal
