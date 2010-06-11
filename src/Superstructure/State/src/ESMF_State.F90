@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.189 2010/06/11 00:31:14 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.190 2010/06/11 17:43:24 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.189 2010/06/11 00:31:14 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.190 2010/06/11 17:43:24 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2365,17 +2365,6 @@ module ESMF_StateMod
         localnestedflag = nestedFlag == ESMF_NESTED_ON
       end if
 
-      ! The following is temporary until itemSearches on nested
-      ! States are supported.
-      if (present (itemSearch) .and. present (nestedFlag)) then
-        if (localnestedflag) then
-          localrc = ESMF_FAILURE
-          if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-        end if
-      end if
-
       stypep => state%statep
 
       if (present(name)) call c_ESMC_GetName(stypep%base, name, localrc)
@@ -2387,6 +2376,7 @@ module ESMF_StateMod
       !  both numbers.  For now, return entire raw count.
 
       localitemcount = infoCountWorker (stypep)
+
       if (present(itemCount))  &
         itemCount = localitemcount 
 
@@ -2414,6 +2404,7 @@ module ESMF_StateMod
           if (.not. present (itemSearch)) then
 	    icount = sp%datacount
 	  else
+            icount = 0
 	    do, i1 = 1, sp%datacount
 	      dp => sp%datalist(i1)
 	      if (dp%namep == itemSearch) then

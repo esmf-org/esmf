@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.72 2010/06/11 00:31:14 w6ws Exp $
+! $Id: ESMF_StateUTest.F90,v 1.73 2010/06/11 17:43:24 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.72 2010/06/11 00:31:14 w6ws Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.73 2010/06/11 17:43:24 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -56,6 +56,7 @@
 
 #if defined (ESMF_TESTEXHAUSTIVE)
       integer :: itemcount
+      type(ESMF_FieldBundle) :: bundle2inner(1)
 #endif
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -831,8 +832,33 @@
       write(name, *) "Adding the same State to a State Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Add a FieldBundle to the outer State which has the same name
+      ! as a FieldBundle in the nested State.
+      bundlename = "Humidity"
+      bundle2inner(1) = ESMF_FieldBundleCreate(name=bundlename, rc=rc)
+      call ESMF_StateAdd(state1, &
+                         fieldBundle=bundle2inner(1),  &
+                         rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Adding a FieldBundle to a outer State test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !call  ESMF_StatePrint(state2, nestedFlag=ESMF_NESTED_ON, rc=rc)
 
       !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test State Validation
+      call ESMF_StateGet (state2,  &
+          itemSearch="Humidity", nestedFlag=ESMF_NESTED_ON,  &
+          itemCount=itemcount, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Counting duplicate names in nested States test"
+      call ESMF_Test((rc == ESMF_SUCCESS) .and. itemcount == 2, &
+                      name, failMsg, result, ESMF_SRCLINE)
+
 
       !EX_UTest
       ! Test State Validation
@@ -841,6 +867,16 @@
       write(name, *) "Validating a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test nested State Validation
+      call ESMF_StateValidate(state2, nestedFlag=ESMF_NESTED_ON, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Validating a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
 
 
       !------------------------------------------------------------------------
