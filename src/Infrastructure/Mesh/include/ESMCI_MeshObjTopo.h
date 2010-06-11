@@ -103,11 +103,11 @@ const MeshObjTopo *FlattenTopo(const MeshObjTopo &topo);
  *              2
  *              o
  *             / \
- *            /   \      
- *           /     \         
- *        5 *       * 4      
- *         /         \       
- *        /           \      
+ *            /   \
+ *           /     \
+ *        5 *       * 4
+ *         /         \
+ *        /           \ 
  *       /             \
  *      o-------*-------o
  *      0       3       1 
