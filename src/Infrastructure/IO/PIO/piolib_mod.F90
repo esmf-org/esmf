@@ -1253,7 +1253,7 @@ contains
        if(check) call checkmpireturn('genindexedblock: after call to type_create_indexed_block: ',ierr)
        call mpi_type_commit(filetype,ierr)
        if(check) call checkmpireturn('genindexedblock: after call to type_commit: ',ierr)
-#ifdef NO_MPI2
+#ifndef NO_MPI2
        call mpi_type_get_envelope(elemtype, nints, nadds, ndtypes, comb, ierr)
 #endif
     end if
