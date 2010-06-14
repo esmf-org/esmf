@@ -1,4 +1,4 @@
-% $Id: TimeMgr_crefdoc.ctex,v 1.7 2010/06/14 22:49:32 theurich Exp $ 
+% $Id: TimeMgr_crefdoc.ctex,v 1.8 2010/06/14 23:13:46 theurich Exp $ 
 
 #define INCLUDE_UML
 #ifdef STANDALONE
@@ -78,11 +78,11 @@
 \input{../Infrastructure/TimeMgr/doc/Calendar_desc}
 #endif
 
-%\subsection{Calendar Options}
+\subsection{Calendar Options}
 #ifdef STANDALONE
-%\input{Calendar_options}
+\input{Calendar_coptions}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/Calendar_options}
+\input{../Infrastructure/TimeMgr/doc/Calendar_coptions}
 #endif
 
 %\subsection{Use and Examples}
@@ -101,16 +101,15 @@
 %\input{../Infrastructure/TimeMgr/doc/Calendar_rest}
 #endif
 
-%%\subsection{Design and Implementation Notes}
-%#ifdef STANDALONE
-%%\input{Calendar_implnotes}
-%#elif defined(CONSTITUENT)
-%%\input{../Infrastructure/TimeMgr/doc/Calendar_implnotes}
-%#endif
+%\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+%\input{Calendar_implnotes}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/TimeMgr/doc/Calendar_implnotes}
+#endif
 
 \subsection{Class API}
 #ifdef STANDALONE
-%\input{ESMF_Calendar_fapi}
 \input{ESMC_Calendar_chapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/ESMC_Calendar_chapi}
@@ -147,7 +146,6 @@
 
 \subsection{Class API}
 #ifdef STANDALONE
-%\input{ESMF_Time_fapi}
 \input{ESMC_Time_chapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/ESMC_Time_chapi}
