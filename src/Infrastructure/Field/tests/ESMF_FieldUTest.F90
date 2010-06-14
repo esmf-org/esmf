@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.148 2010/04/05 11:37:42 feiliu Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.149 2010/06/14 13:51:08 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.148 2010/04/05 11:37:42 feiliu Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.149 2010/06/14 13:51:08 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -64,10 +64,10 @@
       integer :: ldecount
       type(ESMF_IOSpec) :: ios
       type(ESMF_Grid) :: grid3
-      type(ESMF_ArraySpec)            :: arrayspec
+      type(ESMF_ArraySpec)            :: arrayspec, arrayspec1
       type(ESMF_LocStream)            :: locstream
-      type(ESMF_StaggerLoc)                       :: staggerloc8
-      type(ESMF_ArraySpec)                        :: arrayspec8
+      type(ESMF_StaggerLoc)           :: staggerloc8
+      type(ESMF_ArraySpec)            :: arrayspec8
       real(ESMF_KIND_R8), dimension(:,:,:), allocatable :: fptr
       real(ESMF_KIND_R4), dimension(:,:), pointer :: lsfptrR4Out
       type(ESMF_Grid) :: grid, grid2
@@ -148,7 +148,11 @@
             ungriddedLBound=(/1/), ungriddedUBound=(/4/), rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
 
-      call ESMF_FieldGet(fls, isCommitted=isCommitted, rc=rc)
+      call ESMF_FieldGet(fls, arrayspec=arrayspec1, isCommitted=isCommitted, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
+
+      call ESMF_ArrayspecPrint(arrayspec1, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
 
       ! check bounds
       call ESMF_FieldGet(fls, localDE=0, computationalCount=cc, &

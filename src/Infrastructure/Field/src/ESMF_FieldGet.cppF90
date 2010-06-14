@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.49 2010/03/04 18:57:42 svasquez Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.50 2010/06/14 13:51:08 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -32,6 +32,7 @@ module ESMF_FieldGetMod
   use ESMF_BaseMod
   use ESMF_LogErrMod
   use ESMF_IOSpecMod
+  use ESMF_ArraySpecMod
   use ESMF_LocalArrayMod
   use ESMF_ArrayMod
   use ESMF_ArrayGetMod
@@ -59,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.49 2010/03/04 18:57:42 svasquez Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.50 2010/06/14 13:51:08 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -109,13 +110,14 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-  subroutine ESMF_FieldGetDefault(field, isCommitted, geomtype, grid, mesh, locstream, &
+  subroutine ESMF_FieldGetDefault(field, arrayspec, isCommitted, geomtype, grid, mesh, locstream, &
     array, typekind, dimCount, memDimCount, &
     staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     maxHaloLWidth, maxHaloUWidth, localDeCount, name, iospec, rc) 
 !
 ! !ARGUMENTS:
     type(ESMF_Field), intent(inout) :: field    
+    type(ESMF_ArraySpec), intent(out), optional :: arrayspec
     logical, intent(out), optional  :: isCommitted
     type(ESMF_GeomType), intent(out), optional :: geomtype     
     type(ESMF_Grid), intent(out), optional :: grid     
@@ -148,6 +150,9 @@ contains
 ! \begin{description}
 ! \item [field]
 !       {\tt ESMF\_Field} object to query.
+! \item[{[arrayspec]}]
+!       {\tt ESMF\_ArraySpec} object containing the type/kind/rank information
+!       of the Field object.
 ! \item [{[isCommitted]}]
 !       Indicates if the Field is fully committed and ready.
 ! \item [{[geomtype]}]
@@ -263,6 +268,13 @@ contains
    if (ESMF_LogMsgFoundError(localrc, &
      ESMF_ERR_PASSTHRU, &
      ESMF_CONTEXT, rc)) return
+
+    if(present(arrayspec)) then
+        call ESMF_ArrayGet(ftype%array, arrayspec=arrayspec, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rc)) return
+    endif
 
     if(present(isCommitted)) then
         if(fieldstatus .eq. ESMF_STATUS_READY.and.ftype%gridstatus.eq.ESMF_STATUS_READY.and.&
