@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.68 2010/06/11 23:33:44 theurich Exp $
+// $Id: ESMC_Calendar.h,v 1.69 2010/06/14 17:21:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -64,11 +64,34 @@ typedef struct {
 // !IROUTINE: ESMC_CalendarCreate - Create a Calendar
 //
 // !INTERFACE:
-ESMC_Calendar ESMC_CalendarCreate(const char *name, enum ESMC_CalendarType
-  calendarType, int *rc);  
+ESMC_Calendar ESMC_CalendarCreate(
+  const char *name, 
+  enum ESMC_CalendarType calendarType,
+  int *rc);  
 
 // !DESCRIPTION:
-//	Create a Calendar of calendar type.
+//
+//  Creates and sets a {\tt calendar} to the given built-in
+//  {\tt ESMC\_CalendarType}. 
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[{[name]}]
+//    The name for the newly created calendar.  If not specified, i.e. NULL,
+//    a default unique name will be generated: "CalendarNNN" where NNN
+//    is a unique sequence number from 001 to 999.
+//  \item[calendartype]
+//    The built-in {\tt ESMC\_CalendarType}.  Valid values are:
+//    {\tt ESMC\_CAL\_360DAY}, {\tt ESMC\_CAL\_GREGORIAN},
+//    {\tt ESMC\_CAL\_JULIAN}, {\tt ESMC\_CAL\_JULIANDAY},
+//    {\tt ESMC\_CAL\_MODJULIANDAY}, {\tt ESMC\_CAL\_NOCALENDAR},
+//    and {\tt ESMC\_CAL\_NOLEAP}.
+//    See Section ~\ref{subsec:Calendar_options} for a description of each
+//    calendar type.
+//  \item[{[rc]}]
+//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
 //EOP
 //-----------------------------------------------------------------------------
 
@@ -77,10 +100,21 @@ ESMC_Calendar ESMC_CalendarCreate(const char *name, enum ESMC_CalendarType
 // !IROUTINE: ESMC_CalendarDestroy - Destroy a Calendar
 //
 // !INTERFACE:
-int ESMC_CalendarDestroy(ESMC_Calendar *calendar);
+int ESMC_CalendarDestroy(
+  ESMC_Calendar *calendar);
 
 // !DESCRIPTION:
-//      Destroy a Calendar.
+//
+//  Releases all resources associated with this {\tt ESMC\_Calendar}.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[calendar]
+//    Destroy contents of this {\tt ESMC\_Calendar}.
+//  \item[[rc]]
+//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
 //EOP
 //-----------------------------------------------------------------------------
 
@@ -89,10 +123,21 @@ int ESMC_CalendarDestroy(ESMC_Calendar *calendar);
 // !IROUTINE: ESMC_CalendarPrint - Print a Calendar
 //
 // !INTERFACE:
-int ESMC_CalendarPrint(ESMC_Calendar calendar);
+int ESMC_CalendarPrint(
+  ESMC_Calendar calendar);
 
 // !DESCRIPTION:
-//      Print a Calendar.
+//  Prints out an {\tt ESMC\_Calendar}'s properties to {\tt stdio}, 
+//  in support of testing and debugging.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[calendar]
+//    {\tt ESMC\_Calendar} to be printed out.
+//  \item[[rc]]
+//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
 //EOP
 //-----------------------------------------------------------------------------
 
