@@ -1,4 +1,4 @@
-% $Id: 
+% $Id: TimeMgr_refdoc.ctex,v 1.47 2010/06/14 22:49:32 theurich Exp $ 
 
 #define INCLUDE_UML
 #ifdef STANDALONE
