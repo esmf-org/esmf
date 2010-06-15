@@ -1,4 +1,4 @@
-// $Id: ESMCI_SpaceDir.h,v 1.2 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_SpaceDir.h,v 1.3 2010/06/15 23:10:16 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
