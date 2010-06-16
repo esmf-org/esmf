@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.26 2010/04/06 05:58:33 theurich Exp $
+// $Id: ESMCI_Util.h,v 1.27 2010/06/16 18:10:42 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -22,7 +22,7 @@
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
 
-#include "stdio.h"
+#include <stdio.h>
 
 #include "ESMC_Start.h"
 
