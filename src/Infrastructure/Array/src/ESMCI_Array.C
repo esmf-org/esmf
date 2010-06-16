@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.103 2010/05/13 21:11:15 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.104 2010/06/16 00:52:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.103 2010/05/13 21:11:15 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.104 2010/06/16 00:52:33 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4055,7 +4055,7 @@ int Array::redistStore(
       //TODO: this is hardcoded for first collocation only
       int arbSeqIndexCount = srcArbSeqIndexCountPCollPLocalDe[0][i];
       const int *srcArbSeqIndexListPLocalDe =
-        srcArray->distgrid->getArbSeqIndexListPLocalDe(i,1);
+        srcArray->distgrid->getArbSeqIndexList(i,1);
       if (srcArbSeqIndexListPLocalDe){
         for (int j=0; j<arbSeqIndexCount; j++){
           factorIndexList[2*jj] = factorIndexList[2*jj+1] =
