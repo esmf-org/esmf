@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.104 2010/06/16 00:52:33 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.105 2010/06/16 04:35:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.104 2010/06/16 00:52:33 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.105 2010/06/16 04:35:41 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -9283,12 +9283,12 @@ ArrayElement::ArrayElement(
 //
   Array *arrayArg,
   int localDeArg,
-  bool blockExclusiveFlag   // in - block exclusiver region if set to true
+  bool blockExclusiveFlag   // in - block exclusive region if set to true
   ){    
 //
 // !DESCRIPTION:
 //    Constructor of ArrayElement iterator through Array elements in total
-//    region, with this option to block the elements of the exclusiver region.
+//    region, with the option to block the elements of the exclusive region.
 //
 //EOPI
 //-----------------------------------------------------------------------------

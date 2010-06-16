@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.46 2010/04/12 18:17:31 w6ws Exp $
+// $Id: ESMCI_Array.h,v 1.47 2010/06/16 04:35:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -355,7 +355,9 @@ namespace ESMCI {
     int localDe;                      // localDe index
    public:
     ArrayElement(Array *arrayArg, int localDeArg);
+      // construct iterator through exclusive Array region
     ArrayElement(Array *arrayArg, int localDeArg, bool blockExclusiveFlag);
+      // construct iterator through total Array region with block excl. option
     int getLinearIndexExclusive(){
       return array->getLinearIndexExclusive(localDe, &indexTuple[0]);
     }
