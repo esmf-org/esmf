@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.40 2010/06/16 00:55:53 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.41 2010/06/16 05:47:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.40 2010/06/16 00:55:53 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.41 2010/06/16 05:47:40 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2625,7 +2625,7 @@ bool DistGrid::isLocalDeOnEdgeL(
       localDeIndexTuple[dim-1] = -1;
       // get sequence index providing localDe relative index tuple
       int seqindex =
-        getSequenceIndexLocalDe(localDe, localDeIndexTuple, &localrc);
+        getSequenceIndexLocalDe(localDe, localDeIndexTuple, 3, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return false;
       // determine if seqindex indicates edge or not
@@ -2708,7 +2708,7 @@ bool DistGrid::isLocalDeOnEdgeU(
       localDeIndexTuple[dim-1] = indexCountPDimPDe[de*dimCount+(dim-1)];
       // get sequence index providing localDe relative index tuple
       int seqindex =
-        getSequenceIndexLocalDe(localDe, localDeIndexTuple, &localrc);
+        getSequenceIndexLocalDe(localDe, localDeIndexTuple, 3, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return false;
       // determine if seqindex indicates edge or not
@@ -2841,6 +2841,7 @@ int DistGrid::getSequenceIndexLocalDe(
   const int *index,                 // in  - DE-local index tuple in or 
                                     //       relative to exclusive region
                                     //       basis 0
+  int depth,                        // in  - topology recursions depth
   int *rc                           // out - return code
   )const{
 //
@@ -2911,7 +2912,7 @@ int DistGrid::getSequenceIndexLocalDe(
           indexListPDimPLocalDe[localDe*dimCount+i][index[i]];
     }
     // get sequence index providing patch relative index tuple
-    seqindex = getSequenceIndexPatch(patch, patchIndexTuple, 3, &localrc);
+    seqindex = getSequenceIndexPatch(patch, patchIndexTuple, depth, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return -1;  //  bail out with invalid seqindex
     delete [] patchIndexTuple;

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.26 2010/06/16 00:55:53 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.27 2010/06/16 05:47:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -162,8 +162,8 @@ namespace ESMCI {
     const int *getCollocationTable() const {return collocationTable;}
     DELayout *getDELayout()         const {return delayout;}
     const int *getRegDecomp()       const {return regDecomp;}
-    int getSequenceIndexLocalDe(int localDe, const int *index, int *rc=NULL)
-      const;
+    int getSequenceIndexLocalDe(int localDe, const int *index, int depth=0,
+      int *rc=NULL) const;
     int getSequenceIndexPatchRelative(int patch, const int *index, int depth,
       int *rc=NULL)const;
     int getSequenceIndexPatch(int patch, const int *index, int depth,
