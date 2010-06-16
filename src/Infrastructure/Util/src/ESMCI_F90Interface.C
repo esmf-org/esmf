@@ -1,4 +1,4 @@
-// $Id: ESMCI_F90Interface.C,v 1.8 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_F90Interface.C,v 1.9 2010/06/16 00:50:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -35,6 +35,13 @@ InterfaceInt::InterfaceInt(int *arrayArg, int lenArg){
   array = arrayArg;
   dimCount = 1;
   extent[0]=lenArg;
+}
+
+InterfaceInt::InterfaceInt(std::vector<int> &arrayArg){
+  // native constructor, special case 1d
+  array = &(arrayArg[0]);
+  dimCount = 1;
+  extent[0]=arrayArg.size();
 }
 
 InterfaceInt::InterfaceInt(int *arrayArg, int dimArg, const int *lenArg){

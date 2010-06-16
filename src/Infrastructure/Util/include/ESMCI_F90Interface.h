@@ -1,4 +1,4 @@
-// $Id: ESMCI_F90Interface.h,v 1.9 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_F90Interface.h,v 1.10 2010/06/16 00:50:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,6 +33,8 @@
 // Class that helps with [optinal] F90 array arguments on the interface
 //-------------------------------------------------------------------------
 
+#include <vector>
+
 namespace ESMCI {
 
 
@@ -51,6 +53,7 @@ class InterfaceInt{
   public:
     InterfaceInt(void);                                   // native constructor
     InterfaceInt(int *arrayArg, int lenArg);              // native constructor
+    InterfaceInt(std::vector<int> &arrayArg);             // native constructor
     InterfaceInt(int *arrayArg, int dimArg, const int *lenArg); //n. constructor
     ~InterfaceInt(void);                                  // native destructor
 };
