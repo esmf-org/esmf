@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.39 2010/04/07 23:00:44 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.40 2010/06/16 00:55:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.39 2010/04/07 23:00:44 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.40 2010/06/16 00:55:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1924,6 +1924,167 @@ int DistGrid::destruct(bool followCreator){
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::fillSeqIndexList()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::fillSeqIndexList
+//
+// !INTERFACE:
+//
+int DistGrid::fillSeqIndexList(
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  InterfaceInt *seqIndexList,   // in
+  int localDe,                  // in  - local DE = {0, ..., localDeCount-1}
+  int collocation               // in  -
+  )const{
+//
+// !DESCRIPTION:
+//    Fill the seqIndexList argument. Providing this InterfaceInt based 
+//    method is required for efficient filling of arrays that come through
+//    the Fortran API, without having to do an extra copy. It can also leveraged
+//    by the overloaded vector<int> based interface.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  if (seqIndexList != NULL){
+    // seqIndexList provided -> error checking
+    if ((seqIndexList)->dimCount != 1){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        "- seqIndexList array must be of rank 1", &rc);
+      return rc;
+    }
+    int i;
+    for (i=0; i<diffCollocationCount; i++)
+      if (collocationTable[i]==collocation) break;
+    if (i==diffCollocationCount){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+        "- specified collocation not valid", &rc);
+      return rc;
+    }
+    int collIndex = i;
+    // check for arbitrary sequence indices
+    const int *arbSeqIndexList =
+      getArbSeqIndexList(localDe, collocation, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
+    if (arbSeqIndexList){
+      // arbitrary seq indices -> fill seqIndexList with arbSeqIndexList
+      if ((seqIndexList)->extent[0] <
+        elementCountPCollPLocalDe[collIndex][localDe]){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "- 1st dimension of seqIndexList array insufficiently sized", &rc);
+        return rc;
+      }
+      memcpy((seqIndexList)->array, arbSeqIndexList,
+        sizeof(int) * elementCountPCollPLocalDe[collIndex][localDe]);
+    }else{
+      // default seq indices -> generate on the fly and fill in
+      if ((seqIndexList)->extent[0] <
+        (getElementCountPDe())[delayout->getLocalDeList()[localDe]]){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "- 1st dimension of seqIndexList array insufficiently sized", &rc);
+        return rc;
+      }
+      // TODO: must consider collocation subspace here!!!
+      // TODO: use MultiDimIndexLoop class for the following multi-dim loop
+      int *ii = new int[dimCount];     // index tuple basis 0
+      const int *iiEnd = getIndexCountPDimPDe() + dimCount *
+        delayout->getLocalDeList()[localDe];
+      // reset counters
+      int index = 0;
+      for (int j=0; j<dimCount; j++)
+        ii[j] = 0;  // reset
+      // loop over all elements in exclusive region for localDe
+      while(ii[dimCount-1] < iiEnd[dimCount-1]){
+        (seqIndexList)->array[index] =
+          getSequenceIndexLocalDe(localDe, ii);
+        ++index;
+        // multi-dim index increment
+        ++ii[0];
+        for (int j=0; j<dimCount-1; j++){
+          if (ii[j] == iiEnd[j]){
+            ii[j] = 0;  // reset
+            ++ii[j+1];
+          }
+        }
+      }
+      delete [] ii;
+    }
+  }
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::fillSeqIndexList()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::fillSeqIndexList
+//
+// !INTERFACE:
+//
+int DistGrid::fillSeqIndexList(
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  vector<int> &seqIndexList,    // in
+  int localDe,                  // in  - local DE = {0, ..., localDeCount-1}
+  int collocation               // in  -
+  )const{
+//
+// !DESCRIPTION:
+//    Fill the seqIndexList argument. If the size of seqIndexList does not
+//    match it will automatically resized by this method.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  int i;
+  for (i=0; i<diffCollocationCount; i++)
+    if (collocationTable[i]==collocation) break;
+  if (i==diffCollocationCount){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+      "- specified collocation not valid", &rc);
+    return rc;
+  }
+  int collIndex = i;
+
+  int elementCount = elementCountPCollPLocalDe[collIndex][localDe];
+  
+  if (seqIndexList.size() != elementCount)
+    seqIndexList.resize(elementCount);
+  
+  InterfaceInt *seqIndexListAux = new InterfaceInt(seqIndexList);
+  localrc = fillSeqIndexList(seqIndexListAux, localDe, collocation);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  delete seqIndexListAux;
+    
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::DistGrid::fillIndexListPDimPDe()"
 //BOPI
 // !IROUTINE:  ESMCI::DistGrid::fillIndexListPDimPDe
@@ -2351,7 +2512,7 @@ int DistGrid::print()const{
     indexTuple[0], indexTuple[1], seqIndex, lrc);
   printf("--- ESMCI::DistGrid::print - Topology test end ---\n");
 #endif
-
+  
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -3167,15 +3328,15 @@ const int *DistGrid::getIndexListPDimPLocalDe(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid::getArbSeqIndexListPLocalDe()"
+#define ESMC_METHOD "ESMCI::DistGrid::getArbSeqIndexList()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid::getArbSeqIndexListPLocalDe
+// !IROUTINE:  ESMCI::DistGrid::getArbSeqIndexList
 //
 // !INTERFACE:
-const int *DistGrid::getArbSeqIndexListPLocalDe(
+const int *DistGrid::getArbSeqIndexList(
 //
 // !RETURN VALUE:
-//    int *arbSeqIndexListPLocalDe for localDe
+//    int *arbSeqIndexList for localDe
 //
 // !ARGUMENTS:
 //

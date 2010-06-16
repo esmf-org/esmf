@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.22 2010/03/04 18:57:42 svasquez Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.23 2010/06/16 00:55:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -490,75 +490,20 @@ extern "C" {
       collocation = collocationTable[0]; // default to first collocation 
       collIndex = 0;
     }
-    const int *arbSeqIndexListPLocalDe =
-      (*ptr)->getArbSeqIndexListPLocalDe(localDe, collocation, &localrc);
+    const int *arbSeqIndexList =
+      (*ptr)->getArbSeqIndexList(localDe, collocation, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (ESMC_NOT_PRESENT_FILTER(arbSeqIndexFlag) != ESMC_NULL_POINTER){  
-      if (arbSeqIndexListPLocalDe)
+      if (arbSeqIndexList)
         *arbSeqIndexFlag = ESMF_TRUE;
       else
         *arbSeqIndexFlag = ESMF_FALSE;
     }
     // fill seqIndexList
-    if (*seqIndexList != NULL){
-      // seqIndexList provided -> error checking
-      if ((*seqIndexList)->dimCount != 1){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- seqIndexList array must be of rank 1",
-          ESMC_NOT_PRESENT_FILTER(rc));
-        return;
-      }
-      // check for arbitrary sequence indices
-      int *const*arbSeqIndexCountPCollPLocalDe =
-        (*ptr)->getElementCountPCollPLocalDe();
-      if (arbSeqIndexListPLocalDe){
-        // arbitrary seq indices -> fill in arbSeqIndexListPLocalDe
-        if ((*seqIndexList)->extent[0] <
-          arbSeqIndexCountPCollPLocalDe[collIndex][localDe]){
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-            "- 1st dimension of seqIndexList array insufficiently sized", 
-            ESMC_NOT_PRESENT_FILTER(rc));
-          return;
-        }
-        memcpy((*seqIndexList)->array, arbSeqIndexListPLocalDe,
-          sizeof(int) * arbSeqIndexCountPCollPLocalDe[collIndex][localDe]);
-      }else{
-        // default seq indices -> generate on the fly and fill in
-        if ((*seqIndexList)->extent[0] <
-          ((*ptr)->getElementCountPDe())[(*ptr)->getDELayout()->
-          getLocalDeList()[localDe]]){
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-            "- 1st dimension of seqIndexList array insufficiently sized",
-            ESMC_NOT_PRESENT_FILTER(rc));
-          return;
-        }
-        int dimCount = (*ptr)->getDimCount();
-        // TODO: must consider collocation subspace here!!!
-        int *ii = new int[dimCount];     // index tuple basis 0
-        const int *iiEnd = (*ptr)->getIndexCountPDimPDe() + dimCount*
-          (*ptr)->getDELayout()->getLocalDeList()[localDe];
-        // reset counters
-        int index = 0;
-        for (int j=0; j<dimCount; j++)
-          ii[j] = 0;  // reset
-        // loop over all elements in exclusive region for localDe
-        while(ii[dimCount-1] < iiEnd[dimCount-1]){
-          (*seqIndexList)->array[index] =
-            (*ptr)->getSequenceIndexLocalDe(localDe, ii);
-          ++index;
-          // multi-dim index increment
-          ++ii[0];
-          for (int j=0; j<dimCount-1; j++){
-            if (ii[j] == iiEnd[j]){
-              ii[j] = 0;  // reset
-              ++ii[j+1];
-            }
-          }
-        }
-        delete [] ii;
-      }
-    }
+    localrc = (*ptr)->fillSeqIndexList(*seqIndexList, localDe, collocation);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
     // set elementCount
     if (ESMC_NOT_PRESENT_FILTER(elementCount) != ESMC_NULL_POINTER){
       int *const *elementCountPCollPLocalDe =

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.25 2010/03/04 18:57:42 svasquez Exp $
+// $Id: ESMCI_DistGrid.h,v 1.26 2010/06/16 00:55:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -30,6 +30,8 @@
 //
 //EOPI
 //-------------------------------------------------------------------------
+
+#include <vector>
 
 #include "ESMC_Base.h"      // Base is superclass to DistGrid
 #include "ESMCI_VM.h"
@@ -168,11 +170,15 @@ namespace ESMCI {
       int *rc=NULL)const;
     int *const*getElementCountPCollPLocalDe()
       const {return elementCountPCollPLocalDe;}
-    const int *getArbSeqIndexListPLocalDe(int localDe, int collocation,
-      int *rc=NULL) const;
+    const int *getArbSeqIndexList(int localDe, int collocation, int *rc=NULL)
+      const;
     int setArbSeqIndex(InterfaceInt *arbSeqIndex, int localDe, int collocation);
     int setCollocationPDim(InterfaceInt *collocationPDim);
     // fill()
+    int fillSeqIndexList(InterfaceInt *seqIndexList, int localDe,
+      int collocation) const;
+    int fillSeqIndexList(std::vector<int> &seqIndexList, int localDe,
+      int collocation) const;
     int fillIndexListPDimPDe(int *indexList, int de, int dim,
       VMK::commhandle **commh, int rootPet, VM *vm=NULL) const;
     // misc.
