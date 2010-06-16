@@ -1,4 +1,4 @@
-// $Id: ESMC_Util_F.C,v 1.12 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMC_Util_F.C,v 1.13 2010/06/16 18:12:11 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -20,19 +20,135 @@
 //
 //-----------------------------------------------------------------------------
 //
+
+//insert any higher level, 3rd party or system includes here
+#if defined (MAPDEBUG)
+#include <iostream>
+#endif
+#include <map>
+#include <string>
+using namespace std;
+
  // associated class definition file and others
-#include <string.h>
-#include <stdlib.h>
 #include "ESMC_Base.h"
+#include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"  // will this work?
+#include "ESMC_Util.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util_F.C,v 1.12 2010/03/04 18:57:45 svasquez Exp $";
+ static const char *const version = "$Id: ESMC_Util_F.C,v 1.13 2010/06/16 18:12:11 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Map container routines
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// MapName routines allow Fortran callable management of STL map containers
+// containing string/int pairs.
+ 
+void FTN(c_esmc_mapname_add) (MapName **ptr,
+                            char *name, // in - name to be entered
+                            int *index, // in - associated index ordinal
+                            int *rc,    // out - return code
+                            ESMCI_FortranStrLenArg name_len) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_mapname_add"
+
+        ESMF_CHECK_POINTER(ptr, rc)
+
+        string cname (name, name_len);
+#if defined (MAPDEBUG)
+        cout << ESMC_METHOD << ": cname = " << cname;
+        cout << ", index = " << *index << endl;
+//        cout << "    nameTable map address = " << hex << *ptr << endl;
+#endif
+        (*ptr) -> table[cname] = *index;
+#if defined (MAPDEBUG)
+        cout << "    index lookup returned: " << (*ptr) -> table[cname] << endl;
+#endif
+        *rc = ESMF_SUCCESS;
+
+}
+
+void FTN(c_esmc_mapname_create) (MapName **ptr,
+                            int *rc     // out - return code
+                            ) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_mapname_create"
+
+        ESMF_CHECK_POINTER(ptr, rc)
+
+#if defined (MAPDEBUG)
+        cout << ESMC_METHOD << ": entered" << endl;
+#endif
+        *ptr = new MapName;
+        *rc = *ptr ? ESMF_SUCCESS : ESMF_FAILURE;
+#if defined (MAPDEBUG)
+        cout << "    nameTable map address = " << hex << *ptr << endl;
+#endif
+
+}
+
+void FTN(c_esmc_mapname_destroy) (MapName **ptr,
+                            int *rc     // out - return code
+                            ) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_mapname_destroy"
+
+        ESMF_CHECK_POINTER(ptr, rc)
+
+#if defined (MAPDEBUG)
+        cout << ESMC_METHOD << ": entered" << endl;
+#endif
+        delete *ptr;
+        *rc = ESMF_SUCCESS;
+
+}
+
+void FTN(c_esmc_mapname_lookup) (MapName **ptr,
+                            char *name, // in - name to be entered
+                            int *index, // out - associated index ordinal
+                            int *rc,    // out - return code
+                            ESMCI_FortranStrLenArg name_len) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_mapname_lookup"
+
+        ESMF_CHECK_POINTER(ptr, rc)
+
+#if defined (MAPDEBUG)
+        cout << ESMC_METHOD << ": entered" << endl;
+#endif
+        string cname (name, name_len);
+        *index = (*ptr)->table[cname];
+#if defined (MAPDEBUG)
+        cout << "    name: " << cname << ", index returned = " << *index << endl;
+#endif
+        *rc = (*index) ? ESMF_SUCCESS : ESMF_FAILURE;
+}
+
+void FTN(c_esmc_mapname_remove) (MapName **ptr,
+                            char *name, // in - name to be entered
+                            int *rc,    // out - return code
+                            ESMCI_FortranStrLenArg name_len) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_mapname_remove"
+
+        ESMF_CHECK_POINTER(ptr, rc)
+
+#if defined (MAPDEBUG)
+        cout << ESMC_METHOD << ": entered" << endl;
+#endif
+        string cname (name, name_len);
+        (*ptr)->table.erase (cname);
+        *rc = ESMF_SUCCESS;
+}
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

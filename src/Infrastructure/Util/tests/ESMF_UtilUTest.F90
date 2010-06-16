@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.19 2010/06/03 20:55:15 w6ws Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.20 2010/06/16 18:12:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.19 2010/06/03 20:55:15 w6ws Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.20 2010/06/16 18:12:11 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -76,6 +76,9 @@
       integer :: nargs
       character(ESMF_MAXSTR) :: program_path
       integer :: argindex
+
+      type(ESMF_MapName) :: mapcontainer
+      integer :: newvalue
 #endif
 
 !-------------------------------------------------------------------------------
@@ -281,6 +284,80 @@
     call ESMF_UtilGetArgIndex (value="esmf_xyzzy", argindex=argindex, rc=rc)
     call ESMF_Test(rc /= ESMF_SUCCESS .and. argindex == -1,  &
       name, failMsg, result, ESMF_SRCLINE)
+
+
+!MapName Containers
+!==================
+
+! Note: These are internal ESMF routines, subject to change, and
+! not intended to be end-user callable.
+
+    !
+    !EX_UTest
+    ! Test creation of a MapName container
+    write (name, *) "Testing creation of a MapName container"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    call ESMF_UtilMapNameCreate (mapcontainer, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test adding a name/value pair
+    write (name, *) "Testing adding a name/value pair"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    call ESMF_UtilMapNameAdd (mapcontainer,  &
+        name="Temperature", value=1, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test adding a second name/value pair
+    write (name, *) "Testing adding a name/value pair #2"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    call ESMF_UtilMapNameAdd (mapcontainer,  &
+        name="Pressure", value=42, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test looking up a name/value pair
+    write (name, *) "Testing looking up a name/value pair"
+    write (failMsg, *) "did not return ESMF_SUCCESS or correct value"
+    call ESMF_UtilMapNameLookup (mapcontainer,  &
+        name="Temperature", value=newvalue, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS .and. newvalue == 1,  &
+        name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test looking up a second name/value pair
+    write (name, *) "Testing looking up a second name/value pair"
+    write (failMsg, *) "did not return ESMF_SUCCESS or correct value"
+    call ESMF_UtilMapNameLookup (mapcontainer,  &
+        name="Pressure", value=newvalue, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS .and. newvalue == 42,  &
+        name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test removing a name/value pair
+    write (name, *) "Testing removing a name/value pair"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    call ESMF_UtilMapNameRemove (mapcontainer,  &
+        name="Temperature", rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test looking up a removed name/value pair
+    write (name, *) "Testing looking up a name/value pair"
+    write (failMsg, *) "returned ESMF_SUCCESS (but should not)"
+    call ESMF_UtilMapNameLookup (mapcontainer,  &
+        name="Temperature", value=newvalue, rc=rc)
+    call ESMF_Test(rc /= ESMF_SUCCESS,  &
+        name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test destruction of a MapName container
+    write (name, *) "Testing destruction of a MapName container"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    call ESMF_UtilMapNameDestroy (mapcontainer, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
 
 #endif
 

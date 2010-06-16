@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.26 2010/06/04 21:59:19 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.27 2010/06/16 18:12:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -59,22 +59,30 @@
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 
+!  STL map container interface
+
+      public :: ESMF_UtilMapNameAdd
+      public :: ESMF_UtilMapNameCreate
+      public :: ESMF_UtilMapNameDestroy
+      public :: ESMF_UtilMapNameLookup
+      public :: ESMF_UtilMapNameRemove
+
 !  Command line argument methods
-      public ESMF_UtilGetArgC
-      public ESMF_UtilGetArg
-      public ESMF_UtilGetArgIndex
+      public :: ESMF_UtilGetArgC
+      public :: ESMF_UtilGetArg
+      public :: ESMF_UtilGetArgIndex
 
 !  Misc methods
-      public ESMF_StringLowerCase
-      public ESMF_StringUpperCase
+      public :: ESMF_StringLowerCase
+      public :: ESMF_StringUpperCase
 
 !  Misc type-to-string methods
-      public ESMF_StatusString
-      public ESMF_TypeKindString
-      public ESMF_LogicalString
+      public :: ESMF_StatusString
+      public :: ESMF_TypeKindString
+      public :: ESMF_LogicalString
 
 !  Overloaded = operator functions
-      public operator(.eq.), operator(.ne.), assignment(=)
+      public :: operator(.eq.), operator(.ne.), assignment(=)
 !
 !
 
@@ -88,11 +96,213 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.26 2010/06/04 21:59:19 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.27 2010/06/16 18:12:11 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
 
+!------------------------------------------------------------------------- 
+! Map routines - Interfaces to C++ STL map containers
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilMapNameAdd"
+!BOPI
+! !IROUTINE:  ESMF_UtilMapNameAdd - Add a name/value pair to a map container
+!
+! !INTERFACE:
+  subroutine ESMF_UtilMapNameAdd (this, name, value, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_MapName), intent(in) :: this
+    character(*),       intent(in) :: name
+    integer,            intent(in) :: value
+    integer,            intent(out), optional :: rc
+!
+! !Description:
+! This method adds a name/value pair to a MapName container.  The
+! name argument is used within the container to identify the pair
+! for lookups.
+!
+! The arguments are:
+! \begin{description}
+! \item [{[this]}]
+! A ESMF\_MapName object
+! \item [{[name]}]
+! A character string which will be the keyword used to identify the
+! pair within the container.
+! \item [{[value]}]
+! An integer value associated with the name.
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+
+    integer :: localrc
+
+    localrc = ESMF_FAILURE
+
+    call c_esmc_mapname_add (this, name, value, localrc)
+
+    if (present (rc))  &
+      rc = localrc
+
+  end subroutine ESMF_UtilMapNameAdd
+
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilMapNameCreate"
+!BOPI
+! !IROUTINE:  ESMF_UtilMapNameCreate - Create a map container for name/value pairs
+!
+! !INTERFACE:
+  subroutine ESMF_UtilMapNameCreate (this, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_MapName), intent(out) :: this
+    integer,            intent(out), optional :: rc
+!
+! !Description:
+! This method creates a MapName container.
+!
+! The arguments are:
+! \begin{description}
+! \item [{[this]}]
+! A ESMF\_MapName object to be created.
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+
+    integer :: localrc
+
+    localrc = ESMF_FAILURE
+
+    call c_esmc_mapname_create (this, localrc)
+
+    if (present (rc))  &
+      rc = localrc
+
+  end subroutine ESMF_UtilMapNameCreate
+
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilMapNameDestroy"
+!BOPI
+! !IROUTINE:  ESMF_UtilMapNameDestroy - Destroy a map container
+!
+! !INTERFACE:
+  subroutine ESMF_UtilMapNameDestroy (this, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_MapName), intent(inout) :: this
+    integer,            intent(out), optional :: rc
+!
+! !Description:
+! This method destroys a MapName container.
+!
+! The arguments are:
+! \begin{description}
+! \item [{[this]}]
+! A ESMF\_MapName object to be destroyed.
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+
+    integer :: localrc
+
+    localrc = ESMF_FAILURE
+
+    call c_esmc_mapname_destroy (this, localrc)
+
+    if (present (rc))  &
+      rc = localrc
+
+  end subroutine ESMF_UtilMapNameDestroy
+
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilMapNameLookup"
+!BOPI
+! !IROUTINE:  ESMF_UtilMapNameLookup - Return the value associated with a name
+!
+! !INTERFACE:
+  subroutine ESMF_UtilMapNameLookup (this, name, value, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_MapName), intent(in)  :: this
+    character(*),       intent(in)  :: name
+    integer,            intent(out) :: value
+    integer,            intent(out), optional :: rc
+!
+! !Description:
+! This method looks up a name/value pair in a MapName container
+! and returns the value.
+!
+! The arguments are:
+! \begin{description}
+! \item [{[this]}]
+! A ESMF\_MapName object
+! \item [{[name]}]
+! A character string which will be the keyword used to identify the
+! pair within the container.
+! \item [{[value]}]
+! The integer value associated with the name.
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+
+    integer :: localrc
+
+    localrc = ESMF_FAILURE
+
+    call c_esmc_mapname_lookup (this, name, value, localrc)
+
+    if (present (rc))  &
+      rc = localrc
+
+  end subroutine ESMF_UtilMapNameLookup
+
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilMapNameRemove"
+!BOPI
+! !IROUTINE:  ESMF_UtilMapNameRemove - Remove a name/value pair
+!
+! !INTERFACE:
+  subroutine ESMF_UtilMapNameRemove (this, name, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_MapName), intent(in) :: this
+    character(*),       intent(in) :: name
+    integer,            intent(out), optional :: rc
+!
+! !Description:
+! This method removes a name/value pair from a MapName container.
+!
+! The arguments are:
+! \begin{description}
+! \item [{[this]}]
+! A ESMF\_MapName object
+! \item [{[name]}]
+! A character string which will be the keyword used to identify the
+! pair within the container.
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+
+    integer :: localrc
+
+    localrc = ESMF_FAILURE
+
+    call c_esmc_mapname_remove (this, name, localrc)
+
+    if (present (rc))  &
+      rc = localrc
+
+  end subroutine ESMF_UtilMapNameRemove
+
+!------------------------------------------------------------------------- 
+
+!------------------------------------------------------------------------- 
+! Command line interfaces
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_UtilGetArgC"
