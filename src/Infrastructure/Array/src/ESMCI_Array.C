@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.107 2010/06/16 05:52:57 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.108 2010/06/16 22:56:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.107 2010/06/16 05:52:57 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.108 2010/06/16 22:56:41 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2418,6 +2418,96 @@ int Array::validate()const{
     return rc;
   }
 
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::constructPioDof()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::constructPioDof
+//
+// !INTERFACE:
+//
+int Array::constructPioDof(
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  InterfaceInt *pioDofList,     // in
+  int localDe                   // in  - local DE = {0, ..., localDeCount-1}
+  )const{
+//
+// !DESCRIPTION:
+//    Construct the DOF list for PIO for the total Array region on localDe.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  try{
+  
+    if (tensorElementCount != 1){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        "- pioDofList is only defined for tensorElementCount == 1", &rc);
+      return rc;
+    }
+    ArrayElement arrayElement(this, localDe, false);  // also checks localDe
+    int elementCount = totalElementCountPLocalDe[localDe];
+  
+    if (pioDofList != NULL){
+      // pioDofList provided -> error checking
+      if ((pioDofList)->dimCount != 1){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          "- pioDofList array must be of rank 1", &rc);
+        return rc;
+      }
+      if ((pioDofList)->extent[0] < elementCount){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "- 1st dimension of pioDofList array insufficiently sized", &rc);
+        return rc;
+      }
+      // fill pioDofList
+      //TODO: Make the following more efficient by not calling
+      //TODO: getSequenceIndexExclusive() for elements that are outside the
+      //TODO: exclusive region. Just set those elements to 0 in the pioDofList.
+      //TODO: Further, obtain the seqIndex list from DistGrid for all the
+      //TODO: exclusive elements once, and then copy from that list into 
+      //TODO: pioDofList for each exclusive element.
+      int element = 0;
+      while(arrayElement.isWithin()){
+        // obtain seqIndex value
+        SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive(0);
+//printf("arrayElement: %d, ", element); seqIndex.print();
+        pioDofList->array[element] = seqIndex.decompSeqIndex;
+        if (pioDofList->array[element] == -1)
+          pioDofList->array[element] = 0; // translate ESMF to PIO convention
+        arrayElement.next();
+        ++element;
+      }
+    }
+  
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
+    return rc;
+  }catch(exception &x){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      x.what(), &rc);
+    return rc;
+  }catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", &rc);
+    return rc;
+  }
+  
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;

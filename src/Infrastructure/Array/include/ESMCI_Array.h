@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.48 2010/06/16 05:52:57 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.49 2010/06/16 22:56:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -245,6 +245,7 @@ namespace ESMCI {
     static bool match(Array *array1, Array *array2, int *rc=NULL);
     int print() const;
     int validate() const;
+    int constructPioDof(InterfaceInt *pioDofList, int localDe) const;
     // serialize() and deserialize()
     int serialize(char *buffer, int *length, int *offset,
       const ESMC_AttReconcileFlag &attreconflag,
