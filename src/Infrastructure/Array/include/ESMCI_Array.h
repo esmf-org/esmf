@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.47 2010/06/16 04:35:41 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.48 2010/06/16 05:52:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -233,7 +233,7 @@ namespace ESMCI {
     DistGrid *getDistGrid()                 const {return distgrid;}
     DELayout *getDELayout()                 const {return delayout;}
     int getLinearIndexExclusive(int localDe, int *index, int *rc=NULL) const;
-    SeqIndex getSequenceIndexExclusive(int localDe, int *index,
+    SeqIndex getSequenceIndexExclusive(int localDe, int *index, int depth=0,
       int *rc=NULL) const;
     SeqIndex getSequenceIndexPatch(int patch, const int *index, int *rc=NULL)
       const;
@@ -351,18 +351,19 @@ namespace ESMCI {
   //============================================================================
   class ArrayElement : public MultiDimIndexLoop{
     // Iterator type through Array elements.
-    Array *array;                     // associated Array object
+    Array const *array;               // associated Array object
     int localDe;                      // localDe index
    public:
-    ArrayElement(Array *arrayArg, int localDeArg);
+    ArrayElement(Array const *arrayArg, int localDeArg);
       // construct iterator through exclusive Array region
-    ArrayElement(Array *arrayArg, int localDeArg, bool blockExclusiveFlag);
+    ArrayElement(Array const *arrayArg, int localDeArg,
+      bool blockExclusiveFlag);
       // construct iterator through total Array region with block excl. option
     int getLinearIndexExclusive(){
       return array->getLinearIndexExclusive(localDe, &indexTuple[0]);
     }
-    SeqIndex getSequenceIndexExclusive(){
-      return array->getSequenceIndexExclusive(localDe, &indexTuple[0]);
+    SeqIndex getSequenceIndexExclusive(int depth=0){
+      return array->getSequenceIndexExclusive(localDe, &indexTuple[0], depth);
     }
   };  // class ArrayElement 
   //============================================================================

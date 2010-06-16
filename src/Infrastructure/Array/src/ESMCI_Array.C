@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.106 2010/06/16 04:44:39 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.107 2010/06/16 05:52:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.106 2010/06/16 04:44:39 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.107 2010/06/16 05:52:57 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -233,7 +233,7 @@ Array::Array(
       // obtain linear index for this element
       int linIndex = arrayElement.getLinearIndexExclusive();
       // obtain canonical seqIndex value according to DistGrid topology
-      SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive();
+      SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive(3);
 //printf("gjt - arrayElement %05d, linearIndex=%d\n", element, linIndex);
 //seqIndex.print();
       rimSeqIndex[i].push_back(seqIndex); // store seqIndex for this rim element
@@ -1902,14 +1902,17 @@ SeqIndex Array::getSequenceIndexExclusive(
 //
 // !ARGUMENTS:
 //
-  int localDe,                      // in - local DE
-  int *index,                       // in - DE-local index tuple in exclusive
-                                    //      region basis 0
+  int localDe,                      // in  - local DE
+  int *index,                       // in  - DE-local index tuple in exclusive
+                                    //       region basis 0
+  int depth,                        // in  - topology recursions depth
   int *rc                           // out - return code
   )const{
 //
 // !DESCRIPTION:
-//    Get sequential index - assuming index input to be basis 0 in excl. region
+//    Get sequential index - assuming index input to be basis 0 in excl. region,
+//    but allowing the incoming index to be outside of the exclusive region
+//    under special conditions. See the used DistGrid method for details.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1936,7 +1939,7 @@ SeqIndex Array::getSequenceIndexExclusive(
   // determine the sequentialized index for decomposed dimensions
   int decompSeqIndex;
   decompSeqIndex = distgrid->getSequenceIndexLocalDe(localDe, decompIndex,
-    &localrc);  
+    depth, &localrc);  
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return seqIndex;
   seqIndex.decompSeqIndex = decompSeqIndex;
@@ -9204,7 +9207,7 @@ ArrayElement::ArrayElement(
 //
 // !ARGUMENTS:
 //
-  Array *arrayArg,
+  Array const *arrayArg,
   int localDeArg
   ){    
 //
@@ -9281,7 +9284,7 @@ ArrayElement::ArrayElement(
 //
 // !ARGUMENTS:
 //
-  Array *arrayArg,
+  Array const *arrayArg,
   int localDeArg,
   bool blockExclusiveFlag   // in - block exclusive region if set to true
   ){    
