@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.105 2010/06/16 04:35:41 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.106 2010/06/16 04:44:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.105 2010/06/16 04:35:41 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.106 2010/06/16 04:44:39 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -227,7 +227,7 @@ Array::Array(
   rimSeqIndex.resize(localDeCount);
   rimLinIndex.resize(localDeCount);
   for (int i=0; i<localDeCount; i++){
-    ArrayElement arrayElement(this, 0, true);
+    ArrayElement arrayElement(this, i, true);
     int element = 0;
     while(arrayElement.isWithin()){
       // obtain linear index for this element
@@ -3630,7 +3630,7 @@ int Array::haloStore(
     vector<vector<int> > rimMaskElement(localDeCount);
     vector<vector<SeqIndex> > rimMaskSeqIndex(localDeCount);
     for (int i=0; i<localDeCount; i++){
-      ArrayElement arrayElement(array, 0, true);
+      ArrayElement arrayElement(array, i, true);
       int element = 0;
       while(arrayElement.isWithin()){
         SeqIndex seqIndex = array->rimSeqIndex[i][element];
