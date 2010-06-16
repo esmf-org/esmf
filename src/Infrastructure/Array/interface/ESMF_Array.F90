@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.114 2010/04/08 22:43:38 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.115 2010/06/16 22:58:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -93,6 +93,7 @@ module ESMF_ArrayMod
   public ESMF_ArrayValidate
   
 ! - ESMF-internal methods:
+  public ESMF_ArrayConstructPioDof
   public ESMF_ArrayGetInit          ! implemented in ESMF_ArrayCreateMod
   public ESMF_ArraySetInitCreated   ! implemented in ESMF_ArrayCreateMod
   public ESMF_ArrayGetThis          ! implemented in ESMF_ArrayCreateMod
@@ -107,7 +108,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.114 2010/04/08 22:43:38 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.115 2010/06/16 22:58:00 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1162,6 +1163,81 @@ contains
   end subroutine ESMF_ArrayValidate
 !------------------------------------------------------------------------------
 
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayConstructPioDof()"
+!BOPI
+! !IROUTINE: ESMF_ArrayConstructPioDof - Construct PIO DOF list for localDe
+
+! !INTERFACE:
+  subroutine ESMF_ArrayConstructPioDof(array, localDe, pioDofList, &
+    pioDofCount, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),       intent(in)            :: array
+    integer,                intent(in),  optional :: localDe
+    integer,        target, intent(out), optional :: pioDofList(:)
+    integer,                intent(out), optional :: pioDofCount
+    integer,                intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!   Construct PIO DOF list from Array for localDe.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[array]
+!     {\tt ESMF\_Array} object.
+!   \item[{[localDe]}]
+!     Local DE for which information is requested. {\tt [0,..,localDeCount-1]}.
+!     Default is localDe 0.
+!   \item[{[pioDofList]}]
+!     List that holds PIO DOF entries on return.
+!   \item[{[pioDofCount]}]
+!     Number of elements in {\tt pioDofList}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc            ! local return code
+    integer                 :: localDeArg         ! helper variable
+    type(ESMF_InterfaceInt) :: pioDofListArg      ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
+    
+    ! Deal with optional arguments
+    localDeArg = 0  ! default
+    if (present(localDe)) localDeArg = localDe
+    
+    ! Deal with (optional) array arguments
+    pioDofListArg = ESMF_InterfaceIntCreate(pioDofList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayConstructPioDof(array, localDeArg, pioDofListArg, &
+      pioDofCount, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(pioDofListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayConstructPioDof
+!------------------------------------------------------------------------------
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

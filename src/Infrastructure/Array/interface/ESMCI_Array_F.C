@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.37 2010/04/26 21:33:05 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.38 2010/06/16 22:57:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -904,6 +904,37 @@ extern "C" {
       *computationalUWidthArg),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  void FTN(c_esmc_arrayconstructpiodof)(ESMCI::Array **ptr,
+    int *localDeArg, ESMCI::InterfaceInt **pioDofList, int *pioDofCount,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arrayconstructpiodof()"
+    // Initialize return code; assume routine not implemented
+    if (ESMC_NOT_PRESENT_FILTER(rc)) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // shift input indices
+    int localDe = *localDeArg;  // already base 0
+    // check input values
+    int localDeCount = (*ptr)->getDELayout()->getLocalDeCount();
+    if (localDe < 0 || localDe > localDeCount-1){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "- Specified local DE out of bounds", ESMC_NOT_PRESENT_FILTER(rc));
+      return;
+    }
+    // determine pioDofCount
+    if (ESMC_NOT_PRESENT_FILTER(pioDofCount)){
+      *pioDofCount = (*ptr)->getTotalElementCountPLocalDe()[localDe];
+    }
+    // fill seqIndexList
+    if (*pioDofList){
+      localrc = (*ptr)->constructPioDof(*pioDofList, localDe);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
+    }
+    // return successfully
+    if (ESMC_NOT_PRESENT_FILTER(rc)) *rc = ESMF_SUCCESS;   
   }
   
   void FTN(c_esmc_arrayserialize)(ESMCI::Array **array, char *buf, int *length,
