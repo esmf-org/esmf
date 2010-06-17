@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.41 2010/06/16 05:47:40 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.42 2010/06/17 08:03:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.41 2010/06/16 05:47:40 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.42 2010/06/17 08:03:47 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3935,8 +3935,10 @@ int DistGrid::setArbSeqIndex(
     skipDim.resize(0);
     indexTupleBlockStart.resize(0);
     indexTupleBlockEnd.resize(0);
+    indexTupleWatchStart.resize(0);
+    indexTupleWatchEnd.resize(0);
   }
-  MultiDimIndexLoop::MultiDimIndexLoop(const vector<int> sizes){
+  MultiDimIndexLoop::MultiDimIndexLoop(vector<int> const &sizes){
     indexTupleEnd = sizes;
     // default initialize rest
     int rank = sizes.size();
@@ -3945,15 +3947,18 @@ int DistGrid::setArbSeqIndex(
     skipDim.resize(rank);
     indexTupleBlockStart.resize(rank);
     indexTupleBlockEnd.resize(rank);
+    indexTupleWatchStart.resize(rank);
+    indexTupleWatchEnd.resize(rank);
     for (int i=0; i<rank; i++){
       indexTupleStart[i] = indexTuple[i] = 0; // reset
       skipDim[i] = false;                     // reset
       indexTupleBlockStart[i] = indexTupleBlockEnd[i] = 0;  // reset
+      indexTupleWatchStart[i] = indexTupleWatchEnd[i] = 0;  // reset
     }
     adjust();
   }
-  MultiDimIndexLoop::MultiDimIndexLoop(const vector<int> offsets,
-    const vector<int> sizes){
+  MultiDimIndexLoop::MultiDimIndexLoop(vector<int> const &offsets,
+    vector<int> const &sizes){
     indexTupleStart = offsets;
     indexTupleEnd = sizes;
     // default initialize rest
@@ -3963,11 +3968,14 @@ int DistGrid::setArbSeqIndex(
     skipDim.resize(rank);
     indexTupleBlockStart.resize(rank);
     indexTupleBlockEnd.resize(rank);
+    indexTupleWatchStart.resize(rank);
+    indexTupleWatchEnd.resize(rank);
     for (int i=0; i<rank; i++){
       indexTuple[i] = indexTupleStart[i];     // reset
       indexTupleEnd[i] += indexTupleStart[i]; // shift end by offsets
       skipDim[i] = false;                     // reset
       indexTupleBlockStart[i] = indexTupleBlockEnd[i] = 0;  // reset
+      indexTupleWatchStart[i] = indexTupleWatchEnd[i] = 0;  // reset
     }
     adjust();
   }
@@ -3975,14 +3983,24 @@ int DistGrid::setArbSeqIndex(
     // todo: check that dim is between 0...,size-1
     skipDim[dim] = true;
   }
-  void MultiDimIndexLoop::setBlockStart(const vector<int> blockStart){
+  void MultiDimIndexLoop::setBlockStart(vector<int> const &blockStart){
     // todo: check that size of incoming blockStart vector is equal to rank
     indexTupleBlockStart = blockStart;
     adjust();
   }
-  void MultiDimIndexLoop::setBlockEnd(const vector<int> blockEnd){
+  void MultiDimIndexLoop::setBlockEnd(vector<int> const &blockEnd){
     // todo: check that size of incoming blockStart vector is equal to rank
     indexTupleBlockEnd = blockEnd;
+    adjust();
+  }
+  void MultiDimIndexLoop::setWatchStart(vector<int> const &watchStart){
+    // todo: check that size of incoming watchStart vector is equal to rank
+    indexTupleWatchStart = watchStart;
+    adjust();
+  }
+  void MultiDimIndexLoop::setWatchEnd(vector<int> const &watchEnd){
+    // todo: check that size of incoming watchStart vector is equal to rank
+    indexTupleWatchEnd = watchEnd;
     adjust();
   }
   void MultiDimIndexLoop::first(){
@@ -4010,12 +4028,12 @@ int DistGrid::setArbSeqIndex(
         if ((indexTuple[i] < indexTupleBlockStart[i]) ||
           (indexTuple[i] >= indexTupleBlockEnd[i])){
           skipBlockedRegionFlag = false;  // not within blocked region
-        }     
+        }
       }
       if ((indexTuple[i] < indexTupleBlockStart[i]) ||
         (indexTuple[i] >= indexTupleBlockEnd[i])){
         skipBlockedRegionFlag = false;  // not within blocked region
-      }     
+      }
       if (skipBlockedRegionFlag){
         indexTuple[0] = indexTupleBlockEnd[0];
 //        printf("gjt skip the blocked region\n");     
@@ -4047,13 +4065,29 @@ int DistGrid::setArbSeqIndex(
       return true;
     return false;
   }
-  const int *MultiDimIndexLoop::getIndexTuple(){
+  bool MultiDimIndexLoop::isWithinWatch(){
+    bool withinWatchFlag = true;  // init
+    int i;
+    for (i=0; i<indexTuple.size()-1; i++){
+      if ((indexTuple[i] < indexTupleWatchStart[i]) ||
+        (indexTuple[i] >= indexTupleWatchEnd[i])){
+        withinWatchFlag = false;  // not within watched region
+        break;
+      }
+    }
+    if ((indexTuple[i] < indexTupleWatchStart[i]) ||
+      (indexTuple[i] >= indexTupleWatchEnd[i])){
+      withinWatchFlag = false;  // not within watched region
+    }
+    return withinWatchFlag;
+  }
+  int const *MultiDimIndexLoop::getIndexTuple(){
     return &indexTuple[0];
   }
-  const int *MultiDimIndexLoop::getIndexTupleEnd(){
+  int const *MultiDimIndexLoop::getIndexTupleEnd(){
     return &indexTupleEnd[0];
   }
-  const int *MultiDimIndexLoop::getIndexTupleStart(){
+  int const *MultiDimIndexLoop::getIndexTupleStart(){
     return &indexTupleStart[0];
   }
   //============================================================================

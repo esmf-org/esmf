@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.27 2010/06/16 05:47:40 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.28 2010/06/17 08:03:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -207,13 +207,17 @@ namespace ESMCI {
     vector<bool> skipDim;
     vector<int> indexTupleBlockStart; // blocked region
     vector<int> indexTupleBlockEnd;   // blocked region
+    vector<int> indexTupleWatchStart; // watched region
+    vector<int> indexTupleWatchEnd;   // watched region
    public:
     MultiDimIndexLoop();
-    MultiDimIndexLoop(const vector<int> sizes);
-    MultiDimIndexLoop(const vector<int> offsets, const vector<int> sizes);
+    MultiDimIndexLoop(vector<int> const &sizes);
+    MultiDimIndexLoop(vector<int> const &offsets, vector<int> const &sizes);
     void setSkipDim(int dim);
-    void setBlockStart(const vector<int> blockStart);
-    void setBlockEnd(const vector<int> blockEnd);
+    void setBlockStart(vector<int> const &blockStart);
+    void setBlockEnd(vector<int> const &blockEnd);
+    void setWatchStart(vector<int> const &watchStart);
+    void setWatchEnd(vector<int> const &watchEnd);
     void first();
     void last();
     void adjust();
@@ -221,9 +225,10 @@ namespace ESMCI {
     bool isFirst();
     bool isLast();
     bool isWithin();
-    const int *getIndexTuple();
-    const int *getIndexTupleEnd();
-    const int *getIndexTupleStart();
+    bool isWithinWatch();
+    int const *getIndexTuple();
+    int const *getIndexTupleEnd();
+    int const *getIndexTupleStart();
   };  // class MultiDimIndexLoop
   //============================================================================
 
