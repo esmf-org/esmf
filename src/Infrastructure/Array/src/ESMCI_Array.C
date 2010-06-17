@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.109 2010/06/17 05:54:55 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.110 2010/06/17 08:07:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.109 2010/06/17 05:54:55 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.110 2010/06/17 08:07:08 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2478,20 +2478,19 @@ int Array::constructPioDof(
         return rc;
       }
       // fill pioDofList
-      //TODO: Make the following more efficient by not calling
-      //TODO: getSequenceIndexExclusive() for elements that are outside the
-      //TODO: exclusive region. Just set those elements to 0 in the pioDofList.
-      //TODO: Further, obtain the seqIndex list from DistGrid for all the
-      //TODO: exclusive elements once, and then copy from that list into 
-      //TODO: pioDofList for each exclusive element.
+      //TODO: Make the following more efficient by obtaining the seqIndex list
+      //TODO: from DistGrid for all the exclusive elements once, and then copy
+      //TODO: from that list into pioDofList for each exclusive element.
       int element = 0;
       while(arrayElement.isWithin()){
-        // obtain seqIndex value
-        SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive(0);
-//printf("arrayElement: %d, ", element); seqIndex.print();
-        pioDofList->array[element] = seqIndex.decompSeqIndex;
-        if (pioDofList->array[element] == -1)
-          pioDofList->array[element] = 0; // translate ESMF to PIO convention
+        if (arrayElement.isWithinWatch()){
+          // within exclusive Array region -> obtain seqIndex value
+          SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive(0);
+          pioDofList->array[element] = seqIndex.decompSeqIndex;
+        }else{
+          // outside exclusive Array region -> mark this as unmapped element
+          pioDofList->array[element] = 0; // PIO convention for unmapped element
+        }
         arrayElement.next();
         ++element;
       }
@@ -9340,6 +9339,8 @@ ArrayElement::ArrayElement(
   skipDim.resize(rank);
   indexTupleBlockStart.resize(rank);
   indexTupleBlockEnd.resize(rank);
+  indexTupleWatchStart.resize(rank);
+  indexTupleWatchEnd.resize(rank);
   
   // initialize tuple variables for iteration through Array elements within
   // exclusive region, with origin of exclusive region at tuple (0,0,..)
@@ -9350,6 +9351,7 @@ ArrayElement::ArrayElement(
     indexTupleStart[i] = indexTuple[i] = 0;   // reset
     skipDim[i] = false;                       // reset
     indexTupleBlockStart[i] = indexTupleBlockEnd[i] = 0;  // reset
+    indexTupleWatchStart[i] = indexTupleWatchEnd[i] = 0;  // reset
     if (array->getArrayToDistGridMap()[i]){
       // decomposed dimension
       indexTupleEnd[i] = array->getExclusiveUBound()[iOff+iPacked]
@@ -9418,6 +9420,8 @@ ArrayElement::ArrayElement(
   skipDim.resize(rank);
   indexTupleBlockStart.resize(rank);
   indexTupleBlockEnd.resize(rank);
+  indexTupleWatchStart.resize(rank);
+  indexTupleWatchEnd.resize(rank);
   
   // initialize tuple variables for iteration through Array elements within
   // total region, with origin of exclusive region at tuple (0,0,..)
@@ -9427,6 +9431,7 @@ ArrayElement::ArrayElement(
   for (int i=0; i<rank; i++){
     skipDim[i] = false;                       // reset
     indexTupleBlockStart[i] = indexTupleBlockEnd[i] = 0;  // reset
+    indexTupleWatchStart[i] = indexTupleWatchEnd[i] = 0;  // reset
     if (array->getArrayToDistGridMap()[i]){
       // decomposed dimension
       indexTupleStart[i] = indexTuple[i] =
@@ -9434,20 +9439,20 @@ ArrayElement::ArrayElement(
         - array->getExclusiveLBound()[iOff+iPacked];
       indexTupleEnd[i] = array->getTotalUBound()[iOff+iPacked]
         - array->getExclusiveLBound()[iOff+iPacked] + 1;
-      if (blockExclusiveFlag)
-        indexTupleBlockEnd[i] = array->getExclusiveUBound()[iOff+iPacked]
-          - array->getExclusiveLBound()[iOff+iPacked] + 1;
+      indexTupleWatchEnd[i] = array->getExclusiveUBound()[iOff+iPacked]
+        - array->getExclusiveLBound()[iOff+iPacked] + 1;
       ++iPacked;
     }else{
       // tensor dimension
       indexTupleStart[i] = indexTuple[i] = 0;
       indexTupleEnd[i] = array->getUndistUBound()[iTensor]
         - array->getUndistLBound()[iTensor] + 1;
-      if (blockExclusiveFlag)
-        indexTupleBlockEnd[i] = array->getUndistUBound()[iTensor]
-          - array->getUndistLBound()[iTensor] + 1;
+      indexTupleWatchEnd[i] = array->getUndistUBound()[iTensor]
+        - array->getUndistLBound()[iTensor] + 1;
       ++iTensor;
-    }   
+    }
+    if (blockExclusiveFlag)
+      indexTupleBlockEnd[i] =  indexTupleWatchEnd[i];
   }
   adjust(); // adjust indexTuple to point to first element not blocked
 }
