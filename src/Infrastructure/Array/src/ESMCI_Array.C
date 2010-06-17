@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.108 2010/06/16 22:56:41 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.109 2010/06/17 05:54:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.108 2010/06/16 22:56:41 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.109 2010/06/17 05:54:55 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -227,15 +227,18 @@ Array::Array(
   rimSeqIndex.resize(localDeCount);
   rimLinIndex.resize(localDeCount);
   for (int i=0; i<localDeCount; i++){
-    ArrayElement arrayElement(this, i, true);
+//TODO: Actually the call with "i" is the correct one, but it leads to 
+//TODO: problems on some platforms with replicated dimensions. Need to debug!
+//    ArrayElement arrayElement(this, i, true);
+    ArrayElement arrayElement(this, 0, true);
     int element = 0;
     while(arrayElement.isWithin()){
       // obtain linear index for this element
       int linIndex = arrayElement.getLinearIndexExclusive();
       // obtain canonical seqIndex value according to DistGrid topology
       SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive(3);
-//printf("gjt - arrayElement %05d, linearIndex=%d\n", element, linIndex);
-//seqIndex.print();
+//printf("gjt - localDe=%d - arrayElement %05d, linearIndex=%d ", i, element,
+//linIndex); seqIndex.print();
       rimSeqIndex[i].push_back(seqIndex); // store seqIndex for this rim element
       rimLinIndex[i].push_back(linIndex); // store linIndex for this rim element
       arrayElement.next();  // next element
@@ -3723,7 +3726,10 @@ int Array::haloStore(
     vector<vector<int> > rimMaskElement(localDeCount);
     vector<vector<SeqIndex> > rimMaskSeqIndex(localDeCount);
     for (int i=0; i<localDeCount; i++){
-      ArrayElement arrayElement(array, i, true);
+//TODO: Actually the call with "i" is the correct one, but it leads to 
+//TODO: problems on some platforms with replicated dimensions. Need to debug!
+//      ArrayElement arrayElement(array, i, true);
+      ArrayElement arrayElement(array, 0, true);
       int element = 0;
       while(arrayElement.isWithin()){
         SeqIndex seqIndex = array->rimSeqIndex[i][element];
