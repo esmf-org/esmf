@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2010/06/11 01:37:58 theurich Exp $
+# $Id: makefile,v 1.6 2010/06/21 16:20:52 theurich Exp $
 
 ALL: build_here 
 
@@ -8,7 +8,9 @@ CPPFLAGS += -D_USEBOX
 CPPFLAGS += -DNO_MPI2
 
 ifneq ($(ESMF_COMM),mpiuni)
+ifneq ($(ESMF_COMM),mvapich)
 CPPFLAGS += -DUSEMPIIO
+endif
 endif
 
 ifdef ESMF_NETCDF
