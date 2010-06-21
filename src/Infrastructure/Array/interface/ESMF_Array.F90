@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.115 2010/06/16 22:58:00 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.116 2010/06/21 18:52:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -108,7 +108,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.115 2010/06/16 22:58:00 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.116 2010/06/21 18:52:51 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1203,6 +1203,8 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc            ! local return code
+    type(ESMF_DELayout)     :: delayout
+    integer                 :: localDeCount
     integer                 :: localDeArg         ! helper variable
     type(ESMF_InterfaceInt) :: pioDofListArg      ! helper variable
 
@@ -1213,9 +1215,24 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
     
-    ! Deal with optional arguments
-    localDeArg = 0  ! default
-    if (present(localDe)) localDeArg = localDe
+    ! Deal with optional localDe argument
+    if (present(localDe)) then
+      localDeArg = localDe
+    else
+      call ESMF_ArrayGet(array, delayout=delayout, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (localDeCount == 1) then
+        localDeArg = 0 ! default
+      else
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_OPT, &
+          "- must provide optional localDe argument for localDeCount > 1", &
+          ESMF_CONTEXT, rc)
+      endif
+    endif
     
     ! Deal with (optional) array arguments
     pioDofListArg = ESMF_InterfaceIntCreate(pioDofList, rc=localrc)
