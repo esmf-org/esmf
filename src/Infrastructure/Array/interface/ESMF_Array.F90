@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.116 2010/06/21 18:52:51 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.117 2010/06/22 16:43:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -93,13 +93,13 @@ module ESMF_ArrayMod
   public ESMF_ArrayValidate
   
 ! - ESMF-internal methods:
-  public ESMF_ArrayConstructPioDof
   public ESMF_ArrayGetInit          ! implemented in ESMF_ArrayCreateMod
   public ESMF_ArraySetInitCreated   ! implemented in ESMF_ArrayCreateMod
   public ESMF_ArrayGetThis          ! implemented in ESMF_ArrayCreateMod
   public ESMF_ArraySetThis          ! implemented in ESMF_ArrayCreateMod
   public ESMF_ArraySetThisNull      ! implemented in ESMF_ArrayCreateMod
   public ESMF_ArrayCopyThis         ! implemented in ESMF_ArrayCreateMod
+  public ESMF_ArrayConstructPioDof  ! implemented in ESMF_ArrayGetMod
 
 
 !EOPI
@@ -108,7 +108,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.116 2010/06/21 18:52:51 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.117 2010/06/22 16:43:47 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1161,99 +1161,6 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_ArrayValidate
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-internal method -----------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayConstructPioDof()"
-!BOPI
-! !IROUTINE: ESMF_ArrayConstructPioDof - Construct PIO DOF list for localDe
-
-! !INTERFACE:
-  subroutine ESMF_ArrayConstructPioDof(array, localDe, pioDofList, &
-    pioDofCount, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array),       intent(in)            :: array
-    integer,                intent(in),  optional :: localDe
-    integer,        target, intent(out), optional :: pioDofList(:)
-    integer,                intent(out), optional :: pioDofCount
-    integer,                intent(out), optional :: rc
-!         
-!
-! !DESCRIPTION:
-!   Construct PIO DOF list from Array for localDe.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[array]
-!     {\tt ESMF\_Array} object.
-!   \item[{[localDe]}]
-!     Local DE for which information is requested. {\tt [0,..,localDeCount-1]}.
-!     Default is localDe 0.
-!   \item[{[pioDofList]}]
-!     List that holds PIO DOF entries on return.
-!   \item[{[pioDofCount]}]
-!     Number of elements in {\tt pioDofList}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer                 :: localrc            ! local return code
-    type(ESMF_DELayout)     :: delayout
-    integer                 :: localDeCount
-    integer                 :: localDeArg         ! helper variable
-    type(ESMF_InterfaceInt) :: pioDofListArg      ! helper variable
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
-    
-    ! Deal with optional localDe argument
-    if (present(localDe)) then
-      localDeArg = localDe
-    else
-      call ESMF_ArrayGet(array, delayout=delayout, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if (localDeCount == 1) then
-        localDeArg = 0 ! default
-      else
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_OPT, &
-          "- must provide optional localDe argument for localDeCount > 1", &
-          ESMF_CONTEXT, rc)
-      endif
-    endif
-    
-    ! Deal with (optional) array arguments
-    pioDofListArg = ESMF_InterfaceIntCreate(pioDofList, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayConstructPioDof(array, localDeArg, pioDofListArg, &
-      pioDofCount, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-      
-    ! garbage collection
-    call ESMF_InterfaceIntDestroy(pioDofListArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_ArrayConstructPioDof
 !------------------------------------------------------------------------------
 
 
