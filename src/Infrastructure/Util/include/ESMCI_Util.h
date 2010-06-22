@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.27 2010/06/16 18:10:42 w6ws Exp $
+// $Id: ESMCI_Util.h,v 1.28 2010/06/22 23:00:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -23,6 +23,8 @@
  // include files.
 
 #include <stdio.h>
+#include <map>
+#include <string>
 
 #include "ESMC_Start.h"
 
@@ -220,6 +222,12 @@ extern ESMC_ObjectID ESMC_ID_GRIDCOMPONENT;
 extern ESMC_ObjectID ESMC_ID_CPLCOMPONENT;
 extern ESMC_ObjectID ESMC_ID_COMPONENT;
 extern ESMC_ObjectID ESMC_ID_NONE;
+
+
+// MapName container type for name/int pairs
+typedef struct {
+  std::map<std::string, int> table;
+} MapName;
 
 
 #endif  // ESMCI_UTIL_H

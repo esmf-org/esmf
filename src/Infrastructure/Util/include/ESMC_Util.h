@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.34 2010/06/16 18:12:11 w6ws Exp $
+// $Id: ESMC_Util.h,v 1.35 2010/06/22 23:00:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -19,9 +19,6 @@
 
 #ifndef ESMC_UTIL_H
 #define ESMC_UTIL_H
-
-#include <map>
-#include <string>
 
 #include "ESMC_Conf.h"
 
@@ -65,10 +62,5 @@ enum ESMC_TypeKind { ESMC_TYPEKIND_I1=1,
   typedef float     ESMC_R4;
   typedef unsigned long long ESMC_POINTER;
 #endif
-
-// MapName container type for name/int pairs
-typedef struct {
-  std::map<std::string, int> table;
-} MapName;
 
 #endif  // ESMC_UTIL_H
