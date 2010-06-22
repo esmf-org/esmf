@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.44 2010/06/22 21:05:22 samsoncheung Exp $ 
+# $Id: makefile,v 1.45 2010/06/22 22:31:49 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -20,7 +20,6 @@ TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayDataUTest  \
                 RUN_ESMF_ArrayScatterUTest \
                 RUN_ESMF_ArrayGatherUTest \
-                RUN_ESMF_ArrayIOUTest \
                 RUN_ESMF_ArrayArbIdxSMMUTest \
                 RUN_ESMF_ArrayRedistUTest \
                 RUN_ESMF_ArrayHaloUTest \
@@ -66,8 +65,14 @@ RUN_ESMF_ArrayDataUTestUNI:
 
 RUN_ESMF_ArrayScatterUTest:
 	$(MAKE) TNAME=ArrayScatter NP=4 ftest
+
+# ---
+
 RUN_ESMF_ArrayGatherUTest:
 	$(MAKE) TNAME=ArrayGather NP=4 ftest
+
+# ---
+
 RUN_ESMF_ArrayIOUTest:
 	$(MAKE) TNAME=ArrayIO NP=6 ftest
 
