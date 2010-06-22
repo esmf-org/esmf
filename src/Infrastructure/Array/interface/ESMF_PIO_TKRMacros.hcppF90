@@ -1,0 +1,207 @@
+#if 0
+! $Id: ESMF_PIO_TKRMacros.hcppF90,v 1.1 2010/06/22 21:03:11 samsoncheung Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2010, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+!
+#endif
+#if 0
+!------------------------------------------------------------------------------
+! Macros for any functions which must be overloaded T/K/R (type/kind/rank).
+! Internal macros used only by ESMF source code.  NOT intended for Public Use.
+!
+! Currently defined for ranks 1 to 7, types integer (kind *1,2,4,8) and
+! real (kind *4,8).  ranks, types, kinds can be added or removed and the
+! macros regenerated.
+!
+! The structure of this file and these macros are compatible with the gcc
+! preprocessor - they assume the use of ## as a paste operator, require that
+! no additional spaces be added (e.g. no pre-tokenization as done by some
+! preprocessors which assume C syntax), assume an option exists to suppress
+! C-specific syntax directives such as #line or #pragma, and that an option
+! exists to produce output on stdout and not into a file.  The output of
+! the preprocessor phase is a valid .F90 file ready to be compiled by the
+! standard fortran compiler.  (gcc is *not* used for compilation.)
+!
+! The macros are intended to be written with @\ at the end of each line of
+! a multiline macro, and the output piped thru 'tr' to translate each
+! @ into <cr> to produce multiple lines of fortran code from a single
+! macro invocation.   If any preprocessor directives are to be left in the
+! output file (e.g. #include ""), the source should use ^directive (e.g.
+! ^include "header.h" ) again using 'tr' to substitute # for ^ after
+! preprocessing is completed.  
+!------------------------------------------------------------------------------
+#endif
+
+#if 0
+!------------------------------------------------------------------------------
+! Predefined macros for use as arguments to other macros.
+! These are defined outside the source file because they contain a 
+! variable number of commas, and so the contents could not be given 
+! literally as a single macro argument.  However, these symbols can 
+! be used as macro arguments, and after initial substitution they 
+! are rescanned by the preprocessor and expanded safely.
+!
+! col are colons per dim, used for declarations: dimension(:,:)
+! len are sizes per dim, used for passing into other functions
+! rng are lower and upper bounds of indices: allocate(ptr(lb:ub))
+! lb is used alone to reference the first element of an array: ptr(lb)
+!------------------------------------------------------------------------------
+#endif
+
+#define COL1 :
+#define COL2 :,:
+#define COL3 :,:,:
+#define COL4 :,:,:,:
+#define COL5 :,:,:,:,:
+
+#define LEN1 counts(1)
+#define LEN2 counts(1),counts(2)
+#define LEN3 counts(1),counts(2),counts(3)
+#define LEN4 counts(1),counts(2),counts(3),counts(4)
+#define LEN5 counts(1),counts(2),counts(3),counts(4),counts(5)
+
+#define RNG1 lb(1):ub(1)
+#define RNG2 lb(1):ub(1),lb(2):ub(2)
+#define RNG3 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3)
+#define RNG4 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4)
+#define RNG5 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5)
+
+#define LOC1 lb(1)
+#define LOC2 lb(1),lb(2)
+#define LOC3 lb(1),lb(2),lb(3)
+#define LOC4 lb(1),lb(2),lb(3),lb(4)
+#define LOC5 lb(1),lb(2),lb(3),lb(4),lb(5)
+
+
+#if 0
+!------------------------------------------------------------------------------
+! Expand a string into each of the T/K/R procedure interface blocks.
+! Expected use:
+!
+! interface fred
+!  TypeKindRankInterfaceMacro(fred)
+!  module procedure other_explicit_non_TKR_interfaces_to_overload
+! end interface
+!
+!------------------------------------------------------------------------------
+#endif
+
+#define TypeKindRankInterfaceMacro(funcname) \
+!------------------------------------------------------------------------------ @\
+! <This section created by macro - do not edit directly> @\
+    module procedure ESMF_##funcname##1DI4 @\
+    module procedure ESMF_##funcname##1DR4 @\
+    module procedure ESMF_##funcname##2DI4 @\
+    module procedure ESMF_##funcname##2DR4 @\
+    module procedure ESMF_##funcname##2DR8 @\
+    module procedure ESMF_##funcname##3DI4 @\
+    module procedure ESMF_##funcname##3DR4 @\
+    module procedure ESMF_##funcname##3DR8 @\
+    module procedure ESMF_##funcname##4DI4 @\
+    module procedure ESMF_##funcname##4DR4 @\
+    module procedure ESMF_##funcname##4DR8 @\
+^ifndef ESMF_NO_GREATER_THAN_4D @\
+    module procedure ESMF_##funcname##5DI4 @\
+    module procedure ESMF_##funcname##5DR4 @\
+    module procedure ESMF_##funcname##5DR8 @\
+^endif @\
+! < end macro - do not edit directly >  @\
+!------------------------------------------------------------------------------ @\
+
+#if 0
+!------------------------------------------------------------------------------
+! Expand a string into each of the T/K/R procedures.  Assumes one macro
+! which contains only the general protex documentation, and the rest do NOT
+! contain protex.  Expected use:
+!
+!  TypeKindRankDeclarationMacro(fred)
+!
+! where the following other macros are defined elsewhere by the user:
+!  #define fredDoc() ...
+! which contains generic protex documentation only, no code, plus:
+!  #define fredMacro(name, typekind, rank, col, len, rng, loc) ...
+! which contains the actual code for the function, with no protex documentation.
+!------------------------------------------------------------------------------
+#endif
+
+#define TypeKindRankDeclarationMacro(funcname) \
+!------------------------------------------------------------------------------ @\
+! <This section created by macro - do not edit directly> @\
+ @\
+!! < start of macros which become actual subroutine bodies after expansion > @\
+ @\
+funcname##Doc() @\
+funcname##Macro(integer, i4, 1, COL1, LEN1, RNG1, LOC1) @\
+funcname##Macro(real,    r4, 1, COL1, LEN1, RNG1, LOC1) @\
+funcname##Macro(real,    r8, 1, COL1, LEN1, RNG1, LOC1) @\
+funcname##Macro(integer, i4, 2, COL2, LEN2, RNG2, LOC2) @\
+funcname##Macro(real,    r4, 2, COL2, LEN2, RNG2, LOC2) @\
+funcname##Macro(real,    r8, 2, COL2, LEN2, RNG2, LOC2) @\
+funcname##Macro(integer, i4, 3, COL3, LEN3, RNG3, LOC3) @\
+funcname##Macro(real,    r4, 3, COL3, LEN3, RNG3, LOC3) @\
+funcname##Macro(real,    r8, 3, COL3, LEN3, RNG3, LOC3) @\
+funcname##Macro(integer, i4, 4, COL4, LEN4, RNG4, LOC4) @\
+funcname##Macro(real,    r4, 4, COL4, LEN4, RNG4, LOC4) @\
+funcname##Macro(real,    r8, 4, COL4, LEN4, RNG4, LOC4) @\
+^ifndef ESMF_NO_GREATER_THAN_4D @\
+funcname##Macro(integer, i4, 5, COL5, LEN5, RNG5, LOC5) @\
+funcname##Macro(real,    r4, 5, COL5, LEN5, RNG5, LOC5) @\
+funcname##Macro(real,    r8, 5, COL5, LEN5, RNG5, LOC5) @\
+^endif @\
+ @\
+! < end macro - do not edit directly >  @\
+!------------------------------------------------------------------------------ @\
+
+
+#if 0
+!------------------------------------------------------------------------------
+! Expand generic code for each of the T/K/R procedures.
+! Expected use:
+!
+!   AllTypesMacro(fred)
+!
+! where the following macro is defined elsewhere by the user:
+!  #define fredMacro(name, typekind, rank, col) ...
+! Expected use is to invoke an instance of code for each type, e.g. for
+!  local variable declarations:
+!  type (fred##rank##typekind) :: localvar##rank##typekind(col)
+!------------------------------------------------------------------------------
+#endif
+
+#define AllTypesMacro(fname) \
+ @\
+      fname##Macro(integer, I4, 1, COL1) @\
+      fname##Macro(real,    R4, 1, COL1) @\
+      fname##Macro(real,    R8, 1, COL1) @\
+ @\
+      fname##Macro(integer, I4, 2, COL2) @\
+      fname##Macro(real,    R4, 2, COL2) @\
+      fname##Macro(real,    R8, 2, COL2) @\
+ @\
+      fname##Macro(integer, I4, 3, COL3) @\
+      fname##Macro(real,    R4, 3, COL3) @\
+      fname##Macro(real,    R8, 3, COL3) @\
+ @\
+      fname##Macro(integer, I4, 4, COL4) @\
+      fname##Macro(real,    R4, 4, COL4) @\
+      fname##Macro(real,    R8, 4, COL4) @\
+ @\
+^ifndef ESMF_NO_GREATER_THAN_4D @\
+ @\
+      fname##Macro(integer, I4, 5, COL5) @\
+      fname##Macro(real,    R4, 5, COL5) @\
+      fname##Macro(real,    R8, 5, COL5) @\
+ @\
+^endif @\
+ @\
+! < end macro - do not edit directly >  @\
+ @\
+
