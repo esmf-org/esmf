@@ -1,0 +1,599 @@
+! $Id: ESMF_ArrayIO.cppF90,v 1.1 2010/06/22 21:02:08 samsoncheung Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2010, University Corporation for Atmospheric Research, 
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+! Laboratory, University of Michigan, National Centers for Environmental 
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+^define ESMF_FILENAME "ESMF_ArrayIO.F90"
+!==============================================================================
+!
+! ESMF ArrayIO module
+module ESMF_ArrayIOMod
+!
+!==============================================================================
+!
+! This file contains the ArrayWrite() and ArrayRead() methods.
+!
+!------------------------------------------------------------------------------
+! INCLUDES
+! < ignore blank lines below.  they are created by the files which
+!   define various macros. >
+^include "ESMF.h"
+#include "ESMF_PIO_TKRMacros.hcppF90"
+
+!------------------------------------------------------------------------------
+!BOPI
+! !MODULE: ESMF_ArrayIOMod - Provide TKR overloading for ESMF_ArrayWrite()
+!                            and ESMF_ArrayRead()
+!
+! !DESCRIPTION:
+!
+! The code in this file is part of the {\tt ESMF\_Array} class Fortran API.
+!
+!
+!------------------------------------------------------------------------------
+! !USES:
+  use ESMF_UtilTypesMod ! ESMF utility types
+  use ESMF_InitMacrosMod ! ESMF initializer macros
+  use ESMF_BaseMod ! ESMF base class
+  use ESMF_LogErrMod ! ESMF error handling
+  use ESMF_LocalArrayMod
+  use ESMF_ArraySpecMod
+  use ESMF_VMMod
+  use ESMF_DELayoutMod
+  use ESMF_DistGridMod
+  use ESMF_RHandleMod
+  use ESMF_F90InterfaceMod ! ESMF Fortran-C++ interface helper
+  ! class sub modules
+  use ESMF_ArrayCreateMod ! contains the ESMF_Array derived type definition
+  use ESMF_ArrayGetMod
+  use pio
+  use pio_support, only : piodie ! _EXTERNAL
+  implicit none
+
+  include 'mpif.h'    ! _EXTERNAL
+
+!------------------------------------------------------------------------------
+! !PRIVATE TYPES:
+  private
+
+!------------------------------------------------------------------------------
+!
+! !PUBLIC MEMBER FUNCTIONS:
+
+! - ESMF-public methods:
+  public ESMF_ArrayWrite
+  public ESMF_ArrayRead
+
+!EOPI
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+  character(*), parameter, private :: version = &
+    '$Id: ESMF_ArrayIO.cppF90,v 1.1 2010/06/22 21:02:08 samsoncheung Exp $'
+
+!==============================================================================
+! 
+! INTERFACE BLOCKS
+!
+!==============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_ArrayWrite -- Generic interface
+
+! !INTERFACE:
+  interface ESMF_ArrayWrite
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    TypeKindRankInterfaceMacro(ArrayWrite)
+  end interface
+
+  interface ESMF_ArrayRead
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    TypeKindRankInterfaceMacro(ArrayRead)
+  end interface
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_ArrayIO} functions.
+!EOPI 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine check_pioerr(ierr, localPet, file, line, str1, str2)
+
+    implicit none
+    integer,intent(in) :: ierr
+    integer,intent(in) :: localPet
+    character(len=*),intent(in) :: file
+    integer,intent(in) :: line
+    character(len=*),optional,intent(in) :: str1
+    character(len=*),optional,intent(in) :: str2
+
+    character(len=256) lstr1
+    character(len=256) lstr2
+    character(len=*),parameter :: myname_='check_pioerr'
+
+    lstr1 = ''
+    if (present(str1)) then
+       lstr1 = trim(str1)
+    endif
+    lstr2 = trim(lstr1)
+    if (present(str2)) then
+       lstr2 = trim(str2)
+    endif
+
+    if(ierr /= PIO_noerr) then
+       write(*,*) trim(myname_),':: ERROR on my_task=',localPet,' ierr=',ierr,'  ',trim(lstr1)
+       call piodie(file,line,trim(lstr2))
+    endif
+
+  end subroutine check_pioerr
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      subroutine WriteHeader(File,nxyz,dimid_xyz,spacedim)
+      use pio
+      implicit none
+
+      type (File_desc_t), intent(inout) :: File
+      integer, intent(in) :: spacedim
+      integer, intent(in) :: nxyz(spacedim)
+      integer, intent(out) :: dimid_xyz(spacedim)
+
+      character(len=80) :: text
+      character(len=3) :: cdim
+      integer :: itmp,iostat,i
+
+      iostat = PIO_put_att(File,pio_global,'title','ESMF_Array')
+      if(iostat /= pio_noerr) then
+         write(*,*) 'testPIO:  Error writing TITLE to netCDF file'
+      endif
+
+      iostat = PIO_put_att(File,pio_global,'ivalue', 4)
+      if(iostat /= pio_noerr) then
+         write(*,*) 'testPIO:  Error writing iVALUE to netCDF file'
+      endif
+
+      text = 'Dimension'
+      do i = 1,spacedim
+        write(cdim,'(i3.3)') i
+        text(10:12) = cdim
+        iostat = PIO_def_dim(File,trim(text),nxyz(i),dimid_xyz(i))
+        if(iostat /= pio_noerr) then
+          write(*,*) 'testPIO:  Error defining dimension',i,' for netCDF file'
+        endif
+      enddo
+
+      end subroutine WriteHeader
+
+
+!===============================================================================
+! ArrayWrite() and ArrayRead() interfaces
+!===============================================================================
+
+
+#define ArrayWriteDoc() \
+! -------------------------- ESMF-public method ----------------------------- @\
+!BOP @\
+! @\
+! !IROUTINE: ESMF_ArrayWrite - Write an ESMF_Array via PIO @\
+! @\
+! !INTERFACE: @\
+! subroutine ESMF_ArrayWrite<rank><type><kind>(array, farraywr, dimC, gDimsIndex, fname, rc) @\
+! @\
+! !ARGUMENTS: @\
+!   type(ESMF_Array),           intent(inout)           :: array @\
+!   mtype (ESMF_KIND_##mtypekind),pointer,dimension(mdim)  :: farraywr @\
+!   integer,                    intent(in)              :: dimC @\
+!   integer,                    intent(in)              :: gDimsIndex(dimC) @\
+!   character(*),               intent(in),   optional  :: fname @\
+!   integer,                    intent(out),  optional  :: rc @\
+! @\
+! @\
+! !DESCRIPTION: @\
+!   Write an {ESMF\_Array} object via PIO Library @\
+! @\
+!   Limitation:  @\
+!   (1) Currently only netCDF is supported @\
+!   (2) Assume 1 DE per Pet @\
+! @\
+!   The arguments are: @\
+!   \begin{description} @\
+!   \item[array] @\
+!     The {\tt ESMF\_Array} object from which data will be gathered. @\
+!   \item[farraywr] @\
+!     The Fortran array where data are stored. @\
+!   \item[dimC] @\
+!     The global dimension count, same as dimCount @\
+!   \item[gDimsIndex] @\
+!     The global dimension, gDimsIndex(dimC) @\
+!   \item[{[fname]}] @\
+!     Optional output file name @\
+!   \item[{[rc]}] @\
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!   \end{description} @\
+! @\
+!EOP @\
+!---------------------------------------------------------------------------- @\
+
+#define ArrayWriteMacro(mtype, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+! -------------------------- ESMF-public method ----------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_ArrayWrite" @\
+  subroutine ESMF_ArrayWrite##mrank##D##mtypekind(array, farraywr, dimC, gDimsIndex, fname, rc) @\
+@\
+    type(ESMF_Array),           intent(inout)           :: array @\
+    mtype (ESMF_KIND_##mtypekind),pointer,dimension(mdim)  :: farraywr @\
+    integer,                    intent(in)              :: dimC @\
+    integer,                    intent(in)              :: gDimsIndex(dimC) @\
+    character(*),               intent(in),   optional  :: fname @\
+    integer,                    intent(out),  optional  :: rc @\
+@\
+    ! ESMF VARIABLES @\
+    type(ESMF_VM)       :: vm_opt @\
+    type(ESMF_TypeKind) :: typekind @\
+    integer :: dimid_xyz(dimC) @\
+    integer :: pioDofCount @\
+    integer, allocatable :: pioDofList(:) @\
+    integer :: petCount,localPet,mpic @\
+@\
+    ! PIO VARIABLES: @\
+    type (iosystem_desc_t) :: PIOSYS @\
+    type (File_desc_t)  :: File @\
+    type(var_desc_t) :: vard @\
+    type (IO_desc_t)    :: IOdesc @\
+    integer :: mode, num_aggregator, basepiotype @\
+    integer :: stride, base, num_iotasks, rearr_type @\
+    integer(kind=PIO_OFFSET) :: one @\
+@\
+    ! OTHER VARIABLES: @\
+    integer                       :: localrc        ! local return code @\
+    real (ESMF_KIND_r8) :: st,et,dt_write  ! start/end times for timing @\
+    character(len=80) :: local_fname     ! file name @\
+    character(len=10) :: varname         ! variable name @\
+@\
+    ! Initialize return code @\
+    localrc = ESMF_RC_NOT_IMPL @\
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+@\
+    ! Check init status of arguments @\
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc) @\
+@\
+    ! Obtain localPet @\
+    call ESMF_VMGetCurrent(vm_opt, rc=localrc) @\
+    call ESMF_VMGet(vm_opt, mpiCommunicator=mpic, localPet=localPet, petCount=petCount, rc=localrc) @\
+@\
+    !-------------------------------- @\
+    ! Obatin the DOF from  (pioDofList) @\
+    !-------------------------------- @\
+    call ESMF_ArrayConstructPioDof(array, localDe=0, pioDofCount=pioDofCount, rc=rc) @\
+    allocate(pioDofList(pioDofCount)) @\
+    ! debug write(10+localPet,*) "pioDofCount=",pioDofCount  @\
+    call ESMF_ArrayConstructPioDof(array, localDe=0, pioDofList=pioDofList, rc=rc) @\
+    ! debug write(10+localPet,*) "pioDofList=" @\
+    ! debug write(10+localPet,*) pioDofList @\
+    ! debug write(10+localPet,*) " " @\
+@\
+    !-------------------------------- @\
+    ! Get array typekind from ESMF array @\
+    !-------------------------------- @\
+    call ESMF_ArrayGet(array, typekind=typekind, rc=localrc) @\
+    !debug write(10+localPet,*)'farraywr', farraywr @\
+    !debug write(10+localPet,*)'gDimsIndex', gDimsIndex @\
+    !debug write(10+localPet,*)'' @\
+    !debug write(10+localPet,*)' ================== ' @\
+    !debug write(10+localPet,*)'' @\
+@\
+    !-------------------------------------- @\
+    ! parallel IO subsystem input @\
+    !-------------------------------------- @\
+    num_iotasks    = petCount    ! Same as Compute nodes. @\
+    num_aggregator = 1    ! For MPI-IO @\
+    stride         = 1    ! IO stride @\
+    base           = 0    ! the CPU (myID) associated with striding @\
+                          ! non-zero, will off load the master @\
+    rearr_type     = 2    ! no rearrangement=0 (use box[2] they said) @\
+@\
+    !-------------------------------------- @\
+    ! Initalizes the parallel IO subsystem @\
+    !-------------------------------------- @\
+    call PIO_init(localPet, mpic, num_iotasks, num_aggregator, stride, & @\
+         rearr_type, PIOSYS, base) @\
+@\
+    !------------------------------------------------------- @\
+    ! Explain the distributed array decomposition to PIOlib @\
+    !------------------------------------------------------- @\
+    select case(typekind%dkind) @\
+    case(ESMF_TYPEKIND_R4%dkind) @\
+       basepiotype = PIO_real @\
+       local_fname(12:18) = "real.nc" @\
+    case(ESMF_TYPEKIND_R8%dkind) @\
+       basepiotype = PIO_double @\
+       local_fname(12:20) = "double.nc" @\
+    case(ESMF_TYPEKIND_I4%dkind) @\
+       basepiotype = PIO_int @\
+       local_fname(12:17) = "int.nc" @\
+    case default @\
+       write(*,*)"ESMF_TYPEKIND=",typekind, " is not supported" @\
+       write(*,*)"Stopping the program" @\
+       stop @\
+    end select @\
+    call PIO_initDecomp(PIOSYS,basepiotype, gDimsIndex,pioDofList,IOdesc) @\
+@\
+    !------------ @\
+    ! Open file{s} @\
+    !------------ @\
+    if (present(fname)) then @\
+      local_fname = fname @\
+    else @\
+      local_fname(1:11) = "ESMF_Array_" @\
+    endif @\
+    mode = pio_64bit_offset @\
+    localrc = PIO_CreateFile(PIOSYS,File,iotype_netcdf,trim(local_fname), mode) @\
+@\
+    ! Set Frame to '1' in the PIO descriptor file @\
+    one = 1 @\
+    call PIO_SetFrame(vard,one) @\
+@\
+    !----------------------------------- @\
+    ! for the single record real*8 file @\
+    !----------------------------------- @\
+    call WriteHeader(File,gDimsIndex,dimid_xyz,dimC) @\
+    ! Output are dimid_x,dimid_y,dimid_z @\
+@\
+    localrc = 1 @\
+    write(varname,'(a,i5.5)') 'field',localrc @\
+    rc = PIO_def_var(File,varname,basepiotype,  &  @\
+             dimid_xyz,vard) @\
+    call check_pioerr(rc,localPet,__FILE__,__LINE__,' defvar') @\
+    rc = PIO_enddef(File) @\
+@\
+    !------------------------- @\
+    ! Time the parallel write @\
+    !------------------------- @\
+    dt_write = 0. @\
+    call MPI_Barrier(mpic,rc) @\
+    st = MPI_Wtime() @\
+    call PIO_write_darray(File,vard, IOdesc, farraywr, localrc) @\
+    call check_pioerr(rc,localPet,__FILE__,__LINE__,' write_darray') @\
+    et = MPI_Wtime() @\
+@\
+    call PIO_CloseFile(File) @\
+    call MPI_Barrier(mpic,localrc) @\
+    dt_write = dt_write + (et - st) @\
+!@\
+!!!!!!!!!!!!!!!!!!!!!!!!!!! @\
+@\
+    ! Maximum read/write times @\
+    if(localPet.eq.0) write(*,*) "Time for write:", dt_write @\
+@\
+    call pio_freedecomp(PIOSYS, IOdesc) @\
+    call pio_finalize (PIOSYS, rc) @\
+    deallocate (pioDofList) @\
+@\
+    ! Return successfully @\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+@\
+  end subroutine ESMF_ArrayWrite##mrank##D##mtypekind @\
+!---------------------------------------------------------------------------- @\
+
+
+
+
+#define ArrayReadDoc() \
+! -------------------------- ESMF-public method ----------------------------- @\
+!BOP @\
+! @\
+! !IROUTINE: ESMF_ArrayRead - Read an ESMF_Array via PIO @\
+! @\
+! !INTERFACE: @\
+! subroutine ESMF_ArrayRead<rank><type><kind>(array, farrayrd, dimC, gDimsIndex, fname, rc) @\
+! @\
+! !ARGUMENTS: @\
+!   type(ESMF_Array),           intent(inout)           :: array @\
+!   mtype (ESMF_KIND_##mtypekind),pointer,dimension(mdim)  :: farrayrd @\
+!   integer,                    intent(in)              :: dimC @\
+!   integer,                    intent(in)              :: gDimsIndex(dimC) @\
+!   character(*),               intent(in),   optional  :: fname @\
+!   integer,                    intent(out),  optional  :: rc @\
+! @\
+! @\
+! !DESCRIPTION: @\
+!   Read an {ESMF\_Array} object via PIO Library @\
+! @\
+!   Limitation:  @\
+!   (1) Currently only netCDF is supported @\
+!   (2) Assume 1 DE per Pet @\
+! @\
+!   The arguments are: @\
+!   \begin{description} @\
+!   \item[array] @\
+!     The {\tt ESMF\_Array} object from which data will be gathered. @\
+!   \item[farrayrd] @\
+!     The Fortran array where data are stored. @\
+!   \item[dimC] @\
+!     The global dimension count, same as dimCount @\
+!   \item[gDimsIndex] @\
+!     The global dimension, gDimsIndex(dimC) @\
+!   \item[{[fname]}] @\
+!     Optional output file name @\
+!   \item[{[rc]}] @\
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!   \end{description} @\
+! @\
+!EOP @\
+!---------------------------------------------------------------------------- @\
+
+#define ArrayReadMacro(mtype, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+! -------------------------- ESMF-public method ----------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_ArrayRead" @\
+  subroutine ESMF_ArrayRead##mrank##D##mtypekind(array, farrayrd, dimC, gDimsIndex, fname, rc) @\
+@\
+    type(ESMF_Array),           intent(inout)           :: array @\
+    mtype (ESMF_KIND_##mtypekind),pointer,dimension(mdim)  :: farrayrd @\
+    integer,                    intent(in)              :: dimC @\
+    integer,                    intent(in)              :: gDimsIndex(dimC) @\
+    character(*),               intent(in),   optional  :: fname @\
+    integer,                    intent(out),  optional  :: rc @\
+@\
+    ! ESMF VARIABLES @\
+    type(ESMF_VM)       :: vm_opt @\
+    type(ESMF_TypeKind) :: typekind @\
+    integer :: dimid_xyz(dimC) @\
+    integer :: pioDofCount @\
+    integer, allocatable :: pioDofList(:) @\
+    integer :: petCount,localPet,mpic @\
+@\
+    ! PIO VARIABLES: @\
+    type (iosystem_desc_t) :: PIOSYS @\
+    type (File_desc_t)  :: File @\
+    type(var_desc_t) :: vard @\
+    type (IO_desc_t)    :: IOdesc @\
+    integer :: mode, num_aggregator, basepiotype @\
+    integer :: stride, base, num_iotasks, rearr_type @\
+    integer(kind=PIO_OFFSET) :: one @\
+@\
+    ! OTHER VARIABLES: @\
+    integer                       :: localrc        ! local return code @\
+    real (ESMF_KIND_r8) :: st,et,dt_read  ! start/end times for timing @\
+    character(len=80) :: local_fname     ! file name @\
+    character(len=10) :: varname         ! variable name @\
+@\
+    ! Initialize return code @\
+    localrc = ESMF_RC_NOT_IMPL @\
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+@\
+    ! Check init status of arguments @\
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc) @\
+@\
+    ! Obtain localPet @\
+    call ESMF_VMGetCurrent(vm_opt, rc=localrc) @\
+    call ESMF_VMGet(vm_opt, mpiCommunicator=mpic, localPet=localPet, petCount=petCount, rc=localrc) @\
+@\
+    !-------------------------------- @\
+    ! Obatin the DOF from  (pioDofList) @\
+    !-------------------------------- @\
+    call ESMF_ArrayConstructPioDof(array, localDe=0, pioDofCount=pioDofCount, rc=rc) @\
+    allocate(pioDofList(pioDofCount)) @\
+    ! debug write(10+localPet,*) "pioDofCount=",pioDofCount  @\
+    call ESMF_ArrayConstructPioDof(array, localDe=0, pioDofList=pioDofList, rc=rc) @\
+@\
+@\
+    !-------------------------------- @\
+    ! Get array typekind from ESMF array @\
+    !-------------------------------- @\
+    call ESMF_ArrayGet(array, typekind=typekind, rc=localrc) @\
+@\
+    !-------------------------------------- @\
+    ! parallel IO subsystem input @\
+    !-------------------------------------- @\
+    num_iotasks    = petCount    ! Same as Compute nodes. @\
+    num_aggregator = 1    ! For MPI-IO @\
+    stride         = 1    ! IO stride @\
+    base           = 0    ! the CPU (myID) associated with striding @\
+                          ! non-zero, will off load the master @\
+    rearr_type     = 2    ! no rearrangement=0 (use box[2] they said) @\
+@\
+    !-------------------------------------- @\
+    ! Initalizes the parallel IO subsystem @\
+    !-------------------------------------- @\
+    call PIO_init(localPet, mpic, num_iotasks, num_aggregator, stride, & @\
+         rearr_type, PIOSYS, base) @\
+@\
+    !------------------------------------------------------- @\
+    ! Explain the distributed array decomposition to PIOlib @\
+    !------------------------------------------------------- @\
+    select case(typekind%dkind) @\
+    case(ESMF_TYPEKIND_R4%dkind) @\
+       basepiotype = PIO_real @\
+       local_fname(12:18) = "real.nc" @\
+    case(ESMF_TYPEKIND_R8%dkind) @\
+       basepiotype = PIO_double @\
+       local_fname(12:20) = "double.nc" @\
+    case(ESMF_TYPEKIND_I4%dkind) @\
+       basepiotype = PIO_int @\
+       local_fname(12:17) = "int.nc" @\
+    case default @\
+       write(*,*)"ESMF_TYPEKIND=",typekind, " is not supported" @\
+       write(*,*)"Stopping the program" @\
+       stop @\
+    end select @\
+@\
+    call PIO_initDecomp(PIOSYS,basepiotype, gDimsIndex,pioDofList,IOdesc) @\
+@\
+    !-------------------------------- @\
+    ! Open a file and check data @\
+    !-------------------------------- @\
+    if (present(fname)) then @\
+      local_fname = fname @\
+    else @\
+      local_fname(1:11) = "ESMF_Array_" @\
+    endif @\
+    mode = pio_64bit_offset @\
+    localrc = PIO_OpenFile(PIOSYS,File,iotype_netcdf,local_fname) @\
+    call check_pioerr(rc,localPet,__FILE__,__LINE__,' openfile') @\
+@\
+    ! Set Frame to '1' in the PIO descriptor file @\
+    one = 1 @\
+    rc = PIO_inq_varid(File,'field00001',vard) @\
+    call check_pioerr(rc,localPet,__FILE__,__LINE__,' defvar') @\
+    call PIO_SetFrame(vard,one) @\
+@\
+    !------------------------- @\
+    ! Time the parallel read @\
+    !------------------------- @\
+    dt_read = 0. @\
+    call MPI_Barrier(mpic,rc) @\
+    st = MPI_Wtime() @\
+    call PIO_read_darray(File,vard, IOdesc, farrayrd, localrc) @\
+    call check_pioerr(rc,localPet,__FILE__,__LINE__,' read_darray') @\
+    et = MPI_Wtime() @\
+@\
+    call PIO_CloseFile(File) @\
+    call MPI_Barrier(mpic,localrc) @\
+    dt_read = dt_read + (et - st) @\
+!@\
+!!!!!!!!!!!!!!!!!!!!!!!!!!! @\
+@\
+    ! Maximum read/write times @\
+    if(localPet.eq.0) write(*,*) "Time for read:", dt_read @\
+@\
+    call pio_freedecomp(PIOSYS, IOdesc) @\
+    call pio_finalize (PIOSYS, rc) @\
+    deallocate (pioDofList) @\
+@\
+    ! Return successfully @\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+@\
+  end subroutine ESMF_ArrayRead##mrank##D##mtypekind @\
+
+
+TypeKindRankDeclarationMacro(ArrayWrite)
+TypeKindRankDeclarationMacro(ArrayRead)
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!------------------------------------------------------------------------------
+end module ESMF_ArrayIOMod
+
