@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.1 2010/06/22 21:02:08 samsoncheung Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.2 2010/06/22 22:35:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -52,11 +52,11 @@ module ESMF_ArrayIOMod
   ! class sub modules
   use ESMF_ArrayCreateMod ! contains the ESMF_Array derived type definition
   use ESMF_ArrayGetMod
+^ifdef ESMF_PIO  
   use pio
   use pio_support, only : piodie ! _EXTERNAL
+^endif
   implicit none
-
-  include 'mpif.h'    ! _EXTERNAL
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
@@ -76,7 +76,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.1 2010/06/22 21:02:08 samsoncheung Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.2 2010/06/22 22:35:10 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -126,7 +126,8 @@ contains
     integer,intent(in) :: line
     character(len=*),optional,intent(in) :: str1
     character(len=*),optional,intent(in) :: str2
-
+    
+^ifdef ESMF_PIO  
     character(len=256) lstr1
     character(len=256) lstr2
     character(len=*),parameter :: myname_='check_pioerr'
@@ -144,12 +145,12 @@ contains
        write(*,*) trim(myname_),':: ERROR on my_task=',localPet,' ierr=',ierr,'  ',trim(lstr1)
        call piodie(file,line,trim(lstr2))
     endif
+^endif
 
   end subroutine check_pioerr
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!
       subroutine WriteHeader(File,nxyz,dimid_xyz,spacedim)
-      use pio
       implicit none
 
       type (File_desc_t), intent(inout) :: File
@@ -157,6 +158,7 @@ contains
       integer, intent(in) :: nxyz(spacedim)
       integer, intent(out) :: dimid_xyz(spacedim)
 
+^ifdef ESMF_PIO  
       character(len=80) :: text
       character(len=3) :: cdim
       integer :: itmp,iostat,i
@@ -180,6 +182,11 @@ contains
           write(*,*) 'testPIO:  Error defining dimension',i,' for netCDF file'
         endif
       enddo
+^else
+      do i = 1,spacedim
+        dimid_xyz(i) = -1 ! set to invalid value
+      enddo
+^endif
 
       end subroutine WriteHeader
 
@@ -246,6 +253,7 @@ contains
     character(*),               intent(in),   optional  :: fname @\
     integer,                    intent(out),  optional  :: rc @\
 @\
+^ifdef ESMF_PIO  @\
     ! ESMF VARIABLES @\
     type(ESMF_VM)       :: vm_opt @\
     type(ESMF_TypeKind) :: typekind @\
@@ -369,20 +377,20 @@ contains
     ! Time the parallel write @\
     !------------------------- @\
     dt_write = 0. @\
-    call MPI_Barrier(mpic,rc) @\
-    st = MPI_Wtime() @\
+!    call MPI_Barrier(mpic,rc) @\
+!    st = MPI_Wtime() @\
     call PIO_write_darray(File,vard, IOdesc, farraywr, localrc) @\
     call check_pioerr(rc,localPet,__FILE__,__LINE__,' write_darray') @\
-    et = MPI_Wtime() @\
+!    et = MPI_Wtime() @\
 @\
     call PIO_CloseFile(File) @\
-    call MPI_Barrier(mpic,localrc) @\
-    dt_write = dt_write + (et - st) @\
+!    call MPI_Barrier(mpic,localrc) @\
+!    dt_write = dt_write + (et - st) @\
 !@\
 !!!!!!!!!!!!!!!!!!!!!!!!!!! @\
 @\
     ! Maximum read/write times @\
-    if(localPet.eq.0) write(*,*) "Time for write:", dt_write @\
+!    if(localPet.eq.0) write(*,*) "Time for write:", dt_write @\
 @\
     call pio_freedecomp(PIOSYS, IOdesc) @\
     call pio_finalize (PIOSYS, rc) @\
@@ -390,6 +398,10 @@ contains
 @\
     ! Return successfully @\
     if (present(rc)) rc = ESMF_SUCCESS @\
+^else @\
+    ! Return indicating PIO not present @\
+    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT @\
+^endif @\
 @\
   end subroutine ESMF_ArrayWrite##mrank##D##mtypekind @\
 !---------------------------------------------------------------------------- @\
@@ -454,6 +466,7 @@ contains
     character(*),               intent(in),   optional  :: fname @\
     integer,                    intent(out),  optional  :: rc @\
 @\
+^ifdef ESMF_PIO  @\
     ! ESMF VARIABLES @\
     type(ESMF_VM)       :: vm_opt @\
     type(ESMF_TypeKind) :: typekind @\
@@ -561,20 +574,20 @@ contains
     ! Time the parallel read @\
     !------------------------- @\
     dt_read = 0. @\
-    call MPI_Barrier(mpic,rc) @\
-    st = MPI_Wtime() @\
+!    call MPI_Barrier(mpic,rc) @\
+!    st = MPI_Wtime() @\
     call PIO_read_darray(File,vard, IOdesc, farrayrd, localrc) @\
     call check_pioerr(rc,localPet,__FILE__,__LINE__,' read_darray') @\
-    et = MPI_Wtime() @\
+!    et = MPI_Wtime() @\
 @\
     call PIO_CloseFile(File) @\
-    call MPI_Barrier(mpic,localrc) @\
-    dt_read = dt_read + (et - st) @\
+!    call MPI_Barrier(mpic,localrc) @\
+!    dt_read = dt_read + (et - st) @\
 !@\
 !!!!!!!!!!!!!!!!!!!!!!!!!!! @\
 @\
     ! Maximum read/write times @\
-    if(localPet.eq.0) write(*,*) "Time for read:", dt_read @\
+!    if(localPet.eq.0) write(*,*) "Time for read:", dt_read @\
 @\
     call pio_freedecomp(PIOSYS, IOdesc) @\
     call pio_finalize (PIOSYS, rc) @\
@@ -582,6 +595,10 @@ contains
 @\
     ! Return successfully @\
     if (present(rc)) rc = ESMF_SUCCESS @\
+^else @\
+    ! Return indicating PIO not present @\
+    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT @\
+^endif @\
 @\
   end subroutine ESMF_ArrayRead##mrank##D##mtypekind @\
 
