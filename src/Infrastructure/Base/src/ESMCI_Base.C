@@ -1,4 +1,4 @@
-// $Id: ESMCI_Base.C,v 1.1 2010/06/23 06:35:28 theurich Exp $
+// $Id: ESMCI_Base.C,v 1.2 2010/06/23 07:03:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -7,15 +7,13 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-
+//
+//==============================================================================
 #define ESMF_FILENAME "ESMCI_Base.C"
-
-// ESMC Base method implementation (body) file
-
-// single blank line to make protex happy.
-//BOP
-
-//EOP
+//==============================================================================
+//
+// Base class implementation (body) file
+//
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
@@ -24,19 +22,29 @@
 // in the companion file ESMCI_Base.h
 //
 //-----------------------------------------------------------------------------
-//
- // associated class definition file and others
+
+// single blank line to make protex happy.
+//BOP
+
+//EOP
+
+
+// include associated header file
+#include "ESMCI_Base.h"
+
+// include higher level, 3rd party or system headers
 #include <string.h>
 #include <stdlib.h>
 #include <vector>
-#include "ESMCI_Base.h"
+
+// include ESMF headers
 #include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
 
 //-----------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Base.C,v 1.1 2010/06/23 06:35:28 theurich Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_Base.C,v 1.2 2010/06/23 07:03:24 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

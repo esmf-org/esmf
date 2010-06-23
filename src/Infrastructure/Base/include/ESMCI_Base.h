@@ -1,4 +1,4 @@
-// $Id: ESMCI_Base.h,v 1.1 2010/06/23 05:52:17 theurich Exp $
+// $Id: ESMCI_Base.h,v 1.2 2010/06/23 07:03:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -8,22 +8,17 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
-// ESMF Base C++ declaration include file
-//
-//-----------------------------------------------------------------------------
-//
+//-------------------------------------------------------------------------
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
 
 #ifndef ESMCI_BASE_H
 #define ESMCI_BASE_H
 
-//-----------------------------------------------------------------------------
-
- // Generic constants have been moved to Util.h - the constants in this 
- // file relate directly to the Base class now.
-
-//-----------------------------------------------------------------------------
-
-#include "stdio.h"
+#include <stdio.h>
 
 #include "ESMCI_Util.h"
 class ESMC_Base;
