@@ -1,4 +1,4 @@
-// $Id: ESMCI.h,v 1.33 2010/06/23 09:12:13 theurich Exp $
+// $Id: ESMCI.h,v 1.34 2010/06/23 09:28:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@
 #include "ESMCI_LocalArray.h"
 
 // array, igrid, field, bundle, comms
-#include "ESMC_Grid.h"
+#include "ESMCI_Grid.h"
 
 // components and related items
 #include "ESMCI_State.h"
