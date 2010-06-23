@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.h,v 1.5 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMCI_IO_NetCDF.h,v 1.6 2010/06/23 05:52:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,8 +36,8 @@
 //-------------------------------------------------------------------------
 //
 // !USES:
-#include "ESMC_Base.h"           // inherited Base class
-#include <ESMCI_State.h>
+#include "ESMCI_Base.h"           // inherited Base class
+#include "ESMCI_State.h"
 
 #ifdef ESMF_NETCDF
 #include <netcdfcpp.h>

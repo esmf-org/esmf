@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.112 2010/04/05 21:35:55 w6ws Exp $
+// $Id: ESMCI_Base.h,v 1.1 2010/06/23 05:52:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -13,8 +13,8 @@
 //-----------------------------------------------------------------------------
 //
 
-#ifndef ESMC_BASE_H
-#define ESMC_BASE_H
+#ifndef ESMCI_BASE_H
+#define ESMCI_BASE_H
 
 //-----------------------------------------------------------------------------
 
@@ -135,4 +135,4 @@ class ESMC_Base
 
 };   // end class ESMC_Base
 
-#endif  // ESMC_BASE_H
+#endif  // ESMCI_BASE_H

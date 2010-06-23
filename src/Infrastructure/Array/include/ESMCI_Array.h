@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.49 2010/06/16 22:56:41 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.50 2010/06/23 05:52:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //EOPI
 //-------------------------------------------------------------------------
 
-#include "ESMC_Base.h"      // Base is superclass to Array
+#include "ESMCI_Base.h"       // Base is superclass to Array
 #include "ESMCI_VM.h"
 #include "ESMCI_DELayout.h"
 #include "ESMCI_DistGrid.h"

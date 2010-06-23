@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.80 2010/04/05 21:35:55 w6ws Exp $
+// $Id: ESMCI_Base_F.C,v 1.1 2010/06/23 05:52:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 
 // ESMC Base method interface (from F90 to C++) file
-#define ESMF_FILENAME "ESMC_Base_F.C"
+#define ESMF_FILENAME "ESMCI_Base_F.C"
 
 //-----------------------------------------------------------------------------
 //
@@ -23,13 +23,13 @@
  // associated class definition file and others
 #include <string.h>
 #include <stdlib.h>
-#include "ESMC_Base.h"
-#include "ESMCI_LogErr.h"  // will this work?
+#include "ESMCI_Base.h"
+#include "ESMCI_LogErr.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.80 2010/04/05 21:35:55 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Base_F.C,v 1.1 2010/06/23 05:52:17 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //

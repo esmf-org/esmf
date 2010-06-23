@@ -1,4 +1,4 @@
-// $Id: ESMCI_SAX2ReadHandler.h,v 1.3 2010/04/13 06:00:49 eschwab Exp $
+// $Id: ESMCI_SAX2ReadHandler.h,v 1.4 2010/06/23 05:52:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -52,7 +52,7 @@
  XERCES_CPP_NAMESPACE_USE
 #endif
 
-#include "ESMC_Base.h"
+#include "ESMCI_Base.h"
 
 namespace ESMCI{
 

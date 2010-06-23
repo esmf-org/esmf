@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.h,v 1.13 2010/05/05 21:26:59 oehmke Exp $
+// $Id: ESMCI_LocalArray.h,v 1.14 2010/06/23 05:52:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //EOPI
 //-------------------------------------------------------------------------
 
-#include "ESMC_Base.h"
+#include "ESMCI_Base.h"
 
 //-------------------------------------------------------------------------
 

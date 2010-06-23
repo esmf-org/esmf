@@ -21,7 +21,7 @@
 #include <string.h>                       // for memcpy()
 
 #include "ESMC_Start.h"
-#include "ESMC_Base.h"
+#include "ESMCI_Base.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_DistGrid.h"
 

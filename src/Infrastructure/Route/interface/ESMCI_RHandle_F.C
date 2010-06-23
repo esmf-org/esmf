@@ -1,4 +1,4 @@
-// $Id: ESMCI_RHandle_F.C,v 1.6 2010/04/29 05:25:24 theurich Exp $
+// $Id: ESMCI_RHandle_F.C,v 1.7 2010/06/23 05:52:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -18,7 +18,7 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 #include "ESMC_Start.h"
-#include "ESMC_Base.h"
+#include "ESMCI_Base.h"
 #include "ESMCI_RHandle.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_DELayout.h"

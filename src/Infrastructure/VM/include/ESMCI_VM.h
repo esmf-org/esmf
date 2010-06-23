@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.h,v 1.8 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_VM.h,v 1.9 2010/06/23 05:52:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -53,7 +53,7 @@ typedef struct{
 
 //-------------------------------------------------------------------------
 
-#include "ESMC_Base.h"        // cannot move Base.h before def. of ESMCI::VMId 
+#include "ESMCI_Base.h"        // cannot move Base.h before def. of ESMCI::VMId 
 
 //-------------------------------------------------------------------------
 

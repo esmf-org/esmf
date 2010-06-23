@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.28 2010/06/17 08:03:47 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.29 2010/06/23 05:52:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 
 #include <vector>
 
-#include "ESMC_Base.h"      // Base is superclass to DistGrid
+#include "ESMCI_Base.h"       // Base is superclass to DistGrid
 #include "ESMCI_VM.h"
 #include "ESMCI_DELayout.h"
 
