@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.72 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMC_LogErr.h,v 1.73 2010/06/23 21:52:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -7,9 +7,16 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
+//-----------------------------------------------------------------------------
 
-// ESMC Log include file for C++
+//-----------------------------------------------------------------------------
+// This file is part of the pure C public ESMC API
+//-----------------------------------------------------------------------------
 
+//-------------------------------------------------------------------------
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
 
@@ -17,7 +24,7 @@
 #define ESMC_LOGERR_H
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !CLASS: ESMC_LogErr - Public C interface to the ESMF LogErr class
 //
 // !DESCRIPTION:
@@ -26,11 +33,11 @@
 // all class data and methods.  All methods are defined in the companion file 
 // ESMC\_LogErr.C
 //
-// !USES:
+//EOPI
+//-----------------------------------------------------------------------------
 
 
 #include "ESMF_LogConstants.inc"
-#include "ESMF_ErrReturnCodes.inc"
 
 #ifdef __cplusplus
 extern "C"{
@@ -54,8 +61,5 @@ int ESMC_LogFinalize();
 const char *ESMC_LogGetErrMsg(int rc);
 int ESMC_LogSetFilename(char filename[]);
 void ESMC_TimeStamp(int *y,int* mn,int *d,int *h,int *m,int *s,int *ms);
-
-//EOP
-
 
 #endif  //ESMC_LOGERR_H
