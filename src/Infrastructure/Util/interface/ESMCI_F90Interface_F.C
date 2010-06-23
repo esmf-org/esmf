@@ -1,4 +1,4 @@
-// $Id: ESMC_F90Interface_F.C,v 1.9 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_F90Interface_F.C,v 1.1 2010/06/23 08:32:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMC_F90Interface_F.C"
+#define ESMC_FILENAME "ESMCI_F90Interface_F.C"
 //==============================================================================
 
 #include "ESMCI_F90Interface.h"

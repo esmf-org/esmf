@@ -1,4 +1,4 @@
-// $Id: ESMC_Util_F.C,v 1.16 2010/06/23 06:37:47 theurich Exp $
+// $Id: ESMCI_Util_F.C,v 1.1 2010/06/23 08:32:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -7,9 +7,10 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-
-// ESMC Util method interface (from F90 to C++) file
-#define ESMF_FILENAME "ESMC_Util_F.C"
+//
+//==============================================================================
+#define ESMF_FILENAME "ESMCI_Util_F.C"
+//==============================================================================
 
 //-----------------------------------------------------------------------------
 //
@@ -38,7 +39,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util_F.C,v 1.16 2010/06/23 06:37:47 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_Util_F.C,v 1.1 2010/06/23 08:32:40 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
