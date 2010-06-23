@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.130 2010/04/05 21:35:55 w6ws Exp $
+// $Id: ESMCI_Base.C,v 1.1 2010/06/23 06:35:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -8,7 +8,7 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-#define ESMF_FILENAME "ESMC_Base.C"
+#define ESMF_FILENAME "ESMCI_Base.C"
 
 // ESMC Base method implementation (body) file
 
@@ -21,7 +21,7 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the C++ Base methods declared
-// in the companion file ESMC_Base.h
+// in the companion file ESMCI_Base.h
 //
 //-----------------------------------------------------------------------------
 //
@@ -29,14 +29,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <vector>
-#include "ESMC_Base.h"
+#include "ESMCI_Base.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.130 2010/04/05 21:35:55 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Base.C,v 1.1 2010/06/23 06:35:28 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
