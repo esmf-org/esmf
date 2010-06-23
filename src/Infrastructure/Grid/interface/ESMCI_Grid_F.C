@@ -20,7 +20,7 @@
 
 #include <string.h>                       // for memcpy()
 
-#include "ESMC_Start.h"
+#include "ESMCI_Macros.h"
 #include "ESMCI_DistGrid.h"
 
 #include "ESMCI_Grid.h"

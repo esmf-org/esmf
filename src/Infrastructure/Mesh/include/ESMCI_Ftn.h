@@ -1,4 +1,4 @@
-// $Id: ESMCI_Ftn.h,v 1.5 2010/06/15 23:10:16 rokuingh Exp $
+// $Id: ESMCI_Ftn.h,v 1.6 2010/06/23 23:01:08 theurich Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -14,6 +14,6 @@
 
 // TODO: figure out how to make platform indep.
 
-#include <ESMC_Start.h>
+#include "ESMCI_Macros.h"
 
 #endif

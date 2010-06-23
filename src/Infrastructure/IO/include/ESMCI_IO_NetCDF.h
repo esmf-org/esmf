@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.h,v 1.6 2010/06/23 05:52:17 theurich Exp $
+// $Id: ESMCI_IO_NetCDF.h,v 1.7 2010/06/23 23:01:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@
  // put any constants or macros which apply to the whole component in this file.
  // anything public or esmf-wide should be up higher at the top level
  // include files.
-#include "ESMC_Start.h"
+#include "ESMCI_Macros.h"
 
 //-------------------------------------------------------------------------
 //BOP

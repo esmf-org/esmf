@@ -1,4 +1,4 @@
-// $Id: ESMC_Start.h,v 1.8 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_Macros.h,v 1.1 2010/06/23 23:01:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,

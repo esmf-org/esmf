@@ -1,4 +1,4 @@
-// $Id: ESMCI_F90Interface_F.C,v 1.1 2010/06/23 08:32:40 theurich Exp $
+// $Id: ESMCI_F90Interface_F.C,v 1.2 2010/06/23 23:01:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -13,7 +13,7 @@
 //==============================================================================
 
 #include "ESMCI_F90Interface.h"
-#include "ESMC_Start.h"
+#include "ESMCI_Macros.h"
 
 // the interface subroutine names MUST be in lower case by ESMF convention
 

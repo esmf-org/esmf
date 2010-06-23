@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.30 2010/06/23 22:46:38 theurich Exp $ 
+# $Id: makefile,v 1.31 2010/06/23 23:01:10 theurich Exp $ 
 
 ALL: build_here
 
@@ -13,7 +13,7 @@ SOURCEF	  = ESMF_UtilTypes.F90 \
             
 STOREH    = ESMC_Arg.h ESMCI_Arg.h ESMF_Macros.inc ESMF.h ESMC_Macros.h \
             ESMC_Util.h ESMCI_Util.h ESMF_TypeKindRankMacros.hcppF90 \
-            ESMC_Start.h \
+            ESMCI_Macros.h \
             ESMCI_F90Interface.h ESMF_ErrReturnCodes.inc \
             ESMF_LogMacros.inc ESMF_LogConstants.inc ESMCI_Fraction.h \
             ESMF_TypeKindMacros.hcppF90 ESMF_InitMacros.inc \
