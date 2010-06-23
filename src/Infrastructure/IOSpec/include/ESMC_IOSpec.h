@@ -1,4 +1,4 @@
-// $Id: ESMC_IOSpec.h,v 1.10 2010/03/17 05:54:54 eschwab Exp $
+// $Id: ESMC_IOSpec.h,v 1.11 2010/06/23 08:19:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -22,6 +22,10 @@
 
 //-------------------------------------------------------------------------
 
+#include "ESMCI_Util.h"
+#include "ESMC_Macros.h"
+
+//-------------------------------------------------------------------------
  // put any constants or macros which apply to the whole component in this file.
  // anything public or esmf-wide should be up higher at the top level
  // include files.

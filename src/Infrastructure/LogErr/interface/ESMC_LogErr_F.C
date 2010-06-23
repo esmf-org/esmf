@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr_F.C,v 1.33 2010/06/23 05:52:17 theurich Exp $
+// $Id: ESMC_LogErr_F.C,v 1.34 2010/06/23 08:19:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -8,14 +8,12 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-// ESMC Base method interface (from F90 to C++) file
-
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
 //
 // The code in this file implements the Fortran callable 
-// interfaces to the C++ Base methods.
+// interfaces to the C++ methods.
 //
 //-----------------------------------------------------------------------------
 //
@@ -29,19 +27,17 @@
 #endif
 
 #include "ESMCI_LogErr.h"
-#include "ESMCI_Base.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.33 2010/06/23 05:52:17 theurich Exp $";
+ static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.34 2010/06/23 08:19:07 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
-// This section includes ESMC_Base routine interfaces
 //
 //
 

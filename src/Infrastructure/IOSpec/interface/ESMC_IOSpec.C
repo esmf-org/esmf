@@ -1,4 +1,4 @@
-// $Id: ESMC_IOSpec.C,v 1.9 2010/06/23 05:52:17 theurich Exp $
+// $Id: ESMC_IOSpec.C,v 1.10 2010/06/23 08:19:07 theurich Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -25,7 +25,6 @@
 #include <string.h>
 #include <assert.h>
 // associated class definition file
-#include "ESMCI_Base.h"
 #include "ESMC_IOSpec.h"
 
 // in this case, no body for file, all in class
@@ -33,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_IOSpec.C,v 1.9 2010/06/23 05:52:17 theurich Exp $";
+            "$Id: ESMC_IOSpec.C,v 1.10 2010/06/23 08:19:07 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //

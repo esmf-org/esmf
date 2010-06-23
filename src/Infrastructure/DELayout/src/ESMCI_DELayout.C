@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.35 2010/06/23 07:05:14 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.36 2010/06/23 08:19:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -27,25 +27,26 @@
 #include "ESMCI_DELayout.h"
 
 // include higher level, 3rd party or system headers
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <typeinfo>
 #include <vector>
 
 // include ESMF headers
 #include "ESMC_Start.h"
-#include "ESMCI_Base.h" 
 #include "ESMCI_VM.h"
+#include "ESMCI_F90Interface.h"
 
 // LogErr headers
 #include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"
 
+using namespace std;
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.35 2010/06/23 07:05:14 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.36 2010/06/23 08:19:07 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
