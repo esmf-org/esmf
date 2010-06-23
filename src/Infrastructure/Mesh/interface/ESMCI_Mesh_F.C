@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.41 2010/06/23 05:52:17 theurich Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.42 2010/06/23 22:46:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 #include "ESMC_Start.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMC_LogMacros.inc"             // for LogErr
+#include "ESMCI_LogMacros.inc"
 #include "ESMCI_Mesh.h"
 #include "ESMCI_MeshRead.h"
 #include "ESMCI_MeshRegrid.h" //only for the conservative flag in add_elements
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.41 2010/06/23 05:52:17 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.42 2010/06/23 22:46:38 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 

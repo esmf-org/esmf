@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.40 2010/06/23 08:19:07 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.41 2010/06/23 22:46:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 #include "ESMCI_Array.h"
 
 #include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMC_LogMacros.inc"             // for LogErr
+#include "ESMCI_LogMacros.inc"
 
 using namespace std;
 
