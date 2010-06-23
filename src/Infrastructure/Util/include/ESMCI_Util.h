@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.29 2010/06/23 08:19:07 theurich Exp $
+// $Id: ESMCI_Util.h,v 1.30 2010/06/23 08:54:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -26,8 +26,6 @@
 #include <string>
 
 #include "ESMC_Start.h"
-
-#include "ESMF_InitMacros.inc"
 
 #include "ESMC_Util.h"
 
