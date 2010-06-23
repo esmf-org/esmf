@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.50 2010/06/23 05:52:16 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.51 2010/06/23 18:45:28 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -139,7 +139,9 @@ namespace ESMCI {
       tensorElementCount = 0;
       exclusiveElementCountPDe = NULL;
       totalElementCountPLocalDe = NULL;
+#if !defined (PARCH_IRIX64)
       rimSeqIndex.resize(0);
+#endif
       rimLinIndex.resize(0);
       rimElementCount.resize(0);
       localDeCountAux = 0;  // auxiliary variable for garbage collection
@@ -166,7 +168,9 @@ namespace ESMCI {
       tensorElementCount = 0;
       exclusiveElementCountPDe = NULL;
       totalElementCountPLocalDe = NULL;
+#if !defined (PARCH_IRIX64)
       rimSeqIndex.resize(0);
+#endif
       rimLinIndex.resize(0);
       rimElementCount.resize(0);
       localDeCountAux = 0;  // auxiliary variable for garbage collection
