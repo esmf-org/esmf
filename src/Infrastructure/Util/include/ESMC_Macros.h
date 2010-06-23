@@ -1,4 +1,4 @@
-// $Id: ESMC_Macros.h,v 1.36 2010/06/23 09:04:46 theurich Exp $
+// $Id: ESMC_Macros.h,v 1.37 2010/06/23 09:51:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -26,8 +26,8 @@
 // -------------------------------------------------------------------------
 //EOP
 
-// These MUST stay in sync with the constants defined in ESMF_Base.F90
-// in the Infrastructure/Base/interface directory.
+// These macros MUST stay in sync with the constants defined in
+// src/Infrastructure/Util/src/ESMF_UtilTypes.F90
 
 #define ESMF_SUCCESS  0
 #define ESMF_FAILURE -1
