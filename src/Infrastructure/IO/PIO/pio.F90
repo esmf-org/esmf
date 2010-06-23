@@ -18,8 +18,9 @@ module pio
 	pio_global, pio_char, pio_write, pio_nowrite, pio_clobber, pio_noclobber, &
 	pio_max_name, pio_max_var_dims, pio_rearr_none, pio_rearr_mct, &
 #if defined(_NETCDF) || defined(_PNETCDF)
-	pio_nofill, pio_unlimited, pio_64bit_offset, &
+	pio_nofill, pio_unlimited, &
 #endif
+        pio_64bit_offset, &
         pio_rearr_box, pio_internal_error, pio_bcast_error, pio_return_error
 
 
