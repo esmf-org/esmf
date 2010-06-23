@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.112 2010/06/23 23:01:08 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.113 2010/06/23 23:32:26 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.112 2010/06/23 23:01:08 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.113 2010/06/23 23:32:26 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4540,6 +4540,11 @@ bool operator==(SeqIndex a, SeqIndex b){
   // decompSeqIndex must be equal
   return (a.tensorSeqIndex == b.tensorSeqIndex);
 }
+bool operator!=(SeqIndex a, SeqIndex b){
+  if (a.decompSeqIndex == b.decompSeqIndex) return false;
+  // decompSeqIndex must be equal
+  return (a.tensorSeqIndex != b.tensorSeqIndex);
+}
 bool operator<(SeqIndex a, SeqIndex b){
   if (a.decompSeqIndex < b.decompSeqIndex) return true;
   if (a.decompSeqIndex > b.decompSeqIndex) return false;
@@ -5345,6 +5350,9 @@ namespace DD{
   };
   bool operator==(FactorElement a, FactorElement b){
     return (a.partnerSeqIndex == b.partnerSeqIndex);
+  }
+bool operator!=(FactorElement a, FactorElement b){
+    return (a.partnerSeqIndex != b.partnerSeqIndex);
   }
   bool operator<(FactorElement a, FactorElement b){
     return (a.partnerSeqIndex < b.partnerSeqIndex);

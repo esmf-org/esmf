@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.51 2010/06/23 18:45:28 w6ws Exp $
+// $Id: ESMCI_Array.h,v 1.52 2010/06/23 23:32:26 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -301,6 +301,7 @@ namespace ESMCI {
     }
   };  // struct seqIndex
   bool operator==(SeqIndex a, SeqIndex b);
+  bool operator!=(SeqIndex a, SeqIndex b);
   bool operator<(SeqIndex a, SeqIndex b);
   
   class SeqInd{
