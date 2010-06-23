@@ -1,4 +1,4 @@
-// $Id: ESMCI_State_F.C,v 1.8 2010/03/17 05:54:38 eschwab Exp $
+// $Id: ESMCI_State_F.C,v 1.9 2010/06/23 23:10:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
 #include <string.h>
 
  // insert any higher level, 3rd party or system includes here
-#include "ESMC_Start.h"
+#include "ESMCI_Macros.h"
 
  // associated class definition file
 #include "ESMCI_State.h"
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_State_F.C,v 1.8 2010/03/17 05:54:38 eschwab Exp $";
+             "$Id: ESMCI_State_F.C,v 1.9 2010/06/23 23:10:07 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
