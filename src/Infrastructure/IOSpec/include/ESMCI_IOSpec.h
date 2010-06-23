@@ -1,4 +1,4 @@
-// $Id: ESMC_IOSpec.h,v 1.11 2010/06/23 08:19:07 theurich Exp $
+// $Id: ESMCI_IOSpec.h,v 1.1 2010/06/23 09:12:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -17,8 +17,8 @@
  // these lines prevent this file from being read more than once if it
  // ends up being included multiple times
 
-#ifndef ESMC_IOSPEC_H
-#define ESMC_IOSPEC_H
+#ifndef ESMCI_IOSPEC_H
+#define ESMCI_IOSPEC_H
 
 //-------------------------------------------------------------------------
 
@@ -91,6 +91,6 @@ class ESMC_IOSpec {
 //EOP
 //-------------------------------------------------------------------------
 
-};  // end class ESMC_IOSpec
+};  // end class ESMCI_IOSpec
 
 #endif // ESMC_IOSPEC_H

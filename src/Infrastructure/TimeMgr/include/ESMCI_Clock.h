@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.h,v 1.14 2010/06/23 08:19:07 theurich Exp $
+// $Id: ESMCI_Clock.h,v 1.15 2010/06/23 09:12:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@
 //-------------------------------------------------------------------------
 //
 // !USES:
-#include "ESMC_IOSpec.h"  // IOSpec class for ReadRestart()/WriteRestart()
+#include "ESMCI_IOSpec.h"  // IOSpec class for ReadRestart()/WriteRestart()
 #include "ESMCI_TimeInterval.h"
 #include "ESMCI_Time.h"
 #include "ESMCI_Alarm.h"

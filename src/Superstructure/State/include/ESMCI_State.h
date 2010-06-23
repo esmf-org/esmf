@@ -1,4 +1,4 @@
-// $Id: ESMCI_State.h,v 1.20 2010/04/08 19:14:46 w6ws Exp $
+// $Id: ESMCI_State.h,v 1.21 2010/06/23 09:12:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -37,7 +37,6 @@
 #include "ESMCI_Array.h"
 #include "ESMCI_Field.h"
 #include "ESMCI_F90Interface.h"
-#include "ESMC_IOSpec.h"
 
 
 //-----------------------------------------------------------------------------

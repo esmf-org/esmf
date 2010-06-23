@@ -1,13 +1,13 @@
-# $Id: makefile,v 1.3 2008/09/26 05:18:06 cdeluca Exp $ 
+# $Id: makefile,v 1.4 2010/06/23 09:12:13 theurich Exp $ 
 
 ALL: build_here 
 
-SOURCEC	  = ESMC_IOSpec.C
+SOURCEC	  = ESMCI_IOSpec.C
 SOURCEF	  = 
-SOURCEH	  = 
+SOURCEH	  =
 
 # List all .h files which should be copied to common include dir
-STOREH    = ESMC_IOSpec.h
+STOREH    = ESMCI_IOSpec.h
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
