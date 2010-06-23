@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.12 2008/09/26 05:18:08 cdeluca Exp $ 
+# $Id: makefile,v 1.13 2010/06/23 22:13:48 theurich Exp $ 
 
 ALL: build_here 
 
-SOURCEC	  = ESMC_LogErr_F.C ESMC_LogErr.C
+SOURCEC	  = ESMCI_LogErr_F.C ESMC_LogErr.C
 SOURCEF	  = ESMF_LogErr_C.F90
 SOURCEH	  = ESMC_LogErr.h
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr.C,v 1.12 2010/06/23 08:19:07 theurich Exp $
+// $Id: ESMCI_LogErr.C,v 1.13 2010/06/23 22:13:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 #include "ESMF_ErrReturnCodes.inc"
 
 // include array of error messages
-#include "ESMC_ErrMsgs.C"
+#include "ESMCI_ErrMsgs.C"
 
 using namespace std;
 
@@ -55,7 +55,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_LogErr.C,v 1.12 2010/06/23 08:19:07 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_LogErr.C,v 1.13 2010/06/23 22:13:48 theurich Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines

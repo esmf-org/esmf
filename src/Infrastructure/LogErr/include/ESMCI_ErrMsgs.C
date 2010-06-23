@@ -1,4 +1,4 @@
-//$Id: ESMC_ErrMsgs.C,v 1.20 2010/03/04 18:57:44 svasquez Exp $
+//$Id: ESMCI_ErrMsgs.C,v 1.1 2010/06/23 22:13:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
