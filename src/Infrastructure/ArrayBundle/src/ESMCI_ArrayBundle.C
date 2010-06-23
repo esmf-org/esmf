@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.28 2010/04/27 22:52:34 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.29 2010/06/23 07:05:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -12,7 +12,7 @@
 #define ESMC_FILENAME "ESMCI_ArrayBundle.C"
 //==============================================================================
 //
-// ESMCI ArrayBundle method implementation (body) file
+// ArrayBundle class implementation (body) file
 //
 //-----------------------------------------------------------------------------
 //
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.28 2010/04/27 22:52:34 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.29 2010/06/23 07:05:14 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 

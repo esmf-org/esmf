@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.C,v 1.16 2010/05/05 21:26:59 oehmke Exp $
+// $Id: ESMCI_LocalArray.C,v 1.17 2010/06/23 07:05:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -12,7 +12,7 @@
 #define ESMC_FILENAME "ESMCI_LocalArray.C"
 //==============================================================================
 //
-// ESMC LocalArray method implementation (body) file
+// LocalArray class implementation (body) file
 //
 //-----------------------------------------------------------------------------
 //
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.16 2010/05/05 21:26:59 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.17 2010/06/23 07:05:14 theurich Exp $";
 //-----------------------------------------------------------------------------
 
   

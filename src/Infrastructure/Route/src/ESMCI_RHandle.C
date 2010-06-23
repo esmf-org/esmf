@@ -1,4 +1,4 @@
-// $Id: ESMCI_RHandle.C,v 1.7 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_RHandle.C,v 1.8 2010/06/23 07:05:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -12,7 +12,7 @@
 #define ESMF_FILENAME "ESMCI_RHandle.C"
 //==============================================================================
 //
-// ESMCI RouteHandle method implementation (body) file
+// RouteHandle class implementation (body) file
 //
 //-----------------------------------------------------------------------------
 //
@@ -44,7 +44,7 @@ using namespace std;
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version = 
-  "$Id: ESMCI_RHandle.C,v 1.7 2010/03/04 18:57:45 svasquez Exp $";
+  "$Id: ESMCI_RHandle.C,v 1.8 2010/06/23 07:05:14 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 

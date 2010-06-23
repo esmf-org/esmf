@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.43 2010/06/23 05:52:17 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.44 2010/06/23 07:05:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -12,7 +12,7 @@
 #define ESMC_FILENAME "ESMCI_DistGrid.C"
 //==============================================================================
 //
-// ESMC DistGrid method implementation (body) file
+// DistGrid class implementation (body) file
 //
 //-----------------------------------------------------------------------------
 //
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.43 2010/06/23 05:52:17 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.44 2010/06/23 07:05:14 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {

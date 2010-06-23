@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.17 2010/06/23 05:52:17 theurich Exp $
+// $Id: ESMCI_VM.C,v 1.18 2010/06/23 07:05:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -12,7 +12,7 @@
 #define ESMC_FILENAME "ESMCI_VM.C"
 //==============================================================================
 //
-// ESMC VM method implementation (body) file
+// VM class implementation (body) file
 //
 //-----------------------------------------------------------------------------
 //
@@ -54,7 +54,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.17 2010/06/23 05:52:17 theurich Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.18 2010/06/23 07:05:14 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================

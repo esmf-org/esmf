@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.h,v 1.9 2010/06/23 05:52:17 theurich Exp $
+// $Id: ESMCI_VM.h,v 1.10 2010/06/23 07:05:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -20,7 +20,7 @@
 
 //-------------------------------------------------------------------------
 //BOPI
-// !CLASS: ESMCI_VM - virtual machine
+// !CLASS: ESMCI::VM - VM (virtual machine)
 //
 // !DESCRIPTION:
 //
