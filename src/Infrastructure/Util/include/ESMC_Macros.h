@@ -1,4 +1,4 @@
-// $Id: ESMC_Macros.h,v 1.37 2010/06/23 09:51:55 theurich Exp $
+// $Id: ESMC_Macros.h,v 1.38 2010/06/23 21:56:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -7,14 +7,24 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
+//-----------------------------------------------------------------------------
 
-// Public prototypes and constants for the ESMF C++ interface
+//-----------------------------------------------------------------------------
+// This file is part of the pure C public ESMC API
+//-----------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
 
 #ifndef ESMC_MACROS_H
 #define ESMC_MACROS_H
 
-//BOP
 // -------------------------------------------------------------------------
+//BOPI
 // 
 //  !DESCRIPTION:
 // 
@@ -23,8 +33,8 @@
 //  (all lines below between the !BOP and !EOP markers will be included in
 //   the automated document processing.)
 // 
+//EOPI
 // -------------------------------------------------------------------------
-//EOP
 
 // These macros MUST stay in sync with the constants defined in
 // src/Infrastructure/Util/src/ESMF_UtilTypes.F90
