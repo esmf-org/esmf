@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util_F.C,v 1.1 2010/06/23 08:32:40 theurich Exp $
+// $Id: ESMCI_Util_F.C,v 1.2 2010/06/23 18:25:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -29,6 +29,7 @@
 #include <map>
 #include <string>
 #include <cstring>
+#include <cstdio>
 using namespace std;
 
  // associated class definition file and others
@@ -39,7 +40,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Util_F.C,v 1.1 2010/06/23 08:32:40 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_Util_F.C,v 1.2 2010/06/23 18:25:55 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
