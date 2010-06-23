@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.31 2010/06/02 05:52:09 eschwab Exp $
+// $Id: ESMCI_Attribute.h,v 1.32 2010/06/23 21:35:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -22,7 +22,8 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include "math.h"
+#include <cmath>
+#include <cstdio>
 using namespace std;
 
 #include "ESMCI_Util.h"
