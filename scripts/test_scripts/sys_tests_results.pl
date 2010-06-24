@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.18 2010/02/10 00:50:34 svasquez Exp $
+# $Id: sys_tests_results.pl,v 1.19 2010/06/24 16:14:26 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -9,6 +9,35 @@ sub sys_tests_results($$$$) {
         my $TEST_DIR	= $_[0];
         my $ESMF_BOPT   = $_[1];
         my $SUMMARY     = $_[2];
+
+
+# This subroutine reads the number of pets from the *ST.Log files.
+sub get_pet_count {
+
+        my @logFile    = @_;
+
+        # Find # of processors string
+        $count=grep ( /NUMBER_OF_PROCESSORS/, @logFile);
+        if (($count == "") || ($count == 0)){
+                # Did not find the # of processors string
+                return(0);
+        }
+         # Create list of processor count strings
+        @num_procs = grep(/NUMBER_OF_PROCESSORS/, @file_lines);
+        $pet_count_found = 0;
+        foreach (@num_procs){
+                # remove all white spaces
+        	s/ //g;
+        	$pet_count = 0;
+        	($test_string,$pet_count) = split(/NUMBER_OF_PROCESSORS/, $_);
+		if ($pet_count != 0) {
+			# Read the number of pets from log file.
+        		return($pet_count);
+		}
+        }
+	#Could not read the number of pets from log file.
+	return(0);
+}
 
 
 use File::Find
@@ -212,40 +241,14 @@ use File::Find
                                 push(file_lines, $line);
                         }
                         close ($file);
-			# Find # of processors string
-			$count=grep ( /NUMBER_OF_PROCESSORS/, @file_lines);
-			if (($count == "") || ($count == 0)){
-				# Did not find the # of processors string
-				goto DONE_CHECKING;
+			#Read the pet count from Log file.
+			$pet_count = &get_pet_count(@file_lines);
+			$count=grep ( /PASS/, @file_lines);
+			if ($count == $pet_count) {
+                               	push (pass_tests, $file);
+                               	$pass_count=$pass_count + 1;
 			}
-			else {
-				# Create list of processor count strings
-				@num_procs = grep(/NUMBER_OF_PROCESSORS/, @file_lines); 
-				$pet_count_found = 0;
-				foreach (@num_procs){
-        				# remove all white spaces
-			        	s/ //g;
-        				$pet_count = 0;
-        				($test_string,$pet_count) = split(/NUMBER_OF_PROCESSORS/, $_);
-        				if ($pet_count != 0) {
-                				$pet_count_found = 1;
-                				goto CONT_CHECKING;
-                			}
-					else {
-						goto DONE_CHECKING;
-					}
-				}
-			}
-
-		
-            CONT_CHECKING:if ( $pet_count_found = 1) {
-				$count=grep ( /PASS/, @file_lines);
-				if ($count == $pet_count) {
-                                push (pass_tests, $file);
-                                $pass_count=$pass_count + 1;
-				}
-                        }
-       		DONE_CHECKING:   @file_lines=();
+       		@file_lines=();
                 }
                 # Calculate fail_count
                 $fail_count = $st_count - $pass_count;
