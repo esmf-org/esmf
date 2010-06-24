@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.42 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_Util.C,v 1.1 2010/06/24 04:49:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -7,10 +7,10 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-
-#define ESMF_FILENAME "ESMC_Util.C"
-
-// ESMC Util method implementation (body) file
+//
+//==============================================================================
+#define ESMC_FILENAME "ESMCI_Util.C"
+//==============================================================================
 
 // single blank line to make protex happy.
 //BOP
@@ -21,11 +21,11 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the C++ Util methods declared
-// in the companion file ESMC_Util.h
+// in the companion file ESMCI_Util.h
 //
 //-----------------------------------------------------------------------------
 //
- // associated class definition file and others
+// associated class definition file and others
 #include <string.h>
 #include <stdlib.h>
 #include "ESMCI_Util.h"
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.42 2010/03/04 18:57:45 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_Util.C,v 1.1 2010/06/24 04:49:07 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
