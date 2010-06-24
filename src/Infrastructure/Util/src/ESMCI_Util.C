@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.C,v 1.3 2010/06/24 21:27:11 w6ws Exp $
+// $Id: ESMCI_Util.C,v 1.4 2010/06/24 21:49:25 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 // associated class definition file and others
 #include "ESMCI_Util.h"
 
-#include <string>
+#include <cstring>
 #include <cstdlib>
 
 #include "ESMCI_Macros.h"
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Util.C,v 1.3 2010/06/24 21:27:11 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_Util.C,v 1.4 2010/06/24 21:49:25 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
