@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: unit_tests_results.pl,v 1.17 2008/07/31 19:41:55 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.18 2010/06/24 21:22:17 svasquez Exp $
 # This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -9,6 +9,35 @@ sub unit_tests_results($$$) {
         my $TEST_DIR    = $_[0];
         my $ESMF_BOPT   = $_[1];
         my $SUMMARY     = $_[2];
+
+
+# This subroutine reads the number of pets from the *UTest.Log files.
+sub get_pet_count {
+
+        my @logFile    = @_;
+
+        # Find # of processors string
+        $count=grep ( /NUMBER_OF_PROCESSORS/, @logFile);
+        if (($count == "") || ($count == 0)){
+                # Did not find the # of processors string
+                return(0);
+        }
+         # Create list of processor count strings
+        @num_procs = grep(/NUMBER_OF_PROCESSORS/, @file_lines);
+        $pet_count_found = 0;
+        foreach (@num_procs){
+                # remove all white spaces
+                s/ //g;
+                $pet_count = 0;
+                ($test_string,$pet_count) = split(/NUMBER_OF_PROCESSORS/, $_);
+                if ($pet_count != 0) {
+                        # Read the number of pets from log file.
+                        return($pet_count);
+                }
+        }
+        #Could not read the number of pets from log file.
+        return(0);
+}
 
 
 use File::Find
@@ -182,46 +211,49 @@ use File::Find
 						push(file_lines, $line);
 					}
 					close ("$TEST_DIR/$file");
-					$pet_count=grep ( /NUMBER_OF_PROCESSORS/, @file_lines);
+					#Read the pet count from Log file.
+					$pet_count = &get_pet_count(@file_lines);
 					if ($pet_count == 0) {
-						$pet_count = 1;
-					}
-                        		$pass_count=grep( /PASS/, @file_lines);
-					$pass_count = int $pass_count/$pet_count;
-					# HALT_FAILED must be handled differently
-					# if it occurs we must subtract the pass count by one.
-                        		$fail_count=grep( /HALT_FAILED/, @file_lines);
-					if ($fail_count !=0 ) {
-						$pass_count = $pass_count - 1;
-					}
-					if ($pass_count == $test_count){
-						push(pass_list, $file);
+                				push(crashed_list, $file);
 					}
 					else {
-                        			$fail_count=grep( /FAIL/, @file_lines);
-						$fail_count = int $fail_count/$pet_count;
+                        			$pass_count=grep( /PASS/, @file_lines);
+						$pass_count = int $pass_count/$pet_count;
+						# HALT_FAILED must be handled differently
+						# if it occurs we must subtract the pass count by one.
+                        			$fail_count=grep( /HALT_FAILED/, @file_lines);
 						if ($fail_count !=0 ) {
-							push @fail_test_list, grep (/FAIL/, @file_lines);
+							$pass_count = $pass_count - 1;
 						}
-						if ($test_count != $pass_count + $fail_count) {
-					       		push(crashed_list, $file);
-                                		}
+						if ($pass_count == $test_count){
+							push(pass_list, $file);
+						}
 						else {
-							push(fail_list, $file);
+                        				$fail_count=grep( /FAIL/, @file_lines);
+							$fail_count = int $fail_count/$pet_count;
+							if ($fail_count !=0 ) {
+								push @fail_test_list, grep (/FAIL/, @file_lines);
+							}
+							if ($test_count != $pass_count + $fail_count) {
+					       			push(crashed_list, $file);
+                                			}
+							else {
+								push(fail_list, $file);
+							}
 						}
-					}
-					$total_pass_count = $total_pass_count + $pass_count;
-					$total_fail_count = $total_fail_count + $fail_count;
-					$fail_count =0;
-					$pass_count =0;
-	
-					@file_lines = ();
+						$total_pass_count = $total_pass_count + $pass_count;
+						$total_fail_count = $total_fail_count + $fail_count;
+						$fail_count =0;
+						$pass_count =0;
+		
+						@file_lines = ();
 				
+					}
 				}
 				$test_count =0;
 			}
-
 			
+				
         }
 	# Special code for handling the new Regrid test scheme.
 	# If running Exhaustive unit tests
