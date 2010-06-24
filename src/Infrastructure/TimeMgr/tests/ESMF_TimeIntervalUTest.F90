@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.57 2010/04/27 20:11:29 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.58 2010/06/24 21:12:00 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.57 2010/04/27 20:11:29 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.58 2010/06/24 21:12:00 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -115,7 +115,7 @@
       ! ----------------------------------------------------------------------------
       ! Gregorian Leap year 2004 tests
       ! ----------------------------------------------------------------------------
-      !EX_UTest
+      !NEX_UTest
       ! Testing ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 1/29/2004 by mm=1 Test"
       write(failMsg, *) " Did not return 2/29/2004 12:17:58 or ESMF_SUCCESS"
