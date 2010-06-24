@@ -1,4 +1,4 @@
-// $Id: ESMCI_Fraction.C,v 1.8 2010/04/27 20:08:37 eschwab Exp $
+// $Id: ESMCI_Fraction.C,v 1.9 2010/06/24 07:42:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -17,31 +17,34 @@
 // The code in this file implements the C++ {\tt Fraction} methods
 // declared in the companion file {\tt ESMCI\_Fraction.h}
 //
+//==============================================================================
+#define ESMC_FILENAME "ESMCI_Fraction.C"
+//==============================================================================
+
+// associated class definition file
+#include "ESMCI_Fraction.h"
+ 
+// higher level, 3rd party or system includes
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <limits.h>
+#include <float.h>  // DBL_DIG
+
+#include "ESMCI_Macros.h"
+#include "ESMCI_LogErr.h"
+#include "ESMF_LogMacros.inc"
+
+
+// TODO: resolve ambiguity between C and C++ versions of llabs() function,
+//       or otherwise move macro into ESMCI_Util.h.  Note: llabs() is in C99,
+//       but is not in C++98.
+#define LLABS(a) (((a)<0)?(-1*(a)):(a))
+
 //-------------------------------------------------------------------------
-//
- #define ESMC_FILENAME "ESMCI_Fraction.C"
-
- // higher level, 3rd party or system includes
- #include <stdio.h>
- #include <math.h>
- #include <limits.h>
- #include <float.h>  // DBL_DIG
-
- #include <ESMCI_LogErr.h>
- #include <ESMF_LogMacros.inc>
-
- // associated class definition file
- #include <ESMCI_Fraction.h>
-
- // TODO: resolve ambiguity between C and C++ versions of llabs() function,
- //       or otherwise move macro into ESMCI_Util.h.  Note: llabs() is in C99,
- //       but is not in C++98.
- #define LLABS(a) (((a)<0)?(-1*(a)):(a))
-
-//-------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Fraction.C,v 1.8 2010/04/27 20:08:37 eschwab Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_Fraction.C,v 1.9 2010/06/24 07:42:58 theurich Exp $";
 //-------------------------------------------------------------------------
 
 // TODO:  Use logarithms for checking if a multiplication or division is about

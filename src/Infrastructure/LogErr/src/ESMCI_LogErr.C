@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr.C,v 1.14 2010/06/23 23:01:08 theurich Exp $
+// $Id: ESMCI_LogErr.C,v 1.15 2010/06/24 07:42:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -18,8 +18,11 @@
 // the companion file ESMC\_LogErr.h) provides the user a way to write 
 // {\tt ESMC\_Log} data.
 //
-// insert any higher level, 3rd party or system includes here
 
+// associated class definition file
+#include "ESMCI_LogErr.h"
+
+// higher level, 3rd party or system headers
 #include <stdio.h>        
 #include <stdlib.h>
 #include <stdarg.h>
@@ -31,10 +34,8 @@
 #include <sys/time.h>
 #endif
 
-// associated class definition file
+// other ESMF headers
 #include "ESMCI_Macros.h"
-#include "ESMCI_LogErr.h"
-#include "ESMF_ErrReturnCodes.inc"
 
 // include array of error messages
 #include "ESMCI_ErrMsgs.C"
@@ -55,7 +56,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_LogErr.C,v 1.14 2010/06/23 23:01:08 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_LogErr.C,v 1.15 2010/06/24 07:42:58 theurich Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines

@@ -1,4 +1,4 @@
-// $Id: ESMC_Interface.C,v 1.5 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMC_Interface.C,v 1.6 2010/06/24 07:42:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -27,14 +27,14 @@
 #include "ESMC_Interface.h"
 
 // include ESMF headers
+#include "ESMCI_Macros.h"
 #include "ESMCI_F90Interface.h"
-#include "ESMCI_LogErr.h"
 
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Interface.C,v 1.5 2010/03/04 18:57:45 svasquez Exp $";
+static const char *const version = "$Id: ESMC_Interface.C,v 1.6 2010/06/24 07:42:58 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {

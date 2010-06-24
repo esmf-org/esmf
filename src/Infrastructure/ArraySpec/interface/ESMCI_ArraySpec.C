@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArraySpec.C,v 1.7 2010/03/04 18:57:42 svasquez Exp $
+// $Id: ESMCI_ArraySpec.C,v 1.8 2010/06/24 07:42:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 #include "ESMCI_ArraySpec.h"
 
 // include ESMF headers
-#include "ESMC_Conf.h"
+#include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h" 
 #include "ESMF_LogMacros.inc"             // for LogErr
 
@@ -44,7 +44,7 @@ void FTN(f_esmf_arrayspecgettypekind)(ESMCI::ArraySpec *arrayspec,
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArraySpec.C,v 1.7 2010/03/04 18:57:42 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_ArraySpec.C,v 1.8 2010/06/24 07:42:58 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {

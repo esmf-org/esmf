@@ -1,4 +1,4 @@
-// $Id: ESMCI_Fraction_F.C,v 1.4 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_Fraction_F.C,v 1.5 2010/06/24 07:42:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -17,8 +17,8 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include <ESMCI_F90Interface.h>
-#include <ESMCI_Fraction.h>
+#include "ESMCI_Fraction.h"
+#include "ESMCI_F90Interface.h"
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:

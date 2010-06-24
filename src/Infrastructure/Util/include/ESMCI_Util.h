@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.31 2010/06/23 23:01:10 theurich Exp $
+// $Id: ESMCI_Util.h,v 1.32 2010/06/24 07:42:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -21,11 +21,6 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
-
-#include <map>
-#include <string>
-
-#include "ESMCI_Macros.h"
 
 #include "ESMC_Util.h"
 
@@ -219,12 +214,5 @@ extern ESMC_ObjectID ESMC_ID_GRIDCOMPONENT;
 extern ESMC_ObjectID ESMC_ID_CPLCOMPONENT;
 extern ESMC_ObjectID ESMC_ID_COMPONENT;
 extern ESMC_ObjectID ESMC_ID_NONE;
-
-
-// MapName container type for name/int pairs
-typedef struct {
-  std::map<std::string, int> table;
-} MapName;
-
 
 #endif  // ESMCI_UTIL_H

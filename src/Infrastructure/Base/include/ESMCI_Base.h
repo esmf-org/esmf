@@ -1,4 +1,4 @@
-// $Id: ESMCI_Base.h,v 1.2 2010/06/23 07:03:23 theurich Exp $
+// $Id: ESMCI_Base.h,v 1.3 2010/06/24 07:42:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -18,9 +18,7 @@
 #ifndef ESMCI_BASE_H
 #define ESMCI_BASE_H
 
-#include <stdio.h>
-
-#include "ESMCI_Util.h"
+#include "ESMCI_Macros.h"
 class ESMC_Base;
 #include "ESMCI_VM.h"
 #include "ESMCI_Attribute.h"

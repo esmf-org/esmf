@@ -1,4 +1,4 @@
-// $Id: ESMCI_Base_F.C,v 1.2 2010/06/23 07:03:24 theurich Exp $
+// $Id: ESMCI_Base_F.C,v 1.3 2010/06/24 07:42:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -21,7 +21,7 @@
 #include <stdlib.h>
 
 #include "ESMCI_Base.h"
-
+#include "ESMCI_VM.h"
 #include "ESMCI_LogErr.h"
 
 // the interface subroutine names MUST be in lower case by ESMF convention

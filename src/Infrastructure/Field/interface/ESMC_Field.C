@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.20 2010/03/04 18:57:42 svasquez Exp $
+// $Id: ESMC_Field.C,v 1.21 2010/06/24 07:42:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -22,13 +22,13 @@
 //EOP
 //------------------------------------------------------------------------------
 // INCLUDES
-
-#include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMC_Field.h"
+
+#include "ESMCI_Macros.h"
 #include "ESMCI_Field.h"
 #include "ESMCI_F90Interface.h"
-#include "ESMC_Interface.h"
+#include "ESMCI_LogErr.h"
+#include "ESMF_LogMacros.inc"             // for LogErr
 
 using namespace ESMCI;
 

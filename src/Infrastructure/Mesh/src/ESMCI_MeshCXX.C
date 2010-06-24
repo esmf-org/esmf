@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.C,v 1.13 2010/04/12 21:31:11 w6ws Exp $
+// $Id: ESMCI_MeshCXX.C,v 1.14 2010/06/24 07:42:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -12,6 +12,7 @@
 //------------------------------------------------------------------------------
 // INCLUDES    
 //------------------------------------------------------------------------------
+#include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_F90Interface.h"
@@ -26,7 +27,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.13 2010/04/12 21:31:11 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.14 2010/06/24 07:42:58 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
