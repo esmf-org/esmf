@@ -1,4 +1,4 @@
-// $Id: ESMCI_SAX2ReadHandler.h,v 1.5 2010/06/23 08:19:07 theurich Exp $
+// $Id: ESMCI_SAX2ReadHandler.h,v 1.6 2010/06/24 16:26:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,21 +36,23 @@
 //
 // !USES:
 
- #include <string>
+#include <string>
 
 #ifdef ESMF_XERCES
- #include <xercesc/util/XMLUni.hpp>
- #include <xercesc/util/XMLString.hpp>
- #include <xercesc/util/PlatformUtils.hpp>
- #include <xercesc/util/XercesVersion.hpp>
+#include <xercesc/util/XMLUni.hpp>
+#include <xercesc/util/XMLString.hpp>
+#include <xercesc/util/PlatformUtils.hpp>
+#include <xercesc/util/XercesVersion.hpp>
 
- #include <xercesc/sax2/DefaultHandler.hpp>
- #include <xercesc/sax/ErrorHandler.hpp>
- #include <xercesc/sax/SAXParseException.hpp>
+#include <xercesc/sax2/DefaultHandler.hpp>
+#include <xercesc/sax/ErrorHandler.hpp>
+#include <xercesc/sax/SAXParseException.hpp>
 // #include <xercesc/framework/XMLFormatter.hpp>
- #include <xercesc/sax2/Attributes.hpp>
- XERCES_CPP_NAMESPACE_USE
+#include <xercesc/sax2/Attributes.hpp>
+XERCES_CPP_NAMESPACE_USE
 #endif
+
+#include "ESMCI_Base.h"
 
 namespace ESMCI{
 
