@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.3 2010/06/22 22:31:49 theurich Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.4 2010/06/25 15:21:17 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -52,6 +52,7 @@ program ESMF_ArrayIOUTest
   integer      :: localDeCount, localPet, petCount
   integer :: i,j,k
   real :: Maxvalue, diff
+  logical :: PIONotPresent
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -73,6 +74,8 @@ program ESMF_ArrayIOUTest
       petCount
     goto 10
   endif
+  ! assume PIO library present until proven otherwise
+  PIONotPresent = .false.
 
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
@@ -135,7 +138,10 @@ program ESMF_ArrayIOUTest
   write(name, *) "Write ESMF_Array with Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayWrite(array_halo, Farray3D_halo, 3, (/5,5,5/), fname='file3D_halo.nc', rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (rc==ESMF_RC_LIB_NOT_PRESENT) then
+        PIONotPresent = .true.
+  endif
+  call ESMF_Test((rc==ESMF_SUCCESS .or. PIONotPresent), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
   !NEX_disable_UTest_Multi_Proc_Only
@@ -143,7 +149,7 @@ program ESMF_ArrayIOUTest
   write(name, *) "Write ESMF_Array without Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayWrite(array_nohalo, Farray3D_nohalo, 3, (/5,5,5/), rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((rc==ESMF_SUCCESS .or. PIONotPresent), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_disable_UTest_Multi_Proc_Only
@@ -172,8 +178,13 @@ program ESMF_ArrayIOUTest
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read ESMF_Array without Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_nohalo2, Farray3D_nohalo2,3, (/5,5,5/), rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_ArrayRead(array_nohalo2, Farray3D_nohalo2,3, (/5,5,5/), &
+                      fname='ESMF_Array_int.nc', rc=rc)
+  if (rc==ESMF_RC_LIB_NOT_PRESENT) then
+        PIONotPresent = .true.
+  endif
+  call ESMF_Test((rc==ESMF_SUCCESS .or. PIONotPresent), name, &
+                 failMsg, result,ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_disable_UTest_Multi_Proc_Only
@@ -192,8 +203,8 @@ program ESMF_ArrayIOUTest
   rc = 1
   if (Maxvalue .lt. 1.e-6) rc=0
   write(*,*)"Maximum Error (Without Halo case) = ", Maxvalue
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
+  call ESMF_Test((rc==ESMF_SUCCESS .or. PIONotPresent), name, &
+                 failMsg, result,ESMF_SRCLINE)
 
   deallocate (computationalLWidth, computationalUWidth)
   deallocate (totalLWidth, totalUWidth)
@@ -282,7 +293,8 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayWrite(array_halo, Farray2D_halo, 2, (/5,5/),  &
                        fname='file2D_halo.nc', rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((rc==ESMF_SUCCESS .or. PIONotPresent), name, &
+                 failMsg, result,ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
 ! ! Given an ESMF array, print the netCDF file.
@@ -290,7 +302,8 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayWrite(array_nohalo, Farray2D_nohalo, 2, (/5,5/),  &
                        fname="file2D_nohalo.nc", rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((rc==ESMF_SUCCESS .or. PIONotPresent), name, &
+                 failMsg, result,ESMF_SRCLINE)
 
   deallocate (computationalLWidth, computationalUWidth)
   deallocate (totalLWidth, totalUWidth)
