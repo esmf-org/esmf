@@ -1,4 +1,4 @@
-% $Id: Field_desc.tex,v 1.6 2009/03/03 20:25:55 feiliu Exp $
+% $Id: Field_desc.tex,v 1.7 2010/06/25 18:13:54 feiliu Exp $
 
 An ESMF Field represents a physical field, such as temperature.
 The motivation for including Fields in ESMF is that bundles of 
@@ -21,8 +21,7 @@ grid.  One motivation for FieldBundles is convenience; another is the
 ability to perform optimized collective data transfers.  
 
 Field communications, including data redistribution, regriding, scatter,
-and gather, are enabled in this release.  Field halo update operation is
-not enabled in this release and will be enabled in subsequent releases.
+gather, sparse-matrix matmul, and halo update, are enabled in this release.
 
 ESMF does not currently support vector fields, so the components of 
 a vector field must be stored as separate Field objects.  
