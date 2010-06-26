@@ -1,4 +1,4 @@
-// $Id: ESMC_RegridWgtGenEx.C,v 1.2 2010/05/04 16:43:26 rokuingh Exp $
+// $Id: ESMC_RegridWgtGenEx.C,v 1.3 2010/06/26 01:21:47 rokuingh Exp $
 //==============================================================================
 //
 // Earth System Modeling Framework
@@ -42,6 +42,13 @@
 #include <cmath>
 #include <cstring>
 
+#include <ESMCI_VM.h>
+#include <ESMC_Init.h>
+
+#ifdef REGRIDTIMING
+#include <mpi.h>
+#endif
+
 /**
  * This program may be used to generate an interpolation weight matrix from
  * two SCRIP style input files.  The output is a SCRIP format matrix file.
@@ -50,11 +57,22 @@
 
 using namespace ESMCI;
 
+#ifdef REGRIDTIMING
+struct {
+  double start;
+  double gridsInput;
+  double regridComplete;
+  double weightsOutput;
+} regridTimer;
+#endif
+
 int parseCsrvString(char *csrvStr, int *csrvtype);
 int parseMethodString(char *methodStr, int *methodtype);
 int parsePoleString(char *poleStr, int *poletype, int *poleNPnts);
 
 int main(int argc, char *argv[]) {
+
+  int localrc = 0;
 
   Par::Init("PATCHLOG", false);
 
@@ -64,6 +82,11 @@ int main(int argc, char *argv[]) {
   int csrvType, methodType, poleType, poleNPnts;
 
   try {
+
+    // start the timer
+    #ifdef REGRIDTIMING
+    regridTimer.start = MPI_Wtime();
+    #endif
 
     // Parse commandline
 
@@ -124,15 +147,37 @@ int main(int argc, char *argv[]) {
   //  	 csrvType,methodType,poleType,poleNPnts,srcGridFile,dstGridFile,wghtFile);
 
     // Load files into Meshes
-    if (Par::Rank() == 0) std::cout << "Loading " << srcGridFile << std::endl;
     LoadNCDualMeshPar(srcmesh, srcGridFile);
-    if (Par::Rank() == 0) std::cout << "Loading " << dstGridFile << std::endl;
     LoadNCDualMeshPar(dstmesh, dstGridFile);
     LoadNCDualMeshPar(dstmeshcpy, dstGridFile);
 
-    if(!offline_regrid(srcmesh, dstmesh, dstmeshcpy, &csrvType, &methodType, &poleType, &poleNPnts,
-                       srcGridFile, dstGridFile, wghtFile))
+    // regridTimer
+    #ifdef REGRIDTIMING
+    MPI_Barrier(MPI_COMM_WORLD);
+    regridTimer.gridsInput = MPI_Wtime();
+    #endif
+
+    if(!offline_regrid(srcmesh, dstmesh, dstmeshcpy, &csrvType, &methodType, &poleType, 
+                       &poleNPnts, srcGridFile, dstGridFile, wghtFile))
       Throw() << "Offline regridding error" << std::endl;
+
+    // regridTimer
+    #ifdef REGRIDTIMING
+    MPI_Barrier(MPI_COMM_WORLD);
+    regridTimer.regridComplete = MPI_Wtime();
+    // this is redundant for now because i didn't want to touch any other files yet..
+    regridTimer.weightsOutput = MPI_Wtime();
+    double T0 = regridTimer.start;
+    double T1 = regridTimer.gridsInput;
+    double T2 = regridTimer.regridComplete;
+    double T3 = regridTimer.weightsOutput;
+    ofstream tF;
+    char filename[100];
+    sprintf(filename, "regrid_timing_%d.out", Par::Rank());
+    tF.open(filename);
+    tF << Par::Rank()<< "\t" << T0-T0 << "\t" << T1-T0 << "\t" << T2-T0 << "\t" << T3-T0 << "\t" << std::endl;
+    tF.close();
+    #endif
 
   } // try
    catch (std::exception &x) {
@@ -153,8 +198,6 @@ int main(int argc, char *argv[]) {
     std::cerr.flush();
     Par::Abort();
   }
-
-  if (Par::Rank() == 0) std::cout << "Run has completed" << std::endl;
 
   Par::End();
 
