@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.112 2010/06/28 23:01:42 theurich Exp $
+// $Id: ESMC_Array.h,v 1.113 2010/06/28 23:27:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -130,8 +130,64 @@ int ESMC_ArrayPrint(
 //EOP
 //-----------------------------------------------------------------------------
 
-const char *ESMC_ArrayGetName(ESMC_Array array, int *rc);
-void *ESMC_ArrayGetPtr(ESMC_Array array, int localDe, int *rc);
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_ArrayGetName - Get the name of an Array
+//
+// !INTERFACE:
+const char *ESMC_ArrayGetName(
+  ESMC_Array array,
+  int *rc);
+  
+// !RETURN VALUE:
+//  Pointer to the Array name string.
+//
+// !DESCRIPTION:
+//
+//  Get the name of the specified {\tt ESMC\_Array} object.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[array] 
+//    {\tt ESMC\_Array} object to be queried.
+//  \item[{[rc]}]
+//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_ArrayGetPtr - Get pointer to Array data.
+//
+// !INTERFACE:
+void *ESMC_ArrayGetPtr(
+  ESMC_Array array,
+  int localDe,
+  int *rc);
+
+// !RETURN VALUE:
+//  Pointer to the Array data.
+//
+// !DESCRIPTION:
+//
+//  Get pointer to the data of the specified {\tt ESMC\_Array} object.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[array] 
+//    {\tt ESMC\_Array} object to be queried.
+//  \item[localDe] 
+//    Local De for which to data pointer is queried.
+//  \item[{[rc]}]
+//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+
 int ESMC_ArraySetLWidth(ESMC_Array array,
    ESMC_InterfaceInt computationalLWidthArg);
 
