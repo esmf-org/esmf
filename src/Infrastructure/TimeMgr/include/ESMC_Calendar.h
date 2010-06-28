@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.70 2010/06/16 17:05:09 theurich Exp $
+// $Id: ESMC_Calendar.h,v 1.71 2010/06/28 21:49:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -103,6 +103,9 @@ ESMC_Calendar ESMC_CalendarCreate(
 int ESMC_CalendarDestroy(
   ESMC_Calendar *calendar);
 
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
 // !DESCRIPTION:
 //
 //  Releases all resources associated with this {\tt ESMC\_Calendar}.
@@ -111,8 +114,6 @@ int ESMC_CalendarDestroy(
 //  \begin{description}
 //  \item[calendar]
 //    Destroy contents of this {\tt ESMC\_Calendar}.
-//  \item[[rc]]
-//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
 //EOP
@@ -126,6 +127,9 @@ int ESMC_CalendarDestroy(
 int ESMC_CalendarPrint(
   ESMC_Calendar calendar);
 
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
 // !DESCRIPTION:
 //  Prints out an {\tt ESMC\_Calendar}'s properties to {\tt stdio}, 
 //  in support of testing and debugging.
@@ -134,8 +138,6 @@ int ESMC_CalendarPrint(
 //  \begin{description}
 //  \item[calendar]
 //    {\tt ESMC\_Calendar} to be printed out.
-//  \item[[rc]]
-//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
 //EOP
