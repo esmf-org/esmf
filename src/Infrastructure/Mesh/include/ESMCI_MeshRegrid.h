@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.h,v 1.5 2010/06/15 23:10:16 rokuingh Exp $
+// $Id: ESMCI_MeshRegrid.h,v 1.6 2010/06/28 20:07:10 rokuingh Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -18,8 +18,23 @@
 #include <Mesh/include/ESMCI_Interp.h>
 #include <Mesh/include/ESMCI_WriteWeightsPar.h>
 
+#ifdef REGRIDTIMING
+#include <mpi.h>
+#endif
 
 namespace ESMCI {
+
+#ifdef REGRIDTIMING
+class regridTimer 
+{
+public:
+  double start;
+  double gridsInput;
+  double regridComplete;
+  double weightsOutput;
+private:
+} ;
+#endif
 
 enum {ESMC_REGRID_SCHEME_FULL3D = 0, ESMC_REGRID_SCHEME_NATIVE = 1};
 enum {ESMC_REGRID_METHOD_BILINEAR = 0, ESMC_REGRID_METHOD_PATCH = 1};
@@ -32,7 +47,11 @@ int csrv(Mesh &, Mesh &, IWeights &, MEField<> *, MEField<> *,
          int *, int *, int *, int *, int *);
 
 // online
+#ifdef REGRIDTIMING
+int offline_regrid(Mesh &, Mesh &, Mesh &, int *, int *, int *, int *, char *, char *, char *, regridTimer &rT);
+#else
 int offline_regrid(Mesh &, Mesh &, Mesh &, int *, int *, int *, int *, char *, char *, char *);
+#endif
 int online_regrid(Mesh &, Mesh &, IWeights &, int *, int *, int *, int *);
 
 // get the integration weights for one mesh

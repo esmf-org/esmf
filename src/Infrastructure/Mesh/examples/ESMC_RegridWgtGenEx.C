@@ -1,4 +1,4 @@
-// $Id: ESMC_RegridWgtGenEx.C,v 1.3 2010/06/26 01:21:47 rokuingh Exp $
+// $Id: ESMC_RegridWgtGenEx.C,v 1.4 2010/06/28 20:07:10 rokuingh Exp $
 //==============================================================================
 //
 // Earth System Modeling Framework
@@ -57,15 +57,6 @@
 
 using namespace ESMCI;
 
-#ifdef REGRIDTIMING
-struct {
-  double start;
-  double gridsInput;
-  double regridComplete;
-  double weightsOutput;
-} regridTimer;
-#endif
-
 int parseCsrvString(char *csrvStr, int *csrvtype);
 int parseMethodString(char *methodStr, int *methodtype);
 int parsePoleString(char *poleStr, int *poletype, int *poleNPnts);
@@ -81,11 +72,16 @@ int main(int argc, char *argv[]) {
   bool argsOk,addPole;
   int csrvType, methodType, poleType, poleNPnts;
 
+  // declare the timer
+  #ifdef REGRIDTIMING
+  regridTimer rt;
+  #endif
+
   try {
 
     // start the timer
     #ifdef REGRIDTIMING
-    regridTimer.start = MPI_Wtime();
+    rt.start = MPI_Wtime();
     #endif
 
     // Parse commandline
@@ -154,29 +150,27 @@ int main(int argc, char *argv[]) {
     // regridTimer
     #ifdef REGRIDTIMING
     MPI_Barrier(MPI_COMM_WORLD);
-    regridTimer.gridsInput = MPI_Wtime();
-    #endif
+    rt.gridsInput = MPI_Wtime();
 
     if(!offline_regrid(srcmesh, dstmesh, dstmeshcpy, &csrvType, &methodType, &poleType, 
-                       &poleNPnts, srcGridFile, dstGridFile, wghtFile))
+                       &poleNPnts, srcGridFile, dstGridFile, wghtFile, rt))
       Throw() << "Offline regridding error" << std::endl;
 
-    // regridTimer
-    #ifdef REGRIDTIMING
-    MPI_Barrier(MPI_COMM_WORLD);
-    regridTimer.regridComplete = MPI_Wtime();
-    // this is redundant for now because i didn't want to touch any other files yet..
-    regridTimer.weightsOutput = MPI_Wtime();
-    double T0 = regridTimer.start;
-    double T1 = regridTimer.gridsInput;
-    double T2 = regridTimer.regridComplete;
-    double T3 = regridTimer.weightsOutput;
+    rt.weightsOutput = MPI_Wtime();
+    double T0 = rt.start;
+    double T1 = rt.gridsInput;
+    double T2 = rt.regridComplete;
+    double T3 = rt.weightsOutput;
     ofstream tF;
     char filename[100];
     sprintf(filename, "regrid_timing_%d.out", Par::Rank());
     tF.open(filename);
     tF << Par::Rank()<< "\t" << T0-T0 << "\t" << T1-T0 << "\t" << T2-T0 << "\t" << T3-T0 << "\t" << std::endl;
     tF.close();
+    #else
+    if(!offline_regrid(srcmesh, dstmesh, dstmeshcpy, &csrvType, &methodType, &poleType, 
+                       &poleNPnts, srcGridFile, dstGridFile, wghtFile))
+      Throw() << "Offline regridding error" << std::endl;
     #endif
 
   } // try

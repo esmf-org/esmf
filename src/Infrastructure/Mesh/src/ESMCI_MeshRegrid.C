@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.15 2010/05/07 19:28:16 oehmke Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.16 2010/06/28 20:07:10 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.15 2010/05/07 19:28:16 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.16 2010/06/28 20:07:10 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -66,10 +66,18 @@ int online_regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
 }
 
 // Mesh are not committed yet
+#ifdef REGRIDTIMING
+int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
+             int *regridConserve, int *regridMethod, 
+             int *regridPoleType, int *regridPoleNPnts,
+             char *srcGridFile, char *dstGridFile, char *wghtFile,
+             regridTimer &rt) {
+#else
 int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
              int *regridConserve, int *regridMethod, 
              int *regridPoleType, int *regridPoleNPnts,
              char *srcGridFile, char *dstGridFile, char *wghtFile) {
+#endif
 
   // Conflict management
   int regridScheme = ESMC_REGRID_SCHEME_FULL3D;
@@ -136,6 +144,12 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
     default:
       Throw() << "Regridding method:" << *regridConserve << " is not implemented";
     }
+
+    // regridTimer
+    #ifdef REGRIDTIMING
+    MPI_Barrier(MPI_COMM_WORLD);
+    rt.regridComplete = MPI_Wtime();
+    #endif
 
     // Redistribute weights in an IO friendly decomposition
     if (Par::Rank() == 0) std::cout << "Writing weights to " << wghtFile << std::endl;
