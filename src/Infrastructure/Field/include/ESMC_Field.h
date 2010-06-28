@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.20 2010/06/24 02:47:06 feiliu Exp $
+// $Id: ESMC_Field.h,v 1.21 2010/06/28 22:27:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -24,16 +24,11 @@
 #define ESMC_Field_h
 
 //-----------------------------------------------------------------------------
-//BOP
-// !CLASS:  ESMC_Field - Public C interface to the ESMF Field class
-//
-// !DESCRIPTION:
+// ESMC_Field - Public C interface to the ESMF Field class
 //
 // The code in this file defines the public C Field class and declares method
 // signatures (prototypes).  The companion file {\tt ESMC\_Field.C} contains
 // the definitions (full code bodies) for the Field methods.
-//
-//EOP
 //-----------------------------------------------------------------------------
 
 #if defined (__cplusplus)
