@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.30 2010/06/23 23:01:08 theurich Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.31 2010/06/28 17:59:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -25,15 +25,15 @@
 #include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_Grid.h"
-#include "GridUtil/include/ESMC_GridToMesh.h"
+#include "ESMCI_GridToMesh.h"
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
-#include <Mesh/include/ESMCI_Mesh.h>
-#include <Mesh/include/ESMCI_MeshRead.h>
-#include <Mesh/include/ESMCI_MeshRegrid.h> // only for the REGRID flags
-#include <Mesh/include/ESMCI_Exception.h>
-#include <Mesh/include/ESMCI_Interp.h>
-#include <Mesh/include/ESMCI_ParEnv.h>
+#include "Mesh/include/ESMCI_Mesh.h"
+#include "Mesh/include/ESMCI_MeshRead.h"
+#include "Mesh/include/ESMCI_MeshRegrid.h" // only for the REGRID flags
+#include "Mesh/include/ESMCI_Exception.h"
+#include "Mesh/include/ESMCI_Interp.h"
+#include "Mesh/include/ESMCI_ParEnv.h"
 
 
 //------------------------------------------------------------------------------

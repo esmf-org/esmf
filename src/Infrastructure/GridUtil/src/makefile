@@ -1,13 +1,13 @@
-# $Id: makefile,v 1.8 2010/02/25 19:59:56 oehmke Exp $
+# $Id: makefile,v 1.9 2010/06/28 17:59:24 theurich Exp $
 
 ALL: build_here 
 
-SOURCEC	  = ESMC_GridToMesh.C
+SOURCEC	  = ESMCI_GridToMesh.C
 SOURCEF	  =
 SOURCEH	  = 
 
 # List all .h files which should be copied to common include dir
-STOREH	  = 
+STOREH	  = ESMCI_GridToMesh.h ESMCI_Ptypes.h
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))

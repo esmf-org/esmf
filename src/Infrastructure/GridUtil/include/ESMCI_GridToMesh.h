@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.h,v 1.9 2010/05/05 21:30:43 oehmke Exp $
+// $Id: ESMCI_GridToMesh.h,v 1.1 2010/06/28 17:59:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -14,15 +14,15 @@
 //  the automated document petessing.)
 //-----------------------------------------------------------------------------
 //
-#ifndef ESMC_GridToMesh_h
-#define ESMC_GridToMesh_h
+#ifndef ESMCI_GridToMesh_h
+#define ESMCI_GridToMesh_h
 
 //-----------------------------------------------------------------------------
 
 #include <vector>
 
-#include <Grid/include/ESMCI_Grid.h>
-#include <Mesh/include/ESMCI_Mesh.h>
+#include "ESMCI_Grid.h"
+#include "Mesh/include/ESMCI_Mesh.h"
 
 
 namespace ESMCI {
@@ -39,4 +39,4 @@ class Array;
 } // namespace
 
 
-#endif
+#endif  // ESMCI_GridToMesh_h

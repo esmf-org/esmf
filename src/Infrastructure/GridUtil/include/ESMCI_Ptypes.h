@@ -1,4 +1,4 @@
-// $Id: ESMC_Ptypes.h,v 1.6 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMCI_Ptypes.h,v 1.1 2010/06/28 17:59:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -13,8 +13,8 @@
 //-----------------------------------------------------------------------------
 //
 
-#ifndef ESMC_Ptypes_h
-#define ESMC_Ptypes_h
+#ifndef ESMCI_Ptypes_h
+#define ESMCI_Ptypes_h
 
 // Convenient types for ESMC
 namespace ESMCI {
@@ -23,4 +23,4 @@ typedef unsigned int  UInt;
 
 } // namespace
 
-#endif  // ESMC_Ptypes_h
+#endif  // ESMCI_Ptypes_h

@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.47 2010/05/06 19:02:55 rokuingh Exp $
+// $Id: ESMCI_GridToMesh.C,v 1.1 2010/06/28 17:59:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMC_GridToMesh.C"
+#define ESMC_FILENAME "ESMCI_GridToMesh.C"
 //==============================================================================
 //
 //-----------------------------------------------------------------------------
@@ -20,21 +20,19 @@
 //
 //-----------------------------------------------------------------------------
 
-// ESMF's fun include strategy requires a specific order to includes for
-// compilation to successfully complete.
-#include <GridUtil/include/ESMC_GridToMesh.h>
-#include <Grid/include/ESMCI_Grid.h>
+#include "ESMCI_GridToMesh.h"
+#include "ESMCI_Grid.h"
 #include "ESMCI_VM.h"
 
 #include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
 
-#include "ESMC_Ptypes.h"
-#include <Mesh/include/ESMCI_Mesh.h>
-#include <Mesh/include/ESMCI_MeshRegrid.h>
-#include <Mesh/include/ESMCI_IOField.h>
-#include <Mesh/include/ESMCI_ParEnv.h>
-#include <Mesh/include/ESMCI_DDir.h>
+#include "ESMCI_Ptypes.h"
+#include "Mesh/include/ESMCI_Mesh.h"
+#include "Mesh/include/ESMCI_MeshRegrid.h"
+#include "Mesh/include/ESMCI_IOField.h"
+#include "Mesh/include/ESMCI_ParEnv.h"
+#include "Mesh/include/ESMCI_DDir.h"
 
 #include <limits>
 #include <iostream>
