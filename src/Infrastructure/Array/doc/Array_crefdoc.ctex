@@ -1,4 +1,4 @@
-% $Id: Array_crefdoc.ctex,v 1.1 2010/03/30 21:50:27 svasquez Exp $ 
+% $Id: Array_crefdoc.ctex,v 1.2 2010/06/28 23:01:42 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -103,30 +103,8 @@
 
 \subsection{Class API}
 #ifdef STANDALONE
-%\input{ESMF_ArrayCreate_fapi}
-%\mbox{}\hrulefill\
-%\input{ESMF_ArrayGather_fapi}
-%\mbox{}\hrulefill\
-%\input{ESMF_ArrayGet_fapi}
-%\mbox{}\hrulefill\
-%\input{ESMF_ArrayPr_fapi}
-%\mbox{}\hrulefill\
-%\input{ESMF_ArrayScatter_fapi}
-%\mbox{}\hrulefill\
-%\input{ESMF_Array_fapi}
 \input{ESMC_Array_chapi}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/Array/doc/ESMF_ArrayCreate_fapi}
-%\mbox{}\hrulefill\
-%\input{../Infrastructure/Array/doc/ESMF_ArrayGather_fapi}
-%\mbox{}\hrulefill\
-%\input{../Infrastructure/Array/doc/ESMF_ArrayGet_fapi}
-%\mbox{}\hrulefill\
-%\input{../Infrastructure/Array/doc/ESMF_ArrayPr_fapi}
-%\mbox{}\hrulefill\
-%\input{../Infrastructure/Array/doc/ESMF_ArrayScatter_fapi}
-%\mbox{}\hrulefill\
-%\input{../Infrastructure/Array/doc/ESMF_Array_fapi}
 \input{../Infrastructure/Array/doc/ESMC_Array_chapi}
 #endif
 
