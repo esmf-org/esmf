@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.38 2010/06/25 21:08:34 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.39 2010/06/28 15:23:50 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -2997,9 +2997,6 @@ end function
       ! Initialize return code; assume routine not implemented
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleTypeGetInit,btype,rc)
 
       call ESMF_BaseGetStatus(btype%base, fieldbundlestatus, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
