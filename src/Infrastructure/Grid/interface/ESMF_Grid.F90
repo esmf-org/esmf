@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.150 2010/05/11 03:55:54 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.151 2010/06/28 05:59:47 eschwab Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2837,7 +2837,7 @@ end subroutine ESMF_GridConvertIndex
     type(ESMF_Grid) :: grid 
     character(ESMF_MAXSTR) :: attrvalue
     integer :: maxIndex(2), regDecomp(2)  ! TODO: allow more dimensions
-    integer :: fileNameLen, localrc
+    integer :: fileNameLen, ordinal, localrc
     logical :: xercesPresent
 
     ! Initialize return code; assume failure until success is certain 
@@ -2891,8 +2891,9 @@ end subroutine ESMF_GridConvertIndex
     ! (required, for maxIndex in GriCreate())
     ! use C calls rather than F90, to circumvent mutually dependency
     ! between Grid and Attribute
+    ordinal = 1   ! get the 1st AttPack of type (conv, purp) on 'grid'
     call c_ESMC_AttPackGetChar(grid, 'NX', attrValue, &
-                               'GridSpec', 'General', 'grid', localrc)
+                               'GridSpec', 'General', 'grid', ordinal, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_GridDestroy(grid)
@@ -2909,7 +2910,7 @@ end subroutine ESMF_GridConvertIndex
     end if
 
     call c_ESMC_AttPackGetChar(grid, 'NY', attrValue, &
-                               'GridSpec', 'General', 'grid', localrc)
+                               'GridSpec', 'General', 'grid', ordinal, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_GridDestroy(grid)

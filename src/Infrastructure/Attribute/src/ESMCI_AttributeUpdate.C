@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.23 2010/06/23 23:01:08 theurich Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.24 2010/06/28 05:59:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.23 2010/06/23 23:01:08 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.24 2010/06/28 05:59:47 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -393,10 +393,10 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
     localrc = packList.at(i)->AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
     if (localrc == ESMC_ATTUPDATERM_ATTPACKATT)
       localrc = AttPackRemoveAttribute(packList.at(i)->attrName, packList.at(i)->attrConvention, 
-        packList.at(i)->attrPurpose, packList.at(i)->attrObject);
+        packList.at(i)->attrPurpose, packList.at(i)->attrObject, NULL);
     else if (localrc == ESMC_ATTUPDATERM_ATTPACK) {
       localrc = AttPackRemove(packList.at(i)->attrConvention, 
-        packList.at(i)->attrPurpose, packList.at(i)->attrObject);
+        packList.at(i)->attrPurpose, packList.at(i)->attrObject, NULL);
     if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufRecv failed removing attr", &localrc);

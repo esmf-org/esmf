@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.1 2010/06/02 05:55:29 eschwab Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.2 2010/06/28 05:59:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@ program ESMF_AttributeXMLUTest
 ! !DESCRIPTION:
 !
 ! The code in this file drives F90 Attribute unit tests of features supporing
-! the creation of XML files.  These include, multi-child trees; XML element
+! the creation of XML files.  These include: multi-child trees; XML element
 ! 'attributes'; and multiple attribute packages of the same type, created at
 ! the same tree node level, on component objects.
 ! The companion file ESMF\_Attribute.F90 contains the definitions for the
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.1 2010/06/02 05:55:29 eschwab Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.2 2010/06/28 05:59:47 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -46,14 +46,14 @@ program ESMF_AttributeXMLUTest
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
-      character(ESMF_MAXSTR) :: name
+      character(ESMF_MAXSTR) :: name, attrValue
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! Local variables  
-      integer                 :: rc 
-      type(ESMF_GridComp)     :: gridcomp
+      integer                 :: ordinal, rc 
+      type(ESMF_GridComp)     :: gridcomp, gridcomp2
       character(ESMF_MAXSTR)  :: conv, purp
       
       character(ESMF_MAXSTR),dimension(3)   :: nestConv, nestPurp
@@ -78,7 +78,8 @@ program ESMF_AttributeXMLUTest
 
   !-------------------------------------------------------------------------
   !   Multi-child tree construction tests. Uses CIM XML responsibleParty node
-  !     as a test case, building it up as a tree of custom attribute packages:
+  !     as a test case, building it up as a tree of custom attribute packages
+  !     (not from a standard, built-in package):
   !
   !    <responsibleParty>
   !       <gmd:CI_ResponsibleParty>
@@ -507,24 +508,40 @@ program ESMF_AttributeXMLUTest
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !-------------------------------------------------------------------------
-  !   XML element 'attribute' tests. Uses built-in, standard CIM XML
-  !     responsibleParty node as a test case
+  !   Multiple Attribute Packages of the same (conv,purp) tests. Uses built-in,
+  !   standard CIM XML responsibleParty node package as a test case
   !-------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
     !EX_UTest
+    ! Construct a gridded component ESMF object that will be decorated with
+    ! the Attributes we will be manipulating
+    gridcomp2 = ESMF_GridCompCreate(name="gridded_comp_cim_rp", petList=(/0/), &
+                 rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a gridded component to decorate with Attributes test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    ! call ESMF_AttributeWrite(gridcomp2, 'CIM 1.0', &
+    !                          'Model Component Simulation Description', &
+    !                          attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
+
+    !-------------------------------------------------------------------------
+    !EX__UTest
+    ! TODO: try this instead of creating separate gridcomp2 below (another
+    !       variation of the multiple-attpack-of-the-same-type test)
     ! To create a xml output file separate from the above tests, rename the
     ! gridded component ESMF object. It will be decorated with the standard
-    ! built-in CIM Responsible Pary attribute package
-    call ESMF_GridCompSet(gridcomp, name="gridded_comp_cim_rp", rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Renaming a gridded component Attributes test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    ! built-in CIM Responsible Party attribute package
+    !call ESMF_GridCompSet(gridcomp, name="gridded_comp_cim_rp", rc=rc)
+    !write(failMsg, *) "Did not return ESMF_SUCCESS"
+    !write(name, *) "Renaming a gridded component Attributes test"
+    !call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Create standard CIM attribute package on the gridded component
-    call ESMF_AttributeAdd(gridcomp, &
+    call ESMF_AttributeAdd(gridcomp2, &
                            convention='CIM 1.0', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
@@ -532,63 +549,180 @@ program ESMF_AttributeXMLUTest
     write(name, *) "Creating std CIM responsibleParty attribute package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+    ! call ESMF_AttributeWrite(gridcomp2, 'CIM 1.0', &
+    !                          'Model Component Simulation Description', &
+    !                          attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
+
     !-------------------------------------------------------------------------
     !EX_UTest
-    ! Set the 1st attribute value within the CIM RP package
-    call ESMF_AttributeSet(gridcomp, 'IndividualName', 'Gerard Devine', &
-      convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
+    ! Create duplicate standard CIM attribute package on the gridded component
+    call ESMF_AttributeAdd(gridcomp2, &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+                           rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set 1st attribute value in CIM RP package test"
+    write(name, *) "Creating duplicate std CIM responsibleParty attribute package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    ! call ESMF_AttributeRemove(gridcomp2, &
+    !                 convention='CIM 1.0', &
+    !                 purpose='Model Component Simulation Description', rc=rc)
+    ! call ESMF_AttributeWrite(gridcomp2, 'CIM 1.0', &
+    !                          'Model Component Simulation Description', &
+    !                          attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 1st attribute value within the 1st CIM RP package
+    ordinal = 1
+    call ESMF_AttributeSet(gridcomp2, 'IndividualName', 'Bugs Bunny', &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+    !       convention='ISO 19115', purpose='Responsible Party Description', &
+                           ordinal=ordinal, &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 1st attribute value in 1st CIM RP package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !EX_UTest
-    ! Set the 2nd attribute value within the CIM RP package
-    call ESMF_AttributeSet(gridcomp, 'IndividualPhysicalAddress', &
+    ! Set the 1st attribute value within the 2nd CIM RP package
+    ordinal = 2
+    call ESMF_AttributeSet(gridcomp2, 'IndividualName', 'Pink Panther', &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+    !       convention='ISO 19115', purpose='Responsible Party Description', &
+                           ordinal=ordinal, &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 1st attribute value in 2nd CIM RP package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Get the 1st attribute value within the 2nd CIM RP package
+    ordinal = 2
+    call ESMF_AttributeGet(gridcomp2, 'IndividualName', value=attrValue, &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+    !       convention='ISO 19115', purpose='Responsible Party Description', &
+                           ordinal=ordinal, &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Get 1st attribute value in 2nd CIM RP package test"
+    call ESMF_Test((attrValue=='Pink Panther' .and. rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !print *, "attrValue = ", attrValue
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Get the 1st attribute value within the 1st CIM RP package
+    ordinal = 1
+    call ESMF_AttributeGet(gridcomp2, 'IndividualName', value=attrValue, &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+    !       convention='ISO 19115', purpose='Responsible Party Description', &
+                           ordinal=ordinal, &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Get 1st attribute value in 1st CIM RP package test"
+    call ESMF_Test((attrValue=='Bugs Bunny' .and. rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !print *, "attrValue = ", attrValue
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Get the 1st attribute value within the 2nd CIM RP package
+    !  default ordinal=2 (last one)
+    call ESMF_AttributeGet(gridcomp2, 'IndividualName', value=attrValue, &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+    !       convention='ISO 19115', purpose='Responsible Party Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Get 1st attribute value in 2nd CIM RP package test (default ordinal=2"
+    call ESMF_Test((attrValue=='Pink Panther' .and. rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !print *, "attrValue = ", attrValue
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Create triplicate standard CIM attribute package on the gridded component
+    call ESMF_AttributeAdd(gridcomp2, &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating triplicate std CIM responsibleParty attribute package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 1st attribute value within the last CIM RP package
+    call ESMF_AttributeSet(gridcomp2, 'IndividualName', 'Gerard Devine', &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+    !       convention='ISO 19115', purpose='Responsible Party Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 1st attribute value in last CIM RP package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 2nd attribute value within the last CIM RP package
+    call ESMF_AttributeSet(gridcomp2, 'IndividualPhysicalAddress', &
       'Department of Meteorology University of Reading Earley Gate, Reading Devine', &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set 2nd attribute value in CIM RP package test"
+    write(name, *) "Set 2nd attribute value in last CIM RP package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !EX_UTest
-    ! Set the 3rd attribute value within the CIM RP package
-      call ESMF_AttributeSet(gridcomp, 'IndividualEmailAddress', &
+    ! Set the 3rd attribute value within the last CIM RP package
+      call ESMF_AttributeSet(gridcomp2, 'IndividualEmailAddress', &
                                        'g.m.devine@reading.ac.uk', &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set 3rd attribute value in CIM RP package test"
+    write(name, *) "Set 3rd attribute value in last CIM RP package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !EX_UTest
-    ! Set the 4th attribute value within the CIM RP package
-    call ESMF_AttributeSet(gridcomp, 'IndividualURL', &
+    ! Set the 4th attribute value within the last CIM RP package
+    call ESMF_AttributeSet(gridcomp2, 'IndividualURL', &
                                      'www.nerc.ac.uk', &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set 4th attribute value in CIM RP package test"
+    write(name, *) "Set 4th attribute value in last CIM RP package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !-------------------------------------------------------------------------
+  !   XML element 'attribute' test. Uses built-in, standard CIM XML
+  !     responsibleParty node package as a test case
+  !-------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
     !EX_UTest
-    ! Set the 5th attribute value within the CIM RP package
+    ! Set the 5th attribute value within the last CIM RP package
     ! This is set as an XML element attribute to ensure proper output format
-    call ESMF_AttributeSet(gridcomp, 'IndividualRole', 'author', &
+    call ESMF_AttributeSet(gridcomp2, 'IndividualRole', 'author', &
                                       attrAttribute=.true., &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set 5th attribute value (XML element attribute) in CIM RP package test"
+    write(name, *) "Set 5th attribute value (XML element attribute) in last CIM RP package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    ! call ESMF_AttributeRemove(gridcomp2, &
+    !                 convention='CIM 1.0', &
+    !                 purpose='Model Component Simulation Description', rc=rc)
 
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Write out the attribute tree as a CIM-formatted XML file
-    call ESMF_AttributeWrite(gridcomp, 'CIM 1.0', &
+    call ESMF_AttributeWrite(gridcomp2, 'CIM 1.0', &
                                  'Model Component Simulation Description', &
-    !call ESMF_AttributeWrite(gridcomp, 'ISO 19115', &
-    !                                   'Responsible Party Description', &
+    !call ESMF_AttributeWrite(gridcomp2, 'ISO 19115', &
+    !                            'Responsible Party Description', &
       attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Write out CIM RP XML file test"
@@ -599,6 +733,8 @@ program ESMF_AttributeXMLUTest
     !------------------------------------------------------------------------
     ! clean up
     call ESMF_GridCompDestroy(gridcomp, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_GridCompDestroy(gridcomp2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     !------------------------------------------------------------------------
 

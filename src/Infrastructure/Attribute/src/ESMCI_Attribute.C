@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.61 2010/06/23 23:01:08 theurich Exp $
+// $Id: ESMCI_Attribute.C,v 1.62 2010/06/28 05:59:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.61 2010/06/23 23:01:08 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.62 2010/06/28 05:59:47 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -115,7 +115,7 @@ namespace ESMCI {
   localrc = ESMC_RC_NOT_IMPL;
 
   // Search for the attpack, make it if not found
-  attpack = AttPackGet(convention, purpose, object);
+  attpack = AttPackGet(convention, purpose, object, NULL);
   if(!attpack) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
         "Cannot find the specified Attribute package\n", &localrc);
@@ -171,23 +171,19 @@ namespace ESMCI {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  // Search for the attpack, make it if not found
-  attpack = AttPackGet(convention, purpose, object);
-  if(!attpack) {
-    // name the attribute package using convention, purpose, and object
-    attpack = new Attribute(convention, purpose, object);
-    if (!attpack) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
-        "failed initializing an attpack", &localrc);
-      return localrc;
-    }
+  // name the attribute package using convention, purpose, and object
+  attpack = new Attribute(convention, purpose, object);
+  if (!attpack) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
+      "failed initializing an attpack", &localrc);
+    return localrc;
+  }
 
-    localrc = AttPackSet(attpack);
-    if (localrc != ESMF_SUCCESS) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_NOTSET,
-        "failed adding an attpack to an Attribute", &localrc);
-      return localrc;
-    }
+  localrc = AttPackSet(attpack);
+  if (localrc != ESMF_SUCCESS) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_NOTSET,
+      "failed adding an attpack to an Attribute", &localrc);
+    return localrc;
   }
     
   return ESMF_SUCCESS;
@@ -329,27 +325,72 @@ namespace ESMCI {
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
 
+      string empty="";  // set values initially empty to force writing out empty
+                        // containing XML tree structure(s) as per CIM standard
       localrc = AttPackAddAttribute("IndividualName", "ISO 19115",
                                       "Responsible Party Description", object);
+      localrc = AttPackSet("IndividualName", ESMC_TYPEKIND_CHARACTER, 1,
+         &empty, "ISO 19115", "Responsible Party Description",
+         object, NULL, NULL);
+
       localrc = AttPackAddAttribute("IndividualPhysicalAddress", "ISO 19115",
                                       "Responsible Party Description", object);
+      localrc = AttPackSet("IndividualPhysicalAddress",
+         ESMC_TYPEKIND_CHARACTER, 1,
+         &empty, "ISO 19115", "Responsible Party Description",
+         object, NULL, NULL);
+
       localrc = AttPackAddAttribute("IndividualEmailAddress", "ISO 19115",
                                       "Responsible Party Description", object);
+      localrc = AttPackSet("IndividualEmailAddress", ESMC_TYPEKIND_CHARACTER, 1,
+         &empty, "ISO 19115", "Responsible Party Description",
+         object, NULL, NULL);
+
       localrc = AttPackAddAttribute("IndividualURL", "ISO 19115",
                                       "Responsible Party Description", object);
+      localrc = AttPackSet("IndividualURL", ESMC_TYPEKIND_CHARACTER, 1,
+         &empty, "ISO 19115", "Responsible Party Description",
+         object, NULL, NULL);
+
       localrc = AttPackAddAttribute("IndividualRole", "ISO 19115",
                                       "Responsible Party Description", object);
+      ESMC_Logical attrAttr=ESMF_TRUE;
+      localrc = AttPackSet("IndividualRole", ESMC_TYPEKIND_CHARACTER, 1,
+         &empty, "ISO 19115", "Responsible Party Description",
+         object, NULL, &attrAttr);
 
-      localrc = AttPackAddAttribute("InstitutionName", "ISO 19115",
-                                      "Responsible Party Description", object);
-      localrc = AttPackAddAttribute("InstitutionPhysicalAddress", "ISO 19115",
-                                      "Responsible Party Description", object);
-      localrc = AttPackAddAttribute("InstitutionURL", "ISO 19115",
-                                      "Responsible Party Description", object);
-      localrc = AttPackAddAttribute("InstitutionAbbreviation", "ISO 19115",
-                                      "Responsible Party Description", object);
-      localrc = AttPackAddAttribute("FundingSource", "ISO 19115",
-                                      "Responsible Party Description", object);
+      //localrc = AttPackAddAttribute("InstitutionName", "ISO 19115",
+      //                                "Responsible Party Description", object);
+      //localrc = AttPackSet("InstitutionName", ESMC_TYPEKIND_CHARACTER, 1,
+      //   &empty, "ISO 19115", "Responsible Party Description",
+      //   object, NULL, NULL);
+
+      //localrc = AttPackAddAttribute("InstitutionPhysicalAddress", "ISO 19115",
+      //                                "Responsible Party Description", object);
+      //localrc = AttPackSet("InstitutionPhysicalAddress",
+      //   ESMC_TYPEKIND_CHARACTER, 1,
+      //   &empty, "ISO 19115", "Responsible Party Description",
+      //   object, NULL, NULL);
+
+      //localrc = AttPackAddAttribute("InstitutionURL", "ISO 19115",
+      //                                "Responsible Party Description", object);
+      //localrc = AttPackSet("InstitutionURL", ESMC_TYPEKIND_CHARACTER, 1,
+      //   &empty, "ISO 19115", "Responsible Party Description",
+      //   object, NULL, NULL);
+
+      //localrc = AttPackAddAttribute("InstitutionAbbreviation", "ISO 19115",
+      //                                "Responsible Party Description", object);
+      //localrc = AttPackSet("InstitutionAbbreviation",
+      //   ESMC_TYPEKIND_CHARACTER, 1,
+      //   &empty, "ISO 19115", "Responsible Party Description",
+      //   object, NULL, NULL);
+
+      //localrc = AttPackAddAttribute("FundingSource", "ISO 19115",
+      //                                "Responsible Party Description", object);
+      //localrc = AttPackSet("FundingSource", ESMC_TYPEKIND_CHARACTER, 1,
+      //   &empty, "ISO 19115", "Responsible Party Description",
+      //   object, NULL, NULL);
+
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
@@ -445,7 +486,7 @@ namespace ESMCI {
 
   // Search for the packs to nest this new one around
   for(i=0; i<nestCount; i++) {
-    nestpack[i] = AttPackGet(nestConvention[i], nestPurpose[i], object);
+    nestpack[i] = AttPackGet(nestConvention[i], nestPurpose[i], object, NULL);
     if(!nestpack[i]) {
       // TODO:  more detailed error message including conv,purp,object
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND,
@@ -481,9 +522,7 @@ namespace ESMCI {
   int removed=0;
   for (i=0; i<localParent->packList.size(); i++) {
     for (int j=0; j<nestCount; j++) {
-      if (nestConvention[j].compare(localParent->packList.at(i)->attrConvention)==0 && 
-          nestPurpose[j].compare(localParent->packList.at(i)->attrPurpose)==0 &&
-          object.compare(localParent->packList.at(i)->attrObject)==0) {
+      if (nestpack[j] == localParent->packList.at(i)) { 
         localParent->packList.erase(localParent->packList.begin() + i);
         localParent->structChange = ESMF_TRUE;
         removed++;
@@ -526,28 +565,66 @@ namespace ESMCI {
 //    {\tt Attribute} pointer to requested object or NULL on early exit.
 // 
 // !ARGUMENTS:
-      const string &convention,             // in - Attribute convention to retrieve
-      const string &purpose,                // in - Attribute purpose to retrieve
-      const string &object) const {         // in - Attribute object type to retrieve
+      const string &convention,        // in - Attribute convention to retrieve
+      const string &purpose,           // in - Attribute purpose to retrieve
+      const string &object,            // in - Attribute object type to retrieve
+      int *ordinal) const {            // in - which one of multiple packs
 // !DESCRIPTION:
 //    Get an attpack on an {\tt Attribute} given it's convention, 
-//    purpose, and object type.
+//    purpose, object type, and optional ordinal number
 //
 //EOPI
 
-  unsigned int i;
+  int i;
+  int desiredOne=0;    // default to return last attpack match found,
+                       // out of multiple
+  int currentOne=0;    // the current matched attpack
   Attribute *attpack;
   
   attpack = NULL;
+  if (ordinal) desiredOne = *ordinal;
   
+//printf("AttPackGet(): packList.size() = %d\n", packList.size()); fflush(stdout);
+
   for (i=0; i<packList.size(); i++) {
-    // look for the attpack on this Attribute
+    // look for the attpack on this Attribute, at this level, and return the
+    // last one if any matches there, or the desired ordinal one
+//printf("packList.at(%d)->attrConvention = %s\n", i, packList.at(i)->attrConvention.c_str());
+//printf("packList.at(%d)->attrPurpose = %s\n", i, packList.at(i)->attrPurpose.c_str());
+//printf("packList.at(%d)->attrObject = %s\n", i, packList.at(i)->attrObject.c_str());
     if (convention.compare(packList.at(i)->attrConvention) == 0 && 
         purpose.compare(packList.at(i)->attrPurpose) == 0 &&
-        object.compare(packList.at(i)->attrObject) ==0)
-          return packList.at(i);
-    // recurse through the nested Attribute packages
-    attpack = packList.at(i)->AttPackGet(convention, purpose, object);
+        object.compare(packList.at(i)->attrObject) ==0) {
+          attpack = packList.at(i);
+          // if looking for a particular one (1st, 2nd, 3rd, etc....)
+          if (desiredOne > 0) {
+            currentOne++;
+            if (currentOne == desiredOne) {
+//printf("AttPackGet(): found attpack number %d!\n", desiredOne);
+              return attpack;
+            }
+          }
+    }
+  }
+  if (attpack) {
+    if (desiredOne > 0) {
+//printf("AttPackGet(): did not find the one we wanted -> NULL\n");
+      // did not find the specific one we wanted, so return null
+      return NULL;
+    } else {
+//printf("AttPackGet(): returning last match\n");
+      // otherwise just return the last match
+      return attpack;
+    }
+  }
+
+  // if not found at this level, recurse through the nested Attribute packages,
+  // one level at a time, right-to-left, to find right-most package
+//printf("AttPackGet(): going down a level, packList.size()=%d\n", packList.size());
+  for (i=packList.size()-1; i >= 0; i--) {
+//printf("i=%d\n", i);
+    attpack = packList.at(i)->AttPackGet(convention, purpose, object, ordinal);
+    if (attpack) return attpack;
   }
   
   return attpack;
@@ -610,6 +687,7 @@ namespace ESMCI {
       const string &convention,                       // in - Attribute convention
       const string &purpose,                          // in - Attribute purpose
       const string &object,                           // in - Attribute object type
+      int *ordinal,                          // in - which one of multiple packs
       ESMC_Logical *present) const {         // in/out - the present flag
 // 
 // !DESCRIPTION:
@@ -624,7 +702,7 @@ namespace ESMCI {
   attr = NULL; attpack = NULL;
 
   // get the attpack
-  attpack = AttPackGet(convention, purpose, object);
+  attpack = AttPackGet(convention, purpose, object, ordinal);
   if (!attpack) {
     *present = ESMF_FALSE;
     return ESMF_SUCCESS;
@@ -653,7 +731,8 @@ namespace ESMCI {
 // !ARGUMENTS:
       const string &convention,              // in - convention
       const string &purpose,                 // in - purpose
-      const string &object) {                // in - object type to look for
+      const string &object,                  // in - object type to look for
+      int *ordinal) {                        // in - which one of multiple packs
 // 
 // !DESCRIPTION:
 //     Remove an {\tt Attribute} package
@@ -671,7 +750,7 @@ namespace ESMCI {
   localrc = ESMC_RC_NOT_IMPL;
     
   // get the attpack
-  attpack = AttPackGet(convention, purpose, object);
+  attpack = AttPackGet(convention, purpose, object, ordinal);
   if(!attpack) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
       "Cannot find the Attribute package", &localrc);
@@ -681,9 +760,7 @@ namespace ESMCI {
   // save the parent, remove attpack from it's parent, then delete attpack
   attrparent = attpack->parent;
   for (i=0; i<attrparent->packList.size(); i++) {
-    if (convention.compare(attrparent->packList.at(i)->attrConvention)==0 && 
-        purpose.compare(attrparent->packList.at(i)->attrPurpose)==0 &&
-        object.compare(attrparent->packList.at(i)->attrObject)==0) {
+    if (attrparent->packList.at(i) == attpack) {
       delete (attrparent->packList.at(i));
       attrparent->packList.erase(attrparent->packList.begin() + i);
       attrparent->structChange = ESMF_TRUE;
@@ -718,7 +795,8 @@ namespace ESMCI {
       const string &name,                    // in - name
       const string &convention,              // in - convention
       const string &purpose,                 // in - purpose
-      const string &object) {                // in - object type to look for
+      const string &object,                  // in - object type to look for
+      int *ordinal) {                        // in - which one of multiple packs
 // 
 // !DESCRIPTION:
 //     Remove an {\tt Attribute} from an {\tt Attribute} package
@@ -736,7 +814,7 @@ namespace ESMCI {
   localrc = ESMC_RC_NOT_IMPL;
   
   // get the attpack
-  attpack = AttPackGet(convention, purpose, object);
+  attpack = AttPackGet(convention, purpose, object, ordinal);
   if(!attpack) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
       "Cannot find the specified Attribute package", &localrc);
@@ -778,6 +856,7 @@ namespace ESMCI {
       const string &convention,       // in - attpack convention
       const string &purpose,          // in - attpack purpose
       const string &object,           // in - attpack object type
+      int *ordinal,                   // in - which one of multiple packs
       ESMC_Logical *attrAttr) {
 // 
 // !DESCRIPTION:
@@ -793,14 +872,15 @@ namespace ESMCI {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  // Find the attpack Attribute
-  attpack = AttPackGet(convention, purpose, object);
+  // Find the attpack
+  attpack = AttPackGet(convention, purpose, object, ordinal);
   if(!attpack) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
       "Cannot find the specified Attribute package", &localrc);
     return localrc;
   }
   
+  // Find the attribute
   attr = attpack->AttPackGetAttribute(name);
   if (!attr) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
@@ -854,6 +934,9 @@ namespace ESMCI {
     return localrc;
   }
 
+#if 0
+// ERS: allow duplicate attpacks
+
   // first, see if you are replacing an existing Attribute
   for (i=0; i<packList.size(); i++) {
     if ((attr->attrName).compare(packList.at(i)->attrName)==0 &&
@@ -876,6 +959,7 @@ namespace ESMCI {
       return ESMF_SUCCESS;
     }
   }   
+#endif
 
   // point attr to its new Base
   attr->attrBase = this->attrBase;
@@ -1248,7 +1332,7 @@ namespace ESMCI {
   // Initialize local return code
   localrc = ESMC_RC_NOT_IMPL;
  
-  attpack = AttPackGet(convention, purpose, object);
+  attpack = AttPackGet(convention, purpose, object, NULL);
   if (attpack) {
     numattrs = 0;
     objcount++;
@@ -1341,7 +1425,7 @@ namespace ESMCI {
   // Initialize local return code
   localrc = ESMC_RC_NOT_IMPL;
   
-  attpack = AttPackGet(convention, purpose, object);
+  attpack = AttPackGet(convention, purpose, object, NULL);
   if (attpack) {
     index = 0;
     localrc = attpack->AttributeCountTreeLensAttpack(index, attrLens, attrNames);
@@ -2254,7 +2338,7 @@ namespace ESMCI {
       const string &name) const {        // in - Attribute name to retrieve
 // 
 // !DESCRIPTION:
-//    Get the name of an {\tt Attribute}.
+//    Get the {\tt Attribute} name.
 //
 //EOPI
 
@@ -2300,6 +2384,29 @@ namespace ESMCI {
   return attrList.at(number);
 
 }  // end AttributeGet
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeGetParent"
+//BOPI
+// !IROUTINE:  AttributeGetParent - get {\tt Attribute} parent from an ESMF type
+//
+// !INTERFACE:
+      Attribute *Attribute::AttributeGetParent(
+// 
+// !RETURN VALUE:
+//    {\tt Attribute} parent pointer or NULL on error exit.
+// 
+// !ARGUMENTS:
+      void) const {        // none
+// 
+// !DESCRIPTION:
+//    Get the parent of {\tt Attribute}.
+//
+//EOPI
+
+  return parent;
+
+}  // end AttributeGetParent
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeGet"
@@ -3524,7 +3631,7 @@ namespace ESMCI {
   // Initialize local return code
   localrc = ESMC_RC_NOT_IMPL;
   
-  attpack = AttPackGet(convention, purpose, "field");
+  attpack = AttPackGet(convention, purpose, "field", NULL);
   if (attpack) {
     localrc = attpack->AttributeWriteTabBuffer(tab,index,columns,attrLens,attrNames);
     if (localrc != ESMF_SUCCESS) {
@@ -3715,6 +3822,8 @@ namespace ESMCI {
   bool fielddone, griddone, compdone;
   ESMC_Logical presentflag;
 
+//printf("in AttributeWriteXML()\n"); fflush(stdout);
+
   fielddone = false; griddone = false; compdone = false;
   rows = 0; fldcount = 0; columns = 0;
   attr = NULL; attpack = NULL;
@@ -3733,7 +3842,7 @@ namespace ESMCI {
   //
   if (object.compare("comp")==0) {
     // get value of attribute 0 or set to N/A if not present
-    localrc = AttPackIsPresent("Name",convention,purpose,object,&presentflag);
+    localrc = AttPackIsPresent("Name",convention,purpose,object,NULL,&presentflag);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed finding an attribute");
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -3742,7 +3851,7 @@ namespace ESMCI {
       return ESMF_FAILURE;
     }
     if (presentflag == ESMF_TRUE) {
-      attr = (AttPackGet(convention, purpose, object)->AttPackGetAttribute("Name"));
+      attr = (AttPackGet(convention, purpose, object,NULL)->AttPackGetAttribute("Name"));
       if (attr != NULL) {
         modelcompname = attr->vcp;
       } else {
@@ -3758,7 +3867,7 @@ namespace ESMCI {
     }
   
     // get value of attribute 1 or set to N/A if not present
-    localrc = AttPackIsPresent("FullName",convention,purpose,object,&presentflag);
+    localrc = AttPackIsPresent("FullName",convention,purpose,object,NULL,&presentflag);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed finding an attribute");
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -3767,7 +3876,7 @@ namespace ESMCI {
       return ESMF_FAILURE;
     }
     if (presentflag == ESMF_TRUE) {
-      attr = (AttPackGet(convention,purpose,object)->AttPackGetAttribute("FullName"));
+      attr = (AttPackGet(convention,purpose,object,NULL)->AttPackGetAttribute("FullName"));
       if (attr != NULL) {
         fullname = attr->vcp;
       } else {
@@ -3783,7 +3892,7 @@ namespace ESMCI {
     }
   
     // get value of attribute 2 or set to N/A if not present
-    localrc = AttPackIsPresent("Version",convention,purpose,object,&presentflag);
+    localrc = AttPackIsPresent("Version",convention,purpose,object,NULL,&presentflag);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed finding an attribute");
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -3792,7 +3901,7 @@ namespace ESMCI {
       return ESMF_FAILURE;
     }
     if (presentflag == ESMF_TRUE) {
-      attr = (AttPackGet(convention,purpose,object)->AttPackGetAttribute("Version"));
+      attr = (AttPackGet(convention,purpose,object,NULL)->AttPackGetAttribute("Version"));
       if (attr != NULL) {
         version = attr->vcp;
       } else {
@@ -4042,8 +4151,11 @@ namespace ESMCI {
 
   // do component write
   if (!compdone) {
-    attpack = AttPackGet(convention, purpose, "comp");
-    if (attpack) {
+    int ordinal=1;
+//printf("XMLtraverse(): looking for 1st attpack\n");
+    attpack = AttPackGet(convention, purpose, "comp", &ordinal);
+    while (attpack != NULL) {
+//printf("XMLtraverse(): found ordinal %d match\n", ordinal);
       if (convention.compare("CIM 1.0")==0 &&
           purpose.compare("Model Component Simulation Description")==0) {
         localrc = attpack->AttributeWriteCIMbuffer(io_xml);
@@ -4062,7 +4174,11 @@ namespace ESMCI {
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
         return ESMF_FAILURE;
       }
+      // get next occurence of this attpack, if any
+      ordinal++;
+      attpack = AttPackGet(convention, purpose, "comp", &ordinal);
     }
+//printf("XMLtraverse(): here3\n");
     compdone = true;
   }
 
@@ -4096,7 +4212,7 @@ namespace ESMCI {
   
   // do grid write
   if (!griddone) {
-    attpack = AttPackGet(convention, purpose, "grid");
+    attpack = AttPackGet(convention, purpose, "grid", NULL);
     if (attpack) {
       // write the grid header
       localrc = io_xml->writeStartElement("GridSpec", 0, 1, "name", attpack->attrBase->ESMC_BaseGetName());
@@ -4357,6 +4473,8 @@ namespace ESMCI {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
+//printf("WriteCIMbuffer(): attrList.size() = %d\n", attrList.size()); fflush(stdout);
+
   for (i=0; i<attrList.size(); ++i) { 
     if (attrList.at(i)->items == 1) {
       string name = attrList.at(i)->attrName; 
@@ -4538,7 +4656,7 @@ namespace ESMCI {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attpack = AttPackGet(convention, purpose, "field");
+  attpack = AttPackGet(convention, purpose, "field", NULL);
   if (attpack) {
     // TODO: replace this prototype for WaterML TimeSeries
     if (convention.compare("WaterML")==0 && 
