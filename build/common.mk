@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.297 2010/06/11 01:35:44 theurich Exp $
+#  $Id: common.mk,v 1.298 2010/06/28 22:57:55 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -3090,6 +3090,13 @@ export TEXINPUTS_VALUE
 	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	$(DO_LATEX) $* ref
 
+%_crefdoc.dvi : %_crefdoc.ctex $(REFDOC_DEP_FILES)
+	@echo "========================================="
+	@echo "_crefdoc.dvi rule from common.mk"
+	@echo "========================================="
+	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
+	$(DO_LATEX) $* cref
+
 #-------------------------------------------------------------------------------
 #  pdf rules
 #-------------------------------------------------------------------------------
@@ -3107,12 +3114,23 @@ $(ESMF_DOCDIR)/%.pdf: %.dvi
 
 $(ESMF_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
 	@echo "========================================="
-	@echo "_%refdoc from %.ctex rule from common.mk"
+	@echo "_refdoc hyml rule from common.mk"
 	@echo "========================================="
 	@if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
 	fi;
 	$(DO_L2H) $* ref
+	$(ESMF_RM) .latex2html-init
+	$(ESMF_MV) $(@F) $(ESMF_DOCDIR)
+
+$(ESMF_DOCDIR)/%_crefdoc: %_crefdoc.ctex $(REFDOC_DEP_FILES)
+	@echo "========================================="
+	@echo "_crefdoc html rule from common.mk"
+	@echo "========================================="
+	@if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
+	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
+	fi;
+	$(DO_L2H) $* cref
 	$(ESMF_RM) .latex2html-init
 	$(ESMF_MV) $(@F) $(ESMF_DOCDIR)
 
