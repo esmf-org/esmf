@@ -1,4 +1,4 @@
-! $Id: ESMF_GridToMeshUTest.F90,v 1.16 2010/03/04 18:57:44 svasquez Exp $
+! $Id: ESMF_GridToMeshUTest.F90,v 1.17 2010/06/28 21:55:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridToMeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridToMeshUTest.F90,v 1.16 2010/03/04 18:57:44 svasquez Exp $'
+    '$Id: ESMF_GridToMeshUTest.F90,v 1.17 2010/06/28 21:55:29 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -124,10 +124,6 @@ program ESMF_GridToMeshUTest
   mesh=ESMF_GridToMesh(grid=grid2D, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             isSphere=0, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
-
-  !!  Switch to F90 interface above, because that's what's used in Regrid
-  !  call gridtomesh_test(vm, grid2D, ESMF_STAGGERLOC_CENTER, localrc)
-  !  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
 
   call ESMF_GridDestroy(grid2D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
