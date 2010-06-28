@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// $Id: gridtomesh.C,v 1.15 2010/05/04 16:33:22 rokuingh Exp $
+// $Id: gridtomesh.C,v 1.16 2010/06/28 20:50:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -14,15 +14,15 @@
 // (all lines below between the !BOP and !EOP markers will be included in 
 //  the automated document processing.)
 //-----------------------------------------------------------------------------
-#include "ESMC_GridToMesh.h"
+#include "ESMCI_GridToMesh.h"
 
 #include "ESMC_Conf.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"
-#include <Mesh/include/ESMCI_Mesh.h>
-#include <Mesh/include/ESMCI_MeshRead.h>
-#include <Mesh/include/ESMCI_Exception.h>
+#include "Mesh/include/ESMCI_Mesh.h"
+#include "Mesh/include/ESMCI_MeshRead.h"
+#include "Mesh/include/ESMCI_Exception.h"
 
 #include <iostream>
 
