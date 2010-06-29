@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateSph2DPlus1Ex.F90,v 1.4 2010/03/04 18:57:44 svasquez Exp $
+! $Id: ESMF_GridCreateSph2DPlus1Ex.F90,v 1.5 2010/06/29 20:47:58 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -53,7 +53,8 @@ program ESMF_GridCreateEx
 !EOC         
 
       finalrc = ESMF_SUCCESS
-      call ESMF_Initialize(vm=vm, rc=rc)
+      call ESMF_Initialize(vm=vm, defaultlogfilename="GridCreateSph2DPlus1Ex.Log", &
+                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
 
 !BOE    
 ! Construct a single patch spherical domain without connection across

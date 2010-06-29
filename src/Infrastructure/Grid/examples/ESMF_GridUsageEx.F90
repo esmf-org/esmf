@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.69 2010/04/21 06:07:14 eschwab Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.70 2010/06/29 20:47:58 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -63,7 +63,8 @@ program ESMF_GridCreateEx
 
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
-  call ESMF_Initialize(vm=vm,  rc=rc)
+  call ESMF_Initialize(vm=vm,  defaultlogfilename="GridUsageEx.Log", &
+                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
