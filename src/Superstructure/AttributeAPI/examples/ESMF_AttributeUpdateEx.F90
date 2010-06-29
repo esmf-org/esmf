@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.17 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.18 2010/06/29 21:55:28 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -75,7 +75,8 @@ implicit none
       character(ESMF_MAXSTR)  :: convESMF,purpGen
 
       finalrc = ESMF_SUCCESS
-      call ESMF_Initialize(vm=vm, rc=rc)
+      call ESMF_Initialize(vm=vm, defaultlogfilename="AttributeUpdateEx.Log", &
+                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
       
       call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
       if (rc/=ESMF_SUCCESS) print *, "ERROR!"

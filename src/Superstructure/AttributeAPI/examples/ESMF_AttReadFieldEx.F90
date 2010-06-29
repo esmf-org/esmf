@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadFieldEx.F90,v 1.8 2010/04/21 06:01:52 eschwab Exp $
+! $Id: ESMF_AttReadFieldEx.F90,v 1.9 2010/06/29 21:55:28 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -63,7 +63,8 @@ program ESMF_AttReadFieldEx
 
 !BOC
       ! initialize ESMF
-      call ESMF_Initialize(vm=vm, rc=rc)
+      call ESMF_Initialize(vm=vm, defaultlogfilename="AttReadFieldEx.Log", &
+                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
 !EOC
 
       if (rc.ne.ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadCustCplCompEx.F90,v 1.1 2010/04/21 05:51:38 eschwab Exp $
+! $Id: ESMF_AttReadCustCplCompEx.F90,v 1.2 2010/06/29 21:55:28 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -62,7 +62,8 @@ program ESMF_AttReadCustCplCompEx
 
 !BOC
       ! initialize ESMF
-      call ESMF_Initialize(vm=vm, rc=rc)
+      call ESMF_Initialize(vm=vm, defaultlogfilename="AttReadCustCplCompEx.Log", &
+                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
 !EOC
 
       if (rc.ne.ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
