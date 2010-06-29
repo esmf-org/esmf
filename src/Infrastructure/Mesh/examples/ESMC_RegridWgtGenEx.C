@@ -1,4 +1,4 @@
-// $Id: ESMC_RegridWgtGenEx.C,v 1.4 2010/06/28 20:07:10 rokuingh Exp $
+// $Id: ESMC_RegridWgtGenEx.C,v 1.5 2010/06/29 18:01:46 rokuingh Exp $
 //==============================================================================
 //
 // Earth System Modeling Framework
@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
     MPI_Barrier(MPI_COMM_WORLD);
     rt.gridsInput = MPI_Wtime();
 
-    if(!offline_regrid(srcmesh, dstmesh, dstmeshcpy, &csrvType, &methodType, &poleType, 
+    if(!offline_regrid(srcmesh, dstmesh, dstmeshcpy, &csrvType, &methodType, &poleType,
                        &poleNPnts, srcGridFile, dstGridFile, wghtFile, rt))
       Throw() << "Offline regridding error" << std::endl;
 
@@ -161,14 +161,17 @@ int main(int argc, char *argv[]) {
     double T1 = rt.gridsInput;
     double T2 = rt.regridComplete;
     double T3 = rt.weightsOutput;
-    ofstream tF;
     char filename[100];
     sprintf(filename, "regrid_timing_%d.out", Par::Rank());
-    tF.open(filename);
-    tF << Par::Rank()<< "\t" << T0-T0 << "\t" << T1-T0 << "\t" << T2-T0 << "\t" << T3-T0 << "\t" << std::endl;
+    ofstream tF(filename, ios::app);
+    tF << std::setw(6) << std::setprecision(5) << Par::Rank() << "\t"
+       << std::setw(4) << std::setprecision(3) << T0-T0 << "\t"
+       << std::setw(16) << std::setprecision(12) << T1-T0 << "\t"
+       << std::setw(16) << std::setprecision(12) << T2-T0 << "\t"
+       << std::setw(16) << std::setprecision(12) << T3-T0 << std::endl;
     tF.close();
     #else
-    if(!offline_regrid(srcmesh, dstmesh, dstmeshcpy, &csrvType, &methodType, &poleType, 
+    if(!offline_regrid(srcmesh, dstmesh, dstmeshcpy, &csrvType, &methodType, &poleType,
                        &poleNPnts, srcGridFile, dstGridFile, wghtFile))
       Throw() << "Offline regridding error" << std::endl;
     #endif
