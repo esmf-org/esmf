@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.30 2010/03/04 18:57:42 svasquez Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.31 2010/06/29 19:15:51 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,7 +36,8 @@ program ESMF_DistGridEx
   
   
   finalrc = ESMF_SUCCESS
-  call ESMF_Initialize(vm=vm, rc=rc)
+  call ESMF_Initialize(vm=vm, defaultlogfilename="DistGridEx.Log", &
+                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
