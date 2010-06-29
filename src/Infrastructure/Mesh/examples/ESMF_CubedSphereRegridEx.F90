@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubedSphereRegridEx.F90,v 1.3 2010/05/20 19:18:52 oehmke Exp $
+! $Id: ESMF_CubedSphereRegridEx.F90,v 1.4 2010/06/29 20:57:48 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -104,7 +104,9 @@ program ESMF_CubedSphereRegridEx
       !------------------------------------------------------------------------
       ! Initialize ESMF
       !
-      call ESMF_Initialize (defaultCalendar=ESMF_CAL_GREGORIAN, rc=status)
+      call ESMF_Initialize (defaultCalendar=ESMF_CAL_GREGORIAN, &
+			defaultlogfilename="CubedSphereRegridEx.Log", &
+                    	defaultlogtype=ESMF_LOG_MULTI, rc=status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
 	  ESMF_CONTEXT, rcToReturn=rc)) goto 90
 

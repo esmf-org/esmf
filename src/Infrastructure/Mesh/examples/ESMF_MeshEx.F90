@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.24 2010/04/26 19:05:08 oehmke Exp $
+! $Id: ESMF_MeshEx.F90,v 1.25 2010/06/29 20:57:49 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -58,7 +58,8 @@ program ESMF_MeshEx
 
 
   finalrc = ESMF_SUCCESS
-  call  ESMF_Initialize(vm=vm, rc=rc)
+  call  ESMF_Initialize(vm=vm, defaultlogfilename="ESMF_MeshEx.Log", &
+                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
 
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
