@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateModEx.F90,v 1.4 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_InternalStateModEx.F90,v 1.5 2010/06/29 22:06:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -196,7 +196,8 @@ program ESMF_InternalStateModEx
 
   finalrc = ESMF_SUCCESS
       
-  call ESMF_Initialize(rc=rc)
+  call ESMF_Initialize(defaultlogfilename="InternalStateModEx.Log", &
+                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
 
   comp1 = ESMF_GridCompCreate(name="test", rc=rc)  

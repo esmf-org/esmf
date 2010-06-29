@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.38 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_CplEx.F90,v 1.39 2010/06/29 22:06:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -268,7 +268,8 @@
         
 !-------------------------------------------------------------------------
 !   ! Initialize the Framework and get the default VM
-    call ESMF_Initialize(vm=vm, rc=rc)
+    call ESMF_Initialize(vm=vm, defaultlogfilename="CplEx.Log", &
+                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
     if (rc .ne. ESMF_SUCCESS) then
         print *, "Unable to initialize ESMF Framework"
         print *, "FAIL: ESMF_CplEx.F90"

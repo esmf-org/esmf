@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.44 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_GCompEx.F90,v 1.45 2010/06/29 22:06:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -273,7 +273,8 @@
         
 !-------------------------------------------------------------------------
 !   ! Initialize the Framework and get the global VM
-    call ESMF_Initialize(vm=vm, rc=rc)
+    call ESMF_Initialize(vm=vm, defaultlogfilename="GCompEx.Log", &
+                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
     if (rc .ne. ESMF_SUCCESS) then
         print *, "Unable to initialize ESMF Framework"
         print *, "FAIL: ESMF_GCompEx.F90"
