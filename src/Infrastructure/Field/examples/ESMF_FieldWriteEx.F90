@@ -44,7 +44,8 @@
   integer :: finalrc
   finalrc = ESMF_SUCCESS
   
-  call ESMF_Initialize(rc=rc)
+  call ESMF_Initialize(defaultlogfilename="FieldWriteEx.Log", &
+                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
 
   if (rc.NE.ESMF_SUCCESS) then
      finalrc = ESMF_FAILURE
