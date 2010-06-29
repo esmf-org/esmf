@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.298 2010/06/28 22:57:55 theurich Exp $
+#  $Id: common.mk,v 1.299 2010/06/29 17:21:59 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2506,23 +2506,31 @@ endif
 #
 exfrun:
 	-@cd $(ESMF_EXDIR) ; \
+	$(ESMF_RM) ./PET*$(EXNAME)Ex.Log ; \
 	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
 	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(EXNAME)Ex ; \
 	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(EXNAME)Ex ; \
 	else \
 	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(EXNAME)Ex \> ./ESMF_$(EXNAME)Ex.stdout 2\>\&1 ; \
 	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(EXNAME)Ex > ./ESMF_$(EXNAME)Ex.stdout 2>&1 ; \
-	fi 
+	fi ; \
+	cat ./PET*$(EXNAME)Ex.Log> ./ESMF_$(EXNAME)Ex.Log ; \
+	$(ESMF_RM) ./PET*$(EXNAME)Ex.Log
+
 
 excrun:
 	-@cd $(ESMF_EXDIR) ; \
+	$(ESMF_RM) ./PET*$(EXNAME)Ex.Log ; \
 	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
 	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(EXNAME)Ex ; \
 	  $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(EXNAME)Ex ; \
 	else \
 	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(EXNAME)Ex \> ./ESMC_$(EXNAME)Ex.stdout 2\>\&1 ; \
 	  $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(EXNAME)Ex > ./ESMC_$(EXNAME)Ex.stdout 2>&1 ; \
-	fi 
+	fi ; \
+	cat ./PET*$(EXNAME)Ex.Log> ./ESMC_$(EXNAME)Ex.Log ; \
+	$(ESMF_RM) ./PET*$(EXNAME)Ex.Log
+
 
 #
 # this target deletes only the example related files from the example subdir
