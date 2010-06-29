@@ -62,7 +62,8 @@
       integer :: finalrc
       finalrc = ESMF_SUCCESS                      ! Establish initial success
   
-      call ESMF_Initialize(rc=rc)                 ! Initialize
+      call ESMF_Initialize(defaultlogfilename="ConfigOverviewEx.Log", &
+                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)                 ! Initialize
 
       if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
