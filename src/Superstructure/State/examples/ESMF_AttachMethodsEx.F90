@@ -1,4 +1,4 @@
-! $Id: ESMF_AttachMethodsEx.F90,v 1.3 2010/03/04 18:57:46 svasquez Exp $
+! $Id: ESMF_AttachMethodsEx.F90,v 1.4 2010/06/29 22:29:41 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -149,7 +149,8 @@ program ESMF_AttachMethodsEx
   finalrc = ESMF_SUCCESS
 
 
-  call ESMF_Initialize(rc=rc)
+  call ESMF_Initialize(defaultlogfilename="AttachMethodsEx.Log", &
+                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
   if (rc/=ESMF_SUCCESS) then
     finalrc = ESMF_FAILURE
     goto 10

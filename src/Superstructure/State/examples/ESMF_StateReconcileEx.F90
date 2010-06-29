@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.27 2010/03/04 18:57:46 svasquez Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.28 2010/06/29 22:29:41 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -109,7 +109,8 @@ end module ESMF_StateReconcileEx_Mod
     finalrc = ESMF_SUCCESS
 
 
-    call ESMF_Initialize(vm=vm, rc=rc)
+    call ESMF_Initialize(vm=vm, defaultlogfilename="StateReconcileEx.Log", &
+                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
     
     ! verify that this example can run on the given petCount
     call ESMF_VMGet(vm, petCount=petCount, rc=rc)
