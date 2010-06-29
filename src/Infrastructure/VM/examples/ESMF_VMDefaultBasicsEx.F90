@@ -1,4 +1,4 @@
-! $Id: ESMF_VMDefaultBasicsEx.F90,v 1.10 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_VMDefaultBasicsEx.F90,v 1.11 2010/06/29 21:27:04 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -48,7 +48,8 @@ program ESMF_VMDefaultBasicsEx
   integer :: finalrc
   finalrc = ESMF_SUCCESS
 !BOC
-  call ESMF_Initialize(vm=vm, rc=rc)
+  call ESMF_Initialize(vm=vm, defaultlogfilename="VMDefaultBasicsEx.Log", &
+                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
   ! Providing the optional vm argument to ESMF_Initialize() is one way of
   ! obtaining the global VM.
 !EOC

@@ -1,4 +1,4 @@
-! $Id: ESMF_VMAllFullReduceEx.F90,v 1.9 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_VMAllFullReduceEx.F90,v 1.10 2010/06/29 21:27:04 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -44,7 +44,8 @@ program ESMF_VMAllFullReduceEx
   integer :: finalrc
   finalrc = ESMF_SUCCESS
 
-  call ESMF_Initialize(vm=vm, rc=rc)
+  call ESMF_Initialize(vm=vm, defaultlogfilename="VMAllFullReduceEx.Log", &
+                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
   call ESMF_VMGet(vm, localPet, rc=rc)
