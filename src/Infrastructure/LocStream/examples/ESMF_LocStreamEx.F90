@@ -48,7 +48,8 @@ program ESMF_LocStreamEx
 
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
-  call ESMF_Initialize(vm=vm,  rc=rc)
+  call ESMF_Initialize(vm=vm,  defaultlogfilename="LocStreamEx.Log", &
+                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
