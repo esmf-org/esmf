@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpecEx.F90,v 1.12 2010/03/04 18:57:41 svasquez Exp $
+! $Id: ESMF_ArraySpecEx.F90,v 1.13 2010/06/29 18:52:23 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -43,7 +43,8 @@
 
 !BOC
       ! initialize ESMF framework
-      call ESMF_Initialize(rc=rc)
+      call ESMF_Initialize(defaultlogfilename="ArraySpecEx.Log", &
+                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
