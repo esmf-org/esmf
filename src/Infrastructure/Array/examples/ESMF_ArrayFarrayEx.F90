@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayEx.F90,v 1.16 2010/03/04 18:57:41 svasquez Exp $
+! $Id: ESMF_ArrayFarrayEx.F90,v 1.17 2010/06/29 17:20:16 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -111,7 +111,8 @@ program ESMF_ArrayFarrayEx
   finalrc = ESMF_SUCCESS
   
 !BOC
-  call ESMF_Initialize(rc=rc)
+  call ESMF_Initialize(defaultlogfilename="ArrayFarrayEx.Log", &
+                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
   call ESMF_VMGetGlobal(vm, rc=rc)
