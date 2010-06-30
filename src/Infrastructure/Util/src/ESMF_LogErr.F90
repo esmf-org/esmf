@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.59 2010/05/07 22:40:30 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.60 2010/06/30 22:01:45 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -996,7 +996,7 @@ end function ESMF_LogFoundDeallocError
 !EOP
 	
     integer:: i
-    logical:: masked = .false.
+    logical:: masked
     type(ESMF_LogPrivate), pointer          :: alog
 
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
@@ -1020,6 +1020,7 @@ end function ESMF_LogFoundDeallocError
       if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
     
       ! check the error code
+      masked = .false.
       if (rcToCheck .NE. ESMF_SUCCESS) then
         do i=1, alog%errorMaskCount
           if (alog%errorMask(i) .eq. rcToCheck) masked = .true.
@@ -1402,7 +1403,7 @@ end function ESMF_LogMsgFoundDeallocError
 !EOP
 	
     integer:: i
-    logical:: masked = .false.
+    logical:: masked
     type(ESMF_LogPrivate), pointer          :: alog
     character(len=ESMF_MAXSTR)::tempmsg
     character(len=ESMF_MAXSTR)::allocmsg
@@ -1432,6 +1433,7 @@ end function ESMF_LogMsgFoundDeallocError
     
       ! check the error code
       if (rcToCheck .NE. ESMF_SUCCESS) then
+        masked = .false.
         do i=1, alog%errorMaskCount
           if (alog%errorMask(i) .eq. rcToCheck) masked = .true.
         enddo
@@ -1506,7 +1508,7 @@ end function ESMF_LogMsgFoundError
 !EOP
 
     integer:: i
-    logical:: masked = .false.
+    logical:: masked
     type(ESMF_LogPrivate), pointer          :: alog
     character(len=ESMF_MAXSTR)::tempmsg
     character(len=ESMF_MAXSTR)::allocmsg
@@ -1533,6 +1535,7 @@ end function ESMF_LogMsgFoundError
 	
       ! check the error code
       if (rcValue .NE. ESMF_SUCCESS) then
+        masked = .false.
         do i=1, alog%errorMaskCount
           if (alog%errorMask(i) .eq. rcValue) masked = .true.
         enddo
@@ -1786,14 +1789,15 @@ end subroutine ESMF_LogOpen
 ! 
 !EOP
     integer :: i, status, status2
-    logical :: isDefault=.false.
+    logical :: isDefault
     type(ESMF_LogPrivate), pointer          :: alog
     type(ESMF_LogEntry), dimension(:), pointer :: localbuf
 
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     
     nullify(alog) ! ensure that the association status is well defined
-    
+
+    isDefault = .false.
     if (present(log)) then
       if(log%logTableIndex.gt.0) then
          alog => ESMF_LogTable(log%logTableIndex)
