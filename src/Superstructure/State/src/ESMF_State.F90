@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.190 2010/06/11 17:43:24 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.191 2010/06/30 00:16:43 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.190 2010/06/11 17:43:24 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.191 2010/06/30 00:16:43 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -4198,14 +4198,14 @@ module ESMF_StateMod
 !EOPI
 
         ! Local vars
-        integer :: status                   ! local error status
+        integer :: localrc                   ! local error status
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! Initialize the base object, set the name, etc.
-        call ESMF_BaseCreate(stypep%base, "State", statename, 0, status)
-        if (ESMF_LogMsgFoundError(status, &
+        call ESMF_BaseCreate(stypep%base, "State", statename, 0, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -4220,8 +4220,8 @@ module ESMF_StateMod
         nullify(stypep%datalist)
         
         ! create methodTable object
-        call c_ESMC_MethodTableCreate(stypep%methodTable, status)
-        if (ESMF_LogMsgFoundError(status, &
+        call c_ESMC_MethodTableCreate(stypep%methodTable, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -5494,7 +5494,7 @@ module ESMF_StateMod
 !
 !EOPI
 
-      integer :: status                   ! local error status
+      integer :: localrc                   ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: sname
       integer, allocatable, dimension(:) :: stodo
@@ -5530,8 +5530,8 @@ module ESMF_StateMod
       ! Allocate some flags to mark whether this is a new item which
       !  needs to be added to the end of the list, or if it replaces an
       !  existing entry or placeholder.  Set all entries to 0.
-      allocate(stodo(scount), stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, "adding States", &
+      allocate(stodo(scount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "adding States", &
                                        ESMF_CONTEXT, rc)) return
       stodo(1:scount) = 0
 
@@ -5542,12 +5542,12 @@ module ESMF_StateMod
       ! For each state...
       do i=1, scount
 
-        call ESMF_StateValidate(states(i), options="", rc=status)
+        call ESMF_StateValidate(states(i), options="", rc=localrc)
         ! TODO: add state number to error msg
-        if (ESMF_LogMsgFoundError(status, &
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
-          deallocate(stodo, stat=status)
+          deallocate(stodo, stat=localrc)
           return
         endif
 
@@ -5559,25 +5559,25 @@ module ESMF_StateMod
            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
                                     "Cannot add a State to itself", &
                                     ESMF_CONTEXT, rc)
-          deallocate(stodo, stat=status)
+          deallocate(stodo, stat=localrc)
           return
         endif
    
-        call c_ESMC_GetName(stypep%base, sname, status)
-        if (ESMF_LogMsgFoundError(status, &
+        call c_ESMC_GetName(stypep%base, sname, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
-          deallocate(stodo, stat=status)
+          deallocate(stodo, stat=localrc)
           return
         endif
     
         ! See if this name is already in the state
         exists = ESMF_StateClassFindData(stypep, sname, .false., dataitem, &
-                                         sindex, status)
-        if (ESMF_LogMsgFoundError(status, &
+                                         sindex, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
-          deallocate(stodo, stat=status)
+          deallocate(stodo, stat=localrc)
           return
         endif
    
@@ -5610,11 +5610,11 @@ module ESMF_StateMod
       if (newcount .eq. 0) goto 10
 
       ! We now know how many total new items need to be added
-      call ESMF_StateClassExtendList(stypep, newcount, status)
-      if (ESMF_LogMsgFoundError(status, &
+      call ESMF_StateClassExtendList(stypep, newcount, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
-          deallocate(stodo, stat=status)
+          deallocate(stodo, stat=localrc)
           return
       endif
 
@@ -5633,11 +5633,11 @@ module ESMF_StateMod
             if (present(proxyflag)) nextitem%proxyFlag = proxyflag
 
             ! Add name
-            call c_ESMC_GetName(states(i)%statep%base, nextitem%namep, status)
-            if (ESMF_LogMsgFoundError(status, &
+            call c_ESMC_GetName(states(i)%statep%base, nextitem%namep, localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
-              deallocate(stodo, stat=status)
+              deallocate(stodo, stat=localrc)
               return
             endif
 
@@ -5657,8 +5657,8 @@ module ESMF_StateMod
 10    continue
 
       ! Get rid of temp flag states
-      deallocate(stodo, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, &
+      deallocate(stodo, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, &
                                        "Adding States to a State", &
                                        ESMF_CONTEXT, rc)) return
 
@@ -6221,7 +6221,7 @@ module ESMF_StateMod
 !
 !EOPI
 
-      integer :: localrc, status                     ! Error status
+      integer :: localrc                             ! Error status
       integer :: i
       type(ESMF_StateClass), pointer :: sp           ! state type
       type(ESMF_StateItem), pointer :: sip           ! state item
@@ -6243,8 +6243,8 @@ module ESMF_StateMod
       !nullify(ESMF_StateDeserialize%statep)
       nullify(substate%statep)
 
-      allocate(sp, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, &
+      allocate(sp, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, &
                                      "space for new State object", &
                                      ESMF_CONTEXT, rc)) return
 
@@ -6266,8 +6266,8 @@ module ESMF_StateMod
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      allocate(sp%datalist(sp%alloccount), stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, "State type", &
+      allocate(sp%datalist(sp%alloccount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "State type", &
                                        ESMF_CONTEXT, rc)) return
 
       do i = 1, sp%datacount
@@ -6348,8 +6348,8 @@ module ESMF_StateMod
       !TODO: in the long run the correct thing will be to serialize/deserialize
       !      the methodTable object! For now just put an empty table into proxy.
       ! create methodTable object
-      call c_ESMC_MethodTableCreate(sp%methodTable, status)
-      if (ESMF_LogMsgFoundError(status, &
+      call c_ESMC_MethodTableCreate(sp%methodTable, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
                                   
