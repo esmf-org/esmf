@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMM.F90,v 1.12 2010/05/07 22:36:48 w6ws Exp $
+! $Id: ESMF_FieldBundleSMM.F90,v 1.13 2010/06/30 22:19:26 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleSMM.F90,v 1.12 2010/05/07 22:36:48 w6ws Exp $'
+      '$Id: ESMF_FieldBundleSMM.F90,v 1.13 2010/06/30 22:19:26 w6ws Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleSMMStore
@@ -155,8 +155,8 @@ contains
         type(ESMF_Field)        :: l_dstField ! helper variable
 
         ! local internal variables
-        logical                 :: src_bundle = .true.
-        logical                 :: dst_bundle = .true.
+        logical                 :: src_bundle
+        logical                 :: dst_bundle
         integer                 :: fcount, i
 
         type(ESMF_ArrayBundle)  :: srcab, dstab
@@ -175,6 +175,7 @@ contains
         l_zeroflag = ESMF_REGION_TOTAL
         if (present(zeroflag)) l_zeroflag = zeroflag
 
+        src_bundle = .true.
         if (present(srcFieldBundle)) then
             ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, srcFieldBundle, rc)
 
@@ -197,6 +198,7 @@ contains
             src_bundle = .false.
         endif
 
+        dst_bundle = .true.
         if (present(dstFieldBundle)) then
             ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, dstFieldBundle, rc)
 
