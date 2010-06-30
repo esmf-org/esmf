@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.4 2010/06/25 15:21:17 samsoncheung Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.5 2010/06/30 04:31:22 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,15 +40,15 @@ program ESMF_ArrayIOUTest
   ! local variables
   type(ESMF_VM):: vm
   type(ESMF_ArraySpec):: arrayspec
-  integer(ESMF_KIND_I4), pointer, dimension(:,:,:) ::  Farray3D_halo, Farray3D_nohalo, Farray3D_nohalo2
+  integer(ESMF_KIND_I4), pointer, dimension(:,:,:) ::  Farray3D_halo, Farray3D_nohalo, Farray3D_halo2, Farray3D_nohalo2
   real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray2D_halo, Farray2D_nohalo
   type(ESMF_DistGrid)                     :: distgrid
   type(ESMF_Array)                        :: array_halo, array_nohalo
-  type(ESMF_Array)                        :: array_nohalo2
+  type(ESMF_Array)                        :: array_halo2, array_nohalo2
   integer                                 :: rc, de
   integer, allocatable :: totalLWidth(:), totalUWidth(:), &
                        computationalLWidth(:),computationalUWidth(:)
-  integer, allocatable :: totalLBound(:,:), totalUBound(:,:)
+  integer, allocatable :: exclusiveLBound(:,:), exclusiveUBound(:,:)
   integer      :: localDeCount, localPet, petCount
   integer :: i,j,k
   real :: Maxvalue, diff
@@ -153,7 +153,7 @@ program ESMF_ArrayIOUTest
 
 !------------------------------------------------------------------------
   !NEX_disable_UTest_Multi_Proc_Only
-  write(name, *) "Array without Halo Create Test"
+  write(name, *) "Creat Array without Halo for PIO Read"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array_nohalo2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
           computationalLWidth=(/0,0,0/), computationalUWidth=(/0,0,0/), &
@@ -161,17 +161,29 @@ program ESMF_ArrayIOUTest
           indexflag=ESMF_INDEX_GLOBAL, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+
+!------------------------------------------------------------------------
+  !NEX_disable_UTest_Multi_Proc_Only
+  write(name, *) "Create Array with Halo for PIO Read"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array_halo2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+          computationalLWidth=(/0,3,1/), computationalUWidth=(/1,1,2/), &
+          totalLWidth=(/1,7,1/), totalUWidth=(/4,2,3/), &
+          indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
 !-------------------------------------------------------------------------------
 ! !  Assign value to an existing, allocated F90 pointer.
 ! !  Data is type ESMF_KIND_I4
   localDeCount = 1
-  allocate(totalLBound(3,localDeCount))         ! dimCount=3
-  allocate(totalUBound(3,localDeCount))         ! dimCount=3
+  allocate(exclusiveLBound(3,localDeCount))         ! dimCount=3
+  allocate(exclusiveUBound(3,localDeCount))         ! dimCount=3
   do de=0,localDeCount-1
     call ESMF_ArrayGet(array_nohalo2, localDe=de, farrayPtr=Farray3D_nohalo2, rc=rc) 
   enddo
-  call ESMF_ArrayGet(array_nohalo2, totalLBound=totalLBound, &
-                     totalUBound=totalUBound, rc=rc)
+  call ESMF_ArrayGet(array_nohalo2, exclusiveLBound=exclusiveLBound, &
+                     exclusiveUBound=exclusiveUBound, rc=rc)
 
 !------------------------------------------------------------------------
   !NEX_disable_UTest_Multi_Proc_Only
@@ -192,9 +204,9 @@ program ESMF_ArrayIOUTest
   write(name, *) "Compare readin data to the existing data without halo"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   Maxvalue = 0.0
-  do k=totalLBound(3,1),totalUBound(3,1)
-  do j=totalLBound(2,1),totalUBound(2,1)
-  do i=totalLBound(1,1),totalUBound(1,1)
+  do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
+  do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
+  do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
    diff = abs( Farray3D_nohalo2(i,j,k)-Farray3D_nohalo(i,j,k) )
    if (Maxvalue.le.diff) Maxvalue=diff
   enddo
@@ -206,9 +218,55 @@ program ESMF_ArrayIOUTest
   call ESMF_Test((rc==ESMF_SUCCESS .or. PIONotPresent), name, &
                  failMsg, result,ESMF_SRCLINE)
 
+
+!-------------------------------------------------------------------------------
+! !  Assign value to an existing, allocated F90 pointer.
+! !  Data is type ESMF_KIND_I4
+  localDeCount = 1
+  do de=0,localDeCount-1
+    call ESMF_ArrayGet(array_halo2, localDe=de, farrayPtr=Farray3D_halo2, &
+                       rc=rc)
+  enddo
+  call ESMF_ArrayGet(array_halo2, exclusiveLBound=exclusiveLBound, &
+                     exclusiveUBound=exclusiveUBound, rc=rc)
+
+!------------------------------------------------------------------------
+  !NEX_disable_UTest_Multi_Proc_Only
+! ! Read in a netCDF file to an ESMF array.
+  write(name, *) "Read ESMF_Array without Halo Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayRead(array_halo2, Farray3D_halo2,3, (/5,5,5/), &
+                      fname='ESMF_Array_int.nc', rc=rc)
+  if (rc==ESMF_RC_LIB_NOT_PRESENT) then
+        PIONotPresent = .true.
+  endif
+  call ESMF_Test((rc==ESMF_SUCCESS .or. PIONotPresent), name, &
+                 failMsg, result,ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_disable_UTest_Multi_Proc_Only
+! ! Compare readin and the existing file
+  write(name, *) "Compare readin data to the existing data with halo"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  Maxvalue = 0.0
+  do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
+  do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
+  do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
+   diff = abs( Farray3D_halo2(i,j,k)-Farray3D_halo(i,j,k) )
+   if (Maxvalue.le.diff) Maxvalue=diff
+  enddo
+  enddo
+  enddo
+  rc = 1
+  if (Maxvalue .lt. 1.e-6) rc=0
+  write(*,*)"Maximum Error (With Halo case) = ", Maxvalue
+  call ESMF_Test((rc==ESMF_SUCCESS .or. PIONotPresent), name, &
+                 failMsg, result,ESMF_SRCLINE)
+
+
   deallocate (computationalLWidth, computationalUWidth)
   deallocate (totalLWidth, totalUWidth)
-  deallocate (totalLBound, totalUBound)
+  deallocate (exclusiveLBound, exclusiveUBound)
 
 !------------------------------------------------------------------------
   !NEX_disable_UTest_Multi_Proc_Only
@@ -313,6 +371,7 @@ program ESMF_ArrayIOUTest
   write(name, *) "Destroy Array with Halo"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array_halo, rc=rc)
+  call ESMF_ArrayDestroy(array_halo2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
@@ -323,8 +382,6 @@ program ESMF_ArrayIOUTest
   call ESMF_ArrayDestroy(array_nohalo2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
-
-
 
   !NEX_disable_UTest_Multi_Proc_Only
   write(name, *) "Destroy DistGrid"
