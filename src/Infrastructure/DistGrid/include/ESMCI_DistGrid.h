@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.29 2010/06/23 05:52:17 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.30 2010/06/30 22:08:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -222,13 +222,14 @@ namespace ESMCI {
     void last();
     void adjust();
     void next();
-    bool isFirst();
-    bool isLast();
-    bool isWithin();
-    bool isWithinWatch();
-    int const *getIndexTuple();
-    int const *getIndexTupleEnd();
-    int const *getIndexTupleStart();
+    bool isFirst()const;
+    bool isLast()const;
+    bool isWithin()const;
+    bool isWithinWatch()const;
+    int const *getIndexTuple()const;
+    int const *getIndexTupleEnd()const;
+    int const *getIndexTupleStart()const;
+    void print()const;
   };  // class MultiDimIndexLoop
   //============================================================================
 

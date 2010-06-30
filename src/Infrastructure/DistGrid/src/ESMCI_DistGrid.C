@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.45 2010/06/23 23:01:08 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.46 2010/06/30 22:08:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.45 2010/06/23 23:01:08 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.46 2010/06/30 22:08:06 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2902,20 +2902,25 @@ int DistGrid::getSequenceIndexLocalDe(
     // determine the sequentialized index by construction of default patch rule
     const int *localDeList = delayout->getLocalDeList();
     int patch = patchListPDe[localDeList[localDe]];  // patches are basis 1 !!!!
-    // prepare patch relative index tuple
-    int *patchIndexTuple = new int[dimCount];
-    for (int i=0; i<dimCount; i++){
-      if (contigFlagPDimPDe[de*dimCount+i])
-        patchIndexTuple[i] = minIndexPDimPDe[de*dimCount+i] + index[i];
-      else
-        patchIndexTuple[i] =
-          indexListPDimPLocalDe[localDe*dimCount+i][index[i]];
+    if (patch == 0){
+      // means that the localDe does not have any elements thus not on patch
+      seqindex = -1;  // indicate no seqIndex
+    }else{
+      // prepare patch relative index tuple
+      int *patchIndexTuple = new int[dimCount];
+      for (int i=0; i<dimCount; i++){
+        if (contigFlagPDimPDe[de*dimCount+i])
+          patchIndexTuple[i] = minIndexPDimPDe[de*dimCount+i] + index[i];
+        else
+          patchIndexTuple[i] =
+            indexListPDimPLocalDe[localDe*dimCount+i][index[i]];
+      }
+      // get sequence index providing patch relative index tuple
+      seqindex = getSequenceIndexPatch(patch, patchIndexTuple, depth, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+        return -1;  //  bail out with invalid seqindex
+      delete [] patchIndexTuple;
     }
-    // get sequence index providing patch relative index tuple
-    seqindex = getSequenceIndexPatch(patch, patchIndexTuple, depth, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
-      return -1;  //  bail out with invalid seqindex
-    delete [] patchIndexTuple;
   }
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -3030,8 +3035,9 @@ int DistGrid::getSequenceIndexPatch(
 
   // check input
   if (patch < 1 || patch > patchCount){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "- Specified patch out of bounds", rc);
+    char message[80];
+    sprintf(message, "- Specified patch %d is out of bounds", patch);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, message, rc);
     return -1;
   }
   
@@ -4047,17 +4053,17 @@ int DistGrid::setArbSeqIndex(
       ++indexTuple[0];                  // increment
     adjust();
   }
-  bool MultiDimIndexLoop::isFirst(){
+  bool MultiDimIndexLoop::isFirst()const{
     for (int i=0; i<indexTuple.size(); i++)
       if (indexTuple[i] != indexTupleStart[i]) return false;
     return true;
   }
-  bool MultiDimIndexLoop::isLast(){
+  bool MultiDimIndexLoop::isLast()const{
     for (int i=0; i<indexTuple.size(); i++)
       if (indexTuple[i] != indexTupleEnd[i]-1) return false;
     return true;
   }
-  bool MultiDimIndexLoop::isWithin(){
+  bool MultiDimIndexLoop::isWithin()const{
     for (int i=0; i<indexTuple.size(); i++)
       if (indexTupleStart[i] >= indexTupleEnd[i])
         return false; // this means there are no elements to iterate over
@@ -4065,7 +4071,7 @@ int DistGrid::setArbSeqIndex(
       return true;
     return false;
   }
-  bool MultiDimIndexLoop::isWithinWatch(){
+  bool MultiDimIndexLoop::isWithinWatch()const{
     bool withinWatchFlag = true;  // init
     int i;
     for (i=0; i<indexTuple.size()-1; i++){
@@ -4081,14 +4087,21 @@ int DistGrid::setArbSeqIndex(
     }
     return withinWatchFlag;
   }
-  int const *MultiDimIndexLoop::getIndexTuple(){
+  int const *MultiDimIndexLoop::getIndexTuple()const{
     return &indexTuple[0];
   }
-  int const *MultiDimIndexLoop::getIndexTupleEnd(){
+  int const *MultiDimIndexLoop::getIndexTupleEnd()const{
     return &indexTupleEnd[0];
   }
-  int const *MultiDimIndexLoop::getIndexTupleStart(){
+  int const *MultiDimIndexLoop::getIndexTupleStart()const{
     return &indexTupleStart[0];
+  }
+  void MultiDimIndexLoop::print()const{
+    int i;
+    printf("MultiDimIndexLoop: indexTuple = (");
+    for (i=0; i<indexTuple.size()-1; i++)
+      printf(" %d,", indexTuple[i]);
+    printf(" %d)\n", indexTuple[i]);
   }
   //============================================================================
 
