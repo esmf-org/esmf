@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.20 2010/06/16 18:12:11 w6ws Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.21 2010/06/30 16:30:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.20 2010/06/16 18:12:11 w6ws Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.21 2010/06/30 16:30:11 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -314,6 +314,13 @@
     write (failMsg, *) "did not return ESMF_SUCCESS"
     call ESMF_UtilMapNameAdd (mapcontainer,  &
         name="Pressure", value=42, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test printing the name/value pairs
+    write (name, *) "Testing debug printout to stdout"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    call ESMF_UtilMapNamePrint (mapcontainer, title=name, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest

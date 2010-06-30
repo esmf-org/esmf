@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util_F.C,v 1.3 2010/06/24 07:42:58 theurich Exp $
+// $Id: ESMCI_Util_F.C,v 1.4 2010/06/30 16:30:11 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Util_F.C,v 1.3 2010/06/24 07:42:58 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Util_F.C,v 1.4 2010/06/30 16:30:11 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -141,6 +141,29 @@ void FTN(c_esmc_mapname_lookup) (MapName **ptr,
         cout << "    name: " << cname << ", index returned = " << *index << endl;
 #endif
         *rc = (*index) ? ESMF_SUCCESS : ESMF_FAILURE;
+}
+
+void FTN(c_esmc_mapname_print) (MapName **ptr,
+                            char *title, // in - title for printout
+                            int *rc,     // out - return code
+                            ESMCI_FortranStrLenArg title_len) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_mapname_print"
+
+        ESMF_CHECK_POINTER(ptr, rc)
+
+	fprintf (stdout, "%s\n", string(title, title_len).c_str ());
+	fprintf (stdout, "%s\n", string(title_len, '-').c_str ());
+#if defined (MAPDEBUG)
+        cout << " map size = " << (*ptr)->table.size () << endl;
+#endif
+
+        std::map<std::string, int>::iterator pos;
+        int i=1;
+	for (pos=(*ptr)->table.begin (); pos != (*ptr)->table.end (); ++pos)
+	  fprintf (stdout, " %i: %s, %i\n",
+             i++, pos->first.c_str (), pos->second);
+        *rc = ESMF_SUCCESS;
 }
 
 void FTN(c_esmc_mapname_remove) (MapName **ptr,

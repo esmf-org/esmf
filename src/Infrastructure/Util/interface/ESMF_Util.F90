@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.27 2010/06/16 18:12:11 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.28 2010/06/30 16:30:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -65,6 +65,7 @@
       public :: ESMF_UtilMapNameCreate
       public :: ESMF_UtilMapNameDestroy
       public :: ESMF_UtilMapNameLookup
+      public :: ESMF_UtilMapNamePrint
       public :: ESMF_UtilMapNameRemove
 
 !  Command line argument methods
@@ -96,7 +97,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.27 2010/06/16 18:12:11 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.28 2010/06/30 16:30:11 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -259,6 +260,49 @@
       rc = localrc
 
   end subroutine ESMF_UtilMapNameLookup
+
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilMapNamePrint"
+!BOPI
+! !IROUTINE:  ESMF_UtilMapNamePrint - Print the name/value pairs 
+!
+! !INTERFACE:
+  subroutine ESMF_UtilMapNamePrint (this, title, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_MapName), intent(in) :: this
+    character(*),       intent(in),  optional :: title
+    integer,            intent(out), optional :: rc
+!
+! !Description:
+! This method prints the name/value pair from a MapName container to
+! stdout.
+!
+! The arguments are:
+! \begin{description}
+! \item [{[this]}]
+! A ESMF\_MapName object
+! \item [{[title]}]
+! Title of the print out
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+
+    integer :: localrc
+
+    localrc = ESMF_FAILURE
+
+    if (present (title)) then
+      call c_esmc_mapname_print (this, trim (title), localrc)
+    else
+      call c_esmc_mapname_print (this, "ESMF_UtilMapNamePrint", localrc)
+    end if
+
+    if (present (rc))  &
+      rc = localrc
+
+  end subroutine ESMF_UtilMapNamePrint
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
