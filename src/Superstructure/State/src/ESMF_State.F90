@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.191 2010/06/30 00:16:43 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.192 2010/06/30 23:38:19 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.191 2010/06/30 00:16:43 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.192 2010/06/30 23:38:19 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2345,12 +2345,11 @@ module ESMF_StateMod
 !
 !
 !EOP
-      integer :: i, ilpos
+      integer :: ilpos
       integer :: localrc
       integer :: localitemcount
       logical :: localnestedflag
       type(ESMF_StateClass), pointer :: stypep
-      type(ESMF_StateItem),  pointer :: nextitem
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -2441,14 +2440,14 @@ module ESMF_StateMod
 
             dp => sp%datalist(i1)
 	    if (.not. present (itemSearch)) then
-	      itemNameList(ilpos) = prefix // dp%namep
-	      ilpos = ilpos + 1
-	    else
-	      if (dp%namep == itemSearch) then
-	      itemNameList(ilpos) = prefix // dp%namep
-	      ilpos = ilpos + 1
-	      end if
-	    end if
+              itemNameList(ilpos) = prefix // dp%namep
+              ilpos = ilpos + 1
+            else
+              if (dp%namep == itemSearch) then
+                itemNameList(ilpos) = prefix // dp%namep
+                ilpos = ilpos + 1
+              end if
+            end if
 
             if (dp%otype%ot == ESMF_STATEITEM_STATE%ot  &
                 .and. localnestedflag) then
@@ -4262,8 +4261,6 @@ module ESMF_StateMod
 
         ! Local vars
         integer :: localrc
-        type(ESMF_StateItem), pointer::stateItem
-        type(ESMF_State) :: wrapper
         type(ESMF_Status):: status
 
         ! Initialize return code; assume failure until success is certain
@@ -4344,7 +4341,6 @@ module ESMF_StateMod
       integer :: localrc                  ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: rhname
-      character(len=ESMF_MAXSTR) :: errmsg
       integer, allocatable, dimension(:) :: atodo
       integer :: i
       integer :: newcount, aindex

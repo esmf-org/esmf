@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.78 2010/03/04 18:57:46 svasquez Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.79 2010/06/30 23:38:20 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.78 2010/03/04 18:57:46 svasquez Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.79 2010/06/30 23:38:20 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -754,7 +754,7 @@
 !     \end{description}
 !
 !EOPI
-    integer :: pets, mypet, i, j, k, l, m, localrc, attreconstart
+    integer :: pets, mypet, j, k, l, localrc, attreconstart
     integer(ESMF_KIND_I4) :: objcount, bsbufsize
     integer(ESMF_KIND_I4) :: comm_ints(2)
     type(ESMF_State) :: substate
@@ -766,10 +766,9 @@
     character(len=ESMF_MAXSTR) :: thisname
     character, pointer, dimension(:) :: bptr
     logical :: ihave
-    type(ESMF_VMId) :: temp_vmid
     type(ESMF_StateItemInfo), pointer :: si
     integer :: offset, myOrigCount
-    logical :: i_send, i_recv, llow
+    logical :: i_send, i_recv
 
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -844,8 +843,6 @@
 !!DEBUG "completed broadcast of object type list"
 
            ! Broadcast VMIds
-#define NEWVMID
-#ifdef NEWVMID
            if (i_send) then
                call ESMF_VMBcastVMId(vm, si%vmidsend, count=myOrigCount, &
                    root=j, rc=localrc)
@@ -863,31 +860,6 @@
            if (ESMF_LogMsgFoundError(localrc, &
                           ESMF_ERR_PASSTHRU, &
                           ESMF_CONTEXT, rc)) return
-#else
-           if (i_send) then
-               do, i=0, pets-1
-                   if (j == i) cycle
-                   do, k=1, myOrigCount
-                       call ESMF_VMSendVMId (vm, si%vmidsend(k), i, rc=localrc)
-                       if (ESMF_LogMsgFoundError(localrc, &
-                                      ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rc)) return
-                   end do
-               end do
-           else
-               allocate(si%vmidrecv(si%theircount), stat=localrc)
-               if (ESMF_LogMsgFoundAllocError(localrc, &
-                              "Allocating buffer for local VM ID list", &
-                              ESMF_CONTEXT, rc)) return
-               do, k=1, si%theircount
-                   call ESMF_VMIdCreate (si%vmidrecv(k))
-                   call ESMF_VMRecvVMId (vm, si%vmidrecv(k), j, rc=localrc)
-                   if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-               end do
-           end if
-#endif
 
            ! Broadcast serialized object buffers
            if (i_send) then
@@ -1230,7 +1202,8 @@
       type(ESMF_State), intent(inout) :: state
       integer, intent(out), optional :: rc               
 
-      integer :: localrc, i, iwrt, oldcount
+      integer :: localrc, i, iwrt
+!     integer :: oldcount
       type (ESMF_StateClass), pointer :: stypep
       logical :: emptyNest
 
