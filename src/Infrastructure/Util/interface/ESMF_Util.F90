@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.28 2010/06/30 16:30:11 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.29 2010/07/02 01:00:09 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -28,6 +28,7 @@
       module ESMF_UtilMod
  
       ! parameters, types
+      use ESMF_IOUtilMod
       use ESMF_UtilTypesMod
       use ESMF_InitMacrosMod
       use ESMF_LogErrMod
@@ -97,7 +98,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.28 2010/06/30 16:30:11 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.29 2010/07/02 01:00:09 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -141,7 +142,7 @@
 
     localrc = ESMF_FAILURE
 
-    call c_esmc_mapname_add (this, name, value, localrc)
+    call c_esmc_mapname_add (this, trim (name), value, localrc)
 
     if (present (rc))  &
       rc = localrc
@@ -254,7 +255,7 @@
 
     localrc = ESMF_FAILURE
 
-    call c_esmc_mapname_lookup (this, name, value, localrc)
+    call c_esmc_mapname_lookup (this, trim (name), value, localrc)
 
     if (present (rc))  &
       rc = localrc
@@ -292,6 +293,9 @@
     integer :: localrc
 
     localrc = ESMF_FAILURE
+
+    call ESMF_IOUnitFlush (0, rc=rc)
+    call ESMF_IOUnitFlush (6, rc=rc)
 
     if (present (title)) then
       call c_esmc_mapname_print (this, trim (title), localrc)
@@ -336,7 +340,7 @@
 
     localrc = ESMF_FAILURE
 
-    call c_esmc_mapname_remove (this, name, localrc)
+    call c_esmc_mapname_remove (this, trim (name), localrc)
 
     if (present (rc))  &
       rc = localrc
