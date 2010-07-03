@@ -1,4 +1,4 @@
-! $Id: ESMF_WordsizeUTest.F90,v 1.15 2010/03/04 18:57:46 svasquez Exp $
+! $Id: ESMF_WordsizeUTest.F90,v 1.16 2010/07/03 02:39:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -13,10 +13,6 @@
     program WordsizeTest
     
 #include "ESMF.h"
-
-! must do this to use the ESMC_Conf.h file from fortran
-#define _FROM_FORTRAN 1
-#include "ESMC_Conf.h"
 
     use ESMF_Mod
     use ESMF_TestMod
