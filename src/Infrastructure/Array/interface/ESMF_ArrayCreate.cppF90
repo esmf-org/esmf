@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.45 2010/03/10 05:44:12 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.46 2010/07/03 03:08:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.45 2010/03/10 05:44:12 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.46 2010/07/03 03:08:47 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -117,6 +117,7 @@ module ESMF_ArrayCreateMod
     TypeKindRankInterfaceMacro(ArrayCreateFromPtr)
     module procedure ESMF_ArrayCreateLocalArray
     module procedure ESMF_ArrayCreateAllocate
+    module procedure ESMF_ArrayCreateAllocateAS
     module procedure ESMF_ArrayCreateCopy
 
     module procedure ESMF_ArrayCreateFromLA         !1st prototype
@@ -919,17 +920,18 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayCreateAllocate()"
 !BOP
-! !IROUTINE: ESMF_ArrayCreate - Create Array object from specification and allocate memory
+! !IROUTINE: ESMF_ArrayCreate - Create Array object from rank and typekind (allocate memory)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateAllocate(arrayspec, distgrid, indexflag, &
+  function ESMF_ArrayCreateAllocate(rank, typekind, distgrid, indexflag, &
     distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
     undistLBound, undistUBound, name, rc)
 !
 ! !ARGUMENTS:
-       type(ESMF_ArraySpec),  intent(inout)           :: arrayspec
+       integer,               intent(in)              :: rank
+       type(ESMF_TypeKind),   intent(in)              :: typekind
        type(ESMF_DistGrid),   intent(in)              :: distgrid
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
@@ -959,8 +961,157 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !
 ! The arguments are:
 ! \begin{description}
+! \item[rank] 
+!      The rank of the Array.
+! \item[rank] 
+!      The typekind of the Array.
+! \item[distgrid]
+!      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and
+!      distributed over DEs. The dimCount of distgrid must be smaller or equal
+!      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
+!      raised.
+! \item[{[indexflag]}]
+!      Indicate how DE-local indices are defined. By default, the exclusive
+!      region of each DE is placed to start at the local index space origin,
+!      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be
+!      aligned with the global index space, if a global index space is well
+!      defined by the associated DistGrid. See section \ref{opt:indexflag}
+!      for a list of valid indexflag options.
+! \item[{[distgridToArrayMap]}]
+!      List that contains as many elements as is indicated by @\
+!      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
+!      the DistGrid object to a dimension in the newly allocated Array object @\
+!      by specifying the appropriate Array dimension index. The default is @\
+!      to map all of {\tt distgrid}|s dimensions against the lower dimensions @\
+!      of the Array object in sequence, i.e. {\tt distgridToArrayMap = @\
+!      (/1, 2, .../)}. @\
+!      Unmapped dimensions in the Array object are not decomposed dimensions @\
+!      and form a tensor of rank = Array.rank - DistGrid.dimCount. @\
+!      All {\tt distgridToArrayMap} entries must be greater than or equal @\
+!      to zero and smaller than or equal to the Array rank. It is erroneous @\
+!      to specify the same entry multiple times unless it is zero. @\
+!      If the Array rank is less than the DistGrid dimCount then the default @\
+!      distgridToArrayMap will contain zeros for the dimCount - rank @\
+!      rightmost entries. A zero entry in the {\tt distgridToArrayMap} @\
+!      indicates that the particular DistGrid dimension will be replicating @\
+!      the Array across the DEs along this direction. @\
+! \item[{[computationalEdgeLWidth]}]
+!      This vector argument must have dimCount elements, where dimCount is
+!      specified in distgrid. It specifies the lower corner of the computational
+!      region with respect to the lower corner of the exclusive region for DEs
+!      that are located on the edge of a patch.
+! \item[{[computationalEdgeUWidth]}]
+!      This vector argument must have dimCount elements, where dimCount is
+!      specified in distgrid. It specifies the upper corner of the computational
+!      region with respect to the upper corner of the exclusive region for DEs
+!      that are located on the edge of a patch.
+! \item[{[computationalLWidth]}]
+!      This vector argument must have dimCount elements, where dimCount is
+!      specified in distgrid. It specifies the lower corner of the computational
+!      region with respect to the lower corner of the exclusive region.
+!      The default is a zero vector.
+! \item[{[computationalUWidth]}]
+!      This vector argument must have dimCount elements, where dimCount is
+!      specified in distgrid. It specifies the upper corner of the computational
+!      region with respect to the upper corner of the exclusive region.
+!      The default is a zero vector.
+! \item[{[totalLWidth]}]
+!      This vector argument must have dimCount elements, where dimCount is
+!      specified in distgrid. It specifies the lower corner of the total memory
+!      region with respect to the lower corner of the computational region.
+!      The default is to accommodate the union of exclusive and computational
+!      region.
+! \item[{[totalUWidth]}]
+!      This vector argument must have dimCount elements, where dimCount is
+!      specified in distgrid. It specifies the upper corner of the total memory
+!      region with respect to the upper corner of the computational region.
+!      The default is to accommodate the union of exclusive and computational
+!      region.
+! \item[{[undistLBound]}]
+!      Lower bounds for the array dimensions that are not distributed.
+! \item[{[undistUBound]}]
+!      Upper bounds for the array dimensions that are not distributed.
+! \item[{[name]}]
+!      Name of the Array object.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc    ! local return code
+    type(ESMF_ArraySpec)    :: arrayspec
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Set ArraySpec from rank and typekind input
+    call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return    
+        
+    ! Call into ArraySpec overloaded interface
+    ESMF_ArrayCreateAllocate = ESMF_ArrayCreate(arrayspec, distgrid, &
+      indexflag, distgridToArrayMap, computationalEdgeLWidth, &
+      computationalEdgeUWidth, computationalLWidth, computationalUWidth, &
+      totalLWidth, totalUWidth, undistLBound, undistUBound, name, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end function ESMF_ArrayCreateAllocate
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayCreateAllocateAS()"
+!BOP
+! !IROUTINE: ESMF_ArrayCreate - Create Array object from ArraySpec (allocate memory)
+
+! !INTERFACE:
+  ! Private name; call using ESMF_ArrayCreate()
+  function ESMF_ArrayCreateAllocateAS(arrayspec, distgrid, indexflag, &
+    distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, &
+    computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
+    undistLBound, undistUBound, name, rc)
+!
+! !ARGUMENTS:
+       type(ESMF_ArraySpec),  intent(inout)           :: arrayspec
+       type(ESMF_DistGrid),   intent(in)              :: distgrid
+       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+       integer,               intent(in),   optional  :: distgridToArrayMap(:)
+       integer,               intent(in),   optional  :: computationalEdgeLWidth(:)
+       integer,               intent(in),   optional  :: computationalEdgeUWidth(:)
+       integer,               intent(in),   optional  :: computationalLWidth(:)
+       integer,               intent(in),   optional  :: computationalUWidth(:)
+       integer,               intent(in),   optional  :: totalLWidth(:)
+       integer,               intent(in),   optional  :: totalUWidth(:)
+       integer,               intent(in),   optional  :: undistLBound(:)
+       integer,               intent(in),   optional  :: undistUBound(:)
+       character (len=*),     intent(in),   optional  :: name
+       integer,               intent(out),  optional  :: rc
+!     
+! !RETURN VALUE:
+    type(ESMF_Array) :: ESMF_ArrayCreateAllocateAS
+!
+! !DESCRIPTION:
+! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
+! according to arrayspec and distgrid. Each PET must issue
+! this call with identical arguments in order to create a consistent Array 
+! object. DE-local allocations are made according to the total region defined
+! by the arguments to this call: {\tt distgrid} and the optional {\tt Width} 
+! arguments.
+!
+! The return value is the newly created {\tt ESMF\_Array} object.
+!
+! The arguments are:
+! \begin{description}
 ! \item[arrayspec] 
-!     {\tt ESMF\_ArraySpec} object containing the type/kind/rank information.
+!      {\tt ESMF\_ArraySpec} object containing the type/kind/rank information.
 ! \item[distgrid]
 !      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
@@ -1157,15 +1308,15 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
-    ESMF_ArrayCreateAllocate = array 
+    ESMF_ArrayCreateAllocateAS = array 
  
     ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_ArrayCreateAllocate)
+    ESMF_INIT_SET_CREATED(ESMF_ArrayCreateAllocateAS)
  
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
-  end function ESMF_ArrayCreateAllocate
+  end function ESMF_ArrayCreateAllocateAS
 !------------------------------------------------------------------------------
 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.25 2010/06/11 23:14:41 theurich Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.26 2010/07/03 03:08:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.25 2010/06/11 23:14:41 theurich Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.26 2010/07/03 03:08:47 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -99,9 +99,7 @@ program ESMF_ArrayCreateGetUTest
   if (petCount /= 4) goto 10
 
   !------------------------------------------------------------------------
-  ! preparations
-  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  ! DistGrid preparation
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/15,23/), &
     regDecomp=(/2,2/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -109,6 +107,26 @@ program ESMF_ArrayCreateGetUTest
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate Allocate 2D ESMF_TYPEKIND_R8 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array = ESMF_ArrayCreate(rank=2, typekind=ESMF_TYPEKIND_R8, &
+    distgrid=distgrid, indexflag=ESMF_INDEX_GLOBAL, name="MyArray", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayDestroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  ! ArraySpec preparation
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayCreate Allocate 2D ESMF_TYPEKIND_R8 Test w/ ArraySpec"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     indexflag=ESMF_INDEX_GLOBAL, name="MyArray", rc=rc)
