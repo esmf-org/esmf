@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.30 2010/06/30 22:08:06 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.31 2010/07/06 23:49:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -225,6 +225,7 @@ namespace ESMCI {
     bool isFirst()const;
     bool isLast()const;
     bool isWithin()const;
+    bool isWithinBlock(int dim)const;
     bool isWithinWatch()const;
     int const *getIndexTuple()const;
     int const *getIndexTupleEnd()const;

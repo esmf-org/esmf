@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.46 2010/06/30 22:08:06 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.47 2010/07/06 23:49:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.46 2010/06/30 22:08:06 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.47 2010/07/06 23:49:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -4070,6 +4070,13 @@ int DistGrid::setArbSeqIndex(
     if (indexTuple[indexTuple.size()-1] < indexTupleEnd[indexTuple.size()-1])
       return true;
     return false;
+  }
+  bool MultiDimIndexLoop::isWithinBlock(int dim)const{
+    if (indexTuple[dim] < indexTupleBlockStart[dim])
+      return false;
+    if (indexTuple[dim] >= indexTupleBlockEnd[dim])
+      return false;
+    return true;
   }
   bool MultiDimIndexLoop::isWithinWatch()const{
     bool withinWatchFlag = true;  // init
