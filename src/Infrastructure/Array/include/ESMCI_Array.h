@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.52 2010/06/23 23:32:26 w6ws Exp $
+// $Id: ESMCI_Array.h,v 1.53 2010/07/06 23:55:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -236,9 +236,10 @@ namespace ESMCI {
       {return distgridToPackedArrayMap;}
     DistGrid *getDistGrid()                 const {return distgrid;}
     DELayout *getDELayout()                 const {return delayout;}
-    int getLinearIndexExclusive(int localDe, int *index, int *rc=NULL) const;
-    SeqIndex getSequenceIndexExclusive(int localDe, int *index, int depth=0,
-      int *rc=NULL) const;
+    int getLinearIndexExclusive(int localDe, int const *index, int *rc=NULL)
+      const;
+    SeqIndex getSequenceIndexExclusive(int localDe, int const *index,
+      int depth=0, int *rc=NULL) const;
     SeqIndex getSequenceIndexPatch(int patch, const int *index, int *rc=NULL)
       const;
     int setComputationalLWidth(InterfaceInt *computationalLWidthArg);
@@ -292,6 +293,10 @@ namespace ESMCI {
   struct SeqIndex{
     int decompSeqIndex;
     int tensorSeqIndex;
+    SeqIndex(){
+      decompSeqIndex = -1;  // invalidate
+      tensorSeqIndex = -1;  // invalidate
+    }
     void print(){
       printf("SeqIndex: (%d, %d)\n", decompSeqIndex, tensorSeqIndex);
     }
@@ -365,12 +370,9 @@ namespace ESMCI {
     ArrayElement(Array const *arrayArg, int localDeArg,
       bool blockExclusiveFlag);
       // construct iterator through total Array region with block excl. option
-    int getLinearIndexExclusive(){
-      return array->getLinearIndexExclusive(localDe, &indexTuple[0]);
-    }
-    SeqIndex getSequenceIndexExclusive(int depth=0){
-      return array->getSequenceIndexExclusive(localDe, &indexTuple[0], depth);
-    }
+    bool isValid()const;
+    int getLinearIndexExclusive()const;
+    SeqIndex getSequenceIndexExclusive(int depth=0)const;
   };  // class ArrayElement 
   //============================================================================
   

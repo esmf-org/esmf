@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.114 2010/06/25 22:19:28 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.115 2010/07/06 23:55:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.114 2010/06/25 22:19:28 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.115 2010/07/06 23:55:27 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -236,7 +236,11 @@ Array::Array(
       // obtain linear index for this element
       int linIndex = arrayElement.getLinearIndexExclusive();
       // obtain canonical seqIndex value according to DistGrid topology
-      SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive(3);
+      SeqIndex seqIndex;  // invalidated by default constructor
+      if (arrayElement.isValid()){
+        // seqIndex is well defined for this arrayElement
+        seqIndex = arrayElement.getSequenceIndexExclusive(3);
+      }
 //printf("gjt - localDe=%d - arrayElement %05d, linearIndex=%d ", i, element,
 //linIndex); seqIndex.print();
       rimSeqIndex[i].push_back(seqIndex); // store seqIndex for this rim element
@@ -1848,7 +1852,7 @@ int Array::getLinearIndexExclusive(
 // !ARGUMENTS:
 //
   int localDe,                      // in - local DE
-  int *index,                       // in - DE-local index tuple in exclusive
+  int const *index,                 // in - DE-local index tuple in exclusive
                                     //      region basis 0
   int *rc                           // out - return code
   )const{
@@ -1906,7 +1910,7 @@ SeqIndex Array::getSequenceIndexExclusive(
 // !ARGUMENTS:
 //
   int localDe,                      // in  - local DE
-  int *index,                       // in  - DE-local index tuple in exclusive
+  int const *index,                 // in  - DE-local index tuple in exclusive
                                     //       region basis 0
   int depth,                        // in  - topology recursions depth
   int *rc                           // out - return code
@@ -9300,7 +9304,7 @@ int Array::sparseMatMulRelease(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::ArrayElement::ArrayElement()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::ArrayElement
+// !IROUTINE:  ESMCI::ArrayElement::ArrayElement
 //
 // !INTERFACE:
 ArrayElement::ArrayElement(
@@ -9380,7 +9384,7 @@ ArrayElement::ArrayElement(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::ArrayElement::ArrayElement()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::ArrayElement
+// !IROUTINE:  ESMCI::ArrayElement::ArrayElement
 //
 // !INTERFACE:
 ArrayElement::ArrayElement(
@@ -9463,6 +9467,106 @@ ArrayElement::ArrayElement(
       indexTupleBlockEnd[i] =  indexTupleWatchEnd[i];
   }
   adjust(); // adjust indexTuple to point to first element not blocked
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayElement::isValid()"
+//BOPI
+// !IROUTINE:  ESMCI::ArrayElement::isValid
+//
+// !INTERFACE:
+bool ArrayElement::isValid(
+//
+// !RETURN VALUE:
+//    true or false
+//
+// !ARGUMENTS:
+//
+  )const{    
+//
+// !DESCRIPTION:
+//    Indicate whether the ArrayElement is valid. Invalid elements are
+//    those that are outside the exclusive region for discontiguous dimensions.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int rank = array->getRank();
+  int iOff = localDe * array->getDistGrid()->getDimCount();
+  int iPacked = 0;    // reset
+  for (int i=0; i<rank; i++){
+    if (array->getArrayToDistGridMap()[i]){
+      // decomposed dimension
+      if (array->getDistGrid()->getContigFlagPDimPDe()[iOff+iPacked] == 0){
+        // discontigous dimension -> check if within MultiDimIndexLoop block
+        if (isWithinBlock(i) == false) return false;
+      }
+      ++iPacked;
+    }
+  }
+  return true;  // all dimensions are in valid range
+}
+//-----------------------------------------------------------------------------
+    
+    
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayElement::getLinearIndexExclusive()"
+//BOPI
+// !IROUTINE:  ESMCI::ArrayElement::getLinearIndexExclusive
+//
+// !INTERFACE:
+int ArrayElement::getLinearIndexExclusive(
+//
+// !RETURN VALUE:
+//    linear index
+//
+// !ARGUMENTS:
+//
+  )const{    
+//
+// !DESCRIPTION:
+//    Obtain linear index for ArrayElement
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  return array->getLinearIndexExclusive(localDe, &indexTuple[0]);
+}
+//-----------------------------------------------------------------------------
+    
+    
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayElement::getSequenceIndexExclusive()"
+//BOPI
+// !IROUTINE:  ESMCI::ArrayElement::getSequenceIndexExclusive
+//
+// !INTERFACE:
+SeqIndex ArrayElement::getSequenceIndexExclusive(
+//
+// !RETURN VALUE:
+//    sequence index
+//
+// !ARGUMENTS:
+//
+  int depth
+  )const{    
+//
+// !DESCRIPTION:
+//    Obtain sequence index for ArrayElement
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  
+  SeqIndex seqIndex = array->getSequenceIndexExclusive(localDe, &indexTuple[0],
+    depth, &localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, NULL))
+    throw localrc;  // bail out with exception
+  return seqIndex;
 }
 //-----------------------------------------------------------------------------
 
