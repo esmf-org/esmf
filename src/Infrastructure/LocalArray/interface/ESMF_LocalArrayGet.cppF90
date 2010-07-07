@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.14 2010/03/04 18:57:44 svasquez Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.15 2010/07/07 01:07:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -204,7 +204,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.14 2010/03/04 18:57:44 svasquez Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.15 2010/07/07 01:07:35 theurich Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -262,13 +262,13 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_LocalArrayGet()
-  subroutine ESMF_LocalArrayGetDefault(larray, rank, typekind, counts, lbounds, &
-    ubounds, base, name, rc)
+  subroutine ESMF_LocalArrayGetDefault(larray, typekind, rank, counts, &
+    lbounds, ubounds, base, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_LocalArray),      intent(in)            :: larray
-    integer,                    intent(out), optional :: rank
     type(ESMF_TypeKind),        intent(out), optional :: typekind
+    integer,                    intent(out), optional :: rank
     integer,                    intent(out), optional :: counts(:)
     integer,                    intent(out), optional :: lbounds(:)
     integer,                    intent(out), optional :: ubounds(:)
@@ -283,10 +283,10 @@ contains
 !   \begin{description}
 !   \item[larray] 
 !     Queried {\tt ESMF\_LocalArray} object.
-!   \item[{[rank]}]
-!     Rank of the LocalArray object.
 !   \item[{[typekind]}]
 !     TypeKind of the LocalArray object.
+!   \item[{[rank]}]
+!     Rank of the LocalArray object.
 !   \item[{[counts]}]
 !     Count per dimension.
 !   \item[{[lbounds]}]

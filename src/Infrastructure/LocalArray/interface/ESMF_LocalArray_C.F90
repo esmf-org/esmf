@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_C.F90,v 1.3 2010/05/10 07:20:54 theurich Exp $
+! $Id: ESMF_LocalArray_C.F90,v 1.4 2010/07/07 01:07:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -23,9 +23,9 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LocalArray_C.F90,v 1.3 2010/05/10 07:20:54 theurich Exp $'
+!      '$Id: ESMF_LocalArray_C.F90,v 1.4 2010/07/07 01:07:35 theurich Exp $'
 !==============================================================================
-subroutine f_esmf_localarrayf90allocate(array, rank, kind, counts, &
+subroutine f_esmf_localarrayf90allocate(array, rank, typekind, counts, &
   lbounds, ubounds, rc)
   use ESMF_UtilTypesMod     ! ESMF base class
   use ESMF_BaseMod          ! ESMF base class
@@ -35,19 +35,19 @@ subroutine f_esmf_localarrayf90allocate(array, rank, kind, counts, &
 
   type(ESMF_LocalArray) :: array
   integer :: rank
-  type(ESMF_TypeKind) :: kind
+  type(ESMF_TypeKind) :: typekind
   integer :: counts(rank)
   integer :: lbounds(rank)
   integer :: ubounds(rank)
   integer :: rc
 
   ! Beware - these args are not in the same order
-  call ESMF_LocalArrConstrF90Ptr(array, counts, rank, kind, &
+  call ESMF_LocalArrConstrF90Ptr(array, counts, typekind, rank, &
     lbounds, ubounds, rc=rc)
 end subroutine f_esmf_localarrayf90allocate
 
 
-subroutine f_esmf_localarrayf90deallocate(array, rank, kind, rc)
+subroutine f_esmf_localarrayf90deallocate(array, rank, typekind, rc)
   use ESMF_UtilTypesMod     ! ESMF base class
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LocalArrayMod
@@ -56,14 +56,14 @@ subroutine f_esmf_localarrayf90deallocate(array, rank, kind, rc)
 
   type(ESMF_LocalArray) :: array
   integer :: rank
-  type(ESMF_TypeKind) :: kind
+  type(ESMF_TypeKind) :: typekind
   integer :: rc
 
-  call ESMF_LocalArrayF90Deallocate(array, rank, kind, rc=rc)
+  call ESMF_LocalArrayF90Deallocate(array, typekind, rank, rc=rc)
 end subroutine f_esmf_localarrayf90deallocate
 
 
-subroutine f_esmf_localarrayadjust(array, rank, kind, counts, &
+subroutine f_esmf_localarrayadjust(array, rank, typekind, counts, &
   lbounds, ubounds, rc)
   use ESMF_UtilTypesMod    ! ESMF base class
   use ESMF_BaseMod    ! ESMF base class
@@ -73,13 +73,13 @@ subroutine f_esmf_localarrayadjust(array, rank, kind, counts, &
 
   type(ESMF_LocalArray) :: array
   integer :: rank
-  type(ESMF_TypeKind) :: kind
+  type(ESMF_TypeKind) :: typekind
   integer :: counts(rank)
   integer :: lbounds(rank)
   integer :: ubounds(rank)
   integer :: rc
 
-  call ESMF_LocalArrayAdjust(array, counts, rank, kind, &
+  call ESMF_LocalArrayAdjust(array, counts, typekind, rank, &
     lbounds, ubounds,rc=rc)
 end subroutine f_esmf_localarrayadjust
 

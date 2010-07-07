@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.23 2010/03/04 18:57:44 svasquez Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.24 2010/07/07 01:07:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -137,7 +137,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.23 2010/03/04 18:57:44 svasquez Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.24 2010/07/07 01:07:35 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -261,15 +261,15 @@ end function
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocalArrayCreate()
-  function ESMF_LocalArrayCreateByTKR(rank, typekind, counts, lbounds, &
+  function ESMF_LocalArrayCreateByTKR(typekind, rank, counts, lbounds, &
     ubounds, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByTKR
 !
 ! !ARGUMENTS:
-    integer,              intent(in)            :: rank
     type(ESMF_TypeKind),  intent(in)            :: typekind
+    integer,              intent(in)            :: rank
     integer,              intent(in),  optional :: counts(:)
     integer,              intent(in),  optional :: lbounds(:)
     integer,              intent(in),  optional :: ubounds(:)
@@ -281,10 +281,10 @@ end function
 !    
 !  The arguments are:
 !  \begin{description}
-!  \item[rank]
-!    Array rank (dimensionality, 1D, 2D, etc). Maximum allowed is 7D.
 !  \item[typekind]
 !    Array typekind. See section \ref{opt:typekind} for valid values.
+!  \item[rank]
+!    Array rank (dimensionality, 1D, 2D, etc). Maximum allowed is 7D.
 !  \item[{[counts]}]
 !    The number of items in each dimension of the array. This is a 1D
 !    integer array the same length as the rank. The {\tt count} argument may
@@ -387,7 +387,7 @@ end function
       ESMF_CONTEXT, rc)) return
 
     ! Complete the initial LocalArray object
-    call ESMF_LocalArrConstrF90Ptr(array, cnts, rank, typekind, lb, ub, localrc)
+    call ESMF_LocalArrConstrF90Ptr(array, cnts, typekind, rank, lb, ub, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
@@ -462,14 +462,14 @@ end function
     ! Check init status of arguments
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
 
-    call ESMF_ArraySpecGet(arrayspec, rank, typekind, localrc)
+    call ESMF_ArraySpecGet(arrayspec, typekind=typekind, rank=rank, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
     
     ! Call the CreateByTKR function to make the array
-    ESMF_LocalArrayCreateBySpec = ESMF_LocalArrayCreateByTKR(rank, &
-      typekind, counts, lbounds, ubounds, localrc)
+    ESMF_LocalArrayCreateBySpec = ESMF_LocalArrayCreateByTKR(typekind, rank, &
+      counts, lbounds, ubounds, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
@@ -847,7 +847,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
-      call ESMF_LocalArrayF90Deallocate(larray, rank, typekind, localrc)
+      call ESMF_LocalArrayF90Deallocate(larray, typekind, rank, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
@@ -881,14 +881,14 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
 ! !IROUTINE: ESMF_LocalArrConstrF90Ptr - Create and add F90 ptr to array
 
 ! !INTERFACE:
-  subroutine ESMF_LocalArrConstrF90Ptr(array, counts, rank, kind, lbounds, &
+  subroutine ESMF_LocalArrConstrF90Ptr(array, counts, typekind, rank, lbounds, &
     ubounds, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_LocalArray), intent(inout) :: array
     integer, dimension(:), intent(in) :: counts
+    type(ESMF_TypeKind), intent(in) :: typekind
     integer, intent(in) :: rank
-    type(ESMF_TypeKind), intent(in) :: kind
     integer, dimension(:), intent(in) :: lbounds
     integer, dimension(:), intent(in) :: ubounds
     integer, intent(out), optional :: rc 
@@ -910,8 +910,8 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
 !    Array rank.
 !    This must match what is already in the array - it is here only as
 !    a convienience.
-!  \item[kind]
-!    Array kind. 
+!  \item[typekind]
+!    Array typetypekind. 
 !    This must match what is already in the array - it is here only as
 !    a convienience.
 !   \item[lbounds]
@@ -935,7 +935,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
     ! Cannot check init status of array argument here because
     ! the array object is only partially created at this point
         
-    localtk = kind%dkind
+    localtk = typekind%dkind
 
     ! Call a T/K/R specific interface in order to create the proper
     !  type of F90 pointer, allocate the space, set the values in the
@@ -1131,7 +1131,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
         end select
       case default
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-          "Unsupported kind", & 
+          "Unsupported typekind", & 
           ESMF_CONTEXT, rc)) return
     end select
 
@@ -1351,12 +1351,12 @@ TypeKindRankDeclarationMacro(LocalArrConstrF90Ptr)
 ! !IROUTINE:  ESMF_LocalArrayF90Deallocate - Deallocate an F90 pointer 
 !
 ! !INTERFACE: 
-  subroutine ESMF_LocalArrayF90Deallocate(array, rank, kind, rc)
+  subroutine ESMF_LocalArrayF90Deallocate(array, typekind, rank, rc)
 ! 
 ! !ARGUMENTS: 
     type(ESMF_LocalArray), intent(inout) :: array 
+    type(ESMF_TypeKind) :: typekind
     integer :: rank   
-    type(ESMF_TypeKind) :: kind
     integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1365,10 +1365,10 @@ TypeKindRankDeclarationMacro(LocalArrConstrF90Ptr)
 !     \begin{description} 
 !     \item[array]  
 !          A partially created {\tt ESMF\_LocalArray} object. 
+!     \item[typekind]  
+!          The {\tt ESMF\_LocalArray} kind (short/2, long/8, etc).  
 !     \item[rank]  
 !          The {\tt ESMF\_LocalArray} rank.  
-!     \item[kind]  
-!          The {\tt ESMF\_LocalArray} kind (short/2, long/8, etc).  
 !     \item[{[rc]}]  
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 !   \end{description} 
@@ -1384,7 +1384,7 @@ AllTypesMacro(LocalArrayVar)
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
  
-    localtk = kind
+    localtk = typekind
 
     !! calling routines generated from macros by the preprocessor
 
@@ -1895,14 +1895,14 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
 ! !IROUTINE: ESMF_LocalArrayAdjust - Adjust bounds of Fortran array member
 !
 ! !INTERFACE:
-  subroutine ESMF_LocalArrayAdjust(array, counts, rank, kind, lbounds, &
+  subroutine ESMF_LocalArrayAdjust(array, counts, typekind, rank, lbounds, &
     ubounds, rc)
 !
 ! !ARGUMENTS:
    type(ESMF_LocalArray), intent(inout) :: array
    integer, dimension(:), intent(in) :: counts
+   type(ESMF_TypeKind), intent(in) :: typekind
    integer, intent(in) :: rank
-   type(ESMF_TypeKind), intent(in) :: kind
    integer, dimension(:), intent(in) :: lbounds
    integer, dimension(:), intent(in) :: ubounds
    integer, intent(out), optional :: rc 
@@ -1922,7 +1922,7 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
     ! Cannot check init status of array argument here because
     ! the array object is only partially created at this point
             
-    localtk = kind%dkind
+    localtk = typekind%dkind
         
     ! Call a T/K/R specific interface
 
