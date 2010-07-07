@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.53 2010/07/06 23:55:27 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.54 2010/07/07 21:35:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -244,6 +244,7 @@ namespace ESMCI {
       const;
     int setComputationalLWidth(InterfaceInt *computationalLWidthArg);
     int setComputationalUWidth(InterfaceInt *computationalUWidthArg);
+    int setRimSeqIndex(int localDe, InterfaceInt *rimSeqIndexArg);
     const char *getName()               const {return ESMC_BaseGetName();}
     int setName(const char *name){return ESMC_BaseSetName(name, "Array");}
     // misc.

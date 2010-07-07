@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.115 2010/07/06 23:55:27 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.116 2010/07/07 21:35:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.115 2010/07/06 23:55:27 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.116 2010/07/07 21:35:45 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2196,6 +2196,62 @@ int Array::setComputationalUWidth(
     memcpy(computationalLBound, computationalLBoundNew,
       redDimCount*localDeCount*sizeof(int));
     delete [] computationalLBoundNew;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::setRimSeqIndex()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::setRimSeqIndex
+//
+// !INTERFACE:
+int Array::setRimSeqIndex(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int localDe,                        // (in)
+  InterfaceInt *rimSeqIndexArg        // (in)
+  ){
+//
+// !DESCRIPTION:
+//    Set rimSeqIndex for localDe.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // check rimSeqIndexArg input and process
+  if (rimSeqIndexArg != NULL){
+    if (rimSeqIndexArg->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- rimSeqIndexArg array must be of rank 1", &rc);
+      return rc;
+    }
+    //TODO: check localDe range
+    if (rimSeqIndexArg->extent[0] != rimSeqIndex[localDe].size()){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- rimSeqIndexArg argument must be of size rimSeqIndex[localDe].size()",
+        &rc);
+      return rc;
+    }
+    
+//TODO: need to get this working for tensorCount > 1
+    
+    for (int i=0; i<rimSeqIndex[localDe].size(); i++){
+      rimSeqIndex[localDe][i].decompSeqIndex = rimSeqIndexArg->array[i];
+      rimSeqIndex[localDe][i].tensorSeqIndex = 1;
+    }
   }
 
   // return successfully
@@ -9489,18 +9545,26 @@ bool ArrayElement::isValid(
 //
 // !DESCRIPTION:
 //    Indicate whether the ArrayElement is valid. Invalid elements are
-//    those that are outside the exclusive region for discontiguous dimensions.
+//    those that are outside the exclusive region for discontiguous dimensions,
+//    or arbitrarily decomposed dimensions.
 //
 //EOPI
 //-----------------------------------------------------------------------------
   int rank = array->getRank();
-  int iOff = localDe * array->getDistGrid()->getDimCount();
+  int de = array->getDELayout()->getLocalDeList()[localDe];
+  int iOff = de * array->getDistGrid()->getDimCount();
   int iPacked = 0;    // reset
   for (int i=0; i<rank; i++){
     if (array->getArrayToDistGridMap()[i]){
       // decomposed dimension
       if (array->getDistGrid()->getContigFlagPDimPDe()[iOff+iPacked] == 0){
         // discontigous dimension -> check if within MultiDimIndexLoop block
+        if (isWithinBlock(i) == false) return false;
+      }
+      int collocation = array->getDistGrid()->getCollocationPDim()[i];
+      if (array->getDistGrid()->getArbSeqIndexList(localDe, collocation)){
+        // arbitrarily decomposed dimension
+        // -> check if within MultiDimIndexLoop block
         if (isWithinBlock(i) == false) return false;
       }
       ++iPacked;
