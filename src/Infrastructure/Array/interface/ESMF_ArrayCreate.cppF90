@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.48 2010/07/07 05:57:40 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.49 2010/07/07 21:38:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -86,6 +86,7 @@ module ESMF_ArrayCreateMod
   public ESMF_ArrayGetThis
   public ESMF_ArraySetThis
   public ESMF_ArraySetThisNull
+  public ESMF_ArraySetPLocalDeInternal
   public ESMF_ArrayCopyThis
 ! ESMF_ArrayCreateFromGrid - defined in ESMF_Grid.F90 due to circularity issues 
 
@@ -95,7 +96,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.48 2010/07/07 05:57:40 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.49 2010/07/07 21:38:48 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1514,11 +1515,17 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
   
     localHaloCount = size(haloSeqIndexList)
     
-    ! Call into conventional interface
+    ! Call into conventional interface to create the Array object
     ESMF_ArrayCreateAllocateASArb = ESMF_ArrayCreate(arrayspec, distgrid, &
       totalUWidth=(/localHaloCount/), &
       undistLBound=undistLBound, undistUBound=undistUBound, name=name, &
       rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Set the arbitrary sequence indices in the Array halo rim
+    call ESMF_ArraySetPLocalDeInternal(ESMF_ArrayCreateAllocateASArb, &
+      localDe=0, rimSeqIndex=haloSeqIndexList, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -1850,6 +1857,73 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_ArraySetThisNull
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArraySetPLocalDeInternal()"
+!BOPI
+! !IROUTINE: ESMF_ArraySetPLocalDeInternal - Set Array properties
+!
+! !INTERFACE:
+  subroutine ESMF_ArraySetPLocalDeInternal(array, localDe, rimSeqIndex, rc)
+
+!
+! !ARGUMENTS:
+    type(ESMF_Array),   intent(inout)           :: array
+    integer,            intent(in)              :: localDe
+    integer,            intent(in),   optional  :: rimSeqIndex(:)
+    integer,            intent(out),  optional  :: rc
+
+!
+! !DESCRIPTION:
+!     Sets adjustable settings in an {\tt ESMF\_Array} object for a specific
+!     localDe.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!       {\tt ESMF\_Array} object for which to set properties.
+!     \item [localDe]
+!       Local DE for which to set values.
+!     \item[{[rimSeqIndex]}] 
+!       Sequence indices in the halo rim of localDe.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_InterfaceInt)       :: rimSeqIndexArg ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
+    
+    ! Deal with (optional) array arguments
+    rimSeqIndexArg = ESMF_InterfaceIntCreate(farray1D=rimSeqIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_esmc_arraysetplocalde(array, localDe, rimSeqIndexArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Garbage collection
+    call ESMF_InterfaceIntDestroy(rimSeqIndexArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArraySetPLocalDeInternal
 !------------------------------------------------------------------------------
 
 

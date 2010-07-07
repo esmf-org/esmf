@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.118 2010/06/22 22:36:03 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.119 2010/07/07 21:38:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.118 2010/06/22 22:36:03 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.119 2010/07/07 21:38:48 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -128,7 +128,8 @@ module ESMF_ArrayMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-    module procedure ESMF_ArraySet
+    module procedure ESMF_ArraySetDefault
+    module procedure ESMF_ArraySetPLocalDe
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -357,12 +358,13 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySet()"
+#define ESMF_METHOD "ESMF_ArraySetDefault()"
 !BOP
 ! !IROUTINE: ESMF_ArraySet - Set Array properties
 !
 ! !INTERFACE:
-  subroutine ESMF_ArraySet(array, name, computationalLWidth, &
+  ! Private name; call using ESMF_ArraySet()
+  subroutine ESMF_ArraySetDefault(array, name, computationalLWidth, &
     computationalUWidth, rc)
 
 !
@@ -445,7 +447,61 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArraySet
+  end subroutine ESMF_ArraySetDefault
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySetPLocalDe()"
+!BOP
+! !IROUTINE: ESMF_ArraySet - Set Array properties
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_ArraySet()
+  subroutine ESMF_ArraySetPLocalDe(array, localDe, rimSeqIndex, rc)
+
+!
+! !ARGUMENTS:
+    type(ESMF_Array),   intent(inout)           :: array
+    integer,            intent(in)              :: localDe
+    integer,            intent(in),   optional  :: rimSeqIndex(:)
+    integer,            intent(out),  optional  :: rc
+
+!
+! !DESCRIPTION:
+!     Sets adjustable settings in an {\tt ESMF\_Array} object for a specific
+!     localDe.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!       {\tt ESMF\_Array} object for which to set properties.
+!     \item [localDe]
+!       Local DE for which to set values.
+!     \item[{[rimSeqIndex]}] 
+!       Sequence indices in the halo rim of localDe.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Call into the internal method
+    call ESMF_ArraySetPLocalDeInternal(array, localDe, rimSeqIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArraySetPLocalDe
 !------------------------------------------------------------------------------
 
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.42 2010/06/23 23:01:08 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.43 2010/07/07 21:38:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -904,6 +904,19 @@ extern "C" {
     // Call into the C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*array)->setComputationalUWidth(
       *computationalUWidthArg),
+      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  void FTN(c_esmc_arraysetplocalde)(ESMCI::Array **array,
+    int *localDe, ESMCI::InterfaceInt **rimSeqIndexArg, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraysetplocalde()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.MsgFoundError((*array)->setRimSeqIndex(*localDe,
+      *rimSeqIndexArg),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
