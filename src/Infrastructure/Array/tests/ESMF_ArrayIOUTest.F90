@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.5 2010/06/30 04:31:22 samsoncheung Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.6 2010/07/07 17:13:28 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@ program ESMF_ArrayIOUTest
   array_halo = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
           computationalLWidth=(/0,3,1/), computationalUWidth=(/1,1,2/), &
           totalLWidth=(/1,7,1/), totalUWidth=(/4,2,3/), &
-          indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+          indexflag=ESMF_INDEX_GLOBAL, name="temperature", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
@@ -118,7 +118,7 @@ program ESMF_ArrayIOUTest
   array_nohalo = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
           computationalLWidth=(/0,0,0/), computationalUWidth=(/0,0,0/), &
           totalLWidth=(/0,0,0/), totalUWidth=(/0,0,0/), &
-          indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+          indexflag=ESMF_INDEX_GLOBAL, name='velocity', rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
 
 !-------------------------------------------------------------------------------
@@ -158,7 +158,7 @@ program ESMF_ArrayIOUTest
   array_nohalo2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
           computationalLWidth=(/0,0,0/), computationalUWidth=(/0,0,0/), &
           totalLWidth=(/0,0,0/), totalUWidth=(/0,0,0/), &
-          indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+          indexflag=ESMF_INDEX_GLOBAL, name='velocity', rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
@@ -169,7 +169,7 @@ program ESMF_ArrayIOUTest
   array_halo2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
           computationalLWidth=(/0,3,1/), computationalUWidth=(/1,1,2/), &
           totalLWidth=(/1,7,1/), totalUWidth=(/4,2,3/), &
-          indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+          indexflag=ESMF_INDEX_GLOBAL, name='temperature', rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
@@ -236,7 +236,7 @@ program ESMF_ArrayIOUTest
   write(name, *) "Read ESMF_Array without Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayRead(array_halo2, Farray3D_halo2,3, (/5,5,5/), &
-                      fname='ESMF_Array_int.nc', rc=rc)
+                      fname='file3D_halo.nc', rc=rc)
   if (rc==ESMF_RC_LIB_NOT_PRESENT) then
         PIONotPresent = .true.
   endif
@@ -331,7 +331,7 @@ program ESMF_ArrayIOUTest
   array_nohalo = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
           computationalLWidth=(/0,0/), computationalUWidth=(/0,0/), &
           totalLWidth=(/0,0/), totalUWidth=(/0,0/), &
-          indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+          indexflag=ESMF_INDEX_GLOBAL, name='u-velocity', rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
