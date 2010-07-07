@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.3 2010/06/22 22:49:08 theurich Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.4 2010/07/07 17:12:49 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.3 2010/06/22 22:49:08 theurich Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.4 2010/07/07 17:12:49 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -271,7 +271,7 @@ contains
     integer                       :: localrc        ! local return code @\
     real (ESMF_KIND_r8) :: st,et,dt_write  ! start/end times for timing @\
     character(len=80) :: local_fname     ! file name @\
-    character(len=10) :: varname         ! variable name @\
+    character(len=30) :: varname         ! variable name @\
 @\
     ! Initialize return code @\
     localrc = ESMF_RC_NOT_IMPL @\
@@ -289,11 +289,11 @@ contains
     !-------------------------------- @\
     call ESMF_ArrayConstructPioDof(array, localDe=0, pioDofCount=pioDofCount, rc=rc) @\
     allocate(pioDofList(pioDofCount)) @\
-    ! debug write(10+localPet,*) "pioDofCount=",pioDofCount  @\
+    !debug write(10+localPet,*) "pioDofCount=",pioDofCount  @\
     call ESMF_ArrayConstructPioDof(array, localDe=0, pioDofList=pioDofList, rc=rc) @\
-    ! debug write(10+localPet,*) "pioDofList=" @\
-    ! debug write(10+localPet,*) pioDofList @\
-    ! debug write(10+localPet,*) " " @\
+    !debug write(10+localPet,*) "pioDofList=" @\
+    !debug write(10+localPet,*) pioDofList @\
+    !debug write(10+localPet,*) " " @\
 @\
     !-------------------------------- @\
     ! Get array typekind from ESMF array @\
@@ -363,7 +363,7 @@ contains
     ! Output are dimid_x,dimid_y,dimid_z @\
 @\
     localrc = 1 @\
-    write(varname,'(a,i5.5)') 'field',localrc @\
+    call ESMF_ArrayGet(array, name=varname, rc=localrc) @\
     rc = PIO_def_var(File,varname,basepiotype,  &  @\
              dimid_xyz,vard) @\
     call check_pioerr(rc,localPet,__FILE__,__LINE__,' defvar') @\
@@ -484,7 +484,7 @@ contains
     integer                       :: localrc        ! local return code @\
     real (ESMF_KIND_r8) :: st,et,dt_read  ! start/end times for timing @\
     character(len=80) :: local_fname     ! file name @\
-    character(len=10) :: varname         ! variable name @\
+    character(len=30) :: varname         ! variable name @\
 @\
     ! Initialize return code @\
     localrc = ESMF_RC_NOT_IMPL @\
@@ -502,7 +502,7 @@ contains
     !-------------------------------- @\
     call ESMF_ArrayConstructPioDof(array, localDe=0, pioDofCount=pioDofCount, rc=rc) @\
     allocate(pioDofList(pioDofCount)) @\
-    ! debug write(10+localPet,*) "pioDofCount=",pioDofCount  @\
+    !debug write(10+localPet,*) "pioDofCount=",pioDofCount  @\
     call ESMF_ArrayConstructPioDof(array, localDe=0, pioDofList=pioDofList, rc=rc) @\
 @\
 @\
@@ -562,7 +562,8 @@ contains
 @\
     ! Set Frame to '1' in the PIO descriptor file @\
     one = 1 @\
-    rc = PIO_inq_varid(File,'field00001',vard) @\
+    call ESMF_ArrayGet(array, name=varname, rc=localrc) @\
+    rc = PIO_inq_varid(File, trim(varname), vard) @\
     call check_pioerr(rc,localPet,__FILE__,__LINE__,' defvar') @\
     call PIO_SetFrame(vard,one) @\
 @\
