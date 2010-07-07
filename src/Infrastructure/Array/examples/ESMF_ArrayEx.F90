@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.56 2010/06/29 17:15:28 svasquez Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.57 2010/07/07 01:08:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -66,29 +66,18 @@ program ESMF_ArrayEx
 !BOE
 ! \subsubsection{Array creation with automatic memory allocation}
 !
-! The examples of the previous sections made the user responsible for 
-! providing memory allocations for the PET-local regions of the Array object.
-! The user was able to use any of the Fortran array methods or go through the
-! {\tt ESMF\_LocalArray} interfaces to obtain memory allocations before
-! passing them into ArrayCreate(). Alternatively, users may wish for ESMF to
-! handle memory allocation of an Array object directly. The following example
-! shows the interfaces that are available to the user to do just this.
+! In the examples of the previous sections the user provided memory allocations
+! for each of the DE-local regions for an Array object. The user was able to 
+! use any of the Fortran methods to allocate memory, or go through
+! the {\tt ESMF\_LocalArray} interfaces to obtain memory allocations before
+! passing them into ArrayCreate(). Alternatively ESMF offers methods that 
+! handle Array memory allocations inside the library.
 ! 
-! To create an {\tt ESMF\_Array} object without providing an existing
-! Fortran array or {\tt ESMF\_LocalArray} the {\em type, kind and rank}
-! (tkr) of the Array must be specified in form of an {\tt ESMF\_ArraySpec}
-! argument. Here a 2D Array of double precision real numbers is to be created:
-!EOE
-!BOC
-  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
-!EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
-! Further an {\tt ESMF\_DistGrid} argument must be constructed that holds
-! information about the entire domain (patchwork) and the decomposition into 
-! DE-local exclusive
-! regions. The following line creates a DistGrid for a 5x5 global LR domain 
-! that is decomposed into 2 x 3 = 6 DEs.
+! As before, to create an {\tt ESMF\_Array} object an {\tt ESMF\_DistGrid}
+! must be created. The DistGrid object holds information about the entire 
+! index space and how it is dcomposed into DE-local exclusive regions. The 
+! following line of code creates a DistGrid for a 5x5 global index space that 
+! is decomposed into 2 x 3 = 6 DEs.
 !EOE
 !BOC
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
@@ -96,27 +85,8 @@ program ESMF_ArrayEx
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
-! This is enough information to create a Array object with default settings.
-!EOE
-!BOC
-  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
-!EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-!  call ESMF_ArrayPrint(array, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-
-!BOE
-! The {\tt array} object created by the above call is an ESMF distributed 
-! object. As such it must follow the ESMF convention that requires that 
-! the call to {\tt ESMF\_ArrayCreate()} must be issued in unison by all 
-! PETs of the current context.
-!
-! The index space covered by the Array object and the decomposition into 
-! DE-local exclusive regions, as it is described by the DistGrid object,
-! is illustrated in the following diagram. Each asterix (*) represents a single
-! element.
+! The following is a representation of the index space and its decompositon into
+! DEs. Each asterix (*) represents a single element.
 !
 ! \begin{verbatim}
 ! 
@@ -143,6 +113,50 @@ program ESMF_ArrayEx
 ! 1st dimension
 !
 ! \end{verbatim}
+!
+! The other piece of information, besides the DistGrid, that is required to
+! create an Array object is the {\em type, kind and rank}, "tkr" for short, of
+! the Array. This information can be supplied directly through the 
+! {\tt typekind} and {\tt rank} arguments, or through a single {\tt arrayspec}
+! argument.
+!
+! Here a 2D Array of double precision real numbers is created on the previously
+! created DistGrid, specifying the "tkr" information directly.
+!EOE
+!BOC
+  array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, rank=2, &
+    distgrid=distgrid, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!EOE
+! The different methods on how an Array object is created have no effect on
+! the use of {\tt ESMF\_ArrayDestroy()}.
+!BOC
+  call ESMF_ArrayDestroy(array, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+! Alternatively the same Array can be created specifying the "tkr" information
+! in form of an ArraySpec variable.  
+!EOE
+!BOC
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!  call ESMF_ArrayPrint(array, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! The Array object created by the above call is an ESMF distributed 
+! object. As such it must follow the ESMF convention that requires that 
+! the call to {\tt ESMF\_ArrayCreate()} must be issued in unison by all 
+! PETs of the current context.
+!
 
 ! \subsubsection{Native language memory access}
 !
