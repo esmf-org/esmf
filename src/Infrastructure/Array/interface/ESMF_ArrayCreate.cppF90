@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.47 2010/07/07 01:08:44 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.48 2010/07/07 05:57:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.47 2010/07/07 01:08:44 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.48 2010/07/07 05:57:40 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -117,7 +117,9 @@ module ESMF_ArrayCreateMod
     TypeKindRankInterfaceMacro(ArrayCreateFromPtr)
     module procedure ESMF_ArrayCreateLocalArray
     module procedure ESMF_ArrayCreateAllocate
+    module procedure ESMF_ArrayCreateAllocateArb
     module procedure ESMF_ArrayCreateAllocateAS
+    module procedure ESMF_ArrayCreateAllocateASArb
     module procedure ESMF_ArrayCreateCopy
 
     module procedure ESMF_ArrayCreateFromLA         !1st prototype
@@ -951,8 +953,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
-! according to arrayspec and distgrid. Each PET must issue
-! this call with identical arguments in order to create a consistent Array 
+! according to typekind/rank and distgrid. Each PET must issue this call with 
+! identical arguments in unison in order to create a consistent Array 
 ! object. DE-local allocations are made according to the total region defined
 ! by the arguments to this call: {\tt distgrid} and the optional {\tt Width} 
 ! arguments.
@@ -1063,6 +1065,111 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_ArrayCreateAllocate
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayCreateAllocateArb()"
+!BOP
+! !IROUTINE: ESMF_ArrayCreate - Create Array object from rank and typekind (allocate memory)
+
+! !INTERFACE:
+  ! Private name; call using ESMF_ArrayCreate()
+  function ESMF_ArrayCreateAllocateArb(typekind, rank, distgrid, &
+    haloSeqIndexList, distgridToArrayMap, undistLBound, undistUBound, &
+    name, rc)
+!
+! !ARGUMENTS:
+       type(ESMF_TypeKind),   intent(in)              :: typekind
+       integer,               intent(in)              :: rank
+       type(ESMF_DistGrid),   intent(in)              :: distgrid
+       integer,               intent(in)              :: haloSeqIndexList(:)
+       integer,               intent(in),   optional  :: distgridToArrayMap(:)
+       integer,               intent(in),   optional  :: undistLBound(:)
+       integer,               intent(in),   optional  :: undistUBound(:)
+       character (len=*),     intent(in),   optional  :: name
+       integer,               intent(out),  optional  :: rc
+!     
+! !RETURN VALUE:
+    type(ESMF_Array) :: ESMF_ArrayCreateAllocateArb
+!
+! !DESCRIPTION:
+! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
+! according to typekind/rank and distgrid. Each PET must issue this call with 
+! identical arguments in unison in order to create a consistent Array 
+! object. DE-local allocations are made according to the total region defined
+! by the arguments to this call: {\tt distgrid} and {\tt haloSeqIndexList} 
+! arguments.
+!
+! The return value is the newly created {\tt ESMF\_Array} object.
+!
+! The arguments are:
+! \begin{description}
+! \item[typekind] 
+!      The typekind of the Array.
+! \item[rank] 
+!      The rank of the Array.
+! \item[distgrid]
+!      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and
+!      distributed over DEs. The dimCount of distgrid must be smaller or equal
+!      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
+!      raised.
+! \item[haloSeqIndexList]
+!      One dimensional array containing sequence indices of local halo region.
+! \item[{[distgridToArrayMap]}]
+!      List that contains as many elements as is indicated by @\
+!      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
+!      the DistGrid object to a dimension in the newly allocated Array object @\
+!      by specifying the appropriate Array dimension index. The default is @\
+!      to map all of {\tt distgrid}|s dimensions against the lower dimensions @\
+!      of the Array object in sequence, i.e. {\tt distgridToArrayMap = @\
+!      (/1, 2, .../)}. @\
+!      Unmapped dimensions in the Array object are not decomposed dimensions @\
+!      and form a tensor of rank = Array.rank - DistGrid.dimCount. @\
+!      All {\tt distgridToArrayMap} entries must be greater than or equal @\
+!      to zero and smaller than or equal to the Array rank. It is erroneous @\
+!      to specify the same entry multiple times unless it is zero. @\
+!      If the Array rank is less than the DistGrid dimCount then the default @\
+!      distgridToArrayMap will contain zeros for the dimCount - rank @\
+!      rightmost entries. A zero entry in the {\tt distgridToArrayMap} @\
+!      indicates that the particular DistGrid dimension will be replicating @\
+!      the Array across the DEs along this direction. @\
+! \item[{[undistLBound]}]
+!      Lower bounds for the array dimensions that are not distributed.
+! \item[{[undistUBound]}]
+!      Upper bounds for the array dimensions that are not distributed.
+! \item[{[name]}]
+!      Name of the Array object.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc    ! local return code
+    type(ESMF_ArraySpec)    :: arrayspec
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Set ArraySpec from rank and typekind input
+    call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return    
+        
+    ! Call into ArraySpec overloaded interface
+    ESMF_ArrayCreateAllocateArb = ESMF_ArrayCreate(arrayspec, distgrid, &
+      haloSeqIndexList, distgridToArrayMap, undistLBound, undistUBound, &
+      name, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end function ESMF_ArrayCreateAllocateArb
 !------------------------------------------------------------------------------
 
 
@@ -1317,6 +1424,108 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_ArrayCreateAllocateAS
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayCreateAllocateASArb()"
+!BOP
+! !IROUTINE: ESMF_ArrayCreate - Create Array object from rank and typekind (allocate memory)
+
+! !INTERFACE:
+  ! Private name; call using ESMF_ArrayCreate()
+  function ESMF_ArrayCreateAllocateASArb(arrayspec, distgrid, &
+    haloSeqIndexList, distgridToArrayMap, undistLBound, undistUBound, &
+    name, rc)
+!
+! !ARGUMENTS:
+       type(ESMF_ArraySpec),  intent(inout)           :: arrayspec
+       type(ESMF_DistGrid),   intent(in)              :: distgrid
+       integer,               intent(in)              :: haloSeqIndexList(:)
+       integer,               intent(in),   optional  :: distgridToArrayMap(:)
+       integer,               intent(in),   optional  :: undistLBound(:)
+       integer,               intent(in),   optional  :: undistUBound(:)
+       character (len=*),     intent(in),   optional  :: name
+       integer,               intent(out),  optional  :: rc
+!     
+! !RETURN VALUE:
+    type(ESMF_Array) :: ESMF_ArrayCreateAllocateASArb
+!
+! !DESCRIPTION:
+! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
+! according to arrayspec and distgrid. Each PET must issue this call with 
+! identical arguments in unison in order to create a consistent Array 
+! object. DE-local allocations are made according to the total region defined
+! by the arguments to this call: {\tt distgrid} and {\tt haloSeqIndexList} 
+! arguments.
+!
+! The return value is the newly created {\tt ESMF\_Array} object.
+!
+! The arguments are:
+! \begin{description}
+! \item[arrayspec] 
+!      {\tt ESMF\_ArraySpec} object containing the type/kind/rank information.
+! \item[distgrid]
+!      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and
+!      distributed over DEs. The dimCount of distgrid must be smaller or equal
+!      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
+!      raised.
+! \item[haloSeqIndexList]
+!      One dimensional array containing sequence indices of local halo region.
+! \item[{[distgridToArrayMap]}]
+!      List that contains as many elements as is indicated by @\
+!      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
+!      the DistGrid object to a dimension in the newly allocated Array object @\
+!      by specifying the appropriate Array dimension index. The default is @\
+!      to map all of {\tt distgrid}|s dimensions against the lower dimensions @\
+!      of the Array object in sequence, i.e. {\tt distgridToArrayMap = @\
+!      (/1, 2, .../)}. @\
+!      Unmapped dimensions in the Array object are not decomposed dimensions @\
+!      and form a tensor of rank = Array.rank - DistGrid.dimCount. @\
+!      All {\tt distgridToArrayMap} entries must be greater than or equal @\
+!      to zero and smaller than or equal to the Array rank. It is erroneous @\
+!      to specify the same entry multiple times unless it is zero. @\
+!      If the Array rank is less than the DistGrid dimCount then the default @\
+!      distgridToArrayMap will contain zeros for the dimCount - rank @\
+!      rightmost entries. A zero entry in the {\tt distgridToArrayMap} @\
+!      indicates that the particular DistGrid dimension will be replicating @\
+!      the Array across the DEs along this direction. @\
+! \item[{[undistLBound]}]
+!      Lower bounds for the array dimensions that are not distributed.
+! \item[{[undistUBound]}]
+!      Upper bounds for the array dimensions that are not distributed.
+! \item[{[name]}]
+!      Name of the Array object.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc    ! local return code
+    integer                 :: localHaloCount
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+  !TODO: check that distgrid is 1D arbitrary
+  
+    localHaloCount = size(haloSeqIndexList)
+    
+    ! Call into conventional interface
+    ESMF_ArrayCreateAllocateASArb = ESMF_ArrayCreate(arrayspec, distgrid, &
+      totalUWidth=(/localHaloCount/), &
+      undistLBound=undistLBound, undistUBound=undistUBound, name=name, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end function ESMF_ArrayCreateAllocateASArb
 !------------------------------------------------------------------------------
 
 
