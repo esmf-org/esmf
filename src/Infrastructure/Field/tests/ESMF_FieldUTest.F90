@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.149 2010/06/14 13:51:08 feiliu Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.150 2010/07/07 20:48:46 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.149 2010/06/14 13:51:08 feiliu Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.150 2010/07/07 20:48:46 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -125,6 +125,51 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_TESTEXHAUSTIVE
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      ! Testing creating a field on a locstream
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Creating a Field on a LocStream from typekind and rank"
+      ! initialize 
+      rc=ESMF_SUCCESS
+      correct=.true.
+      
+      ! Create locstream
+      locstream=ESMF_LocStreamCreate(localCount=10, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE   
+
+      ! Create Field
+      fls=ESMF_FieldCreate(locstream, typekind=ESMF_TYPEKIND_R4, rank=2, &
+            ungriddedLBound=(/1/), ungriddedUBound=(/4/), rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
+
+      call ESMF_FieldGet(fls, arrayspec=arrayspec1, isCommitted=isCommitted, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
+
+      ! check bounds
+      call ESMF_FieldGet(fls, localDE=0, computationalCount=cc, &
+             computationalLBound=cl, computationalUBound=cu, &
+             farrayPtr=lsfptrR4Out, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
+
+      ! Check output
+      if (cl(1) .ne. 1) correct=.false.
+      if (cu(1) .ne. 10) correct=.false.
+      if (cc(1) .ne. 10) correct=.false.
+      if (cl(2) .ne. 1) correct=.false.
+      if (cu(2) .ne. 4) correct=.false.
+      if (cc(2) .ne. 4) correct=.false.
+
+      ! Destroy Field
+      call ESMF_FieldDestroy(fls, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE   
+
+      ! Destroy LocStream 
+      call ESMF_LocStreamDestroy(locstream, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE   
+
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
@@ -454,6 +499,16 @@
                                           name="rh", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a Field with a Grid and ArraySpec Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldDestroy(f2)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      f2 = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R4, rank=2, &
+            indexflag=ESMF_INDEX_DELOCAL, staggerloc=ESMF_STAGGERLOC_CENTER, &
+                                          name="rh", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Creating a Field with a Grid, typekind, and rank Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------

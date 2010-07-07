@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.19 2010/06/29 19:43:19 svasquez Exp $
+! $Id: ESMF_FieldEx.F90,v 1.20 2010/07/07 20:48:46 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -200,6 +200,62 @@
 
     call ESMF_FieldDestroy(field, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Create Field with Grid, typekind, and rank}
+!\label{sec:field:usage:create_grid_tkr}
+!
+!  A user can create an {\tt ESMF\_Field} from an {\tt ESMF\_Grid} and
+!  typekind/rank.
+!  This create method associates the two objects.  
+! 
+!  We first create a Grid with a regular distribution that is
+!  10x20 index in 2x2 DEs.  This version of Field create simply
+!  associates the data with the Grid.  The data is referenced
+!  explicitly on a regular 2x2 uniform grid. 
+!  Finally we create a Field from
+!  the Grid, typekind, rank, and a user specified StaggerLoc.
+!
+!  This example also illustrates a typical use of this Field creation
+!  method. By creating a Field from a Grid and typekind/rank, the
+!  user allows the ESMF library to create a internal Array in the Field.
+!  Then the user can use {\tt ESMF\_FieldGet()} to retrieve the Fortran
+!  data array
+!  and necessary bounds information to assign initial values to it.
+!EOE
+
+!BOC
+    ! create a grid
+    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+          regDecomp=(/2,2/), name="atmgrid", rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! create a Field from the Grid and arrayspec
+    field1 = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R4, rank=2, &
+        indexflag=ESMF_INDEX_DELOCAL, &
+        staggerloc=ESMF_STAGGERLOC_CENTER, name="pressure", rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_FieldGet(field1, localDe=0, farrayPtr=farray2dd, &
+        totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, rc=rc)
+
+    do i = ftlb(1), ftub(1)
+        do j = ftlb(2), ftub(2)
+            farray2dd(i, j) = sin(i/ftc(1)*PI) * cos(j/ftc(2)*PI) 
+        enddo
+    enddo
+
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!EOC
+    print *, "Field creation from Grid, typekind, and rank returned"
+
+    call ESMF_GridDestroy(grid, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_FieldDestroy(field1, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%

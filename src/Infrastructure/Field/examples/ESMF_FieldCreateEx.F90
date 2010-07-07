@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.95 2010/06/29 19:43:19 svasquez Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.96 2010/07/07 20:48:45 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -532,6 +532,255 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_LocStreamDestroy(locs,rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Create a Field from a LocStream}
+!\label{sec:field:usage:create_locs_tkr}
+! 
+! In this example, an {\tt ESMF\_Field} is created from an {\tt ESMF\_LocStream} 
+! and typekind/rank.
+! The location stream object is uniformly distributed
+! in a 1 dimensional space on 4 DEs. The rank is 1 dimensional. 
+! Please refer to LocStream examples section for more information on LocStream creation.
+!
+!EOE  
+!BOC
+
+    locs = ESMF_LocStreamCreate(minIndex=1, maxIndex=16, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    field = ESMF_FieldCreate(locs, typekind=ESMF_TYPEKIND_I4, rank=1, &
+        rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!EOC
+    print *, "Field Create from a LocStream, typekind, and rank returned"
+    call ESMF_FieldDestroy(field,rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_LocStreamDestroy(locs,rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Create a Field from a Mesh}
+!\label{sec:field:usage:create_mesh_tkr}
+! 
+! In this example, an {\tt ESMF\_Field} is created from an {\tt ESMF\_Mesh} 
+! and typekind/rank.
+! The mesh object is on a Euclidean surface that is partitioned to a 2x2 rectangular
+! space with 4 elements and 9 nodes. The nodal space is represented by
+! a distgrid with 9 indices. Field is created on locally owned nodes on each PET.
+! Therefore, the created Field has 9 data points globally.
+! The mesh object can be represented by the picture
+! below. For more information on Mesh creation, please see Section~\ref{sec:mesh:usage:meshCreation}.
+! \begin{verbatim}
+!              Mesh Ids
+!
+!  2.0   7 ------- 8 -------- 9
+!        |         |          |
+!        |    3    |    4     |
+!        |         |          |
+!  1.0   4 ------- 5 -------- 6
+!        |         |          |
+!        |    1    |    2     |
+!        |         |          |
+!  0.0   1 ------- 2 -------- 3
+!
+!       0.0       1.0        2.0 
+!
+!      Node Ids at corners
+!      Element Ids in centers
+! 
+!
+!             Mesh Owners
+!
+!  2.0   2 ------- 2 -------- 3
+!        |         |          |
+!        |    2    |    3     |
+!        |         |          |
+!  1.0   0 ------- 0 -------- 1
+!        |         |          |
+!        |    0    |    1     |
+!        |         |          |
+!  0.0   0 ------- 0 -------- 1
+!
+!       0.0       1.0        2.0 
+!
+!      Node Owners at corners
+!      Element Owners in centers
+!\end{verbatim} 
+!
+!EOE  
+  ! Only do this if we have 4 PETs
+   if (petCount .eq. 4) then
+      ! Setup mesh data depending on PET
+      if (localPet .eq. 0) then
+         ! Fill in node data
+         numNodes=4
+
+        !! node ids
+        allocate(nodeIds(numNodes))
+        nodeIds=(/1,2,4,5/) 
+
+        !! node Coords
+        allocate(nodeCoords(numNodes*2))
+        nodeCoords=(/0.0,0.0, &
+                     1.0,0.0, &
+                     0.0,1.0, &
+                     1.0,1.0/)
+
+        !! node owners
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0,0,0,0/) ! everything on proc 0
+
+        ! Fill in elem data
+        numElems=1
+
+        !! elem ids
+        allocate(elemIds(numElems))
+        elemIds=(/1/) 
+
+        !! elem type
+        allocate(elemTypes(numElems))
+        elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+        !! elem conn
+        allocate(elemConn(numElems*4))
+        elemConn=(/1,2,4,3/)
+      else if (localPet .eq. 1) then
+         ! Fill in node data
+         numNodes=4
+
+        !! node ids
+        allocate(nodeIds(numNodes))
+        nodeIds=(/2,3,5,6/) 
+
+        !! node Coords
+        allocate(nodeCoords(numNodes*2))
+        nodeCoords=(/1.0,0.0, &
+                     2.0,0.0, &
+                     1.0,1.0, &
+                     2.0,1.0/)
+
+        !! node owners
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0,1,0,1/) 
+
+        ! Fill in elem data
+        numElems=1
+
+        !! elem ids
+        allocate(elemIds(numElems))
+        elemIds=(/2/) 
+
+        !! elem type
+        allocate(elemTypes(numElems))
+        elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+        !! elem conn
+        allocate(elemConn(numElems*4))
+        elemConn=(/1,2,4,3/)
+      else if (localPet .eq. 2) then
+         ! Fill in node data
+         numNodes=4
+
+        !! node ids
+        allocate(nodeIds(numNodes))
+        nodeIds=(/4,5,7,8/) 
+
+        !! node Coords
+        allocate(nodeCoords(numNodes*2))
+        nodeCoords=(/0.0,1.0, &
+                     1.0,1.0, &
+                     0.0,2.0, &
+                     1.0,2.0/)
+
+        !! node owners
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0,0,2,2/) 
+
+        ! Fill in elem data
+        numElems=1
+
+        !! elem ids
+        allocate(elemIds(numElems))
+        elemIds=(/3/) 
+
+        !! elem type
+        allocate(elemTypes(numElems))
+        elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+        !! elem conn
+        allocate(elemConn(numElems*4))
+        elemConn=(/1,2,4,3/)  
+      else 
+         ! Fill in node data
+         numNodes=4
+
+        !! node ids
+        allocate(nodeIds(numNodes))
+        nodeIds=(/5,6,8,9/) 
+
+        !! node Coords
+        allocate(nodeCoords(numNodes*2))
+        nodeCoords=(/1.0,1.0, &
+                     2.0,1.0, &
+                     1.0,2.0, &
+                     2.0,2.0/)
+
+        !! node owners
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0,1,2,3/) 
+
+        ! Fill in elem data
+        numElems=1
+
+        !! elem ids
+        allocate(elemIds(numElems))
+        elemIds=(/4/) 
+
+        !! elem type
+        allocate(elemTypes(numElems))
+        elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+        !! elem conn
+        allocate(elemConn(numElems*4))
+        elemConn=(/1,2,4,3/)  
+      endif
+
+!BOC
+      ! Create Mesh structure in 1 step
+      mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+             nodeIds=nodeIds, nodeCoords=nodeCoords, &
+             nodeOwners=nodeOwners, elementIds=elemIds,&
+             elementTypes=elemTypes, elementConn=elemConn, &
+             rc=rc)
+      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+      ! Field is created on the 1 dimensinonal nodal distgrid. On
+      ! each PET, Field is created on the locally owned nodes.
+      field = ESMF_FieldCreate(mesh, typekind=ESMF_TYPEKIND_I4, rank=1, rc=rc)
+      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!EOC
+
+      ! deallocate node data
+      deallocate(nodeIds)
+      deallocate(nodeCoords)
+      deallocate(nodeOwners)
+
+      ! deallocate elem data
+      deallocate(elemIds)
+      deallocate(elemTypes)
+      deallocate(elemConn)
+    ! endif for skip for != 4 procs
+    endif 
+    print *, "Field Create from a Mesh and typekind/rank returned"
+
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
