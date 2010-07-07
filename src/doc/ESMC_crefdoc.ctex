@@ -1,4 +1,4 @@
-% $Id: ESMC_crefdoc.ctex,v 1.2 2010/06/28 20:46:55 theurich Exp $
+% $Id: ESMC_crefdoc.ctex,v 1.3 2010/07/07 19:21:55 svasquez Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -144,10 +144,6 @@
 %#include "../Infrastructure/LocalArray/doc/LocalArray_crefdoc.ctex"
 
 #include "../Infrastructure/ArraySpec/doc/ArraySpec_crefdoc.ctex"
-
-#include "../Infrastructure/Grid/doc/Grid_crefdoc.ctex"
-
-#include "../Infrastructure/LocStream/doc/LocStream_crefdoc.ctex"
 
 #include "../Infrastructure/Mesh/doc/Mesh_crefdoc.ctex"
 
