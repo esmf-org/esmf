@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.57 2010/07/07 01:08:44 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.58 2010/07/07 03:39:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -114,11 +114,10 @@ program ESMF_ArrayEx
 !
 ! \end{verbatim}
 !
-! The other piece of information, besides the DistGrid, that is required to
-! create an Array object is the {\em type, kind and rank}, "tkr" for short, of
-! the Array. This information can be supplied directly through the 
-! {\tt typekind} and {\tt rank} arguments, or through a single {\tt arrayspec}
-! argument.
+! The other piece of information, besides the DistGrid, required to create an
+! Array object is the {\em type, kind and rank}, "tkr" for short, of the Array.
+! This information can be supplied directly through the {\tt typekind} and 
+! {\tt rank} arguments, or through a single {\tt arrayspec} argument.
 !
 ! Here a 2D Array of double precision real numbers is created on the previously
 ! created DistGrid, specifying the "tkr" information directly.
@@ -128,9 +127,10 @@ program ESMF_ArrayEx
     distgrid=distgrid, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!EOE
+!BOE
 ! The different methods on how an Array object is created have no effect on
 ! the use of {\tt ESMF\_ArrayDestroy()}.
+!EOE
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC  
