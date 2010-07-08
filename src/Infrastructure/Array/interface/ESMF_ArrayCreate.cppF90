@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.52 2010/07/08 05:10:01 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.53 2010/07/08 05:37:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.52 2010/07/08 05:10:01 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.53 2010/07/08 05:37:20 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -114,8 +114,9 @@ module ESMF_ArrayCreateMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-    TypeKindRankInterfaceMacro(ArrayCreateAssmdShape)
     TypeKindRankInterfaceMacro(ArrayCreateFromPtr)
+    TypeKindRankInterfaceMacro(ArrayCreateFromPtrArb)
+    TypeKindRankInterfaceMacro(ArrayCreateAssmdShape)
     module procedure ESMF_ArrayCreateLocalArray
     module procedure ESMF_ArrayCreateLocalArrayArb
     module procedure ESMF_ArrayCreateAllocate
@@ -366,6 +367,186 @@ contains
 !---------------------------------------------------------------------------- @\
 
 TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
+
+
+#define ArrayCreateFromPtrArbDoc() \
+! -------------------------- ESMF-public method ----------------------------- @\
+!BOP @\
+! !IROUTINE: ESMF_ArrayCreate - Create Array object from Fortran array pointer w/ arbitrary seqIndices for halo@\
+! @\
+! !INTERFACE: @\
+! ! Private name; call using ESMF_ArrayCreate() @\
+! function ESMF_ArrayCreateFromPtrArb<rank><type><kind>(farrayPtr, & @\
+!   distgrid, haloSeqIndexList, copyflag, distgridToArrayMap, name, rc) @\
+! @\
+! !ARGUMENTS: @\
+!   <type> (ESMF_KIND_<kind>),dimension(<rank>),pointer :: farrayPtr @\
+!   type(ESMF_DistGrid),   intent(in)              :: distgrid @\
+!   integer,               intent(in)              :: haloSeqIndexList(:) @\
+!   type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag @\
+!   integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
+!   character (len=*),     intent(in),   optional  :: name @\
+!   integer,               intent(out),  optional  :: rc @\
+! @\
+! !RETURN VALUE: @\
+!   type(ESMF_Array) :: ESMF_ArrayCreateFromPtrArb##mrank##D##mtypekind @\
+! @\
+! !DESCRIPTION: @\
+! Create an {\tt ESMF\_Array} object from existing local native Fortran @\
+! arrays with pointer attribute, according to distgrid. Besides @\
+! {\tt farrayPtr} each PET must issue this call with identical arguments in @\
+! order to create a consistent Array object. The bounds of the local arrays @\
+! are preserved by this call and determine the bounds of the total region of @\
+! the resulting Array object. Bounds of the DE-local exclusive regions are @\
+! set to be consistent with the total regions and the specified distgrid @\
+! argument. Bounds for Array dimensions that are not distributed are @\
+! automatically set to the bounds provided by {\tt farrayPtr}. @\
+! @\
+! This interface requires a 1 DE per PET decomposition. The Array object will @\
+! not be created and an error will be returned if this condition is not met. @\
+! @\
+! The not distributed Array dimensions form a tensor of rank = array.rank - @\
+! distgrid.dimCount. By default all tensor elements are associated with @\
+! stagger location 0. The widths of the computational region are set to @\
+! the provided value, or zero by default, for all tensor elements. Use @\
+! {\tt ESMF\_ArraySet()} to change these default settings after the @\
+! Array object has been created. @\
+! @\
+! The return value is the newly created {\tt ESMF\_Array} object. @\
+! @\
+! The arguments are: @\
+! \begin{description} @\
+! \item[farrayPtr] @\
+!      Valid native Fortran array with pointer attribute. Memory must be @\
+!      associated with the actual argument. The type/kind/rank information of @\
+!      {\tt farrayPtr} will be used to set {\tt Array}|s properties @\
+!      accordingly. The shape of {\tt farrayPtr} will be checked against the @\
+!      information contained in the {\tt distgrid}. The bounds of @\
+!      {\tt farrayPtr} will be preserved by this call and the bounds of the @\
+!      resulting Array object are set accordingly. @\
+! \item[distgrid] @\
+!      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and @\
+!      distributed over DEs. The dimCount of distgrid must be smaller or equal @\
+!      to the rank of {\tt farrayPtr}. @\
+! \item[haloSeqIndexList] @\
+!      One dimensional array containing sequence indices of local halo region. @\
+!      The size (and content) of {\tt haloSeqIndexList} can (and typically will) @\
+!      be different on each PET. @\
+! \item[{[copyflag]}] @\
+!      Specifies whether the Array object will reference the memory allocation @\
+!      provided by {\tt farrayPtr} directly or will copy the data from @\
+!      {\tt farrayPtr} into a new memory allocation. Valid options are @\
+!      {\tt ESMF\_DATA\_REF} (default) or {\tt ESMF\_DATA\_COPY}. @\
+!      Depending on the specific situation the {\tt ESMF\_DATA\_REF} option @\
+!      may be unsafe when specifying an array slice for {\tt farrayPtr}. @\
+! \item[{[distgridToArrayMap]}] @\
+!      List that contains as many elements as is indicated by @\
+!      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
+!      the DistGrid object to a dimension in {\tt farrayPtr} by specifying the @\
+!      appropriate Array dimension index. The default is to map all of @\
+!      {\tt distgrid}|s dimensions against the lower dimensions of the @\
+!      {\tt farrayPtr} argument in sequence, i.e. {\tt distgridToArrayMap = @\
+!      (/1, 2, .../)}. @\
+!      Unmapped {\tt farrayPtr} dimensions are not decomposed dimensions and @\
+!      form a tensor of rank = Array.rank - DistGrid.dimCount. @\
+!      All {\tt distgridToArrayMap} entries must be greater than or equal @\
+!      to zero and smaller than or equal to the Array rank. It is erroneous @\
+!      to specify the same entry multiple times unless it is zero. @\
+!      If the Array rank is less than the DistGrid dimCount then the default @\
+!      distgridToArrayMap will contain zeros for the dimCount - rank @\
+!      rightmost entries. A zero entry in the {\tt distgridToArrayMap} @\
+!      indicates that the particular DistGrid dimension will be replicating @\
+!      the Array across the DEs along this direction. @\
+! \item[{[name]}] @\
+!      Name of the Array object. @\
+! \item[{[rc]}] @\
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+! \end{description} @\
+! @\
+!EOP @\
+!---------------------------------------------------------------------------- @\
+
+#define ArrayCreateFromPtrArbMacro(mtype, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+! -------------------------- ESMF-public method ----------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_ArrayCreateFromPtrArb" @\
+  function ESMF_ArrayCreateFromPtrArb##mrank##D##mtypekind(farrayPtr, & @\
+    distgrid, haloSeqIndexList, copyflag, distgridToArrayMap, & @\
+    name, rc) @\
+@\
+    type(ESMF_Array) :: ESMF_ArrayCreateFromPtrArb##mrank##D##mtypekind @\
+@\
+    mtype (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: farrayPtr @\
+    type(ESMF_DistGrid),   intent(in)              :: distgrid @\
+    integer,               intent(in)              :: haloSeqIndexList(:) @\
+    type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag @\
+    integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
+    character (len=*),     intent(in),   optional  :: name @\
+    integer,               intent(out),  optional  :: rc @\
+@\
+    ! Local variables @\
+    integer                 :: localrc    ! local return code @\
+    integer                 :: localHaloCount @\
+    integer                 :: dimCount, localDeCount @\
+    type(ESMF_DELayout)     :: delayout @\
+@\
+    ! Initialize return code; assume failure until success is certain @\
+    localrc = ESMF_RC_NOT_IMPL @\
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+@\
+    ! Check init status of arguments used directly @\
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
+@\
+    ! Ensure incoming DistGrid is 1D @\
+    call ESMF_DistGridGet(distgrid, dimCount=dimCount, delayout=delayout, & @\
+      rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    if (dimCount /= 1) then @\
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, & @\
+        "- this ArrayCreate() interface requires 1D DistGrid", & @\
+        ESMF_CONTEXT, rc) @\
+      return @\
+    endif @\
+@\
+    ! Ensure there is only 1 DE/PET @\
+    call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    if (localDeCount /= 1) then @\
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, & @\
+        "- this ArrayCreate() interface only supports 1DE/PETs", & @\
+        ESMF_CONTEXT, rc) @\
+      return @\
+    endif @\
+@\
+    ! Prepare for actual ArrayCreate() call @\
+    localHaloCount = size(haloSeqIndexList) @\
+@\
+    ! Call into conventional interface to create the Array object @\
+    ESMF_ArrayCreateFromPtrArb##mrank##D##mtypekind = & @\
+      ESMF_ArrayCreate(farrayPtr, distgrid, copyflag, & @\
+      distgridToArrayMap=distgridToArrayMap, totalUWidth=(/localHaloCount/), & @\
+      name=name, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    ! Set the arbitrary sequence indices in the Array halo rim @\
+    call ESMF_ArraySetPLocalDeInternal( & @\
+      ESMF_ArrayCreateFromPtrArb##mrank##D##mtypekind, & @\
+      localDe=0, rimSeqIndex=haloSeqIndexList, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    ! Return successfully @\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+@\
+  end function ESMF_ArrayCreateFromPtrArb##mrank##D##mtypekind @\
+!---------------------------------------------------------------------------- @\
+
+TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
 
 
 #define ArrayCreateAssmdShapeDoc() \
