@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.27 2010/07/07 01:08:44 theurich Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.28 2010/07/08 19:17:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.27 2010/07/07 01:08:44 theurich Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.28 2010/07/08 19:17:53 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -106,10 +106,19 @@ program ESMF_ArrayCreateGetUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayCreate Allocate 2D ESMF_TYPEKIND_R8 rank inconsistency Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_GLOBAL, undistLBound=(/0/), undistUBound=(/2,2/), &
+    name="MyArray", rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate Allocate 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, rank=2, &
-    distgrid=distgrid, indexflag=ESMF_INDEX_GLOBAL, name="MyArray", rc=rc)
+  array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_GLOBAL, name="MyArray", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------

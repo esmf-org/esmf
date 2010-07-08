@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.53 2010/07/08 05:37:20 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.54 2010/07/08 19:17:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.53 2010/07/08 05:37:20 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.54 2010/07/08 19:17:53 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1262,18 +1262,17 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayCreateAllocate()"
 !BOP
-! !IROUTINE: ESMF_ArrayCreate - Create Array object from rank and typekind (allocate memory)
+! !IROUTINE: ESMF_ArrayCreate - Create Array object from typekind (allocate memory)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateAllocate(typekind, rank, distgrid, indexflag, &
+  function ESMF_ArrayCreateAllocate(typekind, distgrid, indexflag, &
     distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
     undistLBound, undistUBound, name, rc)
 !
 ! !ARGUMENTS:
        type(ESMF_TypeKind),   intent(in)              :: typekind
-       integer,               intent(in)              :: rank
        type(ESMF_DistGrid),   intent(in)              :: distgrid
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
@@ -1293,10 +1292,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
-! according to typekind/rank and distgrid. Each PET must issue this call with 
-! identical arguments in unison in order to create a consistent Array 
-! object. DE-local allocations are made according to the total region defined
-! by the arguments to this call: {\tt distgrid} and the optional {\tt Width} 
+! according to typekind and distgrid. The Array rank is indirectly determined
+! by the incoming information. Each PET must issue this call in unison in order
+! to create a consistent Array object. DE-local allocations are made according
+! to the total region defined by the {\tt distgrid} and the optional {\tt Width}
 ! arguments.
 !
 ! The return value is the newly created {\tt ESMF\_Array} object.
@@ -1305,8 +1304,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! \begin{description}
 ! \item[typekind] 
 !      The typekind of the Array.
-! \item[rank] 
-!      The rank of the Array.
 ! \item[distgrid]
 !      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
@@ -1382,12 +1379,36 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc    ! local return code
+    integer                 :: rank, dimCount, i
     type(ESMF_ArraySpec)    :: arrayspec
-
+    
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! Check init status of arguments used directly
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
+    
+    ! Determine rank from input information
+    call ESMF_DistGridGet(distgrid, dimCount=dimCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    rank = dimCount ! default value
+    
+    if (present(distgridToArrayMap)) then
+      rank = 0 ! reset
+      do i=1, size(distgridToArrayMap)
+        if (distgridToArrayMap(i)>0) rank = rank+1  ! mapping against Array dim
+      enddo
+    endif
+
+    if (present(undistLBound)) then
+      rank = rank + size(undistLBound)
+    else if (present(undistUBound)) then
+      rank = rank + size(undistUBound)
+    endif
+      
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1412,17 +1433,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayCreateAllocateArb()"
 !BOP
-! !IROUTINE: ESMF_ArrayCreate - Create Array object from rank and typekind (allocate memory) w/ arbitrary seqIndices for halo
+! !IROUTINE: ESMF_ArrayCreate - Create Array object from typekind (allocate memory) w/ arbitrary seqIndices for halo
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateAllocateArb(typekind, rank, distgrid, &
+  function ESMF_ArrayCreateAllocateArb(typekind, distgrid, &
     haloSeqIndexList, distgridToArrayMap, undistLBound, undistUBound, &
     name, rc)
 !
 ! !ARGUMENTS:
        type(ESMF_TypeKind),   intent(in)              :: typekind
-       integer,               intent(in)              :: rank
        type(ESMF_DistGrid),   intent(in)              :: distgrid
        integer,               intent(in)              :: haloSeqIndexList(:)
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
@@ -1436,10 +1456,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
-! according to typekind/rank and distgrid. Each PET must issue this call in 
-! unison in order to create a consistent Array object. DE-local allocations 
-! are made according to the total region defined by the arguments to this call:
-! {\tt distgrid} and {\tt haloSeqIndexList} arguments.
+! according to typekind and distgrid. The Array rank is indirectly determined
+! by the incoming information. Each PET must issue this call in unison in order
+! to create a consistent Array object. DE-local allocations are made according
+! to the total region defined by the {\tt distgrid} and {\tt haloSeqIndexList}
+! arguments.
 !
 ! The return value is the newly created {\tt ESMF\_Array} object.
 !
@@ -1447,8 +1468,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! \begin{description}
 ! \item[typekind] 
 !      The typekind of the Array.
-! \item[rank] 
-!      The rank of the Array.
 ! \item[distgrid]
 !      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
@@ -1489,12 +1508,36 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc    ! local return code
+    integer                 :: rank, dimCount, i
     type(ESMF_ArraySpec)    :: arrayspec
-
+    
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! Check init status of arguments used directly
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
+    
+    ! Determine rank from input information
+    call ESMF_DistGridGet(distgrid, dimCount=dimCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    rank = dimCount ! default value
+    
+    if (present(distgridToArrayMap)) then
+      rank = 0 ! reset
+      do i=1, size(distgridToArrayMap)
+        if (distgridToArrayMap(i)>0) rank = rank+1  ! mapping against Array dim
+      enddo
+    endif
+
+    if (present(undistLBound)) then
+      rank = rank + size(undistLBound)
+    else if (present(undistUBound)) then
+      rank = rank + size(undistUBound)
+    endif
+      
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &

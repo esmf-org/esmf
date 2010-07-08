@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.58 2010/07/07 03:39:02 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.59 2010/07/08 19:17:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -114,17 +114,20 @@ program ESMF_ArrayEx
 !
 ! \end{verbatim}
 !
-! The other piece of information, besides the DistGrid, required to create an
+! Besides the DistGrid, the other piece of information required to create an
 ! Array object is the {\em type, kind and rank}, "tkr" for short, of the Array.
-! This information can be supplied directly through the {\tt typekind} and 
-! {\tt rank} arguments, or through a single {\tt arrayspec} argument.
+! Actually the rank of the Array object is fully determined by the DistGrid
+! and other (optional) arguments passed into ArrayCreate, so that explicit 
+! specification of the Array rank is redundant.
 !
-! Here a 2D Array of double precision real numbers is created on the previously
-! created DistGrid, specifying the "tkr" information directly.
+! The simplest way to supply the type and kind information of the Array is
+! directly through the {\tt typekind} argument. Here a double precision Array
+! is created on the previously created DistGrid. Since no other arguments are
+! specified that could alter the rank of the Array it becomes equal to the 
+! dimCount of the DistGrid, i.e a 2D Array is created on top of the DistGrid.
 !EOE
 !BOC
-  array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, rank=2, &
-    distgrid=distgrid, rc=rc)
+  array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
@@ -137,7 +140,10 @@ program ESMF_ArrayEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! Alternatively the same Array can be created specifying the "tkr" information
-! in form of an ArraySpec variable.  
+! in form of an ArraySpec variable. The ArraySpec explicitly contains the 
+! Array rank and thus results in an overspecification on the ArrayCreate()
+! interface. ESMF checks all input information for consistency and returns 
+! appropriate error codes in case any inconsistencies are found.
 !EOE
 !BOC
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
