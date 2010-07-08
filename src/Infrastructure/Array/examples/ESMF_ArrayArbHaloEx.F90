@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbHaloEx.F90,v 1.4 2010/07/08 19:17:53 theurich Exp $
+! $Id: ESMF_ArrayArbHaloEx.F90,v 1.5 2010/07/08 20:54:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@ program ESMF_ArrayArbHaloEx
 ! \label{Array:ArbHalo}
 !
 ! In the previous section the Array {\em halo} operation was demonstrated 
-! for regularily decomposed ESMF Arrays. However, the ESMF halo operation
+! for regularly decomposed ESMF Arrays. However, the ESMF halo operation
 ! is not restricted to regular decompositions. The same Array halo methods
 ! apply unchanged to Arrays that are created on arbitrarily distributed
 ! DistGrids. This includes the non-blocking features discussed in section
@@ -106,20 +106,20 @@ program ESMF_ArrayArbHaloEx
 ! However, while an Array that was created on a regular DistGrid automatically
 ! inherits the index space topology information that is contained within the
 ! DistGrid object, there is no such topology information available for
-! DistGrid objects with arbitrary sequence indices. As a consequnce of
+! DistGrid objects with arbitrary sequence indices. As a consequence of
 ! this, Arrays created on arbitrary DistGrids do not automatically have
 ! the information that is required to associated halo elements with the
 ! exclusive elements across DEs. Instead the user must supply this information
 ! explicitly during Array creation.
 !
-! Mutliple ArrayCreate() interfaces exist that allow the creation of an Array
+! Multiple ArrayCreate() interfaces exist that allow the creation of an Array
 ! on a DistGrid with arbitrary sequence indices, while supplying the sequence
 ! indices for the halo region of the local DE through an additional argument
 ! with dummy name {\tt haloSeqIndexList}. As in the regular case the
 ! ArrayCreate() interfaces differ in the way that the memory allocations for
 ! the Array elements are passed into the call. The following code shows how 
 ! an ESMF Array can be wrapped around existing PET-local memory allocations.
-! The allocations are of different size on each PET as to accomodate the correct
+! The allocations are of different size on each PET as to accommodate the correct
 ! number of local Array elements.
 !EOE
 !BOC
@@ -170,7 +170,7 @@ program ESMF_ArrayArbHaloEx
 ! is correctly sized to hold the exclusive elements, as indicated by the
 ! DistGrid object, plus the halo elements as indicated by the local
 ! {\tt haloSeqIndexList} argument. The size of the Fortran allocation must
-! match exaclty or a runtime error will be returned.
+! match exactly or a runtime error will be returned.
 !
 ! Analogous to the case of Arrays on regular DistGrids, it is the exclusive
 ! region of the local DE that is typically modified by the code running on 
@@ -339,7 +339,7 @@ program ESMF_ArrayArbHaloEx
 ! By default the DistGrid dimension is mapped to the first Array dimension, 
 ! associating the remaining Array dimensions with the undistributed dimensions
 ! in sequence. The dimension order is important when accessing the individual
-! Array elements. Here the same initialization as before is extented to 
+! Array elements. Here the same initialization as before is extended to 
 ! cover the undistributed dimension.
 !EOE
 !BOC
