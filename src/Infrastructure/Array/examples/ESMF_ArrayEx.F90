@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.59 2010/07/08 19:17:53 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.60 2010/07/08 21:02:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -114,10 +114,10 @@ program ESMF_ArrayEx
 !
 ! \end{verbatim}
 !
-! Besides the DistGrid, the other piece of information required to create an
-! Array object is the {\em type, kind and rank}, "tkr" for short, of the Array.
-! Actually the rank of the Array object is fully determined by the DistGrid
-! and other (optional) arguments passed into ArrayCreate, so that explicit 
+! Besides the DistGrid it is the {\em type, kind} and {\em rank} information,
+! "tkr" for short, that is required to create an Array object. It turns out that
+! the rank of the Array object is fully determined by the DistGrid and other 
+! (optional) arguments passed into ArrayCreate(), so that explicit 
 ! specification of the Array rank is redundant.
 !
 ! The simplest way to supply the type and kind information of the Array is
