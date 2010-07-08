@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.49 2010/07/07 21:38:48 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.50 2010/07/08 04:48:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.49 2010/07/07 21:38:48 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.50 2010/07/08 04:48:03 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1097,11 +1097,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
-! according to typekind/rank and distgrid. Each PET must issue this call with 
-! identical arguments in unison in order to create a consistent Array 
-! object. DE-local allocations are made according to the total region defined
-! by the arguments to this call: {\tt distgrid} and {\tt haloSeqIndexList} 
-! arguments.
+! according to typekind/rank and distgrid. Each PET must issue this call in 
+! unison in order to create a consistent Array object. DE-local allocations 
+! are made according to the total region defined by the arguments to this call:
+! {\tt distgrid} and {\tt haloSeqIndexList} arguments.
 !
 ! The return value is the newly created {\tt ESMF\_Array} object.
 !
@@ -1118,6 +1117,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      raised.
 ! \item[haloSeqIndexList]
 !      One dimensional array containing sequence indices of local halo region.
+!      The size (and content) of {\tt haloSeqIndexList} can (and typically will)
+!      be different on each PET.
 ! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by @\
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
@@ -1455,11 +1456,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
-! according to arrayspec and distgrid. Each PET must issue this call with 
-! identical arguments in unison in order to create a consistent Array 
-! object. DE-local allocations are made according to the total region defined
-! by the arguments to this call: {\tt distgrid} and {\tt haloSeqIndexList} 
-! arguments.
+! according to arrayspec and distgrid. Each PET must issue this call in unison
+! in order to create a consistent Array object. DE-local allocations are made
+! according to the total region defined by the arguments to this call: 
+! {\tt distgrid} and {\tt haloSeqIndexList} arguments.
 !
 ! The return value is the newly created {\tt ESMF\_Array} object.
 !
@@ -1474,6 +1474,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      raised.
 ! \item[haloSeqIndexList]
 !      One dimensional array containing sequence indices of local halo region.
+!      The size (and content) of {\tt haloSeqIndexList} can (and typically will)
+!      be different on each PET.
 ! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by @\
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
@@ -1506,18 +1508,47 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !------------------------------------------------------------------------------
     integer                 :: localrc    ! local return code
     integer                 :: localHaloCount
+    integer                 :: dimCount, localDeCount
+    type(ESMF_DELayout)     :: delayout
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
-  !TODO: check that distgrid is 1D arbitrary
-  
+    ! Check init status of arguments used directly
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
+    
+    ! Ensure incoming DistGrid is 1D
+    call ESMF_DistGridGet(distgrid, dimCount=dimCount, delayout=delayout, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    if (dimCount /= 1) then
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+        "- this ArrayCreate() interface requires 1D DistGrid", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
+
+    ! Ensure there is only 1 DE/PET
+    call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    if (localDeCount /= 1) then
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+        "- this ArrayCreate() interface only supports 1DE/PETs", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
+
+    ! Prepare for actual ArrayCreate() call  
     localHaloCount = size(haloSeqIndexList)
     
     ! Call into conventional interface to create the Array object
     ESMF_ArrayCreateAllocateASArb = ESMF_ArrayCreate(arrayspec, distgrid, &
-      totalUWidth=(/localHaloCount/), &
+      distgridToArrayMap=distgridToArrayMap, totalUWidth=(/localHaloCount/), &
       undistLBound=undistLBound, undistUBound=undistUBound, name=name, &
       rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &

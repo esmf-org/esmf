@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.116 2010/07/07 21:35:45 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.117 2010/07/08 04:48:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.116 2010/07/07 21:35:45 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.117 2010/07/08 04:48:03 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -237,7 +237,7 @@ Array::Array(
       int linIndex = arrayElement.getLinearIndexExclusive();
       // obtain canonical seqIndex value according to DistGrid topology
       SeqIndex seqIndex;  // invalidated by default constructor
-      if (arrayElement.isValid()){
+      if (arrayElement.hasValidSeqIndex()){
         // seqIndex is well defined for this arrayElement
         seqIndex = arrayElement.getSequenceIndexExclusive(3);
       }
@@ -1928,8 +1928,7 @@ SeqIndex Array::getSequenceIndexExclusive(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // initialize seqIndex
-  SeqIndex seqIndex;
-  seqIndex.decompSeqIndex = seqIndex.tensorSeqIndex = -1;
+  SeqIndex seqIndex;  // invalidated by constructor
 
   // prepare decompIndex for decomposed dimensions in the DistGrid order
   int dimCount = distgrid->getDimCount();
@@ -1953,22 +1952,9 @@ SeqIndex Array::getSequenceIndexExclusive(
   
   // garbage collection
   delete [] decompIndex;
-        
-  // determine the sequentialized index for tensor dimensions
-  int tensorSeqIndex = 0;             // reset
-  int tensorIndex = tensorCount - 1;  // reset
-  for (int jj=rank-1; jj>=0; jj--){
-    if (arrayToDistGridMap[jj]==0){
-      // tensor dimension
-      // first time multiply with zero intentionally:
-      tensorSeqIndex *= undistUBound[tensorIndex] - undistLBound[tensorIndex]
-      + 1;
-      tensorSeqIndex += index[jj];
-      --tensorIndex;
-    }
-  }
-  ++tensorSeqIndex; // shift tensor sequentialized index to basis 1 !!!!
-  seqIndex.tensorSeqIndex = tensorSeqIndex;
+  
+  // determine sequentialized index for tensor dimensions
+  seqIndex.tensorSeqIndex = getTensorSequenceIndex(index);
   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -2034,6 +2020,43 @@ SeqIndex Array::getSequenceIndexPatch(
   // garbage collection
   delete [] decompIndex;
         
+  // determine sequentialized index for tensor dimensions
+  seqIndex.tensorSeqIndex = getTensorSequenceIndex(index);
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return seqIndex;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::getTensorSequenceIndex()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::getTensorSequenceIndex
+//
+// !INTERFACE:
+int Array::getTensorSequenceIndex(
+//
+// !RETURN VALUE:
+//    Tensor sequence index
+//
+// !ARGUMENTS:
+//
+  const int *index,                 // in - index tuple basis 0
+  int *rc                           // out - return code
+  )const{
+//
+// !DESCRIPTION:
+//    Get tensor sequential index - assuming index input to be basis 0
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
   // determine the sequentialized index for tensor dimensions
   int tensorSeqIndex = 0;             // reset
   int tensorIndex = tensorCount - 1;  // reset
@@ -2048,11 +2071,58 @@ SeqIndex Array::getSequenceIndexPatch(
     }
   }
   ++tensorSeqIndex; // shift tensor sequentialized index to basis 1 !!!!
-  seqIndex.tensorSeqIndex = tensorSeqIndex;
   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return seqIndex;
+  return tensorSeqIndex;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::getArbSequenceIndexOffset()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::getArbSequenceIndexOffset
+//
+// !INTERFACE:
+int Array::getArbSequenceIndexOffset(
+//
+// !RETURN VALUE:
+//    Arbitrary sequence index offset
+//
+// !ARGUMENTS:
+//
+  const int *index,                 // in - index tuple basis 0
+  int *rc                           // out - return code
+  )const{
+//
+// !DESCRIPTION:
+//    Get offset into arb sequential index list - assuming index input to be
+// basis 0
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  // determine the sequentialized index for tensor dimensions
+  int arbSeqIndexOffset = 0;             // reset
+  int arbIndex = (rank - tensorCount) - 1;  // reset
+  for (int jj=rank-1; jj>=0; jj--){
+    if (arrayToDistGridMap[jj]==1){
+      // decomposed dimension
+      // first time multiply with zero intentionally:
+      arbSeqIndexOffset *= totalUBound[arbIndex] - totalLBound[arbIndex] + 1;
+      arbSeqIndexOffset += index[jj];
+      --arbIndex;
+    }
+  }
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return arbSeqIndexOffset;
 }
 //-----------------------------------------------------------------------------
 
@@ -2231,27 +2301,46 @@ int Array::setRimSeqIndex(
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  // ensure localDe is in range
+  if (localDe < 0 || localDe >= delayout->getLocalDeCount()){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+      "- localDe out of range", &rc);
+    return rc;  // bail out
+  }
+
   // check rimSeqIndexArg input and process
   if (rimSeqIndexArg != NULL){
     if (rimSeqIndexArg->dimCount != 1){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
         "- rimSeqIndexArg array must be of rank 1", &rc);
-      return rc;
+      return rc;  // bail out
     }
-    //TODO: check localDe range
-    if (rimSeqIndexArg->extent[0] != rimSeqIndex[localDe].size()){
+    if (rimSeqIndexArg->extent[0]*tensorElementCount 
+      != rimSeqIndex[localDe].size()){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
         "- rimSeqIndexArg argument must be of size rimSeqIndex[localDe].size()",
         &rc);
-      return rc;
+      return rc;  // bail out
     }
-    
-//TODO: need to get this working for tensorCount > 1
-    
-    for (int i=0; i<rimSeqIndex[localDe].size(); i++){
-      rimSeqIndex[localDe][i].decompSeqIndex = rimSeqIndexArg->array[i];
-      rimSeqIndex[localDe][i].tensorSeqIndex = 1;
-    }
+
+    // fill Array rim elements with sequence indices provided in rimSeqIndexArg
+    ArrayElement arrayElement(this, localDe, true);
+    int i=0;
+    int offStart = arrayElement.getArbSequenceIndexOffset();    
+    while(arrayElement.isWithin()){
+      int off = arrayElement.getArbSequenceIndexOffset() - offStart;
+      rimSeqIndex[localDe][i].decompSeqIndex = rimSeqIndexArg->array[off];
+      rimSeqIndex[localDe][i].tensorSeqIndex =
+        arrayElement.getTensorSequenceIndex();
+#if 0
+printf("setRimSeqIndex(): %d, %d, %d, (%d, %d), %d\n", i, offStart, off, 
+  rimSeqIndex[localDe][i].decompSeqIndex,
+  rimSeqIndex[localDe][i].tensorSeqIndex,
+  rimLinIndex[localDe][i]);
+#endif 
+      ++i;
+      arrayElement.next();  // next element
+    } // multi dim index loop
   }
 
   // return successfully
@@ -9529,12 +9618,12 @@ ArrayElement::ArrayElement(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::ArrayElement::isValid()"
+#define ESMC_METHOD "ESMCI::ArrayElement::hasValidSeqIndex()"
 //BOPI
-// !IROUTINE:  ESMCI::ArrayElement::isValid
+// !IROUTINE:  ESMCI::ArrayElement::hasValidSeqIndex
 //
 // !INTERFACE:
-bool ArrayElement::isValid(
+bool ArrayElement::hasValidSeqIndex(
 //
 // !RETURN VALUE:
 //    true or false
@@ -9561,7 +9650,7 @@ bool ArrayElement::isValid(
         // discontigous dimension -> check if within MultiDimIndexLoop block
         if (isWithinBlock(i) == false) return false;
       }
-      int collocation = array->getDistGrid()->getCollocationPDim()[i];
+      int collocation = array->getDistGrid()->getCollocationPDim()[iPacked];
       if (array->getDistGrid()->getArbSeqIndexList(localDe, collocation)){
         // arbitrarily decomposed dimension
         // -> check if within MultiDimIndexLoop block
@@ -9596,7 +9685,14 @@ int ArrayElement::getLinearIndexExclusive(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  return array->getLinearIndexExclusive(localDe, &indexTuple[0]);
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  
+  int linIndex = array->getLinearIndexExclusive(localDe, &indexTuple[0],
+    &localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, NULL))
+    throw localrc;  // bail out with exception
+  return linIndex;
 }
 //-----------------------------------------------------------------------------
     
@@ -9635,6 +9731,71 @@ SeqIndex ArrayElement::getSequenceIndexExclusive(
 //-----------------------------------------------------------------------------
 
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayElement::getTensorSequenceIndex()"
+//BOPI
+// !IROUTINE:  ESMCI::ArrayElement::getTensorSequenceIndex
+//
+// !INTERFACE:
+int ArrayElement::getTensorSequenceIndex(
+//
+// !RETURN VALUE:
+//    linear index
+//
+// !ARGUMENTS:
+//
+  )const{    
+//
+// !DESCRIPTION:
+//    Obtain linear index for ArrayElement
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  
+  int tensorSeqIndex = array->getTensorSequenceIndex(&indexTuple[0], &localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, NULL))
+    throw localrc;  // bail out with exception
+  return tensorSeqIndex;
+}
+//-----------------------------------------------------------------------------
+    
+    
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayElement::getArbSequenceIndexOffset()"
+//BOPI
+// !IROUTINE:  ESMCI::ArrayElement::getArbSequenceIndexOffset
+//
+// !INTERFACE:
+int ArrayElement::getArbSequenceIndexOffset(
+//
+// !RETURN VALUE:
+//    linear index
+//
+// !ARGUMENTS:
+//
+  )const{    
+//
+// !DESCRIPTION:
+//    Obtain linear index for ArrayElement
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  
+  int arbSeqIndexOffset = array->getArbSequenceIndexOffset(&indexTuple[0],
+    &localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, NULL))
+    throw localrc;  // bail out with exception
+  return arbSeqIndexOffset;
+}
+//-----------------------------------------------------------------------------
+    
+    
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::SparseMatrix::SparseMatrix()"

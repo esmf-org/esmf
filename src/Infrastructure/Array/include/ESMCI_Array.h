@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.54 2010/07/07 21:35:45 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.55 2010/07/08 04:48:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -242,6 +242,8 @@ namespace ESMCI {
       int depth=0, int *rc=NULL) const;
     SeqIndex getSequenceIndexPatch(int patch, const int *index, int *rc=NULL)
       const;
+    int getTensorSequenceIndex(const int *index, int *rc=NULL)const;
+    int getArbSequenceIndexOffset(const int *index, int *rc=NULL)const;
     int setComputationalLWidth(InterfaceInt *computationalLWidthArg);
     int setComputationalUWidth(InterfaceInt *computationalUWidthArg);
     int setRimSeqIndex(int localDe, InterfaceInt *rimSeqIndexArg);
@@ -371,9 +373,11 @@ namespace ESMCI {
     ArrayElement(Array const *arrayArg, int localDeArg,
       bool blockExclusiveFlag);
       // construct iterator through total Array region with block excl. option
-    bool isValid()const;
+    bool hasValidSeqIndex()const;
     int getLinearIndexExclusive()const;
     SeqIndex getSequenceIndexExclusive(int depth=0)const;
+    int getTensorSequenceIndex()const;
+    int getArbSequenceIndexOffset()const;
   };  // class ArrayElement 
   //============================================================================
   
