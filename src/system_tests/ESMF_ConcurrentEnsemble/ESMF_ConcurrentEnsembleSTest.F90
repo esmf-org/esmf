@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.15 2010/07/08 16:25:12 svasquez Exp $
+! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.16 2010/07/08 16:41:36 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -379,7 +379,7 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
 
   do while (.not. ESMF_ClockIsStopTime(clock, rc))
 
-        ! Sequence:  A1, A2, B1, B2 (may run concurrently if petcount==8), Coupler, C
+        ! Sequence:  A1, A2, B1, B2 (run concurrently), Coupler, C
   	call ESMF_GridCompRun(compA1, exportState=cA1exp, clock=clock, userRc=localrc)
   	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     	ESMF_CONTEXT, rcToReturn=rc)) &
