@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.113 2010/06/28 23:27:35 theurich Exp $
+// $Id: ESMC_Array.h,v 1.114 2010/07/08 21:54:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -58,6 +58,9 @@ ESMC_Array ESMC_ArrayCreate(
   const char* name, 
   int *rc);
   
+// !RETURN VALUE:
+//  Newly created ESMC_Array object.
+//
 // !DESCRIPTION:
 //
 //  Create an {\tt ESMC\_Array} object.

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.71 2010/06/28 21:49:32 theurich Exp $
+// $Id: ESMC_Calendar.h,v 1.72 2010/07/08 21:54:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -69,6 +69,9 @@ ESMC_Calendar ESMC_CalendarCreate(
   enum ESMC_CalendarType calendartype,
   int *rc);  
 
+// !RETURN VALUE:
+//  Newly created ESMC_Calendar object.
+//
 // !DESCRIPTION:
 //
 //  Creates and sets a {\tt calendar} to the given built-in
