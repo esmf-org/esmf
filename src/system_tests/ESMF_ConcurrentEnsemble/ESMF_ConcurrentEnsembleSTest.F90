@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.14 2009/10/22 03:24:40 svasquez Exp $
+! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.15 2010/07/08 16:25:12 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -7,9 +7,9 @@
 !-------------------------------------------------------------------------
 !
 ! !DESCRIPTION:
-! System test Ensemble.  
+! System test Concurrent Ensemble.  
 !    The purpose of this system test is to demonstrate how to build 
-!    ensemble components (either sequential or concurrent) in ESMF using different 
+!    concurrent ensemble components in ESMF using different 
 !    components or the same component with different initial 
 !    conditions.
 !
@@ -25,13 +25,6 @@
 !    A couple component, Cpl, is also provided to couple the ensemble components with
 !    the composite component.  
 !
-!    This test is run in two different scenerios:
-!    1.  If the total PET count is 8, the ensemble components will run as concurrent
-!        components, namely, each runs on 2 disjoint PETs.
-!    2.  If the total PET is less than 8, the ensemble components will run as sequential
-!        components, i.e., on all the PETs.
-!    In either case, the composite component and the coupler component run on all the PETs.
-! 
 !    Two techniques are used to implement the ensemble components that are instantiated from
 !    the same component definition.  
 !    1.  Using Attributes to set different initial condition.  Since the ensemble components
@@ -42,14 +35,7 @@
 !        component.
 !    2.  Use InternalState to pass private data values between component's functions. One way
 !        to share component's private data between the init/run/finalize functions is to use
-!        the module's global variables.  When the ensemble components are run in sequential mode,
-!        i.e., there are multiple instances of the same component module  running at the same PETs,
-!        we can no longer use module variables to share the private data.  Alternatively, ESMF provides
-!        Component Internal State to serve the function.  In this example, we set different offset for 
-!        different ensemble components at the init function and pass the offset to the run routine using
-!        the Internal State as a demonstration.  Note that you have to define a data wrapper that
-!        contains a single pointer to point to a data block containing all the data to be shared
-!        in between functions.
+!        the module's global variables.  
 ! 
 !    Each ensemble component exports the array using its ExportState.  Those ExportStates are added
 !    into the ImportState of the Coupler.  The Coupler then creates four arrays each of size 100x150
@@ -68,9 +54,8 @@
 !    The destination array is then exported via its ExportState.  The composite component also
 !    checks the averaged values and reports the errors if any.
 !
-!    In each run cylce, the four ensemble components will run either concurrently or sequentially 
-!    depending on the total number of PETs allocated, followed by the coupler, that performs the
-!    array redistributions for all the four incoming arrays at once, and the composite component.
+!    In each run cylce, the four ensemble components will run concurrently followed by the coupler, 
+!    that performs the array redistributions for all the four incoming arrays at once, and the composite component.
 !    We run the run cycles 5 times. 
 !
 !-------------------------------------------------------------------------
@@ -153,8 +138,7 @@ program ESMF_ConcurrentEnsembleSTest
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
 
-  ! Create the 4 ensemble model components, the composite component and the coupler on disjoint PETs if petCount == 8
-  ! or on all the PETs if petCount < 8
+  ! Create the 4 ensemble model components, the composite component and the coupler on disjoint PETs 
   ! In concurrent mode, each of the four ensemble components run 2 disjoint PETs and the coupler and the composite
   ! components on all the 8 PETs.
   cnameA1 = "user model A-1"
@@ -164,45 +148,26 @@ program ESMF_ConcurrentEnsembleSTest
   cnameC = "user model C"
   cplname = "user one-way coupler"
 
-  if (petCount .lt. 8) then
-	compA1 = ESMF_GridCompCreate(name=cnameA1, rc=localrc)
-	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    		ESMF_CONTEXT, rcToReturn=rc)) &
-    		call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-	compA2 = ESMF_GridCompCreate(name=cnameA2, rc=localrc)
-	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    		ESMF_CONTEXT, rcToReturn=rc)) &
-    		call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-	compB1 = ESMF_GridCompCreate(name=cnameB1, rc=localrc)
-	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    		ESMF_CONTEXT, rcToReturn=rc)) &
-    		call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-	compB2 = ESMF_GridCompCreate(name=cnameB2, rc=localrc)
-	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    		ESMF_CONTEXT, rcToReturn=rc)) &
-    		call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  else
-	! use petList to define comp1 on PET 0,1
-  	compA1 = ESMF_GridCompCreate(name=cnameA1, petList=(/0,1/), rc=localrc)
-	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    		ESMF_CONTEXT, rcToReturn=rc)) &
-    		call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-	! use petList to define comp1 on PET 2,3
-  	compA2 = ESMF_GridCompCreate(name=cnameA2, petList=(/2,3/), rc=localrc)
-	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    		ESMF_CONTEXT, rcToReturn=rc)) &
-    		call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-	! use petList to define comp1 on PET 4,5
-  	compB1 = ESMF_GridCompCreate(name=cnameB1, petList=(/4,5/), rc=localrc)
-	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    		ESMF_CONTEXT, rcToReturn=rc)) &
-    		call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-	! use petList to define comp1 on PET 6,7
-  	compB2 = ESMF_GridCompCreate(name=cnameB2, petList=(/6,7/), rc=localrc)
-	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    		ESMF_CONTEXT, rcToReturn=rc)) &
-    		call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  endif
+  ! use petList to define comp1 on PET 0,1
+  compA1 = ESMF_GridCompCreate(name=cnameA1, petList=(/0,1/), rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+	ESMF_CONTEXT, rcToReturn=rc)) &
+    	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  ! use petList to define comp1 on PET 2,3
+  compA2 = ESMF_GridCompCreate(name=cnameA2, petList=(/2,3/), rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+ 	ESMF_CONTEXT, rcToReturn=rc)) &
+  call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  ! use petList to define comp1 on PET 4,5
+  compB1 = ESMF_GridCompCreate(name=cnameB1, petList=(/4,5/), rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+	ESMF_CONTEXT, rcToReturn=rc)) &
+	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  ! use petList to define comp1 on PET 6,7
+  compB2 = ESMF_GridCompCreate(name=cnameB2, petList=(/6,7/), rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+	ESMF_CONTEXT, rcToReturn=rc)) &
+	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   ! create the composite composite and the coupler on all PETs
   compC = ESMF_GridCompCreate(name=cnameC, rc=localrc)
