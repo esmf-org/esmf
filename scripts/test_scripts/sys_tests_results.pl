@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.19 2010/06/24 16:14:26 svasquez Exp $
+# $Id: sys_tests_results.pl,v 1.20 2010/07/08 21:44:57 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -19,6 +19,7 @@ sub get_pet_count {
         # Find # of processors string
         $count=grep ( /NUMBER_OF_PROCESSORS/, @logFile);
         if (($count == "") || ($count == 0)){
+print "count =$count";
                 # Did not find the # of processors string
                 return(0);
         }
@@ -243,10 +244,12 @@ use File::Find
                         close ($file);
 			#Read the pet count from Log file.
 			$pet_count = &get_pet_count(@file_lines);
-			$count=grep ( /PASS/, @file_lines);
-			if ($count == $pet_count) {
-                               	push (pass_tests, $file);
-                               	$pass_count=$pass_count + 1;
+			if ($pet_count != 0) {
+				$count=grep ( /PASS/, @file_lines);
+				if ($count == $pet_count) {
+                               		push (pass_tests, $file);
+                               		$pass_count=$pass_count + 1;
+				}
 			}
        		@file_lines=();
                 }
