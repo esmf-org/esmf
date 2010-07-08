@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.50 2010/07/08 04:48:03 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.51 2010/07/08 04:56:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.50 2010/07/08 04:48:03 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.51 2010/07/08 04:56:39 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -652,8 +652,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! object. The local arrays provided must be dimensioned according to the 
 ! DE-local total region. Bounds of the exclusive regions are set as specified 
 ! in the distgrid argument. Bounds for array dimensions that are not distributed
-! can be chosen freely using the {\tt undistLBound} and {\tt undistUBound} @\
-! arguments. @\
+! can be chosen freely using the {\tt undistLBound} and {\tt undistUBound}
+! arguments.
 !
 ! This interface is able to handle multiple DEs per PET.
 !
@@ -695,24 +695,24 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      Depending on the specific situation the {\tt ESMF\_DATA\_REF} option
 !      may be unsafe when specifying an array slice for {\tt farray}.
 ! \item[{[distgridToArrayMap]}]
-!      List that contains as many elements as is indicated by @\
-!      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
-!      the DistGrid object to a dimension in the {\tt larrayList} elements @\
-!      by specifying the appropriate Array dimension index. The default is @\
-!      to map all of {\tt distgrid}|s dimensions against the lower dimensions @\
-!      of the {\tt larrayList} elements in sequence, i.e. @\
-!      {\tt distgridToArrayMap = (/1, 2, .../)}. @\
-!      Unmapped dimensions in the {\tt larrayList} elements are not @\
+!      List that contains as many elements as is indicated by
+!      {\tt distgrids}|s dimCount. The list elements map each dimension of
+!      the DistGrid object to a dimension in the {\tt larrayList} elements
+!      by specifying the appropriate Array dimension index. The default is
+!      to map all of {\tt distgrid}|s dimensions against the lower dimensions
+!      of the {\tt larrayList} elements in sequence, i.e.
+!      {\tt distgridToArrayMap = (/1, 2, .../)}.
+!      Unmapped dimensions in the {\tt larrayList} elements are not
 !      decomposed dimensions and form a tensor of 
-!      rank = Array.rank - DistGrid.dimCount. @\
-!      All {\tt distgridToArrayMap} entries must be greater than or equal @\
-!      to zero and smaller than or equal to the Array rank. It is erroneous @\
-!      to specify the same entry multiple times unless it is zero. @\
-!      If the Array rank is less than the DistGrid dimCount then the default @\
-!      distgridToArrayMap will contain zeros for the dimCount - rank @\
-!      rightmost entries. A zero entry in the {\tt distgridToArrayMap} @\
-!      indicates that the particular DistGrid dimension will be replicating @\
-!      the Array across the DEs along this direction. @\
+!      rank = Array.rank - DistGrid.dimCount.
+!      All {\tt distgridToArrayMap} entries must be greater than or equal
+!      to zero and smaller than or equal to the Array rank. It is erroneous
+!      to specify the same entry multiple times unless it is zero.
+!      If the Array rank is less than the DistGrid dimCount then the default
+!      distgridToArrayMap will contain zeros for the dimCount - rank
+!      rightmost entries. A zero entry in the {\tt distgridToArrayMap}
+!      indicates that the particular DistGrid dimension will be replicating
+!      the Array across the DEs along this direction.
 ! \item[{[computationalEdgeLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the computational
@@ -981,23 +981,23 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      defined by the associated DistGrid. See section \ref{opt:indexflag}
 !      for a list of valid indexflag options.
 ! \item[{[distgridToArrayMap]}]
-!      List that contains as many elements as is indicated by @\
-!      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
-!      the DistGrid object to a dimension in the newly allocated Array object @\
-!      by specifying the appropriate Array dimension index. The default is @\
-!      to map all of {\tt distgrid}|s dimensions against the lower dimensions @\
-!      of the Array object in sequence, i.e. {\tt distgridToArrayMap = @\
-!      (/1, 2, .../)}. @\
-!      Unmapped dimensions in the Array object are not decomposed dimensions @\
-!      and form a tensor of rank = Array.rank - DistGrid.dimCount. @\
-!      All {\tt distgridToArrayMap} entries must be greater than or equal @\
-!      to zero and smaller than or equal to the Array rank. It is erroneous @\
-!      to specify the same entry multiple times unless it is zero. @\
-!      If the Array rank is less than the DistGrid dimCount then the default @\
-!      distgridToArrayMap will contain zeros for the dimCount - rank @\
-!      rightmost entries. A zero entry in the {\tt distgridToArrayMap} @\
-!      indicates that the particular DistGrid dimension will be replicating @\
-!      the Array across the DEs along this direction. @\
+!      List that contains as many elements as is indicated by
+!      {\tt distgrids}|s dimCount. The list elements map each dimension of
+!      the DistGrid object to a dimension in the newly allocated Array object
+!      by specifying the appropriate Array dimension index. The default is
+!      to map all of {\tt distgrid}|s dimensions against the lower dimensions
+!      of the Array object in sequence, i.e. {\tt distgridToArrayMap =
+!      (/1, 2, .../)}.
+!      Unmapped dimensions in the Array object are not decomposed dimensions
+!      and form a tensor of rank = Array.rank - DistGrid.dimCount.
+!      All {\tt distgridToArrayMap} entries must be greater than or equal
+!      to zero and smaller than or equal to the Array rank. It is erroneous
+!      to specify the same entry multiple times unless it is zero.
+!      If the Array rank is less than the DistGrid dimCount then the default
+!      distgridToArrayMap will contain zeros for the dimCount - rank
+!      rightmost entries. A zero entry in the {\tt distgridToArrayMap}
+!      indicates that the particular DistGrid dimension will be replicating
+!      the Array across the DEs along this direction.
 ! \item[{[computationalEdgeLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the computational
@@ -1120,23 +1120,23 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      The size (and content) of {\tt haloSeqIndexList} can (and typically will)
 !      be different on each PET.
 ! \item[{[distgridToArrayMap]}]
-!      List that contains as many elements as is indicated by @\
-!      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
-!      the DistGrid object to a dimension in the newly allocated Array object @\
-!      by specifying the appropriate Array dimension index. The default is @\
-!      to map all of {\tt distgrid}|s dimensions against the lower dimensions @\
-!      of the Array object in sequence, i.e. {\tt distgridToArrayMap = @\
-!      (/1, 2, .../)}. @\
-!      Unmapped dimensions in the Array object are not decomposed dimensions @\
-!      and form a tensor of rank = Array.rank - DistGrid.dimCount. @\
-!      All {\tt distgridToArrayMap} entries must be greater than or equal @\
-!      to zero and smaller than or equal to the Array rank. It is erroneous @\
-!      to specify the same entry multiple times unless it is zero. @\
-!      If the Array rank is less than the DistGrid dimCount then the default @\
-!      distgridToArrayMap will contain zeros for the dimCount - rank @\
-!      rightmost entries. A zero entry in the {\tt distgridToArrayMap} @\
-!      indicates that the particular DistGrid dimension will be replicating @\
-!      the Array across the DEs along this direction. @\
+!      List that contains as many elements as is indicated by
+!      {\tt distgrids}|s dimCount. The list elements map each dimension of
+!      the DistGrid object to a dimension in the newly allocated Array object
+!      by specifying the appropriate Array dimension index. The default is
+!      to map all of {\tt distgrid}|s dimensions against the lower dimensions
+!      of the Array object in sequence, i.e. {\tt distgridToArrayMap =
+!      (/1, 2, .../)}.
+!      Unmapped dimensions in the Array object are not decomposed dimensions
+!      and form a tensor of rank = Array.rank - DistGrid.dimCount.
+!      All {\tt distgridToArrayMap} entries must be greater than or equal
+!      to zero and smaller than or equal to the Array rank. It is erroneous
+!      to specify the same entry multiple times unless it is zero.
+!      If the Array rank is less than the DistGrid dimCount then the default
+!      distgridToArrayMap will contain zeros for the dimCount - rank
+!      rightmost entries. A zero entry in the {\tt distgridToArrayMap}
+!      indicates that the particular DistGrid dimension will be replicating
+!      the Array across the DEs along this direction.
 ! \item[{[undistLBound]}]
 !      Lower bounds for the array dimensions that are not distributed.
 ! \item[{[undistUBound]}]
@@ -1234,23 +1234,23 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      defined by the associated DistGrid. See section \ref{opt:indexflag}
 !      for a list of valid indexflag options.
 ! \item[{[distgridToArrayMap]}]
-!      List that contains as many elements as is indicated by @\
-!      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
-!      the DistGrid object to a dimension in the newly allocated Array object @\
-!      by specifying the appropriate Array dimension index. The default is @\
-!      to map all of {\tt distgrid}|s dimensions against the lower dimensions @\
-!      of the Array object in sequence, i.e. {\tt distgridToArrayMap = @\
-!      (/1, 2, .../)}. @\
-!      Unmapped dimensions in the Array object are not decomposed dimensions @\
-!      and form a tensor of rank = Array.rank - DistGrid.dimCount. @\
-!      All {\tt distgridToArrayMap} entries must be greater than or equal @\
-!      to zero and smaller than or equal to the Array rank. It is erroneous @\
-!      to specify the same entry multiple times unless it is zero. @\
-!      If the Array rank is less than the DistGrid dimCount then the default @\
-!      distgridToArrayMap will contain zeros for the dimCount - rank @\
-!      rightmost entries. A zero entry in the {\tt distgridToArrayMap} @\
-!      indicates that the particular DistGrid dimension will be replicating @\
-!      the Array across the DEs along this direction. @\
+!      List that contains as many elements as is indicated by
+!      {\tt distgrids}|s dimCount. The list elements map each dimension of
+!      the DistGrid object to a dimension in the newly allocated Array object
+!      by specifying the appropriate Array dimension index. The default is
+!      to map all of {\tt distgrid}|s dimensions against the lower dimensions
+!      of the Array object in sequence, i.e. {\tt distgridToArrayMap =
+!      (/1, 2, .../)}.
+!      Unmapped dimensions in the Array object are not decomposed dimensions
+!      and form a tensor of rank = Array.rank - DistGrid.dimCount.
+!      All {\tt distgridToArrayMap} entries must be greater than or equal
+!      to zero and smaller than or equal to the Array rank. It is erroneous
+!      to specify the same entry multiple times unless it is zero.
+!      If the Array rank is less than the DistGrid dimCount then the default
+!      distgridToArrayMap will contain zeros for the dimCount - rank
+!      rightmost entries. A zero entry in the {\tt distgridToArrayMap}
+!      indicates that the particular DistGrid dimension will be replicating
+!      the Array across the DEs along this direction.
 ! \item[{[computationalEdgeLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the computational
@@ -1477,23 +1477,23 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      The size (and content) of {\tt haloSeqIndexList} can (and typically will)
 !      be different on each PET.
 ! \item[{[distgridToArrayMap]}]
-!      List that contains as many elements as is indicated by @\
-!      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
-!      the DistGrid object to a dimension in the newly allocated Array object @\
-!      by specifying the appropriate Array dimension index. The default is @\
-!      to map all of {\tt distgrid}|s dimensions against the lower dimensions @\
-!      of the Array object in sequence, i.e. {\tt distgridToArrayMap = @\
-!      (/1, 2, .../)}. @\
-!      Unmapped dimensions in the Array object are not decomposed dimensions @\
-!      and form a tensor of rank = Array.rank - DistGrid.dimCount. @\
-!      All {\tt distgridToArrayMap} entries must be greater than or equal @\
-!      to zero and smaller than or equal to the Array rank. It is erroneous @\
-!      to specify the same entry multiple times unless it is zero. @\
-!      If the Array rank is less than the DistGrid dimCount then the default @\
-!      distgridToArrayMap will contain zeros for the dimCount - rank @\
-!      rightmost entries. A zero entry in the {\tt distgridToArrayMap} @\
-!      indicates that the particular DistGrid dimension will be replicating @\
-!      the Array across the DEs along this direction. @\
+!      List that contains as many elements as is indicated by
+!      {\tt distgrids}|s dimCount. The list elements map each dimension of
+!      the DistGrid object to a dimension in the newly allocated Array object
+!      by specifying the appropriate Array dimension index. The default is
+!      to map all of {\tt distgrid}|s dimensions against the lower dimensions
+!      of the Array object in sequence, i.e. {\tt distgridToArrayMap =
+!      (/1, 2, .../)}.
+!      Unmapped dimensions in the Array object are not decomposed dimensions
+!      and form a tensor of rank = Array.rank - DistGrid.dimCount.
+!      All {\tt distgridToArrayMap} entries must be greater than or equal
+!      to zero and smaller than or equal to the Array rank. It is erroneous
+!      to specify the same entry multiple times unless it is zero.
+!      If the Array rank is less than the DistGrid dimCount then the default
+!      distgridToArrayMap will contain zeros for the dimCount - rank
+!      rightmost entries. A zero entry in the {\tt distgridToArrayMap}
+!      indicates that the particular DistGrid dimension will be replicating
+!      the Array across the DEs along this direction.
 ! \item[{[undistLBound]}]
 !      Lower bounds for the array dimensions that are not distributed.
 ! \item[{[undistUBound]}]
