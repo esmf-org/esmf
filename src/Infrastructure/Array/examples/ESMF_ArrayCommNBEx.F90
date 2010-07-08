@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCommNBEx.F90,v 1.3 2010/06/29 17:15:28 svasquez Exp $
+! $Id: ESMF_ArrayCommNBEx.F90,v 1.4 2010/07/08 17:58:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -72,11 +72,11 @@ program ESMF_ArrayCommNBEx
 ! \label{Array:CommNB}
 ! 
 ! All {\tt ESMF\_RouteHandle} based communcation methods, like 
-! {\tt ESMF\_ArrayRedist()} or {\tt ESMF\_ArraySMM()}, can be executed in
-! blocking or non-blocking mode. The non-blocking feature is useful, for
-! example, to overlap computation with communication, or to implement a more
-! loosely synchronized inter-Component interaction scheme than is possible
-! with the blocking communication mode.
+! {\tt ESMF\_ArrayRedist()}, {\tt ESMF\_ArrayHalo()} and {\tt ESMF\_ArraySMM()}, 
+! can be executed in blocking or non-blocking mode. The non-blocking feature is
+! useful, for example, to overlap computation with communication, or to
+! implement a more loosely synchronized inter-Component interaction scheme than
+! is possible with the blocking communication mode.
 !
 ! Access to the non-blocking execution mode is provided uniformly across all
 ! RouteHandle based communication calls. Every such call contains the optional
