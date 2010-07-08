@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.96 2010/07/07 20:48:45 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.97 2010/07/08 13:50:54 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -504,7 +504,37 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create a Field from a LocStream}
+!\subsubsection{Create a Field from a LocStream, typekind, and rank}
+!\label{sec:field:usage:create_locs_tkr}
+! 
+! In this example, an {\tt ESMF\_Field} is created from an {\tt ESMF\_LocStream} 
+! and typekind/rank.
+! The location stream object is uniformly distributed
+! in a 1 dimensional space on 4 DEs. The rank is 1 dimensional. 
+! Please refer to LocStream examples section for more information on LocStream creation.
+!
+!EOE  
+!BOC
+
+    locs = ESMF_LocStreamCreate(minIndex=1, maxIndex=16, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    field = ESMF_FieldCreate(locs, typekind=ESMF_TYPEKIND_I4, rank=1, &
+        rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!EOC
+    print *, "Field Create from a LocStream, typekind, and rank returned"
+    call ESMF_FieldDestroy(field,rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_LocStreamDestroy(locs,rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Create a Field from a LocStream and arrayspec}
 !\label{sec:field:usage:create_locs_arrayspec}
 ! 
 ! In this example, an {\tt ESMF\_Field} is created from an {\tt ESMF\_LocStream} 
@@ -537,37 +567,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create a Field from a LocStream}
-!\label{sec:field:usage:create_locs_tkr}
-! 
-! In this example, an {\tt ESMF\_Field} is created from an {\tt ESMF\_LocStream} 
-! and typekind/rank.
-! The location stream object is uniformly distributed
-! in a 1 dimensional space on 4 DEs. The rank is 1 dimensional. 
-! Please refer to LocStream examples section for more information on LocStream creation.
-!
-!EOE  
-!BOC
-
-    locs = ESMF_LocStreamCreate(minIndex=1, maxIndex=16, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    field = ESMF_FieldCreate(locs, typekind=ESMF_TYPEKIND_I4, rank=1, &
-        rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!EOC
-    print *, "Field Create from a LocStream, typekind, and rank returned"
-    call ESMF_FieldDestroy(field,rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    call ESMF_LocStreamDestroy(locs,rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!-------------------------------- Example -----------------------------
-!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!BOE
-!\subsubsection{Create a Field from a Mesh}
+!\subsubsection{Create a Field from a Mesh, typekind, and rank}
 !\label{sec:field:usage:create_mesh_tkr}
 ! 
 ! In this example, an {\tt ESMF\_Field} is created from an {\tt ESMF\_Mesh} 
@@ -785,7 +785,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create a Field from a Mesh}
+!\subsubsection{Create a Field from a Mesh and arrayspec}
 !\label{sec:field:usage:create_mesh_arrayspec}
 ! 
 ! In this example, an {\tt ESMF\_Field} is created from an {\tt ESMF\_Mesh} 
@@ -796,42 +796,6 @@
 ! Therefore, the created Field has 9 data points globally.
 ! The mesh object can be represented by the picture
 ! below. For more information on Mesh creation, please see Section~\ref{sec:mesh:usage:meshCreation}.
-! \begin{verbatim}
-!              Mesh Ids
-!
-!  2.0   7 ------- 8 -------- 9
-!        |         |          |
-!        |    3    |    4     |
-!        |         |          |
-!  1.0   4 ------- 5 -------- 6
-!        |         |          |
-!        |    1    |    2     |
-!        |         |          |
-!  0.0   1 ------- 2 -------- 3
-!
-!       0.0       1.0        2.0 
-!
-!      Node Ids at corners
-!      Element Ids in centers
-! 
-!
-!             Mesh Owners
-!
-!  2.0   2 ------- 2 -------- 3
-!        |         |          |
-!        |    2    |    3     |
-!        |         |          |
-!  1.0   0 ------- 0 -------- 1
-!        |         |          |
-!        |    0    |    1     |
-!        |         |          |
-!  0.0   0 ------- 0 -------- 1
-!
-!       0.0       1.0        2.0 
-!
-!      Node Owners at corners
-!      Element Owners in centers
-!\end{verbatim} 
 !
 !EOE  
   ! Only do this if we have 4 PETs
