@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.111 2010/07/09 19:23:28 theurich Exp $
+# $Id: makefile,v 1.112 2010/07/09 21:05:09 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -177,6 +177,7 @@ script_info:
 	-@echo "ESMF_INSTALL_HEADERDIR: $(ESMF_INSTALL_HEADERDIR)"
 	-@echo "ESMF_INSTALL_MODDIR:    $(ESMF_INSTALL_MODDIR)"
 	-@echo "ESMF_INSTALL_LIBDIR:    $(ESMF_INSTALL_LIBDIR)"
+	-@echo "ESMF_INSTALL_BINDIR:    $(ESMF_INSTALL_BINDIR)"
 	-@echo "ESMF_INSTALL_DOCDIR:    $(ESMF_INSTALL_DOCDIR)"
 	-@echo " "
 #
@@ -370,8 +371,14 @@ info_mk: chkdir_lib
           fi; \
          fi
 
+# Rewrite esmf.mk during installation to ensure correct installation paths are encoded
 install_info_mk:
 	$(MAKE) info_mk ESMF_LDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_LIBDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_MODDIR=$(ESMF_INSTALL_MODDIR_ABSPATH) ESMF_INCDIR=$(ESMF_INSTALL_HEADERDIR_ABSPATH)
+
+# Relink apps during installation to ensure correct shared library location is encoded
+install_apps:
+	mkdir -p $(ESMF_INSTALL_BINDIR_ABSPATH)
+	$(MAKE) build_apps ESMF_APPSDIR=$(ESMF_INSTALL_BINDIR_ABSPATH) ESMF_LDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_LIBDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_MODDIR=$(ESMF_INSTALL_MODDIR_ABSPATH) ESMF_INCDIR=$(ESMF_INSTALL_HEADERDIR_ABSPATH)
 
 # Ranlib on the libraries
 ranlib:
@@ -421,6 +428,7 @@ install:
 	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)
 	cp -f $(ESMF_LIBDIR)/lib*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
 	$(ESMF_RANLIB) $(ESMF_INSTALL_LIBDIR_ABSPATH)/lib*.a
+	$(MAKE) install_apps
 	mkdir -p $(ESMF_INSTALL_DOCDIR_ABSPATH)
 	@if [ -d $(ESMF_DOCDIR) ]; then \
         cp -rf $(ESMF_DOCDIR)/* $(ESMF_INSTALL_DOCDIR_ABSPATH); \

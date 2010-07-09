@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.300 2010/07/09 19:23:28 theurich Exp $
+#  $Id: common.mk,v 1.301 2010/07/09 21:05:09 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -413,6 +413,16 @@ ifeq ($(pathtype),rel)
 export ESMF_INSTALL_LIBDIR_ABSPATH = $(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_LIBDIR)
 else
 export ESMF_INSTALL_LIBDIR_ABSPATH = $(ESMF_INSTALL_LIBDIR)
+endif
+
+ifndef ESMF_INSTALL_BINDIR
+ESMF_INSTALL_BINDIR := bin/bin$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
+endif
+pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_INSTALL_BINDIR))
+ifeq ($(pathtype),rel)
+export ESMF_INSTALL_BINDIR_ABSPATH = $(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_BINDIR)
+else
+export ESMF_INSTALL_BINDIR_ABSPATH = $(ESMF_INSTALL_BINDIR)
 endif
 
 ifndef ESMF_INSTALL_DOCDIR
@@ -1633,8 +1643,10 @@ clean_validate:
 # build_apps
 #
 build_apps: reqfile_libesmf reqdir_lib
-	$(MAKE) ACTION=tree_build_apps tree
+	cd $(ESMF_DIR)/src/apps; $(MAKE) ACTION=tree_build_apps tree
 	@echo "ESMF apps built successfully."
+# Notice: the cd into "$(ESMF_DIR)/src/apps" before the tree target above
+# makes this a lot faster than a complete tree traversal starting at the root!
 
 tree_build_apps: $(APPS_BUILD)
 
