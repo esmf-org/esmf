@@ -1,4 +1,4 @@
-// $Id: ESMCI_Init.C,v 1.6 2010/06/23 23:10:07 theurich Exp $
+// $Id: ESMCI_Init.C,v 1.7 2010/07/09 19:20:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ char **globalargv;
       ESMC_CalendarType defaultCalendar,   // in - optional time manager
                                            //      default calendar type
       char *defaultLogFilename,            // in - default log filename
-      ESMC_LogType defaultLogType) {       // in - default log type (single/multi)
+      ESMC_LogType defaultLogType) {       // in - default log type
 //  
 // !DESCRIPTION:
 //
@@ -90,7 +90,7 @@ char **globalargv;
 
     int rc;
     ESMCI_MainLanguage l = ESMF_MAIN_C;
-    ESMC_LogType lt = ESMC_LOG_SINGLE;
+    ESMC_LogType lt = ESMC_LOG_MULTI;
 
     globalargc = 0;
     globalargv = NULL;
@@ -123,7 +123,7 @@ char **globalargv;
 
     int rc;
     ESMCI_MainLanguage l = ESMF_MAIN_C;
-    ESMC_LogType lt = ESMC_LOG_SINGLE;
+    ESMC_LogType lt = ESMC_LOG_MULTI;
 
     // make this public so the mpi init code in Machine can grab them.
     globalargc = argc;
