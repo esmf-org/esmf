@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.299 2010/06/29 17:21:59 svasquez Exp $
+#  $Id: common.mk,v 1.300 2010/07/09 19:23:28 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -474,11 +474,17 @@ else
 ESMF_OBJDIR     = $(ESMF_MODDIR)
 endif
 
+# local obj dir
+ESMF_LOCOBJDIR = $(ESMF_OBJDIR)/$(LOCDIR)
+
 # test executable directory
 ESMF_TESTDIR    = $(ESMF_BUILD)/test/test$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
 
 # example executable diretory
 ESMF_EXDIR      = $(ESMF_BUILD)/examples/examples$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
+
+# apps executable directory
+ESMF_APPSDIR     = $(ESMF_BUILD)/apps/apps$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
 
 # include file directory
 ESMF_INCDIR     = $(ESMF_BUILD)/src/include
@@ -1243,6 +1249,15 @@ chkdir_examples:
 	  echo Making directory $(ESMF_EXDIR) for examples output; \
 	  mkdir -p $(ESMF_EXDIR) ; fi
 
+chkdir_apps:
+	@if [ ! -d $(ESMF_APPSDIR) ]; then \
+	  echo Making directory $(ESMF_APPSDIR) for apps output; \
+	  mkdir -p $(ESMF_APPSDIR) ; fi
+
+chkdir_locobj:
+	@if [ ! -d $(ESMF_LOCOBJDIR) ]; then \
+	  echo Making directory $(ESMF_LOCOBJDIR) for apps output; \
+	  mkdir -p $(ESMF_LOCOBJDIR) ; fi
 
 # use these targets if the libdir, testdir, etc. must be there already. 
 # this target prints a fail message and exits if not present.
@@ -1610,6 +1625,32 @@ clean_validate:
 	$(MAKE) clean_unit_tests 
 
 
+#-------------------------------------------------------------------------------
+# Targets for building apps.
+#-------------------------------------------------------------------------------
+
+#
+# build_apps
+#
+build_apps: reqfile_libesmf reqdir_lib
+	$(MAKE) ACTION=tree_build_apps tree
+	@echo "ESMF apps built successfully."
+
+tree_build_apps: $(APPS_BUILD)
+
+#
+#  Link rule for Fortran apps.
+#
+$(ESMF_APPSDIR)/ESMF_% : $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $(ESMFLIB)
+	$(MAKE) chkdir_apps
+	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_EXEOUT_OPTION) $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $< $(ESMF_F90ESMFLINKLIBS)
+
+#
+#  Link rule for C apps.
+#
+$(ESMF_APPSDIR)/ESMC_% : $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $(ESMFLIB)
+	$(MAKE) chkdir_apps
+	$(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_EXEOUT_OPTION) $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $< $(ESMF_CXXESMFLINKLIBS)
 
 #-------------------------------------------------------------------------------
 # Targets for building and running system tests.
@@ -2826,6 +2867,30 @@ $(ESMF_OBJDIR)/%.o : %.c
 $(ESMF_OBJDIR)/%.o : %.C
 	$(ESMF_CXXCOMPILE_CMD) $< $(ESMF_OBJOUT_OPTION)
 
+$(ESMF_LOCOBJDIR)/%.o : %.F90
+	$(MAKE) chkdir_locobj 
+	$(ESMF_F90COMPILEFREECPP_CMD) $< $(ESMF_OBJOUT_OPTION)
+
+$(ESMF_LOCOBJDIR)/%.o : %.f90
+	$(MAKE) chkdir_locobj 
+	$(ESMF_F90COMPILEFREENOCPP_CMD) $< $(ESMF_OBJOUT_OPTION)
+
+$(ESMF_LOCOBJDIR)/%.o : %.F
+	$(MAKE) chkdir_locobj 
+	$(ESMF_F90COMPILEFIXCPP_CMD) $< $(ESMF_OBJOUT_OPTION)
+
+$(ESMF_LOCOBJDIR)/%.o : %.f
+	$(MAKE) chkdir_locobj 
+	$(ESMF_F90COMPILEFIXNOCPP_CMD) $< $(ESMF_OBJOUT_OPTION)
+
+$(ESMF_LOCOBJDIR)/%.o : %.c
+	$(MAKE) chkdir_locobj 
+	$(ESMF_CXXCOMPILE_CMD) $< $(ESMF_OBJOUT_OPTION)
+
+$(ESMF_LOCOBJDIR)/%.o : %.C
+	$(MAKE) chkdir_locobj 
+	$(ESMF_CXXCOMPILE_CMD) $< $(ESMF_OBJOUT_OPTION)
+
 .F90.o:
 	$(ESMF_F90COMPILEFREECPP_CMD) $< $(ESMF_OBJOUT_OPTION)
 
@@ -3152,7 +3217,7 @@ $(ESMF_DOCDIR)/%_crefdoc: %_crefdoc.ctex $(REFDOC_DEP_FILES)
 #-------------------------------------------------------------------------------
 # Keep .o and .$(ESMF_SL_SUFFIX) files
 #-------------------------------------------------------------------------------
-.PRECIOUS: %.o %.$(ESMF_SL_SUFFIX)
+.PRECIOUS: %.o %.$(ESMF_SL_SUFFIX) $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ))
 
 
 #-------------------------------------------------------------------------------

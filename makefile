@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.110 2010/06/11 01:35:44 theurich Exp $
+# $Id: makefile,v 1.111 2010/07/09 19:23:28 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -31,12 +31,13 @@ include $(ESMF_DIR)/build/common.mk
 #-------------------------------------------------------------------------------
 DIRS = src
 
-CLEANDIRS = $(ESMF_LIBDIR) $(ESMF_MODDIR) $(ESMF_OBJDIR) $(ESMF_TESTDIR) $(ESMF_EXDIR) \
-	    $(ESMF_BUILD)/src/include $(ESMF_ETCDIR)
+CLEANDIRS = $(ESMF_LIBDIR) $(ESMF_MODDIR) $(ESMF_OBJDIR) $(ESMF_TESTDIR) \
+  $(ESMF_EXDIR) $(ESMF_BUILD)/src/include $(ESMF_ETCDIR) $(ESMF_APPSDIR)
 CLOBBERDIRS = $(ESMF_BUILD)/lib $(ESMF_BUILD)/mod $(ESMF_BUILD)/obj \
 	      $(ESMF_BUILD)/test $(ESMF_BUILD)/quick_start \
               $(ESMF_BUILD)/release $(ESMF_BUILD)/examples \
-              $(ESMF_BUILD)/doc
+              $(ESMF_BUILD)/doc \
+              $(ESMF_BUILD)/apps
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
