@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.85 2010/04/21 06:09:52 eschwab Exp $
+% $Id: ESMF_install.tex,v 1.86 2010/07/09 22:04:21 theurich Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -413,32 +413,39 @@ Possible value: {\em flag}
 
 This variable can be used to override the default  Fortran90 optimization flag.
 
+\item[ESMF\_INSTALL\_BINDIR]
+Possible value: {\em relative or absolute path}
+
+Location into which to install the ESMF apps during installation. This
+location can be specified as absolute path (starting with "/") or relative to
+{\tt ESMF\_INSTALL\_PREFIX}.
+
 \item[ESMF\_INSTALL\_DOCDIR]
 Possible value: {\em relative or absolute path}
 
 Location into which to install the documentation during installation. This
-location can be specified as absolute path or relative to
+location can be specified as absolute path (starting with "/") or relative to
 {\tt ESMF\_INSTALL\_PREFIX}.
 
 \item[ESMF\_INSTALL\_HEADERDIR]
 Possible value: {\em relative or absolute path}
 
 Location into which to install the header files during installation. This
-location can be specified as absolute path or relative to
+location can be specified as absolute path (starting with "/") or relative to
 {\tt ESMF\_INSTALL\_PREFIX}.
 
 \item[ESMF\_INSTALL\_LIBDIR]
 Possible value: {\em relative or absolute path}
 
 Location into which to install the library files during installation. This
-location can be specified as absolute path or relative to
+location can be specified as absolute path (starting with "/") or relative to
 {\tt ESMF\_INSTALL\_PREFIX}.
 
 \item[ESMF\_INSTALL\_MODDIR]
 Possible value: {\em relative or absolute path}
 
 Location into which to install the F90 module files during installation. This
-location can be specified as absolute path or relative to
+location can be specified as absolute path (starting with "/") or relative to
 {\tt ESMF\_INSTALL\_PREFIX}.
 
 \item[ESMF\_INSTALL\_PREFIX]
@@ -448,7 +455,7 @@ This variable specifies the prefix of the installation path used during the
 installation process accessible thought the install target. Libraries, F90
 module files, header files and documentation all are installed relative to
 {\tt ESMF\_INSTALL\_PREFIX} by default. The {\tt ESMF\_INSTALL\_PREFIX} may be
-provided as absolute path or relative to {\tt ESMF\_DIR}.
+provided as absolute path (starting with "/") or relative to {\tt ESMF\_DIR}.
 
 \item[ESMF\_LAPACK]
 See \ref{sec:lapack}
@@ -761,14 +768,15 @@ necessary files created during the build process into user specified locations.
 The installation procedure will also install the ESMF documentation if it has
 been built successfully following the procedure outlined above.
 
-The installation location can be customized using five {\tt ESMF\_} environment
+The installation location can be customized using six {\tt ESMF\_} environment
 variables:
 \begin{itemize}
-\item {\tt ESMF\_INSTALL\_PREFIX}
-\item {\tt ESMF\_INSTALL\_HEADERDIR}
-\item {\tt ESMF\_INSTALL\_LIBDIR}
-\item {\tt ESMF\_INSTALL\_MODDIR}
-\item {\tt ESMF\_INSTALL\_DOCDIR}
+\item {\tt ESMF\_INSTALL\_PREFIX} -- prefix for the other five variables.
+\item {\tt ESMF\_INSTALL\_HEADERDIR} -- where to install header files.
+\item {\tt ESMF\_INSTALL\_LIBDIR} -- where to install library files.
+\item {\tt ESMF\_INSTALL\_MODDIR} -- where to install Fortran module files.
+\item {\tt ESMF\_INSTALL\_BINDIR} -- where to install application files.
+\item {\tt ESMF\_INSTALL\_DOCDIR} -- where to install documentation files.
 \end{itemize}
 
 Section~\ref{EnvironmentVariables} describes what each of these 
