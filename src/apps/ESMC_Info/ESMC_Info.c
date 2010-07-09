@@ -1,3 +1,5 @@
+/* $Id: ESMC_Info.c,v 1.2 2010/07/09 20:16:13 theurich Exp $ */
+
 #include <stdio.h>
 #include "ESMC.h"
 

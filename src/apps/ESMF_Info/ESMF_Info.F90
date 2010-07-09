@@ -1,3 +1,5 @@
+! $Id: ESMF_Info.F90,v 1.2 2010/07/09 20:16:13 theurich Exp $
+
 program ESMF_Info
 
   ! modules
