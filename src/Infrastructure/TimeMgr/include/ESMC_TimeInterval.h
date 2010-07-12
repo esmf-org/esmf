@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.56 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMC_TimeInterval.h,v 1.57 2010/07/12 05:26:25 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -24,17 +24,12 @@
 #define ESMC_TimeInterval_H
 
 //-----------------------------------------------------------------------------
-//BOPI
-// !CLASS:  ESMC_TimeInterval - Public C interface to the ESMF TimeInterval class
-//
-// !DESCRIPTION:
+// ESMC_TimeInterval - Public C interface to the ESMF TimeInterval class
 //
 // The code in this file defines the public C TimeInterval interfaces and
 // declares method signatures (prototypes).  The companion file
 // {\tt ESMC\_TimeInterval.C} contains the definitions (full code bodies) for
 // the TimeInterval methods.
-//
-//EOPI
 //-----------------------------------------------------------------------------
 
 #include "ESMC_Util.h"

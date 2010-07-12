@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.62 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMC_Clock.h,v 1.63 2010/07/12 05:26:25 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -24,16 +24,11 @@
 #define ESMC_Clock_H
 
 //-----------------------------------------------------------------------------
-//BOPI
-// !CLASS:  ESMC_Clock - Public C interface to the ESMF Clock class
-//
-// !DESCRIPTION:
+// ESMC_Clock - Public C interface to the ESMF Clock class
 //
 // The code in this file defines the public C Clock interfaces and declares
 // method signatures (prototypes).  The companion file {\tt ESMC\_Clock.C}
 // contains the definitions (full code bodies) for the Clock methods.
-//
-//EOPI
 //-----------------------------------------------------------------------------
 
 #include "ESMC_Util.h"

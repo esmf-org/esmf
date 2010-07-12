@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.56 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMC_Time.h,v 1.57 2010/07/12 05:26:25 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -24,16 +24,11 @@
 #define ESMC_Time_H
 
 //-----------------------------------------------------------------------------
-//BOPI
-// !CLASS:  ESMC_Time - Public C interface to the ESMF Time class
-//
-// !DESCRIPTION:
+// ESMC_Time - Public C interface to the ESMF Time class
 //
 // The code in this file defines the public C Time interfaces and declares
 // method signatures (prototypes).  The companion file {\tt ESMC\_Time.C}
 // contains the definitions (full code bodies) for the Time methods.
-//
-//EOPI
 //-----------------------------------------------------------------------------
 
 #include "ESMC_Util.h"
