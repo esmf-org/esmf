@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.113 2010/07/12 23:23:36 theurich Exp $
+# $Id: makefile,v 1.114 2010/07/12 23:43:41 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -247,6 +247,10 @@ info_mk: chkdir_lib
 	-@echo "# Please see end of file for options used on this ESMF build" >> $(MKINFO)
 	-@echo "#" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
+	-@echo "" >> $(MKINFO)
+	-@echo "ESMF_APPSDIR=$(ESMF_APPSDIR)" >> $(MKINFO)
+	-@echo "" >> $(MKINFO)
+	-@echo "" >> $(MKINFO)
 	-@echo "ESMF_F90COMPILER=$(ESMF_F90COMPILER)" >> $(MKINFO)
 	-@echo "ESMF_F90LINKER=$(ESMF_F90LINKER)" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
@@ -373,7 +377,7 @@ info_mk: chkdir_lib
 
 # Rewrite esmf.mk during installation to ensure correct installation paths are encoded
 install_info_mk:
-	$(MAKE) info_mk ESMF_LDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_LIBDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_MODDIR=$(ESMF_INSTALL_MODDIR_ABSPATH) ESMF_INCDIR=$(ESMF_INSTALL_HEADERDIR_ABSPATH)
+	$(MAKE) info_mk ESMF_APPSDIR=$(ESMF_INSTALL_BINDIR_ABSPATH) ESMF_LDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_LIBDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_MODDIR=$(ESMF_INSTALL_MODDIR_ABSPATH) ESMF_INCDIR=$(ESMF_INSTALL_HEADERDIR_ABSPATH)
 
 # Relink apps during installation to ensure correct shared library location is encoded
 install_apps:
