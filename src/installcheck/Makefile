@@ -1,4 +1,4 @@
-# Example GNU Makefile for user ESMF application
+# GNU Makefile template for user ESMF application
 
 ################################################################################
 ################################################################################
@@ -10,8 +10,9 @@
 ##                                                                            ##
 ## This example Makefile uses the "ESMFMKFILE" environment variable.          ##
 ##                                                                            ##
-## If you find that this Makefile cannot find variable ESMFMKFILE then please ##
-## contact the person responsible for the ESMF installation on your system.   ##
+## If you notice that this Makefile cannot find variable ESMFMKFILE then      ##
+## please contact the person responsible for the ESMF installation on your    ##
+## system.                                                                    ##
 ## As a work-around you can simply hardcode the path to "esmf.mk" in the      ##
 ## include line below. However, doing so will render this Makefile a lot less ##
 ## flexible and non-portable.                                                 ##
