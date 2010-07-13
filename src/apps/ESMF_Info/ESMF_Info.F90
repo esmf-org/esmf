@@ -1,4 +1,4 @@
-! $Id: ESMF_Info.F90,v 1.2 2010/07/09 20:16:13 theurich Exp $
+! $Id: ESMF_Info.F90,v 1.3 2010/07/13 23:37:15 theurich Exp $
 
 program ESMF_Info
 
@@ -8,19 +8,36 @@ program ESMF_Info
   implicit none
   
   ! local variables
-  integer:: rc
-  
-  call ESMF_Initialize(rc=rc)
+  integer:: rc, localPet
+  integer:: argIndex
+  type(ESMF_VM):: vm
+    
+  call ESMF_Initialize(vm=vm, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
-  print *, "ESMF_Info"
+  call ESMF_VMGet(vm, localPet=localPet, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
-  print *, "  ESMF_MAJOR_VERSION:   ", ESMF_MAJOR_VERSION
-  print *, "  ESMF_MINOR_VERSION:   ", ESMF_MINOR_VERSION
-  print *, "  ESMF_REVISION:        ", ESMF_REVISION
-  print *, "  ESMF_PATCHLEVEL:      ", ESMF_PATCHLEVEL
-  print *, "  ESMF_VERSION_STRING:  ", ESMF_VERSION_STRING
-
+  if (localPet == 0) then
+    ! check for standard command line arguments
+    call ESMF_UtilGetArgIndex(value="--help", argIndex=argIndex, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (argIndex >= 0) then
+      ! standard --help argument was specified
+      print *, "ESMF_Info: Print information about the ESMF installation."
+      print *, "Options:"
+      print *, "  --help        Display this information"
+    else
+      ! regular execution
+      print *, "ESMF_Info"
+      print *, "  ESMF_MAJOR_VERSION:   ", ESMF_MAJOR_VERSION
+      print *, "  ESMF_MINOR_VERSION:   ", ESMF_MINOR_VERSION
+      print *, "  ESMF_REVISION:        ", ESMF_REVISION
+      print *, "  ESMF_PATCHLEVEL:      ", ESMF_PATCHLEVEL
+      print *, "  ESMF_VERSION_STRING:  ", ESMF_VERSION_STRING
+    end if
+  endif
+  
   call ESMF_Finalize()
-  
+
 end program
