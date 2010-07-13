@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.29 2010/07/02 01:00:09 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.30 2010/07/13 22:36:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.29 2010/07/02 01:00:09 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.30 2010/07/13 22:36:16 theurich Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -569,13 +569,14 @@
 !
 ! The arguments are:
 ! \begin{description}
-! \item [{[value]}]
+! \item [value]
 ! A character string which will be searched for in the command line
 ! argument list.
-! \item [{argindex}]
+! \item [{[argindex]}]
 ! If the {\tt value} string is found, the position will be returned
 ! as a non-negative integer.  If the string is not found, a negative
 ! value will be returned.
+! \item [{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !EOP
@@ -587,12 +588,9 @@
     integer :: localrc
     integer :: nargs
 
-    ! assume failure until success
-
-    if (present (rc)) then
-      rc = ESMF_FAILURE
-    end if
-    localrc = ESMF_RC_NOT_FOUND
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     nargs = ESMF_UtilGetArgC ()
 
@@ -608,16 +606,13 @@
     ! comparison.
 
     call arg_search_worker (len_max, argindex_local)
-    if (argindex_local >= 0)  &
-      localrc = ESMF_SUCCESS
-
+    
     if (present (argindex)) &
       argindex = argindex_local
 
-    if (present (rc)) then
-      rc = localrc
-    end if
-
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+      
   contains
 
     subroutine arg_search_worker (len_max, argindex1)
