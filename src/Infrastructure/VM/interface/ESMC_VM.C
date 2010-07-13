@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.8 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMC_VM.C,v 1.9 2010/07/13 23:34:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.8 2010/03/04 18:57:45 svasquez Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.9 2010/07/13 23:34:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -118,18 +118,20 @@ int ESMC_VMGet(ESMC_VM vm, int *localPet, int *petCount, int *peCount,
 
   ESMCI::VM *vmp = (ESMCI::VM*)(vm.ptr);
 
-  *localPet = vmp->getLocalPet();
-  *petCount = vmp->getPetCount();
+  if (localPet) *localPet = vmp->getLocalPet();
+  if (petCount) *petCount = vmp->getPetCount();
 
-  //compute peCount
-  int npets = vmp->getNpets();
-  *peCount = 0; // reset
-  for (int i=0; i<npets; i++)
-    *peCount += vmp->getNcpet(i);
+  if (peCount){
+    //compute peCount
+    int npets = vmp->getNpets();
+    *peCount = 0; // reset
+    for (int i=0; i<npets; i++)
+      *peCount += vmp->getNcpet(i);
+  }
 
-  *mpiCommunicator = vmp->getMpi_c();
-  *pthreadsEnabledFlag = vmp->isPthreadsEnabled();
-  *openMPEnabledFlag = vmp->isOpenMPEnabled();
+  if (mpiCommunicator) *mpiCommunicator = vmp->getMpi_c();
+  if (pthreadsEnabledFlag) *pthreadsEnabledFlag = vmp->isPthreadsEnabled();
+  if (openMPEnabledFlag) *openMPEnabledFlag = vmp->isOpenMPEnabled();
 
   // return successfully
   rc = ESMF_SUCCESS;
