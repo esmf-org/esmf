@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.22 2010/07/14 14:31:54 theurich Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.23 2010/07/14 22:56:41 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.22 2010/07/14 14:31:54 theurich Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.23 2010/07/14 22:56:41 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -79,6 +79,7 @@
 
       type(ESMF_MapName) :: mapcontainer
       integer :: newvalue
+      logical :: isfound
 #endif
 
 !-------------------------------------------------------------------------------
@@ -328,8 +329,9 @@
     write (name, *) "Testing looking up a name/value pair"
     write (failMsg, *) "did not return ESMF_SUCCESS or correct value"
     call ESMF_UtilMapNameLookup (mapcontainer,  &
-        name="Temperature", value=newvalue, rc=rc)
-    call ESMF_Test(rc == ESMF_SUCCESS .and. newvalue == 1,  &
+        name="Temperature", value=newvalue, foundFlag=isfound, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS .and.  &
+        isfound .and. newvalue == 1,         &
         name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest
@@ -337,8 +339,9 @@
     write (name, *) "Testing looking up a second name/value pair"
     write (failMsg, *) "did not return ESMF_SUCCESS or correct value"
     call ESMF_UtilMapNameLookup (mapcontainer,  &
-        name="Pressure", value=newvalue, rc=rc)
-    call ESMF_Test(rc == ESMF_SUCCESS .and. newvalue == 42,  &
+        name="Pressure", value=newvalue, foundFlag=isfound, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS .and.  &
+        isfound .and. newvalue == 42,        &
         name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest
@@ -354,8 +357,8 @@
     write (name, *) "Testing looking up a name/value pair"
     write (failMsg, *) "returned ESMF_SUCCESS (but should not)"
     call ESMF_UtilMapNameLookup (mapcontainer,  &
-        name="Temperature", value=newvalue, rc=rc)
-    call ESMF_Test(rc /= ESMF_SUCCESS,  &
+        name="Temperature", value=newvalue, foundFlag=isfound, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS .and. .not. isfound,  &
         name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util_F.C,v 1.4 2010/06/30 16:30:11 w6ws Exp $
+// $Id: ESMCI_Util_F.C,v 1.5 2010/07/14 22:56:41 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Util_F.C,v 1.4 2010/06/30 16:30:11 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_Util_F.C,v 1.5 2010/07/14 22:56:41 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -125,6 +125,7 @@ void FTN(c_esmc_mapname_destroy) (MapName **ptr,
 void FTN(c_esmc_mapname_lookup) (MapName **ptr,
                             char *name, // in - name to be entered
                             int *index, // out - associated index ordinal
+                            ESMC_Logical *foundflag, // out - true if name was found 
                             int *rc,    // out - return code
                             ESMCI_FortranStrLenArg name_len) {
 #undef  ESMC_METHOD
@@ -136,11 +137,20 @@ void FTN(c_esmc_mapname_lookup) (MapName **ptr,
         cout << ESMC_METHOD << ": entered" << endl;
 #endif
         string cname (name, name_len);
-        *index = (*ptr)->table[cname];
+        std::map<std::string, int>::iterator pos;
+        pos = (*ptr)->table.find (cname);
+
+        bool found = pos != (*ptr)->table.end ();
+        if (found)
+          *index = pos->second;
+        else
+          *index = -1;
+        *foundflag = found ? ESMF_TRUE : ESMF_FALSE;
 #if defined (MAPDEBUG)
-        cout << "    name: " << cname << ", index returned = " << *index << endl;
+        cout << "    name: " << cname << ", index returned = " << *index;
+        cout << ", found = " << found << endl;
 #endif
-        *rc = (*index) ? ESMF_SUCCESS : ESMF_FAILURE;
+        *rc = ESMF_SUCCESS;
 }
 
 void FTN(c_esmc_mapname_print) (MapName **ptr,

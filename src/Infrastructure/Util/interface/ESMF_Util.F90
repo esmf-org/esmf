@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.30 2010/07/13 22:36:16 theurich Exp $
+! $Id: ESMF_Util.F90,v 1.31 2010/07/14 22:56:41 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.30 2010/07/13 22:36:16 theurich Exp $'
+               '$Id: ESMF_Util.F90,v 1.31 2010/07/14 22:56:41 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -226,12 +226,13 @@
 ! !IROUTINE:  ESMF_UtilMapNameLookup - Return the value associated with a name
 !
 ! !INTERFACE:
-  subroutine ESMF_UtilMapNameLookup (this, name, value, rc)
+  subroutine ESMF_UtilMapNameLookup (this, name, value, foundFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_MapName), intent(in)  :: this
     character(*),       intent(in)  :: name
     integer,            intent(out) :: value
+    logical,            intent(out) :: foundFlag
     integer,            intent(out), optional :: rc
 !
 ! !Description:
@@ -247,6 +248,8 @@
 ! pair within the container.
 ! \item [{[value]}]
 ! The integer value associated with the name.
+! \item [{[foundFlag]}]
+! Set to .TRUE. if the name is found, otherwise .FALSE.
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !EOPI
@@ -255,7 +258,7 @@
 
     localrc = ESMF_FAILURE
 
-    call c_esmc_mapname_lookup (this, trim (name), value, localrc)
+    call c_esmc_mapname_lookup (this, trim (name), value, foundFlag, localrc)
 
     if (present (rc))  &
       rc = localrc
