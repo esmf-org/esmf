@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.6 2010/07/07 17:13:28 samsoncheung Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.7 2010/07/14 18:53:08 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, print the netCDF file.
   write(name, *) "Write ESMF_Array with Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_halo, Farray3D_halo, 3, (/5,5,5/), fname='file3D_halo.nc', rc=rc)
+  call ESMF_ArrayWrite(array_halo, fname='file3D_halo.nc', rc=rc)
   if (rc==ESMF_RC_LIB_NOT_PRESENT) then
         PIONotPresent = .true.
   endif
@@ -148,7 +148,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, print the netCDF file.
   write(name, *) "Write ESMF_Array without Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_nohalo, Farray3D_nohalo, 3, (/5,5,5/), rc=rc)
+  call ESMF_ArrayWrite(array_nohalo, fname='file3D_nohalo.nc', rc=rc)
   call ESMF_Test((rc==ESMF_SUCCESS .or. PIONotPresent), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
@@ -190,8 +190,7 @@ program ESMF_ArrayIOUTest
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read ESMF_Array without Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_nohalo2, Farray3D_nohalo2,3, (/5,5,5/), &
-                      fname='ESMF_Array_int.nc', rc=rc)
+  call ESMF_ArrayRead(array_nohalo2, fname='file3D_nohalo.nc', rc=rc)
   if (rc==ESMF_RC_LIB_NOT_PRESENT) then
         PIONotPresent = .true.
   endif
@@ -235,8 +234,7 @@ program ESMF_ArrayIOUTest
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read ESMF_Array without Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_halo2, Farray3D_halo2,3, (/5,5,5/), &
-                      fname='file3D_halo.nc', rc=rc)
+  call ESMF_ArrayRead(array_halo2, fname='file3D_halo.nc', rc=rc)
   if (rc==ESMF_RC_LIB_NOT_PRESENT) then
         PIONotPresent = .true.
   endif
@@ -349,8 +347,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, print the netCDF file.
   write(name, *) "Write 2D ESMF_Array with Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_halo, Farray2D_halo, 2, (/5,5/),  &
-                       fname='file2D_halo.nc', rc=rc)
+  call ESMF_ArrayWrite(array_halo, fname='file2D_halo.nc', rc=rc)
   call ESMF_Test((rc==ESMF_SUCCESS .or. PIONotPresent), name, &
                  failMsg, result,ESMF_SRCLINE)
 
@@ -358,8 +355,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, print the netCDF file.
   write(name, *) "Write 2D ESMF_Array without Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_nohalo, Farray2D_nohalo, 2, (/5,5/),  &
-                       fname="file2D_nohalo.nc", rc=rc)
+  call ESMF_ArrayWrite(array_nohalo, fname="file2D_nohalo.nc", rc=rc)
   call ESMF_Test((rc==ESMF_SUCCESS .or. PIONotPresent), name, &
                  failMsg, result,ESMF_SRCLINE)
 
