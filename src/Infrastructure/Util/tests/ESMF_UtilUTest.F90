@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.21 2010/06/30 16:30:11 w6ws Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.22 2010/07/14 14:31:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.21 2010/06/30 16:30:11 w6ws Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.22 2010/07/14 14:31:54 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -282,7 +282,7 @@
     write (name, *) "Testing ESMF_UtilGetArgIndex for program path"
     write (failMsg, *) "did not return -1"
     call ESMF_UtilGetArgIndex (value="esmf_xyzzy", argindex=argindex, rc=rc)
-    call ESMF_Test(rc /= ESMF_SUCCESS .and. argindex == -1,  &
+    call ESMF_Test(rc == ESMF_SUCCESS .and. argindex == -1,  &
       name, failMsg, result, ESMF_SRCLINE)
 
 
