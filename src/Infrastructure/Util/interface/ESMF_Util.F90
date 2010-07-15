@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.31 2010/07/14 22:56:41 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.32 2010/07/15 23:37:37 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.31 2010/07/14 22:56:41 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.32 2010/07/15 23:37:37 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -254,11 +254,14 @@
 ! \end{description}
 !EOPI
 
+    type(ESMF_Logical) :: localfoundflag
     integer :: localrc
 
     localrc = ESMF_FAILURE
 
-    call c_esmc_mapname_lookup (this, trim (name), value, foundFlag, localrc)
+    call c_esmc_mapname_lookup (this, trim (name),  &
+                                value, localfoundFlag, localrc)
+    foundflag = localfoundflag
 
     if (present (rc))  &
       rc = localrc
