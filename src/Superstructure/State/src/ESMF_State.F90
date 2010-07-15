@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.192 2010/06/30 23:38:19 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.193 2010/07/15 23:57:23 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.192 2010/06/30 23:38:19 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.193 2010/07/15 23:57:23 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -3510,16 +3510,17 @@ module ESMF_StateMod
            return
        endif
 
-       call statePrintWorker (state%statep, level=0)
+       call statePrintWorker (state%statep, level=0, rc1=rc)
 
        ! Set return values 
        if (present(rc)) rc = ESMF_SUCCESS
        
    contains
 
-     recursive subroutine statePrintWorker (sp, level)
+     recursive subroutine statePrintWorker (sp, level, rc1)
        type(ESMF_StateClass), pointer :: sp
        integer, intent(in) :: level
+       integer, intent(out), optional :: rc1
 
        type(ESMF_StateItem) , pointer :: dp
 
@@ -3538,7 +3539,7 @@ module ESMF_StateMod
        call c_ESMC_GetName(sp%base, name, localrc)
        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rc1)) return
        write (ESMF_IOstdout,*) nestr, "State name: ", trim(name)
        if (sp%st == ESMF_STATE_IMPORT) then
          msgbuf = "Import State"
@@ -3549,7 +3550,7 @@ module ESMF_StateMod
        else if (sp%st == ESMF_STATE_INVALID) then
          call ESMF_LogWrite("Uninitialized or already destroyed State", &
                                 ESMF_LOG_INFO)
-         if (present (rc)) rc = ESMF_SUCCESS
+         if (present (rc1)) rc1 = ESMF_SUCCESS
          return
        else
          call ESMF_LogWrite ("error: unknown state",  &
@@ -3564,7 +3565,7 @@ module ESMF_StateMod
        call c_ESMC_BasePrint(sp%base, level, "brief", localrc)
        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc1)) return
        
       
        do i=1, sp%datacount
