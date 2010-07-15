@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.36 2010/07/13 23:36:15 theurich Exp $
+// $Id: ESMC_Util.h,v 1.37 2010/07/15 16:19:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -22,9 +22,15 @@
 
 #include "ESMC_Conf.h"
 
+#ifdef __cplusplus
 extern "C" {
+#endif
+
   int ESMC_UtilGetArgIndex(int argc, char *argv[], char *value, int *rc);
-}
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 // general logical value - MUST MATCH F90
 enum ESMC_Logical { ESMF_TRUE=1,
