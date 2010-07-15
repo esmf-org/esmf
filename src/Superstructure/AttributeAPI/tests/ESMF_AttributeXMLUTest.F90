@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.2 2010/06/28 05:59:47 eschwab Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.3 2010/07/15 16:45:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.2 2010/06/28 05:59:47 eschwab Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.3 2010/07/15 16:45:21 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -728,13 +728,12 @@ program ESMF_AttributeXMLUTest
     write(name, *) "Write out CIM RP XML file test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#endif
-
     !------------------------------------------------------------------------
     ! clean up
-    call ESMF_GridCompDestroy(gridcomp, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     call ESMF_GridCompDestroy(gridcomp2, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+#endif
+    call ESMF_GridCompDestroy(gridcomp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     !------------------------------------------------------------------------
 
