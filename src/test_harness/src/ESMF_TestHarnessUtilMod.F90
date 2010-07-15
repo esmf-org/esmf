@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUtilMod.F90,v 1.11 2010/03/04 19:40:09 theurich Exp $
+! $Id: ESMF_TestHarnessUtilMod.F90,v 1.12 2010/07/15 18:53:03 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 ! !DESCRIPTION:
 !
 ! The code in this file contains basic utilities for string manipulation and 
-! inputting configuration table entries
+! inputting configuration table entries and misc utility functions
 !
 !-------------------------------------------------------------------------------
 ! !USES:
@@ -42,6 +42,8 @@
   implicit none
 
 !===============================================================================
+! minimum error neighborhood for regrid interpolation
+real(ESMF_KIND_R8), parameter :: RegridMinNeighborhood = 1.0D-14
 
   contains 
 
@@ -1199,6 +1201,80 @@
   !-----------------------------------------------------------------------------
   end subroutine read_table_string
   !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !
+  ! check an actual value against and expected value within a (relative) tolerance
+  !
+  logical function check_value (exp_val, act_val, tol)
+    real(ESMF_KIND_R8), intent(in) :: exp_val
+    real(ESMF_KIND_R8), intent(in) :: act_val
+    real(ESMF_KIND_R8), intent(in) :: tol
+
+    real(ESMF_KIND_R8) :: abs_err
+    real(ESMF_KIND_R8) :: tol_band
+
+    abs_err  = abs(act_val - exp_val)
+    tol_band = abs(tol * exp_val) + RegridMinNeighborhood
+
+    check_value = abs_err .LT. tol_band
+
+#if 1
+    ! print error message if value rejected because its outside of the minimum tolerance band
+    if (.NOT. check_value) then
+      if (abs_err .GE. RegridMinNeighborhood) then
+        call ESMF_LogMsgSetError (ESMF_FAILURE, "regrid error - value outside of minimum tolerance band", &
+          __LINE__, __FILE__)
+      end if
+    end if
+#endif
+
+! debug
+#if 0
+    if (.NOT. check_value) then
+      print *, "check_value - value out of tolerance(debug)", exp_val, act_val, abs_err, tol_band
+    endif
+#endif
+
+    return
+  !-----------------------------------------------------------------------------
+  end function check_value
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !
+  ! check an ESMF return code, display file/line no of error location
+  !
+  logical function CheckError (checkpoint, line, file, rcValue, msg, rcToReturn)
+    logical,          intent(in)  :: checkpoint
+    integer,          intent(in)  :: line
+    character(len=*), intent(in)  :: file
+    character(len=*), intent(in)  :: msg
+    integer,          intent(in)  :: rcValue
+    integer,          intent(out) :: rcToReturn
+
+    if (checkpoint) then
+      print '("checkpoint at line ", I5, " in file ", A)', line, file
+    end if
+
+    rcToReturn = ESMF_SUCCESS
+
+    CheckError = ESMF_LogMsgFoundError (rcValue, msg, rcToReturn=rcToReturn)
+
+    if (CheckError) then
+      print '("error detected at line ", I5, " in file ", A " - return code = ", I8)', &
+        line, file, rcToReturn
+      print '("     ", A)', msg
+    end if
+
+    return
+  !-----------------------------------------------------------------------------
+  end function CheckError
+  !-----------------------------------------------------------------------------
+
+!-----------------------------------------------------------------------
+
 
 !===============================================================================
   end module ESMF_TestHarnessUtilMod

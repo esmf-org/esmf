@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUTest.F90,v 1.29 2010/06/11 18:13:30 garyblock Exp $
+! $Id: ESMF_TestHarnessUTest.F90,v 1.30 2010/07/15 18:53:03 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,6 +34,7 @@
 
   use ESMF_TestHarnessTypesMod
   use ESMF_TestHarnessMod
+  use ESMF_TestHarnessParser
 
   use ESMF_TestHarnessGridMod
   use ESMF_TestHarnessDistMod
@@ -59,9 +60,6 @@
   character(ESMF_MAXSTR) :: name, failmsg
 
   ! logical :: localdebugflag = .false.
-
-  ! top level test harness config file
-  !character(ESMF_MAXSTR) :: test_harness_name = "test_harness.rc"
 
   ! test harness config file path & top level config file name
   integer                :: argc
@@ -213,6 +211,7 @@
 
 contains
 
+! move to ESMF_TestHarnessParser someday,  many globals are referenced
 !===============================================================================
 ! !IROUTINE: Read_TestHarness_Config
 
@@ -580,7 +579,6 @@ contains
 !===============================================================================
   end subroutine Read_TestHarness_Specifier
 !===============================================================================
-
 
 !-------------------------------------------------------------------------------
 ! !IROUTINE: RunTests         
