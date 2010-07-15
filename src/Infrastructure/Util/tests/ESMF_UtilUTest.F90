@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.23 2010/07/14 22:56:41 w6ws Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.24 2010/07/15 18:27:03 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.23 2010/07/14 22:56:41 w6ws Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.24 2010/07/15 18:27:03 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -352,13 +352,21 @@
         name="Temperature", rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
+call ESMF_UtilMapNamePrint (mapcontainer, title='after Temperature removal', rc=rc)
+
     !EX_UTest
-    ! Test looking up a removed name/value pair
-    write (name, *) "Testing looking up a name/value pair"
-    write (failMsg, *) "returned ESMF_SUCCESS (but should not)"
+    ! Test looking up a removed name/value pair (part 1)
+    write (name, *) "Testing looking up a removed name/value pair"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
     call ESMF_UtilMapNameLookup (mapcontainer,  &
         name="Temperature", value=newvalue, foundFlag=isfound, rc=rc)
-    call ESMF_Test(rc == ESMF_SUCCESS .and. .not. isfound,  &
+    call ESMF_Test(rc == ESMF_SUCCESS,  &
+        name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test looking up a removed name/value pair (part 2)
+    write (failMsg, *) "indicated a removed pair was found"
+    call ESMF_Test(.not. isfound,  &
         name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest
@@ -367,7 +375,6 @@
     write (failMsg, *) "did not return ESMF_SUCCESS"
     call ESMF_UtilMapNameDestroy (mapcontainer, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
 
 #endif
 
