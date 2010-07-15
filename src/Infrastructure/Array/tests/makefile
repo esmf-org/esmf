@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.48 2010/07/14 18:53:54 samsoncheung Exp $ 
+# $Id: makefile,v 1.49 2010/07/15 20:26:03 garyblock Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -37,6 +37,12 @@ ifeq ($(ESMF_TESTHARNESS_ARRAY), default)
   TESTS_RUN := $(TESTS_RUN) RUN_ESMF_TestHarnessArray_default
 else
   TESTS_RUN := $(TESTS_RUN) $(ESMF_TESTHARNESS_ARRAY)
+endif
+
+ifeq ($(ESMF_TESTHARNESS_ARRAY_UNI), default)
+  TESTS_RUN_UNI := $(TESTS_RUN_UNI) RUN_ESMF_TestHarnessArrayUNI_default
+else
+  TESTS_RUN_UNI := $(TESTS_RUN_UNI) $(ESMF_TESTHARNESS_ARRAY_UNI)
 endif
 
 include ${ESMF_DIR}/makefile
@@ -114,3 +120,18 @@ RUN_ESMF_TestHarnessArray_1:
 #
 RUN_ESMF_TestHarnessArray_2:
 	$(MAKE) TESTHARNESSCASE=array_2 NP=4 run_test_harness
+
+# UNI test harness
+RUN_ESMF_TestHarnessArrayUNI_default:
+	$(MAKE) TESTHARNESSCASE=array_default NP=1 run_test_harness
+
+#
+RUN_ESMF_TestHarnessArrayUNI_1:
+	$(MAKE) TESTHARNESSCASE=array_1 NP=1 run_test_harness
+
+#
+RUN_ESMF_TestHarnessArrayUNI_2:
+	$(MAKE) TESTHARNESSCASE=array_2 NP=1 run_test_harness
+
+
+##

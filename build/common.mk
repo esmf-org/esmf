@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.302 2010/07/12 12:51:04 theurich Exp $
+#  $Id: common.mk,v 1.303 2010/07/15 20:26:03 garyblock Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -212,8 +212,16 @@ ifndef ESMF_TESTHARNESS_ARRAY
 export ESMF_TESTHARNESS_ARRAY = default
 endif
 
+ifndef ESMF_TESTHARNESS_ARRAY_UNI
+export ESMF_TESTHARNESS_ARRAY_UNI = default
+endif
+
 ifndef ESMF_TESTHARNESS_FIELD
 export ESMF_TESTHARNESS_FIELD = default
+endif
+
+ifndef ESMF_TESTHARNESS_FIELD_UNI
+export ESMF_TESTHARNESS_FIELD_UNI = default
 endif
 
 ifndef ESMF_ETCDIR
