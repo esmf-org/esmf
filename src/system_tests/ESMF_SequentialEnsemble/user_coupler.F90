@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.3 2009/10/22 03:28:51 svasquez Exp $
+! $Id: user_coupler.F90,v 1.4 2010/07/15 20:15:34 peggyli Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -73,7 +73,7 @@ module user_coupler
     ! Initialize return code
     rc = ESMF_SUCCESS
 
-    ! get vm to be used by stateReconcile
+    ! get vm 
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -84,12 +84,9 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! each item in the import state contains one export state from the ensemble, let's get them one by one
-    ! and call stateReconcile to reconcile them if they are concurrent components
     ! Also call ArrayRedistStore to regrid them to the destination array and add them to the export state
     do i=1,itemcount
         call ESMF_StateGet(importState, stateItemNames(i), state, rc=rc)
-        if (rc/=ESMF_SUCCESS) return ! bail out
-        call ESMF_StateReconcile(state, vm, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
 
         ! Get source Array out of import state
