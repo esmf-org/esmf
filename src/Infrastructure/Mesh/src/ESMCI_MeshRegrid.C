@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.16 2010/06/28 20:07:10 rokuingh Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.17 2010/07/16 19:52:57 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,10 +15,100 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.16 2010/06/28 20:07:10 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.17 2010/07/16 19:52:57 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
+
+#ifdef DEBUG
+int print_debug_info(IWeights &wts) {
+  // print out info of weight matrix
+  int snegcount = 0;
+  int stotalcount = 0;
+  int negcount = 0;
+  int rowsum = 0;
+  int rowsumcount = 0;
+  int totalcount = 0;
+  int gt1count = 0;
+  double max = 0;
+  double maxneg = 0;
+  double min = 0;
+  double badcolid = 0;
+  double badrowid = 0;
+
+
+  IWeights::WeightMap::iterator wit = wts.begin_row(), wet = wts.end_row();
+  //IWeights::WeightMap::iterator wit = stw.begin_row(), wet = stw.end_row();
+  for (; wit != wet; ++wit) {
+    const IWeights::Entry &_row = wit->first;
+    const std::vector<IWeights::Entry> &_col = wit->second;
+
+//    std::cout<<Par::Rank()<<"  "<<_row.id<<"    ";
+    rowsum = 0;
+    for (UInt c = 0; c < _col.size(); ++c) {
+      double value = _col[c].value;
+      if (value < 0) negcount++;
+      if (value > max) max = value;
+      if (value < min) min = value;
+      if (value > 1) gt1count++;
+      if (value < 0 && std::abs(value) > std::abs(maxneg)) {
+        maxneg = value;
+        badcolid = _col[c].id;
+        badrowid = _row.id;
+      }
+      rowsum += value;
+
+//      std::cout<<std::setprecision(3)<<_col[c].value<<"  ";
+    }
+    if (rowsum > 1.01 || rowsum < .99) rowsumcount++;
+    totalcount++;
+//    std::cout<<std::endl;
+    for (UInt c = 0; c < _col.size(); ++c) {
+      double value = _col[c].value;
+      
+    }
+  }
+
+  std::cout<<std::endl<<std::setw(30)<<"Negative weights count = "<<negcount
+           <<std::endl<<std::setw(30)<<"Greater than 1 count = "<<gt1count
+           <<std::endl<<std::setw(30)<<"Row sum not 1 count = "<<rowsumcount
+           <<std::endl<<std::setw(30)<<"Total row count = "<<totalcount
+           <<std::endl<<std::setw(30)<<"Max weight  = "<<max
+           <<std::endl<<std::setw(30)<<"Min weight = "<<min
+           <<std::endl<<std::setw(30)<<"Max neg weight = "<<maxneg
+           <<std::endl<<std::setw(30)<<"Bad weight ["<<badrowid<<","<<badcolid<<"]"
+           <<std::endl<<std::endl;
+
+  return 1;
+}
+
+int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts, 
+                                  Mesh &dstmesh, MEField<> *dst_neg_wts)
+{
+  IWeights::WeightMap::const_iterator wi = wts.begin_row(), we = wts.end_row();
+  for (; wi != we; ++wi) {
+    const IWeights::Entry &_row = wi->first;
+    const std::vector<IWeights::Entry> &_col = wi->second;
+    // look for destination node id matching _row.id
+    MeshDB::MeshObjIDMap::iterator ndi =
+      dstmesh.map_find(MeshObj::NODE, _row.id);
+    ThrowRequire(ndi != dstmesh.map_end(MeshObj::NODE));
+    double *Ddata = dst_neg_wts->data(*ndi);
+    double min = 1.0;
+    double max = 0.0;
+    for (UInt c = 0; c < _col.size(); ++c) {
+      double value = _col[c].value;
+      if (value < min) min = value;
+      if (value > max) max = value;
+    }
+    *Ddata = 0;
+    if (min < 0) *Ddata = min;
+    if (max > 1.0) *Ddata = max;
+    if (min < 0 && max > 1.0) *Ddata = std::max(std::abs(max),std::abs(min));
+  }
+  return 1;
+}
+#endif
 
 // Meshes are already committed
 int online_regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
@@ -85,6 +175,16 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
 
   IWeights wts;
   MEField<> *src_iwts, *dst_iwts, *dst_iwtscpy;
+
+#ifdef DEBUG
+  // Add fields to mesh to hold negative weights
+  MEField<> *src_neg_wts, *dst_neg_wts;
+  Context ctxt; ctxt.flip();
+  src_neg_wts = srcmesh.RegisterField("negwts",
+    MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+  dst_neg_wts = dstmesh.RegisterField("negwts",
+    MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+#endif
 
     switch (*regridConserve) {
 
@@ -159,6 +259,13 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
     WriteNCMatFilePar(srcGridFile, dstGridFile, wghtFile,
                       wts, srcmesh, dstmesh, dstmeshcpy,
                       regridConserve, regridMethod, NCMATPAR_ORDER_SEQ);
+
+#ifdef DEBUG
+    print_debug_info(wts);
+    form_neg_wts_field(wts, srcmesh, src_neg_wts, dstmesh, dst_neg_wts);
+    WriteMesh(srcmesh, "srcmesh");
+    WriteMesh(dstmesh, "dstmesh");
+#endif
 
   return 1;
 
@@ -272,8 +379,6 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
     sig.intWeights(src_iwts);
     dig.intWeights(dst_iwts);
 
-
-
 #if 0
   // print out info of the iwts
   Mesh::iterator sni=srcmesh.node_begin(), sne=srcmesh.node_end();
@@ -296,7 +401,6 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
     printf("DW Sum=%20.17f \n",dsum);
 #endif
 
-
     // Pole constraints
     IWeights pole_constraints, stw;
     UInt constraint_id = dstmesh.DefineContext("pole_constraints");
@@ -313,7 +417,6 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
           MeshAddPoleTeeth(dstmesh, i, constraint_id, pole_constraints);
       }
     }
-
 
     // Get coordinate fields
     MEField<> &scoord = *srcmesh.GetCoordField();
@@ -380,12 +483,11 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
     // L2 projection conservative interpolation
     interp.interpL2csrvM(stw, &wts, src_iwts, dst_iwts);
 
-
-/*
   // print out info of the iwts
   Mesh::iterator sni=srcmesh.node_begin(), sne=srcmesh.node_end();
   Mesh::iterator dni=dstmesh.node_begin(), dne=dstmesh.node_end();
 
+#ifdef DEBUG
   int snegcount = 0;
   int stotalcount = 0;
   for (; sni != sne; ++sni) {
@@ -401,64 +503,9 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
     dtotalcount++;
     if (*Ddata < 0) ++dnegcount;
   }
+#endif
 
-  // print out info of weight matrix
-  int negcount = 0;
-  int rowsum = 0;
-  int rowsumcount = 0;
-  int totalcount = 0;
-  int gt1count = 0;
-  double max = 0;
-  double min = 0;
-double badcolid = 0;
-double badrowid = 0;
-
-  IWeights::WeightMap::iterator wit = wts.begin_row(), wet = wts.end_row();
-  //IWeights::WeightMap::iterator wit = stw.begin_row(), wet = stw.end_row();
-  for (; wit != wet; ++wit) {
-    const IWeights::Entry &_row = wit->first;
-    const std::vector<IWeights::Entry> &_col = wit->second;
-
-    std::cout<<Par::Rank()<<"  "<<_row.id<<"    ";
-    rowsum = 0;
-    for (UInt c = 0; c < _col.size(); ++c) {
-      double value = _col[c].value;
-      if (value < 0) negcount++;
-      if (value > max) {
-        max = value;
-        badcolid = _col[c].id;
-        badrowid = _row.id;
-      }
-      if (value < min) min = value;
-      if (value > 1) gt1count++;
-      rowsum += value;
-
-      std::cout<<std::setprecision(3)<<_col[c].value<<"  ";
-    }
-    if (rowsum > 1.01 || rowsum < .99) rowsumcount++;
-    totalcount++;
-    std::cout<<std::endl;
-    for (UInt c = 0; c < _col.size(); ++c) {
-      double value = _col[c].value;
-      
-    }
-  }
-  std::cout<<std::endl<<"Negative weights count = "<<negcount
-           <<std::endl<<"Greater than 1 count = "<<gt1count
-           <<std::endl<<"Row sum not 1 count = "<<rowsumcount
-           <<std::endl<<"Total row count = "<<totalcount<<std::endl
-           <<std::endl<<"Max weight  = "<<max
-           <<std::endl<<"Min weight = "<<min<<std::endl;
-
-  std::cout<<std::setprecision(4)<<std::endl<<"Bad weight ["<<badrowid<<","<<badcolid<<"]"<<std::endl<<std::endl;
-
-  std::cout<<std::endl<<"Source iwts total count = "<<stotalcount
-                      <<"  and negcount = "<<snegcount<<std::endl;
-  std::cout<<std::endl<<"Destination iwts total count = "<<dtotalcount
-                      <<"  and negcount = "<<dnegcount<<std::endl<<std::endl;
-*/
-
-    return 1;
+  return 1;
   }
 
   // to generate the iwts again, and return to Fortran 
