@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.55 2010/03/04 18:57:44 svasquez Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.56 2010/07/16 22:52:51 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.55 2010/03/04 18:57:44 svasquez Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.56 2010/07/16 22:52:51 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -519,6 +519,15 @@
       print *, " rc = ", rc
 
       !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Log Close
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_LogClose(log2, rc)
+      write(name, *) "Close a closed Log Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+
+      !------------------------------------------------------------------------
       ! Verify that the file can be opened with Fortran IO
       !EX_UTest
       write(name, *) "Open Log file with Fortran IO Test"
@@ -598,6 +607,14 @@
       write(name, *) " LogFlush of unopened log Test"
       call ESMF_LogFlush(log2, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test LogFlush of default log
+      write(failMsg, *) "Did not return ESMF_FAILURE"
+      write(name, *) " LogFlush of default log Test"
+      call ESMF_LogFlush( rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 100   continue
