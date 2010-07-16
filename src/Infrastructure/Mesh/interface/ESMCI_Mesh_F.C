@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.43 2010/06/23 23:01:08 theurich Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.44 2010/07/16 21:46:23 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.43 2010/06/23 23:01:08 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.44 2010/07/16 21:46:23 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -924,10 +924,12 @@ extern "C" void FTN(c_esmc_meshserialize)(Mesh **meshpp,
     // Calc Size
     int size = 3*sizeof(int)+2*numSets*sizeof(UInt);
 
+    if (nvalSetSizes != NULL)
       for (int i=0; i<numSets; i++) {
 	size +=nvalSetSizes[i]*sizeof(UInt);
       }
 
+    if (nvalSetObjSizes != NULL)
       for (int i=0; i<numSets; i++) {
 	size +=nvalSetObjSizes[i]*sizeof(UInt);
       }
@@ -954,29 +956,34 @@ extern "C" void FTN(c_esmc_meshserialize)(Mesh **meshpp,
     if (*inquireflag != ESMF_INQUIREONLY) {
 
       // Save set sizes and values
-      for (int i=0; i<numSets; i++) {
-	*uip++=nvalSetSizes[i];
-      }
+      if (nvalSetSizes != NULL)
+        for (int i=0; i<numSets; i++) {
+	  *uip++=nvalSetSizes[i];
+        }
 
-      int k=0;
-      for (int i=0; i<numSets; i++) {
-	for (int j=0; j<nvalSetSizes[i]; j++) {
-	  *uip++=nvalSetVals[k];
-	  k++;
-	}
+      if (nvalSetVals != 0) {
+        int k=0;
+        for (int i=0; i<numSets; i++) {
+	  for (int j=0; j<nvalSetSizes[i]; j++) {
+	    *uip++=nvalSetVals[k];
+	    k++;
+	  }
+        }
       }
 
       // Save set obj sizes and values
-      for (int i=0; i<numSets; i++) {
-	*uip++=nvalSetObjSizes[i];
-      }
+      if (nvalSetObjSizes != NULL)
+        for (int i=0; i<numSets; i++) {
+	  *uip++=nvalSetObjSizes[i];
+        }
 
-      k=0;
-      for (int i=0; i<numSets; i++) {
-	for (int j=0; j<nvalSetObjSizes[i]; j++) {
-	  *uip++=nvalSetObjVals[k];
-	  k++;
-
+      if (nvalSetObjVals != NULL) {
+        int k=0;
+        for (int i=0; i<numSets; i++) {
+	  for (int j=0; j<nvalSetObjSizes[i]; j++) {
+	    *uip++=nvalSetObjVals[k];
+	    k++;
+          }
 	}
       }
 
