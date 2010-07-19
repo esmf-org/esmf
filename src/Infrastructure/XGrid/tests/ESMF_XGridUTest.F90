@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.1 2010/07/16 14:15:08 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.2 2010/07/19 19:36:04 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -54,28 +54,28 @@
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
  
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_disable UTest
     ! Create an empty XGrid
     call test1(rc)
     write(failMsg, *) ""
     write(name, *) "Creating an XGrid from user input simplest form"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_disable_UTest
     ! Create an empty XGrid with area/centroid
     call test2(rc)
     write(failMsg, *) ""
     write(name, *) "Creating an XGrid with area/centroid"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_disable_UTest
     ! Create an empty XGrid with area/centroid, sparseMatA2X
     call test3(rc)
     write(failMsg, *) ""
     write(name, *) "Creating an XGrid with area/centroid, sparseMatA2X"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     call ESMF_Finalize(rc=rc)
   
