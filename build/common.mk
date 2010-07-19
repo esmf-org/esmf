@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.303 2010/07/15 20:26:03 garyblock Exp $
+#  $Id: common.mk,v 1.304 2010/07/19 21:20:17 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2187,7 +2187,7 @@ unit_test_links:
 #
 # run_unit_tests
 #
-run_unit_tests:  reqdir_tests verify_exhaustive_flag
+run_unit_tests:  reqdir_tests verify_exhaustive_flag init_test_harness
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor unit tests when ESMF_COMM is mpiuni;" ; \
 	  echo "run run_unit_tests_uni instead." ; \
@@ -2206,7 +2206,7 @@ tree_run_unit_tests: $(TESTS_RUN)
 #
 # run_unit_tests_uni
 #
-run_unit_tests_uni:  reqdir_tests verify_exhaustive_flag
+run_unit_tests_uni:  reqdir_tests verify_exhaustive_flag init_test_harness
 	@if [ -f $(UNIT_TESTS_CONFIG) ] ; then \
 	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(UNIT_TESTS_CONFIG) > $(UNIT_TESTS_CONFIG).temp; \
            $(ESMF_MV) $(UNIT_TESTS_CONFIG).temp $(UNIT_TESTS_CONFIG); \
