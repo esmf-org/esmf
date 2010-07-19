@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUtilMod.F90,v 1.12 2010/07/15 18:53:03 garyblock Exp $
+! $Id: ESMF_TestHarnessUtilMod.F90,v 1.13 2010/07/19 21:41:21 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -44,6 +44,15 @@
 !===============================================================================
 ! minimum error neighborhood for regrid interpolation
 real(ESMF_KIND_R8), parameter :: RegridMinNeighborhood = 1.0D-14
+
+
+! global storage of test specification
+type (harness_descriptor), save :: har
+
+integer :: localPet
+integer :: petCount
+integer :: rootPet = Harness_rootPet
+
 
   contains 
 

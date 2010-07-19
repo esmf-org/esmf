@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessParser.F90,v 1.1 2010/07/15 18:53:03 garyblock Exp $
+! $Id: ESMF_TestHarnessParser.F90,v 1.2 2010/07/19 21:41:21 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -39,6 +39,9 @@
 
   use ESMF_TestHarnessReportMod
 
+  use ESMF_TestHarnessGridMod
+  use ESMF_TestHarnessDistMod
+
   use ESMF_Mod
 
   implicit none
@@ -58,7 +61,372 @@ logical                       :: checkpoint = .FALSE.
   contains 
 
 !===============================================================================
+! !IROUTINE: Read_TestHarness_Config
 
+! !INTERFACE:
+  subroutine Read_TestHarness_Config(srcPath, configFname, returnrc)
+!
+! !ARGUMENTS:
+  character(len=*), intent(in)  :: srcPath
+  character(len=*), intent(in)  :: configFname
+  integer,          intent(out) :: returnrc
+
+! actual arguments through globals
+!    har structure
+
+!
+! !DESCRIPTION:
+! Routine opens the top level config file "test_harness.rc", which specifies the 
+! test class, the reporting style, and depending on how the ESMF_TESTEXHAUSTIVE
+! flag is set, extracts the list of files containing the problem descriptor
+! strings.
+!
+! Upon completion, the routine returns the values to a public record
+!       har%testClass               Problem Descriptor Test Class
+!       har%reportType              Output Report type
+!       har%numRecords              number of problem descriptor filenames
+!       har%rcrd(k)%filename        kth problem descriptor filename
+!===============================================================================
+
+  ! local ESMF types
+  type(ESMF_Config)      :: localcf
+
+  ! local parameters
+  character(ESMF_MAXSTR), parameter :: test_class_name   = "test_class:"
+  character(ESMF_MAXSTR), parameter :: setup_report_name = "setup_report:"
+  character(ESMF_MAXSTR), parameter :: test_report_name  = "test_report:"
+
+
+  ! local character strings
+  character(ESMF_MAXSTR) :: ltag, ltmp
+  character(ESMF_MAXSTR) :: filename
+
+  ! local integer variables
+  integer :: kfile, ncolumns
+  integer :: localrc
+  integer :: allocRcToTest 
+
+  ! local  logical
+  logical :: flag = .true.
+
+  ! initialize return code
+  returnrc = ESMF_RC_NOT_IMPL
+  localrc = ESMF_RC_NOT_IMPL
+
+  !-----------------------------------------------------------------------------
+  ! create config handle and load the testing harness config file
+  !-----------------------------------------------------------------------------
+  localcf = ESMF_ConfigCreate(rc=localrc)
+  if( ESMF_LogMsgFoundError(localrc, "cannot create config object",            &
+                            rcToReturn=returnrc) ) return
+
+  !call ESMF_ConfigLoadFile(localcf, trim(adjustL(test_harness_name)),          &
+  !         rc=localrc )
+
+  filename = trim(srcPath) // "/" // trim(configFname)
+  call ESMF_ConfigLoadFile (localcf, trim(filename), rc=localrc)
+  if( ESMF_LogMsgFoundError(localrc, "cannot load config file " //             &
+      trim(configFname), rcToReturn=returnrc) ) return
+  
+  !-----------------------------------------------------------------------------
+  ! find and read the test class 
+  !-----------------------------------------------------------------------------
+  call ESMF_ConfigFindLabel(localcf, trim(adjustL(test_class_name)), rc=localrc) 
+  if( ESMF_LogMsgFoundError(localrc, "cannot find config label " //            &
+      trim(adjustL(test_class_name)),rcToReturn=returnrc) ) return
+
+  call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc )
+  har%testClass = trim(adjustL( ltmp ))
+  if( ESMF_LogMsgFoundError(localrc, "cannot get value for label " //          &
+      trim(adjustL(test_class_name)),rcToReturn=returnrc) ) return
+
+  !-----------------------------------------------------------------------------
+  ! if the class is not supported, then post an error
+  !-----------------------------------------------------------------------------
+  if ( trim(adjustL(har%testClass)) /= 'ARRAY'        .and.                    &
+       trim(adjustL(har%testClass)) /= 'ARRAYBUNDLE'  .and.                    &
+       trim(adjustL(har%testClass)) /= 'FIELD'        .and.                    &
+       trim(adjustL(har%testClass)) /= 'FIELDBUNDLE' .and.                     &
+       trim(adjustL(har%testClass)) /= 'GRID'   .and.                          &
+       trim(adjustL(har%testClass)) /= 'REGRID' ) then
+     call ESMF_LogMsgSetError( ESMF_FAILURE,"class name not of valid type "//  &
+          trim(adjustL(har%testClass)), rcToReturn=returnrc)
+     return
+  endif
+
+  !-----------------------------------------------------------------------------
+  ! determine type of test report and toggle setup report
+  !-----------------------------------------------------------------------------
+
+  call ESMF_ConfigFindLabel(localcf,trim(adjustL(setup_report_name)),rc=localrc)
+  if( ESMF_LogMsgFoundError(localrc,"cannot find config label " //             &
+      trim(adjustL(setup_report_name)), rcToReturn=returnrc) ) return
+
+  call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
+  har%setupReportType = trim(adjustL( ltmp ))
+  if( ESMF_LogMsgFoundError(localrc,  "cannot get value for label " //         &
+      trim(adjustL(setup_report_name)), rcToReturn=returnrc) ) return
+
+  if((har%setupReportType /= "TRUE").and.(har%setupReportType /= "FALSE")) then
+     call ESMF_LogMsgSetError( ESMF_FAILURE, "setup report flag " //           &
+          "improperly set " // trim(har%setupReportType), rcToReturn=returnrc)
+     return
+  endif
+
+  !-----------------------------------------------------------------------------
+  ! read test report flag 
+  ! test_report: FULL  - full report presenting both success and failure configs
+  ! test_report: FAILURE - report only failure configurations
+  ! test_report: SUCCESS - report only successful configurations
+  ! test_report: NONE - no report
+  !-----------------------------------------------------------------------------
+  call ESMF_ConfigFindLabel(localcf,trim(adjustL(test_report_name)),rc=localrc )
+  if( ESMF_LogMsgFoundError(localrc, "cannot find config label " //            &
+      trim(adjustL(test_report_name)), rcToReturn=returnrc) ) return
+
+  call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc )
+  har%reportType = trim(adjustL( ltmp ))
+  if( ESMF_LogMsgFoundError(localrc, "cannot get value for label " //          &
+      trim(adjustL(test_report_name)), rcToReturn=returnrc) ) return
+
+  if ( har%reportType /= "FULL" .and. har%reportType /= "FAILURE" .and.        &
+       har%reportType /= "SUCCESS" .and. har%reportType /= "NONE" ) then
+     call ESMF_LogMsgSetError( ESMF_FAILURE, "report flag improperly set" //   &
+          trim(har%reportType), rcToReturn=returnrc) 
+     return
+  endif
+
+  !-----------------------------------------------------------------------------
+  ! based on whether exhaustive or nonexhaustive tests are to be run,  find 
+  ! and load the problem descriptor file names
+  !-----------------------------------------------------------------------------
+!#ifdef ESMF_TESTEXHAUSTIVE
+! ltag = 'exhaustive::'
+! if(localPet == rootPet)  print *, "running exhaustive tests"
+!#else
+  ltag = 'nonexhaustive::'
+  if(localPet == rootPet)  print *, "running nonexhaustive tests"
+!#endif
+  call ESMF_ConfigFindLabel(localcf, trim(adjustL(ltag)), rc=localrc )
+  if( ESMF_LogMsgFoundError(localrc, "cannot find config label " //            &
+      trim(adjustL(ltag)), rcToReturn=returnrc) ) return
+
+  ! determine the number of entries
+  call ESMF_ConfigGetDim(localcf, har%numRecords, ncolumns,                    &
+       trim(adjustL(ltag)), rc=localrc)
+  if( ESMF_LogMsgFoundError(localrc, "cannot find the size of the table " //   &
+      trim(adjustL(ltag)), rcToReturn=returnrc) ) return
+
+  ! if there are no entries post an error
+  if ( har%numRecords .le. 0 ) then
+     call ESMF_LogMsgSetError( ESMF_FAILURE, "no problem descriptor files "//  &
+          "specified", rcToReturn=returnrc)
+     return
+  endif
+
+  !-----------------------------------------------------------------------------
+  ! find the problem descriptor file names and read them
+  !-----------------------------------------------------------------------------
+  call ESMF_ConfigFindLabel(localcf, trim(adjustL(ltag)), rc=localrc)
+  if( ESMF_LogMsgFoundError(localrc, "cannot find table label of " //          &
+      trim(adjustL(ltag)), rcToReturn=returnrc) ) return
+
+  !-----------------------------------------------------------------------------
+  ! allocate space to hold problem descriptor filenames and advance through the
+  ! table extracting the problem descriptor filenames
+  !-----------------------------------------------------------------------------
+  allocate( har%rcrd(har%numRecords), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "rcrd type "//                 &
+     " in Read_TestHarness_Config", rcToReturn=returnrc)) then
+  endif
+
+
+  do kfile=1,har%numRecords
+     ! advance to new line in table
+     call ESMF_ConfigNextLine(localcf, tableEnd=flag, rc=localrc)
+     if( ESMF_LogMsgFoundError(localrc, "cannot advance to next line of " //   &
+         "table " // trim(adjustL(ltag)), rcToReturn=returnrc) ) return
+ 
+     ! retrieve the problem descriptor filenames 
+     call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
+     if( ESMF_LogMsgFoundError(localrc, "cannot get descriptor filename in "// &
+         trim(adjustL(ltag)), rcToReturn=returnrc) ) return
+
+     filename = trim(srcPath) // "/" // trim(adjustL(ltmp))
+     har%rcrd(kfile)%filename  = trim(filename)
+  enddo   ! file
+
+  !-----------------------------------------------------------------------------
+  ! clean up CF
+  !-----------------------------------------------------------------------------
+  call ESMF_ConfigDestroy(localcf, rc=localrc)
+  if( ESMF_LogMsgFoundError(localrc, "cannot destroy config file " //          &
+      trim(configFname), rcToReturn=returnrc) ) return
+
+  ! if I've gotten this far without an error, then the routine has succeeded.
+  returnrc = ESMF_SUCCESS
+
+!===============================================================================
+  end subroutine Read_TestHarness_Config
+!===============================================================================
+
+!-------------------------------------------------------------------------------
+ 
+!===============================================================================
+! !IROUTINE: Read_TestHarness_Specifier
+
+! !INTERFACE:
+  subroutine Read_TestHarness_Specifier(srcPath, returnrc)
+!
+! !ARGUMENTS:
+  character(len=*), intent (in)   :: srcPath
+  integer,          intent(inout) :: returnrc
+
+!
+! !DESCRIPTION:
+! the routine conducts the three tasks needed to conduct the test runs:
+!
+! 1. Reads the problem descriptor files, storing each problem descriptor string
+! and the names of the accompaning support files in the harness descriptor record.
+!
+! 2. Parse the descriptor strings and store the information in the harness 
+! descriptor record.
+!
+! 3. Read the grid and distribution specifier files and store the configurations
+! in the harness descriptor record.
+!
+!===============================================================================
+
+  ! local ESMF types
+
+  ! local parameters
+  ! logical :: flag = .true.
+
+  ! local integer variables
+  integer :: nPEs
+  integer :: k, kfile, kstr
+  integer :: iDfile, iGfile, iD, iG
+  integer :: nDfiles, nGfiles, nstatus
+  integer :: nDspec, nGspec
+  integer :: localrc
+  integer :: allocRcToTest
+
+  ! initialize return flag
+  returnrc = ESMF_RC_NOT_IMPL
+  localrc = ESMF_RC_NOT_IMPL
+
+  !-----------------------------------------------------------------------------
+  ! read each of the problem descriptor files obtained from read_testharness_config 
+  ! and extract the problem descriptor strings and the accompanying specifier
+  ! filenames.
+  !-----------------------------------------------------------------------------
+  call read_descriptor_files(srcPath, har%numRecords,har%rcrd,localrc)
+  if (ESMF_LogMsgFoundError(localrc, "ERROR with read descriptor files",       &
+     rcToReturn=returnrc)) return
+
+  !-----------------------------------------------------------------------------
+  ! loops through the list of descriptor files and reads each problem
+  ! descriptor string and its associated specifer files for (1) class, (2)
+  ! distribution ensemble, and (3) grid ensemble.
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  ! parse each problem descriptor string in each of the numRecords files
+  !-----------------------------------------------------------------------------
+  do kfile=1,har%numRecords
+     do kstr=1,har%rcrd(kfile)%numStrings
+        call parse_descriptor_string(har%rcrd(kfile)%numStrings,               &
+                  har%rcrd(kfile)%str(kstr), localrc)
+        if (ESMF_LogMsgFoundError(localrc," error in problem descriptor file " &
+           // trim(adjustL(har%rcrd(kfile)%filename)),                         &
+           rcToReturn=returnrc)) return  
+
+        ! read distribution specifier files
+        do k=1,har%rcrd(kfile)%str(kstr)%nDfiles
+           nPEs = petCount
+           call read_dist_specification(nPEs,                                  &
+                    har%rcrd(kfile)%str(kstr)%Dfiles(k),                       &
+                    har%rcrd(kfile)%str(kstr)%DstMem,                          &
+                    har%rcrd(kfile)%str(kstr)%SrcMem, localrc)       
+           if (ESMF_LogMsgFoundError(localrc," error reading dist specifier"   &
+              // " file "  //                                                  &
+              trim(adjustL(har%rcrd(kfile)%str(kstr)%Dfiles(k)%filename)),     &
+              rcToReturn=returnrc)) return
+        enddo   ! k
+
+        ! read grid specifier files
+        do k=1,har%rcrd(kfile)%str(kstr)%nGfiles
+           call read_grid_specification(har%rcrd(kfile)%str(kstr)%Gfiles(k),   &
+                    localrc)
+           if (ESMF_LogMsgFoundError(localrc," error reading grid specifier"   &
+              // " file "  //                                                  &
+              trim(adjustL(har%rcrd(kfile)%str(kstr)%Gfiles(k)%filename)),     &
+              rcToReturn=returnrc)) return
+        enddo   ! k
+
+        ! allocate and initialize test status
+        nDfiles = har%rcrd(kfile)%str(kstr)%nDfiles
+        nGfiles = har%rcrd(kfile)%str(kstr)%nGfiles
+        allocate( har%rcrd(kfile)%str(kstr)%test_record(nDfiles,nGfiles),      &
+                  stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "rcrd type "//           &
+           " in Read_TestHarness_Config", rcToReturn=returnrc)) then
+        endif
+
+        ! initialize test result to UNDEFINED
+        do iDfile=1,har%rcrd(kfile)%str(kstr)%nDfiles
+        do iGfile=1,har%rcrd(kfile)%str(kstr)%nGfiles
+           nDspec = har%rcrd(kfile)%str(kstr)%Dfiles(iDfile)%nDspecs
+           nGspec = har%rcrd(kfile)%str(kstr)%Gfiles(iGfile)%nGspecs
+        !  print*,'==== file  sizes',iDfile,iGfile,nDspec,nGspec
+           ! allocate work space for test result
+           allocate( har%rcrd(kfile)%str(kstr)%test_record(iDfile,iGfile)%     &
+              test_status(nDspec,nGspec), stat=allocRcToTest )
+           if (ESMF_LogMsgFoundAllocError(allocRcToTest, "test status type"//  &
+              " in Read_TestHarness_Config", rcToReturn=returnrc)) then
+           endif
+           ! allocate work space for test string
+           allocate( har%rcrd(kfile)%str(kstr)%test_record(iDfile,iGfile)%     &
+              test_string(nDspec,nGspec), stat=allocRcToTest )
+           if (ESMF_LogMsgFoundAllocError(allocRcToTest, "test status type"//  &
+              " in Read_TestHarness_Config", rcToReturn=returnrc)) then
+           endif
+
+           do iD=1, nDspec
+           do iG=1, nGspec
+             har%rcrd(kfile)%str(kstr)%test_record(iDfile,iGfile)%             &
+                 test_status(iD,iG) = HarnessTest_UNDEFINED 
+           enddo   ! iG
+           enddo   ! iD
+
+        enddo   ! iGfile
+        enddo   ! iDfile
+
+     enddo  ! kstr
+  enddo    ! kfile
+
+  !-----------------------------------------------------------------------------
+  ! list imported problem configurations before continuing
+  !-----------------------------------------------------------------------------
+  nstatus= 0
+  if( trim(har%setupReportType) == "TRUE" )  nstatus= 1
+  do kfile=1,har%numrecords
+     do kstr=1,har%rcrd(kfile)%numStrings
+        call construct_descriptor_string(har%rcrd(kfile)%str(kstr),nstatus, &  
+                                         localPet, localrc)
+     enddo  ! kstr
+  enddo    ! kfile
+
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  ! if I've gotten this far without an error, then the routine has succeeded.
+  !-----------------------------------------------------------------------------
+  returnrc = ESMF_SUCCESS
+
+!===============================================================================
+  end subroutine Read_TestHarness_Specifier
+!===============================================================================
 
 !-------------------------------------------------------------------------------
 !===============================================================================

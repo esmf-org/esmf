@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUTest.F90,v 1.30 2010/07/15 18:53:03 garyblock Exp $
+! $Id: ESMF_TestHarnessUTest.F90,v 1.31 2010/07/19 21:41:21 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,8 +36,8 @@
   use ESMF_TestHarnessMod
   use ESMF_TestHarnessParser
 
-  use ESMF_TestHarnessGridMod
-  use ESMF_TestHarnessDistMod
+  !use ESMF_TestHarnessGridMod
+  !use ESMF_TestHarnessDistMod
 
   use ESMF_TestHarnessReportMod
 
@@ -51,10 +51,10 @@
   type(ESMF_VM)          :: vm
 
   ! global storage of test specification
-  type (harness_descriptor), save :: har
+  !type (harness_descriptor), save :: har
 
   ! local variables
-  integer :: localPet, petCount, rootPet = Harness_rootPet
+  !integer :: localPet, petCount, rootPet = Harness_rootPet
   integer :: result = 0  ! cumulative result of failures; 0 failures => "all pass"
 
   character(ESMF_MAXSTR) :: name, failmsg
@@ -210,7 +210,7 @@
 !===============================================================================
 
 contains
-
+#if 0
 ! move to ESMF_TestHarnessParser someday,  many globals are referenced
 !===============================================================================
 ! !IROUTINE: Read_TestHarness_Config
@@ -579,6 +579,7 @@ contains
 !===============================================================================
   end subroutine Read_TestHarness_Specifier
 !===============================================================================
+#endif
 
 !-------------------------------------------------------------------------------
 ! !IROUTINE: RunTests         

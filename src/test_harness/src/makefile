@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2010/07/15 18:53:03 garyblock Exp $ 
+# $Id: makefile,v 1.10 2010/07/19 21:41:21 garyblock Exp $ 
 
 ALL:      build_unit_tests
 
@@ -17,6 +17,6 @@ ESMF_UTEST_TestHarness_OBJS = ESMF_TestHarnessTypesMod.o ESMF_TestHarnessMod.o E
 
 ESMF_TestHarnessMod.o: ESMF_TestHarnessTypesMod.o  ESMF_TestHarnessUtilMod.o ESMF_TestHarnessReportMod.o
 
-ESMF_TestHarnessParser.o: ESMF_TestHarnessTypesMod.o  ESMF_TestHarnessUtilMod.o
+ESMF_TestHarnessParser.o: ESMF_TestHarnessTypesMod.o  ESMF_TestHarnessGridMod.o  ESMF_TestHarnessDistMod.o ESMF_TestHarnessUtilMod.o
 
 ESMF_TestHarnessUTest.o: ESMF_TestHarnessTypesMod.o ESMF_TestHarnessMod.o ESMF_TestHarnessParser.o ESMF_TestHarnessGridMod.o  ESMF_TestHarnessDistMod.o ESMF_TestHarnessReportMod.o 
