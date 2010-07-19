@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.1 2010/07/16 14:15:08 feiliu Exp $
+! $Id: ESMF_XGridEx.F90,v 1.2 2010/07/19 19:31:28 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
     program ESMF_XGridEx
 
 !------------------------------------------------------------------------------
-!ESMF_MULTI_PROC_EXAMPLE        String used by test script to count examples.
+!ESMF_Disable_MULTI_PROC_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 ! !PROGRAM: ESMF_XGridEx - XGrid Examples
 !
