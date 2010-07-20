@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.1 2010/07/16 14:15:08 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.2 2010/07/20 21:10:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.1 2010/07/16 14:15:08 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.2 2010/07/20 21:10:20 feiliu Exp $'
 
 !==============================================================================
 !
@@ -146,6 +146,8 @@ integer, intent(out), optional  :: rc
 !     \item [{[sparseMatX2B]}]
 !           indexlist from xgrid index space to a Grid index space on side B
 !           indexFactorlist from xgrid index space to a Grid index space on side B
+!     \item [{[name]}]
+!           name of the xgrid object.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} only if the {\tt ESMF\_XGrid} 
 !           is created.
@@ -256,7 +258,7 @@ integer, intent(out), optional  :: rc
     ESMF_XGridCreateRaw%xgtypep => xgtype 
     ESMF_INIT_SET_CREATED(ESMF_XGridCreateRaw)
 
-    rc = ESMF_SUCCESS
+    if(present(rc)) rc = ESMF_SUCCESS
 
 end function ESMF_XGridCreateRaw
 
@@ -394,7 +396,7 @@ subroutine ESMF_XGridDistGrids(xgtype, rc)
         deallocate(iarray, indices)
     endif
 
-    rc = ESMF_SUCCESS
+    if(present(rc)) rc = ESMF_SUCCESS
 
 end subroutine ESMF_XGridDistGrids
 
@@ -418,7 +420,7 @@ subroutine ESMF_XGridDG(grid, distgrid, factorIndexList, rc)
         "- Creating distgrid from factorIndexList", &
         ESMF_CONTEXT, rc)) return
     
-    rc = ESMF_SUCCESS
+    if(present(rc)) rc = ESMF_SUCCESS
 
 end subroutine ESMF_XGridDG
 
@@ -468,7 +470,7 @@ subroutine ESMF_SparseMatca(sparseMats, sparseMatd, ngrid, tag, rc)
         ESMF_CONTEXT, rc)) return
     sparseMatd = sparseMats
 
-    rc = ESMF_SUCCESS
+    if(present(rc)) rc = ESMF_SUCCESS
 
 end subroutine ESMF_SparseMatca
 
@@ -522,7 +524,7 @@ subroutine ESMF_XGridConstructBaseObj(xgtype, name, rc)
     if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
-    rc = ESMF_SUCCESS
+    if(present(rc)) rc = ESMF_SUCCESS
 
 end subroutine ESMF_XGridConstructBaseObj
 !------------------------------------------------------------------------------

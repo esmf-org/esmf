@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.2 2010/07/19 19:36:04 svasquez Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.3 2010/07/20 21:10:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
     use ESMF_Mod
     use ESMF_XGridMod
     use ESMF_XGridCreateMod
-
+    use ESMF_XGridGetMod
 
     implicit none
 
@@ -189,9 +189,16 @@ contains
         integer                             :: localrc, i
         type(ESMF_XGrid)                    :: xgrid
         type(ESMF_Grid)                     :: sideA(2), sideB(1)
-        type(ESMF_DistGrid)                 :: sideAdg(2), sideBdg(1)
+        type(ESMF_DistGrid)                 :: sideAdg(2), sideBdg(1), distgrid
         real*8                              :: centroid(12,2), area(12)
         type(ESMF_XGridSpec)                :: sparseMatA2X(2)
+
+        type(ESMF_Grid)                     :: l_sideA(2), l_sideB(1)
+        type(ESMF_DistGrid)                 :: l_sideAdg(2), l_sideBdg(1)
+        real*8                              :: l_centroid(12,2), l_area(12)
+        type(ESMF_XGridSpec)                :: l_sparseMatA2X(2)
+
+        integer                             :: eleCount, elb(ESMF_MAXDIM), eub(ESMF_MAXDIM)
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -259,13 +266,33 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_XGridDestroy(xgrid, rc=localrc)
+        deallocate(sparseMatA2X(1)%factorIndexList, sparseMatA2X(1)%factorList)
+        deallocate(sparseMatA2X(2)%factorIndexList, sparseMatA2X(2)%factorList)
+
+        call ESMF_XGridGet(xgrid, sideA=l_sideA, sideB=l_sideB, area=l_area, &
+            centroid=l_centroid, distgridA=l_sideAdg, &
+            distgridM = distgrid, sparseMatA2X=l_sparseMatA2X, &
+            rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        deallocate(sparseMatA2X(1)%factorIndexList, sparseMatA2X(1)%factorList)
-        deallocate(sparseMatA2X(2)%factorIndexList, sparseMatA2X(2)%factorList)
+        call ESMF_XGridGet(xgrid, localDe=0, elementCount=eleCount, &
+            exclusiveLBound=elb, exclusiveUBound=eub, &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_DistGridPrint(distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_XGridDestroy(xgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
 
     end subroutine test3
 

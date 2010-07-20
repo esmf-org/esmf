@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.2 2010/07/19 19:31:28 svasquez Exp $
+! $Id: ESMF_XGridEx.F90,v 1.3 2010/07/20 21:10:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@
     allocate(sparseMatA2X(2)%factorIndexList(2,3), sparseMatA2X(2)%factorList(3))
 
     ! Refer to the figure above to check the numbering
-    ! - setting up mapping between A1 -> X
+    ! - set up mapping between A1 -> X
     sparseMatA2X(1)%factorIndexList(1,1)=1
     sparseMatA2X(1)%factorIndexList(1,2)=2
     sparseMatA2X(1)%factorIndexList(1,3)=2
@@ -117,7 +117,7 @@
     sparseMatA2X(1)%factorIndexList(2,7)=7
     sparseMatA2X(1)%factorIndexList(2,8)=8
     sparseMatA2X(1)%factorIndexList(2,9)=9
-    ! - setting up mapping between A2 -> X
+    ! - set up mapping between A2 -> X
     sparseMatA2X(2)%factorIndexList(1,1)=1
     sparseMatA2X(2)%factorIndexList(1,2)=2
     sparseMatA2X(2)%factorIndexList(1,3)=2

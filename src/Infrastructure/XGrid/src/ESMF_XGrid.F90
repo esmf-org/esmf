@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.1 2010/07/16 14:15:08 feiliu Exp $
+! $Id: ESMF_XGrid.F90,v 1.2 2010/07/20 21:10:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -62,6 +62,15 @@ module ESMF_XGridMod
 ! ! ESMF_XGridType
 ! ! Definition of the XGrid class.
 
+  type ESMF_XGridSide
+    integer                     :: side
+  end type ESMF_XGridSide
+
+  type(ESMF_XGridSide), parameter :: &
+    ESMF_XGRID_SIDEA=ESMF_XGridSide(0), &
+    ESMF_XGRID_SIDEB=ESMF_XGridSide(1), &
+    ESMF_XGRID_BALANCED=ESMF_XGridSide(2)
+
   type ESMF_XGridSpec
     sequence
     integer, pointer            :: factorIndexList(:,:)       ! factorIndexList
@@ -99,6 +108,8 @@ module ESMF_XGridMod
   public ESMF_XGrid
   public ESMF_XGridType
   public ESMF_XGridSpec
+  public ESMF_XGridSide, ESMF_XGRID_SIDEA, ESMF_XGRID_SIDEB, &
+    ESMF_XGRID_BALANCED
 
 !------------------------------------------------------------------------------
 !
@@ -122,7 +133,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.1 2010/07/16 14:15:08 feiliu Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.2 2010/07/20 21:10:20 feiliu Exp $'
 
 !==============================================================================
 !
@@ -515,9 +526,6 @@ contains
       if  (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_XGridDeserialize
-
-!----------------------------------------------------------------------------
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
