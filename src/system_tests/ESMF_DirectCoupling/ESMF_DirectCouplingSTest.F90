@@ -1,4 +1,4 @@
-! $Id: ESMF_DirectCouplingSTest.F90,v 1.8 2009/10/19 16:57:53 svasquez Exp $
+! $Id: ESMF_DirectCouplingSTest.F90,v 1.9 2010/07/20 05:50:12 eschwab Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -35,7 +35,7 @@
 !     "ioComp.arrayDst" on a 100x150 DistGrid with a single DE. The modelAComp
 !     creates a 100x150 Array "modelA.array" with 2 DEs across its 2 PETs during
 !     Initialize(). Finally modelBComp also creates a 100x150 Array 
-!     "modelB.array" with 3 DEs across the the PETs it is defined on.
+!     "modelB.array" with 3 DEs across the PETs it is defined on.
 !
 !     The cplComp has a 2 phase Initialize(). During the first phase an
 !     ArrayRegrid() between "ioComp.arraySrc" and "modelA.array" is precomputed.
@@ -53,7 +53,7 @@
 !     modelBComp are set up for direct coupling. The Run() section on the 
 !     main driver level starts up ioComp and modelComp concurrently. The
 !     modelComp Run() branches out into concurrent exection of modelAComp and
-!     modelBComp. Once running ioComp, modelAComp and modelBComp do not return
+!     modelBComp. Once running, ioComp, modelAComp and modelBComp do not return
 !     to an upper level to exchange data but call directly into the precomputed
 !     ArrayRedist() methods.
 !
@@ -62,7 +62,7 @@
 !
 !       10.0 + 5.0*sin((I/Imax)*pi) + 2.0*sin((J/Jmax)*pi)
 !
-!     where I = [1,..,Imax=100] and J = [1,..,Jmax=150]. The "ioCOmp.arrayDst"
+!     where I = [1,..,Imax=100] and J = [1,..,Jmax=150]. The "ioComp.arrayDst"
 !     is initialized to 0.
 !
 !     During each iteration a full coupling cycle is completed:
