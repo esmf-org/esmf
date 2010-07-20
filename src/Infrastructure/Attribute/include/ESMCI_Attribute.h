@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.33 2010/06/28 05:59:47 eschwab Exp $
+// $Id: ESMCI_Attribute.h,v 1.34 2010/07/20 05:49:39 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -190,6 +190,9 @@ class Attribute
     // query for existence of an attribute
     int AttributeIsPresent(const string &name, ESMC_Logical *present) const;
 
+    // query for whether an attribute has been set
+    bool AttributeIsSet(const string &name) const;
+
     // link/unlink an attribute hierarchy
     int AttributeLink(Attribute *destination);
     int AttributeLinkRemove(Attribute *destination);
@@ -253,11 +256,11 @@ class Attribute
 
     int AttributeWriteXML(const string &convention, const string &purpose, 
       const string &object, const string &varobj, const string &basename) const;
+
     int AttributeWriteXMLtraverse(IO_XML *io_xml, const string &convention,
       const string &purpose,
       const int &columns,bool &fielddone,bool &griddone,bool &compdone) const;
     int AttributeWriteXMLbuffer(IO_XML *io_xml) const;
-    int AttributeWriteCIMbuffer(IO_XML *io_xml) const;
     int AttributeWriteXMLbuffergrid(IO_XML *io_xml) const;
     int AttributeWriteXMLbufferfield(IO_XML *io_xml, const string &convention,
       const string &purpose, int &index, const int &columns) const;
@@ -266,6 +269,13 @@ class Attribute
 
     int AttributeWriteWaterMLbuffieldT(IO_XML *io_xml, int &index,
        const int &columns) const;
+
+    int AttributeWriteCIM(IO_XML *io_xml) const;
+    int AttributeWriteCIMmodelComp(IO_XML *io_xml, int indent) const;
+    int AttributeWriteCIMsimRun(IO_XML *io_xml) const;
+    int AttributeWriteCIMplatform(IO_XML *io_xml) const;
+    int AttributeWriteCIMRP(IO_XML *io_xml, int indent) const;
+    int AttributeWriteCIMbuffer(IO_XML *io_xml) const; 
 
     // Print
     int ESMC_Print(void) const;

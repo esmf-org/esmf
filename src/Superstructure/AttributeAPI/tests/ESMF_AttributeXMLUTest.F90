@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.3 2010/07/15 16:45:21 eschwab Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.4 2010/07/20 05:49:39 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.3 2010/07/15 16:45:21 eschwab Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.4 2010/07/20 05:49:39 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -53,7 +53,10 @@ program ESMF_AttributeXMLUTest
 
       ! Local variables  
       integer                 :: ordinal, rc 
-      type(ESMF_GridComp)     :: gridcomp, gridcomp2
+      type(ESMF_GridComp)     :: gridcomp, gridcomp2, gridcomp3
+      type(ESMF_Field)        :: field1
+      type(ESMF_FieldBundle)  :: fieldBundle
+      type(ESMF_State)        :: importState
       character(ESMF_MAXSTR)  :: conv, purp
       
       character(ESMF_MAXSTR),dimension(3)   :: nestConv, nestPurp
@@ -679,7 +682,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the 3rd attribute value within the last CIM RP package
-      call ESMF_AttributeSet(gridcomp2, 'IndividualEmailAddress', &
+    call ESMF_AttributeSet(gridcomp2, 'IndividualEmailAddress', &
                                        'g.m.devine@reading.ac.uk', &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -705,7 +708,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 5th attribute value within the last CIM RP package
     ! This is set as an XML element attribute to ensure proper output format
-    call ESMF_AttributeSet(gridcomp2, 'IndividualRole', 'author', &
+    call ESMF_AttributeSet(gridcomp2, 'ResponsiblePartyRole', 'author', &
                                       attrAttribute=.true., &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -728,8 +731,684 @@ program ESMF_AttributeXMLUTest
     write(name, *) "Write out CIM RP XML file test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+  !-------------------------------------------------------------------------
+  !   <CIMRecord> attribute representation and output test for
+  !   <modelComponent> with <composition> (fields), <simulationRun>, and
+  !   <platform>. Uses built-in, standard CIM packages.
+  !-------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Construct a gridded component ESMF object that will be decorated with
+    ! Attributes to output <CIMRecord>s
+    gridcomp3 = ESMF_GridCompCreate(name="gridded_comp_cim", petList=(/0/), &
+                 rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a gridded component to decorate with Attributes test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Create standard CIM attribute package on the gridded component
+    call ESMF_AttributeAdd(gridcomp3, &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating std CIM responsibleParty attribute package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    ! <modelComponent> attributes
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 1st <modelComponent> attribute value within the CIM component
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'ComponentShortName', 'HiGEM', &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 1st <modelComponent> attribute value in CIM component package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 2nd <modelComponent> attribute value within the CIM component
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'ComponentLongName', 'UK High Resolution Global Environment Model', &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 2nd <modelComponent> attribute value in CIM component package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 3rd <modelComponent> attribute value within the CIM component
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'ComponentDescription',  &
+      'HiGEM brings together expertise from NERC, the UK academic ' // &
+      'community and the Met Office in a concerted UK effort to ' // &
+      'develop coupled climate models with increased horizontal ' // &
+      'resolutions. Increasing the horizontal resolution of coupled ' // &
+      'climate models will allow us to capture climate processes and ' // &
+      'weather systems in much greater detail.', &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 3rd <modelComponent> attribute value in CIM component package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 4th <modelComponent> attribute value within the CIM component
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'Version', 'HiGEM', &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 4th <modelComponent> attribute value in CIM component package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 5th <modelComponent> attribute value within the CIM component
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'YearReleased', '2009', &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 5th <modelComponent> attribute value in CIM component package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 6th <modelComponent> attribute value within the CIM component
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'ModelType', 'AerosolEmissionAndConc', &
+                           attrAttribute=.true., &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 6th <modelComponent> attribute value in CIM component package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    ! <simulationRun> attributes
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 1st <simulationRun> attribute value within the CIM component
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'SimulationShortName', '1.1_HiGEM_Sim', &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 1st <simulationRun> attribute value in CIM component package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 2nd <simulationRun> attribute value within the CIM component
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'SimulationLongName', 'HiGEM Simulation for Experiment 1.1', &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 2nd <simulationRun> attribute value in CIM component package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 3rd <simulationRun> attribute value within the CIM component
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'SimulationRationale', &
+     'HiGEM simulation run in repsect to CMIP5 core experiment 1.1 (Decadal)', &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 3rd <simulationRun> attribute value in CIM component package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 4th <simulationRun> attribute value within the CIM component
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'SimulationStartDate', &
+     '1960-1-1T00:00:00Z', &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 4th <simulationRun> attribute value in CIM component package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 5th <simulationRun> attribute value within the CIM component
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'SimulationDuration', '10.0 Years', &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 5th <simulationRun> attribute value in CIM component package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    ! <documentGenealogy>
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 1st <documentGenealogy> attribute value within the CIM component
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'PreviousVersion', &
+      'HadGEM1 Atmosphere', &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 1st <documentGenealogy> attribute value in CIM component package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 2nd <documentGenealogy> attribute value within the CIM component
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'PreviousVersionDescription', &
+      'Horizontal resolution increased to 1.25 x 0.83 degrees;&#13; ' // &
+      'Timestep reduced from 30 minutes to 20 minutes;&#13; ' // &
+      'Magnitude of polar filtering in the advection scheme reduced;&#13; ' // &
+      'Vertical velocity threshold at which targeted moisture diffusion ' // &
+      'is triggered was increased from 0.1m/s to 0.4m/s;&#13; ' // &
+      'Snow-free sea-ice albedo reduced from 0.61 to 0.57;&#13; ' // &
+      'Total ocean current included in the calculation of surface ' // &
+      'fluxes of heat, moisture, and momentum.', &
+                           convention='CIM 1.0', &
+                           purpose='Model Component Simulation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 2nd <documentGenealogy> attribute value in CIM component package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    ! <componentProperty> Scientific Property Description package
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 1st <componentProperty> attribute value within the CIM component
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'ScientificPropertyShortName', &
+      'TimeStep', &
+                      convention='CIM 1.0', &
+                      purpose='Scientific Property Description', &
+                      rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 1st <componentProperty> attribute value in CIM component package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 2nd <componentProperty> attribute value within the CIM component
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'ScientificPropertyLongName', &
+      'TimeStep', &
+                      convention='CIM 1.0', &
+                      purpose='Scientific Property Description', &
+                      rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 2nd <componentProperty> attribute value in CIM component package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 3rd <componentProperty> attribute value within the CIM component
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'ScientificPropertyValue', &
+      '20 mins', &
+                      convention='CIM 1.0', &
+                      purpose='Scientific Property Description', &
+                      rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 3rd <componentProperty> attribute value in CIM component package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    ! <platform> Platform Description package
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 1st <platform> attribute value within the CIM platform
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'MachineDescription', &
+      'HECToR (Phase 2a) is currently an integrated system known ' // &
+      'as Rainier, which includes a scalar MPP XT4 system, a vector ' // &
+      'system known as BlackWidow, and storage systems.', &
+                           convention='CIM 1.0', &
+                           purpose='Platform Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 1st <platform> attribute value in CIM platform package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 2nd <platform> attribute value within the CIM platform
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'MachineName', &
+      'HECToR', &
+                           convention='CIM 1.0', &
+                           purpose='Platform Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 2nd <platform> attribute value in CIM platform package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 3rd <platform> attribute value within the CIM platform
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'MachineOperatingSystem', &
+      'Unicos', &
+                           convention='CIM 1.0', &
+                           purpose='Platform Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 3rd <platform> attribute value in CIM platform package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 4th <platform> attribute value within the CIM platform
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'MachineMaxProcessors', &
+      '22656', &
+                           convention='CIM 1.0', &
+                           purpose='Platform Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 4th <platform> attribute value in CIM platform package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 5th <platform> attribute value within the CIM platform
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'MachineProcessor', &
+      'AMD X86_64', &
+                           convention='CIM 1.0', &
+                           purpose='Platform Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 5th <platform> attribute value in CIM platform package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 6th <platform> attribute value within the CIM platform
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'MachineCoresPerProcessor', &
+      '4', &
+                           convention='CIM 1.0', &
+                           purpose='Platform Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 6th <platform> attribute value in CIM platform package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 7th <platform> attribute value within the CIM platform
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'MachineVendor', &
+      'Cray Inc', &
+                           convention='CIM 1.0', &
+                           purpose='Platform Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 7th <platform> attribute value in CIM platform package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 8th <platform> attribute value within the CIM platform
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'MachineCompiler', &
+      'Pathscale', &
+                           convention='CIM 1.0', &
+                           purpose='Platform Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 8th <platform> attribute value in CIM platform package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 9th <platform> attribute value within the CIM platform
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'MachineCompilerVersion', &
+      '3.0', &
+                           convention='CIM 1.0', &
+                           purpose='Platform Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 9th <platform> attribute value in CIM platform package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 10th <platform> attribute value within the CIM platform
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'MachineInterconnectType', &
+      'Cray Interconnect', &
+                           convention='CIM 1.0', &
+                           purpose='Platform Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 10th <platform> attribute value in CIM platform package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 11th <platform> attribute value within the CIM platform
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'MachineHardwareType', &
+      'Parallel', &
+                           convention='CIM 1.0', &
+                           purpose='Platform Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 11th <platform> attribute value in CIM platform package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    ! <citation> Citation Description package
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 1st <citation> attribute value within the CIM citation
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'CitationShortTitle', &
+      'Shaffrey_2009', &
+                           convention='ISO 19115', &
+                           purpose='Citation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 1st <citation> attribute value in CIM citation package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 2nd <citation> attribute value within the CIM citation
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'CitationLongTitle', &
+      'Shaffrey, L.C.; Norton, W.A.; Vidale, P.L.; Demory, M.E.; ' // &
+      'Donners, J.; Cole, J.W.; Wilson, S.S.; Slingo, J.M.; ' // &
+      'Steenman-Clark, L.; Stevens, I.; Stevens, D.P.; Roberts, M.J.; ' // &
+      'Clayton, A.; Johns, T.C.; Martin, G.M.; Harle, J.D.; New, A.L.; ' // &
+      'Jrrar, A.; Connolley, W.M.; King, J.C.; Woodage, J.; Slingo, A.; ' // &
+      'Clark, D.B.; Davies, T.M.; Iwi, A.M.. 2009 UK-HiGEM: ' // &
+      'The New U.K. High Resolution Global Environment Model - ' // &
+      'Model description and basic evaluation. Journal of Climate, ' // &
+      '22 (8). 1861-1896.', &
+                           convention='ISO 19115', &
+                           purpose='Citation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 2nd <citation> attribute value in CIM citation package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 3rd <citation> attribute value within the CIM citation
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'CitationDate', &
+      '2009?(not in sample file)', &
+                           convention='ISO 19115', &
+                           purpose='Citation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 3rd <citation> attribute value in CIM citation package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 4th <citation> attribute value within the CIM citation
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'CitationPresentationForm', &
+      'Online Refereed', &
+                           convention='ISO 19115', &
+                           purpose='Citation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 4th <citation> attribute value in CIM citation package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 5th <citation> attribute value within the CIM citation
+    !   package
+    call ESMF_AttributeSet(gridcomp3, 'CitationDOI', &
+      'doi:10.1175/2008JCLI2508.1', &
+                           convention='ISO 19115', &
+                           purpose='Citation Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 5th <citation> attribute value in CIM citation package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    ! <responsibleParty> Responsible Party package
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 1st attribute value within the CIM RP package
+    ! This sets <gmd:individualName> and <gmd:role> codeListValue='author'
+    !call ESMF_AttributeSet(gridcomp3, 'PrincipalInvestigator','Gerard Devine', &
+    call ESMF_AttributeSet(gridcomp3, 'IndividualName','Gerard Devine', &
+      convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 1st attribute value in last CIM RP package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 2nd attribute value within the CIM RP package
+    call ESMF_AttributeSet(gridcomp3, 'IndividualPhysicalAddress', &
+      'Department of Meteorology University of Reading Earley Gate, Reading Devine', &
+      convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 2nd attribute value in last CIM RP package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 3rd attribute value within the CIM RP package
+    call ESMF_AttributeSet(gridcomp3, 'IndividualEmailAddress', &
+                                       'g.m.devine@reading.ac.uk', &
+      convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 3rd attribute value in last CIM RP package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 5th attribute value within the CIM RP package
+    ! This is set as an XML element attribute to ensure proper output format
+    call ESMF_AttributeSet(gridcomp3, 'ResponsiblePartyRole', 'author', &
+                                      attrAttribute=.true., &
+      convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 5th attribute value (XML element attribute) in CIM RP package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    ! <coupling>
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Construct a field ESMF object that will be decorated with
+    ! Attributes to output within <coupling>s in a <modelComponent>
+    field1 = ESMF_FieldCreateEmpty(name="DMS_emi", rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a field to decorate with Attributes test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Create standard CIM attribute package on the field
+    call ESMF_AttributeAdd(field1, &
+                           convention='CIM 1.0', &
+                           purpose='Inputs Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating std CIM Inputs attribute package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 1st <coupling> attribute value within the CIM field
+    !   package
+    call ESMF_AttributeSet(field1, 'Name', 'DMS_emi', &
+                           convention='CIM 1.0', &
+                           purpose='Inputs Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 1st <couling> attribute value in CIM field package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 2nd <coupling> attribute value within the CIM field
+    !   package
+    call ESMF_AttributeSet(field1, 'InputType', 'boundaryCondition', &
+                           convention='CIM 1.0', &
+                           purpose='Inputs Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 2nd <couling> attribute value in CIM field package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+    !-------------------------------------------------------------------------
+    ! 3rd through 7th attributes are not well defined yet in CIM sample file
+    !-------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 8th <coupling> attribute value within the CIM field
+    !   package
+    call ESMF_AttributeSet(field1, 'InputSpatialRegriddingMethod', &
+     'conservativeSpatialRegridding', &
+                           convention='CIM 1.0', &
+                           purpose='Inputs Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 8th <couling> attribute value in CIM field package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 9th <coupling> attribute value within the CIM field
+    !   package
+    call ESMF_AttributeSet(field1, 'InputSpatialRegriddingType', &
+     'TBD', &
+                           convention='CIM 1.0', &
+                           purpose='Inputs Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 9th <couling> attribute value in CIM field package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 10th <coupling> attribute value within the CIM field
+    !   package
+    call ESMF_AttributeSet(field1, 'InputFrequency', &
+     '15 minutes', &
+                           convention='CIM 1.0', &
+                           purpose='Inputs Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 10th <couling> attribute value in CIM field package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 11th <coupling> attribute value within the CIM field
+    !   package
+    call ESMF_AttributeSet(field1, 'InputTimeTransformationType', &
+     'TimeAverage', &
+                           convention='CIM 1.0', &
+                           purpose='Inputs Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 11th <couling> attribute value in CIM field package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Construct a fieldbundle ESMF object that will contain fields
+    fieldBundle = ESMF_FieldBundleCreate(name="Field Bundle", rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a fieldbundle to contain fields test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Add the field to the field bundle (links attributes also)
+    call ESMF_FieldBundleAdd(fieldBundle, field1, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Adding a field to a fieldbundle test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Construct an import state ESMF object that will contain a fieldbundle
+    importState = ESMF_StateCreate("importState", ESMF_STATE_IMPORT, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating an import state test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Add a fieldbundle to the import state (links attributes also)
+    call ESMF_StateAdd(importState, fieldbundle=fieldBundle, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Adding a field bundle to an import state test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Link import state attributes to the gridded component
+    call ESMF_AttributeLink(gridcomp3, importState, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Linking import state attributes to gridded component"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Write out the attribute tree as a CIM-formatted XML file
+    call ESMF_AttributeWrite(gridcomp3, 'CIM 1.0', &
+                                 'Model Component Simulation Description', &
+      attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Write out CIM XML file test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
     !------------------------------------------------------------------------
     ! clean up
+    call ESMF_FieldDestroy(field1, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_FieldBundleDestroy(fieldbundle, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_StateDestroy(importState, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_GridCompDestroy(gridcomp3, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     call ESMF_GridCompDestroy(gridcomp2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 #endif

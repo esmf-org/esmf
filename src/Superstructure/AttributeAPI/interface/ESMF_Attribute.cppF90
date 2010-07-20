@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.60 2010/06/28 05:59:47 eschwab Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.61 2010/07/20 05:49:39 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.60 2010/06/28 05:59:47 eschwab Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.61 2010/07/20 05:49:39 eschwab Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -1952,7 +1952,8 @@ contains
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       if (.not.((convention.eq."ESMF"   .and.purpose.eq."General").or. & @\
-                (convention.eq."CIM 1.0".and.purpose.eq."Model Component Simulation Description"))) then @\
+                (convention.eq."CIM 1.0".and.purpose.eq."Model Component Simulation Description").or. & @\
+                (convention.eq."CIM 1.0".and.purpose.eq."Inputs Description"))) then @\
         call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & @\
           "See ESMF Reference Manual for ESMF standard Attribute package convention and purpose values", & @\
           ESMF_CONTEXT, rc) @\
