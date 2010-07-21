@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.5 2010/07/14 18:52:15 samsoncheung Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.6 2010/07/21 20:01:06 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -10,6 +10,9 @@
 !
 !==============================================================================
 ^define ESMF_FILENAME "ESMF_ArrayIO.F90"
+^ifdef ESMF_PIO
+^define PIO_IS_ON 1
+^endif
 !==============================================================================
 !
 ! ESMF ArrayIO module
@@ -24,7 +27,7 @@ module ESMF_ArrayIOMod
 ! < ignore blank lines below.  they are created by the files which
 !   define various macros. >
 ^include "ESMF.h"
-#include "ESMF_PIO_TKRMacros.hcppF90"
+#include "ESMF_TypeKindRankMacros.hcppF90"
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -76,12 +79,8 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.5 2010/07/14 18:52:15 samsoncheung Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.6 2010/07/21 20:01:06 samsoncheung Exp $'
 
-!==============================================================================
-! 
-! INTERFACE BLOCKS
-!
 !==============================================================================
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -89,7 +88,8 @@ module ESMF_ArrayIOMod
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_ArrayIO} functions.
+! types of
+! {\tt ESMF\_ArrayWrite} and {\tt ESMF\_ArrayRead} functions.
 !EOPI 
 
 
@@ -105,7 +105,7 @@ contains
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayWrite"
 
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_ArrayWrite - Write Array via PIO
 
 ! !INTERFACE:
@@ -117,23 +117,23 @@ contains
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Write an {ESMF\_Array} object via PIO Library
+!   Write the Fortran array inside the {ESMF\_Array} object via PIO Library
 !
 !   Limitation:
 !   (1) Currently only netCDF is supported
 !   (2) Assume 1 DE per Pet
 !
-!  The arguments are:
+!  The arguments are:e
 !  \begin{description}
 !  \item[array]
-!    Existing {\tt ESMF\_Array} object without alloc for data
+!    The {\tt ESMF\_Array} object that contains the Fortran array to be written
 !   \item[fname]
-!    The name of the file in which data written
+!    The name of the file (netcdf) in which Fortran array is written to
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     ! Local vars
     integer :: localrc                   ! local return code
@@ -168,15 +168,15 @@ contains
         ! The PIO data type is PIO_int
         select case(rank)
           case (1)
-            call ESMF_IntArrayWrite1DI4(array, PIO_int, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl1DI4(array, fname, rc=localrc)
           case (2)
-            call ESMF_IntArrayWrite2DI4(array, PIO_int, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl2DI4(array, fname, rc=localrc)
           case (3)
-            call ESMF_IntArrayWrite3DI4(array, PIO_int, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl3DI4(array, fname, rc=localrc)
           case (4)
-            call ESMF_IntArrayWrite4DI4(array, PIO_int, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl4DI4(array, fname, rc=localrc)
           case (5)
-            call ESMF_IntArrayWrite5DI4(array, PIO_int, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl5DI4(array, fname, rc=localrc)
           case default
             if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
               "Unsupported rank", &
@@ -187,15 +187,15 @@ contains
         ! The PIO data type is PIO_real
         select case(rank)
           case (1)
-            call ESMF_IntArrayWrite1DR4(array, PIO_real, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl1DR4(array, fname, rc=localrc)
           case (2)
-            call ESMF_IntArrayWrite2DR4(array, PIO_real, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl2DR4(array, fname, rc=localrc)
           case (3)
-            call ESMF_IntArrayWrite3DR4(array, PIO_real, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl3DR4(array, fname, rc=localrc)
           case (4)
-            call ESMF_IntArrayWrite4DR4(array, PIO_real, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl4DR4(array, fname, rc=localrc)
           case (5)
-            call ESMF_IntArrayWrite5DR4(array, PIO_real, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl5DR4(array, fname, rc=localrc)
           case default
             if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
               "Unsupported rank", &
@@ -206,15 +206,15 @@ contains
         ! The PIO data type is PIO_double
         select case(rank)
           case (1)
-            call ESMF_IntArrayWrite1DR8(array, PIO_double, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl1DR8(array, fname, rc=localrc)
           case (2)
-            call ESMF_IntArrayWrite2DR8(array, PIO_double, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl2DR8(array, fname, rc=localrc)
           case (3)
-            call ESMF_IntArrayWrite3DR8(array, PIO_double, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl3DR8(array, fname, rc=localrc)
           case (4)
-            call ESMF_IntArrayWrite4DR8(array, PIO_double, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl4DR8(array, fname, rc=localrc)
           case (5)
-            call ESMF_IntArrayWrite5DR8(array, PIO_double, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl5DR8(array, fname, rc=localrc)
           case default
             if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
               "Unsupported rank", &
@@ -247,8 +247,8 @@ contains
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayRead"
 
-!BOPI
-! !IROUTINE: ESMF_ArrayRead - Read Array via PIO
+!BOP
+! !IROUTINE: ESMF_ArrayRead - Read Fortran array (via PIO) and put it to an ESMF_Array
 
 ! !INTERFACE:
   subroutine ESMF_ArrayRead(array, fname, rc)
@@ -259,7 +259,7 @@ contains
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Read an {ESMF\_Array} object via PIO Library 
+!   Read an Fortran array (via PIO) and put it to an {ESMF\_Array} object
 ! 
 !   Limitation:  
 !   (1) Currently only netCDF is supported 
@@ -268,14 +268,14 @@ contains
 !  The arguments are:
 !  \begin{description}
 !  \item[array]
-!    Existing {\tt ESMF\_Array} object without alloc for data
+!    The {\tt ESMF\_Array} object holding a Fortran array to be read in
 !   \item[fname]
-!    The name of the file in which data read in
+!    The name of the file (netcdf) in which Fortran array is read
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     ! Local vars
     integer :: localrc                   ! local return code
@@ -310,15 +310,15 @@ contains
         ! The PIO data type is PIO_int
         select case(rank)
           case (1)
-            call ESMF_IntArrayRead1DI4(array, PIO_int, fname, rc=localrc)
+            call ESMF_ArrayReadIntl1DI4(array, fname, rc=localrc)
           case (2)
-            call ESMF_IntArrayRead2DI4(array, PIO_int, fname, rc=localrc)
+            call ESMF_ArrayReadIntl2DI4(array, fname, rc=localrc)
           case (3)
-            call ESMF_IntArrayRead3DI4(array, PIO_int, fname, rc=localrc)
+            call ESMF_ArrayReadIntl3DI4(array, fname, rc=localrc)
           case (4)
-            call ESMF_IntArrayRead4DI4(array, PIO_int, fname, rc=localrc)
+            call ESMF_ArrayReadIntl4DI4(array, fname, rc=localrc)
           case (5)
-            call ESMF_IntArrayRead5DI4(array, PIO_int, fname, rc=localrc)
+            call ESMF_ArrayReadIntl5DI4(array, fname, rc=localrc)
           case default
             if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
               "Unsupported rank", &
@@ -329,15 +329,15 @@ contains
         select case(rank)
         ! The PIO data type is PIO_real
           case (1)
-            call ESMF_IntArrayRead1DR4(array, PIO_real, fname, rc=localrc)
+            call ESMF_ArrayReadIntl1DR4(array, fname, rc=localrc)
           case (2)
-            call ESMF_IntArrayRead2DR4(array, PIO_real, fname, rc=localrc)
+            call ESMF_ArrayReadIntl2DR4(array, fname, rc=localrc)
           case (3)
-            call ESMF_IntArrayRead3DR4(array, PIO_real, fname, rc=localrc)
+            call ESMF_ArrayReadIntl3DR4(array, fname, rc=localrc)
           case (4)
-            call ESMF_IntArrayRead4DR4(array, PIO_real, fname, rc=localrc)
+            call ESMF_ArrayReadIntl4DR4(array, fname, rc=localrc)
           case (5)
-            call ESMF_IntArrayRead5DR4(array, PIO_real, fname, rc=localrc)
+            call ESMF_ArrayReadIntl5DR4(array, fname, rc=localrc)
           case default
             if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
               "Unsupported rank", &
@@ -348,15 +348,15 @@ contains
         ! The PIO data type is PIO_double
         select case(rank)
           case (1)
-            call ESMF_IntArrayRead1DR8(array, PIO_double, fname, rc=localrc)
+            call ESMF_ArrayReadIntl1DR8(array, fname, rc=localrc)
           case (2)
-            call ESMF_IntArrayRead2DR8(array, PIO_double, fname, rc=localrc)
+            call ESMF_ArrayReadIntl2DR8(array, fname, rc=localrc)
           case (3)
-            call ESMF_IntArrayRead3DR8(array, PIO_double, fname, rc=localrc)
+            call ESMF_ArrayReadIntl3DR8(array, fname, rc=localrc)
           case (4)
-            call ESMF_IntArrayRead4DR8(array, PIO_double, fname, rc=localrc)
+            call ESMF_ArrayReadIntl4DR8(array, fname, rc=localrc)
           case (5)
-            call ESMF_IntArrayRead5DR8(array, PIO_double, fname, rc=localrc)
+            call ESMF_ArrayReadIntl5DR8(array, fname, rc=localrc)
           case default
             if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
               "Unsupported rank", &
@@ -454,32 +454,29 @@ contains
 
       end subroutine WriteHeader
 
-^endif
-
 
 !===============================================================================
-! IntArrayWrite() and IntArrayRead() interfaces
+! ArrayWriteIntl() and ArrayReadIntl() interfaces
 !===============================================================================
 
 
-#define IntArrayWriteDoc() \
+#define ArrayWriteIntlDoc() \
 ! -------------------------- ESMF-public method ----------------------------- @\
-!BOP @\
+!BOPI @\
 ! @\
-! !IROUTINE: ESMF_IntArrayWrite - Write an ESMF_Array via PIO @\
+! !IROUTINE: ESMF_ArrayWriteIntl - Write an ESMF_Array via PIO @\
 ! @\
 ! !INTERFACE: @\
-! subroutine ESMF_IntArrayWrite<rank><type><kind>(array, basepiotype, fname, rc) @\
+! subroutine ESMF_ArrayWriteIntl<rank><type><kind>(array, fname, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Array),           intent(inout)           :: array @\
-!   integer,                    intent(in)              :: basepiotype @\
 !   character(*),               intent(in)              :: fname @\
 !   integer,                    intent(out),  optional  :: rc @\
 ! @\
 ! @\
 ! !DESCRIPTION: @\
-!   Write an {ESMF\_Array} object via PIO Library @\
+!   Write an Fortran array inside {ESMF\_Array} object via PIO Library @\
 ! @\
 !   Limitation:  @\
 !   (1) Currently only netCDF is supported @\
@@ -488,26 +485,23 @@ contains
 !   The arguments are: @\
 !   \begin{description} @\
 !   \item[array] @\
-!     The {\tt ESMF\_Array} object from which data will be gathered. @\
-!   \item[basepiotype] @\
-!     The PIO datatype: PIO_real, PIO_double, or PIO_int @\
+!     The {\tt ESMF\_Array} object where the output Fortran array is stored. @\
 !   \item[{[fname]}] @\
-!     Optional output file name @\
+!     Output file name @\
 !   \item[{[rc]}] @\
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !   \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
 !---------------------------------------------------------------------------- @\
 
-#define IntArrayWriteMacro(mtype, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+#define ArrayWriteIntlMacro(mtype, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 ! -------------------------- ESMF-public method ----------------------------- @\
 ^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_IntArrayWrite" @\
-  subroutine ESMF_IntArrayWrite##mrank##D##mtypekind(array, basepiotype, fname, rc) @\
+^define ESMF_METHOD "ESMF_ArrayWriteIntl" @\
+  subroutine ESMF_ArrayWriteIntl##mrank##D##mtypekind(array, fname, rc) @\
 @\
     type(ESMF_Array),           intent(inout)           :: array @\
-    integer,                    intent(in)              :: basepiotype @\
     character(*),               intent(in)              :: fname @\
     integer,                    intent(out),  optional  :: rc @\
 @\
@@ -530,6 +524,7 @@ contains
     integer :: mode, num_aggregator @\
     integer :: stride, base, num_iotasks, rearr_type @\
     integer(kind=PIO_OFFSET) :: one @\
+    integer :: basepiotype @\
 @\
     ! OTHER VARIABLES: @\
     integer                       :: localrc        ! local return code @\
@@ -553,11 +548,7 @@ contains
     !-------------------------------- @\
     call ESMF_ArrayConstructPioDof(array, localDe=0, pioDofCount=pioDofCount, rc=rc) @\
     allocate(pioDofList(pioDofCount)) @\
-    !debug write(10+localPet,*) "pioDofCount=",pioDofCount  @\
     call ESMF_ArrayConstructPioDof(array, localDe=0, pioDofList=pioDofList, rc=rc) @\
-    !debug write(10+localPet,*) "pioDofList=" @\
-    !debug write(10+localPet,*) pioDofList @\
-    !debug write(10+localPet,*) " " @\
 @\
     !------------------------------------------- @\
     ! Get array dimension counts from ESMF array @\
@@ -575,11 +566,6 @@ contains
       gDimsIndex(i) = maxIndexPDimPPatch(i,1)-minIndexPDimPPatch(i,1)+1 @\
     enddo @\
 @\
-    !debug write(10+localPet,*)'farraywr', farraywr @\
-    !debug write(10+localPet,*)'gDimsIndex', gDimsIndex @\
-    !debug write(10+localPet,*)'' @\
-    !debug write(10+localPet,*)' ================== ' @\
-    !debug write(10+localPet,*)'' @\
 @\
     !-------------------------------------- @\
     ! parallel IO subsystem input @\
@@ -600,6 +586,18 @@ contains
     !------------------------------------------------------- @\
     ! Explain the distributed array decomposition to PIOlib @\
     !------------------------------------------------------- @\
+    select case (ESMF_TYPEKIND_##mtypekind%dkind) @\
+     case(ESMF_TYPEKIND_I4%dkind) @\
+       basepiotype=PIO_int @\
+     case(ESMF_TYPEKIND_R4%dkind) @\
+       basepiotype=PIO_real @\
+     case(ESMF_TYPEKIND_R8%dkind) @\
+       basepiotype=PIO_double @\
+     case default @\
+       write(*,*)"Unsupported typekind" @\
+       return @\
+    end select @\
+@\
     call PIO_initDecomp(PIOSYS,basepiotype, gDimsIndex,pioDofList,IOdesc) @\
 @\
     !------------ @\
@@ -660,30 +658,28 @@ contains
     if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT @\
 ^endif @\
 @\
-  end subroutine ESMF_IntArrayWrite##mrank##D##mtypekind @\
+  end subroutine ESMF_ArrayWriteIntl##mrank##D##mtypekind @\
 !---------------------------------------------------------------------------- @\
 
 
 
-
-#define IntArrayReadDoc() \
+#define ArrayReadIntlDoc() \
 ! -------------------------- ESMF-public method ----------------------------- @\
-!BOP @\
+!BOPI @\
 ! @\
-! !IROUTINE: ESMF_IntArrayRead - Read an ESMF_Array via PIO @\
+! !IROUTINE: ESMF_ArrayReadIntl - Read an ESMF_Array via PIO @\
 ! @\
 ! !INTERFACE: @\
-! subroutine ESMF_IntArrayRead<rank><type><kind>(array, basepiotype, fname, rc) @\
+! subroutine ESMF_ArrayReadIntl<rank><type><kind>(array, fname, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Array),           intent(inout)           :: array @\
-!   integer,                    intent(in)              :: basepiotype @\
 !   character(*),               intent(in)              :: fname @\
 !   integer,                    intent(out),  optional  :: rc @\
 ! @\
 ! @\
 ! !DESCRIPTION: @\
-!   Read an {ESMF\_Array} object via PIO Library @\
+!   Read an Fortran array via PIO and put it in an {ESMF\_Array} object @\
 ! @\
 !   Limitation:  @\
 !   (1) Currently only netCDF is supported @\
@@ -692,26 +688,23 @@ contains
 !   The arguments are: @\
 !   \begin{description} @\
 !   \item[array] @\
-!     The {\tt ESMF\_Array} object from which data will be gathered. @\
-!   \item[basepiotype] @\
-!     The PIO datatype: PIO_real, PIO_double, or PIO_int @\
+!     The {\tt ESMF\_Array} object where the input Fortran array is stored. @\
 !   \item[{[fname]}] @\
-!     Optional output file name @\
+!     Input file name @\
 !   \item[{[rc]}] @\
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !   \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
 !---------------------------------------------------------------------------- @\
 
-#define IntArrayReadMacro(mtype, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+#define ArrayReadIntlMacro(mtype, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 ! -------------------------- ESMF-public method ----------------------------- @\
 ^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_IntArrayRead" @\
-  subroutine ESMF_IntArrayRead##mrank##D##mtypekind(array, basepiotype, fname, rc) @\
+^define ESMF_METHOD "ESMF_ArrayReadIntl" @\
+  subroutine ESMF_ArrayReadIntl##mrank##D##mtypekind(array, fname, rc) @\
 @\
     type(ESMF_Array),           intent(inout)           :: array @\
-    integer,                    intent(in)              :: basepiotype @\
     character(*),               intent(in)              :: fname @\
     integer,                    intent(out),  optional  :: rc @\
 @\
@@ -735,6 +728,7 @@ contains
     integer :: mode, num_aggregator @\
     integer :: stride, base, num_iotasks, rearr_type @\
     integer(kind=PIO_OFFSET) :: one @\
+    integer :: basepiotype @\
 @\
     ! OTHER VARIABLES: @\
     integer                       :: localrc        ! local return code @\
@@ -758,7 +752,6 @@ contains
     !-------------------------------- @\
     call ESMF_ArrayConstructPioDof(array, localDe=0, pioDofCount=pioDofCount, rc=rc) @\
     allocate(pioDofList(pioDofCount)) @\
-    write(10+localPet,*) "pioDofCount=",pioDofCount  @\
     call ESMF_ArrayConstructPioDof(array, localDe=0, pioDofList=pioDofList, rc=rc) @\
 @\
 @\
@@ -797,6 +790,18 @@ contains
     !------------------------------------------------------- @\
     ! Explain the distributed array decomposition to PIOlib @\
     !------------------------------------------------------- @\
+    select case (ESMF_TYPEKIND_##mtypekind%dkind) @\
+     case(ESMF_TYPEKIND_I4%dkind) @\
+       basepiotype=PIO_int @\
+     case(ESMF_TYPEKIND_R4%dkind) @\
+       basepiotype=PIO_real @\
+     case(ESMF_TYPEKIND_R8%dkind) @\
+       basepiotype=PIO_double @\
+     case default @\
+       write(*,*)"Unsupported typekind" @\
+       return @\
+    end select @\
+@\
     call PIO_initDecomp(PIOSYS,basepiotype, gDimsIndex,pioDofList,IOdesc) @\
 @\
     !-------------------------------- @\
@@ -846,12 +851,13 @@ contains
     if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT @\
 ^endif @\
 @\
-  end subroutine ESMF_IntArrayRead##mrank##D##mtypekind @\
+  end subroutine ESMF_ArrayReadIntl##mrank##D##mtypekind @\
 
 
-TypeKindRankDeclarationMacro(IntArrayWrite)
-TypeKindRankDeclarationMacro(IntArrayRead)
+TypeKindRankDeclarationMacro(ArrayWriteIntl)
+TypeKindRankDeclarationMacro(ArrayReadIntl)
 
+^endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
