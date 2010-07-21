@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.7 2010/07/14 18:53:08 samsoncheung Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.8 2010/07/21 19:58:39 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,11 +40,11 @@ program ESMF_ArrayIOUTest
   ! local variables
   type(ESMF_VM):: vm
   type(ESMF_ArraySpec):: arrayspec
-  integer(ESMF_KIND_I4), pointer, dimension(:,:,:) ::  Farray3D_halo, Farray3D_nohalo, Farray3D_halo2, Farray3D_nohalo2
-  real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray2D_halo, Farray2D_nohalo
+  integer(ESMF_KIND_I4), pointer, dimension(:,:,:) ::  Farray3D_withhalo, Farray3D_wouthalo, Farray3D_withhalo2, Farray3D_wouthalo2
+  real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray2D_withhalo, Farray2D_wouthalo
   type(ESMF_DistGrid)                     :: distgrid
-  type(ESMF_Array)                        :: array_halo, array_nohalo
-  type(ESMF_Array)                        :: array_halo2, array_nohalo2
+  type(ESMF_Array)                        :: array_withhalo, array_wouthalo
+  type(ESMF_Array)                        :: array_withhalo2, array_wouthalo2
   integer                                 :: rc, de
   integer, allocatable :: totalLWidth(:), totalUWidth(:), &
                        computationalLWidth(:),computationalUWidth(:)
@@ -78,6 +78,11 @@ program ESMF_ArrayIOUTest
   PIONotPresent = .false.
 
 !-------------------------------------------------------------------------------
+!
+! Tests: 3D case (Integer)
+! Write Fortran data (Farray3D_*halo) from an ESMF_Array with/without Halos
+! Then read them back in to a new array (Farray3D_*halo2), and
+! compare the read in data and the original data
 !-------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
@@ -105,7 +110,7 @@ program ESMF_ArrayIOUTest
   allocate(computationalUWidth(3)) ! dimCount=3
   allocate(totalLWidth(3))         ! dimCount=3
   allocate(totalUWidth(3))         ! dimCount=3
-  array_halo = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+  array_withhalo = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
           computationalLWidth=(/0,3,1/), computationalUWidth=(/1,1,2/), &
           totalLWidth=(/1,7,1/), totalUWidth=(/4,2,3/), &
           indexflag=ESMF_INDEX_GLOBAL, name="temperature", rc=rc)
@@ -115,7 +120,7 @@ program ESMF_ArrayIOUTest
   !NEX_disable_UTest_Multi_Proc_Only
   write(name, *) "Array without Halo Create Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array_nohalo = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+  array_wouthalo = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
           computationalLWidth=(/0,0,0/), computationalUWidth=(/0,0,0/), &
           totalLWidth=(/0,0,0/), totalUWidth=(/0,0,0/), &
           indexflag=ESMF_INDEX_GLOBAL, name='velocity', rc=rc)
@@ -125,19 +130,42 @@ program ESMF_ArrayIOUTest
 ! !  Assign value to an existing, allocated F90 pointer.
 ! !  Data is type ESMF_KIND_I4
   localDeCount = 1
-  do de=0,localDeCount-1
-    call ESMF_ArrayGet(array_halo, localDe=de, farrayPtr=Farray3D_halo, rc=rc)
-    call ESMF_ArrayGet(array_nohalo, localDe=de, farrayPtr=Farray3D_nohalo, rc=rc)
-    Farray3D_halo   = 12  ! e.g. fill the entire local DE allocation
-    Farray3D_nohalo = 12  ! e.g. fill the entire local DE allocation
+  call ESMF_ArrayGet(array_withhalo, localDe=0, farrayPtr=Farray3D_withhalo, rc=rc)
+  call ESMF_ArrayGet(array_wouthalo, localDe=0, farrayPtr=Farray3D_wouthalo, rc=rc)
+
+  localDeCount = 1
+  allocate(exclusiveLBound(3,localDeCount))         ! dimCount=3
+  allocate(exclusiveUBound(3,localDeCount))         ! dimCount=3
+
+  call ESMF_ArrayGet(array_wouthalo, exclusiveLBound=exclusiveLBound, &
+                     exclusiveUBound=exclusiveUBound, rc=rc)
+
+  do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
+  do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
+  do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
+    Farray3D_wouthalo(i,j,k) = i+j+k
   enddo
+  enddo
+  enddo
+
+  call ESMF_ArrayGet(array_withhalo, exclusiveLBound=exclusiveLBound, &
+                     exclusiveUBound=exclusiveUBound, rc=rc)
+  Farray3D_withhalo = 1     ! All entries are 1 including the halos.
+  do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
+  do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
+  do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
+    Farray3D_withhalo(i,j,k) = i+j+k
+  enddo
+  enddo
+  enddo
+
 
 !------------------------------------------------------------------------
   !NEX_disable_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, print the netCDF file.
   write(name, *) "Write ESMF_Array with Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_halo, fname='file3D_halo.nc', rc=rc)
+  call ESMF_ArrayWrite(array_withhalo, fname='file3D_withhalo.nc', rc=rc)
   if (rc==ESMF_RC_LIB_NOT_PRESENT) then
         PIONotPresent = .true.
   endif
@@ -148,14 +176,14 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, print the netCDF file.
   write(name, *) "Write ESMF_Array without Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_nohalo, fname='file3D_nohalo.nc', rc=rc)
+  call ESMF_ArrayWrite(array_wouthalo, fname='file3D_wouthalo.nc', rc=rc)
   call ESMF_Test((rc==ESMF_SUCCESS .or. PIONotPresent), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_disable_UTest_Multi_Proc_Only
   write(name, *) "Creat Array without Halo for PIO Read"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array_nohalo2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+  array_wouthalo2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
           computationalLWidth=(/0,0,0/), computationalUWidth=(/0,0,0/), &
           totalLWidth=(/0,0,0/), totalUWidth=(/0,0,0/), &
           indexflag=ESMF_INDEX_GLOBAL, name='velocity', rc=rc)
@@ -166,7 +194,7 @@ program ESMF_ArrayIOUTest
   !NEX_disable_UTest_Multi_Proc_Only
   write(name, *) "Create Array with Halo for PIO Read"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array_halo2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+  array_withhalo2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
           computationalLWidth=(/0,3,1/), computationalUWidth=(/1,1,2/), &
           totalLWidth=(/1,7,1/), totalUWidth=(/4,2,3/), &
           indexflag=ESMF_INDEX_GLOBAL, name='temperature', rc=rc)
@@ -176,13 +204,10 @@ program ESMF_ArrayIOUTest
 !-------------------------------------------------------------------------------
 ! !  Assign value to an existing, allocated F90 pointer.
 ! !  Data is type ESMF_KIND_I4
-  localDeCount = 1
-  allocate(exclusiveLBound(3,localDeCount))         ! dimCount=3
-  allocate(exclusiveUBound(3,localDeCount))         ! dimCount=3
   do de=0,localDeCount-1
-    call ESMF_ArrayGet(array_nohalo2, localDe=de, farrayPtr=Farray3D_nohalo2, rc=rc) 
+    call ESMF_ArrayGet(array_wouthalo2, localDe=de, farrayPtr=Farray3D_wouthalo2, rc=rc) 
   enddo
-  call ESMF_ArrayGet(array_nohalo2, exclusiveLBound=exclusiveLBound, &
+  call ESMF_ArrayGet(array_wouthalo2, exclusiveLBound=exclusiveLBound, &
                      exclusiveUBound=exclusiveUBound, rc=rc)
 
 !------------------------------------------------------------------------
@@ -190,7 +215,7 @@ program ESMF_ArrayIOUTest
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read ESMF_Array without Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_nohalo2, fname='file3D_nohalo.nc', rc=rc)
+  call ESMF_ArrayRead(array_wouthalo2, fname='file3D_wouthalo.nc', rc=rc)
   if (rc==ESMF_RC_LIB_NOT_PRESENT) then
         PIONotPresent = .true.
   endif
@@ -206,7 +231,7 @@ program ESMF_ArrayIOUTest
   do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
   do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
   do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
-   diff = abs( Farray3D_nohalo2(i,j,k)-Farray3D_nohalo(i,j,k) )
+   diff = abs( Farray3D_wouthalo2(i,j,k)-Farray3D_wouthalo(i,j,k) )
    if (Maxvalue.le.diff) Maxvalue=diff
   enddo
   enddo
@@ -221,12 +246,11 @@ program ESMF_ArrayIOUTest
 !-------------------------------------------------------------------------------
 ! !  Assign value to an existing, allocated F90 pointer.
 ! !  Data is type ESMF_KIND_I4
-  localDeCount = 1
   do de=0,localDeCount-1
-    call ESMF_ArrayGet(array_halo2, localDe=de, farrayPtr=Farray3D_halo2, &
-                       rc=rc)
+    call ESMF_ArrayGet(array_withhalo2, localDe=de, &
+         farrayPtr=Farray3D_withhalo2, rc=rc)
   enddo
-  call ESMF_ArrayGet(array_halo2, exclusiveLBound=exclusiveLBound, &
+  call ESMF_ArrayGet(array_withhalo2, exclusiveLBound=exclusiveLBound, &
                      exclusiveUBound=exclusiveUBound, rc=rc)
 
 !------------------------------------------------------------------------
@@ -234,7 +258,7 @@ program ESMF_ArrayIOUTest
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read ESMF_Array without Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_halo2, fname='file3D_halo.nc', rc=rc)
+  call ESMF_ArrayRead(array_withhalo2, fname='file3D_withhalo.nc', rc=rc)
   if (rc==ESMF_RC_LIB_NOT_PRESENT) then
         PIONotPresent = .true.
   endif
@@ -250,7 +274,7 @@ program ESMF_ArrayIOUTest
   do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
   do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
   do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
-   diff = abs( Farray3D_halo2(i,j,k)-Farray3D_halo(i,j,k) )
+   diff = abs( Farray3D_withhalo2(i,j,k)-Farray3D_withhalo(i,j,k) )
    if (Maxvalue.le.diff) Maxvalue=diff
   enddo
   enddo
@@ -270,14 +294,14 @@ program ESMF_ArrayIOUTest
   !NEX_disable_UTest_Multi_Proc_Only
   write(name, *) "Destroy Array with Halo"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayDestroy(array_halo, rc=rc)
+  call ESMF_ArrayDestroy(array_withhalo, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_disable_UTest_Multi_Proc_Only
   write(name, *) "Destroy Array without Halo"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayDestroy(array_nohalo, rc=rc)
+  call ESMF_ArrayDestroy(array_wouthalo, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
@@ -290,7 +314,12 @@ program ESMF_ArrayIOUTest
 
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
-
+!
+! Tests: 2D case (real8)
+! Write Fortran data (Farray2D_withhalo) from an ESMF_Array with Halos
+! Then read data back in to a new array without Halos (Farray2D_wouthalo),
+! and compare the read in data and the original data
+!-------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
   !NEX_disable_UTest_Multi_Proc_Only
@@ -316,17 +345,17 @@ program ESMF_ArrayIOUTest
   allocate(computationalUWidth(2)) ! dimCount=2
   allocate(totalLWidth(2))         ! dimCount=2
   allocate(totalUWidth(2))         ! dimCount=2
-  array_halo = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+  array_withhalo = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
           computationalLWidth=(/0,3/), computationalUWidth=(/1,1/), &
           totalLWidth=(/1,7/), totalUWidth=(/4,2/), &
-          indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+          indexflag=ESMF_INDEX_GLOBAL, name='u-velocity', rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_disable_UTest_Multi_Proc_Only
   write(name, *) "Array without Halo Create Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array_nohalo = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+  array_wouthalo = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
           computationalLWidth=(/0,0/), computationalUWidth=(/0,0/), &
           totalLWidth=(/0,0/), totalUWidth=(/0,0/), &
           indexflag=ESMF_INDEX_GLOBAL, name='u-velocity', rc=rc)
@@ -336,46 +365,84 @@ program ESMF_ArrayIOUTest
 ! !  Assign value to an existing, allocated F90 pointer.
 ! !  Data is type ESMF_KIND_R8
   localDeCount = 1
-  do de=0,localDeCount-1
-    call ESMF_ArrayGet(array_halo, localDe=de, farrayPtr=Farray2D_halo, rc=rc)
-    call ESMF_ArrayGet(array_nohalo, localDe=de, farrayPtr=Farray2D_nohalo, rc=rc)
-    Farray2D_halo   = 0.12  ! e.g. fill the entire local DE allocation
-    Farray2D_nohalo = 0.12  ! e.g. fill the entire local DE allocation
+  call ESMF_ArrayGet(array_withhalo, localDe=0, farrayPtr=Farray2D_withhalo, rc=rc)
+  call ESMF_ArrayGet(array_wouthalo, localDe=0, farrayPtr=Farray2D_wouthalo, rc=rc)
+
+  localDeCount = 1
+  allocate(exclusiveLBound(2,localDeCount))         ! dimCount=2
+  allocate(exclusiveUBound(2,localDeCount))         ! dimCount=2
+
+  call ESMF_ArrayGet(array_withhalo, exclusiveLBound=exclusiveLBound, &
+                     exclusiveUBound=exclusiveUBound, rc=rc)
+  Farray2D_withhalo = 0.02  ! halo points will have value 0.02
+  do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
+  do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
+    Farray2D_withhalo(i,j) = sin(dfloat(i)/5.0)*tan(dfloat(j)/5.0)
   enddo
+  enddo
+
 
 !------------------------------------------------------------------------
 ! ! Given an ESMF array, print the netCDF file.
   write(name, *) "Write 2D ESMF_Array with Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_halo, fname='file2D_halo.nc', rc=rc)
+  call ESMF_ArrayWrite(array_withhalo, fname='file2D_withhalo.nc', rc=rc)
+  call ESMF_Test((rc==ESMF_SUCCESS .or. PIONotPresent), name, &
+                 failMsg, result,ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+! !  Assign value to an existing, allocated F90 pointer.
+! !  Data is type ESMF_KIND_R8
+  call ESMF_ArrayGet(array_wouthalo, localDe=0, &
+          farrayPtr=Farray2D_wouthalo, rc=rc)
+
+  call ESMF_ArrayGet(array_wouthalo, exclusiveLBound=exclusiveLBound, &
+                     exclusiveUBound=exclusiveUBound, rc=rc)
+
+!------------------------------------------------------------------------
+! ! Read in a netCDF file to an ESMF array.
+  write(name, *) "Read 2D ESMF_Array to ESMF_Array without halo Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayRead(array_wouthalo, fname="file2D_withhalo.nc", rc=rc)
   call ESMF_Test((rc==ESMF_SUCCESS .or. PIONotPresent), name, &
                  failMsg, result,ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-! ! Given an ESMF array, print the netCDF file.
-  write(name, *) "Write 2D ESMF_Array without Halo Test"
+  !NEX_disable_UTest_Multi_Proc_Only
+! ! Compare readin and the existing file
+  write(name, *) "Compare readin data to the existing data without halo"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_nohalo, fname="file2D_nohalo.nc", rc=rc)
+  Maxvalue = 0.0
+  do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
+  do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
+   diff = abs( Farray2D_wouthalo(i,j) - Farray2D_withhalo(i,j) )
+   if (Maxvalue.le.diff) Maxvalue=diff
+  enddo
+  enddo
+  rc = 1
+  if (Maxvalue .lt. 1.e-6) rc=0
+  write(*,*)"Maximum Error (withhalo-withouthalo case) = ", Maxvalue
   call ESMF_Test((rc==ESMF_SUCCESS .or. PIONotPresent), name, &
                  failMsg, result,ESMF_SRCLINE)
 
   deallocate (computationalLWidth, computationalUWidth)
   deallocate (totalLWidth, totalUWidth)
+  deallocate (exclusiveLBound, exclusiveUBound)
 
 !------------------------------------------------------------------------
   !NEX_disable_UTest_Multi_Proc_Only
   write(name, *) "Destroy Array with Halo"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayDestroy(array_halo, rc=rc)
-  call ESMF_ArrayDestroy(array_halo2, rc=rc)
+  call ESMF_ArrayDestroy(array_withhalo, rc=rc)
+  call ESMF_ArrayDestroy(array_withhalo2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_disable_UTest_Multi_Proc_Only
   write(name, *) "Destroy Array without Halo"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayDestroy(array_nohalo, rc=rc)
-  call ESMF_ArrayDestroy(array_nohalo2, rc=rc)
+  call ESMF_ArrayDestroy(array_wouthalo, rc=rc)
+  call ESMF_ArrayDestroy(array_wouthalo2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
