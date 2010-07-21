@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.22 2010/07/19 13:21:28 feiliu Exp $
+// $Id: ESMC_Field.h,v 1.23 2010/07/21 18:41:03 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -50,9 +50,13 @@ typedef void * ESMC_Field;
 // !IROUTINE: ESMC_FieldCreate - Create a Field
 //
 // !INTERFACE:
-ESMC_Field ESMC_FieldCreate(ESMC_Mesh mesh, ESMC_ArraySpec arrayspec,
-  ESMC_InterfaceInt gridToFieldMap, ESMC_InterfaceInt ungriddedLBound,
-  ESMC_InterfaceInt ungriddedUBound, const char *name, int *rc);
+ESMC_Field ESMC_FieldCreate(ESMC_Mesh mesh, 
+  ESMC_ArraySpec arrayspec,
+  ESMC_InterfaceInt gridToFieldMap, 
+  ESMC_InterfaceInt ungriddedLBound,
+  ESMC_InterfaceInt ungriddedUBound, 
+  const char *name, 
+  int *rc);
 
 // !RETURN VALUE:
 //  Newly created ESMC_Field object.
@@ -113,7 +117,8 @@ ESMC_Field ESMC_FieldCreate(ESMC_Mesh mesh, ESMC_ArraySpec arrayspec,
 // !IROUTINE: ESMC_FieldDestroy - Destroy a Field
 //
 // !INTERFACE:
-int ESMC_FieldDestroy(ESMC_Field *field);
+int ESMC_FieldDestroy(
+  ESMC_Field *field);
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -137,7 +142,8 @@ int ESMC_FieldDestroy(ESMC_Field *field);
 // !IROUTINE: ESMC_FieldPrint - Print the internal information of a Field
 //
 // !INTERFACE:
-int ESMC_FieldPrint(ESMC_Field field);
+int ESMC_FieldPrint(
+  ESMC_Field field);
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -161,10 +167,12 @@ int ESMC_FieldPrint(ESMC_Field field);
 // !IROUTINE: ESMC_FieldGetMesh - Get the internal Mesh stored in the Field
 //
 // !INTERFACE:
-ESMC_Mesh ESMC_FieldGetMesh(ESMC_Field field, int *rc);
+ESMC_Mesh ESMC_FieldGetMesh(
+  ESMC_Field field, 
+  int *rc);
 
 // !RETURN VALUE:
-//  The ESMC_Mesh object stored in the {\tt ESMC\_Field}.
+//  The ESMC_Mesh object stored in the ESMC_Field.
 //
 // !DESCRIPTION:
 //
@@ -186,10 +194,12 @@ ESMC_Mesh ESMC_FieldGetMesh(ESMC_Field field, int *rc);
 // !IROUTINE: ESMC_FieldGetArray - Get the internal Array stored in the Field
 //
 // !INTERFACE:
-ESMC_Array ESMC_FieldGetArray(ESMC_Field field, int *rc);
+ESMC_Array ESMC_FieldGetArray(
+  ESMC_Field field, 
+  int *rc);
 
 // !RETURN VALUE:
-//  The ESMC_Array object stored in the {\tt ESMC\_Field}.
+//  The ESMC_Array object stored in the ESMC_Field.
 //
 // !DESCRIPTION:
 //
@@ -211,10 +221,13 @@ ESMC_Array ESMC_FieldGetArray(ESMC_Field field, int *rc);
 // !IROUTINE: ESMC_FieldGetPtr - Get the internal Fortran data pointer stored in the Field
 //
 // !INTERFACE:
-void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc);
+void *ESMC_FieldGetPtr(
+  ESMC_Field field, 
+  int localDe, 
+  int *rc);
 
 // !RETURN VALUE:
-//  The Fortran data pointer stored in the {\tt ESMC\_Field}.
+//  The Fortran data pointer stored in the ESMC_Field.
 //
 // !DESCRIPTION:
 //
