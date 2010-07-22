@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.8 2010/07/21 19:58:39 samsoncheung Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.9 2010/07/22 20:31:18 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -377,7 +377,7 @@ program ESMF_ArrayIOUTest
   Farray2D_withhalo = 0.02  ! halo points will have value 0.02
   do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
   do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
-    Farray2D_withhalo(i,j) = sin(dfloat(i)/5.0)*tan(dfloat(j)/5.0)
+    Farray2D_withhalo(i,j) = sin (dble (i)/5.0d0) * tan (dble (j)/5.0d0)
   enddo
   enddo
 
