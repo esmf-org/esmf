@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.151 2010/06/28 05:59:47 eschwab Exp $'
+      '$Id: ESMF_Grid.F90,v 1.152 2010/07/22 23:01:04 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -659,8 +659,8 @@ end interface
       integer,                intent(in),optional     :: staggerEdgeUWidth(:)
       integer,                intent(in),optional     :: staggerAlign(:)
       integer,                intent(in),optional     :: staggerMemLBound(:)      
-      integer,                intent(out), optional   :: totalLWidth(:)         ! N. IMP
-      integer,                intent(out), optional   :: totalUWidth(:)         ! N. IMP
+      integer,                intent(in), optional    :: totalLWidth(:)         ! N. IMP
+      integer,                intent(in), optional    :: totalUWidth(:)         ! N. IMP
       integer,                intent(out),optional    :: rc
 !
 ! !DESCRIPTION:
@@ -736,7 +736,6 @@ end interface
 	  
     ! check for not implemented parameters
     if (present(totalLWidth)) then
-       totalLWidth = 0
        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
                  "- totalLWidth specification not yet implemented", & 
                  ESMF_CONTEXT, rc) 
@@ -744,7 +743,6 @@ end interface
     endif
 
     if (present(totalUWidth)) then
-       totalUWidth = 0
        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
                  "- totalUWidth specification not yet implemented", & 
                  ESMF_CONTEXT, rc) 
@@ -1001,8 +999,8 @@ end interface
       integer,                intent(in),optional     :: staggerEdgeUWidth(:)
       integer,                intent(in),optional     :: staggerAlign(:)
       integer,                intent(in),optional     :: staggerMemLBound(:)      
-      integer,                intent(out), optional   :: totalLWidth(:)         ! N. IMP
-      integer,                intent(out), optional   :: totalUWidth(:)         ! N. IMP
+      integer,                intent(in), optional    :: totalLWidth(:)         ! N. IMP
+      integer,                intent(in), optional    :: totalUWidth(:)         ! N. IMP
       integer,                intent(out),optional    :: rc
 !
 ! !DESCRIPTION:
@@ -1082,7 +1080,6 @@ end interface
 	  
     ! check for not implemented parameters
     if (present(totalLWidth)) then
-       totalLWidth = 0
        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
                  "- totalLWidth specification not yet implemented", & 
                  ESMF_CONTEXT, rc) 
@@ -1090,7 +1087,6 @@ end interface
     endif
 
     if (present(totalUWidth)) then
-       totalUWidth = 0
        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
                  "- totalUWidth specification not yet implemented", & 
                  ESMF_CONTEXT, rc) 
@@ -5838,7 +5834,7 @@ end subroutine ESMF_GridGetDefault
     type(ESMF_Grid),    intent(in)            :: grid
 	integer,        intent(in), optional  :: tileNo
 	integer,target, intent(out),optional  :: minIndex(:)
-	integer,target, intent(out)           :: maxIndex(:)
+	integer,target, intent(out),optional  :: maxIndex(:)
 	integer,        intent(out), optional :: rc
 !
 ! !DESCRIPTON:
