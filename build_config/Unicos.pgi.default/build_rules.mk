@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.10 2010/04/15 22:08:05 theurich Exp $
+# $Id: build_rules.mk,v 1.11 2010/07/22 05:45:32 theurich Exp $
 #
 # Unicos.pgi.default
 #
@@ -112,7 +112,7 @@ ESMF_F90LINKLIBS += -lstd -lrt -lC -ldl
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.pgf90 $(ESMF_F90COMPILER)) -ldl
+ESMF_CXXLINKLIBS += -lrt -ldl
 
 ############################################################
 # Blank out shared library options
