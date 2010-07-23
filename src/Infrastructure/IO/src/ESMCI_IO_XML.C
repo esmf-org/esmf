@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.C,v 1.10 2010/04/21 05:58:38 eschwab Exp $
+// $Id: ESMCI_IO_XML.C,v 1.11 2010/07/23 05:55:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.10 2010/04/21 05:58:38 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.11 2010/07/23 05:55:53 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 
@@ -479,7 +479,7 @@ namespace ESMCI{
     //      create "r,w,rw" flags in Create(), as well as move
     //      readHandler/parser instantiation to Create()/construct().  ?
     if (writeHandler == ESMC_NULL_POINTER) {
-      writeHandler = new SAX2WriteHandler(this->fileName, "LATIN1",
+      writeHandler = new SAX2WriteHandler(this->fileName, "UTF-8",
                                           XMLFormatter::UnRep_CharRef, false);
     }
 
@@ -586,7 +586,7 @@ namespace ESMCI{
     //      create "r,w,rw" flags in Create(), as well as move
     //      readHandler/parser instantiation to Create()/construct().  ?
     if (writeHandler == ESMC_NULL_POINTER) {
-      writeHandler = new SAX2WriteHandler(this->fileName, "LATIN1",
+      writeHandler = new SAX2WriteHandler(this->fileName, "UTF-8",
                                           XMLFormatter::UnRep_CharRef, false);
     }
 
@@ -672,7 +672,7 @@ namespace ESMCI{
     //      create "r,w,rw" flags in Create(), as well as move
     //      readHandler/parser instantiation to Create()/construct().  ?
     if (writeHandler == ESMC_NULL_POINTER) {
-      writeHandler = new SAX2WriteHandler(this->fileName, "LATIN1",
+      writeHandler = new SAX2WriteHandler(this->fileName, "UTF-8",
                                           XMLFormatter::UnRep_CharRef, false);
     }
 
@@ -765,7 +765,7 @@ namespace ESMCI{
     //      create "r,w,rw" flags in Create(), as well as move
     //      readHandler/parser instantiation to Create()/construct().  ?
     if (writeHandler == ESMC_NULL_POINTER) {
-      writeHandler = new SAX2WriteHandler(this->fileName, "LATIN1",
+      writeHandler = new SAX2WriteHandler(this->fileName, "UTF-8",
                                           XMLFormatter::UnRep_CharRef, false);
     }
 
