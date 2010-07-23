@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.h,v 1.19 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMC_Init.h,v 1.20 2010/07/23 02:10:41 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,16 +46,14 @@ extern "C" {
 //
 // !INTERFACE:
   int ESMC_Initialize(
-//
-// !RETURN VALUE:
-//  int return code
-//
-// !ARGUMENTS:
     int *rc,        // return code
     ...);           // optional arguments
 #define ESMC_InitArgDefaultConfigFilename(ARG)  \
 ESMCI_Arg(ESMCI_InitArgDefaultConfigFilenameID,ARG)
-//  
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
 // !DESCRIPTION:
 //  Initialize the ESMF.  This method must be called before
 //  any other ESMF methods are used.  The method contains a
@@ -92,7 +90,21 @@ ESMCI_Arg(ESMCI_InitArgDefaultConfigFilenameID,ARG)
 #ifdef __cplusplus
 extern "C" {
 #endif
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Finalize - Finanalize the ESMF Framework
+//
+// !INTERFACE:
   int ESMC_Finalize(void);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+// This must be called once on each PET before the application exits to
+// allow ESMF to flush buffers, close open connections, and release
+// internal resources cleanly.
+//EOP
 #ifdef __cplusplus
 } // extern "C"
 #endif
