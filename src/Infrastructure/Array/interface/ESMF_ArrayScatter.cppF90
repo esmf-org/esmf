@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatter.cppF90,v 1.21 2010/05/07 22:45:15 w6ws Exp $
+! $Id: ESMF_ArrayScatter.cppF90,v 1.22 2010/07/23 18:57:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -11,7 +11,14 @@
 !==============================================================================
 ^define ESMF_FILENAME "ESMF_ArrayScatter.F90"
 !==============================================================================
-!
+
+#if 0
+!==============================================================================
+! TKR overloading macros
+#endif
+#include "ESMF_TypeKindRankMacros.hcppF90"
+
+!==============================================================================
 ! ESMF ArrayScatter module
 module ESMF_ArrayScatterMod
 !
@@ -21,10 +28,7 @@ module ESMF_ArrayScatterMod
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-! < ignore blank lines below.  they are created by the files which
-!   define various macros. >
 ^include "ESMF.h"
-#include "ESMF_TypeKindRankMacros.hcppF90"
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -70,7 +74,7 @@ module ESMF_ArrayScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayScatter.cppF90,v 1.21 2010/05/07 22:45:15 w6ws Exp $'
+    '$Id: ESMF_ArrayScatter.cppF90,v 1.22 2010/07/23 18:57:24 theurich Exp $'
 
 !==============================================================================
 ! 

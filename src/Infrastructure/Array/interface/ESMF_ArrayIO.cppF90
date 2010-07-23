@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.6 2010/07/21 20:01:06 samsoncheung Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.7 2010/07/23 18:57:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -10,11 +10,16 @@
 !
 !==============================================================================
 ^define ESMF_FILENAME "ESMF_ArrayIO.F90"
-^ifdef ESMF_PIO
-^define PIO_IS_ON 1
-^endif
 !==============================================================================
-!
+
+#if 0
+!==============================================================================
+! TKR overloading macros, limited to those interfaces implemented by PIO
+#endif
+^define PIO_TKR
+#include "ESMF_TypeKindRankMacros.hcppF90"
+
+!==============================================================================
 ! ESMF ArrayIO module
 module ESMF_ArrayIOMod
 !
@@ -24,10 +29,7 @@ module ESMF_ArrayIOMod
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-! < ignore blank lines below.  they are created by the files which
-!   define various macros. >
 ^include "ESMF.h"
-#include "ESMF_TypeKindRankMacros.hcppF90"
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -79,7 +81,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.6 2010/07/21 20:01:06 samsoncheung Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.7 2010/07/23 18:57:24 theurich Exp $'
 
 !==============================================================================
 
