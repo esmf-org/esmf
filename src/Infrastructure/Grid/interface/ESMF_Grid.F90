@@ -222,7 +222,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.152 2010/07/22 23:01:04 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.153 2010/07/23 04:13:26 w6ws Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5834,7 +5834,7 @@ end subroutine ESMF_GridGetDefault
     type(ESMF_Grid),    intent(in)            :: grid
 	integer,        intent(in), optional  :: tileNo
 	integer,target, intent(out),optional  :: minIndex(:)
-	integer,target, intent(out),optional  :: maxIndex(:)
+	integer,target, intent(out)           :: maxIndex(:)
 	integer,        intent(out), optional :: rc
 !
 ! !DESCRIPTON:
