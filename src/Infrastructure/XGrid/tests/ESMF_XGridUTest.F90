@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.3 2010/07/20 21:10:20 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.4 2010/07/23 15:37:10 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -198,10 +198,22 @@ contains
         real*8                              :: l_centroid(12,2), l_area(12)
         type(ESMF_XGridSpec)                :: l_sparseMatA2X(2)
 
-        integer                             :: eleCount, elb(ESMF_MAXDIM), eub(ESMF_MAXDIM)
+        type(ESMF_VM)                       :: vm
+        integer                             :: lpet, eleCount
+        integer                             :: elb(ESMF_MAXDIM), eub(ESMF_MAXDIM)
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
+
+        call ESMF_VMGetCurrent(vm=vm, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_VMGet(vm, localPet=lpet, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
 
         sideAdg(1) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/2,2/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -284,10 +296,19 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
+        print *, lpet, eleCount, elb(1), eub(1)
+
         call ESMF_DistGridPrint(distgrid, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
+
+        do i = 1, 2
+            call ESMF_DistGridPrint(l_sideAdg(i), rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+        enddo
 
         call ESMF_XGridDestroy(xgrid, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &

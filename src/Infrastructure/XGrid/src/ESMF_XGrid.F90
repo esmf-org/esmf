@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.2 2010/07/20 21:10:20 feiliu Exp $
+! $Id: ESMF_XGrid.F90,v 1.3 2010/07/23 15:37:10 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -133,7 +133,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.2 2010/07/20 21:10:20 feiliu Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.3 2010/07/23 15:37:10 feiliu Exp $'
 
 !==============================================================================
 !
@@ -230,8 +230,13 @@ contains
 !
 !EOPI
 
- dval%factorIndexList => sval%factorIndexList
- dval%factorList => sval%factorList
+ ! deep copy of the lists
+ allocate(dval%factorIndexList(size(sval%factorIndexList,1), &
+    size(sval%factorIndexList,2)))
+ allocate(dval%factorList(size(sval%factorList,1)))
+
+ dval%factorIndexList = sval%factorIndexList
+ dval%factorList = sval%factorList
 
  end subroutine
 

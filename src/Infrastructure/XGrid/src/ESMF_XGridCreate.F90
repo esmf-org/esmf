@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.2 2010/07/20 21:10:20 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.3 2010/07/23 15:37:10 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.2 2010/07/20 21:10:20 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.3 2010/07/23 15:37:10 feiliu Exp $'
 
 !==============================================================================
 !
@@ -79,6 +79,7 @@ module ESMF_XGridCreateMod
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_XGridCreateRaw
+!        module procedure ESMF_XGridCreateOnline
 
 
 ! !DESCRIPTION:
@@ -97,11 +98,115 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridCreateOnline()"
+!BOP
+! !IROUTINE:  ESMF_XGridCreateOnline - Create an XGrid online from user input
+
+! !INTERFACE:
+
+type(ESMF_XGrid) function ESMF_XGridCreateOnline(sideA, sideB, sideAPriority, &
+sideBPriority, storeOverlay, name, rc)
+type(ESMF_Grid), intent(in)     :: sideA(:), sideB(:)
+integer, intent(in), optional   :: sideAPriority(:), sideBPriority(:)
+logical, intent(in), optional   :: storeOverlay
+character(len=*), intent(in), optional :: name
+integer, intent(out), optional  :: rc
+!
+! !DESCRIPTION:
+!      Create an XGrid onine from user input
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [sideA]
+!           2D Grids on side A
+!     \item [sideB]
+!           2D Grids on side B
+!     \item [{[sideAPriority]}]
+!           Priority array of Grids on sideA during overlay generation.
+!           The priority arrays describe the priorities of Grids at the overlapping region.
+!           Flux contributions at the overlapping region are computed from the Grid of the
+!           highest priority.
+!     \item [{[sideBPriority]}]
+!           priority of Grids on sideB during overlay generation
+!           The priority arrays describe the priorities of Grids at the overlapping region.
+!           Flux contributions at the overlapping region are computed from the Grid of the
+!           highest priority.
+!     \item [{[storeOverlay]}]
+!           Setting the storeOverlay optional argument to .false. (default) 
+!           allows a user to bypass internal calculation of the fully 
+!           unstructured grid and its storage.
+!     \item [{[name]}]
+!           name of the xgrid object.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} only if the {\tt ESMF\_XGrid} 
+!           is created.
+!     \end{description}
+!
+!EOP
+    integer :: localrc, ngrid_a, ngrid_b, i
+    type(ESMF_XGridType), pointer :: xgtype
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! Initialize return code   
+    if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! check init status of input Grids
+    ngrid_a = size(sideA, 1)
+    ngrid_b = size(sideB, 1)
+    if(ngrid_a .le. 0 .or. ngrid_b .le. 0) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+           "- number of Grids are invalid on one side of the XGrid", &
+           ESMF_CONTEXT, rc) 
+        return
+    endif
+    do i = 1, ngrid_a
+        ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,sideA(i),rc)
+    enddo
+    do i = 1, ngrid_b
+        ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,sideB(i),rc)
+    enddo
+
+    ! initialize XGridType object and its base object
+    nullify(xgtype)
+    nullify(ESMF_XGridCreateOnline%xgtypep)
+    call ESMF_XGridConstructBaseObj(xgtype, name, localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, &
+                                "Constructing xgtype base object ", &
+                                ESMF_CONTEXT, rc)) return
+
+    ! copy the Grids
+    allocate(xgtype%sideA(ngrid_a), xgtype%sideB(ngrid_b), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, &
+        "- Allocating xgtype%grids ", &
+        ESMF_CONTEXT, rc)) return
+    xgtype%sideA = sideA
+    xgtype%sideB = sideB
+
+    !TODO: call into online regridding to compute the distgrids
+
+    ! Finalize XGrid Creation
+    xgtype%status = ESMF_STATUS_READY
+    ESMF_XGridCreateOnline%xgtypep => xgtype 
+    ESMF_INIT_SET_CREATED(ESMF_XGridCreateOnline)
+
+    call ESMF_XGridValidate(ESMF_XGridCreateOnline, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+
+    if(present(rc)) rc = ESMF_SUCCESS
+
+end function ESMF_XGridCreateOnline
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridCreateRaw()"
-!BOPI
+!BOP
 ! !IROUTINE:  ESMF_XGridCreateRaw - Create an XGrid from raw input parameters
 
 ! !INTERFACE:
@@ -122,7 +227,7 @@ character (len=*), intent(in), optional :: name
 integer, intent(out), optional  :: rc 
 !
 ! !DESCRIPTION:
-!      Set one xgrid structure equal to another
+!      Create an XGrid directly from raw input parameters
 !
 !     The arguments are:
 !     \begin{description}
@@ -153,7 +258,7 @@ integer, intent(out), optional  :: rc
 !           is created.
 !     \end{description}
 !
-!EOPI
+!EOP
 
     integer :: localrc, ngrid_a, ngrid_b, n_idx_a2x, n_idx_x2a, n_idx_b2x, n_idx_x2b
     integer :: n_wgts_a, n_wgts_b, ndim, ncells, i
@@ -236,6 +341,12 @@ integer, intent(out), optional  :: rc
             ESMF_CONTEXT, rc)) return
     endif
 
+    ! TODO:
+    ! if both A2X and X2A are present, check the sequence index list of X are identical
+    ! this checking will be collective since the indices needs to be gathered
+    ! if(present(sparseMatA2X) .and. present(sparseMatX2A)) then
+    ! endif
+
     if(present(sparseMatB2X)) then
         call ESMF_SparseMatca(sparseMatB2X, xgtype%sparseMatB2X, ngrid_b, 'sparseMatB2X', rc=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, &
@@ -250,13 +361,27 @@ integer, intent(out), optional  :: rc
             ESMF_CONTEXT, rc)) return
     endif
 
+    ! TODO:
+    ! if both B2X and X2B are present, check the sequence index list of X are identical
+    ! this checking will be collective since the indices needs to be gathered
+    ! if(present(sparseMatA2X) .and. present(sparseMatX2A)) then
+    ! endif
+
     ! create the distgrids
-    call ESMF_XGridDistGrids(xgtype, rc)
+    call ESMF_XGridDistGrids(xgtype, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
 
     ! Finalize XGrid Creation
     xgtype%status = ESMF_STATUS_READY
     ESMF_XGridCreateRaw%xgtypep => xgtype 
     ESMF_INIT_SET_CREATED(ESMF_XGridCreateRaw)
+
+    call ESMF_XGridValidate(ESMF_XGridCreateRaw, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
 
     if(present(rc)) rc = ESMF_SUCCESS
 
@@ -269,10 +394,7 @@ subroutine ESMF_XGridDistGrids(xgtype, rc)
     type(ESMF_XGridType), intent(inout) :: xgtype
     integer, intent(out), optional      :: rc
 
-    integer :: i, j, ii, ngrid, localrc, nidx, nidx_tot, l, u
-    integer :: minidx, maxidx, minidx1, maxidx1, minidx_n, maxidx_n
-    integer, allocatable :: indices(:), indices_diff(:), indices_union(:)
-    integer, allocatable :: iarray(:), iarray_t(:)
+    integer :: i, ngrid, localrc
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -289,7 +411,25 @@ subroutine ESMF_XGridDistGrids(xgtype, rc)
             ESMF_CONTEXT, rc)) return
         do i = 1, ngrid
             call ESMF_XGridDG(xgtype%sideA(i), xgtype%distgridA(i), &
-                xgtype%sparseMatA2X(i)%factorIndexList, rc=localrc)
+                xgtype%sparseMatA2X(i)%factorIndexList, 2, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+        enddo
+    endif
+
+    ! if A2X is not provided and X2A is provided
+    ! compute A side distgrids based on X2A 
+    if(.not. associated(xgtype%sparseMatA2X) .and. &
+        associated(xgtype%sparseMatX2A)) then
+        ngrid = size(xgtype%sideA, 1)
+        allocate(xgtype%distgridA(ngrid), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+            "- Allocating xgtype%distgridA(ngrid) ", &
+            ESMF_CONTEXT, rc)) return
+        do i = 1, ngrid
+            call ESMF_XGridDG(xgtype%sideA(i), xgtype%distgridA(i), &
+                xgtype%sparseMatX2A(i)%factorIndexList, 1, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -305,106 +445,183 @@ subroutine ESMF_XGridDistGrids(xgtype, rc)
             ESMF_CONTEXT, rc)) return
         do i = 1, ngrid
             call ESMF_XGridDG(xgtype%sideB(i), xgtype%distgridB(i), &
-                xgtype%sparseMatB2X(i)%factorIndexList, rc=localrc)
+                xgtype%sparseMatB2X(i)%factorIndexList, 2, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
     endif
 
-    ! use the union of A2X to create the balanced distgrid
+    ! if B2X is not provided and X2B is provided
+    ! compute B side distgrids based on X2B 
+    if(.not. associated(xgtype%sparseMatB2X) .and. &
+        associated(xgtype%sparseMatX2B)) then
+        ngrid = size(xgtype%sideB, 1)
+        allocate(xgtype%distgridB(ngrid), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+            "- Allocating xgtype%distgridB(ngrid) ", &
+            ESMF_CONTEXT, rc)) return
+        do i = 1, ngrid
+            call ESMF_XGridDG(xgtype%sideB(i), xgtype%distgridB(i), &
+                xgtype%sparseMatX2B(i)%factorIndexList, 1, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+        enddo
+    endif
+
+    ! use the union of A2X indices to create the balanced distgrid
     if(associated(xgtype%sparseMatA2X)) then
-        ngrid = size(xgtype%sideA, 1)
-
-        ! generate the union of indices from all the A2X factorIndexLists
-        ! generate the initial array that has the index positions marked '1'
-        minidx = minval(xgtype%sparseMatA2X(1)%factorIndexList(2,:))
-        maxidx = maxval(xgtype%sparseMatA2X(1)%factorIndexList(2,:))
-        allocate(iarray(minidx:maxidx), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
-            "- Allocating iarray(minidx:maxidx) ", &
-            ESMF_CONTEXT, rc)) return
-        iarray = 0
-        do i = minidx, maxidx
-            iarray(xgtype%sparseMatA2X(1)%factorIndexList(2,i)) = 1
-        enddo
-
-        do i = 2, ngrid
-
-            minidx1 = minval(xgtype%sparseMatA2X(i)%factorIndexList(2,:))
-            maxidx1 = maxval(xgtype%sparseMatA2X(i)%factorIndexList(2,:))
-            minidx_n = min(minidx, minidx1)
-            maxidx_n = max(maxidx, maxidx1)
-
-            allocate(iarray_t(minidx_n:maxidx_n), stat=localrc)
-            if (ESMF_LogMsgFoundAllocError(localrc, &
-                "- Allocating iarray_t(minidx_n:maxidx_n) ", &
-                ESMF_CONTEXT, rc)) return
-            ! copy the old index position array
-            do j = minidx, maxidx
-                iarray_t(j) = iarray(j)
-            enddo
-            ! toggle the index position array with the new index list
-            l = lbound(xgtype%sparseMatA2X(i)%factorIndexList, 2)
-            u = ubound(xgtype%sparseMatA2X(i)%factorIndexList, 2)
-            do j = l, u
-                iarray_t(xgtype%sparseMatA2X(i)%factorIndexList(2,j)) = 1
-            enddo
-
-            minidx = minidx_n
-            maxidx = maxidx_n
-
-            ! reset the index posity array, swap the temp one over
-            deallocate(iarray)         
-            allocate(iarray(minidx:maxidx), stat=localrc)
-            if (ESMF_LogMsgFoundAllocError(localrc, &
-                "- Allocating iarray(minidx:maxidx) ", &
-                ESMF_CONTEXT, rc)) return
-            do j = minidx, maxidx
-                iarray(j) = iarray_t(j)
-            enddo
-            deallocate(iarray_t)
-        enddo
-
-        ! compress the iarray into the index list
-        ! first count how many 1s are thyere
-        nidx = 0
-        do i = minidx, maxidx
-            if(iarray(i) .eq. 1) nidx = nidx + 1
-        enddo
-
-        allocate(indices(nidx), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
-            "- Allocating indices(nidx) ", &
-            ESMF_CONTEXT, rc)) return
-
-        ! every marked position means that index exists
-        ! add that index to indices array
-        ii = 1
-        do i = minidx, maxidx
-            if(iarray(i) .eq. 1) then
-                indices(ii) = i
-                ii = ii + 1
-            endif
-        enddo
-
-        xgtype%distgridM = ESMF_DistGridCreate(indices, rc=localrc)
+        xgtype%distgridM = ESMF_XGridDGOverlay(xgtype%sparseMatA2X, 2, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        
-        deallocate(iarray, indices)
+    endif
+
+    ! if A2X is not provided and X2A is provided
+    ! use the union of X2A indices to create the balanced distgrid
+    if(.not. associated(xgtype%sparseMatA2X) .and. &
+        associated(xgtype%sparseMatX2A)) then
+        xgtype%distgridM = ESMF_XGridDGOverlay(xgtype%sparseMatX2A, 1, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+    endif
+
+    ! use the union of B2X indices to create the balanced distgrid
+    if(.not. associated(xgtype%sparseMatA2X) .and. &
+       .not. associated(xgtype%sparseMatX2A) .and. &
+        associated(xgtype%sparseMatB2X)) then
+        xgtype%distgridM = ESMF_XGridDGOverlay(xgtype%sparseMatB2X, 2, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+    endif
+
+    ! use the union of X2B indices to create the balanced distgrid
+    if(.not. associated(xgtype%sparseMatA2X) .and. &
+       .not. associated(xgtype%sparseMatX2A) .and. &
+       .not. associated(xgtype%sparseMatB2X) .and. &
+        associated(xgtype%sparseMatX2B)) then
+        xgtype%distgridM = ESMF_XGridDGOverlay(xgtype%sparseMatX2B, 1, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
     endif
 
     if(present(rc)) rc = ESMF_SUCCESS
 
 end subroutine ESMF_XGridDistGrids
 
-subroutine ESMF_XGridDG(grid, distgrid, factorIndexList, rc)
+!------------------------------------------------------------------------------
+type(ESMF_DistGrid) function ESMF_XGridDGOverlay(sparseMat, dim, rc)
+    type(ESMF_XGridSpec), intent(in), pointer   :: sparseMat(:)
+    integer, intent(in)                         :: dim
+    integer, intent(out), optional              :: rc
+
+    integer :: i, j, ii, ngrid, localrc, nidx, nidx_tot, l, u
+    integer :: minidx, maxidx, minidx1, maxidx1, minidx_n, maxidx_n
+    integer, allocatable :: indices(:), indices_diff(:), indices_union(:)
+    integer, allocatable :: iarray(:), iarray_t(:)
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! Initialize return code   
+    if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ngrid = size(sparseMat, 1)
+
+    ! generate the union of indices from all the A2X factorIndexLists
+    ! generate the initial array that has the index positions marked '1'
+    minidx = minval(sparseMat(1)%factorIndexList(dim,:))
+    maxidx = maxval(sparseMat(1)%factorIndexList(dim,:))
+    allocate(iarray(minidx:maxidx), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, &
+        "- Allocating iarray(minidx:maxidx) ", &
+        ESMF_CONTEXT, rc)) return
+    iarray = 0
+    do i = minidx, maxidx
+        iarray(sparseMat(1)%factorIndexList(dim,i)) = 1
+    enddo
+
+    do i = 2, ngrid
+
+        minidx1 = minval(sparseMat(i)%factorIndexList(dim,:))
+        maxidx1 = maxval(sparseMat(i)%factorIndexList(dim,:))
+        minidx_n = min(minidx, minidx1)
+        maxidx_n = max(maxidx, maxidx1)
+
+        allocate(iarray_t(minidx_n:maxidx_n), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+            "- Allocating iarray_t(minidx_n:maxidx_n) ", &
+            ESMF_CONTEXT, rc)) return
+        ! copy the old index position array
+        do j = minidx, maxidx
+            iarray_t(j) = iarray(j)
+        enddo
+        ! toggle the index position array with the new index list
+        l = lbound(sparseMat(i)%factorIndexList, dim)
+        u = ubound(sparseMat(i)%factorIndexList, dim)
+        do j = l, u
+            iarray_t(sparseMat(i)%factorIndexList(dim,j)) = 1
+        enddo
+
+        minidx = minidx_n
+        maxidx = maxidx_n
+
+        ! reset the index posity array, swap the temp one over
+        deallocate(iarray)         
+        allocate(iarray(minidx:maxidx), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+            "- Allocating iarray(minidx:maxidx) ", &
+            ESMF_CONTEXT, rc)) return
+        do j = minidx, maxidx
+            iarray(j) = iarray_t(j)
+        enddo
+        deallocate(iarray_t)
+    enddo
+
+    ! compress the iarray into the index list
+    ! first count how many 1s are thyere
+    nidx = 0
+    do i = minidx, maxidx
+        if(iarray(i) .eq. 1) nidx = nidx + 1
+    enddo
+
+    allocate(indices(nidx), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, &
+        "- Allocating indices(nidx) ", &
+        ESMF_CONTEXT, rc)) return
+
+    ! every marked position means that index exists
+    ! add that index to indices array
+    ii = 1
+    do i = minidx, maxidx
+        if(iarray(i) .eq. 1) then
+            indices(ii) = i
+            ii = ii + 1
+        endif
+    enddo
+
+    ESMF_XGridDGOverlay = ESMF_DistGridCreate(indices, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+    
+    deallocate(iarray, indices)
+
+    if(present(rc)) rc = ESMF_SUCCESS
+
+end function ESMF_XGridDGOverlay
+
+!------------------------------------------------------------------------------
+subroutine ESMF_XGridDG(grid, distgrid, factorIndexList, dim, rc)
 
     type(ESMF_Grid), intent(in)                 :: grid
     type(ESMF_DistGrid), intent(inout)          :: distgrid
     integer, intent(in), pointer                :: factorIndexList(:,:)
+    integer, intent(in)                         :: dim
     integer, intent(out), optional              :: rc
 
     integer                                     :: localrc, nidx_src, nidx_dst
@@ -415,7 +632,9 @@ subroutine ESMF_XGridDG(grid, distgrid, factorIndexList, rc)
     ! Initialize return code   
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    distgrid = ESMF_DistGridCreate(factorIndexList(2,:), rc=localrc)
+    !print *, dim, size(factorIndexList, 2), factorIndexList(dim, :)
+
+    distgrid = ESMF_DistGridCreate(factorIndexList(dim,:), rc=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, &
         "- Creating distgrid from factorIndexList", &
         ESMF_CONTEXT, rc)) return
@@ -424,6 +643,7 @@ subroutine ESMF_XGridDG(grid, distgrid, factorIndexList, rc)
 
 end subroutine ESMF_XGridDG
 
+!------------------------------------------------------------------------------
 subroutine ESMF_SparseMatca(sparseMats, sparseMatd, ngrid, tag, rc)
 
     type(ESMF_XGridSpec), intent(in)    :: sparseMats(:)
@@ -564,6 +784,11 @@ end subroutine ESMF_XGridConstructBaseObj
 
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
+
+    call ESMF_XGridValidate(xgrid, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
 
     if (.not.associated(xgrid%xgtypep)) then 
       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
