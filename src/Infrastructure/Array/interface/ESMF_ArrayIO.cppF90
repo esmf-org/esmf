@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.8 2010/07/23 20:35:57 theurich Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.9 2010/07/23 21:11:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.8 2010/07/23 20:35:57 theurich Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.9 2010/07/23 21:11:10 theurich Exp $'
 
 !==============================================================================
 
@@ -192,7 +192,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
-            call ESMF_LogSetFoundError(ESMF_RC_ARG_BAD, "Unsupported rank", &
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
               ESMF_CONTEXT, rc)
             return
         end select
@@ -221,7 +221,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
-            call ESMF_LogSetFoundError(ESMF_RC_ARG_BAD, "Unsupported rank", &
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
               ESMF_CONTEXT, rc)
             return
         end select
@@ -250,13 +250,13 @@ contains
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
-            call ESMF_LogSetFoundError(ESMF_RC_ARG_BAD, "Unsupported rank", &
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
               ESMF_CONTEXT, rc)
             return
         end select
 
       case default
-        call ESMF_LogSetFoundError(ESMF_RC_ARG_BAD, "Unsupported typekind", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported typekind", &
           ESMF_CONTEXT, rc)
         return
 
