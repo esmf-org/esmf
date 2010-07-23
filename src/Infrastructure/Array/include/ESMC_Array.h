@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.114 2010/07/08 21:54:23 theurich Exp $
+// $Id: ESMC_Array.h,v 1.115 2010/07/23 23:00:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -53,10 +53,10 @@ typedef struct{
 //
 // !INTERFACE:
 ESMC_Array ESMC_ArrayCreate(
-  ESMC_ArraySpec arrayspec,
-  ESMC_DistGrid distgrid,
-  const char* name, 
-  int *rc);
+  ESMC_ArraySpec arrayspec,   // in
+  ESMC_DistGrid distgrid,     // in
+  const char* name,           // in
+  int *rc);                   // out
   
 // !RETURN VALUE:
 //  Newly created ESMC_Array object.
@@ -91,7 +91,7 @@ ESMC_Array ESMC_ArrayCreate(
 //
 // !INTERFACE:
 int ESMC_ArrayDestroy(
-  ESMC_Array *array);
+  ESMC_Array *array);         // inout
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -115,7 +115,7 @@ int ESMC_ArrayDestroy(
 //
 // !INTERFACE:
 int ESMC_ArrayPrint(
-  ESMC_Array array);
+  ESMC_Array array);          // in
   
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -139,8 +139,8 @@ int ESMC_ArrayPrint(
 //
 // !INTERFACE:
 const char *ESMC_ArrayGetName(
-  ESMC_Array array,
-  int *rc);
+  ESMC_Array array,           // in
+  int *rc);                   // out
   
 // !RETURN VALUE:
 //  Pointer to the Array name string.
@@ -166,9 +166,9 @@ const char *ESMC_ArrayGetName(
 //
 // !INTERFACE:
 void *ESMC_ArrayGetPtr(
-  ESMC_Array array,
-  int localDe,
-  int *rc);
+  ESMC_Array array,           // in
+  int localDe,                // in
+  int *rc);                   // out
 
 // !RETURN VALUE:
 //  Pointer to the Array data.
