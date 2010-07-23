@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.24 2010/07/15 18:27:03 w6ws Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.25 2010/07/23 13:40:30 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.24 2010/07/15 18:27:03 w6ws Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.25 2010/07/23 13:40:30 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -325,24 +325,44 @@
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest
-    ! Test looking up a name/value pair
-    write (name, *) "Testing looking up a name/value pair"
-    write (failMsg, *) "did not return ESMF_SUCCESS or correct value"
+    ! Test looking up a name/value pair (part 1)
+    write (name, *) "Testing looking up a name/value pair (part 1)"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
     call ESMF_UtilMapNameLookup (mapcontainer,  &
         name="Temperature", value=newvalue, foundFlag=isfound, rc=rc)
-    call ESMF_Test(rc == ESMF_SUCCESS .and.  &
-        isfound .and. newvalue == 1,         &
-        name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest
-    ! Test looking up a second name/value pair
-    write (name, *) "Testing looking up a second name/value pair"
+    ! Test looking up a name/value pair (part 2)
+    write (name, *) "Testing looking up a name/value pair (part 2)"
+    write (failMsg, *) "did not return correct foundFlag"
+    call ESMF_Test(isfound, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test looking up a name/value pair (part 3)
+    write (name, *) "Testing looking up a name/value pair (part 3)"
+    write (failMsg, *) "did not return correct value"
+    call ESMF_Test(newvalue == 1, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test looking up a second name/value pair (part 1)
+    write (name, *) "Testing looking up a second name/value pair (part 1)"
     write (failMsg, *) "did not return ESMF_SUCCESS or correct value"
     call ESMF_UtilMapNameLookup (mapcontainer,  &
         name="Pressure", value=newvalue, foundFlag=isfound, rc=rc)
-    call ESMF_Test(rc == ESMF_SUCCESS .and.  &
-        isfound .and. newvalue == 42,        &
-        name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test looking up a second name/value pair (part 2)
+    write (name, *) "Testing looking up a second name/value pair (part 2)"
+    write (failMsg, *) "did not return correct foundFlag"
+    call ESMF_Test(isfound, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test looking up a second name/value pair (part 3)
+    write (name, *) "Testing looking up a second name/value pair (part 3)"
+    write (failMsg, *) "did not return correct value"
+    call ESMF_Test(newvalue == 42, name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest
     ! Test removing a name/value pair
@@ -352,11 +372,9 @@
         name="Temperature", rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
-call ESMF_UtilMapNamePrint (mapcontainer, title='after Temperature removal', rc=rc)
-
     !EX_UTest
     ! Test looking up a removed name/value pair (part 1)
-    write (name, *) "Testing looking up a removed name/value pair"
+    write (name, *) "Testing looking up a removed name/value pair (part 1)"
     write (failMsg, *) "did not return ESMF_SUCCESS"
     call ESMF_UtilMapNameLookup (mapcontainer,  &
         name="Temperature", value=newvalue, foundFlag=isfound, rc=rc)
@@ -365,6 +383,7 @@ call ESMF_UtilMapNamePrint (mapcontainer, title='after Temperature removal', rc=
 
     !EX_UTest
     ! Test looking up a removed name/value pair (part 2)
+    write (name, *) "Testing looking up a removed name/value pair (part 2)"
     write (failMsg, *) "indicated a removed pair was found"
     call ESMF_Test(.not. isfound,  &
         name, failMsg, result, ESMF_SRCLINE)
