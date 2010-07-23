@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.74 2010/06/23 22:07:32 theurich Exp $
+// $Id: ESMC_LogErr.h,v 1.75 2010/07/23 01:37:31 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -43,20 +43,48 @@
 extern "C"{
 #endif
 
+enum ESMC_MsgType{ESMC_LOG_INFO=1,ESMC_LOG_WARN=2,ESMC_LOG_ERROR=3};
+enum ESMC_LogType{ESMC_LOG_SINGLE=1,ESMC_LOG_MULTI=2,ESMC_LOG_NONE=3};
+
 // Class declaration type
 typedef struct{
 void *ptr;
 }ESMC_LogErr;
 
 // Class API
-int ESMC_LogWrite(const char msg[], int msgtype);
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_LogWrite - Write an entry into the Log file
+//
+// !INTERFACE:
+int ESMC_LogWrite(
+  const char msg[],      // in
+  ESMC_MsgType msgtype); // in
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Write an entry into the Log file.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[{[msg]}]
+//    The message to be written.
+//  \item[{[msgtype]}]
+//    The message type.  Can be one of ESMC\_LOG\_INFO, ESMC\_LOG\_WARN,
+//    or ESMF\_LOG\_ERROR.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
 
 #ifdef __cplusplus
 } // extern "C"
 #endif
 
-enum ESMC_MsgType{ESMC_LOG_INFO=1,ESMC_LOG_WARN=2,ESMC_LOG_ERROR=3};
-enum ESMC_LogType{ESMC_LOG_SINGLE=1,ESMC_LOG_MULTI=2,ESMC_LOG_NONE=3};
 int ESMC_LogFinalize();
 const char *ESMC_LogGetErrMsg(int rc);
 int ESMC_LogSetFilename(char filename[]);
