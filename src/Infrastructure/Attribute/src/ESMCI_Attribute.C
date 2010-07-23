@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.64 2010/07/22 06:00:11 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.65 2010/07/23 05:54:20 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.64 2010/07/22 06:00:11 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.65 2010/07/23 05:54:20 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -5377,11 +5377,11 @@ namespace ESMCI {
         if ((ap = attpack->AttPackGetAttribute("Name")) != NULL) {
           localrc = ap->parent->AttributeGet("Name", &value);
           localrc = io_xml->writeStartElement("connection", 5, 0);
-          localrc = io_xml->writeStartElement("connectionSource", 6, 0);
+          localrc = io_xml->writeStartElement("connectionTarget", 6, 0);
           localrc = io_xml->writeStartElement("reference", 7, 0);
           localrc = io_xml->writeElement("name", value, 8);
           localrc = io_xml->writeEndElement("reference", 7);
-          localrc = io_xml->writeEndElement("connectionSource", 6);
+          localrc = io_xml->writeEndElement("connectionTarget", 6);
           localrc = io_xml->writeEndElement("connection", 5);
         }
 
