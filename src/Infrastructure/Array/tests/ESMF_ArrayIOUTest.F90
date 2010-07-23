@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.9 2010/07/22 20:31:18 w6ws Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.10 2010/07/23 21:22:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -86,7 +86,7 @@ program ESMF_ArrayIOUTest
 !-------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "dstDistgrid Create Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1/), &
@@ -94,7 +94,7 @@ program ESMF_ArrayIOUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Array Spec Set Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4,   &
@@ -103,7 +103,7 @@ program ESMF_ArrayIOUTest
 
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Array with Halo Create Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   allocate(computationalLWidth(3)) ! dimCount=3
@@ -117,7 +117,7 @@ program ESMF_ArrayIOUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Array without Halo Create Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array_wouthalo = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
@@ -161,7 +161,7 @@ program ESMF_ArrayIOUTest
 
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, print the netCDF file.
   write(name, *) "Write ESMF_Array with Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -172,7 +172,7 @@ program ESMF_ArrayIOUTest
   call ESMF_Test((rc==ESMF_SUCCESS .or. PIONotPresent), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, print the netCDF file.
   write(name, *) "Write ESMF_Array without Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -180,7 +180,7 @@ program ESMF_ArrayIOUTest
   call ESMF_Test((rc==ESMF_SUCCESS .or. PIONotPresent), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Creat Array without Halo for PIO Read"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array_wouthalo2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
@@ -191,7 +191,7 @@ program ESMF_ArrayIOUTest
 
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Create Array with Halo for PIO Read"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array_withhalo2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
@@ -211,7 +211,7 @@ program ESMF_ArrayIOUTest
                      exclusiveUBound=exclusiveUBound, rc=rc)
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read ESMF_Array without Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -223,7 +223,7 @@ program ESMF_ArrayIOUTest
                  failMsg, result,ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
 ! ! Compare readin and the existing file
   write(name, *) "Compare readin data to the existing data without halo"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -254,7 +254,7 @@ program ESMF_ArrayIOUTest
                      exclusiveUBound=exclusiveUBound, rc=rc)
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read ESMF_Array without Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -266,7 +266,7 @@ program ESMF_ArrayIOUTest
                  failMsg, result,ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
 ! ! Compare readin and the existing file
   write(name, *) "Compare readin data to the existing data with halo"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -291,21 +291,21 @@ program ESMF_ArrayIOUTest
   deallocate (exclusiveLBound, exclusiveUBound)
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Destroy Array with Halo"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array_withhalo, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Destroy Array without Halo"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array_wouthalo, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Destroy DistGrid"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_DistGridDestroy(distgrid, rc=rc)
@@ -322,7 +322,7 @@ program ESMF_ArrayIOUTest
 !-------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "dstDistgrid Create Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), &
@@ -330,7 +330,7 @@ program ESMF_ArrayIOUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Array Spec Set Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8,   &
@@ -338,7 +338,7 @@ program ESMF_ArrayIOUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Array with Halo Create Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   allocate(computationalLWidth(2)) ! dimCount=2
@@ -352,7 +352,7 @@ program ESMF_ArrayIOUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Array without Halo Create Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array_wouthalo = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
@@ -383,6 +383,7 @@ program ESMF_ArrayIOUTest
 
 
 !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, print the netCDF file.
   write(name, *) "Write 2D ESMF_Array with Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -400,6 +401,7 @@ program ESMF_ArrayIOUTest
                      exclusiveUBound=exclusiveUBound, rc=rc)
 
 !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read 2D ESMF_Array to ESMF_Array without halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -408,7 +410,7 @@ program ESMF_ArrayIOUTest
                  failMsg, result,ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
 ! ! Compare readin and the existing file
   write(name, *) "Compare readin data to the existing data without halo"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -430,7 +432,7 @@ program ESMF_ArrayIOUTest
   deallocate (exclusiveLBound, exclusiveUBound)
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Destroy Array with Halo"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array_withhalo, rc=rc)
@@ -438,7 +440,7 @@ program ESMF_ArrayIOUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Destroy Array without Halo"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array_wouthalo, rc=rc)
@@ -446,7 +448,7 @@ program ESMF_ArrayIOUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Destroy DistGrid"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_DistGridDestroy(distgrid, rc=rc)
