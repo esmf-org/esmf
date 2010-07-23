@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.75 2010/07/23 01:37:31 w6ws Exp $
+// $Id: ESMC_LogErr.h,v 1.76 2010/07/23 01:51:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ void *ptr;
 // !INTERFACE:
 int ESMC_LogWrite(
   const char msg[],      // in
-  ESMC_MsgType msgtype); // in
+  int msgtype); // in
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
