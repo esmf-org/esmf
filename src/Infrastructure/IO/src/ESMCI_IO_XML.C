@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.C,v 1.11 2010/07/23 05:55:53 eschwab Exp $
+// $Id: ESMCI_IO_XML.C,v 1.12 2010/07/24 05:56:23 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -22,9 +22,9 @@
  #define ESMC_FILENAME "ESMCI_IO_XML.C"
 
  // higher level, 3rd party or system includes here
- #include <stdio.h>
- #include <stdarg.h>
- #include <string>
+ #include <cstdio>
+ #include <cstdarg>
+ #include <cstring>
  #include <memory> // std::auto_ptr
 
 #ifdef ESMF_XERCES
@@ -44,12 +44,12 @@
  #include <ESMCI_SAX2ReadHandler.h>
  #include <ESMCI_SAX2WriteHandler.h>
 
- using namespace std; 
+ using namespace std;  // auto_ptr
 
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.11 2010/07/23 05:55:53 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.12 2010/07/24 05:56:23 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 
@@ -437,32 +437,34 @@ namespace ESMCI{
 }  // end IO_XML::read
 
 //-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  IO_XML::writeStartElement - Performs a write on an IO object
+//BOPI
+// !IROUTINE:  IO_XML::writeElementCore - writes core of an XML element
 //
 // !INTERFACE:
-      int IO_XML::writeStartElement(
+      int IO_XML::writeElementCore(
 //
 // !RETURN VALUE:
 //     int error return code
 //
 // !ARGUMENTS:
-      const string        &name,
-      const int            indentLevel,
-      const int            nPairs, ...) {
+      const string &name,
+      const string &value,
+      const int     indentLevel,
+      const int     nPairs,
+      va_list       args) {
       // nPairs of (char *attrName, char *attrValue) var args
 
 // !DESCRIPTION:
-//      Part of writing an {\tt ESMC\_IO\_XML} object to file.
-//      Maps to SAX2 startElement().
+//   Private method used internally by public methods writeStartElement() &
+//   writeElement() to share the common logic of writing the bulk of the tag.
+//   (the difference is in the handling of the end-of-line/end-of-tag)
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMCI::IO_XML::writeStartElement()"
+ #define ESMC_METHOD "ESMCI::IO_XML::writeElementCore()"
 
-    va_list ap;
     int rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
@@ -470,8 +472,6 @@ namespace ESMCI{
          "; 'this' pointer is NULL.", &rc);
       return(rc);
     }
-
-    va_start(ap, nPairs);
 
 #ifdef ESMF_XERCES
     // if first write() call, instantiate a writeHandler for this IO_XML.
@@ -494,8 +494,8 @@ namespace ESMCI{
     if (nPairs > 0) {
       attrList = new RefVectorOf<XMLAttr>(nPairs, true); // adopt elems
       for (int i=0; i < nPairs; i++) {
-        attrName  = va_arg(ap, char*);
-        attrValue = va_arg(ap, char*);
+        attrName  = va_arg(args, char*);
+        attrValue = va_arg(args, char*);
         if (strlen(attrName) > 0) {
           attrNameX  = XMLString::transcode(attrName);
           attrValueX = XMLString::transcode(attrValue);
@@ -524,7 +524,7 @@ namespace ESMCI{
       XMLString::release(&indent);
     }
  
-    // write out the element's name and its attributes
+    // write out the element's name and its attributes, if any
     //   <name attrName="attrValue" ... >
     XMLCh* qname = XMLString::transcode(name.c_str());
     writeHandler->startElement(XMLUni::fgZeroLenString,
@@ -532,7 +532,66 @@ namespace ESMCI{
                                qname, fAttrList);
     XMLString::release(&qname);
 
-    // end of line
+    // write out element name's value, if there is one
+    if (!(value.empty())) {
+      XMLCh* outChars = XMLString::transcode(value.c_str());
+      writeHandler->characters(outChars, XMLString::stringLen(outChars));
+      XMLString::release(&outChars);
+    }
+         
+#else
+    // xerces library not present
+    rc = ESMF_RC_LIB_NOT_PRESENT;
+#endif
+
+    return (rc);
+
+}  // end IO_XML::writeElementCore
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  IO_XML::writeStartElement - writes start of an XML element
+//
+// !INTERFACE:
+      int IO_XML::writeStartElement(
+//
+// !RETURN VALUE:
+//     int error return code
+//
+// !ARGUMENTS:
+      const string &name,
+      const string &value,
+      const int     indentLevel,
+      const int     nPairs, ...) {
+      // nPairs of (char *attrName, char *attrValue) var args
+
+// !DESCRIPTION:
+//   Call writeElementCore(), then write an end-of-line character
+//
+//EOP
+// !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMCI::IO_XML::writeStartElement()"
+
+    va_list args;
+    int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
+    va_start(args, nPairs);
+
+#ifdef ESMF_XERCES
+
+    // write start of tag & any attrs
+    rc = writeElementCore(name, value, indentLevel, nPairs, args);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
+
+    // write end-of-line
     XMLCh* newLine = XMLString::transcode("\n");
     writeHandler->characters(newLine, XMLString::stringLen(newLine));
     XMLString::release(&newLine);
@@ -542,7 +601,8 @@ namespace ESMCI{
     rc = ESMF_RC_LIB_NOT_PRESENT;
 #endif
 
-    va_end(ap);
+    va_end(args);
+
     return (rc);
 
 }  // end IO_XML::writeStartElement
@@ -558,9 +618,11 @@ namespace ESMCI{
 //     int error return code
 //
 // !ARGUMENTS:
-      const string        &name,
-      const string        &value,
-      const int           indentLevel) {
+      const string &name,
+      const string &value,
+      const int     indentLevel,
+      const int     nPairs, ...) {
+      // nPairs of (char *attrName, char *attrValue) var args
 
 // !DESCRIPTION:
 //      Part of writing an {\tt ESMC\_IO\_XML} object to file.
@@ -572,6 +634,7 @@ namespace ESMCI{
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMCI::IO_XML::writeElement()"
 
+    va_list args;
     int rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
@@ -580,55 +643,31 @@ namespace ESMCI{
       return(rc);
     }
 
+    va_start(args, nPairs);
+
 #ifdef ESMF_XERCES
-    // if first write() call, instantiate a writeHandler for this IO_XML.
-    // TODO:  move instantiation to Create()/construct(), if we ever
-    //      create "r,w,rw" flags in Create(), as well as move
-    //      readHandler/parser instantiation to Create()/construct().  ?
-    if (writeHandler == ESMC_NULL_POINTER) {
-      writeHandler = new SAX2WriteHandler(this->fileName, "UTF-8",
-                                          XMLFormatter::UnRep_CharRef, false);
-    }
 
-    // indent if needed
-    if (indentLevel > 0) {
-      string indentSpaces;
-      for(int i=0; i<indentLevel; i++) indentSpaces += "  ";
-      XMLCh* indent = XMLString::transcode(indentSpaces.c_str());
-      writeHandler->characters(indent, XMLString::stringLen(indent));
-      XMLString::release(&indent);
-    }
- 
-    XMLCh* qname;
-    if (!(name.empty())) {
-      VecAttributesImpl fAttrList;  // empty attributes list
-      qname = XMLString::transcode(name.c_str());
-      // write out the start of the XML element <name>
-      writeHandler->startElement(XMLUni::fgZeroLenString,
-                                 XMLUni::fgZeroLenString,
-                                 qname, fAttrList);
-    }
-         
-    // write out element name's value <name>value</name>
-    XMLCh* outChars = XMLString::transcode(value.c_str());
-    writeHandler->characters(outChars, XMLString::stringLen(outChars));
-    XMLString::release(&outChars);
-         
-    if (!(name.empty())) {
-      // write out the end of the XML element </name>
-      writeHandler->endElement(XMLUni::fgZeroLenString,
-                               XMLUni::fgZeroLenString, qname);
-      XMLString::release(&qname);
+    // write start of tag & any attrs
+    rc = writeElementCore(name, value, indentLevel, nPairs, args);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
 
-      // end of line
-      XMLCh* newLine = XMLString::transcode("\n");
-      writeHandler->characters(newLine, XMLString::stringLen(newLine));
-      XMLString::release(&newLine);
-    }
+    // write the end of the XML element </name>
+    XMLCh* qname = XMLString::transcode(name.c_str());
+    writeHandler->endElement(XMLUni::fgZeroLenString,
+                             XMLUni::fgZeroLenString, qname);
+    XMLString::release(&qname);
+
+    // write end-of-line
+    XMLCh* newLine = XMLString::transcode("\n");
+    writeHandler->characters(newLine, XMLString::stringLen(newLine));
+    XMLString::release(&newLine);
+
 #else
     // xerces library not present
     rc = ESMF_RC_LIB_NOT_PRESENT;
 #endif
+
+    va_end(args);
 
     return (rc);
 
@@ -685,13 +724,13 @@ namespace ESMCI{
       XMLString::release(&indent);
     }
  
-    // write out the end of the XML element </name>
+    // write the end of the XML element </name>
     XMLCh* qname = XMLString::transcode(name.c_str());
     writeHandler->endElement(XMLUni::fgZeroLenString,
                              XMLUni::fgZeroLenString, qname);
     XMLString::release(&qname);
 
-    // end of line
+    // write end-of-line
     XMLCh* newLine = XMLString::transcode("\n");
     writeHandler->characters(newLine, XMLString::stringLen(newLine));
     XMLString::release(&newLine);

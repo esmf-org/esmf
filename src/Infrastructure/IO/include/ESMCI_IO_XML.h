@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.h,v 1.8 2010/06/23 23:01:08 theurich Exp $
+// $Id: ESMCI_IO_XML.h,v 1.9 2010/07/24 05:56:23 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,6 +36,7 @@
 //-------------------------------------------------------------------------
 //
 // !USES:
+#include <stdarg.h>
 #include "ESMCI_Base.h"           // inherited Base class
 #include "ESMCI_SAX2WriteHandler.h"
 // #include "ESMCI_SAX2ReadHandler.h"  // TODO: ?
@@ -69,17 +70,23 @@ namespace ESMCI{
     int read(int fileNameLen, const char* fileName,
              int schemaFileNameLen, const char* schemaFileName);
 
-    // maps to SAX2 startElement() 
+    // maps to SAX2 startElement() & characters(), but not endElement();
+    //   use to open a nested tag section
     int writeStartElement(const string& name,
+                          const string& value,
                           const int     indentLevel,
                           const int     nPairs, ...); // nPairs of
                  // (char *attrName, char *attrValue)
 
-    // maps to SAX2 characters(), optionally to startElement() & endElement()
+    // maps to SAX2 startElement, characters() & endElement();
+    //   use to write an entire tag, with xml attrs, and with no nested tags
     int writeElement(const string& name,
                      const string& value,
-                     const int     indentLevel);
-    // maps to SAX2 endElement()
+                     const int     indentLevel,
+                     const int     nPairs, ...); // nPairs of
+                 // (char *attrName, char *attrValue)
+
+    // maps to SAX2 endElement(); use to close a nested tag section
     int writeEndElement(const string& name,
                         const int     indentLevel);
 
@@ -98,6 +105,15 @@ namespace ESMCI{
     // IO_XML(const IO_XML &io_xml);  TODO
     ~IO_XML(){destruct();}
    private:
+    // used internally by public methods writeStartElement() & writeElement()
+    //   to share the common logic of writing the bulk of the tag
+    //   (the difference is in the handling of the end-of-line/end-of-tag)
+    int writeElementCore(const string& name,
+                         const string& value,
+                         const int     indentLevel,
+                         const int     nPairs,
+                         va_list       args); // nPairs of
+                     // (char *attrName, char *attrValue)
     void destruct();
 
     // friend function to allocate and initialize IO_XML object from heap
