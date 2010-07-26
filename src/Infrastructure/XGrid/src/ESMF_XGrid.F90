@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.3 2010/07/23 15:37:10 feiliu Exp $
+! $Id: ESMF_XGrid.F90,v 1.4 2010/07/26 19:38:00 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -133,7 +133,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.3 2010/07/23 15:37:10 feiliu Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.4 2010/07/26 19:38:00 feiliu Exp $'
 
 !==============================================================================
 !
@@ -244,7 +244,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridValidate"
 
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_XGridValidate - Check validity of a XGrid
 
 ! !INTERFACE:
@@ -270,7 +270,7 @@ contains
 !           is valid.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       integer :: localrc
 
