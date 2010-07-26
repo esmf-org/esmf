@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.11 2010/07/23 21:55:47 theurich Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.12 2010/07/26 21:13:45 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -42,9 +42,11 @@ program ESMF_ArrayIOUTest
   type(ESMF_ArraySpec):: arrayspec
   integer(ESMF_KIND_I4), pointer, dimension(:,:,:) ::  Farray3D_withhalo, Farray3D_wouthalo, Farray3D_withhalo2, Farray3D_wouthalo2
   real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray2D_withhalo, Farray2D_wouthalo
-  type(ESMF_DistGrid)                     :: distgrid
+  real(ESMF_KIND_R8), dimension(5,5) :: FarrayGr_1 , FarrayGr_2
+  type(ESMF_DistGrid)                     :: distgrid, distgrid_diff
   type(ESMF_Array)                        :: array_withhalo, array_wouthalo
   type(ESMF_Array)                        :: array_withhalo2, array_wouthalo2
+  type(ESMF_Array)                        :: array_diff
   integer                                 :: rc, de
   integer, allocatable :: totalLWidth(:), totalUWidth(:), &
                        computationalLWidth(:),computationalUWidth(:)
@@ -438,14 +440,77 @@ program ESMF_ArrayIOUTest
    if (Maxvalue.le.diff) Maxvalue=diff
   enddo
   enddo
-  write(*,*)"Maximum Error (withhalo-withouthalo case) = ", Maxvalue
 #ifdef ESMF_PIO
-  write(*,*)"Maximum Error (Without Halo case) = ", Maxvalue
+  write(*,*)"Maximum Error (withhalo-withouthalo case) = ", Maxvalue
   call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
 #else
   write(failMsg, *) "Comparison did not failed as was expected"
   call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
 #endif
+
+
+!------------------------------------------------------------------------
+!------------------------------------------------------------------------
+! Further test that read a file2D_wouthalo.nc file into an Array
+! that was created on a different DistGrid.
+!
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "dstDistgrid Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid_diff = ESMF_DistGridCreate(minIndex=(/1,1/), &
+              maxIndex=(/5,5/), regDecomp=(/3,2/),  rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array_diff = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid_diff, &
+          computationalLWidth=(/0,0/), computationalUWidth=(/0,0/), &
+          totalLWidth=(/0,0/), totalUWidth=(/0,0/), &
+          indexflag=ESMF_INDEX_GLOBAL, name='u-velocity', rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+! ! Read in a netCDF file to an ESMF array.
+  write(name, *) "Read 2D ESMF_Array with different distgrid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayRead(array_diff, fname="file2D_withhalo.nc", rc=rc)
+#ifdef ESMF_PIO
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, & 
+     ESMF_SRCLINE)
+#endif 
+
+!-------------------------------------------------------------------------------
+! !  Compare global Fortran array
+! !  Data is type ESMF_KIND_R8
+  call ESMF_ArrayGather(array_diff, FarrayGr_1, patch=1, rootPet=0, rc=rc)
+  call ESMF_ArrayGather(array_wouthalo, FarrayGr_2, patch=1, rootPet=0, rc=rc)
+
+  write(name, *) "Compare readin data from a different distgrid"
+  write(failMsg, *) "Comparison failed"
+  Maxvalue = 0.0
+  if (localPet .eq.0) then
+   do j=1,5
+   do i=1,5
+     diff = abs(FarrayGr_1(i,j) - FarrayGr_2(i,j) )
+     if (diff .gt. Maxvalue) Maxvalue = diff
+   enddo
+   enddo
+#ifdef ESMF_PIO
+  write(*,*)"Maximum Error (different distgrid) = ", Maxvalue
+  call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Comparison did not failed as was expected"
+  call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+#endif
+  endif
+
 
   deallocate (computationalLWidth, computationalUWidth)
   deallocate (totalLWidth, totalUWidth)
@@ -465,6 +530,7 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array_wouthalo, rc=rc)
   call ESMF_ArrayDestroy(array_wouthalo2, rc=rc)
+  call ESMF_ArrayDestroy(array_diff, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
@@ -472,6 +538,7 @@ program ESMF_ArrayIOUTest
   write(name, *) "Destroy DistGrid"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_DistGridDestroy(distgrid_diff, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
