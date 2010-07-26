@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.12 2010/03/04 18:57:42 svasquez Exp $
+! $Id: ESMF_FieldPr.F90,v 1.13 2010/07/26 21:09:55 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,6 +46,8 @@ module ESMF_FieldPrMod
   use ESMF_InitMacrosMod
 
   use ESMF_FieldMod
+  use ESMF_FieldGetMod
+  use ESMF_ArrayIOMod
 
   implicit none
 
@@ -59,6 +61,8 @@ module ESMF_FieldPrMod
 !
 ! - ESMF-public methods:
    public ESMF_FieldPrint              ! Print contents of a Field
+   public ESMF_FieldWrite              ! Write array data in a Field
+   public ESMF_FieldRead               ! Read  array data to a Field
 
 !------------------------------------------------------------------------------
 
@@ -210,6 +214,161 @@ contains
 
         end subroutine ESMF_FieldPrint
 
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldWrite"
+
+!BOP
+! !IROUTINE:  ESMF_FieldWrite - Write the Field data
+
+! !INTERFACE:
+      subroutine ESMF_FieldWrite(field, fname, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout) :: field 
+      character(*), intent(in) :: fname 
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Write the array data in the {ESMF\_Field} object to file.
+!     This subroutine uses ESMF_ArrayWrite to write array
+!     data to a netCDF file. \\
+!
+!   Limitation:
+!   See limitation in ESMF_ArrayWrite()
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item[fname]
+!           The name of the netcdf file in which Fortran array is written to.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+        character(len=ESMF_MAXSTR)      :: name
+        type(ESMF_FieldType), pointer   :: fp 
+        type(ESMF_Array)                :: array 
+        integer                         :: i, localrc
+        integer                         :: gridrank, arrayrank
+        type(ESMF_Status)               :: fieldstatus
+
+#ifdef ESMF_PIO
+!       Initialize
+        localrc = ESMF_RC_NOT_IMPL
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+        ! check variables
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
+        fp => field%ftypep
+
+        call c_ESMC_GetName(fp%base, name, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldGet(field, array=array, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        call ESMF_ArrayWrite(array, fname, vname=trim(name), &
+          rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
+#else
+        ! Return indicating PIO not present
+        if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+#endif
+
+        end subroutine ESMF_FieldWrite
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRead"
+
+!BOP
+! !IROUTINE:  ESMF_FieldRead - Read the array data in a Field
+
+! !INTERFACE:
+      subroutine ESMF_FieldRead(field, fname, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout) :: field 
+      character(*), intent(in) :: fname 
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Read array data from file and put it into the {ESMF\_Field} object.
+!     This subroutine uses ESMF_ArrayWrite to write the array
+!     data to a netCDF file. \\
+!
+!   Limitation:
+!   See limitation in ESMF_ArrayWrite()
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item[fname]
+!           The name of the netcdf file in which array data is read from.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+        character(len=ESMF_MAXSTR)      :: name
+        type(ESMF_FieldType), pointer   :: fp 
+        type(ESMF_Array)                :: array 
+        integer                         :: i, localrc
+        integer                         :: gridrank, arrayrank
+        type(ESMF_Status)               :: fieldstatus
+
+#ifdef ESMF_PIO
+!       Initialize
+        localrc = ESMF_RC_NOT_IMPL
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+        ! check variables
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
+        fp => field%ftypep
+
+        call c_ESMC_GetName(fp%base, name, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldGet(field, array=array, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        call ESMF_ArrayRead(array, fname, vname=trim(name), &
+          rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
+#else
+        ! Return indicating PIO not present
+        if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+#endif
+
+        end subroutine ESMF_FieldRead
 
 !------------------------------------------------------------------------------
 
