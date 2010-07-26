@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.9 2010/07/23 21:11:10 theurich Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.10 2010/07/26 21:12:56 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.9 2010/07/23 21:11:10 theurich Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.10 2010/07/26 21:12:56 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -111,11 +111,12 @@ contains
 ! !IROUTINE: ESMF_ArrayWrite - Write Array data
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayWrite(array, fname, rc)
+  subroutine ESMF_ArrayWrite(array, fname, vname, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array), intent(inout) :: array
     character(*), intent(in) :: fname
+    character(*), intent(in), optional :: vname
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -131,6 +132,8 @@ contains
 !    The {\tt ESMF\_Array} object that contains the data to be written.
 !   \item[fname]
 !    The name of the file (netcdf) in which Fortran array is written to.
+!   \item[vname]
+!    Variable name written in netcdf file; default is the "name" of array
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -141,6 +144,7 @@ contains
     integer :: localrc                   ! local return code
     integer :: localtk
     integer :: rank
+    character(len=80) :: varname
 
     type(ESMF_TypeKind)             :: typekind
 
@@ -153,9 +157,10 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
 
     ! Obtain typekind and rank
-    call ESMF_ArrayGet( array, typekind=typekind, rank=rank, rc=localrc)
+    call ESMF_ArrayGet( array, typekind=typekind, rank=rank, name=varname, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    if(present(vname)) varname = vname
  
     ! Call a T/K/R specific interface in order to create the proper
     !  type of F90 pointer, allocate the space, set the values in the
@@ -172,23 +177,23 @@ contains
         ! The PIO data type is PIO_int
         select case(rank)
           case (1)
-            call ESMF_ArrayWriteIntl1DI4(array, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl1DI4(array, fname, varname, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
-            call ESMF_ArrayWriteIntl2DI4(array, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl2DI4(array, fname, varname, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
-            call ESMF_ArrayWriteIntl3DI4(array, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl3DI4(array, fname, varname, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
-            call ESMF_ArrayWriteIntl4DI4(array, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl4DI4(array, fname, varname, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
-            call ESMF_ArrayWriteIntl5DI4(array, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl5DI4(array, fname, varname, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
@@ -201,23 +206,23 @@ contains
         ! The PIO data type is PIO_real
         select case(rank)
           case (1)
-            call ESMF_ArrayWriteIntl1DR4(array, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl1DR4(array, fname, varname, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
-            call ESMF_ArrayWriteIntl2DR4(array, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl2DR4(array, fname, varname, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
-            call ESMF_ArrayWriteIntl3DR4(array, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl3DR4(array, fname, varname, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
-            call ESMF_ArrayWriteIntl4DR4(array, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl4DR4(array, fname, varname, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
-            call ESMF_ArrayWriteIntl5DR4(array, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl5DR4(array, fname, varname, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
@@ -230,23 +235,23 @@ contains
         ! The PIO data type is PIO_double
         select case(rank)
           case (1)
-            call ESMF_ArrayWriteIntl1DR8(array, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl1DR8(array, fname, varname, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
-            call ESMF_ArrayWriteIntl2DR8(array, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl2DR8(array, fname, varname, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
-            call ESMF_ArrayWriteIntl3DR8(array, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl3DR8(array, fname, varname, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
-            call ESMF_ArrayWriteIntl4DR8(array, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl4DR8(array, fname, varname, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
-            call ESMF_ArrayWriteIntl5DR8(array, fname, rc=localrc)
+            call ESMF_ArrayWriteIntl5DR8(array, fname, varname, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
@@ -281,11 +286,12 @@ contains
 ! !IROUTINE: ESMF_ArrayRead - Read Array data.
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayRead(array, fname, rc)
+  subroutine ESMF_ArrayRead(array, fname, vname, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array), intent(inout) :: array
     character(*), intent(in)  :: fname
+    character(*), intent(in), optional :: vname
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -300,7 +306,9 @@ contains
 !   \item[array]
 !    The {\tt ESMF\_Array} object through which the read data is returned.
 !   \item[fname]
-!    The name of the file (netcdf) in which Fortran array is read.
+!    The name of the file (netcdf) in which array data is read from.
+!   \item[vname]
+!    Variable name in netcdf file; default is the "name" of array
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -311,6 +319,7 @@ contains
     integer :: localrc                   ! local return code
     integer :: localtk
     integer :: rank
+    character(len=80) :: varname
 
     type(ESMF_TypeKind)             :: typekind
 
@@ -323,7 +332,10 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
 
     ! Obtain typekind and rank
-    call ESMF_ArrayGet( array, typekind=typekind, rank=rank, rc=localrc)
+    call ESMF_ArrayGet( array, typekind=typekind, rank=rank, name=varname, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if(present(vname)) varname = vname
 
     ! Call a T/K/R specific interface in order to create the proper
     !  type of F90 pointer, allocate the space, set the values in the
@@ -340,69 +352,95 @@ contains
         ! The PIO data type is PIO_int
         select case(rank)
           case (1)
-            call ESMF_ArrayReadIntl1DI4(array, fname, rc=localrc)
+            call ESMF_ArrayReadIntl1DI4(array, fname, varname, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
-            call ESMF_ArrayReadIntl2DI4(array, fname, rc=localrc)
+            call ESMF_ArrayReadIntl2DI4(array, fname, varname, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
-            call ESMF_ArrayReadIntl3DI4(array, fname, rc=localrc)
+            call ESMF_ArrayReadIntl3DI4(array, fname, varname, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
-            call ESMF_ArrayReadIntl4DI4(array, fname, rc=localrc)
+            call ESMF_ArrayReadIntl4DI4(array, fname, varname, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
-            call ESMF_ArrayReadIntl5DI4(array, fname, rc=localrc)
+            call ESMF_ArrayReadIntl5DI4(array, fname, varname, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case default
-            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-              "Unsupported rank", &
-              ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
+              ESMF_CONTEXT, rc)
+            return
         end select
 
       case (ESMF_TYPEKIND_R4%dkind)
         select case(rank)
         ! The PIO data type is PIO_real
           case (1)
-            call ESMF_ArrayReadIntl1DR4(array, fname, rc=localrc)
+            call ESMF_ArrayReadIntl1DR4(array, fname, varname, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
-            call ESMF_ArrayReadIntl2DR4(array, fname, rc=localrc)
+            call ESMF_ArrayReadIntl2DR4(array, fname, varname, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
-            call ESMF_ArrayReadIntl3DR4(array, fname, rc=localrc)
+            call ESMF_ArrayReadIntl3DR4(array, fname, varname, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
-            call ESMF_ArrayReadIntl4DR4(array, fname, rc=localrc)
+            call ESMF_ArrayReadIntl4DR4(array, fname, varname, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
-            call ESMF_ArrayReadIntl5DR4(array, fname, rc=localrc)
+            call ESMF_ArrayReadIntl5DR4(array, fname, varname, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case default
-            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-              "Unsupported rank", &
-              ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
+              ESMF_CONTEXT, rc)
+            return
         end select
 
       case (ESMF_TYPEKIND_R8%dkind)
         ! The PIO data type is PIO_double
         select case(rank)
           case (1)
-            call ESMF_ArrayReadIntl1DR8(array, fname, rc=localrc)
+            call ESMF_ArrayReadIntl1DR8(array, fname, varname, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
-            call ESMF_ArrayReadIntl2DR8(array, fname, rc=localrc)
+            call ESMF_ArrayReadIntl2DR8(array, fname, varname, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
-            call ESMF_ArrayReadIntl3DR8(array, fname, rc=localrc)
+            call ESMF_ArrayReadIntl3DR8(array, fname, varname, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
-            call ESMF_ArrayReadIntl4DR8(array, fname, rc=localrc)
+            call ESMF_ArrayReadIntl4DR8(array, fname, varname, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
-            call ESMF_ArrayReadIntl5DR8(array, fname, rc=localrc)
+            call ESMF_ArrayReadIntl5DR8(array, fname, varname, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           case default
-            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-              "Unsupported rank", &
-              ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
+              ESMF_CONTEXT, rc)
+            return
         end select
 
       case default
-        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-          "Unsupported typekind", &
-          ESMF_CONTEXT, rc)) return
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported typekind", &
+          ESMF_CONTEXT, rc)
+        return
 
     end select
-
-    if (ESMF_LogMsgFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -496,11 +534,12 @@ contains
 ! !IROUTINE: ESMF_ArrayWriteIntl - Write an ESMF_Array via PIO @\
 ! @\
 ! !INTERFACE: @\
-! subroutine ESMF_ArrayWriteIntl<rank><type><kind>(array, fname, rc) @\
+! subroutine ESMF_ArrayWriteIntl<rank><type><kind>(array, fname, varname, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Array),           intent(inout)           :: array @\
 !   character(*),               intent(in)              :: fname @\
+!   character(*),               intent(in)              :: varname @\
 !   integer,                    intent(out),  optional  :: rc @\
 ! @\
 ! @\
@@ -517,6 +556,8 @@ contains
 !    The {\tt ESMF\_Array} object that contains the data to be written. @\
 !   \item[fname] @\
 !    The name of the file (netcdf) in which Fortran array is written to. @\
+!   \item[varname] @\
+!     Variable name written in netcdf file @\
 !   \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
@@ -528,10 +569,11 @@ contains
 ! -------------------------- ESMF-public method ----------------------------- @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayWriteIntl" @\
-  subroutine ESMF_ArrayWriteIntl##mrank##D##mtypekind(array, fname, rc) @\
+  subroutine ESMF_ArrayWriteIntl##mrank##D##mtypekind(array, fname, varname, rc) @\
 @\
     type(ESMF_Array),           intent(inout)           :: array @\
     character(*),               intent(in)              :: fname @\
+    character(*),               intent(in)              :: varname @\
     integer,                    intent(out),  optional  :: rc @\
 @\
     ! ESMF VARIABLES @\
@@ -559,7 +601,6 @@ contains
     integer                       :: localrc        ! local return code @\
     integer                       :: i   @\
     real (ESMF_KIND_r8) :: st,et,dt_write  ! start/end times for timing @\
-    character(len=30) :: varname         ! variable name @\
 @\
     ! Initialize return code @\
     localrc = ESMF_RC_NOT_IMPL @\
@@ -641,7 +682,8 @@ contains
      case(ESMF_TYPEKIND_R8%dkind) @\
        basepiotype=PIO_double @\
      case default @\
-       write(*,*)"Unsupported typekind" @\
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported typekind", & @\
+              ESMF_CONTEXT, rc) @\
        return @\
     end select @\
 @\
@@ -667,9 +709,6 @@ contains
     ! Output are dimid_x,dimid_y,dimid_z @\
 @\
     localrc = 1 @\
-    call ESMF_ArrayGet(array, name=varname, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-      ESMF_CONTEXT, rcToReturn=rc)) return @\
     pioerr = PIO_def_var(File,varname,basepiotype, dimid_xyz,vard) @\
     call check_pioerr(pioerr, localPet, __FILE__, __LINE__, " defvar") @\
     !TODO: need error checking here! @\
@@ -724,11 +763,12 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
 ! !IROUTINE: ESMF_ArrayReadIntl - Read an ESMF_Array via PIO @\
 ! @\
 ! !INTERFACE: @\
-! subroutine ESMF_ArrayReadIntl<rank><type><kind>(array, fname, rc) @\
+! subroutine ESMF_ArrayReadIntl<rank><type><kind>(array, fname, varname, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Array),           intent(inout)           :: array @\
 !   character(*),               intent(in)              :: fname @\
+!   character(*),               intent(in)              :: varname @\
 !   integer,                    intent(out),  optional  :: rc @\
 ! @\
 ! @\
@@ -744,7 +784,9 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
 !   \item[array] @\
 !    The {\tt ESMF\_Array} object through which the read data is returned. @\
 !   \item[fname] @\
-!    The name of the file (netcdf) in which Fortran array is read. @\
+!    The name of the file (netcdf) in which array data is read from. @\
+!   \item[varname] @\
+!     Variable name in netcdf file @\
 !   \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
@@ -756,10 +798,11 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
 ! -------------------------- ESMF-public method ----------------------------- @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayReadIntl" @\
-  subroutine ESMF_ArrayReadIntl##mrank##D##mtypekind(array, fname, rc) @\
+  subroutine ESMF_ArrayReadIntl##mrank##D##mtypekind(array, fname, varname, rc) @\
 @\
     type(ESMF_Array),           intent(inout)           :: array @\
     character(*),               intent(in)              :: fname @\
+    character(*),               intent(in)              :: varname @\
     integer,                    intent(out),  optional  :: rc @\
 @\
     ! ESMF VARIABLES @\
@@ -782,12 +825,12 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
     integer :: stride, base, num_iotasks, rearr_type @\
     integer(kind=PIO_OFFSET) :: one @\
     integer :: basepiotype @\
+    integer :: pioerr @\
 @\
     ! OTHER VARIABLES: @\
     integer                       :: localrc        ! local return code @\
     integer                       :: i   @\
     real (ESMF_KIND_r8) :: st,et,dt_read  ! start/end times for timing @\
-    character(len=30) :: varname         ! variable name @\
 @\
     ! Initialize return code @\
     localrc = ESMF_RC_NOT_IMPL @\
@@ -798,27 +841,43 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
 @\
     ! Obtain localPet @\
     call ESMF_VMGetCurrent(vm_opt, rc=localrc) @\
-    call ESMF_VMGet(vm_opt, mpiCommunicator=mpic, localPet=localPet, petCount=petCount, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+    call ESMF_VMGet(vm_opt, mpiCommunicator=mpic, localPet=localPet, & @\
+      petCount=petCount, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     !-------------------------------- @\
     ! Obatin the DOF from  (pioDofList) @\
     !-------------------------------- @\
-    call ESMF_ArrayConstructPioDof(array, localDe=0, pioDofCount=pioDofCount, rc=rc) @\
+    call ESMF_ArrayConstructPioDof(array, localDe=0, & @\
+      pioDofCount=pioDofCount, rc=rc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
     allocate(pioDofList(pioDofCount)) @\
-    call ESMF_ArrayConstructPioDof(array, localDe=0, pioDofList=pioDofList, rc=rc) @\
+    call ESMF_ArrayConstructPioDof(array, localDe=0, & @\
+      pioDofList=pioDofList, rc=rc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
 @\
     !-------------------------------- @\
     ! Get array typekind from ESMF array @\
     !-------------------------------- @\
     call ESMF_ArrayGet(array, dimCount=dimC, rc=localrc) @\
-    call ESMF_ArrayGet(array, typekind=typekind, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
     allocate (gDimsIndex(dimC)) @\
     allocate ( minIndexPDimPPatch(dimC,1) ) @\
     allocate ( maxIndexPDimPPatch(dimC,1) ) @\
     call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayrd, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
     call ESMF_ArrayGet(array, maxIndexPDimPPatch=maxIndexPDimPPatch, & @\
                     minIndexPDimPPatch=minIndexPDimPPatch, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     do i=1,dimC @\
       gDimsIndex(i) = maxIndexPDimPPatch(i,1)-minIndexPDimPPatch(i,1)+1 @\
@@ -839,6 +898,7 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
     !-------------------------------------- @\
     call PIO_init(localPet, mpic, num_iotasks, num_aggregator, stride, & @\
          rearr_type, PIOSYS, base) @\
+    !TODO: need error checking here! @\
 @\
     !------------------------------------------------------- @\
     ! Explain the distributed array decomposition to PIOlib @\
@@ -851,25 +911,27 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
      case(ESMF_TYPEKIND_R8%dkind) @\
        basepiotype=PIO_double @\
      case default @\
-       write(*,*)"Unsupported typekind" @\
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported typekind", & @\
+              ESMF_CONTEXT, rc) @\
        return @\
     end select @\
 @\
     call PIO_initDecomp(PIOSYS,basepiotype, gDimsIndex,pioDofList,IOdesc) @\
+    !TODO: need error checking here! @\
 @\
     !-------------------------------- @\
     ! Open a file and check data @\
     !-------------------------------- @\
     mode = pio_64bit_offset @\
-    localrc = PIO_OpenFile(PIOSYS,File,iotype_netcdf,fname) @\
-    call check_pioerr(rc,localPet,__FILE__,__LINE__," openfile") @\
+    pioerr = PIO_OpenFile(PIOSYS,File,iotype_netcdf,fname) @\
+    call check_pioerr(pioerr,localPet,__FILE__,__LINE__," openfile") @\
 @\
     ! Set Frame to '1' in the PIO descriptor file @\
     one = 1 @\
-    call ESMF_ArrayGet(array, name=varname, rc=localrc) @\
-    rc = PIO_inq_varid(File, trim(varname), vard) @\
-    call check_pioerr(rc,localPet,__FILE__,__LINE__," defvar") @\
+    pioerr = PIO_inq_varid(File, trim(varname), vard) @\
+    call check_pioerr(pioerr,localPet,__FILE__,__LINE__," defvar") @\
     call PIO_SetFrame(vard,one) @\
+    !TODO: need error checking here! @\
 @\
     !------------------------- @\
     ! Time the parallel read @\
@@ -877,11 +939,13 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
     dt_read = 0. @\
 !    call MPI_Barrier(mpic,rc) @\
 !    st = MPI_Wtime() @\
-    call PIO_read_darray(File,vard, IOdesc, farrayrd, localrc) @\
-    call check_pioerr(rc,localPet,__FILE__,__LINE__," read_darray") @\
+    call PIO_read_darray(File,vard, IOdesc, farrayrd, pioerr) @\
+    call check_pioerr(pioerr,localPet,__FILE__,__LINE__," read_darray") @\
+    !TODO: need error checking here! @\
 !    et = MPI_Wtime() @\
 @\
     call PIO_CloseFile(File) @\
+    !TODO: need error checking here! @\
 !    call MPI_Barrier(mpic,localrc) @\
 !    dt_read = dt_read + (et - st) @\
 !@\
@@ -891,7 +955,9 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
 !    if(localPet.eq.0) write(*,*) "Time for read:", dt_read @\
 @\
     call pio_freedecomp(PIOSYS, IOdesc) @\
+    !TODO: need error checking here! @\
     call pio_finalize (PIOSYS, rc) @\
+    !TODO: need error checking here! @\
     deallocate (pioDofList) @\
     deallocate (gDimsIndex) @\
     deallocate (minIndexPDimPPatch) @\
