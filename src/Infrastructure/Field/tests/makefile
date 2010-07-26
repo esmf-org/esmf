@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.78 2010/07/15 20:26:03 garyblock Exp $ 
+# $Id: makefile,v 1.79 2010/07/26 21:12:00 samsoncheung Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -13,6 +13,7 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridCsrvUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldArbGridUTest \
+		$(ESMF_TESTDIR)/ESMF_FieldIOUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldStressUTest
                
 TESTS_RUN     = RUN_ESMF_FieldUTest \
@@ -20,6 +21,7 @@ TESTS_RUN     = RUN_ESMF_FieldUTest \
 		RUN_ESMF_FieldRegridUTest \
 		RUN_ESMF_FieldRegridCsrvUTest \
 		RUN_ESMF_FieldArbGridUTest \
+		RUN_ESMF_FieldIOUTest \
 		RUN_ESMF_FieldStressUTest \
 		RUN_ESMC_FieldUTest
 
@@ -87,6 +89,9 @@ RUN_ESMF_FieldRegridCsrvUTestUNI:
 
 RUN_ESMF_FieldArbGridUTest:
 	$(MAKE) TNAME=FieldArbGrid NP=4 ftest
+
+RUN_ESMF_FieldIOUTest:
+	$(MAKE) TNAME=FieldIO NP=4 ftest
 
 RUN_ESMF_FieldArbGridUTestUNI:
 	$(MAKE) TNAME=FieldArbGrid NP=1 ftest
