@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.21 2010/04/21 06:09:05 eschwab Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.22 2010/07/27 22:24:11 w6ws Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -26,7 +26,7 @@
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{\bf Attribute Design}
-%\newcommand{\myauthors}{Ryan O'Kuinghttons}
+%\newcommand{\myauthors}{Ryan O\'Kuinghttons}
 #endif
 
 #ifdef STANDALONE
