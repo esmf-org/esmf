@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.1 2010/07/20 21:10:20 feiliu Exp $
+! $Id: ESMF_XGridGet.F90,v 1.2 2010/07/27 18:52:58 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.1 2010/07/20 21:10:20 feiliu Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.2 2010/07/27 18:52:58 feiliu Exp $'
 
 !==============================================================================
 !
@@ -79,6 +79,7 @@ module ESMF_XGridGetMod
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_XGridGetDefault
+        module procedure ESMF_XGridGetDG
         module procedure ESMF_XGridGetEle
 
 
@@ -107,7 +108,7 @@ contains
 
 ! !INTERFACE:
 
-subroutine ESMF_XGridGetDefault(xgrid, &
+subroutine ESMF_XGridGetDefault(xgrid, ngridA, ngridB, &
     sideA, sideB, area, centroid, &
     distgridA, distgridB, distgridM, &
     dimCount, localDECount, &
@@ -118,6 +119,7 @@ subroutine ESMF_XGridGetDefault(xgrid, &
 !
 ! !ARGUMENTS:
 type(ESMF_XGrid), intent(in)                 :: xgrid
+integer, intent(out), optional               :: ngridA, ngridB
 type(ESMF_Grid), intent(out), optional       :: sideA(:), sideB(:)
 real*8, intent(out), optional                :: area(:)
 real*8, intent(out), optional                :: centroid(:,:)
@@ -138,6 +140,10 @@ integer, intent(out), optional               :: rc
 !     \begin{description}
 !     \item [xgrid]
 !       The xgrid object used to retrieve information from.
+!     \item [{[ngridA]}]
+!           Number of grids on the A side
+!     \item [{[ngridB]}]
+!           Number of grids on the B side
 !     \item [{[sideA]}]
 !           2D Grids on side A
 !     \item [{[sideB]}]
@@ -390,6 +396,90 @@ end subroutine ESMF_XGridGetDefault
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridGetDG()"
+!BOPI
+! !IROUTINE:  ESMF_XGridGetDG - Get an individual distgrid
+
+! !INTERFACE:
+
+subroutine ESMF_XGridGetDG(xgrid, gridIndex, &
+    distgridA, distgridB, &
+    rc) 
+
+!
+! !ARGUMENTS:
+type(ESMF_XGrid), intent(in)                 :: xgrid
+integer, intent(in)                          :: gridIndex
+type(ESMF_DistGrid), intent(out), optional   :: distgridA
+type(ESMF_DistGrid), intent(out), optional   :: distgridB
+integer, intent(out), optional               :: rc 
+!
+! !DESCRIPTION:
+!      Get information about XGrid
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [xgrid]
+!       The xgrid object used to retrieve information from.
+!     \item [{[gridIndex]}]
+!           Index of distgrid to be retrieved.
+!     \item [{[distgridA]}]
+!           distgrid whose sequence index list is an overlap between gridIndex-th Grid
+!           on sideA and the xgrid object.
+!     \item [{[distgridB]}]
+!           distgrid whose sequence index list is an overlap between gridIndex-th Grid
+!           on sideB and the xgrid object.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} only if the {\tt ESMF\_XGrid} 
+!           is created.
+!     \end{description}
+!
+!EOPI
+
+    type(ESMF_XGridType), pointer :: xgtypep
+
+    ! Initialize return code   
+    if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! check init status of input XGrid
+    ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
+
+    xgtypep => xgrid%xgtypep
+
+    if(gridIndex .lt. 0) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+           "- gridIndex cannot be less than 0", &
+           ESMF_CONTEXT, rc) 
+        return
+    endif
+
+    if(present(distgridA)) then
+        if(gridIndex .gt. size(xgtypep%distgridA, 1)) then
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+               "- gridIndex cannot be greater than the size of distgridA in the XGrid", &
+               ESMF_CONTEXT, rc) 
+            return
+        endif
+        distgridA = xgtypep%distgridA(gridIndex)
+    endif
+
+    if(present(distgridB)) then
+        if(gridIndex .gt. size(xgtypep%distgridB, 1)) then
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+               "- gridIndex cannot be greater than the size of distgridB in the XGrid", &
+               ESMF_CONTEXT, rc) 
+            return
+        endif
+        distgridB = xgtypep%distgridB(gridIndex)
+    endif
+
+    ! success
+    if(present(rc)) rc = ESMF_SUCCESS
+
+end subroutine ESMF_XGridGetDG
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridGetEle()"
 !BOPI
 ! !IROUTINE:  ESMF_XGridGetEle - Get information about XGrid
@@ -398,7 +488,7 @@ end subroutine ESMF_XGridGetDefault
 
 subroutine ESMF_XGridGetEle(xgrid, &
     localDE, elementCount, &
-    exclusiveLBound, exclusiveUBound, &
+    exclusiveCount, exclusiveLBound, exclusiveUBound, &
     rc) 
 
 !
@@ -406,8 +496,9 @@ subroutine ESMF_XGridGetEle(xgrid, &
 type(ESMF_XGrid), intent(in)                 :: xgrid
 integer, intent(in)                          :: localDE
 integer, intent(out), optional               :: elementCount
-integer, intent(out), optional               :: exclusiveLBound(ESMF_MAXDIM)
-integer, intent(out), optional               :: exclusiveUBound(ESMF_MAXDIM)
+integer, intent(out), optional               :: exclusiveCount(1)
+integer, intent(out), optional               :: exclusiveLBound(1)
+integer, intent(out), optional               :: exclusiveUBound(1)
 integer, intent(out), optional               :: rc 
 !
 ! !DESCRIPTION:
@@ -457,47 +548,52 @@ integer, intent(out), optional               :: rc
             ESMF_CONTEXT, rc)) return
     endif
 
+    call ESMF_DistGridGet(xgtypep%distgridM, delayout=delayout, &
+        rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+    call ESMF_DELayoutGet(delayout, localDECount=ldeCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+    allocate(minIndex(1, ldeCount))
+    call ESMF_DistGridGet(xgtypep%distgridM, delayout=delayout, &
+        minIndexPDimPDe=minIndex, &
+        rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
     if(present(exclusiveLBound)) then
-        call ESMF_DistGridGet(xgtypep%distgridM, delayout=delayout, &
-            rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
-        call ESMF_DELayoutGet(delayout, localDECount=ldeCount, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
-        allocate(minIndex(1, ldeCount))
-        call ESMF_DistGridGet(xgtypep%distgridM, delayout=delayout, &
-            minIndexPDimPDe=minIndex, &
-            rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
         exclusiveLBound(1) = minIndex(1,localDE+1)
-        deallocate(minIndex)
     endif
 
+    call ESMF_DistGridGet(xgtypep%distgridM, delayout=delayout, &
+        rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+    call ESMF_DELayoutGet(delayout, localDECount=ldeCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+    allocate(maxIndex(1, ldeCount))
+    call ESMF_DistGridGet(xgtypep%distgridM, delayout=delayout, &
+        maxIndexPDimPDe=maxIndex, &
+        rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
     if(present(exclusiveUBound)) then
-        call ESMF_DistGridGet(xgtypep%distgridM, delayout=delayout, &
-            rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
-        call ESMF_DELayoutGet(delayout, localDECount=ldeCount, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
-        allocate(maxIndex(1, ldeCount))
-        call ESMF_DistGridGet(xgtypep%distgridM, delayout=delayout, &
-            maxIndexPDimPDe=maxIndex, &
-            rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
         exclusiveUBound(1) = maxIndex(1,localDE+1)
-        deallocate(maxIndex)
     endif
+
+    if(present(exclusiveCount)) then
+        exclusiveCount(1) = maxIndex(1,localDE+1) - minIndex(1,localDE+1) + 1
+    endif
+
+    deallocate(minIndex)
+    deallocate(maxIndex)
 
     if(present(rc)) rc = ESMF_SUCCESS
 
