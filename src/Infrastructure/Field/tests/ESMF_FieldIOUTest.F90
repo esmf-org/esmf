@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.2 2010/07/27 15:37:22 svasquez Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.3 2010/07/27 17:47:11 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@ program ESMF_FieldIOUTest
   Farray_w = 0.02  ! halo points will have value 0.02
   do j=exclusiveLBound(2),exclusiveUBound(2)
   do i=exclusiveLBound(1),exclusiveUBound(1)
-    Farray_w(i,j) = sin(dfloat(i)/5.0)*tan(dfloat(j)/5.0)
+    Farray_w(i,j) = sin(dble(i)/5.0)*tan(dble(j)/5.0)
   enddo
   enddo
 !------------------------------------------------------------------------
@@ -213,11 +213,11 @@ program ESMF_FieldIOUTest
   deallocate (exclusiveLBound, exclusiveUBound)
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Destroy Grid"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_GridDestroy(grid, rc=rc)
-  !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -229,11 +229,11 @@ program ESMF_FieldIOUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-  !NEX_disable_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Destroy Array "
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
-  !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
