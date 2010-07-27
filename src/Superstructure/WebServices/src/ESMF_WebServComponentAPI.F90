@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServComponentAPI.F90,v 1.1 2010/07/27 05:52:46 theurich Exp $
+! $Id: ESMF_WebServComponentAPI.F90,v 1.2 2010/07/27 06:21:25 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -18,7 +18,11 @@
 !   !   put more info here...
 
   subroutine f_esmf_processinit(comp, impstate, expstate, clock, phase, rc)
-    use ESMF_Mod
+    use ESMF_CompMod
+    use ESMF_GridCompMod
+    use ESMF_StateMod
+    use ESMF_ClockMod
+
     implicit none
 
     type(ESMF_GridComp) :: comp
@@ -43,7 +47,11 @@
 !   !   put more info here...
 
   subroutine f_esmf_processrun(comp, impstate, expstate, clock, phase, rc)
-    use ESMF_Mod
+    use ESMF_CompMod
+    use ESMF_GridCompMod
+    use ESMF_StateMod
+    use ESMF_ClockMod
+
     implicit none
 
     type(ESMF_GridComp) :: comp
@@ -68,7 +76,11 @@
 !   !   put more info here...
 
   subroutine f_esmf_processfinal(comp, impstate, expstate, clock, phase, rc)
-    use ESMF_Mod
+    use ESMF_CompMod
+    use ESMF_GridCompMod
+    use ESMF_StateMod
+    use ESMF_ClockMod
+
     implicit none
 
     type(ESMF_GridComp) :: comp
@@ -93,7 +105,12 @@
 !   !   put more info here...
  
   subroutine process_request(comp, importState, exportState, clock, phase, procType, rc)
-    use ESMF_Mod
+    use ESMF_CompMod
+    use ESMF_GridCompMod
+    use ESMF_StateMod
+    use ESMF_ClockMod
+    use ESMF_UtilTypesMod
+
     implicit none
 
     type(ESMF_GridComp) :: comp
@@ -138,7 +155,12 @@
 !   !   put more info here...
 
   subroutine wait_for_request(comp, exportState, rc)
-    use ESMF_Mod
+    use ESMF_CompMod
+    use ESMF_StateMod
+    use ESMF_GridCompMod
+    use ESMF_ClockMod
+    use ESMF_UtilTypesMod
+    
     implicit none
 
     type(ESMF_GridComp) :: comp
