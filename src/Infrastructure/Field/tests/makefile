@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.79 2010/07/26 21:12:00 samsoncheung Exp $ 
+# $Id: makefile,v 1.80 2010/07/28 22:01:49 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -37,14 +37,10 @@ TESTS_RUN_UNI = RUN_ESMF_FieldStressUTestUNI \
 #
 ifeq ($(ESMF_TESTHARNESS_FIELD), default)
   TESTS_RUN := $(TESTS_RUN) RUN_ESMF_TestHarnessField_default
-else
-  TESTS_RUN := $(TESTS_RUN) $(ESMF_TESTHARNESS_FIELD)
-endif
-
-ifeq ($(ESMF_TESTHARNESS_FIELD_UNI), default)
   TESTS_RUN_UNI := $(TESTS_RUN_UNI) RUN_ESMF_TestHarnessFieldUNI_default
 else
-  TESTS_RUN_UNI := $(TESTS_RUN_UNI) $(ESMF_TESTHARNESS_FIELD_UNI)
+  TESTS_RUN := $(TESTS_RUN) $(ESMF_TESTHARNESS_FIELD)
+  TESTS_RUN_UNI := $(TESTS_RUN_UNI) $(ESMF_TESTHARNESS_FIELD)
 endif
 
 include ${ESMF_DIR}/makefile
