@@ -41,9 +41,7 @@ case the environment variable variable is not set.
 The environment variables currently defined are:
 \begin{itemize}
 \item ESMF\_TESTHARNESS\_ARRAY - set target for Array class tests
-\item ESMF\_TESTHARNESS\_ARRAY\_UNI - set target for Array class UNI tests
 \item ESMF\_TESTHARNESS\_FIELD - set target for Field class tests
-\item ESMF\_TESTHARNESS\_FIELD\_UNI - set target for Field class UNI tests
 \end{itemize}
 
 The targets currently supported for the ESMF\_TESTHARNESS\_ARRAY variable are:
@@ -53,23 +51,10 @@ The targets currently supported for the ESMF\_TESTHARNESS\_ARRAY variable are:
 \item RUN\_ESMF\_TestHarnessArray\_2 - Quick test of 2D and 3D redistribution
 \end{itemize}
 
-The targets currently supported for the ESMF\_TESTHARNESS\_ARRAY\_UNI variable are:
-\begin{itemize}
-\item RUN\_ESMF\_TestHarnessArrayUNI\_default - Used to verify functionality of the test harness
-\item RUN\_ESMF\_TestHarnessArrayUNI\_1 - Basic test of 2D and 3D redistribution
-\item RUN\_ESMF\_TestHarnessArrayUNI\_2 - Quick test of 2D and 3D redistribution
-\end{itemize}
-
 The targets currently supported for the ESMF\_TESTHARNESS\_FIELD variable are:
 \begin{itemize}
 \item RUN\_ESMF\_TestHarnessField\_default - Used to verify functionality of the test harness
 \item RUN\_ESMF\_TestHarnessField\_1 - Basic test of 2D and 3D regrid
-\end{itemize}
-
-The targets currently supported for the ESMF\_TESTHARNESS\_FIELD\_UNI variable are:
-\begin{itemize}
-\item RUN\_ESMF\_TestHarnessFieldUNI\_default - Used to verify functionality of the test harness
-\item RUN\_ESMF\_TestHarnessFieldUNI\_1 - Basic test of 2D and 3D regrid
 \end{itemize}
 
 Each target selects the desired sequence of test cases for that target.
