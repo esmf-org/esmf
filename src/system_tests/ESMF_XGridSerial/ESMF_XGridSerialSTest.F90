@@ -1,7 +1,7 @@
-! $Id: ESMF_XGridSerialSTest.F90,v 1.1 2010/07/27 15:11:33 feiliu Exp $
+! $Id: ESMF_XGridSerialSTest.F90,v 1.2 2010/07/28 15:23:47 feiliu Exp $
 !
 !-------------------------------------------------------------------------
-!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
