@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.2 2010/07/28 06:01:13 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.3 2010/07/28 19:59:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -518,7 +518,7 @@ program ESMF_AttributeCIMEx
 !     internal Attribute hierarchy in that it has all the attributes of
 !     the fields within its top-level <modelComponent> record.  The filename
 !     used, coupler\_component.xml, is derived from the name of the coupler
-!     Component, given as an input argument in the ESMF_CplCompCreate()
+!     Component, given as an input argument in the ESMF\_CplCompCreate()
 !     call above.  The file is written to the examples execution directory.
 !EOE
 
