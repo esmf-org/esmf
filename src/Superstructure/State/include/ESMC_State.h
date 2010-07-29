@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.31 2010/07/22 00:20:11 w6ws Exp $
+// $Id: ESMC_State.h,v 1.32 2010/07/29 22:14:30 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -24,14 +24,10 @@
 #define ESMC_State_H
 
 //-----------------------------------------------------------------------------
-//BOP
-// !CLASS:  ESMC_State - C interface to the F90 State object
-//
-// !DESCRIPTION:
+// ESMC_State - C interface to the F90 State object
 //
 // The code in this file defines the public C State
 // 
-//EOP
 //-----------------------------------------------------------------------------
 
 #include "ESMC_Array.h"
@@ -68,7 +64,7 @@ ESMC_State ESMC_StateCreate(
 //    The name for the State object. If not specified, i.e. NULL,
 //    a default unique name will be generated: "StateNNN" where NNN
 //    is a unique sequence number from 001 to 999.
-//  \item[{[rc]}]
+//  \item[rc]
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
@@ -92,7 +88,7 @@ int ESMC_StateDestroy(
 //
 //  The arguments are:
 //  \begin{description}
-//  \item[{[state]}]
+//  \item[state]
 //    The State to be destroyed.
 //  \end{description}
 //
@@ -116,7 +112,7 @@ int ESMC_StatePrint(
 //
 //  The arguments are:
 //  \begin{description}
-//  \item[{[state]}]
+//  \item[state]
 //    The State to be printed.
 //  \end{description}
 //
@@ -141,9 +137,9 @@ int ESMC_StateAddArray(
 //
 //  The arguments are:
 //  \begin{description}
-//  \item[{[state]}]
+//  \item[state]
 //    The State object.
-//  \item[{[array]}]
+//  \item[array]
 //    The Array object to be included within the State.
 //  \end{description}
 //
@@ -168,9 +164,9 @@ int ESMC_StateAddField(
 //
 //  The arguments are:
 //  \begin{description}
-//  \item[{[state]}]
+//  \item[state]
 //    The State object.
-//  \item[{[array]}]
+//  \item[array]
 //    The Array object to be included within the State.
 //  \end{description}
 //
@@ -197,11 +193,11 @@ int ESMC_StateGetArray(
 //
 //  The arguments are:
 //  \begin{description}
-//  \item[{[state]}]
+//  \item[state]
 //    The State object.
-//  \item[{[name]}]
+//  \item[name]
 //    The name of the desired Array object.
-//  \item[{[array]}]
+//  \item[array]
 //    A pointer to the Array object.
 //  \end{description}
 //
@@ -228,11 +224,11 @@ int ESMC_StateGetField(
 //
 //  The arguments are:
 //  \begin{description}
-//  \item[{[state]}]
+//  \item[state]
 //    The State object.
-//  \item[{[name]}]
+//  \item[name]
 //    The name of the desired Field object.
-//  \item[{[array]}]
+//  \item[array]
 //    A pointer to the Field object.
 //  \end{description}
 //
