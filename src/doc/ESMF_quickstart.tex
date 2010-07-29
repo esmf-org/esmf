@@ -355,15 +355,14 @@ the bundled test and example applications.
 
 \noindent Other test-related targets are:
 \begin{description}
-%\item[all\_tests] build and run all available tests and demos
-\item[all\_tests] build and run all available tests
-\item[build\_all\_tests] build tests only, do not execute
-\item[run\_all\_tests] run tests without rebuilding and print a
+\item[all\_tests] build and run all available tests and examples
+\item[build\_all\_tests] build tests and examples; do not execute
+\item[run\_all\_tests] run tests and examples without rebuilding; print a
 summary of the results
-\item[check\_all\_tests] 
-print out the results summary without re-executing the tests again
-%\item[clean\_all\_tests] remove all test and demo executables 
-\item[clean\_all\_tests] remove all test executables 
+\item[check\_all\_tests] print out the results summary without re-executing
+\item[dust\_all\_tests] remove all test and example output files
+\item[clean\_all\_tests] remove all test and example executables and output
+files
 \end{description}
 
 For all the targets listed above, the string {\tt all\_tests} can be
@@ -376,8 +375,10 @@ specific type of test:
 %\item[demos] demos are example applications showing the use of the system
 \end{description}
 For example, {\tt gmake build\_examples} recompiles the example programs but 
-does not execute them.  {\tt gmake clean\_system\_tests} removes all
-executables and files associated with the system tests.
+does not execute them. {\tt gmake dust\_unit\_tests} removes all
+output files generated when executing the unit tests, but leaves the
+executables. {\tt gmake clean\_system\_tests} removes all executables and files
+associated with the system tests.
 
 For the unit tests only, there is an additional environment variable
 which affects how the tests are built:
