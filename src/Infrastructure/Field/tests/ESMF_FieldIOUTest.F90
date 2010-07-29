@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.3 2010/07/27 17:47:11 samsoncheung Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.4 2010/07/29 17:29:57 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -69,7 +69,7 @@ program ESMF_FieldIOUTest
 
 
 !------------------------------------------------------------------------
-  !EX_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   ! Verifying that a Grid can be created
   grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
     regDecomp=(/2,2/), gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
@@ -106,7 +106,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
-  !EX_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   ! Create Field
   field_w=ESMF_FieldCreate(grid, farray=Farray_w, indexflag=ESMF_INDEX_DELOCAL, name="temperature",  rc=rc)
   write(failMsg, *) ""
@@ -115,7 +115,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
-  !EX_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   ! Obtain ESMF_Array
   call ESMF_FieldGet(field_w, array=array, rc=rc)
   write(failMsg, *) ""
@@ -124,7 +124,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
-  !EX_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   ! Write Fortran array in Field
   call ESMF_FieldWrite(field_w, fname="field.nc", rc=rc)
   write(failMsg, *) ""
@@ -145,7 +145,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
-  !EX_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   ! Create a ArraySpec
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8,   &
                          rank=2, rc=rc)
@@ -155,7 +155,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
-  !EX_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   ! Create a new Field
   field_r = ESMF_FieldCreate(grid, arrayspec, indexflag=ESMF_INDEX_DELOCAL, &
              name="temperature",  rc=rc)
@@ -165,7 +165,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
-  !EX_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   ! Read data to Object Field_r
   call ESMF_FieldRead(field_r, fname="field.nc", rc=rc)
   write(failMsg, *) ""
@@ -179,7 +179,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
-  !EX_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   ! Obtain the Fortran pointer
   call ESMF_FieldGet(field_r, localDe=0, farrayPtr=Farray_r, rc=rc)
   write(failMsg, *) ""
