@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.305 2010/07/28 22:01:49 theurich Exp $
+#  $Id: common.mk,v 1.306 2010/07/29 16:12:16 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1789,9 +1789,22 @@ MPMDCLEANUP:
 	$(ESMF_RM) -f *.o *.mod
 
 #
+# dust_system_tests
+#
+dust_system_tests:
+	$(ESMF_RM) $(ESMF_TESTDIR)/system_tests_results
+	$(ESMF_RM) $(ESMF_TESTDIR)/*STest.Log
+	$(ESMF_RM) $(ESMF_TESTDIR)/*STest.stdout
+	$(ESMF_RM) $(ESMF_TESTDIR)/*.rc
+	$(ESMF_RM) $(ESMF_TESTDIR)/data
+
+#
 # run_system_tests
 #
 run_system_tests:  reqdir_tests update_sys_tests_flags
+	@if [ $(ESMF_DIR) = `pwd` ] ; then \
+	  $(MAKE) dust_system_tests ; \
+	fi
 	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR) ; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
@@ -1822,6 +1835,9 @@ tree_run_system_tests: $(SYSTEM_TESTS_RUN)
 # run_system_tests_uni
 #
 run_system_tests_uni:  reqdir_tests update_sys_tests_flags
+	@if [ $(ESMF_DIR) = `pwd` ] ; then \
+	  $(MAKE) dust_system_tests ; \
+	fi
 	@if [ -f $(SYS_TESTS_CONFIG) ] ; then \
            $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
            $(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG); \
@@ -2177,15 +2193,28 @@ unit_test_links:
 	ln -s $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.Log l
 
 #
+# dust_unit_tests
+#
+dust_unit_tests: dust_test_harness
+	$(ESMF_RM) $(ESMF_TESTDIR)/unit_tests_results
+	$(ESMF_RM) $(ESMF_TESTDIR)/*UTest.Log
+	$(ESMF_RM) $(ESMF_TESTDIR)/*UTest.stdout
+	$(ESMF_RM) $(ESMF_TESTDIR)/*.rc
+	$(ESMF_RM) $(ESMF_TESTDIR)/data
+
+#
 # run_unit_tests
 #
-run_unit_tests:  reqdir_tests verify_exhaustive_flag init_test_harness
+run_unit_tests:  reqdir_tests verify_exhaustive_flag
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor unit tests when ESMF_COMM is mpiuni;" ; \
 	  echo "run run_unit_tests_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
-	fi 
+	fi
+	@if [ $(ESMF_DIR) = `pwd` ] ; then \
+	  $(MAKE) dust_unit_tests ; \
+	fi
 	@if [ -f $(UNIT_TESTS_CONFIG) ] ; then \
 	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Multiprocessor/' $(UNIT_TESTS_CONFIG) > $(UNIT_TESTS_CONFIG).temp; \
            $(ESMF_MV) $(UNIT_TESTS_CONFIG).temp $(UNIT_TESTS_CONFIG); \
@@ -2198,7 +2227,10 @@ tree_run_unit_tests: $(TESTS_RUN)
 #
 # run_unit_tests_uni
 #
-run_unit_tests_uni:  reqdir_tests verify_exhaustive_flag init_test_harness
+run_unit_tests_uni:  reqdir_tests verify_exhaustive_flag
+	@if [ $(ESMF_DIR) = `pwd` ] ; then \
+	  $(MAKE) dust_unit_tests ; \
+	fi
 	@if [ -f $(UNIT_TESTS_CONFIG) ] ; then \
 	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(UNIT_TESTS_CONFIG) > $(UNIT_TESTS_CONFIG).temp; \
            $(ESMF_MV) $(UNIT_TESTS_CONFIG).temp $(UNIT_TESTS_CONFIG); \
@@ -2369,11 +2401,8 @@ citest:
 
 ##########################
 # prepare to run test harness
-init_test_harness:
-	$(ESMF_RM) $(ESMF_TESTDIR)/test_harness.list
-	$(ESMF_RM) $(ESMF_TESTDIR)/test_harness.rc
-	$(ESMF_RM) $(ESMF_TESTDIR)/ESMF_TestHarness*UTest.stdout
-	$(ESMF_RM) $(ESMF_TESTDIR)/PET*.TestHarnessUTest.Log
+dust_test_harness:
+	$(ESMF_RM) $(ESMF_TESTDIR)/test_harness.*
 
 #
 # run test harness
@@ -2508,6 +2537,16 @@ $(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(ESMFLIB)
 	$(ESMF_RM) $<
 
 #
+# dust_examples
+#
+dust_examples:
+	$(ESMF_RM) $(ESMF_EXDIR)/examples_results
+	$(ESMF_RM) $(ESMF_EXDIR)/*Ex.Log
+	$(ESMF_RM) $(ESMF_EXDIR)/*Ex.stdout
+	$(ESMF_RM) $(ESMF_EXDIR)/*.rc
+	$(ESMF_RM) $(ESMF_EXDIR)/data
+
+#
 # run_examples
 #
 run_examples:  reqdir_examples
@@ -2516,6 +2555,9 @@ run_examples:  reqdir_examples
 	  echo "run run_examples_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
+	fi
+	@if [ $(ESMF_DIR) = `pwd` ] ; then \
+	  $(MAKE) dust_examples ; \
 	fi
 	@if [ -f $(EXAMPLES_CONFIG) ] ; then \
 	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Multiprocessor/' $(EXAMPLES_CONFIG) > $(EXAMPLES_CONFIG).temp; \
@@ -2530,6 +2572,9 @@ tree_run_examples: $(EXAMPLES_RUN)
 # run_examples_uni
 #
 run_examples_uni:  reqdir_examples
+	@if [ $(ESMF_DIR) = `pwd` ] ; then \
+	  $(MAKE) dust_examples ; \
+	fi
 	@if [ -f $(EXAMPLES_CONFIG) ] ; then \
 	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(EXAMPLES_CONFIG) > $(EXAMPLES_CONFIG).temp; \
 	$(ESMF_MV) $(EXAMPLES_CONFIG).temp $(EXAMPLES_CONFIG); \
