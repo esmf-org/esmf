@@ -1,4 +1,4 @@
-// $Id: ESMCI_FieldReg.C,v 1.6 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_FieldReg.C,v 1.7 2010/07/29 22:29:58 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -18,7 +18,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FieldReg.C,v 1.6 2010/03/04 18:57:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_FieldReg.C,v 1.7 2010/07/29 22:29:58 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -32,6 +32,8 @@ fields(),
 ndfields(),
 efields()
 {
+  // Initialize numSets
+  numSets=0;
 }
 
 FieldReg::~FieldReg() {
@@ -509,6 +511,26 @@ void FieldReg::ProxyCommit(MeshDB &mesh,
 			   std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg) {
   Trace __trace("FieldReg::ProxyCommit(MeshDB &mesh)");
 
+
+  // Copy imprint information to proxy mesh
+  //// Clear vectors first
+  numSets=0;
+  nvalSetSizes.clear();
+  nvalSetVals.clear();
+  nvalSetObjSizes.clear();
+  nvalSetObjVals.clear();
+
+  //// Then put in info
+  numSets=numSetsArg;
+  nvalSetSizes.insert(nvalSetSizes.begin(),nvalSetSizesArg.begin(), nvalSetSizesArg.end());
+  nvalSetVals.insert(nvalSetVals.begin(),nvalSetValsArg.begin(), nvalSetValsArg.end());
+  nvalSetObjSizes.insert(nvalSetObjSizes.begin(), nvalSetObjSizesArg.begin(), nvalSetObjSizesArg.end());
+  nvalSetObjVals.insert(nvalSetObjVals.begin(), nvalSetObjValsArg.begin(), nvalSetObjValsArg.end());
+
+
+
+
+  // Setup for generating proxy
   int setPos=0;
   int nvalSetPos=0;
   int nvalSetObjPos=0;
