@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.306 2010/07/29 16:12:16 theurich Exp $
+#  $Id: common.mk,v 1.307 2010/07/29 17:22:22 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1590,6 +1590,7 @@ all_tests: info
 	  $(MAKE) $(ALLTEST_TARGETS) results_summary ;\
         fi
 
+dust_all_tests: dust_unit_tests dust_system_tests dust_examples
 
 build_all_tests: clean_if_exhaustive_flag_mismatch
 	$(MAKE) build_unit_tests build_system_tests build_examples build_demos 
