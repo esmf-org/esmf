@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.31 2010/07/28 06:01:54 eschwab Exp $
+% $Id: Attribute_desc.tex,v 1.32 2010/07/30 06:00:00 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@ Attribute hierarchies are linked in a ``shallow" manner, meaning that the Attrib
 \subsubsection{Attribute Packages}
  \label{desc:AttPacks}
 
-At this time, all ESMF objects which are enabled to contain Attributes can also contain Attribute packages.  Every Attribute package is specified by a {\bf convention} and a {\bf purpose}, hereafter called {\bf specifiers}, such as ``CF" (see below) and ``general".  These specifiers are used to validate ESMF Attribute packages against existing metadata conventions.  One can use an ESMF supplied standard Attribute package, specify their own Attribute packages, or add customized Attributes to the ESMF supplied Attribute packages.  Currently, working with Attribute packages is quite involved, but future development with IO will allow for a more automated approach to populating Attribute packages from a file.
+At this time, all ESMF objects which are enabled to contain Attributes can also contain Attribute packages.  Every Attribute package is specified by a {\bf convention} and a {\bf purpose}, hereafter called {\bf specifiers}, such as ``CF" (see below) and ``General".  These specifiers are used to validate ESMF Attribute packages against existing metadata conventions.  One can use an ESMF supplied standard Attribute package, specify their own Attribute packages, or add customized Attributes to the ESMF supplied Attribute packages.  Currently, working with Attribute packages is quite involved, but future development with IO will allow for a more automated approach to populating Attribute packages from a file.
 
 The standard Attribute packages supplied by ESMF exist for the following ESMF objects:
 
@@ -64,13 +64,27 @@ The standard Attribute packages supplied by ESMF exist for the following ESMF ob
 \item Array
 \end{itemize}
 
-The ESMF standard Attribute packages are based on a blend of the Climate and Forecast (CF) and Earth System Grid (ESG) conventions.  When additional Attributes beyond the ESMF supplied Attribute packages are desired, these can be generated with the Attribute package nesting capabilities.  User supplied Attribute packages will also be an option in future releases.  An example of some more standardized user supplied Attribute packages are in Tables \ref{ComponentAttributePackages} - \ref{GridAttributePackages}, which summarize the Attribute packages available at this point in time.
+The standard Attribute packages supplied by ESMF are based on 
+
+\begin{itemize}
+\item a blend of the Earth System Grid (ESG) and Climate and Forecast (CF) conventions, and
+\item a blend of the Metafor Common Information Model (CIM) and Climate and Forecast (CF) conventions.
+\end{itemize}
+
+When additional Attributes beyond the ESMF supplied Attribute packages are desired, these can be generated with the Attribute package nesting capabilities.  User supplied Attribute packages will also be an option in future releases.  The ESMF supplied Attribute packages are shown in Tables \ref{ComponentAttributePackages} - \ref{CIMFieldAttributePackages}, which summarize the Attribute packages available at this point in time.
 
 \vspace{18pt}
 
+{\bf \large ESG/CF Attribute Packages}
+
+These Attribute packages are designed to hold ESG and CF conforming Attributes on ESMF objects. The Attributes can be written to an XML file, or in the case of the Field package, also to a tab-delimited file.  The file layout for both XML and tab-delimited is prescribed by ESMF.  Tab-delimited format is not currently supported for packages other than Field.
+
+\vspace{8pt}
+
+\label{ComponentAttributePackages}
 \begin{tabular}{|p{4cm}|p{4cm}|p{6cm}|}
 \hline
-\multicolumn{3}{|c|}{{\bf \large Component Attribute Packages}} \\
+\multicolumn{3}{|c|}{{\bf \large ESG/CF Component Attribute Packages}} \\
 \hline\hline
 {\bf Convention} & {\bf Purpose} & {\bf Name} \\
 \hline\hline
@@ -92,13 +106,13 @@ The ESMF standard Attribute packages are based on a blend of the Climate and For
      & & {\tt References} \\
 \hline
 \end{tabular}
-\label{ComponentAttributePackages}
 
 \vspace{18pt}
 
+\label{StateAttributePackages}
 \begin{tabular}{|p{4cm}|p{4cm}|p{6cm}|}
 \hline
-\multicolumn{3}{|c|}{{\bf \large State Attribute Packages}} \\
+\multicolumn{3}{|c|}{{\bf \large ESG/CF State Attribute Packages}} \\
 \hline\hline
 {\bf Convention} & {\bf Purpose} & {\bf Name} \\
 \hline\hline
@@ -106,13 +120,13 @@ The ESMF standard Attribute packages are based on a blend of the Climate and For
  & & {\tt Import} \\ 
 \hline
 \end{tabular}
-\label{StateAttributePackages}
 
 \vspace{18pt}
 
+\label{FieldAttributePackages}
 \begin{tabular}{|p{4cm}|p{4cm}|p{6cm}|}
 \hline
-\multicolumn{3}{|c|}{{\bf \large Field Attribute Packages}} \\
+\multicolumn{3}{|c|}{{\bf \large ESG/CF Field Attribute Packages}} \\
 \hline\hline
 {\bf Convention} & {\bf Purpose} & {\bf Name} \\
 \hline\hline
@@ -131,11 +145,11 @@ The ESMF standard Attribute packages are based on a blend of the Climate and For
      & & {\tt Units}  \\
 \hline
 \end{tabular}
-\label{FieldAttributePackages}
 
+\label{ArrayAttributePackages}
 \begin{tabular}{|p{4cm}|p{4cm}|p{6cm}|}
 \hline
-\multicolumn{3}{|c|}{{\bf \large Array Attribute Packages}} \\
+\multicolumn{3}{|c|}{{\bf \large ESG/CF Array Attribute Packages}} \\
 \hline\hline
 {\bf Convention} & {\bf Purpose} & {\bf Name} \\
 \hline\hline
@@ -154,11 +168,11 @@ The ESMF standard Attribute packages are based on a blend of the Climate and For
      & & {\tt Units}  \\
 \hline
 \end{tabular}
-\label{ArrayAttributePackages}
 
+\label{GridAttributePackages}
 \begin{tabular}{|p{4cm}|p{4cm}|p{6cm}|}
 \hline
-\multicolumn{3}{|c|}{{\bf \large Grid Attribute Packages}} \\
+\multicolumn{3}{|c|}{{\bf \large ESG/CF Grid Attribute Packages}} \\
 \hline\hline
 {\bf Convention} & {\bf Purpose} & {\bf Name} \\
 \hline\hline
@@ -181,13 +195,72 @@ The ESMF standard Attribute packages are based on a blend of the Climate and For
  & & {\tt Resolution} \\ 
 \hline
 \end{tabular}
-\label{GridAttributePackages}
 
 \vspace{18pt}
 
+{\bf \large CIM/CF Attribute Packages}
+
+These Attribute packages are designed to hold CIM Attributes on ESMF Component and Field objects. The Attributes can be written to an XML file whose layout is specified by the CIM convention, as promulgated by Metafor, http://metaforclimate.eu.  Writing CIM Attributes to a tab-delimited file is currently not supported.
+
+The CIM XML output file is divided into major sections called <CIMRecord>s.  The Attributes in the CIM Component package below are output to the <modelComponent>, <simulationRun>, and <platform> <CIMRecord>s.  The <modelComponet> <CIMRecord> can contain a tree of <childComponents>, reflecting a hierarchical ESMF-based model.  Each <childComponent> is derived from its own instance of a CIM Component Attribute package, attached to a corresponding ESMF Component object.
+
+The Attributes in the CIM Field package below, attached to ESMF Field objects, appear in the <modelComponent> <CIMRecord> of the output XML file, within a subsection called <composition>.  In contrast to the hierarchical <childComponent>s, the Field Attributes appearing in <composition> are flat in structure, representing a single listing of Fields from across all the Components in an ESMF Component tree.
+
+See the example "Advanced Attribute usage: CIM Attribute Packages."
+
+\vspace{8pt}
+
+\label{CIMComponentAttributePackages}
+\begin{tabular}{|p{4cm}|p{4cm}|p{8cm}|}
+\hline
+\multicolumn{3}{|c|}{{\bf \large CIM Component Attribute Packages}} \\
+\hline\hline
+{\bf Convention} & {\bf Purpose} & {\bf Name} \\
+\hline\hline
+{\tt CIM 1.0} & {\tt Model Component Simulation Description} & {\bf Component CIM 1.0 Platform Description, \newline\newline \bf Component ISO 19115 Responsible Party Description +} \\
+     & & \\
+     & & {\tt ComponentShortName} \\
+     & & {\tt ComponentLongName} \\
+     & & {\tt ComponentDescription}  \\
+     & & {\tt Version}  \\
+     & & {\tt YearReleased} \\
+     & & {\tt ModelType} \\
+     & & {\tt SimulationShortName}\\
+     & & {\tt SimulationLongName} \\ 
+     & & {\tt SimulationRationale} \\
+     & & {\tt SimulationStartDate} \\ 
+     & & {\tt SimulationDuration} \\ 
+     & & {\tt PreviousVersion} \\ 
+     & & {\tt PreviousVersionDescription} \\ 
+\hline
+{\tt CIM 1.0} & {\tt Platform Description} & {\bf Child of Component CIM 1.0 Model Component Simulation Description}\\
+     & & {\tt MachineName} \\
+     & & {\tt MachineDescription} \\
+     & & {\tt MachineHardwareType} \\
+     & & {\tt MachineOperatingSystem} \\
+     & & {\tt MachineVendor} \\
+     & & {\tt MachineInterconnectType} \\
+     & & {\tt MachineMaxProcessors} \\
+     & & {\tt MachineCoresPerProcessor} \\
+     & & {\tt MachineProcessor} \\
+     & & {\tt MachineCompiler} \\
+     & & {\tt MachineCompilerVersion} \\
+\hline
+{\tt ISO 19115} & {\tt Responsible Party Description} & {\bf Child of Component CIM 1.0 Model Component Simulation Description}\\
+     & & {\tt IndividualName} \\
+     & & {\tt IndividualPhysicalAddress} \\
+     & & {\tt IndividualEmailAddress} \\
+     & & {\tt IndividualURL} \\
+     & & {\tt ResponsiblePartyRole} \\
+\hline
+\end{tabular}
+
+\vspace{18pt}
+
+\label{CIMFieldAttributePackages}
 \begin{tabular}{|p{4cm}|p{4cm}|p{6cm}|}
 \hline
-\multicolumn{3}{|c|}{{\bf \large CIM Field Attribute Packages}} \\
+\multicolumn{3}{|c|}{{\bf \large CIM/CF Field Attribute Packages}} \\
 \hline\hline
 {\bf Convention} & {\bf Purpose} & {\bf Name} \\
 \hline\hline
@@ -211,7 +284,6 @@ The ESMF standard Attribute packages are based on a blend of the Climate and For
      & & {\tt Units}  \\
 \hline
 \end{tabular}
-\label{FieldAttributePackages}
 
 \vspace{18pt}
 
