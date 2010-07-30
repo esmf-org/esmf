@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.76 2010/07/23 01:51:21 w6ws Exp $
+// $Id: ESMC_LogErr.h,v 1.77 2010/07/30 00:19:02 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -24,16 +24,14 @@
 #define ESMC_LOGERR_H
 
 //-----------------------------------------------------------------------------
-//BOPI
-// !CLASS: ESMC_LogErr - Public C interface to the ESMF LogErr class
 //
-// !DESCRIPTION:
+// ESMC_LogErr - Public C interface to the ESMF LogErr class
 //
 // The code in this file defines the public C LogErr interface and declares 
 // all class data and methods.  All methods are defined in the companion file 
 // ESMC\_LogErr.C
 //
-//EOPI
+//
 //-----------------------------------------------------------------------------
 
 
@@ -59,8 +57,8 @@ void *ptr;
 //
 // !INTERFACE:
 int ESMC_LogWrite(
-  const char msg[],      // in
-  int msgtype); // in
+  const char msg[], // in
+  int msgtype);     // in
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -71,9 +69,9 @@ int ESMC_LogWrite(
 //
 //  The arguments are:
 //  \begin{description}
-//  \item[{[msg]}]
+//  \item[msg]
 //    The message to be written.
-//  \item[{[msgtype]}]
+//  \item[msgtype]
 //    The message type.  Can be one of ESMC\_LOG\_INFO, ESMC\_LOG\_WARN,
 //    or ESMF\_LOG\_ERROR.
 //  \end{description}
