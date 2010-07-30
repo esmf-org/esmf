@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.3 2010/07/28 19:59:14 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.4 2010/07/30 05:58:35 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -202,40 +202,40 @@ program ESMF_AttributeCIMEx
         convention=convCIM, purpose=purpComp, rc=rc)
 
       ! Platform description attributes
+      call ESMF_AttributeSet(cplcomp, 'MachineName', &
+       'HECToR', &
+        convention=convCIM, purpose=purpPlatform, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'MachineDescription', &
         'HECToR (Phase 2a) is currently an integrated system known ' // &
         'as Rainier, which includes a scalar MPP XT4 system, a vector ' // &
         'system known as BlackWidow, and storage systems.', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'MachineName', &
-       'HECToR', &
+      call ESMF_AttributeSet(cplcomp, 'MachineHardwareType', &
+       'Parallel', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'MachineOperatingSystem', &
        'Unicos', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'MachineVendor', &
+       'Cray Inc', &
+        convention=convCIM, purpose=purpPlatform, rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'MachineInterconnectType', &
+       'Cray Interconnect', &
+        convention=convCIM, purpose=purpPlatform, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'MachineMaxProcessors', &
        '22656', &
-        convention=convCIM, purpose=purpPlatform, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'MachineProcessor', &
-       'AMD X86_64', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'MachineCoresPerProcessor', &
        '4', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'MachineVendor', &
-       'Cray Inc', &
+      call ESMF_AttributeSet(cplcomp, 'MachineProcessor', &
+       'AMD X86_64', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'MachineCompiler', &
        'Pathscale', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'MachineCompilerVersion', &
        '3.0', &
-        convention=convCIM, purpose=purpPlatform, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'MachineInterconnectType', &
-       'Cray Interconnect', &
-        convention=convCIM, purpose=purpPlatform, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'MachineHardwareType', &
-       'Parallel', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
 
       ! Responsible party attributes (for Principal Investigator)
