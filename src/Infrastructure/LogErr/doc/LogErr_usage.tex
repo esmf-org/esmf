@@ -1,4 +1,4 @@
-% $Id: LogErr_usage.tex,v 1.24 2006/11/30 19:30:18 theurich Exp $
+% $Id: LogErr_usage.tex,v 1.25 2010/07/30 00:25:32 w6ws Exp $
 
 %\subsection{Use and Examples}
 
@@ -21,15 +21,9 @@ By default, the Log file is not truncated at the start of a new run; it just
 gets appended each time.  Future functionality would include an option to
 either truncate or append to the Log file. 
 
-In all cases where a Log is opened, a unit number is assigned to a specific
-Log.  A Log is assigned the lowest available unit number starting with
-11.  If a unit number is occupied, the next higher unit number is 
-checked using the Fortran "inquire" method.  The process repeats until a free
-unit number is found or when the unit number reaches {\tt ESMF\_LOG\_UPPER} in 
-which case an error is returned.  As a result, the user should always check 
-for free numbers using Fortran's "inquire" to prevent potential unit number 
-conflicts.  In the future we anticipate supporting an option in which a 
-desired unit number can be passed in.
+In all cases where a Log is opened, a Fortran unit number is assigned to a specific
+Log.  A Log is assigned an unused unit number using the algorithm described in
+the ESMF\_IOUnitGet method.
 
 The user can then set or get options on how the Log should be used 
 with the {\tt ESMF\_LogSet()} and {\tt ESMF\_LogGet()} methods.  These are 
