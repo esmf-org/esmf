@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.78 2010/07/30 21:49:29 w6ws Exp $
+// $Id: ESMC_LogErr.h,v 1.79 2010/07/30 22:43:17 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -41,8 +41,8 @@
 extern "C"{
 #endif
 
-enum ESMC_MsgType{ESMC_LOG_INFO=1,  ESMC_LOG_WARNING=2,ESMC_LOG_ERROR=3};
-enum ESMC_LogType{ESMC_LOG_SINGLE=1,ESMC_LOG_MULTI=2,  ESMC_LOG_NONE=3};
+enum ESMC_MsgType{ESMC_LOG_INFO=1,  ESMC_LOG_WARN=2,  ESMC_LOG_ERROR=3};
+enum ESMC_LogType{ESMC_LOG_SINGLE=1,ESMC_LOG_MULTI=2, ESMC_LOG_NONE=3};
 
 // Class declaration type
 typedef struct{
