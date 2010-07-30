@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.66 2010/07/24 05:56:23 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.67 2010/07/30 05:58:06 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.66 2010/07/24 05:56:23 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.67 2010/07/30 05:58:06 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -442,11 +442,11 @@ namespace ESMCI {
       // Simulation Run attributes
       //  1 <simulationRun> in separate <CIMRecord>
       //
-      localrc = AttPackAddAttribute("SimulationRationale", "CIM 1.0",
-                            "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("SimulationShortName", "CIM 1.0",
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("SimulationLongName", "CIM 1.0",
+                            "Model Component Simulation Description", object);
+      localrc = AttPackAddAttribute("SimulationRationale", "CIM 1.0",
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("SimulationStartDate", "CIM 1.0",
                             "Model Component Simulation Description", object);
@@ -459,9 +459,9 @@ namespace ESMCI {
       // Document Relationship attributes
       //  1 <documentGenealogy> at end of <modelComponent>
       //
-      localrc = AttPackAddAttribute("PreviousVersionDescription", "CIM 1.0",
-                            "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("PreviousVersion", "CIM 1.0",
+                            "Model Component Simulation Description", object);
+      localrc = AttPackAddAttribute("PreviousVersionDescription", "CIM 1.0",
                             "Model Component Simulation Description", object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
@@ -485,9 +485,9 @@ namespace ESMCI {
       //  1 <platform> in separate <CIMRecord>,
       //    also 1 within <deployment> within <simulationRun> <CIMRecord>
       //
-      localrc = AttPackAddAttribute("MachineDescription", "CIM 1.0",
-                            "Platform Description", object);
       localrc = AttPackAddAttribute("MachineName", "CIM 1.0",
+                            "Platform Description", object);
+      localrc = AttPackAddAttribute("MachineDescription", "CIM 1.0",
                             "Platform Description", object);
       localrc = AttPackAddAttribute("MachineHardwareType", "CIM 1.0",
                             "Platform Description", object);
@@ -5066,8 +5066,8 @@ namespace ESMCI {
                                    "value", value.c_str(), 5);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
   }
-  if (attpack->AttributeIsSet("machineMaximumProcessors")) {
-    localrc = attpack->AttributeGet("machineMaximumProcessors", &value);
+  if (attpack->AttributeIsSet("MachineMaxProcessors")) {
+    localrc = attpack->AttributeGet("MachineMaxProcessors", &value);
     localrc = io_xml->writeElement("machineMaximumProcessors", value, 5, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
   }
@@ -5076,11 +5076,9 @@ namespace ESMCI {
     localrc = io_xml->writeElement("machineCoresPerProcessor", value, 5, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
   }
-  if (attpack->AttributeIsSet("machineProcessorType")) {
-    localrc = attpack->AttributeGet("machineProcessorType", &value);
-    localrc = io_xml->writeStartElement("machineProcessorType", "", 5, 1,
-                                        "value", value.c_str(), 5);
-    localrc = io_xml->writeEndElement("machineProcessorType", 5);
+  if (attpack->AttributeIsSet("MachineProcessor")) {
+    localrc = attpack->AttributeGet("MachineProcessor", &value);
+    localrc = io_xml->writeElement("machineProcessorType", value, 5, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
   }
 
