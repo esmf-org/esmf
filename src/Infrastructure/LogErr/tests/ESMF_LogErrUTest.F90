@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.56 2010/07/16 22:52:51 svasquez Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.57 2010/07/31 00:25:10 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.56 2010/07/16 22:52:51 svasquez Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.57 2010/07/31 00:25:10 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -76,6 +76,7 @@
       character(1) :: pet_char
       type(ESMF_TimeInterval) :: one_sec, zero, time_diff
       type(ESMF_Time) :: my_time, log_time
+      type(ESMF_MsgType) :: zero_messages(0)
 #endif
 
 
@@ -616,9 +617,84 @@
       call ESMF_LogFlush( rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test msgMask filter
+      write(failMsg, *) "Did not return ESMF_FAILURE"
+      write(name, *) " LogSet with empty msgMask Test"
+      call ESMF_LogSet (  &
+          msgMask=zero_messages,  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test msgMask filter
+      write(failMsg, *) "Did not return ESMF_FAILURE"
+      write(name, *) " LogSet with msgMask set to errors only Test"
+      call ESMF_LogSet (  &
+          msgMask=(/ ESMF_LOG_ERROR /),  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test msgMask filter
+      write(failMsg, *) "Did not return ESMF_FAILURE"
+      write(name, *) " LogSet with msgMask set for errors and info Test"
+      call ESMF_LogSet (  &
+          msgMask=(/ ESMF_LOG_ERROR, ESMF_LOG_INFO /),  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test msgMask filter
+      write(failMsg, *) "Did not return ESMF_FAILURE"
+      write(name, *) " LogSet with msgMask set for all types Test"
+      call ESMF_LogSet (  &
+          msgMask = (/ ESMF_LOG_ERROR, ESMF_LOG_INFO, ESMF_LOG_WARNING /),  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 #endif
 100   continue
       call ESMF_TestEnd(result, ESMF_SRCLINE)
 
+contains
+
+  subroutine search_file (filename, text, found, rc)
+    character(*), intent(in)  :: filename
+    character(*), intent(in)  :: text
+    logical,      intent(out) :: found
+    integer,      intent(out) :: rc
+
+    character(ESMF_MAXSTR)    :: record
+    integer :: ioerr
+    integer :: unitno
+
+    rc    = ESMF_FAILURE
+    found = .false.
+
+    call ESMF_IOUnitGet (unitno)
+    open (unit=unitno, file=filename, status='old',  &
+        action='read', position='rewind', iostat=ioerr)
+    if (ioerr /= 0) then
+      print *, 'Could not open file: ', trim (filename), ', iostat =', ioerr
+      return
+    end if
+
+    do
+      read (unitno, '(a)', iostat=ioerr) record
+      if (ioerr /= 0) exit
+      found = index (record, text) > 0
+      if (found) exit
+    end do
+
+    close (unitno)
+
+    rc = ESMF_SUCCESS
+
+  end subroutine search_file
 
       end program ESMF_LogErrUTest
