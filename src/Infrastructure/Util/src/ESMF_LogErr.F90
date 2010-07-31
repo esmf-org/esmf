@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.61 2010/07/28 04:40:35 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.62 2010/07/31 00:24:07 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -144,15 +144,17 @@ type ESMF_LogPrivate
     type(ESMF_HaltType)                             ::  halt
     type(ESMF_LogType)			            ::  logtype      
 #ifndef ESMF_NO_INITIALIZERS
-    type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY=>Null()
-    type(ESMF_Logical)                              ::  FileIsOpen=ESMF_FALSE
-    integer                                         ::  errorMaskCount=0
-    integer, dimension(:), pointer                  ::  errorMask(:)=>Null()
+    type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY   => null ()
+    type(ESMF_Logical)                              ::  FileIsOpen  = ESMF_FALSE
+    integer                                         ::  errorMaskCount= 0
+    integer, dimension(:), pointer                  ::  errorMask(:)=> null ()
+    type(ESMF_MsgType), pointer                     ::  msgMask(:)  => null ()
 #else
     type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY
     type(ESMF_Logical)                              ::  FileIsOpen
     integer                                         ::  errorMaskCount
     integer, dimension(:), pointer                  ::  errorMask(:)
+    type(ESMF_MsgType), pointer                     ::  msgMask(:)
 #endif                                          
     character(len=MAX_FNAME_LEN)                    ::  nameLogErrFile
     character(len=ESMF_MAXSTR)                      ::  petNumLabel
@@ -390,6 +392,7 @@ contains
 !       s%errorMask(:)=>Null()
        nullify(s%errorMask)
        s%errorMaskCount=0
+       s%msgMask => null ()
        ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_LogPrivateInit
 
@@ -1744,7 +1747,7 @@ end subroutine ESMF_LogOpen
 
 ! !INTERFACE: 
 	subroutine ESMF_LogSet(log,verbose,flush,rootOnly,halt, &
-                               stream,maxElements,errorMask,rc)
+                               stream,maxElements, msgMask, errorMask,rc)
 !
 ! !ARGUMENTS:
 !	
@@ -1752,9 +1755,10 @@ end subroutine ESMF_LogOpen
 	logical, intent(in),optional			        :: verbose
 	logical, intent(in),optional			        :: flush
 	logical, intent(in),optional			        :: rootOnly
-	type(ESMF_HaltType), intent(in),optional                :: halt
+	type(ESMF_HaltType), intent(in), optional               :: halt
 	integer, intent(in),optional			        :: stream  
 	integer, intent(in),optional			        :: maxElements
+        type(ESMF_MsgType),  intent(in), optional               :: msgMask(:)
 	integer, intent(in),optional			        :: errorMask(:)
 	integer, intent(out),optional			        :: rc
 	
@@ -1786,6 +1790,16 @@ end subroutine ESMF_LogOpen
 !            \end{description}
 !      \item [{[maxElements]}]
 !            Maximum number of elements in the Log.
+!      \item [{[msgMask]}]
+!            An array of message types that will be logged.  Requests not
+!            matching the list will be ignored.  By default all messages
+!            will be logged.  If an empty array is provided, no messages
+!            will be logged.
+!            \begin{description}
+!              \item {\tt {ESMF\_LOG\_INFO} - Log all informational messages};
+!              \item {\tt {ESMF\_LOG\_WARNING} - Log warning messages};
+!              \item {\tt {ESMF\_LOG\_ERROR} - Log error messages};
+!            \end{description}
 !      \item [{[errorMask]}]
 !            List of error codes that will {\em not} be logged as errors.
 !      \item [{[rc]}]
@@ -1877,6 +1891,15 @@ end subroutine ESMF_LogOpen
         endif
       endif
 
+      if (present (msgMask)) then
+        if (associated (alog%msgMask))  &
+          deallocate (alog%msgMask)
+        if (size (msgMask) > 0) then
+          allocate (alog%msgMask(size (msgMask)))
+          alog%msgMask = msgMask
+        end if
+      end if
+
       if (present(rc)) then
         rc=ESMF_SUCCESS 
       endif
@@ -1942,12 +1965,13 @@ end subroutine ESMF_LogSet
     character(len=10)               :: t
     character(len=8)                :: d
     !character(len=7)               :: lt
-    character(len=32)               ::tmethod
-    character(len=MAX_FNAME_LEN)    ::tfile
-    integer			    ::tline
-    integer                         ::h,m,s,ms,y,mn,dy
-    integer			    ::rc2,index
-    type(ESMF_LogPrivate), pointer    :: alog
+    character(len=32)               :: tmethod
+    character(len=MAX_FNAME_LEN)    :: tfile
+    integer			    :: tline
+    integer                         :: i
+    integer                         :: h, m, s, ms, y, mn, dy
+    integer			    :: rc2, index
+    type(ESMF_LogPrivate), pointer  :: alog
     
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     
@@ -1975,6 +1999,19 @@ end subroutine ESMF_LogSet
           if (present(rc)) rc=ESMF_FAILURE
           return
         endif
+
+        if (associated (alog%msgMask)) then
+          do, i=1, size (alog%msgMask)
+             if (msgtype == alog%msgMask(i)) then
+               exit
+             end if
+          end do
+
+          if (i > size (alog%msgMask)) then
+            if (present (rc)) rc=ESMF_SUCCESS
+            return
+          end if
+        end if
 
         index = alog%fIndex
       
