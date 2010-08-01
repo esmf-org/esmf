@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.57 2010/07/31 00:25:10 w6ws Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.58 2010/08/01 22:41:53 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.57 2010/07/31 00:25:10 w6ws Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.58 2010/08/01 22:41:53 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -631,9 +631,9 @@
       !EX_UTest
       ! Test msgMask filter
       write(failMsg, *) "Did not return ESMF_FAILURE"
-      write(name, *) " LogSet with msgMask set to errors only Test"
+      write(name, *) " LogSet with msgMask set to info only Test"
       call ESMF_LogSet (  &
-          msgMask=(/ ESMF_LOG_ERROR /),  &
+          msgMask=(/ ESMF_LOG_INFO /),  &
           rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
