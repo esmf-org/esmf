@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.4 2010/07/30 05:58:35 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.5 2010/08/01 05:34:10 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -18,6 +18,7 @@ program ESMF_AttributeCIMEx
 
 !BOE
 ! \subsubsection{Example: Advanced Attribute usage: CIM Attribute Packages}
+! \label{sec:attribute:usage:cimAttPack}
 !
 ! This example illustrates the use of the Metafor CIM Attribute packages,
 ! supplied by ESMF, to create an Attribute hierarchy on an ESMF object tree.

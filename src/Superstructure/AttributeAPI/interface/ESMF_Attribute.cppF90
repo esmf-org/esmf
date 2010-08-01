@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.61 2010/07/20 05:49:39 eschwab Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.62 2010/08/01 05:34:10 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.61 2010/07/20 05:49:39 eschwab Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.62 2010/08/01 05:34:10 eschwab Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -676,8 +676,9 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Add a custom Attribute package, with nested Attribute packages,
-!     to <object>. 
+!     Add a custom Attribute package, with one or more nested Attribute
+!     packages, to <object>.  Allows for building full multiple-child Attribute
+!     hierarchies (multi-child trees).
 !     See Section~\ref{desc:AttPacks} for a description of Attribute packages
 !     and their conventions, purposes, and object types.
 !
@@ -742,7 +743,8 @@ contains
 !
 ! !DESCRIPTION:
 !     Add a custom Attribute package, with a single nested Attribute
-!     package, to <object>.  
+!     package, to <object>.  Allows for building single-child Attribute
+!     hierarchies (single-child trees).
 !     See Section~\ref{desc:AttPacks} for a description of Attribute packages
 !     and their conventions, purposes, and object types.
 !
@@ -1842,8 +1844,9 @@ contains
 !     Write the Attribute package for <object>.  The Attribute package defines 
 !     the convention, purpose, and object type of the associated Attributes.  Either
 !     tab-delimited or xml format is acheived by using {\tt attwriteflag}.  
-!     See Section~\ref{desc:AttPacks} for a description of Attribute packages
-!     and their conventions, purposes, and object types.
+!     Currently, only ESMF/ESG/CF Field Attribute packages can be written in
+!     tab-delimited format.  See Section~\ref{desc:AttPacks} for a description
+!     of Attribute packages and their conventions, purposes, and object types.
 !
 !     Note:  For an object type of {\tt ESMF\_GridComp}, convention='WaterML',
 !     purpose='TimeSeries', and attwriteflag=ESMF\_ATTWRITE\_XML, an XML file
@@ -2083,8 +2086,10 @@ contains
  @\
 ! @\
 ! !DESCRIPTION: @\
-!     Add a custom Attribute package for the object, with nested @\
+!     Add a custom Attribute package for the object, with one or more nested @\
 !     Attribute packages, or modify an existing Attribute package. @\
+!     Allows for building full multiple-child Attribute hierarchies @\
+!     (multi-child trees). @\
 ! @\
 !     The arguments are: @\
 !     \begin{description} @\
@@ -2230,6 +2235,8 @@ contains
 ! !DESCRIPTION: @\
 !     Add a custom Attribute package for the object, with a single @\
 !     nested Attribute package, or modify an existing Attribute package. @\
+!     Allows for building single-child Attribute hierarchies @\
+!     (single-child trees). @\
 ! @\
 !     The arguments are: @\
 !     \begin{description} @\
