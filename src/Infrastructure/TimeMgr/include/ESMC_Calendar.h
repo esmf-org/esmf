@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.72 2010/07/08 21:54:23 theurich Exp $
+// $Id: ESMC_Calendar.h,v 1.73 2010/08/02 06:01:33 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -65,9 +65,9 @@ typedef struct {
 //
 // !INTERFACE:
 ESMC_Calendar ESMC_CalendarCreate(
-  const char *name, 
-  enum ESMC_CalendarType calendartype,
-  int *rc);  
+  const char *name,                      // in
+  enum ESMC_CalendarType calendartype,   // in
+  int *rc);                              // out
 
 // !RETURN VALUE:
 //  Newly created ESMC_Calendar object.
@@ -104,7 +104,7 @@ ESMC_Calendar ESMC_CalendarCreate(
 //
 // !INTERFACE:
 int ESMC_CalendarDestroy(
-  ESMC_Calendar *calendar);
+  ESMC_Calendar *calendar);              // inout
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -128,7 +128,7 @@ int ESMC_CalendarDestroy(
 //
 // !INTERFACE:
 int ESMC_CalendarPrint(
-  ESMC_Calendar calendar);
+  ESMC_Calendar calendar);               // in
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
