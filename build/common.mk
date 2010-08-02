@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.308 2010/08/02 20:01:25 theurich Exp $
+#  $Id: common.mk,v 1.309 2010/08/02 21:58:21 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1512,7 +1512,7 @@ mostlyclean:
 	$(MAKE) ACTION=tree_mostlyclean tree
 
 tree_mostlyclean:
-	@for DIR in $(DUSTDIRS) foo ; do \
+	@for DIR in $(MOSTLYCLEANDIRS) foo ; do \
 	   if [ $$DIR != "foo" ] ; then \
 	      cd $$DIR; $(MAKE) ACTION=tree_clean tree ;\
 	   fi ;\
