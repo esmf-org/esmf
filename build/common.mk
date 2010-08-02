@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.307 2010/07/29 17:22:22 theurich Exp $
+#  $Id: common.mk,v 1.308 2010/08/02 20:01:25 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1669,7 +1669,7 @@ $(ESMF_APPSDIR)/ESMC_% : $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $(ESMFLIB)
 # Targets for building and running system tests.
 #-------------------------------------------------------------------------------
 
-system_tests: chkdir_tests build_libs
+system_tests: chkdir_tests build_libs dust_system_tests
 	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR); fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
@@ -1696,7 +1696,7 @@ tree_system_tests: tree_build_system_tests tree_run_system_tests
 #
 # system_tests_uni, build and run uni versions of the system tests
 #
-system_tests_uni: chkdir_tests build_libs
+system_tests_uni: chkdir_tests build_libs dust_system_tests
 	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR); fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
@@ -2135,7 +2135,7 @@ check_use_test_cases:
 # all is well (it comes out 128).  if this gets fixed in our code, the dashes
 # can be removed and make can correctly stop on error.
 
-unit_tests: chkdir_tests build_libs
+unit_tests: chkdir_tests build_libs dust_unit_tests
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor unit tests when ESMF_COMM is mpiuni;" ; \
 	  echo "run unit_tests_uni instead." ; \
@@ -2151,7 +2151,7 @@ tree_unit_tests: tree_build_unit_tests tree_run_unit_tests
 #
 # tests_uni
 #
-unit_tests_uni: chkdir_tests build_libs
+unit_tests_uni: chkdir_tests build_libs dust_unit_tests
 	$(MAKE) MULTI="Uniprocessor" config_unit_tests
 	-$(MAKE) ACTION=tree_unit_tests_uni tree
 	$(MAKE) check_unit_tests
@@ -2491,7 +2491,7 @@ err: ; $(error gnumake exiting)
 #
 # examples
 #
-examples: chkdir_examples build_libs
+examples: chkdir_examples build_libs dust_examples
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor examples when ESMF_COMM is mpiuni;" ; \
 	  echo "run examples_uni instead." ; \
@@ -2508,7 +2508,7 @@ tree_examples: tree_build_examples tree_run_examples
 #
 # examples_uni
 #
-examples_uni: chkdir_examples build_libs
+examples_uni: chkdir_examples build_libs dust_examples
 	$(MAKE) MULTI="Uniprocessor" config_examples
 	-$(MAKE) ACTION=tree_examples_uni tree
 	$(MAKE) check_examples
