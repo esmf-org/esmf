@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: examples_results.pl,v 1.7 2009/03/02 06:05:31 svasquez Exp $
+# $Id: examples_results.pl,v 1.8 2010/08/02 17:14:16 theurich Exp $
 # This subroutine is called at the end of the examples, "check_examples" and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 # The results are either complete results or a summary.
@@ -194,6 +194,9 @@ use File::Find;
 				}
                         	# Sort the pass_ex_files
                         	@pass_ex_files = sort (@pass_ex_files);
+                                foreach $file ( @pass_ex_files ) {
+                                  $file = "PASS: " . $file;
+                                }
                         	print @pass_ex_files;
                         	print "\n\n";
 			}
@@ -215,6 +218,9 @@ use File::Find;
                			print "\n\n";
 				# Sort the act_ex_files
 				@act_ex_files = sort (@act_ex_files);
+                                foreach $file ( @act_ex_files ) {
+                                  $file = "FAIL: " . $file;
+                                }
 				print @act_ex_files;
                			print "\n\n";
 			}

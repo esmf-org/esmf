@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: unit_tests_results.pl,v 1.18 2010/06/24 21:22:17 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.19 2010/08/02 17:14:16 theurich Exp $
 # This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -354,13 +354,13 @@ use File::Find
 
 	# Delete ./ from all lists
         foreach ( @pass_list) {
-                s/\.\///; # Delete all the "./"
+                s/\.\//PASS: /; # Delete all the "./"
 	}
         foreach ( @crashed_list) {
-                s/\.\///; # Delete all the "./"
+                s/\.\//CRASH: /; # Delete all the "./"
 	}
         foreach ( @fail_list) {
-                s/\.\///; # Delete all the "./"
+                s/\.\//FAIL: /; # Delete all the "./"
 	}
 	if (!$SUMMARY) { # Print only if full output requested
         	# Print to the screen
@@ -469,6 +469,13 @@ use File::Find
 	}
 	foreach (@harness_fail){
                         s/UTest.stdout/UTest/;
+	}
+	# Prepend "PASS/FAIL" prefix to each line
+	foreach $line (@harness_pass){
+                        $line = "PASS: " . $line;
+	}
+	foreach $line (@harness_fail){
+                        $line = "FAIL: " . $line;
 	}
 
 
