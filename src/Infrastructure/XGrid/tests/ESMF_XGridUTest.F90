@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.5 2010/07/27 18:52:58 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.6 2010/08/02 17:38:57 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -199,7 +199,7 @@ contains
         type(ESMF_XGridSpec)                :: l_sparseMatA2X(2)
 
         type(ESMF_VM)                       :: vm
-        integer                             :: lpet, eleCount
+        integer                             :: lpet, eleCount, ngridA, ngridB
         integer                             :: elb(1), eub(1), ec(1)
 
         rc = ESMF_SUCCESS
@@ -281,7 +281,8 @@ contains
         deallocate(sparseMatA2X(1)%factorIndexList, sparseMatA2X(1)%factorList)
         deallocate(sparseMatA2X(2)%factorIndexList, sparseMatA2X(2)%factorList)
 
-        call ESMF_XGridGet(xgrid, sideA=l_sideA, sideB=l_sideB, area=l_area, &
+        call ESMF_XGridGet(xgrid, ngridA=ngridA, ngridB=ngridB, &
+            sideA=l_sideA, sideB=l_sideB, area=l_area, &
             centroid=l_centroid, distgridA=l_sideAdg, &
             distgridM = distgrid, sparseMatA2X=l_sparseMatA2X, &
             rc=localrc)

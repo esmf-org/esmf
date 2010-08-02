@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.2 2010/07/27 18:52:58 feiliu Exp $
+! $Id: ESMF_XGridGet.F90,v 1.3 2010/08/02 17:38:57 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.2 2010/07/27 18:52:58 feiliu Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.3 2010/08/02 17:38:57 feiliu Exp $'
 
 !==============================================================================
 !
@@ -200,6 +200,14 @@ integer, intent(out), optional               :: rc
     ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
 
     xgtypep => xgrid%xgtypep
+
+    if(present(ngridA)) then
+        ngridA = size(sideA, 1)
+    endif
+
+    if(present(ngridB)) then
+        ngridB = size(sideB, 1)
+    endif
 
     if(present(sideA)) then
         ngrid_a = size(sideA, 1)
