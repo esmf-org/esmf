@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.4 2010/07/26 19:38:00 feiliu Exp $
+! $Id: ESMF_XGrid.F90,v 1.5 2010/08/03 16:25:40 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -119,6 +119,7 @@ module ESMF_XGridMod
    public ESMF_XGridValidate           ! Check internal consistency
 
    public assignment(=)
+   public operator(.eq.), operator(.ne.) 
 
 ! - ESMF-internal methods:
    public ESMF_XGridGetInit            ! For Standardized Initialization
@@ -133,7 +134,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.4 2010/07/26 19:38:00 feiliu Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.5 2010/08/03 16:25:40 feiliu Exp $'
 
 !==============================================================================
 !
@@ -160,6 +161,37 @@ module ESMF_XGridMod
       end interface
 !
 !
+!==============================================================================
+!BOPI
+! !INTERFACE:
+      interface operator (.eq.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_XGridSideEqual
+
+! !DESCRIPTION:
+!     This interface overloads the equality operator for the specific
+!     ESMF GridConn.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (.ne.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_XGridSideNotEqual
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF GridConn.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -600,5 +632,73 @@ contains
     end subroutine ESMF_XGridInitialize
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridSideEqual"
+!BOPI
+! !IROUTINE: ESMF_XGridSideEqual - Equality of XGridSides
+!
+! !INTERFACE:
+      function ESMF_XGridSideEqual(XGridSide1, XGridSide2)
+
+! !RETURN VALUE:
+      logical :: ESMF_XGridSideEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_XGridSide), intent(in) :: &
+        XGridSide1,      &! Two xgrid sides to compare for
+        XGridSide2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF XGridSide to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[XGridSide1, XGridSide2]
+!          Two XGridSide to compare for equality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_XGridSideEqual = (XGridSide1%side == &
+                              XGridSide2%side)
+
+      end function ESMF_XGridSideEqual
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridSideNotEqual"
+!BOPI
+! !IROUTINE: ESMF_XGridSideNotEqual - Non-equality of XGridSides
+!
+! !INTERFACE:
+      function ESMF_XGridSideNotEqual(XGridSide1, XGridSide2)
+
+! !RETURN VALUE:
+      logical :: ESMF_XGridSideNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_XGridSide), intent(in) :: &
+         XGridSide1,      &! Two XGridSide Statuses to compare for
+         XGridSide2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF XGridSide to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[XGridSide1, XGridSide2]
+!          Two XGridSides to compare for inequality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_XGridSideNotEqual = (XGridSide1%side /= &
+                                 XGridSide2%side)
+
+      end function ESMF_XGridSideNotEqual
+
 
 end module ESMF_XGridMod
