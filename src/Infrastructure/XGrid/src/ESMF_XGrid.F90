@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.5 2010/08/03 16:25:40 feiliu Exp $
+! $Id: ESMF_XGrid.F90,v 1.6 2010/08/03 21:18:42 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,6 +63,7 @@ module ESMF_XGridMod
 ! ! Definition of the XGrid class.
 
   type ESMF_XGridSide
+    sequence
     integer                     :: side
   end type ESMF_XGridSide
 
@@ -134,7 +135,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.5 2010/08/03 16:25:40 feiliu Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.6 2010/08/03 21:18:42 oehmke Exp $'
 
 !==============================================================================
 !

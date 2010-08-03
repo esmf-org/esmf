@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.50 2010/06/14 13:51:08 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.51 2010/08/03 21:18:42 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -37,6 +37,7 @@ module ESMF_FieldGetMod
   use ESMF_ArrayMod
   use ESMF_ArrayGetMod
   use ESMF_GridMod
+  use ESMF_XGridMod
   use ESMF_MeshMod
   use ESMF_LocStreamMod
   use ESMF_GeomBaseMod
@@ -60,7 +61,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.50 2010/06/14 13:51:08 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.51 2010/08/03 21:18:42 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -82,6 +83,7 @@ module ESMF_FieldGetMod
     module procedure ESMF_FieldGetGridAllocBounds
     module procedure ESMF_FieldGetMeshAllocBounds
     module procedure ESMF_FieldGetLSAllocBounds
+    module procedure ESMF_FieldGetXGAllocBounds
     !module procedure ESMF_FieldGetLocalArray !TODO: FIELDINTEGRATION
     TypeKindRankInterfaceMacro(FieldGetDataPtr)
 
@@ -110,9 +112,9 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-  subroutine ESMF_FieldGetDefault(field, arrayspec, isCommitted, geomtype, grid, mesh, locstream, &
+  subroutine ESMF_FieldGetDefault(field, arrayspec, isCommitted, geomtype, grid, mesh, locstream, xgrid, &
     array, typekind, dimCount, memDimCount, &
-    staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    staggerloc, xgridSide, gridIndex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     maxHaloLWidth, maxHaloUWidth, localDeCount, name, iospec, rc) 
 !
 ! !ARGUMENTS:
@@ -123,11 +125,14 @@ contains
     type(ESMF_Grid), intent(out), optional :: grid     
     type(ESMF_Mesh), intent(out), optional :: mesh     
     type(ESMF_LocStream), intent(out), optional :: locstream     
+    type(ESMF_XGrid), intent(out), optional :: xgrid     
     type(ESMF_Array), intent(out), optional :: array     
     type(ESMF_TypeKind), intent(out), optional :: typekind
     integer, intent(out), optional :: dimCount
     integer, intent(out), optional :: memDimCount
     type(ESMF_StaggerLoc), intent(out), optional :: staggerloc 
+    type(ESMF_XGridSide), intent(out), optional :: xgridSide 
+    integer, intent(out), optional :: gridIndex
     integer, intent(out), optional :: gridToFieldMap(:)    
     integer, intent(out), optional :: ungriddedLBound(:)
     integer, intent(out), optional :: ungriddedUBound(:)
@@ -164,6 +169,8 @@ contains
 !       {\tt ESMF\_Mesh}.
 ! \item [{[locstream]}]
 !       {\tt ESMF\_LocStream}.
+! \item [{[xgrid]}]
+!       {\tt ESMF\_XGrid}.
 ! \item [{[array]}]
 !       {\tt ESMF\_Array}.
 ! \item [{[typekind]}]
@@ -184,6 +191,12 @@ contains
 !       Stagger location of data in grid cells.  For valid
 !       predefined values and interpretation of results see
 !       Section \ref{sec:opt:staggerloc}.
+! \item [{[xgridSide]}]
+!        The side of the XGrid that the Field was created on (either ESMF\_XGRID\_SIDEA,
+!        ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). 
+! \item [{[gridIndex]}]
+!        If xgridSide is ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which 
+!        Grid/Mesh on that side the Field was created on. 
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension
@@ -304,7 +317,20 @@ contains
                              ESMF_CONTEXT, rc)) return
         endif
         call ESMF_GeomBaseGet(ftype%geombase, &
-                  grid=grid, staggerloc=staggerloc, rc=localrc)
+                  grid=grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+    endif
+
+    if (present(staggerloc)) then
+        if (ftype%gridstatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                            "No Grid or invalid Grid attached to Field", &
+                             ESMF_CONTEXT, rc)) return
+        endif
+        call ESMF_GeomBaseGet(ftype%geombase, &
+                  staggerloc=staggerloc, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -335,6 +361,47 @@ contains
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
     endif
+
+    if (present(xgrid)) then
+        if (ftype%gridstatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                            "No XGrid or invalid XGrid attached to Field", &
+                             ESMF_CONTEXT, rc)) return
+        endif
+        call ESMF_GeomBaseGet(ftype%geombase, &
+                  xgrid=xgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+    endif
+
+
+    if (present(xgridSide)) then
+        if (ftype%gridstatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                            "No XGrid or invalid XGrid attached to Field", &
+                             ESMF_CONTEXT, rc)) return
+        endif
+        call ESMF_GeomBaseGet(ftype%geombase, &
+                  xgridside=xgridside, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+    endif
+
+    if (present(gridIndex)) then
+        if (ftype%gridstatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                            "No XGrid or invalid XGrid attached to Field", &
+                             ESMF_CONTEXT, rc)) return
+        endif
+        call ESMF_GeomBaseGet(ftype%geombase, &
+                  gridIndex=gridIndex, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+    endif
+
 
 
     if (present(array)) then
@@ -1433,6 +1500,138 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     if (present(rc)) rc = ESMF_SUCCESS
     end subroutine ESMF_FieldGetMeshAllocBounds
 
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldGetXGAllocBounds"
+!BOP
+! !IROUTINE: ESMF_FieldGet -  Get precomputed Fortran data array bounds
+
+! !INTERFACE:
+  ! Private name; call using ESMF_FieldGet()
+    subroutine ESMF_FieldGetXGAllocBounds(xgrid, xgridSide, gridIndex, &
+        localDe, gridToFieldMap, &
+        ungriddedLBound, ungriddedUBound, &
+        totalLBound, totalUBound, totalCount, rc)
+    
+! !ARGUMENTS:
+    type(ESMF_XGrid) :: xgrid
+    type(ESMF_XGridSide), intent(in), optional :: xgridSide
+    integer, intent(in), optional :: gridIndex
+    integer, intent(in), optional :: localDe
+    integer, intent(in), optional :: gridToFieldMap(:)    
+    integer, intent(in), optional :: ungriddedLBound(:)
+    integer, intent(in), optional :: ungriddedUBound(:)
+    integer, intent(out), optional :: totalLBound(:)
+    integer, intent(out), optional :: totalUBound(:)
+    integer, intent(out), optional :: totalCount(:)
+    integer, intent(out), optional :: rc     
+
+!
+! !DESCRIPTION:
+! Compute the lower and upper bounds of Fortran data array that can later
+! be used in FieldCreate interface to create a {\tt ESMF\_Field} from a
+! {\tt ESMF\_XGrid} and the Fortran data array.  For an example and
+! associated documentation using this method see Section 
+! \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded}.
+!
+! The arguments are:
+! \begin{description}
+! \item [xgrid]
+!        {\tt ESMF\_XGrid} object.
+! \item [{[xgridSide]}]
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRID\_SIDEA,
+!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then
+!       defaults to ESMF\_XGRID\_BALANCED.
+! \item [{[xgridIndex]}]
+!       If xgridSide is ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on
+!       that side to create the Field on. If not provided, defaults to 1.
+! \item [{[localDe]}]
+!       Local DE for which information is requested. {\tt [0,..,localDeCount-1]}.
+!       For {\tt localDeCount==1} the {\tt localDe} argument may be omitted,
+!       in which case it will default to {\tt localDe=0}.
+! \item [{[gridToFieldMap]}]
+!       List with number of elements equal to 1.
+!       The list elements map the dimension
+!       of the {\tt locstream} to a dimension in the {\tt field} by
+!       specifying the appropriate {\tt field} dimension index. The default is to
+!       map the {\tt locstream}|s dimension against the lowest dimension of
+!       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1/).
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
+!       to one and smaller than or equal to the {\tt field} rank.
+!       The total ungridded dimensions in the {\tt field}
+!       are the total {\tt field} dimensions less
+!       the dimensions in
+!       the {\tt grid}.  Ungridded dimensions must be in the same order they are
+!       stored in the {\t field}.  
+! \item [{[ungriddedLBound]}]
+!       Lower bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than 1, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item [{[ungriddedUBound]}]
+!       Upper bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than 1, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item [{[totalLBound]}]
+!       The relative lower bounds of Fortran data array to be used
+!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_LocStream} and Fortran data array.
+!       This is an output variable from this user interface.
+! \item [{[totalUBound]}]
+!       The relative upper bounds of Fortran data array to be used
+!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_LocStream} and Fortran data array.
+!       This is an output variable from this user interface.
+! \item [{[totalCount]}]
+!       Number of elements need to be allocated for Fortran data array to be used
+!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_LocStream} and Fortran data array.
+!       This is an output variable from this user interface.
+!
+! \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+
+!  !Local Variables
+    integer :: localrc
+    type(ESMF_GeomBase) :: geombase
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit, xgrid, rc)
+
+     ! Create GeomBase from LocStream
+    geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+ 
+
+    ! call into generic alloc bound calculation subroutine
+    call ESMF_FieldGetGBAllocBounds(geombase, localDe, gridToFieldMap, &
+        ungriddedLBound, ungriddedUBound, &
+        totalLBound=totalLBound, totalUBound=totalUBound, &
+        totalCount=totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+
+    ! Destroy GeomBase
+    call ESMF_GeomBaseDestroy(geombase, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    end subroutine ESMF_FieldGetXGAllocBounds
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD

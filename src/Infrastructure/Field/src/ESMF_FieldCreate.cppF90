@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.69 2010/07/07 20:48:46 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.70 2010/08/03 21:18:41 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -38,6 +38,7 @@ module ESMF_FieldCreateMod
   use ESMF_DELayoutMod
   use ESMF_StaggerLocMod
   use ESMF_GridMod
+  use ESMF_XGridMod
   use ESMF_DistGridMod
   use ESMF_MeshMod
   use ESMF_LocStreamMod
@@ -67,7 +68,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.69 2010/07/07 20:48:46 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.70 2010/08/03 21:18:41 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -103,6 +104,13 @@ module ESMF_FieldCreateMod
     module procedure ESMF_FieldCreateMeshArray
     TypeKindRankInterfaceMacro(FieldCreateMeshData)
     TypeKindRankInterfaceMacro(FieldCreateMeshDataPtr)
+
+    module procedure ESMF_FieldCreateXGTKR
+    module procedure ESMF_FieldCreateXGArraySpec
+    module procedure ESMF_FieldCreateXGArray
+    TypeKindRankInterfaceMacro(FieldCreateXGData)
+    TypeKindRankInterfaceMacro(FieldCreateXGDataPtr)
+
 
 ! !DESCRIPTION:
 !   This interface provides an entry point for methods that create a complete
@@ -4269,5 +4277,708 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
 
 !------------------------------------------------------------------------------
+
+
+! ESMF_FieldCreateXGrid
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldCreateXGTKR"
+!BOP
+! !IROUTINE:   ESMF_FieldCreate - Create a Field from XGrid and typekind/rank
+
+! !INTERFACE:
+  ! Private name; call using ESMF_FieldCreate()
+  function ESMF_FieldCreateXGTKR(xgrid, xgridSide, gridIndex, typekind, rank, &
+    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    name, iospec, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_Field) :: ESMF_FieldCreateXGTKR
+!
+! !ARGUMENTS:
+    type(ESMF_XGrid) :: xgrid
+    type(ESMF_XGridSide), intent(in), optional  :: xgridSide
+    integer, intent(in), optional               :: gridIndex
+    type(ESMF_TypeKind), intent(in)             :: typekind
+    integer, intent(in)                         :: rank
+    integer, intent(in), optional :: gridToFieldMap(:)    
+    integer, intent(in), optional :: ungriddedLBound(:)
+    integer, intent(in), optional :: ungriddedUBound(:)
+    character (len=*), intent(in), optional :: name 
+    type(ESMF_IOSpec), intent(in), optional :: iospec 
+    integer, intent(out), optional :: rc              
+!
+! !DESCRIPTION:
+! Create an {\tt ESMF\_Field} and allocate space internally for an
+! {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}. For an example and
+! associated documentation using this method see Section 
+! \ref{sec:field:usage:create_locs_tkr}.
+! 
+! The arguments are:
+! \begin{description}
+! \item [xgrid] 
+!       {\tt ESMF\_XGrid} object. 
+! \item [{[xgridSide]}] 
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRID\_SIDEA,
+!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then
+!       defaults to ESMF\_XGRID\_BALANCED.
+! \item [{[xgridIndex]}] 
+!       If xgridSide is  ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on
+!       that side to create the Field on. If not provided, defaults to 1. 
+! \item[typekind]
+!      The typekind of the Field.
+! \item[rank]
+!      The rank of the Field.
+! \item [{[gridToFieldMap]}]
+!       List with number of elements equal to the
+!       {\tt grid}|s dimCount.  The list elements map each dimension
+!       of the {\tt grid} to a dimension in the {\tt field} by
+!       specifying the appropriate {\tt field} dimension index. The default is to
+!       map all of the {\tt grid}|s dimensions against the lowest dimensions of
+!       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
+!       to one and smaller than or equal to the {\tt field} rank.
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry
+!       multiple times. The total ungridded dimensions in the {\tt field}
+!       are the total {\tt field} dimensions less
+!       the dimensions in
+!       the {\tt grid}.  Ungridded dimensions must be in the same order they are
+!       stored in the {\t field}.  
+!       If the Field dimCount is less than the XGrid dimCount then the default
+!       gridToFieldMap will contain zeros for the rightmost entries. A zero
+!       entry in the {\tt gridToFieldMap} indicates that the particular
+!       XGrid dimension will be replicating the Field across the DEs along
+!       this direction.
+! \item [{[ungriddedLBound]}]
+!       Lower bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item [{[ungriddedUBound]}]
+!       Upper bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item [{[name]}] 
+!       Field name. 
+! \item [{[iospec]}] 
+!       I/O specification. ! NOT IMPLEMENTED
+! \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                          !  Local error code
+    type(ESMF_ArraySpec) :: arrayspec
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! Initialize return code   
+    if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Set ArraySpec from rank and typekind input
+    call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_FieldCreateXGTKR = ESMF_FieldCreate(xgrid, xgridside, gridIndex, arrayspec, &
+        gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+        name, iospec, rc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+end function ESMF_FieldCreateXGTKR
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldCreateXGArraySpec"
+!BOP
+! !IROUTINE:   ESMF_FieldCreate - Create a Field from XGrid and ArraySpec
+
+! !INTERFACE:
+  ! Private name; call using ESMF_FieldCreate()
+  function ESMF_FieldCreateXGArraySpec(xgrid, xgridSide, gridIndex, arrayspec, &
+    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    name, iospec, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_Field) :: ESMF_FieldCreateXGArraySpec
+!
+! !ARGUMENTS:
+    type(ESMF_XGrid) :: xgrid
+    type(ESMF_XGridSide), intent(in), optional  :: xgridSide
+    integer, intent(in), optional               :: gridIndex
+    type(ESMF_ArraySpec), intent(inout) :: arrayspec     
+    integer, intent(in), optional :: gridToFieldMap(:)    
+    integer, intent(in), optional :: ungriddedLBound(:)
+    integer, intent(in), optional :: ungriddedUBound(:)
+    character (len=*), intent(in), optional :: name 
+    type(ESMF_IOSpec), intent(in), optional :: iospec 
+    integer, intent(out), optional :: rc              
+!
+! !DESCRIPTION:
+! Create an {\tt ESMF\_Field} and allocate space internally for an
+! {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}. For an example and
+! associated documentation using this method see Section 
+! \ref{sec:field:usage:create_locs_arrayspec}.
+! 
+! The arguments are:
+! \begin{description}
+! \item [xgrid] 
+!       {\tt ESMF\_XGrid} object. 
+! \item [{[xgridSide]}] 
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRID\_SIDEA,
+!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then
+!       defaults to ESMF\_XGRID\_BALANCED.
+! \item [{[xgridIndex]}] 
+!       If xgridSide is  ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on
+!       that side to create the Field on. If not provided, defaults to 1. 
+! \item [arrayspec]
+!       Data type and kind specification. 
+! \item [{[gridToFieldMap]}]
+!       List with number of elements equal to the
+!       {\tt grid}|s dimCount.  The list elements map each dimension
+!       of the {\tt grid} to a dimension in the {\tt field} by
+!       specifying the appropriate {\tt field} dimension index. The default is to
+!       map all of the {\tt grid}|s dimensions against the lowest dimensions of
+!       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
+!       to one and smaller than or equal to the {\tt field} rank.
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry
+!       multiple times. The total ungridded dimensions in the {\tt field}
+!       are the total {\tt field} dimensions less
+!       the dimensions in
+!       the {\tt grid}.  Ungridded dimensions must be in the same order they are
+!       stored in the {\t field}.  
+!       If the Field dimCount is less than the XGrid dimCount then the default
+!       gridToFieldMap will contain zeros for the rightmost entries. A zero
+!       entry in the {\tt gridToFieldMap} indicates that the particular
+!       XGrid dimension will be replicating the Field across the DEs along
+!       this direction.
+! \item [{[ungriddedLBound]}]
+!       Lower bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item [{[ungriddedUBound]}]
+!       Upper bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item [{[name]}] 
+!       Field name. 
+! \item [{[iospec]}] 
+!       I/O specification. ! NOT IMPLEMENTED
+! \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                          !  Local error code
+    type(ESMF_GeomBase) :: geombase
+
+    ! Initialize 
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! Initialize return code   
+    if(present(rc)) then
+      rc = ESMF_RC_NOT_IMPL
+    endif
+
+    ! check init status of input parameters
+    ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit, arrayspec)
+
+    ! Create GeomBase from Xgrid
+    geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+
+    ! Create Field from GeomBase
+    ESMF_FieldCreateXGArraySpec=ESMF_FieldCreateGBArraySpec(geombase, &
+        arrayspec, gridToFieldMap, &
+        ungriddedLBound, ungriddedUBound, &
+        name=name, iospec=iospec, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+
+    if(present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_FieldCreateXGArraySpec
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldCreateXGArray"
+!BOP
+! !IROUTINE: ESMF_FieldCreate - Create a Field from XGrid and Array
+
+! !INTERFACE:
+  ! Private name; call using ESMF_FieldCreate()
+  function ESMF_FieldCreateXGArray(xgrid, xgridSide, gridIndex, array, copyflag, &
+    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    name, iospec, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_Field) :: ESMF_FieldCreateXGArray    
+!
+! !ARGUMENTS:
+    type(ESMF_XGrid) :: xgrid
+    type(ESMF_XGridSide), intent(in), optional  :: xgridSide
+    integer, intent(in), optional               :: gridIndex
+    type(ESMF_Array), intent(in) :: array              
+    type(ESMF_CopyFlag), intent(in), optional :: copyflag       
+    integer, intent(in), optional :: gridToFieldMap(:)    
+    integer, intent(in), optional :: ungriddedLBound(:)
+    integer, intent(in), optional :: ungriddedUBound(:)
+    character (len = *), intent(in), optional :: name   
+    type(ESMF_IOSpec), intent(in), optional :: iospec   
+    integer, intent(out), optional :: rc                
+!
+! !DESCRIPTION:
+! Create an {\tt ESMF\_Field}.  This version of creation
+! assumes the data exists already and is being
+! passed in through an {\tt ESMF\_Array}.  For an example and
+! associated documentation using this method see Section 
+! \ref{sec:field:usage:create_grid_array}.
+! 
+! The arguments are:
+! \begin{description}
+! \item [xgrid] 
+!       {\tt ESMF\_XGrid} object. 
+! \item [{[xgridSide]}] 
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRID\_SIDEA,
+!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then
+!       defaults to ESMF\_XGRID\_BALANCED.
+! \item [{[xgridIndex]}] 
+!       If xgridSide is  ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on
+!       that side to create the Field on. If not provided, defaults to 1. 
+! \item [array]
+!       {\tt ESMF\_Array} object.
+! \item [{[copyflag]}]
+!       Indicates whether to copy the contents of the {\tt array} or reference it directly.
+!       For valid values see \ref{opt:copyflag}.  The default is
+!       {\tt ESMF\_DATA\_REF}.
+! \item [{[gridToFieldMap]}]
+!       List with number of elements equal to the
+!       {\tt grid}|s dimCount.  The list elements map each dimension
+!       of the {\tt grid} to a dimension in the {\tt field} by
+!       specifying the appropriate {\tt field} dimension index. The default is to
+!       map all of the {\tt grid}|s dimensions against the lowest dimensions of
+!       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
+!       to one and smaller than or equal to the {\tt field} rank.
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry
+!       multiple times. The total ungridded dimensions in the {\tt field}
+!       are the total {\tt field} dimensions less
+!       the dimensions in
+!       the {\tt grid}.  Ungridded dimensions must be in the same order they are
+!       stored in the {\t field}.  
+!       If the Field dimCount is less than the XGrid dimCount then the default
+!       gridToFieldMap will contain zeros for the rightmost entries. A zero
+!       entry in the {\tt gridToFieldMap} indicates that the particular
+!       XGrid dimension will be replicating the Field across the DEs along
+!       this direction.
+! \item [{[ungriddedLBound]}]
+!       Lower bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item [{[ungriddedUBound]}]
+!       Upper bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item [{[name]}] 
+!       Field name. 
+! \item [{[iospec]}] 
+!       I/O specification. NOT IMPLEMENTED
+! \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                       !  Local error code
+    type(ESMF_GeomBase) :: geombase
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! Initialize return code   
+    if (present(rc)) then
+      rc = ESMF_RC_NOT_IMPL
+    endif     
+
+    ! check init status of input parameters
+    ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+    ! Create GeomBase from Mesh
+    geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+
+    ! Create Field from GeomBase
+    ESMF_FieldCreateXGArray=ESMF_FieldCreateGBArray(geombase, array, copyflag, &
+    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    name=name, iospec=iospec, rc=localrc)
+
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+ 
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_FieldCreateXGArray
+!------------------------------------------------------------------------------
+
+   
+#define FieldCreateXGDataDoc() \
+!---------------------------------------------------------------------------- @\
+!BOP @\
+! !IROUTINE: ESMF_FieldCreate - Create a Field from XGrid and Fortran array @\
+! @\
+! !INTERFACE: @\
+! ! Private name; call using ESMF_FieldCreate() @\
+! function ESMF_FieldCreateXGData<rank><type><kind>(xgrid, & @\
+!   xgridSide, gridIndex, farray, indexflag, copyflag,     & @\
+!   gridToFieldMap, ungriddedLBound, ungriddedUBound, name,& @\
+!   iospec, rc) @\
+! @\
+! !RETURN VALUE: @\
+!   type(ESMF_Field) :: ESMF_FieldCreateXGData<rank><type><kind> @\
+! @\
+! !ARGUMENTS: @\
+!   type(ESMF_XGrid) :: xgrid @\
+!   type(ESMF_XGridSide), intent(in), optional  :: xgridSide @\
+!   integer, intent(in), optional               :: gridIndex @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), target :: farray @\
+!   type(ESMF_IndexFlag), intent(in)            :: indexflag @\
+!   type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+!   integer, intent(in), optional :: gridToFieldMap(:)     @\
+!   integer, intent(in), optional :: ungriddedLBound(:) @\
+!   integer, intent(in), optional :: ungriddedUBound(:) @\
+!   character (len=*), intent(in), optional :: name  @\
+!   type(ESMF_IOSpec), intent(in), optional :: iospec @\
+!   integer, intent(out), optional :: rc                @\
+! @\
+! !DESCRIPTION: @\
+! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Xgrid}. @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! the retrieved data pointer is not allowed. @\
+! @\
+! The arguments are: @\
+! \begin{description} @\
+! \item [xgrid] @\
+!       {\tt ESMF\_XGrid} object. @\ 
+! \item [{[xgridSide]}] @\
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRID\_SIDEA, @\
+!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then @\
+!       defaults to ESMF\_XGRID\_BALANCED. @\
+! \item [{[xgridIndex]}] @\
+!       If xgridSide is  ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on @\
+!       that side to create the Field on. If not provided, defaults to 1. @\
+! \item [farray] @\
+!       Native fortran data array to be copied/referenced in the Field @\
+!       The Field dimension (dimCount) will be the same as the dimCount @\
+!       for the {\tt farray}. @\
+! \item[indexflag] @\
+!       Indicate how DE-local indices are defined. See section @\
+!       \ref{opt:indexflag} for a list of valid indexflag options. @\
+! \item [{[copyflag]}] @\
+!       Whether to copy the contents of the {\tt farray} or reference directly. @\
+!       For valid values see \ref{opt:copyflag}.  The default is @\
+!       {\tt ESMF\_DATA\_REF}. @\
+! \item [{[gridToFieldMap]}] @\
+!       List with number of elements equal to the @\
+!       {\tt xgrid}|s dimCount.  The list elements map each dimension @\
+!       of the {\tt xgrid} to a dimension in the {\tt farray} by @\
+!       specifying the appropriate {\tt farray} dimension index. The default is to @\
+!       map all of the {\tt xgrid}|s dimensions against the lowest dimensions of @\
+!       the {\tt farray} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
+!       to one and smaller than or equal to the {\tt farray} rank. @\
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry @\
+!       multiple times. The total ungridded dimensions in the {\tt field} @\
+!       are the total {\tt farray} dimensions less @\
+!       the total (distributed + undistributed) dimensions in @\
+!       the {\tt xgrid}.  Unxgridded dimensions must be in the same order they are @\
+!       stored in the {\t farray}.  Permutations of the order of @\
+!       dimensions are handled via individual communication methods.  For example, @\
+!       an undistributed dimension can be remapped to a distributed dimension @\
+!       as part of the {\tt ESMF\_ArrayRedist()} operation. @\
+!       If the Field dimCount is less than the Xgrid dimCount then the default @\
+!       gridToFieldMap will contain zeros for the rightmost entries. A zero @\
+!       entry in the {\tt gridToFieldMap} indicates that the particular @\
+!       Xgrid dimension will be replicating the Field across the DEs along @\
+!       this direction. @\
+! \item [{[ungriddedLBound]}] @\
+!       Lower bounds of the ungridded dimensions of the {\tt field}. @\
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
+!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
+!       {\tt field} are also undistributed. When field dimension count is @\
+!       greater than xgrid dimension count, both ungriddedLBound and ungriddedUBound @\
+!       must be specified. When both are specified the values are checked @\
+!       for consistency.  Note that the the ordering of @\
+!       these ungridded dimensions is the same as their order in the {\tt farray}. @\
+! \item [{[ungriddedUBound]}] @\
+!       Upper bounds of the ungridded dimensions of the {\tt field}. @\
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded @\
+!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
+!       {\tt field} are also undistributed. When field dimension count is @\
+!       greater than xgrid dimension count, both ungriddedLBound and ungriddedUBound @\
+!       must be specified. When both are specified the values are checked @\
+!       for consistency.  Note that the the ordering of @\
+!       these ungridded dimensions is the same as their order in the {\tt farray}. @\
+! \item [{[name]}]  @\
+!       Field name.  @\
+! \item [{[iospec]}]  @\
+!       I/O specification. NOT IMPLEMENTED @\
+! \item [{[rc]}]  @\
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+! \end{description} @\
+! @\
+!EOP @\
+!---------------------------------------------------------------------------- @\
+
+#define FieldCreateXGDataMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+!---------------------------------------------------------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_FieldCreateXGData" @\
+  function ESMF_FieldCreateXGData##mrank##D##mtypekind(xgrid, & @\
+    xgridSide, gridIndex, farray, indexflag, copyflag,        & @\
+    gridToFieldMap, ungriddedLBound, ungriddedUBound, name, iospec, rc) @\
+@\
+    ! return value @\
+    type(ESMF_Field) :: ESMF_FieldCreateXGData##mrank##D##mtypekind @\
+@\
+    ! input arguments @\
+    type(ESMF_XGrid) :: xgrid @\
+    type(ESMF_XGridSide), intent(in), optional  :: xgridSide @\
+    integer, intent(in), optional               :: gridIndex @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
+    type(ESMF_IndexFlag), intent(in)            :: indexflag @\
+    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    integer, intent(in), optional :: gridToFieldMap(:)     @\
+    integer, intent(in), optional :: ungriddedLBound(:) @\
+    integer, intent(in), optional :: ungriddedUBound(:) @\
+    character (len=*), intent(in), optional :: name  @\
+    type(ESMF_IOSpec), intent(in), optional :: iospec @\
+    integer, intent(out), optional :: rc                @\
+@\
+    integer :: localrc                       !  Local error code@\
+    type(ESMF_GeomBase) :: geombase @\
+@\
+    ! Initialize @\
+    localrc = ESMF_RC_NOT_IMPL@\
+@\
+    ! Initialize return code   @\
+    if (present(rc)) then@\
+      rc = ESMF_RC_NOT_IMPL@\
+    endif     @\
+@\
+    ! check init status of input parameters@\
+    ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)@\
+@\
+@\
+    ! Create GeomBase from Xgrid@\
+    geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex ,rc=localrc)@\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
+                                     ESMF_CONTEXT, rc)) return@\
+@\
+@\
+       ESMF_FieldCreateXGData##mrank##D##mtypekind = & @\
+              ESMF_FieldCreateGBData##mrank##D##mtypekind(geombase, & @\
+                               farray, indexflag=indexflag, copyflag=copyflag, & @\
+                               gridToFieldMap=gridToFieldMap, & @\
+                               ungriddedLBound=ungriddedLBound, & @\
+                               ungriddedUBound=ungriddedUBound, & @\
+                               name=name, iospec=iospec, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+@\
+@\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+  end function ESMF_FieldCreateXGData##mrank##D##mtypekind  @\
+!------------------------------------------------------------------------------ @\
+
+TypeKindRankDeclarationMacro(FieldCreateXGData)
+
+
+#define FieldCreateXGDataPtrDoc() \
+!---------------------------------------------------------------------------- @\
+!BOP @\
+! !IROUTINE: ESMF_FieldCreate - Create a Field from XGrid and Fortran array pointer @\
+! @\
+! !INTERFACE: @\
+! ! Private name; call using ESMF_FieldCreate() @\
+! function ESMF_FieldCreateXGDataPtr<rank><type><kind>(xgrid, xgridSide, gridIndex, & @\
+!   farrayPtr, copyflag, gridToFieldMap, & @\
+!   name, iospec, rc) @\
+! @\
+! !RETURN VALUE: @\
+!   type(ESMF_Field) :: ESMF_FieldCreateXGDataPtr<rank><type><kind> @\
+! @\
+! !ARGUMENTS: @\
+!   type(ESMF_XGrid) :: xgrid @\
+!   type(ESMF_XGridSide), intent(in), optional  :: xgridSide @\
+!   integer, intent(in), optional               :: gridIndex @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farrayPtr @\
+!   type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+!   integer, intent(in), optional :: gridToFieldMap(:)     @\
+!   character (len=*), intent(in), optional :: name  @\
+!   type(ESMF_IOSpec), intent(in), optional :: iospec @\
+!   integer, intent(out), optional :: rc                @\
+! @\
+! !DESCRIPTION: @\
+! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_Xgrid}. @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not @\
+! deallocate the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! @\
+! The arguments are: @\
+! \begin{description} @\
+! \item [xgrid] @\
+!       {\tt ESMF\_XGrid} object. @\ 
+! \item [{[xgridSide]}] @\
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRID\_SIDEA, @\
+!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then @\
+!       defaults to ESMF\_XGRID\_BALANCED. @\
+! \item [{[xgridIndex]}] @\
+!       If xgridSide is  ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on @\
+!       that side to create the Field on. If not provided, defaults to 1. @\
+! \item [farrayPtr] @\
+!       Native fortran data pointer to be copied/referenced in the Field @\
+!       The Field dimension (dimCount) will be the same as the dimCount @\
+!       for the {\tt farrayPtr}. @\
+! \item [{[copyflag]}] @\
+!       Whether to copy the contents of the {\tt farrayPtr} or reference it directly. @\
+!       For valid values see \ref{opt:copyflag}.  The default is @\
+!       {\tt ESMF\_DATA\_REF}. @\
+! \item [{[gridToFieldMap]}] @\
+!       List with number of elements equal to the @\
+!       {\tt xgrid}|s dimCount.  The list elements map each dimension @\
+!       of the {\tt xgrid} to a dimension in the {\tt farrayPtr} by @\
+!       specifying the appropriate {\tt farrayPtr} dimension index. The default is to @\
+!       map all of the {\tt xgrid}|s dimensions against the lowest dimensions of @\
+!       the {\tt farrayPtr} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
+!       to one and smaller than or equal to the {\tt farrayPtr} rank. @\
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry @\
+!       multiple times. The total ungridded dimensions in the {\tt field} @\
+!       are the total {\tt farrayPtr} dimensions less @\
+!       the total (distributed + undistributed) dimensions in @\
+!       the {\tt xgrid}.  Unxgridded dimensions must be in the same order they are @\
+!       stored in the {\t farrayPtr}.  Permutations of the order of @\
+!       dimensions are handled via individual communication methods.  For example, @\
+!       an undistributed dimension can be remapped to a distributed dimension @\
+!       as part of the {\tt ESMF\_ArrayRedist()} operation. @\
+!       If the Field dimCount is less than the Xgrid dimCount then the default @\
+!       gridToFieldMap will contain zeros for the rightmost entries. A zero @\
+!       entry in the {\tt gridToFieldMap} indicates that the particular @\
+!       Xgrid dimension will be replicating the Field across the DEs along @\
+!       this direction. @\
+! \item [{[name]}]  @\
+!       Field name.  @\
+! \item [{[iospec]}]  @\
+!       I/O specification. NOT IMPLEMENTED @\
+! \item [{[rc]}]  @\
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+! \end{description} @\
+! @\
+!EOP @\
+!---------------------------------------------------------------------------- @\
+
+#define FieldCreateXGDataPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+!---------------------------------------------------------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_FieldCreateXGDataPtr" @\
+  function ESMF_FieldCreateXGDataPtr##mrank##D##mtypekind(xgrid, & @\
+    xgridSide, gridIndex, farrayPtr, copyflag, gridToFieldMap, & @\
+    name, iospec, rc) @\
+@\
+    ! return value @\
+    type(ESMF_Field) :: ESMF_FieldCreateXGDataPtr##mrank##D##mtypekind @\
+@\
+    ! input arguments @\
+    type(ESMF_XGrid) :: xgrid @\
+    type(ESMF_XGridSide), intent(in), optional  :: xgridSide @\
+    integer, intent(in), optional               :: gridIndex @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
+    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    integer, intent(in), optional :: gridToFieldMap(:)     @\
+    character (len=*), intent(in), optional :: name  @\
+    type(ESMF_IOSpec), intent(in), optional :: iospec @\
+    integer, intent(out), optional :: rc                @\
+@\
+    integer :: localrc                       !  Local error code@\
+    type(ESMF_GeomBase) :: geombase @\
+@\
+    ! Initialize @\
+    localrc = ESMF_RC_NOT_IMPL@\
+@\
+    ! Initialize return code   @\
+    if (present(rc)) then@\
+      rc = ESMF_RC_NOT_IMPL@\
+    endif     @\
+@\
+    ! check init status of input parameters@\
+    ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)@\
+@\
+@\
+    ! Create GeomBase from Xgrid@\
+    geombase=ESMF_GeomBaseCreate(xgrid,xgridSide,gridIndex,rc=localrc)@\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
+                                     ESMF_CONTEXT, rc)) return@\
+@\
+@\
+       ESMF_FieldCreateXGDataPtr##mrank##D##mtypekind = & @\
+              ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind(geombase, & @\
+                               farrayPtr, copyflag=copyflag, & @\
+                               gridToFieldMap=gridToFieldMap, & @\
+                               name=name, iospec=iospec, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+@\
+@\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+  end function ESMF_FieldCreateXGDataPtr##mrank##D##mtypekind  @\
+!------------------------------------------------------------------------------ @\
+
+TypeKindRankDeclarationMacro(FieldCreateXGDataPtr)
+
+!------------------------------------------------------------------------------
+
+
+
 
 end module ESMF_FieldCreateMod
