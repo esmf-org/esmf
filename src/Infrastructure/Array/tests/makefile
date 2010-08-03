@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.50 2010/07/28 22:01:49 theurich Exp $ 
+# $Id: makefile,v 1.51 2010/08/03 15:46:47 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -38,7 +38,7 @@ ifeq ($(ESMF_TESTHARNESS_ARRAY), default)
   TESTS_RUN_UNI := $(TESTS_RUN_UNI) RUN_ESMF_TestHarnessArrayUNI_default
 else
   TESTS_RUN := $(TESTS_RUN) $(ESMF_TESTHARNESS_ARRAY)
-  TESTS_RUN_UNI := $(TESTS_RUN) $(ESMF_TESTHARNESS_ARRAY)
+  TESTS_RUN_UNI := $(TESTS_RUN_UNI) $(ESMF_TESTHARNESS_ARRAY)
 endif
 
 include ${ESMF_DIR}/makefile
