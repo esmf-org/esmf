@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.13 2010/04/27 17:55:22 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.14 2010/08/04 18:22:37 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -85,6 +85,8 @@ module ESMF_ArrayBundleMod
   public ESMF_ArrayBundleSMM
   public ESMF_ArrayBundleSMMRelease
   public ESMF_ArrayBundleSMMStore
+  public ESMF_ArrayBundleWrite
+  public ESMF_ArrayBundleRead
   public ESMF_ArrayBundleValidate
 
 ! - ESMF-internal methods:
@@ -99,7 +101,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.13 2010/04/27 17:55:22 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.14 2010/08/04 18:22:37 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -732,6 +734,195 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_ArrayBundlePrint
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleWrite()"
+!BOP
+! !IROUTINE: ESMF_ArrayBundleWrite - Write ArrayBundle arrays
+
+! !INTERFACE:
+  subroutine ESMF_ArrayBundleWrite(arraybundle, fname, mfiles, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle), intent(in)        :: arraybundle
+    character(*), intent(in)                  :: fname
+    logical,          intent(in) ,  optional  :: mfiles
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!   Print internal information of the specified {\tt ESMF\_ArrayBundle} object. \\
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[arraybundle] 
+!     {\tt ESMF\_ArrayBundle} object.
+!   \item[fname]
+!    The name of the file (netcdf) in which Fortran array is written to.
+!   \item[mfiles]
+!    A logical flag, if TRUE, each array will be written a separate file.
+!    The default is FALSE, ie all arrays are written in one file.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    character(len=80), allocatable :: Aname(:)
+    integer :: arrayCount,i
+    type(ESMF_Array), allocatable :: arrayList(:)
+    logical :: multif
+    character(len=80) :: filename
+    character(len=3) :: cnum
+
+#ifdef ESMF_PIO
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
+
+    ! Check options
+    multif = .false.
+    if (present(mfiles)) multif = mfiles
+    
+    call ESMF_ArrayBundleGet(arraybundle, arrayCount=arrayCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    allocate (Aname(arrayCount))
+    allocate (arrayList(arrayCount))
+    call ESMF_ArrayBundleGet(arraybundle, arrayList=arrayList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (multif) then
+      do i=1,arrayCount
+        write(cnum,"(i3.3)") i
+        filename = fname // cnum
+        ! Get and write the first array in the Bundle
+        call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
+        call ESMF_ArrayWrite(arrayList(i), fname=trim(filename), rc=localrc)
+      enddo
+    else
+      ! Get and write the first array in the Bundle
+      call ESMF_ArrayGet(arrayList(1), name=Aname(1), rc=localrc)
+      call ESMF_ArrayWrite(arrayList(1), fname=fname, rc=localrc)
+
+      ! Get and write the rest of the arrays in the Bundle
+      do i=2,arrayCount
+       call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
+       call ESMF_ArrayWrite(arrayList(i), fname=fname, etag=1, rc=localrc)
+      enddo
+    endif
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+#else
+    ! Return indicating PIO not present
+    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+#endif
+ 
+  end subroutine ESMF_ArrayBundleWrite
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleRead()"
+!BOP
+! !IROUTINE: ESMF_ArrayBundleWrite - Write ArrayBundle arrays
+
+! !INTERFACE:
+  subroutine ESMF_ArrayBundleRead(arraybundle, fname, mfiles, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle), intent(in)        :: arraybundle
+    character(*), intent(in)                  :: fname
+    logical,          intent(in) ,  optional  :: mfiles
+    integer,          intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Read internal information of the specified {\tt ESMF\_ArrayBundle} object.
+!   \\
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[arraybundle] 
+!     {\tt ESMF\_ArrayBundle} object.
+!   \item[fname]
+!    The name of the file (netcdf) in which Fortran array is read from.
+!   \item[mfiles]
+!    A logical flag, if TRUE, each array located in a separate file.
+!    The default is FALSE, ie all arrays are located in one file.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    character(len=80), allocatable :: Aname(:)
+    integer :: arrayCount,i
+    type(ESMF_Array), allocatable :: arrayList(:)
+    logical :: multif
+    character(len=80) :: filename
+    character(len=3) :: cnum
+
+#ifdef ESMF_PIO
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
+
+    ! Check options
+    multif = .false.
+    if (present(mfiles)) multif = mfiles
+
+    call ESMF_ArrayBundleGet(arraybundle, arrayCount=arrayCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    allocate (Aname(arrayCount))
+    allocate (arrayList(arrayCount))
+    call ESMF_ArrayBundleGet(arraybundle, arrayList=arrayList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (multif) then
+      do i=1,arrayCount
+        write(cnum,"(i3.3)") i
+        filename = fname // cnum
+        call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
+        call ESMF_ArrayRead(arrayList(i), fname=filename,  &
+               vname=Aname(i), rc=localrc)
+      enddo
+    else
+      ! Get and read the arrays in the Bundle
+      do i=1,arrayCount
+       call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
+       call ESMF_ArrayRead(arrayList(i), fname=fname, vname=Aname(i), rc=localrc)
+      enddo
+    endif
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+#else
+    ! Return indicating PIO not present
+    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+#endif
+
+  end subroutine ESMF_ArrayBundleRead
 !------------------------------------------------------------------------------
 
 
