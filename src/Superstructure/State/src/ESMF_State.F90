@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.193 2010/07/15 23:57:23 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.194 2010/08/04 01:27:00 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.193 2010/07/15 23:57:23 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.194 2010/08/04 01:27:00 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -3591,7 +3591,7 @@ module ESMF_StateMod
          case (ESMF_STATEITEM_NAME%ot)
              outbuf = trim (outbuf) // " Placeholder name"
          case (ESMF_STATEITEM_INDIRECT%ot)
-             outbuf = trim (outbuf) // " Indirect field inside a bundle"
+             outbuf = trim (outbuf) // " Indirect Field inside a FieldBundle"
          case (ESMF_STATEITEM_UNKNOWN%ot)
              outbuf = trim (outbuf) // " Unknown"
          case (ESMF_STATEITEM_NOTFOUND%ot)
@@ -3601,7 +3601,7 @@ module ESMF_StateMod
          end select
 
          if (longflag) &
-           outbuf = trim (outbuf) // ", proxy: " // merge ("T", "F", dp%proxyFlag)
+           outbuf = trim (outbuf) // ", proxy flag: " // merge ("yes", "no ", dp%proxyFlag)
 
 #if defined (ESMF_ENABLESTATENEEDED)
          select case (dp%needed%needed)
@@ -4218,7 +4218,12 @@ module ESMF_StateMod
         stypep%alloccount = 0
         stypep%datacount = 0
         nullify(stypep%datalist)
-        
+
+        call ESMF_UtilMapNameCreate (stypep%nameMap, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
         ! create methodTable object
         call c_ESMC_MethodTableCreate(stypep%methodTable, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -4295,6 +4300,12 @@ module ESMF_StateMod
           if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
+          ! destroy the nameMap
+          call ESMF_UtilMapNameDestroy (stypep%nameMap, rc=localrc)
+          if (ESMF_LogMsgFoundError (localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
         endif
 
         ! Set as deleted
@@ -4361,8 +4372,14 @@ module ESMF_StateMod
   
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
-      if (acount .le. 0) then
+      if (acount <= 0) then
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, "acount must be >= 0", &
+                                     ESMF_CONTEXT, rc)) return
+      endif
+
+      if (acount > size (routehandles)) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD,  &
+                                     "acount must be <= size (routehandles)", &
                                      ESMF_CONTEXT, rc)) return
       endif
       
@@ -4478,8 +4495,14 @@ module ESMF_StateMod
             if (ESMF_LogMsgFoundError(localrc, "getting name from routehandle", &
                                       ESMF_CONTEXT, rc)) return
 
+            call ESMF_UtilMapNameAdd (stypep%nameMap,  &
+              name=nextitem%namep, value=stypep%datacount, rc=localrc)
+            if (ESMF_LogMsgFoundError (localrc,  &
+                                       ESMF_ERR_PASSTHRU,  &
+                                       ESMF_CONTEXT, rc)) return
+
             nextitem%datap%rp = routehandles(i)
- 
+
             nextitem%needed = stypep%needed_default
             nextitem%ready = stypep%ready_default
             nextitem%valid = stypep%stvalid_default
@@ -4558,8 +4581,14 @@ module ESMF_StateMod
   
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
-      if (acount .le. 0) then
+      if (acount <= 0) then
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, "acount must be >= 0", &
+                                     ESMF_CONTEXT, rc)) return
+      endif
+
+      if (acount > size (arrays)) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD,  &
+                                     "acount must be <= size (arrays)", &
                                      ESMF_CONTEXT, rc)) return
       endif
       
@@ -4674,6 +4703,12 @@ module ESMF_StateMod
             if (ESMF_LogMsgFoundError(localrc, "getting name from array", &
                                       ESMF_CONTEXT, rc)) return
 
+            call ESMF_UtilMapNameAdd (stypep%nameMap,  &
+              name=nextitem%namep, value=stypep%datacount, rc=localrc)
+            if (ESMF_LogMsgFoundError (localrc,  &
+                                       ESMF_ERR_PASSTHRU,  &
+                                       ESMF_CONTEXT, rc)) return
+
             nextitem%datap%ap = arrays(i)
  
             nextitem%needed = stypep%needed_default
@@ -4754,8 +4789,14 @@ module ESMF_StateMod
   
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
-      if (acount .le. 0) then
+      if (acount <= 0) then
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, "acount must be >= 0", &
+                                     ESMF_CONTEXT, rc)) return
+      endif
+
+      if (acount > size (arraybundles)) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD,  &
+                                     "acount must be <= size (arraybundles)", &
                                      ESMF_CONTEXT, rc)) return
       endif
       
@@ -4870,6 +4911,12 @@ module ESMF_StateMod
             if (ESMF_LogMsgFoundError(localrc, "getting name from arraybundle", &
                                       ESMF_CONTEXT, rc)) return
 
+            call ESMF_UtilMapNameAdd (stypep%nameMap,  &
+              name=nextitem%namep, value=stypep%datacount, rc=localrc)
+            if (ESMF_LogMsgFoundError (localrc,  &
+                                       ESMF_ERR_PASSTHRU,  &
+                                       ESMF_CONTEXT, rc)) return
+
             nextitem%datap%abp = arraybundles(i)
  
             nextitem%needed = stypep%needed_default
@@ -4950,19 +4997,17 @@ module ESMF_StateMod
 
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
-      if (fcount .le. 0) then
+      if (fcount <= 0) then
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, "fcount must be >= 0", &
-                                      ESMF_CONTEXT, rc)) return
-      endif
-      
-      ! make sure sizes are consistent
-      newcount = size(fields)
-      if (fcount .gt. newcount) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                      "count must not be >= list length", &
-                                      ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rc)) return
       endif
 
+      if (fcount > size (fields)) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD,  &
+                                     "fcount must be <= size (fields)", &
+                                     ESMF_CONTEXT, rc)) return
+      endif
+      
       ! Add the fields to the state, checking for name clashes
       !  and name placeholders
 
@@ -5074,6 +5119,12 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+            call ESMF_UtilMapNameAdd (stypep%nameMap,  &
+              name=nextitem%namep, value=stypep%datacount, rc=localrc)
+            if (ESMF_LogMsgFoundError (localrc,  &
+                                       ESMF_ERR_PASSTHRU,  &
+                                       ESMF_CONTEXT, rc)) return
+
             nextitem%datap%fp = fields(i)
  
             nextitem%needed = stypep%needed_default
@@ -5157,9 +5208,15 @@ module ESMF_StateMod
   
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
-      if (bcount .le. 0) then
+      if (bcount <= 0) then
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, "bcount must be >= 0", &
-                                      ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rc)) return
+      endif
+
+      if (bcount > size (bundles)) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD,  &
+                                     "bcount must be <= size (bundles)", &
+                                     ESMF_CONTEXT, rc)) return
       endif
       
       ! Add the bundles to the state, checking for name clashes
@@ -5342,6 +5399,12 @@ module ESMF_StateMod
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10
 
+            call ESMF_UtilMapNameAdd (stypep%nameMap,  &
+              name=nextitem%namep, value=stypep%datacount, rc=localrc)
+            if (ESMF_LogMsgFoundError (localrc,  &
+                                       ESMF_ERR_PASSTHRU,  &
+                                       ESMF_CONTEXT, rc)) return
+
            nextitem%datap%fbp = bundles(i)
 
            nextitem%needed = stypep%needed_default
@@ -5513,8 +5576,14 @@ module ESMF_StateMod
   
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
-      if (scount .le. 0) then
+      if (scount <= 0) then
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, "scount must be >= 0", &
+                                     ESMF_CONTEXT, rc)) return
+      endif
+
+      if (scount > size (states)) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD,  &
+                                     "scount must be <= size (states)", &
                                      ESMF_CONTEXT, rc)) return
       endif
       
@@ -5636,7 +5705,16 @@ module ESMF_StateMod
                                   ESMF_CONTEXT, rc)) then
               deallocate(stodo, stat=localrc)
               return
-            endif
+            end if
+
+            call ESMF_UtilMapNameAdd (stypep%nameMap,  &
+              name=nextitem%namep, value=stypep%datacount, rc=localrc)
+            if (ESMF_LogMsgFoundError (localrc,  &
+                                       ESMF_ERR_PASSTHRU,  &
+                                       ESMF_CONTEXT, rc)) then
+              deallocate(stodo, stat=localrc)
+              return
+            end if
 
             nextitem%datap%spp => states(i)%statep
  
@@ -5714,9 +5792,8 @@ module ESMF_StateMod
 !EOPI
 
       integer :: localrc                   ! local error status
-      integer :: i, dcount, itemindex
+      integer :: itemindex
       logical :: itemfound
-      type(ESMF_StateItem), pointer :: nextitem
 
       ! Initialize return code.  Assume failure until success assured.
       localrc = ESMF_RC_NOT_IMPL
@@ -5731,18 +5808,13 @@ module ESMF_StateMod
       ! This function is only called internally, so we do not need to check
       ! the validity of the state - it has been checked before we get here.
 
-      ! For each item in the array, check the name
-      dcount = stypep%datacount
-           
-      do i=1, dcount
-        nextitem => stypep%datalist(i)
-        if (trim(nextitem%namep) .eq. trim(dataname)) then
-           itemfound = .TRUE.
-           itemindex = i
-           exit             ! leave loop at this point
-        endif
-      enddo
-  
+      call ESMF_UtilMapNameLookup (stypep%nameMap, name=dataname,  &
+          value=itemindex, foundFlag=itemfound,  &
+          rc=localrc)
+      if (ESMF_LogMsgFoundError (localrc,  &
+                                 ESMF_ERR_PASSTHRU,  &
+                                 ESMF_CONTEXT, rc)) return
+
       if (itemfound) then
         ESMF_StateClassFindData = .TRUE.
         if (present(dataitem)) dataitem => stypep%datalist(itemindex) 
@@ -5902,6 +5974,12 @@ module ESMF_StateMod
 
             ! Add name
             nextitem%namep = namelist(i)
+
+            call ESMF_UtilMapNameAdd (stypep%nameMap,  &
+              name=nextitem%namep, value=stypep%datacount, rc=localrc)
+            if (ESMF_LogMsgFoundError (localrc,  &
+                                       ESMF_ERR_PASSTHRU,  &
+                                       ESMF_CONTEXT, rc)) return
 
             nextitem%needed = stypep%needed_default
             nextitem%ready = stypep%ready_default
