@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.6 2010/08/02 17:38:57 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.7 2010/08/04 14:48:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -197,6 +197,7 @@ contains
         type(ESMF_DistGrid)                 :: l_sideAdg(2), l_sideBdg(1)
         real*8                              :: l_centroid(12,2), l_area(12)
         type(ESMF_XGridSpec)                :: l_sparseMatA2X(2)
+        type(ESMF_Field)                    :: field
 
         type(ESMF_VM)                       :: vm
         integer                             :: lpet, eleCount, ngridA, ngridB
@@ -319,7 +320,22 @@ contains
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        call ESMF_XGridGet(xgrid, 1, distgridB=distgrid, rc=localrc)
+        !call ESMF_XGridGet(xgrid, 1, distgridB=distgrid, rc=localrc)
+        !if (ESMF_LogMsgFoundError(localrc, &
+        !    ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rc)) return
+
+        field = ESMF_FieldCreate(xgrid, typekind=ESMF_TYPEKIND_R8, rank=1, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldPrint(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
