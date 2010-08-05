@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.22 2010/08/02 17:14:16 theurich Exp $
+# $Id: sys_tests_results.pl,v 1.23 2010/08/05 22:55:17 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -277,9 +277,10 @@ use File::Find
                         	print "\n\n";
                         	# Sort the pass_st_files
                         	@pass_st_files = sort (@pass_st_files);
-                                foreach $file ( @pass_st_files ) {
-                                  $file = "PASS: " . $file;
-                                }
+				# comment out until bug is fixed
+                                #foreach $file ( @pass_st_files ) {
+                                  #$file = "PASS: " . $file;
+                                #}
                         	print @pass_st_files;
                         	print "\n\n";
                 	}
@@ -301,9 +302,10 @@ use File::Find
                         	print "\n\n";
                         	# Sort the act_st_files
                         	@act_st_files = sort (@act_st_files);
-                                foreach $file ( @act_st_files ) {
-                                  $file = "FAIL: " . $file;
-                                }
+				# comment out until bug is fixed
+                                #foreach $file ( @act_st_files ) {
+                                  #$file = "FAIL: " . $file;
+                                #}
                         	print @act_st_files;
                         	print "\n\n";
                 	}
