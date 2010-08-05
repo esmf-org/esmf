@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.6 2010/08/03 21:18:42 oehmke Exp $
+! $Id: ESMF_XGrid.F90,v 1.7 2010/08/05 13:42:21 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -135,7 +135,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.6 2010/08/03 21:18:42 oehmke Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.7 2010/08/05 13:42:21 feiliu Exp $'
 
 !==============================================================================
 !
@@ -152,6 +152,7 @@ module ESMF_XGridMod
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_XGridAssign
       module procedure ESMF_XGridSpecAssign
+      module procedure ESMF_XGridSideAssign
 
 
 ! !DESCRIPTION:
@@ -270,6 +271,39 @@ contains
 
  dval%factorIndexList = sval%factorIndexList
  dval%factorList = sval%factorList
+
+ end subroutine
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridSideAssign()"
+!BOPI
+! !IROUTINE:  ESMF_XGridSideAssign - set one xgrid side struct equal to another
+
+! !INTERFACE:
+
+   subroutine ESMF_XGridSideAssign(dval, sval)
+!
+! !ARGUMENTS:
+ type(ESMF_XGridSide), intent(out) :: dval
+ type(ESMF_XGridSide), intent(in) :: sval
+!
+! !DESCRIPTION:
+!      Set one xgrid side structure equal to another
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [dval]
+!           destination structure
+!     \item [dval]
+!           source structure
+!     \end{description}
+!
+!EOPI
+
+ ! deep copy of the lists
+
+ dval%side = sval%side
 
  end subroutine
 

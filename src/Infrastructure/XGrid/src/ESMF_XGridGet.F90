@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.3 2010/08/02 17:38:57 feiliu Exp $
+! $Id: ESMF_XGridGet.F90,v 1.4 2010/08/05 13:42:21 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.3 2010/08/02 17:38:57 feiliu Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.4 2010/08/05 13:42:21 feiliu Exp $'
 
 !==============================================================================
 !
@@ -410,16 +410,15 @@ end subroutine ESMF_XGridGetDefault
 
 ! !INTERFACE:
 
-subroutine ESMF_XGridGetDG(xgrid, gridIndex, &
-    distgridA, distgridB, &
+subroutine ESMF_XGridGetDG(xgrid, distgrid, xgridSide, gridIndex, &
     rc) 
 
 !
 ! !ARGUMENTS:
 type(ESMF_XGrid), intent(in)                 :: xgrid
-integer, intent(in)                          :: gridIndex
-type(ESMF_DistGrid), intent(out), optional   :: distgridA
-type(ESMF_DistGrid), intent(out), optional   :: distgridB
+type(ESMF_DistGrid), intent(out)             :: distgrid
+type(ESMF_XGridSide), intent(in), optional   :: xgridSide
+integer, intent(in), optional                :: gridIndex
 integer, intent(out), optional               :: rc 
 !
 ! !DESCRIPTION:
@@ -429,22 +428,26 @@ integer, intent(out), optional               :: rc
 !     \begin{description}
 !     \item [xgrid]
 !       The xgrid object used to retrieve information from.
-!     \item [{[gridIndex]}]
-!           Index of distgrid to be retrieved.
-!     \item [{[distgridA]}]
-!           distgrid whose sequence index list is an overlap between gridIndex-th Grid
-!           on sideA and the xgrid object.
-!     \item [{[distgridB]}]
-!           distgrid whose sequence index list is an overlap between gridIndex-th Grid
-!           on sideB and the xgrid object.
+!     \item [distgrid]
+!       Distgrid whose sequence index list is an overlap between gridIndex-th Grid
+!       on xgridSide and the xgrid object.
+!     \item [{[xgridSide]}] 
+!       Which side of the XGrid to retrieve the distgrid from (either ESMF\_XGRID\_SIDEA,
+!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then
+!       defaults to ESMF\_XGRID\_BALANCED.
+!     \item [{[xgridIndex]}] 
+!       If xgridSide is  ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on
+!       that side to create the Field on. If not provided, defaults to 1. 
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} only if the {\tt ESMF\_XGrid} 
-!           is created.
+!       Return code; equals {\tt ESMF\_SUCCESS} only if the {\tt ESMF\_XGrid} 
+!       is created.
 !     \end{description}
 !
 !EOPI
 
     type(ESMF_XGridType), pointer :: xgtypep
+    type(ESMF_XGridSide)          :: l_xgridSide
+    integer                       :: l_gridIndex
 
     ! Initialize return code   
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -454,31 +457,47 @@ integer, intent(out), optional               :: rc
 
     xgtypep => xgrid%xgtypep
 
-    if(gridIndex .lt. 0) then
+    if(present(xgridSide)) then
+        l_xgridSide = xgridSide
+    else                   
+        l_xgridSide = ESMF_XGRID_BALANCED
+    endif
+
+    if(present(gridIndex)) then
+        l_gridIndex = gridIndex
+    else                   
+        l_gridIndex = 1
+    endif
+
+    if(l_gridIndex .lt. 0) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
            "- gridIndex cannot be less than 0", &
            ESMF_CONTEXT, rc) 
         return
     endif
 
-    if(present(distgridA)) then
-        if(gridIndex .gt. size(xgtypep%distgridA, 1)) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-               "- gridIndex cannot be greater than the size of distgridA in the XGrid", &
-               ESMF_CONTEXT, rc) 
-            return
-        endif
-        distgridA = xgtypep%distgridA(gridIndex)
+    if(l_xgridSide .eq. ESMF_XGRID_BALANCED) then
+        distgrid = xgtypep%distgridM
     endif
 
-    if(present(distgridB)) then
-        if(gridIndex .gt. size(xgtypep%distgridB, 1)) then
+    if(l_xgridSide .eq. ESMF_XGRID_SIDEA) then
+        if(l_gridIndex .gt. size(xgtypep%distgridA, 1)) then
             call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-               "- gridIndex cannot be greater than the size of distgridB in the XGrid", &
+"- gridIndex cannot be greater than the size of distgridA in the XGrid", &
                ESMF_CONTEXT, rc) 
             return
         endif
-        distgridB = xgtypep%distgridB(gridIndex)
+        distgrid = xgtypep%distgridA(l_gridIndex)
+    endif
+
+    if(l_xgridSide .eq. ESMF_XGRID_SIDEB) then
+        if(l_gridIndex .gt. size(xgtypep%distgridB, 1)) then
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+"- gridIndex cannot be greater than the size of distgridB in the XGrid", &
+               ESMF_CONTEXT, rc) 
+            return
+        endif
+        distgrid = xgtypep%distgridB(l_gridIndex)
     endif
 
     ! success
@@ -504,9 +523,9 @@ subroutine ESMF_XGridGetEle(xgrid, &
 type(ESMF_XGrid), intent(in)                 :: xgrid
 integer, intent(in)                          :: localDE
 integer, intent(out), optional               :: elementCount
-integer, intent(out), optional               :: exclusiveCount(1)
-integer, intent(out), optional               :: exclusiveLBound(1)
-integer, intent(out), optional               :: exclusiveUBound(1)
+integer, intent(out), optional               :: exclusiveCount
+integer, intent(out), optional               :: exclusiveLBound
+integer, intent(out), optional               :: exclusiveUBound
 integer, intent(out), optional               :: rc 
 !
 ! !DESCRIPTION:
@@ -573,7 +592,7 @@ integer, intent(out), optional               :: rc
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
     if(present(exclusiveLBound)) then
-        exclusiveLBound(1) = minIndex(1,localDE+1)
+        exclusiveLBound = minIndex(1,localDE+1)
     endif
 
     call ESMF_DistGridGet(xgtypep%distgridM, delayout=delayout, &
@@ -593,11 +612,11 @@ integer, intent(out), optional               :: rc
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
     if(present(exclusiveUBound)) then
-        exclusiveUBound(1) = maxIndex(1,localDE+1)
+        exclusiveUBound = maxIndex(1,localDE+1)
     endif
 
     if(present(exclusiveCount)) then
-        exclusiveCount(1) = maxIndex(1,localDE+1) - minIndex(1,localDE+1) + 1
+        exclusiveCount = maxIndex(1,localDE+1) - minIndex(1,localDE+1) + 1
     endif
 
     deallocate(minIndex)
