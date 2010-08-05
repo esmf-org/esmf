@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.58 2010/08/01 22:41:53 w6ws Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.59 2010/08/05 18:44:07 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.58 2010/08/01 22:41:53 w6ws Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.59 2010/08/05 18:44:07 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -76,7 +76,6 @@
       character(1) :: pet_char
       type(ESMF_TimeInterval) :: one_sec, zero, time_diff
       type(ESMF_Time) :: my_time, log_time
-      type(ESMF_MsgType) :: zero_messages(0)
 #endif
 
 
@@ -619,41 +618,41 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test msgMask filter
+      ! Test msgAllow filter
       write(failMsg, *) "Did not return ESMF_FAILURE"
-      write(name, *) " LogSet with empty msgMask Test"
+      write(name, *) " LogSet with msgAllow set to info only Test"
       call ESMF_LogSet (  &
-          msgMask=zero_messages,  &
+          msgAllow=(/ ESMF_LOG_INFO /),  &
           rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test msgMask filter
+      ! Test msgAllow filter
       write(failMsg, *) "Did not return ESMF_FAILURE"
-      write(name, *) " LogSet with msgMask set to info only Test"
+      write(name, *) " LogSet with msgAllow set for warnings and info Test"
       call ESMF_LogSet (  &
-          msgMask=(/ ESMF_LOG_INFO /),  &
+          msgAllow=(/ ESMF_LOG_WARNING, ESMF_LOG_INFO /),  &
           rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test msgMask filter
+      ! Test msgAllow filter
       write(failMsg, *) "Did not return ESMF_FAILURE"
-      write(name, *) " LogSet with msgMask set for errors and info Test"
+      write(name, *) " LogSet with msgAllow set for errors and info Test"
       call ESMF_LogSet (  &
-          msgMask=(/ ESMF_LOG_ERROR, ESMF_LOG_INFO /),  &
+          msgAllow=(/ ESMF_LOG_ERROR, ESMF_LOG_INFO /),  &
           rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test msgMask filter
+      ! Test msgAllow filter
       write(failMsg, *) "Did not return ESMF_FAILURE"
-      write(name, *) " LogSet with msgMask set for all types Test"
+      write(name, *) " LogSet with msgAllow set for all types Test"
       call ESMF_LogSet (  &
-          msgMask = (/ ESMF_LOG_ERROR, ESMF_LOG_INFO, ESMF_LOG_WARNING /),  &
+          msgAllow = ESMF_LOG_ALL,  &
           rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
