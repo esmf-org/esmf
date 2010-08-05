@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.4 2010/07/26 19:38:00 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.5 2010/08/05 17:25:31 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.4 2010/07/26 19:38:00 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.5 2010/08/05 17:25:31 feiliu Exp $'
 
 !==============================================================================
 !
@@ -509,16 +509,16 @@ subroutine ESMF_XGridDistGrids(xgtype, rc)
             ESMF_CONTEXT, rc)) return
     endif
 
-    if(.not. associated(xgtype%sparseMatA2X) .and. &
-       .not. associated(xgtype%sparseMatX2A) .and. &
-       .not. associated(xgtype%sparseMatB2X) .and. &
-       .not. associated(xgtype%sparseMatX2B)) then
-        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-           "- one of the sparse matrix arguments must be specified", &
-           ESMF_CONTEXT, rc) 
-        return
+    !if(.not. associated(xgtype%sparseMatA2X) .and. &
+    !   .not. associated(xgtype%sparseMatX2A) .and. &
+    !   .not. associated(xgtype%sparseMatB2X) .and. &
+    !   .not. associated(xgtype%sparseMatX2B)) then
+    !    call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+    !       "- one of the sparse matrix arguments must be specified", &
+    !       ESMF_CONTEXT, rc) 
+    !    return
 
-    endif
+    !endif
 
     if(present(rc)) rc = ESMF_SUCCESS
 

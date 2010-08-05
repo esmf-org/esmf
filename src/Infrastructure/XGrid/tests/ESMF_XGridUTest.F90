@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.7 2010/08/04 14:48:23 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.8 2010/08/05 17:25:31 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -201,7 +201,7 @@ contains
 
         type(ESMF_VM)                       :: vm
         integer                             :: lpet, eleCount, ngridA, ngridB
-        integer                             :: elb(1), eub(1), ec(1)
+        integer                             :: elb, eub, ec
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -298,7 +298,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        print *, lpet, eleCount, elb(1), eub(1)
+        print *, lpet, eleCount, elb, eub
 
         call ESMF_DistGridPrint(distgrid, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -312,11 +312,13 @@ contains
                 ESMF_CONTEXT, rc)) return
         enddo
 
-        call ESMF_XGridGet(xgrid, 1, distgridA=distgrid, rc=localrc)
+        call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEA, gridIndex=1, &
+            distgrid=distgrid, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        call ESMF_XGridGet(xgrid, 2, distgridA=distgrid, rc=localrc)
+        call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEA, gridIndex=2, &
+            distgrid=distgrid, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
