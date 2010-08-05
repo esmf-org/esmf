@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.18 2010/04/12 21:16:52 w6ws Exp $
+// $Id: ESMC_Config.h,v 1.19 2010/08/05 04:44:15 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -24,19 +24,13 @@
 #define ESMC_Config_H
 
 //-----------------------------------------------------------------------------
-//BOP
-// !CLASS:  ESMC_Config - C++ interface to the F90 Config object
-//
-// !DESCRIPTION:
+// ESMC_Config - C++ interface to the F90 Config object
 //
 // The code in this file defines the C++ Config members and declares method 
-// signatures (prototypes).  The companion file ESMC\_Config.C contains
+// signatures (prototypes).  The companion file {\tt ESMC\_Config.C} contains
 // the definitions (full code bodies) for the Config methods.
-//
-//EOP
 //-----------------------------------------------------------------------------
 
-// !USES:
 #include "ESMC_Arg.h"
 #include "ESMC_Util.h"
 
@@ -71,24 +65,250 @@ typedef struct {
 
 // prototypes for the ESMC_Config API
 
-ESMC_Config ESMC_ConfigCreate(int* rc);
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ConfigCreate - Create a Config object
+//
+// !INTERFACE:
+ESMC_Config ESMC_ConfigCreate(
+  int* rc                    // out - return code
+  );
 
-int ESMC_ConfigDestroy(ESMC_Config* config);
+// !RETURN VALUE:
+//  ESMC_Config*  to newly allocated ESMC_Config
+//
+// !DESCRIPTION:
+//  Creates an {\tt ESMC\_Config} for use in subsequent calls.
+//
+//   The arguments are:
+//   \begin{description}
+//   \item [{[rc]}]
+//     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//   \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
 
-int ESMC_ConfigLoadFile(ESMC_Config config, const char* fname, ...);
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ConfigDestroy - Destroy a Config object
+//
+// !INTERFACE:
+int ESMC_ConfigDestroy(
+  ESMC_Config* config        // in  - ESMC_Config to destroy
+  );
 
-int ESMC_ConfigFindLabel(ESMC_Config config, const char* label);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//  Destroys the {\tt config} object.
+//
+//   The arguments are:
+//   \begin{description}
+//   \item [config]
+//     Already created {\tt ESMC\_Config} object.
+//   \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
 
-int ESMC_ConfigNextLine(ESMC_Config config, int tableEnd );
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ConfigLoadFile - Load resource file into memory
+//
+// !INTERFACE:
+int ESMC_ConfigLoadFile(
+  ESMC_Config config,        // in  - ESMC_Config object
+  const char* name,          // in  - file name
+  ...                        // optional argument list: (unique)
+  );
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//  Resource file with {\tt filename} is loaded into memory.
+//
+//   The arguments are:
+//   \begin{description}
+//   \item [config]
+//     Already created {\tt ESMC\_Config} object.
+//   \item [filename]
+//     Configuration file name.
+//   \item [{[delayout]}]
+//     {\tt ESMC\_DELayout} associated with this {\tt config} object.
+//     **NOTE: {\tt ESMC\_DELayout} is not yet enabled
+//   \item [{[unique]}]
+//     If specified as true, uniqueness of labels are checked and 
+//     error code set if duplicates found (optional).
+//   \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ConfigFindLabel - Find a label
+//
+// !INTERFACE:
+int ESMC_ConfigFindLabel(
+  ESMC_Config config,        // in  - ESMC_Config object
+  const char* label          // in  - label
+  );
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//  Equals -1 if buffer could not be loaded, -2 if label not found,
+//  and -3 if invalid operation with index.
+//
+// !DESCRIPTION:
+//  Finds the {\tt label} (key) in the {\tt config} file. 
+//
+//  Since the search is done by looking for a word in the 
+//  whole resource file, it is important to use special 
+//  conventions to distinguish labels from other words 
+//  in the resource files. The DAO convention is to finish 
+//  line labels by : and table labels by ::.
+//
+//   The arguments are:
+//   \begin{description}
+//   \item [config]
+//     Already created {\tt ESMC\_Config} object.
+//   \item [label]
+//     Identifying label. 
+//   \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ConfigNextLine - Find next line
+//
+// !INTERFACE:
+int ESMC_ConfigNextLine(
+  ESMC_Config config,       // in  - ESMC_Config object
+  int tableEnd);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//  Selects the next line (for tables).
+//
+//   The arguments are:
+//   \begin{description}
+//   \item [config]
+//     Already created {\tt ESMC\_Config} object.
+//   \item [{[tableEnd]}]
+//     End of table mark (::) is checked.
+//   \end{description} //
+//EOP
+//-----------------------------------------------------------------------------
 
 //int ESMC_ConfigGetChar(ESMC_Config config, char* value, ...);
 
-int ESMC_ConfigGetLen(ESMC_Config config, int* wordCount, ...);
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ConfigGetLen - Get the length of the line in words
+//
+// !INTERFACE:
+int ESMC_ConfigGetLen(
+  ESMC_Config config,        // in  - ESMC_Config object
+  int* wordCount,            // out - length of line in words
+  ...                        // optional argument list: (label)
+  );
 
-int ESMC_ConfigGetDim(ESMC_Config config, int* lineCount, int* columnCount,
-  ...);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//  Gets the length of the line in words by counting words
+//  disregarding types.  Returns the word count as an integer.
+//
+//   The arguments are:
+//   \begin{description}
+//   \item [config]
+//     Already created {\tt ESMC\_Config} object.
+//   \item [wordCount]
+//     Returned number of words in the line. 
+//   \item [{[label]}]
+//     Identifying label.  If not specified, use the current line (optional).
+//   \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
 
-int ESMC_ConfigValidate(ESMC_Config config, ...);
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ConfigGetDim - Get table sizes
+//
+// !INTERFACE:
+int ESMC_ConfigGetDim(
+  ESMC_Config config,        // in  - ESMC_Config object
+  int* lineCount,            // out - number of lines in table
+  int* columnCount,          // out - number of columns in table
+  ...                        // optional argument list: (label)
+  );
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//  Returns the number of lines in the table in {\tt lineCount} and 
+//  the maximum number of words in a table line in {\tt columnCount}.
+//
+//   The arguments are:
+//   \begin{description}
+//   \item [config]
+//     Already created {\tt ESMC\_Config} object.
+//   \item [lineCount]
+//     Returned number of lines in the table. 
+//   \item [columnCount]
+//     Returned maximum number of words in a table line. 
+//   \item [{[label]}]
+//     Identifying label (optional).
+//   \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ConfigValidate - Validate a Config object
+//
+// !INTERFACE:
+int ESMC_ConfigValidate(
+  ESMC_Config config,        // in  - ESMC_Config object
+  ...                        // optional argument list: (options)
+  );
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//  Equals ESMF_RC_ATTR_UNUSED if any unused attributes are found
+//  with option "unusedAttributes" below.
+//
+// !DESCRIPTION:
+//   Checks whether a {\tt config} object is valid.
+//
+//   The arguments are:
+//   \begin{description}
+//   \item [config]
+//     Already created {\tt ESMC\_Config} object.
+//   \item[{[options]}]
+//     If none specified:  simply check that the buffer is not full and the
+//       pointers are within range (optional).
+//     "unusedAttributes" - Report to the default logfile all attributes not
+//       retrieved via a call to {\tt ESMC\_ConfigGetAttribute()} or
+//       {\tt ESMC\_ConfigGetChar()}.  The attribute name (label) will be
+//       logged via {\tt ESMC\_LogErr} with the WARNING log message type.
+//       For an array-valued attribute, retrieving at least one value via
+//       {\tt ESMC\_ConfigGetAttribute()} or {\tt ESMC\_ConfigGetChar()}
+//       constitutes being "used."
+//   \end{description}
+//
+//EOP
 
 int ESMC_ConfigGetAttribute(ESMC_Config config, void* value, enum ESMC_TypeKind tk,
   ...);
