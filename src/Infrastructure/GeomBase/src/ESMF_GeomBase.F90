@@ -1,4 +1,4 @@
-! $Id: ESMF_GeomBase.F90,v 1.6 2010/08/05 16:50:42 oehmke Exp $
+! $Id: ESMF_GeomBase.F90,v 1.7 2010/08/05 17:54:45 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -156,7 +156,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.6 2010/08/05 16:50:42 oehmke Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.7 2010/08/05 17:54:45 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1071,7 +1071,7 @@ end subroutine ESMF_GeomBaseGet
 
 
        case  (ESMF_GEOMTYPE_XGRID%type) ! Xgrid
-          call ESMF_XGridGet(gbcp%xgrid, localDE, &   
+          call ESMF_XGridGet(gbcp%xgrid, localDE=localDE, &   
               exclusiveLBound=el, &
                exclusiveUBound=eu, &
                exclusiveCount=ec,  &
