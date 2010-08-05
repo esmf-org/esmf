@@ -1,4 +1,4 @@
-! $Id: ESMF_GeomBase.F90,v 1.5 2010/08/04 16:40:19 oehmke Exp $
+! $Id: ESMF_GeomBase.F90,v 1.6 2010/08/05 16:50:42 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -156,7 +156,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.5 2010/08/04 16:40:19 oehmke Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.6 2010/08/05 16:50:42 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -380,30 +380,13 @@ end interface
 
           ! Get distgrid
 	  if (present(distgrid)) then
-              if (gbcp%xgridside .eq. ESMF_XGRID_SIDEA) then
-                   call ESMF_XGridGet(gbcp%xgrid, gbcp%xgridindex, &
-                          distgridA=distgrid, rc=localrc)
-                   if (ESMF_LogMsgFoundError(localrc, &
+              call ESMF_XGridGet(gbcp%xgrid, gridIndex=gbcp%xgridindex, &
+                                 xgridSide=gbcp%xgridSide, &
+                                 distgrid=distgrid, rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
-              else if (gbcp%xgridside .eq. ESMF_XGRID_SIDEB) then
-                   call ESMF_XGridGet(gbcp%xgrid, gbcp%xgridindex, &
-                          distgridB=distgrid, rc=localrc)
-                   if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
-              else if (gbcp%xgridside .eq. ESMF_XGRID_BALANCED) then
-                   call ESMF_XGridGet(gbcp%xgrid, distgridM=distgrid, &
-                          rc=localrc)
-                   if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
-              else
-                   if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                               " Bad XGridSide value", &
-                               ESMF_CONTEXT, rc)) return
-	      endif
-           endif
+          endif
 
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
@@ -960,34 +943,16 @@ end interface
 
           ! Get distgrid
 	  if (present(distgrid)) then
-              if (gbcp%xgridside .eq. ESMF_XGRID_SIDEA) then
-                   call ESMF_XGridGet(gbcp%xgrid, gbcp%xgridindex, &
-                          distgridA=distgrid, rc=localrc)
-                   if (ESMF_LogMsgFoundError(localrc, &
+              call ESMF_XGridGet(gbcp%xgrid, gridIndex=gbcp%xgridindex, &
+                                 xgridSide=gbcp%xgridSide, &
+                                 distgrid=distgrid, rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
-              else if (gbcp%xgridside .eq. ESMF_XGRID_SIDEB) then
-                   call ESMF_XGridGet(gbcp%xgrid, gbcp%xgridindex, &
-                          distgridB=distgrid, rc=localrc)
-                   if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
-              else if (gbcp%xgridside .eq. ESMF_XGRID_BALANCED) then
-                   call ESMF_XGridGet(gbcp%xgrid, distgridM=distgrid, &
-                          rc=localrc)
-                   if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
-              else
-                   if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                               " Bad XGridSide value", &
-                               ESMF_CONTEXT, rc)) return
-	      endif
-           endif
-
-            if (present(indexFlag)) indexFlag = ESMF_INDEX_DELOCAL
-            if (present(xgridside)) xgridside=gbcp%xgridside
-            if (present(gridIndex)) gridIndex=gbcp%xgridIndex
+          endif
+          if (present(indexFlag)) indexFlag = ESMF_INDEX_DELOCAL
+          if (present(xgridside)) xgridside=gbcp%xgridside
+          if (present(gridIndex)) gridIndex=gbcp%xgridIndex
              
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
@@ -1054,7 +1019,6 @@ end subroutine ESMF_GeomBaseGet
     integer :: localrc
     type(ESMF_GeomBaseClass),pointer :: gbcp
     integer :: cl,cu,cc,el,eu,ec
-    integer :: el1(1),eu1(1),ec1(1)
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1108,18 +1072,17 @@ end subroutine ESMF_GeomBaseGet
 
        case  (ESMF_GEOMTYPE_XGRID%type) ! Xgrid
           call ESMF_XGridGet(gbcp%xgrid, localDE, &   
-              exclusiveLBound=el1, &
-               exclusiveUBound=eu1, &
-               exclusiveCount=ec1,  &
+              exclusiveLBound=el, &
+               exclusiveUBound=eu, &
+               exclusiveCount=ec,  &
                rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-         if (present(exclusiveLBound)) exclusiveLBound(1)=el1(1)
-         if (present(exclusiveUBound)) exclusiveUBound(1)=eu1(1)
-         if (present(exclusiveCount)) exclusiveCount(1)=ec1(1)
-
+         if (present(exclusiveLBound)) exclusiveLBound(1)=el
+         if (present(exclusiveUBound)) exclusiveUBound(1)=eu
+         if (present(exclusiveCount)) exclusiveCount(1)=ec
 
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
