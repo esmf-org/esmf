@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.4 2010/08/05 13:42:21 feiliu Exp $
+! $Id: ESMF_XGridGet.F90,v 1.5 2010/08/05 17:59:36 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.4 2010/08/05 13:42:21 feiliu Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.5 2010/08/05 17:59:36 feiliu Exp $'
 
 !==============================================================================
 !
@@ -108,8 +108,8 @@ contains
 
 ! !INTERFACE:
 
-subroutine ESMF_XGridGetDefault(xgrid, ngridA, ngridB, &
-    sideA, sideB, area, centroid, &
+subroutine ESMF_XGridGetDefault(xgrid, &
+    sideA, sideB, ngridA, ngridB, area, centroid, &
     distgridA, distgridB, distgridM, &
     dimCount, localDECount, &
     sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, &
@@ -119,8 +119,8 @@ subroutine ESMF_XGridGetDefault(xgrid, ngridA, ngridB, &
 !
 ! !ARGUMENTS:
 type(ESMF_XGrid), intent(in)                 :: xgrid
-integer, intent(out), optional               :: ngridA, ngridB
 type(ESMF_Grid), intent(out), optional       :: sideA(:), sideB(:)
+integer, intent(out), optional               :: ngridA, ngridB
 real*8, intent(out), optional                :: area(:)
 real*8, intent(out), optional                :: centroid(:,:)
 type(ESMF_DistGrid), intent(out), optional   :: distgridA(:)
@@ -140,14 +140,14 @@ integer, intent(out), optional               :: rc
 !     \begin{description}
 !     \item [xgrid]
 !       The xgrid object used to retrieve information from.
-!     \item [{[ngridA]}]
-!           Number of grids on the A side
-!     \item [{[ngridB]}]
-!           Number of grids on the B side
 !     \item [{[sideA]}]
 !           2D Grids on side A
 !     \item [{[sideB]}]
 !           2D Grids on side B
+!     \item [{[ngridA]}]
+!           Number of grids on the A side
+!     \item [{[ngridB]}]
+!           Number of grids on the B side
 !     \item [{[area]}]
 !           area of the xgrid cells
 !     \item [{[centroid]}]
