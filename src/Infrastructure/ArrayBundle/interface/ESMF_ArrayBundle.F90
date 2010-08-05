@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.14 2010/08/04 18:22:37 samsoncheung Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.15 2010/08/05 06:32:26 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.14 2010/08/04 18:22:37 samsoncheung Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.15 2010/08/05 06:32:26 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -807,17 +807,29 @@ contains
         filename = fname // cnum
         ! Get and write the first array in the Bundle
         call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_ArrayWrite(arrayList(i), fname=trim(filename), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     else
       ! Get and write the first array in the Bundle
       call ESMF_ArrayGet(arrayList(1), name=Aname(1), rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
       call ESMF_ArrayWrite(arrayList(1), fname=fname, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Get and write the rest of the arrays in the Bundle
       do i=2,arrayCount
        call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_ArrayWrite(arrayList(i), fname=fname, etag=1, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     endif
 
@@ -903,14 +915,22 @@ contains
         write(cnum,"(i3.3)") i
         filename = fname // cnum
         call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_ArrayRead(arrayList(i), fname=filename,  &
                vname=Aname(i), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     else
       ! Get and read the arrays in the Bundle
       do i=1,arrayCount
        call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_ArrayRead(arrayList(i), fname=fname, vname=Aname(i), rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     endif
 
