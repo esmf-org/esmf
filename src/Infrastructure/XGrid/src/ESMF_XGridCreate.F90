@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.5 2010/08/05 17:25:31 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.6 2010/08/06 17:05:36 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.5 2010/08/05 17:25:31 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.6 2010/08/06 17:05:36 feiliu Exp $'
 
 !==============================================================================
 !
@@ -219,8 +219,8 @@ type(ESMF_XGrid) function ESMF_XGridCreateRaw(sideA, sideB, area, centroid, &
 !
 ! !ARGUMENTS:
 type(ESMF_Grid), intent(in)     :: sideA(:), sideB(:)
-real*8, intent(in), optional    :: area(:)
-real*8, intent(in), optional    :: centroid(:,:)
+real(ESMF_KIND_R8), intent(in), optional   :: area(:)
+real(ESMF_KIND_R8), intent(in), optional   :: centroid(:,:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatA2X(:), sparseMatX2A(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatB2X(:), sparseMatX2B(:)
 character (len=*), intent(in), optional :: name
@@ -526,7 +526,7 @@ end subroutine ESMF_XGridDistGrids
 
 !------------------------------------------------------------------------------
 type(ESMF_DistGrid) function ESMF_XGridDGOverlay(sparseMat, dim, rc)
-    type(ESMF_XGridSpec), intent(in), pointer   :: sparseMat(:)
+    type(ESMF_XGridSpec), pointer               :: sparseMat(:)
     integer, intent(in)                         :: dim
     integer, intent(out), optional              :: rc
 
@@ -631,7 +631,7 @@ subroutine ESMF_XGridDG(grid, distgrid, factorIndexList, dim, rc)
 
     type(ESMF_Grid), intent(in)                 :: grid
     type(ESMF_DistGrid), intent(inout)          :: distgrid
-    integer, intent(in), pointer                :: factorIndexList(:,:)
+    integer,             pointer                :: factorIndexList(:,:)
     integer, intent(in)                         :: dim
     integer, intent(out), optional              :: rc
 
@@ -658,7 +658,7 @@ end subroutine ESMF_XGridDG
 subroutine ESMF_SparseMatca(sparseMats, sparseMatd, ngrid, tag, rc)
 
     type(ESMF_XGridSpec), intent(in)    :: sparseMats(:)
-    type(ESMF_XGridSpec), intent(out), pointer   :: sparseMatd(:)
+    type(ESMF_XGridSpec),     pointer   :: sparseMatd(:)
     integer, intent(in)                 :: ngrid
     character(len=*), intent(in)        :: tag
     integer, intent(out), optional      :: rc
@@ -716,7 +716,7 @@ subroutine ESMF_XGridConstructBaseObj(xgtype, name, rc)
 
 !
 ! !ARGUMENTS:
-    type(ESMF_XGridType), intent(inout), pointer :: xgtype
+    type(ESMF_XGridType),                pointer :: xgtype
     character (len=*), intent(in), optional      :: name
     integer, intent(out), optional               :: rc 
 
