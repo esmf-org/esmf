@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.23 2010/08/05 22:55:17 svasquez Exp $
+# $Id: sys_tests_results.pl,v 1.24 2010/08/06 16:39:36 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -249,6 +249,9 @@ use File::Find
                                		push (pass_tests, $file);
                                		$pass_count=$pass_count + 1;
 				}
+				else {
+					push (fail_tests, $file);
+				}			
 			}
        		@file_lines=();
                 }
@@ -256,7 +259,7 @@ use File::Find
                 $fail_count = $st_count - $pass_count;
 		$system_test_count = $st_count;
                 if ($pass_count != 0) {
-                        #Strip the names of failed system_tests
+                        #Strip the names of passed system_tests
                         foreach (@pass_tests) {
                                 s/\.\///; # Delete "./"
                                 s/\./ /; # Break it into 2 fields
@@ -277,21 +280,25 @@ use File::Find
                         	print "\n\n";
                         	# Sort the pass_st_files
                         	@pass_st_files = sort (@pass_st_files);
-				# comment out until bug is fixed
-                                #foreach $file ( @pass_st_files ) {
-                                  #$file = "PASS: " . $file;
-                                #}
+                                foreach $file ( @pass_st_files ) {
+                                  $file = "PASS: " . $file;
+                                }
                         	print @pass_st_files;
                         	print "\n\n";
                 	}
 		}
                 if ($fail_count != 0) {
-                        # Find the act_st_files fles that are in the pass_tests
-                        foreach $file ( @pass_st_files) {
-                                foreach (@act_st_files){
-                                        s/$file//s;
-                                }
+			#Strip the names of failed system_tests
+                        foreach (@fail_tests) {
+                                s/\.\///; # Delete "./"
+                                s/\./ /; # Break it into 2 fields
+                                s/([^ ]*) ([^ ]*)/$1/; # Get rid of the 2nd field
                         }
+                        # Find the act_st_files fles that are in the fail_tests
+                        foreach $file ( @fail_tests) {
+                                push @fail_st_files, grep (/$file.F90/, @act_st_files);
+                        }
+
 			if (!$SUMMARY) { # Print only if full output requested
                         	if ($fail_count == 1) {
                                 	print "The following system test failed, did not build, or did not execute:\n";
@@ -300,13 +307,12 @@ use File::Find
                                 	print "The following system tests failed, did not build, or did not execute:\n";
                         	}
                         	print "\n\n";
-                        	# Sort the act_st_files
-                        	@act_st_files = sort (@act_st_files);
-				# comment out until bug is fixed
-                                #foreach $file ( @act_st_files ) {
-                                  #$file = "FAIL: " . $file;
-                                #}
-                        	print @act_st_files;
+                        	# Sort the fail_st_files
+                        	@fail_st_files = sort (@fail_st_files);
+                                foreach $file ( @fail_st_files ) {
+                                  $file = "FAIL: " . $file;
+                                }
+                        	print @fail_st_files;
                         	print "\n\n";
                 	}
 		}
