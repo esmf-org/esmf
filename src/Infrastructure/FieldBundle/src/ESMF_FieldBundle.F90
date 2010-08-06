@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.39 2010/06/28 15:23:50 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.40 2010/08/06 17:32:22 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,6 +46,7 @@
       use ESMF_FieldMod
       use ESMF_FieldCreateMod
       use ESMF_FieldGetMod
+      use ESMF_FieldPrMod
       use ESMF_InitMacrosMod
       use ESMF_GeomBaseMod
       use ESMF_LocStreamMod
@@ -214,13 +215,13 @@
     public ESMF_FieldBundleDeserialize  ! ... and back into an object again
     public ESMF_FieldBundleValidate     ! Check internal consistency
     public ESMF_FieldBundlePrint        ! Print contents of a FieldBundle
+    public ESMF_FieldBundleWrite        ! Write array contents of a FieldBundle
+    public ESMF_FieldBundleRead         ! Read array contents for a FieldBundle
 
     public operator(.eq.), operator(.ne.)
 
 !  !subroutine ESMF_FieldBundleWriteRestart(bundle, iospec, rc)
 !  !function ESMF_FieldBundleReadRestart(name, iospec, rc)
-!  !subroutine ESMF_FieldBundleWrite(bundle, subarray, iospec, rc)
-!  !function ESMF_FieldBundleRead(name, iospec, rc)
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !  ! additional future signatures of ESMF_FieldBundleCreate() functions:
@@ -1786,48 +1787,99 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleRead"
-!BOPI
-! !IROUTINE: ESMF_FieldBundleRead - Create a FieldBundle from an external source
+!BOP
+! !IROUTINE: ESMF_FieldBundleRead - Read arrays to a FieldBundle form file 
 !
 ! !INTERFACE:
-!      function ESMF_FieldBundleRead(name, iospec, rc)
-!
-! !RETURN VALUE:
-!      type(ESMF_FieldBundle) :: ESMF_FieldBundleRead
+      subroutine ESMF_FieldBundleRead(bundle, fname, mfiles, rc)
 !
 ! !ARGUMENTS:
-!      character (len = *), intent(in) :: name
-!      type(ESMF_IOSpec), intent(in), optional :: iospec
-!      integer, intent(out), optional :: rc
+      type(ESMF_FieldBundle), intent(inout) :: bundle
+      character(*), intent(in)              :: fname
+      logical,      intent(in) ,  optional  :: mfiles
+      integer,      intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!      Used to read data from persistent storage in a variety of formats.
+!     Read arrays from file(s) to FieldBundle 
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           An {\tt ESMF\_FieldBundle} object.
-!     \item [{[iospec]}]
-!           The file I/O specification.
+!      An {\tt ESMF\_FieldBundle} object.
+!     \item[fname]
+!      The name of the file (netcdf) in which Fortran array is read from.
+!     \item[mfiles]
+!      A logical flag, if TRUE, each array located in a separate file.
+!      The default is FALSE, ie all arrays are located in one file.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-
-!EOPI
-
 !
-!  TODO: code goes here
+!EOP
 !
-!      type(ESMF_FieldBundle) :: b
+      integer :: localrc                        ! local return code
+      character(len=ESMF_MAXSTR) :: filename
+      type(ESMF_FieldBundleType), pointer :: btype
+      type(ESMF_Field), allocatable :: fieldList(:)
+      integer :: i, fieldCount
+      logical :: multif
+      character(len=3) :: cnum
 
+#ifdef ESMF_PIO
       ! Initialize return code; assume routine not implemented
-!      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
-!      allocate(b%btypep)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
 
-!      ESMF_FieldBundleRead = b
+      if (.not. associated(bundle%btypep)) then
+        write(*,*) "Empty or Uninitialized FieldBundle"
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
 
-!      end function ESMF_FieldBundleRead
+      ! Check options
+      multif = .false.
+      if (present(mfiles)) multif = mfiles
+
+      btype => bundle%btypep
+      write (*, *)  "  Field count = ", btype%field_count
+      fieldCount = btype%field_count
+
+      allocate (fieldList(fieldCount))
+      
+      if (multif) then
+        do i=1,fieldCount
+          write(cnum,"(i3.3)") i
+          filename = fname // cnum
+          call ESMF_FieldBundleGet(bundle, fieldIndex=i, field=fieldList(i), rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+          call ESMF_FieldRead(fieldList(i), fname=filename, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+      else
+        ! Get and read the arrays in the Bundle
+        do i=1,fieldCount
+         call ESMF_FieldBundleGet(bundle, fieldIndex=i, field=fieldList(i), rc=localrc)
+         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+         call ESMF_FieldRead(fieldList(i), fname=fname, rc=localrc)
+         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+      endif
+
+      ! Return successfully
+      if (present(rc)) rc = ESMF_SUCCESS
+
+#else
+      ! Return indicating PIO not present
+      if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+#endif
+
+      end subroutine ESMF_FieldBundleRead
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2297,19 +2349,17 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleWrite"
-!BOPI
-! !IROUTINE: ESMF_FieldBundleWrite - Save a FieldBundle to an external destination
+!BOP
+! !IROUTINE: ESMF_FieldBundleWrite - Save the Field arrays in a netCDF file.
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleWrite(bundle, &
-      iospec, rc)
-      !subarray, 
+      subroutine ESMF_FieldBundleWrite(bundle, fname, mfiles, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: bundle
-!      type(ESMF_InternArray), pointer, optional :: subarray
-      type(ESMF_IOSpec), intent(in), optional :: iospec 
-      integer, intent(out), optional :: rc
+      character(*), intent(in)              :: fname
+      logical,      intent(in) ,  optional  :: mfiles
+      integer,      intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !      Used to write data to persistent storage in a variety of formats.  
@@ -2318,29 +2368,90 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           An {\tt ESMF\_FieldBundle} object.
-!     \item [{[subarray]}]
-!           The subset to write.
-!     \item [{[iospec]}]
-!           The I/O specification.
+!      An {\tt ESMF\_FieldBundle} object.
+!     \item[fname]
+!      The name of the file (netcdf) in which Fortran array is written to.
+!     \item[mfiles]
+!      A logical flag, if TRUE, each array will be written a separate file.
+!      The default is FALSE, ie all arrays are written in one file.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
       integer :: localrc                        ! local return code
+      character(len=ESMF_MAXSTR) :: filename
+      type(ESMF_FieldBundleType), pointer :: btype
+      type(ESMF_Field), allocatable :: fieldList(:)
+      integer :: i, fieldCount
+      logical :: multif
+      character(len=3) :: cnum
 
+#ifdef ESMF_PIO
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-!
-!  TODO: code goes here
-!
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
 
+      if (.not. associated(bundle%btypep)) then
+        write(*,*) "Empty or Uninitialized FieldBundle"
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
+      ! Check options
+      multif = .false.
+      if (present(mfiles)) multif = mfiles
+
+      btype => bundle%btypep
+      write (*, *)  "  Field count = ", btype%field_count
+      fieldCount = btype%field_count
+
+      allocate (fieldList(fieldCount))
+
+      if (multif) then
+       do i=1,fieldCount
+        write(cnum,"(i3.3)") i
+        filename = fname // cnum
+        ! Get and write the first array in the Bundle
+        call ESMF_FieldBundleGet(bundle, fieldIndex=i , field=fieldList(i), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_FieldWrite(fieldList(i), fname=trim(filename), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+       enddo
+      else
+       ! Get and write the first array in the Bundle
+       call ESMF_FieldBundleGet(bundle, fieldIndex=1 , field=fieldList(1), rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_FieldWrite(fieldList(1), fname=fname, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Get and write the rest of the arrays in the Bundle
+       do i=2,fieldCount
+        call ESMF_FieldBundleGet(bundle, fieldIndex=i , field=fieldList(i), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_FieldWrite(fieldList(i), fname=fname, etag=1, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+       enddo
+      endif
+
+      deallocate( fieldList )
+
+      ! Return successfully
       if (present(rc)) rc = ESMF_SUCCESS
+
+#else
+      ! Return indicating PIO not present
+      if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+#endif
+
       end subroutine ESMF_FieldBundleWrite
 
 
