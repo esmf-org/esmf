@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.14 2010/07/28 19:57:27 eschwab Exp $
+! $Id: ESMF_FieldPr.F90,v 1.15 2010/08/06 02:17:40 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -225,12 +225,13 @@ contains
 ! !IROUTINE:  ESMF_FieldWrite - Write the Field data
 
 ! !INTERFACE:
-      subroutine ESMF_FieldWrite(field, fname, rc)
+      subroutine ESMF_FieldWrite(field, fname, etag, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field 
       character(*), intent(in) :: fname 
+      integer, intent(in), optional :: etag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -247,6 +248,8 @@ contains
 !           An {\tt ESMF\_Field} object.
 !     \item[fname]
 !           The name of the netcdf file in which Fortran array is written to.
+!     \item[etag]
+!           A tag indicates if a file already exist with value 1.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -255,7 +258,7 @@ contains
         character(len=ESMF_MAXSTR)      :: name
         type(ESMF_FieldType), pointer   :: fp 
         type(ESMF_Array)                :: array 
-        integer                         :: i, localrc
+        integer                         :: i, existag, localrc
         integer                         :: gridrank, arrayrank
         type(ESMF_Status)               :: fieldstatus
 
@@ -266,6 +269,9 @@ contains
 
         ! check variables
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
+        existag = 0
+        if(present(etag)) existag = etag
 
         fp => field%ftypep
 
@@ -279,7 +285,7 @@ contains
                                   ESMF_CONTEXT, rc)) return
 
         call ESMF_ArrayWrite(array, fname, vname=trim(name), &
-          rc=localrc)
+          etag=existag, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
