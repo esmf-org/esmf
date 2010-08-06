@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: examples_results.pl,v 1.9 2010/08/05 23:01:30 svasquez Exp $
+# $Id: examples_results.pl,v 1.10 2010/08/06 16:54:59 svasquez Exp $
 # This subroutine is called at the end of the examples, "check_examples" and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 # The results are either complete results or a summary.
@@ -168,13 +168,16 @@ use File::Find;
 				push (pass_tests, $file);
 				$pass_count=$pass_count + 1;
 			}
+			else {
+				push (fail_tests, $file);
+			}
 			@file_lines=();
 		}
 		# Calculate fail_count
 		$fail_count = $ex_count - $pass_count;
 		$example_count = $ex_count;
                 if ($pass_count != 0) {
-                        #Strip the names of failed examples
+                        #Strip the names of passed examples
                         foreach (@pass_tests) {
                                 s/\.\///; # Delete "./"
                                 s/\./ /; # Break it into 2 fields
@@ -194,21 +197,25 @@ use File::Find;
 				}
                         	# Sort the pass_ex_files
                         	@pass_ex_files = sort (@pass_ex_files);
-				#Comment out because it introduced bug
-                                #foreach $file ( @pass_ex_files ) {
-                                  #$file = "PASS: " . $file;
-                                #}
+                                foreach $file ( @pass_ex_files ) {
+                                  $file = "PASS: " . $file;
+                                }
                         	print @pass_ex_files;
                         	print "\n\n";
 			}
                 }
 		if ($fail_count != 0) {
-                	# Find the act_ex_files fles that are in the pass_tests
-                	foreach $file ( @pass_ex_files) {
-				foreach (@act_ex_files){
-					s/$file//s;
-				}
-                	}
+                        #Strip the names of failed examples
+                        foreach (@fail_tests) {
+                                s/\.\///; # Delete "./"
+                                s/\./ /; # Break it into 2 fields
+                                s/([^ ]*) ([^ ]*)/$1/; # Get rid of the 2nd field
+                        }
+                        # Find the act_ex_files fles that are in the fail_tests
+                        foreach $file ( @fail_tests) {
+                                push @fail_ex_files, grep (/$file/, @act_ex_files);
+                        }
+      
 			if (!$SUMMARY) { # Print only if full output requested
 				if ($fail_count == 1) {
 					print "The following example failed, did not build, or did not execute:\n";
@@ -217,13 +224,12 @@ use File::Find;
 					print "The following examples failed, did not build, or did not execute:\n";
 				}
                			print "\n\n";
-				# Sort the act_ex_files
-				@act_ex_files = sort (@act_ex_files);
-				#Comment out code that introduced bug
-                                #foreach $file ( @act_ex_files ) {
-                                  #$file = "FAIL: " . $file;
-                                #}
-				print @act_ex_files;
+				# Sort the fail_ex_files
+				@fail_ex_files = sort (@fail_ex_files);
+                                foreach $file ( @fail_ex_files ) {
+                                  $file = "FAIL: " . $file;
+                                }
+				print @fail_ex_files;
                			print "\n\n";
 			}
 		}
