@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: examples_results.pl,v 1.11 2010/08/06 19:45:12 svasquez Exp $
+# $Id: examples_results.pl,v 1.12 2010/08/09 23:01:02 svasquez Exp $
 # This subroutine is called at the end of the examples, "check_examples" and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 # The results are either complete results or a summary.
@@ -197,16 +197,15 @@ use File::Find;
 				}
                         	# Sort the pass_ex_files
                         	@pass_ex_files = sort (@pass_ex_files);
-				# comment out until bug is fixed
-                                #foreach $file ( @pass_ex_files ) {
-                                  #$file = "PASS: " . $file;
-                                #}
-                        	print @pass_ex_files;
+                                foreach $file ( @pass_ex_files ) {
+                                	print ("PASS: $file");
+                                }
                         	print "\n\n";
 			}
                 }
 		if ($fail_count != 0) {
                         # Find the act_ex_files fles that are in the pass_tests
+			# to create list of failed examples.
                         foreach $file ( @pass_ex_files) {
                                 foreach (@act_ex_files){
                                         s/$file//s;
@@ -224,10 +223,12 @@ use File::Find;
 				# Sort the act_ex_files
 				@act_ex_files = sort (@act_ex_files);
 				# comment out until bug is fixed
-                                #foreach $file ( @act_ex_files ) {
-                                #  $file = "FAIL: " . $file;
-                                #}
-				print @act_ex_files;
+                                foreach $file ( @act_ex_files ) {
+                                	#Do not print empty lines
+                                        if (grep (/src/, $file)){
+                                                print ("FAIL: $file");
+                                        }
+                                }
                			print "\n\n";
 			}
 		}

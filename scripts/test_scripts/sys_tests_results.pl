@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.25 2010/08/06 19:45:34 svasquez Exp $
+# $Id: sys_tests_results.pl,v 1.26 2010/08/09 23:01:02 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -280,21 +280,22 @@ use File::Find
                         	print "\n\n";
                         	# Sort the pass_st_files
                         	@pass_st_files = sort (@pass_st_files);
-                                #foreach $file ( @pass_st_files ) {
-                                  #$file = "PASS: " . $file;
-                                #}
-                        	print @pass_st_files;
+                                foreach $file ( @pass_st_files ) {
+					print ("PASS: $file");
+                                }
                         	print "\n\n";
                 	}
 		}
                 if ($fail_count != 0) {
 				# Find the act_st_files fles that are in the pass_tests
-                        foreach $file ( @pass_st_files) {
+				# to create list of failed system tests.
+                        	foreach $file ( @pass_st_files) {
                                 foreach (@act_st_files){
                                         s/$file//s;
                                 }
 
                         }
+
 
 			if (!$SUMMARY) { # Print only if full output requested
                         	if ($fail_count == 1) {
@@ -306,10 +307,12 @@ use File::Find
                         	print "\n\n";
                         	# Sort the fail_st_files
                         	@act_st_files = sort (@act_st_files);
-                                #foreach $file ( @act_st_files ) {
-                                  #$file = "FAIL: " . $file;
-                                #}
-                        	print @act_st_files;
+                                foreach $file ( @act_st_files ) {
+					#Do not print empty lines
+					if (grep (/src/, $file)){
+				  		print ("FAIL: $file");
+					}
+                                }
                         	print "\n\n";
                 	}
 		}
