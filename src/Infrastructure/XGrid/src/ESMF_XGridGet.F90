@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.5 2010/08/05 17:59:36 feiliu Exp $
+! $Id: ESMF_XGridGet.F90,v 1.6 2010/08/09 20:43:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.5 2010/08/05 17:59:36 feiliu Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.6 2010/08/09 20:43:06 feiliu Exp $'
 
 !==============================================================================
 !
@@ -584,9 +584,9 @@ integer, intent(out), optional               :: rc
     if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
+
     allocate(minIndex(1, ldeCount))
-    call ESMF_DistGridGet(xgtypep%distgridM, delayout=delayout, &
-        minIndexPDimPDe=minIndex, &
+    call ESMF_DistGridGet(xgtypep%distgridM, minIndexPDimPDe=minIndex, &
         rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -595,18 +595,8 @@ integer, intent(out), optional               :: rc
         exclusiveLBound = minIndex(1,localDE+1)
     endif
 
-    call ESMF_DistGridGet(xgtypep%distgridM, delayout=delayout, &
-        rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
-    call ESMF_DELayoutGet(delayout, localDECount=ldeCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
     allocate(maxIndex(1, ldeCount))
-    call ESMF_DistGridGet(xgtypep%distgridM, delayout=delayout, &
-        maxIndexPDimPDe=maxIndex, &
+    call ESMF_DistGridGet(xgtypep%distgridM, maxIndexPDimPDe=maxIndex, &
         rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
