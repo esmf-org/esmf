@@ -1,4 +1,4 @@
-% $Id: Array_refdoc.ctex,v 1.28 2010/07/07 21:43:42 theurich Exp $ 
+% $Id: Array_refdoc.ctex,v 1.29 2010/08/09 21:34:16 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -130,6 +130,13 @@
 \input{../Infrastructure/Array/doc/ESMF_ArrayScatter_fapi}
 \mbox{}\hrulefill\
 \input{../Infrastructure/Array/doc/ESMF_Array_fapi}
+#endif
+
+\subsection{Class API: Array I/O}
+#ifdef STANDALONE
+\input{ESMF_ArrayIO_fapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Array/doc/ESMF_ArrayIO_fapi}
 #endif
 
 %#ifdef STANDALONE
