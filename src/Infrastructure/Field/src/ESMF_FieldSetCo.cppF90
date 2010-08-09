@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.17 2010/03/04 18:57:42 svasquez Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.18 2010/08/09 13:29:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -35,6 +35,7 @@ module ESMF_FieldSetCoMod
   use ESMF_DistGridMod
   use ESMF_StaggerLocMod
   use ESMF_GridMod
+  use ESMF_XGridMod
   use ESMF_MeshMod
   use ESMF_LocStreamMod
   use ESMF_GeomBaseMod
@@ -58,7 +59,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.17 2010/03/04 18:57:42 svasquez Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.18 2010/08/09 13:29:23 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -82,12 +83,15 @@ module ESMF_FieldSetCoMod
     TypeKindRankInterfaceMacro(FieldSetCommitLSPtr)
     TypeKindRankInterfaceMacro(FieldSetCommitMesh)
     TypeKindRankInterfaceMacro(FieldSetCommitMeshPtr)
+    TypeKindRankInterfaceMacro(FieldSetCommitXG)
+    TypeKindRankInterfaceMacro(FieldSetCommitXGPtr)
     TypeKindRankInterfaceMacro(FieldSetCommitGB)
     TypeKindRankInterfaceMacro(FieldSetCommitGBPtr)
 
 ! !DESCRIPTION:
 !   This interface finishes a {\tt ESMF\_Field} started with FieldCreateEmpty
-!   These methods all take {\tt ESMF\_Grid} and Fortran data array or pointer as input to
+!   These methods all take {\tt ESMF\_Grid}, or {\tt ESMF\_LocStream}, or {\tt ESMF\_Mesh},
+!   or {\tt ESMF\_XGrid}, and Fortran data array or pointer as input to
 !   fill in the {\tt ESMF\_Field} internals. 
   end interface
 !EOPI
@@ -1030,6 +1034,294 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 !---------------------------------------------------------------------------- @\
 
 TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
+
+! XGrid
+#define FieldSetCommitXGDoc() \
+!---------------------------------------------------------------------------- @\
+!BOP @\
+! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field from XGrid started with FieldCreateEmpty @\
+! @\
+! !INTERFACE: @\
+! ! Private name; call using ESMF_FieldSetCommit() @\
+! subroutine ESMF_FieldSetCommitXG<rank><type><kind>(field, xgrid, & @\
+!   xgridSide, gridIndex, & @\
+!   farray, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
+!   ungriddedUBound, rc) @\
+! @\
+! !ARGUMENTS: @\
+!   type(ESMF_Field),      intent(inout)        :: field @\
+!   type(ESMF_XGrid),       intent(in)          :: xgrid @\
+!   type(ESMF_XGridSide), intent(in), optional  :: xgridSide @\
+!   integer,              intent(in), optional  :: gridIndex @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), target  :: farray @\
+!   type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
+!   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
+!   integer,               intent(in), optional :: gridToFieldMap(:) @\
+!   integer,               intent(in), optional :: ungriddedLBound(:) @\
+!   integer,               intent(in), optional :: ungriddedUBound(:) @\
+!   integer,               intent(inout), optional :: rc @\
+! @\
+! !DESCRIPTION: @\
+! This call completes an {\tt ESMF\_Field} allocated with the @\
+! {\tt ESMF\_FieldCreateEmpty()} call. For an example and @\
+! associated documentation using this method see Section  @\
+! \ref{sec:field:usage:create_empty_setcommit}. @\
+! @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! the retrieved data pointer is not allowed. @\
+! @\
+! The arguments are: @\
+! \begin{description} @\
+! \item [field]  @\
+!       The {\tt ESMF\_Field} object to be completed and @\
+!       committed in this call.  The {\tt field} will have the same dimension @\
+!       (dimCount) as the rank of the {\tt farray}.  @\
+! \item [xgrid]  @\
+!       The {\tt ESMF\_XGrid} object to finish the Field. @\
+! \item [{[xgridSide]}] @\
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRID\_SIDEA, @\
+!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then @\
+!       defaults to ESMF\_XGRID\_BALANCED. @\
+! \item [{[xgridIndex]}] @\
+!       If xgridSide is  ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on @\
+!       that side to create the Field on. If not provided, defaults to 1. @\
+! \item [farray] @\
+!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
+!       for the {\tt farray}. @\
+! \item [indexflag] @\
+!       Indicate how DE-local indices are defined. See section @\
+!       \ref{opt:indexflag} for a list of valid indexflag options. @\
+! \item [{[copyflag]}] @\
+!       Indicates whether to copy the {\tt farray} or reference it directly. @\
+!       For valid values see \ref{opt:copyflag}.  The default is @\
+!       {\tt ESMF\_DATA\_REF}. @\
+! \item [{[gridToFieldMap]}] @\
+!       List with number of elements equal to the @\
+!       {\tt xgrid}|s dimCount.  The list elements map each dimension @\
+!       of the {\tt xgrid} to a dimension in the {\tt farray} by @\
+!       specifying the appropriate {\tt farray} dimension index. The @\
+!       default is to map all of the {\tt xgrid}|s dimensions against the @\
+!       lowest dimensions of the {\tt farray} in sequence, i.e. @\
+!       {\tt gridToFieldMap} = (/1,2,3,.../). @\
+!       Unmapped {\tt farray} dimensions are undistributed Field @\
+!       dimensions. @\
+!       All {\tt gridToFieldMap} entries must be greater than or equal @\
+!       to zero and smaller than or equal to the Field dimCount. It is erroneous @\
+!       to specify the same entry multiple times unless it is zero. @\
+!       If the Field dimCount is less than the XGrid dimCount then the default @\
+!       gridToFieldMap will contain zeros for the rightmost entries. A zero @\
+!       entry in the {\tt gridToFieldMap} indicates that the particular @\
+!       XGrid dimension will be replicating the Field across the DEs along @\
+!       this direction. @\
+! \item [{[ungriddedLBound]}] @\
+!       Lower bounds of the ungridded dimensions of the {\tt field}. @\
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
+!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
+!       {\tt field} are also undistributed. When field dimension count is @\
+!       greater than XGrid dimension count, both ungriddedLBound and ungriddedUBound @\
+!       must be specified. When both are specified the values are checked @\
+!       for consistency.  Note that the the ordering of @\
+!       these ungridded dimensions is the same as their order in the {\tt field}. @\
+! \item [{[ungriddedUBound]}] @\
+!       Upper bounds of the ungridded dimensions of the {\tt field}. @\
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded @\
+!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
+!       {\tt field} are also undistributed. When field dimension count is @\
+!       greater than XGrid dimension count, both ungriddedLBound and ungriddedUBound @\
+!       must be specified. When both are specified the values are checked @\
+!       for consistency.  Note that the the ordering of @\
+!       these ungridded dimensions is the same as their order in the {\tt field}. @\
+! \item [{[rc]}]  @\
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+! \end{description} @\
+! @\
+!EOP @\
+!---------------------------------------------------------------------------- @\
+
+#define FieldSetCommitXGMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+!---------------------------------------------------------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_FieldSetCommitXG" @\
+  subroutine ESMF_FieldSetCommitXG##mrank##D##mtypekind(field, xgrid, & @\
+    xgridSide, gridIndex, farray, & @\
+    indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
+    ungriddedUBound, rc) @\
+@\
+    ! input arguments @\
+    type(ESMF_Field) :: field @\
+    type(ESMF_XGrid) :: xgrid                  @\
+    type(ESMF_XGridSide), intent(in), optional  :: xgridSide @\
+    integer,              intent(in), optional  :: gridIndex @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
+    type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
+    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    integer, intent(in), optional :: gridToFieldMap(:)     @\
+    integer, intent(in), optional :: ungriddedLBound(:) @\
+    integer, intent(in), optional :: ungriddedUBound(:) @\
+    integer, intent(out), optional :: rc                @\
+    ! local variables @\
+    integer                        :: localrc  @\
+    type(ESMF_GeomBase)   :: geombase @\
+@\
+    if (present(rc)) then @\
+      rc = ESMF_RC_NOT_IMPL @\
+    endif @\
+    localrc = ESMF_RC_NOT_IMPL @\
+@\
+    ! make sure field, xgrid, farray are properly initialized @\
+    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
+    ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc) @\
+@\
+    geombase=ESMF_GeomBaseCreate(xgrid,xgridSide, gridIndex, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+@\
+  ! Do General GeomBase SetCommit @\
+  call ESMF_FieldSetCommitGB##mrank##D##mtypekind(field, geombase, farray, & @\
+    indexflag=indexflag, copyflag=copyflag, gridToFieldMap=gridToFieldMap, & @\
+    ungriddedLBound=ungriddedLBound, & @\
+    ungriddedUBound=ungriddedUBound, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+@\
+@\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+  end subroutine ESMF_FieldSetCommitXG##mrank##D##mtypekind  @\
+!---------------------------------------------------------------------------- @\
+
+TypeKindRankDeclarationMacro(FieldSetCommitXG)
+
+
+#define FieldSetCommitXGPtrDoc() \
+!---------------------------------------------------------------------------- @\
+!BOP @\
+! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field from XGrid started with FieldCreateEmpty @\
+! @\
+! !INTERFACE: @\
+! ! Private name; call using ESMF_FieldSetCommit() @\
+! subroutine ESMF_FieldSetCommitXGPtr<rank><type><kind>(field, xgrid, & @\
+!   xgridSide, gridIndex, & @\
+!   farrayPtr, indexflag, copyflag, gridToFieldMap, rc) @\
+! @\
+! !ARGUMENTS: @\
+!   type(ESMF_Field),      intent(inout)        :: field @\
+!   type(ESMF_XGrid),       intent(in)          :: xgrid @\
+!   type(ESMF_XGridSide), intent(in), optional  :: xgridSide @\
+!   integer,              intent(in), optional  :: gridIndex @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
+!   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
+!   integer,               intent(in), optional :: gridToFieldMap(:) @\
+!   integer,               intent(inout), optional :: rc @\
+! @\
+! !DESCRIPTION: @\
+! This call completes an {\tt ESMF\_Field} allocated with the @\
+! {\tt ESMF\_FieldCreateEmpty()} call. For an example and @\
+! associated documentation using this method see Section  @\
+! \ref{sec:field:usage:create_empty_setcommit}. @\
+! @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
+! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! @\
+! The arguments are: @\
+! \begin{description} @\
+! \item [field]  @\
+!       The {\tt ESMF\_Field} object to be completed and @\
+!       committed in this call.  The {\tt field} will have the same dimension @\
+!       (dimCount) as the rank of the {\tt farrayPtr}.  @\
+! \item [xgrid]  @\
+!       The {\tt ESMF\_XGrid} object to finish the Field. @\
+! \item [{[xgridSide]}] @\
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRID\_SIDEA, @\
+!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then @\
+!       defaults to ESMF\_XGRID\_BALANCED. @\
+! \item [{[xgridIndex]}] @\
+!       If xgridSide is  ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on @\
+!       that side to create the Field on. If not provided, defaults to 1. @\
+! \item [farrayPtr] @\
+!       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
+!       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
+!       for the {\tt farrayPtr}. @\
+! \item [{[copyflag]}] @\
+!       Indicates whether to copy the {\tt farrayPtr} or reference it directly. @\
+!       For valid values see \ref{opt:copyflag}.  The default is @\
+!       {\tt ESMF\_DATA\_REF}. @\
+! \item [{[gridToFieldMap]}] @\
+!       List with number of elements equal to the @\
+!       {\tt xgrid}|s dimCount.  The list elements map each dimension @\
+!       of the {\tt xgrid} to a dimension in the {\tt farrayPtr} by @\
+!       specifying the appropriate {\tt farrayPtr} dimension index. The @\
+!       default is to map all of the {\tt xgrid}|s dimensions against the @\
+!       lowest dimensions of the {\tt farrayPtr} in sequence, i.e. @\
+!       {\tt gridToFieldMap} = (/1,2,3,.../). @\
+!       Unmapped {\tt farrayPtr} dimensions are undistributed Field @\
+!       dimensions. @\
+!       All {\tt gridToFieldMap} entries must be greater than or equal @\
+!       to zero and smaller than or equal to the Field dimCount. It is erroneous @\
+!       to specify the same entry multiple times unless it is zero. @\
+!       If the Field dimCount is less than the XGrid dimCount then the default @\
+!       gridToFieldMap will contain zeros for the rightmost entries. A zero @\
+!       entry in the {\tt gridToFieldMap} indicates that the particular @\
+!       XGrid dimension will be replicating the Field across the DEs along @\
+!       this direction. @\
+! \item [{[rc]}]  @\
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+! \end{description} @\
+! @\
+!EOP @\
+!---------------------------------------------------------------------------- @\
+
+#define FieldSetCommitXGPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+!---------------------------------------------------------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_FieldSetCommitXGPtr" @\
+  subroutine ESMF_FieldSetCommitXGPtr##mrank##D##mtypekind(field, xgrid, & @\
+    xgridSide, gridIndex, & @\
+    farrayPtr, copyflag, gridToFieldMap, rc) @\
+@\
+    ! input arguments @\
+    type(ESMF_Field) :: field @\
+    type(ESMF_XGrid) :: xgrid                  @\
+    type(ESMF_XGridSide), intent(in), optional  :: xgridSide @\
+    integer,              intent(in), optional  :: gridIndex @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
+    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    integer, intent(in), optional :: gridToFieldMap(:)     @\
+    integer, intent(out), optional :: rc                @\
+    ! local variables @\
+    integer                        :: localrc  @\
+    type(ESMF_GeomBase)   :: geombase @\
+@\
+    if (present(rc)) then @\
+      rc = ESMF_RC_NOT_IMPL @\
+    endif @\
+    localrc = ESMF_RC_NOT_IMPL @\
+@\
+    ! make sure field, xgrid, farrayPtr are properly initialized @\
+    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
+    ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc) @\
+@\
+    geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+@\
+  ! Do General GeomBase SetCommit @\
+  call ESMF_FieldSetCommitGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
+    copyflag=copyflag, gridToFieldMap=gridToFieldMap, & @\
+    rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+@\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+  end subroutine ESMF_FieldSetCommitXGPtr##mrank##D##mtypekind  @\
+!---------------------------------------------------------------------------- @\
+
+TypeKindRankDeclarationMacro(FieldSetCommitXGPtr)
 
 
 #define FieldSetCommitGBDoc() \
