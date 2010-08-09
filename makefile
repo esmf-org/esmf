@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.114 2010/07/12 23:43:41 theurich Exp $
+# $Id: makefile,v 1.115 2010/08/09 21:57:40 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -433,6 +433,7 @@ install:
 	cp -f $(ESMF_LIBDIR)/lib*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
 	$(ESMF_RANLIB) $(ESMF_INSTALL_LIBDIR_ABSPATH)/lib*.a
 	$(MAKE) install_apps
+	-cp -f $(ESMF_EXDIR)/ESMC_RegridWgtGenEx $(ESMF_INSTALL_BINDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_DOCDIR_ABSPATH)
 	@if [ -d $(ESMF_DOCDIR) ]; then \
         cp -rf $(ESMF_DOCDIR)/* $(ESMF_INSTALL_DOCDIR_ABSPATH); \
@@ -441,6 +442,8 @@ install:
 	-@echo " "
 	-@echo "ESMF installation complete."
 	-@echo " "
+        
+#TODO: remove the above cp line for ESMC_RegridWgtGenEx once unified app!!!!!
 
 # ------------------------------------------------------------------
 # INSTALLCHECK target
