@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: examples_results.pl,v 1.12 2010/08/09 23:01:02 svasquez Exp $
+# $Id: examples_results.pl,v 1.13 2010/08/10 16:49:47 svasquez Exp $
 # This subroutine is called at the end of the examples, "check_examples" and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 # The results are either complete results or a summary.
@@ -225,7 +225,7 @@ use File::Find;
 				# comment out until bug is fixed
                                 foreach $file ( @act_ex_files ) {
                                 	#Do not print empty lines
-                                        if (grep (/src/, $file)){
+                                        if (grep (/ESM/, $file)){
                                                 print ("FAIL: $file");
                                         }
                                 }
