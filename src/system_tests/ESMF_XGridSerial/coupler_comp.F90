@@ -1,4 +1,4 @@
-! $Id: coupler_comp.F90,v 1.1 2010/07/27 15:11:33 feiliu Exp $
+! $Id: coupler_comp.F90,v 1.2 2010/08/11 20:40:34 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -28,7 +28,7 @@ module coupler_comp
 
   private
   type(ESMF_XGrid)  :: xgrid
-  type(ESMF_Field)  :: flux
+  type(ESMF_Field)  :: field
   contains
 
 !-------------------------------------------------------------------------
@@ -104,8 +104,9 @@ module coupler_comp
     type(ESMF_Field) :: F_lnd, F_ocn, F_atm
     type(ESMF_VM) :: vm
     type(ESMF_Grid)  :: lnd_grid, ocn_grid, atm_grid
-    type(ESMF_XGridSpec) :: sparseMatA2X(2)
-    real*8               :: centroid(12,2), area(12)
+    type(ESMF_XGridSpec) :: sparseMatA2X(2), sparseMatX2B(1)
+    real(ESMF_KIND_R8)   :: centroid(12,2), area(12)
+    real(ESMF_KIND_R8), pointer         :: xfptr(:)
 
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -149,10 +150,13 @@ module coupler_comp
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Set up the sparsematrix matmul information
+
     allocate(sparseMatA2X(1)%factorIndexList(2,9), sparseMatA2X(1)%factorList(9))
     allocate(sparseMatA2X(2)%factorIndexList(2,3), sparseMatA2X(2)%factorList(3))
+    allocate(sparseMatX2B(1)%factorIndexList(2,12), sparseMatX2B(1)%factorList(12))
 
-    ! - set up mapping between ocn grid -> xgrid
+    ! factorIndexList
+    ! setting up mapping between A1 -> X
     sparseMatA2X(1)%factorIndexList(1,1)=1
     sparseMatA2X(1)%factorIndexList(1,2)=2
     sparseMatA2X(1)%factorIndexList(1,3)=2
@@ -171,7 +175,7 @@ module coupler_comp
     sparseMatA2X(1)%factorIndexList(2,7)=7
     sparseMatA2X(1)%factorIndexList(2,8)=8
     sparseMatA2X(1)%factorIndexList(2,9)=9
-    ! - set up mapping between lnd grid -> xgrid
+    ! setting up mapping between A2 -> X
     sparseMatA2X(2)%factorIndexList(1,1)=1
     sparseMatA2X(2)%factorIndexList(1,2)=2
     sparseMatA2X(2)%factorIndexList(1,3)=2
@@ -179,14 +183,78 @@ module coupler_comp
     sparseMatA2X(2)%factorIndexList(2,2)=11
     sparseMatA2X(2)%factorIndexList(2,3)=12
 
+    ! Note that the weights are dest area weighted
+    ! factorList
+    ! setting up mapping between A1 -> X
+    sparseMatA2X(1)%factorList(1)=1
+    sparseMatA2X(1)%factorList(2)=1
+    sparseMatA2X(1)%factorList(3)=1
+    sparseMatA2X(1)%factorList(4)=1
+    sparseMatA2X(1)%factorList(5)=1
+    sparseMatA2X(1)%factorList(6)=1
+    sparseMatA2X(1)%factorList(7)=1
+    sparseMatA2X(1)%factorList(8)=1
+    sparseMatA2X(1)%factorList(9)=1
+    ! setting up mapping between A2 -> X
+    sparseMatA2X(2)%factorList(1)=1
+    sparseMatA2X(2)%factorList(2)=1
+    sparseMatA2X(2)%factorList(3)=1
+
+    ! factorIndexList
+    ! setting up mapping between X -> B
+    sparseMatX2B(1)%factorIndexList(1,1)=1
+    sparseMatX2B(1)%factorIndexList(1,2)=2
+    sparseMatX2B(1)%factorIndexList(1,3)=3
+    sparseMatX2B(1)%factorIndexList(1,4)=4
+    sparseMatX2B(1)%factorIndexList(1,5)=5
+    sparseMatX2B(1)%factorIndexList(1,6)=6
+    sparseMatX2B(1)%factorIndexList(1,7)=7
+    sparseMatX2B(1)%factorIndexList(1,8)=8
+    sparseMatX2B(1)%factorIndexList(1,9)=9
+    sparseMatX2B(1)%factorIndexList(1,10)=10
+    sparseMatX2B(1)%factorIndexList(1,11)=11
+    sparseMatX2B(1)%factorIndexList(1,12)=12
+    sparseMatX2B(1)%factorIndexList(2,1)=1
+    sparseMatX2B(1)%factorIndexList(2,2)=1
+    sparseMatX2B(1)%factorIndexList(2,3)=2
+    sparseMatX2B(1)%factorIndexList(2,4)=1
+    sparseMatX2B(1)%factorIndexList(2,5)=1
+    sparseMatX2B(1)%factorIndexList(2,6)=2
+    sparseMatX2B(1)%factorIndexList(2,7)=3
+    sparseMatX2B(1)%factorIndexList(2,8)=3
+    sparseMatX2B(1)%factorIndexList(2,9)=4
+    sparseMatX2B(1)%factorIndexList(2,10)=3
+    sparseMatX2B(1)%factorIndexList(2,11)=3
+    sparseMatX2B(1)%factorIndexList(2,12)=4
+
+    ! factorList
+    ! setting up mapping between X -> B
+    sparseMatX2B(1)%factorList(1)=4./9
+    sparseMatX2B(1)%factorList(2)=2./9
+    sparseMatX2B(1)%factorList(3)=2./3
+    sparseMatX2B(1)%factorList(4)=2./9
+    sparseMatX2B(1)%factorList(5)=1./9
+    sparseMatX2B(1)%factorList(6)=1./3
+    sparseMatX2B(1)%factorList(7)=2./9
+    sparseMatX2B(1)%factorList(8)=1./9
+    sparseMatX2B(1)%factorList(9)=1./3
+    sparseMatX2B(1)%factorList(10)=4./9
+    sparseMatX2B(1)%factorList(11)=2./9
+    sparseMatX2B(1)%factorList(12)=2./3
+
+    ! Finally ready to do an flux exchange from A side to B side
     xgrid = ESMF_XGridCreate((/ocn_grid, lnd_grid/), (/atm_grid/), &
         area=area, centroid=centroid, &
-        sparseMatA2X=sparseMatA2X, rc=rc)
+        sparseMatA2X=sparseMatA2X, sparseMatX2B=sparseMatX2B, &
+        rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! create a flux Field on the xgrid
-    !flux = ESMF_FieldCreate(xgrid, ...)
-    !if (rc/=ESMF_SUCCESS) return ! bail out
+    field = ESMF_FieldCreate(xgrid, typekind=ESMF_TYPEKIND_R8, rank=1, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_FieldGet(field, farrayPtr=xfptr, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    xfptr = 0.0
 
     ! Precompute and store an FieldRegrid operation
     !call ESMF_FieldRegridStore(F_lnd, flux, xgrid, &
@@ -199,6 +267,10 @@ module coupler_comp
     !  routehandle=routehandle, rc=rc)
     !if (rc/=ESMF_SUCCESS) return ! bail out
     
+    deallocate(sparseMatA2X(1)%factorIndexList, sparseMatA2X(1)%factorList)
+    deallocate(sparseMatA2X(2)%factorIndexList, sparseMatA2X(2)%factorList)
+    deallocate(sparseMatX2B(1)%factorIndexList, sparseMatX2B(1)%factorList)
+
     print *, "User Coupler Init returning"
    
   end subroutine user_init
@@ -267,6 +339,9 @@ module coupler_comp
     print *, "User Coupler Final starting"
 
     call ESMF_XGridDestroy(xgrid, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_FieldDestroy(field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
   
     ! Release resources stored for the ArrayRedist.
