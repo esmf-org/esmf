@@ -26,10 +26,18 @@ The test harness code consists of a single executable that uses a customizable c
 files which are located within the \texttt{<classdir>/tests/harness\_config} directory of each 
 supported class; currently only ESMF\_ARRAY and ESMF\_FIELD.
 
-There are two primary ways to invoke the test harness, as an integral part of running unit
-tests and as a separate stand-alone test.  Running the harness along with the unit tests provides
-frequent regression testing of the redistribution and regridding features.  Running the test harness
-in stand alone mode is useful for isolating faults in failed test cases.
+There are three ways to invoke the test harness, as an integral part of running unit
+tests; as a stand-alone test invoked through gmake; and as a standalone test invoked through the command line.
+
+Running the harness along with the unit tests provides
+frequent regression testing of the redistribution and regridding features.  
+
+Running the test harness
+in stand alone mode using gmake is useful for isolating faults in failed test cases.  
+
+Running the test harness from the command line provides the most control over Test Harness execution.
+Understanding the underlying program allows the developer full access to test harness features.  
+This is useful in developing makefiles, scripts, and configuration files. 
 
 \subsection{Running Test Harness Tests as Part of Unit Tests}
 When running as an integral part of the unit tests, the makefile contained in the
@@ -78,7 +86,7 @@ In this example, the test harness target is RUN\_ESMF\_TestHarnessField\_1.  Thi
 single test harness test case. Additional lines can be added if additional steps are desired.
 The next section will describe the details of invoking a test case.
 
-\subsection{Invoking a Single Test Harness Test Case}
+\subsection{Invoking a Single Test Harness Test Case Using gmake}
 A single test harness test case can be invoked from the \texttt{<classdir>/tests}
 directory through the make command with the local parameters \texttt{TESTHARNESSCASE} and
 \texttt{NP} with the \texttt{run\_test\_harness} target.
@@ -96,6 +104,44 @@ All of the configuration files for a particular test case will be prefixed with
 The top level configuration file will have a suffix of \texttt{\_test.rc}.
 Thus, the top level configuration file for the \texttt{field\_1} test case will be
 \texttt{field\_1\_test.rc}.
+
+The next section describes invoking the Test Harness from the Command Line.
+
+\subsection{Invoking a Single Test Harness Test Case fromthe Command Line}
+The Test Harness is built by invoking gmake from the \$ESMF\_DIR/src/test_harness/src directory or 
+by building all the unit tests. This creates the exececutable file ESMF\_TestHarnessUTest in 
+the currently selected test directory.
+
+To run the executable, enter:
+\begin{verbatim}
+\<run path\>ESMF\_TestHarnessUTest \<cmd args\>
+where,
+\<run path\> is the path to the executable,
+and \<cmd args\> are the optional command arguments
+
+The cmd args are as follows:
+-path \<config path\>
+-case \<case filename\>
+-xml \<xml filename\>
+-norun
+
+\end{verbatim}
+
+The path argument sets the path to the configuration files.  All of the configuration files 
+for a testcase must reside in the same directory.  If this argument is not present, the current working directory
+will be used as the path.
+
+The case argument is the name of the top level configuration file.  This is described in a later 
+section of this document.  If this argument is not present, test\_harness.rc will be used.
+
+The xml argument instructs the test harness to generate an XML test case summary file 
+in the current working directory.
+
+The norun argument instructs the test harness not to run the test cases.  The configuration files will be parsed
+and if selected, an XML file will be generated.  The XML file can be post-processed to generate human
+readable test configuration summary reports.
+
+If running under mpi, you would need to prefix this command with the proper mpirun command.
 
 The next section describes the format of the top level resource file.
 

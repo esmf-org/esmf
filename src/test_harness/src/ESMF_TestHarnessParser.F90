@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessParser.F90,v 1.2 2010/07/19 21:41:21 garyblock Exp $
+! $Id: ESMF_TestHarnessParser.F90,v 1.3 2010/08/12 15:42:51 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -45,11 +45,15 @@
   use ESMF_Mod
 
   implicit none
+  private
 
 !-------------------------------------------------------------------------------
 ! PUBLIC METHODS:
 !-------------------------------------------------------------------------------
-  public read_descriptor_files, parse_descriptor_string
+  public read_testharness_config
+  public read_testharness_specifier
+  public read_descriptor_files
+  public parse_descriptor_string
 
 !===============================================================================
 ! debug trace switch
@@ -82,6 +86,7 @@ logical                       :: checkpoint = .FALSE.
 ! strings.
 !
 ! Upon completion, the routine returns the values to a public record
+!       har%topFname                top level configuration filename
 !       har%testClass               Problem Descriptor Test Class
 !       har%reportType              Output Report type
 !       har%numRecords              number of problem descriptor filenames
@@ -112,6 +117,9 @@ logical                       :: checkpoint = .FALSE.
   ! initialize return code
   returnrc = ESMF_RC_NOT_IMPL
   localrc = ESMF_RC_NOT_IMPL
+
+  ! save top level filename for summary report
+  har%topFname = trim(configFname)
 
   !-----------------------------------------------------------------------------
   ! create config handle and load the testing harness config file

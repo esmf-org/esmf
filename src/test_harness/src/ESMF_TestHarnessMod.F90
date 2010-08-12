@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.49 2010/07/15 18:53:02 garyblock Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.50 2010/08/12 15:42:51 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -47,6 +47,7 @@
   use ESMF_FieldGetMod
 
   implicit none
+  private
 
 !-------------------------------------------------------------------------------
 ! PUBLIC METHODS:

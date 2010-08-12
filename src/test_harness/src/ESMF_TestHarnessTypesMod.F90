@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessTypesMod.F90,v 1.11 2010/03/04 19:40:09 theurich Exp $
+! $Id: ESMF_TestHarnessTypesMod.F90,v 1.12 2010/08/12 15:42:51 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -132,7 +132,7 @@
   type process_record
      character(ESMF_MAXSTR) ::string 
      integer :: tag                   ! process tag
-     integer :: location              ! string location of method
+     !integer :: location              ! string location of method
   end type process_record
 
 
@@ -212,6 +212,7 @@
   end type problem_descriptor_records
 
   type harness_descriptor
+     character(ESMF_MAXSTR) :: topFname        ! top level config filename
      character(ESMF_MAXSTR) :: testClass       ! test class
      character(ESMF_MAXSTR) :: reportType      ! test result report type 
      character(ESMF_MAXSTR) :: setupReportType ! setup report type 

@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessReportMod.F90,v 1.11 2010/03/04 19:40:09 theurich Exp $
+! $Id: ESMF_TestHarnessReportMod.F90,v 1.12 2010/08/12 15:42:51 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -31,6 +31,9 @@
 ! The code in this file contains  Modules for reporting the test harness
 ! results.
 !
+! In addition, This module will print a summary report describing the the
+! tests that will be run for a harness suite.
+!
 !-------------------------------------------------------------------------------
 ! !USES:
 
@@ -42,6 +45,7 @@
 ! PUBLIC METHODS:
 !-------------------------------------------------------------------------------
   public report_descriptor_string, construct_descriptor_string
+  public summary_report_generate
 
 
 
@@ -405,8 +409,310 @@
   end subroutine report_descriptor_string
   !-----------------------------------------------------------------------------
 
- !------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  subroutine summary_report_write_detail_line (DSpecNo, GSpecNo, &
+      srcDist, dstDist, srcGrid, dstGrid, rptLun, localrc)
+    integer,                         intent(in)  :: DSpecNo
+    integer,                         intent(in)  :: GSpecNo
+    type(dist_specification_record), intent(in)  :: srcDist
+    type(dist_specification_record), intent(in)  :: dstDist
+    type(grid_specification_record), intent(in)  :: srcGrid
+    type(grid_specification_record), intent(in)  :: dstGrid
+    integer,                         intent(in)  :: rptLun
+    integer,                         intent(out) :: localrc
 
+    integer :: RankNo
+
+    localrc = ESMF_SUCCESS
+
+    write (rptLun, 9001)
+
+    write (rptLun, 9005) DSpecNo
+    write (rptLun, 9006) GSpecNo
+
+    ! make sure distribution rank is consistent
+    if (srcDist%drank .NE. dstDist%drank) then
+      write (rptLun, '("source distribution rank does not match destination rank", I4, 2x, I4)') &
+        srcDist%drank, dstDist%drank
+    end if
+
+    ! make sure grid rank is consistent
+    if (srcGrid%grank .NE. dstGrid%grank) then
+      write (rptLun, '("source grid rank does not match destination rank", I4, 2x, I4)') &
+        srcGrid%grank, dstGrid%grank
+    end if
+
+    ! make sure distribution and grid are consistent
+    if (srcDist%drank .NE. srcGrid%grank) then
+      write (rptLun, '("distribution rank does not match grid rank", I4, 2x, I4)') &
+        srcDist%drank, srcGrid%grank
+    end if
+
+    write (rptLun, 9007) srcDist%drank
+    write (rptLun, 9008) srcGrid%grank
+
+    ! write source distribution
+    do RankNo = 1, srcDist%drank
+      write (rptLun, 9012) RankNo, srcDist%dsize(RankNo), RankNo
+    end do
+
+    ! write destination distribution
+    do RankNo = 1, dstDist%drank
+      write (rptLun, 9013) RankNo, dstDist%dsize(RankNo), RankNo
+    end do
+
+    ! write source grid
+    do RankNo = 1, srcGrid%grank
+      write (rptLun, 9020) RankNo, srcGrid%gsize(RankNo), RankNo
+      write (rptLun, 9021) RankNo, srcGrid%grange(RankNo, 1), RankNo
+      write (rptLun, 9022) RankNo, srcGrid%grange(RankNo, 2), RankNo
+      write (rptLun, 9023) RankNo, trim(srcGrid%gtype(RankNo)%string), RankNo
+      write (rptLun, 9024) RankNo, trim(srcGrid%gunits(RankNo)%string), RankNo
+    end do
+
+    ! write destination grid
+    do RankNo = 1, dstGrid%grank
+      write (rptLun, 9030) RankNo, dstGrid%gsize(RankNo), RankNo
+      write (rptLun, 9031) RankNo, dstGrid%grange(RankNo, 1), RankNo
+      write (rptLun, 9032) RankNo, dstGrid%grange(RankNo, 2), RankNo
+      write (rptLun, 9023) RankNo, trim(dstGrid%gtype(RankNo)%string), RankNo
+      write (rptLun, 9024) RankNo, trim(dstGrid%gunits(RankNo)%string), RankNo
+    end do
+
+    write (rptLun, 9002)
+
+    9001 FORMAT ('        <Row>')
+    9002 FORMAT ('        </Row>')
+
+    9005 FORMAT ('          <DSpecNo>', I3, '</DSpecNo>')
+    9006 FORMAT ('          <GSpecNo>', I3, '</GSpecNo>')
+    9007 FORMAT ('          <DistRank>', I1, '</DistRank>')
+    9008 FORMAT ('          <GridRank>', I1, '</GridRank>')
+
+    9012 FORMAT ('          <SourceDistSize', I1, '>', I5, '</SourceDistSize', I1, '>')
+    9013 FORMAT ('          <DestDistSize', I1, '>', I5, '</DestDistSize', I1, '>')
+
+    9020 FORMAT ('          <SourceGridSize', I1, '>', I5, '</SourceGridSize', I1, '>')
+    9021 FORMAT ('          <SourceGridCoordLow', I1, '>', E14.6, '</SourceGridCoordLow', I1, '>')
+    9022 FORMAT ('          <SourceGridCoordHigh', I1, '>', E14.6, '</SourceGridCoordHigh', I1, '>')
+    9023 FORMAT ('          <SourceGridType', I1, '>', A16, '</SourceGridType', I1, '>')
+    9024 FORMAT ('          <SourceGridUnits', I1, '>', A16, '</SourceGridUnits', I1, '>')
+
+    9030 FORMAT ('          <DestGridSize', I1, '>', I5, '</DestGridSize', I1, '>')
+    9031 FORMAT ('          <DestGridCoordLow', I1, '>', E14.6, '</DestGridCoordLow', I1, '>')
+    9032 FORMAT ('          <DestGridCoordHigh', I1, '>', E14.6, '</DestGridCoordHigh', I1, '>')
+    9033 FORMAT ('          <DestGridType', I1, '>', A16, '</DestGridType', I1, '>')
+    9034 FORMAT ('          <DestGridUnits', I1, '>', A16, '</DestGridUnits', I1, '>')
+
+  end subroutine summary_report_write_detail_line
+
+  !-----------------------------------------------------------------------------
+  subroutine summary_report_process_dist_grid_files (DfileNo, GfileNo, DRec, GRec, rptLun, localrc)
+    integer,            intent(in)  :: DFileNo
+    integer,            intent(in)  :: GfileNo
+    type(dist_record),  intent(in)  :: DRec
+    type(grid_record),  intent(in)  :: GRec
+    integer,            intent(in)  :: rptLun
+    integer,            intent(out) :: localrc
+
+    integer :: DSpecCnt
+    integer :: DSpecNo
+
+    integer :: GSpecCnt
+    integer :: GSpecNo
+
+    localrc = ESMF_SUCCESS
+
+    write (rptLun, 9001)
+
+    write (rptLun, 9012) DfileNo
+    write (rptLun, 9013) GfileNo
+
+    DSpecCnt = DRec%nDspecs
+    write (rptLun, 9010) DSpecCnt
+
+    GSpecCnt = GRec%nGspecs
+    write (rptLun, 9011) GSpecCnt
+
+    ! process all dist records
+    do DSpecNo = 1,DSpecCnt
+      ! process all grid records
+      do GSpecNo = 1, GSpecCnt
+        ! display distribution/grid
+        call summary_report_write_detail_line (DSpecNo, GSpecNo, &
+          DRec%src_dist(DSpecNo), DRec%dst_dist(DSpecNo), &
+          GRec%src_grid(GSpecNo), GRec%dst_grid(GSpecNo), rptLun, localrc)
+      end do
+    end do
+
+    write (rptLun, 9002)
+
+    9001 FORMAT ('      <DistGridFile>')
+    9002 FORMAT ('      </DistGridFile>')
+    9010 FORMAT ('        <DSpecCnt>', I3, '</DSpecCnt>')
+    9011 FORMAT ('        <GSpecCnt>', I3, '</GSpecCnt>')
+    9012 FORMAT ('        <DFileNo>', I3, '</DFileNo>')
+    9013 FORMAT ('        <GFileNo>', I3, '</GFileNo>')
+  end subroutine summary_report_process_dist_grid_files
+
+  !-----------------------------------------------------------------------------
+  subroutine summary_report_process_prob_descr_string (pdsNo, probDescrStr, rptLun, localrc)
+    integer,                           intent(in)  :: pdsNo
+    type(problem_descriptor_strings),  intent(in)  :: probDescrStr
+    integer,                           intent(in)  :: rptLun
+    integer,                           intent(out) :: localrc
+
+    !integer :: PdsCnt
+    !integer :: PdsNo
+
+    integer :: DfileCnt
+    integer :: DfileNo
+
+    integer :: GfileCnt
+    integer :: GfileNo
+
+    write (rptLun, 9001)
+    write (rptLun, 9015) pdsNo
+    write (rptLun, 9010) trim(probDescrStr%pds)
+
+    write (rptLun, 9011)  trim(probDescrStr%process%string)
+    write (rptLun, 9012) probDescrStr%process%tag
+
+    DfileCnt = probDescrStr%nDFiles
+    write (rptLun, 9013) DfileCnt
+
+    GfileCnt = probDescrStr%nGFiles
+    write (rptLun, 9014) GfileCnt
+
+    ! for each distribution file
+    do DfileNo = 1, DfileCnt
+      ! for each grid file
+      do GfileNo = 1, GfileCnt
+        ! display dist file and grid file entry
+        call summary_report_process_dist_grid_files (DfileNo, GfileNo, &
+          probDescrStr%Dfiles(DfileNo), probDescrStr%Gfiles(GfileNo), rptLun, localrc)
+      end do
+    end do
+
+    write (rptLun, 9002)
+
+    localrc = ESMF_SUCCESS
+
+    90 continue
+
+    9001 FORMAT ('    <ProbDescString>')
+    9002 FORMAT ('    </ProbDescString>')
+    9010 FORMAT ('      <PDS>', A, '</PDS>')
+    9011 FORMAT ('      <Process>', A, '</Process>')
+    9012 FORMAT ('      <ProcessCode>', I3, '</ProcessCode>')
+    9013 FORMAT ('      <DistFileCnt>', I3, '</DistFileCnt>')
+    9014 FORMAT ('      <GridFileCnt>', I3, '</GridFileCnt>')
+    9015 FORMAT ('      <PdsNo>', I3, '</PdsNo>')
+
+  end subroutine summary_report_process_prob_descr_string
+
+  !-----------------------------------------------------------------------------
+  subroutine summary_report_process_prob_descr_rec (pdrNo, probDescrRec, rptLun, localrc)
+    integer,                           intent(in)  :: pdrNo
+    type(problem_descriptor_records),  intent(in)  :: probDescrRec
+    integer,                           intent(in)  :: rptLun
+    integer,                           intent(out) :: localrc
+
+    integer :: PdsCnt
+    integer :: PdsNo
+
+    write (rptLun, 9001)
+    write (rptLun, 9012) pdrNo
+    write (rptLun, 9010) trim(probDescrRec%filename)
+
+    PdsCnt = probDescrRec%numStrings
+    write (rptLun, 9011) PdsCnt
+
+    do PdsNo = 1, PdsCnt
+      call summary_report_process_prob_descr_string (PdsNo, probDescrRec%str(PdsNo), rptLun, localrc)
+    end do
+
+    write (rptLun, 9002)
+
+    localrc = ESMF_SUCCESS
+
+    90 continue
+
+    9001 FORMAT ('  <ProbDescRec>')
+    9002 FORMAT ('  </ProbDescRec>')
+    9010 FORMAT ('    <Filename>', A, '</Filename>')
+    9011 FORMAT ('    <PdsCnt>', I3, '</PdsCnt>')
+    9012 FORMAT ('    <PdrNo>', I4, '</PdrNo>')
+  end subroutine summary_report_process_prob_descr_rec
+
+  !-----------------------------------------------------------------------------
+  subroutine summary_report_generate (harnDesc, reportFname, localrc)
+    type (harness_descriptor), intent(in)  :: harnDesc
+    character(len=*),          intent(in)  :: reportFname
+    integer,                   intent(out) :: localrc
+
+    integer, parameter :: rptLun = 50
+    integer :: iostat
+    logical :: openstat
+
+    integer :: PdrNo
+    integer :: PdrCnt
+
+    ! initialize return status
+    localrc = ESMF_FAILURE
+
+    ! open report file
+    open (unit=rptLun, file=reportFname, status='REPLACE', iostat=iostat, action='WRITE')
+    if (iostat .NE. 0) then
+      print '("error in summary_report_generate, unable to open report file - filename = ", A)', &
+        reportFname
+      go to 90
+    end if
+
+    ! write top level structure
+    write (rptLun, 9000)
+    !write (rptLun, 9001)
+    write (rptLun, 9005)
+    write (rptLun, 9010) trim(harnDesc%topFname)
+    write (rptLun, 9011) trim(harnDesc%testClass)
+    write (rptLun, 9012) trim(harnDesc%reportType)
+    write (rptLun, 9013) trim(harnDesc%setupReportType)
+    write (rptLun, 9014) harnDesc%numRecords
+
+    ! problem_descriptor_records
+    PdrCnt = harnDesc%numRecords
+    do PdrNo = 1, PdrCnt
+      call summary_report_process_prob_descr_rec (PdrNo, harnDesc%rcrd(PdrNo), rptLun, localrc)
+    end do
+
+    ! write trailer
+    write (rptLun, 9006)
+
+    localrc = ESMF_SUCCESS
+
+    ! return status & exit
+    90 continue
+
+    ! close report file
+    inquire (rptLun, opened=openstat)
+    if (openstat) then
+      close (rptLun)
+    end if
+
+    9000 FORMAT ('<?xml version="1.0"?>')
+    !9001 FORMAT ('<?xml-stylesheet type="application/xml" href="Harness.xslt"?>')
+    9005 FORMAT ('<TopConfig>')
+    9006 FORMAT ('</TopConfig>')
+    9010 FORMAT ('  <TopFname>', A, '</TopFname>')
+    9011 FORMAT ('  <TestClass>', A, '</TestClass>')
+    9012 FORMAT ('  <ReportType>', A, '</ReportType>')
+    9013 FORMAT ('  <SetUpReportType>', A, '</SetUpReportType>')
+    9014 FORMAT ('  <PDRCnt>', I3, '</PDRCnt>')
+
+  end subroutine summary_report_generate
+  !-----------------------------------------------------------------------------
 !===============================================================================
   end module ESMF_TestHarnessReportMod
 !===============================================================================
