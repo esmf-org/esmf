@@ -1,4 +1,4 @@
-! $Id: land_comp.F90,v 1.1 2010/07/27 15:11:33 feiliu Exp $
+! $Id: land_comp.F90,v 1.2 2010/08/12 18:05:10 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -116,7 +116,7 @@ module land_comp
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/1,2/), &
-      regDecomp=(/petCount,1/), rc=rc)
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     grid = ESMF_GridCreate(distgrid=distgrid, destroyDistGrid=.true., &
         indexflag=ESMF_INDEX_GLOBAL, rc=rc)

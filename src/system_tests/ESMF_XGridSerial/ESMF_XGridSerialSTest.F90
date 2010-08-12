@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridSerialSTest.F90,v 1.2 2010/07/28 15:23:47 feiliu Exp $
+! $Id: ESMF_XGridSerialSTest.F90,v 1.3 2010/08/12 18:05:10 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
@@ -10,24 +10,21 @@
 ! System test XGridSerial.  
 !    Three gridded components and one coupler component, one-way coupling,
 !    all components are executed in serial mode. The three gridded components
-!    are idealized atmosphere, land, and ocean component with atmosphere and land on
-!    one side of the coupler component, while ocean component on the other side.
+!    are idealized atmosphere, land, and ocean component with ocean and land on
+!    one side of the exchange grid, while atmosphere component on the other side.
 !    Exchange grid is created inside the coupler component.
 !
 !    Atmosphere component runs on all PETs and defines a 2D souserrce Field
 !    2x2. Land gridded component defines another 2D souserrce Field 
 !    1x2 but runs on all PETs. Ocean component again runs on all PETs and defines
-!    a 2D souserrce Field 2x2. All gridded components use DELayouts 
-!    with 1 DE per PET. The decomposition of the atmosphere Field is defined as 
-!    (petCount x 1) = (2 x 2), land Field as (petCount x 1) = (1 x 2), while 
-!    the destination Field is decomposed as (1 x petCount) = (2 x 2).
+!    a 2D souserrce Field 2x2.
 !
-!    Both atmosphere and land initialize souserrce Fields to a constant function: 
+!    Both ocean and land initialize source Fields to a constant function: 
 !    1.0. The coupler runs on all PETs and has access to atmosphere, land,
 !    and ocean temperature Fields. The coupler uses the exchange grid to do a
-!    SMM from souserrce Fields to destination Field.
+!    SMM from source Fields to destination Field.
 !
-!    Finally the second gridded component compares the data stored in the
+!    Finally the atmosphere gridded component compares the data stored in the
 !    destination Field to the exact solution of the above function as a measure
 !    of the accuracy of the XGrid methods.
 !
