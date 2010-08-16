@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.15 2010/08/05 06:32:26 samsoncheung Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.16 2010/08/16 18:58:58 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.15 2010/08/05 06:32:26 samsoncheung Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.16 2010/08/16 18:58:58 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -744,12 +744,13 @@ contains
 ! !IROUTINE: ESMF_ArrayBundleWrite - Write ArrayBundle arrays
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleWrite(arraybundle, fname, mfiles, rc)
+  subroutine ESMF_ArrayBundleWrite(arraybundle, fname, mfiles, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)        :: arraybundle
-    character(*), intent(in)                  :: fname
+    character(*),     intent(in)              :: fname
     logical,          intent(in) ,  optional  :: mfiles
+    character(*),     intent(in),   optional  :: iofmt
     integer,          intent(out),  optional  :: rc  
 !         
 !
@@ -765,6 +766,8 @@ contains
 !   \item[mfiles]
 !    A logical flag, if TRUE, each array will be written a separate file.
 !    The default is FALSE, ie all arrays are written in one file.
+!   \item[iofmt]
+!    The IO format supported are "bin", "pnc", "snc", "nc4p", and "nc4c".
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -778,6 +781,7 @@ contains
     logical :: multif
     character(len=80) :: filename
     character(len=3) :: cnum
+    character(len=10)               :: iofmtd
 
 #ifdef ESMF_PIO
     ! initialize return code; assume routine not implemented
@@ -790,6 +794,8 @@ contains
     ! Check options
     multif = .false.
     if (present(mfiles)) multif = mfiles
+    iofmtd = "snc"
+    if(present(iofmt)) iofmtd = trim(iofmt)
     
     call ESMF_ArrayBundleGet(arraybundle, arrayCount=arrayCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -809,7 +815,8 @@ contains
         call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayWrite(arrayList(i), fname=trim(filename), rc=localrc)
+        call ESMF_ArrayWrite(arrayList(i), fname=trim(filename),  &
+           iofmt=iofmtd, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
@@ -818,7 +825,7 @@ contains
       call ESMF_ArrayGet(arrayList(1), name=Aname(1), rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_ArrayWrite(arrayList(1), fname=fname, rc=localrc)
+      call ESMF_ArrayWrite(arrayList(1), fname=fname, iofmt=iofmtd, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -827,7 +834,8 @@ contains
        call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_ArrayWrite(arrayList(i), fname=fname, etag=1, rc=localrc)
+       call ESMF_ArrayWrite(arrayList(i), fname=fname, etag=1, &
+         iofmt=iofmtd, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
@@ -852,12 +860,13 @@ contains
 ! !IROUTINE: ESMF_ArrayBundleWrite - Write ArrayBundle arrays
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleRead(arraybundle, fname, mfiles, rc)
+  subroutine ESMF_ArrayBundleRead(arraybundle, fname, mfiles, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)        :: arraybundle
-    character(*), intent(in)                  :: fname
+    character(*),     intent(in)              :: fname
     logical,          intent(in) ,  optional  :: mfiles
+    character(*),     intent(in),   optional  :: iofmt
     integer,          intent(out),  optional  :: rc
 !         
 !
@@ -874,6 +883,8 @@ contains
 !   \item[mfiles]
 !    A logical flag, if TRUE, each array located in a separate file.
 !    The default is FALSE, ie all arrays are located in one file.
+!   \item[iofmt]
+!    The IO format supported are "bin", "pnc", "snc", "nc4p", and "nc4c".
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -884,9 +895,10 @@ contains
     character(len=80), allocatable :: Aname(:)
     integer :: arrayCount,i
     type(ESMF_Array), allocatable :: arrayList(:)
-    logical :: multif
-    character(len=80) :: filename
-    character(len=3) :: cnum
+    logical                       :: multif
+    character(len=80)             :: filename
+    character(len=3)              :: cnum
+    character(len=10)             :: iofmtd
 
 #ifdef ESMF_PIO
     ! initialize return code; assume routine not implemented
@@ -899,6 +911,8 @@ contains
     ! Check options
     multif = .false.
     if (present(mfiles)) multif = mfiles
+    iofmtd = "snc"
+    if(present(iofmt)) iofmtd = trim(iofmt)
 
     call ESMF_ArrayBundleGet(arraybundle, arrayCount=arrayCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -918,7 +932,7 @@ contains
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_ArrayRead(arrayList(i), fname=filename,  &
-               vname=Aname(i), rc=localrc)
+               vname=Aname(i), iofmt=iofmtd, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
@@ -928,7 +942,8 @@ contains
        call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_ArrayRead(arrayList(i), fname=fname, vname=Aname(i), rc=localrc)
+       call ESMF_ArrayRead(arrayList(i), fname=fname, vname=Aname(i), &
+          iofmt=iofmtd, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       enddo

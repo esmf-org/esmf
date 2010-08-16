@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.40 2010/08/06 17:32:22 samsoncheung Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.41 2010/08/16 19:01:03 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -1791,12 +1791,13 @@ end function
 ! !IROUTINE: ESMF_FieldBundleRead - Read arrays to a FieldBundle form file 
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleRead(bundle, fname, mfiles, rc)
+      subroutine ESMF_FieldBundleRead(bundle, fname, mfiles, iofmt, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: bundle
       character(*), intent(in)              :: fname
       logical,      intent(in) ,  optional  :: mfiles
+      character(*), intent(in) ,  optional  :: iofmt
       integer,      intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -1811,6 +1812,8 @@ end function
 !     \item[mfiles]
 !      A logical flag, if TRUE, each array located in a separate file.
 !      The default is FALSE, ie all arrays are located in one file.
+!     \item[iofmt]
+!      The IO format supported are "bin", "pnc", "snc", "nc4p", and "nc4c".
 !     \item [{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1823,7 +1826,8 @@ end function
       type(ESMF_Field), allocatable :: fieldList(:)
       integer :: i, fieldCount
       logical :: multif
-      character(len=3) :: cnum
+      character(len=3)              :: cnum
+      character(len=10)             :: iofmtd
 
 #ifdef ESMF_PIO
       ! Initialize return code; assume routine not implemented
@@ -1841,6 +1845,8 @@ end function
       ! Check options
       multif = .false.
       if (present(mfiles)) multif = mfiles
+      iofmtd = "snc"
+      if(present(iofmt)) iofmtd = trim(iofmt)
 
       btype => bundle%btypep
       write (*, *)  "  Field count = ", btype%field_count
@@ -1855,7 +1861,8 @@ end function
           call ESMF_FieldBundleGet(bundle, fieldIndex=i, field=fieldList(i), rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
-          call ESMF_FieldRead(fieldList(i), fname=filename, rc=localrc)
+          call ESMF_FieldRead(fieldList(i), fname=filename, &
+             iofmt=iofmtd, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
@@ -1865,7 +1872,7 @@ end function
          call ESMF_FieldBundleGet(bundle, fieldIndex=i, field=fieldList(i), rc=localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
-         call ESMF_FieldRead(fieldList(i), fname=fname, rc=localrc)
+         call ESMF_FieldRead(fieldList(i), fname=fname, iofmt=iofmtd, rc=localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
@@ -2353,12 +2360,13 @@ end function
 ! !IROUTINE: ESMF_FieldBundleWrite - Save the Field arrays in a netCDF file.
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleWrite(bundle, fname, mfiles, rc)
+      subroutine ESMF_FieldBundleWrite(bundle, fname, mfiles, iofmt, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: bundle
       character(*), intent(in)              :: fname
       logical,      intent(in) ,  optional  :: mfiles
+      character(*), intent(in) ,  optional  :: iofmt
       integer,      intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -2374,6 +2382,8 @@ end function
 !     \item[mfiles]
 !      A logical flag, if TRUE, each array will be written a separate file.
 !      The default is FALSE, ie all arrays are written in one file.
+!     \item[iofmt]
+!      The IO format supported are "bin", "pnc", "snc", "nc4p", and "nc4c".
 !     \item [{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2385,7 +2395,8 @@ end function
       type(ESMF_Field), allocatable :: fieldList(:)
       integer :: i, fieldCount
       logical :: multif
-      character(len=3) :: cnum
+      character(len=3)              :: cnum
+      character(len=10)             :: iofmtd
 
 #ifdef ESMF_PIO
       ! Initialize return code; assume routine not implemented
@@ -2403,6 +2414,8 @@ end function
       ! Check options
       multif = .false.
       if (present(mfiles)) multif = mfiles
+      iofmtd = "snc"
+      if(present(iofmt)) iofmtd = trim(iofmt)
 
       btype => bundle%btypep
       write (*, *)  "  Field count = ", btype%field_count
@@ -2418,7 +2431,8 @@ end function
         call ESMF_FieldBundleGet(bundle, fieldIndex=i , field=fieldList(i), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_FieldWrite(fieldList(i), fname=trim(filename), rc=localrc)
+        call ESMF_FieldWrite(fieldList(i), fname=trim(filename), &
+           iofmt=iofmtd, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
        enddo
@@ -2427,7 +2441,7 @@ end function
        call ESMF_FieldBundleGet(bundle, fieldIndex=1 , field=fieldList(1), rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_FieldWrite(fieldList(1), fname=fname, rc=localrc)
+       call ESMF_FieldWrite(fieldList(1), fname=fname, iofmt=iofmtd, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2436,7 +2450,8 @@ end function
         call ESMF_FieldBundleGet(bundle, fieldIndex=i , field=fieldList(i), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_FieldWrite(fieldList(i), fname=fname, etag=1, rc=localrc)
+        call ESMF_FieldWrite(fieldList(i), fname=fname, etag=1, &
+           iofmt=iofmtd, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
        enddo
