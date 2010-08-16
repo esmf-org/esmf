@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.310 2010/08/16 04:43:08 samsoncheung Exp $
+#  $Id: common.mk,v 1.311 2010/08/16 18:54:40 samsoncheung Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -960,6 +960,7 @@ endif
 #-------------------------------------------------------------------------------
 ifdef ESMF_PNETCDF
 CPPFLAGS                += -DESMF_PNETCDF=1
+ESMF_PNETCDF_LIBS = -lpnetcdf
 ifdef ESMF_PNETCDF_INCLUDE
 ESMF_CXXCOMPILEPATHS    += -I$(ESMF_PNETCDF_INCLUDE)
 ESMF_F90COMPILEPATHS    += -I$(ESMF_PNETCDF_INCLUDE)
