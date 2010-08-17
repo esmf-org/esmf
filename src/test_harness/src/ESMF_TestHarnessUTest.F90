@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUTest.F90,v 1.32 2010/08/12 15:42:51 garyblock Exp $
+! $Id: ESMF_TestHarnessUTest.F90,v 1.33 2010/08/17 20:50:11 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -127,10 +127,10 @@
 
     print '("Path = ", A)', trim(srcPath(1))
     print '("Config File = ", A)', trim(configFname(1))
-    print '("Run Flag = ", I)', runFlag(1)
-    print '("XML Flag = ", I)', xmlFlag(1)
+    print '("Run Flag = ", I2)', runFlag(1)
+    print '("XML Flag = ", I2)', xmlFlag(1)
 
-    if (xmlFlag(1)) then
+    if (xmlFlag(1) .ne. 0) then
       print '("XML File = ", A)', trim(xmlFname(1))
     end if
   end if  ! PET 0 command line processing
@@ -155,9 +155,9 @@
 
     print '(I4, "Path = ", A)', localPet, trim(srcPath(1))
     print '(I4, "Config File = ", A)', localPet, trim(configFname(1))
-    print '(I4, "Run Flag = ", I)', localPet, runFlag(1)
-    print '(I4, "XML Flag = ", I)', localPet, xmlFlag(1)
-    if (xmlFlag(1)) then
+    print '(I4, "Run Flag = ", I2)', localPet, runFlag(1)
+    print '(I4, "XML Flag = ", I2)', localPet, xmlFlag(1)
+    if (xmlFlag(1) .ne. 0) then
       print '(I4, "XML File = ", A)', localPet, trim(xmlFname(1))
     end if
 
