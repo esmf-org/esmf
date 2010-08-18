@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.32 2010/07/15 23:37:37 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.33 2010/08/18 19:29:31 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.32 2010/07/15 23:37:37 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.33 2010/08/18 19:29:31 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -375,6 +375,11 @@
 !
 ! The number of arguments returned does not include the name of the
 ! command itself - which is typically returned as argument zero.
+!
+! Some MPI implementations do not consistently provide command line
+! arguments on PETs other than PET 0.  It is therefore recommended
+! that PET 0 call this method and broadcast the results to the other
+! PETs using ESMF\_VMBroadcast.
 !EOP
     integer :: argc
 
@@ -441,6 +446,11 @@
 ! \item [{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
+!
+! Some MPI implementations do not consistently provide command line
+! arguments on PETs other than PET 0.  It is therefore recommended
+! that PET 0 call this method and broadcast the results to the other
+! PETs using ESMF\_VMBroadcast.
 !EOP
 !------------------------------------------------------------------------- 
 #if defined (ESMF_NEEDSPXFGETARG) || defined (ESMF_NEEDSGETARG)
@@ -585,6 +595,11 @@
 ! \item [{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
+!
+! Some MPI implementations do not consistently provide command line
+! arguments on PETs other than PET 0.  It is therefore recommended
+! that PET 0 call this method and broadcast the results to the other
+! PETs using ESMF\_VMBroadcast.
 !EOP
 !------------------------------------------------------------------------- 
 
