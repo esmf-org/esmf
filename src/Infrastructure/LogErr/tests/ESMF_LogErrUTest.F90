@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.59 2010/08/05 18:44:07 w6ws Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.60 2010/08/18 01:59:26 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.59 2010/08/05 18:44:07 w6ws Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.60 2010/08/18 01:59:26 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -65,7 +65,7 @@
       integer :: num_pets, my_pet, input_status, ran_num, rc2, k, i
       integer :: datetime_commbuf(8)
       integer, pointer :: rndseed(:)
-      type(ESMF_Log) :: log2, log4, log6
+      type(ESMF_Log) :: log2, log4, log6, log8
       character (5) :: random_chars
       character (9) :: msg_string, random_string
       character :: random_char
@@ -76,6 +76,8 @@
       character(1) :: pet_char
       type(ESMF_TimeInterval) :: one_sec, zero, time_diff
       type(ESMF_Time) :: my_time, log_time
+      integer :: log8unit
+      logical :: was_found
 #endif
 
 
@@ -624,6 +626,92 @@
       call ESMF_LogSet (  &
           msgAllow=(/ ESMF_LOG_INFO /),  &
           rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Write a log file with message filtering
+      write (failMsg, *) 'Could not write a log file with filtering'
+      write (name, *) ' Creating a log file with message filtering'
+      do, i=1,1
+        ! Make sure we start with a clean log
+        call ESMF_IOUnitGet (unit=log8unit, rc=rc)
+        if (rc /= ESMF_SUCCESS) exit
+
+        open (log8unit, file=trim (my_pet_char) // '.logAllow',  &
+            status='unknown', iostat=rc)
+        if (rc /= 0) then
+            rc = ESMF_FAILURE
+            exit
+        end if
+
+        close (log8unit, status='delete', iostat=rc)
+        if (rc /= 0) then
+            rc = ESMF_FAILURE
+            exit
+        end if
+
+        ! Write some messages
+	call ESMF_LogOpen (log8, filename='logAllow', rc=rc)
+	if (rc /= ESMF_SUCCESS) exit
+
+	call ESMF_LogSet (log8,  &
+            msgAllow=(/ ESMF_LOG_INFO /),  &
+            rc=rc)
+	if (rc /= ESMF_SUCCESS) exit
+
+	call ESMF_LogWrite (log=log8,  &
+            msgType=ESMF_LOG_INFO, msg='should be in log', rc=rc)
+	if (rc /= ESMF_SUCCESS) exit
+
+	call ESMF_LogWrite (log=log8,  &
+            msgType=ESMF_LOG_WARNING, msg='should NOT be in log', rc=rc)
+	if (rc /= ESMF_SUCCESS) exit
+
+	call ESMF_LogWrite (log=log8,  &
+            msgType=ESMF_LOG_ERROR, msg='should NOT be in log', rc=rc)
+	if (rc /= ESMF_SUCCESS) exit
+
+	call ESMF_LogClose (log8, rc=rc)
+	if (rc /= ESMF_SUCCESS) exit
+
+      end do
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test log for INFO messages
+      write(failMsg, *) "INFO log message expected, but not found"
+      write(name, *) " Search log for INFO messages"
+ 
+      ! Check for messages we do want
+      call search_file (filename=trim (my_pet_char) // '.logAllow',  &
+          text='INFO', found=was_found, rc=rc)
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, was_found .and. rc==ESMF_SUCCESS)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test log for WARNING messages
+      write(failMsg, *) "WARNING log message found, but not expected"
+      write(name, *) " Search log for WARNING messages"
+ 
+      ! Check for messages we didn't want
+      call search_file (filename=trim (my_pet_char) // '.logAllow',  &
+          text='WARNING', found=was_found, rc=rc)
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, .not. was_found .and. rc==ESMF_SUCCESS)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test log for ERROR messages
+      write(failMsg, *) "ERROR log message found, but not expected"
+      write(name, *) " Search log for ERROR messages"
+ 
+      ! Check for messages we didn't want
+      call search_file (filename=trim (my_pet_char) // '.logAllow',  &
+          text='ERROR', found=was_found, rc=rc)
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, .not. was_found .and. rc==ESMF_SUCCESS)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
