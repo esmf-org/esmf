@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.23 2010/07/28 06:01:13 eschwab Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.24 2010/08/18 21:47:57 murphysj Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -52,6 +52,28 @@
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Attribute/doc/Attribute_desc}
 #endif
+
+\subsection{Attribute Packages}
+#ifdef STANDALONE
+\input{Attribute_pack}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Attribute/doc/Attribute_pack}
+#endif
+
+\subsection{Attribute Packages Nesting}
+#ifdef STANDALONE
+\input{Attribute_pack_nest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Attribute/doc/Attribute_pack_nest}
+#endif
+
+\subsection{Attribute Export}
+#ifdef STANDALONE
+\input{Attribute_export}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Attribute/doc/Attribute_export}
+#endif
+
 
 \subsection{Object Model}
 #ifdef STANDALONE
