@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.64 2010/08/06 23:38:55 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.65 2010/08/18 02:01:13 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -155,7 +155,7 @@ type ESMF_LogPrivate
     type(ESMF_Logical)                              ::  FileIsOpen  = ESMF_FALSE
     integer                                         ::  errorMaskCount= 0
     integer, dimension(:), pointer                  ::  errorMask(:)=> null ()
-    type(ESMF_MsgType), pointer                     ::  msgAllow(:)  => null ()
+    type(ESMF_MsgType), pointer                     ::  msgAllow(:) => null ()
 #else
     type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY
     type(ESMF_Logical)                              ::  FileIsOpen
