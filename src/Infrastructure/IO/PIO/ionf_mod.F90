@@ -345,7 +345,9 @@ contains
                 i=i*2
              end do
              close(fh)
-             if(eof<0) call piodie(__FILE__,__LINE__,'Unrecognized file format ',0,filename)             
+             if(eof<0) call piodie(  &
+               __FILE__,  &
+               __LINE__,'Unrecognized file format ',0,filename)             
           end if
 
        end if
