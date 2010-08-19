@@ -880,7 +880,9 @@ contains
           call piodie( _FILE_,__LINE__, &
                'both optional parameters start and count must be provided')
        else
-          call getiostartandcount(iosystem%num_tasks, ndims, dims, iosystem%num_iotasks, iosystem%io_rank, iosystem%io_comm, iodesc%start, iodesc%count)
+          call getiostartandcount(iosystem%num_tasks, ndims, dims,  &
+             iosystem%num_iotasks, iosystem%io_rank, iosystem%io_comm,  &
+             iodesc%start, iodesc%count)
        end if
        iosize=1
        do i=1,ndims
@@ -958,7 +960,12 @@ contains
        iodesc%write%n_words    = iodesc%write%n_elemtype*lenblocks
        call genindexedblock(lenblocks,piotype,iodesc%write%elemtype,iodesc%write%filetype,displace)
 
-       if(debug) print *,__FILE__,__LINE__,iodesc%write%n_elemtype,iodesc%write%n_words,iodesc%write%elemtype,iodesc%write%filetype
+       if(debug) then
+          print *,  &
+             __FILE__,  &
+             __LINE__,iodesc%write%n_elemtype,iodesc%write%n_words,  &
+             iodesc%write%elemtype,iodesc%write%filetype
+       end if
     else
        iodesc%write%n_elemtype=0
        iodesc%write%n_words=0
