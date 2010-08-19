@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.6 2007/07/19 22:15:33 cdeluca Exp $
+! $Id: CoupledFlowApp.F90,v 1.7 2010/08/19 15:59:42 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -34,8 +34,8 @@
     type(ESMF_DELayout) :: DELayoutTop
     integer :: pet_id
 
-    ! A common igrid
-    type(ESMF_IGrid) :: igrid
+    ! A common grid
+    type(ESMF_Grid) :: grid
 
     ! A clock, a calendar, and timesteps
     type(ESMF_Clock) :: clock
@@ -43,10 +43,12 @@
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
 
-    ! Variables related to igrid and clock
+    ! Variables related to grid and clock
     integer :: counts(2)
-    integer :: i_max, j_max
+    integer :: i_max, j_max, i, j
     real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max, g_min(2), g_max(2)
+    real(ESMF_KIND_R8), pointer :: CoordX(:), CoordY(:)
+    real(ESMF_KIND_R8) :: dx, dy
     integer :: s_month, s_day, s_hour, s_min
     integer :: e_month, e_day, e_hour, e_min
 
@@ -64,17 +66,17 @@
 !     The variables are:
 !     \begin{description}
 !     \item [i\_max]
-!           Global number of cells in the first igrid direction.
+!           Global number of cells in the first grid direction.
 !     \item [j\_max]
-!           Global number of cells in the second igrid direction.
+!           Global number of cells in the second grid direction.
 !     \item [x\_min]
-!           Minimum igrid coordinate in the first direction.
+!           Minimum grid coordinate in the first direction.
 !     \item [x\_max]
-!           Maximum igrid coordinate in the first direction.
+!           Maximum grid coordinate in the first direction.
 !     \item [y\_min]
-!           Minimum igrid coordinate in the second direction.
+!           Minimum grid coordinate in the second direction.
 !     \item [y\_max]
-!           Maximum igrid coordinate in the second direction.
+!           Maximum grid coordinate in the second direction.
 !     \item [s\_month]
 !           Simulation start time month (integer).
 !     \item [s\_day]
@@ -173,7 +175,7 @@
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!  Create and initialize a clock, and a igrid.
+!  Create and initialize a clock, and a grid.
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
@@ -207,22 +209,22 @@
 !     current time from the start time by the timestep.
 !EOP 
       !
-      ! Create the IGrid and attach it to the Component
+      ! Create the Grid and attach it to the Component
       !
 
-      ! Create a default DELayout for the igrid based on the global VM
+      ! Create a default DELayout for the grid based on the global VM
       DELayoutTop = ESMF_DELayoutCreate(vm, rc=rc)
 !BOP
 !
 ! !DESCRIPTION:
-! \subsubsection{Example of IGrid Creation:}
+! \subsubsection{Example of Grid Creation:}
 !
-!  The following piece of code provides an example of IGrid creation used in
-!  the Demo.  The extents of the IGrid were previously read in from an input
-!  file, but the rest of the IGrid parameters are set here by default.  The
-!  IGrid spans the Application's PET list, while the type of the IGrid is 
+!  The following piece of code provides an example of Grid creation used in
+!  the Demo.  The extents of the Grid were previously read in from an input
+!  file, but the rest of the Grid parameters are set here by default.  The
+!  Grid spans the Application's PET list, while the type of the Grid is 
 !  assumed to be horizontal and cartesian x-y with an Arakawa C staggering.  
-!  The IGrid name is set to "source igrid":
+!  The Grid name is set to "source grid":
 !\begin{verbatim}
       counts(1) = i_max
       counts(2) = j_max
@@ -230,17 +232,32 @@
       g_min(2) = y_min
       g_max(1) = x_max
       g_max(2) = y_max
-      igrid = ESMF_IGridCreateHorzXYUni(counts=counts, &
-                             minGlobalCoordPerDim=g_min, &
-                             maxGlobalCoordPerDim=g_max, &
-                             horzStagger=ESMF_IGRID_HORZ_STAGGER_C_NE, &
-                             name="source igrid", rc=rc)
-      call ESMF_IGridDistribute(igrid, delayout=DELayoutTop, rc=rc)
+      grid = ESMF_GridCreateShapeTile(maxIndex=counts, &
+                             !horzStagger=ESMF_GRID_HORZ_STAGGER_C_NE, &
+                             coordDep1=(/1/), &
+                             coordDep2=(/2/), &
+                             name="source grid", rc=rc)
+      ! Get pointer reference to internal coordinate
+      call ESMF_GridGetCoord(grid, localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_CENTER, &
+        coordDim=1, fptr=CoordX, rc=rc)
+      call ESMF_GridGetCoord(grid, localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_CENTER, &
+        coordDim=2, fptr=CoordY, rc=rc)
+
+      dx = (x_max-x_min)/i_max
+      dy = (y_max-y_min)/j_max
+      do i = 1, i_max
+        coordX(i) = x_min + dx*i
+      enddo
+      do j = 1, j_max
+        coordY(j) = y_min + dy*j
+      enddo
 
 !\end{verbatim}
-!     The IGrid can then be attached to the Gridded Component with a set call:
+!     The Grid can then be attached to the Gridded Component with a set call:
 !\begin{verbatim}
-     call ESMF_GridCompSet(compGridded, igrid=igrid, rc=rc)
+     call ESMF_GridCompSet(compGridded, grid=grid, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -282,7 +299,7 @@
 
       call ESMF_StateDestroy(flowstate, rc)
 
-      call ESMF_IGridDestroy(igrid, rc)
+      call ESMF_GridDestroy(grid, rc)
 
       call ESMF_ClockDestroy(clock, rc)
 

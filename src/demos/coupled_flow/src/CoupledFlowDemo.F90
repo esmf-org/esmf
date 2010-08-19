@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.6 2009/03/23 20:40:48 theurich Exp $
+! $Id: CoupledFlowDemo.F90,v 1.7 2010/08/19 15:59:42 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -35,7 +35,6 @@
 
     ! States and DELayouts for the Subcomponents
     character(len=ESMF_MAXSTR) :: cnameIN, cnameFS, cplname
-    type(ESMF_DELayout), save :: layoutTop, layoutIN, layoutFS
     type(ESMF_State), save :: INimp, INexp, FSimp, FSexp
 
     ! Public entry point
@@ -128,17 +127,14 @@
     integer :: npets
     integer :: mid, by2, quart, by4
 
-    type(ESMF_IGrid) :: igridTop, igridIN, igridFS
-    real(ESMF_KIND_R8) :: mincoords(ESMF_MAXIGRIDDIM), maxcoords(ESMF_MAXIGRIDDIM)
-    integer :: counts(ESMF_MAXIGRIDDIM)
-    type(ESMF_IGridHorzStagger) :: horz_stagger
+    type(ESMF_Grid) :: gridTop, gridIN, gridFS
     type(ESMF_VM) :: vm
-    integer :: halo_width = 1
+    integer :: halo_width(2) = 1, minIndex(2), maxIndex(2)
+    type(ESMF_Array) :: coordX, coordY
 
 
-    ! Get our vm and igrid from the component
-    call ESMF_GridCompGet(gcomp, vm=vm, igrid=igridTop, rc=rc)
-    call ESMF_IGridGet(igridTop, delayout=layoutTop, rc=rc)
+    ! Get our vm and grid from the component
+    call ESMF_GridCompGet(gcomp, vm=vm, grid=gridTop, rc=rc)
 
     ! Sanity check the number of PETs we were started on.
     call ESMF_VMGet(vm, petCount=npets, rc=rc)
@@ -176,7 +172,7 @@
 !
 !   The following code creates 2 Gridded Components on the same set of PETs 
 !   (persistent execution threads) as the top level Component, but each 
-!   of the IGrids useds by these Components will have a different connectivity.
+!   of the Grids useds by these Components will have a different connectivity.
 !   It also creates a Coupler Component on the same PET set.
 !
 !\begin{verbatim}
@@ -211,44 +207,57 @@
  
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!  Init section for subcomponents.  Create subigrids on separate DELayouts,
+!  Init section for subcomponents.  Create subgrids on separate DELayouts,
 !    and create import/export states for subcomponents.
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
  
     ! 
-    ! Create and attach subigrids to the subcomponents.
+    ! Create and attach subgrids to the subcomponents.
     !
-    call ESMF_IGridGet(igridTop, horzRelLoc=ESMF_CELL_CENTER, &
-                               globalCellCountPerDim=counts, &
-                               minGlobalCoordPerDim=mincoords, &
-                               maxGlobalCoordPerDim=maxcoords, &
-                               horzstagger=horz_stagger, &      
-                               rc=rc)
+    call ESMF_GridGet(gridTop, &
+          staggerLoc=ESMF_STAGGERLOC_CENTER, &
+          minIndex=minIndex, maxIndex=maxIndex, rc=rc)
 
+    call ESMF_GridGetCoord(gridTop, &
+          staggerLoc=ESMF_STAGGERLOC_CENTER, &
+          coordDim=1, array=CoordX, doCopy=ESMF_DATA_COPY, rc=rc)
 
-    igridIN = ESMF_IGridCreateHorzXYUni(counts=counts, &
-                             minGlobalCoordPerDim=mincoords, &
-                             maxGlobalCoordPerDim=maxcoords, &
-                             horzstagger=horz_stagger, &      
-                             name="Injector igrid", rc=rc)
+    call ESMF_GridGetCoord(gridTop, &
+          staggerLoc=ESMF_STAGGERLOC_CENTER, &
+          coordDim=2, array=CoordY, doCopy=ESMF_DATA_COPY, rc=rc)
 
-    layoutIN = ESMF_DELayoutCreate(vm, (/ mid, by2 /), rc=rc)
-    call ESMF_IGridDistribute(igridIN, delayout=layoutIN, rc=rc)
+    gridIN = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxIndex, &
+                             regDecomp=(/ mid, by2 /), &
+                             coordDep1=(/1/), &
+                             coordDep2=(/2/), &
+                             name="Injector grid", rc=rc)
 
+    call ESMF_GridSetCoord(gridIN, &
+          staggerLoc=ESMF_STAGGERLOC_CENTER, &
+          coordDim=1, array=CoordX, rc=rc)
 
-    call ESMF_GridCompSet(INcomp, igrid=igridIN, rc=rc)
+    call ESMF_GridSetCoord(gridIN, &
+          staggerLoc=ESMF_STAGGERLOC_CENTER, &
+          coordDim=2, array=CoordY, rc=rc)
 
-    igridFS = ESMF_IGridCreateHorzXYUni(counts=counts, &
-                             minGlobalCoordPerDim=mincoords, &
-                             maxGlobalCoordPerDim=maxcoords, &
-                             horzstagger=horz_stagger, &      
-                             name="Flow Solver igrid", rc=rc)
+    call ESMF_GridCompSet(INcomp, grid=gridIN, rc=rc)
 
-    layoutFS = ESMF_DELayoutCreate(vm, (/ quart, by4 /), rc=rc)
-    call ESMF_IGridDistribute(igridFS, delayout=layoutFS, rc=rc)
+    gridFS = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxIndex, &
+                             regDecomp=(/ quart, by4 /), &
+                             coordDep1=(/1/), &
+                             coordDep2=(/2/), &
+                             name="Flow Solver grid", rc=rc)
 
-    call ESMF_GridCompSet(FScomp, igrid=igridFS, rc=rc)
+    call ESMF_GridSetCoord(gridFS, &
+          staggerLoc=ESMF_STAGGERLOC_CENTER, &
+          coordDim=1, array=CoordX, rc=rc)
+
+    call ESMF_GridSetCoord(gridFS, &
+          staggerLoc=ESMF_STAGGERLOC_CENTER, &
+          coordDim=2, array=CoordY, rc=rc)
+
+    call ESMF_GridCompSet(FScomp, grid=gridFS, rc=rc)
 
 
     !
@@ -449,10 +458,6 @@ end subroutine coupledflow_run
       call ESMF_GridCompDestroy(INcomp, rc)
       call ESMF_GridCompDestroy(FScomp, rc)
       call ESMF_CplCompDestroy(cpl, rc)
-
-      print *, "ready to destroy all delayouts"
-      !call ESMF_DELayoutDestroy(layoutIN, rc)
-      !call ESMF_DELayoutDestroy(layoutFS, rc)
 
       print *, "end of CoupledFlowMod Finalization routine"
       rc = ESMF_SUCCESS

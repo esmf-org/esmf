@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.5 2009/03/23 20:40:48 theurich Exp $
+! $Id: CouplerMod.F90,v 1.6 2010/08/19 15:59:42 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -134,7 +134,7 @@
       call ESMF_StateSetNeeded(importState, "RHO", ESMF_NEEDED, rc)
       call ESMF_StateSetNeeded(importState, "FLAG", ESMF_NEEDED, rc)
 
-      call ESMF_FieldRedistStore(src_field, dst_field, vm, &
+      call ESMF_FieldRedistStore(src_field, dst_field, &
                                  routehandle=fromFlow_rh, rc=rc)
       
     endif
@@ -145,7 +145,7 @@
       call ESMF_StateSetNeeded(importState, "RHO", ESMF_NEEDED, rc)
       call ESMF_StateSetNeeded(importState, "FLAG", ESMF_NEEDED, rc)
 
-      call ESMF_FieldRedistStore(src_field, dst_field, vm, &
+      call ESMF_FieldRedistStore(src_field, dst_field, &
                                  routehandle=fromInject_rh, rc=rc)
 
     endif

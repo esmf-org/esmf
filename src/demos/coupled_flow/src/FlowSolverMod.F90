@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.7 2008/07/03 23:07:47 eschwab Exp $
+! $Id: FlowSolverMod.F90,v 1.8 2010/08/19 15:59:42 feiliu Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -142,7 +142,7 @@
 !
 ! !DESCRIPTION:
 !     This subroutine is the registered init routine.  It reads input,
-!     creates the IGrid, attaches it to the Gridded Component,
+!     creates the Grid, attaches it to the Gridded Component,
 !     initializes data, and sets the import and export States.
 !     \begin{description}
 !     \item [gcomp]
@@ -163,11 +163,11 @@
 ! Local variables
 !
       type(ESMF_DELayout) :: layout
-      type(ESMF_IGrid) :: igrid
-      real(ESMF_KIND_R8), dimension(ESMF_MAXIGRIDDIM) :: global_min_coord
-      real(ESMF_KIND_R8), dimension(ESMF_MAXIGRIDDIM) :: global_max_coord
+      type(ESMF_Grid) :: grid
+      real(ESMF_KIND_R8), dimension(ESMF_MAXDIM) :: global_min_coord
+      real(ESMF_KIND_R8), dimension(ESMF_MAXDIM) :: global_max_coord
       real :: x_min, x_max, y_min, y_max
-      integer, dimension(ESMF_MAXIGRIDDIM) :: global_nmax
+      integer, dimension(ESMF_MAXDIM) :: global_nmax
       integer :: counts(2)
       namelist /input/ uin, rhoin, siein, &
                        gamma, akb, q0, u0, v0, sie0, rho0, &
@@ -197,9 +197,9 @@
 !           Dimensionless linear artificial viscosity coefficient
 !           (should be between 0.1 and 0.2).
 !     \item [u0]
-!           Initial velocity in the first igrid direction.
+!           Initial velocity in the first grid direction.
 !     \item [v0]
-!           Initial velocity in the second igrid direction.
+!           Initial velocity in the second grid direction.
 !     \item [sie0]
 !           Initial specific internal energy.
 !     \item [rho0]
@@ -213,26 +213,26 @@
 !           block of cells that will serve as an obstacle and not allow
 !           fluid flow.
 !     \item [iobs\_min]
-!           Minimum global cell number in the first igrid direction defining
+!           Minimum global cell number in the first grid direction defining
 !           a block of cells to be an obstacle.  Must be [nobsdesc] number
 !           of these.
 !     \item [iobs\_max]
-!           Maximum global cell number in the first igrid direction defining
+!           Maximum global cell number in the first grid direction defining
 !           a block of cells to be an obstacle.  Must be [nobsdesc] number
 !           of these.
 !     \item [jobs\_min]
-!           Minimum global cell number in the second igrid direction defining
+!           Minimum global cell number in the second grid direction defining
 !           a block of cells to be an obstacle.  Must be [nobsdesc] number
 !           of these.
 !     \item [jobs\_max]
-!           Maximum global cell number in the second igrid direction defining
+!           Maximum global cell number in the second grid direction defining
 !           a block of cells to be an obstacle.  Must be [nobsdesc] number
 !           of these.
 !     \item [iflo\_min]
-!           Minimum global igrid cell number for the second inflow along the
+!           Minimum global grid cell number for the second inflow along the
 !           bottom boundary.
 !     \item [iflo\_max]
-!           Maximum global igrid cell number for the second inflow along the
+!           Maximum global grid cell number for the second inflow along the
 !           bottom boundary.
 !     \end{description}
 !
@@ -254,13 +254,14 @@
 !
 ! Query component for information.
 !
-      call ESMF_GridCompGet(gcomp, igrid=igrid, rc=rc)
+      call ESMF_GridCompGet(gcomp, grid=grid, rc=rc)
 
-      call ESMF_IGridGet(igrid, horzRelLoc=ESMF_CELL_CENTER, &
-                              delayout=layout, &
-                              globalCellCountPerDim=global_nmax, &
-                              minGlobalCoordPerDim=global_min_coord, &
-                              maxGlobalCoordPerDim=global_max_coord, rc=rc)
+! TODO: restore the following code:
+!      call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+!                              globalCellCountPerDim=global_nmax, &
+!                              minGlobalCoordPerDim=global_min_coord, &
+!                              maxGlobalCoordPerDim=global_max_coord, rc=rc)
+
 !
 ! Extract and calculate some other quantities
 !
@@ -284,7 +285,7 @@
 ! Precompute the Halo communication pattern; since all data variables are
 ! the same data type and size, the same handle can be reused for all of them.
 !
-      call ESMF_FieldHaloStore(field_u, halohandle, rc=rc)
+      call ESMF_FieldHaloStore(field_u, routehandle=halohandle, rc=rc)
 !
 ! For initialization, add all fields to the import state.  Only the ones
 ! needed will be copied over to the export state for coupling.
@@ -373,13 +374,13 @@
       do i=1, datacount
 
         ! check isneeded flag here
-        if (.not. ESMF_StateIsNeeded(export_state, datanames(i), rc)) then 
+        if (.not. ESMF_StateIsNeeded(export_state, itemName=datanames(i), rc=rc)) then 
            cycle
         endif
 
         ! Set export data in export state
-        call ESMF_StateGet(import_state, datanames(i), thisfield, rc=rc)
-        call ESMF_StateAdd(export_state, thisfield, rc=rc)
+        call ESMF_StateGet(import_state, itemName=datanames(i), field=thisfield, rc=rc)
+        call ESMF_StateAdd(export_state, field=thisfield, rc=rc)
 
       enddo
 
@@ -421,7 +422,8 @@
       integer :: i, j, n, x, y, nx, ny, ncounts(2), pos(2), de_id
       integer, dimension(1,2) :: local, global
       real(ESMF_KIND_R8) :: s_
-      type(ESMF_IGrid) :: igrid
+      type(ESMF_Grid) :: grid
+      type(ESMF_DistGrid) :: distgrid
       type(ESMF_DELayout) :: layout
 !
 ! Set initial values
@@ -436,17 +438,17 @@
         rc = ESMF_FAILURE
       endif
 !
-! get IGrid from Component
+! get Grid from Component
 !
-      call ESMF_GridCompGet(gcomp, igrid=igrid, rc=status)
+      call ESMF_GridCompGet(gcomp, grid=grid, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in Flowinit:  igrid comp get"
+        print *, "ERROR in Flowinit:  grid comp get"
         return
       endif
 !
 ! create space for global arrays
 !
-      call FlowArraysAlloc(igrid, status)
+      call FlowArraysAlloc(grid, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  arraysglobalalloc"
         return
@@ -473,9 +475,10 @@
 ! First, get size of delayout and position of my DE to determine if
 ! this DE is on the domain boundary
 !
-      call ESMF_IGridGet(igrid, delayout=layout, rc=status)
+      call ESMF_GridGet(grid, distgrid=distgrid, rc=status)
+      call ESMF_DistGridGet(distgrid, delayout=layout, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in Flowinit:  igrid comp get"
+        print *, "ERROR in Flowinit:  grid comp get"
         return
       endif
       call ESMF_DELayoutGetDeprecated(layout, deCountPerDim=ncounts, localDE=de_id, &
@@ -590,12 +593,13 @@
           global(1,2) = j
           do i = iobs_min(n),iobs_max(n)
             global(1,1) = i
-            call ESMF_IGridGlobalToDELocalIndex(igrid, horzRelloc=ESMF_CELL_CENTER,&
-                                      global2d=global, local2d=local, rc=status)
+            ! TODO: restore
+            !call ESMF_GridGlobalToDELocalIndex(grid, horzRelloc=ESMF_CELL_CENTER,&
+            !                          global2d=global, local2d=local, rc=status)
             if (local(1,1).gt.-1) local(1,1) = local(1,1) + 1
             if (local(1,2).gt.-1) local(1,2) = local(1,2) + 1
   ! TODO:  The above two lines are junk, making up for the halo width which is
-  !        no longer in IGrid. GlobalToLocal should be an Array method
+  !        no longer in Grid. GlobalToLocal should be an Array method
             if(local(1,1).ne.-1 .and. local(1,2).ne.-1) then
               flag(local(1,1),local(1,2)) = -1
             endif
@@ -609,12 +613,13 @@
         do j = 1, 2 
           global(1,1) = i
           global(1,2) = j
-          call ESMF_IGridGlobalToDELocalIndex(igrid, horzRelloc=ESMF_CELL_CENTER, &
-                                      global2d=global, local2d=local, rc=status)
+          ! TODO: restore
+          !call ESMF_GridGlobalToDELocalIndex(grid, horzRelloc=ESMF_CELL_CENTER, &
+          !                            global2d=global, local2d=local, rc=status)
           if (local(1,1).gt.-1) local(1,1) = local(1,1) + 1
           if (local(1,2).gt.-1) local(1,2) = local(1,2) + 1
 ! TODO:  The above two lines are junk, making up for the halo width which is
-!        no longer in IGrid. GlobalToLocal should be an Array method
+!        no longer in Grid. GlobalToLocal should be an Array method
           if(local(1,1).ne.-1 .and. local(1,2).ne.-1) then
             flag(local(1,1),local(1,2)) = 10
           endif
@@ -830,11 +835,11 @@
 !  put needed data in export state
 !
       do i=1, datacount
-          if (.not. ESMF_StateIsNeeded(export_state, datanames(i), rc)) then 
+          if (.not. ESMF_StateIsNeeded(export_state, itemName=datanames(i), rc=rc)) then 
               cycle
           endif
-          call ESMF_StateGet(import_state, datanames(i), thisfield, rc=rc)
-          call ESMF_StateAdd(export_state, thisfield, rc=rc)
+          call ESMF_StateGet(import_state, itemName=datanames(i), field=thisfield, rc=rc)
+          call ESMF_StateAdd(export_state, field=thisfield, rc=rc)
         enddo
 !
 ! Print graphics every printout steps
@@ -1608,7 +1613,7 @@
       logical :: rcpresent
       integer :: i, j, pet_id
       integer(kind=ESMF_KIND_I8) :: frame
-      type(ESMF_InternArray) :: outarray
+      type(ESMF_Array) :: outarray
       type(ESMF_VM) :: vm
       character(len=ESMF_MAXSTR) :: filename
 !
@@ -1635,48 +1640,23 @@
 !
 ! And now test output to a file
 !
-      call ESMF_FieldGather(field_u, 0, outarray, rc=status)
-      if (pet_id .eq. 0) then
-        write(filename, 20)  "U_velocity", file_no
-        call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
-        call ESMF_InternArrayDestroy(outarray, status)
-      endif
+      call ESMF_FieldWrite(field_u, fname=filename, rc=status)
 
-      call ESMF_FieldGather(field_v, 0, outarray, rc=status)
-      if (pet_id .eq. 0) then
-        write(filename, 20)  "V_velocity", file_no
-        call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
-        call ESMF_InternArrayDestroy(outarray, status)
-      endif
+      call ESMF_FieldWrite(field_v, fname=filename, rc=status)
 
-      call ESMF_FieldGather(field_sie, 0, outarray, rc=status)
-      if (pet_id .eq. 0) then
-        write(filename, 20)  "SIE", file_no
-        call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
-        call ESMF_InternArrayDestroy(outarray, status)
-      endif
+      call ESMF_FieldWrite(field_sie, fname=filename, rc=status)
 !
 ! First time through output two more files
 !
       if(file_no .eq. 1) then
-        call ESMF_FieldGather(field_flag, 0, outarray, rc=status)
-        if (pet_id .eq. 0) then
-          write(filename, 20)  "FLAG", file_no
-          call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
-          call ESMF_InternArrayDestroy(outarray, status)
-        endif
+        call ESMF_FieldWrite(field_flag, fname=filename, rc=status)
 
         do j = jmin, jmax
           do i = imin, imax
             de(i,j) = pet_id
           enddo
         enddo
-        call ESMF_FieldGather(field_de, 0, outarray, rc=status)
-        if (pet_id .eq. 0) then
-          write(filename, 20)  "DE", file_no
-          call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
-          call ESMF_InternArrayDestroy(outarray, status)
-        endif
+        call ESMF_FieldWrite(field_de, fname=filename, rc=status)
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS

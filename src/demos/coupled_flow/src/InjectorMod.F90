@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.8 2009/03/23 20:40:48 theurich Exp $
+! $Id: InjectorMod.F90,v 1.9 2010/08/19 15:59:42 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -150,8 +150,7 @@
       !
       ! Local variables
       !
-      type(ESMF_DELayout) :: layout
-      type(ESMF_IGrid) :: igrid
+      type(ESMF_Grid) :: grid
       integer :: on_month, on_day, on_hour, on_min
       integer :: off_month, off_day, off_hour, off_min
       real :: in_energy, in_velocity, in_rho
@@ -233,8 +232,7 @@
       !
       ! Query component for information.
       !
-      call ESMF_GridCompGet(gcomp, igrid=igrid, rc=rc)
-      call ESMF_IGridGet(igrid, delayout=layout, rc=rc)
+      call ESMF_GridCompGet(gcomp, grid=grid, rc=rc)
       if (rc .ne. ESMF_SUCCESS) then
          print *, "ERROR in injector_init: getting info from component"
          return
@@ -243,7 +241,7 @@
       !
       ! create space for data arrays
       !
-      call InjectArraysAlloc(igrid, rc)
+      call InjectArraysAlloc(grid, rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in injector_init:  injectarraysalloc"
         return
@@ -418,13 +416,13 @@
       
         ! Get the Field and FieldBundle data from the State, and a pointer to
         !  the existing data (not a copy).
-        call ESMF_FieldGetDataPointer(local_sie, data_sie, ESMF_DATA_REF, rc=rc)
+        call ESMF_FieldGet(local_sie, farrayPtr=data_sie, rc=rc)
             
-        call ESMF_FieldGetDataPointer(local_v, data_v, ESMF_DATA_REF, rc=rc)
+        call ESMF_FieldGet(local_v, farrayPtr=data_v, rc=rc)
       
-        call ESMF_FieldGetDataPointer(local_rho, data_rho, ESMF_DATA_REF, rc=rc)
+        call ESMF_FieldGet(local_rho, farrayPtr=data_rho, rc=rc)
       
-        call ESMF_FieldGetDataPointer(local_flag, data_flag, ESMF_DATA_REF, rc=rc)
+        call ESMF_FieldGet(local_flag, farrayPtr=data_flag, rc=rc)
           
         ! Update values.  Flag = 10 means override values with our own.
 

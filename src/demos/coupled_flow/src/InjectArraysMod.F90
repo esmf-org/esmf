@@ -1,4 +1,4 @@
-! $Id: InjectArraysMod.F90,v 1.3 2007/06/23 04:01:15 cdeluca Exp $
+! $Id: InjectArraysMod.F90,v 1.4 2010/08/19 15:59:42 feiliu Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -6,7 +6,7 @@
 !
 ! !DESCRIPTION:
 !  Global storage of arrays and scalars, using the following 
-!    ESMF objects: ESMF\_Field, ESMF\_IGrid, ESMF\_Array.
+!    ESMF objects: ESMF\_Field, ESMF\_Grid, ESMF\_Array.
 !
 !EOPI
 
@@ -70,16 +70,16 @@
 
 !-------------------------------------------------------------------------
  
-      subroutine InjectArraysAlloc(igrid, rc)
+      subroutine InjectArraysAlloc(grid, rc)
 
-      type(ESMF_IGrid) :: igrid
+      type(ESMF_Grid) :: grid
       integer, intent(out), optional :: rc
 
 ! Local variables
 !
       integer :: status
       logical :: rcpresent
-      integer :: haloWidth
+      integer :: haloWidth(2), haloLWidth(2), haloUWidth(2)
       type(ESMF_ArraySpec) :: arrayspec
       integer, dimension(2) :: lb, ub
 !
@@ -101,45 +101,45 @@
       call ESMF_ArraySpecSet(arrayspec, rank=2, &
                              typekind=ESMF_TYPEKIND_R4)
 
-      field_sie  = ESMF_FieldCreate(igrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                   haloWidth=haloWidth, name="SIE", rc=status)
-      call ESMF_FieldGetDataPointer(field_sie, sie, ESMF_DATA_REF, rc=status)
+      field_sie  = ESMF_FieldCreate(grid, arrayspec, &
+                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="SIE", rc=status)
+      call ESMF_FieldGet(field_sie, farrayPtr=sie, rc=status)
 
-      field_u    = ESMF_FieldCreate(igrid, arrayspec, horzRelloc=ESMF_CELL_EFACE, &
-                   haloWidth=haloWidth, name="U", rc=status)
-      call ESMF_FieldGetDataPointer(field_u, u, ESMF_DATA_REF, rc=status)
+      field_u    = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_EDGE1, &
+                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="U", rc=status)
+      call ESMF_FieldGet(field_u, farrayPtr=u, rc=status)
 
-      field_v    = ESMF_FieldCreate(igrid, arrayspec, horzRelloc=ESMF_CELL_NFACE, &
-                   haloWidth=haloWidth, name="V", rc=status)
-      call ESMF_FieldGetDataPointer(field_v, v, ESMF_DATA_REF, rc=status)
+      field_v    = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_EDGE2, &
+                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="V", rc=status)
+      call ESMF_FieldGet(field_v, farrayPtr=v, rc=status)
 
-      field_rho  = ESMF_FieldCreate(igrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                   haloWidth=haloWidth, name="RHO", rc=status)
-      call ESMF_FieldGetDataPointer(field_rho, rho, ESMF_DATA_REF, rc=status)
+      field_rho  = ESMF_FieldCreate(grid, arrayspec, &
+                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="RHO", rc=status)
+      call ESMF_FieldGet(field_rho, farrayPtr=rho, rc=status)
 
-      field_rhoi = ESMF_FieldCreate(igrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                   haloWidth=haloWidth, name="RHOI", rc=status)
-      call ESMF_FieldGetDataPointer(field_rhoi, rhoi, ESMF_DATA_REF, rc=status)
+      field_rhoi = ESMF_FieldCreate(grid, arrayspec, &
+                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="RHOI", rc=status)
+      call ESMF_FieldGet(field_rhoi, farrayPtr=rhoi, rc=status)
 
-      field_rhou = ESMF_FieldCreate(igrid, arrayspec, horzRelloc=ESMF_CELL_EFACE, &
-                   haloWidth=haloWidth, name="RHOU", rc=status)
-      call ESMF_FieldGetDataPointer(field_rhou, rhou, ESMF_DATA_REF, rc=status)
+      field_rhou = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_EDGE1, &
+                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="RHOU", rc=status)
+      call ESMF_FieldGet(field_rhou, farrayPtr=rhou, rc=status)
 
-      field_rhov = ESMF_FieldCreate(igrid, arrayspec, horzRelloc=ESMF_CELL_NFACE, &
-                   haloWidth=haloWidth, name="RHOV", rc=status)
-      call ESMF_FieldGetDataPointer(field_rhov, rhov, ESMF_DATA_REF, rc=status)
+      field_rhov = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_EDGE2, &
+                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="RHOV", rc=status)
+      call ESMF_FieldGet(field_rhov, farrayPtr=rhov, rc=status)
 
-      field_p    = ESMF_FieldCreate(igrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                   haloWidth=haloWidth, name="P", rc=status)
-      call ESMF_FieldGetDataPointer(field_p, p, ESMF_DATA_REF, rc=status)
+      field_p    = ESMF_FieldCreate(grid, arrayspec, &
+                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="P", rc=status)
+      call ESMF_FieldGet(field_p, farrayPtr=p, rc=status)
 
-      field_q    = ESMF_FieldCreate(igrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                   haloWidth=haloWidth, name="Q", rc=status)
-      call ESMF_FieldGetDataPointer(field_q, q, ESMF_DATA_REF, rc=status)
+      field_q    = ESMF_FieldCreate(grid, arrayspec, &
+                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="Q", rc=status)
+      call ESMF_FieldGet(field_q, farrayPtr=q, rc=status)
 
-      field_flag = ESMF_FieldCreate(igrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                   haloWidth=haloWidth, name="FLAG", rc=status)
-      call ESMF_FieldGetDataPointer(field_flag, flag, ESMF_DATA_REF, rc=status)
+      field_flag = ESMF_FieldCreate(grid, arrayspec, &
+                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="FLAG", rc=status)
+      call ESMF_FieldGet(field_flag, farrayPtr=flag, rc=status)
 
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in InjectArraysAlloc"
@@ -148,14 +148,18 @@
 !
 ! set some of the scalars from Field information
 !      
-      call ESMF_FieldGet(field_flag, haloWidth=haloWidth, lbounds=lb, &
-                         ubounds=ub, rc=rc)
+      call ESMF_FieldGet(field_flag, &
+                        maxHaloLWidth=haloLWidth, maxHaloUWidth=haloUWidth, &
+                        rc=status)
+      call ESMF_FieldGetBounds(field_flag, &
+                        exclusiveLBound=lb, exclusiveUBound=ub, rc=status)
+
 
       ! Computational region: data unique to this DE
-      imin = lb(1) + haloWidth
-      imax = ub(1) - haloWidth
-      jmin = lb(2) + haloWidth
-      jmax = ub(2) - haloWidth
+      imin = lb(1) + haloLWidth(1)
+      imax = ub(1) - haloUWidth(1)
+      jmin = lb(2) + haloLWidth(2)
+      jmax = ub(2) - haloUWidth(2)
       ! Total region: data plus the halo widths
       imin_t = lb(1)
       imax_t = ub(1)
