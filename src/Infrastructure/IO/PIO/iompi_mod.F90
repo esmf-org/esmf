@@ -430,7 +430,9 @@ contains
      !-------------------------------------
      ! Set file view for distributed array
      !-------------------------------------
-     if(Debug) print *,_FILE_,__LINE__,'IAM: ',File%iosystem%io_rank,' before set_view iodesc%Read%fileTYPE: ',iodesc%Read%FileTYPE
+     if(Debug) then
+        print *,_FILE_,__LINE__,'IAM: ',File%iosystem%io_rank,' before set_view iodesc%Read%fileTYPE: ',iodesc%Read%FileTYPE
+     end if
      call MPI_File_set_view(File%fh,File%offset, iodesc%Read%elemTYPE, iodesc%Read%fileType, 'native',File%iosystem%info,ierr)
      if(Check) call CheckMPIreturn('read_mpiio_text: after call to file_set_view: ',ierr)
 !DBG     if(Debug) print *,_FILE_,__LINE__,'IAM: ',File%iosystem%io_rank,' after set_view IODesc%Read%fileTYPE: ',iodesc%Read%fileTYPE
@@ -496,7 +498,9 @@ contains
      !-------------------------------------
      ! Set file view for distributed array
      !-------------------------------------
-     if(Debug) print *,_FILE_,__LINE__,'IAM: ',File%iosystem%io_rank,' before set_view iodesc%Read%fileTYPE: ',iodesc%Read%FileTYPE
+     if(Debug) then
+        print *,_FILE_,__LINE__,'IAM: ',File%iosystem%io_rank,' before set_view iodesc%Read%fileTYPE: ',iodesc%Read%FileTYPE
+     end if
      call MPI_File_set_view(File%fh,File%offset, iodesc%Read%elemTYPE, iodesc%Read%fileType, 'native',File%iosystem%info,ierr)
      if(Check) call CheckMPIreturn('read_mpiio_real: after call to file_set_view: ',ierr)
 !DBG     if(Debug) print *,_FILE_,__LINE__,'IAM: ',File%iosystem%io_rank,' after set_view IODesc%Read%fileTYPE: ',iodesc%Read%fileTYPE
@@ -562,7 +566,9 @@ contains
      !-------------------------------------
      ! Set file view for distributed array
      !-------------------------------------
-     if(Debug) print *,_FILE_,__LINE__,'IAM: ',File%iosystem%io_rank,' before set_view iodesc%Read%fileTYPE: ',iodesc%Read%FileTYPE
+     if(Debug) then
+        print *,_FILE_,__LINE__,'IAM: ',File%iosystem%io_rank,' before set_view iodesc%Read%fileTYPE: ',iodesc%Read%FileTYPE
+     end if
      call MPI_File_set_view(File%fh,File%offset, iodesc%Read%elemTYPE, iodesc%Read%fileType, 'native',File%iosystem%info,ierr)
      if(Check) call CheckMPIreturn('read_mpiio_double: after call to file_set_view: ',ierr)
 !DBG     if(Debug) print *,_FILE_,__LINE__,'IAM: ',File%iosystem%io_rank,' after set_view IODesc%Read%fileTYPE: ',iodesc%Read%fileTYPE
@@ -628,7 +634,9 @@ contains
      !-------------------------------------
      ! Set file view for distributed array
      !-------------------------------------
-     if(Debug) print *,_FILE_,__LINE__,'IAM: ',File%iosystem%io_rank,' before set_view iodesc%Read%fileTYPE: ',iodesc%Read%FileTYPE
+     if(Debug) then
+        print *,_FILE_,__LINE__,'IAM: ',File%iosystem%io_rank,' before set_view iodesc%Read%fileTYPE: ',iodesc%Read%FileTYPE
+     end if
      call MPI_File_set_view(File%fh,File%offset, iodesc%Read%elemTYPE, iodesc%Read%fileType, 'native',File%iosystem%info,ierr)
      if(Check) call CheckMPIreturn('read_mpiio_int: after call to file_set_view: ',ierr)
 !DBG     if(Debug) print *,_FILE_,__LINE__,'IAM: ',File%iosystem%io_rank,' after set_view IODesc%Read%fileTYPE: ',iodesc%Read%fileTYPE
