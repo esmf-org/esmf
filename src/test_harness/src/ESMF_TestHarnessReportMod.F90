@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessReportMod.F90,v 1.12 2010/08/12 15:42:51 garyblock Exp $
+! $Id: ESMF_TestHarnessReportMod.F90,v 1.13 2010/08/19 14:05:09 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -477,8 +477,8 @@
       write (rptLun, 9030) RankNo, dstGrid%gsize(RankNo), RankNo
       write (rptLun, 9031) RankNo, dstGrid%grange(RankNo, 1), RankNo
       write (rptLun, 9032) RankNo, dstGrid%grange(RankNo, 2), RankNo
-      write (rptLun, 9023) RankNo, trim(dstGrid%gtype(RankNo)%string), RankNo
-      write (rptLun, 9024) RankNo, trim(dstGrid%gunits(RankNo)%string), RankNo
+      write (rptLun, 9033) RankNo, trim(dstGrid%gtype(RankNo)%string), RankNo
+      write (rptLun, 9034) RankNo, trim(dstGrid%gunits(RankNo)%string), RankNo
     end do
 
     write (rptLun, 9002)
