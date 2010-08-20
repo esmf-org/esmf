@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.3 2010/08/18 21:47:25 murphysj Exp $
+% $Id: Attribute_pack.tex,v 1.4 2010/08/20 20:20:21 murphysj Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -371,16 +371,12 @@ The GFDL Gridspec Standard is currently the only Grid pre-defined Attribute pack
 {\tt DiscretizationType} & Specifies the method by which a two-dimensional coordinate system is sampled to form a computational grid. &  Logically rectangular, Pixel-based catchment, Structured triangular, Unstructured triangular\\ 
 {\tt GeometryType} & Indicates the geometric figure used to approximate the shape of the Earth, e.g. "sphere".& Ellipsoid, Plane, Sphere\\ 
 {\tt IsConformal} & Indicates if the grid tile is angle-preserving. If so, angles measured on the grid are equal to the equivalent angles on the Earth. & True, False\\ 
-{\tt IsPoleCovered} & & \\ 
 {\tt IsRegular} & Indicates whether or not the horizontal coordinates of the grid can be defined using 1D arrays (vectors). This means that grid node locations are defined by the cartesian product of the X/Lon and Y/Lat coordinate vectors. It also means that grid cells are logically rectangular (they may also be physically rectangular in the case of projected coordinates). & True, False\\ 
 {\tt IsUniform} &Indicates whether or not the horizontal coordinates of a grid have fixed offsets in the X and Y directions. If the offset is the same in both directions then the grid is logically square, otherwise it is logically rectangular. & True, False\\ 
 {\tt NorthPoleLocation} & Defines the lat-long position of the 'north pole' used by the grid tile in the case of rotated/displaced pole grids.& N/A \\ 
 {\tt NumberOfCells} & The number of cells in an unstructured grid. & N/A\\ 
-{\tt NumDims} & & N/A\\ 
 {\tt NX} & Specifies the length of the X, or longitude, dimension of the grid tile. & N/A \\ 
 {\tt NY} & Specifies the length of the Y, or latitude, dimension of the grid tile. & N/A \\ 
-{\tt NZ} & Specifies the length of the Z, or vertical deminsion of a grid. & N/A \\ 
-{\tt Resolution} & & \\ 
 \end{tabular}
 
 
