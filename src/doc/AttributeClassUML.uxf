@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><umlet_diagram><help_text>// Uncomment the following line to change the fontsize:
-fontsize=18
+fontsize=11
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -20,7 +20,7 @@ fontsize=18
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 
-// This text will be stored with each diagram;  use it for notes.</help_text><zoom_level>10</zoom_level><element><type>com.umlet.element.base.Class</type><coordinates><x>70</x><y>30</y><w>310</w><h>680</h></coordinates><panel_attributes>_Attribute_
+// This text will be stored with each diagram;  use it for notes.</help_text><zoom_level>10</zoom_level><element><type>com.umlet.element.base.Class</type><coordinates><x>70</x><y>40</y><w>190</w><h>420</h></coordinates><panel_attributes>_Attribute_
 --
 + attrName : string
 + tk : ESMFC_Typekind
@@ -31,10 +31,11 @@ fontsize=18
 + attrPack : ESMC_Logical
 + attrPackHead : ESMC_Logical
 + attrNested : ESMC_Logical
++ attrAttr : ESMC_Logical
 + linkChange : ESMC_Logical
 + structChange: ESMF_Logical
 + valueChange : ESMC_Logical
-+ attrBAse : ESMC_Base*
++ attrBase : ESMC_Base*
 + parent : Attribute *
 + attrList : vector&lt;Attribute *&gt;
 + packList : vector&lt;Attribute *&gt;
