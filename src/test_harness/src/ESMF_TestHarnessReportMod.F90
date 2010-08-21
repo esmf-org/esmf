@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessReportMod.F90,v 1.13 2010/08/19 14:05:09 garyblock Exp $
+! $Id: ESMF_TestHarnessReportMod.F90,v 1.14 2010/08/21 13:25:31 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -412,7 +412,7 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
-  subroutine summary_report_write_detail_line (DSpecNo, GSpecNo, &
+  subroutine summ_rpt_write_detail_line (DSpecNo, GSpecNo, &
       srcDist, dstDist, srcGrid, dstGrid, rptLun, localrc)
     integer,                         intent(in)  :: DSpecNo
     integer,                         intent(in)  :: GSpecNo
@@ -506,10 +506,10 @@
     9033 FORMAT ('          <DestGridType', I1, '>', A16, '</DestGridType', I1, '>')
     9034 FORMAT ('          <DestGridUnits', I1, '>', A16, '</DestGridUnits', I1, '>')
 
-  end subroutine summary_report_write_detail_line
+  end subroutine summ_rpt_write_detail_line
 
   !-----------------------------------------------------------------------------
-  subroutine summary_report_process_dist_grid_files (DfileNo, GfileNo, DRec, GRec, rptLun, localrc)
+  subroutine summ_rpt_proc_dist_grid_files (DfileNo, GfileNo, DRec, GRec, rptLun, localrc)
     integer,            intent(in)  :: DFileNo
     integer,            intent(in)  :: GfileNo
     type(dist_record),  intent(in)  :: DRec
@@ -541,7 +541,7 @@
       ! process all grid records
       do GSpecNo = 1, GSpecCnt
         ! display distribution/grid
-        call summary_report_write_detail_line (DSpecNo, GSpecNo, &
+        call summ_rpt_write_detail_line (DSpecNo, GSpecNo, &
           DRec%src_dist(DSpecNo), DRec%dst_dist(DSpecNo), &
           GRec%src_grid(GSpecNo), GRec%dst_grid(GSpecNo), rptLun, localrc)
       end do
@@ -555,10 +555,10 @@
     9011 FORMAT ('        <GSpecCnt>', I3, '</GSpecCnt>')
     9012 FORMAT ('        <DFileNo>', I3, '</DFileNo>')
     9013 FORMAT ('        <GFileNo>', I3, '</GFileNo>')
-  end subroutine summary_report_process_dist_grid_files
+  end subroutine summ_rpt_proc_dist_grid_files
 
   !-----------------------------------------------------------------------------
-  subroutine summary_report_process_prob_descr_string (pdsNo, probDescrStr, rptLun, localrc)
+  subroutine summ_rpt_proc_prob_descr_string (pdsNo, probDescrStr, rptLun, localrc)
     integer,                           intent(in)  :: pdsNo
     type(problem_descriptor_strings),  intent(in)  :: probDescrStr
     integer,                           intent(in)  :: rptLun
@@ -591,7 +591,7 @@
       ! for each grid file
       do GfileNo = 1, GfileCnt
         ! display dist file and grid file entry
-        call summary_report_process_dist_grid_files (DfileNo, GfileNo, &
+        call summ_rpt_proc_dist_grid_files (DfileNo, GfileNo, &
           probDescrStr%Dfiles(DfileNo), probDescrStr%Gfiles(GfileNo), rptLun, localrc)
       end do
     end do
@@ -611,10 +611,10 @@
     9014 FORMAT ('      <GridFileCnt>', I3, '</GridFileCnt>')
     9015 FORMAT ('      <PdsNo>', I3, '</PdsNo>')
 
-  end subroutine summary_report_process_prob_descr_string
+  end subroutine summ_rpt_proc_prob_descr_string
 
   !-----------------------------------------------------------------------------
-  subroutine summary_report_process_prob_descr_rec (pdrNo, probDescrRec, rptLun, localrc)
+  subroutine summ_rpt_proc_prob_descr_rec (pdrNo, probDescrRec, rptLun, localrc)
     integer,                           intent(in)  :: pdrNo
     type(problem_descriptor_records),  intent(in)  :: probDescrRec
     integer,                           intent(in)  :: rptLun
@@ -631,7 +631,7 @@
     write (rptLun, 9011) PdsCnt
 
     do PdsNo = 1, PdsCnt
-      call summary_report_process_prob_descr_string (PdsNo, probDescrRec%str(PdsNo), rptLun, localrc)
+      call summ_rpt_proc_prob_descr_string (PdsNo, probDescrRec%str(PdsNo), rptLun, localrc)
     end do
 
     write (rptLun, 9002)
@@ -645,7 +645,7 @@
     9010 FORMAT ('    <Filename>', A, '</Filename>')
     9011 FORMAT ('    <PdsCnt>', I3, '</PdsCnt>')
     9012 FORMAT ('    <PdrNo>', I4, '</PdrNo>')
-  end subroutine summary_report_process_prob_descr_rec
+  end subroutine summ_rpt_proc_prob_descr_rec
 
   !-----------------------------------------------------------------------------
   subroutine summary_report_generate (harnDesc, reportFname, localrc)
@@ -666,7 +666,7 @@
     ! open report file
     open (unit=rptLun, file=reportFname, status='REPLACE', iostat=iostat, action='WRITE')
     if (iostat .NE. 0) then
-      print '("error in summary_report_generate, unable to open report file - filename = ", A)', &
+      print '("error in summ_rpt_generate, unable to open report file - filename = ", A)', &
         reportFname
       go to 90
     end if
@@ -684,7 +684,7 @@
     ! problem_descriptor_records
     PdrCnt = harnDesc%numRecords
     do PdrNo = 1, PdrCnt
-      call summary_report_process_prob_descr_rec (PdrNo, harnDesc%rcrd(PdrNo), rptLun, localrc)
+      call summ_rpt_proc_prob_descr_rec (PdrNo, harnDesc%rcrd(PdrNo), rptLun, localrc)
     end do
 
     ! write trailer
