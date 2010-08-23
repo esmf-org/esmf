@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.18 2010/05/04 16:33:22 rokuingh Exp $
+! $Id: ESMF_GridUtil.F90,v 1.19 2010/08/23 17:27:45 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.18 2010/05/04 16:33:22 rokuingh Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.19 2010/08/23 17:27:45 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -336,6 +336,8 @@ module ESMF_GridUtilMod
 !         Stagger location on grid to build.
 !   \item [isSphhere]
 !         1 = a spherical grid, build 3d mesh
+!   \item [regridConserve]
+!         ESMF\_REGRID\_CONSERVE\_ON turns on the conservative regridding
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
