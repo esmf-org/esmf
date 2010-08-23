@@ -323,7 +323,8 @@ contains
                 File%iotype=pio_iotype_netcdf4c
              end if
 #else
-             call piodie(__FILE__,__LINE__,'You must link with the netcdf4 ',0,&
+             call piodie(__FILE__,__LINE__,&
+                  'You must link with the netcdf4 ',0,&
                   'library built with hdf5 support to read this file',0,filename)
 #endif       
           else 
