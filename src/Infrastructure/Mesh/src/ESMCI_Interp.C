@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.24 2010/06/23 23:01:08 theurich Exp $
+// $Id: ESMCI_Interp.C,v 1.25 2010/08/24 16:10:51 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -21,6 +21,7 @@
 #include <Mesh/include/ESMCI_Migrator.h>
 #include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_MeshUtils.h>
+#include <Mesh/include/ESMCI_ConserveInterp.h>
 
 #include <iostream>
 #include <fstream>
@@ -34,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.24 2010/06/23 23:01:08 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.25 2010/08/24 16:10:51 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -624,6 +625,77 @@ Par::Out() << std::endl;
 
   } // for searchresult
 }
+
+void calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw) {
+  Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
+    
+  // Get src coord field
+  MEField<> *src_cfield = srcmesh.GetCoordField();
+
+  // Get src coord field
+  MEField<> *dst_cfield = dstmesh.GetCoordField();
+
+  double tot=0.0;
+
+
+  // Loop through search results
+  SearchResult::iterator sb = sres.begin(), se = sres.end();
+  for (; sb != se; sb++) {
+    
+    // NOTE: sr.elem is a dst element and sr.elems is a list of src elements
+    Search_result &sr = **sb;
+
+    // Declare weight vector
+    std::vector<int> valid;
+    std::vector<double> wgts;
+
+    // Allocate space for weight calc output arrays
+    valid.resize(sr.elems.size(),0);
+    wgts.resize(sr.elems.size(),0.0);
+
+    // Calculate weights
+    calc_1st_order_weights(sr.elem,dst_cfield,sr.elems,src_cfield,
+			   &valid, &wgts);
+
+    // Count number of valid weights
+    int num_valid=0;
+    for (int i=0; i<sr.elems.size(); i++) {
+      if (valid[i]==1) num_valid++;
+    }
+
+    // If none valid, then don't add weights
+    if (num_valid < 1) continue;
+
+    // Temporary empty col with negatives so unset values
+    // can be detected if they sneak through
+    IWeights::Entry col_empty(-1, 0, -1.0, 0);
+
+    // Allocate column of empty entries
+    std::vector<IWeights::Entry> col;
+    col.resize(num_valid,col_empty);
+
+    // Put weights into column
+    int j=0;
+    for (int i=0; i<sr.elems.size(); i++) {
+      if (valid[i]==1) {
+	col[j].id=sr.elems[i]->get_id();
+	col[j].value=wgts[i];
+	j++;
+      }
+    }
+
+    // Set row info
+    IWeights::Entry row(sr.elem->get_id(), 0, 0.0, 0);
+
+    // Put weights into weight matrix
+    iw.InsertRow(row, col);       
+
+  } // for searchresult
+
+
+}
+
+
  
  /* Matrix version of point serial transfer */
  void mat_point_serial_transfer(MEField<> &sfield, _field &dfield, SearchResult &sres, IWeights &iw) {
@@ -750,11 +822,18 @@ static GeomRend::DstConfig get_dst_config(Mesh &dest, const std::vector<Interp::
   
   // Loop fieldpairs.  If any have INTERP_PATCH, collect nieghbors
   bool nbor = false;
+  bool cnsrv = false;
   for (UInt i = 0; i < fpairs.size() && nbor == false; i++) {
     if (fpairs[i].idata == Interp::INTERP_PATCH) nbor = true;
+    if (fpairs[i].idata == Interp::INTERP_CONSERVE) cnsrv = true;
   }
   
-  return GeomRend::DstConfig(repF.ObjType(), otype, repF.GetContext(), nbor);
+  // TODO: make this more general
+  if (cnsrv) {
+    return GeomRend::DstConfig(MeshObj::ELEMENT,MeshObj::ELEMENT, repF.GetContext(), nbor);
+  } else {
+    return GeomRend::DstConfig(repF.ObjType(), otype, repF.GetContext(), nbor);
+  }
 }
   
 Interp::Interp(Mesh &src, Mesh &dest, const std::vector<FieldPair> &_fpairs, int unmappedaction) :
@@ -769,6 +848,7 @@ has_patch(false),
 srcmesh(src),
 dstmesh(dest)
 {
+
   // Different paths for parallel/serial
   UInt search_obj_type = grend.GetDstObjType();
   
@@ -790,19 +870,13 @@ dstmesh(dest)
        //std::cout << "Building rendezvous..." << std::endl;
     grend.Build(srcF.size(), &srcF[0], dstF.size(), &dstF[0]);
     
-#ifdef MYSEARCH
-//    if (Par::Rank() == 0) std::cout << "Start search" << std::endl;
-    Search(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), unmappedaction, sres, 1e-8);
-//    if (Par::Rank() == 0) std::cout << "end search" << std::endl;
-#else
-/*
-     if (Par::Rank() == 0)
-       std::cout << "Starting search..." << std::endl;
-*/
-    OctSearch(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), unmappedaction, sres, 1e-8);
-  //   if (Par::Rank() == 0)
-       //std::cout << "Done with search..." << std::endl;
-#endif
+    if (search_obj_type == MeshObj::NODE) {
+      OctSearch(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), unmappedaction, sres, 1e-8);
+    } else if (search_obj_type == MeshObj::ELEMENT) {
+      OctSearchElems(grend.GetDstRend(), unmappedaction, grend.GetSrcRend(), ESMC_UNMAPPEDACTION_IGNORE, 1e-8, sres);
+    }
+
+
     /*
     Par::Out() << "SrcRend **************" << std::endl;
     grend.GetSrcRend().Print(Par::Out());
@@ -812,22 +886,12 @@ dstmesh(dest)
     // Serial track.  Meshes already in geometric rendezvous.  (Perhaps get
     // the subset of the mesh for interpolating??)
 
-#ifdef MYSEARCH
-//    if (Par::Rank() == 0) std::cout << "Start search" << std::endl;
-    Search(src, dest, search_obj_type, unmappedaction, sres, 1e-8);
-//    if (Par::Rank() == 0) std::cout << "end search" << std::endl;
-#else
-/*
-     if (Par::Rank() == 0)
-       std::cout << "Starting search..." << std::endl;
-*/
-    OctSearch(src, dest, search_obj_type, unmappedaction, sres, 1e-8);
-/*
-     if (Par::Rank() == 0)
-       std::cout << "Done with search..." << std::endl;
-*/
-#endif
-     
+    if (search_obj_type == MeshObj::NODE) {
+      OctSearch(src, dest, search_obj_type, unmappedaction, sres, 1e-8);
+    } else if (search_obj_type == MeshObj::ELEMENT) {
+      OctSearchElems(dest, unmappedaction, src, ESMC_UNMAPPEDACTION_IGNORE, 1e-8, sres);
+    }
+
 
      //PrintSearchResult(sres);
   }
@@ -937,6 +1001,7 @@ void Interp::mat_transfer_serial(int fpair_num, IWeights &iw) {
   
   if (fpair.idata == INTERP_STD) mat_point_serial_transfer(*fpair.first, *fpair.second->GetNodalfield(), sres, iw);
   else if (fpair.idata == INTERP_PATCH) mat_patch_serial_transfer(*srcmesh.GetCoordField(), *fpair.first, *fpair.second->GetNodalfield(), sres, srcmesh, iw);
+  else if (fpair.idata == INTERP_CONSERVE) calc_conserve_mat_serial(srcmesh, dstmesh, sres, iw);
     
 }
 
@@ -945,29 +1010,31 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw) {
   // By all rights, here we don't HAVE to actually perform the interpolation.
   // However, we actually do it as a cross check.
     
-  // Send source data to rendezvous decomp
-  const std::vector<MEField<> *> &src_rend_Fields = grend.GetSrcRendFields();
-  
-  MEField<> *sFR = src_rend_Fields[fpair_num], *sF = srcF[fpair_num];
-  
-  grend.GetSrcComm().SendFields(1, &sF, &sFR);
-  
-  // Perform the interpolation
-  const std::vector<_field*> &dst_rend_fields = grend.GetDstRendfields();
-  
-  _field *dfR = dst_rend_fields[fpair_num], *df = dstf[fpair_num]; 
-   
-  if (fpairs[fpair_num].idata == INTERP_STD)
-     mat_point_serial_transfer(*sFR, *dfR, sres, iw);
-  else if (fpairs[fpair_num].idata == INTERP_PATCH)
-     mat_patch_serial_transfer(*grend.GetSrcRend().GetCoordField(), *sFR, *dfR, sres, srcmesh, iw);
-  
-  // Retrieve the interpolated data
-  CommRel &dst_node_rel = grend.GetDstComm().GetCommRel(MeshObj::NODE);
+  if (fpairs[fpair_num].idata != INTERP_CONSERVE) {
+    // Send source data to rendezvous decomp
+    const std::vector<MEField<> *> &src_rend_Fields = grend.GetSrcRendFields();
+    
+    MEField<> *sFR = src_rend_Fields[fpair_num], *sF = srcF[fpair_num];
+    
+    grend.GetSrcComm().SendFields(1, &sF, &sFR);
+    
+    // Perform the interpolation
+    const std::vector<_field*> &dst_rend_fields = grend.GetDstRendfields();
+    
+    _field *dfR = dst_rend_fields[fpair_num], *df = dstf[fpair_num]; 
+    
+    if (fpairs[fpair_num].idata == INTERP_STD)
+      mat_point_serial_transfer(*sFR, *dfR, sres, iw);
+    else if (fpairs[fpair_num].idata == INTERP_PATCH)
+      mat_patch_serial_transfer(*grend.GetSrcRend().GetCoordField(), *sFR, *dfR, sres, srcmesh, iw);
+    
+    // Retrieve the interpolated data
+    CommRel &dst_node_rel = grend.GetDstComm().GetCommRel(MeshObj::NODE);
+    
+    // Send the data back (comm has been transposed in GeomRend::Build)
+    dst_node_rel.send_fields(1, &dfR, &df);
+  } else calc_conserve_mat_serial(grend.GetSrcRend(),grend.GetDstRend(), sres, iw);
 
-  // Send the data back (comm has been transposed in GeomRend::Build)
-  dst_node_rel.send_fields(1, &dfR, &df);
-  
 }
 
 /*

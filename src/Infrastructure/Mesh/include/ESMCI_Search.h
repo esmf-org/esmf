@@ -1,4 +1,4 @@
-// $Id: ESMCI_Search.h,v 1.8 2010/06/15 23:10:16 rokuingh Exp $
+// $Id: ESMCI_Search.h,v 1.9 2010/08/24 16:10:51 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -32,9 +32,15 @@ struct Search_node_result {
   const MeshObj *node;
   double pcoord[3];  // parametric coord of node in elem
 };
+
+
 struct Search_result {
   const MeshObj *elem;
   std::vector<Search_node_result> nodes;
+  std::vector<const MeshObj *> elems;
+
+  // AN IDEA would be to do some kind of inheritence instead of having nodes and elems in the same struct
+
   bool operator<(const Search_result &rhs) const {
     return elem->get_id() < rhs.elem->get_id();
   }
@@ -48,8 +54,8 @@ struct Search_result {
 typedef std::vector<Search_result*> SearchResult;
 
 
-void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, int unmappedaction, SearchResult &result,
-            double stol = 1e-8, std::vector<const MeshObj*> *to_investigate = NULL);
+  void OctSearchElems(const Mesh &meshA, int unmappedactionA, const Mesh &meshB, int unmappedactionB, 
+                      double stol, SearchResult &result);
 
 void OctSearch(const Mesh &src, const Mesh &dest, UInt dst_obj_type, int unmappedaction, SearchResult &result,
             double stol = 1e-8, std::vector<const MeshObj*> *to_investigate = NULL, OTree *box = NULL);

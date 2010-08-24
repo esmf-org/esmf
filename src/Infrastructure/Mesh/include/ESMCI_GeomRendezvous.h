@@ -1,4 +1,4 @@
-// $Id: ESMCI_GeomRendezvous.h,v 1.7 2010/06/15 23:10:16 rokuingh Exp $
+// $Id: ESMCI_GeomRendezvous.h,v 1.8 2010/08/24 16:10:51 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -59,15 +59,17 @@ public:
   void Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF);
 
   struct ZoltanUD {
-    ZoltanUD(UInt _sdim, MEField<> *_coord_src, MEField<> *_coord_dst) :
+  ZoltanUD(UInt _sdim, MEField<> *_coord_src, MEField<> *_coord_dst,bool _iter_is_obj) :
       coord_src(_coord_src),
       coord_dst(_coord_dst),
-      sdim(_sdim) {}
+	sdim(_sdim), 
+	iter_is_obj(_iter_is_obj) {}
     std::vector<MeshObj*> srcObj;
     std::vector<MeshObj*> dstObj;
     MEField<> *coord_src;
     MEField<> *coord_dst;
     UInt sdim;
+    bool iter_is_obj;
   };
 	
   Mesh &GetSrcRend() { return srcmesh_rend; }

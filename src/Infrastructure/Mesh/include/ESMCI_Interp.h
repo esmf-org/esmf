@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.h,v 1.8 2010/06/15 23:10:16 rokuingh Exp $
+// $Id: ESMCI_Interp.h,v 1.9 2010/08/24 16:10:51 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -130,7 +130,7 @@ void IWeights::GatherTangentVectors(const Mesh &mesh, TVECT tv, bool transpose) 
 class Interp {
 public:
 
-  enum {INTERP_STD = 0, INTERP_PATCH};
+  enum {INTERP_STD = 0, INTERP_PATCH, INTERP_CONSERVE};
   
   struct FieldPair {
   FieldPair(MEField<> *_sF, MEField<> *_dF, UChar _idata=INTERP_STD, UChar _patch_order=2) :

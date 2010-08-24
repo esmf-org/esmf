@@ -1,4 +1,4 @@
-// $Id: ESMCI_BBox.h,v 1.7 2010/06/15 23:10:16 rokuingh Exp $
+// $Id: ESMCI_BBox.h,v 1.8 2010/08/24 16:10:51 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -43,6 +43,10 @@ BBox(const MEField<> &coords, const MeshObj &obj, double normexp = 0.0);
 BBox(const MEField<> &coords, const MeshDB &mesh);
 
 BBox(_field &coords, const MeshDB &mesh);
+
+#if 0
+ BBox(_field &coords, const MeshObj &obj);
+#endif
 
 BBox(const BBox &rhs);
 BBox &operator=(const BBox &rhs);

@@ -1,4 +1,4 @@
-// $Id: ESMCI_BBox.C,v 1.4 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_BBox.C,v 1.5 2010/08/24 16:10:51 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -26,7 +26,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_BBox.C,v 1.4 2010/03/04 18:57:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_BBox.C,v 1.5 2010/08/24 16:10:51 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -55,6 +55,7 @@ BBox &BBox::operator=(const BBox &rhs) {
 
   return *this;
 }
+
 
 BBox::BBox(const MEField<> &coords, const MeshObj &obj, double normexp) :
  isempty(false)
@@ -133,6 +134,8 @@ BBox::BBox(const MEField<> &coords, const MeshObj &obj, double normexp) :
 
 }
 
+
+
 BBox::BBox(const MEField<> &coords, const MeshDB &mesh) :
  isempty(false)
 {
@@ -175,6 +178,38 @@ BBox::BBox(_field &coords, const MeshDB &mesh) {
   }
   
 }
+
+#if 0
+  // NOTE THAT THIS DOENS'T DO THE EXPANSION IN THE NORMAL DIRECTION
+BBox::BBox(_field &coords, const MeshObj &obj) :
+ isempty(false)
+{
+  if (obj.get_type() != MeshObj::ELEMENT) Throw() << "Not able to create BBOx for non element";
+  const MeshObjTopo &topo = *GetMeshObjTopo(obj);
+  const UInt npe = topo.num_nodes;
+
+  if (topo.spatial_dim != topo.parametric_dim) 
+    Throw() << "Won't work for shell elements !!!!";
+
+  dim = topo.spatial_dim;
+
+  for (UInt i =0; i < dim; i++) {
+    min[i] = std::numeric_limits<double>::max();
+    max[i] = -std::numeric_limits<double>::max();
+  }
+  
+  // Loop the nodes
+  for (UInt n = 0; n < topo.num_nodes; n++) {
+    const MeshObj &node = *(obj.Relations[n].obj);
+    const double *coord = coords.data(node);
+    for (UInt j = 0; j < dim; j++) {
+      if (coord[j] < min[j]) min[j] = coord[j];
+      if (coord[j] > max[j]) max[j] = coord[j];
+    }
+  }
+}
+
+#endif
 
 void BBox::checkEmpty() {
   isempty = false;

@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.17 2010/07/16 19:52:57 rokuingh Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.18 2010/08/24 16:10:51 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.17 2010/07/16 19:52:57 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.18 2010/08/24 16:10:51 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -327,6 +327,9 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
       fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_STD));
     else if (*regridMethod == ESMC_REGRID_METHOD_PATCH)
       fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_PATCH));
+    else if (*regridMethod == ESMC_REGRID_METHOD_CONSERVE)
+      fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_CONSERVE));
+
 
      // Build the rendezvous grids
      Interp interp(srcmesh, dstmesh, fpairs, *unmappedaction);

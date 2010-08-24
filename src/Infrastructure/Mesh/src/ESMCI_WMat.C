@@ -1,4 +1,4 @@
-// $Id: ESMCI_WMat.C,v 1.5 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_WMat.C,v 1.6 2010/08/24 16:10:51 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -16,7 +16,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WMat.C,v 1.5 2010/03/04 18:57:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WMat.C,v 1.6 2010/08/24 16:10:51 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -47,13 +47,15 @@ WMat &WMat::operator=(const WMat &rhs)
   return *this;
 }
 
+// Insert row and associated columns into matrix complain if row is already there
+// and it isn't the same
 void WMat::InsertRow(const Entry &row, const std::vector<Entry> &cols) {
 
-  
   std::pair<WeightMap::iterator, bool> wi =
     weights.insert(std::make_pair(row, cols));
     
   if (wi.second == false) {
+
     // Just verify that entries are the same
     std::vector<Entry> &tcol = wi.first->second;
     ThrowRequire(tcol.size() == cols.size());
@@ -62,6 +64,70 @@ void WMat::InsertRow(const Entry &row, const std::vector<Entry> &cols) {
       ThrowRequire(tcol[i].idx == cols[i].idx);
       ThrowRequire(std::abs(tcol[i].value-cols[i].value) < 1e-5);
     }
+
+  } else {
+    
+    // Sort the column entries (invariant used elsewhere).
+    std::sort(wi.first->second.begin(), wi.first->second.end());
+
+    // compress storage
+    std::vector<Entry>(wi.first->second).swap(wi.first->second);    
+  }
+  
+}
+
+
+// Insert row and associated columns into matrix complain if column doesn't 
+// exist then add it, if it exists with a different value then complain
+// ASSUMES cols is in sorted order
+void WMat::InsertRowMerge(const Entry &row, const std::vector<Entry> &cols) {
+
+  std::pair<WeightMap::iterator, bool> wi =
+    weights.insert(std::make_pair(row, cols));
+    
+  if (wi.second == false) {
+
+    // Get old columns associated with original row 
+    std::vector<Entry> &old_cols = wi.first->second;
+
+    // temp to put merged results into
+    std::vector<Entry> tmp_cols;
+    tmp_cols.resize(cols.size()+old_cols.size());
+
+    // If nothing to be added then exit
+    if (tmp_cols.empty()) return;
+
+    // Merge cols together
+    merge(old_cols.begin(),old_cols.end(), 
+	  cols.begin(),cols.end(),
+	  tmp_cols.begin());
+
+    // Resize old_cols to contain merged and unqiued data
+    old_cols.resize(tmp_cols.size());
+
+    // Get rid of duplicates and 
+    // make sure there are no bad duplicates
+    // (e.g. same id, but different values)
+    // These will be in sequence since the cols
+    // are sorted.
+    int j=0;
+    old_cols[0]=tmp_cols[0];
+    for (int i=1; i<tmp_cols.size(); i++) {
+      if (tmp_cols[i].id != old_cols[j].id) {
+	j++;
+	old_cols[j]=tmp_cols[i];
+      } else {
+	if (tmp_cols[i].value != old_cols[j].value)
+	  Throw() << "Shouldn't have same source ID with different value!";
+      }
+    }
+
+    // Resize old_cols to fit just what's needed
+    old_cols.resize(j+1);
+
+    // Get rid of extra memory
+    std::vector<Entry>(old_cols).swap(old_cols);
+
   } else {
     
     // Sort the column entries (invariant used elsewhere).
@@ -69,10 +135,11 @@ void WMat::InsertRow(const Entry &row, const std::vector<Entry> &cols) {
 
     // compress storage
     std::vector<Entry>(wi.first->second).swap(wi.first->second);
-    
   }
   
 }
+
+
 
 void WMat::Print(std::ostream &os) {
   

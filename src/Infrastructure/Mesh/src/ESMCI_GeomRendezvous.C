@@ -1,4 +1,4 @@
-// $Id: ESMCI_GeomRendezvous.C,v 1.8 2010/04/19 22:33:16 rokuingh Exp $
+// $Id: ESMCI_GeomRendezvous.C,v 1.9 2010/08/24 16:10:51 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_GeomRendezvous.C,v 1.8 2010/04/19 22:33:16 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_GeomRendezvous.C,v 1.9 2010/08/24 16:10:51 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -79,6 +79,7 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
   MEField<> *coord_dst = udata.coord_dst;
   *err = 0;
 
+
   UInt list1_size = udata.srcObj.size();
   for (UInt i = 0; i < (UInt) numObjs; i++) {
     UInt mesh = gids[2*i]; // 0 = src, 1 = dst
@@ -86,6 +87,7 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
 
     std::vector<double> ndata(numDim);
     double *c;
+
     if (mesh == 0) {
       MeshObj *elemp = udata.srcObj[idx];
       elemCentroid(*coord_src, *elemp, &ndata[0]);
@@ -94,11 +96,19 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
     } else if (mesh == 1) {
       UInt sidx = idx - list1_size; // local indices start from first list, continue into second
       MeshObj *nodep = udata.dstObj[sidx];
-      c = coord_dst->data(*nodep);
-    } else throw("GetObject, unknown mesh from global id");
 
+      // Get destination coord depending on object type
+      if (udata.iter_is_obj) {
+	elemCentroid(*coord_dst, *nodep, &ndata[0]);
+	c = &ndata[0];
+      } else {
+	c = coord_dst->data(*nodep);
+      }
+
+    } else throw("GetObject, unknown mesh from global id");
     for (UInt d = 0; d < (UInt) numDim; d++) pts[i*numDim + d] = c[d];
   }
+
 }
 
 /*-----------------------------------------------------------------------------------*/
@@ -379,9 +389,13 @@ void GeomRend::build_dst_mig(Zoltan_Struct *zz, ZoltanUD &zud, int numExport,
 
     std::vector<CommRel::CommNode> mignode;
 
-    CommRel &dst_migration = dstComm.GetCommRel(dcfg.obj_type);
-    dst_migration.Init("dst_migration", dstmesh, dstmesh_rend, false);
     rcb_isect(zz, coord, zud.dstObj, mignode, dcfg.geom_tol, sdim);
+
+    // Add results to the migspec
+    CommRel &dst_migration = dstComm.GetCommRel(dcfg.obj_type); 
+    //    CommRel &dst_migration = dstComm.GetCommRel(MeshObj::ELEMENT);
+    dst_migration.Init("dst_migration", dstmesh, dstmesh_rend, false);
+    dst_migration.add_domain(mignode); // BOB added
     
     // Now flush out the comm with lower hierarchy
     dst_migration.dependants(dstComm.GetCommRel(MeshObj::NODE), MeshObj::NODE); 
@@ -500,7 +514,6 @@ void GeomRend::migrate_meshes() {
   srcComm.GetCommRel(MeshObj::FACE).build_range();
   srcComm.GetCommRel(MeshObj::ELEMENT).build_range();
 
-
   {  
     int num_snd=0;
     MEField<> *snd[2],*rcv[2];
@@ -529,7 +542,6 @@ void GeomRend::migrate_meshes() {
      srcComm.SendFields(num_snd, snd, rcv);
   }
 
-  
   // And now the destination
   dstComm.GetCommRel(MeshObj::NODE).build_range();
   
@@ -540,22 +552,19 @@ void GeomRend::migrate_meshes() {
     dstComm.GetCommRel(MeshObj::ELEMENT).build_range();
   }
   
+
   MEField<> *dc = dstmesh.GetCoordField();
-
   MEField<> *dm = dstmesh.GetField("mask");
-
   
   dstmesh_rend.Commit();
   
-  if (iter_is_obj) {
-    
+  if (iter_is_obj) {    
     MEField<> *dc_r = dstmesh_rend.GetCoordField();
     dstComm.SendFields(1, &dc, &dc_r);
-    
   } else {
     int num_snd=0;
     _field *snd[2],*rcv[2];
-
+    
     _field *dcf = dc->GetNodalfield();
     _field *dc_rf = dstmesh_rend.Getfield("coordinates_1");
     ThrowRequire(dc_rf);
@@ -581,7 +590,8 @@ void GeomRend::migrate_meshes() {
     dst_node.send_fields(num_snd, snd, rcv);
         Trace __trace1("dst_node post send fields->");
 
-  }  
+  }
+
 
 }
 
@@ -594,7 +604,7 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF)
   // Should not use neighbors flag unless source has ghosting enabled
   ThrowRequire(!dcfg.neighbors || srcmesh.HasGhost());
 	
-  ZoltanUD zud(sdim, srcmesh.GetCoordField(), dstmesh.GetCoordField());
+  ZoltanUD zud(sdim, srcmesh.GetCoordField(), dstmesh.GetCoordField(), iter_is_obj);
 
   // Gather the destination points.  Also get a min/max
   double cmin[3], cmax[3];
@@ -617,8 +627,6 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF)
   // Zoltan Parameters
   set_zolt_param(zz);
 
-
-
   // Local vars needed by zoltan
   int changes;
   int numGidEntries;
@@ -640,7 +648,6 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF)
   Zoltan_Set_Num_Geom_Fn(zz, GetNumGeom, (void*) &zud);
   Zoltan_Set_Geom_Multi_Fn(zz, GetObject, (void*) &zud);
 
-
   // Call zoltan
   rc = Zoltan_LB_Partition(zz, &changes, &numGidEntries, &numLidEntries,
     &numImport, &importGlobalids, &importLocalids, &importProcs, &importToPart,
@@ -651,6 +658,7 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF)
 
   // Build the destination migration
   build_dst_mig(zz, zud, numExport, exportLocalids, exportGlobalids, exportProcs);
+
 
   // Ok.  Done with zud lists, so free them in the intests of memory
   std::vector<MeshObj*>().swap(zud.srcObj);
@@ -685,7 +693,6 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF)
   
   //WriteMesh(srcmesh_rend, "srcrend");
 
-
   // Now, IMPORTANT: We transpose the destination comm since this is how is will be
   // used until destruction.
   dstComm.Transpose();
@@ -696,9 +703,7 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF)
   Zoltan_LB_Free_Part(&exportGlobalids, &exportLocalids,
                       &exportProcs, &exportToPart);
 
-
   Zoltan_Destroy(&zz);
-
 }
 
 } // namespace ESMCI

@@ -1,4 +1,4 @@
-// $Id: ESMCI_WMat.h,v 1.6 2010/06/15 23:10:16 rokuingh Exp $
+// $Id: ESMCI_WMat.h,v 1.7 2010/08/24 16:10:51 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -87,6 +87,8 @@ public:
   WMat &operator=(const WMat &);
   
   void InsertRow(const Entry &row, const std::vector<Entry> &cols);
+
+  void InsertRowMerge(const Entry &row, const std::vector<Entry> &cols);
   
   void GetRowGIDS(std::vector<UInt> &gids);
 
@@ -138,6 +140,11 @@ public:
     InsertRow(row.first, row.second);
   }
 
+  void InsertRowMerge(WeightMap::value_type &row) {
+    InsertRowMerge(row.first, row.second);
+  }
+
+
   std::pair<int, int> count_matrix_entries() const;
   
   WeightMap weights;
@@ -179,7 +186,9 @@ struct MigTraits<WMat> {
   
   static element_iterator element_end(WMat &t) { return t.end_row(); }
   
-  static void insert_element(WMat & t, UInt , element_type &el) { t.InsertRow(el); }
+  static void insert_element(WMat & t, UInt , element_type &el) { t.InsertRowMerge(el); }
+
+  //  static void insert_element(WMat & t, UInt , element_type &el) { t.InsertRow(el); }
   
   static void resize_object(WMat &, UInt) {}
   

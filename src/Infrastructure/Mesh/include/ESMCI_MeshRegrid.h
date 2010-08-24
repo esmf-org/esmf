@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.h,v 1.6 2010/06/28 20:07:10 rokuingh Exp $
+// $Id: ESMCI_MeshRegrid.h,v 1.7 2010/08/24 16:10:51 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -37,7 +37,8 @@ private:
 #endif
 
 enum {ESMC_REGRID_SCHEME_FULL3D = 0, ESMC_REGRID_SCHEME_NATIVE = 1};
-enum {ESMC_REGRID_METHOD_BILINEAR = 0, ESMC_REGRID_METHOD_PATCH = 1};
+enum {ESMC_REGRID_METHOD_BILINEAR = 0, ESMC_REGRID_METHOD_PATCH, 
+      ESMC_REGRID_METHOD_CONSERVE};
 enum {ESMC_REGRID_CONSERVE_OFF = 0, ESMC_REGRID_CONSERVE_ON = 1};
 enum {ESMC_REGRID_POLETYPE_NONE = 0, ESMC_REGRID_POLETYPE_ALL = 1, ESMC_REGRID_POLETYPE_NPNT = 2, ESMC_REGRID_POLETYPE_TEETH = 3};
 

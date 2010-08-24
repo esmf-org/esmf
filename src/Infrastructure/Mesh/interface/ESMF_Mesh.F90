@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.32 2010/05/06 21:20:08 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.33 2010/08/24 16:10:51 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.32 2010/05/06 21:20:08 oehmke Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.33 2010/08/24 16:10:51 oehmke Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -107,6 +107,17 @@ module ESMF_MeshMod
         ESMF_MESH_PARTITON_NODAL = ESMF_MeshPartitionType(0), &
         ESMF_MESH_PARTITION_ELEMENT = ESMF_MeshPartitionType(1)
 
+
+  type ESMF_MeshLoc
+  sequence
+!  private
+    integer :: meshloc
+  end type
+
+  type(ESMF_MeshLoc), parameter :: &
+        ESMF_MESHLOC_NODE = ESMF_MeshLoc(1), &
+        ESMF_MESHLOC_ELEMENT = ESMF_MeshLoc(2)
+
 !------------------------------------------------------------------------------
 !     ! ESMF_Mesh
 !
@@ -118,6 +129,9 @@ module ESMF_MeshMod
   public ESMF_MESHELEMTYPE_QUAD, ESMF_MESHELEMTYPE_TRI, &
          ESMF_MESHELEMTYPE_HEX, ESMF_MESHELEMTYPE_TETRA
       
+  public ESMF_MeshLoc
+  public ESMF_MESHLOC_NODE, ESMF_MESHLOC_ELEMENT
+
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -144,7 +158,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.32 2010/05/06 21:20:08 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.33 2010/08/24 16:10:51 oehmke Exp $'
 
 !==============================================================================
 ! 
