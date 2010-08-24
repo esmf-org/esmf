@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.97 2010/06/16 18:12:11 w6ws Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.98 2010/08/24 16:13:29 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -582,7 +582,8 @@
 
       type(ESMF_RegridMethod), parameter :: &
            ESMF_REGRID_METHOD_BILINEAR    = ESMF_RegridMethod(0), &
-           ESMF_REGRID_METHOD_PATCH       = ESMF_RegridMethod(1)
+           ESMF_REGRID_METHOD_PATCH       = ESMF_RegridMethod(1), &
+           ESMF_REGRID_METHOD_CONSERVE    = ESMF_RegridMethod(2)
 
 !------------------------------------------------------------------------------
 !
@@ -670,7 +671,8 @@
       public ESMF_AttWriteFlag, ESMF_ATTWRITE_TAB, ESMF_ATTWRITE_XML
 
        public ESMF_RegridMethod,   ESMF_REGRID_METHOD_BILINEAR, &
-                                   ESMF_REGRID_METHOD_PATCH
+                                   ESMF_REGRID_METHOD_PATCH, &
+                                   ESMF_REGRID_METHOD_CONSERVE
        public ESMF_RegridConserve, ESMF_REGRID_CONSERVE_OFF, &
                                    ESMF_REGRID_CONSERVE_ON
 
