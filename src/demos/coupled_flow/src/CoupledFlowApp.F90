@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.7 2010/08/19 15:59:42 feiliu Exp $
+! $Id: CoupledFlowApp.F90,v 1.8 2010/08/24 16:13:51 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -98,7 +98,7 @@
 !EOP
 
     ! Return codes for error checks
-    integer :: rc
+    integer :: rc, urc
         
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -121,6 +121,7 @@
     ! Initialize ESMF, get the default Global VM, and set
     ! the default calendar to be Gregorian.
     call ESMF_Initialize(vm=vm, defaultCalendar=ESMF_CAL_GREGORIAN, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !\end{verbatim}
 !EOP 
 
@@ -158,6 +159,7 @@
 !\begin{verbatim}
     ! Create the top level Gridded Component.
     compGridded = ESMF_GridCompCreate(name="Coupled Flow Demo", rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !\end{verbatim}
 !EOP 
 
@@ -171,6 +173,7 @@
 !------------------------------------------------------------------------------
       call ESMF_GridCompSetServices(compGridded, CoupledFlow_register, rc)
       print *, "Comp SetServices finished, rc= ", rc
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
 
 !------------------------------------------------------------------------------
@@ -189,21 +192,25 @@
 !     initialize a time interval (timestep) to 2 seconds:
 !\begin{verbatim}
       call ESMF_TimeIntervalSet(timeStep, s=2, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !\end{verbatim}
 !     And then we set the start time and stop time to input values for the month,
 !     day, and hour (assuming the year to be 2003):
 !\begin{verbatim}
       call ESMF_TimeSet(startTime, yy=2003, mm=s_month, dd=s_day, &
                         h=s_hour, m=s_min, s=0, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       call ESMF_TimeSet(stopTime, yy=2003, mm=e_month, dd=e_day, &
                         h=e_hour, m=e_min, s=0, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !\end{verbatim}
 !     With the time interval, start time, and stop time set above, the Clock can
 !     now be created:
 !\begin{verbatim}
       clock = ESMF_ClockCreate(timeStep=timeStep, startTime=startTime, &
                                stopTime=stopTime, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !\end{verbatim}
 !     Subsequent calls to ESMF\_ClockAdvance with this clock will increment the
 !     current time from the start time by the timestep.
@@ -214,6 +221,7 @@
 
       ! Create a default DELayout for the grid based on the global VM
       DELayoutTop = ESMF_DELayoutCreate(vm, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !BOP
 !
 ! !DESCRIPTION:
@@ -237,13 +245,18 @@
                              coordDep1=(/1/), &
                              coordDep2=(/2/), &
                              name="source grid", rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       ! Get pointer reference to internal coordinate
       call ESMF_GridGetCoord(grid, localDE=0, &
         staggerLoc=ESMF_STAGGERLOC_CENTER, &
         coordDim=1, fptr=CoordX, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_GridGetCoord(grid, localDE=0, &
         staggerLoc=ESMF_STAGGERLOC_CENTER, &
         coordDim=2, fptr=CoordY, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       dx = (x_max-x_min)/i_max
       dy = (y_max-y_min)/j_max
@@ -258,6 +271,7 @@
 !     The Grid can then be attached to the Gridded Component with a set call:
 !\begin{verbatim}
      call ESMF_GridCompSet(compGridded, grid=grid, rc=rc)
+     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -268,6 +282,7 @@
 !------------------------------------------------------------------------------
 
       flowstate = ESMF_StateCreate("Coupled Flow State", rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
      
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -276,18 +291,20 @@
 !------------------------------------------------------------------------------
  
       call ESMF_GridCompInitialize(compGridded, flowstate, flowstate, &
-                                                                 clock, rc=rc)
-      print *, "Coupled Flow Component Initialize finished, rc =", rc
+                                                                 clock, rc=rc, userRc=urc)
+      print *, "Coupled Flow Component Initialize finished, rc =", rc, urc
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
+
+      call ESMF_GridCompRun(compGridded, flowstate, flowstate, clock, rc=rc, userRc=urc)
+      print *, "Coupled Flow Component Run finished, rc =", rc, urc
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
  
-
-
-      call ESMF_GridCompRun(compGridded, flowstate, flowstate, clock, rc=rc)
-      print *, "Coupled Flow Component Run finished, rc =", rc
- 
-
-
-      call ESMF_GridCompFinalize(compGridded, flowstate, flowstate, clock, rc=rc)
-      print *, "Coupled Flow Component Finalize finished, rc =", rc
+      call ESMF_GridCompFinalize(compGridded, flowstate, flowstate, clock, rc=rc, userRc=urc)
+      print *, "Coupled Flow Component Finalize finished, rc =", rc, urc
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
  
  
 !------------------------------------------------------------------------------
@@ -297,15 +314,20 @@
 !------------------------------------------------------------------------------
 !     Clean up
 
-      call ESMF_StateDestroy(flowstate, rc)
+      call ESMF_StateDestroy(flowstate, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-      call ESMF_GridDestroy(grid, rc)
+      call ESMF_GridDestroy(grid, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-      call ESMF_ClockDestroy(clock, rc)
+      call ESMF_ClockDestroy(clock, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-      call ESMF_GridCompDestroy(compGridded, rc)
+      call ESMF_GridCompDestroy(compGridded, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-      call ESMF_DELayoutDestroy(DELayoutTop, rc)
+      call ESMF_DELayoutDestroy(DELayoutTop, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
 
 !------------------------------------------------------------------------------
@@ -320,6 +342,7 @@
 
       ! Get our PET number from the VM
       call ESMF_VMGet(vm, localPET=pet_id, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       ! This output goes to the console/screen (standard error) where
       ! hopefully the user will see it without needing to inspect the log file.

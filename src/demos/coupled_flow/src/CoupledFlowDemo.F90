@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.7 2010/08/19 15:59:42 feiliu Exp $
+! $Id: CoupledFlowDemo.F90,v 1.8 2010/08/24 16:13:51 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -83,8 +83,11 @@
         ! Register the callback routines.
 
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, coupledflow_init, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, coupledflow_run, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, coupledflow_final, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
 !\end{verbatim}
 !EOP
@@ -124,7 +127,7 @@
 !     \end{description}
 !
 !EOPI
-    integer :: npets
+    integer :: npets, urc
     integer :: mid, by2, quart, by4
 
     type(ESMF_Grid) :: gridTop, gridIN, gridFS
@@ -135,9 +138,11 @@
 
     ! Get our vm and grid from the component
     call ESMF_GridCompGet(gcomp, vm=vm, grid=gridTop, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     ! Sanity check the number of PETs we were started on.
     call ESMF_VMGet(vm, petCount=npets, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
     if (npets .eq. 1) then
       mid = 1
       by2 = 1
@@ -178,12 +183,15 @@
 !\begin{verbatim}
     cnameIN = "Injector model"
     INcomp = ESMF_GridCompCreate(name=cnameIN, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     cnameFS = "Flow Solver model"
     FScomp = ESMF_GridCompCreate(name=cnameFS, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     cplname = "Two-way coupler"
     cpl = ESMF_CplCompCreate(name=cplname, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -195,13 +203,16 @@
 !  Register section for subcomponents
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-    call ESMF_GridCompSetServices(INcomp, Injector_register, rc)
+    call ESMF_GridCompSetServices(INcomp, Injector_register, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
     print *, "Injector Comp SetServices finished, rc= ", rc
 
-    call ESMF_GridCompSetServices(FScomp, FlowSolver_register, rc)
+    call ESMF_GridCompSetServices(FScomp, FlowSolver_register, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
     print *, "FlowSolver Comp SetServices finished, rc= ", rc
 
-    call ESMF_CplCompSetServices(cpl, Coupler_register, rc)
+    call ESMF_CplCompSetServices(cpl, Coupler_register, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
     print *, "Coupler Comp SetServices finished, rc= ", rc
 
  
@@ -218,46 +229,57 @@
     call ESMF_GridGet(gridTop, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
           minIndex=minIndex, maxIndex=maxIndex, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     call ESMF_GridGetCoord(gridTop, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
           coordDim=1, array=CoordX, doCopy=ESMF_DATA_COPY, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     call ESMF_GridGetCoord(gridTop, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
           coordDim=2, array=CoordY, doCopy=ESMF_DATA_COPY, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     gridIN = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxIndex, &
                              regDecomp=(/ mid, by2 /), &
                              coordDep1=(/1/), &
                              coordDep2=(/2/), &
                              name="Injector grid", rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     call ESMF_GridSetCoord(gridIN, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
           coordDim=1, array=CoordX, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     call ESMF_GridSetCoord(gridIN, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
           coordDim=2, array=CoordY, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     call ESMF_GridCompSet(INcomp, grid=gridIN, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     gridFS = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxIndex, &
                              regDecomp=(/ quart, by4 /), &
                              coordDep1=(/1/), &
                              coordDep2=(/2/), &
                              name="Flow Solver grid", rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     call ESMF_GridSetCoord(gridFS, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
           coordDim=1, array=CoordX, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     call ESMF_GridSetCoord(gridFS, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
           coordDim=2, array=CoordY, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     call ESMF_GridCompSet(FScomp, grid=gridFS, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
 
     !
@@ -273,42 +295,58 @@
 !
 !\begin{verbatim}
     INimp = ESMF_StateCreate("Injection Input", ESMF_STATE_IMPORT,  rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
     INexp = ESMF_StateCreate("Injection Feedback", ESMF_STATE_EXPORT, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !\end{verbatim}
 !EOP
     ! 
     ! Initialize the injector component, first phase 
     !
-    call ESMF_GridCompInitialize(INcomp, INimp, INexp, clock, 1, rc=rc)
+    call ESMF_GridCompInitialize(INcomp, INimp, INexp, clock, 1, rc=rc, userRc=urc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+    if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
     print *, "Injection Model Initialize finished, rc =", rc
  
     !
     ! Create import/export states for FlowSolver Component
     !
     FSimp = ESMF_StateCreate("FlowSolver Input", ESMF_STATE_IMPORT, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
     FSexp = ESMF_StateCreate("FlowSolver Feedback ", ESMF_STATE_EXPORT, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     !
     ! Initialize the flow solver component, first phase
     !
-    call ESMF_GridCompInitialize(FScomp, FSimp, FSexp, clock, 1, rc=rc)
+    call ESMF_GridCompInitialize(FScomp, FSimp, FSexp, clock, 1, rc=rc, userRc=urc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+    if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
     print *, "Flow Model Initialize finished, rc =", rc
 
     !
     ! Initialize the coupler, once for each export state
     ! (note this is not 2 phases - it is calling the same code each time.)
     !
-    call ESMF_CplCompInitialize(cpl, FSexp, INimp, clock, rc=rc)
-    call ESMF_CplCompInitialize(cpl, INexp, FSimp, clock, rc=rc)
+    call ESMF_CplCompInitialize(cpl, FSexp, INimp, clock, rc=rc, userRc=urc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+    if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
+    call ESMF_CplCompInitialize(cpl, INexp, FSimp, clock, rc=rc, userRc=urc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+    if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
     print *, "Coupler Initialize finished, rc =", rc
  
     !
     ! Second phase of init
     !
-    call ESMF_GridCompInitialize(INcomp, INimp, INexp, clock, 2, rc=rc)
+    call ESMF_GridCompInitialize(INcomp, INimp, INexp, clock, 2, rc=rc, userRc=urc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+    if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
     print *, "Injection Model Initialize finished, rc =", rc
  
-    call ESMF_GridCompInitialize(FScomp, FSimp, FSexp, clock, 2, rc=rc)
+    call ESMF_GridCompInitialize(FScomp, FSimp, FSexp, clock, 2, rc=rc, userRc=urc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+    if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
     print *, "Flow Model Initialize finished, rc =", rc
 
     end subroutine coupledflow_init
@@ -348,30 +386,42 @@
 
      ! Local variables
      type(ESMF_Clock) :: localclock
+     integer          :: urc
 
 
      ! make our own local copy of the clock
-     localclock = ESMF_ClockCreate(clock, rc)
+     localclock = ESMF_ClockCreate(clock, rc=rc)
+     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
      print *, "Run Loop Start time"
-     call ESMF_ClockPrint(localclock, "currtime string", rc)
+     call ESMF_ClockPrint(localclock, "currtime string", rc=rc)
+     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
      do while (.not. ESMF_ClockIsStopTime(localclock, rc))
 
         ! Run FlowSolver Component
-        call ESMF_GridCompRun(FScomp, FSimp, FSexp, localclock, rc=rc)
+        call ESMF_GridCompRun(FScomp, FSimp, FSexp, localclock, rc=rc, userRc=urc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+        if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
 
         ! Couple export state of FlowSolver to import of Injector
-        call ESMF_CplCompRun(cpl, FSexp, INimp, localclock, rc=rc)
+        call ESMF_CplCompRun(cpl, FSexp, INimp, localclock, rc=rc, userRc=urc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+        if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
   
         ! Run Injector Component
-        call ESMF_GridCompRun(INcomp, INimp, INexp, localclock, rc=rc)
+        call ESMF_GridCompRun(INcomp, INimp, INexp, localclock, rc=rc, userRc=urc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+        if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
   
         ! Couple export state of Injector to import of FlowSolver
-        call ESMF_CplCompRun(cpl, INexp, FSimp, localclock, rc=rc)
+        call ESMF_CplCompRun(cpl, INexp, FSimp, localclock, rc=rc, userRc=urc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+        if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
   
         ! Advance the time
         call ESMF_ClockAdvance(localclock, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       
         ! This demo runs a lot of time steps and only outputs files
         ! every N iterations.  This print statement, if commented in,
@@ -381,9 +431,11 @@
      enddo
 
      print *, "Run Loop End time"
-     call ESMF_ClockPrint(localclock, "currtime string", rc)
+     call ESMF_ClockPrint(localclock, "currtime string", rc=rc)
+     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
  
      call ESMF_ClockDestroy(localclock, rc)
+     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
 end subroutine coupledflow_run
 
@@ -421,25 +473,27 @@ end subroutine coupledflow_run
 !
 !EOPI
 
+      integer :: urc
+
       ! First finalize all subcomponents
 
       ! Finalize Injector Component    
-      call ESMF_GridCompFinalize(INcomp, INimp, INexp, clock, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) then
+      call ESMF_GridCompFinalize(INcomp, INimp, INexp, clock, rc=rc, userRc=urc)
+      if (rc .ne. ESMF_SUCCESS .or. urc .ne. ESMF_SUCCESS) then
           print *, "Injector Component Finalize routine returned error"
           return
       endif
 
       ! Finalize FlowSolver Component
-      call ESMF_GridCompFinalize(FScomp, FSimp, FSimp, clock, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) then
+      call ESMF_GridCompFinalize(FScomp, FSimp, FSimp, clock, rc=rc, userRc=urc)
+      if (rc .ne. ESMF_SUCCESS .or. urc .ne. ESMF_SUCCESS) then
           print *, "FlowSolver Component Finalize routine returned error"
           return
       endif
 
       ! Finalize Coupler
-      call ESMF_CplCompFinalize(cpl, INexp, FSimp, clock, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) then
+      call ESMF_CplCompFinalize(cpl, INexp, FSimp, clock, rc=rc, userRc=urc)
+      if (rc .ne. ESMF_SUCCESS .or. urc .ne. ESMF_SUCCESS) then
           print *, "Coupler Component Finalize routine returned error"
           return
       endif
@@ -449,15 +503,22 @@ end subroutine coupledflow_run
       ! Then clean them up
 
       print *, "ready to destroy all states"
-      call ESMF_StateDestroy(INimp, rc)
-      call ESMF_StateDestroy(INexp, rc)
-      call ESMF_StateDestroy(FSimp, rc)
-      call ESMF_StateDestroy(FSexp, rc)
+      call ESMF_StateDestroy(INimp, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateDestroy(INexp, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateDestroy(FSimp, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateDestroy(FSexp, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       print *, "ready to destroy all components"
-      call ESMF_GridCompDestroy(INcomp, rc)
-      call ESMF_GridCompDestroy(FScomp, rc)
-      call ESMF_CplCompDestroy(cpl, rc)
+      call ESMF_GridCompDestroy(INcomp, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_GridCompDestroy(FScomp, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_CplCompDestroy(cpl, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       print *, "end of CoupledFlowMod Finalization routine"
       rc = ESMF_SUCCESS
