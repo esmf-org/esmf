@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.86 2010/07/09 22:04:21 theurich Exp $
+% $Id: ESMF_install.tex,v 1.87 2010/08/25 04:32:07 theurich Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -142,6 +142,10 @@ When defined, enables the use of PNETCDF.
 \item["not set"] (default): PNETCDF-dependent features will be disabled.
 The {\tt ESMF\_PNETCDF\_INCLUDE}, {\tt ESMF\_PNETCDF\_LIBPATH}, and
 {\tt ESMF\_PNETCDF\_LIBS} environment variables will be ignored.
+
+\item[standard] {\tt ESMF\_PNETCDF\_LIBS} will be set to "-lpnetcdf".  
+The {\tt ESMF\_PNETCDF\_INCLUDE} and {\tt ESMF\_PNETCDF\_LIBPATH}
+environment variables will be also used, if defined.
 
 \item[<userstring>] If set, {\tt ESMF\_PNETCDF\_INCLUDE},
 {\tt ESMF\_PNETCDF\_LIBPATH}, and {\tt ESMF\_PNETCDF\_LIBS} environment
