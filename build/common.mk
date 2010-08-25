@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.313 2010/08/25 05:05:36 theurich Exp $
+#  $Id: common.mk,v 1.314 2010/08/25 05:10:31 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -740,7 +740,7 @@ ifeq ($(origin ESMF_CXXLINKOPTS_ENV), environment)
 ESMF_CXXLINKOPTS = $(ESMF_CXXLINKOPTS_ENV)
 endif
 ESMF_CXXLINKOPTS +=
-ESMF_CXXLINKPATHS += -L$(ESMF_LDIR) $(ESMF_CXXLINKPATHSTHIRD)
+ESMF_CXXLINKPATHS = -L$(ESMF_LDIR) $(ESMF_CXXLINKPATHSTHIRD)
 ESMF_CXXLINKRPATHS += $(ESMF_CXXRPATHPREFIX)$(ESMF_LDIR)
 ESMF_CXXLINKLIBS +=
 ESMF_CXXESMFLINKLIBS += -lesmf $(ESMF_CXXLINKLIBS)
