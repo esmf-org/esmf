@@ -1,4 +1,4 @@
-// $Id: ESMCI_Search.C,v 1.14 2010/08/24 16:10:51 oehmke Exp $
+// $Id: ESMCI_Search.C,v 1.15 2010/08/25 16:29:42 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Search.C,v 1.14 2010/08/24 16:10:51 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Search.C,v 1.15 2010/08/25 16:29:42 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -667,12 +667,13 @@ static int found_func_elems(void *c, void *y) {
       if (meshB_elist.size() == 0) return;
 
   } else { // meshB masks exist
+      Throw() << " ERROR Masking not yet implemented for conservative";
+
       MeshDB::const_iterator ei = meshB.elem_begin(), ee = meshB.elem_end();
       for (; ei != ee; ++ei) {
 
 	// Check the mask value of all the nodes in the elem, only
 	// add if none are masked
-	printf("ERROR --------- masking not yet implemented !!!!!! \n");
 #if 0
 	  // Get mask value
 	  double *m=meshBmask_field.data(*ni);
