@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridEx.F90,v 1.9 2010/06/29 21:55:28 svasquez Exp $
+! $Id: ESMF_AttReadGridEx.F90,v 1.10 2010/08/25 05:50:43 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -93,6 +93,17 @@ program ESMF_AttReadGridEx
 !print *, 'rc = ', rc
 
 !BOC
+      ! Get GridSpec "GridType" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='GridType', value=attrValue, &
+                             convention='GridSpec', purpose='General', rc=rc)
+!EOC
+
+      if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='cubed sphere') &
+                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+!print *, 'rc = ', rc
+!print *, 'attrvalue = ', attrvalue
+
+!BOC
       ! Get GridSpec "CongruentTiles" Attribute from a Grid
       call ESMF_AttributeGet(grid, name='CongruentTiles', value=attrValue, &
                              convention='GridSpec', purpose='General', rc=rc)
@@ -104,12 +115,12 @@ program ESMF_AttReadGridEx
 !print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "GridType" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='GridType', value=attrValue, &
+      ! Get GridSpec "NumberOfGridTiles" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='NumberOfGridTiles', value=attrValue, &
                              convention='GridSpec', purpose='General', rc=rc)
 !EOC
 
-      if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='cubed sphere') &
+      if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='1') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
@@ -160,17 +171,6 @@ program ESMF_AttReadGridEx
 !print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "IsPoleCovered" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='IsPoleCovered', value=attrValue, &
-                             convention='GridSpec', purpose='General', rc=rc)
-!EOC
-
-      if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='true') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-!print *, 'rc = ', rc
-!print *, 'attrvalue = ', attrvalue
-
-!BOC
       ! Get GridSpec "IsRegular" Attribute from a Grid
       call ESMF_AttributeGet(grid, name='IsRegular', value=attrValue, &
                              convention='GridSpec', purpose='General', rc=rc)
@@ -216,17 +216,6 @@ program ESMF_AttReadGridEx
 !print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "NumDims" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='NumDims', value=attrValue, &
-                             convention='GridSpec', purpose='General', rc=rc)
-!EOC
-
-      if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='2') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-!print *, 'rc = ', rc
-!print *, 'attrvalue = ', attrvalue
-
-!BOC
       ! Get GridSpec "NX" Attribute from a Grid
       call ESMF_AttributeGet(grid, name='NX', value=attrValue, &
                              convention='GridSpec', purpose='General', rc=rc)
@@ -244,17 +233,6 @@ program ESMF_AttReadGridEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='96') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-!print *, 'rc = ', rc
-!print *, 'attrvalue = ', attrvalue
-
-!BOC
-      ! Get GridSpec "NZ" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='NZ', value=attrValue, &
-                             convention='GridSpec', purpose='General', rc=rc)
-!EOC
-
-      if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='15') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue

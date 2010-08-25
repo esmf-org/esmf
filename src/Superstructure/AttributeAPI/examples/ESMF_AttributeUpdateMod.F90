@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.17 2009/10/01 17:24:22 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.18 2010/08/25 05:50:43 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -444,15 +444,13 @@ module ESMF_AttributeUpdateMod
     call ESMF_AttributeSet(grid,'CongruentTiles',.true.,convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'NorthPoleLocation','long: 0.0 lat: 90.0',convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'NumberOfCells','53457',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'NumDims','2',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'NumberOfGridTiles','1',convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'NX','96',convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'NY','96',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'NZ','15',convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'Resolution','C48',convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'IsConformal',.false.,convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'IsRegular',.false.,convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'IsUniform',.false.,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'IsPoleCovered',.true.,convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'DiscretizationType','Logically Rectangular',convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'GeometryType','Sphere',convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return

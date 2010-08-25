@@ -2,21 +2,19 @@
 <GridSpec name="gfdl_fv_cubed_sphere_atmos_am3">
   <Mosaic name="gfdl_fv_cubed_sphere_atmos_am3_mosaic">
     <attribute_package convention="GridSpec" purpose="General">
-      <CongruentTiles>true</CongruentTiles>
       <GridType>cubed sphere</GridType>
+      <CongruentTiles>true</CongruentTiles>
+      <NumberOfGridTiles>1</NumberOfGridTiles>
       <DimOrder>YX</DimOrder>
       <DiscretizationType>logically_rectangular</DiscretizationType>
       <GeometryType>sphere</GeometryType>
       <IsConformal>false</IsConformal>
-      <IsPoleCovered>true</IsPoleCovered>
       <IsRegular>false</IsRegular>
       <IsUniform>false</IsUniform>
       <NorthPoleLocation>long: 0.0 lat: 90.0</NorthPoleLocation>
       <NumberOfCells>53457</NumberOfCells>
-      <NumDims>2</NumDims>
       <NX>96</NX>
       <NY>96</NY>
-      <NZ>15</NZ>
       <Resolution>C48</Resolution>
     </attribute_package>
   </Mosaic>
