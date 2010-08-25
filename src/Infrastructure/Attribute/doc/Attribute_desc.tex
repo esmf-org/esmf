@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.36 2010/08/18 21:45:47 murphysj Exp $
+% $Id: Attribute_desc.tex,v 1.37 2010/08/25 05:56:48 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -11,9 +11,9 @@
 
 The ESMF Attribute Class was created with the long-term goal of enabling models to be self-describing. Note that Attributes are individual name-value pairs, while Metadata is a term used to describe instances of Attributes that describe a particular object. While most of the discussion to follow is about specific Attributes, the overall goal is to create a Metadata system.   
 
-\subsubsection{ESMF's approach to Attributes}
+\subsubsection{ESMF's Approach to Attributes}
 
-ESMF's Approach to Attributes can be summed up in the following:
+ESMF's Approach to attributes can be summed up in the following:
 
 \begin{itemize}
   \item Implement community standards where they exist
@@ -113,16 +113,6 @@ The following is an alphabetical list of all the attributes impletmented in ESMF
      {\tt Version} & A specific form or variation of an artifact i.e. a unit of software or metadata. & ESG Basic Component, CIM Main\\ 
 
 \end{tabular}
-
-
-\subsubsection{Attribute Types}
-
-(SJM: this part should be moved out the intro. It makes no sense w/o other stuff below. Do we need it?  Where should it go?)
-
-
-Each Attribute contains a name-value pair in which the value can be any of several numeric, character, and logical types (see table \ref{table:attTypes}). Additionally, all Attributes are identified by a convention, purpose, and object. These are additional strings that are initialized as empty until specified. 
-
-All Attributes contain three vectors of pointers to other Attributes, which are empty until specified otherwise.  These vectors of Attribute pointers hold the Attributes, Attribute packages, and Attribute links.  This feature is what allows the Attribute class to self assemble complex structures for representing and organizing the metadata of an ESMF object hierarchy.
 
 \subsubsection{Attribute Hierarchies}
 

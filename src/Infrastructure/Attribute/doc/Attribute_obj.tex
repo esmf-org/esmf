@@ -1,4 +1,4 @@
-% $Id: Attribute_obj.tex,v 1.14 2010/08/20 21:48:43 murphysj Exp $
+% $Id: Attribute_obj.tex,v 1.15 2010/08/25 05:56:48 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -26,7 +26,13 @@ Each Attribute contains a name-value pair in which the value can be any of sever
 \item {\tt EMSF\_TYPEKIND\_Character} list
 \end{itemize}
 
-The other members of the Attribute class can be seen in Figure \ref{fig:AttributeClassUML}  which shows a UML representation of the ESMF Attribute object.   For a more detailed view of how Attribute packages and hierarchies are formed, see Figures \ref{fig:AttributePackageUML} and \ref{fig:AttributeHierarchyUML}, respectively.
+The other members of the Attribute class can be seen in Figure \ref{fig:AttributeClassUML}  below, which shows a UML representation of the ESMF Attribute class.
+
+In addition to a name, all Attributes within an Attribute package are identified by a convention, purpose, and the ESMF object type they are associated with. These are additional strings that are initialized as empty until specified. 
+
+Also, all Attributes contain three vectors of pointers to other Attributes, which are empty until specified otherwise.  These vectors of Attribute pointers hold the Attributes, Attribute packages, and Attribute links.  This feature is what allows the Attribute class to self assemble complex structures for representing and organizing the metadata of an ESMF object hierarchy.
+
+For a more detailed view of how Attribute packages and hierarchies are formed, see Figures \ref{fig:AttributePackageUML} and \ref{fig:AttributeHierarchyUML}, respectively.
 
 \begin{figure}[h]
 \centering

@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.24 2010/08/18 21:47:57 murphysj Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.25 2010/08/25 05:56:48 eschwab Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -74,14 +74,6 @@
 \input{../Infrastructure/Attribute/doc/Attribute_export}
 #endif
 
-
-\subsection{Object Model}
-#ifdef STANDALONE
-\input{Attribute_obj}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Attribute/doc/Attribute_obj}
-#endif
-
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Attribute_usage} 
@@ -119,6 +111,13 @@
 \input{Attribute_implnotes}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Attribute/doc/Attribute_implnotes}
+#endif
+
+\subsection{Object Model}
+#ifdef STANDALONE
+\input{Attribute_obj}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Attribute/doc/Attribute_obj}
 #endif
 
 \subsection{Class API}
