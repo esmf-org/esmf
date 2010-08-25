@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.8 2010/08/19 15:59:42 feiliu Exp $
+! $Id: FlowSolverMod.F90,v 1.9 2010/08/25 17:23:23 feiliu Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -115,10 +115,14 @@
 !
 ! Register the callback routines.
 !
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, Flow_Init1, 1, rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, Flow_Init1, 1, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, Flow_Init2, 2, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, FlowSolve, 0, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, Flow_Final, 0, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       print *, "FlowSolverMod: Registered Initialize, Run, and Finalize routines"
 
@@ -255,12 +259,14 @@
 ! Query component for information.
 !
       call ESMF_GridCompGet(gcomp, grid=grid, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
 ! TODO: restore the following code:
 !      call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
 !                              globalCellCountPerDim=global_nmax, &
 !                              minGlobalCoordPerDim=global_min_coord, &
 !                              maxGlobalCoordPerDim=global_max_coord, rc=rc)
+!      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
 !
 ! Extract and calculate some other quantities
@@ -279,39 +285,55 @@
       call FlowInit(gcomp, clock, rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flow_init:  flowinit"
-        return
       endif
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !
 ! Precompute the Halo communication pattern; since all data variables are
 ! the same data type and size, the same handle can be reused for all of them.
 !
       call ESMF_FieldHaloStore(field_u, routehandle=halohandle, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !
 ! For initialization, add all fields to the import state.  Only the ones
 ! needed will be copied over to the export state for coupling.
 !
       call ESMF_StateAdd(import_state, field_sie, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(import_state, field_u, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(import_state, field_v, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(import_state, field_rho, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(import_state, field_p, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(import_state, field_q, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(import_state, field_flag, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !
 ! This is adding names only to the export list, marked by default
 ! as "not needed".  The coupler will mark the ones needed based
 ! on the requirements of the component(s) this is coupled to.
 !
       call ESMF_StateAdd(export_state, "SIE", rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(export_state, "U", rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(export_state, "V", rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(export_state, "RHO", rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(export_state, "P", rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(export_state, "Q", rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(export_state, "FLAG", rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
 ! Give the export state an initial set of values for the SIE Field.
       call ESMF_StateAdd(export_state, field_sie, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       rc = ESMF_SUCCESS
 
@@ -380,7 +402,9 @@
 
         ! Set export data in export state
         call ESMF_StateGet(import_state, itemName=datanames(i), field=thisfield, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
         call ESMF_StateAdd(export_state, field=thisfield, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       enddo
 
@@ -443,16 +467,16 @@
       call ESMF_GridCompGet(gcomp, grid=grid, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  grid comp get"
-        return
       endif
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 !
 ! create space for global arrays
 !
       call FlowArraysAlloc(grid, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  arraysglobalalloc"
-        return
       endif
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 !
 ! flags for boundary conditions (ordered left, right, bottom, top):
 !     nbc(i) = 1       inflow
@@ -476,24 +500,26 @@
 ! this DE is on the domain boundary
 !
       call ESMF_GridGet(grid, distgrid=distgrid, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_DistGridGet(distgrid, delayout=layout, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  grid comp get"
-        return
       endif
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_DELayoutGetDeprecated(layout, deCountPerDim=ncounts, localDE=de_id, &
                                rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  delayout get size"
-        return
       endif
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       nx = ncounts(1)
       ny = ncounts(2)
       call ESMF_DELayoutGetDELocalInfo(layout, de_id, coord=pos, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  delayout get position"
-        return
       endif
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       x = pos(1)
       y = pos(2)
 !
@@ -675,13 +701,13 @@
       call ESMF_ClockGet(clock, timeStep=time_step, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: clock get timestep"
-        return
       endif
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_TimeIntervalGet(time_step, s_r8=s_, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: time interval get"
-        return
       endif
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       dt = s_
       write(*,*) 'dt = ', dt
 ! 
@@ -690,8 +716,8 @@
       call FlowStability(status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: flow stability"
-        return
       endif
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -764,13 +790,13 @@
       call ESMF_ClockGet(clock, timeStep=time_step, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: clock get timestep"
-        return
       endif
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_TimeIntervalGet(time_step, s_r8=s_, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: time interval get"
-        return
       endif
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       dt = s_
 !
 ! Copy injection values from exclusive domain into ghost cells
@@ -797,40 +823,40 @@
       call FlowRhoVel(rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: flowrhovel"
-        return
       endif
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !    
 ! calculate RHOI's (energy)
 !
       call FlowRhoI(rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: flowrhoi"
-        return
       endif
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !    
 ! determine new densities and internal energies
 !
       call FlowRho(rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: flowrho"
-        return
       endif
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !
 !  update velocities
 !
       call FlowVel(rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: flowvel"
-        return
       endif
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !
 !  new pressures and viscosities
 !
       call FlowState(rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve"
-        return
       endif
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !
 !  put needed data in export state
 !
@@ -839,7 +865,9 @@
               cycle
           endif
           call ESMF_StateGet(import_state, itemName=datanames(i), field=thisfield, rc=rc)
+          if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
           call ESMF_StateAdd(export_state, field=thisfield, rc=rc)
+          if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
         enddo
 !
 ! Print graphics every printout steps
@@ -847,6 +875,7 @@
       if(mod(counter, printout) .eq. 0) then
         print_count = print_count + 1
         call FlowPrint(gcomp, clock, print_count, rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       endif
 
       rc = ESMF_SUCCESS
@@ -989,8 +1018,8 @@
       call ESMF_FieldHalo(field_rhov, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRhoVel:  rhov halo"
-        return
       endif
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
   
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1109,8 +1138,8 @@
       call ESMF_FieldHalo(field_rhoi, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRhoI:  rhoi halo"
-        return
       endif
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1225,13 +1254,13 @@
       call ESMF_FieldHalo(field_rho, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRho:  rho halo"
-        return
       endif
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldHalo(field_sie, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRho:  sie halo"
-        return
       endif
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1378,23 +1407,23 @@
       call ESMF_FieldHalo(field_u, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  u halo"
-        return
       endif
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldHalo(field_v, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  v halo"
-        return
       endif
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldHalo(field_rhou, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  rhou halo"
-        return
       endif
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldHalo(field_rhov, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  rhov halo"
-        return
       endif
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1479,13 +1508,13 @@
       call ESMF_FieldHalo(field_p, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowState:  p halo"
-        return
       endif
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldHalo(field_q, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowState:  q halo"
-        return
       endif
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1632,24 +1661,31 @@
 ! Collect results on DE 0 and output to a file
 !
       call ESMF_GridCompGet(gcomp, vm=vm, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_VMGet(vm, localPet=pet_id, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 !
 ! Frame number from computation
 !
       call ESMF_ClockGet(clock, advanceCount=frame, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 !
 ! And now test output to a file
 !
       call ESMF_FieldWrite(field_u, fname=filename, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       call ESMF_FieldWrite(field_v, fname=filename, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       call ESMF_FieldWrite(field_sie, fname=filename, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 !
 ! First time through output two more files
 !
       if(file_no .eq. 1) then
         call ESMF_FieldWrite(field_flag, fname=filename, rc=status)
+        if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
         do j = jmin, jmax
           do i = imin, imax
@@ -1657,6 +1693,7 @@
           enddo
         enddo
         call ESMF_FieldWrite(field_de, fname=filename, rc=status)
+        if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1709,10 +1746,11 @@
       call FlowArraysDealloc(rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flow_Final"
-        return
       endif
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
    
       call ESMF_FieldHaloRelease(halohandle, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       rc = ESMF_SUCCESS
 

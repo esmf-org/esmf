@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.9 2010/08/19 15:59:42 feiliu Exp $
+! $Id: InjectorMod.F90,v 1.10 2010/08/25 17:23:23 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -95,9 +95,13 @@
         !  This Component has a 2 phase initialization, and a single
         !   phase run and finalize.
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, injector_init1, 1, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, injector_init2, 2, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, injector_run, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, injector_final, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
         print *, "InjectorMod: Registered Initialize, Run, and Finalize routines"
 
@@ -106,6 +110,7 @@
         allocate(datablock)
         wrap%ptr => datablock
         call ESMF_GridCompSetInternalState(comp, wrap, rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
         print *, "InjectorMod: Registered Private Data block for Internal State"
     end subroutine
@@ -115,7 +120,7 @@
 ! !IROUTINE: User Initialization routine, phase 1
 
 ! !INTERFACE:
-      subroutine injector_init1(gcomp, importState, exportState, clock, rc)
+     subroutine injector_init1(gcomp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: gcomp
@@ -211,6 +216,7 @@
 
       ! Set peristent values in saved data block
       call ESMF_GridCompGetInternalState(gcomp, wrap, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       datablock => wrap%ptr
 
       ! initialize start time to 12May2003, 3:00 pm
@@ -218,11 +224,13 @@
       call ESMF_TimeSet(datablock%inject_start_time, &
                         yy=2003, mm=on_month, dd=on_day, &
                         h=on_hour, m=on_min, s=0, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       ! initialize stop time to 13May2003, 2:00 pm
       call ESMF_TimeSet(datablock%inject_stop_time, &
                         yy=2003, mm=off_month, dd=off_day, &
                         h=off_hour, m=off_min, s=0, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
 
       datablock%inject_energy = in_energy
@@ -237,6 +245,7 @@
          print *, "ERROR in injector_init: getting info from component"
          return
       endif
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       !
       ! create space for data arrays
@@ -251,27 +260,42 @@
       !  needed will be copied over to the export state for coupling.
       !  These are empty and will be filled in by the first run of the 
       !  Coupler.
-      call ESMF_StateAdd(importState, field_sie, rc)
-      call ESMF_StateAdd(importState, field_u, rc)
-      call ESMF_StateAdd(importState, field_v, rc)
-      call ESMF_StateAdd(importState, field_rho, rc)
-      call ESMF_StateAdd(importState, field_p, rc)
-      call ESMF_StateAdd(importState, field_q, rc)
-      call ESMF_StateAdd(importState, field_flag, rc)
+      call ESMF_StateAdd(importState, field_sie, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateAdd(importState, field_u, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateAdd(importState, field_v, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateAdd(importState, field_rho, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateAdd(importState, field_p, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateAdd(importState, field_q, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateAdd(importState, field_flag, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       ! This is adding names only to the export list, marked by default
       !  as "not needed". The coupler will mark the ones needed based
       !  on the requirements of the component(s) this is coupled to.
-      call ESMF_StateAdd(exportState, "SIE", rc)
-      call ESMF_StateAdd(exportState, "U", rc)
-      call ESMF_StateAdd(exportState, "V", rc)
-      call ESMF_StateAdd(exportState, "RHO", rc)
-      call ESMF_StateAdd(exportState, "P", rc)
-      call ESMF_StateAdd(exportState, "Q", rc)
-      call ESMF_StateAdd(exportState, "FLAG", rc)
+      call ESMF_StateAdd(exportState, "SIE", rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateAdd(exportState, "U", rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateAdd(exportState, "V", rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateAdd(exportState, "RHO", rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateAdd(exportState, "P", rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateAdd(exportState, "Q", rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateAdd(exportState, "FLAG", rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
 ! Give the export state an initial set of values for the SIE Field.
-      call ESMF_StateAdd(exportState, field_sie, rc)
+      call ESMF_StateAdd(exportState, field_sie, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       rc = ESMF_SUCCESS
 
@@ -339,7 +363,9 @@
          endif
 
          call ESMF_StateGet(importState, datanames(i), thisfield, rc=rc)
+         if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
          call ESMF_StateAdd(exportState, thisfield, rc=rc)
+         if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       enddo
 
@@ -405,29 +431,39 @@
 
         ! Get our local info
         call ESMF_GridCompGetInternalState(comp, wrap, rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
         datablock => wrap%ptr
 
 
         ! Get the Field and FieldBundle data from the State that we might update
         call ESMF_StateGet(importState, "SIE", local_sie, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
         call ESMF_StateGet(importState, "V", local_v, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
         call ESMF_StateGet(importState, "RHO", local_rho, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
         call ESMF_StateGet(importState, "FLAG", local_flag, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       
         ! Get the Field and FieldBundle data from the State, and a pointer to
         !  the existing data (not a copy).
         call ESMF_FieldGet(local_sie, farrayPtr=data_sie, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
             
         call ESMF_FieldGet(local_v, farrayPtr=data_v, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       
         call ESMF_FieldGet(local_rho, farrayPtr=data_rho, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       
         call ESMF_FieldGet(local_flag, farrayPtr=data_flag, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
           
         ! Update values.  Flag = 10 means override values with our own.
 
         ! Check time to see if we are still injecting
         call ESMF_ClockGet(clock, currTime=currtime, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
         if ((currtime .ge. datablock%inject_start_time) .and. &
             (currtime .le. datablock%inject_stop_time)) then
 
@@ -466,7 +502,9 @@
            endif
 
            call ESMF_StateGet(importState, datanames(i), thisfield, rc=rc)
+           if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
            call ESMF_StateAdd(exportState, thisfield, rc=rc)
+           if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
         enddo
 
@@ -514,12 +552,14 @@
     
         ! Release our field and data space
         call InjectArraysDealloc(rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
 
         ! Get our local info and release it
         nullify(wrap%ptr)
         datablock => wrap%ptr
         call ESMF_GridCompGetInternalState(comp, wrap, rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
         datablock => wrap%ptr
         deallocate(datablock, stat=allocrc)

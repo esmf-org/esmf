@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.4 2010/08/19 15:59:42 feiliu Exp $
+! $Id: FlowArraysMod.F90,v 1.5 2010/08/25 17:23:23 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -111,13 +111,15 @@
 !     ArraySpec with rank 2 for a two-dimensional array
 !     and kind ESMF\_KIND\_R4:
 !\begin{verbatim}
-      call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R4)
+      call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R4, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 !\end{verbatim}
 !     Next, create a Field named "SIE" using the ArraySpec with a relative
 !     location (relloc) at the cell centers:
 !\begin{verbatim}
       field_sie  = ESMF_FieldCreate(grid, arrayspec, &
                    maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="SIE", rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 !\end{verbatim}
 !     Once the Field has been created, we get a pointer to the Array
 !     data (the Fortran 90 array), and call it "sie".
@@ -125,48 +127,69 @@
 !     F90 allocation but will reference the data inside "field\_sie."
 !\begin{verbatim}
       call ESMF_FieldGet(field_sie, farrayPtr=sie, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 !\end{verbatim}
 !EOP
 
       field_u    = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_EDGE1, &
                    maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="U", rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_u, farrayPtr=u, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_v    = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_EDGE2, &
                    maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="V", rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_v, farrayPtr=v, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_rho  = ESMF_FieldCreate(grid, arrayspec, &
                    maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="RHO", rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_rho, farrayPtr=rho, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_rhoi = ESMF_FieldCreate(grid, arrayspec, &
                    maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="RHOI", rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_rhoi, farrayPtr=rhoi, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_rhou = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_EDGE1, &
                    maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="RHOU", rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_rhou, farrayPtr=rhou, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_rhov = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_EDGE2, &
                    maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="RHOV", rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_rhov, farrayPtr=rhov, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_p    = ESMF_FieldCreate(grid, arrayspec, &
                    maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="P", rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_p, farrayPtr=p, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_q    = ESMF_FieldCreate(grid, arrayspec, &
                    maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="Q", rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_q, farrayPtr=q, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_flag = ESMF_FieldCreate(grid, arrayspec, &
                    maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="FLAG", rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_flag, farrayPtr=flag, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_de   = ESMF_FieldCreate(grid, arrayspec, &
                    maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="DE", rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_de, farrayPtr=de, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowArraysAlloc"
@@ -178,8 +201,10 @@
       call ESMF_FieldGet(field_de, &
                         maxHaloLWidth=haloLWidth, maxHaloUWidth=haloUWidth, &
                         rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGetBounds(field_de, &
                         exclusiveLBound=lb, exclusiveUBound=ub, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       ! Computational region: data unique to this DE
       imin = lb(1) + haloLWidth(1)
@@ -222,16 +247,27 @@
 ! deallocate global arrays - destroy the Fields
 !
       call ESMF_FieldDestroy(field_sie , rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldDestroy(field_u   , rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldDestroy(field_v   , rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldDestroy(field_rho , rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldDestroy(field_rhoi, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldDestroy(field_rhou, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldDestroy(field_rhov, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldDestroy(field_p   , rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldDestroy(field_q   , rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldDestroy(field_flag, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldDestroy(field_de  , rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowArraysDealloc"
