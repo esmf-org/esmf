@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.4 2010/07/29 17:29:57 samsoncheung Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.5 2010/08/25 23:43:03 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -126,7 +126,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Write Fortran array in Field
-  call ESMF_FieldWrite(field_w, fname="field.nc", rc=rc)
+  call ESMF_FieldWrite(field_w, file="field.nc", rc=rc)
   write(failMsg, *) ""
   write(name, *) "Write Fortran array in Field"
 #ifdef ESMF_PIO
@@ -167,7 +167,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Read data to Object Field_r
-  call ESMF_FieldRead(field_r, fname="field.nc", rc=rc)
+  call ESMF_FieldRead(field_r, file="field.nc", rc=rc)
   write(failMsg, *) ""
   write(name, *) "Read data to object field_r"
 #ifdef ESMF_PIO

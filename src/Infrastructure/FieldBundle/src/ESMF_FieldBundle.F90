@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.41 2010/08/16 19:01:03 samsoncheung Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.42 2010/08/25 23:44:08 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -1791,11 +1791,11 @@ end function
 ! !IROUTINE: ESMF_FieldBundleRead - Read arrays to a FieldBundle form file 
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleRead(bundle, fname, mfiles, iofmt, rc)
+      subroutine ESMF_FieldBundleRead(bundle, file, mfiles, iofmt, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: bundle
-      character(*), intent(in)              :: fname
+      character(*), intent(in)              :: file
       logical,      intent(in) ,  optional  :: mfiles
       character(*), intent(in) ,  optional  :: iofmt
       integer,      intent(out),  optional  :: rc
@@ -1807,7 +1807,7 @@ end function
 !     \begin{description}
 !     \item [bundle]
 !      An {\tt ESMF\_FieldBundle} object.
-!     \item[fname]
+!     \item[file]
 !      The name of the file (netcdf) in which Fortran array is read from.
 !     \item[mfiles]
 !      A logical flag, if TRUE, each array located in a separate file.
@@ -1857,11 +1857,11 @@ end function
       if (multif) then
         do i=1,fieldCount
           write(cnum,"(i3.3)") i
-          filename = fname // cnum
+          filename = file // cnum
           call ESMF_FieldBundleGet(bundle, fieldIndex=i, field=fieldList(i), rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
-          call ESMF_FieldRead(fieldList(i), fname=filename, &
+          call ESMF_FieldRead(fieldList(i), file=filename, &
              iofmt=iofmtd, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1872,7 +1872,7 @@ end function
          call ESMF_FieldBundleGet(bundle, fieldIndex=i, field=fieldList(i), rc=localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
-         call ESMF_FieldRead(fieldList(i), fname=fname, iofmt=iofmtd, rc=localrc)
+         call ESMF_FieldRead(fieldList(i), file=file, iofmt=iofmtd, rc=localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
@@ -2360,11 +2360,11 @@ end function
 ! !IROUTINE: ESMF_FieldBundleWrite - Save the Field arrays in a netCDF file.
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleWrite(bundle, fname, mfiles, iofmt, rc)
+      subroutine ESMF_FieldBundleWrite(bundle, file, mfiles, iofmt, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: bundle
-      character(*), intent(in)              :: fname
+      character(*), intent(in)              :: file
       logical,      intent(in) ,  optional  :: mfiles
       character(*), intent(in) ,  optional  :: iofmt
       integer,      intent(out),  optional  :: rc
@@ -2377,7 +2377,7 @@ end function
 !     \begin{description}
 !     \item [bundle]
 !      An {\tt ESMF\_FieldBundle} object.
-!     \item[fname]
+!     \item[file]
 !      The name of the file (netcdf) in which Fortran array is written to.
 !     \item[mfiles]
 !      A logical flag, if TRUE, each array will be written a separate file.
@@ -2426,12 +2426,12 @@ end function
       if (multif) then
        do i=1,fieldCount
         write(cnum,"(i3.3)") i
-        filename = fname // cnum
+        filename = file // cnum
         ! Get and write the first array in the Bundle
         call ESMF_FieldBundleGet(bundle, fieldIndex=i , field=fieldList(i), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_FieldWrite(fieldList(i), fname=trim(filename), &
+        call ESMF_FieldWrite(fieldList(i), file=trim(filename), &
            iofmt=iofmtd, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2441,7 +2441,7 @@ end function
        call ESMF_FieldBundleGet(bundle, fieldIndex=1 , field=fieldList(1), rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_FieldWrite(fieldList(1), fname=fname, iofmt=iofmtd, rc=localrc)
+       call ESMF_FieldWrite(fieldList(1), file=file, iofmt=iofmtd, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2450,7 +2450,7 @@ end function
         call ESMF_FieldBundleGet(bundle, fieldIndex=i , field=fieldList(i), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_FieldWrite(fieldList(i), fname=fname, etag=1, &
+        call ESMF_FieldWrite(fieldList(i), file=file, append=.true., &
            iofmt=iofmtd, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return

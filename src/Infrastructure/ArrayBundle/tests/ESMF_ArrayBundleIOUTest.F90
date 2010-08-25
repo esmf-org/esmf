@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleIOUTest.F90,v 1.1 2010/08/04 18:23:51 samsoncheung Exp $
+! $Id: ESMF_ArrayBundleIOUTest.F90,v 1.2 2010/08/25 23:41:55 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -149,7 +149,7 @@ program ESMF_ArrayBundleIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleWrite Single file Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayBundleWrite(arraybundle_w, fname="bundle.nc", rc=rc)
+  call ESMF_ArrayBundleWrite(arraybundle_w, file="bundle.nc", rc=rc)
 #ifdef ESMF_PIO
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -162,7 +162,7 @@ program ESMF_ArrayBundleIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleWrite Multiple files Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayBundleWrite(arraybundle_w, fname="sep.nc", mfiles=.true., rc=rc)
+  call ESMF_ArrayBundleWrite(arraybundle_w, file="sep.nc", mfiles=.true., rc=rc)
 #ifdef ESMF_PIO
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -213,8 +213,8 @@ program ESMF_ArrayBundleIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleRead Single file Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  !call ESMF_ArrayBundleRead(arraybundle_r, fname="bundle.nc", rc=rc)
-  call ESMF_ArrayBundleRead(arraybundle_r, fname="sep.nc", mfiles=.true., rc=rc)
+  !call ESMF_ArrayBundleRead(arraybundle_r, file="bundle.nc", rc=rc)
+  call ESMF_ArrayBundleRead(arraybundle_r, file="sep.nc", mfiles=.true., rc=rc)
 #ifdef ESMF_PIO
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else

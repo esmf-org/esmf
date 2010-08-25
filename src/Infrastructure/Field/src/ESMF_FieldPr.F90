@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.16 2010/08/16 19:00:04 samsoncheung Exp $
+! $Id: ESMF_FieldPr.F90,v 1.17 2010/08/25 23:42:43 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -225,13 +225,13 @@ contains
 ! !IROUTINE:  ESMF_FieldWrite - Write the Field data
 
 ! !INTERFACE:
-      subroutine ESMF_FieldWrite(field, fname, etag, iofmt, rc)
+      subroutine ESMF_FieldWrite(field, file, append, iofmt, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field 
-      character(*), intent(in) :: fname 
-      integer, intent(in), optional :: etag
+      character(*), intent(in) :: file 
+      logical, intent(in), optional :: append
       character(*), intent(in), optional :: iofmt
       integer, intent(out), optional :: rc
 !
@@ -246,23 +246,24 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!         An {\tt ESMF\_Field} object.
-!     \item[fname]
-!         The name of the netcdf file in which Fortran array is written to.
-!     \item[etag]
-!         A tag indicates if a file already exist with value 1.
+!        An {\tt ESMF\_Field} object.
+!     \item[file]
+!        The name of the netcdf file in which Fortran array is written to.
+!     \item[append]
+!        Logical: if true, data is appended to an exist file, default is false.
 !     \item[iofmt]
-!         The IO format supported are "bin", "pnc", "snc", "nc4p", and "nc4c".
+!        The IO format supported are "bin", "pnc", "snc", "nc4p", and "nc4c".
 !     \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
         character(len=ESMF_MAXSTR)      :: name
         type(ESMF_FieldType), pointer   :: fp 
         type(ESMF_Array)                :: array 
-        integer                         :: i, existag, localrc
+        integer                         :: i, localrc
         integer                         :: gridrank, arrayrank
+        logical                         :: appended
         type(ESMF_Status)               :: fieldstatus
         character(len=10)               :: iofmtd
 
@@ -274,8 +275,8 @@ contains
         ! check variables
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-        existag = 0
-        if(present(etag)) existag = etag
+        appended = .false.
+        if(present(append)) appended = append
 
         iofmtd = "snc"
         if(present(iofmt)) iofmtd = trim(iofmt)
@@ -291,8 +292,8 @@ contains
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        call ESMF_ArrayWrite(array, fname, vname=trim(name), &
-          etag=existag, iofmt=iofmtd, rc=localrc)
+        call ESMF_ArrayWrite(array, file, vname=trim(name), &
+          append=appended, iofmt=iofmtd, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -316,12 +317,12 @@ contains
 ! !IROUTINE:  ESMF_FieldRead - Read the array data in a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRead(field, fname, iofmt, rc)
+      subroutine ESMF_FieldRead(field, file, iofmt, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field 
-      character(*), intent(in) :: fname 
+      character(*), intent(in) :: file 
       character(*), intent(in), optional :: iofmt 
       integer, intent(out), optional :: rc
 !
@@ -337,7 +338,7 @@ contains
 !     \begin{description}
 !     \item [field]
 !         An {\tt ESMF\_Field} object.
-!     \item[fname]
+!     \item[file]
 !         The name of the netcdf file in which array data is read from.
 !     \item[iofmt]
 !         The IO format supported are "bin", "pnc", "snc", "nc4p", and "nc4c".
@@ -376,7 +377,7 @@ contains
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        call ESMF_ArrayRead(array, fname, vname=trim(name), &
+        call ESMF_ArrayRead(array, file, vname=trim(name), &
           iofmt=iofmtd, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return

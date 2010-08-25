@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.16 2010/08/16 18:58:58 samsoncheung Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.17 2010/08/25 23:41:31 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.16 2010/08/16 18:58:58 samsoncheung Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.17 2010/08/25 23:41:31 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -744,11 +744,11 @@ contains
 ! !IROUTINE: ESMF_ArrayBundleWrite - Write ArrayBundle arrays
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleWrite(arraybundle, fname, mfiles, iofmt, rc)
+  subroutine ESMF_ArrayBundleWrite(arraybundle, file, mfiles, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)        :: arraybundle
-    character(*),     intent(in)              :: fname
+    character(*),     intent(in)              :: file
     logical,          intent(in) ,  optional  :: mfiles
     character(*),     intent(in),   optional  :: iofmt
     integer,          intent(out),  optional  :: rc  
@@ -761,7 +761,7 @@ contains
 !   \begin{description}
 !   \item[arraybundle] 
 !     {\tt ESMF\_ArrayBundle} object.
-!   \item[fname]
+!   \item[file]
 !    The name of the file (netcdf) in which Fortran array is written to.
 !   \item[mfiles]
 !    A logical flag, if TRUE, each array will be written a separate file.
@@ -810,12 +810,12 @@ contains
     if (multif) then
       do i=1,arrayCount
         write(cnum,"(i3.3)") i
-        filename = fname // cnum
+        filename = file // cnum
         ! Get and write the first array in the Bundle
         call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayWrite(arrayList(i), fname=trim(filename),  &
+        call ESMF_ArrayWrite(arrayList(i), file=trim(filename),  &
            iofmt=iofmtd, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
@@ -825,7 +825,7 @@ contains
       call ESMF_ArrayGet(arrayList(1), name=Aname(1), rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_ArrayWrite(arrayList(1), fname=fname, iofmt=iofmtd, rc=localrc)
+      call ESMF_ArrayWrite(arrayList(1), file=file, iofmt=iofmtd, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -834,7 +834,7 @@ contains
        call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_ArrayWrite(arrayList(i), fname=fname, etag=1, &
+       call ESMF_ArrayWrite(arrayList(i), file=file, append=.true., &
          iofmt=iofmtd, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -857,14 +857,14 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRead()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleWrite - Write ArrayBundle arrays
+! !IROUTINE: ESMF_ArrayBundleRead - Write ArrayBundle arrays
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleRead(arraybundle, fname, mfiles, iofmt, rc)
+  subroutine ESMF_ArrayBundleRead(arraybundle, file, mfiles, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)        :: arraybundle
-    character(*),     intent(in)              :: fname
+    character(*),     intent(in)              :: file
     logical,          intent(in) ,  optional  :: mfiles
     character(*),     intent(in),   optional  :: iofmt
     integer,          intent(out),  optional  :: rc
@@ -878,7 +878,7 @@ contains
 !   \begin{description}
 !   \item[arraybundle] 
 !     {\tt ESMF\_ArrayBundle} object.
-!   \item[fname]
+!   \item[file]
 !    The name of the file (netcdf) in which Fortran array is read from.
 !   \item[mfiles]
 !    A logical flag, if TRUE, each array located in a separate file.
@@ -927,11 +927,11 @@ contains
     if (multif) then
       do i=1,arrayCount
         write(cnum,"(i3.3)") i
-        filename = fname // cnum
+        filename = file // cnum
         call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayRead(arrayList(i), fname=filename,  &
+        call ESMF_ArrayRead(arrayList(i), file=filename,  &
                vname=Aname(i), iofmt=iofmtd, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
@@ -942,7 +942,7 @@ contains
        call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_ArrayRead(arrayList(i), fname=fname, vname=Aname(i), &
+       call ESMF_ArrayRead(arrayList(i), file=file, vname=Aname(i), &
           iofmt=iofmtd, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return

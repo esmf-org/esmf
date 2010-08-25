@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.12 2010/07/26 21:13:45 samsoncheung Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.13 2010/08/25 23:40:44 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -164,7 +164,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write ESMF_Array with Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_withhalo, fname='file3D_withhalo.nc', rc=rc)
+  call ESMF_ArrayWrite(array_withhalo, file='file3D_withhalo.nc', rc=rc)
 #ifdef ESMF_PIO
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -177,7 +177,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write ESMF_Array without Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_wouthalo, fname='file3D_wouthalo.nc', rc=rc)
+  call ESMF_ArrayWrite(array_wouthalo, file='file3D_wouthalo.nc', rc=rc)
 #ifdef ESMF_PIO
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -221,7 +221,7 @@ program ESMF_ArrayIOUTest
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read ESMF_Array without Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_wouthalo2, fname='file3D_wouthalo.nc', rc=rc)
+  call ESMF_ArrayRead(array_wouthalo2, file='file3D_wouthalo.nc', rc=rc)
 #ifdef ESMF_PIO
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -266,7 +266,7 @@ program ESMF_ArrayIOUTest
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read ESMF_Array without Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_withhalo2, fname='file3D_withhalo.nc', rc=rc)
+  call ESMF_ArrayRead(array_withhalo2, file='file3D_withhalo.nc', rc=rc)
 #ifdef ESMF_PIO
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -398,7 +398,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write 2D ESMF_Array with Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_withhalo, fname='file2D_withhalo.nc', rc=rc)
+  call ESMF_ArrayWrite(array_withhalo, file='file2D_withhalo.nc', rc=rc)
 #ifdef ESMF_PIO
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -420,7 +420,7 @@ program ESMF_ArrayIOUTest
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read 2D ESMF_Array to ESMF_Array without halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_wouthalo, fname="file2D_withhalo.nc", rc=rc)
+  call ESMF_ArrayRead(array_wouthalo, file="file2D_withhalo.nc", rc=rc)
 #ifdef ESMF_PIO
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -477,7 +477,7 @@ program ESMF_ArrayIOUTest
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read 2D ESMF_Array with different distgrid"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_diff, fname="file2D_withhalo.nc", rc=rc)
+  call ESMF_ArrayRead(array_diff, file="file2D_withhalo.nc", rc=rc)
 #ifdef ESMF_PIO
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
