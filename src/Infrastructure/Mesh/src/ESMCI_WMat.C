@@ -1,4 +1,4 @@
-// $Id: ESMCI_WMat.C,v 1.6 2010/08/24 16:10:51 oehmke Exp $
+// $Id: ESMCI_WMat.C,v 1.7 2010/08/26 19:29:10 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -16,7 +16,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WMat.C,v 1.6 2010/08/24 16:10:51 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_WMat.C,v 1.7 2010/08/26 19:29:10 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -117,8 +117,12 @@ void WMat::InsertRowMerge(const Entry &row, const std::vector<Entry> &cols) {
 	j++;
 	old_cols[j]=tmp_cols[i];
       } else {
-	if (tmp_cols[i].value != old_cols[j].value)
-	  Throw() << "Shouldn't have same source ID with different value!";
+	// If we look like the same entry, but have different values then complain
+	// NOTE: equality for entries considers more than just the .id, but doesn't
+	//       consider .value
+	if ((tmp_cols[i]       == old_cols[j]) &&
+	    (tmp_cols[i].value != old_cols[j].value))
+	  Throw() << "Shouldn't have same entries with different value!";
       }
     }
 
