@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.115 2010/08/09 21:57:40 theurich Exp $
+# $Id: makefile,v 1.116 2010/08/26 18:27:40 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -66,8 +66,7 @@ script_info:
 	@$(ESMF_CPP) --version $(ESMF_DIR)/scpripts/empty.C
 	-@echo "" 
 	-@echo "--------------------------------------------------------------"
-	-@if [ -f $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h ] ; then \
-	  fgrep ESMF_VERSION_STRING $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) "s/^#define //" ; fi
+	-@echo "ESMF_VERSION_STRING:    $(ESMF_VERSION_STRING)"
 	-@echo "--------------------------------------------------------------"
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
@@ -246,6 +245,13 @@ info_mk: chkdir_lib
 	-@echo "#" >> $(MKINFO)
 	-@echo "# Please see end of file for options used on this ESMF build" >> $(MKINFO)
 	-@echo "#" >> $(MKINFO)
+	-@echo "" >> $(MKINFO)
+	-@echo "" >> $(MKINFO)
+	-@echo "ESMF_VERSION_STRING=$(ESMF_VERSION_STRING)" >> $(MKINFO)
+	-@echo "ESMF_MAJOR_VERSION=$(ESMF_MAJOR_VERSION)" >> $(MKINFO)
+	-@echo "ESMF_MINOR_VERSION=$(ESMF_MINOR_VERSION)" >> $(MKINFO)
+	-@echo "ESMF_REVISION=$(ESMF_REVISION)" >> $(MKINFO)
+	-@echo "ESMF_PATCHLEVEL=$(ESMF_PATCHLEVEL)" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "ESMF_APPSDIR=$(ESMF_APPSDIR)" >> $(MKINFO)

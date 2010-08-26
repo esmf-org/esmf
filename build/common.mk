@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.314 2010/08/25 05:10:31 theurich Exp $
+#  $Id: common.mk,v 1.315 2010/08/26 18:27:40 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -439,6 +439,19 @@ endif
 # Set ESMFMKFILE here in order to be available for installcheck target
 #-------------------------------------------------------------------------------
 export ESMFMKFILE = $(ESMF_INSTALL_LIBDIR_ABSPATH)/esmf.mk
+
+#-------------------------------------------------------------------------------
+# Set ESMF Version variables
+#-------------------------------------------------------------------------------
+ESMF_VERSION_STRING = `fgrep ESMF_VERSION_STRING $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) -e 's/.* \"//' -e 's/\"//' `
+
+ESMF_MAJOR_VERSION = `fgrep ESMF_MAJOR_VERSION $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) -e 's/.* //' `
+
+ESMF_MINOR_VERSION = `fgrep ESMF_MINOR_VERSION $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) -e 's/.* //' `
+
+ESMF_REVISION = `fgrep ESMF_REVISION $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) -e 's/.* //' `
+
+ESMF_PATCHLEVEL = `fgrep ESMF_PATCHLEVEL $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) -e 's/.* //' `
 
 #-------------------------------------------------------------------------------
 # TODO: in general ESMF_BUILD is respected - most generated files are created
