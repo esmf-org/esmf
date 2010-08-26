@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.6 2010/08/19 15:59:42 feiliu Exp $
+! $Id: CouplerMod.F90,v 1.7 2010/08/26 17:17:27 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -67,8 +67,11 @@
       ! Register the callback routines.
 
       call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, coupler_init, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, coupler_run, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, coupler_final, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       print *, "CouplerMod: Registered Initialize, Run, and Finalize routines"
 
@@ -123,30 +126,44 @@
 
     ! Get VM from coupler component to use in computing redistribution
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     call ESMF_StateGet(importState, name=statename, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
     call ESMF_StateGet(importState, "SIE", src_field, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
     call ESMF_StateGet(exportState, "SIE", dst_field, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     if (trim(statename) .eq. "FlowSolver Feedback") then
       call ESMF_StateSetNeeded(importState, "SIE", ESMF_NEEDED, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateSetNeeded(importState, "V", ESMF_NEEDED, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateSetNeeded(importState, "RHO", ESMF_NEEDED, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateSetNeeded(importState, "FLAG", ESMF_NEEDED, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       call ESMF_FieldRedistStore(src_field, dst_field, &
                                  routehandle=fromFlow_rh, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       
     endif
 
     if (trim(statename) .eq. "Injection Feedback") then
       call ESMF_StateSetNeeded(importState, "SIE", ESMF_NEEDED, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateSetNeeded(importState, "V", ESMF_NEEDED, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateSetNeeded(importState, "RHO", ESMF_NEEDED, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateSetNeeded(importState, "FLAG", ESMF_NEEDED, rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       call ESMF_FieldRedistStore(src_field, dst_field, &
                                  routehandle=fromInject_rh, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     endif
 
@@ -216,6 +233,7 @@
         ! both ways - so we only care about the coupling direction in order 
         ! to get the right routehandle selected.
         call ESMF_StateGet(importState, name=statename, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
         if (trim(statename) .eq. "FlowSolver Feedback") then
             routehandle = fromFlow_rh 
         else
@@ -245,7 +263,9 @@
 !
 !\begin{verbatim}
            call ESMF_StateGet(importState, datanames(i), srcfield, rc=rc)
+           if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
            call ESMF_StateGet(exportState, datanames(i), dstfield, rc=rc)
+           if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !\end{verbatim}
 !
 !   The redist routine uses information contained in the Fields and the
@@ -257,6 +277,7 @@
 !
 !\begin{verbatim}
            call ESMF_FieldRedist(srcfield, dstfield, routehandle, rc=rc)
+           if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -310,8 +331,10 @@
 
         ! Only thing to do here is release redist and route handles
         call ESMF_FieldRedistRelease(fromFlow_rh, rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
         call ESMF_FieldRedistRelease(fromInject_rh, rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
         rc = ESMF_SUCCESS
     
