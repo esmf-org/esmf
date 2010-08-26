@@ -1,4 +1,4 @@
-% $Id: Grid_crefdoc.ctex,v 1.10 2010/06/28 21:35:31 theurich Exp $
+% $Id: Grid_crefdoc.ctex,v 1.11 2010/08/26 05:49:22 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,6 +63,13 @@
 \input{../Infrastructure/Grid/doc/Grid_desc}
 #endif
 
+%\subsection{Grid Options}
+#ifdef STANDALONE
+%\input{Grid_options}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Grid/doc/Grid_options}
+#endif
+
 %\subsection{Use and Examples}
 #ifdef STANDALONE
 %\input{Grid_usage}
@@ -92,13 +99,6 @@
 %\input{Grid_implnotes}
 #elif defined(CONSTITUENT)
 %\input{../Infrastructure/Grid/doc/Grid_implnotes}
-#endif
-
-%\subsection{Grid Options}
-#ifdef STANDALONE
-%\input{Grid_options}
-#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Grid/doc/Grid_options}
 #endif
 
 \subsection{Class API: General Grid Methods}
