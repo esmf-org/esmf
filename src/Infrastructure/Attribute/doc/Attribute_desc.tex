@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.37 2010/08/25 05:56:48 eschwab Exp $
+% $Id: Attribute_desc.tex,v 1.38 2010/08/26 05:49:10 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,83 +36,6 @@ ESMF's Approach to attributes can be summed up in the following:
   \item Export Attributes in more than one format (see Section XX)
   \item Ensure that all Attributes are consistent across the entire virtual machine of the object to which they are attached  
 \end{itemize}
-
-
-\subsubsection{Table of Available Attributes}
-
-The following is an alphabetical list of all the attributes impletmented in ESMF, their definitions, and which packages they are contained within. A list of attributes by package exists in the following section. 
-
-
-\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}}
-     \hline\hline
-     {\bf Name} & {\bf Definition} & {\bf Attribute Package}\\
-     \hline\hline
-     {\tt Agency} & An administrative unit of government.& ESG Basic Component\\
-     {\tt Author} & The person who created the content of a book, article, or other source. & ESG Basic Component\\
-     {\tt CodingLanguage} & The computer language in which a unit of software is written. & ESG Basic Component\\
-     {\tt ComponentShortName} & A version of the component name that contains acronyms. & CIM Main\\
-     {\tt ComponentLongName} & A version of the component name with all acronyms spelled out. & CIM Main\\
-     {\tt ComponentDescription} & A multi-line description of the component. & CIM Main \\
-     {\tt Discipline} & A subject, theme, category, or general area of interest.& ESG Basic Component \\
-     {\tt DimOrder} & The order in which latitude and longitude appear within the two dimensional grid array. & Gridspec\\ 
-     {\tt DiscretizationType} & Specifies the method by which a two-dimensional coordinate system is sampled to form a computational grid.& Gridspec \\
-     {\tt FullName} & The name of a model, model component, simulation, experiment, or dataset with all acronyms spelled out.& ESG Basic Component\\
-     {\tt GeometryType} & Indicates the geometric figure used to approximate the shape of the Earth, e.g. "sphere". & Gridspec \\
-     {\tt GridType} & A text description of the grid that uses common terminology. & Gridspec \\
-     {\tt IndividualName} & The person designated to provide information about a model component. & CIM Responsible Party\\
-     {\tt IndividualPhysicalAddress} & The address of the person designated to provide information about a model component. & CIM Responsible Party\\
-     {\tt IndividualEmailAddress} & The email address that others can use to ask questions about a model component. & CIM Responsible Party\\
-     {\tt IndividualURL} & A URL of a contact or institution. & CIM Responsible Party\\
-     {\tt InputType} & The form of the input condition (e.g. initial condition or boundary condition). &  CIM Inputs \\
-     {\tt InputSourceComponent} & The component the input condition is coming from. & CIM Inputs\\ 
-     {\tt InputTargetComponent} & The component the input condition is going to. & CIM Inputs\\ 
-     {\tt InputTechnique} & The software package or mechanism used to transfer and transform data between model components. & CIM Inputs\\ 
-     {\tt InputSpatialRegriddingMethod} & Method used to interpolate a field from one grid (source grid) to another (target grid). & CIM Inputs\\ 
-     {\tt InputSpatialRegriddingType} & Characteristics of the scheme used to interpolate a field from one grid (source grid) to another (target grid).& CIM Inputs\\ 
-     {\tt InputFrequency} & The frequency (e.g. months, days) that a field from one component is input to another. & CIM Inputs\\ 
-     {\tt InputTimeTransformationType} & Temporal transformation performed on the input field before or after regridding onto the target grid.& CIM Inputs\\ 
-     {\tt Institution} & An organization associated with a model component, simulation, or dataset.& ESG Basic Component\\
-     {\tt IsConformal} & Indicates if the grid tile is angle-preserving. If so, angles measured on the grid are equal to the equivalent angles on the Earth. & Gridspec\\ 
-     {\tt IsRegular} & Indicates whether or not the horizontal coordinates of the grid can be defined using 1D arrays (vectors). This means that grid node locations are defined by the cartesian product of the X/Lon and Y/Lat coordinate vectors. It also means that grid cells are logically rectangular (they may also be physically rectangular in the case of projected coordinates). & Gridspec\\ 
-     {\tt IsUniform} &Indicates whether or not the horizontal coordinates of a grid have fixed offsets in the X and Y directions. If the offset is the same in both directions then the grid is logically square, otherwise it is logically rectangular. & Gridspec \\
-     {\tt MachineName} & The name given to a computer by its system administrators. This is not the brand name of the system.& CIM Platform \\
-     {\tt MachineDescription} & A short note about the machine. & CIM Platform\\
-     {\tt MachineHardwareType} & The type of computer system (e.g. vector, parallel, cluster, etc.).& CIM Platform\\
-     {\tt MachineOperatingSystem} & The software that is responsible for the management and coordination of activities and the sharing of resources of a computer. & CIM Platform\\
-     {\tt MachineVendor} & The brand name of a computer system. & CIM Platform \\
-     {\tt MachineInterconnectType} & The technology used to associate each node in a supercomputer with every other node. & CIM Platform\\
-     {\tt MachineMaxProcessors} & The highest number of computer chips on a computer system. & CIM Platform\\
-     {\tt MachineCoresPerProcessor} & The number of sub-divided elements or mini-chips on a computer chip. &  CIM Platform\\
-     {\tt MachineProcessor} & The type of computer chip used in a particular computer platform. & CIM Platform\\
-     {\tt MachineCompiler} & The brand of the software that takes source code and turns it into an executable.& CIM Platform\\
-     {\tt MachineCompilerVersion} & The specific configuration value of the software used to take source code and turn it into executable code. & CIM Platform\\
-     {\tt ModelComponentFramework} & The software package or mechanism used to transfer and transform data between model components.& ESG Basic Component \\
-     {\tt ModelType} & A short string describing the discipline of a model component. & CIM Main\\
-     {\tt Name} & \\
-     {\tt NorthPoleLocation} & Defines the lat-long position of the 'north pole' used by the grid tile in the case of rotated/displaced pole grids.& N/A \\ 
-     {\tt NumberOfCells} & The number of cells in an unstructured grid. & \\ 
-     {\tt NumDims} & & N/A\\ 
-     {\tt NX} & Specifies the length of the X, or longitude, dimension of the grid tile. & Gridspec \\ 
-     {\tt NY} & Specifies the length of the Y, or latitude, dimension of the grid tile. & Gridspec\\ 
-     {\tt PhysicalDomain} & A description of the geographic range being simulated. & ESG Basic Component \\
-     {\tt PreviousVersion} & Name of the previous version of a model or model component. & CIM Main\\ 
-     {\tt PreviousVersionDescription} &  A short note about the previous version of the model or model component. & CIM Main \\
-     {\tt ResponsiblePartyRole} & A flag to define the Responsible Party block. &  CIM Responsible Party\\ 
-     {\tt SimulationShortName} & The name of the simulation. & CIM Main\\
-     {\tt SimulationLongName} & The name of the simulation with any acronyms spelled out. & CIM Main\\ 
-     {\tt SimulationRationale} & The reason for performing an experiment. & CIM Main\\
-     {\tt SimulationStartDate} & The date in simulated time of the start of a model simulation. & CIM Main\\ 
-     {\tt SimulationDuration} & The length of time a simulation runs.&  CIM Main\\ 
-     {\tt StateIntent} & An indication of whether a field is imported into or exported from a particular model component. This refers to coupling, and not history outout. & ESMF State\\
-     {\tt YearReleased} & The year a model component was issued. & CIM Main\\
-     {\tt VariableLongName} & An ad-hoc long descriptive name which may, for example, be used for labeling plots & CF General\\
-     {\tt VariableShortName}  & The short\_name is technically not part of the CF stanard but is commonly the name of the variable on the output file and so is distinct from the long\_name & CF General\\
-     {\tt VariableStandardName} & The approved CF standard name for a variable if it exists &  CF Extended\\
-     {\tt VariableState} & An indication of whether a variable is exported or imported. This refers to coupling and not history output. & ESG Field\\
-     {\tt VariableUnits}  & The value of the units attribute is a string that can be recognized by UNIDATA"s Udunits package & CF General\\
-     {\tt Version} & A specific form or variation of an artifact i.e. a unit of software or metadata. & ESG Basic Component, CIM Main\\ 
-
-\end{tabular}
 
 \subsubsection{Attribute Hierarchies}
 
