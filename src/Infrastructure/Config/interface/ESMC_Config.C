@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.C,v 1.19 2010/06/24 07:42:58 theurich Exp $
+// $Id: ESMC_Config.C,v 1.20 2010/08/26 22:49:23 w6ws Exp $
 //
 // Earth System Modeling Framework
 // copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char* const version = "$Id: ESMC_Config.C,v 1.19 2010/06/24 07:42:58 theurich Exp $";
+static const char* const version = "$Id: ESMC_Config.C,v 1.20 2010/08/26 22:49:23 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 // class declaration type -> this should be moved into ESMCI namespace
@@ -68,7 +68,7 @@ extern "C" {
   void FTN(f_esmf_configfindlabel)(ESMCI_Config* config, char* label, int* rc,
     ESMCI_FortranStrLenArg llen);
 
-  void FTN(f_esmf_confignextline)(ESMCI_Config* config, int* ltable, int* rc);
+  void FTN(f_esmf_confignextline)(ESMCI_Config* config, ESMC_Logical* tableEnd, int* rc);
 
 //  void FTN(f_esmf_configgetchar)(ESMCI_Config* config, char* value, char* label,
 //    char* dvalue, int* rc, ESMCI_FortranStrLenArg, ESMCI_FortranStrLenArg llen,
@@ -516,8 +516,8 @@ int ESMC_ConfigNextLine(
 //  Equals {\tt ESMF\_SUCCESS} if there are no errors.
 //
 // !ARGUMENTS:
-  ESMC_Config config,       // in  - ESMC_Config object
-  int tableEnd){
+  ESMC_Config config,       // in
+  bool *tableEnd){          // out
 //
 // !DESCRIPTION:
 //  Selects the next line (for tables).
@@ -534,6 +534,7 @@ int ESMC_ConfigNextLine(
   // local vars
   int rc;                     // return code
   int localrc;                // local return code
+  ESMC_Logical localtableEnd; // local tableEnd flag
 
   // Initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
@@ -550,10 +551,12 @@ int ESMC_ConfigNextLine(
   ESMCI_Config *configp = (ESMCI_Config*)(config.ptr);
 
   // call Fortran interface
-  FTN(f_esmf_confignextline)(configp, &tableEnd, &localrc);
+  FTN(f_esmf_confignextline)(configp, &localtableEnd, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
     return rc;
   }
+
+  *tableEnd = (localtableEnd == ESMF_TRUE) ? true : false;
 
   // set return code for this branch
   rc = ESMF_SUCCESS;

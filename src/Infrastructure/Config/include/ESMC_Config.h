@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.19 2010/08/05 04:44:15 w6ws Exp $
+// $Id: ESMC_Config.h,v 1.20 2010/08/26 22:49:23 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@ typedef struct {
 //
 // !INTERFACE:
 ESMC_Config ESMC_ConfigCreate(
-  int* rc                    // out - return code
+  int* rc                    // out
   );
 
 // !RETURN VALUE:
@@ -95,7 +95,7 @@ ESMC_Config ESMC_ConfigCreate(
 //
 // !INTERFACE:
 int ESMC_ConfigDestroy(
-  ESMC_Config* config        // in  - ESMC_Config to destroy
+  ESMC_Config* config        // in
   );
 
 // !RETURN VALUE:
@@ -107,7 +107,7 @@ int ESMC_ConfigDestroy(
 //   The arguments are:
 //   \begin{description}
 //   \item [config]
-//     Already created {\tt ESMC\_Config} object.
+//     Already created {\tt ESMC\_Config} object to destroy.
 //   \end{description}
 //
 //EOP
@@ -119,9 +119,9 @@ int ESMC_ConfigDestroy(
 //
 // !INTERFACE:
 int ESMC_ConfigLoadFile(
-  ESMC_Config config,        // in  - ESMC_Config object
-  const char* name,          // in  - file name
-  ...                        // optional argument list: (unique)
+  ESMC_Config config,        // in
+  const char* file,          // in
+  ...                        // optional argument list
   );
 
 // !RETURN VALUE:
@@ -134,7 +134,7 @@ int ESMC_ConfigLoadFile(
 //   \begin{description}
 //   \item [config]
 //     Already created {\tt ESMC\_Config} object.
-//   \item [filename]
+//   \item [file]
 //     Configuration file name.
 //   \item [{[delayout]}]
 //     {\tt ESMC\_DELayout} associated with this {\tt config} object.
@@ -153,8 +153,8 @@ int ESMC_ConfigLoadFile(
 //
 // !INTERFACE:
 int ESMC_ConfigFindLabel(
-  ESMC_Config config,        // in  - ESMC_Config object
-  const char* label          // in  - label
+  ESMC_Config config,        // in
+  const char* label          // in
   );
 
 // !RETURN VALUE:
@@ -188,8 +188,8 @@ int ESMC_ConfigFindLabel(
 //
 // !INTERFACE:
 int ESMC_ConfigNextLine(
-  ESMC_Config config,       // in  - ESMC_Config object
-  int tableEnd);
+  ESMC_Config config,       // in
+  bool *tableEnd);          // out
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -215,9 +215,9 @@ int ESMC_ConfigNextLine(
 //
 // !INTERFACE:
 int ESMC_ConfigGetLen(
-  ESMC_Config config,        // in  - ESMC_Config object
-  int* wordCount,            // out - length of line in words
-  ...                        // optional argument list: (label)
+  ESMC_Config config,        // in
+  int* wordCount,            // out
+  ...                        // optional argument list
   );
 
 // !RETURN VALUE:
@@ -246,10 +246,10 @@ int ESMC_ConfigGetLen(
 //
 // !INTERFACE:
 int ESMC_ConfigGetDim(
-  ESMC_Config config,        // in  - ESMC_Config object
-  int* lineCount,            // out - number of lines in table
-  int* columnCount,          // out - number of columns in table
-  ...                        // optional argument list: (label)
+  ESMC_Config config,        // in
+  int* lineCount,            // out
+  int* columnCount,          // out
+  ...                        // optional argument list
   );
 
 // !RETURN VALUE:
@@ -280,8 +280,8 @@ int ESMC_ConfigGetDim(
 //
 // !INTERFACE:
 int ESMC_ConfigValidate(
-  ESMC_Config config,        // in  - ESMC_Config object
-  ...                        // optional argument list: (options)
+  ESMC_Config config,        // in
+  ...                        // optional argument list
   );
 
 // !RETURN VALUE:
@@ -310,6 +310,7 @@ int ESMC_ConfigValidate(
 //
 //EOP
 
+// The following are not currently implemented:
 int ESMC_ConfigGetAttribute(ESMC_Config config, void* value, enum ESMC_TypeKind tk,
   ...);
 

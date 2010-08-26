@@ -1,4 +1,4 @@
-!  $Id: ESMF_Config_C.F90,v 1.15 2010/05/10 07:20:54 theurich Exp $
+!  $Id: ESMF_Config_C.F90,v 1.16 2010/08/26 22:49:23 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Config_C.F90,v 1.15 2010/05/10 07:20:54 theurich Exp $'
+!      '$Id: ESMF_Config_C.F90,v 1.16 2010/08/26 22:49:23 w6ws Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -127,9 +127,9 @@
 
      implicit none
 
-     type(ESMF_Config), intent(inout)  :: config      
-     integer, intent(out)              :: tableEnd
-     integer, intent(out)              :: rc   
+     type(ESMF_Config),  intent(inout) :: config      
+     type(ESMF_Logical), intent(out)   :: tableEnd
+     integer,            intent(out)   :: rc   
 
      logical :: ltableEnd
 
@@ -137,11 +137,7 @@
      rc = ESMF_RC_NOT_IMPL
 
      call ESMF_ConfigNextLine(config, tableEnd=ltableEnd, rc=rc)
-     if (ltableEnd) then
-       tableEnd = 1
-     else
-       tableEnd = 0
-     endif
+     tableEnd = ltableEnd
 
    end subroutine f_esmf_confignextline
 !------------------------------------------------------------------------------

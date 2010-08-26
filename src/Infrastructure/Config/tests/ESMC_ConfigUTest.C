@@ -1,4 +1,4 @@
-// $Id: ESMC_ConfigUTest.C,v 1.11 2010/04/12 21:16:52 w6ws Exp $
+// $Id: ESMC_ConfigUTest.C,v 1.12 2010/08/26 22:49:23 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -11,6 +11,9 @@
 //==============================================================================
 
 #include <string.h>
+#if !defined(__cplusplus)
+#include <stdbool.h>
+#endif
 
 // ESMF header
 #include "ESMC.h"
@@ -107,10 +110,10 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   //Find the next line
-  int tableEnd = 1;           //true
+  bool tableEnd = true;           //true
   strcpy(name, "ConfigNextLine Unit test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_ConfigNextLine(cf, tableEnd);
+  rc = ESMC_ConfigNextLine(cf, &tableEnd);
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
   //----------------------------------------------------------------------------
 
