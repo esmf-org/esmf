@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.6 2010/08/06 17:05:36 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.7 2010/08/27 17:47:46 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.6 2010/08/06 17:05:36 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.7 2010/08/27 17:47:46 feiliu Exp $'
 
 !==============================================================================
 !
@@ -346,6 +346,8 @@ integer, intent(out), optional  :: rc
     ! this checking will be collective since the indices needs to be gathered
     ! if(present(sparseMatA2X) .and. present(sparseMatX2A)) then
     ! endif
+    ! Another approach is to create 2 distgrids and use distgridMatch to compare
+    ! the result Distgrid as discussed.
 
     if(present(sparseMatB2X)) then
         call ESMF_SparseMatca(sparseMatB2X, xgtype%sparseMatB2X, ngrid_b, 'sparseMatB2X', rc=localrc)

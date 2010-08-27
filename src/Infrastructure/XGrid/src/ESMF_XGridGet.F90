@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.7 2010/08/10 20:14:49 feiliu Exp $
+! $Id: ESMF_XGridGet.F90,v 1.8 2010/08/27 17:47:46 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.7 2010/08/10 20:14:49 feiliu Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.8 2010/08/27 17:47:46 feiliu Exp $'
 
 !==============================================================================
 !
@@ -104,9 +104,9 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridGetDefault()"
 !BOPI
-! !IROUTINE:  ESMF_XGridGetDefault - Get default information from XGrid
+! !IROUTINE:  ESMF_XGridGet - Get default information from XGrid
 
-! !INTERFACE:
+! !INTERFACE: ESMF_XGridGet
 
 subroutine ESMF_XGridGetDefault(xgrid, &
     sideA, sideB, ngridA, ngridB, area, centroid, &
@@ -404,11 +404,93 @@ end subroutine ESMF_XGridGetDefault
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridGetSMMSpec()"
+!BOPI
+! !IROUTINE:  ESMF_XGridGet - Get an individual SparseMatSpec
+
+! !INTERFACE: ESMF_XGridGet
+
+subroutine ESMF_XGridGetSMMSpec(xgrid, sparseMat, srcSide, srcGridIndex, &
+    dstSide, dstGridIndex, &
+    rc) 
+
+!
+! !ARGUMENTS:
+type(ESMF_XGrid), intent(in)                 :: xgrid
+type(ESMF_XGridSpec), intent(out)            :: sparseMat
+type(ESMF_XGridSide), intent(in)             :: srcSide
+integer, intent(in)                          :: srcGridIndex
+type(ESMF_XGridSide), intent(in)             :: dstSide
+integer, intent(in)                          :: dstGridIndex
+integer, intent(out), optional               :: rc 
+!
+! !DESCRIPTION:
+!      Get information about XGrid
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [xgrid]
+!       The xgrid object used to retrieve information from.
+!     \item [distgrid]
+!       Distgrid whose sequence index list is an overlap between gridIndex-th Grid
+!       on xgridSide and the xgrid object.
+!     \item [{[srcSide]}] 
+!       Side of the XGrid from (either ESMF\_XGRID\_SIDEA,
+!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED).
+!     \item [{[srcGridIndex]}] 
+!       If xgridSide is  ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on
+!       that side.
+!     \item [{[dstSide]}] 
+!       Side of the XGrid from (either ESMF\_XGRID\_SIDEA,
+!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED).
+!     \item [{[dstGridIndex]}] 
+!       If xgridSide is  ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on
+!       that side.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} only if the {\tt ESMF\_XGrid} 
+!       is created.
+!     \end{description}
+!
+!EOPI
+
+    type(ESMF_XGridType), pointer :: xgtypep
+
+    ! Initialize return code   
+    if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! check init status of input XGrid
+    ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
+
+    xgtypep => xgrid%xgtypep
+
+    if(srcSide .eq. ESMF_XGRID_SIDEA .and. dstSide .eq. ESMF_XGRID_BALANCED) then
+        sparseMat = xgtypep%SparseMatA2X(srcGridIndex)
+    endif
+
+    if(srcSide .eq. ESMF_XGRID_SIDEB .and. dstSide .eq. ESMF_XGRID_BALANCED) then
+        sparseMat = xgtypep%SparseMatB2X(srcGridIndex)
+    endif
+
+    if(srcSide .eq. ESMF_XGRID_BALANCED .and. dstSide .eq. ESMF_XGRID_SIDEA) then
+        sparseMat = xgtypep%SparseMatX2A(dstGridIndex)
+    endif
+
+    if(srcSide .eq. ESMF_XGRID_BALANCED .and. dstSide .eq. ESMF_XGRID_sideB) then
+        sparseMat = xgtypep%SparseMatX2B(dstGridIndex)
+    endif
+
+    ! success
+    if(present(rc)) rc = ESMF_SUCCESS
+
+end subroutine ESMF_XGridGetSMMSpec
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridGetDG()"
 !BOPI
-! !IROUTINE:  ESMF_XGridGetDG - Get an individual distgrid
+! !IROUTINE:  ESMF_XGridGet - Get an individual distgrid
 
-! !INTERFACE:
+! !INTERFACE: ESMF_XGridGet
 
 subroutine ESMF_XGridGetDG(xgrid, distgrid, xgridSide, gridIndex, &
     rc) 
@@ -509,9 +591,9 @@ end subroutine ESMF_XGridGetDG
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridGetEle()"
 !BOPI
-! !IROUTINE:  ESMF_XGridGetEle - Get information about XGrid
+! !IROUTINE:  ESMF_XGridGet - Get information about XGrid
 
-! !INTERFACE:
+! !INTERFACE: ESMF_XGridGet
 
 subroutine ESMF_XGridGetEle(xgrid, &
     localDE, elementCount, &
