@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.8 2010/08/24 16:13:51 feiliu Exp $
+! $Id: CoupledFlowDemo.F90,v 1.9 2010/08/27 14:52:25 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -133,7 +133,7 @@
     type(ESMF_Grid) :: gridTop, gridIN, gridFS
     type(ESMF_VM) :: vm
     integer :: halo_width(2) = 1, minIndex(2), maxIndex(2)
-    type(ESMF_Array) :: coordX, coordY
+    type(ESMF_Array) :: coordX, coordY, newCoordX, newCoordY
 
 
     ! Get our vm and grid from the component
@@ -233,12 +233,20 @@
 
     call ESMF_GridGetCoord(gridTop, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
-          coordDim=1, array=CoordX, doCopy=ESMF_DATA_COPY, rc=rc)
+          coordDim=1, array=CoordX, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     call ESMF_GridGetCoord(gridTop, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
-          coordDim=2, array=CoordY, doCopy=ESMF_DATA_COPY, rc=rc)
+          coordDim=2, array=CoordY, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    call ESMF_ArrayPrint(coordX, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    newCoordX = ESMF_ArrayCreate(coordX, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+    newCoordY = ESMF_ArrayCreate(coordY, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     gridIN = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxIndex, &
@@ -250,12 +258,12 @@
 
     call ESMF_GridSetCoord(gridIN, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
-          coordDim=1, array=CoordX, rc=rc)
+          coordDim=1, array=newCoordX, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     call ESMF_GridSetCoord(gridIN, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
-          coordDim=2, array=CoordY, rc=rc)
+          coordDim=2, array=newCoordY, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     call ESMF_GridCompSet(INcomp, grid=gridIN, rc=rc)
