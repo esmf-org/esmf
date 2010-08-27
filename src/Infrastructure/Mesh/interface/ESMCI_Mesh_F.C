@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.44 2010/07/16 21:46:23 w6ws Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.45 2010/08/27 21:11:27 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.44 2010/07/16 21:46:23 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.45 2010/08/27 21:11:27 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -377,7 +377,7 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
 
       // The object
       long eid = elemId[e];
-      MeshObj *elem = new MeshObj(MeshObj::ELEMENT, eid);
+      MeshObj *elem = new MeshObj(MeshObj::ELEMENT, eid, e);
 
       for (int n = 0; n < nnodes; ++n) {
       
@@ -709,6 +709,39 @@ void getNodeGIDS(Mesh &mesh, std::vector<int> &ngid) {
 
 }
 
+
+/**
+ * Sort nodes by the order in which they were originally declared
+ * (which is stored by get_data_index)
+ */
+void getElemGIDS(Mesh &mesh, std::vector<int> &egid) {
+
+  UInt nelems = mesh.num_elems();
+
+  Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+
+  std::vector<std::pair<int,int> > gids;
+
+  for (; ei != ee; ++ei) {
+
+    MeshObj &elem = *ei;
+
+    if (!GetAttr(elem).is_locally_owned()) continue;
+
+    int idx = elem.get_data_index();
+
+    gids.push_back(std::make_pair(idx, elem.get_id()));
+
+  }
+
+  std::sort(gids.begin(), gids.end());
+
+  egid.clear();
+  for (UInt i = 0; i < gids.size(); ++i) egid.push_back(gids[i].second);
+
+}
+
+
 extern "C" void FTN(c_esmc_meshget)(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc){
 
   // Initialize the parallel environment for mesh (if not already done)
@@ -755,7 +788,8 @@ extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *
       
       getNodeGIDS(*meshp, ngids);
       
-      getMeshGIDS(*meshp, ae, egids);
+      //      getMeshGIDS(*meshp, ae, egids);
+      getElemGIDS(*meshp, egids);
     }
     
     /*
@@ -810,6 +844,7 @@ extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *
     int rc1;
     
     int *indices = (esize==0)?NULL:&egids[0];
+
 
     FTN(f_esmf_getmeshdistgrid)(egrid, &esize, indices, &rc1);
 

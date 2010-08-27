@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.33 2010/08/24 16:10:51 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.34 2010/08/27 21:11:27 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.33 2010/08/24 16:10:51 oehmke Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.34 2010/08/27 21:11:27 oehmke Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -151,6 +151,7 @@ module ESMF_MeshMod
   public ESMF_MeshSerialize
   public ESMF_MeshDeserialize
   public ESMF_MeshFindPnt
+  public operator(.eq.), operator(.ne.) 
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -158,7 +159,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.33 2010/08/24 16:10:51 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.34 2010/08/27 21:11:27 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -171,6 +172,41 @@ module ESMF_MeshMod
      module procedure ESMF_MeshCreate1Part
      module procedure ESMF_MeshCreateFromPointer
    end interface
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (.eq.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_MeshLocEqual
+
+! !DESCRIPTION:
+!     This interface overloads the equality operator for the specific
+!     ESMF MeshLoc.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (.ne.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_MeshLocEqual
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF MeshLoc.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+
+
 
       contains
 
@@ -1440,6 +1476,77 @@ module ESMF_MeshMod
     
   end subroutine ESMF_MeshFindPnt
 !------------------------------------------------------------------------------
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshLocEqual"
+!BOPI
+! !IROUTINE: ESMF_MeshLocEqual - Equality of MeshLoc statuses
+!
+! !INTERFACE:
+      function ESMF_MeshLocEqual(MeshLoc1, MeshLoc2)
+
+! !RETURN VALUE:
+      logical :: ESMF_MeshLocEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_MeshLoc), intent(in) :: &
+         MeshLoc1,      &! Two igrid statuses to compare for
+         MeshLoc2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF MeshLoc statuses to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[MeshLoc1, MeshLoc2]
+!          Two igrid statuses to compare for equality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_MeshLocEqual = (MeshLoc1%meshloc == &
+                              MeshLoc2%meshloc)
+
+      end function ESMF_MeshLocEqual
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshLocNotEqual"
+!BOPI
+! !IROUTINE: ESMF_MeshLocNotEqual - Non-equality of MeshLoc statuses
+!
+! !INTERFACE:
+      function ESMF_MeshLocNotEqual(MeshLoc1, MeshLoc2)
+
+! !RETURN VALUE:
+      logical :: ESMF_MeshLocNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_MeshLoc), intent(in) :: &
+         MeshLoc1,      &! Two MeshLoc Statuses to compare for
+         MeshLoc2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF MeshLoc statuses to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[MeshLoc1, MeshLoc2]
+!          Two statuses of MeshLocs to compare for inequality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_MeshLocNotEqual = (MeshLoc1%meshloc /= &
+                                 MeshLoc2%meshloc)
+
+      end function ESMF_MeshLocNotEqual
 
 
 
