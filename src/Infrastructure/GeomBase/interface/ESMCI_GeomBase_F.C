@@ -1,4 +1,4 @@
-// $Id: ESMCI_GeomBase_F.C,v 1.3 2010/06/23 23:10:07 theurich Exp $
+// $Id: ESMCI_GeomBase_F.C,v 1.4 2010/08/27 21:12:09 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_GeomBase_F.C,v 1.3 2010/06/23 23:10:07 theurich Exp $";
+             "$Id: ESMCI_GeomBase_F.C,v 1.4 2010/08/27 21:12:09 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -44,16 +44,17 @@ extern "C" {
 
 // non-method functions
   void FTN(c_esmc_geombaseserialize)(int *geomtype, int * staggerloc,
-		    char *buffer, int *length, int *offset,
-                    ESMC_InquireFlag *inquireflag, int *localrc,
-                    ESMCI_FortranStrLenArg buffer_l){
+				     int *meshloc, int *xgridside, int *xgridindex, 
+				     char *buffer, int *length, int *offset,
+				     ESMC_InquireFlag *inquireflag, int *localrc,
+				     ESMCI_FortranStrLenArg buffer_l){
     int *ip;
 
     // Initialize return code; assume routine not implemented
     if (localrc) *localrc = ESMC_RC_NOT_IMPL;
 
     // TODO: verify length > 4 status vars, and if not, make room.
-    int fixedpart = 2 * sizeof(int);
+    int fixedpart = 5 * sizeof(int);
     if (*inquireflag != ESMF_INQUIREONLY) {
       if ((*length - *offset) < fixedpart) {     
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -68,10 +69,13 @@ extern "C" {
     if (*inquireflag != ESMF_INQUIREONLY) {
       *ip++ = *geomtype;
       *ip++ = *staggerloc; 
+      *ip++ = *meshloc; 
+      *ip++ = *xgridside; 
+      *ip++ = *xgridindex; 
     }
 
     // Adjust offset
-    *offset += 2 * sizeof(int);
+    *offset += 5 * sizeof(int);
 
     // return success
     if (localrc) *localrc = ESMF_SUCCESS;
@@ -81,8 +85,9 @@ extern "C" {
 
 
   void FTN(c_esmc_geombasedeserialize)(int *geomtype, int * staggerloc,
-	       char *buffer, int *offset, int *localrc,
-               ESMCI_FortranStrLenArg buffer_l){
+				       int *meshloc, int *xgridside, int *xgridindex, 
+				       char *buffer, int *offset, int *localrc,
+				       ESMCI_FortranStrLenArg buffer_l){
 
     int *ip;
 
@@ -93,9 +98,12 @@ extern "C" {
     ip = (int *)(buffer + *offset);
     *geomtype = *ip++;
     *staggerloc = *ip++; 
+    *meshloc = *ip++; 
+    *xgridside = *ip++; 
+    *xgridindex = *ip++; 
 
     // Adjust offset
-    *offset += 2 * sizeof(int);
+    *offset += 5 * sizeof(int);
 
     if (localrc) *localrc = ESMF_SUCCESS;
 

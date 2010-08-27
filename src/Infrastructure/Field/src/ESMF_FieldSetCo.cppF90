@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.18 2010/08/09 13:29:23 feiliu Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.19 2010/08/27 21:13:26 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.18 2010/08/09 13:29:23 feiliu Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.19 2010/08/27 21:13:26 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -782,13 +782,14 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitMesh<rank><type><kind>(field, mesh, & @\
-!   farray, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
+!   farray, location, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
 !   ungriddedUBound, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inout)        :: field @\
 !   type(ESMF_Mesh),       intent(in)           :: mesh @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), target  :: farray @\
+!   type(ESMF_MeshLoc),    intent(in), optional :: location @\
 !   type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
 !   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
@@ -817,6 +818,10 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
 !       Native fortran data array to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farray}. @\
+! \item [{[location]}] @\
+!       Which part of the mesh to build the Field on. Can be set to either @\
+!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, @\ 
+!       defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
 ! \item [indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
 !       \ref{opt:indexflag} for a list of valid indexflag options. @\
@@ -872,13 +877,14 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldSetCommitMesh" @\
   subroutine ESMF_FieldSetCommitMesh##mrank##D##mtypekind(field, mesh, farray, & @\
-    indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
+    location, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
     type(ESMF_Mesh) :: mesh                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
+    type(ESMF_MeshLoc), intent(in), optional    :: location @\
     type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
@@ -898,7 +904,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,mesh,rc) @\
 @\
-    geombase=ESMF_GeomBaseCreate(mesh,rc=localrc) @\
+    geombase=ESMF_GeomBaseCreate(mesh,location,rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -994,12 +1000,13 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldSetCommitMeshPtr" @\
   subroutine ESMF_FieldSetCommitMeshPtr##mrank##D##mtypekind(field, mesh, & @\
-    farrayPtr, copyflag, gridToFieldMap, rc) @\
+    farrayPtr, location, copyflag, gridToFieldMap, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
     type(ESMF_Mesh) :: mesh                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
+    type(ESMF_MeshLoc), intent(in), optional   :: location @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(out), optional :: rc                @\
@@ -1016,7 +1023,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,mesh,rc) @\
 @\
-    geombase=ESMF_GeomBaseCreate(mesh,rc=localrc) @\
+    geombase=ESMF_GeomBaseCreate(mesh,location,rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
