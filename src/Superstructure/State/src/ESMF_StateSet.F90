@@ -1,4 +1,4 @@
-! $Id: ESMF_StateSet.F90,v 1.4 2010/03/04 18:57:46 svasquez Exp $
+! $Id: ESMF_StateSet.F90,v 1.5 2010/08/27 04:38:03 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateSet.F90,v 1.4 2010/03/04 18:57:46 svasquez Exp $'
+      '$Id: ESMF_StateSet.F90,v 1.5 2010/08/27 04:38:03 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -127,7 +127,7 @@
                                   ESMF_CONTEXT, rc)) return
 
       exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
-                                      dataitem, rc=localrc)
+                                      dataitem=dataitem, rc=localrc)
       if (.not. exists) then
           if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, itemName, &
                                       ESMF_CONTEXT, rc)) return

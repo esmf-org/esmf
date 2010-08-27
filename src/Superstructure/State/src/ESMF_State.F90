@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.194 2010/08/04 01:27:00 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.195 2010/08/27 04:38:02 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.194 2010/08/04 01:27:00 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.195 2010/08/27 04:38:02 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2497,14 +2497,16 @@ module ESMF_StateMod
 ! !IROUTINE: ESMF_StateGet - Retrieve an item from a State
 !
 ! !INTERFACE:
-!      subroutine ESMF_StateGet(state, itemName, <item>, nestedStateName, rc)
+!      subroutine ESMF_StateGet(state, itemName, <item>,
+!      nestedStateName, nestedFlag, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_State),  intent(in)            :: state
-!      character (len=*), intent(in)            :: itemName
+!      type(ESMF_State),      intent(in)            :: state
+!      character (len=*),     intent(in)            :: itemName
 !      <item>, see below for supported values
-!      character (len=*), intent(in),  optional :: nestedStateName
-!      integer,           intent(out), optional :: rc             
+!      character (len=*),     intent(in),  optional :: nestedStateName
+!      type(ESMF_NestedFlag), intent(in),  optional :: nestedFlag
+!      integer,               intent(out), optional :: rc             
 !
 !
 ! !DESCRIPTION:
@@ -2514,10 +2516,14 @@ module ESMF_StateMod
 !      If the {\tt state} contains multiple nested {\tt ESMF\_State}s
 !      and the <item> is one level down, this routine can return it
 !      in a single call by specifing the proper {\tt nestedStateName}.
-!      {\tt ESMF\_State}s can be nested to any depth, but this routine 
-!      only searches immediate descendents.  
+!      {\tt ESMF\_State}s can be nested to any depth, but this option 
+!      only searches immediate descendents.
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
+!      Alternatively, if the {\tt nestedFlag} is set to {\tt ESMF\_NESTED\_ON},
+!      the {\tt itemName} is searched for in all levels.
+!      It is an error to specify both {\\tt nestedStateName} and
+!      {\tt nestedFlag}.
 !
 !      Supported values for <item> are:
 !      \begin{description}
@@ -2543,6 +2549,11 @@ module ESMF_StateMod
 !     multiple nested {\tt ESMF\_State}s and the <item> being requested is
 !     one level down in one of the nested {\tt ESMF\_State}.
 !     {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
+!     \item[{[nestedFlag]}]
+!       {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State
+!       level only (default)
+!       {\tt ESMF\_NESTED\_ON} - recursively search for the object both in
+!       the current level and in nested States
 !     \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2557,14 +2568,16 @@ module ESMF_StateMod
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
-      subroutine ESMF_StateGetArray(state, itemName, array, nestedStateName, rc)
+      subroutine ESMF_StateGetArray(state, itemName, array,  &
+          nestedStateName, nestedFlag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State),  intent(in)            :: state
-      character (len=*), intent(in)            :: itemName
-      type(ESMF_Array),  intent(out)           :: array
-      character (len=*), intent(in),  optional :: nestedStateName
-      integer,           intent(out), optional :: rc             
+      type(ESMF_State),      intent(in)            :: state
+      character (len=*),     intent(in)            :: itemName
+      type(ESMF_Array),      intent(out)           :: array
+      character (len=*),     intent(in),  optional :: nestedStateName
+      type(ESMF_NestedFlag), intent(in),  optional :: nestedFlag
+      integer,               intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -2578,6 +2591,10 @@ module ESMF_StateMod
 !      only searches in immediate descendents.  
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
+!      Alternatively, if the {\tt nestedFlag} is set to {\tt ESMF\_NESTED\_ON},
+!      the {\tt itemName} is searched for in all levels.
+!      It is an error to specify both {\\tt nestedStateName} and
+!      {\tt nestedFlag}.
 !      
 !     The arguments are:
 !  \begin{description}     
@@ -2587,12 +2604,18 @@ module ESMF_StateMod
 !    Name of {\tt ESMF\_Array} to be returned.
 !  \item[array]
 !    Returned reference to the {\tt ESMF\_Array}.
-!  \item[{[nestedStateName]}]
-!    Optional.  An error if specified when the {\tt state} argument contains
-!    no nested {\tt ESMF\_State}s.  Required if the {\tt state} contains 
-!    multiple nested {\tt ESMF\_State}s and the object being requested is
-!    in one level down in one of the nested {\tt ESMF\_State}.
-!    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
+!     Optional.  An error if specified when the {\tt state} argument contains
+!     no nested {\tt ESMF\_State}s.  Required if the {\tt state} contains 
+!     multiple nested {\tt ESMF\_State}s and the <item> being requested is
+!     one level down in one of the nested {\tt ESMF\_State}.
+!     {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
+!     \item[{[nestedFlag]}]
+!     Optional.  Allows searching for the <item> being requested in either
+!     the current level, or any nested States.
+!       {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State
+!       level only (default)
+!       {\tt ESMF\_NESTED\_ON} - recursively search for the object both in
+!       the current level and in nested States
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -2619,9 +2642,21 @@ module ESMF_StateMod
       if (present(rc)) rc=ESMF_RC_NOT_IMPL
       ! TODO: do we need an empty (or invalid) array to mark failure?
 
+      if (present (nestedStateName) .and. present (nestedFlag)) then
+          errmsg = "both nestedStateName and nestedFlag were specified"
+          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
+                                     ESMF_CONTEXT, rc)) return
+      end if
+
+      if (present (nestedFlag)) then
+          errmsg = "nestedFlag is not supported yet"
+          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
+                                     ESMF_CONTEXT, rc)) return
+      end if
+
       if (present(nestedStateName)) then
           exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
-                                                          dataitem, rc=localrc)
+                                           dataitem=dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
               if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
@@ -2641,7 +2676,7 @@ module ESMF_StateMod
 
 
       exists = ESMF_StateClassFindData(top%statep, itemName, .true., &
-                                                          dataitem, rc=localrc)
+                                       dataitem=dataitem, rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no Array found named ", trim(itemName)
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
@@ -2669,14 +2704,15 @@ module ESMF_StateMod
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
       subroutine ESMF_StateGetArrayBundle(state, itemName, arraybundle, &
-        nestedStateName, rc)
+        nestedStateName, nestedFlag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State),  intent(in)            :: state
-      character (len=*), intent(in)            :: itemName
-      type(ESMF_ArrayBundle), intent(out)      :: arraybundle
-      character (len=*), intent(in),  optional :: nestedStateName
-      integer,           intent(out), optional :: rc             
+      type(ESMF_State),       intent(in)            :: state
+      character (len=*),      intent(in)            :: itemName
+      type(ESMF_ArrayBundle), intent(out)           :: arraybundle
+      character (len=*),      intent(in),  optional :: nestedStateName
+      type(ESMF_NestedFlag),  intent(in),  optional :: nestedFlag
+      integer,                intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -2690,6 +2726,10 @@ module ESMF_StateMod
 !      only searches in immediate descendents.  
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
+!      Alternatively, if the {\tt nestedFlag} is set to {\tt ESMF\_NESTED\_ON},
+!      the {\tt itemName} is searched for in all levels.
+!      It is an error to specify both {\\tt nestedStateName} and
+!      {\tt nestedFlag}.
 !
 !     The arguments are:
 !  \begin{description}     
@@ -2705,6 +2745,13 @@ module ESMF_StateMod
 !    multiple nested {\tt ESMF\_State}s and the object being requested is
 !    in one level down in one of the nested {\tt ESMF\_State}.
 !    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
+!     \item[{[nestedFlag]}]
+!     Optional.  Allows searching for the <item> being requested in either
+!     the current level, or any nested States.
+!       {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State
+!       level only (default)
+!       {\tt ESMF\_NESTED\_ON} - recursively search for the object both in
+!       the current level and in nested States
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -2731,9 +2778,21 @@ module ESMF_StateMod
       if (present(rc)) rc=ESMF_RC_NOT_IMPL
       ! TODO: do we need an empty (or invalid) arraybundle to mark failure?
 
+      if (present (nestedStateName) .and. present (nestedFlag)) then
+          errmsg = "both nestedStateName and nestedFlag were specified"
+          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
+                                     ESMF_CONTEXT, rc)) return
+      end if
+
+      if (present (nestedFlag)) then
+          errmsg = "nestedFlag is not supported yet"
+          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
+                                     ESMF_CONTEXT, rc)) return
+      end if
+
       if (present(nestedStateName)) then
           exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
-                                                          dataitem, rc=localrc)
+                                           dataitem=dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
               if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
@@ -2753,7 +2812,7 @@ module ESMF_StateMod
 
 
       exists = ESMF_StateClassFindData(top%statep, itemName, .true., &
-                                                          dataitem, rc=localrc)
+                                       dataitem=dataitem, rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no ArrayBundle found named ", trim(itemName)
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
@@ -2781,14 +2840,15 @@ module ESMF_StateMod
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
       subroutine ESMF_StateGetField(state, itemName, field, &
-                                    nestedStateName, rc)
+                                    nestedStateName, nestedFlag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state
-      character (len=*), intent(in) :: itemName
-      type(ESMF_Field), intent(out) :: field
-      character (len=*), intent(in), optional :: nestedStateName
-      integer, intent(out), optional :: rc             
+      type(ESMF_State),      intent(in)            :: state
+      character (len=*),     intent(in)            :: itemName
+      type(ESMF_Field),      intent(out)           :: field
+      character (len=*),     intent(in),  optional :: nestedStateName
+      type(ESMF_NestedFlag), intent(in),  optional :: nestedFlag
+      integer,               intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -2802,6 +2862,10 @@ module ESMF_StateMod
 !      only searches in immediate descendents.  
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
+!      Alternatively, if the {\tt nestedFlag} is set to {\tt ESMF\_NESTED\_ON},
+!      the {\tt itemName} is searched for in all levels.
+!      It is an error to specify both {\\tt nestedStateName} and
+!      {\tt nestedFlag}.
 !
 !     The arguments are:
 !  \begin{description}     
@@ -2817,6 +2881,13 @@ module ESMF_StateMod
 !    multiple nested {\tt ESMF\_State}s and the object being requested is
 !    in one level down in one of the nested {\tt ESMF\_State}.
 !    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
+!  \item[{[nestedFlag]}]
+!    Optional.  Allows searching for the <item> being requested in either
+!    the current level, or any nested States.
+!    {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State
+!    level only (default)
+!    {\tt ESMF\_NESTED\_ON} - recursively search for the object both in
+!    the current level and in nested States
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -2841,9 +2912,21 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+      if (present (nestedStateName) .and. present (nestedFlag)) then
+          errmsg = "both nestedStateName and nestedFlag were specified"
+          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
+                                     ESMF_CONTEXT, rc)) return
+      end if
+
+      if (present (nestedFlag)) then
+          errmsg = "nestedFlag is not supported yet"
+          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
+                                     ESMF_CONTEXT, rc)) return
+      end if
+
       if (present(nestedStateName)) then
           exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
-                                                          dataitem, rc=localrc)
+                                           dataitem=dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
               if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
@@ -2863,7 +2946,7 @@ module ESMF_StateMod
 
 
       exists = ESMF_StateClassFindData(top%statep, itemName, .true., &
-                                                          dataitem, rc=localrc)
+                                       dataitem=dataitem, rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no Field found named ", trim(itemName)
           if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
@@ -2898,14 +2981,15 @@ module ESMF_StateMod
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
       subroutine ESMF_StateGetFieldBundle(state, itemName, fieldbundle, &
-                                     nestedStateName, rc)
+                                     nestedStateName, nestedFlag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state
-      character (len=*), intent(in) :: itemName
-      type(ESMF_FieldBundle), intent(out) :: fieldbundle
-      character (len=*), intent(in), optional :: nestedStateName
-      integer, intent(out), optional :: rc             
+      type(ESMF_State),       intent(in)            :: state
+      character (len=*),      intent(in)            :: itemName
+      type(ESMF_FieldBundle), intent(out)           :: fieldbundle
+      character (len=*),      intent(in),  optional :: nestedStateName
+      type(ESMF_NestedFlag),  intent(in),  optional :: nestedFlag
+      integer,                intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -2919,6 +3003,10 @@ module ESMF_StateMod
 !      only searches in immediate descendents.  
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
+!      Alternatively, if the {\tt nestedFlag} is set to {\tt ESMF\_NESTED\_ON},
+!      the {\tt itemName} is searched for in all levels.
+!      It is an error to specify both {\\tt nestedStateName} and
+!      {\tt nestedFlag}.
 !
 !     The arguments are:
 !  \begin{description}     
@@ -2934,6 +3022,13 @@ module ESMF_StateMod
 !    multiple nested {\tt ESMF\_State}s and the object being requested is
 !    in one level down in one of the nested {\tt ESMF\_State}.
 !    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
+!  \item[{[nestedFlag]}]						    
+!    Optional.  Allows searching for the <item> being requested in either   
+!    the current level, or any nested States.				    
+!      {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State 
+!      level only (default)						    
+!      {\tt ESMF\_NESTED\_ON} - recursively search for the object both in   
+!      the current level and in nested States				    
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -2959,9 +3054,21 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+      if (present (nestedStateName) .and. present (nestedFlag)) then
+          errmsg = "both nestedStateName and nestedFlag were specified"
+          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
+                                     ESMF_CONTEXT, rc)) return
+      end if
+
+      if (present (nestedFlag)) then
+          errmsg = "nestedFlag is not supported yet"
+          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
+                                     ESMF_CONTEXT, rc)) return
+      end if
+
       if (present(nestedStateName)) then
           exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
-                                                          dataitem, rc=localrc)
+                                           dataitem=dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
               if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
@@ -2981,7 +3088,7 @@ module ESMF_StateMod
 
 
       exists = ESMF_StateClassFindData(top%statep, itemName, .true., &
-                                                          dataitem, rc=localrc)
+                                       dataitem=dataitem, rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no FieldBundle found named ", trim(itemName)
           if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
@@ -3137,7 +3244,7 @@ module ESMF_StateMod
                                   ESMF_CONTEXT, rc)) return
 
       exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
-                                      dataitem, rc=localrc)
+                                      dataitem=dataitem, rc=localrc)
       if (.not. exists) then
           if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, trim(itemName), &
                                      ESMF_CONTEXT, rc)) return
@@ -3158,14 +3265,15 @@ module ESMF_StateMod
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
       subroutine ESMF_StateGetRouteHandle(state, itemName, routehandle, &
-        nestedStateName, rc)
+                                     nestedStateName, nestedFlag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State),  intent(in)            :: state
-      character (len=*), intent(in)            :: itemName
-      type(ESMF_RouteHandle),  intent(out)     :: routehandle
-      character (len=*), intent(in),  optional :: nestedStateName
-      integer,           intent(out), optional :: rc             
+      type(ESMF_State),       intent(in)            :: state
+      character (len=*),      intent(in)            :: itemName
+      type(ESMF_RouteHandle), intent(out)           :: routehandle
+      character (len=*),      intent(in),  optional :: nestedStateName
+      type(ESMF_NestedFlag),  intent(in),  optional :: nestedFlag
+      integer,                intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -3179,6 +3287,10 @@ module ESMF_StateMod
 !      only searches in immediate descendents.  
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
+!      Alternatively, if the {\tt nestedFlag} is set to {\tt ESMF\_NESTED\_ON},
+!      the {\tt itemName} is searched for in all levels.
+!      It is an error to specify both {\\tt nestedStateName} and
+!      {\tt nestedFlag}.
 !
 !     The arguments are:
 !  \begin{description}     
@@ -3194,6 +3306,20 @@ module ESMF_StateMod
 !    multiple nested {\tt ESMF\_State}s and the object being requested is
 !    in one level down in one of the nested {\tt ESMF\_State}.
 !    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
+!  \item[{[nestedFlag]}]						    
+!    Optional.  Allows searching for the <item> being requested in either   
+!    the current level, or any nested States.				    
+!      {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State 
+!      level only (default)						    
+!      {\tt ESMF\_NESTED\_ON} - recursively search for the object both in   
+!      the current level and in nested States				    
+!  \item[{[nestedFlag]}]						    
+!    Optional.  Allows searching for the <item> being requested in either   
+!    the current level, or any nested States.				    
+!      {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State 
+!      level only (default)						    
+!      {\tt ESMF\_NESTED\_ON} - recursively search for the object both in   
+!      the current level and in nested States				    
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -3220,9 +3346,21 @@ module ESMF_StateMod
       if (present(rc)) rc=ESMF_RC_NOT_IMPL
       ! TODO: do we need an empty (or invalid) routehandle to mark failure?
 
+      if (present (nestedStateName) .and. present (nestedFlag)) then
+          errmsg = "both nestedStateName and nestedFlag were specified"
+          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
+                                     ESMF_CONTEXT, rc)) return
+      end if
+
+      if (present (nestedFlag)) then
+          errmsg = "nestedFlag is not supported yet"
+          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
+                                     ESMF_CONTEXT, rc)) return
+      end if
+
       if (present(nestedStateName)) then
           exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
-                                                          dataitem, rc=localrc)
+                                           dataitem=dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
               if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
@@ -3242,7 +3380,7 @@ module ESMF_StateMod
 
 
       exists = ESMF_StateClassFindData(top%statep, itemName, .true., &
-                                                          dataitem, rc=localrc)
+                                       dataitem=dataitem, rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no RouteHandle found named ", trim(itemName)
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
@@ -3269,20 +3407,22 @@ module ESMF_StateMod
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
-      subroutine ESMF_StateGetState(state, itemName, nestedState, rc)
+      subroutine ESMF_StateGetState(state, itemName, nestedState,  &
+          nestedFlag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state
-      character (len=*), intent(in) :: itemName
-      type(ESMF_State), intent(out) :: nestedState
-      integer, intent(out), optional :: rc             
+      type(ESMF_State),      intent(in)            :: state
+      character (len=*),     intent(in)            :: itemName
+      type(ESMF_State),      intent(out)           :: nestedState
+      type(ESMF_NestedFlag), intent(in),  optional :: nestedFlag
+      integer,               intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
 !      Returns a nested {\tt ESMF\_State} from another {\tt ESMF\_State} 
-!      by name.  This does not allow the caller to
-!      retrieve an {\tt ESMF\_State} from two levels down.  It returns
-!      immediate child objects only.
+!      by name.  By default, only one level of nested State is searched.
+!      If the {\tt nestedFlag} is set to {\tt ESMF\_NESTED\_ON},
+!      the {\tt itemName} is searched for in all nestedlevels.
 !
 !     The arguments are:
 !     \begin{description}     
@@ -3293,6 +3433,13 @@ module ESMF_StateMod
 !       Name of nested {\tt ESMF\_State} to return.
 !     \item[nestedState]
 !       Returned {\tt ESMF\_State}.
+!     \item[{[nestedFlag]}]						    
+!      Optional.  Allows searching for the <item> being requested in either   
+!      the current level, or any nested States. 			      
+!        {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State 
+!        level only (default)						      
+!        {\tt ESMF\_NESTED\_ON} - recursively search for the object both in   
+!        the current level and in nested States 			      
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3316,8 +3463,14 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+      if (present (nestedFlag)) then
+          errmsg = "nestedFlag is not supported yet"
+          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
+                                     ESMF_CONTEXT, rc)) return
+      end if
+
       exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
-                                                         dataitem, rc=localrc)
+                                       dataitem=dataitem, rc=localrc)
       if (.not. exists) then
           write (errmsg,*) "no nested state found named ", trim(itemName)
           if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
@@ -3398,7 +3551,7 @@ module ESMF_StateMod
       ! if the 3rd arg below is .true. then it's an error, if it's .false.
       ! then it's not.  for now, it's an error.
       exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
-                                      dataitem, rc=localrc)
+                                      dataitem=dataitem, rc=localrc)
       if (.not. exists) then
           if (ESMF_LogMsgFoundError(localrc, &
                                       "Item by that name not found", &
@@ -4434,7 +4587,7 @@ module ESMF_StateMod
     
         ! See if this name is already in the state
         exists = ESMF_StateClassFindData(stypep, rhname, .false., &
-                                        dataitem, aindex, localrc)
+                                        dataitem=dataitem, index=aindex, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) then
           deallocate(atodo, stat=localrc)
@@ -4643,7 +4796,7 @@ module ESMF_StateMod
     
         ! See if this name is already in the state
         exists = ESMF_StateClassFindData(stypep, aname, .false., &
-                                        dataitem, aindex, localrc)
+                                        dataitem=dataitem, index=aindex, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) then
           deallocate(atodo, stat=localrc)
@@ -4851,7 +5004,8 @@ module ESMF_StateMod
     
         ! See if this name is already in the state
         exists = ESMF_StateClassFindData(stypep, aname, .false., &
-                                        dataitem, aindex, localrc)
+                                        dataitem=dataitem, index=aindex, &
+                                        rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) then
           deallocate(atodo, stat=localrc)
@@ -5057,7 +5211,8 @@ module ESMF_StateMod
     
         ! See if this name is already in the state
         exists = ESMF_StateClassFindData(stypep, fname, .false., &
-                                        dataitem, findex, localrc)
+                                        dataitem=dataitem, index=findex, &
+                                        rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) then
           deallocate(ftodo, stat=localrc)
@@ -5275,7 +5430,8 @@ module ESMF_StateMod
     
         ! See if this name is already in the state
         exists = ESMF_StateClassFindData(stypep, bname, .false., &
-                                        dataitem, bindex, localrc)
+                                        dataitem=dataitem, index=bindex,  &
+                                        rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) goto 10
    
@@ -5322,8 +5478,9 @@ module ESMF_StateMod
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10
     
-            exists = ESMF_StateClassFindData(stypep, fname, .false., dataitem, &
-                                                              findex, localrc)
+            exists = ESMF_StateClassFindData(stypep, fname, .false.,  &
+                                      dataitem=dataitem, index=findex, &
+                                      rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10
@@ -5470,8 +5627,9 @@ module ESMF_StateMod
           !  found.  We just added the bundle above, so bindex is the
           !  value to set.
           else if (ftodo(fruncount) .eq. -2) then
-            exists = ESMF_StateClassFindData(stypep, fname, .true., dataitem, &
-                                                              findex, localrc)
+            exists = ESMF_StateClassFindData(stypep, fname, .true.,  &
+                                            dataitem=dataitem, index=findex, &
+                                            rc=localrc)
 
             if (.not. exists) then
               call ESMF_LogMsgSetError(ESMF_RC_INTNRL_INCONS, &
@@ -5638,8 +5796,9 @@ module ESMF_StateMod
         endif
     
         ! See if this name is already in the state
-        exists = ESMF_StateClassFindData(stypep, sname, .false., dataitem, &
-                                         sindex, rc=localrc)
+        exists = ESMF_StateClassFindData(stypep, sname, .false.,  &
+                                         dataitem=dataitem, &
+                                         index=sindex, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
@@ -5748,19 +5907,20 @@ module ESMF_StateMod
 ! !IROUTINE: ESMF_StateClassFindData - internal routine to find data item by name
 !
 ! !INTERFACE:
-      function ESMF_StateClassFindData(stypep, dataname, expected, dataitem, &
-                                                                     index, rc)
+      function ESMF_StateClassFindData(stypep, dataname, expected,  &
+                                       nestedFlag, dataitem, index, rc)
 !
 ! !RETURN VALUE:
       logical :: ESMF_StateClassFindData
 !
 ! !ARGUMENTS:
-      type(ESMF_StateClass), pointer :: stypep
-      character (len=*), intent(in) :: dataname
-      logical, intent(in) :: expected
-      type(ESMF_StateItem), pointer, optional :: dataitem
-      integer, intent(out), optional :: index
-      integer, intent(out), optional :: rc             
+      type(ESMF_StateClass), pointer               :: stypep
+      character (len=*),     intent(in)            :: dataname
+      logical,               intent(in)            :: expected
+      type(ESMF_NestedFlag), intent(in),  optional :: nestedFlag
+      type(ESMF_StateItem),  pointer,     optional :: dataitem
+      integer,               intent(out), optional :: index
+      integer,               intent(out), optional :: rc             
 
 ! !DESCRIPTION:
 !    Returns {\tt TRUE} if a data item with this name is found, and returns
@@ -5780,11 +5940,16 @@ module ESMF_StateMod
 !       Logical.  If set to {\tt true} the name must be found or an error code 
 !       is set. The default is {\tt false} and the error code is not set if 
 !       the name is not found.
+!      \item[{[nestedFlag]}]
+!       If set to {\tt ESMF\_NESTED\_TRUE}, will search nested States for
+!       {\tt dataname}.
 !      \item[{[dataitem]}]
 !       Pointer to the corresponding {\tt ESMF\_StateItem} item if one is
 !       found with the right name.
 !      \item[{[index]}]
-!       Index number in datalist where this name was found.
+!       Index number in datalist where this name was found.  When nested
+!       States are being searched, this index refers to the State where
+!       the item was found.
 !      \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -5794,6 +5959,7 @@ module ESMF_StateMod
       integer :: localrc                   ! local error status
       integer :: itemindex
       logical :: itemfound
+      character(len=ESMF_MAXSTR) :: errmsg
 
       ! Initialize return code.  Assume failure until success assured.
       localrc = ESMF_RC_NOT_IMPL
@@ -5802,8 +5968,12 @@ module ESMF_StateMod
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
 
+      if (present (nestedFlag)) then
+          errmsg = "nestedFlag is not supported yet"
+          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
+                                     ESMF_CONTEXT, rc)) return
+      end if
 
-      itemfound = .FALSE.
   
       ! This function is only called internally, so we do not need to check
       ! the validity of the state - it has been checked before we get here.
@@ -5915,7 +6085,7 @@ module ESMF_StateMod
 
         ! See if this name is already in the state
         exists = ESMF_StateClassFindData(stypep, namelist(i), .false., &
-                                        dataitem, nindex, localrc)
+                                dataitem=dataitem, index=nindex, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
