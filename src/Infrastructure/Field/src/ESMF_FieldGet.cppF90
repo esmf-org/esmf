@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.51 2010/08/03 21:18:42 oehmke Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.52 2010/08/27 21:24:04 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.51 2010/08/03 21:18:42 oehmke Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.52 2010/08/27 21:24:04 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -114,7 +114,7 @@ contains
   ! Private name; call using ESMF_FieldGet()
   subroutine ESMF_FieldGetDefault(field, arrayspec, isCommitted, geomtype, grid, mesh, locstream, xgrid, &
     array, typekind, dimCount, memDimCount, &
-    staggerloc, xgridSide, gridIndex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    staggerloc, meshLocation, xgridSide, gridIndex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     maxHaloLWidth, maxHaloUWidth, localDeCount, name, iospec, rc) 
 !
 ! !ARGUMENTS:
@@ -131,6 +131,7 @@ contains
     integer, intent(out), optional :: dimCount
     integer, intent(out), optional :: memDimCount
     type(ESMF_StaggerLoc), intent(out), optional :: staggerloc 
+    type(ESMF_MeshLoc), intent(out), optional :: meshLocation 
     type(ESMF_XGridSide), intent(out), optional :: xgridSide 
     integer, intent(out), optional :: gridIndex
     integer, intent(out), optional :: gridToFieldMap(:)    
@@ -191,6 +192,10 @@ contains
 !       Stagger location of data in grid cells.  For valid
 !       predefined values and interpretation of results see
 !       Section \ref{sec:opt:staggerloc}.
+! \item [{[meshLocation]}]
+!       The part of the mesh to build the Field on. Can be either
+!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, 
+!       defaults to {\tt ESMF\_MESHLOC\_NODE}.
 ! \item [{[xgridSide]}]
 !        The side of the XGrid that the Field was created on (either ESMF\_XGRID\_SIDEA,
 !        ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). 
@@ -335,6 +340,20 @@ contains
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
     endif
+
+    if (present(meshLocation)) then
+        if (ftype%gridstatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                            "No Mesh or invalid Mesh attached to Field", &
+                             ESMF_CONTEXT, rc)) return
+        endif
+        call ESMF_GeomBaseGet(ftype%geombase, &
+                  meshloc=meshLocation, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+    endif
+
 
     if (present(mesh)) then
         if (ftype%gridstatus .ne. ESMF_STATUS_READY) then
