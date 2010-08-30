@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.7 2010/08/27 22:11:07 murphysj Exp $
+% $Id: Attribute_pack.tex,v 1.8 2010/08/30 19:43:32 murphysj Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -146,7 +146,7 @@ There are many attributes that are used to describe components. There are curren
      {\tt MachineMaxProcessors} & The highest number of computer chips on a computer system. & N/A\\
      {\tt MachineCoresPerProcessor} & The number of sub-divided elements or mini-chips on a computer chip. &  N/A\\
      {\tt MachineProcessor} & The type of computer chip used in a particular computer platform. & Altix, AMD x86-64, Bluegene, G4, G5, Intel em64t, intel IA-64, Itanium, NEC, operteron, Origin3800, Pentium 3, Pentium 4, SP, SPARC, X1, Xeon, XT3-4, ZX6000\\
-     {\tt MachineCompiler} & The brand of the software that takes source code and turns it into an executable.& \\
+     {\tt MachineCompiler} & The brand of the software that takes source code and turns it into an executable.& Absoft, Default, Intel, Lahey, NAG, Pathscale, PGI, PGIGCC, XLF, XLFGCC\\
      {\tt MachineCompilerVersion} & The specific configuration value of the software used to take source code and turn it into executable code. & N/A \\
 \end{tabular}
 
@@ -358,7 +358,7 @@ The GFDL Gridspec Standard is currently the only Grid pre-defined Attribute pack
     \item Output Options
     \begin{itemize}
         \item Simple XML
-        \item Can be used to create a Grid object by reading in an XML file with these attributes. This is currently limited to 2D regularly distributed rectinlinear grids. See section XX for details. 
+        \item Can be used to create a Grid object by reading in an XML file with these attributes. This is currently limited to 2D regularly distributed rectinlinear grids. See Section \ref{example:GridCrFromFile} for details. 
     \end{itemize}
     \item Description: This package contains the Attributes developed as part of GFDL's Gridspec standard.
 \end{itemize}
@@ -463,7 +463,7 @@ The following is an alphabetical list of all the attributes impletmented in ESMF
 
 
 \subsubsection{Custom Attribute Packages}
-\label{CustomAttPacks}
+\label{sec:CustomAttPacks}
 
 ESMF allows for the creation of custom attribute packages. This can be done to augment one of the pre-defined packages (via package nesting \ref{sec:AttPackNesting}) or to create a suite of 
 attributes unique to the user. Example of how to create a custom package are contained in Section XX (link to the proposed custom att pack example)

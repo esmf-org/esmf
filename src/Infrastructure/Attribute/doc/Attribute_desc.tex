@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.39 2010/08/27 21:37:35 murphysj Exp $
+% $Id: Attribute_desc.tex,v 1.40 2010/08/30 19:43:32 murphysj Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -32,12 +32,13 @@ ESMF's Approach to attributes can be summed up in the following:
   \item Establish pre-defined Attribute packages (see Section \ref{sec:AttPacks})to make Attribute creation easier for the user
   \item Allow for user-defined Custom Attribute packages (see Section \ref{sec:CustomAttPacks})
   \item Enable the nesting of Attribute packages (see Section \ref{sec:AttPackNesting}) including Custom packages
-  \item Enable complex Attribute heirarchies
+  \item Enable complex Attribute heirarchies (see Section \ref{sec:AttHeir}
   \item Export Attributes in more than one format (see Section \ref{sec:AttributeExports})
   \item Ensure that all Attributes are consistent across the entire virtual machine of the object to which they are attached  
 \end{itemize}
 
 \subsubsection{Attribute Hierarchies}
+\label{sec:AttHeir}
 
 Of the ESMF objects with Attributes, only some can link their Attributes together in an Attribute hierarchy.  These objects are:
 
