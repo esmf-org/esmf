@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.35 2010/05/20 17:54:18 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.36 2010/08/30 15:47:52 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.35 2010/05/20 17:54:18 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.36 2010/08/30 15:47:52 oehmke Exp $'
 
 !==============================================================================
 !
@@ -329,7 +329,9 @@ contains
         type(ESMF_VM)        :: vm
         type(ESMF_Mesh)      :: srcMesh
         type(ESMF_Mesh)      :: dstMesh
+        type(ESMF_MeshLoc)   :: meshloc
         type(ESMF_StaggerLoc) :: srcStaggerLoc,dstStaggerLoc
+        integer              :: gridDimCount
 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -381,6 +383,36 @@ contains
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
+	  ! if we're doing conservative then do some checking and
+          ! change staggerloc
+          if (lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE) then
+            ! Only Center stagger is supported right now until we figure out what the
+            ! control volume for the others should be
+	    if (srcStaggerloc .ne. ESMF_STAGGERLOC_CENTER) then
+                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+              "- can't currently do conservative regrid on a stagger other then center", & 
+                 ESMF_CONTEXT, rc) 
+              return
+            endif
+
+            ! Can only do conservative on 2D right now
+            call ESMF_GridGet(grid=srcGrid, &
+                   dimCount=gridDimCount, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            if (gridDimCount .ne. 2) then
+                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 "- can currently only do conservative regridding on 2D grids", & 
+                 ESMF_CONTEXT, rc) 
+              return
+            endif
+
+            ! Create the mesh from corner stagger to better represent the
+            ! control volumes (the following simple assign only works because
+            ! we only support 2D right now)
+	    srcStaggerloc=ESMF_STAGGERLOC_CORNER
+          endif
+
           isSphere = 0
           if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) isSphere = 1
 
@@ -396,9 +428,26 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         else
-          call ESMF_FieldGet(srcField, mesh=srcMesh, rc=localrc)
+          call ESMF_FieldGet(srcField, mesh=srcMesh, meshLocation=meshloc, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! Mesh needs to be built on elements for conservative, and nodes for the others
+          if ((lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE)) then
+              if (meshloc .ne. ESMF_MESHLOC_ELEMENT) then
+                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 "- can currently only do conservative regridding on a mesh built on elements", & 
+                 ESMF_CONTEXT, rc) 
+                 return	  
+              endif
+          else
+              if (meshloc .ne. ESMF_MESHLOC_NODE) then
+                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 "- S can currently only do bilinear or patch regridding on a mesh built on nodes", & 
+                 ESMF_CONTEXT, rc) 
+                 return	  
+              endif
+          endif	  
         endif
 
         if (dstgeomtype .eq. ESMF_GEOMTYPE_GRID) then
@@ -406,6 +455,36 @@ contains
                  staggerloc=dstStaggerloc, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+	  ! if we're doing conservative then do some checking and
+          ! change staggerloc
+          if (lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE) then
+            ! Only Center stagger is supported right now until we figure out what the
+            ! control volume for the others should be
+	    if (dstStaggerloc .ne. ESMF_STAGGERLOC_CENTER) then
+                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+              "- can't currently do conservative regrid on a stagger other then center", & 
+                 ESMF_CONTEXT, rc) 
+              return
+            endif
+
+            ! Can only do conservative on 2D right now
+            call ESMF_GridGet(grid=dstGrid, &
+                   dimCount=gridDimCount, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            if (gridDimCount .ne. 2) then
+                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 "- can currently only do conservative regridding on 2D grids", & 
+                 ESMF_CONTEXT, rc) 
+              return
+            endif
+
+            ! Create the mesh from corner stagger to better represent the
+            ! control volumes (the following simple assign only works because
+            ! we only support 2D right now)
+	    dstStaggerloc=ESMF_STAGGERLOC_CORNER
+          endif
 
           isSphere = 0
           if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) isSphere = 1
@@ -421,9 +500,26 @@ contains
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
-          call ESMF_FieldGet(dstField, mesh=dstMesh, rc=localrc)
+          call ESMF_FieldGet(dstField, mesh=dstMesh, meshLocation=meshloc, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! Mesh needs to be built on elements for conservative, and nodes for the others
+          if ((lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE)) then
+              if (meshloc .ne. ESMF_MESHLOC_ELEMENT) then
+                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 "- can currently only do conservative regridding on a mesh built on elements", & 
+                 ESMF_CONTEXT, rc) 
+                return	  
+              endif
+          else
+              if (meshloc .ne. ESMF_MESHLOC_NODE) then
+                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 "- D can currently only do bilinear or patch regridding on a mesh built on nodes", & 
+                 ESMF_CONTEXT, rc) 
+                return	  
+              endif
+          endif	  
         endif
 
         ! At this point, we have the meshes, so we are ready to call
