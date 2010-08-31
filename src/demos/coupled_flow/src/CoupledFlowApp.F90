@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.8 2010/08/24 16:13:51 feiliu Exp $
+! $Id: CoupledFlowApp.F90,v 1.9 2010/08/31 15:33:57 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -51,6 +51,7 @@
     real(ESMF_KIND_R8) :: dx, dy
     integer :: s_month, s_day, s_hour, s_min
     integer :: e_month, e_day, e_hour, e_min
+    type(ESMF_Array)  :: Ax, Ay
 
     ! Read in from config file
     namelist /input/ i_max, j_max, x_min, x_max, y_min, y_max, &
@@ -256,6 +257,12 @@
       call ESMF_GridGetCoord(grid, localDE=0, &
         staggerLoc=ESMF_STAGGERLOC_CENTER, &
         coordDim=2, fptr=CoordY, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+      call ESMF_GridGetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, array=Ax, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+      call ESMF_ArrayPrint(Ax, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       dx = (x_max-x_min)/i_max

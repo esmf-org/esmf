@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.9 2010/08/25 17:23:23 feiliu Exp $
+! $Id: FlowSolverMod.F90,v 1.10 2010/08/31 15:33:58 feiliu Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -1672,19 +1672,19 @@
 !
 ! And now test output to a file
 !
-      call ESMF_FieldWrite(field_u, fname=filename, rc=status)
+      call ESMF_FieldWrite(field_u, filename, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
-      call ESMF_FieldWrite(field_v, fname=filename, rc=status)
+      call ESMF_FieldWrite(field_v, filename, append=.true., rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
-      call ESMF_FieldWrite(field_sie, fname=filename, rc=status)
+      call ESMF_FieldWrite(field_sie, filename, append=.true., rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 !
 ! First time through output two more files
 !
       if(file_no .eq. 1) then
-        call ESMF_FieldWrite(field_flag, fname=filename, rc=status)
+        call ESMF_FieldWrite(field_flag, filename, append=.true., rc=status)
         if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
         do j = jmin, jmax
@@ -1692,7 +1692,7 @@
             de(i,j) = pet_id
           enddo
         enddo
-        call ESMF_FieldWrite(field_de, fname=filename, rc=status)
+        call ESMF_FieldWrite(field_de, filename, append=.true., rc=status)
         if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       endif
 
