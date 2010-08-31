@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.37 2010/08/30 16:26:00 feiliu Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.38 2010/08/31 15:02:47 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -68,7 +68,6 @@ module ESMF_FieldRegridMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     module procedure ESMF_FieldRegridRun
-!    module procedure ESMF_FieldRegridRunX
 !EOPI
 
   end interface
@@ -82,7 +81,7 @@ module ESMF_FieldRegridMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     module procedure ESMF_FieldRegridStoreNX
-!    module procedure ESMF_FieldRegridStoreX
+    module procedure ESMF_FieldRegridStoreX
 !EOPI
 
   end interface
@@ -94,7 +93,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.37 2010/08/30 16:26:00 feiliu Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.38 2010/08/31 15:02:47 feiliu Exp $'
 
 !==============================================================================
 !
