@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.34 2010/08/27 21:11:27 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.35 2010/08/31 16:43:53 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.34 2010/08/27 21:11:27 oehmke Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.35 2010/08/31 16:43:53 oehmke Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -159,7 +159,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.34 2010/08/27 21:11:27 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.35 2010/08/31 16:43:53 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -196,7 +196,7 @@ module ESMF_MeshMod
       interface operator (.ne.)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_MeshLocEqual
+         module procedure ESMF_MeshLocNotEqual
 
 ! !DESCRIPTION:
 !     This interface overloads the inequality operator for the specific
