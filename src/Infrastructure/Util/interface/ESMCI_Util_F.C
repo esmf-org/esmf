@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util_F.C,v 1.5 2010/07/14 22:56:41 w6ws Exp $
+// $Id: ESMCI_Util_F.C,v 1.6 2010/09/01 21:39:48 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Util_F.C,v 1.5 2010/07/14 22:56:41 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_Util_F.C,v 1.6 2010/09/01 21:39:48 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -65,7 +65,7 @@ extern "C" {
  
 void FTN(c_esmc_mapname_add) (MapName **ptr,
                             char *name, // in - name to be entered
-                            int *index, // in - associated index ordinal
+                            int *value, // in - associated value
                             int *rc,    // out - return code
                             ESMCI_FortranStrLenArg name_len) {
 #undef  ESMC_METHOD
@@ -76,12 +76,12 @@ void FTN(c_esmc_mapname_add) (MapName **ptr,
         string cname (name, name_len);
 #if defined (MAPDEBUG)
         cout << ESMC_METHOD << ": cname = " << cname;
-        cout << ", index = " << *index << endl;
+        cout << ", value = " << *value << endl;
 //        cout << "    nameTable map address = " << hex << *ptr << endl;
 #endif
-        (*ptr) -> table[cname] = *index;
+        (*ptr) -> table[cname] = *value;
 #if defined (MAPDEBUG)
-        cout << "    index lookup returned: " << (*ptr) -> table[cname] << endl;
+        cout << "    value lookup returned: " << (*ptr) -> table[cname] << endl;
 #endif
         *rc = ESMF_SUCCESS;
 
@@ -123,8 +123,8 @@ void FTN(c_esmc_mapname_destroy) (MapName **ptr,
 }
 
 void FTN(c_esmc_mapname_lookup) (MapName **ptr,
-                            char *name, // in - name to be entered
-                            int *index, // out - associated index ordinal
+                            char *name, // in - name to be looked up
+                            int *value, // out - associated value
                             ESMC_Logical *foundflag, // out - true if name was found 
                             int *rc,    // out - return code
                             ESMCI_FortranStrLenArg name_len) {
@@ -142,12 +142,12 @@ void FTN(c_esmc_mapname_lookup) (MapName **ptr,
 
         bool found = pos != (*ptr)->table.end ();
         if (found)
-          *index = pos->second;
+          *value = pos->second;
         else
-          *index = -1;
+          *value = -1;
         *foundflag = found ? ESMF_TRUE : ESMF_FALSE;
 #if defined (MAPDEBUG)
-        cout << "    name: " << cname << ", index returned = " << *index;
+        cout << "    name: " << cname << ", value returned = " << *value;
         cout << ", found = " << found << endl;
 #endif
         *rc = ESMF_SUCCESS;
@@ -190,6 +190,21 @@ void FTN(c_esmc_mapname_remove) (MapName **ptr,
 #endif
         string cname (name, name_len);
         (*ptr)->table.erase (cname);
+        *rc = ESMF_SUCCESS;
+}
+
+void FTN(c_esmc_mapname_sizeget) (MapName **ptr,
+                            int *size,  // out - # of items in the map
+                            int *rc) {  // out - return code
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_mapname_sizeget"
+
+        ESMF_CHECK_POINTER(ptr, rc)
+
+#if defined (MAPDEBUG)
+        cout << ESMC_METHOD << ": entered" << endl;
+#endif
+        *size = (*ptr)->table.size ();
         *rc = ESMF_SUCCESS;
 }
 

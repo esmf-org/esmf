@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.33 2010/08/18 19:29:31 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.34 2010/09/01 21:39:48 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -68,6 +68,7 @@
       public :: ESMF_UtilMapNameLookup
       public :: ESMF_UtilMapNamePrint
       public :: ESMF_UtilMapNameRemove
+      public :: ESMF_UtilMapNameSize
 
 !  Command line argument methods
       public :: ESMF_UtilGetArgC
@@ -75,6 +76,8 @@
       public :: ESMF_UtilGetArgIndex
 
 !  Misc methods
+      public :: ESMF_Array2String
+      public :: ESMF_String2Array
       public :: ESMF_StringLowerCase
       public :: ESMF_StringUpperCase
 
@@ -98,7 +101,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.33 2010/08/18 19:29:31 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.34 2010/09/01 21:39:48 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -352,6 +355,45 @@
       rc = localrc
 
   end subroutine ESMF_UtilMapNameRemove
+
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilMapNameSize"
+!BOPI
+! !IROUTINE:  ESMF_UtilMapNameSize - Return the size of the map
+!
+! !INTERFACE:
+  function ESMF_UtilMapNameSize (this, rc)
+!
+! !RETURN VALUE:
+    integer :: ESMF_UtilMapNameSize
+!
+! !ARGUMENTS:
+    type(ESMF_MapName), intent(in) :: this
+    integer,            intent(out), optional :: rc
+!
+! !Description:
+! This method returns the number of elements contained within
+! a MapName container.
+!
+! The arguments are:
+! \begin{description}
+! \item [{[this]}]
+! A ESMF\_MapName object
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+
+    integer :: localrc
+
+    localrc = ESMF_FAILURE
+
+    call c_esmc_mapname_sizeget (this, ESMF_UtilMapNameSize, localrc)
+
+    if (present (rc))  &
+      rc = localrc
+
+  end function ESMF_UtilMapNameSize
 
 !------------------------------------------------------------------------- 
 
@@ -657,6 +699,71 @@
     end subroutine arg_search_worker
 
   end subroutine ESMF_UtilGetArgIndex
+
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_Array2String"
+!BOPI
+!  !IROUTINE:  ESMF_Array2String - convert character array to string
+!  
+! !INTERFACE: 
+      function ESMF_Array2String (charArray) 
+!
+! !ARGUMENTS:
+      character(len=1), intent(in) :: charArray(:)
+
+!
+! !RETURN VALUE:
+      character(len=size (charArray)) :: ESMF_Array2String
+
+!
+! !DESCRIPTION:
+!   Converts given an array of characters to a string.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[charArray]
+!       An array of characters.
+!     \end{description}
+!
+!
+!EOPI
+
+      ESMF_Array2String = transfer (charArray, mold=ESMF_Array2String)
+
+      end function ESMF_Array2String
+
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_String2Array"
+!BOPI
+!  !IROUTINE:  ESMF_String2Array - convert character string to array
+!  
+! !INTERFACE: 
+      function ESMF_String2Array (string) 
+!
+! !ARGUMENTS:
+      character(len=*), intent(in) :: string
+!
+! !RETURN VALUE:
+      character(len=1) :: ESMF_String2Array(len (string))
+
+!
+! !DESCRIPTION:
+!   Converts given a string to an array of characters.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[string]
+!       A character string.
+!     \end{description}
+!
+!
+!EOPI
+
+      ESMF_String2Array = transfer (string, mold=ESMF_String2Array)
+
+      end function ESMF_String2Array
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD

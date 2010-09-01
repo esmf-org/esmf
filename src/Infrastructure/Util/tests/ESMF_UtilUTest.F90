@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.25 2010/07/23 13:40:30 w6ws Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.26 2010/09/01 21:39:48 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.25 2010/07/23 13:40:30 w6ws Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.26 2010/09/01 21:39:48 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -79,6 +79,7 @@
 
       type(ESMF_MapName) :: mapcontainer
       integer :: newvalue
+      integer :: mapsize
       logical :: isfound
 #endif
 
@@ -315,6 +316,20 @@
     write (failMsg, *) "did not return ESMF_SUCCESS"
     call ESMF_UtilMapNameAdd (mapcontainer,  &
         name="Pressure", value=42, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test obtaining the size of the map
+    write (name, *) "Testing obtaining size"
+    write (failMsg, *) "did not return correct size"
+    mapsize = ESMF_UtilMapNameSize (mapcontainer)
+    call ESMF_Test(mapsize == 2, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test obtaining the size of the map
+    write (name, *) "Testing obtaining size return code"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    mapsize = ESMF_UtilMapNameSize (mapcontainer, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest
