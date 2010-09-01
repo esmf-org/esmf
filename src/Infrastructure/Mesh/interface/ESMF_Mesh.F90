@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.35 2010/08/31 16:43:53 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.36 2010/09/01 23:34:32 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.35 2010/08/31 16:43:53 oehmke Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.36 2010/09/01 23:34:32 peggyli Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -48,6 +48,7 @@ module ESMF_MeshMod
   use ESMF_DistGridMod
   use ESMF_RHandleMod
   use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
+  use ESMF_IOScripMod
  
   implicit none
 
@@ -107,7 +108,6 @@ module ESMF_MeshMod
         ESMF_MESH_PARTITON_NODAL = ESMF_MeshPartitionType(0), &
         ESMF_MESH_PARTITION_ELEMENT = ESMF_MeshPartitionType(1)
 
-
   type ESMF_MeshLoc
   sequence
 !  private
@@ -117,6 +117,18 @@ module ESMF_MeshMod
   type(ESMF_MeshLoc), parameter :: &
         ESMF_MESHLOC_NODE = ESMF_MeshLoc(1), &
         ESMF_MESHLOC_ELEMENT = ESMF_MeshLoc(2)
+
+  type ESMF_FileFormatType
+  sequence
+ ! private
+    integer :: fileformat
+  end type
+
+  type(ESMF_FileFormatType), parameter :: &
+        ESMF_FILEFORMAT_VTK = ESMF_FileFormatType(1), &
+        ESMF_FILEFORMAT_SCRIP = ESMF_FileFormatType(2), &
+        ESMF_FILEFORMAT_ESMFMESH = ESMF_FileFormatType(3), &
+        ESMF_FILEFORMAT_ESMFGRID = ESMF_FileFormatType(4)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_Mesh
@@ -128,7 +140,10 @@ module ESMF_MeshMod
   public ESMF_Mesh               
   public ESMF_MESHELEMTYPE_QUAD, ESMF_MESHELEMTYPE_TRI, &
          ESMF_MESHELEMTYPE_HEX, ESMF_MESHELEMTYPE_TETRA
-      
+  
+  public ESMF_FileFormatType, ESMF_FILEFORMAT_VTK, ESMF_FILEFORMAT_SCRIP, &
+	 ESMF_FILEFORMAT_ESMFMESH, ESMF_FILEFORMAT_ESMFGRID
+    
   public ESMF_MeshLoc
   public ESMF_MESHLOC_NODE, ESMF_MESHLOC_ELEMENT
 
@@ -159,7 +174,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.35 2010/08/31 16:43:53 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.36 2010/09/01 23:34:32 peggyli Exp $'
 
 !==============================================================================
 ! 
@@ -171,8 +186,41 @@ module ESMF_MeshMod
      module procedure ESMF_MeshCreate3Part
      module procedure ESMF_MeshCreate1Part
      module procedure ESMF_MeshCreateFromPointer
+     module procedure ESMF_MeshCreateFromFile
    end interface
 
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (.eq.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_FileFormatTypeEqual
+
+! !DESCRIPTION:
+!     This interface overloads the equality operator for the specific
+!     ESMF GridFileFormatType.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (.ne.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_FileFormatTypeNotEqual
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF GridFileFormatType.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -206,10 +254,9 @@ module ESMF_MeshMod
 !EOPI
       end interface
 
-
+!------------------------------------------------------------------------------
 
       contains
-
 
 !------------------------------------------------------------------------------
 
@@ -703,6 +750,433 @@ module ESMF_MeshMod
     if (present (rc)) rc = localrc
     
   end function ESMF_MeshCreate1Part
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshCreateFromFile()"
+!BOP
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a grid file defined in a SCRIP format
+!   file or a ESMF Unstructured grid file
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_MeshCreate()
+    function ESMF_MeshCreateFromFile(filename, filetype, convert3D, rc)
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)         :: ESMF_MeshCreateFromFile
+! !ARGUMENTS:
+    character(len=*), intent(in)              :: filename
+    type(ESMF_FileFormatType), intent(in)     :: filetype
+    logical, intent(in), optional             :: convert3D
+    integer, intent(out), optional            :: rc
+!
+! !DESCRIPTION:
+!   Create a mesh from a grid file defined in SCRIP format or in ESMF Unstructured grid format.
+!
+!   \begin{description}
+!   \item [filename]
+!         The name of the grid file
+!   \item[filetype] 
+!         ESMF_FILEFORMAT_SCRIP or ESMF_FILEFORMAT_ESMFMESH
+!   \item[convert3D] 
+!         if TRUE, the node coordinates will be converted into 3D Cartisian, which
+!         is required for a global grid
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    logical::  localConvert3D      ! local flag
+    integer::  localrc
+
+    if (present(convert3D)) then
+	localConvert3D = convert3D
+    else
+	localConvert3D = .false.
+    endif
+
+    if (filetype .eq. ESMF_FILEFORMAT_SCRIP) then
+	ESMF_MeshCreateFromFile = ESMF_MeshCreateFromScrip(filename, localConvert3D,localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+    elseif (filetype .eq. ESMF_FILEFORMAT_ESMFMESH) then
+	ESMF_MeshCreateFromFile = ESMF_MeshCreateFromUnstruct(filename, localConvert3D, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                 "- the filetype has to be either ESMF_FILEFORMAT_ESMFMESH or ESMF_FILEFORMAT_SCRIP", & 
+                 ESMF_CONTEXT, rc) 
+       return
+    endif
+
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+end function ESMF_MeshCreateFromFile
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshCreateFromUnstruct()"
+!BOPI
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a grid file defined in the ESMF Unstructured
+!  Grid format
+!  Create a triangle and quad mesh using a global node coordinate table and a distributed
+! element connection array
+!  arguments:  VertexCoords(3, NodeCnt), where NodeCnt is the total node count for the
+!  global mesh, the first dimension stores the x,y,z coordinates of the node
+!              CellConnect(4, ElemCnt), where ElemCnt is the total number of elements
+!                The first dimension contains the global node IDs at the four corner of the element 
+!              StartCell, the first Element ID in this PET
+!  in this local PET.  Note the CellConnect is local and VertexCoords is global.
+!  In this routine, we have to figure out which nodes are used by the local Elements 
+!  and who are the owners of the local nodes, then add the local nodes and elements into
+!  the mesh
+! !INTERFACE:
+! Private name; call using ESMF_MeshCreate()
+    function ESMF_MeshCreateFromUnstruct(filename, convert3D, rc)
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)         :: ESMF_MeshCreateFromUnstruct
+! !ARGUMENTS:
+    character(len=*), intent(in)              :: filename
+    logical, intent(in)                       :: convert3D
+    integer, intent(out), optional            :: rc
+!
+! !DESCRIPTION:
+!   Create a mesh from a grid file defined in the ESMF Unstructured grid format.
+!
+!   \begin{description}
+!   \item [filename]
+!         The name of the grid file
+!   \item[convert3D] 
+!         if TRUE, the node coordinates will be converted into 3D Cartisian, which
+!         is required for a global grid
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                             :: localrc      ! local return code
+    integer			        :: PetNo, PetCnt 
+    real(ESMF_KIND_R8),pointer          :: nodeCoords(:,:)
+    integer(ESMF_KIND_I4),pointer       :: elementConn(:,:)
+    integer(ESMF_KIND_I4),pointer       :: elmtNum(:)
+    integer                             :: startElmt
+    integer                             :: NodeNo
+    integer                             :: NodeCnt, NodeDim, total
+    integer, allocatable                :: NodeId(:)
+    integer, allocatable                :: NodeUsed(:)
+    real(ESMF_KIND_R8), allocatable     :: NodeCoords1D(:)
+    real(ESMF_KIND_R8)                  :: coorX, coorY, deg2rad
+    integer, allocatable                :: NodeOwners(:)
+    integer, allocatable                :: NodeOwners1(:)
+
+    integer                             :: ElemNo, TotalElements
+    integer                             :: ElemCnt,i,j,k,dim
+    integer				:: localNodes, myStartElmt
+    integer                             :: ConnNo, TotalConnects
+    integer, allocatable                :: ElemId(:)
+    integer, allocatable                :: ElemType(:)
+    integer, allocatable                :: ElemConn(:)
+    integer, allocatable                :: LocalElmTable(:)
+    integer                             :: sndBuf(1)
+    type(ESMF_VM)                       :: vm
+    type(ESMF_Mesh)                     :: Mesh
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! get global vm information
+    !
+    call ESMF_VMGetGlobal(vm, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set up local pet info
+    call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    ! Read the mesh definition from the file
+    call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, startElmt, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Total number of nodes for the global mesh
+    NodeCnt = ubound (nodeCoords, 2)
+    NodeDim  = ubound (nodeCoords, 1)
+    deg2rad = 3.141592653589793238/180;
+
+    ! create the mesh
+    ! The spatialDim=3, we need to convert the 2D coordinate into 3D Cartisian in order
+    ! to handle the periodic longitude correctly
+    if (convert3D) then
+        Mesh = ESMF_MeshCreate3part (2, 3, localrc)
+    else
+        Mesh = ESMF_MeshCreate3part (2, NodeDim, localrc)
+    end if
+   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! These two arrays are temp arrays
+    ! NodeUsed() used for multiple purposes, first, find the owners of the node
+    ! later, used to store the local Node ID to be used in the ElmtConn table
+    ! NodeOwners1() is the receiving array for ESMF_VMAllReduce(), it will store
+    ! the lowest PET number that stores the node.  That PET will become the owner
+    ! of the node.
+    allocate (NodeUsed(NodeCnt))
+    allocate (NodeOwners1(NodeCnt))
+
+    ! Set to a number > PetCnt because it will store the PetNo if this node is used by
+    ! the local elements and we will do a global reduce to find the minimal values
+    NodeUsed(:)=PetCnt+100
+
+    ! Total number of local elements
+    ElemCnt = ubound (elementConn, 2)
+
+    ! Set the coorsponding NodeUsed(:) value to my PetNo if it is used by the local element 
+    ! Also calculate the total number of mesh elements based on elmtNum
+    ! if elmtNum == 3 or 4, no change, if elmtNum > 4, break it into elmtNum-2 triangles
+    totalElements = ElemCnt
+    totalConnects = 0
+    do ElemNo =1, ElemCnt
+        do i=1,elmtNum(ElemNo)	
+            NodeUsed(elementConn(i,ElemNo))=PetNo
+        enddo
+	if (elmtNum(ElemNo) > 4) TotalElements = TotalElements + (elmtNum(ElemNo)-3)
+	if (elmtNum(ElemNo) <= 4) then
+           TotalConnects = TotalConnects+elmtNum(ElemNo)
+        else
+	   TotalConnects = TotalConnects+3*(elmtNum(ElemNo)-2)
+        end if
+    end do
+
+    ! Do a global reduce to find out the lowest PET No that owns each node, the result is in
+    ! NodeOwners1(:) 
+    call ESMF_VMAllReduce(vm, NodeUsed, NodeOwners1, NodeCnt, ESMF_MIN, rc=localrc)
+   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    
+
+    ! count number of nodes used and convert NodeUsed values into local index
+    localNodes = 0
+    do NodeNo = 1, NodeCnt
+       if (NodeUsed(NodeNo) == PetNo) then
+         localNodes = localNodes+1
+	 NodeUsed(NodeNo) = localNodes
+       else
+	 NodeUsed(NodeNo) = 0
+       endif
+    enddo
+
+    ! allocate nodes arrays for ESMF_MeshAddNodes()
+    allocate (NodeId(localNodes))
+    if (convert3D) then
+       allocate(NodeCoords1D(localNodes*3))
+    else
+       allocate (NodeCoords1D(localNodes*NodeDim))
+    endif
+    allocate (NodeOwners(localNodes))
+
+    ! copy vertex information into nodes, NodeUsed(:) now contains either 0 (not for me) or
+    ! the local node index.  The owner of the node is stored in NodeOwners1(:)
+    ! Also calculate how many nodes are "owned" by me -- total
+    i = 1
+    total = 0
+    do NodeNo = 1, NodeCnt
+        if (NodeUsed(NodeNo) > 0) then
+	   NodeId     (i) = NodeNo     
+	   if (convert3D) then
+              coorX = nodeCoords(1,NodeNo)*deg2rad
+              coorY = (90.0-nodeCoords(2,NodeNo))*deg2rad
+              NodeCoords1D((i-1)*3+1) = COS(coorX)*SIN(coorY)             
+              NodeCoords1D((i-1)*3+2) = SIN(coorX)*SIN(coorY)             
+              NodeCoords1D((i-1)*3+3) = COS(coorY)
+           !   write (*,'(6F8.4)')nodeCoords(:,NodeNo), COS(coorX),SIN(coorX),COS(coorY),SIN(coorY)
+           else 
+             do dim = 1, NodeDim
+               NodeCoords1D ((i-1)*NodeDim+dim) = nodeCoords (dim, NodeNo)
+	     end do
+           endif
+           NodeOwners (i) = NodeOwners1(NodeNo)
+	   if (NodeOwners1(NodeNo) == PetNo) total = total+1
+           i = i+1
+        endif
+    end do
+
+    ! Add nodes
+    call ESMF_MeshAddNodes (Mesh, NodeId, NodeCoords1D, NodeOwners, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Need to calculate the total number of ESMF_MESH objects and the start element ID
+    ! Do a global gather to get all the local TotalElements
+
+    allocate(localElmTable(PetCnt))
+    sndBuf(1)=TotalElements
+    call ESMF_VMAllGather(vm, sndBuf, localElmTable, 1, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    
+    ! Find out the start element ID
+    myStartElmt=0
+    do i=1,PetNo
+      myStartElmt = myStartElmt+localElmTable(i)
+    end do
+    deallocate(localElmTable)
+
+    ! print *, PetNo, ' My start cell and total local ', myStartElmt, TotalElements, TotalConnects
+
+    ! allocate element arrays for the local elements
+    allocate (ElemId(TotalElements))
+    allocate (ElemType(TotalElements))
+    allocate (ElemConn(TotalConnects))
+
+    ! the node number is 0 based, need to change it to 1 based
+    ! The ElemId is the global ID.  The myStartElmt is the starting Element ID(-1), and the
+    ! element IDs will be from startElmt to startElmt+ElemCnt-1
+    ! The ElemConn() contains the four corner node IDs for each element and it is organized
+    ! as a 1D array.  The node IDs are "local", which are stored in NodeUsed(:)
+    ElemNo = 1
+    ConnNo = 0
+    do j = 1, ElemCnt
+	if (elmtNum(j)==3) then        
+           ElemId(ElemNo) = myStartElmt+ElemNo
+           ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
+           do i=1,3
+              ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+	   end do
+           ElemNo=ElemNo+1
+           ConnNo=ConnNo+3
+	elseif (elmtNum(j)==4) then
+           ElemId(ElemNo) = myStartElmt+ElemNo
+           ElemType (ElemNo) = ESMF_MESHELEMTYPE_QUAD
+           do i=1,4
+              ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+	   end do
+           ElemNo=ElemNo+1
+	   ConnNo=ConnNo+4
+	else
+	! elmtNum(j) > 4, break into elmtNum(j)-2 triangles
+	   do k=0,elmtNum(j)-3
+             ElemId(ElemNo)=myStartElmt+ElemNo
+             ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
+             ElemConn (ConnNo+1) = NodeUsed(elementConn(1,j))
+             ElemConn (ConnNo+2) = NodeUsed(elementConn(2+k,j))
+             ElemConn (ConnNo+3) = NodeUsed(elementConn(3+k,j))
+             ElemNo=ElemNo+1
+	     ConnNo=ConnNo+3
+	   end do
+         end if
+    end do
+    
+    if (ElemNo /= TotalElements+1) then
+	print *, PetNo, ' TotalElements does not match ',ElemNo-1, TotalElements
+    end if
+
+    ! Add elements
+    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    deallocate(NodeUsed, NodeId, NodeCoords1D, NodeOwners, NodeOwners1)
+    deallocate(ElemId, ElemType, ElemConn)
+
+    ESMF_MeshCreateFromUnstruct = Mesh
+
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+end function ESMF_MeshCreateFromUnstruct
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshCreateFromScrip()"
+!BOPI
+! !IROUTINE: ESMF_MeshCreateFrom Scrip - called from ESMF_MeshCreateFromFile
+!   Create a mesh from a unstructured grid defined in a SCRIP file
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_MeshCreate()
+    function ESMF_MeshCreateFromScrip(filename, convert3D, rc)
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)         :: ESMF_MeshCreateFromScrip
+! !ARGUMENTS:
+    character(len=*), intent(in)              :: filename
+    logical, intent(in)                       :: convert3D
+    integer, intent(out), optional            :: rc
+!
+! !DESCRIPTION:
+!   Create a mesh from a grid file defined in SCRIP format or in ESMF Unstructured grid format.
+!
+!   \begin{description}
+!   \item [filename]
+!         The name of the grid file
+!   \item[convert3D] 
+!         if TRUE, the node coordinates will be converted into 3D Cartisian, which
+!         is required for a global grid
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    character(len=128)      :: cmd, esmffilename
+    integer   	            :: PetNo, PetCnt 
+    integer                 :: scrip_file_len, esmf_file_len
+    type(ESMF_VM)           :: vm
+    integer                 :: dualflag
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! get global vm information
+    !
+    call ESMF_VMGetGlobal(vm, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set up local pet info
+    call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    esmffilename = ".esmf.nc"
+    
+    if (PetNo == 0) then
+        ! this is a serial call into C code for now
+        scrip_file_len = len_trim(filename)
+        esmf_file_len = len_trim(esmffilename)
+        dualflag = 1
+        call c_ConvertSCRIP(filename, scrip_file_len, &
+          esmffilename, esmf_file_len, dualflag, localrc )
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    call ESMF_VMBarrier(vm)
+    ESMF_MeshCreateFromScrip=ESMF_MeshCreateFromUnstruct(esmffilename,convert3D, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    if (PetNo == 0) then
+      write(cmd, '("/bin/rm ",A)') trim(esmffilename)
+      call system(cmd)
+    endif    
+
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+end function ESMF_MeshCreateFromScrip
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -1477,7 +1951,74 @@ module ESMF_MeshMod
   end subroutine ESMF_MeshFindPnt
 !------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FileFormatTypeEqual"
+!BOPI
+! !IROUTINE: ESMF_FileFormatTypeEqual - Equality of FileFormatTypes
+!
+! !INTERFACE:
+      function ESMF_FileFormatTypeEqual(FileFormatType1, FileFormatType2)
 
+! !RETURN VALUE:
+      logical :: ESMF_FileFormatTypeEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_FileFormatType), intent(in) :: &
+         FileFormatType1,      &! Two igrid statuses to compare for
+         FileFormatType2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF_FileFormatTypeType statuses to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[FileFormatType1, FileFormatType2]
+!          Two igrid statuses to compare for equality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_FileFormatTypeEqual = (FileFormatType1%fileformat == &
+                              FileFormatType2%fileformat)
+
+      end function ESMF_FileFormatTypeEqual
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FileFormatTypeNotEqual"
+!BOPI
+! !IROUTINE: ESMF_FileFormatTypeNotEqual - Non-equality of FileFormatTypes
+!
+! !INTERFACE:
+      function ESMF_FileFormatTypeNotEqual(FileFormatType1, FileFormatType2)
+
+! !RETURN VALUE:
+      logical :: ESMF_FileFormatTypeNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_FileFormatType), intent(in) :: &
+         FileFormatType1,      &! Two FileFormatType Statuses to compare for
+         FileFormatType2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF_FileFormatTypeType statuses to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[FileFormatType1, FileFormatType2]
+!          Two statuses of FileFormatTypes to compare for inequality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_FileFormatTypeNotEqual = (FileFormatType1%fileformat /= &
+                                 FileFormatType2%fileformat)
+
+      end function ESMF_FileFormatTypeNotEqual
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1547,10 +2088,6 @@ module ESMF_MeshMod
                                  MeshLoc2%meshloc)
 
       end function ESMF_MeshLocNotEqual
-
-
-
-
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef ESMF_METHOD
