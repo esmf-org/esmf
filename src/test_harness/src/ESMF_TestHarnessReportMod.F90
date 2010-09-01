@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessReportMod.F90,v 1.14 2010/08/21 13:25:31 w6ws Exp $
+! $Id: ESMF_TestHarnessReportMod.F90,v 1.15 2010/09/01 20:24:59 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,6 +37,7 @@
 !-------------------------------------------------------------------------------
 ! !USES:
 
+  use ESMF_TestHarnessTypesMod
   use ESMF_TestHarnessUtilMod
 
   implicit none
@@ -494,15 +495,16 @@
     9012 FORMAT ('          <SourceDistSize', I1, '>', I5, '</SourceDistSize', I1, '>')
     9013 FORMAT ('          <DestDistSize', I1, '>', I5, '</DestDistSize', I1, '>')
 
+    ! EN format specifier displays real in engineering format (ISO 1539-1:2004 sect. 10.6.1.2.3)
     9020 FORMAT ('          <SourceGridSize', I1, '>', I5, '</SourceGridSize', I1, '>')
-    9021 FORMAT ('          <SourceGridCoordLow', I1, '>', E14.6, '</SourceGridCoordLow', I1, '>')
-    9022 FORMAT ('          <SourceGridCoordHigh', I1, '>', E14.6, '</SourceGridCoordHigh', I1, '>')
+    9021 FORMAT ('          <SourceGridCoordLow', I1, '>', EN17.6, '</SourceGridCoordLow', I1, '>')
+    9022 FORMAT ('          <SourceGridCoordHigh', I1, '>', EN17.6, '</SourceGridCoordHigh', I1, '>')
     9023 FORMAT ('          <SourceGridType', I1, '>', A16, '</SourceGridType', I1, '>')
     9024 FORMAT ('          <SourceGridUnits', I1, '>', A16, '</SourceGridUnits', I1, '>')
 
     9030 FORMAT ('          <DestGridSize', I1, '>', I5, '</DestGridSize', I1, '>')
-    9031 FORMAT ('          <DestGridCoordLow', I1, '>', E14.6, '</DestGridCoordLow', I1, '>')
-    9032 FORMAT ('          <DestGridCoordHigh', I1, '>', E14.6, '</DestGridCoordHigh', I1, '>')
+    9031 FORMAT ('          <DestGridCoordLow', I1, '>', EN17.6, '</DestGridCoordLow', I1, '>')
+    9032 FORMAT ('          <DestGridCoordHigh', I1, '>', EN17.6, '</DestGridCoordHigh', I1, '>')
     9033 FORMAT ('          <DestGridType', I1, '>', A16, '</DestGridType', I1, '>')
     9034 FORMAT ('          <DestGridUnits', I1, '>', A16, '</DestGridUnits', I1, '>')
 
@@ -660,6 +662,8 @@
     integer :: PdrNo
     integer :: PdrCnt
 
+    integer :: timeStamp(8)
+
     ! initialize return status
     localrc = ESMF_FAILURE
 
@@ -671,15 +675,20 @@
       go to 90
     end if
 
+    ! get timestamp
+    call date_and_time (values=timeStamp)
+
     ! write top level structure
     write (rptLun, 9000)
     !write (rptLun, 9001)
     write (rptLun, 9005)
-    write (rptLun, 9010) trim(harnDesc%topFname)
-    write (rptLun, 9011) trim(harnDesc%testClass)
-    write (rptLun, 9012) trim(harnDesc%reportType)
-    write (rptLun, 9013) trim(harnDesc%setupReportType)
-    write (rptLun, 9014) harnDesc%numRecords
+    write (rptLun, 9010) timeStamp(1:3), timeStamp(5:7)
+    write (rptLun, 9011) adjustL(trim(harnDesc%configPath))
+    write (rptLun, 9012) adjustL(trim(harnDesc%topFname))
+    write (rptLun, 9013) adjustL(trim(harnDesc%testClass))
+    write (rptLun, 9014) trim(harnDesc%reportType)
+    write (rptLun, 9015) trim(harnDesc%setupReportType)
+    write (rptLun, 9016) harnDesc%numRecords
 
     ! problem_descriptor_records
     PdrCnt = harnDesc%numRecords
@@ -705,11 +714,13 @@
     !9001 FORMAT ('<?xml-stylesheet type="application/xml" href="Harness.xslt"?>')
     9005 FORMAT ('<TopConfig>')
     9006 FORMAT ('</TopConfig>')
-    9010 FORMAT ('  <TopFname>', A, '</TopFname>')
-    9011 FORMAT ('  <TestClass>', A, '</TestClass>')
-    9012 FORMAT ('  <ReportType>', A, '</ReportType>')
-    9013 FORMAT ('  <SetUpReportType>', A, '</SetUpReportType>')
-    9014 FORMAT ('  <PDRCnt>', I3, '</PDRCnt>')
+    9010 FORMAT ('  <Timestamp>', I4, '/', I2, '/' I2, 2x, I2, ':' I2, ':' I2, '</Timestamp>')
+    9011 FORMAT ('  <ConfigPath>', A, '</ConfigPath>')
+    9012 FORMAT ('  <TopFname>', A, '</TopFname>')
+    9013 FORMAT ('  <TestClass>', A, '</TestClass>')
+    9014 FORMAT ('  <ReportType>', A, '</ReportType>')
+    9015 FORMAT ('  <SetUpReportType>', A, '</SetUpReportType>')
+    9016 FORMAT ('  <PDRCnt>', I3, '</PDRCnt>')
 
   end subroutine summary_report_generate
   !-----------------------------------------------------------------------------

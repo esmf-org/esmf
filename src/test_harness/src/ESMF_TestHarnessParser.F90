@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessParser.F90,v 1.3 2010/08/12 15:42:51 garyblock Exp $
+! $Id: ESMF_TestHarnessParser.F90,v 1.4 2010/09/01 20:24:59 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -86,6 +86,7 @@ logical                       :: checkpoint = .FALSE.
 ! strings.
 !
 ! Upon completion, the routine returns the values to a public record
+!       har%configPath              path to configuration files
 !       har%topFname                top level configuration filename
 !       har%testClass               Problem Descriptor Test Class
 !       har%reportType              Output Report type
@@ -118,8 +119,11 @@ logical                       :: checkpoint = .FALSE.
   returnrc = ESMF_RC_NOT_IMPL
   localrc = ESMF_RC_NOT_IMPL
 
+  ! save config path for summary report
+  har%configPath = adjustL(srcPath)
+
   ! save top level filename for summary report
-  har%topFname = trim(configFname)
+  har%topFname = adjustL(configFname)
 
   !-----------------------------------------------------------------------------
   ! create config handle and load the testing harness config file

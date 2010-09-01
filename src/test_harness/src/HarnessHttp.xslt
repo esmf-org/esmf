@@ -9,7 +9,10 @@
         </TITLE>
       </HEAD>
       <BODY>
-        <BR>Test Class: <xsl:value-of select="TestClass"/></BR>
+        Test Case: <xsl:value-of select="TopFname"/><BR/>
+        Config File Path: <xsl:value-of select="ConfigPath"/><BR/>
+        Timestamp: <xsl:value-of select="Timestamp"/><BR/>
+        Test Class: <xsl:value-of select="TestClass"/><BR/>
         <xsl:apply-templates/>
       </BODY>
     </HTML>

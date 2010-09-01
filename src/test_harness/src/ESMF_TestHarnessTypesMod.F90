@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessTypesMod.F90,v 1.12 2010/08/12 15:42:51 garyblock Exp $
+! $Id: ESMF_TestHarnessTypesMod.F90,v 1.13 2010/09/01 20:24:59 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -212,6 +212,7 @@
   end type problem_descriptor_records
 
   type harness_descriptor
+     character(ESMF_MAXSTR) :: configPath      ! path to configuration files
      character(ESMF_MAXSTR) :: topFname        ! top level config filename
      character(ESMF_MAXSTR) :: testClass       ! test class
      character(ESMF_MAXSTR) :: reportType      ! test result report type 
