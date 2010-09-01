@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.12 2009/09/09 05:48:42 eschwab Exp $
+# $Id: makefile,v 1.13 2010/09/01 23:38:36 peggyli Exp $
 
 ALL: build_here 
 
-SOURCEC	  = ESMCI_IO_XML_F.C ESMCI_IO_NetCDF_F.C
+SOURCEC	  = ESMCI_IO_XML_F.C ESMCI_IO_NetCDF_F.C ESMC_IOScrip2ESMF.C
 # TODO      ESMC_IO_XML.C ESMC_IO_NetCDF.C (C interface)
-SOURCEF	  = ESMF_IO_NetCDF.F90
+SOURCEF	  = ESMF_IO_NetCDF.F90 ESMF_IOScrip.F90
 SOURCEH	  = 
 
 # List all .h files which should be copied to common include dir
