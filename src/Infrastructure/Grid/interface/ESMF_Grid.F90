@@ -46,6 +46,7 @@
       use ESMF_DistGridMod
       use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
       use ESMF_ArraySpecMod
+      use ESMF_IOScripMod
 
 !     NEED TO ADD MORE HERE
       implicit none
@@ -222,7 +223,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.153 2010/07/23 04:13:26 w6ws Exp $'
+      '$Id: ESMF_Grid.F90,v 1.154 2010/09/01 23:35:37 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -281,6 +282,8 @@ interface ESMF_GridCreate
       module procedure ESMF_GridCreateFromDistGrid
       module procedure ESMF_GridCreateFromDistGridArb
       module procedure ESMF_GridCreateFromFile
+      module procedure ESMF_GridCreateFromScripDistGrid
+      module procedure ESMF_GridCreateFromScripReg
 
       
 ! !DESCRIPTION: 
@@ -2986,6 +2989,359 @@ end subroutine ESMF_GridConvertIndex
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateFromScripDistGrid"
+!BOP
+! !ROUTINE: ESMF_GridCreate: Create a ESMF_Grid from a logically rectangular grid in a 
+!  SCRIP format file and a DistGrid
+
+! !INTERFACE:
+  function ESMF_GridCreateFromScripDistGrid(distgrid, filename, rc)
+
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateFromScripDistGrid
+!
+! !ARGUMENTS:
+ 
+    type(ESMF_DistGrid), intent(in) :: distgrid
+    character(len=*), intent(in)  :: filename
+    integer, intent(out), optional  :: rc
+
+! !DESCRIPTION:
+! This function creates a {\tt ESMF\_Grid} object using the grid definition from
+! a SCRIP grid file. The grid distribution is defined by a DistGrid object. The
+! topology of the distgrid has to match with the grid topology defined in the
+! file.  The grid defined int the file has to be a 2D logically rectangular
+! grid. 
+!
+! The arguments are:
+! \begin{description}
+! \item[distgrid]
+!      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and
+!      distributed over DEs. 
+! \item[{[filename]}]
+!     The SCRIP Grid filename.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+
+#ifdef ESMF_NETCDF
+    integer :: ncid
+    integer :: ncStatus
+    integer :: totalpoints,totaldims
+    integer, pointer :: dims(:)
+    character(len=80) :: units
+    integer :: DimId, VarId
+    real(ESMF_KIND_R8) :: rad2deg
+    real(ESMF_KIND_R8),  allocatable:: coordX(:),coordY(:)
+    type(ESMF_Grid)  :: grid
+    type(ESMF_Array) :: array
+    real(ESMF_KIND_R8), allocatable :: coord2D(:,:)
+    type(ESMF_VM) :: vm
+    integer :: numDim, minInd(2,1), maxInd(2,1), buf(1)
+    integer :: localrc
+    integer :: PetNo, PetCnt
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! get global vm information
+    !
+    call ESMF_VMGetGlobal(vm, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rc)) return
+
+    ! set up local pet info
+    call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rc)) return
+
+    ! get dimension from distgrid
+    call ESMF_DistGridGet(distgrid, dimCount=numDim, minIndexPDimPPatch=minInd,&
+		         maxIndexPDimPPatch=maxInd, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rc)) return
+
+    if (numDim /=2) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_RANK, &
+	  "- The distgrid dimCount has to be 2", ESMF_CONTEXT, rc)
+	return
+    endif
+
+    if (minInd(1,1) /= 1 .and. minInd(2,1) /=1) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_RANK, &
+	  "- The minIndex of distgrip has to be 1", ESMF_CONTEXT, rc)
+	return
+    endif
+
+    if (PetNo == 0) then
+       call ESMF_ScripInq(filename, grid_dims=dims, grid_rank=totaldims, &
+   	  grid_size=totalpoints, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+
+       ! check if the grid_dim matches with the distgrid dimension
+       if (dims(1) /= maxInd(1,1) .and. dims(2) /= maxInd(2,1) ) then
+	  call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &
+	   "- The grid_dims does not match with distgrid dimension", &
+ 	    ESMF_CONTEXT, rc)
+            return
+       endif
+	
+       ! if grid_rank is not equal to 2, return error 
+       ! Does SCRIP allow 3D datasets?  What will be the format??
+       if (totaldims /= 2) then
+	  call ESMF_LogMsgSetError(ESMF_RC_ARG_RANK,"- The grip has to be 2D", &
+	  ESMF_CONTEXT, rc)
+	  return
+       endif
+
+       ! Get the cell_center lat and lan, if in radians, convert to degree
+       allocate(coordX(totalpoints), coordY(totalpoints))
+       call ESMF_ScripGetVar(filename, grid_center_lon=coordX, &	
+          grid_center_lat=coordY, convertToDeg=.TRUE., rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+    endif
+
+    ! Create Grid based on the input distgrid
+    grid = ESMF_GridCreate(distgrid=distgrid, &
+		gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+		indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+    ! Set coordinate tables 
+    ! Longitude
+    call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+    call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+	array = array, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+
+    if (PetNo == 0) then
+       allocate(coord2D(dims(1),dims(2)))
+       coord2D = RESHAPE(coordX,(/dims(1), dims(2)/))
+    endif
+    call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
+    !print *, "Finish ArrayScatter 1st dim coord"
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+    
+    ! Latitude
+    call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+	array = array, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+    if (PetNo == 0) then
+       coord2D = RESHAPE(coordY,(/dims(1), dims(2)/))
+    endif
+    call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
+    !print *, "Finish ArrayScatter 1st dim coord"
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+    if (PetNo == 0)  deallocate(coord2D, coordX, coordY)
+    
+    ESMF_GridCreateFromScripDistGrid = grid
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+#else
+    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+#endif
+
+    return
+end function ESMF_GridCreateFromScripDistGrid
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateFromScripReg"
+!BOP
+! !ROUTINE: ESMF_GridCreate: Create a ESMF_Grid from a logically rectangular grid in a 
+!  SCRIP format file and a Regular Decomp map
+
+! !INTERFACE:
+  function ESMF_GridCreateFromScripReg(filename, regDecomp, decompflag, rc)
+
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateFromScripReg
+!
+! !ARGUMENTS:
+ 
+    character(len=*), intent(in)                :: filename
+    integer, intent(in)                         :: regDecomp(:)
+    type(ESMF_DecompFlag), intent(in),optional  :: decompflag(:)
+    integer, intent(out), optional              :: rc
+
+! !DESCRIPTION:
+! This function creates a {\tt ESMF\_Grid} object using the grid definition from
+! a SCRIP grid file. 
+! To specify the distribution, the user passes in an array 
+! ({\tt regDecomp}) specifying the number of DEs to divide each 
+! dimension into. The array {\tt decompflag} indicates how the division into DEs is to
+! occur.  The default is to divide the range as evenly as possible.
+! The grid defined int the file has to be a 2D logically rectangular
+! grid. 
+!
+! The arguments are:
+! \begin{description}
+! \item[{[filename]}]
+!     The SCRIP Grid filename.
+! \item[{[regDecomp]}] 
+!      A 2 element array specifying how the grid is decomposed.
+!      Each entry is the number of decounts for that dimension.
+! \item[{[decompflag]}]
+!      List of decomposition flags indicating how each dimension of the
+!      patch is to be divided between the DEs. The default setting
+!      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
+!      Section~\ref{opt:decompflag} for a full description of the 
+!      possible options. 
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+
+#ifdef ESMF_NETCDF
+    integer :: ncid
+    integer :: ncStatus
+    integer :: totalpoints,totaldims
+    integer, pointer :: dims(:)
+    character(len=80) :: units
+    integer :: DimId, VarId
+    real(ESMF_KIND_R8) :: rad2deg
+    real(ESMF_KIND_R8),  allocatable:: coordX(:),coordY(:)
+    type(ESMF_Grid)  :: grid
+    type(ESMF_Array) :: array
+    real(ESMF_KIND_R8), allocatable :: coord2D(:,:)
+    type(ESMF_VM) :: vm
+    integer :: numDim, minInd(2,1), maxInd(2,1), buf(1), msgbuf(3)
+    type(ESMF_DistGrid) :: distgrid
+    type(ESMF_DecompFlag):: decompflagLocal(2)
+    integer :: localrc
+    integer :: PetNo, PetCnt
+  
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! get global vm information
+    !
+    call ESMF_VMGetGlobal(vm, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set up local pet info
+    call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(decompFlag)) then
+        decompFlagLocal(:)=decompFlag(:)
+    else
+        decompFlagLocal(:)=ESMF_DECOMP_HOMOGEN
+    endif
+
+    ! Get the grid rank and dimensions from the SCRIP file on PET 0, broadcast the
+    ! data to all the PETs
+    if (PetNo == 0) then
+       call ESMF_ScripInq(filename, grid_dims=dims, grid_rank=totaldims, &
+			  grid_size=totalpoints, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+       ! broadcast the values to other PETs
+       msgbuf(1)=totaldims
+       msgbuf(2)=dims(1)
+       msgbuf(3)=dims(2)
+       call ESMF_VMBroadcast(vm, msgbuf, 3, 0, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call ESMF_VMBroadcast(vm, msgbuf, 3, 0, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      allocate(dims(2))
+      totaldims = msgbuf(1)
+      dims(1)=msgbuf(2)
+      dims(2)=msgbuf(3)
+    endif  
+
+    ! if grid_rank is not equal to 2, return error 
+    ! Does SCRIP allow 3D datasets?  What will be the format??
+    if (totaldims /= 2) then
+	call ESMF_LogMsgSetError(ESMF_RC_ARG_RANK,"- The grip has to be 2D", &
+	  ESMF_CONTEXT, rc)
+	return
+    endif
+       
+    ! Create DistGrid --------------------------------------------------------------
+    distgrid=ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=dims, &
+              regDecomp=regDecomp, decompflag=decompFlagLocal, &
+	      indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (PetNo == 0) then
+      ! Get the cell_center lat and lan, if in radians, convert to degree
+      allocate(coordX(totalpoints), coordY(totalpoints))
+      call ESMF_ScripGetVar(filename, grid_center_lon=coordX, &	
+          grid_center_lat=coordY, convertToDeg=.TRUE., rc=rc)
+    endif
+
+    ! Create Grid based on the input distgrid
+    grid = ESMF_GridCreate(distgrid=distgrid, &
+		gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+		indexflag=ESMF_INDEX_GLOBAL, destroyDistGrid=.true.,&
+		destroyDELayout=.true., rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+    ! Set coordinate tables 
+    ! Longitude
+    call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+    call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+	array = array, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+
+    if (PetNo == 0) then
+       allocate(coord2D(dims(1),dims(2)))
+       coord2D = RESHAPE(coordX,(/dims(1), dims(2)/))
+       !call ESMF_ArrayGet(array,minIndexPDimPPatch=lbnd,maxIndexPDimPPatch=ubnd,rc=localrc)
+    endif
+    call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+
+    ! Latitude
+    call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+	array = array, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+    if (PetNo == 0) then
+       coord2D = RESHAPE(coordY,(/dims(1), dims(2)/))
+    endif
+    call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+    if (PetNo == 0)  deallocate(coord2D, coordX, coordY)
+    
+    ESMF_GridCreateFromScripReg = grid
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+#else
+    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+#endif
+
+    return
+end function ESMF_GridCreateFromScripReg
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateEmpty"
 !BOP
 ! !IROUTINE: ESMF_GridCreateEmpty - Create a Grid that has no contents
@@ -4011,8 +4367,8 @@ end subroutine ESMF_GridConvertIndex
 
   
    ! Create Grid from specification -----------------------------------------------
-   ESMF_GridCreateShapeTileIrreg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
-                                    distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
+   ESMF_GridCreateShapeTileIrreg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, distgrid, &
+                                    distgridToGridMap=distgridToGridMap, &
                                     coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
@@ -4908,8 +5264,8 @@ end subroutine ESMF_GridConvertIndex
    endif
 
   
-   ESMF_GridCreateShapeTileReg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
-                                    distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
+   ESMF_GridCreateShapeTileReg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, distgrid, &
+                                    distgridToGridMap=distgridToGridMap, &
                                     coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
