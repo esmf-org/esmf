@@ -1251,9 +1251,10 @@ subroutine ESMF_EsmfInq(filename, nodeCount, elementCount, &
         ESMF_METHOD, &
         ESMF_SRCLINE, rc)) return
     end if
+    if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
-    rc = ESMF_RC_LIB_NOT_PRESENT
+    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
 #endif
 
     return
@@ -1422,6 +1423,7 @@ subroutine ESMF_EsmfGetVerts(ncid, numElements, numNodePElement, numNodes, &
     integer, parameter :: fillValue1 = -9999
     integer :: i,j, index
 
+#ifdef ESMF_NETCDF
     allocate(nodeCoords(2, numNodes))
     allocate(elementConn(numNodePElement, numElements))
 
@@ -1463,6 +1465,11 @@ subroutine ESMF_EsmfGetVerts(ncid, numElements, numNodePElement, numNodes, &
       enddo
     enddo
     if (present(rc)) rc=ESMF_SUCCESS
+    return
+#else
+    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+    return
+#endif
 end subroutine ESMF_EsmfGetVerts
 !-----------------------------------------------------------------------
 
