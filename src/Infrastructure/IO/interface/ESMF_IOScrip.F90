@@ -38,7 +38,9 @@
       use ESMF_InitMacrosMod    ! ESMF initializer macros
       use ESMF_LogErrMod        ! ESMF error handling
       use ESMF_VMMod
+#ifdef ESMF_NETCDF
       use netcdf
+#endif
 
 !     NEED TO ADD MORE HERE
       implicit none
