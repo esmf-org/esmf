@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.36 2010/09/01 23:34:32 peggyli Exp $
+! $Id: ESMF_Mesh.F90,v 1.37 2010/09/03 22:15:42 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.36 2010/09/01 23:34:32 peggyli Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.37 2010/09/03 22:15:42 peggyli Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -43,6 +43,7 @@ module ESMF_MeshMod
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_IOUtilMod
   use ESMF_VMMod
   use ESMF_DELayoutMod
   use ESMF_DistGridMod
@@ -174,7 +175,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.36 2010/09/01 23:34:32 peggyli Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.37 2010/09/03 22:15:42 peggyli Exp $'
 
 !==============================================================================
 ! 
@@ -1137,6 +1138,8 @@ end function ESMF_MeshCreateFromUnstruct
     integer                 :: scrip_file_len, esmf_file_len
     type(ESMF_VM)           :: vm
     integer                 :: dualflag
+    integer                 :: unit
+    logical                 :: notavail
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1170,8 +1173,16 @@ end function ESMF_MeshCreateFromUnstruct
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     if (PetNo == 0) then
-      write(cmd, '("/bin/rm ",A)') trim(esmffilename)
-      call system(cmd)
+!      system() is not available on some of the compilers, use open/close to
+!      delete the file instead
+!      write(cmd, '("/bin/rm ",A)') trim(esmffilename)
+!      call system(cmd)
+!      First find an available unit numer
+       call ESMF_IOUnitGet(unit,rc)
+       if (rc==ESMF_SUCCESS) then
+  	  open(unit, FILE=esmffilename,status='unknown')
+          close (unit, STATUS='delete')
+       endif
     endif    
 
     if (present(rc)) rc=ESMF_SUCCESS
