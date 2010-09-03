@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.38 2010/08/31 15:02:47 feiliu Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.39 2010/09/03 15:48:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.38 2010/08/31 15:02:47 feiliu Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.39 2010/09/03 15:48:23 feiliu Exp $'
 
 !==============================================================================
 !
@@ -659,6 +659,10 @@ contains
 !EOP
         integer :: localrc, i
 
+        type(ESMF_GeomType)  :: geomtype
+        logical              :: deleteSrcGrid, deleteDstGrid
+        type(ESMF_XGrid)     :: srcXGrid, dstXGrid        
+
         integer :: srcIdx, dstIdx, ngrid_a, ngrid_b
         type(ESMF_XGridSide) :: srcSide, dstSide
         type(ESMF_Grid), allocatable :: gridA(:), gridB(:)
@@ -684,15 +688,69 @@ contains
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(srcField, grid=srcGrid, &
+        deleteSrcGrid = .false.
+        call ESMF_FieldGet(srcField, geomtype=geomtype, &
                rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(dstField, grid=dstGrid, &
+        if(geomtype == ESMF_GEOMTYPE_GRID) then
+            call ESMF_FieldGet(srcField, grid=srcGrid, &
+                   rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+            if(geomtype == ESMF_GEOMTYPE_XGRID) then
+                call ESMF_FieldGet(srcField, xgrid=srcXGrid, &
+                       rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+                call ESMF_XGridGet(srcXGrid, distgridM=distgridM, rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+                srcGrid = ESMF_GridCreate(distgrid=distgridM, rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+                deleteSrcGrid = .true.
+            else
+                call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+                       "- src Field is not built on Grid or XGrid", &
+                       ESMF_CONTEXT, rc) 
+                return
+            endif
+        endif
+
+        deleteDstGrid = .false.
+        call ESMF_FieldGet(dstField, geomtype=geomtype, &
                rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if(geomtype == ESMF_GEOMTYPE_GRID) then
+            call ESMF_FieldGet(dstField, grid=dstGrid, &
+                   rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+            if(geomtype == ESMF_GEOMTYPE_XGRID) then
+                call ESMF_FieldGet(dstField, xgrid=dstXGrid, &
+                       rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+                call ESMF_XGridGet(dstXGrid, distgridM=distgridM, rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+                dstGrid = ESMF_GridCreate(distgrid=distgridM, rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+                deleteDstGrid = .true.
+            else
+                call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+                       "- src Field is not built on Grid or XGrid", &
+                       ESMF_CONTEXT, rc) 
+                return
+            endif
+        endif
 
         call ESMF_GridGet(srcGrid, distgrid=srcDistGrid, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -813,6 +871,18 @@ contains
             regridScheme, localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if(deleteSrcGrid) then
+            call ESMF_GridDestroy(srcGrid, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+        if(deleteDstGrid) then
+            call ESMF_GridDestroy(dstGrid, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
 
         if(present(rc)) rc = ESMF_SUCCESS
 
