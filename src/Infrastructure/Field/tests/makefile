@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.80 2010/07/28 22:01:49 theurich Exp $ 
+# $Id: makefile,v 1.81 2010/09/03 15:47:33 feiliu Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -14,6 +14,7 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldArbGridUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldIOUTest \
+		$(ESMF_TESTDIR)/ESMF_FieldRegridXGUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldStressUTest
                
 TESTS_RUN     = RUN_ESMF_FieldUTest \
@@ -23,12 +24,14 @@ TESTS_RUN     = RUN_ESMF_FieldUTest \
 		RUN_ESMF_FieldArbGridUTest \
 		RUN_ESMF_FieldIOUTest \
 		RUN_ESMF_FieldStressUTest \
+#		RUN_ESMF_FieldRegridXGUTest \
 		RUN_ESMC_FieldUTest
 
 TESTS_RUN_UNI = RUN_ESMF_FieldStressUTestUNI \
                 RUN_ESMF_FieldRegridUTestUNI \
                 RUN_ESMF_FieldRegridCsrvUTestUNI \
                 RUN_ESMF_FieldArbGridUTestUNI \
+#                RUN_ESMF_FieldRegridXGUTestUNI \
                 RUN_ESMC_FieldUTestUNI
 
 #
@@ -82,6 +85,12 @@ RUN_ESMF_FieldRegridCsrvUTest:
 
 RUN_ESMF_FieldRegridCsrvUTestUNI:
 	$(MAKE) TNAME=FieldRegridCsrv NP=1 ftest
+
+RUN_ESMF_FieldRegridXGUTest:
+	$(MAKE) TNAME=FieldRegridXG NP=4 ftest
+
+RUN_ESMF_FieldRegridXGUTestUNI:
+	$(MAKE) TNAME=FieldRegridXG NP=1 ftest
 
 RUN_ESMF_FieldArbGridUTest:
 	$(MAKE) TNAME=FieldArbGrid NP=4 ftest
