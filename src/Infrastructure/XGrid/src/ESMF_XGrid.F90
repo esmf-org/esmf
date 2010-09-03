@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.7 2010/08/05 13:42:21 feiliu Exp $
+! $Id: ESMF_XGrid.F90,v 1.8 2010/09/03 17:14:15 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -74,8 +74,8 @@ module ESMF_XGridMod
 
   type ESMF_XGridSpec
     sequence
-    integer, pointer            :: factorIndexList(:,:)       ! factorIndexList
-    real(ESMF_KIND_R8), pointer :: factorList(:)   ! factorList
+    integer, pointer            :: factorIndexList(:,:)     ! factorIndexList
+    real(ESMF_KIND_R8), pointer :: factorList(:)  ! factorList
   end type ESMF_XGridSpec
 
   type ESMF_XGridType
@@ -135,7 +135,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.7 2010/08/05 13:42:21 feiliu Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.8 2010/09/03 17:14:15 feiliu Exp $'
 
 !==============================================================================
 !
@@ -661,6 +661,14 @@ contains
 !EOPI
         xgtypep%status  = ESMF_STATUS_UNINIT
         xgtypep%is_proxy       = .false. 
+        nullify(xgtypep%sideA)
+        nullify(xgtypep%sideB)
+        nullify(xgtypep%area)
+        nullify(xgtypep%centroid)
+        nullify(xgtypep%sparseMatA2X)
+        nullify(xgtypep%sparseMatX2A)
+        nullify(xgtypep%sparseMatB2X)
+        nullify(xgtypep%sparseMatX2B)
 
         if(present(rc)) rc = ESMF_SUCCESS
 
