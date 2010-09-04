@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessReportMod.F90,v 1.15 2010/09/01 20:24:59 garyblock Exp $
+! $Id: ESMF_TestHarnessReportMod.F90,v 1.16 2010/09/04 04:56:12 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -714,7 +714,7 @@
     !9001 FORMAT ('<?xml-stylesheet type="application/xml" href="Harness.xslt"?>')
     9005 FORMAT ('<TopConfig>')
     9006 FORMAT ('</TopConfig>')
-    9010 FORMAT ('  <Timestamp>', I4, '/', I2, '/' I2, 2x, I2, ':' I2, ':' I2, '</Timestamp>')
+    9010 FORMAT ('  <Timestamp>', I4, '/', I2, '/', I2, 2x, I2, ':', I2, ':', I2, '</Timestamp>')
     9011 FORMAT ('  <ConfigPath>', A, '</ConfigPath>')
     9012 FORMAT ('  <TopFname>', A, '</TopFname>')
     9013 FORMAT ('  <TestClass>', A, '</TestClass>')
