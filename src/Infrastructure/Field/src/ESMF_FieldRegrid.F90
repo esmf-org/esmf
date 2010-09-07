@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.39 2010/09/03 15:48:23 feiliu Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.40 2010/09/07 16:39:56 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.39 2010/09/03 15:48:23 feiliu Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.40 2010/09/07 16:39:56 feiliu Exp $'
 
 !==============================================================================
 !
@@ -575,7 +575,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldRegridStoreX"
 
 !BOP
-! !IROUTINE: ESMF_FieldRegridStore - Store regrid and return RouteHandle and weights
+! !IROUTINE: ESMF_FieldRegridStore - Store regrid and return RouteHandle using XGrid
 !
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridStore()
@@ -660,17 +660,15 @@ contains
         integer :: localrc, i
 
         type(ESMF_GeomType)  :: geomtype
-        logical              :: deleteSrcGrid, deleteDstGrid
         type(ESMF_XGrid)     :: srcXGrid, dstXGrid        
 
         integer :: srcIdx, dstIdx, ngrid_a, ngrid_b
         type(ESMF_XGridSide) :: srcSide, dstSide
         type(ESMF_Grid), allocatable :: gridA(:), gridB(:)
-        type(ESMF_DistGrid)  :: srcDistGrid, dstDistGrid, distGridM
         type(ESMF_Grid)      :: srcGrid
         type(ESMF_Grid)      :: dstGrid
         type(ESMF_XGridSpec) :: sparseMat
-        logical :: found
+        logical :: found, match
     
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -679,39 +677,78 @@ contains
         ! look for the correct Grid to use
         ! first Get necessary information from XGrid and Fields
         call ESMF_XGridGet(xgrid, ngridA=ngrid_a, ngridB=ngrid_b, &
-            distGridM=distGridM, rc=rc)
+            rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         allocate(gridA(ngrid_a), gridB(ngrid_b))
 
-        call ESMF_XGridGet(xgrid, sideA=gridA, sideB=gridB, rc=rc)
+        call ESMF_XGridGet(xgrid, sideA=gridA, sideB=gridB, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-        deleteSrcGrid = .false.
         call ESMF_FieldGet(srcField, geomtype=geomtype, &
                rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
+        ! locate the Grid or XGrid contained in srcField
         if(geomtype == ESMF_GEOMTYPE_GRID) then
             call ESMF_FieldGet(srcField, grid=srcGrid, &
                    rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
+
+            found = .false.
+            do i = 1, ngrid_a
+                if(ESMF_GridMatch(srcGrid, gridA(i))) then
+                    srcIdx = i
+                    srcSide = ESMF_XGRID_SIDEA
+                    found = .true.
+                    exit
+                endif
+            enddo 
+            do i = 1, ngrid_b
+                if(ESMF_GridMatch(srcGrid, gridB(i))) then
+                    if(found) then
+                        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                           "- duplication of Grid found in XGrid", &
+                           ESMF_CONTEXT, rc) 
+                        return
+                    endif
+                    srcIdx = i
+                    srcSide = ESMF_XGRID_SIDEB
+                    found = .true.
+                    exit
+                endif
+            enddo 
+
+            if(.not. found) then
+                call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                   "- cannot Locate src Field Grid in XGrid", &
+                   ESMF_CONTEXT, rc) 
+                return
+            endif
+
         else
             if(geomtype == ESMF_GEOMTYPE_XGRID) then
                 call ESMF_FieldGet(srcField, xgrid=srcXGrid, &
                        rc=localrc)
                 if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
-                call ESMF_XGridGet(srcXGrid, distgridM=distgridM, rc=localrc)
+                
+                match = ESMF_XGridMatch(xgrid, srcXGrid, rc=localrc)
                 if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
-                srcGrid = ESMF_GridCreate(distgrid=distgridM, rc=localrc)
-                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
-                deleteSrcGrid = .true.
+
+                if(match) then
+                    srcSide = ESMF_XGRID_BALANCED
+                    srcIdx = 1
+                else
+                    call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+                           "- XGrid in srcField doesn't match the input XGrid", &
+                           ESMF_CONTEXT, rc) 
+                    return
+                endif
             else
                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
                        "- src Field is not built on Grid or XGrid", &
@@ -720,7 +757,7 @@ contains
             endif
         endif
 
-        deleteDstGrid = .false.
+        ! locate the Grid or XGrid contained in dstField
         call ESMF_FieldGet(dstField, geomtype=geomtype, &
                rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -731,121 +768,64 @@ contains
                    rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
+
+            found = .false.
+            do i = 1, ngrid_a
+                if(ESMF_GridMatch(dstGrid, gridA(i))) then
+                    dstIdx = i
+                    dstSide = ESMF_XGRID_SIDEA
+                    found = .true.
+                    exit
+                endif
+            enddo 
+            do i = 1, ngrid_b
+                if(ESMF_GridMatch(dstGrid, gridB(i))) then
+                    if(found) then
+                        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                           "- duplication of Grid found in XGrid", &
+                           ESMF_CONTEXT, rc) 
+                        return
+                    endif
+                    dstIdx = i
+                    dstSide = ESMF_XGRID_SIDEB
+                    found = .true.
+                    exit
+                endif
+            enddo 
+
+            if(.not. found) then
+                call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                   "- cannot Locate dst Field Grid in XGrid", &
+                   ESMF_CONTEXT, rc) 
+                return
+            endif
+
         else
             if(geomtype == ESMF_GEOMTYPE_XGRID) then
                 call ESMF_FieldGet(dstField, xgrid=dstXGrid, &
                        rc=localrc)
                 if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
-                call ESMF_XGridGet(dstXGrid, distgridM=distgridM, rc=localrc)
+
+                match = ESMF_XGridMatch(xgrid, dstXGrid, rc=localrc)
                 if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
-                dstGrid = ESMF_GridCreate(distgrid=distgridM, rc=localrc)
-                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
-                deleteDstGrid = .true.
+
+                if(match) then
+                    dstSide = ESMF_XGRID_BALANCED
+                    dstIdx = 1
+                else
+                    call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+                           "- XGrid in dstField doesn't match the input XGrid", &
+                           ESMF_CONTEXT, rc) 
+                    return
+                endif
             else
                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
                        "- src Field is not built on Grid or XGrid", &
                        ESMF_CONTEXT, rc) 
                 return
             endif
-        endif
-
-        call ESMF_GridGet(srcGrid, distgrid=srcDistGrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_GridGet(dstGrid, distgrid=dstDistGrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-        ! locate src Field information in XGrid
-        found = .false.
-        do i = 1, ngrid_a
-            if(ESMF_GridMatch(srcGrid, gridA(i))) then
-                srcIdx = i
-                srcSide = ESMF_XGRID_SIDEA
-                found = .true.
-                exit
-            endif
-        enddo 
-        do i = 1, ngrid_b
-            if(ESMF_GridMatch(srcGrid, gridB(i))) then
-                ! Need to consider cases where duplication exists, 
-                ! but it's a rare situation.
-                if(found) then
-                    call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
-                       "- duplication of Grid found in XGrid", &
-                       ESMF_CONTEXT, rc) 
-                    return
-                endif
-                srcIdx = i
-                srcSide = ESMF_XGRID_SIDEB
-                found = .true.
-                exit
-            endif
-        enddo 
-        if(ESMF_DistGridMatch(srcDistGrid, distGridM, rc=localrc)) then
-            if(found) then
-                call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
-                   "- duplication of Grid found in XGrid", &
-                   ESMF_CONTEXT, rc) 
-                return
-            endif
-            srcIdx = 1
-            srcSide = ESMF_XGRID_BALANCED
-            found = .true.
-        endif
-
-        if(.not. found) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
-               "- cannot Locate src Field Grid in XGrid", &
-               ESMF_CONTEXT, rc) 
-            return
-        endif
-            
-        ! locate dst Field information in XGrid
-        found = .false.
-        do i = 1, ngrid_a
-            if(ESMF_GridMatch(dstGrid, gridA(i))) then
-                dstIdx = i
-                dstSide = ESMF_XGRID_SIDEA
-                found = .true.
-                exit
-            endif
-        enddo 
-        do i = 1, ngrid_b
-            if(ESMF_GridMatch(dstGrid, gridB(i))) then
-                ! Need to consider cases where duplication exists, 
-                ! but it's a rare situation.
-                if(found) then
-                    call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
-                       "- duplication of Grid found in XGrid", &
-                       ESMF_CONTEXT, rc) 
-                    return
-                endif
-                dstIdx = i
-                dstSide = ESMF_XGRID_SIDEB
-                found = .true.
-                exit
-            endif
-        enddo 
-        if(ESMF_DistGridMatch(dstDistGrid, distGridM, rc=localrc)) then
-            if(found) then
-                call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
-                   "- duplication of Grid found in XGrid", &
-                   ESMF_CONTEXT, rc) 
-                return
-            endif
-            dstIdx = 1
-            dstSide = ESMF_XGRID_BALANCED
-            found = .true.
-        endif
-        if(.not. found) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
-               "- cannot Locate dst Field Grid in XGrid", &
-               ESMF_CONTEXT, rc) 
-            return
         endif
 
         ! src and dst Fields should not be on the same side
@@ -871,18 +851,6 @@ contains
             regridScheme, localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-
-        if(deleteSrcGrid) then
-            call ESMF_GridDestroy(srcGrid, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
-
-        if(deleteDstGrid) then
-            call ESMF_GridDestroy(dstGrid, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
 
         if(present(rc)) rc = ESMF_SUCCESS
 
