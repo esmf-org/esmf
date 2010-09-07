@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.8 2010/09/03 17:14:15 feiliu Exp $
+! $Id: ESMF_XGrid.F90,v 1.9 2010/09/07 16:40:29 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -118,6 +118,7 @@ module ESMF_XGridMod
 !
 ! - ESMF-public methods:
    public ESMF_XGridValidate           ! Check internal consistency
+   public ESMF_XGridMatch              ! Check if two XGrids match
 
    public assignment(=)
    public operator(.eq.), operator(.ne.) 
@@ -135,7 +136,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.8 2010/09/03 17:14:15 feiliu Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.9 2010/09/07 16:40:29 feiliu Exp $'
 
 !==============================================================================
 !
@@ -306,6 +307,70 @@ contains
  dval%side = sval%side
 
  end subroutine
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridMatch"
+
+!BOPI
+! !IROUTINE:  ESMF_XGridValidate - Check if two XGrids match
+
+! !INTERFACE:
+      function ESMF_XGridMatch(xgrid1, xgrid2, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_XGridMatch
+!
+! !ARGUMENTS:
+      type(ESMF_XGrid), intent(inout) :: xgrid1, xgrid2 
+      integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!      Compare two {\tt XGrid}s and check if they match each other. The 
+!      comparison is incremental. First the internal pointer association
+!      is checked to see if they are the same object. A deep check of 
+!      individual XGrid members is not implemented yet for performance 
+!      consideration.
+!
+!      The method returns an error code if problems are found.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [xgrid1]
+!           First {\tt ESMF\_XGrid} to match.
+!     \item [xgrid2]
+!           Second {\tt ESMF\_XGrid} to match.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt xgrid} 
+!           is valid.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc
+
+      type(ESMF_XGridType), pointer :: xgtypep
+      type(ESMF_Status) :: xgridstatus
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid1,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid2,rc)
+
+      if(associated(xgrid1%xgtypep, xgrid2%xgtypep)) then
+        ESMF_XGridMatch = .true.
+      else
+        ESMF_XGridMatch = .false.
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_XGridMatch
+
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
