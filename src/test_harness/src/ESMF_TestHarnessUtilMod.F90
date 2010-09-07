@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUtilMod.F90,v 1.13 2010/07/19 21:41:21 garyblock Exp $
+! $Id: ESMF_TestHarnessUtilMod.F90,v 1.14 2010/09/07 15:29:23 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -1272,7 +1272,7 @@ integer :: rootPet = Harness_rootPet
     CheckError = ESMF_LogMsgFoundError (rcValue, msg, rcToReturn=rcToReturn)
 
     if (CheckError) then
-      print '("error detected at line ", I5, " in file ", A " - return code = ", I8)', &
+      print '("error detected at line ", I5, " in file ", A, " - return code = ", I8)', &
         line, file, rcToReturn
       print '("     ", A)', msg
     end if
