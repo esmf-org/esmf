@@ -1,4 +1,4 @@
-! $Id: coupler_comp.F90,v 1.1 2010/08/12 22:32:29 feiliu Exp $
+! $Id: coupler_comp.F90,v 1.2 2010/09/08 17:20:23 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -27,8 +27,8 @@ module coupler_comp
   type(ESMF_RouteHandle), save :: routehandle
 
   private
-  type(ESMF_XGrid)  :: xgrid
-  type(ESMF_Field)  :: field
+  type(ESMF_XGrid), save  :: xgrid
+  type(ESMF_Field), save  :: field
   contains
 
 !-------------------------------------------------------------------------
