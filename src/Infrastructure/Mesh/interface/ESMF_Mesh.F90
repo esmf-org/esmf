@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.37 2010/09/03 22:15:42 peggyli Exp $
+! $Id: ESMF_Mesh.F90,v 1.38 2010/09/08 22:31:23 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.37 2010/09/03 22:15:42 peggyli Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.38 2010/09/08 22:31:23 svasquez Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -175,7 +175,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.37 2010/09/03 22:15:42 peggyli Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.38 2010/09/08 22:31:23 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -780,7 +780,7 @@ module ESMF_MeshMod
 !   \item [filename]
 !         The name of the grid file
 !   \item[filetype] 
-!         ESMF_FILEFORMAT_SCRIP or ESMF_FILEFORMAT_ESMFMESH
+!         ESMF\_FILEFORMAT\_SCRIP or ESMF\_FILEFORMAT\_ESMFMESH
 !   \item[convert3D] 
 !         if TRUE, the node coordinates will be converted into 3D Cartisian, which
 !         is required for a global grid
