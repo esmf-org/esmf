@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.3 2010/09/08 13:15:46 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.4 2010/09/08 14:50:48 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -117,7 +117,8 @@ contains
             ESMF_CONTEXT, rc)) return
 
         do i = 1, 2
-            sideA(i) = ESMF_GridCreate(distgrid=sideAdg(i), destroyDistGrid=.true., rc=localrc)
+            sideA(i) = ESMF_GridCreate(distgrid=sideAdg(i), indexflag=ESMF_INDEX_GLOBAL, &
+                destroyDistGrid=.true., rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -127,7 +128,8 @@ contains
                 ESMF_CONTEXT, rc)) return
         enddo
         do i = 1, 1
-            sideB(i) = ESMF_GridCreate(distgrid=sideBdg(i), destroyDistGrid=.true., rc=localrc)
+            sideB(i) = ESMF_GridCreate(distgrid=sideBdg(i), indexflag=ESMF_INDEX_GLOBAL, &
+                destroyDistGrid=.true., rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
