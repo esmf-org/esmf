@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.20 2010/08/26 22:49:23 w6ws Exp $
+// $Id: ESMC_Config.h,v 1.21 2010/09/08 23:14:41 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -138,7 +138,7 @@ int ESMC_ConfigLoadFile(
 //     Configuration file name.
 //   \item [{[delayout]}]
 //     {\tt ESMC\_DELayout} associated with this {\tt config} object.
-//     **NOTE: {\tt ESMC\_DELayout} is not yet enabled
+//     **NOTE: This argument is not currently supported.
 //   \item [{[unique]}]
 //     If specified as true, uniqueness of labels are checked and 
 //     error code set if duplicates found (optional).
@@ -189,7 +189,7 @@ int ESMC_ConfigFindLabel(
 // !INTERFACE:
 int ESMC_ConfigNextLine(
   ESMC_Config config,       // in
-  bool *tableEnd);          // out
+  int *tableEnd);           // out
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -202,7 +202,8 @@ int ESMC_ConfigNextLine(
 //   \item [config]
 //     Already created {\tt ESMC\_Config} object.
 //   \item [{[tableEnd]}]
-//     End of table mark (::) is checked.
+//     End of table mark (::) found flag.  Returns 1 when found, and 0 when
+//     not found.
 //   \end{description} //
 //EOP
 //-----------------------------------------------------------------------------

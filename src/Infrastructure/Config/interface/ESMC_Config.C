@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.C,v 1.20 2010/08/26 22:49:23 w6ws Exp $
+// $Id: ESMC_Config.C,v 1.21 2010/09/08 23:14:41 w6ws Exp $
 //
 // Earth System Modeling Framework
 // copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char* const version = "$Id: ESMC_Config.C,v 1.20 2010/08/26 22:49:23 w6ws Exp $";
+static const char* const version = "$Id: ESMC_Config.C,v 1.21 2010/09/08 23:14:41 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 // class declaration type -> this should be moved into ESMCI namespace
@@ -517,7 +517,7 @@ int ESMC_ConfigNextLine(
 //
 // !ARGUMENTS:
   ESMC_Config config,       // in
-  bool *tableEnd){          // out
+  int *tableEnd){           // out
 //
 // !DESCRIPTION:
 //  Selects the next line (for tables).
@@ -527,7 +527,8 @@ int ESMC_ConfigNextLine(
 //   \item [config]
 //     Already created {\tt ESMC\_Config} object.
 //   \item [{[tableEnd]}]
-//     End of table mark (::) is checked.
+//     End of table mark (::) found flag.  Returns 1 when found, and 0 when
+//     not found.
 //   \end{description} //
 //EOP
 //-----------------------------------------------------------------------------
@@ -556,7 +557,7 @@ int ESMC_ConfigNextLine(
     return rc;
   }
 
-  *tableEnd = (localtableEnd == ESMF_TRUE) ? true : false;
+  *tableEnd = localtableEnd == ESMF_TRUE;
 
   // set return code for this branch
   rc = ESMF_SUCCESS;
