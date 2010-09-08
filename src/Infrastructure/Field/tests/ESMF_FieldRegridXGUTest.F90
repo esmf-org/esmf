@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.2 2010/09/03 19:16:01 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.3 2010/09/08 13:15:46 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -121,9 +121,17 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
+            call ESMF_GridAddCoord(sideA(i), staggerLoc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
         enddo
         do i = 1, 1
             sideB(i) = ESMF_GridCreate(distgrid=sideBdg(i), destroyDistGrid=.true., rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+            call ESMF_GridAddCoord(sideB(i), staggerLoc=ESMF_STAGGERLOC_CENTER, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -343,6 +351,7 @@ contains
         do i = 1, 2
             call ESMF_FieldRegridStore(xgrid, srcField=srcField(i), dstField=field, &
                 routehandle=rh_src2xgrid(i), &
+                regridScheme=ESMF_REGRID_SCHEME_NATIVE, &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -374,7 +383,9 @@ contains
 
         ! from X -> B
         do i = 1, 1
-            call ESMF_FieldRegridStore(xgrid, srcField=field, dstField=dstField(i), routehandle=rh_xgrid2dst(i), &
+            call ESMF_FieldRegridStore(xgrid, srcField=field, dstField=dstField(i), &
+                routehandle=rh_xgrid2dst(i), &
+                regridScheme=ESMF_REGRID_SCHEME_NATIVE, &
                 rc = localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
