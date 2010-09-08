@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.116 2010/08/26 18:27:40 theurich Exp $
+# $Id: makefile,v 1.117 2010/09/08 23:30:40 rokuingh Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -439,7 +439,7 @@ install:
 	cp -f $(ESMF_LIBDIR)/lib*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
 	$(ESMF_RANLIB) $(ESMF_INSTALL_LIBDIR_ABSPATH)/lib*.a
 	$(MAKE) install_apps
-	-cp -f $(ESMF_EXDIR)/ESMC_RegridWgtGenEx $(ESMF_INSTALL_BINDIR_ABSPATH)
+	-cp -f $(ESMF_EXDIR)/ESMF_RegridWeightGen $(ESMF_INSTALL_BINDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_DOCDIR_ABSPATH)
 	@if [ -d $(ESMF_DOCDIR) ]; then \
         cp -rf $(ESMF_DOCDIR)/* $(ESMF_INSTALL_DOCDIR_ABSPATH); \
