@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridConcurrentSTest.F90,v 1.1 2010/08/12 22:32:29 feiliu Exp $
+! $Id: ESMF_XGridConcurrentSTest.F90,v 1.2 2010/09/08 17:21:02 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
@@ -101,7 +101,7 @@ program ESMF_XGridConcurrentSTest
   cname1 = "land"
   ! use petList to define land on 2 PETs
   land = ESMF_GridCompCreate(name=cname1, petlist=(/0,1/), rc=localrc)
-  print *, "Created component ", trim(cname2), "rc =", localrc
+  print *, "Created component ", trim(cname1), "rc =", localrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
