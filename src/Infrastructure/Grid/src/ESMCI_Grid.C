@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.108 2010/06/23 23:01:08 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.109 2010/09/08 20:21:59 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.108 2010/06/23 23:01:08 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.109 2010/09/08 20:21:59 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -2781,7 +2781,7 @@ int Grid::setCoordArray(
             ESMF_ERR_PASSTHRU, &rc)) return rc;        
 
   // Make sure that they match
-  if (staggerDistgrid != arrayArg->getDistGrid()) {
+  if (!DistGrid::match(staggerDistgrid, arrayArg->getDistGrid())) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- Array and Grid DistGrid mismatch ", &rc);
       return rc;
