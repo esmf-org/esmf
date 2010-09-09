@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.13 2010/08/25 23:40:44 samsoncheung Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.14 2010/09/09 20:11:55 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@ program ESMF_ArrayIOUTest
   type(ESMF_Array)                        :: array_withhalo, array_wouthalo
   type(ESMF_Array)                        :: array_withhalo2, array_wouthalo2
   type(ESMF_Array)                        :: array_diff
-  integer                                 :: rc, de
+  integer                                 :: rc, rc_tmp, de
   integer, allocatable :: totalLWidth(:), totalUWidth(:), &
                        computationalLWidth(:),computationalUWidth(:)
   integer, allocatable :: exclusiveLBound(:,:), exclusiveUBound(:,:)
@@ -163,27 +163,25 @@ program ESMF_ArrayIOUTest
   !NEX_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write ESMF_Array with Halo Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_ArrayWrite(array_withhalo, file='file3D_withhalo.nc', rc=rc)
-#ifdef ESMF_PIO
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif  
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
+   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+  else
+   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  endif
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write ESMF_Array without Halo Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_ArrayWrite(array_wouthalo, file='file3D_wouthalo.nc', rc=rc)
-#ifdef ESMF_PIO
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif  
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
+   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+  else
+   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  endif  
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -220,14 +218,13 @@ program ESMF_ArrayIOUTest
   !NEX_UTest_Multi_Proc_Only
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read ESMF_Array without Halo Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_ArrayRead(array_wouthalo2, file='file3D_wouthalo.nc', rc=rc)
-#ifdef ESMF_PIO
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif  
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
+   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+  else
+   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  endif  
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -243,13 +240,13 @@ program ESMF_ArrayIOUTest
   enddo
   enddo
   enddo
-#ifdef ESMF_PIO
-  write(*,*)"Maximum Error (Without Halo case) = ", Maxvalue
-  call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Comparison did not failed as was expected"
-  call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
-#endif
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
+   write(failMsg, *) "Comparison did not failed as was expected"
+   call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  else
+   write(*,*)"Maximum Error (Without Halo case) = ", Maxvalue
+   call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  endif
 
 !-------------------------------------------------------------------------------
 ! !  Get Fortran pointer to Array data
@@ -265,14 +262,14 @@ program ESMF_ArrayIOUTest
   !NEX_UTest_Multi_Proc_Only
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read ESMF_Array without Halo Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_ArrayRead(array_withhalo2, file='file3D_withhalo.nc', rc=rc)
-#ifdef ESMF_PIO
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif  
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
+   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+  else
+   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  endif
+
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -289,13 +286,13 @@ program ESMF_ArrayIOUTest
   enddo
   enddo
   write(*,*)"Maximum Error (With Halo case) = ", Maxvalue
-#ifdef ESMF_PIO
-  write(*,*)"Maximum Error (Without Halo case) = ", Maxvalue
-  call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Comparison did not failed as was expected"
-  call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
-#endif
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
+   write(failMsg, *) "Comparison did not failed as was expected"
+   call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  else
+   write(*,*)"Maximum Error (Without Halo case) = ", Maxvalue
+   call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  endif
 
   deallocate (computationalLWidth, computationalUWidth)
   deallocate (totalLWidth, totalUWidth)
@@ -397,14 +394,13 @@ program ESMF_ArrayIOUTest
   !NEX_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write 2D ESMF_Array with Halo Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_ArrayWrite(array_withhalo, file='file2D_withhalo.nc', rc=rc)
-#ifdef ESMF_PIO
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif  
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
+   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+  else
+   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  endif
 
 !-------------------------------------------------------------------------------
 ! !  Get Fortran pointer to Array data
@@ -419,14 +415,14 @@ program ESMF_ArrayIOUTest
   !NEX_UTest_Multi_Proc_Only
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read 2D ESMF_Array to ESMF_Array without halo Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_ArrayRead(array_wouthalo, file="file2D_withhalo.nc", rc=rc)
-#ifdef ESMF_PIO
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif  
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
+   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+  else
+   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  endif
+
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -440,13 +436,13 @@ program ESMF_ArrayIOUTest
    if (Maxvalue.le.diff) Maxvalue=diff
   enddo
   enddo
-#ifdef ESMF_PIO
-  write(*,*)"Maximum Error (withhalo-withouthalo case) = ", Maxvalue
-  call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Comparison did not failed as was expected"
-  call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
-#endif
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
+   write(failMsg, *) "Comparison did not failed as was expected"
+   call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  else
+   write(*,*)"Maximum Error (Without Halo case) = ", Maxvalue
+   call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  endif
 
 
 !------------------------------------------------------------------------
@@ -476,15 +472,14 @@ program ESMF_ArrayIOUTest
   !NEX_UTest_Multi_Proc_Only
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read 2D ESMF_Array with different distgrid"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_ArrayRead(array_diff, file="file2D_withhalo.nc", rc=rc)
-#ifdef ESMF_PIO
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, & 
-     ESMF_SRCLINE)
-#endif 
+  rc_tmp = rc
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
+   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+  else
+   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  endif
 
 !-------------------------------------------------------------------------------
 ! !  Compare global Fortran array
@@ -502,13 +497,13 @@ program ESMF_ArrayIOUTest
      if (diff .gt. Maxvalue) Maxvalue = diff
    enddo
    enddo
-#ifdef ESMF_PIO
-  write(*,*)"Maximum Error (different distgrid) = ", Maxvalue
-  call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Comparison did not failed as was expected"
-  call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
-#endif
+  if(rc_tmp==ESMF_RC_LIB_NOT_PRESENT) then
+   write(failMsg, *) "Comparison did not failed as was expected"
+   call ESMF_Test((Maxvalue .gt. -1.), name, failMsg, result,ESMF_SRCLINE)
+  else
+   write(*,*)"Maximum Error (different distgrid) = ", Maxvalue
+   call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  endif
   endif
 
 

@@ -139,14 +139,13 @@
   !NEX_UTest_Multi_Proc_Only
   ! FieldBundle Write to a single file Test
   call ESMF_FieldBundleWrite(bundleTst, file="single.nc", rc=rc)
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
   write(name, *) "Writing a FieldBundle to a single file Test"
-#ifdef ESMF_PIO
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
+   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+  else
+   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  endif
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
@@ -155,12 +154,11 @@
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Writing a FieldBundle to multiple files Test"
   call ESMF_FieldBundleWrite(bundleTst, file="multi.nc", mfiles=.true., rc=rc)
-#ifdef ESMF_PIO
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
+   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+  else
+   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  endif
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
@@ -202,12 +200,11 @@
   call ESMF_FieldBundleRead(bundleRd, file="single.nc", rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Writing a FieldBundle to a single file Test"
-#ifdef ESMF_PIO
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
+   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+  else
+   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  endif
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
@@ -223,27 +220,27 @@
    if (Maxvalue.le.diff) Maxvalue=diff
   enddo
   enddo
-#ifdef ESMF_PIO
-   write(*,*)"Maximum Error  = ", Maxvalue
-   call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
-#else
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
    write(failMsg, *) "Comparison did not failed as was expected"
    call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
-#endif
+  else
+   write(*,*)"Maximum Error  = ", Maxvalue
+   call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  endif
+
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! FieldBundle Read from multiple files Test
   call ESMF_FieldBundleRead(bundleRd, file="multi.nc", mfiles=.true., rc=rc)
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
   write(name, *) "Writing a FieldBundle to a single file Test"
-#ifdef ESMF_PIO
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
+   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+  else
+   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  endif
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
@@ -259,13 +256,14 @@
    if (Maxvalue.le.diff) Maxvalue=diff
   enddo
   enddo
-#ifdef ESMF_PIO
-   write(*,*)"Maximum Error  = ", Maxvalue
-   call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
-#else
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
    write(failMsg, *) "Comparison did not failed as was expected"
    call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
-#endif
+  else
+   write(*,*)"Maximum Error  = ", Maxvalue
+   call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  endif
+
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleIOUTest.F90,v 1.2 2010/08/25 23:41:55 samsoncheung Exp $
+! $Id: ESMF_ArrayBundleIOUTest.F90,v 1.3 2010/09/09 20:12:47 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@ program ESMF_ArrayBundleIOUTest
   integer(ESMF_KIND_I4), pointer, dimension(:,:,:) :: farrayPtr3, farrayPtr3_r
   
   integer, allocatable :: exclusiveLBound(:,:), exclusiveUBound(:,:)
-  integer :: i,j,rc
+  integer :: i,j,rc,rc_tmp
   real :: Maxvalue, diff
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -148,27 +148,24 @@ program ESMF_ArrayBundleIOUTest
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleWrite Single file Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_ArrayBundleWrite(arraybundle_w, file="bundle.nc", rc=rc)
-#ifdef ESMF_PIO
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif  
-
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
+   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+  else
+   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  endif
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleWrite Multiple files Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_ArrayBundleWrite(arraybundle_w, file="sep.nc", mfiles=.true., rc=rc)
-#ifdef ESMF_PIO
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif  
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
+   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+  else
+   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  endif
 
 
   !------------------------------------------------------------------------
@@ -212,15 +209,15 @@ program ESMF_ArrayBundleIOUTest
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleRead Single file Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
   !call ESMF_ArrayBundleRead(arraybundle_r, file="bundle.nc", rc=rc)
   call ESMF_ArrayBundleRead(arraybundle_r, file="sep.nc", mfiles=.true., rc=rc)
-#ifdef ESMF_PIO
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  rc_tmp=rc   ! for later use in comparison
+  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif  
+  else
+   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  endif  
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -253,13 +250,13 @@ program ESMF_ArrayBundleIOUTest
    if (Maxvalue.le.diff) Maxvalue=diff
   enddo
   enddo
-#ifdef ESMF_PIO
-   write(*,*)"Maximum Error  = ", Maxvalue
-   call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
-#else
+  if(rc_tmp==ESMF_RC_LIB_NOT_PRESENT) then
    write(failMsg, *) "Comparison did not failed as was expected"
    call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
-#endif
+  else
+   write(*,*)"Maximum Error  = ", Maxvalue
+   call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  endif
 !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
