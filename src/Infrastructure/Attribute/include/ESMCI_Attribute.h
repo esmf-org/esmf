@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.35 2010/07/22 06:00:11 eschwab Exp $
+// $Id: ESMCI_Attribute.h,v 1.36 2010/09/09 23:01:11 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@ using namespace std;
 // !USES:
 
 // Eventually move this to ESMCI_Util.h
-enum ESMC_AttUpdateRm{ESMC_ATTUPDATERM_ATTRIBUTE=-1,
+enum ESMC_AttUpdateRm{ESMC_ATTUPDATERM_ATTRIBUTE=-42,
                       ESMC_ATTUPDATERM_ATTPACKATT,
                       ESMC_ATTUPDATERM_ATTPACK};
 
