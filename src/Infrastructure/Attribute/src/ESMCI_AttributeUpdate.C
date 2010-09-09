@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.24 2010/06/28 05:59:47 eschwab Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.25 2010/09/09 21:24:08 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.24 2010/06/28 05:59:47 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.25 2010/09/09 21:24:08 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -232,6 +232,16 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
     delete [] thiskey;
     return ESMF_FAILURE;
   }
+
+  // check if buffer has been overwritten
+  if (length < *offset){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                      "Overread the buffer", &localrc);
+    delete [] thiskey;
+    delete [] distkey;
+    return localrc;
+  // the perfect case - also recursion stop case
+  } else if (length == *offset) return ESMF_SUCCESS;
 
   // unpack next key
   memcpy(distkey, recvBuf+(*offset), keySize);
