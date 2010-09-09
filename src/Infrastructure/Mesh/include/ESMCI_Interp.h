@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.h,v 1.9 2010/08/24 16:10:51 oehmke Exp $
+// $Id: ESMCI_Interp.h,v 1.10 2010/09/09 20:26:11 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -184,6 +184,7 @@ public:
   std::vector<int> iflag;
   bool has_std; // true if a standard interpolation exists
   bool has_patch; // true if a patch interp exists
+  bool has_cnsrv; // true if a conserve interp exists
   Mesh &srcmesh;
   Mesh &dstmesh;
 };

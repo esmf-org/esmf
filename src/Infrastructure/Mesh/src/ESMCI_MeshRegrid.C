@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.18 2010/08/24 16:10:51 oehmke Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.19 2010/09/09 20:26:11 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.18 2010/08/24 16:10:51 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.19 2010/09/09 20:26:11 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -280,16 +280,18 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
     IWeights pole_constraints, stw;
     UInt constraint_id = srcmesh.DefineContext("pole_constraints");
 
-    if (*regridScheme == ESMC_REGRID_SCHEME_FULL3D) {
-      if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
-        for (UInt i = 1; i <= 7; ++i)
-          MeshAddPole(srcmesh, i, constraint_id, pole_constraints);
-      } else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
-        for (UInt i = 1; i <= 7; ++i)
-          MeshAddPoleNPnts(srcmesh, *regridPoleNPnts, i, constraint_id, pole_constraints);
-      } else if (*regridPoleType == ESMC_REGRID_POLETYPE_TEETH) {
-        for (UInt i = 1; i <= 7; ++i)
-          MeshAddPoleTeeth(srcmesh, i, constraint_id, pole_constraints);
+    if (*regridMethod != ESMC_REGRID_METHOD_CONSERVE) { // No poles if conservative
+      if (*regridScheme == ESMC_REGRID_SCHEME_FULL3D) {
+	if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
+	  for (UInt i = 1; i <= 7; ++i)
+	    MeshAddPole(srcmesh, i, constraint_id, pole_constraints);
+	} else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
+	  for (UInt i = 1; i <= 7; ++i)
+	    MeshAddPoleNPnts(srcmesh, *regridPoleNPnts, i, constraint_id, pole_constraints);
+	} else if (*regridPoleType == ESMC_REGRID_POLETYPE_TEETH) {
+	  for (UInt i = 1; i <= 7; ++i)
+	    MeshAddPoleTeeth(srcmesh, i, constraint_id, pole_constraints);
+	}
       }
     }
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_ConserveInterp.h,v 1.1 2010/08/24 16:10:51 oehmke Exp $
+// $Id: ESMCI_ConserveInterp.h,v 1.2 2010/09/09 20:26:11 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -25,7 +25,11 @@
 namespace ESMCI {
 
 
-  void calc_1st_order_weights(const MeshObj *src_elem, MEField<> *src_cfield, 
+  void calc_1st_order_weights_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
+                             std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
+			      std::vector<int> *valid, std::vector<double> *wgts);
+
+  void calc_1st_order_weights_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
                              std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
 			      std::vector<int> *valid, std::vector<double> *wgts);
 

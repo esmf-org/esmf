@@ -1,4 +1,4 @@
-// $Id: ESMCI_Integrate.C,v 1.7 2010/05/13 18:51:55 w6ws Exp $
+// $Id: ESMCI_Integrate.C,v 1.8 2010/09/09 20:26:11 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Integrate.C,v 1.7 2010/05/13 18:51:55 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Integrate.C,v 1.8 2010/09/09 20:26:11 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #ifndef M_PI
@@ -249,7 +249,7 @@ void Integrate::int_weights_parallel(MEField<> *iwts) {
 //    ^
 //    | --- angle being calculated
 //      
-  double angle(double *u, double *v, double *w) {
+  double angle_gc(double *u, double *v, double *w) {
   
   double cosa=u[0]*v[0]+u[1]*v[1]+u[2]*v[2];
 
@@ -284,7 +284,7 @@ void weights_great_circle_same(int n, double *pnts, double *weights) {
     double *pnt2=pnts+3*((i+2)%n);
 
     // compute angle for pnt1
-    sum += angle(pnt1, pnt2, pnt0);
+    sum += angle_gc(pnt1, pnt2, pnt0);
   }
 
   // Compute weight

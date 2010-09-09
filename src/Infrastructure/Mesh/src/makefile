@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 2010/08/24 16:10:51 oehmke Exp $
+# $Id: makefile,v 1.27 2010/09/09 20:26:11 oehmke Exp $
 
 # leave alone.
 ALL: build_here 
@@ -23,6 +23,7 @@ SOURCEC	  = \
            ESMCI_Interp.C \
            ESMCI_IOField.C \
            ESMCI_Kernel.C \
+           ESMCI_MathUtil.C \
            ESMCI_Mapping.C \
            ESMCI_MasterElement.C \
            ESMCI_MCoord.C \

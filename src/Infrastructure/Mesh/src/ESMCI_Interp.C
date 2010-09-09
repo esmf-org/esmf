@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.25 2010/08/24 16:10:51 oehmke Exp $
+// $Id: ESMCI_Interp.C,v 1.26 2010/09/09 20:26:11 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.25 2010/08/24 16:10:51 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.26 2010/09/09 20:26:11 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -626,7 +626,9 @@ Par::Out() << std::endl;
   } // for searchresult
 }
 
-void calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw) {
+
+
+void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
     
   // Get src coord field
@@ -654,7 +656,7 @@ void calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, 
     wgts.resize(sr.elems.size(),0.0);
 
     // Calculate weights
-    calc_1st_order_weights(sr.elem,dst_cfield,sr.elems,src_cfield,
+    calc_1st_order_weights_2D_2D_cart(sr.elem,dst_cfield,sr.elems,src_cfield,
 			   &valid, &wgts);
 
     // Count number of valid weights
@@ -694,6 +696,125 @@ void calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, 
 
 
 }
+
+void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw) {
+  Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
+    
+  // Get src coord field
+  MEField<> *src_cfield = srcmesh.GetCoordField();
+
+  // Get src coord field
+  MEField<> *dst_cfield = dstmesh.GetCoordField();
+
+  // Loop through search results
+  SearchResult::iterator sb = sres.begin(), se = sres.end();
+  for (; sb != se; sb++) {
+    
+    // NOTE: sr.elem is a dst element and sr.elems is a list of src elements
+    Search_result &sr = **sb;
+
+    // Declare weight vector
+    std::vector<int> valid;
+    std::vector<double> wgts;
+
+    // Allocate space for weight calc output arrays
+    valid.resize(sr.elems.size(),0);
+    wgts.resize(sr.elems.size(),0.0);
+
+    // Calculate weights
+   calc_1st_order_weights_2D_3D_sph(sr.elem,dst_cfield,sr.elems,src_cfield,
+			       &valid, &wgts);
+
+    // Count number of valid weights
+    int num_valid=0;
+    for (int i=0; i<sr.elems.size(); i++) {
+      if (valid[i]==1) num_valid++;
+    }
+
+
+#if 0
+    // Normalize weights
+    double tot=0.0;
+    for (int i=0; i<sr.elems.size(); i++) {
+      if (valid[i]==1) {
+	tot +=wgts[i];
+      }
+    }
+
+    for (int i=0; i<sr.elems.size(); i++) {
+      if (valid[i]==1) {
+	wgts[i]=wgts[i]/tot;
+      }
+    }
+#endif
+
+    // If none valid, then don't add weights
+    if (num_valid < 1) continue;
+
+    // Temporary empty col with negatives so unset values
+    // can be detected if they sneak through
+    IWeights::Entry col_empty(-1, 0, -1.0, 0);
+
+    // Allocate column of empty entries
+    std::vector<IWeights::Entry> col;
+    col.resize(num_valid,col_empty);
+
+    // Put weights into column
+    int j=0;
+    for (int i=0; i<sr.elems.size(); i++) {
+      if (valid[i]==1) {
+	col[j].id=sr.elems[i]->get_id();
+	col[j].value=wgts[i];
+	j++;
+      }
+    }
+
+    // Set row info
+    IWeights::Entry row(sr.elem->get_id(), 0, 0.0, 0);
+
+    // Put weights into weight matrix
+    iw.InsertRow(row, col);       
+
+  } // for searchresult
+
+
+}
+
+
+
+
+void calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw) {
+  Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
+    
+  // both meshes have to have the same dimensions
+  if (srcmesh.parametric_dim() != dstmesh.parametric_dim()) {
+    Throw() << "src and dst mesh must have the same parametric dimension for conservative regridding";
+  }
+
+  if (srcmesh.spatial_dim() != dstmesh.spatial_dim()) {
+    Throw() << "src and dst mesh must have the same spatial dimension for conservative regridding";
+  }
+
+  // Get dimension, because they're the same can just get one
+  int sdim=srcmesh.spatial_dim();
+  int pdim=srcmesh.parametric_dim();
+
+  // Get weights depending on dimension
+  if (pdim==2) {
+    if (sdim==2) {
+      calc_conserve_mat_serial_2D_2D_cart(srcmesh, dstmesh, sres, iw);
+    } else if (sdim==3) {
+      calc_conserve_mat_serial_2D_3D_sph(srcmesh, dstmesh, sres, iw);
+    }
+  } else {
+    Throw() << "Meshes with parametric dimension != 2 not supported for conservative regridding";
+  }
+
+
+
+}
+
+
 
 
  
@@ -845,6 +966,7 @@ srcF(),
 dstF(),
 has_std(false),
 has_patch(false),
+has_cnsrv(false),
 srcmesh(src),
 dstmesh(dest)
 {
@@ -900,6 +1022,7 @@ dstmesh(dest)
   for (UInt j = 0; j < fpairs.size(); j++) {
     if (fpairs[j].idata == Interp::INTERP_STD) has_std = true;
     if (fpairs[j].idata == Interp::INTERP_PATCH) has_patch = true;
+    if (fpairs[j].idata == Interp::INTERP_CONSERVE) has_cnsrv = true;
   }
   
 }
@@ -930,7 +1053,24 @@ void Interp::operator()(int fpair_num, IWeights &iw) {
     iw.Migrate(dstmesh);
   }
 
-  
+  if (has_cnsrv) {
+    WMat::WeightMap::iterator wi = iw.begin_row(), we = iw.end_row();
+    for (; wi != we; ++wi) {
+      const WMat::Entry &w = wi->first;
+      std::vector<WMat::Entry> &wcol = wi->second;
+
+      double tot=0.0;
+      for (UInt j = 0; j < wcol.size(); ++j) {
+        WMat::Entry &wc = wcol[j];
+        tot += wc.value;
+      } // for j
+
+      for (UInt j = 0; j < wcol.size(); ++j) {
+        WMat::Entry &wc = wcol[j];
+        wc.value=wc.value/tot;
+      } // for j      
+    } // for wi
+  }
 }
 
 
