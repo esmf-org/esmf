@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.14 2010/08/25 23:40:03 samsoncheung Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.15 2010/09/09 20:09:35 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.14 2010/08/25 23:40:03 samsoncheung Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.15 2010/09/09 20:09:35 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -139,7 +139,7 @@ contains
 !   \item[{[append]}]
 !    A logical flag: append data to an existing file, default is false.
 !   \item[{[iofmt]}]
-!    The IO format supported are "bin", "pnc", "snc", "nc4p", and "nc4c".
+!    The IO format supported are "pnc" and "snc".
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -156,7 +156,6 @@ contains
 
     type(ESMF_TypeKind)             :: typekind
 
-^ifdef ESMF_PIO
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -164,6 +163,19 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
 
+^ifdef ESMF_NETCDF
+    ! NetCDF is used
+    iofmtd = "snc"
+^elif ESMF_PNETCDF
+    ! PNetCDF is used
+    iofmtd = "pnc"
+^else
+^undef ESMF_PIO
+    ! TODO: We could use MPI_IO, but for now, it is left out.
+^endif
+
+
+^ifdef ESMF_PIO
     ! Obtain typekind and rank
     call ESMF_ArrayGet( array, typekind=typekind, rank=rank, name=varname, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -173,8 +185,6 @@ contains
     file_exists = .false.
     if(present(append)) file_exists = append
 
-    iofmtd = "snc"
-    if(present(iofmt)) iofmtd = trim(iofmt)
 
     ! Call a T/K/R specific interface in order to create the proper
     !  type of F90 pointer, allocate the space, set the values in the
@@ -325,7 +335,7 @@ contains
 !   \item[{[vname]}]
 !    Variable name in netcdf file; default is the "name" of array
 !   \item[{[iofmt]}]
-!    The IO format supported are "bin", "pnc", "snc", "nc4p", and "nc4c".
+!    The IO format supported are "pnc" and  "snc".
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -341,7 +351,6 @@ contains
 
     type(ESMF_TypeKind)             :: typekind
 
-^ifdef ESMF_PIO
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -349,9 +358,18 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
 
+^ifdef ESMF_NETCDF
+    ! NetCDF is used
     iofmtd = "snc"
-    if(present(iofmt)) iofmtd = trim(iofmt)
+^elif ESMF_PNETCDF
+    ! PNetCDF is used
+    iofmtd = "pnc"
+^else
+^undef ESMF_PIO
+    ! TODO: We could use MPI_IO, but for now, it is left out.
+^endif
 
+^ifdef ESMF_PIO
     ! Obtain typekind and rank
     call ESMF_ArrayGet( array, typekind=typekind, rank=rank, name=varname, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
