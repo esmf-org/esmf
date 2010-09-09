@@ -91,12 +91,25 @@ module user_model2
     integer, intent(out) :: rc
 
     ! Local variables
-    character(ESMF_MAXSTR)      :: convCIM, purpComp, purpField
+    character(ESMF_MAXSTR)      :: convCIM, purpComp, purpField, attrValue
     type(ESMF_Field)            :: OH, Orog
     type(ESMF_FieldBundle)      :: fieldbundle
     
     ! Initialize return code
     rc = ESMF_SUCCESS
+
+
+    call ESMF_AttributeAdd(importState, convention='ESMF', purpose='General', rc=rc)
+    call ESMF_AttributeSet(importState, name='Import', value='True', &
+                           convention='ESMF', purpose='General', rc=rc)
+    call ESMF_AttributeSet(importState, name='Export', value='False', &
+                           convention='ESMF', purpose='General', rc=rc)
+    call ESMF_AttributeGet(importState, name='Import', value=attrValue, &
+                           convention='ESMF', purpose='General', rc=rc)
+print *, 'State Import = ', attrValue
+    call ESMF_AttributeGet(importState, name='Export', value=attrValue, &
+                           convention='ESMF', purpose='General', rc=rc)
+print *, 'State Export = ', attrValue
 
     ! Create the CIM Attribute package on the Gridded Component and set its
     ! values.  The standard Attribute package currently supplied by ESMF for a

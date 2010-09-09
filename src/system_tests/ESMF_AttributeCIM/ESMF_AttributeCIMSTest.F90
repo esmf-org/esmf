@@ -27,7 +27,7 @@ program ESMF_AttributeCIMSTest
       
   ! Local variables
   integer :: localPet, petCount, localrc, rc, userrc
-  character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
+  character(len=ESMF_MAXSTR) :: cname1, cname2, cplname, attrValue
   type(ESMF_VM):: vm
   type(ESMF_State) :: c1imp, c1exp, c2imp, c2exp
   type(ESMF_GridComp) :: comp1
@@ -243,6 +243,16 @@ program ESMF_AttributeCIMSTest
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
     
   ! Attribute-specific initialization
+
+    !call ESMF_StateReconcile(c2imp, vm, ESMF_ATTRECONCILE_ON, rc=rc)
+    call ESMF_AttributeUpdate(c2imp, vm, rootList=(/3,4,5/), rc=rc)
+
+    call ESMF_AttributeGet(c2imp, name='Import', value=attrValue, &
+                           convention='ESMF', purpose='General', rc=rc)
+print *, 'localPet ', localPet, 'c2imp Import = ', attrValue
+    call ESMF_AttributeGet(c2imp, name='Export', value=attrValue, &
+                           convention='ESMF', purpose='General', rc=rc)
+print *, 'localPet ', localPet, 'c2imp Export = ', attrValue
 
   ! reconcile comp2's export State (to get comp2's Field Attributes onto
   ! PETs 0,1,2, from PETs 3,4,5, since Coupler is setup one way,

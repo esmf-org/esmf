@@ -100,8 +100,8 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateReconcile(importState, vm, ESMF_ATTRECONCILE_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateReconcile(exportState, vm, ESMF_ATTRECONCILE_ON, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+!    call ESMF_StateReconcile(exportState, vm, ESMF_ATTRECONCILE_ON, rc=rc)
+!    if (rc/=ESMF_SUCCESS) return ! bail out
                                   
     ! Create the CIM Attribute package on the Coupler Component and set its
     ! values.  The standard Attribute package currently supplied by ESMF for a
