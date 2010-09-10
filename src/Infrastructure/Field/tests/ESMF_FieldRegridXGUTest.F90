@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.4 2010/09/08 14:50:48 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.5 2010/09/10 14:53:38 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -353,7 +353,6 @@ contains
         do i = 1, 2
             call ESMF_FieldRegridStore(xgrid, srcField=srcField(i), dstField=field, &
                 routehandle=rh_src2xgrid(i), &
-                regridScheme=ESMF_REGRID_SCHEME_NATIVE, &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -387,13 +386,12 @@ contains
         do i = 1, 1
             call ESMF_FieldRegridStore(xgrid, srcField=field, dstField=dstField(i), &
                 routehandle=rh_xgrid2dst(i), &
-                regridScheme=ESMF_REGRID_SCHEME_NATIVE, &
                 rc = localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             call ESMF_FieldRegrid(srcField=field, dstField=dstField(i), routehandle=rh_xgrid2dst(i), &
-                zeroflag=ESMF_REGION_EMPTY, &
+                !zeroflag=ESMF_REGION_EMPTY, &
                 checkflag=.TRUE.,&
                 rc = localrc)
             if (ESMF_LogMsgFoundError(localrc, &
