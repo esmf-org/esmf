@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.41 2010/09/10 15:09:39 feiliu Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.42 2010/09/10 16:29:00 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -39,7 +39,6 @@ module ESMF_FieldRegridMod
   use ESMF_RegridMod
   use ESMF_FieldMod
   use ESMF_FieldGetMod
-  use ESMF_FieldSMMMod
   use ESMF_XGridMod
   use ESMF_XGridGetMod
 
@@ -94,7 +93,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.41 2010/09/10 15:09:39 feiliu Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.42 2010/09/10 16:29:00 feiliu Exp $'
 
 !==============================================================================
 !
@@ -203,7 +202,8 @@ contains
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
-        ! Should be able to call into Field SMM directly now
+        ! Once the compilation order is sorted out, 
+        ! Should be able to call into Field SMM directly.
         !call ESMF_FieldSMM(srcField=srcField, dstField=dstField, &
         !           routehandle=routeHandle, zeroflag=zeroflag, &
         !           checkflag=checkflag, rc=localrc)
@@ -656,6 +656,8 @@ contains
         type(ESMF_Grid)      :: dstGrid
         type(ESMF_XGridSpec) :: sparseMat
         logical :: found, match
+        type(ESMF_Array)     :: srcArray
+        type(ESMF_Array)     :: dstArray
     
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -829,12 +831,27 @@ contains
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         
-        ! delegate the call into StoreNX at this point 
-        call ESMF_FieldSMMStore(srcField, dstField, routeHandle, &
+        ! Now we go through the painful process of extracting the data members
+        ! that we need. Need to resolve compilation order.
+        call ESMF_FieldGet(srcField, array=srcArray, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_ArraySMMStore(srcArray, dstArray, routeHandle, &
             sparseMat%factorList, sparseMat%factorIndexList, &
             localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+
+        !call ESMF_FieldSMMStore(srcField, dstField, routeHandle, &
+        !    sparseMat%factorList, sparseMat%factorIndexList, &
+        !    localrc)
+        !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        !  ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(rc)) rc = ESMF_SUCCESS
 
