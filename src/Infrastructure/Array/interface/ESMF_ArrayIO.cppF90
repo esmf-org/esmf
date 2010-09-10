@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.15 2010/09/09 20:09:35 samsoncheung Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.16 2010/09/10 06:55:49 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.15 2010/09/09 20:09:35 samsoncheung Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.16 2010/09/10 06:55:49 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -170,7 +170,7 @@ contains
     ! PNetCDF is used
     iofmtd = "pnc"
 ^else
-^undef ESMF_PIO
+    iofmtd = "bin"
     ! TODO: We could use MPI_IO, but for now, it is left out.
 ^endif
 
@@ -365,7 +365,7 @@ contains
     ! PNetCDF is used
     iofmtd = "pnc"
 ^else
-^undef ESMF_PIO
+    iofmtd = "bin"
     ! TODO: We could use MPI_IO, but for now, it is left out.
 ^endif
 
@@ -773,7 +773,7 @@ contains
       call WriteHeader(FileObj,varname,1,gDimsIndex,dimid_xyz,dimC) @\
     else @\
       pioerr = PIO_CreateFile(PIOSYS,FileObj,fmtiotype,trim(file)) @\
-      call WriteHeader(FileObj,varname,0,gDimsIndex,dimid_xyz,dimC) @\
+      if(iofmt .ne. 'bin') call WriteHeader(FileObj,varname,0,gDimsIndex,dimid_xyz,dimC) @\
     endif @\
     !TODO: need error checking here! @\
 @\
@@ -787,6 +787,7 @@ contains
     ! call PIO_SetFrame(vard,one) @\
     !TODO: need error checking here! @\
 @\
+    if(iofmt .ne. 'bin') then @\
     localrc = 1 @\
     pioerr = PIO_def_var(FileObj,varname,basepiotype, dimid_xyz,vard) @\
     call check_pioerr(pioerr, localPet,  & @\
@@ -795,6 +796,7 @@ contains
     !TODO: need error checking here! @\
     pioerr = PIO_enddef(FileObj) @\
     !TODO: need error checking here! @\
+    endif @\
 @\
     !------------------------- @\
     ! Time the parallel write @\
@@ -1035,6 +1037,7 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
       __FILE__,  & @\
       __LINE__," openfile") @\
 @\
+    if( iofmt .ne. 'bin') then @\
     ! Set Frame to '1' in the PIO descriptor file @\
     one = 1 @\
     pioerr = PIO_inq_varid(FileObj, trim(varname), vard) @\
@@ -1043,6 +1046,7 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
       __LINE__," defvar") @\
     call PIO_SetFrame(vard,one) @\
     !TODO: need error checking here! @\
+    endif @\
 @\
     !------------------------- @\
     ! Time the parallel read @\
