@@ -98,7 +98,15 @@ module user_model2
     ! Initialize return code
     rc = ESMF_SUCCESS
 
+#if 1
+    call ESMF_AttributeAdd(comp, convention='ESMF', purpose='General', rc=rc)
+    call ESMF_AttributeSet(comp, 'References', &
+      'CF Committee', convention='ESMF', purpose='General', rc=rc)
+    call ESMF_AttributeSet(comp, 'Comment', &
+      'Testing Component attpack', convention='ESMF', purpose='General', rc=rc)
+#endif
 
+#if 0
     call ESMF_AttributeAdd(importState, convention='ESMF', purpose='General', rc=rc)
     call ESMF_AttributeSet(importState, name='Import', value='True', &
                            convention='ESMF', purpose='General', rc=rc)
@@ -110,6 +118,7 @@ print *, 'State Import = ', attrValue
     call ESMF_AttributeGet(importState, name='Export', value=attrValue, &
                            convention='ESMF', purpose='General', rc=rc)
 print *, 'State Export = ', attrValue
+#endif
 
     ! Create the CIM Attribute package on the Gridded Component and set its
     ! values.  The standard Attribute package currently supplied by ESMF for a
@@ -117,6 +126,7 @@ print *, 'State Export = ', attrValue
     ! These Attributes conform to the CIM convention as defined by Metafor and
     ! their values are set individually.
 
+#if 0
     !
     !  CIM child component attributes, set on this comp, child of the coupler
     !
@@ -150,6 +160,7 @@ print *, 'State Export = ', attrValue
       'author', &
         convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
+#endif
 
     ! Create two Fields, and add CIM Attribute packages.
     ! The standard Attribute package currently supplied by ESMF for 

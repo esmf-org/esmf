@@ -243,7 +243,7 @@ program ESMF_AttributeCIMSTest
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
     
   ! Attribute-specific initialization
-
+#if 0
     !call ESMF_StateReconcile(c2imp, vm, ESMF_ATTRECONCILE_ON, rc=rc)
     call ESMF_AttributeUpdate(c2imp, vm, rootList=(/3,4,5/), rc=rc)
 
@@ -253,6 +253,33 @@ print *, 'localPet ', localPet, 'c2imp Import = ', attrValue
     call ESMF_AttributeGet(c2imp, name='Export', value=attrValue, &
                            convention='ESMF', purpose='General', rc=rc)
 print *, 'localPet ', localPet, 'c2imp Export = ', attrValue
+#endif
+
+  ! now call AttributeUpdate to get a VM wide view of the
+  ! metadata set on comp1 in comp1initialize
+  call ESMF_AttributeUpdate(comp1, vm, rootList=(/0,1,2/), rc=rc)
+  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+
+  ! now call AttributeUpdate to get a VM wide view of the
+  ! metadata set on comp2 in comp1initialize
+
+#if 1
+! crashes on Update() if linked here, before StateReconcile() 
+call ESMF_AttributeLink(comp2, c2exp, rc=rc)
+  call ESMF_AttributeUpdate(comp2, vm, rootList=(/3,4,5/), rc=rc)
+  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+
+    call ESMF_AttributeGet(comp2, name='References', value=attrValue, &
+      convention='ESMF', purpose='General', rc=rc)
+print *, 'localPet ', localPet, 'comp2 References = ', attrValue
+    call ESMF_AttributeGet(comp2, name='Comment', value=attrValue, &
+      convention='ESMF', purpose='General', rc=rc)
+print *, 'localPet ', localPet, 'comp2 Comment = ', attrValue
+#endif
 
   ! reconcile comp2's export State (to get comp2's Field Attributes onto
   ! PETs 0,1,2, from PETs 3,4,5, since Coupler is setup one way,
@@ -262,6 +289,22 @@ print *, 'localPet ', localPet, 'c2imp Export = ', attrValue
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+
+#if 0
+! in this code position, after StateReconcile, Update() is a no-op.
+call ESMF_AttributeLink(comp2, c2exp, rc=rc)
+  call ESMF_AttributeUpdate(comp2, vm, rootList=(/3,4,5/), rc=rc)
+  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+
+    call ESMF_AttributeGet(comp2, name='References', value=attrValue, &
+      convention='ESMF', purpose='General', rc=rc)
+print *, 'localPet ', localPet, 'comp2 References = ', attrValue
+    call ESMF_AttributeGet(comp2, name='Comment', value=attrValue, &
+      convention='ESMF', purpose='General', rc=rc)
+print *, 'localPet ', localPet, 'comp2 Comment = ', attrValue
+#endif
 
   ! link the Coupler Component Attribute hierarchy to the Gridded Components'
   ! (must occur here in driver, rather than coupler initialize, since driver has
@@ -284,25 +327,13 @@ print *, 'localPet ', localPet, 'c2imp Export = ', attrValue
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
+#if 0
   call ESMF_AttributeLink(comp2, c2exp, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+#endif
   
-  ! now call AttributeUpdate to get a VM wide view of the
-  ! metadata set on comp1 in comp1initialize
-  call ESMF_AttributeUpdate(comp1, vm, rootList=(/0,1,2/), rc=rc)
-  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-
-  ! now call AttributeUpdate to get a VM wide view of the
-  ! metadata set on comp2 in comp1initialize
-  call ESMF_AttributeUpdate(comp2, vm, rootList=(/3,4,5/), rc=rc)
-  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-
   ! Write the Attribute info in CIM XML format for the Coupler, both Components,
   ! and their Fields
   conv = 'CIM 1.0'
