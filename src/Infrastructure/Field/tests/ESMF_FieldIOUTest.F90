@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.6 2010/09/09 20:12:22 samsoncheung Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.7 2010/09/11 22:23:15 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@ program ESMF_FieldIOUTest
   real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray_w, Farray_r
   type(ESMF_Array)                        :: array
   type(ESMF_StaggerLoc)                       :: sloc
-  integer                                 :: rc, rc_tmp, de
+  integer                                 :: rc, de
   integer, allocatable :: computationalLBound(:),computationalUBound(:)
   integer, allocatable :: exclusiveLBound(:), exclusiveUBound(:)
   integer      :: localDeCount, localPet, petCount
@@ -129,11 +129,12 @@ program ESMF_FieldIOUTest
   call ESMF_FieldWrite(field_w, file="field.nc", rc=rc)
   write(failMsg, *) ""
   write(name, *) "Write Fortran array in Field"
-  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
-   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-  else
-   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  endif
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
 !------------------------------------------------------------------------
 
 
@@ -169,12 +170,12 @@ program ESMF_FieldIOUTest
   write(failMsg, *) ""
   write(name, *) "Read data to object field_r"
   call ESMF_FieldRead(field_r, file="field.nc", rc=rc)
-  rc_tmp = rc   ! for later use in comparison
-  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
-   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-  else
-   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  endif
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
@@ -198,13 +199,13 @@ program ESMF_FieldIOUTest
   enddo
   write(name, *) "Compare readin data to the existing data"
   write(failMsg, *) "Comparison failed"
-  if(rc_tmp==ESMF_RC_LIB_NOT_PRESENT) then
-   write(failMsg, *) "Comparison did not failed as was expected"
-   call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
-  else
-   write(*,*)"Maximum Error  = ", Maxvalue
-   call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
-  endif
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  write(*,*)"Maximum Error (read-write) = ", Maxvalue
+  call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Comparison did not failed as was expected"
+  call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+#endif
 
 !------------------------------------------------------------------------
 
