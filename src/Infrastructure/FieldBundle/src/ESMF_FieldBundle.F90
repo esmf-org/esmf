@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.42 2010/08/25 23:44:08 samsoncheung Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.43 2010/09/11 22:21:50 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -1797,7 +1797,7 @@ end function
       type(ESMF_FieldBundle), intent(inout) :: bundle
       character(*), intent(in)              :: file
       logical,      intent(in) ,  optional  :: mfiles
-      character(*), intent(in) ,  optional  :: iofmt
+      type(ESMF_IOFmtFlag), intent(in) ,  optional  :: iofmt
       integer,      intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -1813,7 +1813,8 @@ end function
 !      A logical flag, if TRUE, each array located in a separate file.
 !      The default is FALSE, ie all arrays are located in one file.
 !     \item[iofmt]
-!      The IO format supported are "bin", "pnc", "snc", "nc4p", and "nc4c".
+!     The PIO format. Please see Section~\ref{opt:} for the list of options.
+!     If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !     \item [{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1827,7 +1828,7 @@ end function
       integer :: i, fieldCount
       logical :: multif
       character(len=3)              :: cnum
-      character(len=10)             :: iofmtd
+      type(ESMF_IOFmtFlag)          :: iofmtd
 
 #ifdef ESMF_PIO
       ! Initialize return code; assume routine not implemented
@@ -1845,8 +1846,8 @@ end function
       ! Check options
       multif = .false.
       if (present(mfiles)) multif = mfiles
-      iofmtd = "snc"
-      if(present(iofmt)) iofmtd = trim(iofmt)
+      iofmtd = ESMF_IOFMT_NETCDF
+      if(present(iofmt)) iofmtd = iofmt
 
       btype => bundle%btypep
       write (*, *)  "  Field count = ", btype%field_count
@@ -2366,7 +2367,7 @@ end function
       type(ESMF_FieldBundle), intent(inout) :: bundle
       character(*), intent(in)              :: file
       logical,      intent(in) ,  optional  :: mfiles
-      character(*), intent(in) ,  optional  :: iofmt
+      type(ESMF_IOFmtFlag), intent(in) ,  optional  :: iofmt
       integer,      intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -2383,7 +2384,8 @@ end function
 !      A logical flag, if TRUE, each array will be written a separate file.
 !      The default is FALSE, ie all arrays are written in one file.
 !     \item[iofmt]
-!      The IO format supported are "bin", "pnc", "snc", "nc4p", and "nc4c".
+!    The PIO format. Please see Section~\ref{opt:} for the list of options.
+!    If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !     \item [{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2396,7 +2398,7 @@ end function
       integer :: i, fieldCount
       logical :: multif
       character(len=3)              :: cnum
-      character(len=10)             :: iofmtd
+      type(ESMF_IOFmtFlag)          :: iofmtd
 
 #ifdef ESMF_PIO
       ! Initialize return code; assume routine not implemented
@@ -2414,8 +2416,8 @@ end function
       ! Check options
       multif = .false.
       if (present(mfiles)) multif = mfiles
-      iofmtd = "snc"
-      if(present(iofmt)) iofmtd = trim(iofmt)
+      iofmtd = ESMF_IOFMT_NETCDF
+      if(present(iofmt)) iofmtd = iofmt
 
       btype => bundle%btypep
       write (*, *)  "  Field count = ", btype%field_count

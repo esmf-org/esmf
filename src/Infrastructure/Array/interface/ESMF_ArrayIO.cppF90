@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.16 2010/09/10 06:55:49 samsoncheung Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.17 2010/09/11 22:27:06 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.16 2010/09/10 06:55:49 samsoncheung Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.17 2010/09/11 22:27:06 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -118,7 +118,7 @@ contains
     character(*), intent(in) :: file
     character(*), intent(in), optional :: vname
     logical, intent(in), optional :: append
-    character(*), intent(in), optional :: iofmt
+    type(ESMF_IOFmtFlag), intent(in), optional :: iofmt
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -139,7 +139,8 @@ contains
 !   \item[{[append]}]
 !    A logical flag: append data to an existing file, default is false.
 !   \item[{[iofmt]}]
-!    The IO format supported are "pnc" and "snc".
+!    The PIO format. Please see Section~\ref{opt:} for the list of options.
+!    If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -152,7 +153,8 @@ contains
     integer :: rank
     logical :: file_exists
     character(len=80) :: varname
-    character(len=10) :: iofmtd
+    type(ESMF_IOFmtFlag) :: iofmt_internal
+    character(len=10) :: piofmt
 
     type(ESMF_TypeKind)             :: typekind
 
@@ -163,16 +165,43 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
 
-^ifdef ESMF_NETCDF
-    ! NetCDF is used
-    iofmtd = "snc"
-^elif ESMF_PNETCDF
-    ! PNetCDF is used
-    iofmtd = "pnc"
+    ! Handle IO format
+    iofmt_internal = ESMF_IOFMT_NETCDF   ! default format
+    if (present(iofmt)) iofmt_internal = iofmt
+
+    if (iofmt_internal .eq. ESMF_IOFMT_NETCDF) then
+    ! NETCDF format selected
+^ifdef ESMF_PNETCDF
+    piofmt = "pnc"  ! PNETCDF first choice to write NETCDF format
+^elif ESMF_NETCDF
+    piofmt = "snc"  ! serial NETCDF second choice to write NETCDF format
 ^else
-    iofmtd = "bin"
-    ! TODO: We could use MPI_IO, but for now, it is left out.
+    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, &
+      "NETCDF or PNETCDF libraries are missingfor this format choice", &
+       ESMF_CONTEXT, rc)
+    return
 ^endif
+
+    else if (iofmt_internal == ESMF_IOFMT_BIN) then
+ 
+    ! binary format selected
+    piofmt = "bin"
+    if (present(vname)) then
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+      "The input argument vname cannot be sepcified in ESMF_IOFMT_BIN mode", &
+       ESMF_CONTEXT, rc)
+      return
+    endif
+
+    else
+
+    ! format option that is not supported
+    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, &
+      "this format is not currently supported by the ESMF IO layer", &
+       ESMF_CONTEXT, rc)
+    return
+
+    endif
 
 
 ^ifdef ESMF_PIO
@@ -201,23 +230,23 @@ contains
         ! The PIO data type is PIO_int
         select case(rank)
           case (1)
-            call ESMF_ArrayWriteIntl1DI4(array, file, varname, file_exists, iofmtd, rc=localrc)
+            call ESMF_ArrayWriteIntl1DI4(array, file, varname, file_exists, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
-            call ESMF_ArrayWriteIntl2DI4(array, file, varname, file_exists, iofmtd, rc=localrc)
+            call ESMF_ArrayWriteIntl2DI4(array, file, varname, file_exists, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
-            call ESMF_ArrayWriteIntl3DI4(array, file, varname, file_exists, iofmtd, rc=localrc)
+            call ESMF_ArrayWriteIntl3DI4(array, file, varname, file_exists, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
-            call ESMF_ArrayWriteIntl4DI4(array, file, varname, file_exists, iofmtd, rc=localrc)
+            call ESMF_ArrayWriteIntl4DI4(array, file, varname, file_exists, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
-            call ESMF_ArrayWriteIntl5DI4(array, file, varname, file_exists, iofmtd, rc=localrc)
+            call ESMF_ArrayWriteIntl5DI4(array, file, varname, file_exists, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
@@ -230,23 +259,23 @@ contains
         ! The PIO data type is PIO_real
         select case(rank)
           case (1)
-            call ESMF_ArrayWriteIntl1DR4(array, file, varname, file_exists, iofmtd, rc=localrc)
+            call ESMF_ArrayWriteIntl1DR4(array, file, varname, file_exists, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
-            call ESMF_ArrayWriteIntl2DR4(array, file, varname, file_exists, iofmtd, rc=localrc)
+            call ESMF_ArrayWriteIntl2DR4(array, file, varname, file_exists, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
-            call ESMF_ArrayWriteIntl3DR4(array, file, varname, file_exists, iofmtd, rc=localrc)
+            call ESMF_ArrayWriteIntl3DR4(array, file, varname, file_exists, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
-            call ESMF_ArrayWriteIntl4DR4(array, file, varname, file_exists, iofmtd, rc=localrc)
+            call ESMF_ArrayWriteIntl4DR4(array, file, varname, file_exists, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
-            call ESMF_ArrayWriteIntl5DR4(array, file, varname, file_exists, iofmtd, rc=localrc)
+            call ESMF_ArrayWriteIntl5DR4(array, file, varname, file_exists, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
@@ -259,23 +288,23 @@ contains
         ! The PIO data type is PIO_double
         select case(rank)
           case (1)
-            call ESMF_ArrayWriteIntl1DR8(array, file, varname, file_exists, iofmtd, rc=localrc)
+            call ESMF_ArrayWriteIntl1DR8(array, file, varname, file_exists, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
-            call ESMF_ArrayWriteIntl2DR8(array, file, varname, file_exists, iofmtd, rc=localrc)
+            call ESMF_ArrayWriteIntl2DR8(array, file, varname, file_exists, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
-            call ESMF_ArrayWriteIntl3DR8(array, file, varname, file_exists, iofmtd, rc=localrc)
+            call ESMF_ArrayWriteIntl3DR8(array, file, varname, file_exists, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
-            call ESMF_ArrayWriteIntl4DR8(array, file, varname, file_exists, iofmtd, rc=localrc)
+            call ESMF_ArrayWriteIntl4DR8(array, file, varname, file_exists, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
-            call ESMF_ArrayWriteIntl5DR8(array, file, varname, file_exists, iofmtd, rc=localrc)
+            call ESMF_ArrayWriteIntl5DR8(array, file, varname, file_exists, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
@@ -316,7 +345,7 @@ contains
     type(ESMF_Array), intent(inout) :: array
     character(*), intent(in)  :: file
     character(*), intent(in), optional :: vname
-    character(*), intent(in), optional :: iofmt
+    type(ESMF_IOFmtFlag), intent(in), optional :: iofmt
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -335,7 +364,8 @@ contains
 !   \item[{[vname]}]
 !    Variable name in netcdf file; default is the "name" of array
 !   \item[{[iofmt]}]
-!    The IO format supported are "pnc" and  "snc".
+!    The PIO format. Please see Section~\ref{opt:} for the list of options.
+!    If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -347,7 +377,8 @@ contains
     integer :: localtk
     integer :: rank
     character(len=80) :: varname
-    character(len=10) :: iofmtd
+    type(ESMF_IOFmtFlag) :: iofmt_internal
+    character(len=10) :: piofmt
 
     type(ESMF_TypeKind)             :: typekind
 
@@ -358,16 +389,43 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
 
-^ifdef ESMF_NETCDF
-    ! NetCDF is used
-    iofmtd = "snc"
-^elif ESMF_PNETCDF
-    ! PNetCDF is used
-    iofmtd = "pnc"
+    ! Handle IO format
+    iofmt_internal = ESMF_IOFMT_NETCDF   ! default format
+    if (present(iofmt)) iofmt_internal = iofmt
+
+    if (iofmt_internal == ESMF_IOFMT_NETCDF) then
+    ! NETCDF format selected
+^ifdef ESMF_PNETCDF
+    piofmt = "pnc"  ! PNETCDF first choice to write NETCDF format
+^elif ESMF_NETCDF
+    piofmt = "snc"  ! serial NETCDF second choice to write NETCDF format
 ^else
-    iofmtd = "bin"
-    ! TODO: We could use MPI_IO, but for now, it is left out.
+    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, &
+      "NETCDF or PNETCDF libraries are missingfor this format choice", &
+       ESMF_CONTEXT, rc)
+    return
 ^endif
+
+    else if (iofmt_internal == ESMF_IOFMT_BIN) then
+
+    ! binary format selected
+    piofmt = "bin"
+    if (present(vname)) then
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+      "The input argument vname cannot be sepcified in ESMF_IOFMT_BIN mode", &
+       ESMF_CONTEXT, rc)
+      return
+    endif
+
+    else
+
+    ! format option that is not supported
+    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, &
+      "this format is not currently supported by the ESMF IO layer", &
+       ESMF_CONTEXT, rc)
+    return
+
+    endif
 
 ^ifdef ESMF_PIO
     ! Obtain typekind and rank
@@ -391,23 +449,23 @@ contains
         ! The PIO data type is PIO_int
         select case(rank)
           case (1)
-            call ESMF_ArrayReadIntl1DI4(array, file, varname, iofmtd, rc=localrc)
+            call ESMF_ArrayReadIntl1DI4(array, file, varname, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
-            call ESMF_ArrayReadIntl2DI4(array, file, varname, iofmtd, rc=localrc)
+            call ESMF_ArrayReadIntl2DI4(array, file, varname, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
-            call ESMF_ArrayReadIntl3DI4(array, file, varname, iofmtd, rc=localrc)
+            call ESMF_ArrayReadIntl3DI4(array, file, varname, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
-            call ESMF_ArrayReadIntl4DI4(array, file, varname, iofmtd, rc=localrc)
+            call ESMF_ArrayReadIntl4DI4(array, file, varname, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
-            call ESMF_ArrayReadIntl5DI4(array, file, varname, iofmtd, rc=localrc)
+            call ESMF_ArrayReadIntl5DI4(array, file, varname, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
@@ -420,23 +478,23 @@ contains
         select case(rank)
         ! The PIO data type is PIO_real
           case (1)
-            call ESMF_ArrayReadIntl1DR4(array, file, varname, iofmtd, rc=localrc)
+            call ESMF_ArrayReadIntl1DR4(array, file, varname, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
-            call ESMF_ArrayReadIntl2DR4(array, file, varname, iofmtd, rc=localrc)
+            call ESMF_ArrayReadIntl2DR4(array, file, varname, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
-            call ESMF_ArrayReadIntl3DR4(array, file, varname, iofmtd, rc=localrc)
+            call ESMF_ArrayReadIntl3DR4(array, file, varname, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
-            call ESMF_ArrayReadIntl4DR4(array, file, varname, iofmtd, rc=localrc)
+            call ESMF_ArrayReadIntl4DR4(array, file, varname, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
-            call ESMF_ArrayReadIntl5DR4(array, file, varname, iofmtd, rc=localrc)
+            call ESMF_ArrayReadIntl5DR4(array, file, varname, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
@@ -449,23 +507,23 @@ contains
         ! The PIO data type is PIO_double
         select case(rank)
           case (1)
-            call ESMF_ArrayReadIntl1DR8(array, file, varname, iofmtd, rc=localrc)
+            call ESMF_ArrayReadIntl1DR8(array, file, varname, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
-            call ESMF_ArrayReadIntl2DR8(array, file, varname, iofmtd, rc=localrc)
+            call ESMF_ArrayReadIntl2DR8(array, file, varname, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
-            call ESMF_ArrayReadIntl3DR8(array, file, varname, iofmtd, rc=localrc)
+            call ESMF_ArrayReadIntl3DR8(array, file, varname, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
-            call ESMF_ArrayReadIntl4DR8(array, file, varname, iofmtd, rc=localrc)
+            call ESMF_ArrayReadIntl4DR8(array, file, varname, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
-            call ESMF_ArrayReadIntl5DR8(array, file, varname, iofmtd, rc=localrc)
+            call ESMF_ArrayReadIntl5DR8(array, file, varname, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
@@ -579,14 +637,14 @@ contains
 ! !IROUTINE: ESMF_ArrayWriteIntl - Write an ESMF_Array via PIO @\
 ! @\
 ! !INTERFACE: @\
-! subroutine ESMF_ArrayWriteIntl<rank><type><kind>(array, file, varname, file_exists, iofmt, rc) @\
+! subroutine ESMF_ArrayWriteIntl<rank><type><kind>(array, file, varname, file_exists, piofmt, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Array),           intent(inout)           :: array @\
 !   character(*),               intent(in)              :: file @\
 !   character(*),               intent(in)              :: varname @\
 !   logical,                    intent(in)              :: file_exists @\
-!   character(*),               intent(in)              :: iofmt @\
+!   character(*),               intent(in)              :: piofmt @\
 !   integer,                    intent(out),  optional  :: rc @\
 ! @\
 ! @\
@@ -607,7 +665,7 @@ contains
 !     Variable name written in netcdf file @\
 !   \item[{[file_exists]}] @\
 !     A tag indicates file already existed with value 1. @\
-!   \item[iofmt] @\
+!   \item[piofmt] @\
 !    The IO format supported are "bin", "pnc", "snc", "nc4p", and "nc4c". @\
 !   \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -620,13 +678,13 @@ contains
 ! -------------------------- ESMF-public method ----------------------------- @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayWriteIntl" @\
-  subroutine ESMF_ArrayWriteIntl##mrank##D##mtypekind(array, file, varname, file_exists, iofmt, rc) @\
+  subroutine ESMF_ArrayWriteIntl##mrank##D##mtypekind(array, file, varname, file_exists, piofmt, rc) @\
 @\
     type(ESMF_Array),           intent(inout)           :: array @\
     character(*),               intent(in)              :: file @\
     character(*),               intent(in)              :: varname @\
     logical,                    intent(in)              :: file_exists @\
-    character(*),               intent(in)              :: iofmt @\
+    character(*),               intent(in)              :: piofmt @\
     integer,                    intent(out),  optional  :: rc @\
 @\
     ! ESMF VARIABLES @\
@@ -743,7 +801,7 @@ contains
     !------------------------------------------------------- @\
     ! Define the IO file type  @\
     !------------------------------------------------------- @\
-    select case (trim(iofmt)) @\
+    select case (trim(piofmt)) @\
      case('bin') @\
        fmtiotype = iotype_pbinary @\
      case('pnc') @\
@@ -773,7 +831,7 @@ contains
       call WriteHeader(FileObj,varname,1,gDimsIndex,dimid_xyz,dimC) @\
     else @\
       pioerr = PIO_CreateFile(PIOSYS,FileObj,fmtiotype,trim(file)) @\
-      if(iofmt .ne. 'bin') call WriteHeader(FileObj,varname,0,gDimsIndex,dimid_xyz,dimC) @\
+      if(piofmt .ne. 'bin') call WriteHeader(FileObj,varname,0,gDimsIndex,dimid_xyz,dimC) @\
     endif @\
     !TODO: need error checking here! @\
 @\
@@ -787,7 +845,7 @@ contains
     ! call PIO_SetFrame(vard,one) @\
     !TODO: need error checking here! @\
 @\
-    if(iofmt .ne. 'bin') then @\
+    if(piofmt .ne. 'bin') then @\
     localrc = 1 @\
     pioerr = PIO_def_var(FileObj,varname,basepiotype, dimid_xyz,vard) @\
     call check_pioerr(pioerr, localPet,  & @\
@@ -848,13 +906,13 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
 ! !IROUTINE: ESMF_ArrayReadIntl - Read an ESMF_Array via PIO @\
 ! @\
 ! !INTERFACE: @\
-! subroutine ESMF_ArrayReadIntl<rank><type><kind>(array, file, varname, iofmt, rc) @\
+! subroutine ESMF_ArrayReadIntl<rank><type><kind>(array, file, varname, piofmt, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Array),           intent(inout)           :: array @\
 !   character(*),               intent(in)              :: file @\
 !   character(*),               intent(in)              :: varname @\
-!   character(*),               intent(in)              :: iofmt @\
+!   character(*),               intent(in)              :: piofmt @\
 !   integer,                    intent(out),  optional  :: rc @\
 ! @\
 ! @\
@@ -873,7 +931,7 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
 !    The name of the file (netcdf) in which array data is read from. @\
 !   \item[varname] @\
 !     Variable name in netcdf file @\
-!   \item[iofmt] @\
+!   \item[piofmt] @\
 !    The IO format supported are "bin", "pnc", "snc", "nc4p", and "nc4c". @\
 !   \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -886,12 +944,12 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
 ! -------------------------- ESMF-public method ----------------------------- @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayReadIntl" @\
-  subroutine ESMF_ArrayReadIntl##mrank##D##mtypekind(array, file, varname, iofmt, rc) @\
+  subroutine ESMF_ArrayReadIntl##mrank##D##mtypekind(array, file, varname, piofmt, rc) @\
 @\
     type(ESMF_Array),           intent(inout)           :: array @\
     character(*),               intent(in)              :: file @\
     character(*),               intent(in)              :: varname @\
-    character(*),               intent(in)              :: iofmt @\
+    character(*),               intent(in)              :: piofmt @\
     integer,                    intent(out),  optional  :: rc @\
 @\
     ! ESMF VARIABLES @\
@@ -1008,7 +1066,7 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
     !------------------------------------------------------- @\
     ! Define the IO file type  @\
     !------------------------------------------------------- @\
-    select case (trim(iofmt)) @\
+    select case (trim(piofmt)) @\
      case('bin') @\
        fmtiotype = iotype_pbinary @\
      case('pnc') @\
@@ -1037,7 +1095,7 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
       __FILE__,  & @\
       __LINE__," openfile") @\
 @\
-    if( iofmt .ne. 'bin') then @\
+    if( piofmt .ne. 'bin') then @\
     ! Set Frame to '1' in the PIO descriptor file @\
     one = 1 @\
     pioerr = PIO_inq_varid(FileObj, trim(varname), vard) @\

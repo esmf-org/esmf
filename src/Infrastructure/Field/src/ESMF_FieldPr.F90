@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.17 2010/08/25 23:42:43 samsoncheung Exp $
+! $Id: ESMF_FieldPr.F90,v 1.18 2010/09/11 22:24:36 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -232,7 +232,7 @@ contains
       type(ESMF_Field), intent(inout) :: field 
       character(*), intent(in) :: file 
       logical, intent(in), optional :: append
-      character(*), intent(in), optional :: iofmt
+      type(ESMF_IOFmtFlag), intent(in), optional :: iofmt
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -252,7 +252,8 @@ contains
 !     \item[append]
 !        Logical: if true, data is appended to an exist file, default is false.
 !     \item[iofmt]
-!        The IO format supported are "bin", "pnc", "snc", "nc4p", and "nc4c".
+!        The PIO format. Please see Section~\ref{opt:} for the list of options.
+!        If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !     \item [{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -265,7 +266,7 @@ contains
         integer                         :: gridrank, arrayrank
         logical                         :: appended
         type(ESMF_Status)               :: fieldstatus
-        character(len=10)               :: iofmtd
+        type(ESMF_IOFmtFlag)            :: iofmtd
 
 #ifdef ESMF_PIO
 !       Initialize
@@ -278,8 +279,8 @@ contains
         appended = .false.
         if(present(append)) appended = append
 
-        iofmtd = "snc"
-        if(present(iofmt)) iofmtd = trim(iofmt)
+        iofmtd = ESMF_IOFMT_NETCDF   ! default format
+        if(present(iofmt)) iofmtd = iofmt
 
         fp => field%ftypep
 
@@ -323,7 +324,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field 
       character(*), intent(in) :: file 
-      character(*), intent(in), optional :: iofmt 
+      type(ESMF_IOFmtFlag), intent(in), optional :: iofmt 
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -337,13 +338,14 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!         An {\tt ESMF\_Field} object.
+!       An {\tt ESMF\_Field} object.
 !     \item[file]
-!         The name of the netcdf file in which array data is read from.
+!       The name of the netcdf file in which array data is read from.
 !     \item[iofmt]
-!         The IO format supported are "bin", "pnc", "snc", "nc4p", and "nc4c".
+!       The PIO format. Please see Section~\ref{opt:} for the list of options.
+!       If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !     \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
@@ -353,7 +355,7 @@ contains
         integer                         :: i, localrc
         integer                         :: gridrank, arrayrank
         type(ESMF_Status)               :: fieldstatus
-        character(len=10)               :: iofmtd
+        type(ESMF_IOFmtFlag)            :: iofmtd
 
 #ifdef ESMF_PIO
 !       Initialize
@@ -363,8 +365,8 @@ contains
         ! check variables
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-        iofmtd = "snc"
-        if(present(iofmt)) iofmtd = trim(iofmt)
+        iofmtd = ESMF_IOFMT_NETCDF   ! default format
+        if(present(iofmt)) iofmtd = iofmt
 
         fp => field%ftypep
 
