@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.62 2010/03/04 18:57:42 svasquez Exp $
+! $Id: ESMF_DistGrid.F90,v 1.63 2010/09/11 00:07:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.62 2010/03/04 18:57:42 svasquez Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.63 2010/09/11 00:07:12 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -188,13 +188,15 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDG(distgrid, firstExtra, lastExtra, indexflag, rc)
+  function ESMF_DistGridCreateDG(distgrid, firstExtra, lastExtra, indexflag, &
+    connectionList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),          intent(in)            :: distgrid
     integer, target,              intent(in), optional  :: firstExtra(:)
     integer, target,              intent(in), optional  :: lastExtra(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
+    integer, target,              intent(in), optional  :: connectionList(:,:)
     integer,                      intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
@@ -203,10 +205,14 @@ contains
 ! !DESCRIPTION:
 !     Create a new DistGrid from an existing DistGrid, keeping the decomposition
 !     unchanged. The {\tt firstExtra} and {\tt lastExtra} arguments allow extra
-!     elements to be added at the first/last edge DE in each dimension. If
-!     neither {\tt firstExtra}, {\tt lastExtra}, nor {\tt indexflag} are
-!     specified the method reduces to a deep copy of the incoming DistGrid
-!     object.
+!     elements to be added at the first/last edge DE in each dimension. The 
+!     method also allows the {\tt indexflag} to be set. Further, if the 
+!     {\tt connectionList} argument is passed in it will be used to set 
+!     connections in the newly created DistGrid, otherwise the connections of
+!     the incoming DistGrid will be used.
+!     If neither {\tt firstExtra}, {\tt lastExtra}, {\tt indexflag}, nor 
+!     {\tt connectionList} arguments are specified, the method reduces to a 
+!     deep copy of the incoming DistGrid object.
 !
 !     The arguments are:
 !     \begin{description}
@@ -223,6 +229,25 @@ contains
 !          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!     \item[{[connectionList]}]
+!          List of connections between patches in index space. The second dimension
+!          of {\tt connectionList} steps through the connection interface elements, 
+!          defined by the first index. The first index must be of size
+!          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
+!          decomposed index space. Each {\tt connectionList} element specifies
+!          the connection interface in the format
+!
+!         {\tt (/patchIndex\_A,
+!          patchIndex\_B, positionVector, orientationVector/)} where:
+!          \begin{itemize}
+!          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
+!                index of the two connected patches respectively,
+!          \item {\tt positionVector} is the vector that points from patch A's
+!                minIndex to patch B's minIndex.
+!          \item {\tt orientationVector} associates each dimension of patch A
+!                with a dimension in patch B's index space. Negative index
+!                values may be used to indicate a reversal in index orientation.
+!          \end{itemize}
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -233,6 +258,7 @@ contains
     type(ESMF_DistGrid)     :: dg           ! opaque pointer to new C++ DistGrid
     type(ESMF_InterfaceInt) :: firstExtraArg ! helper variable
     type(ESMF_InterfaceInt) :: lastExtraArg ! helper variable
+    type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -248,13 +274,17 @@ contains
     lastExtraArg = ESMF_InterfaceIntCreate(lastExtra, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    connectionListArg = &
+      ESMF_InterfaceIntCreate(farray2D=connectionList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark this DistGrid as invalid
     dg%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridCreateDG(dg, distgrid, firstExtraArg, &
-      lastExtraArg, indexflag, localrc)
+      lastExtraArg, indexflag, connectionListArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -263,6 +293,9 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(lastExtraArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(connectionListArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -282,18 +315,20 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDGP()"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from DistGrid
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDGP(distgrid, firstExtra, lastExtra, indexflag, rc)
+  function ESMF_DistGridCreateDGP(distgrid, firstExtra, lastExtra, indexflag, &
+    connectionList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),          intent(in)            :: distgrid
     integer, target,              intent(in)            :: firstExtra(:,:)
     integer, target,              intent(in)            :: lastExtra(:,:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
+    integer, target,              intent(in), optional  :: connectionList(:,:)
     integer,                      intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
@@ -301,7 +336,15 @@ contains
 !
 ! !DESCRIPTION:
 !     Create a new DistGrid from an existing DistGrid, keeping the decomposition
-!     unchanged.
+!     unchanged. The {\tt firstExtra} and {\tt lastExtra} arguments allow extra
+!     elements to be added at the first/last edge DE in each dimension. The 
+!     method also allows the {\tt indexflag} to be set. Further, if the 
+!     {\tt connectionList} argument is passed in it will be used to set 
+!     connections in the newly created DistGrid, otherwise the connections of
+!     the incoming DistGrid will be used.
+!     If neither {\tt firstExtra}, {\tt lastExtra}, {\tt indexflag}, nor 
+!     {\tt connectionList} arguments are specified, the method reduces to a 
+!     deep copy of the incoming DistGrid object.
 !
 !     The arguments are:
 !     \begin{description}
@@ -320,12 +363,13 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_DistGrid)     :: dg           ! opaque pointer to new C++ DistGrid
     type(ESMF_InterfaceInt) :: firstExtraArg ! helper variable
     type(ESMF_InterfaceInt) :: lastExtraArg ! helper variable
+    type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -341,13 +385,17 @@ contains
     lastExtraArg = ESMF_InterfaceIntCreate(farray2D=lastExtra, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    connectionListArg = &
+      ESMF_InterfaceIntCreate(farray2D=connectionList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark this DistGrid as invalid
     dg%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridCreateDG(dg, distgrid, firstExtraArg, &
-      lastExtraArg, indexflag, localrc)
+      lastExtraArg, indexflag, connectionListArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -356,6 +404,9 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(lastExtraArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(connectionListArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     

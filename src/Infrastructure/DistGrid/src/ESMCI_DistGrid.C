@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.47 2010/07/06 23:49:34 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.48 2010/09/11 00:07:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.47 2010/07/06 23:49:34 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.48 2010/09/11 00:07:12 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -74,15 +74,20 @@ DistGrid *DistGrid::create(
   InterfaceInt *firstExtra,               // (in)
   InterfaceInt *lastExtra,                // (in)
   ESMC_IndexFlag *indexflag,              // (in)
+  InterfaceInt *connectionList,           // (in)
   int *rc                                 // (out) return code
   ){
 //
 // !DESCRIPTION:
 //    Create a new DistGrid from an existing DistGrid, keeping the decomposition
 //    unchanged. The firstExtra and lastExtra arguments allow extra elements to
-//    be added at the first/last edge DE in each dimension. If neither
-//    firstExtra, lastExtra, nor indexflag are specified the method reduces to
-//    a deep copy of the incoming DistGrid.
+//    be added at the first/last edge DE in each dimension. The method also 
+//    allows the indexflag to be set. Further, if the connectionList argument
+//    is passed in it will be used to set connections in the newly created
+//    DistGrid, otherwise the connections of the incoming DistGrid will be used.
+//    If neither firstExtra, lastExtra, indexflag, nor connectionList arguments
+//    are specified, the method reduces to a deep copy of the incoming DistGrid
+//    object.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -92,27 +97,66 @@ DistGrid *DistGrid::create(
   
   DistGrid *distgrid = NULL;  // initialize
   
-  if (firstExtra || lastExtra || indexflag){
+  if (firstExtra || lastExtra || indexflag || connectionList){
+    // creating a new DistGrid from the existing one considering additional info
     // prepare for internal InterfaceInt usage
     int dimInterfaceInt;
     int *dimCountInterfaceInt = new int[2];
     // prepare connectionList
-    //TODO: connectionList may need to be modified according to
-    // firstExtra and lastExtra arguments
-    InterfaceInt *connectionList = NULL;  // default
+    bool connectionListInternalFlag = false;
     int *connectionListAlloc = NULL; // default
-    if (dg->connectionCount){
-      dimInterfaceInt = 2;
+    if (connectionList){
+      // connectionList was provided -> check for correct format
       int elementSize = 3*dg->dimCount+2;
-      dimCountInterfaceInt[0] = elementSize;
-      dimCountInterfaceInt[1] = dg->connectionCount;
-      connectionListAlloc = new int[elementSize * dg->connectionCount];
-      for (int i=0; i<dg->connectionCount; i++){
-        memcpy(&(connectionListAlloc[elementSize*i]), dg->connectionList[i],
-          sizeof(int)*elementSize);
+      if (connectionList->dimCount != 2){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          "- connectionList array must be of rank 2", rc);
+        return ESMC_NULL_POINTER;
       }
-      connectionList = new InterfaceInt(dg->maxIndexPDimPPatch,
-        dimInterfaceInt, dimCountInterfaceInt);
+      if (connectionList->extent[0] != elementSize){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "- 1st dimension of connectionList array must be of size "
+          "(3*dimCount+2)", rc);
+        return ESMC_NULL_POINTER;
+      }
+      // check patchA & patchB entries
+      for (int i=0; i<connectionList->extent[1]; i++){
+        if (connectionList->array[elementSize*i] < 1 || 
+          connectionList->array[elementSize*i] > dg->patchCount){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+            "- patchA in connectionList element lies outside [1,patchCount]",
+            rc);
+          return ESMC_NULL_POINTER;
+        }
+        if (connectionList->array[elementSize*i+1] < 1 ||
+          connectionList->array[elementSize*i+1] > dg->patchCount){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+            "- patchB in connectionList element lies outside [1,patchCount]",
+            rc);
+          return ESMC_NULL_POINTER;
+        }
+      }
+    }else{
+      // connectionList was not provided on the interface -> set up internally
+      connectionListInternalFlag = true;
+      //TODO: connectionList may need to be modified according to
+      //TODO: firstExtra and lastExtra arguments
+      //TODO: on the other hand it seems like a mistake to add edge padding
+      //TODO: across edges that are connected, since padding makes really only
+      //TODO: sense for open edges.
+      if (dg->connectionCount){
+        dimInterfaceInt = 2;
+        int elementSize = 3*dg->dimCount+2;
+        dimCountInterfaceInt[0] = elementSize;
+        dimCountInterfaceInt[1] = dg->connectionCount;
+        connectionListAlloc = new int[elementSize * dg->connectionCount];
+        for (int i=0; i<dg->connectionCount; i++){
+          memcpy(&(connectionListAlloc[elementSize*i]), dg->connectionList[i],
+            sizeof(int)*elementSize);
+        }
+        connectionList = new InterfaceInt(dg->maxIndexPDimPPatch,
+          dimInterfaceInt, dimCountInterfaceInt);
+      }
     }
     // prepare for single- vs. multi-patch case
     dimInterfaceInt = 1;  // default single-patch
@@ -125,8 +169,97 @@ DistGrid *DistGrid::create(
       dimCountInterfaceInt[1] = 1;
     int totalCountInterfaceInt = dimCountInterfaceInt[0]
       * dimCountInterfaceInt[1];
+    // consistency check the input argument firstExtra
+    if (firstExtra){
+      if (firstExtra->dimCount != dimInterfaceInt){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "- distgrid and firstExtra arguments differ single/multi patch", rc);
+        return ESMC_NULL_POINTER;
+      }
+      if (firstExtra->extent[0] != dg->dimCount){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "- distgrid and firstExtra arguments assume different dimCount", rc);
+        return ESMC_NULL_POINTER;
+      }
+      if (dimInterfaceInt==2){
+        if (firstExtra->extent[1] != dg->patchCount){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+            "- distgrid and firstExtra arguments assume different patchCount",
+            rc);
+          return ESMC_NULL_POINTER;
+        }
+      }
+    }
+    // consistency check the input argument lastExtra
+    if (lastExtra){
+      if (lastExtra->dimCount != dimInterfaceInt){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "- distgrid and lastExtra arguments differ single/multi patch", rc);
+        return ESMC_NULL_POINTER;
+      }
+      if (lastExtra->extent[0] != dg->dimCount){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "- distgrid and lastExtra arguments assume different dimCount", rc);
+        return ESMC_NULL_POINTER;
+      }
+      if (dimInterfaceInt==2){
+        if (lastExtra->extent[1] != dg->patchCount){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+            "- distgrid and lastExtra arguments assume different patchCount",
+            rc);
+          return ESMC_NULL_POINTER;
+        }
+      }
+    }
+    // edges modified by firstExtra or lastExtra cannot also be connected
+    if (connectionList){
+      // there are connections
+      int elementSize = connectionList->extent[0];
+      int connectionCount = connectionList->extent[1];
+      for (int i=0; i<connectionCount; i++){
+        int *element = connectionList->array + i*elementSize;
+        int patchA = element[0];
+        int patchB = element[1];
+        int *positionVector = element + 2;
+        if (firstExtra){
+          // there are possible modifications on the lower edge
+          for (int j=0; j<dg->dimCount; j++){
+            if (positionVector[j] < 0){
+              if (firstExtra->array[dg->dimCount*(patchA-1)+j] != 0){
+                ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                  "- connected edges cannot be modified", rc);
+                return ESMC_NULL_POINTER;
+              }
+            }else{
+              if (firstExtra->array[dg->dimCount*(patchB-1)+j] != 0){
+                ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                  "- connected edges cannot be modified", rc);
+                return ESMC_NULL_POINTER;
+              }
+            }
+          }
+        }
+        if (lastExtra){
+          // there are possible modifications on the lower edge
+          for (int j=0; j<dg->dimCount; j++){
+            if (positionVector[j] < 0){
+              if (lastExtra->array[dg->dimCount*(patchB-1)+j] != 0){
+                ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                  "- connected edges cannot be modified", rc);
+                return ESMC_NULL_POINTER;
+              }
+            }else{
+              if (lastExtra->array[dg->dimCount*(patchA-1)+j] != 0){
+                ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                  "- connected edges cannot be modified", rc);
+                return ESMC_NULL_POINTER;
+              }
+            }
+          }
+        }
+      }
+    }
     // prepare minIndex and maxIndex
-    // firstExtra and lastExtra arguments
     int *minIndexAlloc = new int[totalCountInterfaceInt];
     if (firstExtra)
       for (int i=0; i<totalCountInterfaceInt; i++)
@@ -148,7 +281,7 @@ DistGrid *DistGrid::create(
     InterfaceInt *maxIndex = new InterfaceInt(maxIndexAlloc,
       dimInterfaceInt, dimCountInterfaceInt);
     //TODO: decompflag needs to be kept in DistGrid so it can be used here!
-    //TODO: indexflag needs to be kept in DistGrid so it can be used here as def
+    //TODO: indexflag needs to be kept in DistGrid so it can be used as default!
     
     // create DistGrid according to collected information
     if (dg->regDecomp!=NULL){
@@ -230,12 +363,14 @@ DistGrid *DistGrid::create(
     delete [] minIndexAlloc;
     delete maxIndex;
     delete [] maxIndexAlloc;
-    if (connectionList)
-      delete connectionList;
-    if (connectionListAlloc)
-      delete [] connectionListAlloc;
+    if (connectionListInternalFlag){
+      if (connectionList)
+        delete connectionList;
+      if (connectionListAlloc)
+        delete [] connectionListAlloc;
+    }
   }else{
-    // deep copy
+    // simple deep copy of the incoming DistGrid
     distgrid = new DistGrid();
     int dimCount = distgrid->dimCount = dg->dimCount;
     int patchCount = distgrid->patchCount = dg->patchCount;
@@ -1741,13 +1876,25 @@ int DistGrid::construct(
         "(3*dimCount+2)", &rc);
       return rc;
     }
-    // fill in the connectionList member
+    // fill in the connectionList member and check patchA & patchB entries
     connectionCount = connectionListArg->extent[1];
     connectionList = new int*[connectionCount];
     for (int i=0; i<connectionCount; i++){
       connectionList[i] = new int[elementSize];
       memcpy(connectionList[i],
         &(connectionListArg->array[elementSize*i]), sizeof(int)*elementSize);
+      if (connectionList[i][0] < 1 || connectionList[i][0] > patchCount){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "- patchA in connectionList element lies outside [1,patchCount]",
+          &rc);
+        return rc;
+      }
+      if (connectionList[i][1] < 1 || connectionList[i][1] > patchCount){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "- patchB in connectionList element lies outside [1,patchCount]",
+          &rc);
+        return rc;
+      }
     }
   }else{
     // connectionList was not provided -> nullify

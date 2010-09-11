@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.109 2010/09/08 20:21:59 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.110 2010/09/11 00:07:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.109 2010/09/08 20:21:59 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.110 2010/09/11 00:07:12 theurich Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -4387,7 +4387,8 @@ int Grid::getStaggerDistgrid(
       staggerDistgridList[staggerloc]=DistGrid::create(distgrid,
 						       staggerEdgeLWidthIntInt, 
 						       staggerEdgeUWidthIntInt, 
-						       &indexflag, &localrc);
+						       &indexflag, NULL, 
+                                                       &localrc);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
 	return rc;
       

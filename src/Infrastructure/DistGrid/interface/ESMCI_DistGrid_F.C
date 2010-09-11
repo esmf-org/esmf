@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.26 2010/06/23 23:01:08 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.27 2010/09/11 00:07:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -49,7 +49,7 @@ extern "C" {
   void FTN(c_esmc_distgridcreatedg)(ESMCI::DistGrid **ptr, 
     ESMCI::DistGrid **dg, ESMCI::InterfaceInt **firstExtra,
     ESMCI::InterfaceInt **lastExtra, ESMC_IndexFlag *indexflag,
-    int *rc){
+    ESMCI::InterfaceInt **connectionList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreatedg()"
     // Initialize return code; assume routine not implemented
@@ -57,7 +57,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     // call into C++
     *ptr = ESMCI::DistGrid::create(*dg, *firstExtra, *lastExtra,
-      ESMC_NOT_PRESENT_FILTER(indexflag), &localrc);
+      ESMC_NOT_PRESENT_FILTER(indexflag), *connectionList, &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
