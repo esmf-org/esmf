@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.98 2010/08/24 16:13:29 oehmke Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.99 2010/09/11 22:19:32 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -386,6 +386,20 @@
         ESMF_MODE_REVERSE = ESMF_Direction(2)
 
 !------------------------------------------------------------------------------
+!
+!     ! PIO Format type
+
+      type ESMF_IOFmtFlag
+      sequence
+      private
+          integer :: io_type
+      end type
+
+      type(ESMF_IOFmtFlag), parameter ::  &
+                             ESMF_IOFMT_BIN    = esmf_IOFmtFlag(0), &
+                             ESMF_IOFMT_NETCDF = ESMF_IOFmtFlag(1)
+
+!------------------------------------------------------------------------------
 !     ! ESMF_IndexFlag
 !
 !     ! Interface flag for setting index bounds
@@ -643,6 +657,8 @@
 
       public ESMF_Direction, ESMF_MODE_FORWARD, ESMF_MODE_REVERSE
 
+      public ESMF_IOFmtFlag, ESMF_IOFMT_BIN, ESMF_IOFMT_NETCDF
+
       public ESMF_IndexFlag
       public ESMF_INDEX_DELOCAL, ESMF_INDEX_GLOBAL, ESMF_INDEX_USER
       public ESMF_NestedFlag
@@ -736,6 +752,7 @@ interface operator (.eq.)
   module procedure ESMF_nfeq
   module procedure ESMF_rfeq
   module procedure ESMF_unmappedActioneq
+  module procedure ESMF_ioeq
 end interface
 
 interface operator (.ne.)
@@ -759,6 +776,7 @@ interface assignment (=)
   module procedure ESMF_tfas2_v
   module procedure ESMF_ptas
   module procedure ESMF_ptas2
+  module procedure ESMF_ioas
 end interface  
 
 
@@ -1056,6 +1074,23 @@ function ESMF_frne(fr1, fr2)
  type(ESMF_Direction), intent(in) :: fr1, fr2
 
  ESMF_frne = (fr1%value .ne. fr2%value)
+end function
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_IOFmtFlag
+
+subroutine ESMF_ioas(io1, io2)
+ type(ESMF_IOFmtFlag), intent(out) :: io1
+ type(ESMF_IOFmtFlag), intent(in)  :: io2
+
+ io1%io_type = io2%io_type
+end subroutine
+
+function ESMF_ioeq(io1, io2)
+  logical ESMF_ioeq
+  type(ESMF_IOFmtFlag), intent(in) :: io1, io2
+
+  ESMF_ioeq = (io1%io_type .eq. io2%io_type)
 end function
 
 !------------------------------------------------------------------------------
