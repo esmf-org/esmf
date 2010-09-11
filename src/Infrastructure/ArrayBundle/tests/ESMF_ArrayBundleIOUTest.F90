@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleIOUTest.F90,v 1.3 2010/09/09 20:12:47 samsoncheung Exp $
+! $Id: ESMF_ArrayBundleIOUTest.F90,v 1.4 2010/09/11 22:25:13 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -148,13 +148,14 @@ program ESMF_ArrayBundleIOUTest
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleWrite Single file Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayBundleWrite(arraybundle_w, file="bundle.nc", rc=rc)
-  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
-   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-  else
-   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  endif
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -213,11 +214,12 @@ program ESMF_ArrayBundleIOUTest
   !call ESMF_ArrayBundleRead(arraybundle_r, file="bundle.nc", rc=rc)
   call ESMF_ArrayBundleRead(arraybundle_r, file="sep.nc", mfiles=.true., rc=rc)
   rc_tmp=rc   ! for later use in comparison
-  if(rc==ESMF_RC_LIB_NOT_PRESENT) then
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-  else
-   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  endif  
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -250,13 +252,13 @@ program ESMF_ArrayBundleIOUTest
    if (Maxvalue.le.diff) Maxvalue=diff
   enddo
   enddo
-  if(rc_tmp==ESMF_RC_LIB_NOT_PRESENT) then
-   write(failMsg, *) "Comparison did not failed as was expected"
-   call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
-  else
-   write(*,*)"Maximum Error  = ", Maxvalue
-   call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
-  endif
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  write(*,*)"Maximum Error  = ", Maxvalue
+  call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Comparison did not failed as was expected"
+  call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+#endif
 !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
