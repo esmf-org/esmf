@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.70 2010/06/29 20:47:58 svasquez Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.71 2010/09/13 05:52:51 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -2875,6 +2875,18 @@ endif
 !   1st dim
 ! \end{verbatim}
 !EOE
+
+!BOE
+! Write the attributes back out to an xml file.
+!EOE
+
+!BOC
+   ! Write an XML file 
+   call ESMF_AttributeWrite(grid2D, 'ESMF', 'General', &
+                            attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
+!EOC
+   if (rc == ESMF_RC_LIB_NOT_PRESENT) goto 10  ! exit if Xerces not present
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example

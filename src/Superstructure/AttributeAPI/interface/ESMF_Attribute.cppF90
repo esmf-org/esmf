@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.62 2010/08/01 05:34:10 eschwab Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.63 2010/09/13 05:52:51 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.62 2010/08/01 05:34:10 eschwab Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.63 2010/09/13 05:52:51 eschwab Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -509,7 +509,7 @@ module ESMF_AttributeMod
         !module procedure ESMF_DistGridAttWrite
         module procedure ESMF_FieldAttWrite
         module procedure ESMF_FieldBundleAttWrite
-        !module procedure ESMF_GridAttWrite
+        module procedure ESMF_GridAttWrite
         module procedure ESMF_StateAttWrite
 
 ! !DESCRIPTION:
@@ -1874,6 +1874,7 @@ contains
 !     \item type(ESMF\_GridComp), intent(inout) :: comp  
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
+!     \item type(ESMF\_Grid), intent(inout) :: grid 
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !
@@ -1954,7 +1955,11 @@ contains
       ! check input variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      if (.not.((convention.eq."ESMF"   .and.purpose.eq."General").or. & @\
+      if (.not.((convention.eq."ESG" .and.purpose.eq."General").or. & @\
+                (convention.eq."ESMF".and.purpose.eq."General").or. & @\
+                (convention.eq."CF".and.purpose.eq."General").or. & @\
+                (convention.eq."CF".and.purpose.eq."Extended").or. & @\
+                (convention.eq."GridSpec".and.purpose.eq."General").or. & @\
                 (convention.eq."CIM 1.0".and.purpose.eq."Model Component Simulation Description").or. & @\
                 (convention.eq."CIM 1.0".and.purpose.eq."Inputs Description"))) then @\
         call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & @\
@@ -4710,6 +4715,8 @@ AttRemoveMacro(ESMF_Grid, grid, grid)
 TypeKind3DeclarationMacro(AttSet, ESMF_Grid, grid, grid)
 AttSetLogicalMacro(ESMF_Grid, grid, grid)
 AttSetCharacterMacro(ESMF_Grid, grid, grid)
+
+AttWriteMacro(ESMF_Grid, grid, grid, grid, grid)
 
 !-------------------------------------------------------------------------
 !  STATE
