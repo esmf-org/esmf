@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.18 2010/09/11 22:25:49 samsoncheung Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.19 2010/09/13 20:18:06 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.18 2010/09/11 22:25:49 samsoncheung Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.19 2010/09/13 20:18:06 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -767,8 +767,8 @@ contains
 !    A logical flag, if TRUE, each array will be written a separate file.
 !    The default is FALSE, ie all arrays are written in one file.
 !   \item[iofmt]
-!    The PIO format. Please see Section~\ref{opt:} for the list of options.
-!    If not present, defaults to ESMF\_IOFMT\_NETCDF.
+!    The PIO format. Please see Section~\ref{opt:iofmtflag} for the list 
+!    of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -885,8 +885,8 @@ contains
 !    A logical flag, if TRUE, each array located in a separate file.
 !    The default is FALSE, ie all arrays are located in one file.
 !   \item[iofmt]
-!    The PIO format. Please see Section~\ref{opt:} for the list of options.
-!    If not present, defaults to ESMF\_IOFMT\_NETCDF.
+!    The PIO format. Please see Section~\ref{opt:iofmtflag} for the list 
+!    of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
