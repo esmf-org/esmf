@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.18 2010/09/13 17:55:42 samsoncheung Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.19 2010/09/13 20:17:26 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.18 2010/09/13 17:55:42 samsoncheung Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.19 2010/09/13 20:17:26 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -139,8 +139,8 @@ contains
 !   \item[{[append]}]
 !    A logical flag: append data to an existing file, default is false.
 !   \item[{[iofmt]}]
-!    The PIO format. Please see Section~\ref{opt:} for the list of options.
-!    If not present, defaults to ESMF\_IOFMT\_NETCDF.
+!    The PIO format. Please see Section~\ref{opt:iofmtflag} for the list 
+!    of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -365,8 +365,8 @@ contains
 !   \item[{[vname]}]
 !    Variable name in netcdf file; default is the "name" of array
 !   \item[{[iofmt]}]
-!    The PIO format. Please see Section~\ref{opt:} for the list of options.
-!    If not present, defaults to ESMF\_IOFMT\_NETCDF.
+!    The PIO format. Please see Section~\ref{opt:iofmtflag} for the list 
+!    of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -669,7 +669,7 @@ contains
 !   \item[{[file_exists]}] @\
 !     A tag indicates file already existed with value 1. @\
 !   \item[piofmt] @\
-!    The IO format supported are "bin", "pnc", "snc", "nc4p", and "nc4c". @\
+!    The IO format supported are "bin", "pnc", and "snc". @\
 !   \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
@@ -935,7 +935,7 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
 !   \item[varname] @\
 !     Variable name in netcdf file @\
 !   \item[piofmt] @\
-!    The IO format supported are "bin", "pnc", "snc", "nc4p", and "nc4c". @\
+!    The IO format supported are "bin", "pnc", and "snc". @\
 !   \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
