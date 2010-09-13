@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.43 2010/09/11 22:21:50 samsoncheung Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.44 2010/09/13 20:19:19 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -1813,8 +1813,8 @@ end function
 !      A logical flag, if TRUE, each array located in a separate file.
 !      The default is FALSE, ie all arrays are located in one file.
 !     \item[iofmt]
-!     The PIO format. Please see Section~\ref{opt:} for the list of options.
-!     If not present, defaults to ESMF\_IOFMT\_NETCDF.
+!     The PIO format. Please see Section~\ref{opt:iofmtflag} for the list 
+!     of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !     \item [{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2384,8 +2384,8 @@ end function
 !      A logical flag, if TRUE, each array will be written a separate file.
 !      The default is FALSE, ie all arrays are written in one file.
 !     \item[iofmt]
-!    The PIO format. Please see Section~\ref{opt:} for the list of options.
-!    If not present, defaults to ESMF\_IOFMT\_NETCDF.
+!      The PIO format. Please see Section~\ref{opt:iofmtflag} for the list 
+!      of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !     \item [{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
