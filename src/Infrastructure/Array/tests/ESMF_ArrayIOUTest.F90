@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.16 2010/09/13 05:30:24 samsoncheung Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.17 2010/09/13 17:49:49 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,9 @@ program ESMF_ArrayIOUTest
   ! local variables
   type(ESMF_VM):: vm
   type(ESMF_ArraySpec):: arrayspec
-  integer(ESMF_KIND_I4), pointer, dimension(:,:,:) ::  Farray3D_withhalo, Farray3D_wouthalo, Farray3D_withhalo2, Farray3D_wouthalo2, Farray3D_withhalo3
+  integer(ESMF_KIND_I4), pointer, dimension(:,:,:) ::  Farray3D_withhalo, &
+               Farray3D_wouthalo, Farray3D_withhalo2, &
+               Farray3D_wouthalo2, Farray3D_withhalo3
   real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray2D_withhalo, Farray2D_wouthalo
   real(ESMF_KIND_R8), dimension(5,5) :: FarrayGr_1 , FarrayGr_2
   type(ESMF_DistGrid)                     :: distgrid, distgrid_diff
@@ -286,6 +288,8 @@ program ESMF_ArrayIOUTest
     call ESMF_ArrayGet(array_withhalo3, localDe=de, &
          farrayPtr=Farray3D_withhalo3, rc=rc)
   enddo
+  Farray3D_withhalo2 = 0    ! Initialize it for some fortran compilers
+  Farray3D_withhalo3 = 0    ! Initialize it for some fortran compilers
   call ESMF_ArrayGet(array_withhalo2, exclusiveLBound=exclusiveLBound, &
                      exclusiveUBound=exclusiveUBound, rc=rc)
 
@@ -309,7 +313,7 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayRead(array_withhalo3, file='file3D_withhalo.bin', &
        iofmt=ESMF_IOFMT_BIN, rc=rc)
-#ifdef ESMF_PIO 
+#if (defined ESMF_PIO)
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -326,6 +330,7 @@ program ESMF_ArrayIOUTest
   do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
   do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
    diff = abs( Farray3D_withhalo2(i,j,k)-Farray3D_withhalo(i,j,k) )
+   write(localPet+10,*) Farray3D_withhalo2(i,j,k), Farray3D_withhalo(i,j,k)
    if (Maxvalue.le.diff) Maxvalue=diff
   enddo
   enddo
@@ -565,7 +570,6 @@ program ESMF_ArrayIOUTest
    enddo
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
    write(*,*)"Maximum Error (different distgrid) = ", Maxvalue
-   write(*,*)"Maximum Error (With/Without Halo case) = ", Maxvalue
    call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
 #else
    write(failMsg, *) "Comparison did not failed as was expected"
