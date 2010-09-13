@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.10 2010/08/11 15:09:34 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.11 2010/09/13 19:29:22 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -600,6 +600,11 @@ contains
         integer                             :: xlb(1), xub(1)
         type(ESMF_RouteHandle)              :: rh_src2xgrid(2), rh_xgrid2dst(1)
 
+
+        type(ESMF_XGrid)                    :: xgrid1
+        character, pointer                  :: buffer(:)
+        integer                             :: buff_length, offset
+
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
@@ -920,6 +925,38 @@ contains
 
         print *, '- B after SMM from X -> B'
         print *, fptr ! should be 1/B_area
+
+        ! Allocate serialization buffer
+
+        buff_length = 1
+        allocate (buffer(buff_length))
+        offset = 0
+        call ESMF_XGridSerialize(xgrid, buffer, buff_length, offset, &
+            inquireflag=ESMF_INQUIREONLY, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        deallocate (buffer)
+
+        buff_length = offset
+        allocate (buffer(buff_length))
+
+        ! call serialize and deserialize and verify again
+
+        offset = 0
+        call ESMF_XGridSerialize(xgrid, buffer, buff_length, offset, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        offset = 0
+
+        xgrid1 = ESMF_XGridDeserialize(buffer, offset, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        deallocate (buffer)
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &

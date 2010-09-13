@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGrid_F.C,v 1.2 2010/09/13 16:11:28 feiliu Exp $
+// $Id: ESMCI_XGrid_F.C,v 1.3 2010/09/13 19:29:22 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_XGrid_F.C,v 1.2 2010/09/13 16:11:28 feiliu Exp $";
+             "$Id: ESMCI_XGrid_F.C,v 1.3 2010/09/13 19:29:22 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -44,6 +44,8 @@ extern "C" {
 // non-method functions
 void FTN(c_esmc_xgridserialize)(
                 int * s, int * cellCount, int * dimCount, 
+                int * ngridA, int * ngridB,
+                int * eleCountA2X, int * eleCountX2A, int * eleCountB2X, int * eleCountX2B, 
                 double * area, double * centroid, 
                 char *buffer, int *length, int *offset,
                 ESMC_InquireFlag *inquireflag, int *localrc,
@@ -63,11 +65,39 @@ void FTN(c_esmc_xgridserialize)(
     ptr += SSIZE*sizeof(int);
 #undef SSIZE
     if (linquireflag != ESMF_INQUIREONLY)
+      memcpy((void *)ptr, (const void *)ngridA, sizeof(int));
+    ptr += sizeof(int);
+    if (linquireflag != ESMF_INQUIREONLY)
+      memcpy((void *)ptr, (const void *)ngridB, sizeof(int));
+    ptr += sizeof(int);
+    if (linquireflag != ESMF_INQUIREONLY)
       memcpy((void *)ptr, (const void *)cellCount, sizeof(int));
     ptr += sizeof(int);
     if (linquireflag != ESMF_INQUIREONLY)
       memcpy((void *)ptr, (const void *)dimCount, sizeof(int));
     ptr += sizeof(int);
+
+    // sparseMat meta data
+    if(eleCountA2X != 0) {
+        if (linquireflag != ESMF_INQUIREONLY)
+          memcpy((void *)ptr, (const void *)eleCountA2X, *ngridA*sizeof(int));
+        ptr += *ngridA*sizeof(int);
+    }
+    if(eleCountX2A != 0) {
+        if (linquireflag != ESMF_INQUIREONLY)
+          memcpy((void *)ptr, (const void *)eleCountX2A, *ngridA*sizeof(int));
+        ptr += *ngridA*sizeof(int);
+    }
+    if(eleCountB2X != 0) {
+        if (linquireflag != ESMF_INQUIREONLY)
+          memcpy((void *)ptr, (const void *)eleCountB2X, *ngridB*sizeof(int));
+        ptr += *ngridB*sizeof(int);
+    }
+    if(eleCountX2B != 0) {
+        if (linquireflag != ESMF_INQUIREONLY)
+          memcpy((void *)ptr, (const void *)eleCountX2B, *ngridB*sizeof(int));
+        ptr += *ngridB*sizeof(int);
+    }
 
 #define AREA_IDX 4
 #define CENTROID_IDX 5
