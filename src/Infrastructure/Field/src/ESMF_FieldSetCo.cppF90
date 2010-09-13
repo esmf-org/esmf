@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.19 2010/08/27 21:13:26 oehmke Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.20 2010/09/13 23:45:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.19 2010/08/27 21:13:26 oehmke Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.20 2010/09/13 23:45:44 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -257,6 +257,7 @@ contains
     integer                        :: localrc  @\
     type(ESMF_GeomBase)   :: geombase @\
     type(ESMF_GridDecompType) :: decompType @\
+    type(ESMF_Logical) :: linkChange @\
 @\
     if (present(rc)) then @\
       rc = ESMF_RC_NOT_IMPL @\
@@ -310,7 +311,8 @@ contains
         ESMF_CONTEXT, rc)) return @\
 @\
     !  link the Attribute hierarchies @\
-    call c_ESMC_AttributeLink(field%ftypep%base, grid, localrc) @\
+    linkChange = ESMF_TRUE @\
+    call c_ESMC_AttributeLink(field%ftypep%base, grid, linkChange, localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
                     ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
@@ -445,6 +447,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
     integer                        :: localrc  @\
     type(ESMF_GeomBase)            :: geombase @\
     type(ESMF_GridDecompType)      :: decompType @\
+    type(ESMF_Logical)             :: linkChange @\
 @\
     if (present(rc)) then @\
       rc = ESMF_RC_NOT_IMPL @\
@@ -499,7 +502,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 @\
 @\
     !  link the Attribute hierarchies @\
-    call c_ESMC_AttributeLink(field%ftypep%base, grid, localrc) @\
+    linkChange = ESMF_TRUE @\
+    call c_ESMC_AttributeLink(field%ftypep%base, grid, linkChange, localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
                     ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\

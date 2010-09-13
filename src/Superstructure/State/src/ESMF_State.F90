@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.196 2010/09/13 05:50:47 eschwab Exp $
+! $Id: ESMF_State.F90,v 1.197 2010/09/13 23:45:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.196 2010/09/13 05:50:47 eschwab Exp $'
+      '$Id: ESMF_State.F90,v 1.197 2010/09/13 23:45:44 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -275,6 +275,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
       type(ESMF_Array) :: temp_list(1)
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
+      type(ESMF_Logical) :: linkChange
       integer :: localrc
 
       ! check input variables
@@ -298,7 +299,8 @@ module ESMF_StateMod
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMC_AttributeLink(state%statep%base, array, localrc)
+      linkChange = ESMF_TRUE
+      call c_ESMC_AttributeLink(state%statep%base, array, linkChange, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -366,6 +368,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
       type(ESMF_Array) :: temp_list(1)
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
+      type(ESMF_Logical) :: linkChange
       integer :: localrc
 
       ! check input variables
@@ -390,7 +393,8 @@ module ESMF_StateMod
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMC_AttributeLink(state%statep%base, array, localrc)
+      linkChange = ESMF_TRUE
+      call c_ESMC_AttributeLink(state%statep%base, array, linkChange, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -455,6 +459,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
       type(ESMF_ArrayBundle) :: temp_list(1)
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
+      type(ESMF_Logical) :: linkChange
       integer :: localrc
 
       ! check input variables
@@ -479,7 +484,8 @@ module ESMF_StateMod
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMC_AttributeLink(state%statep%base, arraybundle, localrc)
+      linkChange = ESMF_TRUE
+      call c_ESMC_AttributeLink(state%statep%base, arraybundle, linkChange, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -547,6 +553,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
       type(ESMF_ArrayBundle) :: temp_list(1)
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
+      type(ESMF_Logical) :: linkChange
       integer :: localrc
 
       ! check input variables
@@ -571,7 +578,8 @@ module ESMF_StateMod
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMC_AttributeLink(state%statep%base, arraybundle, localrc)
+      linkChange = ESMF_TRUE
+      call c_ESMC_AttributeLink(state%statep%base, arraybundle, linkChange, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -636,9 +644,10 @@ module ESMF_StateMod
 !
 !EOPI
 !------------------------------------------------------------------------------
-      integer :: localrc
       type(ESMF_Field) :: temp_list(1)
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
+      type(ESMF_Logical) :: linkChange
+      integer :: localrc
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -660,7 +669,9 @@ module ESMF_StateMod
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMC_AttributeLink(state%statep%base, field%ftypep%base, localrc)
+      linkChange = ESMF_TRUE
+      call c_ESMC_AttributeLink(state%statep%base, field%ftypep%base, &
+        linkChange, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -728,9 +739,10 @@ module ESMF_StateMod
 !
 !EOPI
 !------------------------------------------------------------------------------
-      integer :: localrc
       type(ESMF_Field) :: temp_list(1)
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
+      type(ESMF_Logical) :: linkChange
+      integer :: localrc
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -753,7 +765,9 @@ module ESMF_StateMod
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMC_AttributeLink(state%statep%base, field%ftypep%base, localrc)
+      linkChange = ESMF_TRUE
+      call c_ESMC_AttributeLink(state%statep%base, field%ftypep%base, &
+        linkChange, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -819,9 +833,10 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
 
-      integer :: localrc
       type(ESMF_FieldBundle) :: temp_list(1)
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
+      type(ESMF_Logical) :: linkChange
+      integer :: localrc
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -844,8 +859,9 @@ module ESMF_StateMod
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
+      linkChange = ESMF_TRUE
       call c_ESMC_AttributeLink(state%statep%base, &
-        fieldbundle%btypep%base, localrc)
+        fieldbundle%btypep%base, linkChange, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -914,9 +930,10 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
 
-      integer :: localrc
       type(ESMF_FieldBundle) :: temp_list(1)
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
+      type(ESMF_Logical) :: linkChange
+      integer :: localrc
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -939,8 +956,9 @@ module ESMF_StateMod
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
+      linkChange = ESMF_TRUE
       call c_ESMC_AttributeLink(state%statep%base, &
-        fieldbundle%btypep%base, localrc)
+        fieldbundle%btypep%base, linkChange, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -1132,9 +1150,10 @@ module ESMF_StateMod
 !
 !EOPI
 !------------------------------------------------------------------------------
-      integer :: localrc
       type(ESMF_State) :: temp_list(1)
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
+      type(ESMF_Logical) :: linkChange
+      integer :: localrc
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1157,7 +1176,9 @@ module ESMF_StateMod
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMC_AttributeLink(state%statep%base, nestedstate%statep%base, localrc)
+      linkChange = ESMF_TRUE
+      call c_ESMC_AttributeLink(state%statep%base, nestedstate%statep%base, &
+        linkChange, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -1226,9 +1247,10 @@ module ESMF_StateMod
 !
 !EOPI
 !------------------------------------------------------------------------------
-      integer :: localrc
       type(ESMF_State) :: temp_list(1)
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
+      type(ESMF_Logical) :: linkChange
+      integer :: localrc
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1252,7 +1274,9 @@ module ESMF_StateMod
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMC_AttributeLink(state%statep%base, nestedstate%statep%base, localrc)
+      linkChange = ESMF_TRUE
+      call c_ESMC_AttributeLink(state%statep%base, nestedstate%statep%base, &
+        linkChange, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -1368,6 +1392,7 @@ module ESMF_StateMod
       integer :: localrc, i
       integer :: countOpt
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
+      type(ESMF_Logical) :: linkChange
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1409,9 +1434,10 @@ module ESMF_StateMod
         ESMF_CONTEXT, rcToReturn=rc))  return
 
       ! link the Attribute hierarchies
+      linkChange = ESMF_TRUE
       do i=1,count
          call c_ESMC_AttributeLink(state%statep%base, &
-          arrayList(i), localrc)
+          arrayList(i), linkChange, localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
       enddo
@@ -1482,6 +1508,7 @@ module ESMF_StateMod
       integer :: localrc, i
       integer :: countOpt
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
+      type(ESMF_Logical) :: linkChange
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1523,9 +1550,10 @@ module ESMF_StateMod
         ESMF_CONTEXT, rcToReturn=rc))  return
 
       ! link the Attribute hierarchies
+      linkChange = ESMF_TRUE
       do i=1,count
          call c_ESMC_AttributeLink(state%statep%base, &
-          arraybundleList(i), localrc)
+          arraybundleList(i), linkChange, localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
       enddo
@@ -1593,6 +1621,7 @@ module ESMF_StateMod
 !EOPI
       integer :: localrc,i
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
+      type(ESMF_Logical) :: linkChange
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1615,9 +1644,10 @@ module ESMF_StateMod
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       ! link the Attribute hierarchies
+      linkChange = ESMF_TRUE
       do i=1,count
          call c_ESMC_AttributeLink(state%statep%base, &
-          fieldList(i)%ftypep%base, localrc)
+          fieldList(i)%ftypep%base, linkChange, localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
       enddo
@@ -1685,6 +1715,7 @@ module ESMF_StateMod
 !EOPI
       integer :: localrc,i
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
+      type(ESMF_Logical) :: linkChange
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1708,9 +1739,10 @@ module ESMF_StateMod
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       ! link the Attribute hierarchies
+      linkChange = ESMF_TRUE
       do i=1,count
          call c_ESMC_AttributeLink(state%statep%base, &
-          fieldbundleList(i)%btypep%base, localrc)
+          fieldbundleList(i)%btypep%base, linkChange, localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
       enddo
@@ -1914,6 +1946,7 @@ module ESMF_StateMod
 !EOPI
       integer :: localrc,i
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
+      type(ESMF_Logical) :: linkChange
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1937,9 +1970,10 @@ module ESMF_StateMod
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       ! link the Attribute hierarchies
+      linkChange = ESMF_TRUE
       do i=1,count
          call c_ESMC_AttributeLink(state%statep%base, &
-          nestedStateList(i)%statep%base, localrc)
+          nestedStateList(i)%statep%base, linkChange, localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
       enddo
@@ -6382,7 +6416,7 @@ module ESMF_StateMod
       type(ESMF_StateItem), pointer :: sip           ! state item
       type(ESMF_State) :: subsubstate
       type(ESMF_AttReconcileFlag) :: lattreconflag
-
+      type(ESMF_Logical) :: linkChange
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
@@ -6393,6 +6427,8 @@ module ESMF_StateMod
       else
         lattreconflag = ESMF_ATTRECONCILE_OFF
       endif
+      ! linkChanges is true for all but Component
+      linkChange = ESMF_TRUE
 
       ! in case of error, make sure this is invalid.
       !nullify(ESMF_StateDeserialize%statep)
@@ -6441,7 +6477,8 @@ module ESMF_StateMod
               !  here we relink the State Attribute hierarchy to the FieldBundle
               !  Attribute hierarchy, as they were linked before
               if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
-                call c_ESMC_AttributeLink(sp%base, sip%datap%fbp%btypep%base, localrc)
+                call c_ESMC_AttributeLink(sp%base, sip%datap%fbp%btypep%base, &
+                  linkChange, localrc)
                 if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then
@@ -6456,7 +6493,8 @@ module ESMF_StateMod
               !  here we relink the State Attribute hierarchy to the Field
               !  Attribute hierarchy, as they were linked before
               if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
-                call c_ESMC_AttributeLink(sp%base, sip%datap%fp%ftypep%base, localrc)
+                call c_ESMC_AttributeLink(sp%base, sip%datap%fp%ftypep%base, &
+                  linkChange, localrc)
                 if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then
@@ -6480,7 +6518,8 @@ module ESMF_StateMod
               !  here we relink the State Attribute hierarchy to the subState
               !  Attribute hierarchy, as they were linked before
               if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
-                call c_ESMC_AttributeLink(sp%base, sip%datap%spp%base, localrc)
+                call c_ESMC_AttributeLink(sp%base, sip%datap%spp%base, &
+                  linkChange, localrc)
                 if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then

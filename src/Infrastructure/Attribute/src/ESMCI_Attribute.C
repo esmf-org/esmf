@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.69 2010/09/13 05:50:47 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.70 2010/09/13 23:45:44 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.69 2010/09/13 05:50:47 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.70 2010/09/13 23:45:44 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1350,7 +1350,8 @@ namespace ESMCI {
   // copy Attribute links by value
   for (i=0; i<source.linkList.size(); i++) {
     attr = source.linkList.at(i);
-    localrc = AttributeLink(attr);
+    ESMC_Logical temp_linkChange = ESMF_TRUE;
+    localrc = AttributeLink(attr, &temp_linkChange);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
@@ -2881,7 +2882,8 @@ namespace ESMCI {
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      Attribute *destination) {  // in/out destination Attribute to be linked
+      Attribute *destination,         // in/out destination Attribute to be linked
+      ESMC_Logical *linkChangeIn) {   // in - link Changes?
 // !DESCRIPTION:
 //     Link an {\tt Attribute} hierarchy.
 //
@@ -2911,7 +2913,8 @@ namespace ESMCI {
   attr = destination;
   // attrBase and parent should already be set
   linkList.push_back(attr);  
-  linkChange = ESMF_TRUE;
+  // set the linkChange as desired
+  linkChange = *linkChangeIn;
 
   return ESMF_SUCCESS;
 
@@ -2929,7 +2932,8 @@ namespace ESMCI {
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      Attribute *destination) {  // in/out destination Attribute to be linked
+      Attribute *destination,         // in/out destination Attribute to be linked
+      ESMC_Logical *linkChangeIn) {   // in - link Changes?
 // !DESCRIPTION:
 //     Set a link in an {\tt Attribute} hierarchy.
 //
@@ -2950,6 +2954,7 @@ namespace ESMCI {
         // don't delete the root, but erase the Attribute pointer
         linkList.erase(linkList.begin() + i);
         structChange = ESMF_TRUE;
+        linkChange = *linkChangeIn;
         done = true;
         break;
     }

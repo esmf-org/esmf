@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.79 2010/06/30 23:38:20 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.80 2010/09/13 23:45:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.79 2010/06/30 23:38:20 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.80 2010/09/13 23:45:44 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1206,6 +1206,7 @@
 !     integer :: oldcount
       type (ESMF_StateClass), pointer :: stypep
       logical :: emptyNest
+      type (ESMF_Logical) :: linkChange
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1221,8 +1222,9 @@
           if (stypep%datalist(i)%datap%spp%datacount == 0) then
             ! nested State is empty
             emptyNest = .true.
+            linkChange = ESMF_TRUE
             call c_ESMC_AttributeLinkRemove(stypep%base, stypep%datalist(i)%datap%spp%base, &
-              localrc)
+              linkChange, localrc)
            if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return

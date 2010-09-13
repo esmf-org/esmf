@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.72 2010/08/30 15:47:52 oehmke Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.73 2010/09/13 23:45:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -68,7 +68,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.72 2010/08/30 15:47:52 oehmke Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.73 2010/09/13 23:45:44 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -2255,6 +2255,7 @@ end function ESMF_FieldCreateGridTKR
     type(ESMF_StaggerLoc)  :: localStaggerLoc
     type(ESMF_IndexFlag)   :: g_indexflag
     type(ESMF_GridDecompType) :: decompType
+    type(ESMF_Logical) :: linkChange
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -2325,8 +2326,9 @@ end function ESMF_FieldCreateGridTKR
                                      ESMF_CONTEXT, rc)) return
 
     !  link the Attribute hierarchies
+    linkChange = ESMF_TRUE 
     call c_ESMC_AttributeLink(ESMF_FieldCreateGridArraySpec%ftypep%base, &
-                              grid, localrc)
+                              grid, linkChange, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -2461,6 +2463,7 @@ end function ESMF_FieldCreateGridTKR
     type(ESMF_GeomBase) :: geombase
     type(ESMF_StaggerLoc) :: localStaggerloc
     type(ESMF_GridDecompType) :: decompType
+    type(ESMF_Logical) :: linkChange
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -2517,8 +2520,9 @@ end function ESMF_FieldCreateGridTKR
         ESMF_CONTEXT, rc)) return
  
     !  link the Attribute hierarchies
+    linkChange = ESMF_TRUE
     call c_ESMC_AttributeLink(ESMF_FieldCreateGridArray%ftypep%base, &
-                              grid, localrc)
+                              grid, linkChange, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -2694,6 +2698,7 @@ end function ESMF_FieldCreateGridTKR
     type(ESMF_GeomBase) :: geombase @\
     type(ESMF_StaggerLoc) :: localStaggerloc@\
     type(ESMF_GridDecompType)      :: decompType @\
+    type(ESMF_Logical) :: linkChange @\
 @\
     ! Initialize @\
     localrc = ESMF_RC_NOT_IMPL@\
@@ -2754,9 +2759,10 @@ end function ESMF_FieldCreateGridTKR
         ESMF_CONTEXT, rc)) return @\
 @\
     !  link the Attribute hierarchies @\
+    linkChange = ESMF_TRUE @\
     call c_ESMC_AttributeLink( & @\
       ESMF_FieldCreateGridData##mrank##D##mtypekind%ftypep%base, & @\
-      grid, localrc) @\
+      grid, linkChange, localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
                     ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
@@ -2908,6 +2914,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
     type(ESMF_GeomBase) :: geombase @\
     type(ESMF_StaggerLoc) :: localStaggerloc@\
     type(ESMF_GridDecompType)      :: decompType @\
+    type(ESMF_Logical) :: linkChange @\
 @\
     ! Initialize @\
     localrc = ESMF_RC_NOT_IMPL@\
@@ -2966,9 +2973,10 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
         ESMF_CONTEXT, rc)) return @\
 @\
     !  link the Attribute hierarchies @\
+    linkChange = ESMF_TRUE @\
     call c_ESMC_AttributeLink( & @\
       ESMF_FieldCreateGridDataPtr##mrank##D##mtypekind%ftypep%base, & @\
-      grid, localrc) @\
+      grid, linkChange, localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
                     ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\

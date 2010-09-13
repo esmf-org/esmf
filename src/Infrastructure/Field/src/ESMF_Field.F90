@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.346 2010/06/09 18:37:04 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.347 2010/09/13 23:45:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -132,7 +132,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.346 2010/06/09 18:37:04 feiliu Exp $'
+    '$Id: ESMF_Field.F90,v 1.347 2010/09/13 23:45:44 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -566,6 +566,7 @@ contains
       type(ESMF_FieldType), pointer :: fp    ! field type
       integer staggerloc
       type(ESMF_AttReconcileFlag) :: lattreconflag
+      type(ESMF_Logical) :: linkChange
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -621,7 +622,8 @@ contains
           !  hierarchy of the object in the GeomBase, Grid for now
           if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value .and. & 
               fp%geombase%gbcp%type%type == ESMF_GEOMTYPE_GRID%type) then
-            call c_ESMC_AttributeLink(fp%base, fp%geombase%gbcp%grid, localrc)
+            linkChange = ESMF_TRUE
+            call c_ESMC_AttributeLink(fp%base, fp%geombase%gbcp%grid, linkChange, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return

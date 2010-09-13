@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.44 2010/09/13 20:19:19 samsoncheung Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.45 2010/09/13 23:45:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -393,6 +393,7 @@ end function
       logical :: dummy
       type(ESMF_Field) :: temp_list(1)
       type(ESMF_FieldBundleType), pointer :: btype
+      type(ESMF_Logical) :: linkChange
 
       ! Initialize return code in case we return early.
       ! Otherwise, count on AddFieldList call to set rc
@@ -419,7 +420,8 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       !  link the Attribute hierarchies
-      call c_ESMC_AttributeLink(btype%base, field%ftypep%base, status)
+      linkChange = ESMF_TRUE
+      call c_ESMC_AttributeLink(btype%base, field%ftypep%base, linkChange, status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -478,6 +480,7 @@ end function
       logical :: dummy
       type(ESMF_FieldBundleType), pointer :: btype
       integer :: i
+      type(ESMF_Logical) :: linkChange
 
       ! Initialize return code in case we return early.
       ! Otherwise, count on AddFieldList call to set rc
@@ -504,9 +507,10 @@ end function
                                 ESMF_CONTEXT, rc)) return
       
       ! link the Attribute hierarchies
+      linkChange = ESMF_TRUE
       do i=1,fieldCount
          call c_ESMC_AttributeLink(btype%base, &
-          fieldList(i)%ftypep%base, status)
+          fieldList(i)%ftypep%base, linkChange, status)
          if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
       enddo
@@ -587,6 +591,7 @@ end function
       logical :: dummy
       integer :: status                                ! Error status
       integer :: i      
+      type(ESMF_Logical) :: linkChange
 
       ! Initialize return code in case we return early.
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -617,9 +622,10 @@ end function
       endif
 
       ! link the Attribute hierarchies
+      linkChange = ESMF_TRUE
       do i=1,fieldCount
          call c_ESMC_AttributeLink(btypep%base, &
-          fieldList(i)%ftypep%base, status)
+          fieldList(i)%ftypep%base, linkChange, status)
          if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
       enddo
@@ -764,6 +770,7 @@ end function
 
       type(ESMF_FieldBundleType), pointer :: btypep   ! Pointer to new bundle
       integer :: status                          ! Error status
+      type(ESMF_Logical) :: linkChange
 
       ! Initialize pointers
       status = ESMF_RC_NOT_IMPL
@@ -802,6 +809,7 @@ end function
           btypep%gridstatus = ESMF_STATUS_READY
 
           !  link the Attribute hierarchies
+          linkChange = ESMF_TRUE
           call c_ESMC_AttributeLink(btypep%base, grid, status)
           if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -2076,6 +2084,7 @@ end function
 
       integer :: status                           ! Error status
       type(ESMF_FieldBundleType), pointer :: btype     ! internal data
+      type(ESMF_Logical) :: linkChange
 
       ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
@@ -2118,6 +2127,7 @@ end function
 
 
       !  link the Attribute hierarchies
+      linkChange = ESMF_TRUE
       call c_ESMC_AttributeLink(btype%base, grid, status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -3316,6 +3326,7 @@ end function
       type(ESMF_AttReconcileFlag) :: lattreconflag
       type(ESMF_Grid) :: grid
       type(ESMF_GeomType) :: geomtype
+      type(ESMF_Logical) :: linkChange
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -3328,6 +3339,8 @@ end function
       else
         lattreconflag = ESMF_ATTRECONCILE_OFF
       endif
+      ! linkChange flag true for all but Components
+      linkChange = ESMF_TRUE;
 
       ! in case of error, make sure this is invalid.
       nullify(ESMF_FieldBundleDeserialize%btypep)
@@ -3382,7 +3395,7 @@ end function
                                          ESMF_ERR_PASSTHRU, &
                                          ESMF_CONTEXT, rc)) return
 
-               call c_ESMC_AttributeLink(bp%base, grid, localrc)
+               call c_ESMC_AttributeLink(bp%base, grid, linkChange, localrc)
                if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3408,7 +3421,8 @@ end function
           !  here we relink the Field Attribute hierarchies to the FieldBundle
           !  Attribute hierarchies, as they were before
           if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
-            call c_ESMC_AttributeLink(bp%base, bp%flist(i)%ftypep%base, localrc)
+            call c_ESMC_AttributeLink(bp%base, bp%flist(i)%ftypep%base, &
+              linkChange, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then

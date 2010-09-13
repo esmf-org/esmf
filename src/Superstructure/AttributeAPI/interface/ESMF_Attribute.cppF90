@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.63 2010/09/13 05:52:51 eschwab Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.64 2010/09/13 23:45:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.63 2010/09/13 05:52:51 eschwab Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.64 2010/09/13 23:45:44 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -3390,6 +3390,7 @@ contains
 !EOPI @\
  @\
       integer :: localrc                           ! Error status @\
+      type(ESMF_Logical) :: linkChange @\
  @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
@@ -3400,7 +3401,8 @@ contains
       ! check input variables @\
       ESMF_INIT_CHECK_DEEP(mclass2##GetInit,mthis2,rc) @\
  @\
-      call c_ESMC_AttributeLink(mthisfield1, mthisfield2, localrc) @\
+      linkChange = ESMF_TRUE @\
+      call c_ESMC_AttributeLink(mthisfield1, mthisfield2, linkChange, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -3410,7 +3412,62 @@ contains
 
 !-----------------------------------------------------------------------------
 
-#define ESMF_StateAttLinkMacro(mclass, mclassshort, mthis1, mthis2, mthisfield1, mthisfield2, mthisfield3, mobj) \
+#define AttLinkCompMacro(mclass1, mclass2, mclass2short, mthis1, mthis2, mthisfield1, mthisfield2) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttLink" @\
+ @\
+!BOPI @\
+! !IROUTINE: ESMF_AttributeLink - Link one Attribute hierarchy to another @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeLink() @\
+      subroutine mclass1##AttLink##mclass2short(mthis1, mthis2, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(mclass1), intent(inout) :: mthis1 @\
+      type(mclass2), intent(inout)  :: mthis2 @\
+      integer, intent(out), optional  :: rc    @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Attaches two Attribute hierarchies @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis1] @\
+!      An {\tt mclass1} object. @\
+!     \item [mthis2] @\
+!      An {\tt mclass2} object. @\
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc                           ! Error status @\
+      type(ESMF_Logical) :: linkChange @\
+ @\
+      ! Initialize return code; assume failure until success is certain @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(mclass1##GetInit,mthis1,rc) @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(mclass2##GetInit,mthis2,rc) @\
+ @\
+      linkChange = ESMF_FALSE @\
+      call c_ESMC_AttributeLink(mthisfield1, mthisfield2, linkChange, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass1##AttLink##mclass2short @\
+
+!-----------------------------------------------------------------------------
+
+#define AttLinkStateMacro(mclass, mclassshort, mthis1, mthis2, mthisfield1, mthisfield2, mthisfield3, mobj) \
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_StateAttLink" @\
  @\
@@ -3447,6 +3504,7 @@ contains
       character (len=*), parameter :: lobject = #mobj @\
       character (len=*), parameter :: lname1 = 'import' @\
       character (len=*), parameter :: lname2 = 'export' @\
+      type(ESMF_Logical) :: linkChange @\
  @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
@@ -3455,7 +3513,8 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,mthis1,rc) @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis2,rc) @\
  @\
-      call c_ESMC_AttributeLink(mthisfield1, mthisfield2, localrc) @\
+      linkChange = ESMF_TRUE @\
+      call c_ESMC_AttributeLink(mthisfield1, mthisfield2, linkChange, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -3519,6 +3578,7 @@ contains
 !EOPI @\
  @\
       integer :: localrc                           ! Error status @\
+      type(ESMF_Logical) :: linkChange @\
  @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
@@ -3529,7 +3589,63 @@ contains
       ! check input variables @\
       ESMF_INIT_CHECK_DEEP(mclass2##GetInit,mthis2,rc) @\
  @\
-      call c_ESMC_AttributeLinkRemove(mthisfield1, mthisfield2, localrc) @\
+      linkChange = ESMF_TRUE @\
+      call c_ESMC_AttributeLinkRemove(mthisfield1, mthisfield2, linkChange, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass1##AttLinkRm##mclass2short @\
+
+!-----------------------------------------------------------------------------
+
+#define AttLinkRemoveCompMacro(mclass1, mclass2, mclass2short, mthis1, mthis2, mthisfield1, mthisfield2) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttLinkRemove" @\
+ @\
+!BOPI @\
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink one Attribute hierarchy from another @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeLinkRemove() @\
+      subroutine mclass1##AttLinkRm##mclass2short(mthis1, mthis2, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(mclass1), intent(inout) :: mthis1 @\
+      type(mclass2), intent(inout)  :: mthis2 @\
+      integer, intent(out), optional  :: rc    @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Unattaches two Attribute hierarchies @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis1] @\
+!      An {\tt mclass1} object. @\
+!     \item [mthis2] @\
+!      An {\tt mclass2} object. @\
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc                           ! Error status @\
+      type(ESMF_Logical) :: linkChange @\
+ @\
+      ! Initialize return code; assume failure until success is certain @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(mclass1##GetInit,mthis1,rc) @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(mclass2##GetInit,mthis2,rc) @\
+ @\
+      linkChange = ESMF_FALSE @\
+      call c_ESMC_AttributeLinkRemove(mthisfield1, mthisfield2, linkChange, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -4545,17 +4661,17 @@ AttGetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
 
 GetCountNameNumberMacro(ESMF_CplComp, comp, comp%compp%base)
 
-AttLinkMacro(ESMF_CplComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
+AttLinkCompMacro(ESMF_CplComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
-AttLinkMacro(ESMF_CplComp, ESMF_GridComp, GridComp, comp1, comp2,  & @\
+AttLinkCompMacro(ESMF_CplComp, ESMF_GridComp, GridComp, comp1, comp2,  & @\
                 comp1%compp%base, comp2%compp%base)
-AttLinkMacro(ESMF_CplComp, ESMF_State, State, comp, state,  & @\
+AttLinkCompMacro(ESMF_CplComp, ESMF_State, State, comp, state,  & @\
                 comp%compp%base, state%statep%base)
-AttLinkRemoveMacro(ESMF_CplComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
+AttLinkRemoveCompMacro(ESMF_CplComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
-AttLinkRemoveMacro(ESMF_CplComp, ESMF_GridComp, GridComp, comp1, comp2,  & @\
+AttLinkRemoveCompMacro(ESMF_CplComp, ESMF_GridComp, GridComp, comp1, comp2,  & @\
                 comp1%compp%base, comp2%compp%base)
-AttLinkRemoveMacro(ESMF_CplComp, ESMF_State, State, comp, state,  & @\
+AttLinkRemoveCompMacro(ESMF_CplComp, ESMF_State, State, comp, state,  & @\
                 comp%compp%base, state%statep%base)
 
 AttReadMacro(ESMF_CplComp, comp, comp%compp%base)
@@ -4586,17 +4702,17 @@ AttGetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
 
 GetCountNameNumberMacro(ESMF_GridComp, comp, comp%compp%base)
 
-AttLinkMacro(ESMF_GridComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
+AttLinkCompMacro(ESMF_GridComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
-AttLinkMacro(ESMF_GridComp, ESMF_GridComp, GridComp, comp1, comp2, & @\
+AttLinkCompMacro(ESMF_GridComp, ESMF_GridComp, GridComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
-AttLinkMacro(ESMF_GridComp, ESMF_State, State, comp, state, & @\
+AttLinkCompMacro(ESMF_GridComp, ESMF_State, State, comp, state, & @\
                 comp%compp%base, state%statep%base)
-AttLinkRemoveMacro(ESMF_GridComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
+AttLinkRemoveCompMacro(ESMF_GridComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
-AttLinkRemoveMacro(ESMF_GridComp, ESMF_GridComp, GridComp, comp1, comp2, & @\
+AttLinkRemoveCompMacro(ESMF_GridComp, ESMF_GridComp, GridComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
-AttLinkRemoveMacro(ESMF_GridComp, ESMF_State, State, comp, state, & @\
+AttLinkRemoveCompMacro(ESMF_GridComp, ESMF_State, State, comp, state, & @\
                 comp%compp%base, state%statep%base)
 
 AttReadMacro(ESMF_GridComp, comp, comp%compp%base)
@@ -4734,15 +4850,15 @@ AttGetCharacterMacro(ESMF_State, state, state%statep%base)
 
 GetCountNameNumberMacro(ESMF_State, state, state%statep%base)
 
-ESMF_StateAttLinkMacro(ESMF_Array, Array, state, array, state%statep%base, & @\
+AttLinkStateMacro(ESMF_Array, Array, state, array, state%statep%base, & @\
                           array, statep%st, array)
-ESMF_StateAttLinkMacro(ESMF_ArrayBundle, ArrayBundle, state, arraybundle, state%statep%base, & @\
+AttLinkStateMacro(ESMF_ArrayBundle, ArrayBundle, state, arraybundle, state%statep%base, & @\
                           arraybundle, statep%st, array)
-ESMF_StateAttLinkMacro(ESMF_Field, Field, state, field, state%statep%base, & @\
+AttLinkStateMacro(ESMF_Field, Field, state, field, state%statep%base, & @\
                           field%ftypep%base, statep%st, field)
-ESMF_StateAttLinkMacro(ESMF_FieldBundle, FieldBundle, state, fieldbundle, state%statep%base, & @\
+AttLinkStateMacro(ESMF_FieldBundle, FieldBundle, state, fieldbundle, state%statep%base, & @\
                           fieldbundle%btypep%base, statep%st, field)
-ESMF_StateAttLinkMacro(ESMF_State, State, state1, state2, state1%statep%base, & @\
+AttLinkStateMacro(ESMF_State, State, state1, state2, state1%statep%base, & @\
                           state2%statep%base, statep%st, field)
 AttLinkRemoveMacro(ESMF_State, ESMF_Array, Array, state, array, & @\
                 state%statep%base, array)

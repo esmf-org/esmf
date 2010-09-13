@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.33 2010/06/28 05:59:47 eschwab Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.34 2010/09/13 23:45:44 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.33 2010/06/28 05:59:47 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.34 2010/09/13 23:45:44 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -3087,6 +3087,7 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base **source,       // in/out - base object
       ESMC_Base **destination,  // in/out - base destination object
+      ESMC_Logical *linkChange, // in/out - link changes boolean
       int *rc) {                // in/out - return value 
 // 
 // !DESCRIPTION:
@@ -3113,8 +3114,15 @@ extern "C" {
     return;
   }
 
+  if (!linkChange) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad linkChange", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
   // Set the attribute link on the object.
-  status = (**source).root.AttributeLink(&(**destination).root);
+  status = (**source).root.AttributeLink(&(**destination).root, linkChange);
   ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3136,6 +3144,7 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base **source,       // in/out - base object
       ESMC_Base **destination,  // in/out - base destination object
+      ESMC_Logical *linkChange, // in/out - link changes boolean
       int *rc) {                // in/out - return value 
 // 
 // !DESCRIPTION:
@@ -3162,8 +3171,15 @@ extern "C" {
     return;
   }
 
+  if (!linkChange) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad linkChange", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
   // Set the attribute link on the object.
-  status = (**source).root.AttributeLinkRemove(&(**destination).root);
+  status = (**source).root.AttributeLinkRemove(&(**destination).root, linkChange);
   ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 

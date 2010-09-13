@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.36 2010/09/09 23:01:11 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.37 2010/09/13 23:45:44 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -194,8 +194,8 @@ class Attribute
     bool AttributeIsSet(const string &name) const;
 
     // link/unlink an attribute hierarchy
-    int AttributeLink(Attribute *destination);
-    int AttributeLinkRemove(Attribute *destination);
+    int AttributeLink(Attribute *destination, ESMC_Logical *linkChangeIn);
+    int AttributeLinkRemove(Attribute *destination, ESMC_Logical *linkChangeIn);
 
     // destroy an attribute or attpack
     int AttributeRemove(const string &name);
@@ -469,9 +469,10 @@ extern "C" {
                                   int *rc, 
                                   ESMCI_FortranStrLenArg nlen);
   void FTN(c_esmc_attributelink)(ESMC_Base **source, ESMC_Base **destination,
-                                  int *rc);
+                                  ESMC_Logical *linkChanges, int *rc);
   void FTN(c_esmc_attributelinkremove)(ESMC_Base **source,
-                                  ESMC_Base **destination, int *rc);
+                                  ESMC_Base **destination, ESMC_Logical *linkChange,
+                                  int *rc);
   void FTN(c_esmc_attributemove)(ESMC_Base **source,
                                   ESMC_Base **destination, int *rc);
   void FTN(c_esmc_attributesetchar)(ESMC_Base **base, char *name, char *value, 
