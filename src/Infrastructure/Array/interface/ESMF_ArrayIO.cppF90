@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.17 2010/09/11 22:27:06 samsoncheung Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.18 2010/09/13 17:55:42 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.17 2010/09/11 22:27:06 samsoncheung Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.18 2010/09/13 17:55:42 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -162,6 +162,8 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+^ifdef ESMF_PIO
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
 
@@ -203,8 +205,7 @@ contains
 
     endif
 
-
-^ifdef ESMF_PIO
+    !
     ! Obtain typekind and rank
     call ESMF_ArrayGet( array, typekind=typekind, rank=rank, name=varname, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -386,6 +387,8 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+^ifdef ESMF_PIO
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
 
@@ -427,7 +430,7 @@ contains
 
     endif
 
-^ifdef ESMF_PIO
+    !
     ! Obtain typekind and rank
     call ESMF_ArrayGet( array, typekind=typekind, rank=rank, name=varname, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
