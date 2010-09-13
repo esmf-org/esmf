@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.17 2010/09/13 17:49:49 samsoncheung Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.18 2010/09/13 22:11:34 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -330,7 +330,6 @@ program ESMF_ArrayIOUTest
   do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
   do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
    diff = abs( Farray3D_withhalo2(i,j,k)-Farray3D_withhalo(i,j,k) )
-   write(localPet+10,*) Farray3D_withhalo2(i,j,k), Farray3D_withhalo(i,j,k)
    if (Maxvalue.le.diff) Maxvalue=diff
   enddo
   enddo
@@ -553,14 +552,16 @@ program ESMF_ArrayIOUTest
 #endif
 
 !-------------------------------------------------------------------------------
-! !  Compare global Fortran array
-! !  Data is type ESMF_KIND_R8
+! !  Compare global Fortran array (Data is type ESMF_KIND_R8)
+! !  Both data are read in, if ESMF_PIO is not defined, we should
+! !  skip this comparison.
+
+  Maxvalue = 0.0
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_ArrayGather(array_diff, FarrayGr_1, patch=1, rootPet=0, rc=rc)
   call ESMF_ArrayGather(array_wouthalo, FarrayGr_2, patch=1, rootPet=0, rc=rc)
-
   write(name, *) "Compare readin data from a different distgrid"
   write(failMsg, *) "Comparison failed"
-  Maxvalue = 0.0
   if (localPet .eq.0) then
    do j=1,5
    do i=1,5
@@ -568,14 +569,13 @@ program ESMF_ArrayIOUTest
      if (diff .gt. Maxvalue) Maxvalue = diff
    enddo
    enddo
-#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
    write(*,*)"Maximum Error (different distgrid) = ", Maxvalue
    call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  endif
 #else
    write(failMsg, *) "Comparison did not failed as was expected"
-   call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+   call ESMF_Test((Maxvalue .eq. 0.0), name, failMsg, result,ESMF_SRCLINE)
 #endif
-  endif
 
   deallocate (computationalLWidth, computationalUWidth)
   deallocate (totalLWidth, totalUWidth)
