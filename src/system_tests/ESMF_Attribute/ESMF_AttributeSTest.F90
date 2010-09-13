@@ -78,42 +78,42 @@ program ESMF_AttributeSTest
 
 
   if (petCount .lt. 6) then
-    ! Create the 2 model components and coupler
+    ! Create the 2 model components and coupler on a single PET
     cname1 = "user model 1"
-    ! use petList to define comp1 on PET 0,1,2,3
+    ! use petList to define comp1 on PET 0
     comp1 = ESMF_GridCompCreate(name=cname1, petList=(/0/), rc=rc)
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     cname2 = "Finite_Volume_Dynamical_Core"
-    ! use petList to define comp1 on PET 0,1,2,3
+    ! use petList to define comp2 on PET 0
     comp2 = ESMF_GridCompCreate(name=cname2, petList=(/0/), rc=rc)
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     cplname = "user coupler"
-    ! use petList to define comp1 on PET 0,1,2,3
+    ! use petList to define cplcomp on PET 0
     cplcomp = ESMF_CplCompCreate(name=cplname, petList=(/0/), rc=rc)
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   else
-    ! Create the 2 model components and coupler
+    ! Create the 2 model components and coupler on 6 PETs
     cname1 = "user model 1"
-    ! use petList to define comp1 on PET 0,1,2,3
+    ! use petList to define comp1 on PETs 0,1,2
     comp1 = ESMF_GridCompCreate(name=cname1, petList=(/0,1,2/), rc=rc)
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     cname2 = "Finite_Volume_Dynamical_Core"
-    ! use petList to define comp1 on PET 0,1,2,3
+    ! use petList to define comp2 on PETs 3,4,5
     comp2 = ESMF_GridCompCreate(name=cname2, petList=(/3,4,5/), rc=rc)
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     cplname = "user coupler"
-    ! use petList to define comp1 on PET 0,1,2,3
+    ! default petList defines cplcomp on all PETs 0,1,2,3,4,5
     cplcomp = ESMF_CplCompCreate(name=cplname, rc=rc)
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
@@ -222,7 +222,7 @@ program ESMF_AttributeSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  ! create the coupler with appropriate import and export states
+  ! initialize the coupler with appropriate import and export states
   call ESMF_CplCompInitialize(cplcomp, importState=c1exp, exportState=c2imp, &
     userRc=userrc, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
