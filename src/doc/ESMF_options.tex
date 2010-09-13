@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.38 2010/09/08 16:50:50 feiliu Exp $
+% $Id: ESMF_options.tex,v 1.39 2010/09/13 18:07:00 samsoncheung Exp $
 
 \section{Global Options, Flags and Parameters}
 
@@ -254,6 +254,19 @@ Valid values are:
       DE.
 \item [ESMF\_DECOMP\_RESTLAST]
       Divide elements over DEs. Assign the rest of this division to the last DE.
+\end{description}
+
+\subsubsection{ESMF\_IOFmtFlag}
+\label{opt:IOFmtFlag}
+{\sf DESCRIPTION:\\}
+Indicates IO format options that is currently supported.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_IOFMT\_BIN]
+      Binary format, such as those supported by MPI_IO.
+\item [ESMF\_IOFMT\_NETCDF]
+      NETCDF and PNETCDF format.
 \end{description}
 
 \subsubsection{ESMF\_IndexFlag}
