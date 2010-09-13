@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.18 2010/09/11 22:24:36 samsoncheung Exp $
+! $Id: ESMF_FieldPr.F90,v 1.19 2010/09/13 20:18:52 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -252,8 +252,8 @@ contains
 !     \item[append]
 !        Logical: if true, data is appended to an exist file, default is false.
 !     \item[iofmt]
-!        The PIO format. Please see Section~\ref{opt:} for the list of options.
-!        If not present, defaults to ESMF\_IOFMT\_NETCDF.
+!        The PIO format. Please see Section~\ref{opt:iofmtflag} for the list 
+!        of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !     \item [{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -342,8 +342,8 @@ contains
 !     \item[file]
 !       The name of the netcdf file in which array data is read from.
 !     \item[iofmt]
-!       The PIO format. Please see Section~\ref{opt:} for the list of options.
-!       If not present, defaults to ESMF\_IOFMT\_NETCDF.
+!       The PIO format. Please see Section~\ref{opt:iofmtflag} for the list 
+!       of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
