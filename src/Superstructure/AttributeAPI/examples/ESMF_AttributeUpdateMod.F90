@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.18 2010/08/25 05:50:43 eschwab Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.19 2010/09/13 05:50:47 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -439,7 +439,7 @@ module ESMF_AttributeUpdateMod
 
     ! Create the Grid Attribute Package
     call ESMF_AttributeAdd(grid,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'DimOrder','YX',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'DimensionOrder','YX',convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'GridType','Cubed sphere',convention=convESMF, purpose=purpGen, rc=status)    
     call ESMF_AttributeSet(grid,'CongruentTiles',.true.,convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'NorthPoleLocation','long: 0.0 lat: 90.0',convention=convESMF, purpose=purpGen, rc=status)

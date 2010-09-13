@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.51 2009/07/13 17:46:15 rokuingh Exp $
+! $Id: user_model1.F90,v 1.52 2010/09/13 05:50:47 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -126,10 +126,10 @@ module user_model1
     ! Initialize variables
     conv = 'ESMF'
     purp = 'General'
-    name1 = 'Name'
-    name2 = 'StandardName'
-    name3 = 'LongName'
-    name4 = 'Units'
+    name1 = 'VariableShortName'
+    name2 = 'VariableStandardName'
+    name3 = 'VariableLongName'
+    name4 = 'VariableUnits'
  
     ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'DPEDT'
@@ -283,22 +283,20 @@ module user_model1
       
     ! Create the Grid Attribute Package
     call ESMF_AttributeAdd(grid,convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'DimOrder','YX',convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(grid,'GridType','Cubed sphere',convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(grid,'CongruentTiles',.true.,convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'NorthPoleLocation','long: 0.0 lat: 90.0',convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'NumberOfCells','53457',convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'NumDims','2',convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'NX','96',convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'NY','96',convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'NZ','15',convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'Resolution','C48',convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(grid,'NumberOfGridTiles','1',convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(grid,'DimensionOrder','YX',convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(grid,'DiscretizationType','Logically rectangular',convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(grid,'GeometryType','Sphere',convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(grid,'IsConformal',.false.,convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(grid,'IsRegular',.false.,convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(grid,'IsUniform',.false.,convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'IsPoleCovered',.true.,convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'DiscretizationType','Logically rectangular',convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'GeometryType','Sphere',convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(grid,'NorthPoleLocation','long: 0.0 lat: 90.0',convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(grid,'NumberOfCells','53457',convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(grid,'NX','96',convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(grid,'NY','96',convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(grid,'Resolution','C48',convention=conv, purpose=purp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Create a FieldBundle for Fields
@@ -384,9 +382,9 @@ module user_model1
 
     conv = 'ESMF'
     purp = 'General'
-    name2 = 'StandardName'
+    name2 = 'VariableStandardName'
     value2 = 'DefaultStandardName'
-    name3 = 'LongName'
+    name3 = 'VariableLongName'
     
     purp2 = 'Extended'
     attrList(1) = 'Coordinates'

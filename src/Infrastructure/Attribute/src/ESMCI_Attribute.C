@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.68 2010/08/25 05:50:02 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.69 2010/09/13 05:50:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.68 2010/08/25 05:50:02 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.69 2010/09/13 05:50:47 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -234,7 +234,7 @@ namespace ESMCI {
       //localrc = AttPackAddAttribute("Area", "GridSpec", "General", object);
       //localrc = AttPackAddAttribute("CoordinatePoles", "GridSpec", "General", object);
 
-      localrc = AttPackAddAttribute("DimOrder", "GridSpec", "General", object);
+      localrc = AttPackAddAttribute("DimensionOrder", "GridSpec", "General", object);
       localrc = AttPackAddAttribute("DiscretizationType", "GridSpec", "General", object);
       localrc = AttPackAddAttribute("GeometryType", "GridSpec", "General", object);
       localrc = AttPackAddAttribute("IsConformal", "GridSpec", "General", object);
@@ -267,9 +267,9 @@ namespace ESMCI {
       localrc = AttPackCreateCustom("CF", "General", object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
-      localrc = AttPackAddAttribute("LongName", "CF", "General", object);
-      localrc = AttPackAddAttribute("Name", "CF", "General", object);
-      localrc = AttPackAddAttribute("Units", "CF", "General", object);
+      localrc = AttPackAddAttribute("VariableLongName", "CF", "General",object);
+      localrc = AttPackAddAttribute("VariableShortName", "CF", "General", object);
+      localrc = AttPackAddAttribute("VariableUnits", "CF", "General", object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
@@ -280,7 +280,7 @@ namespace ESMCI {
       localrc = AttPackNest("CF", "Extended", object, "CF", "General");
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
-      localrc = AttPackAddAttribute("StandardName", "CF", "Extended", object);
+      localrc = AttPackAddAttribute("VariableStandardName", "CF", "Extended", object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
@@ -289,8 +289,7 @@ namespace ESMCI {
       localrc = AttPackNest("ESG", "General", object, "CF", "Extended");
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
-      localrc = AttPackAddAttribute("Export", "ESG", "General", object);
-      localrc = AttPackAddAttribute("Import", "ESG", "General", object);
+      localrc = AttPackAddAttribute("VariableIntent", "ESG", "General", object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
@@ -331,10 +330,10 @@ namespace ESMCI {
     localrc = AttPackCreateCustom("ESMF", "General", object);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &localrc)) return localrc;
-    localrc = AttPackAddAttribute("Export", "ESMF", "General", object);
-    localrc = AttPackAddAttribute("Import", "ESMF", "General", object);
+    localrc = AttPackAddAttribute("StateIntent", "ESMF", "General", object);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &localrc)) return localrc;
+
   } else if (object.compare("comp")==0) {
   // Component standard Attribute packages
     if ((convention.compare("CF")==0  ||
@@ -353,16 +352,16 @@ namespace ESMCI {
       localrc = AttPackNest("ESG", "General", object, "CF", "General");
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
-      localrc = AttPackAddAttribute("Version", "ESG", "General", object);
-      localrc = AttPackAddAttribute("PhysicalDomain", "ESG", "General", object);
-      localrc = AttPackAddAttribute("Name", "ESG", "General", object);
-      localrc = AttPackAddAttribute("ModelComponentFramework", "ESG", "General", object);
-      localrc = AttPackAddAttribute("Institution", "ESG", "General", object);
-      localrc = AttPackAddAttribute("FullName", "ESG", "General", object);
-      localrc = AttPackAddAttribute("Discipline", "ESG", "General", object);
-      localrc = AttPackAddAttribute("CodingLanguage", "ESG", "General", object);
-      localrc = AttPackAddAttribute("Author", "ESG", "General", object);
       localrc = AttPackAddAttribute("Agency", "ESG", "General", object);
+      localrc = AttPackAddAttribute("Author", "ESG", "General", object);
+      localrc = AttPackAddAttribute("CodingLanguage", "ESG", "General", object);
+      localrc = AttPackAddAttribute("Discipline", "ESG", "General", object);
+      localrc = AttPackAddAttribute("FullName", "ESG", "General", object);
+      localrc = AttPackAddAttribute("Institution", "ESG", "General", object);
+      localrc = AttPackAddAttribute("ModelComponentFramework", "ESG", "General", object);
+      localrc = AttPackAddAttribute("Name", "ESG", "General", object);
+      localrc = AttPackAddAttribute("PhysicalDomain", "ESG", "General", object);
+      localrc = AttPackAddAttribute("Version", "ESG", "General", object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
@@ -495,7 +494,7 @@ namespace ESMCI {
                             "Platform Description", object);
       localrc = AttPackAddAttribute("MachineInterconnectType", "CIM 1.0",
                             "Platform Description", object);
-      localrc = AttPackAddAttribute("MachineMaxProcessors", "CIM 1.0",
+      localrc = AttPackAddAttribute("MachineMaximumProcessors", "CIM 1.0",
                             "Platform Description", object);
       localrc = AttPackAddAttribute("MachineCoresPerProcessor", "CIM 1.0",
                             "Platform Description", object);
@@ -5065,8 +5064,8 @@ namespace ESMCI {
                                    "value", value.c_str(), 5);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
   }
-  if (attpack->AttributeIsSet("MachineMaxProcessors")) {
-    localrc = attpack->AttributeGet("MachineMaxProcessors", &value);
+  if (attpack->AttributeIsSet("MachineMaximumProcessors")) {
+    localrc = attpack->AttributeGet("MachineMaximumProcessors", &value);
     localrc = io_xml->writeElement("machineMaximumProcessors", value, 5, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
   }
@@ -5364,8 +5363,8 @@ namespace ESMCI {
           localrc = io_xml->writeEndElement("reference", 6);
           localrc = io_xml->writeEndElement("couplingTarget", 5);
         }
-        if ((ap = attpack->AttPackGetAttribute("Name")) != NULL) {
-          localrc = ap->parent->AttributeGet("Name", &value);
+        if ((ap = attpack->AttPackGetAttribute("VariableShortName")) != NULL) {
+          localrc = ap->parent->AttributeGet("VariableShortName", &value);
           localrc = io_xml->writeStartElement("connection", "", 5, 0);
           localrc = io_xml->writeStartElement("connectionTarget", "", 6, 0);
           localrc = io_xml->writeStartElement("reference", "", 7, 0);

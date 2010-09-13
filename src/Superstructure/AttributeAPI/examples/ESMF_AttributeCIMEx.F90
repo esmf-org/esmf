@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.5 2010/08/01 05:34:10 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.6 2010/09/13 05:50:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeSet(cplcomp, 'MachineInterconnectType', &
        'Cray Interconnect', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'MachineMaxProcessors', &
+      call ESMF_AttributeSet(cplcomp, 'MachineMaximumProcessors', &
        '22656', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'MachineCoresPerProcessor', &

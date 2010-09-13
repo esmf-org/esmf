@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadFieldEx.F90,v 1.9 2010/06/29 21:55:28 svasquez Exp $
+! $Id: ESMF_AttReadFieldEx.F90,v 1.10 2010/09/13 05:50:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -91,8 +91,8 @@ program ESMF_AttReadFieldEx
 !print *, 'rc = ', rc
 
 !BOC
-      ! Get CF "Name" Attribute from a Field
-      call ESMF_AttributeGet(field, name='Name', value=attrValue, &
+      ! Get CF "VariableShortName" Attribute from a Field
+      call ESMF_AttributeGet(field, name='VariableShortName', value=attrValue, &
                              convention='CF', purpose='General', rc=rc)
 !EOC
 
@@ -102,8 +102,9 @@ program ESMF_AttReadFieldEx
 !print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get CF "StandardName" Attribute from a Field
-      call ESMF_AttributeGet(field, name='StandardName', value=attrValue, &
+      ! Get CF "VariableStandardName" Attribute from a Field
+      call ESMF_AttributeGet(field, name='VariableStandardName', &
+                             value=attrValue, &
                              convention='CF', purpose='Extended', rc=rc)
 !EOC
 
@@ -114,8 +115,8 @@ program ESMF_AttReadFieldEx
 !print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get CF "LongName" Attribute from a Field
-      call ESMF_AttributeGet(field, name='LongName', value=attrValue, &
+      ! Get CF "VariableLongName" Attribute from a Field
+      call ESMF_AttributeGet(field, name='VariableLongName', value=attrValue, &
                              convention='CF', purpose='General', rc=rc)
 !EOC
 
@@ -125,8 +126,8 @@ program ESMF_AttReadFieldEx
 !print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get CF "Units" Attribute from a Field
-      call ESMF_AttributeGet(field, name='Units', value=attrValue, &
+      ! Get CF "VariableUnits" Attribute from a Field
+      call ESMF_AttributeGet(field, name='VariableUnits', value=attrValue, &
                              convention='CF', purpose='General', rc=rc)
 !EOC
 

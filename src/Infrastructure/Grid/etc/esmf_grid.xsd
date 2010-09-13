@@ -16,7 +16,7 @@
                     <xsd:element name="GridType" type="xsd:string" minOccurs="0"/>
                     <xsd:element name="CongruentTiles" type="xsd:boolean" minOccurs="0"/>
                     <xsd:element name="NumberOfGridTiles" type="xsd:unsignedLong" minOccurs="0"/>
-                    <xsd:element name="DimOrder" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="DimensionOrder" type="xsd:string" minOccurs="0"/>
                     <xsd:element name="DiscretizationType" type="xsd:string" minOccurs="0"/>
                     <xsd:element name="GeometryType" type="xsd:string" minOccurs="0"/>
                     <xsd:element name="IsConformal" type="xsd:boolean" minOccurs="0"/>

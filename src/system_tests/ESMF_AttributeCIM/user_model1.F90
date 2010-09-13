@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1 2010/09/09 05:42:41 eschwab Exp $
+! $Id: user_model1.F90,v 1.2 2010/09/13 05:50:47 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -151,13 +151,13 @@ module user_model1
     if (rc .ne. ESMF_SUCCESS) return
 
     ! DMS_emi CF-Extended Attributes
-    call ESMF_AttributeSet(DMS_emi, 'Name', 'DMS_emi', &
+    call ESMF_AttributeSet(DMS_emi, 'VariableShortName', 'DMS_emi', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'StandardName', 'DMS_emissions', &
+    call ESMF_AttributeSet(DMS_emi, 'VariableStandardName', 'DMS_emissions', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'LongName', 'DMS emissions', &
+    call ESMF_AttributeSet(DMS_emi, 'VariableLongName', 'DMS emissions', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'Units', 'unknown', &
+    call ESMF_AttributeSet(DMS_emi, 'VariableUnits', 'unknown', &
         convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
@@ -185,7 +185,7 @@ module user_model1
     if (rc .ne. ESMF_SUCCESS) return
 
     ! UM CF-Extended Attributes
-    call ESMF_AttributeSet(UM, 'Name', 'UM_Initial_1960', &
+    call ESMF_AttributeSet(UM, 'VariableShortName', 'UM_Initial_1960', &
         convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 

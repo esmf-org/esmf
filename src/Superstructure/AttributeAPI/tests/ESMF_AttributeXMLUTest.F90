@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.4 2010/07/20 05:49:39 eschwab Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.5 2010/09/13 05:50:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.4 2010/07/20 05:49:39 eschwab Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.5 2010/09/13 05:50:47 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1026,7 +1026,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 4th <platform> attribute value within the CIM platform
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'MachineMaxProcessors', &
+    call ESMF_AttributeSet(gridcomp3, 'MachineMaximumProcessors', &
       '22656', &
                            convention='CIM 1.0', &
                            purpose='Platform Description', &
@@ -1271,7 +1271,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 1st <coupling> attribute value within the CIM field
     !   package
-    call ESMF_AttributeSet(field1, 'Name', 'DMS_emi', &
+    call ESMF_AttributeSet(field1, 'VariableShortName', 'DMS_emi', &
                            convention='CIM 1.0', &
                            purpose='Inputs Description', &
                            rc=rc)

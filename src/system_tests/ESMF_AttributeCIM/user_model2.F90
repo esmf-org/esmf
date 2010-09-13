@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.4 2010/09/11 05:13:12 eschwab Exp $
+! $Id: user_model2.F90,v 1.5 2010/09/13 05:50:47 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -151,13 +151,13 @@ module user_model2
     if (rc .ne. ESMF_SUCCESS) return
 
     ! OH CF-Extended Attributes
-    call ESMF_AttributeSet(OH, 'Name', 'OH_Conc_1900', &
+    call ESMF_AttributeSet(OH, 'VariableShortName', 'OH_Conc_1900', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(OH, 'StandardName', 'OH_Concentrations', &
+    call ESMF_AttributeSet(OH, 'VariableStandardName', 'OH_Concentrations', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(OH, 'LongName', 'seasonal_oxidant_conc', &
+    call ESMF_AttributeSet(OH, 'VariableLongName', 'seasonal_oxidant_conc', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(OH, 'Units', 'unknown', &
+    call ESMF_AttributeSet(OH, 'VariableUnits', 'unknown', &
         convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
@@ -184,13 +184,13 @@ module user_model2
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Orog CF-Extended Attributes
-    call ESMF_AttributeSet(Orog, 'Name', 'UM_Orog_n320', &
+    call ESMF_AttributeSet(Orog, 'VariableShortName', 'UM_Orog_n320', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(Orog, 'StandardName', 'Height', &
+    call ESMF_AttributeSet(Orog, 'VariableStandardName', 'Height', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(Orog, 'LongName', 'Orography', &
+    call ESMF_AttributeSet(Orog, 'VariableLongName', 'Orography', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(Orog, 'Units', 'unknown', &
+    call ESMF_AttributeSet(Orog, 'VariableUnits', 'unknown', &
         convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 

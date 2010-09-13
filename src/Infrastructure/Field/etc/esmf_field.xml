@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <variable>
   <attribute_package convention="CF" purpose="Extended">
-    <StandardName>tendency_of_air_pressure</StandardName>
-    <LongName>Edge pressure tendency</LongName>
-    <Name>DPEDT</Name> 
-    <Units>Pa s-1</Units>
+    <VariableStandardName>tendency_of_air_pressure</VariableStandardName>
+    <VariableLongName>Edge pressure tendency</VariableLongName>
+    <VariableShortName>DPEDT</VariableShortName> 
+    <VariableUnits>Pa s-1</VariableUnits>
   </attribute_package>
 </variable>

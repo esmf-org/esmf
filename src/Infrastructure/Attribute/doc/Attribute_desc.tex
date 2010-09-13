@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.40 2010/08/30 19:43:32 murphysj Exp $
+% $Id: Attribute_desc.tex,v 1.41 2010/09/13 05:50:47 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@ The ESMF Attribute Class was created with the long-term goal of enabling models 
 
 \subsubsection{ESMF's Approach to Attributes}
 
-ESMF's Approach to attributes can be summed up in the following:
+ESMF's Approach to attributes can be summarized as follows:
 
 \begin{itemize}
   \item Implement community standards where they exist
@@ -24,21 +24,21 @@ ESMF's Approach to attributes can be summed up in the following:
      \item CplComp
      \item GridComp
      \item DistGrid
-     \item FieldBundle
      \item Field
+     \item FieldBundle
      \item Grid
      \item State
      \end{itemize}
-  \item Establish pre-defined Attribute packages (see Section \ref{sec:AttPacks})to make Attribute creation easier for the user
-  \item Allow for user-defined Custom Attribute packages (see Section \ref{sec:CustomAttPacks})
-  \item Enable the nesting of Attribute packages (see Section \ref{sec:AttPackNesting}) including Custom packages
-  \item Enable complex Attribute heirarchies (see Section \ref{sec:AttHeir}
-  \item Export Attributes in more than one format (see Section \ref{sec:AttributeExports})
-  \item Ensure that all Attributes are consistent across the entire virtual machine of the object to which they are attached  
+  \item Establish pre-defined Attribute packages (see Section \ref{sec:AttPacks}) to make Attribute creation easier for the user.
+  \item Allow for user-defined Custom Attribute packages (see Section \ref{sec:CustomAttPacks}).
+  \item Enable the nesting of Attribute packages (see Section \ref{sec:AttPackNesting}) including Custom packages.
+  \item Enable complex Attribute heirarchies (see Section \ref{sec:AttHier}.
+  \item Export Attributes in more than one format (see Section \ref{sec:AttributeExports}).
+  \item Ensure that all Attributes are consistent across the entire virtual machine of the object to which they are attached.
 \end{itemize}
 
 \subsubsection{Attribute Hierarchies}
-\label{sec:AttHeir}
+\label{sec:AttHier}
 
 Of the ESMF objects with Attributes, only some can link their Attributes together in an Attribute hierarchy.  These objects are:
 
@@ -48,10 +48,9 @@ Of the ESMF objects with Attributes, only some can link their Attributes togethe
 \item State
 \item Field
 \item FieldBundle
-\item Array
 \item ArrayBundle
 \end{itemize}
 
-The most common use for this capability is for linking the Attributes of a Field to the FieldBundle which holds it, which is then linked to the State that is used to transport all of the data for a Component.  All of these links, with the exception of the link between the Component and the State, are automatically handled by ESMF. Additionally, the State will automatically set the {\it import} and {\it export} boolean valued Attributes that are part of the ESMF supplied standard Attribute package for Field when that Field is added to the State. 
+The most common use for this capability is for linking the Attributes of a Field to the FieldBundle which holds it, which is then linked to the State that is used to transport all of the data for a Component.  All of these links, with the exception of the link between the Component and the State, are automatically handled by ESMF. Additionally, the State will automatically set the {\it VariableIntent} Attribute that is part of the ESMF supplied standard Attribute package for Field when that Field is added to the State.  {\tt VariableIntent} will be set to either {\tt Export} or {\tt Import}.
 
 Attribute hierarchies are linked in a "shallow" manner, meaning that the Attributes belonging to an external object are not copied, they are merely referenced by a pointer.  This is important to ensure that the Attribute hierarchy has a one-to-one correspondence with the object hierarchy.  

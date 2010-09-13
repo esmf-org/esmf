@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridEx.F90,v 1.10 2010/08/25 05:50:43 eschwab Exp $
+! $Id: ESMF_AttReadGridEx.F90,v 1.11 2010/09/13 05:50:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -126,8 +126,8 @@ program ESMF_AttReadGridEx
 !print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "DimOrder" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='DimOrder', value=attrValue, &
+      ! Get GridSpec "DimensionOrder" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='DimensionOrder', value=attrValue, &
                              convention='GridSpec', purpose='General', rc=rc)
 !EOC
 

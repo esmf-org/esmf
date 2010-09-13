@@ -196,7 +196,7 @@ module user_coupler
     call ESMF_AttributeSet(comp, 'MachineInterconnectType', &
       'Cray Interconnect', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
-    call ESMF_AttributeSet(comp, 'MachineMaxProcessors', &
+    call ESMF_AttributeSet(comp, 'MachineMaximumProcessors', &
       '22656', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
     call ESMF_AttributeSet(comp, 'MachineCoresPerProcessor', &

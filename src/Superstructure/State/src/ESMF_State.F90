@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.195 2010/08/27 04:38:02 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.196 2010/09/13 05:50:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.195 2010/08/27 04:38:02 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.196 2010/09/13 05:50:47 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -274,8 +274,7 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
       type(ESMF_Array) :: temp_list(1)
-      character(ESMF_MAXSTR) :: lobject, lname1, lname2
-      type(ESMF_Logical) :: lvalue1, lvalue2
+      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
       integer :: localrc
 
       ! check input variables
@@ -305,23 +304,18 @@ module ESMF_StateMod
 
       ! set the import and export Attributes on any Field connected to this State
       lobject = 'array'
-      lvalue1 = .true.
-      lvalue2 = .false.
-      lname1 = 'Import'
-      lname2 = 'Export'
+      lvalue1 = 'Import' 
+      lvalue2 = 'Export'
+      lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -371,8 +365,7 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
       type(ESMF_Array) :: temp_list(1)
-      character(ESMF_MAXSTR) :: lobject, lname1, lname2
-      type(ESMF_Logical) :: lvalue1, lvalue2
+      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
       integer :: localrc
 
       ! check input variables
@@ -403,23 +396,18 @@ module ESMF_StateMod
 
       ! set the import and export Attributes on any Field connected to this State
       lobject = 'array'
-      lvalue1 = .true.
-      lvalue2 = .false.
-      lname1 = 'Import'
-      lname2 = 'Export'
+      lvalue1 = 'Import' 
+      lvalue2 = 'Export'
+      lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -466,8 +454,7 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
       type(ESMF_ArrayBundle) :: temp_list(1)
-      character(ESMF_MAXSTR) :: lobject, lname1, lname2
-      type(ESMF_Logical) :: lvalue1, lvalue2
+      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
       integer :: localrc
 
       ! check input variables
@@ -498,23 +485,18 @@ module ESMF_StateMod
 
       ! set the import and export Attributes on any Array connected to this State
       lobject = 'array'
-      lvalue1 = .true.
-      lvalue2 = .false.
-      lname1 = 'Import'
-      lname2 = 'Export'
+      lvalue1 = 'Import' 
+      lvalue2 = 'Export'
+      lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -564,8 +546,7 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
       type(ESMF_ArrayBundle) :: temp_list(1)
-      character(ESMF_MAXSTR) :: lobject, lname1, lname2
-      type(ESMF_Logical) :: lvalue1, lvalue2
+      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
       integer :: localrc
 
       ! check input variables
@@ -596,23 +577,18 @@ module ESMF_StateMod
 
       ! set the import and export Attributes on any Array connected to this State
       lobject = 'array'
-      lvalue1 = .true.
-      lvalue2 = .false.
-      lname1 = 'Import'
-      lname2 = 'Export'
+      lvalue1 = 'Import' 
+      lvalue2 = 'Export'
+      lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -662,8 +638,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
       integer :: localrc
       type(ESMF_Field) :: temp_list(1)
-      character(ESMF_MAXSTR) :: lobject, lname1, lname2
-      type(ESMF_Logical) :: lvalue1, lvalue2
+      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -691,23 +666,18 @@ module ESMF_StateMod
 
       ! set the import and export Attributes on any Field connected to this State
       lobject = 'field'
-      lvalue1 = .true.
-      lvalue2 = .false.
-      lname1 = 'Import'
-      lname2 = 'Export'
+      lvalue1 = 'Import' 
+      lvalue2 = 'Export'
+      lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -760,8 +730,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
       integer :: localrc
       type(ESMF_Field) :: temp_list(1)
-      character(ESMF_MAXSTR) :: lobject, lname1, lname2
-      type(ESMF_Logical) :: lvalue1, lvalue2
+      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -790,23 +759,18 @@ module ESMF_StateMod
 
       ! set the import and export Attributes on any Field connected to this State
       lobject = 'field'
-      lvalue1 = .true.
-      lvalue2 = .false.
-      lname1 = 'Import'
-      lname2 = 'Export'
+      lvalue1 = 'Import' 
+      lvalue2 = 'Export'
+      lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -857,8 +821,7 @@ module ESMF_StateMod
 
       integer :: localrc
       type(ESMF_FieldBundle) :: temp_list(1)
-      character(ESMF_MAXSTR) :: lobject, lname1, lname2
-      type(ESMF_Logical) :: lvalue1, lvalue2
+      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -888,23 +851,18 @@ module ESMF_StateMod
 
       ! set the import and export Attributes on any Field connected to this State
       lobject = 'field'
-      lvalue1 = .true.
-      lvalue2 = .false.
-      lname1 = 'Import'
-      lname2 = 'Export'
+      lvalue1 = 'Import' 
+      lvalue2 = 'Export'
+      lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -958,8 +916,7 @@ module ESMF_StateMod
 
       integer :: localrc
       type(ESMF_FieldBundle) :: temp_list(1)
-      character(ESMF_MAXSTR) :: lobject, lname1, lname2
-      type(ESMF_Logical) :: lvalue1, lvalue2
+      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -989,23 +946,18 @@ module ESMF_StateMod
 
       ! set the import and export Attributes on any Field connected to this State
       lobject = 'field'
-      lvalue1 = .true.
-      lvalue2 = .false.
-      lname1 = 'Import'
-      lname2 = 'Export'
+      lvalue1 = 'Import' 
+      lvalue2 = 'Export'
+      lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1182,8 +1134,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
       integer :: localrc
       type(ESMF_State) :: temp_list(1)
-      character(ESMF_MAXSTR) :: lobject, lname1, lname2
-      type(ESMF_Logical) :: lvalue1, lvalue2
+      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1212,23 +1163,18 @@ module ESMF_StateMod
 
       ! set the import and export Attributes on any Field connected to this State
       lobject = 'field'
-      lvalue1 = .true.
-      lvalue2 = .false.
-      lname1 = 'Import'
-      lname2 = 'Export'
+      lvalue1 = 'Import' 
+      lvalue2 = 'Export'
+      lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1282,8 +1228,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
       integer :: localrc
       type(ESMF_State) :: temp_list(1)
-      character(ESMF_MAXSTR) :: lobject, lname1, lname2
-      type(ESMF_Logical) :: lvalue1, lvalue2
+      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1313,23 +1258,18 @@ module ESMF_StateMod
 
       ! set the import and export Attributes on any Field connected to this State
       lobject = 'field'
-      lvalue1 = .true.
-      lvalue2 = .false.
-      lname1 = 'Import'
-      lname2 = 'Export'
+      lvalue1 = 'Import' 
+      lvalue2 = 'Export'
+      lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1427,8 +1367,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
       integer :: localrc, i
       integer :: countOpt
-      character(ESMF_MAXSTR) :: lobject, lname1, lname2
-      type(ESMF_Logical) :: lvalue1, lvalue2
+      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1479,23 +1418,18 @@ module ESMF_StateMod
 
       ! set the import and export Attributes on any Field connected to this State
       lobject = 'array'
-      lvalue1 = .true.
-      lvalue2 = .false.
-      lname1 = 'Import'
-      lname2 = 'Export'
+      lvalue1 = 'Import' 
+      lvalue2 = 'Export'
+      lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1547,8 +1481,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
       integer :: localrc, i
       integer :: countOpt
-      character(ESMF_MAXSTR) :: lobject, lname1, lname2
-      type(ESMF_Logical) :: lvalue1, lvalue2
+      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1599,23 +1532,18 @@ module ESMF_StateMod
 
       ! set the import and export Attributes on any Field connected to this State
       lobject = 'array'
-      lvalue1 = .true.
-      lvalue2 = .false.
-      lname1 = 'Import'
-      lname2 = 'Export'
+      lvalue1 = 'Import' 
+      lvalue2 = 'Export'
+      lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1664,8 +1592,7 @@ module ESMF_StateMod
 !
 !EOPI
       integer :: localrc,i
-      character(ESMF_MAXSTR) :: lobject, lname1, lname2
-      type(ESMF_Logical) :: lvalue1, lvalue2
+      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1697,23 +1624,18 @@ module ESMF_StateMod
 
       ! set the import and export Attributes on any Field connected to this State
       lobject = 'field'
-      lvalue1 = .true.
-      lvalue2 = .false.
-      lname1 = 'Import'
-      lname2 = 'Export'
+      lvalue1 = 'Import' 
+      lvalue2 = 'Export'
+      lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1762,8 +1684,7 @@ module ESMF_StateMod
 !
 !EOPI
       integer :: localrc,i
-      character(ESMF_MAXSTR) :: lobject, lname1, lname2
-      type(ESMF_Logical) :: lvalue1, lvalue2
+      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1796,23 +1717,18 @@ module ESMF_StateMod
 
       ! set the import and export Attributes on any Field connected to this State
       lobject = 'field'
-      lvalue1 = .true.
-      lvalue2 = .false.
-      lname1 = 'Import'
-      lname2 = 'Export'
+      lvalue1 = 'Import' 
+      lvalue2 = 'Export'
+      lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1997,8 +1913,7 @@ module ESMF_StateMod
 !
 !EOPI
       integer :: localrc,i
-      character(ESMF_MAXSTR) :: lobject, lname1, lname2
-      type(ESMF_Logical) :: lvalue1, lvalue2
+      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -2031,23 +1946,18 @@ module ESMF_StateMod
 
       ! set the import and export Attributes on any Field connected to this State
       lobject = 'field'
-      lvalue1 = .true.
-      lvalue2 = .false.
-      lname1 = 'Import'
-      lname2 = 'Export'
+      lvalue1 = 'Import' 
+      lvalue2 = 'Export'
+      lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
+          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return

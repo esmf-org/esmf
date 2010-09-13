@@ -5,7 +5,7 @@
       <GridType>cubed sphere</GridType>
       <CongruentTiles>true</CongruentTiles>
       <NumberOfGridTiles>1</NumberOfGridTiles>
-      <DimOrder>YX</DimOrder>
+      <DimensionOrder>YX</DimensionOrder>
       <DiscretizationType>logically_rectangular</DiscretizationType>
       <GeometryType>sphere</GeometryType>
       <IsConformal>false</IsConformal>
