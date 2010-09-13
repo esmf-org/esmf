@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGrid_F.C,v 1.1 2010/07/16 14:15:08 feiliu Exp $
+// $Id: ESMCI_XGrid_F.C,v 1.2 2010/09/13 16:11:28 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_XGrid_F.C,v 1.1 2010/07/16 14:15:08 feiliu Exp $";
+             "$Id: ESMCI_XGrid_F.C,v 1.2 2010/09/13 16:11:28 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -43,36 +43,61 @@ extern "C" {
 
 // non-method functions
 void FTN(c_esmc_xgridserialize)(
+                int * s, int * cellCount, int * dimCount, 
+                double * area, double * centroid, 
                 char *buffer, int *length, int *offset,
                 ESMC_InquireFlag *inquireflag, int *localrc,
                 ESMCI_FortranStrLenArg buf_l){
 
     ESMC_InquireFlag linquireflag = *inquireflag;
-    int i;
+    int i, padding;
  
     // Initialize return code; assume routine not implemented
     if (localrc) *localrc = ESMC_RC_NOT_IMPL;
-    // either put the code here, or call into a real C++ function
-    ESMC_Status *sp;
 
-    // TODO: verify length > 4 status vars, and if not, make room.
-    int fixedpart = 4 * sizeof(int *) + sizeof(int) + 5 * ESMF_MAXDIM * sizeof(int);
-    if ((*inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < fixedpart) {
-         
-         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                            "Buffer too short to add a XGrid object", localrc);
-         return;
- 
-        //buffer = (char *)realloc((void *)buffer,
-        //                         *length + 2*fixedpart + byte_count);
-        //*length += 2 * fixedpart;
+    char * ptr = (char *)(buffer + *offset);
+
+#define SSIZE 10
+    if (linquireflag != ESMF_INQUIREONLY)
+      memcpy((void *)ptr, (const void *)s, SSIZE*sizeof(int));
+    ptr += SSIZE*sizeof(int);
+#undef SSIZE
+    if (linquireflag != ESMF_INQUIREONLY)
+      memcpy((void *)ptr, (const void *)cellCount, sizeof(int));
+    ptr += sizeof(int);
+    if (linquireflag != ESMF_INQUIREONLY)
+      memcpy((void *)ptr, (const void *)dimCount, sizeof(int));
+    ptr += sizeof(int);
+
+#define AREA_IDX 4
+#define CENTROID_IDX 5
+    // realign
+    *offset = ptr - buffer;
+    padding = (*offset)%8;
+    if(padding) (*offset) += 8-padding;
+    ptr = (char *)(buffer + *offset);
+    if(s[AREA_IDX]){
+       if (linquireflag != ESMF_INQUIREONLY)
+          memcpy(reinterpret_cast<void *>(ptr), reinterpret_cast<const void *>(area), *cellCount*sizeof(double));
+       ptr += *cellCount*sizeof(double);
     }
 
-
-    sp = (ESMC_Status *)(buffer + *offset);
-    char * ptr = (char *)sp;
-
     *offset = ptr - buffer;
+    padding = (*offset)%8;
+    if(padding) (*offset) += 8-padding;
+    ptr = (char *)(buffer + *offset);
+    if(s[CENTROID_IDX]){
+       if (linquireflag != ESMF_INQUIREONLY)
+          memcpy((void *)ptr, (const void *)centroid, *cellCount*(*dimCount)*sizeof(double));
+       ptr += *cellCount*(*dimCount)*sizeof(double);
+    }
+#undef AREA_IDX 
+#undef CENTROID_IDX
+
+    // realign again
+    *offset = ptr - buffer;
+    padding = (*offset)%8;
+    if(padding) (*offset) += 8-padding;
 
     if (localrc) *localrc = ESMF_SUCCESS;
 
@@ -101,5 +126,51 @@ void FTN(c_esmc_xgriddeserialize)(
     return;
 } 
 
+// non-method functions
+void FTN(c_esmc_smmspecserialize)(
+                int * cellCount, 
+                int * indices, double * weights, 
+                char *buffer, int *length, int *offset,
+                ESMC_InquireFlag *inquireflag, int *localrc,
+                ESMCI_FortranStrLenArg buf_l){
+
+    ESMC_InquireFlag linquireflag = *inquireflag;
+    int i, padding;
+ 
+    // Initialize return code; assume routine not implemented
+    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+
+    char * ptr = (char *)(buffer + *offset);
+
+    if (linquireflag != ESMF_INQUIREONLY)
+      memcpy((void *)ptr, (const void *)cellCount, sizeof(int));
+    ptr += sizeof(int);
+
+    // realign
+    *offset = ptr - buffer;
+    padding = (*offset)%8;
+    if(padding) (*offset) += 8-padding;
+    ptr = (char *)(buffer + *offset);
+    if (linquireflag != ESMF_INQUIREONLY)
+       memcpy(reinterpret_cast<void *>(ptr), reinterpret_cast<const void *>(indices), *cellCount*2*sizeof(int));
+    ptr += *cellCount*2*sizeof(int);
+
+    *offset = ptr - buffer;
+    padding = (*offset)%8;
+    if(padding) (*offset) += 8-padding;
+    ptr = (char *)(buffer + *offset);
+    if (linquireflag != ESMF_INQUIREONLY)
+       memcpy((void *)ptr, (const void *)weights, *cellCount*sizeof(double));
+    ptr += *cellCount*sizeof(double);
+
+    // realign again
+    *offset = ptr - buffer;
+    padding = (*offset)%8;
+    if(padding) (*offset) += 8-padding;
+
+    if (localrc) *localrc = ESMF_SUCCESS;
+
+    return;
+} 
 
 }

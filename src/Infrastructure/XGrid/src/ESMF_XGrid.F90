@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.9 2010/09/07 16:40:29 feiliu Exp $
+! $Id: ESMF_XGrid.F90,v 1.10 2010/09/13 16:11:29 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -17,8 +17,8 @@ module ESMF_XGridMod
 !
 !==============================================================================
 !
-! This file contains the XGrid class definition and all XGrid
-! class method.
+! This file contains the XGrid class definition and base XGrid
+! class methods.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -40,7 +40,7 @@ module ESMF_XGridMod
 ! it's critical that the fluxes transferred by the boundary layer are
 ! conservative.   
 !
-! This type is implemented in Fortran 90.
+! The XGrid type is implemented in Fortran 90.
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -62,6 +62,7 @@ module ESMF_XGridMod
 ! ! ESMF_XGridType
 ! ! Definition of the XGrid class.
 
+  ! defines the side relative to an XGrid, SIDEA, SIDEB, or BALANCED
   type ESMF_XGridSide
     sequence
     integer                     :: side
@@ -72,19 +73,21 @@ module ESMF_XGridMod
     ESMF_XGRID_SIDEB=ESMF_XGridSide(1), &
     ESMF_XGRID_BALANCED=ESMF_XGridSide(2)
 
+  ! package the collapsed indicies and weights matrices
   type ESMF_XGridSpec
     sequence
-    integer, pointer            :: factorIndexList(:,:)     ! factorIndexList
-    real(ESMF_KIND_R8), pointer :: factorList(:)  ! factorList
+    integer, pointer            :: factorIndexList(:,:) => null()     ! factorIndexList
+    real(ESMF_KIND_R8), pointer :: factorList(:) => null()  ! factorList
   end type ESMF_XGridSpec
 
+  ! the XGridType definition
   type ESMF_XGridType
     sequence
     type (ESMF_Base)                       :: base                    ! base class object
+    type (ESMF_DistGrid)                   :: distgridM               ! load balanced distgrid in the middle
     type (ESMF_DistGrid), pointer          :: distgridA(:)            ! A side distgrid
     type (ESMF_DistGrid), pointer          :: distgridB(:)            ! B side distgrid
-    type (ESMF_DistGrid)                   :: distgridM               ! load balanced distgrid in the middle
-    type (ESMF_Grid), pointer              :: sideA(:), sideB(:)      ! ??? geometric types ???
+    type (ESMF_Grid), pointer              :: sideA(:), sideB(:)      ! geometric types
     real(ESMF_KIND_R8), pointer            :: area(:), centroid(:,:)  ! area and centroids of xgrid
     type(ESMF_XGridSpec), pointer          :: sparseMatA2X(:), sparseMatX2A(:) ! descriptors of mapping sparsemat
     type(ESMF_XGridSpec), pointer          :: sparseMatB2X(:), sparseMatX2B(:)
@@ -136,7 +139,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.9 2010/09/07 16:40:29 feiliu Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.10 2010/09/13 16:11:29 feiliu Exp $'
 
 !==============================================================================
 !
@@ -499,10 +502,12 @@ contains
 !
 !EOPI
 
-      integer :: localrc
+      integer :: localrc, ngridA, ngridB, i
       type(ESMF_XGridType), pointer :: fp    ! xgrid type
       type(ESMF_AttReconcileFlag) :: lattreconflag
       type(ESMF_InquireFlag) :: linquireflag
+      integer :: s(10)               ! association status variables
+      integer :: cellCount, dimCount ! for area and centroid
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -533,20 +538,130 @@ contains
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_XGridSerialize(fp%status, &
+      ! serialize the distgrids
+      call C_ESMC_DistGridSerialize(fp%distgridM, buffer(1), length, offset, &
+                                   lattreconflag, linquireflag, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                               ESMF_ERR_PASSTHRU, &
+                               ESMF_CONTEXT, rc)) return
+
+      ! set up the association status array
+      s = 0
+      cellCount = 0
+      dimCount = 0
+      if(associated(fp%distgridA)) s(1) = 1
+      if(associated(fp%distgridB)) s(2) = 1
+      if(associated(fp%sideA)) s(3) = 1
+      if(associated(fp%sideB)) s(4) = 1
+      if(associated(fp%area)) then
+        s(5) = 1
+        cellCount = size(fp%area, 1)
+      endif
+      if(associated(fp%centroid)) then
+        s(6) = 1
+        dimCount = size(fp%centroid, 2) ! manifold dimension count
+      endif
+      if(associated(fp%sparseMatA2X)) s(7) = 1
+      if(associated(fp%sparseMatX2A)) s(8) = 1
+      if(associated(fp%sparseMatB2X)) s(9) = 1
+      if(associated(fp%sparseMatX2B)) s(10) = 1
+
+
+      ! call into the C api first to serialize this status array and other meta-data
+      ! this ensures consistency when deserialization
+      call c_ESMC_XGridSerialize(s, cellCount, dimCount, fp%area, fp%centroid, &
                                  buffer(1), length, offset, linquireflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
+      ! serialize the rest of the XGrid members
+      ngridA = size(fp%distgridA,1)
+      do i = 1, ngridA
+        call C_ESMC_DistGridSerialize(fp%distgridA(i), buffer(1), length, offset, &
+                                     lattreconflag, linquireflag, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+      enddo
 
-      !if (fp%gridstatus .eq. ESMF_STATUS_READY) then
-      !  call ESMF_GeomBaseSerialize(fp%geombase, buffer, length, offset, &
-      !                              lattreconflag, linquireflag, localrc)
-      !  if (ESMF_LogMsgFoundError(localrc, &
-      !                               ESMF_ERR_PASSTHRU, &
-      !                               ESMF_CONTEXT, rc)) return
-      !endif
+      ngridB = size(fp%distgridB,1)
+      do i = 1, ngridB
+        call C_ESMC_DistGridSerialize(fp%distgridB(i), buffer(1), length, offset, &
+                                     lattreconflag, linquireflag, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+      enddo
+
+      ! serialize the Grids
+      ngridA = size(fp%sideA,1)
+      do i = 1, ngridA
+        call ESMF_GridSerialize(grid=fp%sideA(i), buffer=buffer, &
+                     length=length, offset=offset, &
+                     attreconflag=lattreconflag, inquireflag=linquireflag, &
+                     rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+      enddo
+      ngridB = size(fp%sideB,1)
+      do i = 1, ngridB
+        call ESMF_GridSerialize(grid=fp%sideB(i), buffer=buffer, &
+                     length=length, offset=offset, &
+                     attreconflag=lattreconflag, inquireflag=linquireflag, &
+                     rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+      enddo
+
+      ! serialize the SparseMatSpec objects
+      if(associated(fp%sparseMatA2X)) then
+          do i = 1, size(fp%sparseMatA2X, 1)
+              call c_ESMC_SMMSpecSerialize(size(fp%sparseMatA2X(i)%factorList, 1), &
+                 fp%sparseMatA2X(i)%factorIndexList, &
+                 fp%sparseMatA2X(i)%factorList, &
+                 buffer(1), length, offset, linquireflag, localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                 ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rc)) return
+          enddo
+      endif
+      if(associated(fp%sparseMatX2A)) then
+          do i = 1, size(fp%sparseMatX2A, 1)
+              call c_ESMC_SMMSpecSerialize(size(fp%sparseMatX2A(i)%factorList, 1), &
+                 fp%sparseMatX2A(i)%factorIndexList, &
+                 fp%sparseMatX2A(i)%factorList, &
+                 buffer(1), length, offset, linquireflag, localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                 ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rc)) return
+          enddo
+      endif
+      if(associated(fp%sparseMatB2X)) then
+          do i = 1, size(fp%sparseMatB2X, 1)
+              call c_ESMC_SMMSpecSerialize(size(fp%sparseMatB2X(i)%factorList, 1), &
+                 fp%sparseMatB2X(i)%factorIndexList, &
+                 fp%sparseMatB2X(i)%factorList, &
+                 buffer(1), length, offset, linquireflag, localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                 ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rc)) return
+          enddo
+      endif
+      if(associated(fp%sparseMatX2B)) then
+          do i = 1, size(fp%sparseMatX2B, 1)
+              call c_ESMC_SMMSpecSerialize(size(fp%sparseMatX2B(i)%factorList, 1), &
+                 fp%sparseMatX2B(i)%factorIndexList, &
+                 fp%sparseMatX2B(i)%factorList, &
+                 buffer(1), length, offset, linquireflag, localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                 ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rc)) return
+          enddo
+      endif
+
 
       if  (present(rc)) rc = ESMF_SUCCESS
 
