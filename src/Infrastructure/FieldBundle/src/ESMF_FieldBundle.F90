@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.45 2010/09/13 23:45:44 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.46 2010/09/14 05:56:23 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -810,7 +810,7 @@ end function
 
           !  link the Attribute hierarchies
           linkChange = ESMF_TRUE
-          call c_ESMC_AttributeLink(btypep%base, grid, status)
+          call c_ESMC_AttributeLink(btypep%base, grid, linkChange, status)
           if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -2128,7 +2128,7 @@ end function
 
       !  link the Attribute hierarchies
       linkChange = ESMF_TRUE
-      call c_ESMC_AttributeLink(btype%base, grid, status)
+      call c_ESMC_AttributeLink(btype%base, grid, linkChange, status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
