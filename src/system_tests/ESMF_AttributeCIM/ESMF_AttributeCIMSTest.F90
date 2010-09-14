@@ -247,24 +247,6 @@ program ESMF_AttributeCIMSTest
     
   ! Attribute-specific initialization
 
-  if (petCount .eq. 6) then
-    ! call AttributeUpdate to get a VM wide view of the
-    ! metadata set on comp1 in comp1initialize
-    call ESMF_AttributeUpdate(comp1, vm, rootList=(/0,1,2/), rc=rc)
-    if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) &
-      call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-
-    ! now call AttributeUpdate to get a VM wide view of the
-    ! metadata set on comp2 in comp1initialize
-    call ESMF_AttributeUpdate(comp2, vm, rootList=(/3,4,5/), rc=rc)
-    if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) &
-      call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  !else
-    ! uni-processor mode -- ESMF_AttributeUpdate() not necessary
-  endif
-
   ! reconcile comp2's export State to get comp2's Field Attributes onto
   ! PETs 0,1,2, from PETs 3,4,5, since Coupler is setup one way,
   ! comp1 -> comp2, rather than vice versa, comp2 -> comp1. So cannot put in
@@ -301,6 +283,24 @@ program ESMF_AttributeCIMSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   
+  if (petCount .eq. 6) then
+    ! call AttributeUpdate to get a VM wide view of the
+    ! metadata set on comp1 in comp1initialize
+    call ESMF_AttributeUpdate(comp1, vm, rootList=(/0,1,2/), rc=rc)
+    if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+
+    ! now call AttributeUpdate to get a VM wide view of the
+    ! metadata set on comp2 in comp1initialize
+    call ESMF_AttributeUpdate(comp2, vm, rootList=(/3,4,5/), rc=rc)
+    if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  !else
+    ! uni-processor mode -- ESMF_AttributeUpdate() not necessary
+  endif
+
   ! write the Attribute info in CIM XML format for the Coupler, both Components,
   ! and their Fields
   conv = 'CIM 1.0'
