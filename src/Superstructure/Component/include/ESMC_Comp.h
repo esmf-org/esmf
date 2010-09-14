@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.52 2010/09/14 23:31:08 svasquez Exp $
+// $Id: ESMC_Comp.h,v 1.53 2010/09/14 23:57:30 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@ enum ESMC_Method { ESMF_SETINIT=1, ESMF_SETRUN, ESMF_SETFINAL,
 typedef void* ESMC_GridComp;
 
 // Class API
-iiiiiiiiii
+
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_GridComp - Create a Gridded Component
@@ -154,8 +154,7 @@ int ESMC_GridCompSetEntryPoint(
   ESMC_State,                           // in	must not be optional
   ESMC_State,                           // in	must not be optional
   ESMC_Clock *,                         // in	must not be optional
-  int *                                 // in   must not be optional
-  ),
+  int *),                               // in   must not be optional
   int phase                             // in
 );
 //
@@ -185,7 +184,7 @@ int ESMC_GridCompSetEntryPoint(
 // !INTERFACE:
 int ESMC_GridCompInitialize(
   ESMC_GridComp comp,           // in
-  ESMC_State importState        // in
+  ESMC_State importState,        // in
   ESMC_State exportState,       // in 
   ESMC_Clock clock,             // in
   int phase,                    // in
@@ -276,22 +275,23 @@ int ESMC_GridCompFinalize(
 //  \item[comp]
 //  {\tt ESMC\_GridComp} to call finalize routine for.
 //  \item[importState]
-//  {\tt ESMC\_State} containing import data for coupling. If not present, a dummy argument will be passed to the user-supp
-lied routine. The importState argument in the user code cannot be optional.
+//  {\tt ESMC\_State} containing import data for coupling. If not present, a dummy argument will be passed to the 
+//  user-supp lied routine. The importState argument in the user code cannot be optional.
 //  \item[exportState]
-//   {\tt ESMC\_State} containing export data for coupling. If not present, a dummy argument will be passed to the user-sup
-plied routine. The exportState argument in the user code cannot be optional.
+//   {\tt ESMC\_State} containing export data for coupling. If not present, a dummy argument will be passed to the 
+//   user-supplied routine. The exportState argument in the user code cannot be optional.
 //   \item[clock]
-//   External {\tt ESMC\_Clock} for passing in time information. This is generally the parent component's clock, and will b
-e treated as read-only by the child component. The child component can maintain a private clock for its own internal time c
-omputations. If not present, a dummy argument will be passed to the user-supplied routine. The clock argument in the user c
-ode cannot be optional.
+//   External {\tt ESMC\_Clock} for passing in time information. This is generally the parent component's clock, 
+//   and will b e treated as read-only by the child component. The child component can maintain a private clock 
+//   for its own internal time computations. If not present, a dummy argument will be passed to the user-supplied 
+//   routine. The clock argument in the user c ode cannot be optional.
 //  \item[phase]
-//   Component providers must document whether their each of their routines are {\tt single-phase} or {\tt multi-phase}. Si
-ngle-phase routines require only one invocation to complete their work. Multi-phase routines provide multiple subroutines t
-o accomplish the work, accomodating components which must complete part of their work, return to the caller and allow other
- processing to occur, and then continue the original operation. For multiple-phase child components, this is the integer ph
-ase number to be invoked. For single-phase child components this argument is optional. The default is 1.
+//   Component providers must document whether their each of their routines are {\tt single-phase} or {\tt multi-phase}. 
+//   Si ngle-phase routines require only one invocation to complete their work. Multi-phase routines provide 
+//   multiple subroutines to accomplish the work, accomodating components which must complete part of their work, 
+//   return to the caller and allow other processing to occur, and then continue the original operation. For 
+//   multiple-phase child components, this is the integer phase number to be invoked. For single-phase child 
+//   components this argument is optional. The default is 1.
 //  \item[userRc]
 //  Return code set by {\tt userRoutine} before returning.
 //  \end{description}
