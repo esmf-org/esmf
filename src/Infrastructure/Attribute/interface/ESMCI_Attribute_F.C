@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.34 2010/09/13 23:45:44 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.35 2010/09/14 05:51:54 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.34 2010/09/13 23:45:44 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.35 2010/09/14 05:51:54 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -3540,6 +3540,68 @@ extern "C" {
 
 }  // end c_ESMC_AttributeSetValue
 
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeSetObjsCharInTree - Set a Char Attribute on all
+//                                           objects in an Attribute hierarchy
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributesetobjscharintree)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributesetobjscharintree()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *object,             // in - F90, object of the Attribute
+      char *name,               // in - F90, non-null terminated string
+      char *value,              // in - value
+      int *rc,                  // in - return code
+      ESMCI_FortranStrLenArg olen, // hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg nlen, // hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg vlen) { // hidden/in - strlen count for value
+// 
+// !DESCRIPTION:
+//     Change the Attribute values for Attribute <name> on all <object>s.
+//
+//EOP
+
+  ESMC_TypeKind tk;
+  int count, status;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if ((!value) || (vlen <= 0) || (value[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute character string value", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  string cvalue(value, vlen);
+  cvalue.resize(cvalue.find_last_not_of(" ")+1);
+
+  if (cvalue.empty()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute character string value conversion",
+                          &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // Re-use c_ESMC_AttributeSetObjsInTree() to set the attribute on the object.
+  tk = ESMC_TYPEKIND_CHARACTER;
+  count = 1;
+  FTN(c_esmc_attributesetobjsintree)(base, object, name, 
+      &tk, &count, (void *)&cvalue, &status, olen, nlen); 
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc));
+
+}  // end c_ESMC_AttributeSetObjsCharInTree
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  c_ESMC_AttributeSetObjsInTree - Set an Attribute on all objects

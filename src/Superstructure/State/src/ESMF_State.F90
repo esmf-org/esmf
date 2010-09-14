@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.197 2010/09/13 23:45:44 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.198 2010/09/14 05:51:54 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.197 2010/09/13 23:45:44 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.198 2010/09/14 05:51:54 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -310,14 +310,14 @@ module ESMF_StateMod
       lvalue2 = 'Export'
       lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -404,14 +404,14 @@ module ESMF_StateMod
       lvalue2 = 'Export'
       lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -495,14 +495,14 @@ module ESMF_StateMod
       lvalue2 = 'Export'
       lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -589,14 +589,14 @@ module ESMF_StateMod
       lvalue2 = 'Export'
       lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -681,14 +681,14 @@ module ESMF_StateMod
       lvalue2 = 'Export'
       lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -777,14 +777,14 @@ module ESMF_StateMod
       lvalue2 = 'Export'
       lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -871,14 +871,14 @@ module ESMF_StateMod
       lvalue2 = 'Export'
       lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -968,14 +968,14 @@ module ESMF_StateMod
       lvalue2 = 'Export'
       lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1188,14 +1188,14 @@ module ESMF_StateMod
       lvalue2 = 'Export'
       lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1286,14 +1286,14 @@ module ESMF_StateMod
       lvalue2 = 'Export'
       lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1448,14 +1448,14 @@ module ESMF_StateMod
       lvalue2 = 'Export'
       lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1564,14 +1564,14 @@ module ESMF_StateMod
       lvalue2 = 'Export'
       lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1658,14 +1658,14 @@ module ESMF_StateMod
       lvalue2 = 'Export'
       lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1753,14 +1753,14 @@ module ESMF_StateMod
       lvalue2 = 'Export'
       lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1984,14 +1984,14 @@ module ESMF_StateMod
       lvalue2 = 'Export'
       lname  = 'VariableIntent'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname, &
-          ESMF_TYPEKIND_CHARACTER, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsCharInTree(state%statep%base, lobject, &
+          lname, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
