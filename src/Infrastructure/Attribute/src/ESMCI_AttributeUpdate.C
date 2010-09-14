@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.26 2010/09/13 23:45:44 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.27 2010/09/14 00:00:53 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.26 2010/09/13 23:45:44 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.27 2010/09/14 00:00:53 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1096,7 +1096,7 @@ static const int keySize = 4*sizeof(int) + 2*sizeof(bool) + 1;
       return ESMF_FAILURE;
     }  
   }
-printf("localPet = %d  linkChanges = %d, realChanges=%d\n", localPet, linkChangesOut, realChangesOut);
+//printf("localPet = %d  linkChanges = %d, realChanges=%d\n", localPet, linkChangesOut, realChangesOut);
   // if link changes, we bail and recommend StateReconcile
   if (linkChangesOut > 0) {
     ESMC_LogDefault.Write(
