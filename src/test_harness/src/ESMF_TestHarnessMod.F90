@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.50 2010/08/12 15:42:51 garyblock Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.51 2010/09/14 18:01:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -1064,7 +1064,7 @@ logical                       :: checkpoint = .FALSE.
   integer, allocatable :: BIndx(:), EIndx(:)
   integer, allocatable :: decompOrder(:)
   type(ESMF_DecompFlag), allocatable :: decompType(:)
-  integer, allocatable :: connectionList(:,:), repetitionVector(:) 
+  integer, allocatable :: connectionList(:,:)
   integer, allocatable :: positionVector(:),orientationVector(:)
 
   ! local logicals
@@ -1094,7 +1094,7 @@ logical                       :: checkpoint = .FALSE.
   if (ESMF_LogMsgFoundAllocError(allocRcToTest, "Type "//                &
      " decompType in create_distribution", rcToReturn=rc)) then
   endif
-  allocate( connectionList(3*Memory%GridRank+2,1), stat=allocRcToTest )
+  allocate( connectionList(2*Memory%GridRank+2,1), stat=allocRcToTest )
   if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
      " connectionList in create_distribution", rcToReturn=rc)) then
   endif
@@ -1163,10 +1163,6 @@ logical                       :: checkpoint = .FALSE.
     ! singlely periodic domain
     noconnections = .FALSE. 
     ! workspace
-    allocate( repetitionVector(Memory%memRank), stat=allocRcToTest )
-    if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//        &
-       " repetitionVector in create_distribution", rcToReturn=rc)) then
-    endif
     allocate( positionVector(Memory%memRank), stat=allocRcToTest )
     if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//        &
        " positionVector in create_distribution", rcToReturn=rc)) then
@@ -1179,12 +1175,10 @@ logical                       :: checkpoint = .FALSE.
     do k=1, Memory%GridRank
       positionVector(k) = 0
       orientationVector(k) = k
-      repetitionVector(k) = 0
       if( pattern_query(GridRecord%gtype(Memory%GridOrder(k))%string,          &
         "_periodic") /= 0 .or. pattern_query(                                  &
         GridRecord%gtype(Memory%GridOrder(k))%string,"_PERIODIC") /= 0)  then
         positionVector(k) = EIndx(k)
-        repetitionVector(k) = k 
       endif
     enddo
   elseif( nconnect > 1 ) then
@@ -1229,7 +1223,7 @@ logical                       :: checkpoint = .FALSE.
                                  patchIndexA=1, patchIndexB=1,                 &
                                  positionVector=positionVector,                &
                                  orientationVector=orientationVector,          &
-                                 repetitionVector=repetitionVector, rc=localrc)
+                                 rc=localrc)
 
     distgrid = ESMF_DistGridCreate(minIndex=BIndx, maxIndex=EIndx,             &
                    regDecomp=decompOrder, decompflag=decompType,               &
@@ -1237,7 +1231,6 @@ logical                       :: checkpoint = .FALSE.
 
   if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating distgrid",                 &
              rcToReturn=rc)) return
-    deallocate( repetitionVector )
     deallocate( positionVector,orientationVector )
   endif
 
