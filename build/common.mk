@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.316 2010/09/13 22:29:33 garyblock Exp $
+#  $Id: common.mk,v 1.317 2010/09/14 15:28:40 garyblock Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1537,7 +1537,7 @@ tree_mostlyclean:
 	      cd $$DIR; $(MAKE) ACTION=tree_clean tree ;\
 	   fi ;\
 	done
-	
+
 #-------------------------------------------------------------------------------
 # Generic target for building and running all tests, examples, and demos.
 #-------------------------------------------------------------------------------
@@ -2391,7 +2391,11 @@ htest:
 	   fi ; \
 	fi ; \
 	cat ./PET*$(TNAME)UTest.Log > ./ESMF_$(HNAME)UTest.Log ; \
-	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
+	$(ESMF_RM) ./PET*$(TNAME)UTest.Log ; \
+	if [ -f $(TESTHARNESSCASE).xml ] ; then \
+		echo xsltproc -o $(TESTHARNESSCASE).html $(ESMF_DIR)/src/test_harness/src/HarnessHttp.xslt $(TESTHARNESSCASE).xml ; \
+		xsltproc -o $(TESTHARNESSCASE).html $(ESMF_DIR)/src/test_harness/src/HarnessHttp.xslt $(TESTHARNESSCASE).xml ; \
+	fi
 
 ### TNAME=TestHarness HNAME=$(TESTHARNESSCASE)_NP$(NP) TESTHARNESSPATH=$(PWD)
 
@@ -2730,7 +2734,6 @@ clean_demos:
 	$(ESMF_RM) $(ESMF_TESTDIR)/*App 
 	@if [ -d src/demos ] ; then cd src/demos; fi; \
 	$(MAKE) clean
-	
 
 
 #-------------------------------------------------------------------------------
