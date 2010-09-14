@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.9 2010/09/13 05:50:47 eschwab Exp $
+% $Id: Attribute_pack.tex,v 1.10 2010/09/14 18:30:08 murphysj Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -63,11 +63,11 @@ There are many attributes that are used to describe components. There are curren
      {\tt Agency} & An administrative unit of government.& DoD, DOE, DOI, NASA, NOAA, NSF\\
      {\tt Author} & The person who created the content of a book, article, or other source. & N/A\\
      {\tt CodingLanguage} & The computer language in which a unit of software is written. & C, C++, F77, F90, Java\\
+     {\tt ComponentFullName} & The name of a model, model component, simulation, experiment, or dataset with all acronyms spelled out.& N/A\\
+     {\tt ComponentShortName} & A version of the component name that contains acronyms & N/A\\
      {\tt Discipline} & A subject, theme, category, or general area of interest.& Aerosol, Fisheries, Climate, Carbon Cycle, Hydrology, Land, Ocean, Polar, Sediment, Storm Surge, Turbulence, Weather, Wave, Weather Prediction \\
-     {\tt FullName} & The name of a model, model component, simulation, experiment, or dataset with all acronyms spelled out.& N/A\\
      {\tt Institution} & An organization associated with a model component, simulation, or dataset.& N/A\\
      {\tt ModelComponentFramework} & The software package or mechanism used to transfer and transform data between model components.& CCA, ESMF, Flume, FMS, OASIS, SWMF \\
-     {\tt Name} & \\
      {\tt PhysicalDomain} & A description of the geographic range being simulated. & Atmosphere, Earth System, Ice, Lake, Land Ocean, River\\
      {\tt Version} & A specific form or variation of an artifact, i.e. a unit of software or metadata. & N/A\\ 
 \end{tabular}
@@ -75,8 +75,6 @@ There are many attributes that are used to describe components. There are curren
 
 
 \vspace{.20in}
-
-
 {\bf 2. Common Information Model (CIM) Main Attribute Package}
 
 \begin{itemize}
@@ -152,7 +150,6 @@ There are many attributes that are used to describe components. There are curren
 
 
 \vspace{.20in}
-
 {\bf 4. CIM Responsible Party Attribute Package}
 
 \begin{itemize}
@@ -173,7 +170,38 @@ There are many attributes that are used to describe components. There are curren
      {\tt IndividualPhysicalAddress} & The address of the person designated to provide information about a model component. & N/A \\
      {\tt IndividualEmailAddress} & The email address that others can use to ask questions about a model component. & N/A \\
      {\tt IndividualURL} & A URL of a contact or institution. & N/A \\
+     {\tt InstitutionName} & An organization associated with a model component or simulation. & N/A \\
+     {\tt InstitutionPhysicalAddress} & The address of an organization associated with a model component or simulation. & N/A \\
+     {\tt InstitutionURL} & A website of an organization associated with a model component or simulation. & N/A \\
+     {\tt InstitutionAbbreviation} & The abbreviation of an organization associated with a model component or simulation. & N/A \\
+     {\tt PrincipalInvestigator} & The scientist in charge of an experiment or research project. & \\
+     {\tt FundingSource} & The entity that funded a model component or simulation. & N/A\\
      {\tt ResponsiblePartyRole} & A flag to define the Responsible Party block. & Author, Principal Investigator, Contact, Center, Funder\\
+\end{tabular}
+
+
+\vspace{.20in}
+{\bf 4. CIM Citation Attribute Package}
+
+\begin{itemize}
+    \item Convention: ISO 19115
+    \item Purpose: Citation Description
+    \item Output Options: 
+    \begin{itemize}
+        \item CIM XML 
+    \end{itemize} 
+    \item Descriptipn: This package is used to describe references. Examples include a URL or a scientific reference. 
+\end{itemize}
+
+
+\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
+     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
+     \hline\hline
+     {\tt CitationShortTitle} & An abbreviation for the citation.  This could be the short scientific citation (e.g. murphy, 2009) or the title of a web page. & N/A \\
+     {\tt CitationLongTitle} & The text of the citation or pointer (e.g. URL) that further describes a model component or simulation. & N/A\\
+     {\tt CitationDate} & The date of the citation. & N/A\\
+     {\tt CitationPresentationForm} & A description of the type of citation & documentDigital, documentHardcopy, imageDigital, imageHardcopy, mapDigital, mapHardcopy, modelDigital, modelHardcopy, profileDigital, profileHardcopy, tableDigital, tableHardcopy, videoDigital, videoHardcopy\\
+     {\tt CitationDOI} & The assigned Digital Object Identifier (DOI) of the citation & N/A\\
 \end{tabular}
 
 
@@ -339,10 +367,11 @@ At this time the Array packages are the same as the Field packages.
 \subsubsection{Grid Attribute Packages}
 \label{GridAttributePackages}
 
-The GFDL Gridspec Standard is currently the only Grid pre-defined Attribute package in ESMF.
+There are two grid attribute packages in ESMF. 
 
 \begin{enumerate}
     \item GFDL Gridspec
+    \item ESMF Grid
 \end{enumerate}
 
 
@@ -350,15 +379,15 @@ The GFDL Gridspec Standard is currently the only Grid pre-defined Attribute pack
 \vspace{.20in}
 {\bf 1. Gridspec}
 
-\label{CIMFieldAttributePackages}
+\label{CIMGridAttributePackage}
 
 \begin{itemize}
-    \item Convention: GridSpec or ESMF
+    \item Convention: GridSpec
     \item Purpose: General
     \item Output Options
     \begin{itemize}
         \item Simple XML
-        \item Can be used to create a Grid object by reading in an XML file with these attributes. This is currently limited to 2D regularly distributed rectinlinear grids. See Section \ref{example:GridCrFromFile} for details. 
+        \item If combined with the ESMF Grid package, this package can be used to create a Grid object by reading in an XML file with these attributes. This is currently limited to 2D regularly distributed rectinlinear grids. See Section \ref{example:GridCrFromFile} for details. 
     \end{itemize}
     \item Description: This package contains the Attributes developed as part of GFDL's Gridspec standard.
 \end{itemize}
@@ -366,18 +395,48 @@ The GFDL Gridspec Standard is currently the only Grid pre-defined Attribute pack
 \begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
 {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
 \hline\hline
+{\tt CongruentTiles} & Indicates whether or not all the tiles contained within a grid mosaic are of the same size and shape. & True, False \\
 {\tt GridType} & A text description of the grid that uses common terminology. & Gnomonic,Cubed Sphere,Displaced Pole, Icosahedral geodesic, Reduced gaussian, Regular lat lon, Spectral gaussian, Tripolar, Yin Yang\\ 
 {\tt DimensionOrder} & The order in which latitude and longitude appear within the two dimensional grid array. & None \\ 
 {\tt DiscretizationType} & Specifies the method by which a two-dimensional coordinate system is sampled to form a computational grid. &  Logically rectangular, Pixel-based catchment, Structured triangular, Unstructured triangular\\ 
+{\tt HorizontalResolution} & The number of points within the horizontal domain of a model or grid. & N/A \\
 {\tt GeometryType} & Indicates the geometric figure used to approximate the shape of the Earth, e.g. "sphere".& Ellipsoid, Plane, Sphere\\ 
 {\tt IsConformal} & Indicates if the grid tile is angle-preserving. If so, angles measured on the grid are equal to the equivalent angles on the Earth. & True, False\\ 
 {\tt IsRegular} & Indicates whether or not the horizontal coordinates of the grid can be defined using 1D arrays (vectors). This means that grid node locations are defined by the cartesian product of the X/Lon and Y/Lat coordinate vectors. It also means that grid cells are logically rectangular (they may also be physically rectangular in the case of projected coordinates). & True, False\\ 
 {\tt IsUniform} &Indicates whether or not the horizontal coordinates of a grid have fixed offsets in the X and Y directions. If the offset is the same in both directions then the grid is logically square, otherwise it is logically rectangular. & True, False\\ 
 {\tt NorthPoleLocation} & Defines the lat-long position of the 'north pole' used by the grid tile in the case of rotated/displaced pole grids.& N/A \\ 
 {\tt NumberOfCells} & The number of cells in an unstructured grid. & N/A\\ 
+{\tt NumberOfGridTiles} & The number of tiles in a mosaic. & N/A \\
 {\tt NX} & Specifies the length of the X, or longitude, dimension of the grid tile. & N/A \\ 
 {\tt NY} & Specifies the length of the Y, or latitude, dimension of the grid tile. & N/A \\ 
 \end{tabular}
+
+
+
+\vspace{.20in}
+{\bf 2. EMSF Grid}
+
+\label{ESMFGridAttributePackage}
+
+\begin{itemize}
+    \item Convention: ESMF
+    \item Purpose: Grid
+    \item Output Options
+    \begin{itemize}
+        \item Simple XML
+        \item If combined with the Gridspec Package, this package can be used to create a Grid object by reading in an XML file with these attributes. This is currently limited to 2D regularly distributed rectinlinear grids. See Section \ref{example:GridCrFromFile} for details. 
+    \end{itemize}
+    \item Description: This package contains two Attributes required by ESMF to generate grids from a file. They describe the decomposition of a grid across ESMF DEs.  
+\end{itemize}
+
+
+\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
+{\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
+\hline\hline
+{\tt RegDecompX} &  The number of DEs in X a particular grid is decomposed into.& N/A\\
+{\tt RegDecompY & The number of DEs in Y a particular grid is decomposed into. N/A\\
+\end{tabular}
+
 
 
 \vspace{.20in}
