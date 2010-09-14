@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.50 2010/09/09 23:07:39 svasquez Exp $
+// $Id: ESMC_Comp.h,v 1.51 2010/09/14 23:15:01 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -51,18 +51,18 @@ enum ESMC_Method { ESMF_SETINIT=1, ESMF_SETRUN, ESMF_SETFINAL,
 typedef void* ESMC_GridComp;
 
 // Class API
-
+iiiiiiiiii
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_GridComp - Create a Gridded Component
 //
 // !INTERFACE:
 ESMC_GridComp ESMC_GridCompCreate(
-  const char *name,			// in 
+  const char *name,                    // in 
   enum ESMC_GridCompType mtype,        // in
-  const char *configFile, 		// in
-  ESMC_Clock clock, 			// in
-  int *rc				// out
+  const char *configFile,              // in
+  ESMC_Clock clock,                    // in
+  int *rc                              // out
 );
 // !RETURN VALUE:
 //  Newly created ESMC_GridComp
@@ -92,7 +92,7 @@ ESMC_GridComp ESMC_GridCompCreate(
 //
 // !INTERFACE:
 int ESMC_GridCompDestroy(
-  ESMC_GridComp *comp		// in
+  ESMC_GridComp *comp               // in
 );
 // !RETURN VALUE:
 //  Return code; equals ESMF\_SUCCESS if there are no errors.
@@ -114,11 +114,11 @@ int ESMC_GridCompDestroy(
 //
 // !INTERFACE:
 int ESMC_GridCompSetServices(
-  ESMC_GridComp comp, 			// in
-  void (*func)(ESMC_GridComp,		// in
-  int *					// in
+  ESMC_GridComp comp,                   // in
+  void (*func)(ESMC_GridComp,           // in
+  int *                                 // in
   ), 	
-  int *userRc				// out
+  int *userRc                           // out
 );
 // !RETURN VALUE:
 //  Return code; equals ESMF\_SUCCESS if there are no errors.
@@ -148,15 +148,15 @@ int ESMC_GridCompSetServices(
 //
 // !INTERFACE:
 int ESMC_GridCompSetEntryPoint(
-  ESMC_GridComp comp, 			// in
-  enum ESMC_Method method,		// in
-  void (*func)(ESMC_GridComp, 		// in
-  ESMC_State, 				// in	must not be optional
-  ESMC_State, 				// in	must not be optional
-  ESMC_Clock *,				// in	must not be optional
-  int *					// in   must not be optional
+  ESMC_GridComp comp,                   // in
+  enum ESMC_Method method,              // in
+  void (*func)(ESMC_GridComp,           // in
+  ESMC_State,                           // in	must not be optional
+  ESMC_State,                           // in	must not be optional
+  ESMC_Clock *,                         // in	must not be optional
+  int *                                 // in   must not be optional
   ),
-  int phase				// in
+  int phase                             // in
 );
 //
 // !RETURN VALUE:
@@ -184,12 +184,36 @@ int ESMC_GridCompSetEntryPoint(
 //
 // !INTERFACE:
 int ESMC_GridCompInitialize(
-  ESMC_GridComp comp, 
-  ESMC_State importState,
-  ESMC_State exportState, 
-  ESMC_Clock clock, 
-  int phase, 
-  int *userRc);
+  ESMC_GridComp comp,           // in
+  ESMC_State importState        // in
+  ESMC_State exportState,       // in 
+  ESMC_Clock clock,             // in
+  int phase,                    // in
+  int *userRc                   // out
+);
+//
+// !RETURN VALUE:
+//  Return code; equals ESMF\_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+// Call the associated user initialization code for a GridComp.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[comp]
+//  {\tt ESMC\_GridComp} to call initialize routine for.
+//  \item[importState]
+//  {\tt ESMC\_State} containing import data for coupling. If not present, a dummy argument will be passed to the user-supplied routine. The importState argument in the user code cannot be optional.
+//  \item[exportState]
+//   {\tt ESMC\_State} containing export data for coupling. If not present, a dummy argument will be passed to the user-supplied routine. The exportState argument in the user code cannot be optional.
+//   \item[clock]
+//   External {\tt ESMC\_Clock} for passing in time information. This is generally the parent component's clock, and will be treated as read-only by the child component. The child component can maintain a private clock for its own internal time computations. If not present, a dummy argument will be passed to the user-supplied routine. The clock argument in the user code cannot be optional. 
+//  \item[phase]
+//   Component providers must document whether their each of their routines are {\tt single-phase} or {\tt multi-phase}. Single-phase routines require only one invocation to complete their work. Multi-phase routines provide multiple subroutines to accomplish the work, accomodating components which must complete part of their work, return to the caller and allow other processing to occur, and then continue the original operation. For multiple-phase child components, this is the integer phase number to be invoked. For single-phase child components this argument is optional. The default is 1.
+//  \item[userRc]
+//  Return code set by {\tt userRoutine} before returning.
+//  \end{description}
 //EOP
 //-----------------------------------------------------------------------------
 //BOP
@@ -197,12 +221,35 @@ int ESMC_GridCompInitialize(
 //
 // !INTERFACE:
 int ESMC_GridCompRun(
-  ESMC_GridComp comp, 
-  ESMC_State importState,
-  ESMC_State exportState, 
-  ESMC_Clock clock, 
-  int phase, 
-  int *userRc);
+  ESMC_GridComp comp,           // in
+  ESMC_State importState,       // in
+  ESMC_State exportState,       // in
+  ESMC_Clock clock,             // in
+  int phase,                    // in
+  int *userRc			// out
+);
+//
+// !RETURN VALUE:
+//  Return code; equals ESMF\_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+// Call the associated user run code for an {\tt ESMC\_GridComp}. 
+//  The arguments are:
+//  \begin{description}
+//  \item[comp]
+//  {\tt ESMC\_GridComp} to call run routine for.
+//  \item[importState]
+//  {\tt ESMC\_State} containing import data for coupling. If not present, a dummy argument will be passed to the user-supplied routine. The importState argument in the user code cannot be optional.
+//  \item[exportState]
+//   {\tt ESMC\_State} containing export data for coupling. If not present, a dummy argument will be passed to the user-supplied routine. The exportState argument in the user code cannot be optional.
+//   \item[clock]
+//   External {\tt ESMC\_Clock} for passing in time information. This is generally the parent component's clock, and will be treated as read-only by the child component. The child component can maintain a private clock for its own internal time computations. If not present, a dummy argument will be passed to the user-supplied routine. The clock argument in the user code cannot be optional.
+//  \item[phase]
+//   Component providers must document whether their each of their routines are {\tt single-phase} or {\tt multi-phase}. Single-phase routines require only one invocation to complete their work. Multi-phase routines provide multiple subroutines to accomplish the work, accomodating components which must complete part of their work, return to the caller and allow other processing to occur, and then continue the original operation. For multiple-phase child components, this is the integer phase number to be invoked. For single-phase child components this argument is optional. The default is 1.
+//  \item[userRc]
+//  Return code set by {\tt userRoutine} before returning.
+//  \end{description}
 //EOP
 //-----------------------------------------------------------------------------
 //BOP
@@ -210,21 +257,70 @@ int ESMC_GridCompRun(
 //
 // !INTERFACE:
 int ESMC_GridCompFinalize(
-  ESMC_GridComp comp, 
-  ESMC_State importState,
-  ESMC_State exportState, 
-  ESMC_Clock clock, 
-  int phase, 
-  int *userRc);
+  ESMC_GridComp comp,           // in
+  ESMC_State importState,       // in
+  ESMC_State exportState,       // in
+  ESMC_Clock clock,             // in
+  int phase,                    // in
+  int *userRc                   // out
+);			
+//
+// !RETURN VALUE:
+//  Return code; equals ESMF\_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+// Call the associated user-supplied finalization code for an {\tt ESMC\_GridComp}. 
+//  The arguments are:
+//  \begin{description}
+//  \item[comp]
+//  {\tt ESMC\_GridComp} to call finalize routine for.
+//  \item[importState]
+//  {\tt ESMC\_State} containing import data for coupling. If not present, a dummy argument will be passed to the user-supp
+lied routine. The importState argument in the user code cannot be optional.
+//  \item[exportState]
+//   {\tt ESMC\_State} containing export data for coupling. If not present, a dummy argument will be passed to the user-sup
+plied routine. The exportState argument in the user code cannot be optional.
+//   \item[clock]
+//   External {\tt ESMC\_Clock} for passing in time information. This is generally the parent component's clock, and will b
+e treated as read-only by the child component. The child component can maintain a private clock for its own internal time c
+omputations. If not present, a dummy argument will be passed to the user-supplied routine. The clock argument in the user c
+ode cannot be optional.
+//  \item[phase]
+//   Component providers must document whether their each of their routines are {\tt single-phase} or {\tt multi-phase}. Si
+ngle-phase routines require only one invocation to complete their work. Multi-phase routines provide multiple subroutines t
+o accomplish the work, accomodating components which must complete part of their work, return to the caller and allow other
+ processing to occur, and then continue the original operation. For multiple-phase child components, this is the integer ph
+ase number to be invoked. For single-phase child components this argument is optional. The default is 1.
+//  \item[userRc]
+//  Return code set by {\tt userRoutine} before returning.
+//  \end{description}
 //EOP
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_GridGetInternalState - Get the Internal State of a Gridded Component
+// !IROUTINE: ESMC_GridCompGetInternalState - Get the Internal State of a Gridded Component
 //
 // !INTERFACE:
 void *ESMC_GridCompGetInternalState(
-  ESMC_GridComp comp, 
-  int *rc);
+  ESMC_GridComp comp,            // in
+  int *rc                       // out
+);
+//
+// !RETURN VALUE:
+//  Return code; equals ESMF\_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Available to be called by an {\\tt ESMC\_GridComp} at any time after {\\tt ESMC\_GridCompSetInternalState} has been called. Since init, run, and finalize must be separate subroutines, data that they need to share in common can either be module global data, or can be allocated in a private data block and the address of that block can be registered with the framework and retrieved by this call. When running multiple instantiations of an {\tt ESMC\_GridComp}, for example during ensemble runs, it may be simpler to maintain private data specific to each run with private data blocks. A corresponding {\tt ESMC\_GridCompSetInternalState} call sets the data pointer to this block, and this call retrieves the data pointer. Note that the dataPointer argument needs to be a derived type which contains only a pointer of the type of the data block defined by the user. When making this call the pointer needs to be unassociated. When the call returns, the pointer will now reference the original data block which was set during the previous call to {\tt ESMC\_GridCompSetInternalState}.
+
+Only the last data block set via {\\tt ESMC\_GridCompSetInternalState} will be accessible. 
+//  The arguments are:
+//  \begin{description}
+//  \item[comp]
+//  An {\tt ESMC\_GridComp} object.
+//  \item[rc]
+//  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. Note: unlike most other ESMF routines, this argument is not optional because of implementation considerations. 
+// \end{description}
 //EOP
 //-----------------------------------------------------------------------------
 //BOP
