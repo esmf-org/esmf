@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.19 2010/09/14 17:02:31 theurich Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.20 2010/09/14 22:48:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -56,7 +56,7 @@ program ESMF_ArrayIOUTest
   integer, allocatable :: exclusiveLBound(:,:), exclusiveUBound(:,:)
   integer      :: localDeCount, localPet, petCount
   integer :: i,j,k
-  real :: Maxvalue, diff
+  real :: Maxvalue(1), diff
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -262,21 +262,21 @@ program ESMF_ArrayIOUTest
 ! ! Compare readin and the existing file
   write(name, *) "Compare readin data to the existing data without halo"
   write(failMsg, *) "Comparison failed"
-  Maxvalue = 0.0
+  Maxvalue(1) = 0.0
   do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
   do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
   do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
    diff = abs( Farray3D_wouthalo2(i,j,k)-Farray3D_wouthalo(i,j,k) )
-   if (Maxvalue.le.diff) Maxvalue=diff
+   if (Maxvalue(1).le.diff) Maxvalue(1)=diff
   enddo
   enddo
   enddo
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  write(*,*)"Maximum Error (Without Halo case) = ", Maxvalue
-  call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  write(*,*)"Maximum Error (Without Halo case) = ", Maxvalue(1)
+  call ESMF_Test((Maxvalue(1) .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
 #else
   write(failMsg, *) "Comparison did not failed as was expected"
-  call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  call ESMF_Test((Maxvalue(1) .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
 #endif
 
 !-------------------------------------------------------------------------------
@@ -313,7 +313,7 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayRead(array_withhalo3, file='file3D_withhalo.bin', &
        iofmt=ESMF_IOFMT_BIN, rc=rc)
-#if (defined ESMF_PIO)
+#ifdef ESMF_PIO
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -325,21 +325,21 @@ program ESMF_ArrayIOUTest
 ! ! Compare readin and the existing file
   write(name, *) "Compare readin data to the existing data with halo"
   write(failMsg, *) "Comparison failed"
-  Maxvalue = 0.0
+  Maxvalue(1) = 0.0
   do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
   do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
   do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
    diff = abs( Farray3D_withhalo2(i,j,k)-Farray3D_withhalo(i,j,k) )
-   if (Maxvalue.le.diff) Maxvalue=diff
+   if (Maxvalue(1).le.diff) Maxvalue(1)=diff
   enddo
   enddo
   enddo
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  write(*,*)"Maximum Error (With Halo case) = ", Maxvalue
-  call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  write(*,*)"Maximum Error (With Halo case) = ", Maxvalue(1)
+  call ESMF_Test((Maxvalue(1) .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
 #else
   write(failMsg, *) "Comparison did not failed as was expected"
-  call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  call ESMF_Test((Maxvalue(1) .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
 #endif
 
 !------------------------------------------------------------------------
@@ -347,21 +347,21 @@ program ESMF_ArrayIOUTest
 ! ! Compare readin and the existing file
   write(name, *) "Compare readin data to the existing binary data with halo"
   write(failMsg, *) "Comparison failed"
-  Maxvalue = 0.0
+  Maxvalue(1) = 0.0
   do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
   do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
   do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
    diff = abs( Farray3D_withhalo3(i,j,k)-Farray3D_withhalo(i,j,k) )
-   if (Maxvalue.le.diff) Maxvalue=diff
+   if (Maxvalue(1).le.diff) Maxvalue(1)=diff
   enddo
   enddo
   enddo
 #ifdef ESMF_PIO
-  write(*,*)"Maximum Error (With Halo case) = ", Maxvalue
-  call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  write(*,*)"Maximum Error (With Halo case) = ", Maxvalue(1)
+  call ESMF_Test((Maxvalue(1) .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
 #else
   write(failMsg, *) "Comparison did not failed as was expected"
-  call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  call ESMF_Test((Maxvalue(1) .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
 #endif
 
   deallocate (computationalLWidth, computationalUWidth)
@@ -500,19 +500,19 @@ program ESMF_ArrayIOUTest
 ! ! Compare readin and the existing file
   write(name, *) "Compare readin data to the existing data without halo"
   write(failMsg, *) "Comparison failed"
-  Maxvalue = 0.0
+  Maxvalue(1) = 0.0
   do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
   do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
    diff = abs( Farray2D_wouthalo(i,j) - Farray2D_withhalo(i,j) )
-   if (Maxvalue.le.diff) Maxvalue=diff
+   if (Maxvalue(1).le.diff) Maxvalue(1)=diff
   enddo
   enddo
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  write(*,*)"Maximum Error (With/Without Halo case) = ", Maxvalue
-  call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  write(*,*)"Maximum Error (With/Without Halo case) = ", Maxvalue(1)
+  call ESMF_Test((Maxvalue(1) .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
 #else
   write(failMsg, *) "Comparison did not failed as was expected"
-  call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  call ESMF_Test((Maxvalue(1) .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
 #endif
 
 !------------------------------------------------------------------------
@@ -556,8 +556,8 @@ program ESMF_ArrayIOUTest
 ! !  Both data are read in, if ESMF_PIO is not defined, we should
 ! !  skip this comparison.
   !NEX_UTest_Multi_Proc_Only
-  Maxvalue = 0.0
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  Maxvalue(1) = 0.0  ! initialize
   call ESMF_ArrayGather(array_diff, FarrayGr_1, patch=1, rootPet=0, rc=rc)
   call ESMF_ArrayGather(array_wouthalo, FarrayGr_2, patch=1, rootPet=0, rc=rc)
   write(name, *) "Compare readin data from a different distgrid"
@@ -566,15 +566,17 @@ program ESMF_ArrayIOUTest
    do j=1,5
    do i=1,5
      diff = abs(FarrayGr_1(i,j) - FarrayGr_2(i,j) )
-     if (diff .gt. Maxvalue) Maxvalue = diff
+     if (diff .gt. Maxvalue(1)) Maxvalue(1) = diff
    enddo
    enddo
-   write(*,*)"Maximum Error (different distgrid) = ", Maxvalue
-   call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
   endif
+  call ESMF_VMBroadcast(vm, Maxvalue, count=1, root=0, rc=rc)
+  write(*,*)"Maximum Error (different distgrid) = ", Maxvalue(1)
+  call ESMF_Test((Maxvalue(1) .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
 #else
+   Maxvalue(1) = 1.0 ! initialize to ensure proper logic below
    write(failMsg, *) "Comparison did not failed as was expected"
-   call ESMF_Test((Maxvalue .eq. 0.0), name, failMsg, result,ESMF_SRCLINE)
+   call ESMF_Test((Maxvalue(1) .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
 #endif
 
   deallocate (computationalLWidth, computationalUWidth)
