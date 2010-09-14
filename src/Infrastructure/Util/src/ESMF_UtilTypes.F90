@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.99 2010/09/11 22:19:32 samsoncheung Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.100 2010/09/14 21:35:37 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -260,6 +260,7 @@
          ESMF_ID_GRIDCOMPONENT = ESMF_ObjectID(33, "ESMF_GridComponent"), &
          ESMF_ID_CPLCOMPONENT = ESMF_ObjectID(34, "ESMF_CplComponent"), &
          ESMF_ID_COMPONENT = ESMF_ObjectID(35, "ESMF_Component"), &
+         ESMF_ID_XGRID = ESMF_ObjectID(36, "ESMF_XGrid"), &
          ESMF_ID_NONE = ESMF_ObjectID(99, "ESMF_None")
 
 !------------------------------------------------------------------------------
@@ -714,7 +715,7 @@
       public ESMF_ID_CONFIG, ESMF_ID_ARRAY
       public ESMF_ID_COMMTABLE, ESMF_ID_ROUTETABLE, ESMF_ID_ROUTE
       public ESMF_ID_ROUTEHANDLE, ESMF_ID_FIELDDATAMAP, ESMF_ID_FIELD
-      public ESMF_ID_FIELDBUNDLE, ESMF_ID_GEOMBASE
+      public ESMF_ID_FIELDBUNDLE, ESMF_ID_GEOMBASE, ESMF_ID_XGRID
       public ESMF_ID_REGRID, ESMF_ID_LOCSTREAM, ESMF_ID_STATE
       public ESMF_ID_GRIDCOMPONENT, ESMF_ID_CPLCOMPONENT, ESMF_ID_COMPONENT
 
