@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.52 2010/09/13 05:50:47 eschwab Exp $
+! $Id: user_model1.F90,v 1.53 2010/09/14 06:00:06 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -331,13 +331,14 @@ module user_model1
       'Fortran 90', convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(comp, 'Discipline', &
       'Atmosphere', convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, 'FullName', &
+    call ESMF_AttributeSet(comp, 'ComponentLongName', &
       'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core', &
         convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(comp, 'ModelComponentFramework', &
       'ESMF', &
       convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(comp, 'Name', 'GEOS-5 FV dynamical core', &
+    call ESMF_AttributeSet(comp, 'ComponentShortName', &
+      'GEOS-5 FV dynamical core', &
       convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(comp, 'PhysicalDomain', &
       'Earth system', convention=conv, purpose=purp, rc=rc)

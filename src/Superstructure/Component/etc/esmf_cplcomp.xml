@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <component>
   <attribute_package convention="ESG" purpose="General">
-    <Name>ESMF Example Coupler</Name>
-    <FullName>Earth System Modeling Framework Example Coupler</FullName>
+    <ComponentShortName>ESMF Example Coupler</ComponentShortName>
+    <ComponentLongName>Earth System Modeling Framework Example Coupler</ComponentLongName>
     <Agency>UCAR</Agency>
     <Institution>National Center for Atmospheric Research (NCAR)</Institution>
     <Version>4</Version>
@@ -11,7 +11,5 @@
     <PhysicalDomain>Earth System</PhysicalDomain>
     <CodingLanguage>Fortran 90</CodingLanguage>
     <ModelComponentFramework>ESMF (Earth System Modeling Framework)</ModelComponentFramework>
-    <Comment>ESMF CplComp Attribute IO Test</Comment>
-    <References>http://www.earthsystemmodeling.org</References>
   </attribute_package>
 </component>

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadCplCompUTest.F90,v 1.6 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_AttReadCplCompUTest.F90,v 1.7 2010/09/14 05:58:05 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_AttReadCplCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttReadCplCompUTest.F90,v 1.6 2010/03/04 18:57:45 svasquez Exp $'
+      '$Id: ESMF_AttReadCplCompUTest.F90,v 1.7 2010/09/14 05:58:05 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -118,13 +118,13 @@ print *, 'rc = ', rc
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Get ESG "Name" Attribute from a CplComp Test
-      attrname = 'Name'
+      ! Get ESG "ComponentShortName" Attribute from a CplComp Test
+      attrname = 'ComponentShortName'
       attrvalue = 'ESMF Example Coupler'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting ESG 'Name' Attribute from a CplComp Test"
+      write(name, *) "Getting ESG 'ComponentShortName' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
                       .or. xercesNotPresent), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -135,13 +135,13 @@ print *, 'outChar = ', trim(adjustL(outChar))
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Get ESG "FullName" Attribute from a CplComp Test
-      attrname = 'FullName'
+      ! Get ESG "ComponentLongName" Attribute from a CplComp Test
+      attrname = 'ComponentLongName'
       attrvalue = 'Earth System Modeling Framework Example Coupler'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting ESG 'FullName' Attribute from a CplComp Test"
+      write(name, *) "Getting ESG 'ComponentLongName' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
                       .or. xercesNotPresent), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -278,42 +278,6 @@ print *, 'outChar = ', outChar
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'ModelComponentFramework' Attribute from a CplComp Test"
-      call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
-                      .or. xercesNotPresent), &
-                      name, failMsg, result, ESMF_SRCLINE)
-print *, 'rc = ', rc
-print *, 'attrname = ', attrname
-print *, 'attrvalue = ', attrvalue
-print *, 'outChar = ', outChar
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Get CF "Comment" Attribute from a CplComp Test
-      attrname = 'Comment'
-      attrvalue = 'ESMF CplComp Attribute IO Test'
-      conv = 'CF'
-      call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting CF 'Comment' Attribute from a CplComp Test"
-      call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
-                      .or. xercesNotPresent), &
-                      name, failMsg, result, ESMF_SRCLINE)
-print *, 'rc = ', rc
-print *, 'attrname = ', attrname
-print *, 'attrvalue = ', attrvalue
-print *, 'outChar = ', outChar
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Get CF "References" Attribute from a CplComp Test
-      attrname = 'References'
-      attrvalue = 'http://www.earthsystemmodeling.org'
-      conv = 'CF'
-      call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting CF 'References' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
                       .or. xercesNotPresent), &
                       name, failMsg, result, ESMF_SRCLINE)

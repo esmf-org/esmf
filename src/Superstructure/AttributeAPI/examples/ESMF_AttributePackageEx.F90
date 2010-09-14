@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.14 2010/06/29 21:55:28 svasquez Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.15 2010/09/14 05:58:05 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -188,10 +188,10 @@ program ESMF_AttributePackageEx
 !EOE
 
 !BOC
-      name1 = 'Name'
-      name2 = 'StandardName'
-      name3 = 'LongName'
-      name4 = 'Units'
+      name1 = 'VariableShortName'
+      name2 = 'VariableStandardName'
+      name3 = 'VariableLongName'
+      name4 = 'VariableUnits'
       
       ! DPEDT
       value1 = 'DPEDT'
@@ -409,12 +409,13 @@ program ESMF_AttributePackageEx
       'Fortran 90', convention=convESMF, purpose=purpGen, rc=rc)
     call ESMF_AttributeSet(gridcomp, 'Discipline', &
       'Atmosphere', convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp, 'FullName', &
+    call ESMF_AttributeSet(gridcomp, 'ComponentLongName', &
       'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core', &
         convention=convESMF, purpose=purpGen, rc=rc)
     call ESMF_AttributeSet(gridcomp, 'ModelComponentFramework', &
       'ESMF', convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp, 'Name', 'GEOS-5 FV dynamical core', &
+    call ESMF_AttributeSet(gridcomp, 'ComponentShortName', &
+      'GEOS-5 FV dynamical core', &
       convention=convESMF, purpose=purpGen, rc=rc)
     call ESMF_AttributeSet(gridcomp, 'PhysicalDomain', &
       'Earth system', convention=convESMF, purpose=purpGen, rc=rc)

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.70 2010/09/13 23:45:44 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.71 2010/09/14 05:54:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.70 2010/09/13 23:45:44 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.71 2010/09/14 05:54:53 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -336,30 +336,19 @@ namespace ESMCI {
 
   } else if (object.compare("comp")==0) {
   // Component standard Attribute packages
-    if ((convention.compare("CF")==0  ||
-         convention.compare("ESG")==0 ||
-         convention.compare("ESMF")==0) && purpose.compare("General")==0) {
-      localrc = AttPackCreateCustom("CF", "General", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-            &localrc)) return localrc;
-      localrc = AttPackAddAttribute("References", "CF", "General", object);
-      localrc = AttPackAddAttribute("Comment", "CF", "General", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-            &localrc)) return localrc;
-    }
     if ((convention.compare("ESG")==0 ||
          convention.compare("ESMF")==0) && purpose.compare("General")==0) {
-      localrc = AttPackNest("ESG", "General", object, "CF", "General");
+      localrc = AttPackCreateCustom("ESG", "General", object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
       localrc = AttPackAddAttribute("Agency", "ESG", "General", object);
       localrc = AttPackAddAttribute("Author", "ESG", "General", object);
       localrc = AttPackAddAttribute("CodingLanguage", "ESG", "General", object);
       localrc = AttPackAddAttribute("Discipline", "ESG", "General", object);
-      localrc = AttPackAddAttribute("FullName", "ESG", "General", object);
+      localrc = AttPackAddAttribute("ComponentLongName", "ESG", "General", object);
       localrc = AttPackAddAttribute("Institution", "ESG", "General", object);
       localrc = AttPackAddAttribute("ModelComponentFramework", "ESG", "General", object);
-      localrc = AttPackAddAttribute("Name", "ESG", "General", object);
+      localrc = AttPackAddAttribute("ComponentShortName", "ESG", "General", object);
       localrc = AttPackAddAttribute("PhysicalDomain", "ESG", "General", object);
       localrc = AttPackAddAttribute("Version", "ESG", "General", object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
@@ -4092,7 +4081,7 @@ namespace ESMCI {
   //
   if (object.compare("comp")==0) {
     // get value of attribute 0 or set to N/A if not present
-    localrc = AttPackIsPresent("Name",convention,purpose,object,NULL,&presentflag);
+    localrc = AttPackIsPresent("ComponentShortName",convention,purpose,object,NULL,&presentflag);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed finding an attribute");
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -4101,7 +4090,7 @@ namespace ESMCI {
       return ESMF_FAILURE;
     }
     if (presentflag == ESMF_TRUE) {
-      attr = (AttPackGet(convention, purpose, object,NULL)->AttPackGetAttribute("Name"));
+      attr = (AttPackGet(convention, purpose, object,NULL)->AttPackGetAttribute("ComponentShortName"));
       if (attr != NULL) {
         modelcompname = attr->vcp;
       } else {
@@ -4117,7 +4106,7 @@ namespace ESMCI {
     }
   
     // get value of attribute 1 or set to N/A if not present
-    localrc = AttPackIsPresent("FullName",convention,purpose,object,NULL,&presentflag);
+    localrc = AttPackIsPresent("ComponentLongName",convention,purpose,object,NULL,&presentflag);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed finding an attribute");
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -4126,7 +4115,7 @@ namespace ESMCI {
       return ESMF_FAILURE;
     }
     if (presentflag == ESMF_TRUE) {
-      attr = (AttPackGet(convention,purpose,object,NULL)->AttPackGetAttribute("FullName"));
+      attr = (AttPackGet(convention,purpose,object,NULL)->AttPackGetAttribute("ComponentLongName"));
       if (attr != NULL) {
         fullname = attr->vcp;
       } else {

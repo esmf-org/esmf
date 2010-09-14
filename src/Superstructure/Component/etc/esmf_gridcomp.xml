@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <component>
   <attribute_package convention="ESG" purpose="General">
-    <Name>GEOS</Name>
-    <FullName>Goddard Earth Observing System Model</FullName>
+    <ComponentShortName>GEOS</ComponentShortName>
+    <ComponentLongName>Goddard Earth Observing System Model</ComponentLongName>
     <Agency>NASA</Agency>
     <Institution>Global Modeling and Assimilation Office (GMAO)</Institution>
     <Version>5</Version>
@@ -11,7 +11,5 @@
     <PhysicalDomain>Earth System</PhysicalDomain>
     <CodingLanguage>Fortran 90</CodingLanguage>
     <ModelComponentFramework>ESMF (Earth System Modeling Framework)</ModelComponentFramework>
-    <Comment>ESMF GridComp Attribute IO Test</Comment>
-    <References>http://gmao.gsfc.nasa.gov/systems/geos5</References>
   </attribute_package>
 </component>

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridCompEx.F90,v 1.9 2010/06/29 21:55:28 svasquez Exp $
+! $Id: ESMF_AttReadGridCompEx.F90,v 1.10 2010/09/14 05:58:05 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -112,8 +112,9 @@ program ESMF_AttReadGridCompEx
 !print *, 'rc = ', rc
 
 !BOC
-      ! Get ESG "Name" Attribute from a GridComp
-      call ESMF_AttributeGet(gridcomp, name='Name', value=attrValue, &
+      ! Get ESG "ComponentShortName" Attribute from a GridComp
+      call ESMF_AttributeGet(gridcomp, name='ComponentShortName', &
+                             value=attrValue, &
                              convention='ESG', purpose='General', rc=rc)
 !EOC
 
@@ -123,8 +124,9 @@ program ESMF_AttReadGridCompEx
 !print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get ESG "FullName" Attribute from a GridComp
-      call ESMF_AttributeGet(gridcomp, name='FullName', value=attrValue, &
+      ! Get ESG "ComponentLongName" Attribute from a GridComp
+      call ESMF_AttributeGet(gridcomp, name='ComponentLongName', &
+                             value=attrValue, &
                              convention='ESG', purpose='General', rc=rc)
 !EOC
 
@@ -221,30 +223,6 @@ program ESMF_AttReadGridCompEx
 
       if (.not.((rc==ESMF_SUCCESS .and. &
                  attrvalue=='ESMF (Earth System Modeling Framework)') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-!print *, 'rc = ', rc
-!print *, 'attrvalue = ', attrvalue
-
-!BOC
-      ! Get CF "Comment" Attribute from a GridComp
-      call ESMF_AttributeGet(gridcomp, name='Comment', value=attrValue, &
-                             convention='CF', purpose='General', rc=rc)
-!EOC
-
-      if (.not.((rc==ESMF_SUCCESS .and. &
-                 attrvalue=='ESMF GridComp Attribute IO Test') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
-!print *, 'rc = ', rc
-!print *, 'attrvalue = ', attrvalue
-
-!BOC
-      ! Get CF "References" Attribute from a GridComp
-      call ESMF_AttributeGet(gridcomp, name='References', value=attrValue, &
-                             convention='CF', purpose='General', rc=rc)
-!EOC
-
-      if (.not.((rc==ESMF_SUCCESS .and. &
-                 attrvalue=='http://gmao.gsfc.nasa.gov/systems/geos5') &
                       .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
