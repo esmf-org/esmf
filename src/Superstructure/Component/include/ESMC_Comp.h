@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.51 2010/09/14 23:15:01 svasquez Exp $
+// $Id: ESMC_Comp.h,v 1.52 2010/09/14 23:31:08 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -312,8 +312,9 @@ void *ESMC_GridCompGetInternalState(
 // !DESCRIPTION:
 //
 //  Available to be called by an {\\tt ESMC\_GridComp} at any time after {\\tt ESMC\_GridCompSetInternalState} has been called. Since init, run, and finalize must be separate subroutines, data that they need to share in common can either be module global data, or can be allocated in a private data block and the address of that block can be registered with the framework and retrieved by this call. When running multiple instantiations of an {\tt ESMC\_GridComp}, for example during ensemble runs, it may be simpler to maintain private data specific to each run with private data blocks. A corresponding {\tt ESMC\_GridCompSetInternalState} call sets the data pointer to this block, and this call retrieves the data pointer. Note that the dataPointer argument needs to be a derived type which contains only a pointer of the type of the data block defined by the user. When making this call the pointer needs to be unassociated. When the call returns, the pointer will now reference the original data block which was set during the previous call to {\tt ESMC\_GridCompSetInternalState}.
-
-Only the last data block set via {\\tt ESMC\_GridCompSetInternalState} will be accessible. 
+//
+//Only the last data block set via {\\tt ESMC\_GridCompSetInternalState} will be accessible. 
+//
 //  The arguments are:
 //  \begin{description}
 //  \item[comp]
