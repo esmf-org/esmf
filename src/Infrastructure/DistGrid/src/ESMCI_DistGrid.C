@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.48 2010/09/11 00:07:12 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.49 2010/09/14 15:56:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.48 2010/09/11 00:07:12 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.49 2010/09/14 15:56:14 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -107,7 +107,7 @@ DistGrid *DistGrid::create(
     int *connectionListAlloc = NULL; // default
     if (connectionList){
       // connectionList was provided -> check for correct format
-      int elementSize = 3*dg->dimCount+2;
+      int elementSize = 2*dg->dimCount+2;
       if (connectionList->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- connectionList array must be of rank 2", rc);
@@ -116,7 +116,7 @@ DistGrid *DistGrid::create(
       if (connectionList->extent[0] != elementSize){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of connectionList array must be of size "
-          "(3*dimCount+2)", rc);
+          "(2*dimCount+2)", rc);
         return ESMC_NULL_POINTER;
       }
       // check patchA & patchB entries
@@ -146,7 +146,7 @@ DistGrid *DistGrid::create(
       //TODO: sense for open edges.
       if (dg->connectionCount){
         dimInterfaceInt = 2;
-        int elementSize = 3*dg->dimCount+2;
+        int elementSize = 2*dg->dimCount+2;
         dimCountInterfaceInt[0] = elementSize;
         dimCountInterfaceInt[1] = dg->connectionCount;
         connectionListAlloc = new int[elementSize * dg->connectionCount];
@@ -412,7 +412,7 @@ DistGrid *DistGrid::create(
     }
     int connectionCount = distgrid->connectionCount = dg->connectionCount;
     if (connectionCount){
-      int elementSize = 3*dimCount+2;
+      int elementSize = 2*dimCount+2;
       distgrid->connectionList = new int*[connectionCount];
       for (int i=0; i<connectionCount; i++){
         distgrid->connectionList[i] = new int[elementSize];
@@ -1864,7 +1864,7 @@ int DistGrid::construct(
   patchCount = patchCountArg;
   if (connectionListArg != NULL){
     // connectionList was provided
-    int elementSize = 3*dimCount+2;
+    int elementSize = 2*dimCount+2;
     if (connectionListArg->dimCount != 2){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- connectionListArg array must be of rank 2", &rc);
@@ -1873,7 +1873,7 @@ int DistGrid::construct(
     if (connectionListArg->extent[0] != elementSize){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- 1st dimension of connectionListArg array must be of size "
-        "(3*dimCount+2)", &rc);
+        "(2*dimCount+2)", &rc);
       return rc;
     }
     // fill in the connectionList member and check patchA & patchB entries
@@ -3793,8 +3793,7 @@ int DistGrid::connection(
   int patchIndexA,                  // in  -
   int patchIndexB,                  // in  -
   InterfaceInt *positionVector,     // in -
-  InterfaceInt *orientationVector,  // in -
-  InterfaceInt *repetitionVector    // in -
+  InterfaceInt *orientationVector   // in -
   ){    
 //
 // !DESCRIPTION:
@@ -3817,11 +3816,11 @@ int DistGrid::connection(
       "- connection array must be of rank 1", &rc);
     return rc;
   }
-  int dimCount = (connection->extent[0]-2)/3;
-  if (connection->extent[0] != dimCount*3 + 2){
+  int dimCount = (connection->extent[0]-2)/2;
+  if (connection->extent[0] != dimCount*2 + 2){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
       "- 1st dimension of connection array must be of size "
-      "(3 * dimCount + 2)", &rc);
+      "(2 * dimCount + 2)", &rc);
     return rc;
   }
   
@@ -3873,28 +3872,6 @@ int DistGrid::connection(
       connection->array[2+dimCount+i] = i+1;
   }
   
-  // check on repetitionVector
-  if (repetitionVector != NULL){
-    // repetitionVector was provided
-    if (repetitionVector->dimCount != 1){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-        "- repetitionVector array must be of rank 1", &rc);
-      return rc;
-    }
-    if (repetitionVector->extent[0] != dimCount){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-        "- 1st dimension of repetitionVector array must be of size dimCount",
-        &rc);
-      return rc;
-    }
-    // fill in the repetitionVector
-    memcpy(&(connection->array[2+2*dimCount]), repetitionVector->array,
-      sizeof(int)*dimCount);
-  }else{
-    // repetitionVector was not provided -> fill in default repetition
-    for (int i=0; i<dimCount; i++)
-      connection->array[2+2*dimCount+i] = 0;
-  }
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;

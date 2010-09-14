@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.60 2010/07/08 21:02:26 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.61 2010/09/14 15:56:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -1465,7 +1465,7 @@ program ESMF_ArrayEx
 ! 
 !EOEI
 !BOCI
-  allocate(connectionList(3*2+2,1))   ! 1 connection: the bipolar fold
+  allocate(connectionList(2*2+2,1))   ! 1 connection: the bipolar fold
   call ESMF_DistGridConnection(connection=connectionList(:,1), &
     patchIndexA=1, patchIndexB=2, &
     positionVector=(/179, 99/), orientationVector=(/-1, -2/), rc=rc)

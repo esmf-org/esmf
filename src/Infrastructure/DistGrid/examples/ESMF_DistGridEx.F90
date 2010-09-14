@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.31 2010/06/29 19:15:51 svasquez Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.32 2010/09/14 15:56:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -592,17 +592,16 @@ program ESMF_DistGridEx
 ! along the first dimension are imposed by adding a
 ! {\tt connectionList} argument with only one element to the create call.
 !
-! Each {\tt connectionList} element is a vector of {\tt (3 * dimCount + 2)}
+! Each {\tt connectionList} element is a vector of {\tt (2 * dimCount + 2)}
 ! integer numbers:
 !EOE
 !BOC
-  allocate(connectionList(3*2+2, 1))  ! (3*dimCount+2, number of connections)
+  allocate(connectionList(2*2+2, 1))  ! (2*dimCount+2, number of connections)
 !EOC
 !BOE
 ! and has the following format:
 !
-! {\tt (/patchIndex\_A, patchIndex\_B, positionVector, orientationVector,
-! repetitionVector/)}.
+! {\tt (/patchIndex\_A, patchIndex\_B, positionVector, orientationVector/)}.
 !
 ! The following constructor call can be used to construct a suitable connectionList
 ! element.
@@ -612,7 +611,7 @@ program ESMF_DistGridEx
      patchIndexA=1, patchIndexB=1, &
      positionVector=(/5, 0/), &
      orientationVector=(/1, 2/), &
-     repetitionVector=(/1, 0/), rc=rc)
+     rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
@@ -632,9 +631,6 @@ program ESMF_DistGridEx
 ! be the same as the orientation of patchA (it maps index 1 of patchA to index 1
 ! of patchB and the same for index 2). The {\tt orientationVector} could have
 ! been omitted in this case which corresponds to the default orientation.
-!
-! Finally, the {\tt repetitionVector} idicates that this connetion element will
-! be periodically repeated along dimension 1.
 !
 ! The {\tt connectionList} can now be used to create a {\tt DistGrid} object with the
 ! desired boundary conditions.

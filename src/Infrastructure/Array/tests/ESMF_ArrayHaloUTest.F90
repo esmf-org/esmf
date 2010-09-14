@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHaloUTest.F90,v 1.8 2010/04/27 07:47:35 theurich Exp $
+! $Id: ESMF_ArrayHaloUTest.F90,v 1.9 2010/09/14 15:56:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayHaloUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayHaloUTest.F90,v 1.8 2010/04/27 07:47:35 theurich Exp $'
+    '$Id: ESMF_ArrayHaloUTest.F90,v 1.9 2010/09/14 15:56:14 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1603,7 +1603,7 @@ program ESMF_ArrayHaloUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Distgrid Connection Test-5"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  allocate(connectionList(3*2+2, 1))  ! (3*dimCount+2, number of connections)
+  allocate(connectionList(2*2+2, 1))  ! (2*dimCount+2, number of connections)
   call ESMF_DistGridConnection(connection=connectionList(:,1), &
      patchIndexA=1, patchIndexB=1, &
      positionVector=(/0, 20/), rc=rc)

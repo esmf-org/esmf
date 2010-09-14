@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.32 2010/09/11 00:07:12 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.33 2010/09/14 15:56:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -192,7 +192,7 @@ namespace ESMCI {
     // connections
     static int connection(InterfaceInt *connection, int patchIndexA, 
       int patchIndexB, InterfaceInt *positionVector,
-      InterfaceInt *orientationVector, InterfaceInt *repetitionVector);
+      InterfaceInt *orientationVector);
   };  // class DistGrid
 
   

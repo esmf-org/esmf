@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.27 2010/09/11 00:07:12 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.28 2010/09/14 15:56:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -595,7 +595,7 @@ extern "C" {
     ESMCI::InterfaceInt **connection, int *patchIndexA,
     int *patchIndexB, ESMCI::InterfaceInt **positionVector,
     ESMCI::InterfaceInt **orientationVector,
-    ESMCI::InterfaceInt **repetitionVector, int *rc){
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_connection()"
     // Initialize return code; assume routine not implemented
@@ -603,7 +603,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(
       ESMCI::DistGrid::connection(*connection, *patchIndexA,
-      *patchIndexB, *positionVector, *orientationVector, *repetitionVector), 
+      *patchIndexB, *positionVector, *orientationVector), 
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

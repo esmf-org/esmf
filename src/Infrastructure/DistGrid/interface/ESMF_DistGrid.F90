@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.63 2010/09/11 00:07:12 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.64 2010/09/14 15:56:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.63 2010/09/11 00:07:12 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.64 2010/09/14 15:56:14 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2915,7 +2915,7 @@ contains
 ! !IROUTINE: ESMF_DistGridConnection - Construct a DistGrid connection element
 ! !INTERFACE:
   subroutine ESMF_DistGridConnection(connection, patchIndexA, patchIndexB, &
-    positionVector, orientationVector, repetitionVector, rc)
+    positionVector, orientationVector, rc)
 !
 ! !ARGUMENTS:
     integer,        target, intent(out)           :: connection(:)
@@ -2923,7 +2923,6 @@ contains
     integer,                intent(in)            :: patchIndexB
     integer,                intent(in)            :: positionVector(:)
     integer,                intent(in),  optional :: orientationVector(:)
-    integer,                intent(in),  optional :: repetitionVector(:)
     integer,                intent(out), optional :: rc
 !         
 !
@@ -2950,12 +2949,6 @@ contains
 !        dimensions of patch A with the same index in patch B. By default
 !        {\tt orientationVector = (/1,2,3,.../)}, i.e. same orientation as
 !        patch A.
-!     \item[{[repetitionVector]}]
-!        The allowed values for each direction are 0 and 1. An entry of 1
-!        indicates that this connection element will be repeated along the
-!        respective dimension. A value of 0 indicates no repetition along this
-!        dimension. By default {\tt repetitionVector = (/0,0,0,.../)}, i.e. no
-!        repetition along any direction.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2966,7 +2959,6 @@ contains
     type(ESMF_InterfaceInt) :: connectionArg        ! helper variable
     type(ESMF_InterfaceInt) :: positionVectorArg    ! helper variable
     type(ESMF_InterfaceInt) :: orientationVectorArg ! helper variable
-    type(ESMF_InterfaceInt) :: repetitionVectorArg  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2983,15 +2975,11 @@ contains
       rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    repetitionVectorArg = ESMF_InterfaceIntCreate(repetitionVector, &
-      rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridConnection(connectionArg, &
       patchIndexA, patchIndexB, positionVectorArg, orientationVectorArg, &
-      repetitionVectorArg, localrc)
+      localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -3003,9 +2991,6 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(orientationVectorArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(repetitionVectorArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
