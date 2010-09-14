@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.18 2010/09/13 22:11:34 samsoncheung Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.19 2010/09/14 17:02:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -296,7 +296,7 @@ program ESMF_ArrayIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Read in a netCDF file to an ESMF array.
-  write(name, *) "Read ESMF_Array without Halo Test"
+  write(name, *) "Read ESMF_Array with Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayRead(array_withhalo2, file='file3D_withhalo.nc', rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
@@ -309,7 +309,7 @@ program ESMF_ArrayIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Read in a binary file to an ESMF array.
-  write(name, *) "Read ESMF_Array without Halo binary Test"
+  write(name, *) "Read ESMF_Array with Halo binary Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayRead(array_withhalo3, file='file3D_withhalo.bin', &
        iofmt=ESMF_IOFMT_BIN, rc=rc)
@@ -485,7 +485,7 @@ program ESMF_ArrayIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Read in a netCDF file to an ESMF array.
-  write(name, *) "Read 2D ESMF_Array to ESMF_Array without halo Test"
+  write(name, *) "Read 2D ESMF_Array written for Array with halo to ESMF_Array without halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayRead(array_wouthalo, file="file2D_withhalo.nc", rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
@@ -555,7 +555,7 @@ program ESMF_ArrayIOUTest
 ! !  Compare global Fortran array (Data is type ESMF_KIND_R8)
 ! !  Both data are read in, if ESMF_PIO is not defined, we should
 ! !  skip this comparison.
-
+  !NEX_UTest_Multi_Proc_Only
   Maxvalue = 0.0
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_ArrayGather(array_diff, FarrayGr_1, patch=1, rootPet=0, rc=rc)
