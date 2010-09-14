@@ -1,4 +1,4 @@
-% $Id: Attribute_rest.tex,v 1.15 2010/08/01 05:34:10 eschwab Exp $
+% $Id: Attribute_rest.tex,v 1.16 2010/09/14 18:53:37 murphysj Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -8,12 +8,21 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-The capabilities of the Attribute class which are still in the developmental stage are listed by category.
+1.Future Capabilities by Category
  
 \subsubsection{Attributes}
 
 \begin{itemize}
 \item Case insensitive Attribute names, conventions, purposes, and values
+\end{itemize}
+
+
+\subsubsection{Attribute Packages}
+
+\begin{itemize}
+\item Automatically create object Attribute packages upon object creation.
+\item The implemention of Grids is still in flux within the CIM.  This will effect the final appearance of the Gridspec package in both ESMF and ESG. It is anticipated that an additional CIM Grid Attribute Package will be created.
+\item Add a CIM Scientific Property Attribute Package. For CMIP5, hundreds of Scientific Properties have been identified. All of these will be added to ESMF.    
 \end{itemize}
 
 \subsubsection{Attribute Hierarchies}
@@ -22,9 +31,12 @@ The capabilities of the Attribute class which are still in the developmental sta
 \item The option of "deep" copies of an Attribute hierarchy
 \end{itemize}
 
-\subsubsection{Attribute Packages}
 
+2.Restrictions
+
+\subsubsection{Attribute Export}
 \begin{itemize}
-\item Automatically create object Attribute packages upon object creation.
-\item Develop more Attribute packages and corresponding XML output for the Metafor CIM convention, such as for scientific properties, numerical experiments, and citations.
+\item Only the CIM XML format is ingestable by ESG
 \end{itemize}
+
+
