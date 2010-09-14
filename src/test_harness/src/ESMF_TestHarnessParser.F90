@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessParser.F90,v 1.4 2010/09/01 20:24:59 garyblock Exp $
+! $Id: ESMF_TestHarnessParser.F90,v 1.5 2010/09/14 23:21:28 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@ logical                       :: checkpoint = .FALSE.
 
   ! local character strings
   character(ESMF_MAXSTR) :: ltag, ltmp
-  character(ESMF_MAXSTR) :: filename
+  character(THARN_MAXFNAME) :: filename
 
   ! local integer variables
   integer :: kfile, ncolumns
@@ -505,7 +505,8 @@ logical                       :: checkpoint = .FALSE.
   type (sized_char_array), allocatable :: ltmpstring(:), lstring(:)
 
   ! local character strings
-  character(ESMF_MAXSTR) :: lfilename, ltmp
+  character(THARN_MAXFNAME) :: lfilename
+  character(ESMF_MAXSTR) :: ltmp
   character(ESMF_MAXSTR) :: lchar, lchar1, lchar2
   
   logical :: flag = .true.

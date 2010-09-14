@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUTest.F90,v 1.33 2010/08/17 20:50:11 garyblock Exp $
+! $Id: ESMF_TestHarnessUTest.F90,v 1.34 2010/09/14 23:21:28 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -57,9 +57,9 @@
   integer                :: argc
   integer                :: argindex
 
-  character(ESMF_MAXSTR) :: srcPath(1)
-  character(ESMF_MAXSTR) :: configFname(1)
-  character(ESMF_MAXSTR) :: xmlFname(1)
+  character(THARN_MAXFNAME)  :: srcPath(1)
+  character(THARN_MAXFNAME)  :: configFname(1)
+  character(THARN_MAXFNAME)  :: xmlFname(1)
   integer                :: runFlag(1)
   integer                :: xmlFlag(1)
 
@@ -137,13 +137,13 @@
 
   ! broadcast command line args to all PETS
 ! how many characters
-  call ESMF_VMBroadcast (vm, bcstData=srcPath, count=ESMF_MAXSTR, root=0, rc=localrc)
+  call ESMF_VMBroadcast (vm, bcstData=srcPath, count=THARN_MAXFNAME, root=0, rc=localrc)
   if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "Broadcast Failure - runFlag", rc)) go to 90
 
-  call ESMF_VMBroadcast (vm, bcstData=configFname, count=ESMF_MAXSTR, root=0, rc=localrc)
+  call ESMF_VMBroadcast (vm, bcstData=configFname, count=THARN_MAXFNAME, root=0, rc=localrc)
   if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "Broadcast Failure - runFlag", rc)) go to 90
 
-  call ESMF_VMBroadcast (vm, bcstData=xmlFname, count=ESMF_MAXSTR, root=0, rc=localrc)
+  call ESMF_VMBroadcast (vm, bcstData=xmlFname, count=THARN_MAXFNAME, root=0, rc=localrc)
   if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "Broadcast Failure - runFlag", rc)) go to 90
 
   call ESMF_VMBroadcast (vm, bcstData=runFlag, count=1, root=0, rc=localrc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessTypesMod.F90,v 1.13 2010/09/01 20:24:59 garyblock Exp $
+! $Id: ESMF_TestHarnessTypesMod.F90,v 1.14 2010/09/14 23:21:28 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -39,6 +39,9 @@
   use ESMF_Mod
 
   implicit none
+
+  ! ESMF_MAXSTR is too small for some filenames
+  integer,parameter :: THARN_MAXFNAME = 256
 
   ! Debug flag
   logical, parameter :: debug_flag = .false.
