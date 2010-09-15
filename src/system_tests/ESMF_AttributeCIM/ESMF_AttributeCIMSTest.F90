@@ -33,7 +33,7 @@ program ESMF_AttributeCIMSTest
   type(ESMF_GridComp) :: comp1
   type(ESMF_GridComp) :: comp2
   type(ESMF_CplComp) :: cplcomp
-  character(ESMF_MAXSTR) :: conv, purp
+  character(ESMF_MAXSTR) :: conv, purp, attrVal
     
   ! Cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -245,8 +245,6 @@ program ESMF_AttributeCIMSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
     
-  ! Attribute-specific initialization
-
   ! reconcile comp2's export State to get comp2's Field Attributes onto
   ! PETs 0,1,2, from PETs 3,4,5, since Coupler is setup one way,
   ! comp1 -> comp2, rather than vice versa, comp2 -> comp1. So cannot put in
@@ -301,10 +299,11 @@ program ESMF_AttributeCIMSTest
     ! uni-processor mode -- ESMF_AttributeUpdate() not necessary
   endif
 
-  ! write the Attribute info in CIM XML format for the Coupler, both Components,
-  ! and their Fields
   conv = 'CIM 1.0'
   purp = 'Model Component Simulation Description'
+#if 1
+  ! write the Attribute info in CIM XML format for the Coupler, both Components,
+  ! and their Fields
   if (localPet .eq. 0) then
     call ESMF_AttributeWrite(cplcomp, conv, purp, &
                              attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
@@ -312,7 +311,7 @@ program ESMF_AttributeCIMSTest
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)  
   endif
-    
+#endif
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Run section
@@ -330,6 +329,22 @@ program ESMF_AttributeCIMSTest
   if (ESMF_LogMsgFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+#if 0
+  if (petCount .eq. 6) then
+    call ESMF_AttributeUpdate(comp1, vm, rootList=(/0,1,2/), rc=rc)
+    if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+
+    call ESMF_AttributeGet(comp1, name="IndividualName", value=attrVal, &
+      convention=conv, purpose=purp, rc=rc)
+    if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    print *, "IndividualName = ", attrVal
+  endif
+#endif
 
   ! run the coupler
   call ESMF_CplCompRun(cplcomp, importState=c1exp, exportState=c2imp, &

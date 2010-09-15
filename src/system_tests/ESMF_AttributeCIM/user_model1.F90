@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.2 2010/09/13 05:50:47 eschwab Exp $
+! $Id: user_model1.F90,v 1.3 2010/09/15 19:52:01 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -224,10 +224,25 @@ module user_model1
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
+    character(ESMF_MAXSTR)      :: convCIM, purpComp, attrVal
+
+    convCIM = 'CIM 1.0'
+    purpComp = 'Model Component Simulation Description'
+
     ! Initialize return code
     rc = ESMF_SUCCESS
 
-    ! Nothing happens in this run cycle for this simple example
+#if 0
+    call ESMF_AttributeRemove(comp, name="YearReleased", &
+      purpose=purpComp, convention=convCIM ,rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+    attrVal = "Test change"
+    call ESMF_AttributeSet(comp, name="IndividualName", &
+      value=attrVal, &
+      convention=convCIM, purpose=purpComp, rc=rc)
+#endif
+
+    if (rc .ne. ESMF_SUCCESS) return
                                                              
   end subroutine user_run
 
