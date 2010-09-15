@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.19 2010/09/13 20:17:26 samsoncheung Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.20 2010/09/15 18:36:11 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.19 2010/09/13 20:17:26 samsoncheung Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.20 2010/09/15 18:36:11 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -828,7 +828,7 @@ contains
     ! Open file{s} @\
     !------------ @\
     mode = pio_64bit_offset @\
-    if (file_exists) then @\
+    if (file_exists .and. piofmt.ne.'bin') then @\
       pioerr = PIO_OpenFile(PIOSYS,FileObj,fmtiotype,trim(file),mode=PIO_write) @\
       pioerr = PIO_redef(FileObj) @\
       call WriteHeader(FileObj,varname,1,gDimsIndex,dimid_xyz,dimC) @\
