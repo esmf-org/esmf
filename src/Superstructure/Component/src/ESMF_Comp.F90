@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.197 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_Comp.F90,v 1.198 2010/09/15 01:56:45 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -142,8 +142,8 @@ module ESMF_CompMod
     type(ESMF_Grid)     :: grid             ! default grid, gcomp only
     type(ESMF_GridCompType) :: gridcomptype ! model type, gcomp only
 
-    character(len=ESMF_MAXSTR) :: configFile! resource filename
-    character(len=ESMF_MAXSTR) :: dirPath   ! relative dirname, app only
+    character(len=ESMF_MAXPATHLEN) :: configFile! resource filename
+    character(len=ESMF_MAXPATHLEN) :: dirPath   ! relative dirname, app only
 
     type(ESMF_CWrap)    :: compw            ! to satisfy the C interface
     type(ESMF_VM)       :: vm               ! component VM
@@ -248,7 +248,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.197 2010/03/04 18:57:45 svasquez Exp $'
+    '$Id: ESMF_Comp.F90,v 1.198 2010/09/15 01:56:45 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -530,8 +530,8 @@ contains
     integer :: localrc                        ! local return code
     integer :: npets, mypet, i, petCount
     integer, pointer :: petlist_loc(:)
-    character(len=ESMF_MAXSTR) :: fullpath    ! config file + dirPath
-    character(len=ESMF_MAXSTR) :: msgbuf
+    character(len=ESMF_MAXPATHLEN) :: fullpath    ! config file + dirPath
+    character(len=ESMF_MAXSTR)     :: msgbuf
     type(ESMF_VM):: vm
 
     ! Assume not implemented until success
