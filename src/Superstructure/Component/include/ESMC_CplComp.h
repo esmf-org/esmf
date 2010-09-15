@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.h,v 1.22 2010/09/15 22:46:50 theurich Exp $
+// $Id: ESMC_CplComp.h,v 1.23 2010/09/15 23:10:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -38,11 +38,11 @@
 extern "C" {
 #endif
 
-
 // Class declaration type
 typedef void* ESMC_CplComp;
 
 // Class API
+
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_CplCompCreate - Create a Coupler Component
@@ -55,6 +55,8 @@ ESMC_CplComp ESMC_CplCompCreate(
   int *rc);
 //EOP
 //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_CplCompDestroy - Destroy a Coupler Component
 //
@@ -63,13 +65,74 @@ int ESMC_CplCompDestroy(
   ESMC_CplComp *comp);
 //EOP
 //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_CplCompDestroy - Destroy a Coupler Component
+// !IROUTINE: ESMC_CplCompFinalize - Finalize a Coupler Component
 //
 // !INTERFACE:
-int ESMC_CplCompSetServices(ESMC_CplComp comp, 
-  void (*func)(ESMC_CplComp, int *), int *userRc);
+int ESMC_CplCompFinalize(
+  ESMC_CplComp comp, 
+  ESMC_State importState,
+  ESMC_State exportState, 
+  ESMC_Clock clock, 
+  int phase, 
+  int *userRc);
 //EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_CplCompGetInternalState - Get the internal State of a Coupler Component
+//
+// !INTERFACE:
+void *ESMC_CplCompGetInternalState(
+  ESMC_CplComp comp, 
+  int *rc);
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_CplCompInitialize - Initialize a Coupler Component
+//
+// !INTERFACE:
+int ESMC_CplCompInitialize(
+  ESMC_CplComp comp, 
+  ESMC_State importState,
+  ESMC_State exportState, 
+  ESMC_Clock clock, 
+  int phase, 
+  int *userRc);
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_CplCompPrint - Print a Coupler Component
+//
+// !INTERFACE:
+int ESMC_CplCompPrint(
+  ESMC_CplComp comp, 
+  const char *options);
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_CplCompRun - Run a Coupler Component
+//
+// !INTERFACE:
+int ESMC_CplCompRun(
+  ESMC_CplComp comp, 
+  ESMC_State importState,
+  ESMC_State exportState, 
+  ESMC_Clock clock, 
+  int phase, 
+  int *userRc);
+//EOP
+//-----------------------------------------------------------------------------
+
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_CplCompSetEntryPoint - Set the Entry point of a Coupler Component
@@ -86,53 +149,7 @@ int ESMC_CplCompSetEntryPoint(
   int phase);
 //EOP
 //-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_CplCompInitialize - Initialize a Coupler Component
-//
-// !INTERFACE:
-int ESMC_CplCompInitialize(
-  ESMC_CplComp comp, 
-  ESMC_State importState,
-  ESMC_State exportState, 
-  ESMC_Clock clock, 
-  int phase, 
-  int *userRc);
-//EOP
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_CplCompRun - Run a Coupler Component
-//
-// !INTERFACE:
-int ESMC_CplCompRun(
-  ESMC_CplComp comp, 
-  ESMC_State importState,
-  ESMC_State exportState, 
-  ESMC_Clock clock, 
-  int phase, 
-  int *userRc);
-//EOP
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_CplCompFinalize - Finalize a Coupler Component
-//
-// !INTERFACE:
-int ESMC_CplCompFinalize(
-  ESMC_CplComp comp, 
-  ESMC_State importState,
-  ESMC_State exportState, 
-  ESMC_Clock clock, 
-  int phase, 
-  int *userRc);
-//EOP
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_CplCompGetInternalState - Get the internal State of a Coupler Component
-//
-// !INTERFACE:
-void *ESMC_CplCompGetInternalState(
-  ESMC_CplComp comp, 
-  int *rc);
-//EOP
+
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_CplCompSetInternalState - Set the internal State of a Coupler Component
@@ -143,17 +160,16 @@ int ESMC_CplCompSetInternalState(
   void *data);
 //EOP
 //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_CplCompPrint - Print a Coupler Component
+// !IROUTINE: ESMC_CplCompSetServices - Destroy a Coupler Component
 //
 // !INTERFACE:
-int ESMC_CplCompPrint(
-  ESMC_CplComp comp, 
-  const char *options);
+int ESMC_CplCompSetServices(ESMC_CplComp comp, 
+  void (*func)(ESMC_CplComp, int *), int *userRc);
 //EOP
 //-----------------------------------------------------------------------------
-
-
 
 #ifdef __cplusplus
 } // extern "C"
