@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.55 2010/09/15 18:08:45 rokuingh Exp $
+! $Id: user_model1.F90,v 1.56 2010/09/15 19:49:44 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -420,7 +420,7 @@ module user_model1
 !        call ESMF_AttributeWrite(field,conv,purp,rc=rc)
 !        call ESMF_AttributeWrite(field,conv,purp, &
 !                               attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-!        call ESMF_AttributeSet(field, name2, value2, convention=conv, purpose=purp, rc=rc)
+        call ESMF_AttributeSet(field, name2, value2, convention=conv, purpose=purp, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
 #if 0
         call ESMF_AttributeAdd(field, convention=conv, purpose=purp2, attrList=attrList, &
@@ -431,7 +431,7 @@ module user_model1
           convention=conv, purpose=purp2, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
 #endif
-!        call ESMF_AttributeRemove(field, name=name3, convention=conv, purpose=purp, rc=rc)
+        call ESMF_AttributeRemove(field, name=name3, convention=conv, purpose=purp, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
     enddo
 
