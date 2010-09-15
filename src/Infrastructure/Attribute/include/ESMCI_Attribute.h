@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.37 2010/09/13 23:45:44 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.38 2010/09/15 19:49:00 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -232,7 +232,7 @@ class Attribute
     int AttributeUpdateComm(VM *vm, int sendBufSize, int *recvBufSize, 
       char *sendBuf, char *recvBuf, const vector<ESMC_I4> &roots, 
       const vector<ESMC_I4> &nonroots) const;
-    int AttributeUpdateChanges(int *linkChanges,
+    int AttributeUpdateTreeChanges(int *linkChanges,
       int *structChanges, int *valueChanges, int *numKeys) const;
     bool AttributeUpdateKeyCompare(char *key1, char *key2) const;
     int AttributeUpdateKeyCreate(char *key) const;

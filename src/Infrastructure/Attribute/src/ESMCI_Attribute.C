@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.72 2010/09/15 04:56:18 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.73 2010/09/15 19:49:00 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.72 2010/09/15 04:56:18 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.73 2010/09/15 19:49:00 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -722,7 +722,7 @@ namespace ESMCI {
     for (int j=0; j<nestCount; j++) {
       if (nestpack[j] == localParent->packList.at(i)) { 
         localParent->packList.erase(localParent->packList.begin() + i);
-        localParent->structChange = ESMF_TRUE;
+        //localParent->structChange = ESMF_TRUE;
         removed++;
         if (removed == nestCount) {
           done = true;
@@ -2945,7 +2945,7 @@ namespace ESMCI {
         linkList.at(i)->attrBase->ESMC_BaseGetVMId())) {
         // don't delete the root, but erase the Attribute pointer
         linkList.erase(linkList.begin() + i);
-        structChange = ESMF_TRUE;
+        //structChange = ESMF_TRUE;
         linkChange = *linkChangeIn;
         done = true;
         break;
@@ -2994,7 +2994,7 @@ namespace ESMCI {
       // found a match, destroy it
       delete attrList.at(i);
       attrList.erase(attrList.begin() + i);
-      structChange = ESMF_TRUE;
+      //structChange = ESMF_TRUE;
       done = true;
       break;
     }
@@ -3074,7 +3074,7 @@ namespace ESMCI {
   
   // add the Attribute
   attrList.push_back(attr);
-  structChange = ESMF_TRUE;
+  //structChange = ESMF_TRUE;
   
   return ESMF_SUCCESS;
 
