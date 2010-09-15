@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.20 2010/09/15 18:36:11 samsoncheung Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.21 2010/09/15 23:24:53 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.20 2010/09/15 18:36:11 samsoncheung Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.21 2010/09/15 23:24:53 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -111,12 +111,12 @@ contains
 ! !IROUTINE: ESMF_ArrayWrite - Write Array data
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayWrite(array, file, vname, append, iofmt, rc)
+  subroutine ESMF_ArrayWrite(array, file, variableName, append, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array), intent(inout) :: array
     character(*), intent(in) :: file
-    character(*), intent(in), optional :: vname
+    character(*), intent(in), optional :: variableName
     logical, intent(in), optional :: append
     type(ESMF_IOFmtFlag), intent(in), optional :: iofmt
     integer, intent(out), optional :: rc
@@ -125,8 +125,7 @@ contains
 !   Write the array data in the {ESMF\_Array} object to file.
 !
 !   Limitation:
-!   (1) Currently only netCDF is supported
-!   (2) Assume 1 DE per Pet
+!     Assume 1 DE per Pet
 !
 !  The arguments are:
 !  \begin{description}
@@ -134,8 +133,8 @@ contains
 !    The {\tt ESMF\_Array} object that contains the data to be written.
 !   \item[file]
 !    The name of the file being written.
-!   \item[{[vname]}]
-!    Variable name written in netcdf file; default is the "name" of array
+!   \item[{[variableName]}]
+!    Variable name written in the output file; default is the "name" of array
 !   \item[{[append]}]
 !    A logical flag: append data to an existing file, default is false.
 !   \item[{[iofmt]}]
@@ -188,9 +187,9 @@ contains
  
     ! binary format selected
     piofmt = "bin"
-    if (present(vname)) then
+    if (present(variableName)) then
       call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
-      "The input argument vname cannot be sepcified in ESMF_IOFMT_BIN mode", &
+      "The input argument variableName cannot be sepcified in ESMF_IOFMT_BIN mode", &
        ESMF_CONTEXT, rc)
       return
     endif
@@ -210,7 +209,7 @@ contains
     call ESMF_ArrayGet( array, typekind=typekind, rank=rank, name=varname, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    if(present(vname)) varname = vname
+    if(present(variableName)) varname = variableName
  
     file_exists = .false.
     if(present(append)) file_exists = append
@@ -340,12 +339,12 @@ contains
 ! !IROUTINE: ESMF_ArrayRead - Read Array data.
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayRead(array, file, vname, iofmt, rc)
+  subroutine ESMF_ArrayRead(array, file, variableName, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array), intent(inout) :: array
     character(*), intent(in)  :: file
-    character(*), intent(in), optional :: vname
+    character(*), intent(in), optional :: variableName
     type(ESMF_IOFmtFlag), intent(in), optional :: iofmt
     integer, intent(out), optional :: rc
 !
@@ -353,17 +352,16 @@ contains
 !   Read array data from file and put it into the {ESMF\_Array} object.
 ! 
 !   Limitation:  
-!   (1) Currently only netCDF is supported 
-!   (2) Assume 1 DE per Pet 
+!    Assume 1 DE per Pet 
 !
 !  The arguments are:
 !  \begin{description}
 !   \item[array]
 !    The {\tt ESMF\_Array} object through which the read data is returned.
 !   \item[file]
-!    The name of the file (netcdf) in which array data is read from.
-!   \item[{[vname]}]
-!    Variable name in netcdf file; default is the "name" of array
+!    The name of the output file in which array data is read from.
+!   \item[{[variableName]}]
+!    Variable name in the output file; default is the "name" of array
 !   \item[{[iofmt]}]
 !    The PIO format. Please see Section~\ref{opt:iofmtflag} for the list 
 !    of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
@@ -413,9 +411,9 @@ contains
 
     ! binary format selected
     piofmt = "bin"
-    if (present(vname)) then
+    if (present(variableName)) then
       call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
-      "The input argument vname cannot be sepcified in ESMF_IOFMT_BIN mode", &
+      "The input argument variableName cannot be sepcified in ESMF_IOFMT_BIN mode", &
        ESMF_CONTEXT, rc)
       return
     endif
@@ -435,7 +433,7 @@ contains
     call ESMF_ArrayGet( array, typekind=typekind, rank=rank, name=varname, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    if(present(vname)) varname = vname
+    if(present(variableName)) varname = variableName
 
     ! Call a T/K/R specific interface in order to create the proper
     !  type of F90 pointer, allocate the space, set the values in the
@@ -655,17 +653,16 @@ contains
 !   Write the array data in the {ESMF\_Array} object to file through PIO. @\
 ! @\
 !   Limitation:  @\
-!   (1) Currently only netCDF is supported @\
-!   (2) Assume 1 DE per Pet @\
+!     Assume 1 DE per Pet @\
 ! @\
 !  The arguments are: @\
 !  \begin{description} @\
 !   \item[array] @\
 !    The {\tt ESMF\_Array} object that contains the data to be written. @\
 !   \item[file] @\
-!    The name of the file (netcdf) in which Fortran array is written to. @\
-!   \item[varname] @\
-!     Variable name written in netcdf file @\
+!    The name of the output file in which Fortran array is written to. @\
+!   \item[variableName] @\
+!     Variable name written in output file @\
 !   \item[{[file_exists]}] @\
 !     A tag indicates file already existed with value 1. @\
 !   \item[piofmt] @\
@@ -923,15 +920,14 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
 !   Read array data from file via PIO and put it into the {ESMF\_Array} object. @\
 ! @\
 !   Limitation:  @\
-!   (1) Currently only netCDF is supported @\
-!   (2) Assume 1 DE per Pet @\
+!     Assume 1 DE per Pet @\
 ! @\
 !  The arguments are: @\
 !  \begin{description} @\
 !   \item[array] @\
 !    The {\tt ESMF\_Array} object through which the read data is returned. @\
 !   \item[file] @\
-!    The name of the file (netcdf) in which array data is read from. @\
+!    The name of the output file in which array data is read from. @\
 !   \item[varname] @\
 !     Variable name in netcdf file @\
 !   \item[piofmt] @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.19 2010/09/13 20:18:52 samsoncheung Exp $
+! $Id: ESMF_FieldPr.F90,v 1.20 2010/09/15 23:25:47 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -238,7 +238,7 @@ contains
 ! !DESCRIPTION:
 !     Write the array data in the {ESMF\_Field} object to file.
 !     This subroutine uses ESMF\_ArrayWrite() to write array
-!     data to a netCDF file. \\
+!     data to a netCDF file.
 !
 !   Limitation:
 !   See limitation in ESMF\_ArrayWrite()
@@ -248,10 +248,10 @@ contains
 !     \item [field]
 !        An {\tt ESMF\_Field} object.
 !     \item[file]
-!        The name of the netcdf file in which Fortran array is written to.
-!     \item[append]
+!        The name of the output file in which field data is written to.
+!     \item[{[append]}]
 !        Logical: if true, data is appended to an exist file, default is false.
-!     \item[iofmt]
+!     \item[{[iofmt]}]
 !        The PIO format. Please see Section~\ref{opt:iofmtflag} for the list 
 !        of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !     \item [{[rc]}]
@@ -293,7 +293,7 @@ contains
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        call ESMF_ArrayWrite(array, file, vname=trim(name), &
+        call ESMF_ArrayWrite(array, file, variableName=trim(name), &
           append=appended, iofmt=iofmtd, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -330,7 +330,7 @@ contains
 ! !DESCRIPTION:
 !     Read array data from file and put it into the {ESMF\_Field} object.
 !     This subroutine uses ESMF\_ArrayWrite() to write the array
-!     data to a netCDF file. \\
+!     data to a file. \\
 !
 !   Limitation:
 !   See limitation in ESMF\_ArrayWrite()
@@ -340,8 +340,8 @@ contains
 !     \item [field]
 !       An {\tt ESMF\_Field} object.
 !     \item[file]
-!       The name of the netcdf file in which array data is read from.
-!     \item[iofmt]
+!       The name of the file in which field data is read from.
+!     \item[{[iofmt]}]
 !       The PIO format. Please see Section~\ref{opt:iofmtflag} for the list 
 !       of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !     \item [{[rc]}]
@@ -379,7 +379,7 @@ contains
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        call ESMF_ArrayRead(array, file, vname=trim(name), &
+        call ESMF_ArrayRead(array, file, variableName=trim(name), &
           iofmt=iofmtd, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return

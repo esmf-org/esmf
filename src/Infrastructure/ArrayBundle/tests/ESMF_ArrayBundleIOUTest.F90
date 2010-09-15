@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleIOUTest.F90,v 1.4 2010/09/11 22:25:13 samsoncheung Exp $
+! $Id: ESMF_ArrayBundleIOUTest.F90,v 1.5 2010/09/15 23:25:32 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@ program ESMF_ArrayBundleIOUTest
   integer(ESMF_KIND_I4), pointer, dimension(:,:,:) :: farrayPtr3, farrayPtr3_r
   
   integer, allocatable :: exclusiveLBound(:,:), exclusiveUBound(:,:)
-  integer :: i,j,rc,rc_tmp
+  integer :: i,j,rc
   real :: Maxvalue, diff
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -161,7 +161,8 @@ program ESMF_ArrayBundleIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleWrite Multiple files Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_ArrayBundleWrite(arraybundle_w, file="sep.nc", mfiles=.true., rc=rc)
+  call ESMF_ArrayBundleWrite(arraybundle_w, file="sep.nc",  &
+                             singleFile=.false., rc=rc)
   if(rc==ESMF_RC_LIB_NOT_PRESENT) then
    call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
   else
@@ -212,8 +213,8 @@ program ESMF_ArrayBundleIOUTest
   write(name, *) "ArrayBundleRead Single file Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
   !call ESMF_ArrayBundleRead(arraybundle_r, file="bundle.nc", rc=rc)
-  call ESMF_ArrayBundleRead(arraybundle_r, file="sep.nc", mfiles=.true., rc=rc)
-  rc_tmp=rc   ! for later use in comparison
+  call ESMF_ArrayBundleRead(arraybundle_r, file="sep.nc",   &
+                            singleFile=.false., rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
