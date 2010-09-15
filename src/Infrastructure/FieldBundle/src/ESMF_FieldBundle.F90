@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.47 2010/09/15 01:36:54 w6ws Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.48 2010/09/15 05:07:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -1796,7 +1796,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleRead"
 !BOP
-! !IROUTINE: ESMF_FieldBundleRead - Read arrays to a FieldBundle form file 
+! !IROUTINE: ESMF_FieldBundleRead - Read arrays to a FieldBundle from file 
 !
 ! !INTERFACE:
       subroutine ESMF_FieldBundleRead(bundle, file, mfiles, iofmt, rc)

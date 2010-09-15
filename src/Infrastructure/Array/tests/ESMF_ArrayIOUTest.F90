@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.20 2010/09/14 22:48:41 theurich Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.21 2010/09/15 05:04:29 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -205,7 +205,7 @@ program ESMF_ArrayIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Creat Array without Halo for PIO Read"
+  write(name, *) "Create Array without Halo for PIO Read"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array_wouthalo2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
           computationalLWidth=(/0,0,0/), computationalUWidth=(/0,0,0/), &
