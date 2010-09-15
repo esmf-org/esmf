@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.18 2010/06/29 21:55:28 svasquez Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.19 2010/09/15 20:26:27 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -153,13 +153,13 @@ implicit none
       'Fortran 90', convention=convESMF, purpose=purpGen, rc=rc)
     call ESMF_AttributeSet(gridcomp1, 'Discipline', &
       'Atmosphere', convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp1, 'FullName', &
+    call ESMF_AttributeSet(gridcomp1, 'ComponentLongName', &
       'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core', &
         convention=convESMF, purpose=purpGen, rc=rc)
     call ESMF_AttributeSet(gridcomp1, 'ModelComponentFramework', &
       'ESMF', &
       convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp1, 'Name', 'GEOS-5 FV dynamical core', &
+    call ESMF_AttributeSet(gridcomp1, 'ComponentShortName', 'GEOS-5 FV dynamical core', &
       convention=convESMF, purpose=purpGen, rc=rc)
     call ESMF_AttributeSet(gridcomp1, 'PhysicalDomain', &
       'Earth system', convention=convESMF, purpose=purpGen, rc=rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.20 2010/09/15 04:59:09 eschwab Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.21 2010/09/15 20:26:27 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -197,7 +197,7 @@ module ESMF_AttributeUpdateMod
     type(ESMF_Grid)             :: grid
     type(ESMF_Field)            :: DPEDT,DTDT,DUDT,DVDT,PHIS,QTR,CNV,CONVCPT, &
                                    CONVKE,CONVPHI
-    type(ESMF_FieldBundle)      :: fbundle
+    type(ESMF_FieldBundle)      :: fieldbundle
     character(ESMF_MAXSTR),dimension(2)   :: attrList         
     
     rc = ESMF_SUCCESS
@@ -242,10 +242,10 @@ module ESMF_AttributeUpdateMod
     convCC = 'CustomConvention'
     convESMF = 'ESMF'
     purpGen = 'General'
-    name1 = 'Name'
-    name2 = 'StandardName'
-    name3 = 'LongName'
-    name4 = 'Units'
+    name1 = 'VariableShortName'
+    name2 = 'VariableStandardName'
+    name3 = 'VariableLongName'
+    name4 = 'VariableUnits'
  
     value1 = 'DPEDT'
     value2 = 'tendency_of_air_pressure'
@@ -439,20 +439,20 @@ module ESMF_AttributeUpdateMod
 
     ! Create the Grid Attribute Package
     call ESMF_AttributeAdd(grid,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'DimensionOrder','YX',convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'GridType','Cubed sphere',convention=convESMF, purpose=purpGen, rc=status)    
     call ESMF_AttributeSet(grid,'CongruentTiles',.true.,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'NorthPoleLocation','long: 0.0 lat: 90.0',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'NumberOfCells','53457',convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'NumberOfGridTiles','1',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'NX','96',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'NY','96',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'HorizontalResolution','C48',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'DimensionOrder','YX',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'DiscretizationType','Logically Rectangular',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'GeometryType','Sphere',convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'IsConformal',.false.,convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'IsRegular',.false.,convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'IsUniform',.false.,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'DiscretizationType','Logically Rectangular',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'GeometryType','Sphere',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'NorthPoleLocation','long: 0.0 lat: 90.0',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'NumberOfCells','53457',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'NX','96',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'NY','96',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'HorizontalResolution','C48',convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
 !EOC
@@ -466,23 +466,23 @@ module ESMF_AttributeUpdateMod
 !EOE
 
 !BOC
-    fbundle = ESMF_FieldBundleCreate(name="fbundle", rc=status)
-    call ESMF_FieldBundleSetGrid(fbundle, grid=grid, rc=status)
+    fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
+    call ESMF_FieldBundleSetGrid(fieldbundle, grid=grid, rc=status)
     if (status .ne. ESMF_SUCCESS) return
       
-    call ESMF_FieldBundleAdd(fbundle, DPEDT, rc=status)
-    call ESMF_FieldBundleAdd(fbundle, DTDT, rc=status)
-    call ESMF_FieldBundleAdd(fbundle, DUDT, rc=status)
-    call ESMF_FieldBundleAdd(fbundle, DVDT, rc=status)
-    call ESMF_FieldBundleAdd(fbundle, PHIS, rc=status)
-    call ESMF_FieldBundleAdd(fbundle, QTR, rc=status)
-    call ESMF_FieldBundleAdd(fbundle, CNV, rc=status)
-    call ESMF_FieldBundleAdd(fbundle, CONVCPT, rc=status)
-    call ESMF_FieldBundleAdd(fbundle, CONVKE, rc=status)
-    call ESMF_FieldBundleAdd(fbundle, CONVPHI, rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, DPEDT, rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, DTDT, rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, DUDT, rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, DVDT, rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, PHIS, rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, QTR, rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, CNV, rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, CONVCPT, rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, CONVKE, rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, CONVPHI, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
-    call ESMF_StateAdd(exportState, fieldbundle=fbundle, rc=status)
+    call ESMF_StateAdd(exportState, fieldbundle=fieldbundle, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 !EOC
 
@@ -587,32 +587,32 @@ module ESMF_AttributeUpdateMod
 !BOC
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet, k
-    character(ESMF_MAXSTR)      :: name2,value2,convESMF,convCC,purpGen,name3
+    character(ESMF_MAXSTR)      :: name2,value2,convESMF,purpGen,purp2,name3
     character(ESMF_MAXSTR),dimension(2) :: attrList
     type(ESMF_Field)            :: field
-    type(ESMF_FieldBundle)      :: fbundle
+    type(ESMF_FieldBundle)      :: fieldbundle
     type(ESMF_Grid)             :: grid
 
     rc = ESMF_SUCCESS
 
     convESMF = 'ESMF'
-    convCC = 'CustomConvention'
     purpGen = 'General'
-    name2 = 'StandardName'
+    name2 = 'VariableStandardName'
     value2 = 'default_standard_name'
-    name3 = 'LongName'
+    name3 = 'VariableLongName'
     
-    attrList(1) = 'coordinates'
-    attrList(2) = 'mask'
+    purp2 = 'Extended'
+    attrList(1) = 'Coordinates'
+    attrList(2) = 'Mask'
     
     call ESMF_GridCompGet(comp, vm=vm, rc=status)
     if (status .ne. ESMF_SUCCESS) return
     call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
-    call ESMF_StateGet(exportState, "fbundle", fbundle, rc=rc)
+    call ESMF_StateGet(exportState, "fieldbundle", fieldbundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_FieldBundleGet(fbundle, grid=grid, rc=rc)
+    call ESMF_FieldBundleGet(fieldbundle, grid=grid, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 !EOC
 
@@ -628,18 +628,20 @@ module ESMF_AttributeUpdateMod
 
 !BOC
     do k = 1, 10
-        call ESMF_FieldBundleGet(fbundle, fieldIndex=k, field=field, rc=rc)
+        call ESMF_FieldBundleGet(fieldbundle, fieldIndex=k, field=field, rc=rc)
         if (rc/=ESMF_SUCCESS) return
         call ESMF_AttributeSet(field, name2, value2, convention=convESMF, &
           purpose=purpGen, rc=status)
         if (rc/=ESMF_SUCCESS) return
-        call ESMF_AttributeAdd(field, convention=convCC, purpose=purpGen, &
+#if 0
+        call ESMF_AttributeAdd(field, convention=convESMF, purpose=purp2, &
           attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
         call ESMF_AttributeSet(field, name='Coordinates', value='Latlon', &
-          convention=convCC, purpose=purpGen, rc=rc)
+          convention=convESMF, purpose=purp2, rc=rc)
         call ESMF_AttributeSet(field, name='Mask', value='Yes', &
-          convention=convCC, purpose=purpGen, rc=rc)
+          convention=convESMF, purpose=purp2, rc=rc)
         if (rc/=ESMF_SUCCESS) return
+#endif
         call ESMF_AttributeRemove(field, name=name3, convention=convESMF, &
           purpose=purpGen, rc=status)
         if (rc/=ESMF_SUCCESS) return
@@ -789,24 +791,24 @@ module ESMF_AttributeUpdateMod
     integer, intent(out) :: rc
 
     type(ESMF_Field)            :: field
-    type(ESMF_FieldBundle)      :: fbundle
+    type(ESMF_FieldBundle)      :: fieldbundle
     type(ESMF_Grid)             :: grid
     integer                     :: k
 
     ! Initialize return code
     rc = ESMF_SUCCESS
     
-    call ESMF_StateGet(exportState, "fbundle", fbundle, rc=rc)
+    call ESMF_StateGet(exportState, "fieldbundle", fieldbundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_FieldBundleGet(fbundle, grid=grid, rc=rc)
+    call ESMF_FieldBundleGet(fieldbundle, grid=grid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     do k = 1, 10
-        call ESMF_FieldBundleGet(fbundle, fieldIndex=k, field=field, rc=rc)
+        call ESMF_FieldBundleGet(fieldbundle, fieldIndex=k, field=field, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
         call ESMF_FieldDestroy(field, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
     enddo
-    call ESMF_FieldBundleDestroy(fbundle, rc=rc)
+    call ESMF_FieldBundleDestroy(fieldbundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_GridDestroy(grid, rc=rc)
