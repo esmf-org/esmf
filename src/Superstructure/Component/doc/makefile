@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.25 2008/09/26 05:18:10 cdeluca Exp $ 
+# $Id: makefile,v 1.26 2010/09/15 22:50:57 theurich Exp $ 
 
 ALL: onedoc
 
 LOCDIR	  = src/Superstructure/Component/doc
 
-DVIFILES  =     Component_refdoc.dvi
-PDFFILES  =     $(ESMC_DOCDIR)/Component_refdoc.pdf
-HTMLFILES =     $(ESMC_DOCDIR)/Component_refdoc
+DVIFILES  =     Component_refdoc.dvi Component_crefdoc.dvi
+PDFFILES  =     $(ESMC_DOCDIR)/Component_refdoc.pdf $(ESMC_DOCDIR)/Component_crefdoc.pdf
+HTMLFILES =     $(ESMC_DOCDIR)/Component_refdoc $(ESMC_DOCDIR)/Component_crefdoc
 
 #
 # Tex Files to make
@@ -39,9 +39,9 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = Component_refdoc $(HTMLFILES)
+CLEANDIRS   = Component_refdoc Component_crefdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              Component_refdoc.tex $(PDFFILES) 
+              Component_refdoc.tex Component_crefdoc.tex $(PDFFILES) 
 CLOBBERDIRS =
 
 
