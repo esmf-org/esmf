@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.100 2010/09/14 21:35:37 feiliu Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.101 2010/09/15 01:18:47 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -66,7 +66,13 @@
 !    !Global integer parameters
 
       integer, parameter :: ESMF_SUCCESS = 0, ESMF_FAILURE = -1
+
+! General non-specific string length
       integer, parameter :: ESMF_MAXSTR = 128
+
+! Maximum length of a file name, including its path.
+      integer, parameter :: ESMF_MAXPATHLEN = 1023
+
 ! TODO:FIELDINTEGRATION Adjust MAXGRIDDIM
       integer, parameter :: ESMF_MAXDIM = 7, &
                             ESMF_MAXDECOMPDIM = 3, &
@@ -695,6 +701,7 @@
 
       public ESMF_FAILURE, ESMF_SUCCESS
       public ESMF_MAXSTR
+      public ESMF_MAXPATHLEN
 ! TODO:FIELDINTEGRATION Adjust MAXGRIDDIM
       public ESMF_MAXDIM, ESMF_MAXDECOMPDIM, ESMF_MAXIGRIDDIM, ESMF_MAXGRIDDIM
      

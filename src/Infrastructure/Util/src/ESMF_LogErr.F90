@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.65 2010/08/18 02:01:13 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.66 2010/09/15 01:18:47 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -53,8 +53,6 @@
 
 implicit none
 private
-
-integer, parameter :: MAX_FNAME_LEN = 64
 
 character(*), parameter:: ESMF_LOG_ERRMSG = "ESMF interface returned ERROR"
   
@@ -113,8 +111,8 @@ type ESMF_LogEntry
     integer		::  h,m,s,ms
     integer		::  line
     logical             ::  methodflag,lineflag,fileflag
-    character(len=2*ESMF_MAXSTR) ::  msg
-    character(len=MAX_FNAME_LEN) ::  file
+    character(len=2*ESMF_MAXSTR)   ::  msg
+    character(len=ESMF_MAXPATHLEN) ::  file
     character(len=32)   ::  method
     character(len=8) 	::  d
     character(len=8)	::  lt  			
@@ -163,7 +161,7 @@ type ESMF_LogPrivate
     integer, dimension(:), pointer                  ::  errorMask(:)
     type(ESMF_MsgType), pointer                     ::  msgAllow(:)
 #endif                                          
-    character(len=MAX_FNAME_LEN)                    ::  nameLogErrFile
+    character(len=ESMF_MAXPATHLEN)                  ::  nameLogErrFile
     character(len=ESMF_MAXSTR)                      ::  petNumLabel
     ESMF_INIT_DECLARE    
 end type ESMF_LogPrivate
@@ -1615,7 +1613,7 @@ end subroutine ESMF_LogMsgSetError
 
     integer 				                   :: status, i, rc2
     type(ESMF_LogEntry), dimension(:), pointer             :: localbuf
-    character(len=MAX_FNAME_LEN)                           :: fname
+    character(len=ESMF_MAXPATHLEN)                         :: fname
     character(ESMF_MAXSTR)                                 :: petNumChar
 
     type(ESMF_LogPrivate),pointer     :: alog
@@ -1677,8 +1675,8 @@ end subroutine ESMF_LogMsgSetError
         fname = trim(alog%petNumLabel) // "." // trim(filename)
         alog%nameLogErrFile=fname
     endif
-    if (len_trim (fname) > MAX_FNAME_LEN) then
-        print *, "ESMF_LogOpen: Filename exceeded", MAX_FNAME_LEN, " characters."
+    if (len_trim (fname) > ESMF_MAXPATHLEN) then
+        print *, "ESMF_LogOpen: Filename exceeded", ESMF_MAXPATHLEN, " characters."
         if (present(rc)) then
             rc = ESMF_FAILURE
         endif
@@ -1974,7 +1972,7 @@ end subroutine ESMF_LogSet
     character(len=8)                :: d
     !character(len=7)               :: lt
     character(len=32)               :: tmethod
-    character(len=MAX_FNAME_LEN)    :: tfile
+    character(len=ESMF_MAXPATHLEN)  :: tfile
     integer			    :: tline
     integer                         :: i
     integer                         :: h, m, s, ms, y, mn, dy
