@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.28 2010/09/15 22:58:31 theurich Exp $
+// $Id: ESMC_GridComp.h,v 1.29 2010/09/15 23:46:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -137,7 +137,6 @@ int ESMC_GridCompFinalize(
   int phase,                    // in
   int *userRc                   // out
 );
-//
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
@@ -170,6 +169,7 @@ int ESMC_GridCompFinalize(
 //  \item[{[userRc]}]
 //    Return code set by {\tt userRoutine} before returning.
 //  \end{description}
+//
 //EOP
 //-----------------------------------------------------------------------------
 
@@ -182,7 +182,6 @@ void *ESMC_GridCompGetInternalState(
   ESMC_GridComp comp,           // in
   int *rc                       // out
 );
-//
 // !RETURN VALUE:
 //  Pointer to private data block that is stored in the internal state.
 //
@@ -209,6 +208,7 @@ void *ESMC_GridCompGetInternalState(
 //  \item[{[rc]}]
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 // \end{description}
+//
 //EOP
 //-----------------------------------------------------------------------------
 
@@ -225,7 +225,6 @@ int ESMC_GridCompInitialize(
   int phase,                    // in
   int *userRc                   // out
 );
-//
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
@@ -258,6 +257,7 @@ int ESMC_GridCompInitialize(
 //  \item[{[userRc]}]
 //    Return code set by {\tt userRoutine} before returning.
 //  \end{description}
+//
 //EOP
 //-----------------------------------------------------------------------------
 
@@ -269,7 +269,7 @@ int ESMC_GridCompInitialize(
 int ESMC_GridCompPrint(
   ESMC_GridComp comp,     // in
   const char *options     // in
-//
+);
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
@@ -284,7 +284,7 @@ int ESMC_GridCompPrint(
 //  \item[{[options]}]
 //    Print options are not yet supported, pass NULL.
 // \end{description}
-);   
+//
 //EOP
 //-----------------------------------------------------------------------------
 
@@ -301,7 +301,6 @@ int ESMC_GridCompRun(
   int phase,                    // in
   int *userRc                   // out
 );
-//
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
@@ -334,6 +333,7 @@ int ESMC_GridCompRun(
 //  \item[{[userRc]}]
 //    Return code set by {\tt userRoutine} before returning.
 //  \end{description}
+//
 //EOP
 //-----------------------------------------------------------------------------
 
@@ -349,7 +349,6 @@ int ESMC_GridCompSetEntryPoint(
     (ESMC_GridComp, ESMC_State, ESMC_State, ESMC_Clock *, int *),
   int phase                                                         // in
 );
-//
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
@@ -373,6 +372,7 @@ int ESMC_GridCompSetEntryPoint(
 //  \item[phase]
 //    The phase number for multi-phase methods.
 //  \end{description}
+//
 //EOP
 //-----------------------------------------------------------------------------
 
@@ -385,7 +385,6 @@ int ESMC_GridCompSetInternalState(
   ESMC_GridComp comp,           // inout
   void *data                    // in
 );
-//
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
@@ -413,6 +412,7 @@ int ESMC_GridCompSetInternalState(
 //  \item[data]
 //    Pointer to private data block to be stored.
 // \end{description}
+//
 //EOP
 //-----------------------------------------------------------------------------
 
