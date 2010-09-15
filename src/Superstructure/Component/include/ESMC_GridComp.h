@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.27 2010/09/15 22:46:50 theurich Exp $
+// $Id: ESMC_GridComp.h,v 1.28 2010/09/15 22:58:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -343,10 +343,11 @@ int ESMC_GridCompRun(
 //
 // !INTERFACE:
 int ESMC_GridCompSetEntryPoint(
-  ESMC_GridComp comp,                                                               // in
-  enum ESMC_Method method,                                                          // in
-  void (*userRoutine)(ESMC_GridComp, ESMC_State, ESMC_State, ESMC_Clock *, int *),  // in
-  int phase                                                                         // in
+  ESMC_GridComp comp,                                               // in
+  enum ESMC_Method method,                                          // in
+  void (*userRoutine)                                               // in
+    (ESMC_GridComp, ESMC_State, ESMC_State, ESMC_Clock *, int *),
+  int phase                                                         // in
 );
 //
 // !RETURN VALUE:
