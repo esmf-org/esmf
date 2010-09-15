@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.19 2010/09/13 05:50:47 eschwab Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.20 2010/09/15 04:59:09 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -447,7 +447,7 @@ module ESMF_AttributeUpdateMod
     call ESMF_AttributeSet(grid,'NumberOfGridTiles','1',convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'NX','96',convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'NY','96',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'Resolution','C48',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'HorizontalResolution','C48',convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'IsConformal',.false.,convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'IsRegular',.false.,convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'IsUniform',.false.,convention=convESMF, purpose=purpGen, rc=status)

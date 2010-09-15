@@ -15,7 +15,7 @@
       <NumberOfCells>53457</NumberOfCells>
       <NX>96</NX>
       <NY>96</NY>
-      <Resolution>C48</Resolution>
+      <HorizontalResolution>C48</HorizontalResolution>
     </attribute_package>
   </Mosaic>
 </GridSpec>

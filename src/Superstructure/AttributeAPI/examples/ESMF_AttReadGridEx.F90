@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridEx.F90,v 1.11 2010/09/13 05:50:47 eschwab Exp $
+! $Id: ESMF_AttReadGridEx.F90,v 1.12 2010/09/15 04:58:36 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -238,8 +238,8 @@ program ESMF_AttReadGridEx
 !print *, 'attrvalue = ', attrvalue
 
 !BOC
-      ! Get GridSpec "Resolution" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='Resolution', value=attrValue, &
+      ! Get GridSpec "HorizontalResolution" Attribute from a Grid
+      call ESMF_AttributeGet(grid, name='HorizontalResolution', value=attrValue, &
                              convention='GridSpec', purpose='General', rc=rc)
 !EOC
 

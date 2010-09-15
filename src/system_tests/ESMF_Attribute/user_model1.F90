@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.53 2010/09/14 06:00:06 eschwab Exp $
+! $Id: user_model1.F90,v 1.54 2010/09/15 05:00:56 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -296,7 +296,7 @@ module user_model1
     call ESMF_AttributeSet(grid,'NumberOfCells','53457',convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(grid,'NX','96',convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(grid,'NY','96',convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'Resolution','C48',convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(grid,'HorizontalResolution','C48',convention=conv, purpose=purp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Create a FieldBundle for Fields

@@ -26,7 +26,7 @@
                     <xsd:element name="NumberOfCells" type="xsd:unsignedLong" minOccurs="0"/>
                     <xsd:element name="NX" type="xsd:unsignedInt" minOccurs="0"/>
                     <xsd:element name="NY" type="xsd:unsignedInt" minOccurs="0"/>
-                    <xsd:element name="Resolution" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="HorizontalResolution" type="xsd:string" minOccurs="0"/>
                   </xsd:sequence>
                   <xsd:attribute name="convention" type="xsd:string" use="required"/>
                   <xsd:attribute name="purpose" type="xsd:string" use="required"/>
