@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUTest.F90,v 1.34 2010/09/14 23:21:28 garyblock Exp $
+! $Id: ESMF_TestHarnessUTest.F90,v 1.35 2010/09/15 21:17:20 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -97,6 +97,7 @@
     call ESMF_UtilGetArgIndex (value="-path", argindex=argindex, rc=rc)
     if ((argindex >= 0) .AND. (argindex < argc - 1)) then
       call ESMF_UtilGetArg (argindex=argindex+1, value=srcPath(1), rc=rc)
+      if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArg failure", rc)) go to 90
     end if
 
     ! get test case info
@@ -104,12 +105,14 @@
     !print '("argindex = ", I4, ", argc = ", I4)', argindex, argc
     if ((argindex >= 0) .AND. (argindex < argc)) then
       call ESMF_UtilGetArg (argindex=argindex+1, value=configFname(1), rc=rc)
+      if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArg failure", rc)) go to 90
     end if
 
     ! get xml file info
     call ESMF_UtilGetArgIndex (value="-xml", argindex=argindex, rc=rc)
     if ((argindex >= 0) .AND. (argindex < argc)) then
       call ESMF_UtilGetArg (argindex=argindex+1, value=xmlFname(1), rc=rc)
+      if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArg failure", rc)) go to 90
       xmlFlag(1) = 1
     end if
 
@@ -125,6 +128,7 @@
     configFname(1) = adjustL(configFname(1))
     xmlFname(1) = adjustL(xmlFname(1))
 
+    print '("Path Length = ", I5)', LEN_TRIM(srcPath(1))
     print '("Path = ", A)', trim(srcPath(1))
     print '("Config File = ", A)', trim(configFname(1))
     print '("Run Flag = ", I2)', runFlag(1)

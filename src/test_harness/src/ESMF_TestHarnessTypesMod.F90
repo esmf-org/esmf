@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessTypesMod.F90,v 1.14 2010/09/14 23:21:28 garyblock Exp $
+! $Id: ESMF_TestHarnessTypesMod.F90,v 1.15 2010/09/15 21:17:20 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -167,7 +167,7 @@
   end type grid_specification_record
 
   type grid_record
-     character(ESMF_MAXSTR) :: filename   ! grid specifier filename
+     character(THARN_MAXFNAME) :: filename   ! grid specifier filename
      integer :: nGspecs                   ! number of grid spec records
      type(grid_specification_record), pointer :: src_grid(:)
      type(grid_specification_record), pointer :: dst_grid(:)
@@ -209,14 +209,14 @@
   end type problem_descriptor_strings
 
   type problem_descriptor_records
-     character(ESMF_MAXSTR) :: filename   ! filename of problem descriptor record
+     character(THARN_MAXFNAME) :: filename   ! filename of problem descriptor record
      integer :: numStrings                ! # of problem descriptor strings in record
      type(problem_descriptor_strings), pointer :: str(:)  ! problem descriptor strngs
   end type problem_descriptor_records
 
   type harness_descriptor
-     character(ESMF_MAXSTR) :: configPath      ! path to configuration files
-     character(ESMF_MAXSTR) :: topFname        ! top level config filename
+     character(THARN_MAXFNAME) :: configPath      ! path to configuration files
+     character(THARN_MAXFNAME) :: topFname        ! top level config filename
      character(ESMF_MAXSTR) :: testClass       ! test class
      character(ESMF_MAXSTR) :: reportType      ! test result report type 
      character(ESMF_MAXSTR) :: setupReportType ! setup report type 
