@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.46 2010/09/14 05:56:23 eschwab Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.47 2010/09/15 01:36:54 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -1830,7 +1830,7 @@ end function
 !EOP
 !
       integer :: localrc                        ! local return code
-      character(len=ESMF_MAXSTR) :: filename
+      character(len=ESMF_MAXPATHLEN)      :: filename
       type(ESMF_FieldBundleType), pointer :: btype
       type(ESMF_Field), allocatable :: fieldList(:)
       integer :: i, fieldCount
@@ -1866,7 +1866,7 @@ end function
       if (multif) then
         do i=1,fieldCount
           write(cnum,"(i3.3)") i
-          filename = file // cnum
+          filename = trim (file) // cnum
           call ESMF_FieldBundleGet(bundle, fieldIndex=i, field=fieldList(i), rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2402,7 +2402,7 @@ end function
 !
 !EOP
       integer :: localrc                        ! local return code
-      character(len=ESMF_MAXSTR) :: filename
+      character(len=ESMF_MAXPATHLEN)      :: filename
       type(ESMF_FieldBundleType), pointer :: btype
       type(ESMF_Field), allocatable :: fieldList(:)
       integer :: i, fieldCount
@@ -2438,7 +2438,7 @@ end function
       if (multif) then
        do i=1,fieldCount
         write(cnum,"(i3.3)") i
-        filename = file // cnum
+        filename = trim (file) // cnum
         ! Get and write the first array in the Bundle
         call ESMF_FieldBundleGet(bundle, fieldIndex=i , field=fieldList(i), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &

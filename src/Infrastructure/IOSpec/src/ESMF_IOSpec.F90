@@ -1,4 +1,4 @@
-! $Id: ESMF_IOSpec.F90,v 1.17 2009/06/08 23:46:56 w6ws Exp $
+! $Id: ESMF_IOSpec.F90,v 1.18 2010/09/15 01:39:29 w6ws Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IOSpec module
@@ -75,10 +75,10 @@
       type ESMF_IOSpec
       sequence
       private
-          type (ESMF_Status) :: iostatus
-          type (ESMF_IOFileFormat) :: iofileformat
-          type (ESMF_IORWType) :: iorwtype
-          character(len=ESMF_MAXSTR) :: filename
+          type (ESMF_Status)             :: iostatus
+          type (ESMF_IOFileFormat)       :: iofileformat
+          type (ESMF_IORWType)           :: iorwtype
+          character(len=ESMF_MAXPATHLEN) :: filename
           logical :: asyncIO       ! TODO: should be a derived type or enum
       end type
 
