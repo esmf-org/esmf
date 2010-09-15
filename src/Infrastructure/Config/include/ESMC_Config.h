@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.21 2010/09/08 23:14:41 w6ws Exp $
+// $Id: ESMC_Config.h,v 1.22 2010/09/15 18:16:31 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -204,7 +204,8 @@ int ESMC_ConfigNextLine(
 //   \item [{[tableEnd]}]
 //     End of table mark (::) found flag.  Returns 1 when found, and 0 when
 //     not found.
-//   \end{description} //
+//   \end{description}
+//
 //EOP
 //-----------------------------------------------------------------------------
 
