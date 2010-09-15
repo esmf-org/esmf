@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.5 2010/09/13 05:50:47 eschwab Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.6 2010/09/15 04:59:53 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.5 2010/09/13 05:50:47 eschwab Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.6 2010/09/15 04:59:53 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -938,10 +938,12 @@ program ESMF_AttributeXMLUTest
     write(name, *) "Set 2nd <documentGenealogy> attribute value in CIM component package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+#if 0
+    ! TODO: uncomment and expand when we have better definition from CIM
     !-------------------------------------------------------------------------
     ! <componentProperty> Scientific Property Description package
     !-------------------------------------------------------------------------
-    !EX_UTest
+    !EX__UTest
     ! Set the 1st <componentProperty> attribute value within the CIM component
     !   package
     call ESMF_AttributeSet(gridcomp3, 'ScientificPropertyShortName', &
@@ -954,7 +956,7 @@ program ESMF_AttributeXMLUTest
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !EX_UTest
+    !EX__UTest
     ! Set the 2nd <componentProperty> attribute value within the CIM component
     !   package
     call ESMF_AttributeSet(gridcomp3, 'ScientificPropertyLongName', &
@@ -967,7 +969,7 @@ program ESMF_AttributeXMLUTest
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !EX_UTest
+    !EX__UTest
     ! Set the 3rd <componentProperty> attribute value within the CIM component
     !   package
     call ESMF_AttributeSet(gridcomp3, 'ScientificPropertyValue', &
@@ -978,6 +980,7 @@ program ESMF_AttributeXMLUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 3rd <componentProperty> attribute value in CIM component package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
     !-------------------------------------------------------------------------
     ! <platform> Platform Description package
