@@ -1,4 +1,4 @@
-% $Id: Component_crefdoc.ctex,v 1.14 2010/03/30 21:42:22 svasquez Exp $
+% $Id: Component_crefdoc.ctex,v 1.15 2010/09/15 22:46:50 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -14,6 +14,7 @@
 \usepackage{epsf}
 \usepackage{html}
 \usepackage{times}
+\usepackage{alltt}
 \usepackage[T1]{fontenc}
 \usepackage[dvips]{graphics,color}
 
@@ -21,7 +22,7 @@
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{Component Reference Manual}
-\newcommand{\myauthors}{Nancy Collins}
+\newcommand{\myauthors}{\it Gerhard Theurich}
 % these are temporary patches until something more
 % permanent is done to the protex script.
 \newlength{\oldparskip}
@@ -56,11 +57,11 @@
 #endif
 
 %\subsection{GridComp Options}
-#ifdef STANDALONE
-#\input{GridComp_options}
-#elif defined(CONSTITUENT)
-#\input{../Superstructure/Component/doc/GridComp_options}
-#endif
+%#ifdef STANDALONE
+%\input{GridComp_options}
+%#elif defined(CONSTITUENT)
+%\input{../Superstructure/Component/doc/GridComp_options}
+%#endif
 
 %\subsection{Use and Examples}
 #ifdef STANDALONE
@@ -70,7 +71,7 @@
 %\input{ESMF_InternalStateModEx_fapi}
 %\input{ESMCI_Comp_chapi}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/GridComp_usage}
+%\input{../Superstructure/Component/doc/GridComp_usage}
 %\input{../Superstructure/Component/doc/ESMF_GCompEx_fapi}
 %\input{../Superstructure/Component/doc/ESMF_InternalStateEx_fapi}
 %\input{../Superstructure/Component/doc/ESMF_InternalStateModEx_fapi} 
@@ -85,11 +86,9 @@
 
 \subsection{Class API}
 #ifdef STANDALONE
-%\input{ESMF_GridComp_fapi}
-\input{ESMC_Comp_chapi}
+\input{ESMC_GridComp_chapi}
 #elif defined(CONSTITUENT)
-%\input{../Superstructure/Component/doc/ESMF_GridComp_fapi}
-\input{../Superstructure/Component/doc/ESMC_Comp_chapi}
+\input{../Superstructure/Component/doc/ESMC_GridComp_chapi}
 #endif
 
 %%%%%%%%%%%%% Coupler Class %%%%%%%%%
@@ -103,26 +102,26 @@
 #endif
 
 %\subsection{Use and Examples}
-#ifdef STANDALONE
-\input{CplComp_usage}
+%#ifdef STANDALONE
+%\input{CplComp_usage}
 %\input{ESMF_CplEx_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/CplComp_usage}
+%#elif defined(CONSTITUENT)
+%\input{../Superstructure/Component/doc/CplComp_usage}
 %\input{../Superstructure/Component/doc/ESMF_CplEx_fapi}
 #endif
 
 %\subsection{Restrictions and Future Work}
-#ifdef STANDALONE
-\input{CplComp_rest}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/CplComp_rest}
-#endif
+%#ifdef STANDALONE
+%\input{CplComp_rest}
+%#elif defined(CONSTITUENT)
+%\input{../Superstructure/Component/doc/CplComp_rest}
+%#endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-%\input{ESMF_CplComp_fapi} 
+\input{ESMC_CplComp_chapi} 
 #elif defined(CONSTITUENT)
-%\input{../Superstructure/Component/doc/ESMF_CplComp_fapi}
+\input{../Superstructure/Component/doc/ESMC_CplComp_chapi}
 #endif
 
 %%%%%%% end class sections %%%%%%%%
