@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.54 2010/09/15 05:00:56 eschwab Exp $
+! $Id: user_model1.F90,v 1.55 2010/09/15 18:08:45 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -349,6 +349,7 @@ module user_model1
     ! link the component to the state
     call ESMF_AttributeLink(comp, exportState, rc=rc)
 
+#if 0
     ! write out the Attributes
     if (localPet .eq. 0) then
       call ESMF_AttributeWrite(comp, conv, purp, rc=rc)
@@ -356,6 +357,7 @@ module user_model1
                                attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
     endif
+#endif
 
   end subroutine user_init
 
@@ -418,8 +420,9 @@ module user_model1
 !        call ESMF_AttributeWrite(field,conv,purp,rc=rc)
 !        call ESMF_AttributeWrite(field,conv,purp, &
 !                               attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-        call ESMF_AttributeSet(field, name2, value2, convention=conv, purpose=purp, rc=rc)
+!        call ESMF_AttributeSet(field, name2, value2, convention=conv, purpose=purp, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
+#if 0
         call ESMF_AttributeAdd(field, convention=conv, purpose=purp2, attrList=attrList, &
           count=2, nestConvention=conv, nestPurpose=purp, rc=rc)
         call ESMF_AttributeSet(field, name='Coordinates', value='Latlon', &
@@ -427,7 +430,8 @@ module user_model1
         call ESMF_AttributeSet(field, name='Mask', value='Yes', &
           convention=conv, purpose=purp2, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
-        call ESMF_AttributeRemove(field, name=name3, convention=conv, purpose=purp, rc=rc)
+#endif
+!        call ESMF_AttributeRemove(field, name=name3, convention=conv, purpose=purp, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
     enddo
 
