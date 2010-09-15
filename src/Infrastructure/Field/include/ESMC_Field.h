@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.25 2010/08/26 17:08:29 feiliu Exp $
+// $Id: ESMC_Field.h,v 1.26 2010/09/15 19:27:38 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -244,10 +244,8 @@ void *ESMC_FieldGetPtr(
 //  \begin{description}
 //  \item[field]
 //    Get the internal Fortran data pointer stored in this {\tt ESMC\_Field}.
-//  \item[{[localDe]}] 
+//  \item[localDe]
 //  Local DE for which information is requested. {\tt [0,..,localDeCount-1]}. 
-//  For {\tt localDeCount==1} the {\tt localDe} argument may be omitted, 
-//  in which case it will default to {\tt localDe=0}. 
 //  \item[{[rc]}]
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
