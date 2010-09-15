@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.132 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_GridComp.F90,v 1.133 2010/09/15 22:27:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.132 2010/03/04 18:57:45 svasquez Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.133 2010/09/15 22:27:40 theurich Exp $'
 
 !==============================================================================
 !
@@ -601,7 +601,7 @@ contains
 !   argument will be passed to the user-supplied routine.  The 
 !   clock argument in the user code cannot be optional. 
 ! \item[{[phase]}]
-!   Component providers must document whether their each of their
+!   Component providers must document whether each of their
 !   routines are {\em single-phase} or {\em multi-phase}.
 !   Single-phase routines require only one invocation to complete
 !   their work.
@@ -1179,7 +1179,7 @@ contains
 !
 ! !DESCRIPTION:
 ! Call into user provided {\tt userRoutine} which is responsible for
-! for setting Component's Initialize(), Run() and Finalize() services.
+! setting Component's Initialize(), Run() and Finalize() services.
 !    
 ! The arguments are:
 ! \begin{description}
