@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.12 2010/09/14 21:34:48 feiliu Exp $
+! $Id: ESMF_XGrid.F90,v 1.13 2010/09/16 17:06:51 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -139,7 +139,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.12 2010/09/14 21:34:48 feiliu Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.13 2010/09/16 17:06:51 feiliu Exp $'
 
 !==============================================================================
 !
@@ -328,7 +328,7 @@ contains
 #define ESMF_METHOD "ESMF_XGridMatch"
 
 !BOPI
-! !IROUTINE:  ESMF_XGridValidate - Check if two XGrids match
+! !IROUTINE:  ESMF_XGridMatch - Check if two XGrids match
 
 ! !INTERFACE:
       function ESMF_XGridMatch(xgrid1, xgrid2, rc)
@@ -344,8 +344,7 @@ contains
 !      Compare two {\tt XGrid}s and check if they match each other. The 
 !      comparison is incremental. First the internal pointer association
 !      is checked to see if they are the same object. A deep check of 
-!      individual XGrid members is not implemented yet for performance 
-!      consideration.
+!      individual XGrid members is carried out subsequently.
 !
 !      The method returns an error code if problems are found.  
 !
@@ -362,24 +361,104 @@ contains
 !
 !EOPI
 
-      integer :: localrc
+      integer :: localrc, i
 
-      type(ESMF_XGridType), pointer :: xgtypep
+      type(ESMF_XGridType), pointer :: fp1, fp2
       type(ESMF_Status) :: xgridstatus
+      integer :: ngridA1, ngridB1
+      integer :: ngridA2, ngridB2
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      ESMF_XGridMatch = .false.
 
-      ! check variables
+      ! Check variables
       ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid1,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid2,rc)
 
+      ! Identical pointer
       if(associated(xgrid1%xgtypep, xgrid2%xgtypep)) then
         ESMF_XGridMatch = .true.
-      else
-        ESMF_XGridMatch = .false.
+        if(present(rc)) rc = ESMF_SUCCESS
+        return
       endif
+
+      ! Compare Grids contained
+      fp1 = xgrid1%xgtypep
+      fp2 = xgrid2%xgtypep
+      ! Side A Grids
+      if(associated(fp1%sideA)) ngridA1 = size(fp1%sideA, 1)
+      if(associated(fp2%sideA)) ngridA2 = size(fp2%sideA, 1)
+      if(ngridA1 /= ngridA2) then
+        if(present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+      if(.not. associated(fp1%sideA, fp2%sideA)) then
+        do i = 1, ngridA1
+          if(.not. ESMF_GridMatch(fp1%sideA(i), fp2%sideA(i))) then
+            if(present(rc)) rc = ESMF_SUCCESS
+            return
+          endif
+        enddo
+      endif
+      ! Side B Grids
+      if(associated(fp1%sideB)) ngridB1 = size(fp1%sideB, 1)
+      if(associated(fp2%sideB)) ngridB2 = size(fp2%sideB, 1)
+      if(ngridB1 /= ngridB2) then
+        if(present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+      if(.not. associated(fp1%sideB, fp2%sideB)) then
+        do i = 1, ngridB1
+          if(.not. ESMF_GridMatch(fp1%sideB(i), fp2%sideB(i))) then
+            if(present(rc)) rc = ESMF_SUCCESS
+            return
+          endif
+        enddo
+      endif
+
+      ! Balanced DistGrid
+      if(.not. ESMF_DistGridMatch(fp1%distgridM, fp2%distgridM)) then
+        if(present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
+      ! Side A DistGrids
+      if(associated(fp1%distgridA)) ngridA1 = size(fp1%distgridA, 1)
+      if(associated(fp2%distgridA)) ngridA2 = size(fp2%distgridA, 1)
+      if(ngridA1 /= ngridA2) then
+        if(present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+      if(.not. associated(fp1%distgridA, fp2%distgridA)) then
+        do i = 1, ngridA1
+          if(.not. ESMF_DistGridMatch(fp1%distgridA(i), fp2%distgridA(i))) then
+            if(present(rc)) rc = ESMF_SUCCESS
+            return
+          endif
+        enddo
+      endif
+      ! Side B DistGrids
+      if(associated(fp1%distgridB)) ngridB1 = size(fp1%distgridB, 1)
+      if(associated(fp2%distgridB)) ngridB2 = size(fp2%distgridB, 1)
+      if(ngridB1 /= ngridB2) then
+        if(present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+      if(.not. associated(fp1%distgridB, fp2%distgridB)) then
+        do i = 1, ngridB1
+          if(.not. ESMF_DistGridMatch(fp1%distgridB(i), fp2%distgridB(i))) then
+            if(present(rc)) rc = ESMF_SUCCESS
+            return
+          endif
+        enddo
+      endif
+
+      ! TODO: Compare the SparseMat objects
+
+      ! All critical internal objects match
+      ESMF_XGridMatch = .true.
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -419,16 +498,17 @@ contains
 !
 !EOPI
 
-      integer :: localrc
+      integer :: localrc, i
 
       type(ESMF_XGridType), pointer :: xgtypep
       type(ESMF_Status) :: xgridstatus
+      integer :: ngridA, ngridB
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      ! check variables
+      ! Check variables
       ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
 
       if (.not.associated(xgrid%xgtypep)) then 
@@ -440,7 +520,7 @@ contains
 
       xgtypep => xgrid%xgtypep
 
-      ! make sure the xgrid is ready before trying to look at contents
+      ! Make sure the xgrid is ready before trying to look at contents
       call ESMF_BaseGetStatus(xgtypep%base, xgridstatus, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -451,6 +531,114 @@ contains
              ESMF_CONTEXT, rc)
          return
       endif 
+
+      ! Verify all associated arrays are sized consistently
+      if(associated(xgtypep%sideA)) ngridA = size(xgtypep%sideA, 1)
+      if(associated(xgtypep%sideB)) ngridB = size(xgtypep%sideB, 1)
+
+      if(associated(xgtypep%area) .and. associated(xgtypep%centroid)) then
+        if(size(xgtypep%area, 1) /= size(xgtypep%centroid, 1)) then
+           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+             "number of area cells differs from number of centroid cells", &
+             ESMF_CONTEXT, rc)
+           return
+        endif
+      endif
+
+      if(associated(xgtypep%sparseMatA2X) .or. associated(xgtypep%sparseMatX2A)) then
+        if(associated(xgtypep%distgridA)) then
+          if(size(xgtypep%distgridA, 1) /= ngridA) then
+             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+               "number of distgrids on side A differs from number of Grids on side A", &
+               ESMF_CONTEXT, rc)
+             return
+          endif
+        endif
+      endif
+
+      if(associated(xgtypep%sparseMatA2X)) then
+        if(size(xgtypep%sparseMatA2X, 1) /= ngridA) then
+           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+             "number of sparseMat objects on side A differs from number of Grids on side A", &
+             ESMF_CONTEXT, rc)
+           return
+        endif
+        do i = 1, ngridA
+          if(size(xgtypep%sparseMatA2X(i)%factorIndexList, 2) /= &
+            size(xgtypep%sparseMatA2X(i)%factorList, 1)) then
+             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+               "number of elements in sparseMatA2X is inconsistent", &
+               ESMF_CONTEXT, rc)
+            return
+          endif
+        enddo
+      endif
+
+      if(associated(xgtypep%sparseMatX2A)) then
+        if(size(xgtypep%sparseMatX2A, 1) /= ngridA) then
+           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+             "number of sparseMat objects on side A differs from number of Grids on side A", &
+             ESMF_CONTEXT, rc)
+           return
+        endif
+        do i = 1, ngridA
+          if(size(xgtypep%sparseMatX2A(i)%factorIndexList, 2) /= &
+            size(xgtypep%sparseMatX2A(i)%factorList, 1)) then
+             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+               "number of elements in sparseMatX2A is inconsistent", &
+               ESMF_CONTEXT, rc)
+            return
+          endif
+        enddo
+      endif
+
+      ! B side
+      if(associated(xgtypep%sparseMatB2X) .or. associated(xgtypep%sparseMatX2B)) then
+        if(associated(xgtypep%distgridB)) then
+          if(size(xgtypep%distgridB, 1) /= ngridB) then
+             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+               "number of distgrids on side B differs from number of Grids on side B", &
+               ESMF_CONTEXT, rc)
+             return
+          endif
+        endif
+      endif
+
+      if(associated(xgtypep%sparseMatB2X)) then
+        if(size(xgtypep%sparseMatB2X, 1) /= ngridB) then
+           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+             "number of sparseMat objects on side B differs from number of Grids on side B", &
+             ESMF_CONTEXT, rc)
+           return
+        endif
+        do i = 1, ngridB
+          if(size(xgtypep%sparseMatB2X(i)%factorIndexList, 2) /= &
+            size(xgtypep%sparseMatB2X(i)%factorList, 1)) then
+             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+               "number of elements in sparseMatB2X is inconsistent", &
+               ESMF_CONTEXT, rc)
+            return
+          endif
+        enddo
+      endif
+
+      if(associated(xgtypep%sparseMatX2B)) then
+        if(size(xgtypep%sparseMatX2B, 1) /= ngridB) then
+           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+             "number of sparseMat objects on side B differs from number of Grids on side B", &
+             ESMF_CONTEXT, rc)
+           return
+        endif
+        do i = 1, ngridB
+          if(size(xgtypep%sparseMatX2B(i)%factorIndexList, 2) /= &
+            size(xgtypep%sparseMatX2B(i)%factorList, 1)) then
+             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+               "number of elements in sparseMatX2B is inconsistent", &
+               ESMF_CONTEXT, rc)
+            return
+          endif
+        enddo
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -803,6 +991,11 @@ contains
                                      "space for new XGrid object", &
                                      ESMF_CONTEXT, rc)) return
 
+      call ESMF_XGridInitialize(fp, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
       ! Deserialize Base
       call c_ESMC_BaseDeserialize(fp%base, buffer(1), offset, lattreconflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -810,11 +1003,6 @@ contains
                                  ESMF_CONTEXT, rc)) return
                                  
       call ESMF_BaseSetInitCreated(fp%base, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
-
-      call ESMF_XGridInitialize(fp, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
