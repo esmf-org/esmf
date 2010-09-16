@@ -1,4 +1,4 @@
-! $Id: ESMF_GeomBase.F90,v 1.8 2010/08/27 21:12:09 oehmke Exp $
+! $Id: ESMF_GeomBase.F90,v 1.9 2010/09/16 17:10:48 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -156,7 +156,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.8 2010/08/27 21:12:09 oehmke Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.9 2010/09/16 17:10:48 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1297,9 +1297,13 @@ end subroutine ESMF_GeomBaseGet
                                  ESMF_CONTEXT, rc)) return
 
        case  (ESMF_GEOMTYPE_XGRID%type)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                               " Xgrid serialization not yet implemented", &
-                               ESMF_CONTEXT, rc)) return
+          call ESMF_XGridSerialize(xgrid=gbcp%xgrid, &
+                      buffer=buffer,length=length, offset=offset, &
+                      inquireflag=linquireflag, &
+                      rc=localrc) 
+          if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
 
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
@@ -1409,9 +1413,11 @@ end subroutine ESMF_GeomBaseGet
                                  ESMF_CONTEXT, rc)) return  
 
        case  (ESMF_GEOMTYPE_XGRID%type)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                               " Xgrid deserialization not yet implemented", &
-                               ESMF_CONTEXT, rc)) return
+          gbcp%xgrid=ESMF_XGridDeserialize(buffer=buffer, &
+              offset=offset, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return  
 
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
