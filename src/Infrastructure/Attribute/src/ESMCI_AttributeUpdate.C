@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.28 2010/09/15 19:49:01 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.29 2010/09/16 17:59:03 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.28 2010/09/15 19:49:01 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.29 2010/09/16 17:59:03 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -233,6 +233,7 @@ static const int keySize = 4*sizeof(int) + 1;
     return ESMF_FAILURE;
   }
 
+
   // ~~~~~~~~~~~~~ STOP CASE ~~~~~~~~~~~~~~
 // else if (length == *offset) return ESMF_SUCCESS;
  
@@ -240,26 +241,30 @@ static const int keySize = 4*sizeof(int) + 1;
   memcpy(distkey, recvBuf+(*offset), keySize);
   *offset += keySize;
 
+#ifdef DEBUG
   // compare keys
   // key = ID, xor [name, conv, purp], value changes, struct changes, pack changes
-/*    printf("\nPET %d  -  %d  %s %d %d %d  -  %d  %s %d %d %d\n", 
+    printf("\nPET %d  -  %d  %s %d %d %d  -  %d  %s %d %d %d\n", 
           localPet, 
           (*(reinterpret_cast<int*> (thiskey+0))),
           thiskey+4,
-          (*(reinterpret_cast<bool*> (thiskey+5))),
+          (*(reinterpret_cast<int*> (thiskey+5))),
           (*(reinterpret_cast<int*> (thiskey+9))),
           (*(reinterpret_cast<int*> (thiskey+13))),
           (*(reinterpret_cast<int*> (distkey+0))),
           distkey+4,
-          (*(reinterpret_cast<bool*> (distkey+5))),
+          (*(reinterpret_cast<int*> (distkey+5))),
           (*(reinterpret_cast<int*> (distkey+9))),
           (*(reinterpret_cast<int*> (distkey+13))));
-*/
+#endif
+
   if (AttributeUpdateKeyCompare(thiskey, distkey) == false) {
-/*    printf("PET %d  -  DeleteMe!!!\n", localPet);
+#ifdef DEBUG
+    printf("PET %d  -  DeleteMe!!!\n", localPet);
     printf("PET %d  -  Name = %s, Convention = %s, Purpose = %s\n\n", 
             localPet, attrName.c_str(), attrConvention.c_str(), attrPurpose.c_str());
-*/
+#endif
+
     if (attrPackHead == ESMF_TRUE) {
       delete [] thiskey;
       delete [] distkey;
@@ -282,12 +287,14 @@ static const int keySize = 4*sizeof(int) + 1;
       return ESMC_ATTUPDATERM_ATTRIBUTE;
     }
   }
-/*  else { 
+#ifdef DEBUG
+  else { 
     printf("PET %d  -  !!MATCH!!!\n", localPet);
     printf("PET %d  -  Name = %s, Convention = %s, Purpose = %s\n\n", 
             localPet, attrName.c_str(), attrConvention.c_str(), attrPurpose.c_str());
   }
-*/
+#endif
+
   // make sure offset is aligned correctly
   nbytes=(*offset)%8;
   if (nbytes!=0) *offset += 8-nbytes;  
@@ -302,7 +309,7 @@ static const int keySize = 4*sizeof(int) + 1;
   }
 
   // get key info
-  int valueChange = (*(reinterpret_cast<bool*> (distkey+sizeof(int)+1)));
+  int valueChange = (*(reinterpret_cast<int*> (distkey+sizeof(int)+1)));
   int attrChange = (*(reinterpret_cast<int*> (distkey+sizeof(int)+1+(sizeof(int)))));
   int packChange = (*(reinterpret_cast<int*> (distkey+sizeof(int)+1+(2*sizeof(int)))));
 
@@ -437,7 +444,29 @@ static const int keySize = 4*sizeof(int) + 1;
       return ESMF_FAILURE;
     }
   }
-  
+
+#ifdef DEBUG
+if (packList.size() == 2) {
+// test the funky key, I guess
+char *testkey1, *testkey2;
+testkey1 = NULL, testkey2 = NULL;
+testkey1 = new char[keySize];
+testkey2 = new char[keySize];
+localrc = packList.at(0)->AttributeUpdateKeyCreate(testkey1);
+localrc = packList.at(1)->AttributeUpdateKeyCreate(testkey2);
+if(AttributeUpdateKeyCompare(testkey1,testkey2) == true) {
+  printf("FAIL!\n");
+  printf("PET %d - %s == %s ??\n", localPet, packList.at(0)->attrName.c_str(), packList.at(1)->attrName.c_str());
+}
+else
+  printf("problems..\n");
+delete [] testkey1, testkey2;
+}
+
+printf("PET %d - attrListSize = %d, packListSize = %d, linkListSize = %d\n", 
+       localPet, attrList.size(), packList.size(), linkList.size());
+#endif
+
   // recurse through the Attribute hierarchy
   for (i=0; i<attrList.size(); ++i) {
     localrc = attrList.at(i)->AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
@@ -502,14 +531,15 @@ static const int keySize = 4*sizeof(int) + 1;
   // recurse the linkList
   for (i=0; i<linkList.size(); ++i) {
     localrc = linkList.at(i)->AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
-/*
+#ifdef DEBUG
     if (localrc == ESMC_ATTUPDATERM_ATTPACK) 
       printf("PET%d - returned ESMC_ATTUPDATERM_ATTPACK\n", localPet);
     else if (localrc == ESMC_ATTUPDATERM_ATTRIBUTE) 
       printf("PET%d - returned ESMC_ATTUPDATERM_ATTRIBUTE\n", localPet);
     else if (localrc == ESMC_ATTUPDATERM_ATTPACKATT) 
       printf("PET%d - returned ESMC_ATTUPDATERM_ATTPACKATT\n", localPet);
-    else */
+    else
+#endif 
     if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
         "AttributeUpdate failed recursing linkList", &localrc);
@@ -606,24 +636,29 @@ static const int keySize = 4*sizeof(int) + 1;
     return ESMF_FAILURE;
   }
 
-/*      
-  if (localPet == 4) {
-  printf("\n!!! BUFSEND !!! - localPet = %d\n", localPet);
-  printf("%d %s %s %s %d %d\n\n", 
+#ifdef DEBUG
+ // compare keys
+  // key = ID, xor [name, conv, purp], value changes, struct changes, pack changes
+  printf("\nPET %d - %d %s %d %d %d\n", 
+                      localPet,
                       (*(reinterpret_cast<int*> (key+0))),
                       key+4,
-                      (*(reinterpret_cast<bool*> (key+5))),
+                      (*(reinterpret_cast<int*> (key+5))),
                       (*(reinterpret_cast<int*> (key+9))),
                       (*(reinterpret_cast<int*> (key+13))));
-  }
-*/
+
+  printf("PET %d - !!!BUFSEND!!!\n", localPet);
+  printf("PET %d  -  Name = %s, Convention = %s, Purpose = %s\n\n", 
+          localPet, attrName.c_str(), attrConvention.c_str(), attrPurpose.c_str());
+#endif
 
   // get key info
-  int valueChanges = (*(reinterpret_cast<bool*> (key+sizeof(int)+1)));
-  int structChanges = (*(reinterpret_cast<bool*> (key+sizeof(int)+1+sizeof(int))));
+  int valueChanges = (*(reinterpret_cast<int*> (key+sizeof(int)+1)));
+  int structChanges = (*(reinterpret_cast<int*> (key+sizeof(int)+1+sizeof(int))));
   int packChanges = (*(reinterpret_cast<int*> (key+sizeof(int)+1+(2*sizeof(int)))));
 
   // if value changes
+  if (valueChanges > 0) {
   int valcount = 0;
   for (i=0; i<attrList.size(); ++i) { 
     if (attrList.at(i)->valueChange == ESMF_TRUE) {
@@ -650,8 +685,10 @@ static const int keySize = 4*sizeof(int) + 1;
     delete [] key;
     return ESMF_FAILURE;
   }
+  }
 
   // if struct changes
+  if (structChanges > 0) {
   int structcount = 0;
   for (i=0; i<attrList.size(); ++i) {
     if (attrList.at(i)->structChange == ESMF_TRUE) {
@@ -678,8 +715,10 @@ static const int keySize = 4*sizeof(int) + 1;
     delete [] key;
     return ESMF_FAILURE;
   }
+  }
 
   // if pack changes
+  if (packChanges > 0) {
   int packcount = 0;
   for (i=0; i<packList.size(); i++) {
     if (packList.at(i)->structChange == ESMF_TRUE) {
@@ -706,6 +745,12 @@ static const int keySize = 4*sizeof(int) + 1;
     delete [] key;
     return ESMF_FAILURE;
   }
+  }
+
+#ifdef DEBUG
+printf("PET %d - BUFSEND recurse attrListsize = %d, packListsize = %d, linkListsize = %d\n",
+       localPet, attrList.size(), packList.size(), linkList.size());
+#endif
 
   // recurse through the Attribute hierarchy
   for (i=0; i<attrList.size(); i++)
@@ -995,10 +1040,10 @@ static const int keySize = 4*sizeof(int) + 1;
   offset += sizeof(int);
 
   // xor the name into key
-  if (!attrName.empty()) {
+  if (!attrName.empty() && attrPackHead != ESMF_TRUE) {
   for (i=0; i<attrName.size(); ++i)
     *xorkey = *xorkey ^ attrName[i];}
-  
+
   // xor the convention into key
   if (!attrConvention.empty()) {
   for (i=0; i<attrConvention.size(); ++i)
@@ -1008,7 +1053,7 @@ static const int keySize = 4*sizeof(int) + 1;
   if (!attrPurpose.empty()) {
   for (i=0; i<attrPurpose.size(); ++i)
     *xorkey = *xorkey ^ attrPurpose[i];}
-    
+
   memcpy((key+offset),xorkey,1);
   offset += 1;
    

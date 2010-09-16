@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.73 2010/09/15 19:49:00 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.74 2010/09/16 17:59:03 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.73 2010/09/15 19:49:00 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.74 2010/09/16 17:59:03 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -244,7 +244,7 @@ namespace ESMCI {
       localrc = AttPackAddAttribute("NumberOfCells", "GridSpec", "General", object);
       localrc = AttPackAddAttribute("NX", "GridSpec", "General", object);
       localrc = AttPackAddAttribute("NY", "GridSpec", "General", object);
-      localrc = AttPackAddAttribute("HorizontalResolution", "GridSpec", "General", object);
+      localrc = AttPackAddAttribute("Resolution", "GridSpec", "General", object);
     }
     if (convention.compare("ESMF")==0 && purpose.compare("General")==0) {
       localrc = AttPackNest("ESMF", "General", object, "GridSpec", "General");
@@ -362,11 +362,10 @@ namespace ESMCI {
     if (convention.compare("CIM 1.0")==0 &&
         purpose.compare("Model Component Simulation Description")==0) {
 
-      // TODO: uncomment and expand when we have better definition from CIM
-      //localrc = AttPackCreateCustom("CIM 1.0",
-      //                              "Scientific Property Description", object);
-      //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      //      &localrc)) return localrc;
+      localrc = AttPackCreateCustom("CIM 1.0",
+                                    "Scientific Property Description", object);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+            &localrc)) return localrc;
 
       localrc = AttPackCreateCustom("CIM 1.0",
                                     "Platform Description", object);
@@ -384,12 +383,11 @@ namespace ESMCI {
             &localrc)) return localrc;
 
       vector<string> nestconv, nestpurp;
-      int nestcount = 3;  // TODO: bump to 4 when Scientific Properties enabled
+      int nestcount = 4;
       nestconv.reserve(nestcount);
       nestpurp.reserve(nestcount);
-      // TODO: uncomment and expand when we have better definition from CIM
-      //nestconv.push_back("CIM 1.0");
-      //nestpurp.push_back("Scientific Property Description");
+      nestconv.push_back("CIM 1.0");
+      nestpurp.push_back("Scientific Property Description");
       nestconv.push_back("CIM 1.0");
       nestpurp.push_back("Platform Description");
       nestconv.push_back("ISO 19115");
@@ -459,15 +457,14 @@ namespace ESMCI {
       //  n <componentProperty>s in 1 <componentProperties> in
       //    <modelComponent>
       //
-      // TODO: uncomment and expand when we have better definition from CIM
-      //localrc = AttPackAddAttribute("ScientificPropertyShortName", "CIM 1.0",
-      //                      "Scientific Property Description", object);
-      //localrc = AttPackAddAttribute("ScientificPropertyLongName", "CIM 1.0",
-      //                      "Scientific Property Description", object);
-      //localrc = AttPackAddAttribute("ScientificPropertyValue", "CIM 1.0",
-      //                      "Scientific Property Description", object);
-      //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      //      &localrc)) return localrc;
+      localrc = AttPackAddAttribute("ScientificPropertyShortName", "CIM 1.0",
+                            "Scientific Property Description", object);
+      localrc = AttPackAddAttribute("ScientificPropertyLongName", "CIM 1.0",
+                            "Scientific Property Description", object);
+      localrc = AttPackAddAttribute("ScientificPropertyValue", "CIM 1.0",
+                            "Scientific Property Description", object);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+            &localrc)) return localrc;
 
       //
       // Platform attributes
@@ -1165,7 +1162,7 @@ namespace ESMCI {
   
   // add the Attribute
   packList.push_back(attr);
-  structChange = ESMF_TRUE;
+  //structChange = ESMF_TRUE;
   attrPack = ESMF_TRUE;
   
   return ESMF_SUCCESS;
