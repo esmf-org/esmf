@@ -1,4 +1,4 @@
-% $Id: Component_crefdoc.ctex,v 1.16 2010/09/15 23:49:01 theurich Exp $
+% $Id: Component_crefdoc.ctex,v 1.17 2010/09/16 00:12:49 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -117,7 +117,7 @@
 %\input{../Superstructure/Component/doc/CplComp_rest}
 %#endif
 
-%\subsection{Class API}
+\subsection{Class API}
 #ifdef STANDALONE
 \input{ESMC_CplComp_chapi} 
 #elif defined(CONSTITUENT)
