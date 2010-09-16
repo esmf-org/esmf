@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.56 2010/09/15 19:49:44 rokuingh Exp $
+! $Id: user_model1.F90,v 1.57 2010/09/16 20:23:59 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -280,7 +280,7 @@ module user_model1
     call ESMF_AttributeSet(CONVPHI, name3, value3, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(CONVPHI, name4, value4, convention=conv, purpose=purp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
-      
+
     ! Create the Grid Attribute Package
     call ESMF_AttributeAdd(grid,convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(grid,'GridType','Cubed sphere',convention=conv, purpose=purp, rc=rc)
@@ -297,6 +297,7 @@ module user_model1
     call ESMF_AttributeSet(grid,'NX','96',convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(grid,'NY','96',convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(grid,'HorizontalResolution','C48',convention=conv, purpose=purp, rc=rc)
+
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Create a FieldBundle for Fields
@@ -422,7 +423,7 @@ module user_model1
 !                               attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
         call ESMF_AttributeSet(field, name2, value2, convention=conv, purpose=purp, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
-#if 0
+#if 1
         call ESMF_AttributeAdd(field, convention=conv, purpose=purp2, attrList=attrList, &
           count=2, nestConvention=conv, nestPurpose=purp, rc=rc)
         call ESMF_AttributeSet(field, name='Coordinates', value='Latlon', &
