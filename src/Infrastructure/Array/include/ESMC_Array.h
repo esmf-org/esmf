@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.115 2010/07/23 23:00:38 theurich Exp $
+// $Id: ESMC_Array.h,v 1.116 2010/09/16 04:33:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -56,8 +56,8 @@ ESMC_Array ESMC_ArrayCreate(
   ESMC_ArraySpec arrayspec,   // in
   ESMC_DistGrid distgrid,     // in
   const char* name,           // in
-  int *rc);                   // out
-  
+  int *rc                     // out
+);
 // !RETURN VALUE:
 //  Newly created ESMC_Array object.
 //
@@ -91,8 +91,8 @@ ESMC_Array ESMC_ArrayCreate(
 //
 // !INTERFACE:
 int ESMC_ArrayDestroy(
-  ESMC_Array *array);         // inout
-
+  ESMC_Array *array           // inout
+);
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
@@ -111,37 +111,13 @@ int ESMC_ArrayDestroy(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_ArrayPrint - Print an Array
-//
-// !INTERFACE:
-int ESMC_ArrayPrint(
-  ESMC_Array array);          // in
-  
-// !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
-//
-// !DESCRIPTION:
-//
-//  Print internal information of the specified {\tt ESMC\_Array} object.
-//
-//  The arguments are:
-//  \begin{description}
-//  \item[array] 
-//    {\tt ESMC\_Array} object to be destroyed.
-//  \end{description}
-//
-//EOP
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-//BOP
 // !IROUTINE: ESMC_ArrayGetName - Get the name of an Array
 //
 // !INTERFACE:
 const char *ESMC_ArrayGetName(
   ESMC_Array array,           // in
-  int *rc);                   // out
-  
+  int *rc                     // out
+);
 // !RETURN VALUE:
 //  Pointer to the Array name string.
 //
@@ -168,8 +144,8 @@ const char *ESMC_ArrayGetName(
 void *ESMC_ArrayGetPtr(
   ESMC_Array array,           // in
   int localDe,                // in
-  int *rc);                   // out
-
+  int *rc                     // out
+);
 // !RETURN VALUE:
 //  Pointer to the Array data.
 //
@@ -185,6 +161,30 @@ void *ESMC_ArrayGetPtr(
 //    Local De for which to data pointer is queried.
 //  \item[{[rc]}]
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_ArrayPrint - Print an Array
+//
+// !INTERFACE:
+int ESMC_ArrayPrint(
+  ESMC_Array array            // in
+);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Print internal information of the specified {\tt ESMC\_Array} object.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[array] 
+//    {\tt ESMC\_Array} object to be printed.
 //  \end{description}
 //
 //EOP

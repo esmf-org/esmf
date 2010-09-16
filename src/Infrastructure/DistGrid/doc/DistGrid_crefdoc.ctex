@@ -1,7 +1,7 @@
-% $Id: DistGrid_crefdoc.ctex,v 1.4 2010/03/30 21:57:55 svasquez Exp $ 
+% $Id: DistGrid_crefdoc.ctex,v 1.5 2010/09/16 04:33:44 theurich Exp $ 
 %
 % Earth System Modeling Framework
-% Copyright 2002-2009, University Corporation for Atmospheric Research, 
+% Copyright 2002-2010, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -87,10 +87,8 @@
 
 \subsection{Class API}
 #ifdef STANDALONE
-%\input{ESMF_DistGrid_fapi}
 \input{ESMC_DistGrid_chapi}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/DistGrid/doc/ESMF_DistGrid_fapi}
 \input{../Infrastructure/DistGrid/doc/ESMC_DistGrid_chapi}
 #endif
 

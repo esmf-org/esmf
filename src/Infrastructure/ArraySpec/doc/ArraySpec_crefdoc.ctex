@@ -1,4 +1,12 @@
-% $Id: ArraySpec_crefdoc.ctex,v 1.1 2010/03/30 21:52:37 svasquez Exp $
+% $Id: ArraySpec_crefdoc.ctex,v 1.2 2010/09/16 04:33:44 theurich Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2010, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -13,8 +21,8 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{ArraySpec Design}
-\newcommand{\myauthors}{Nancy Collins}
+\newcommand{\mytitle}{\Large {\bf ArraySpec Reference}}
+\newcommand{\myauthors}{\large {\it Gerhard Theurich}}
 #endif
 
 #ifdef STANDALONE
@@ -32,6 +40,10 @@
 
 \newpage
 #endif
+
+%============================================================================
+% ArraySpec Class
+%============================================================================
 
 \section{ArraySpec Class}
 
@@ -67,10 +79,8 @@
 
 \subsection{Class API}
 #ifdef STANDALONE
-%\input{ESMF_ArraySpec_fapi}
 \input{ESMC_ArraySpec_chapi}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/ArraySpec/doc/ESMF_ArraySpec_fapi}
 \input{../Infrastructure/ArraySpec/doc/ESMC_ArraySpec_chapi}
 #endif
 

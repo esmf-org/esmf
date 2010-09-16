@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.15 2006/11/16 23:55:55 cdeluca Exp $
+# $Id: makefile,v 1.16 2010/09/16 04:33:44 theurich Exp $
 
 All: onedoc
 
-LOCDIR = src/Infrastructure/DistGrid/doc
+LOCDIR    = src/Infrastructure/DistGrid/doc
 
-DVIFILES = DistGrid_refdoc.dvi
-PDFFILES  = $(ESMC_DOCDIR)/DistGrid_refdoc.pdf
-HTMLFILES = $(ESMC_DOCDIR)/DistGrid_refdoc
+DVIFILES  = DistGrid_refdoc.dvi DistGrid_crefdoc.dvi
+PDFFILES  = $(ESMC_DOCDIR)/DistGrid_refdoc.pdf $(ESMC_DOCDIR)/DistGrid_crefdoc.pdf
+HTMLFILES = $(ESMC_DOCDIR)/DistGrid_refdoc $(ESMC_DOCDIR)/DistGrid_crefdoc
 
 #
 # Tex Files to make
@@ -35,9 +35,9 @@ REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) DistGrid_desc.tex DistGrid_usage.tex Dist
 
 include $(ESMF_DIR)/makefile
 
-DIRS = 
-CLEANDIRS   = DistGrid_refdoc $(HTMLFILES)
+DIRS        = 
+CLEANDIRS   = DistGrid_refdoc DistGrid_crefdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              DistGrid_refdoc.tex $(PDFFILES)
+              DistGrid_refdoc.tex DistGrid_crefdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 

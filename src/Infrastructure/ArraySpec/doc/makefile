@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.7 2008/09/26 04:16:39 cdeluca Exp $ 
+# $Id: makefile,v 1.8 2010/09/16 04:33:44 theurich Exp $ 
 
 ALL: onedoc
 
 LOCDIR	  = src/Infrastructure/ArraySpec/doc
 
-DVIFILES  =   ArraySpec_refdoc.dvi 
-PDFFILES  =   ${ESMC_DOCDIR}/ArraySpec_refdoc.pdf
-HTMLFILES =   ${ESMC_DOCDIR}/ArraySpec_refdoc 
+DVIFILES  = ArraySpec_refdoc.dvi ArraySpec_crefdoc.dvi 
+PDFFILES  = ${ESMC_DOCDIR}/ArraySpec_refdoc.pdf ${ESMC_DOCDIR}/ArraySpec_crefdoc.pdf
+HTMLFILES = ${ESMC_DOCDIR}/ArraySpec_refdoc ${ESMC_DOCDIR}/ArraySpec_crefdoc 
 
 #
 # Tex Files to make
@@ -34,10 +34,10 @@ REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
 include $(ESMF_DIR)/makefile
 
-DIRS	  = 
-CLEANDIRS   = ArraySpec_refdoc $(HTMLFILES)
+DIRS	    = 
+CLEANDIRS   = ArraySpec_refdoc ArraySpec_crefdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              ArraySpec_refdoc.tex $(PDFFILES)
+              ArraySpec_refdoc.tex ArraySpec_crefdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 
 

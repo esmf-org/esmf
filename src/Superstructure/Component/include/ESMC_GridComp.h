@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.29 2010/09/15 23:46:43 theurich Exp $
+// $Id: ESMC_GridComp.h,v 1.30 2010/09/16 04:33:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,14 +63,14 @@ ESMC_GridComp ESMC_GridCompCreate(
   int *rc                              // out
 );
 // !RETURN VALUE:
-//  Newly created ESMC_GridComp
+//  Newly created ESMC_GridComp object.
 //
 // !DESCRIPTION:
 //
-// This interface creates an {\tt ESMC\_GridComp} object. By default, a
-// separate VM context will be created for each component.  This implies
-// creating a new MPI communicator and allocating additional memory to
-// manage the VM resources.
+//  This interface creates an {\tt ESMC\_GridComp} object. By default, a
+//  separate VM context will be created for each component.  This implies
+//  creating a new MPI communicator and allocating additional memory to
+//  manage the VM resources.
 //
 //  The arguments are:
 //  \begin{description}

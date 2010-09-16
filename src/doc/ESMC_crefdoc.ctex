@@ -1,4 +1,4 @@
-% $Id: ESMC_crefdoc.ctex,v 1.3 2010/07/07 19:21:55 svasquez Exp $
+% $Id: ESMC_crefdoc.ctex,v 1.4 2010/09/16 04:33:44 theurich Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -188,7 +188,7 @@
 
 #include "../Infrastructure/LogErr/doc/LogErr_crefdoc.ctex"
 
-#include "../Infrastructure/DELayout/doc/DELayout_crefdoc.ctex"
+%#include "../Infrastructure/DELayout/doc/DELayout_crefdoc.ctex"
 
 #include "../Infrastructure/VM/doc/VM_crefdoc.ctex"
 

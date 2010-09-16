@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.119 2010/05/10 07:20:54 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.120 2010/09/16 04:33:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -184,7 +184,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.119 2010/05/10 07:20:54 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.120 2010/09/16 04:33:44 theurich Exp $"
 
 !==============================================================================
 
@@ -3176,7 +3176,7 @@ module ESMF_VMMod
 !   The {\tt ESMF\_VMGetGlobal()} call provides access to information about the
 !   global execution context via the global VM. This call is necessary because
 !   ESMF does not created a global ESMF Component during
-!   {\tt ESMF\_Initialize()}, that could be queried for information about
+!   {\tt ESMF\_Initialize()} that could be queried for information about
 !   the global execution context of an ESMF application.
 !
 !   Usage of {\tt ESMF\_VMGetGlobal()} from within Component code is

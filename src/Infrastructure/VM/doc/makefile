@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.7 2006/11/16 23:55:58 cdeluca Exp $
+# $Id: makefile,v 1.8 2010/09/16 04:33:44 theurich Exp $
 
 ALL: onedoc
 
-LOCDIR = src/Infrastructure/VM/doc
+LOCDIR    = src/Infrastructure/VM/doc
 
-DVIFILES = VM_refdoc.dvi
-PDFFILES  = $(ESMC_DOCDIR)/VM_refdoc.pdf
-HTMLFILES = $(ESMC_DOCDIR)/VM_refdoc
+DVIFILES  = VM_refdoc.dvi VM_crefdoc.dvi
+PDFFILES  = $(ESMC_DOCDIR)/VM_refdoc.pdf $(ESMC_DOCDIR)/VM_crefdoc.pdf
+HTMLFILES = $(ESMC_DOCDIR)/VM_refdoc $(ESMC_DOCDIR)/VM_crefdoc
 
 #
 # Tex Files to make
@@ -35,8 +35,8 @@ REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) VM_desc.tex VM_usage.tex VM_rest.tex VM_i
 
 include $(ESMF_DIR)/makefile
 
-DIRS = 
-CLEANDIRS   = VM_refdoc $(HTMLFILES)
+DIRS        = 
+CLEANDIRS   = VM_refdoc VM_crefdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              VM_refdoc.tex $(PDFFILES)
+              VM_refdoc.tex VM_crefdoc.tex $(PDFFILES)
 CLOBBERDIRS =
