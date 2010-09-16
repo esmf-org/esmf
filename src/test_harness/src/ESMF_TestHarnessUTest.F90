@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUTest.F90,v 1.36 2010/09/16 14:58:39 garyblock Exp $
+! $Id: ESMF_TestHarnessUTest.F90,v 1.37 2010/09/16 21:39:44 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -66,6 +66,9 @@
   ! -------- beginning of executable code below here -------
 
   !allocate (dummystuff(5))
+  name = ""
+  failmsg = ""
+  har%failures = 0
 
   !------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -93,8 +96,17 @@
     ! get arg cnt
     argc = ESMF_UtilGetArgC ()
 
+    print '("command line arg count = ", I4)', argc
+
+    do argindex = 1, argc
+      call ESMF_UtilGetArg (argindex=argindex, value=name, rc=rc)
+      if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArg failure", rc)) go to 90
+        print '("command line arg [", I2, "] = ", I4, ":", A)', argindex, LEN_TRIM(name), TRIM(name)
+    end do
+
     ! get path info
     call ESMF_UtilGetArgIndex (value="-path", argindex=argindex, rc=rc)
+    print '("argindex (-path) = ", I4)', argindex
     if ((argindex >= 0) .AND. (argindex < argc - 1)) then
       call ESMF_UtilGetArg (argindex=argindex+1, value=srcPath(1), rc=rc)
       if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArg failure", rc)) go to 90
@@ -102,7 +114,7 @@
 
     ! get test case info
     call ESMF_UtilGetArgIndex (value="-case", argindex=argindex, rc=rc)
-    !print '("argindex = ", I4, ", argc = ", I4)', argindex, argc
+    print '("argindex (-case) = ", I4)', argindex
     if ((argindex >= 0) .AND. (argindex < argc)) then
       call ESMF_UtilGetArg (argindex=argindex+1, value=configFname(1), rc=rc)
       if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArg failure", rc)) go to 90
@@ -110,6 +122,7 @@
 
     ! get xml file info
     call ESMF_UtilGetArgIndex (value="-xml", argindex=argindex, rc=rc)
+    print '("argindex (-xml) = ", I4)', argindex
     if ((argindex >= 0) .AND. (argindex < argc)) then
       call ESMF_UtilGetArg (argindex=argindex+1, value=xmlFname(1), rc=rc)
       if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArg failure", rc)) go to 90
