@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.1 2010/09/09 20:27:18 oehmke Exp $
+// $Id: ESMCI_MathUtil.C,v 1.2 2010/09/16 18:41:11 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.1 2010/09/09 20:27:18 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.2 2010/09/16 18:41:11 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -82,12 +82,12 @@ bool invert_matrix_3x3(double m[], double m_inv[]) {
 }
 
 
-// Intersects between the quad q (entries in counterclockwise order)                                                    
-// and the line determined by the endpoints l1 and l2                                                                   
-// returns true if the two intersect and the output variables are valid                                                 
-// outputs p containing the coordinates in the quad and t the coordinate in the line                                    
-// of the intersection.                                                                                                 
-// NOTE: the intersection doesn't have to be inside the quad or line for this to return true                            
+// Intersects between the quad q (entries in counterclockwise order)                                       
+// and the line determined by the endpoints l1 and l2                       
+// returns true if the two intersect and the output variables are valid                                
+// outputs p containing the coordinates in the quad and t the coordinate in the line   
+// of the intersection.                                                           
+// NOTE: the intersection doesn't have to be inside the quad or line for this to return true    
 bool intersect_quad_with_line(const double *q, const double *l1, const double *l2, double *p,
 			      double *t) {
 
@@ -101,7 +101,7 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
   const double *q3=q+9;
 
 
-  // Set some convient variables                                                                                        
+  // Set some convient variables
   A[0]=q0[0]-q1[0]+q2[0]-q3[0];
   A[1]=q0[1]-q1[1]+q2[1]-q3[1];
   A[2]=q0[2]-q1[2]+q2[2]-q3[2];
@@ -122,7 +122,7 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
   E[1]=q0[1]-l1[1];
   E[2]=q0[2]-l1[2];
 
-  // Initialize answer                                                                                                  
+  // Initialize answer
   X[0]=0.0;
   X[1]=0.0;
   X[2]=0.0;
@@ -130,32 +130,33 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
   // Do multiple iterations, exiting inside loop if solution is good enough
   for (int i=0; i<20; i++) {
 
-    // Calculate Value of function at X                                                                                   
+    // Calculate Value of function at X
     F[0]=X[0]*X[1]*A[0]+X[0]*B[0]+X[1]*C[0]+X[2]*D[0]+E[0];
     F[1]=X[0]*X[1]*A[1]+X[0]*B[1]+X[1]*C[1]+X[2]*D[1]+E[1];
     F[2]=X[0]*X[1]*A[2]+X[0]*B[2]+X[1]*C[2]+X[2]*D[2]+E[2];
 
-    // If we're close enough to 0.0 then exit                                                                             
+    // If we're close enough to 0.0 then exit
     if (F[0]*F[0]+F[1]*F[1]+F[2]*F[2] < 1.0E-10) break;
 
-    // Construct Jacobian                                                                                                 
+    // Construct Jacobian
     J[0]=A[0]*X[1]+B[0]; J[1]=A[0]*X[0]+C[0]; J[2]=D[0];
     J[3]=A[1]*X[1]+B[1]; J[4]=A[1]*X[0]+C[1]; J[5]=D[1];
     J[6]=A[2]*X[1]+B[2]; J[7]=A[2]*X[0]+C[2]; J[8]=D[2];
 
-    // Invert Jacobian                                                                                                    
+    // Invert Jacobian
     if (!invert_matrix_3x3(J,inv_J)) return false;
 
-    // Calculate change in X                                                                                              mult(inv_J, F, delta_X);
+    // Calculate change in X
+    mult(inv_J, F, delta_X);
 
-    // Move to next approximation of X                                                                                    
+    // Move to next approximation of X
     X[0] = X[0] - delta_X[0];
     X[1] = X[1] - delta_X[1];
     X[2] = X[2] - delta_X[2];
 
   }
 
-  // Get answer out                                                                                                     
+  // Get answer out
   p[0]=X[0];
   p[1]=X[1];
   *t=X[2];
@@ -164,12 +165,12 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
 }
 
 //// Intersect a line and a tri 
-// Intersects between the tri t (entries in counterclockwise order)                                              
+// Intersects between the tri t (entries in counterclockwise order)
 // and the line determined by the endpoints l1 and l2 (t=0.0 at l1 and t=1.0 at l2)
-// returns true if the two intersect and the output variables are valid                                          
-// outputs p containing the coordinates in the tri and t the coordinate in the line                              
-// of the intersection.                                                                                          
-// NOTE: the intersection doesn't have to be inside the tri or line for this to return true                      
+// returns true if the two intersect and the output variables are valid
+// outputs p containing the coordinates in the tri and t the coordinate in the line
+// of the intersection.
+// NOTE: the intersection doesn't have to be inside the tri or line for this to return true
 bool intersect_tri_with_line(const double *tri, const double *l1, const double *l2, double *p,
 			     double *t) {
 
@@ -181,37 +182,31 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
   const double *tri1=tri+3;
   const double *tri2=tri+6;
 
-  // To do intersection just solve the set of linear equations for both                                          
-
-  // Setup M                                                                                                     
+  // To do intersection just solve the set of linear equations for both
+  // Setup M
   M[0]=l1[0]-l2[0]; M[1]=tri1[0]-tri0[0]; M[2]=tri2[0]-tri0[0];
   M[3]=l1[1]-l2[1]; M[4]=tri1[1]-tri0[1]; M[5]=tri2[1]-tri0[1];
   M[6]=l1[2]-l2[2]; M[7]=tri1[2]-tri0[2]; M[8]=tri2[2]-tri0[2];
 
 
-  // Invert M                                                                                                     
+  // Invert M
   if (!invert_matrix_3x3(M,inv_M)) return false;
 
-  // Set variable holding vector                                                                                 
+  // Set variable holding vector
   V[0]=l1[0]-tri0[0];
   V[1]=l1[1]-tri0[1];
   V[2]=l1[2]-tri0[2];
 
-  // Calculate solution                                                                                         
+  // Calculate solution
   mult(inv_M, V, X);
 
-  // Get answer out                                                                                              
+  // Get answer out
   *t=X[0];
   p[0]=X[1];
   p[1]=X[2];
 
   return true;
 }
-
-
-
-
-
 
 
 } // namespace
