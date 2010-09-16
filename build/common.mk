@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.318 2010/09/14 21:16:18 theurich Exp $
+#  $Id: common.mk,v 1.319 2010/09/16 18:24:22 garyblock Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1454,7 +1454,6 @@ ifeq ($(ESMF_AUTO_LIB_BUILD),OFF)
 else
 	$(MAKE) build_libs
 endif
-	
 
 #-------------------------------------------------------------------------------
 # Clean and clobber targets.
@@ -2387,14 +2386,14 @@ htest:
 	-@cd $(ESMF_TESTDIR) ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log ESMF_$(TNAME)UTest.stdout ; \
 	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest -path $(TESTHARNESSPATH) -case $(TESTHARNESSCASE)_test.rc -xml $(TESTHARNESSCASE).xml; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest -path $(TESTHARNESSPATH) -case $(TESTHARNESSCASE)_test.rc -xml $(TESTHARNESSCASE).xml ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest -case $(TESTHARNESSCASE)_test.rc -xml $(TESTHARNESSCASE).xml; \
+	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest -case $(TESTHARNESSCASE)_test.rc -xml $(TESTHARNESSCASE).xml ; \
 	  if [ -f $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout ] ; then \
 		mv -f $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout $(ESMF_TESTDIR)/ESMF_$(HNAME)UTest.stdout ; \
 	  fi ; \
 	else \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest -path $(TESTHARNESSPATH) -case $(TESTHARNESSCASE)_test.rc -xml $(TESTHARNESSCASE).xml; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest -path $(TESTHARNESSPATH) -case $(TESTHARNESSCASE)_test.rc -xml $(TESTHARNESSCASE).xml 1> ./ESMF_$(HNAME)UTest.stdout 2>&1 ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest -case $(TESTHARNESSCASE)_test.rc -xml $(TESTHARNESSCASE).xml; \
+	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest -case $(TESTHARNESSCASE)_test.rc -xml $(TESTHARNESSCASE).xml 1> ./ESMF_$(HNAME)UTest.stdout 2>&1 ; \
 	  if [ -f $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout ] ; then \
 		mv -f $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout $(ESMF_TESTDIR)/ESMF_$(HNAME)UTest.stdout ; \
 	   fi ; \
@@ -2458,7 +2457,7 @@ dust_test_harness:
 #
 #
 run_test_harness: 
-	$(MAKE) TNAME=TestHarness HNAME=$(TESTHARNESSCASE)_NP$(NP) TESTHARNESSPATH=$(PWD)/harness_config run_test_harness_sec
+	$(MAKE) TNAME=TestHarness HNAME=$(TESTHARNESSCASE)_NP$(NP) run_test_harness_sec
 
 # target with expanded parameters
 run_test_harness_sec:
@@ -2471,6 +2470,7 @@ run_test_harness_sec:
 	fi ; \
 	if [ -d harness_config ] ; then \
 	  if [ -f harness_config/$(TESTHARNESSCASE)_test.rc ] ; then \
+	    cp -f harness_config/$(TESTHARNESSCASE)_*.rc $(ESMF_TESTDIR) ; \
 	    $(MAKE) htest ; \
 	  else \
 	    echo "FAIL: missing file - harness_config/$(TESTHARNESSCASE)_test.rc" ; \
