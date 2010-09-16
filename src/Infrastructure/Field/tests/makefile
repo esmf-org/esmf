@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.81 2010/09/03 15:47:33 feiliu Exp $ 
+# $Id: makefile,v 1.82 2010/09/16 21:11:34 svasquez Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -24,15 +24,15 @@ TESTS_RUN     = RUN_ESMF_FieldUTest \
 		RUN_ESMF_FieldArbGridUTest \
 		RUN_ESMF_FieldIOUTest \
 		RUN_ESMF_FieldStressUTest \
-#		RUN_ESMF_FieldRegridXGUTest \
 		RUN_ESMC_FieldUTest
+#		RUN_ESMF_FieldRegridXGUTest \
 
 TESTS_RUN_UNI = RUN_ESMF_FieldStressUTestUNI \
                 RUN_ESMF_FieldRegridUTestUNI \
                 RUN_ESMF_FieldRegridCsrvUTestUNI \
                 RUN_ESMF_FieldArbGridUTestUNI \
-#                RUN_ESMF_FieldRegridXGUTestUNI \
                 RUN_ESMC_FieldUTestUNI
+#                RUN_ESMF_FieldRegridXGUTestUNI \
 
 #
 # check ESMF_TESTHARNESS_FIELD for default, 
