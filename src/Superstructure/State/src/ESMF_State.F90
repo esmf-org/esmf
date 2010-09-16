@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.198 2010/09/14 05:51:54 eschwab Exp $
+! $Id: ESMF_State.F90,v 1.199 2010/09/16 04:23:14 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.198 2010/09/14 05:51:54 eschwab Exp $'
+      '$Id: ESMF_State.F90,v 1.199 2010/09/16 04:23:14 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2569,6 +2569,7 @@ module ESMF_StateMod
       type(ESMF_StateItem), pointer :: dataitem
       type(ESMF_State) :: top
       logical :: exists
+      type(ESMF_NestedFlag) :: lnestedflag
       integer :: localrc
       character(len=ESMF_MAXSTR) :: errmsg
 
@@ -2592,14 +2593,14 @@ module ESMF_StateMod
                                      ESMF_CONTEXT, rc)) return
       end if
 
+      lnestedflag = ESMF_NESTED_OFF
       if (present (nestedFlag)) then
-          errmsg = "nestedFlag is not supported yet"
-          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
-                                     ESMF_CONTEXT, rc)) return
+          lnestedflag = nestedFlag
       end if
 
       if (present(nestedStateName)) then
-          exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
+          exists = ESMF_StateClassFindData(state%statep,  &
+                                           dataname=nestedStateName, expected=.true., &
                                            dataitem=dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
@@ -2619,8 +2620,10 @@ module ESMF_StateMod
       endif
 
 
-      exists = ESMF_StateClassFindData(top%statep, itemName, .true., &
-                                       dataitem=dataitem, rc=localrc)
+      exists = ESMF_StateClassFindData(top%statep,   &
+                                       dataname=itemName, expected=.true., &
+                                       nestedFlag=nestedFlag, dataitem=dataitem,  &
+                                       rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no Array found named ", trim(itemName)
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
@@ -2705,6 +2708,7 @@ module ESMF_StateMod
       type(ESMF_StateItem), pointer :: dataitem
       type(ESMF_State) :: top
       logical :: exists
+      type(ESMF_NestedFlag) :: lnestedflag
       integer :: localrc
       character(len=ESMF_MAXSTR) :: errmsg
 
@@ -2728,14 +2732,15 @@ module ESMF_StateMod
                                      ESMF_CONTEXT, rc)) return
       end if
 
+
+      lnestedflag = ESMF_NESTED_OFF
       if (present (nestedFlag)) then
-          errmsg = "nestedFlag is not supported yet"
-          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
-                                     ESMF_CONTEXT, rc)) return
+          lnestedflag = nestedFlag
       end if
 
       if (present(nestedStateName)) then
-          exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
+          exists = ESMF_StateClassFindData(state%statep,  &
+                                           dataname=nestedStateName, expected=.true., &
                                            dataitem=dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
@@ -2755,8 +2760,10 @@ module ESMF_StateMod
       endif
 
 
-      exists = ESMF_StateClassFindData(top%statep, itemName, .true., &
-                                       dataitem=dataitem, rc=localrc)
+      exists = ESMF_StateClassFindData(top%statep,   &
+                                       dataname=itemName, expected=.true., &
+                                       nestedFlag=nestedFlag, dataitem=dataitem,  &
+                                       rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no ArrayBundle found named ", trim(itemName)
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
@@ -2842,6 +2849,7 @@ module ESMF_StateMod
       type(ESMF_State) :: top
       character(len=ESMF_MAXSTR) :: errmsg
       logical :: exists
+      type(ESMF_NestedFlag) :: lnestedflag
       integer :: localrc
 
       ! Assume failure until we know we will succeed
@@ -2862,14 +2870,14 @@ module ESMF_StateMod
                                      ESMF_CONTEXT, rc)) return
       end if
 
+      lnestedflag = ESMF_NESTED_OFF
       if (present (nestedFlag)) then
-          errmsg = "nestedFlag is not supported yet"
-          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
-                                     ESMF_CONTEXT, rc)) return
+          lnestedflag = nestedFlag
       end if
 
       if (present(nestedStateName)) then
-          exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
+          exists = ESMF_StateClassFindData(state%statep,  &
+                                           dataname=nestedStateName, expected=.true., &
                                            dataitem=dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
@@ -2889,8 +2897,10 @@ module ESMF_StateMod
       endif
 
 
-      exists = ESMF_StateClassFindData(top%statep, itemName, .true., &
-                                       dataitem=dataitem, rc=localrc)
+      exists = ESMF_StateClassFindData(top%statep,   &
+                                       dataname=itemName, expected=.true., &
+                                       nestedFlag=nestedFlag, dataitem=dataitem,  &
+                                       rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no Field found named ", trim(itemName)
           if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
@@ -2984,6 +2994,7 @@ module ESMF_StateMod
       type(ESMF_State) :: top
       character(len=ESMF_MAXSTR) :: errmsg
       logical :: exists
+      type(ESMF_NestedFlag) :: lnestedflag
 
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -3004,14 +3015,14 @@ module ESMF_StateMod
                                      ESMF_CONTEXT, rc)) return
       end if
 
+      lnestedflag = ESMF_NESTED_OFF
       if (present (nestedFlag)) then
-          errmsg = "nestedFlag is not supported yet"
-          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
-                                     ESMF_CONTEXT, rc)) return
+          lnestedflag = nestedFlag
       end if
 
       if (present(nestedStateName)) then
-          exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
+          exists = ESMF_StateClassFindData(state%statep,  &
+                                           dataname=nestedStateName, expected=.true., &
                                            dataitem=dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
@@ -3031,8 +3042,10 @@ module ESMF_StateMod
       endif
 
 
-      exists = ESMF_StateClassFindData(top%statep, itemName, .true., &
-                                       dataitem=dataitem, rc=localrc)
+      exists = ESMF_StateClassFindData(top%statep,   &
+                                       dataname=itemName, expected=.true., &
+                                       nestedFlag=nestedFlag, dataitem=dataitem,  &
+                                       rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no FieldBundle found named ", trim(itemName)
           if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
@@ -3273,6 +3286,7 @@ module ESMF_StateMod
       type(ESMF_StateItem), pointer :: dataitem
       type(ESMF_State) :: top
       logical :: exists
+      type(ESMF_NestedFlag) :: lnestedflag
       integer :: localrc
       character(len=ESMF_MAXSTR) :: errmsg
 
@@ -3296,14 +3310,14 @@ module ESMF_StateMod
                                      ESMF_CONTEXT, rc)) return
       end if
 
+      lnestedflag = ESMF_NESTED_OFF
       if (present (nestedFlag)) then
-          errmsg = "nestedFlag is not supported yet"
-          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
-                                     ESMF_CONTEXT, rc)) return
+          lnestedflag = nestedFlag
       end if
 
       if (present(nestedStateName)) then
-          exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
+          exists = ESMF_StateClassFindData(state%statep,  &
+                                           dataname=nestedStateName, expected=.true., &
                                            dataitem=dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
@@ -3323,8 +3337,10 @@ module ESMF_StateMod
       endif
 
 
-      exists = ESMF_StateClassFindData(top%statep, itemName, .true., &
-                                       dataitem=dataitem, rc=localrc)
+      exists = ESMF_StateClassFindData(top%statep,   &
+                                       dataname=itemName, expected=.true., &
+                                       nestedFlag=nestedFlag, dataitem=dataitem,  &
+                                       rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no RouteHandle found named ", trim(itemName)
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
@@ -3393,6 +3409,7 @@ module ESMF_StateMod
       type(ESMF_StateItem), pointer :: dataitem
       character(len=ESMF_MAXSTR) :: errmsg
       logical :: exists
+      type(ESMF_NestedFlag) :: lnestedflag
       integer :: localrc
 
       ! Assume failure until we know we will succeed
@@ -3407,14 +3424,19 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+      lnestedflag = ESMF_NESTED_OFF
       if (present (nestedFlag)) then
-          errmsg = "nestedFlag is not supported yet"
-          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
-                                     ESMF_CONTEXT, rc)) return
+        if (nestedFlag == ESMF_NESTED_ON) then
+          write (errmsg, *) "nestedFlag not supported for GetState requests yet"
+          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
+                                      ESMF_CONTEXT, rc)) return
+        end if
       end if
 
-      exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
-                                       dataitem=dataitem, rc=localrc)
+      exists = ESMF_StateClassFindData(state%statep,   &
+                                       dataname=itemName, expected=.true., &
+                                       nestedFlag=nestedFlag, dataitem=dataitem,  &
+                                       rc=localrc)
       if (.not. exists) then
           write (errmsg,*) "no nested state found named ", trim(itemName)
           if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
@@ -4531,7 +4553,8 @@ module ESMF_StateMod
     
         ! See if this name is already in the state
         exists = ESMF_StateClassFindData(stypep, rhname, .false., &
-                                        dataitem=dataitem, index=aindex, rc=localrc)
+                                        dataitem=dataitem, dataindex=aindex,  &
+                                        rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) then
           deallocate(atodo, stat=localrc)
@@ -4740,7 +4763,8 @@ module ESMF_StateMod
     
         ! See if this name is already in the state
         exists = ESMF_StateClassFindData(stypep, aname, .false., &
-                                        dataitem=dataitem, index=aindex, rc=localrc)
+                                        dataitem=dataitem, dataindex=aindex,  &
+                                        rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) then
           deallocate(atodo, stat=localrc)
@@ -4948,7 +4972,7 @@ module ESMF_StateMod
     
         ! See if this name is already in the state
         exists = ESMF_StateClassFindData(stypep, aname, .false., &
-                                        dataitem=dataitem, index=aindex, &
+                                        dataitem=dataitem, dataindex=aindex, &
                                         rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) then
@@ -5155,7 +5179,7 @@ module ESMF_StateMod
     
         ! See if this name is already in the state
         exists = ESMF_StateClassFindData(stypep, fname, .false., &
-                                        dataitem=dataitem, index=findex, &
+                                        dataitem=dataitem, dataindex=findex, &
                                         rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) then
@@ -5374,7 +5398,7 @@ module ESMF_StateMod
     
         ! See if this name is already in the state
         exists = ESMF_StateClassFindData(stypep, bname, .false., &
-                                        dataitem=dataitem, index=bindex,  &
+                                        dataitem=dataitem, dataindex=bindex,  &
                                         rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) goto 10
@@ -5423,7 +5447,7 @@ module ESMF_StateMod
                                       ESMF_CONTEXT, rc)) goto 10
     
             exists = ESMF_StateClassFindData(stypep, fname, .false.,  &
-                                      dataitem=dataitem, index=findex, &
+                                      dataitem=dataitem, dataindex=findex, &
                                       rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
@@ -5572,7 +5596,7 @@ module ESMF_StateMod
           !  value to set.
           else if (ftodo(fruncount) .eq. -2) then
             exists = ESMF_StateClassFindData(stypep, fname, .true.,  &
-                                            dataitem=dataitem, index=findex, &
+                                            dataitem=dataitem, dataindex=findex, &
                                             rc=localrc)
 
             if (.not. exists) then
@@ -5741,8 +5765,8 @@ module ESMF_StateMod
     
         ! See if this name is already in the state
         exists = ESMF_StateClassFindData(stypep, sname, .false.,  &
-                                         dataitem=dataitem, &
-                                         index=sindex, rc=localrc)
+                                         dataitem=dataitem, dataindex=sindex,  &
+                                         rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
@@ -5852,7 +5876,7 @@ module ESMF_StateMod
 !
 ! !INTERFACE:
       function ESMF_StateClassFindData(stypep, dataname, expected,  &
-                                       nestedFlag, dataitem, index, rc)
+                                       nestedFlag, dataitem, dataindex, rc)
 !
 ! !RETURN VALUE:
       logical :: ESMF_StateClassFindData
@@ -5863,7 +5887,7 @@ module ESMF_StateMod
       logical,               intent(in)            :: expected
       type(ESMF_NestedFlag), intent(in),  optional :: nestedFlag
       type(ESMF_StateItem),  pointer,     optional :: dataitem
-      integer,               intent(out), optional :: index
+      integer,               intent(out), optional :: dataindex
       integer,               intent(out), optional :: rc             
 
 ! !DESCRIPTION:
@@ -5890,7 +5914,7 @@ module ESMF_StateMod
 !      \item[{[dataitem]}]
 !       Pointer to the corresponding {\tt ESMF\_StateItem} item if one is
 !       found with the right name.
-!      \item[{[index]}]
+!      \item[{[dataindex]}]
 !       Index number in datalist where this name was found.  When nested
 !       States are being searched, this index refers to the State where
 !       the item was found.
@@ -5903,7 +5927,9 @@ module ESMF_StateMod
       integer :: localrc                   ! local error status
       integer :: itemindex
       logical :: itemfound
+      type(ESMF_StateClass), pointer  :: nested_sp
       character(len=ESMF_MAXSTR) :: errmsg
+      logical :: usenested_lookup
 
       ! Initialize return code.  Assume failure until success assured.
       localrc = ESMF_RC_NOT_IMPL
@@ -5912,39 +5938,181 @@ module ESMF_StateMod
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
 
+!      if (present (nestedFlag)) then
+!        if (nestedFlag == ESMF_NESTED_ON) then
+!          errmsg = "nestedFlag is not supported yet"
+!          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
+!                                     ESMF_CONTEXT, rc)) return
+!        end if
+!      end if
+
+      if (present (dataitem)) nullify (dataitem)
+
+      usenested_lookup = .false.
       if (present (nestedFlag)) then
-          errmsg = "nestedFlag is not supported yet"
-          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
-                                     ESMF_CONTEXT, rc)) return
+        usenested_lookup = nestedFlag == ESMF_NESTED_ON
       end if
 
+      if (usenested_lookup .and. index (dataname, '/') /= 0) then
+        if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP,  &
+                                 ESMF_ERR_PASSTHRU,  &
+                                 ESMF_CONTEXT, rc)) return
+      end if
   
       ! This function is only called internally, so we do not need to check
       ! the validity of the state - it has been checked before we get here.
 
-      call ESMF_UtilMapNameLookup (stypep%nameMap, name=dataname,  &
-          value=itemindex, foundFlag=itemfound,  &
-          rc=localrc)
-      if (ESMF_LogMsgFoundError (localrc,  &
-                                 ESMF_ERR_PASSTHRU,  &
-                                 ESMF_CONTEXT, rc)) return
+      if (.not. usenested_lookup) then
+         call find_pathed_item_worker (stypep, lpath=dataname,  &
+             lfound=itemfound, lindex=itemindex, litem=dataitem)
+      else
+	call ESMF_UtilMapNameLookup (stypep%nameMap, name=dataname,  &
+            value=itemindex, foundFlag=itemfound,  &
+            rc=localrc)
+	if (ESMF_LogMsgFoundError (localrc,  &
+                                   ESMF_ERR_PASSTHRU,  &
+                                   ESMF_CONTEXT, rc)) return
+
+	if (itemfound) then
+          if (present(dataitem)) dataitem => stypep%datalist(itemindex)
+	else
+           call find_nested_item_worker (stypep,  &
+               lfound=itemfound, lindex=itemindex, litem=dataitem)
+	end if
+      end if
 
       if (itemfound) then
         ESMF_StateClassFindData = .TRUE.
-        if (present(dataitem)) dataitem => stypep%datalist(itemindex) 
-        if (present(index)) index = itemindex
+        if (present(dataindex)) dataindex = itemindex
         localrc = ESMF_SUCCESS
       else   ! item not found
         ESMF_StateClassFindData = .FALSE.
-        nullify(dataitem)
         if (expected) then 
           localrc = ESMF_FAILURE
         else
           localrc = ESMF_SUCCESS
-        endif
-      endif
+        end if
+      end if
 
       if (present(rc)) rc = localrc
+
+      contains
+
+        recursive subroutine find_nested_item_worker (sp, lfound, lindex, litem)
+          type(ESMF_StateClass), pointer  :: sp
+          logical,            intent(out) :: lfound
+          integer,            intent(out) :: lindex
+          type(ESMF_StateItem), pointer, optional   :: litem
+
+          type(ESMF_StateClass), pointer  :: sp_local
+          integer       :: i
+          integer       :: lrc
+
+!          print *, 'find_nested_item_worker: entered'
+
+        ! Scan this levels list for States
+
+          lfound = .false.
+
+          call ESMF_UtilMapNameLookup (sp%nameMap, name=dataname,  &
+              value=lindex, foundFlag=lfound,  &
+              rc=lrc)
+	  if (ESMF_LogMsgFoundError (lrc,  &
+                                     ESMF_ERR_PASSTHRU,  &
+                                     ESMF_CONTEXT, rc)) return
+          if (.not. lfound) then
+            do, i=1, sp%datacount
+              if (sp%datalist(i)%otype == ESMF_STATEITEM_STATE) then
+        	sp_local => sp%datalist(i)%datap%spp
+                call find_nested_item_worker (sp_local, lfound, lindex, litem)
+                if (lfound) exit
+              end if
+            end do
+            if (present (litem)) then
+              if (lfound) then
+        	litem => sp_local%datalist(lindex)
+              else
+        	litem => null ()
+              end if
+            end if
+          end if
+
+!          print *, 'find_nested_item_worker: exiting.  Found flag =', lfound
+
+
+        end subroutine find_nested_item_worker
+
+        recursive subroutine find_pathed_item_worker (sp, lpath, lfound, lindex, litem)
+          type(ESMF_StateClass), pointer  :: sp
+          character(*), intent(in)  :: lpath
+          logical,      intent(out) :: lfound
+          integer,      intent(out) :: lindex
+          type(ESMF_StateItem), pointer, optional   :: litem
+
+          type(ESMF_StateClass), pointer  :: sp_local
+          character(len (lpath)) :: itempath_local
+          integer :: slashpos
+          integer :: i
+          integer :: lrc
+
+          ! print *, 'find_pathed_item_worker: entered.  lpath = ', lpath
+
+        ! Strip leading slashes
+
+          do, i=1, len (lpath)
+            if (lpath(i:i) /= '/') exit
+          end do
+          if (i > len (lpath)) then
+             itempath_local = lpath
+          else
+             itempath_local = lpath(i:)
+          end if
+
+          slashpos = index (itempath_local, '/')
+
+        ! Look for the name for this level
+
+          lfound = .false.
+
+          if (slashpos > 0) then
+            ! Midway through the path, so only a State name is valid
+            call ESMF_UtilMapNameLookup (sp%nameMap, name=itempath_local(:slashpos-1),  &
+        	                       value=lindex, foundFlag=lfound,  &
+        	                       rc=lrc)
+	    if (ESMF_LogMsgFoundError (lrc,  &
+                                       ESMF_ERR_PASSTHRU,  &
+                                       ESMF_CONTEXT, rc)) return
+            if (lfound .and. sp%datalist(i)%otype == ESMF_STATEITEM_STATE) then
+              sp_local => sp%datalist(i)%datap%spp
+              call find_pathed_item_worker (sp_local, itempath_local(slashpos+1:),  &
+                                       lfound, lindex, litem)
+            else
+              if (present (litem)) then
+                litem => null ()
+              end if
+            end if
+
+          else
+            ! End of path, so any item is OK
+            call ESMF_UtilMapNameLookup (sp%nameMap, name=itempath_local,  &
+        	                       value=lindex, foundFlag=lfound,  &
+        	                       rc=lrc)
+	    if (ESMF_LogMsgFoundError (lrc,  &
+                                       ESMF_ERR_PASSTHRU,  &
+                                       ESMF_CONTEXT, rc)) return
+            if (present (litem)) then
+              if (lfound) then
+        	litem => sp%datalist(lindex)
+              else
+        	litem => null ()
+              end if
+            end if
+          end if
+
+          ! print *, 'find_pathed_item_worker: exiting.  Found flag =', lfound
+
+
+        end subroutine find_pathed_item_worker
 
       end function ESMF_StateClassFindData
 
@@ -6029,7 +6197,8 @@ module ESMF_StateMod
 
         ! See if this name is already in the state
         exists = ESMF_StateClassFindData(stypep, namelist(i), .false., &
-                                dataitem=dataitem, index=nindex, rc=localrc)
+                                dataitem=dataitem, dataindex=nindex,  &
+                                rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
