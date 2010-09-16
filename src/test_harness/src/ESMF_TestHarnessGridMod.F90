@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessGridMod.F90,v 1.28 2010/03/04 18:57:46 svasquez Exp $
+! $Id: ESMF_TestHarnessGridMod.F90,v 1.29 2010/09/16 14:58:39 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -67,7 +67,7 @@
   type(ESMF_Config)      :: localcf
 
   ! local character strings
-  character(ESMF_MAXSTR) :: ltmp, lfilename
+  character(THARN_MAXSTR) :: ltmp, lfilename
 
   ! local integers variables
   integer :: localrc ! local error status
@@ -204,7 +204,7 @@
   !-----------------------------------------------------------------------------
 
   ! arguments
-  character(ESMF_MAXSTR), intent(in   ) :: lfilename
+  character(THARN_MAXSTR), intent(in   ) :: lfilename
   type(grid_specification_record), pointer :: grid(:)      ! source grid spec
   type(grid_specification_record), pointer :: tmp_grid(:)  ! duplicate copy of
                                                            ! the grid specifier for 
@@ -213,14 +213,14 @@
   integer, intent(inout) :: rc
 
   ! local parameters
-  character(ESMF_MAXSTR), parameter :: descriptor_label = "map_redist::"
+  character(THARN_MAXSTR), parameter :: descriptor_label = "map_redist::"
 
   ! local esmf types
   type(ESMF_Config) :: localcf
 
   ! local character strings
-  character(ESMF_MAXSTR) :: ltmp, lchar
-  character(ESMF_MAXSTR) :: gtype, gunits
+  character(THARN_MAXSTR) :: ltmp, lchar
+  character(THARN_MAXSTR) :: gtype, gunits
 
   logical :: flag = .true.
 
@@ -590,22 +590,22 @@
   !-----------------------------------------------------------------------------
 
   ! arguments
-  character(ESMF_MAXSTR), intent(in   ) :: lfilename
+  character(THARN_MAXSTR), intent(in   ) :: lfilename
   type(grid_specification_record), pointer :: src_grid(:), dst_grid(:)
   type(test_function_record), pointer :: testfunction(:)
   integer, intent(  out) :: ngrids
   integer, intent(inout) :: rc
 
   ! local parameters
-  character(ESMF_MAXSTR), parameter :: descriptor_label = "map_regrid::"
+  character(THARN_MAXSTR), parameter :: descriptor_label = "map_regrid::"
 
   ! local esmf types
   type(ESMF_Config) :: localcf
 
   ! local character strings
-  character(ESMF_MAXSTR) :: ltmp, lchar, lnumb
-  ! character(ESMF_MAXSTR) :: lchartmp
-  character(ESMF_MAXSTR) :: gtype, gunits, gtag
+  character(THARN_MAXSTR) :: ltmp, lchar, lnumb
+  ! character(THARN_MAXSTR) :: lchartmp
+  character(THARN_MAXSTR) :: gtype, gunits, gtag
   type(character_array) :: wchar(10)
 
   logical :: flag = .true.
@@ -1157,7 +1157,7 @@
   ! local ESMF types
 
   ! local character strings
-! character(ESMF_MAXSTR) :: ltmp, lchar
+! character(THARN_MAXSTR) :: ltmp, lchar
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL

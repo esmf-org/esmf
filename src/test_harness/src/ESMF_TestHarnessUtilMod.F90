@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUtilMod.F90,v 1.14 2010/09/07 15:29:23 garyblock Exp $
+! $Id: ESMF_TestHarnessUtilMod.F90,v 1.15 2010/09/16 14:58:39 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -72,7 +72,7 @@ integer :: rootPet = Harness_rootPet
     !---------------------------------------------------------------------------
 
     ! arguments
-    character(len=ESMF_MAXSTR), intent(in   ) :: lstring
+    character(len=THARN_MAXSTR), intent(in   ) :: lstring
     integer,          intent(in   ) :: MemBeg, MemEnd
     integer,          intent(  out) :: localrc
 
@@ -212,7 +212,7 @@ integer :: rootPet = Harness_rootPet
     !---------------------------------------------------------------------------
 
     ! arguments
-    character(len=ESMF_MAXSTR), intent(in   ) :: lstring
+    character(len=THARN_MAXSTR), intent(in   ) :: lstring
     integer,          intent(in   ) :: MemBeg, MemEnd
     integer,          intent(  out) :: localrc
 
@@ -361,7 +361,7 @@ integer :: rootPet = Harness_rootPet
     !---------------------------------------------------------------------------
 
     ! arguments
-    character(ESMF_MAXSTR), intent(in   ) :: lstring
+    character(THARN_MAXSTR), intent(in   ) :: lstring
     integer,                intent(in   ) :: location(2)
     integer,                intent(  out) :: srcMulti, dstMulti
     integer,                intent(  out) :: srcBlock,dstBlock
@@ -462,7 +462,7 @@ integer :: rootPet = Harness_rootPet
     integer,          intent(  out) :: localrc
 
     ! local variables
-    character(ESMF_MAXSTR) :: pattern
+    character(THARN_MAXSTR) :: pattern
     integer :: iredist, iregrid, direction, ib
 
     ! initialize variables
@@ -869,7 +869,7 @@ integer :: rootPet = Harness_rootPet
   ! This separate routine was created to avoid significant duplication of code
   ! necessary for parsing the tables.
   !-----------------------------------------------------------------------------
-  character(ESMF_MAXSTR), intent(in   ) :: lfilename, descriptor_label
+  character(THARN_MAXSTR), intent(in   ) :: lfilename, descriptor_label
   integer, intent(  out) :: int_value
   integer, intent(in   ) :: ncolumns(:), new_row(:)
   integer, intent(inout) :: irow       ! current row of table
@@ -882,7 +882,7 @@ integer :: rootPet = Harness_rootPet
   integer :: localrc ! local error status
 
   ! local character strings
-  character(ESMF_MAXSTR) :: lchar, ltmp
+  character(THARN_MAXSTR) :: lchar, ltmp
   integer :: int_tmp
 
   logical :: flag = .true.
@@ -989,7 +989,7 @@ integer :: rootPet = Harness_rootPet
   ! This separate routine was created to avoid significant duplication of code
   ! necessary for parsing the tables.
   !-----------------------------------------------------------------------------
-  character(ESMF_MAXSTR), intent(in   ) :: lfilename, descriptor_label
+  character(THARN_MAXSTR), intent(in   ) :: lfilename, descriptor_label
   real(ESMF_KIND_R8), intent(  out) :: flt_value
   integer, intent(in   ) :: ncolumns(:), new_row(:)
   integer, intent(inout) :: irow       ! current row of table
@@ -1002,7 +1002,7 @@ integer :: rootPet = Harness_rootPet
   integer :: localrc ! local error status
 
   ! local character strings
-  character(ESMF_MAXSTR) :: lchar, ltmp
+  character(THARN_MAXSTR) :: lchar, ltmp
   real(ESMF_KIND_R8) :: flt_tmp
 
   logical :: flag = .true.
@@ -1109,8 +1109,8 @@ integer :: rootPet = Harness_rootPet
   ! necessary for parsing the tables.
   !-----------------------------------------------------------------------------
   ! arguments
-  character(ESMF_MAXSTR), intent(in   ) :: lfilename, descriptor_label
-  character(ESMF_MAXSTR), intent(  out) :: string
+  character(THARN_MAXSTR), intent(in   ) :: lfilename, descriptor_label
+  character(THARN_MAXSTR), intent(  out) :: string
   integer, intent(in   ) :: ncolumns(:), new_row(:)
   integer, intent(inout) :: irow       ! current row of table
   integer, intent(in   ) :: nrows      ! total rows in table
@@ -1122,7 +1122,7 @@ integer :: rootPet = Harness_rootPet
   integer :: localrc ! local error status
 
   ! local character strings
-  character(ESMF_MAXSTR) :: ltmp, lchar
+  character(THARN_MAXSTR) :: ltmp, lchar
 
   logical :: flag = .true.
 

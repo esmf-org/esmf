@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessParser.F90,v 1.5 2010/09/14 23:21:28 garyblock Exp $
+! $Id: ESMF_TestHarnessParser.F90,v 1.6 2010/09/16 14:58:39 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -98,14 +98,14 @@ logical                       :: checkpoint = .FALSE.
   type(ESMF_Config)      :: localcf
 
   ! local parameters
-  character(ESMF_MAXSTR), parameter :: test_class_name   = "test_class:"
-  character(ESMF_MAXSTR), parameter :: setup_report_name = "setup_report:"
-  character(ESMF_MAXSTR), parameter :: test_report_name  = "test_report:"
+  character(THARN_MAXSTR), parameter :: test_class_name   = "test_class:"
+  character(THARN_MAXSTR), parameter :: setup_report_name = "setup_report:"
+  character(THARN_MAXSTR), parameter :: test_report_name  = "test_report:"
 
 
   ! local character strings
-  character(ESMF_MAXSTR) :: ltag, ltmp
-  character(THARN_MAXFNAME) :: filename
+  character(THARN_MAXSTR) :: ltag, ltmp
+  character(THARN_MAXSTR) :: filename
 
   ! local integer variables
   integer :: kfile, ncolumns
@@ -498,16 +498,16 @@ logical                       :: checkpoint = .FALSE.
   type(ESMF_Config)      :: localcf
 
   ! local parameters
-  character(ESMF_MAXSTR), parameter :: descriptor_label      &
+  character(THARN_MAXSTR), parameter :: descriptor_label      &
                                                = "problem_descriptor_string::"
 
   ! local character types
   type (sized_char_array), allocatable :: ltmpstring(:), lstring(:)
 
   ! local character strings
-  character(THARN_MAXFNAME) :: lfilename
-  character(ESMF_MAXSTR) :: ltmp
-  character(ESMF_MAXSTR) :: lchar, lchar1, lchar2
+  character(THARN_MAXSTR) :: lfilename
+  character(THARN_MAXSTR) :: ltmp
+  character(THARN_MAXSTR) :: lchar, lchar1, lchar2
   
   logical :: flag = .true.
 
@@ -1046,8 +1046,8 @@ logical                       :: checkpoint = .FALSE.
   integer, intent(  out) :: rc
 
   ! local character strings
-  character(ESMF_MAXSTR) :: lstring, lname
-  character(ESMF_MAXSTR) :: src_string, dst_string
+  character(THARN_MAXSTR) :: lstring, lname
+  character(THARN_MAXSTR) :: src_string, dst_string
   type(character_array), allocatable :: lsrc(:), ldst(:)
   type(character_array), allocatable :: grid_type(:), dist_type(:)
 
@@ -1408,7 +1408,7 @@ logical                       :: checkpoint = .FALSE.
 
 
   ! local variables
-  character(ESMF_MAXSTR) :: ltmp, lstagger, intstr
+  character(THARN_MAXSTR) :: ltmp, lstagger, intstr
   integer :: k, n, kstring, rank, halo, ndelim
   integer :: iloc(1), mloc(1)
   integer :: hbeg, hmid, hend, sbeg, send, slen

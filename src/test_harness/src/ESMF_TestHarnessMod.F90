@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.51 2010/09/14 18:01:37 theurich Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.52 2010/09/16 14:58:39 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -74,7 +74,7 @@ logical                       :: checkpoint = .FALSE.
   !-----------------------------------------------------------------------------
   ! arguments
   type(problem_descriptor_strings), intent(inout) :: PDS
-  character(ESMF_MAXSTR), intent(in   ) :: reportType 
+  character(THARN_MAXSTR), intent(in   ) :: reportType 
   type(ESMF_VM), intent(in   ) :: VM
   integer, intent(inout) :: test_failure
   integer, intent(  out) :: rc
@@ -95,7 +95,7 @@ logical                       :: checkpoint = .FALSE.
   integer :: localPET
 
   ! local characters
-  character(ESMF_MAXSTR) :: liG, liD
+  character(THARN_MAXSTR) :: liG, liD
 
   ! debug
   ! real(ESMF_KIND_R8), pointer :: fptr2(:,:)
@@ -368,7 +368,7 @@ logical                       :: checkpoint = .FALSE.
   !-----------------------------------------------------------------------------
   ! arguments
   type(problem_descriptor_strings), intent(inout) :: PDS
-  character(ESMF_MAXSTR), intent(in   ) :: reportType 
+  character(THARN_MAXSTR), intent(in   ) :: reportType 
   type(ESMF_VM), intent(in   ) :: VM
   integer, intent(inout) :: test_failure
   integer, intent(  out) :: rc
@@ -394,7 +394,7 @@ logical                       :: checkpoint = .FALSE.
   integer :: libflag
 
   ! local characters
-  character(ESMF_MAXSTR) :: liG, liD
+  character(THARN_MAXSTR) :: liG, liD
 
   ! debug
   ! real(ESMF_KIND_R8), pointer :: fptr2(:,:)
@@ -736,7 +736,7 @@ logical                       :: checkpoint = .FALSE.
   !-----------------------------------------------------------------------------
   ! arguments
   type(problem_descriptor_strings), intent(inout) :: PDS
-  character(ESMF_MAXSTR), intent(in   ) :: reportType 
+  character(THARN_MAXSTR), intent(in   ) :: reportType 
   type(ESMF_VM), intent(in   ) :: VM
   integer, intent(inout) :: test_failure
   integer, intent(  out) :: rc
@@ -765,7 +765,7 @@ logical                       :: checkpoint = .FALSE.
   ! integer :: libflag
 
   ! local characters
-  character(ESMF_MAXSTR) :: liG, liD
+  character(THARN_MAXSTR) :: liG, liD
 
   ! debug
   ! real(ESMF_KIND_R8), pointer :: fptr2(:,:)

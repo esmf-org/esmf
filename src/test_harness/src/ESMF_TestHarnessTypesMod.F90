@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessTypesMod.F90,v 1.15 2010/09/15 21:17:20 garyblock Exp $
+! $Id: ESMF_TestHarnessTypesMod.F90,v 1.16 2010/09/16 14:58:39 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
   implicit none
 
   ! ESMF_MAXSTR is too small for some filenames
-  integer,parameter :: THARN_MAXFNAME = 256
+  integer,parameter :: THARN_MAXSTR = 256
 
   ! Debug flag
   logical, parameter :: debug_flag = .false.
@@ -104,7 +104,7 @@
 
   ! character types
   type character_array
-     character(ESMF_MAXSTR) :: string
+     character(THARN_MAXSTR) :: string
   end type character_array
 
   ! sized char type
@@ -117,8 +117,8 @@
 !
   type name_record
      integer :: value
-     character(ESMF_MAXSTR) :: descriptor
-     character(ESMF_MAXSTR) :: flags
+     character(THARN_MAXSTR) :: descriptor
+     character(THARN_MAXSTR) :: flags
   end type name_record
 
   type test_record   
@@ -127,13 +127,13 @@
   end type test_record
 
   type test_function_record   
-     character(ESMF_MAXSTR) ::string 
+     character(THARN_MAXSTR) ::string 
      integer :: prank                            ! rank of parameters 
       real(ESMF_KIND_R8), pointer :: param(:)     ! test function parameters
   end type test_function_record   
 
   type process_record
-     character(ESMF_MAXSTR) ::string 
+     character(THARN_MAXSTR) ::string 
      integer :: tag                   ! process tag
      !integer :: location              ! string location of method
   end type process_record
@@ -148,7 +148,7 @@
   end type dist_specification_record
 
   type dist_record
-     character(ESMF_MAXSTR) :: filename   ! grid specifier filename
+     character(THARN_MAXSTR) :: filename   ! grid specifier filename
      integer :: nDspecs                   ! number of grid spec records
      type(dist_specification_record), pointer :: src_dist(:)
      type(dist_specification_record), pointer :: dst_dist(:)
@@ -167,7 +167,7 @@
   end type grid_specification_record
 
   type grid_record
-     character(THARN_MAXFNAME) :: filename   ! grid specifier filename
+     character(THARN_MAXSTR) :: filename   ! grid specifier filename
      integer :: nGspecs                   ! number of grid spec records
      type(grid_specification_record), pointer :: src_grid(:)
      type(grid_specification_record), pointer :: dst_grid(:)
@@ -178,7 +178,7 @@
 !  Memory Types
 
   type memory_config
-     character(ESMF_MAXSTR) :: string    ! memory string 
+     character(THARN_MAXSTR) :: string    ! memory string 
      integer :: memRank                  ! rank of memory chunk
      integer :: DistRank                 ! rank of distribution
      integer :: GridRank                 ! rank of grid
@@ -192,7 +192,7 @@
   end type memory_config
 
   type problem_descriptor_strings
-     character(ESMF_MAXSTR) :: pds         ! problem descriptor string
+     character(THARN_MAXSTR) :: pds         ! problem descriptor string
      type(test_record), pointer :: test_record(:,:) ! test status of the config
                                                     ! (nDfiles,nGfiles)
      type(process_record) :: process       ! method process
@@ -209,17 +209,17 @@
   end type problem_descriptor_strings
 
   type problem_descriptor_records
-     character(THARN_MAXFNAME) :: filename   ! filename of problem descriptor record
+     character(THARN_MAXSTR) :: filename   ! filename of problem descriptor record
      integer :: numStrings                ! # of problem descriptor strings in record
      type(problem_descriptor_strings), pointer :: str(:)  ! problem descriptor strngs
   end type problem_descriptor_records
 
   type harness_descriptor
-     character(THARN_MAXFNAME) :: configPath      ! path to configuration files
-     character(THARN_MAXFNAME) :: topFname        ! top level config filename
-     character(ESMF_MAXSTR) :: testClass       ! test class
-     character(ESMF_MAXSTR) :: reportType      ! test result report type 
-     character(ESMF_MAXSTR) :: setupReportType ! setup report type 
+     character(THARN_MAXSTR) :: configPath      ! path to configuration files
+     character(THARN_MAXSTR) :: topFname        ! top level config filename
+     character(THARN_MAXSTR) :: testClass       ! test class
+     character(THARN_MAXSTR) :: reportType      ! test result report type 
+     character(THARN_MAXSTR) :: setupReportType ! setup report type 
      integer :: numRecords                     ! number of problem descriptor filenames
      type(problem_descriptor_records), pointer :: rcrd(:)  ! problem descriptor recd 
      integer :: failures                       ! number of test failures

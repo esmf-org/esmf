@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessDistMod.F90,v 1.17 2010/03/04 19:40:09 theurich Exp $
+! $Id: ESMF_TestHarnessDistMod.F90,v 1.18 2010/09/16 14:58:39 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -77,9 +77,9 @@
   type(character_array) ::  pattern(7)
 
   ! local character strings
-  character(ESMF_MAXSTR) :: ltmp, lchar, lnumb, ltag
-  character(ESMF_MAXSTR) :: dtag
-  character(ESMF_MAXSTR) :: distribution_label
+  character(THARN_MAXSTR) :: ltmp, lchar, lnumb, ltag
+  character(THARN_MAXSTR) :: dtag
+  character(THARN_MAXSTR) :: distribution_label
 
   type(character_array) :: lop(56)  ! work space dimensioned 8*7 = max number
                                     ! of operators * maximum rank of distribution

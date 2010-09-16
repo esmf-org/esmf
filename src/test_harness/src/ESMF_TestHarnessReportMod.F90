@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessReportMod.F90,v 1.16 2010/09/04 04:56:12 w6ws Exp $
+! $Id: ESMF_TestHarnessReportMod.F90,v 1.17 2010/09/16 14:58:39 garyblock Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -74,8 +74,8 @@
   integer, intent(  out) :: localrc
 
   ! local character strings
-  character(ESMF_MAXSTR) :: src_string, dst_string
-  character(ESMF_MAXSTR) :: lstatus, laction, lgrid, ldist, lsuffix, ltmp
+  character(THARN_MAXSTR) :: src_string, dst_string
+  character(THARN_MAXSTR) :: lstatus, laction, lgrid, ldist, lsuffix, ltmp
   character(7) :: lsize, lorder, ltmpL, ltmpR, l1, l2, l3, l4  
 
   ! local integer variables
@@ -305,12 +305,12 @@
   ! arguments
   type(problem_descriptor_strings), intent(inout) :: PDS
   integer, intent(in   ) :: iG, iD, iDfile, iGfile
-  character(ESMF_MAXSTR), intent(in   ) :: reportType
+  character(THARN_MAXSTR), intent(in   ) :: reportType
   integer, intent(in   ) :: localPET
   integer, intent(  out) :: localrc
 
   ! local character strings
-  character(ESMF_MAXSTR) :: lstatus, lout, test_string
+  character(THARN_MAXSTR) :: lstatus, lout, test_string
   character(7) :: l1, l2, lpet
 
   ! local integer variables
