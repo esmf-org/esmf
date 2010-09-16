@@ -1,4 +1,4 @@
-// $Id: ESMCI_WMat.C,v 1.10 2010/09/09 20:26:11 oehmke Exp $
+// $Id: ESMCI_WMat.C,v 1.11 2010/09/16 16:47:12 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -16,7 +16,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WMat.C,v 1.10 2010/09/09 20:26:11 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_WMat.C,v 1.11 2010/09/16 16:47:12 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -98,7 +98,7 @@ void WMat::InsertRowMerge(const Entry &row, const std::vector<Entry> &cols) {
     if (tmp_cols.empty()) return;
 
     // Merge cols together
-    merge(old_cols.begin(),old_cols.end(), 
+    std::merge(old_cols.begin(),old_cols.end(), 
 	  cols.begin(),cols.end(),
 	  tmp_cols.begin());
 
