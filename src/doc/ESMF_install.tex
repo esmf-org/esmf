@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.87 2010/08/25 04:32:07 theurich Exp $
+% $Id: ESMF_install.tex,v 1.88 2010/09/16 05:47:24 samsoncheung Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -205,6 +205,48 @@ the application.
 The default value depends on the setting of {\tt ESMF\_XERCES}.  For the
 typical case where {\tt ESMF\_XERCES} is set to "standard", {\tt ESMF\_XERCES\_LIBS} is set to "-lxerces-c". 
 \end{description}
+
+
+\subsubsection{PIO}
+\label{sec:pio}
+ESMF provides the ability to read and write data in both binary and
+NetCDF format through a third-party IO software PIO. The following
+environment variables enable, and specify the name and location of the
+desired PIO library and associated header files: 
+
+\begin{description}
+\item[ESMF\_PIO] Possible value: "not set" (default), internal, external
+
+When defined, enables the use of PIO.
+
+\begin{description}
+\item["not set"] (default): PIO-dependent features will be disabled.
+
+\item[internal] PIO-dependent features will be enabled and they use the PIO
+library that built with ESMF.  However, this internal PIO does not 
+support mpiuni mode.
+
+\item[external] PIO-dependent features will be enabled and they relied on
+external  PIO library that built separately.  Thus, the library and 
+its path should be set via environment variables {\tt ESMF\_PIO\_LIBS}
+and {\tt ESMF\_PIO\_LIBPATH}.
+\end{description}
+
+\item[ESMF\_PIO\_LIBPATH] Typical value: /usr/local/lib (no default)
+
+Specifies the path where the PIO library file is located.
+
+\item[ESMF\_PIO\_LIBS] Typical value: -lpio; it is default
+when {\tt ESMF\_PIO} is set to external.
+\end{description}
+
+\begin{description}
+If {tt\ ESMF\_PIO} is enabled, it supports the IO format of binary 
+and NetCDF files.  To enable the feature of NetCDF IO, the
+{tt\ ESMF\_PNETCDF} (see 6.3.3) and/or {tt\ ESMF\_NETCDF} (see 6.3.2)
+should be enabled.
+\end{description}
+
 
 \subsection{ESMF Environment Variables}
 \label{EnvironmentVariables}
