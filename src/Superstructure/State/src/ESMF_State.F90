@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.199 2010/09/16 04:23:14 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.200 2010/09/16 05:20:36 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.199 2010/09/16 04:23:14 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.200 2010/09/16 05:20:36 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -3409,7 +3409,6 @@ module ESMF_StateMod
       type(ESMF_StateItem), pointer :: dataitem
       character(len=ESMF_MAXSTR) :: errmsg
       logical :: exists
-      type(ESMF_NestedFlag) :: lnestedflag
       integer :: localrc
 
       ! Assume failure until we know we will succeed
@@ -3423,15 +3422,6 @@ module ESMF_StateMod
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-
-      lnestedflag = ESMF_NESTED_OFF
-      if (present (nestedFlag)) then
-        if (nestedFlag == ESMF_NESTED_ON) then
-          write (errmsg, *) "nestedFlag not supported for GetState requests yet"
-          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
-                                      ESMF_CONTEXT, rc)) return
-        end if
-      end if
 
       exists = ESMF_StateClassFindData(state%statep,   &
                                        dataname=itemName, expected=.true., &
@@ -5934,6 +5924,7 @@ module ESMF_StateMod
       ! Initialize return code.  Assume failure until success assured.
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      ESMF_StateClassFindData = .FALSE.
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
@@ -6194,6 +6185,14 @@ module ESMF_StateMod
       ! This is the start of the first pass through the names list.
       ! For each name...
       do i=1, ncount
+
+        ! Make sure name does not have a slash in it
+        if (index (namelist(i), '/') > 0) then
+          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_BAD,  &
+                                    "namelist name must not have slashes in it",  &
+                                    ESMF_CONTEXT, rc)) return
+        end if
+                                 
 
         ! See if this name is already in the state
         exists = ESMF_StateClassFindData(stypep, namelist(i), .false., &
