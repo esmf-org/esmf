@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.35 2010/09/14 05:51:54 eschwab Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.36 2010/09/16 19:16:41 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.35 2010/09/14 05:51:54 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.36 2010/09/16 19:16:41 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -3542,14 +3542,14 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeSetObjsCharInTree - Set a Char Attribute on all
+// !IROUTINE:  c_ESMC_AttributeSetObjChrInTree - Set a Char Attribute on all
 //                                           objects in an Attribute hierarchy
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributesetobjscharintree)(
+      void FTN(c_esmc_attributesetobjchrintree)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributesetobjscharintree()"
+#define ESMC_METHOD "c_esmc_attributesetobjchrintree()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -3601,7 +3601,7 @@ extern "C" {
   ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 
-}  // end c_ESMC_AttributeSetObjsCharInTree
+}  // end c_ESMC_AttributeSetObjChrInTree
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  c_ESMC_AttributeSetObjsInTree - Set an Attribute on all objects
