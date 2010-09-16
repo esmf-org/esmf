@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.74 2010/09/16 17:59:03 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.75 2010/09/16 19:54:15 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.74 2010/09/16 17:59:03 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.75 2010/09/16 19:54:15 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -244,7 +244,7 @@ namespace ESMCI {
       localrc = AttPackAddAttribute("NumberOfCells", "GridSpec", "General", object);
       localrc = AttPackAddAttribute("NX", "GridSpec", "General", object);
       localrc = AttPackAddAttribute("NY", "GridSpec", "General", object);
-      localrc = AttPackAddAttribute("Resolution", "GridSpec", "General", object);
+      localrc = AttPackAddAttribute("HorizontalResolution", "GridSpec", "General", object);
     }
     if (convention.compare("ESMF")==0 && purpose.compare("General")==0) {
       localrc = AttPackNest("ESMF", "General", object, "GridSpec", "General");
