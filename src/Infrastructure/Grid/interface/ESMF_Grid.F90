@@ -1,4 +1,4 @@
-! $Id.F90,v 1.22 2007/09/05 18:31:55 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.156 2010/09/16 00:35:40 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.155 2010/09/15 22:57:15 w6ws Exp $'
+      '$Id: ESMF_Grid.F90,v 1.156 2010/09/16 00:35:40 w6ws Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -279,11 +279,11 @@ interface ESMF_GridCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_GridCreateDistGrid
-      module procedure ESMF_GridCreateDistGridArb
-      module procedure ESMF_GridCreateFile
-      module procedure ESMF_GridCreateScripDistGrid
-      module procedure ESMF_GridCreateScripReg
+      module procedure ESMF_GridCreateFrmDistGrid
+      module procedure ESMF_GridCreateFrmDistGridArb
+      module procedure ESMF_GridCreateFrmFile
+      module procedure ESMF_GridCreateFrmScripDistGrd
+      module procedure ESMF_GridCreateFrmScripReg
 
       
 ! !DESCRIPTION: 
@@ -2145,13 +2145,13 @@ end subroutine ESMF_GridConvertIndex
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
-      function ESMF_GridCreateDistGrid(name,coordTypeKind,distgrid, &
+      function ESMF_GridCreateFrmDistGrid(name,coordTypeKind,distgrid, &
                          distgridToGridMap, coordDimCount, coordDimMap, &
                          gridEdgeLWidth, gridEdgeUWidth, gridAlign, gridMemLBound, &
                          indexflag, destroyDistGrid, destroyDELayout, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateDistGrid
+      type(ESMF_Grid) :: ESMF_GridCreateFrmDistGrid
 !
 ! !ARGUMENTS:
        character (len=*), intent(in), optional :: name
@@ -2396,15 +2396,15 @@ end subroutine ESMF_GridConvertIndex
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set return value
-    ESMF_GridCreateDistGrid = grid
+    ESMF_GridCreateFrmDistGrid = grid
 
     ! Set init status
-    ESMF_INIT_SET_CREATED(ESMF_GridCreateDistGrid)
+    ESMF_INIT_SET_CREATED(ESMF_GridCreateFrmDistGrid)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-    end function ESMF_GridCreateDistGrid
+    end function ESMF_GridCreateFrmDistGrid
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2414,12 +2414,12 @@ end subroutine ESMF_GridConvertIndex
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
-      function ESMF_GridCreateDistGridArb(name,coordTypeKind,distgrid, &
+      function ESMF_GridCreateFrmDistGridArb(name,coordTypeKind,distgrid, &
 			 indexArray, distDim, coordDimCount, coordDimMap, &
                          destroyDistGrid, destroyDELayout, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateDistGridArb
+      type(ESMF_Grid) :: ESMF_GridCreateFrmDistGridArb
 !
 ! !ARGUMENTS:
        character (len=*), intent(in), optional :: name
@@ -2774,29 +2774,29 @@ end subroutine ESMF_GridConvertIndex
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set return value
-    ESMF_GridCreateDistGridArb = grid
+    ESMF_GridCreateFrmDistGridArb = grid
 
     ! Set init status
-    ESMF_INIT_SET_CREATED(ESMF_GridCreateDistGridArb)
+    ESMF_INIT_SET_CREATED(ESMF_GridCreateFrmDistGridArb)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-    end function ESMF_GridCreateDistGridArb
+    end function ESMF_GridCreateFrmDistGridArb
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateFile"
+#define ESMF_METHOD "ESMF_GridCreateFrmFile"
 !BOP
 ! !IROUTINE: ESMF_GridCreate - Create a Grid from a file
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
-     function ESMF_GridCreateFile(fileName, convention, purpose, rc)
+     function ESMF_GridCreateFrmFile(fileName, convention, purpose, rc)
 !
 ! !RETURN VALUE:
-     type(ESMF_Grid) :: ESMF_GridCreateFile
+     type(ESMF_Grid) :: ESMF_GridCreateFrmFile
 !
 ! !ARGUMENTS:
        character (len=*), intent(in)            :: fileName
@@ -2977,28 +2977,28 @@ end subroutine ESMF_GridConvertIndex
     ! call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
 
     ! Set return value
-    ESMF_GridCreateFile = grid
+    ESMF_GridCreateFrmFile = grid
 
     ! Set init status
-    ESMF_INIT_SET_CREATED(ESMF_GridCreateFile)
+    ESMF_INIT_SET_CREATED(ESMF_GridCreateFrmFile)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-    end function ESMF_GridCreateFile
+    end function ESMF_GridCreateFrmFile
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateScripDistGrid"
+#define ESMF_METHOD "ESMF_GridCreateFrmScripDistGrd"
 !BOP
 ! !ROUTINE: ESMF_GridCreate: Create a ESMF_Grid from a logically rectangular grid in a 
 !  SCRIP format file and a DistGrid
 
 ! !INTERFACE:
-  function ESMF_GridCreateScripDistGrid(distgrid, filename, rc)
+  function ESMF_GridCreateFrmScripDistGrd(distgrid, filename, rc)
 
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateScripDistGrid
+      type(ESMF_Grid) :: ESMF_GridCreateFrmScripDistGrd
 !
 ! !ARGUMENTS:
  
@@ -3145,7 +3145,7 @@ end subroutine ESMF_GridConvertIndex
              ESMF_CONTEXT, rc)) return
     if (PetNo == 0)  deallocate(coord2D, coordX, coordY)
     
-    ESMF_GridCreateScripDistGrid = grid
+    ESMF_GridCreateFrmScripDistGrd = grid
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
@@ -3153,21 +3153,21 @@ end subroutine ESMF_GridConvertIndex
 #endif
 
     return
-end function ESMF_GridCreateScripDistGrid
+end function ESMF_GridCreateFrmScripDistGrd
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateScripReg"
+#define ESMF_METHOD "ESMF_GridCreateFrmScripReg"
 !BOP
 ! !ROUTINE: ESMF_GridCreate: Create a ESMF_Grid from a logically rectangular grid in a 
 !  SCRIP format file and a Regular Decomp map
 
 ! !INTERFACE:
-  function ESMF_GridCreateScripReg(filename, regDecomp, decompflag, rc)
+  function ESMF_GridCreateFrmScripReg(filename, regDecomp, decompflag, rc)
 
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateScripReg
+      type(ESMF_Grid) :: ESMF_GridCreateFrmScripReg
 !
 ! !ARGUMENTS:
  
@@ -3330,7 +3330,7 @@ end function ESMF_GridCreateScripDistGrid
              ESMF_CONTEXT, rc)) return
     if (PetNo == 0)  deallocate(coord2D, coordX, coordY)
     
-    ESMF_GridCreateScripReg = grid
+    ESMF_GridCreateFrmScripReg = grid
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
@@ -3338,7 +3338,7 @@ end function ESMF_GridCreateScripDistGrid
 #endif
 
     return
-end function ESMF_GridCreateScripReg
+end function ESMF_GridCreateFrmScripReg
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -4367,7 +4367,7 @@ end function ESMF_GridCreateScripReg
 
   
    ! Create Grid from specification -----------------------------------------------
-   ESMF_GridCreateShapeTileIrreg=ESMF_GridCreateDistGrid(name, coordTypeKind, distgrid, &
+   ESMF_GridCreateShapeTileIrreg=ESMF_GridCreateFrmDistGrid(name, coordTypeKind, distgrid, &
                                     distgridToGridMap=distgridToGridMap, &
                                     coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
@@ -5264,7 +5264,7 @@ end function ESMF_GridCreateScripReg
    endif
 
   
-   ESMF_GridCreateShapeTileReg=ESMF_GridCreateDistGrid(name, coordTypeKind, distgrid, &
+   ESMF_GridCreateShapeTileReg=ESMF_GridCreateFrmDistGrid(name, coordTypeKind, distgrid, &
                                     distgridToGridMap=distgridToGridMap, &
                                     coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
@@ -5873,7 +5873,7 @@ end function ESMF_GridCreateScripReg
         ESMF_CONTEXT, rcToReturn=rc)) return
    endif
    ! Create Grid from specification -----------------------------------------------
-   ESMF_GridCreateShapeTileArb=ESMF_GridCreateDistGridArb(name, coordTypeKind, &
+   ESMF_GridCreateShapeTileArb=ESMF_GridCreateFrmDistGridArb(name, coordTypeKind, &
 			       distgrid, indexArray, &
                                distDim=distDimLocal, &
 			       coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
@@ -12271,7 +12271,7 @@ endif
 !  Grid objects match, .false. otherwise. This method considers most parts of
 !  the Grids when testing for a match (coordinates, items, Distgrids, Arrays, etc). The 
 !  parts which aren't considered for a match are the {\tt destroyDistgrid} and 
-!  the {\tt destroyDELayout} flags used in the {\tt ESMF\_GridCreateDistgrid()} call. 
+!  the {\tt destroyDELayout} flags used in the {\tt ESMF\_GridCreateFrmDistgrid()} call. 
 !  Please also note that this call returns the match for the piece of the Grids on
 !  the local PET only. It's entirely possible for this call to return a different match
 !  on different PETs for the same Grids. The user is responsible for computing the global match across
