@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.88 2010/09/16 05:47:24 samsoncheung Exp $
+% $Id: ESMF_install.tex,v 1.89 2010/09/16 18:53:00 samsoncheung Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -210,9 +210,9 @@ typical case where {\tt ESMF\_XERCES} is set to "standard", {\tt ESMF\_XERCES\_L
 \subsubsection{PIO}
 \label{sec:pio}
 ESMF provides the ability to read and write data in both binary and
-NetCDF format through a third-party IO software PIO. The following
-environment variables enable, and specify the name and location of the
-desired PIO library and associated header files: 
+NetCDF formats through a third-party IO software, ParallelIO (PIO).
+The following environment variables enable, and specify the name and 
+location of the desired PIO library and associated header files:
 
 \begin{description}
 \item[ESMF\_PIO] Possible value: "not set" (default), internal, external
@@ -227,7 +227,7 @@ library that built with ESMF.  However, this internal PIO does not
 support mpiuni mode.
 
 \item[external] PIO-dependent features will be enabled and they relied on
-external  PIO library that built separately.  Thus, the library and 
+an external PIO library that built separately the user.  Thus, the library and 
 its path should be set via environment variables {\tt ESMF\_PIO\_LIBS}
 and {\tt ESMF\_PIO\_LIBPATH}.
 \end{description}
@@ -240,12 +240,10 @@ Specifies the path where the PIO library file is located.
 when {\tt ESMF\_PIO} is set to external.
 \end{description}
 
-\begin{description}
-If {tt\ ESMF\_PIO} is enabled, it supports the IO format of binary 
-and NetCDF files.  To enable the feature of NetCDF IO, the
-{tt\ ESMF\_PNETCDF} (see 6.3.3) and/or {tt\ ESMF\_NETCDF} (see 6.3.2)
+If {\tt ESMF\_PIO} is enabled, it supports the IO format of binary 
+and NetCDF files.  To enable the feature of NetCDF IO format, the
+{\tt ESMF\_PNETCDF} (see 6.3.3) and/or {\tt ESMF\_NETCDF} (see 6.3.2)
 should be enabled.
-\end{description}
 
 
 \subsection{ESMF Environment Variables}
