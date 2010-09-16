@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.156 2010/09/16 00:35:40 w6ws Exp $
+! $Id: ESMF_Grid.F90,v 1.157 2010/09/16 18:37:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.156 2010/09/16 00:35:40 w6ws Exp $'
+      '$Id: ESMF_Grid.F90,v 1.157 2010/09/16 18:37:38 svasquez Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2991,7 +2991,7 @@ end subroutine ESMF_GridConvertIndex
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFrmScripDistGrd"
 !BOP
-! !ROUTINE: ESMF_GridCreate: Create a ESMF_Grid from a logically rectangular grid in a 
+! !ROUTINE: ESMF_GridCreate Create a ESMF_Grid from a logically rectangular grid in a 
 !  SCRIP format file and a DistGrid
 
 ! !INTERFACE:
@@ -3160,7 +3160,7 @@ end function ESMF_GridCreateFrmScripDistGrd
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFrmScripReg"
 !BOP
-! !ROUTINE: ESMF_GridCreate: Create a ESMF_Grid from a logically rectangular grid in a 
+! !ROUTINE: ESMF_GridCreate Create a ESMF_Grid from a logically rectangular grid in a 
 !  SCRIP format file and a Regular Decomp map
 
 ! !INTERFACE:
