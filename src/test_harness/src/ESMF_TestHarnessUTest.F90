@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUTest.F90,v 1.38 2010/09/17 04:47:03 theurich Exp $
+! $Id: ESMF_TestHarnessUTest.F90,v 1.39 2010/09/17 04:59:03 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -268,7 +268,7 @@
 !   gather aggregate error count?
 !
 90 continue
-  write(name, *) "Harness Test  for class " // trim(adjustL(har%testClass))
+  name = "Harness Test  for class " // adjustL(har%testClass)
   call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
     ESMF_SRCLINE)
 
