@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.29 2010/09/17 05:46:30 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.30 2010/09/17 22:10:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -832,6 +832,8 @@ class XXE{
       VMK::commhandle **commhandle;
       bool activeFlag;
       bool cancelledFlag;
+      int checkCancelMsg(char **rraList, int const *vectorLength,
+        char const *cancelMsg);  // may set cancelledFlag for recv
     }CommhandleInfo;
 
 };  // class XXE
