@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.70 2010/06/23 05:52:17 theurich Exp $
+// $Id: ESMCI_Grid.h,v 1.71 2010/09/17 03:13:32 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,6 +44,7 @@ enum ESMC_GridStatus {ESMC_GRIDSTATUS_INVALID=-1,
                       ESMC_GRIDSTATUS_NOT_READY,
 		      ESMC_GRIDSTATUS_SHAPE_READY
 };
+
 
 // Eventually move this to ESMCI_Util.h
 #define ESMC_GRIDITEM_INVALID -2
@@ -711,6 +712,7 @@ int getComputationalUBound(
     Grid *grid;     // grid being iterated through
     int staggerloc; // staggerloc in grid being iterated through
     DistGrid *staggerDistgrid;
+    DistGrid *centerDistgrid;
 
     const ESMC_GridConn *connL;
     const ESMC_GridConn *connU;
@@ -755,6 +757,7 @@ int getComputationalUBound(
   int getCount();
   int getDE();
   void getCornersCellNodeLocalID(int *cnrCount, int *cnrList);
+  template <class TYPE> void setArrayData(Array *array, TYPE data);
   }; 
 
 

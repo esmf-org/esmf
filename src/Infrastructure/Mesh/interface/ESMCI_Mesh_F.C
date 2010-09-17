@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.45 2010/08/27 21:11:27 oehmke Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.46 2010/09/17 03:13:32 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -34,11 +34,12 @@
 #include "ESMCI_GlobalIds.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_FindPnts.h"
+#include "Mesh/include/ESMCI_MathUtil.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.45 2010/08/27 21:11:27 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.46 2010/09/17 03:13:32 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1322,3 +1323,118 @@ extern "C" void FTN(c_esmc_getlocalcoords)(Mesh **meshpp, double *nodeCoord, int
 } 
 
 
+////////////////
+
+
+extern "C" void FTN(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc) {
+
+  
+  // Declare polygon information
+#define  MAX_NUM_POLY_COORDS  60
+#define  MAX_NUM_POLY_NODES_2D  30  // MAX_NUM_POLY_COORDS/2
+#define  MAX_NUM_POLY_NODES_3D  20  // MAX_NUM_POLY_COORDS/3
+  int num_poly_nodes;
+  double poly_coords[MAX_NUM_POLY_COORDS];
+  
+  
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+	throw localrc;  // bail out with exception
+    }
+    
+    // Get Mesh pointer
+    Mesh *meshp = *meshpp;
+    
+    // Get Mesh reference
+    Mesh &mesh = *meshp;
+    
+    // Declare id vector
+    std::vector<int> egids; 
+    
+    // get elem ids
+    getElemGIDS(*meshp, egids);
+    
+    // If there are no elements then leave
+    if (egids.empty()) {
+      if (rc!=NULL) *rc = ESMF_SUCCESS;
+      return;
+    }
+
+    // Check size
+    if (*num_elem != egids.size()) {
+      Throw() << "Number of elements doesn't match size of input array for areas";
+    }
+
+    // Get coord field
+    MEField<> *cfield = mesh.GetCoordField();
+
+    // Get dimensions
+    int sdim=mesh.spatial_dim();
+    int pdim=mesh.parametric_dim();
+
+    // Loop through elements and put areas into array
+    for (int i=0; i<egids.size(); i++) {
+      // Get element gid
+      int elem_gid=egids[i];
+      
+      //  Find the corresponding Mesh element
+      Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, elem_gid);
+      if (mi == mesh.map_end(MeshObj::ELEMENT)) {
+	Throw() << "Element not in mesh";
+      }
+      
+      // Get the element
+      const MeshObj &elem = *mi; 
+      
+      // Only put it in if it's locally owned
+      if (!GetAttr(elem).is_locally_owned()) continue;
+
+      // Compute area depending on dimensions
+      double area;
+      if (pdim==2) {
+	if (sdim==2) {
+	  get_elem_coords(&elem, cfield, 2, MAX_NUM_POLY_NODES_2D, &num_poly_nodes, poly_coords);
+          area=area_of_flat_2D_polygon(num_poly_nodes, poly_coords);
+	} else if (sdim==3) {
+	  get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
+	  remove_0len_edges3D(&num_poly_nodes, poly_coords);
+	  area=great_circle_area(num_poly_nodes, poly_coords);
+	}
+      } else {
+	Throw() << "Meshes with parametric dimension != 2 not supported for computing areas";
+      }
+
+      // Put area into area array
+      elem_areas[i]=area;
+    }
+        
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", rc);
+    return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}

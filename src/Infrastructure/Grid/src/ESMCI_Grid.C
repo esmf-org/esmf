@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.110 2010/09/11 00:07:12 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.111 2010/09/17 03:13:32 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.110 2010/09/11 00:07:12 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.111 2010/09/17 03:13:32 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -7191,6 +7191,22 @@ void GridCellIter::getDEBnds(
 
   }
 
+  // If using center make sure we aren't going to go outside the bounds
+    int centerUBnd[ESMF_MAXDIM]; 
+    int centerLBnd[ESMF_MAXDIM];
+    
+    // Get center bounds
+    grid->getExclusiveUBound(0, localDE, centerUBnd);  
+    grid->getExclusiveLBound(0, localDE, centerLBnd);  
+    
+    for (int i=0; i<rank; i++) {
+      int rc;
+      if ((uBnd[i] > centerUBnd[i]) || (lBnd[i] < centerLBnd[i])) {
+	ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+	"- center stagger not contained properly within staggerloc being regridded", &rc);
+        throw rc;
+      }
+    }
 }
 //-----------------------------------------------------------------------------
 
@@ -7276,6 +7292,7 @@ GridCellIter::GridCellIter(
 //  
  Grid *gridArg,
  int  staggerlocArg
+
  ){
 //
 // !DESCRIPTION:
@@ -7291,12 +7308,12 @@ GridCellIter::GridCellIter(
   rank=grid->getDimCount();
   connL=grid->getConnL();
   connU=grid->getConnU();
-
+    
   // Get Alignment for staggerloc
   const int *staggerAlign= grid->getStaggerAlign(staggerloc);
 
   // Convert to -1,+1 alignment used in GridCellIter
-  // (i.e. make 0 the same as -1)
+  // (make 0 the same as -1)
   for (int i=0; i<rank; i++) {
     if (staggerAlign[i] < 1) align[i]=-1;
     else align[i]=1;
@@ -7304,6 +7321,11 @@ GridCellIter::GridCellIter(
 
   // Get distgrid for this staggerloc 
   grid->getStaggerDistgrid(staggerloc, &staggerDistgrid);
+
+  // If we should use the center distgrid for calculating seqIndices
+  // (e.g. if we're doing conservative regridding)
+  grid->getStaggerDistgrid(0,&centerDistgrid);
+  
 
   // initialize 
   for (int i=0; i<ESMF_MAXDIM; i++) {
@@ -7502,7 +7524,14 @@ int GridCellIter::getGlobalID(
 
 
   // NOTE THAT THIS ONLY WORKS FOR SINGLE PATCH GRIDS WITH GLOBAL INDEXING
-  gid=staggerDistgrid->getSequenceIndexPatch(1,curInd,0,&localrc);
+  //  gid=staggerDistgrid->getSequenceIndexPatch(1,curInd,0,&localrc);
+
+
+  // TODO: There is an assumption here that the center and the stagger that this iterator
+  // was created on have the same align. This problem will go away when we put in the 
+  // the topo stuff, becasue then we will be doing stuff relative to the bottom of the DE, but
+  // if this change doesn't happen, then need to take care of that. 
+  gid=centerDistgrid->getSequenceIndexPatch(1,curInd,0,&localrc);
 
   if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,curInd[0],curInd[1],localrc);
 #endif
@@ -7756,6 +7785,53 @@ void GridCellIter::getCornersCellNodeLocalID(
   }
 
 }
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridIter::getArrayData()"
+//BOPI
+// !IROUTINE:  getArrayData
+//
+// !INTERFACE:
+template <class TYPE>
+void GridCellIter::setArrayData(
+//
+// !RETURN VALUE:
+//  void
+//
+// !ARGUMENTS:
+//   Data output
+// 
+                            Array *array,
+                            TYPE data 
+ ){
+//
+// !DESCRIPTION:
+// Set data to a passed in Array
+// TODO: Need to come up with a way to handle Arrays with more dimensions than the Grid
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+  LocalArray *localArray;
+  
+  // if done then leave
+  if (done) return;
+  
+  //// Get LocalArray cooresponding to staggerloc, coord and localDE
+  localArray=array->getLocalarrayList()[curDE];
+  
+  //// Get pointer to LocalArray data
+  localArray->setData(curInd, data);
+  
+}
+
+// Add more types here if necessary
+template void GridCellIter::setArrayData(Array *array, ESMC_R8 data);
+template void GridCellIter::setArrayData(Array *array, ESMC_R4 data);
+template void GridCellIter::setArrayData(Array *array, ESMC_I4 data);
 //-----------------------------------------------------------------------------
 
 

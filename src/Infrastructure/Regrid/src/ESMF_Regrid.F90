@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.147 2010/05/06 21:38:21 oehmke Exp $
+! $Id: ESMF_Regrid.F90,v 1.148 2010/09/17 03:13:32 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -83,6 +83,7 @@
     ! 
     public ESMF_RegridStore
     public ESMF_RegridGetIwts
+    public ESMF_RegridGetArea
     public operator (.eq.)
 
 
@@ -95,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.147 2010/05/06 21:38:21 oehmke Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.148 2010/09/17 03:13:32 oehmke Exp $'
 
 !==============================================================================
 !
@@ -484,5 +485,71 @@ end function my_xor
       rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridGetIwts
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridGetArea"
+!BOPI
+! !IROUTINE: ESMF_RegridGetArea - Gets the area of grid cells
+
+! !INTERFACE:
+      subroutine ESMF_RegridGetArea(Grid, Mesh, Array, staggerLoc, &
+                 regridScheme, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(inout)         :: Grid
+      type(ESMF_Mesh), intent(inout)         :: Mesh
+      type(ESMF_Array), intent(inout)        :: Array
+      type(ESMF_StaggerLoc), intent(in)      :: staggerLoc
+      integer, intent(in)                    :: regridScheme
+      integer, intent(out), optional         :: rc
+!
+! !DESCRIPTION:
+!     The arguments are:
+!     \begin{description}
+!     \item[Mesh]
+!          The mesh.
+!     \item[Array]
+!          The grid array.
+!     \item[regridScheme]
+!          Whether to use 3d or native coordinates
+!     \item[{rc}]
+!          Return code.
+!     \end{description}
+!EOPI
+       integer :: localrc
+       type(ESMF_VM)        :: vm
+       logical :: isMemFreed
+
+       ! Logic to determine if valid optional args are passed.  
+
+       ! Initialize return code; assume failure until success is certain
+       localrc = ESMF_RC_NOT_IMPL
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+       ! Make sure the srcMesh has its internal bits in place
+       call ESMF_MeshGet(Mesh, isMemFreed=isMemFreed, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       if (isMemFreed)  then
+           call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- Mesh has had its coordinate and connectivity info freed", & 
+                 ESMF_CONTEXT, rc) 
+          return 
+       endif
+
+       ! Call through to the C++ object that does the work
+       call c_ESMC_regrid_getarea(Grid, Mesh, Array, staggerLoc, &
+                                  regridScheme, localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+      rc = ESMF_SUCCESS
+
+      end subroutine ESMF_RegridGetArea
+
 
    end module ESMF_RegridMod

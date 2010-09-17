@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.38 2010/09/08 22:31:23 svasquez Exp $
+! $Id: ESMF_Mesh.F90,v 1.39 2010/09/17 03:13:32 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.38 2010/09/08 22:31:23 svasquez Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.39 2010/09/17 03:13:32 oehmke Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -167,6 +167,7 @@ module ESMF_MeshMod
   public ESMF_MeshSerialize
   public ESMF_MeshDeserialize
   public ESMF_MeshFindPnt
+  public ESMF_MeshGetElemArea
   public operator(.eq.), operator(.ne.) 
 
 !EOPI
@@ -175,7 +176,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.38 2010/09/08 22:31:23 svasquez Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.39 2010/09/17 03:13:32 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1961,6 +1962,75 @@ end function ESMF_MeshCreateFromScrip
     
   end subroutine ESMF_MeshFindPnt
 !------------------------------------------------------------------------------
+
+
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshGetElemArea()"
+!BOPI
+! !IROUTINE: ESMF_MeshGetElemArea - Find area of elements in mesh
+!
+! !INTERFACE:
+    subroutine ESMF_MeshGetElemArea(mesh, areaList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)                     :: mesh
+    real(ESMF_KIND_R8), pointer                     :: areaList(:)
+    integer, intent(out), optional                  :: rc
+!
+! !DESCRIPTION:
+!   Write a mesh to VTK file.
+!
+!   \begin{description}
+!   \item [mesh]
+!         The mesh.
+!   \item [areaList]
+!         Areas for the mesh elements will be put here
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    ! If mesh has been freed then exit
+    if (mesh%isCMeshFreed) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh internals have been freed", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+    ! If mesh has been freed then exit
+    if (.not. mesh%isFullyCreated) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh has not been fully created", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+   ! Call into mesh get areas
+    call C_ESMC_MeshGetArea(mesh%this, size(areaList), areaList, localrc);
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! return success
+     if  (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_MeshGetElemArea
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.42 2010/09/10 16:29:00 feiliu Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.43 2010/09/17 03:13:32 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -56,6 +56,7 @@ module ESMF_FieldRegridMod
    public ESMF_FieldRegrid             ! apply a regrid operator
    public ESMF_FieldRegridRelease      ! apply a regrid operator
    public ESMF_FieldRegridGetIwts      ! get integration weights
+   public ESMF_FieldRegridGetArea      ! get area
    private checkGrid                   ! small subroutine to check the grid
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -93,7 +94,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.42 2010/09/10 16:29:00 feiliu Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.43 2010/09/17 03:13:32 oehmke Exp $'
 
 !==============================================================================
 !
@@ -856,6 +857,179 @@ contains
         if(present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_FieldRegridStoreX
+
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRegridGetArea"
+
+!BOPI
+! !IROUTINE: ESMF_FieldRegridGetArea - Get the integration area
+!
+! !INTERFACE:
+  !   Private name; call using ESMF_FieldRegridGetArea()
+      subroutine ESMF_FieldRegridGetArea(areaField, MaskValues, regridScheme, rc)
+!
+! !RETURN VALUE:
+!      
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout)                 :: areaField
+      integer(ESMF_KIND_I4), intent(in), optional     :: MaskValues(:)
+      integer, intent(in), optional                   :: regridScheme
+      integer, intent(out), optional                  :: rc 
+!
+! !DESCRIPTION:
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [Field]
+!           The Field.
+!     \item [{[regridScheme]}]
+!           Whether to convert to spherical coordinates 
+!           ({\tt ESMF\_REGRID\_SCHEME\_FULL3D}), 
+!           or to leave in native coordinates 
+!           ({\tt ESMF\_REGRID\_SCHEME\_NATIVE}). 
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+        integer :: localrc
+        integer              :: isSphere
+        integer              :: lregridScheme
+        type(ESMF_GeomType)  :: geomtype
+
+        type(ESMF_Grid)      :: Grid
+        type(ESMF_Array)     :: Array
+        type(ESMF_Mesh)      :: Mesh
+        type(ESMF_StaggerLoc) :: staggerLoc
+	type(ESMF_MeshLoc)   :: meshLoc
+        real(ESMF_KIND_R8), pointer :: areaFptr(:)
+        integer :: gridDimCount, localDECount
+	type(ESMF_TypeKind) :: typekind
+  
+        ! Initialize return code; assume failure until success is certain
+        localrc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+
+  !  check Field and areaField to make sure they are from the same grid
+
+        ! Now we go through the painful process of extracting the data members
+        ! that we need.
+        call ESMF_FieldGet(areaField, typekind=typekind, geomtype=geomtype, array=Array, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+	! Check typekind
+        if (typekind .ne. ESMF_TYPEKIND_R8) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+              "- Area calculation is only supported for Fields of typekind=ESMF_TYPEKIND_R8", & 
+              ESMF_CONTEXT, rc) 
+           return
+        endif
+
+
+        ! Will eventually determine scheme either as a parameter or from properties
+        ! of the source grid
+        if (present(regridScheme)) then
+          lregridScheme = regridScheme
+        else
+          lregridScheme = ESMF_REGRID_SCHEME_NATIVE
+        endif
+
+        ! If grids, then convert to a mesh to do the regridding
+        if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
+          call ESMF_FieldGet(areaField, grid=Grid, &
+                 staggerloc=staggerLoc, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+          isSphere = 0
+          if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) isSphere = 1
+
+          ! Only Center stagger is supported right now until we figure out what the
+          ! control volume for the others should be
+	  if (staggerloc .ne. ESMF_STAGGERLOC_CENTER) then
+                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+              "- can't currently calculate area on a stagger other then center", & 
+                 ESMF_CONTEXT, rc) 
+              return
+          endif
+
+	  ! Can only do conservative on 2D right now
+          call ESMF_GridGet(grid=Grid, &
+                   dimCount=gridDimCount, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          if (gridDimCount .ne. 2) then
+                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 "- can currently only calculate area on 2D grids", & 
+                 ESMF_CONTEXT, rc) 
+                return
+          endif 
+
+          ! check grid
+          call checkGrid(Grid,staggerloc,rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! Convert Grid to Mesh
+          Mesh = ESMF_GridToMesh(Grid, ESMF_STAGGERLOC_CORNER, isSphere, &
+                      MaskValues, ESMF_REGRID_CONSERVE_OFF, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+	  ! call into the Regrid GetareaField interface
+          call ESMF_RegridGetArea(Grid, Mesh, Array, ESMF_STAGGERLOC_CORNER, lregridScheme, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+        else
+          call ESMF_FieldGet(areaField, mesh=Mesh, meshLocation=meshLoc, &
+                 localDECount=localDECount, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+	  if (meshLoc .ne. ESMF_MESHLOC_ELEMENT) then
+                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+              "- can't currently calculate area on a mesh location other than elements", & 
+                 ESMF_CONTEXT, rc) 
+              return
+          endif
+
+	  ! Don't need to do anything if there are no DEs
+	  if (localDECount < 1) then
+              if(present(rc)) rc = ESMF_SUCCESS
+              return
+          endif
+
+          ! Get pointer to field data
+	  ! Right now Mesh will only have one DE per PET
+          call ESMF_FieldGet(areaField, localDE=0,  farrayPtr=areaFptr, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! Get Area
+	  call ESMF_MeshGetElemArea(mesh, areaList=areaFptr, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+        endif
+
+
+        ! destroy Mesh, if they were created here
+        if (geomtype .ne. ESMF_GEOMTYPE_MESH) then
+        call ESMF_MeshDestroy(Mesh,rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+        endif
+
+        if(present(rc)) rc = ESMF_SUCCESS
+
+    end subroutine ESMF_FieldRegridGetArea
 
 !------------------------------------------------------------------------------
 

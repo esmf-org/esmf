@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridToMesh.C,v 1.1 2010/06/28 17:59:24 theurich Exp $
+// $Id: ESMCI_GridToMesh.C,v 1.2 2010/09/17 03:13:32 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -33,6 +33,7 @@
 #include "Mesh/include/ESMCI_IOField.h"
 #include "Mesh/include/ESMCI_ParEnv.h"
 #include "Mesh/include/ESMCI_DDir.h"
+#include "Mesh/include/ESMCI_MathUtil.h"
 
 #include <limits>
 #include <iostream>
@@ -612,7 +613,91 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
    delete gni;
 
 }
+
 #undef  ESMC_METHOD
+
+
+  void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "CpMeshElemDataToArray()" 
+    Trace __trace("CpMeshElemDataToArray()");
+    
+    int localrc;
+    int rc;
+
+#define  MAX_NUM_POLY_COORDS  60
+#define  MAX_NUM_POLY_NODES_2D  30  // MAX_NUM_POLY_COORDS/2
+#define  MAX_NUM_POLY_NODES_3D  20  // MAX_NUM_POLY_COORDS/3
+    
+    int num_poly_nodes;
+    double poly_coords[MAX_NUM_POLY_COORDS];
+
+
+    // Initialize the parallel environment for mesh (if not already done)
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+      throw localrc;  // bail out with exception
+
+    if (grid.getIndexFlag() != ESMF_INDEX_GLOBAL) {
+      Throw() << "Currently the Grid must be created with indexflag=ESMF_INDEX_GLOBAL to use this functionality";
+    }
+    
+    // Get coord field
+    MEField<> *cfield = mesh.GetCoordField();
+
+    // Get dimensions
+    int sdim=mesh.spatial_dim();
+    int pdim=mesh.parametric_dim();
+    
+    // Loop elemets of the grid.  Here we loop all elements, both owned and not.
+    ESMCI::GridCellIter *gci=new ESMCI::GridCellIter(&grid,staggerLoc);
+    
+    // loop through all nodes in the Grid
+    for(gci->toBeg(); !gci->isDone(); gci->adv()) {   
+      //     if(!gni->isLocal()) continue;
+      
+      // get the global id of this Grid node
+      int gid=gci->getGlobalID(); 
+      
+      //  Find the corresponding Mesh element
+      Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, gid);
+      if (mi == mesh.map_end(MeshObj::ELEMENT)) {
+	Throw() << "Grid entry not in mesh";
+      }
+      
+      // Get the element
+      const MeshObj &elem = *mi; 
+      
+      // Only put it in if it's locally owned
+      if (!GetAttr(elem).is_locally_owned()) continue;
+
+      // Get area depending on dimensions
+      double area;
+      
+      if (pdim==2) {
+	if (sdim==2) {
+	  get_elem_coords(&elem, cfield, 2, MAX_NUM_POLY_NODES_2D, &num_poly_nodes, poly_coords);
+          area=area_of_flat_2D_polygon(num_poly_nodes, poly_coords);
+	} else if (sdim==3) {
+	  get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
+	  remove_0len_edges3D(&num_poly_nodes, poly_coords);
+	  area=great_circle_area(num_poly_nodes, poly_coords);
+	}
+      } else {
+	Throw() << "Meshes with parametric dimension != 2 not supported for computing areas";
+      }
+      
+       // Put it into the Array
+      gci->setArrayData(&array, area);
+   }
+
+   // delete Grid Iters
+   delete gci;
+
+}
+
+#undef  ESMC_METHOD
+
 
 
 } // namespace

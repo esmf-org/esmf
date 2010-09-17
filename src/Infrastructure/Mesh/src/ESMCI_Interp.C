@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.26 2010/09/09 20:26:11 oehmke Exp $
+// $Id: ESMCI_Interp.C,v 1.27 2010/09/17 03:13:32 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.26 2010/09/09 20:26:11 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.27 2010/09/17 03:13:32 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1053,6 +1053,7 @@ void Interp::operator()(int fpair_num, IWeights &iw) {
     iw.Migrate(dstmesh);
   }
 
+#if 1
   if (has_cnsrv) {
     WMat::WeightMap::iterator wi = iw.begin_row(), we = iw.end_row();
     for (; wi != we; ++wi) {
@@ -1071,6 +1072,7 @@ void Interp::operator()(int fpair_num, IWeights &iw) {
       } // for j      
     } // for wi
   }
+#endif
 }
 
 

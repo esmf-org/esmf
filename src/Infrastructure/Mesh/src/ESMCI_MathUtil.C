@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.2 2010/09/16 18:41:11 oehmke Exp $
+// $Id: ESMCI_MathUtil.C,v 1.3 2010/09/17 03:13:32 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.2 2010/09/16 18:41:11 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.3 2010/09/17 03:13:32 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -128,15 +128,16 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
   X[2]=0.0;
 
   // Do multiple iterations, exiting inside loop if solution is good enough
-  for (int i=0; i<20; i++) {
+  for (int i=0; i<100; i++) {
 
     // Calculate Value of function at X
     F[0]=X[0]*X[1]*A[0]+X[0]*B[0]+X[1]*C[0]+X[2]*D[0]+E[0];
     F[1]=X[0]*X[1]*A[1]+X[0]*B[1]+X[1]*C[1]+X[2]*D[1]+E[1];
     F[2]=X[0]*X[1]*A[2]+X[0]*B[2]+X[1]*C[2]+X[2]*D[2]+E[2];
 
-    // If we're close enough to 0.0 then exit
-    if (F[0]*F[0]+F[1]*F[1]+F[2]*F[2] < 1.0E-10) break;
+    // If we're close enough to 0.0 then exit           
+    if (F[0]*F[0]+F[1]*F[1]+F[2]*F[2] < 1.0E-20) break;
+
 
     // Construct Jacobian
     J[0]=A[0]*X[1]+B[0]; J[1]=A[0]*X[0]+C[0]; J[2]=D[0];
@@ -145,15 +146,14 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
 
     // Invert Jacobian
     if (!invert_matrix_3x3(J,inv_J)) return false;
-
+    
     // Calculate change in X
     mult(inv_J, F, delta_X);
-
+    
     // Move to next approximation of X
     X[0] = X[0] - delta_X[0];
     X[1] = X[1] - delta_X[1];
     X[2] = X[2] - delta_X[2];
-
   }
 
   // Get answer out
@@ -206,6 +206,176 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
   p[1]=X[2];
 
   return true;
+}
+
+
+  // Num is the number of vertices in the polygon
+  // coords is of size 2*num
+  double area_of_flat_2D_polygon(int num, double *coords) {
+
+    double area=0;
+    for(int i=0; i<num; i++) {
+      int ip1=(i+1)%num; // i plus 1 mod the size to wrap at end
+
+      area += (coords[2*i]*coords[2*ip1+1]-coords[2*ip1]*coords[2*i+1]);
+    }
+    
+    return 0.5*area;
+
+  }
+
+
+
+//    w
+//    | \
+//    |   \
+//    |     \
+//    u------v
+//    ^
+//    | --- angle being calculated
+//      
+  double angle(double *u, double *v, double *w) {
+  
+  double cosa=u[0]*v[0]+u[1]*v[1]+u[2]*v[2];
+
+  double cosb=u[0]*w[0]+u[1]*w[1]+u[2]*w[2];
+
+  double cosc=v[0]*w[0]+v[1]*w[1]+v[2]*w[2];
+
+  //  printf("a=%f b=%f c=%f \n",cosa,cosb,cosc);
+
+  double sina=sqrt(1.0-cosa*cosa);
+
+  double sinb=sqrt(1.0-cosb*cosb);
+
+#if 0
+    if (debug) {
+        printf("u=[%f %f %f] ",u[0],u[1],u[2]);
+        printf("v=[%f %f %f] ",v[0],v[1],v[2]);
+        printf("w=[%f %f %f] ",w[0],w[1],w[2]);
+	//        printf("sina=%f sinb=%f ",sina,sinb);
+	printf("sina*sinb=%f ",sina*sinb);
+	printf("cosc-(cosa*cosb)=%f ",cosc-(cosa*cosb));
+	printf("cosc-(cosa*cosb)/sina*sinb=%30.27f ",(cosc-(cosa*cosb))/(sina*sinb));
+        printf("angle=%f \n",acos((cosc-(cosa*cosb))/(sina*sinb)));
+
+
+    }
+#endif
+
+    // Calculate the cosine of the angle we're calculating
+    // using spherical trigonometry formula
+   double cos_angle=(cosc-(cosa*cosb))/(sina*sinb);
+
+   // If we've gone a little out of bounds due to round off, shift back
+   if (cos_angle > 1.0) cos_angle=1.0;
+   if (cos_angle < -1.0) cos_angle=-1.0;
+
+   // return angle
+   return acos(cos_angle);
+
+}
+
+
+// Compute the great circle area of a polygon on a sphere
+double great_circle_area(int n, double *pnts) {
+
+  // sum angles around polygon
+  double sum=0.0;
+  for (int i=0; i<n; i++) {
+    // points that make up a side of polygon
+    double *pnt0=pnts+3*i;
+    double *pnt1=pnts+3*((i+1)%n);
+    double *pnt2=pnts+3*((i+2)%n);
+
+    // compute angle for pnt1
+    sum += angle(pnt1, pnt2, pnt0);
+  }
+
+  // return area
+  return sum-(((double)(n-2))*((double)M_PI));
+}
+
+
+  // Not really a math routine, but useful as a starting point for math routines
+  void get_elem_coords(const MeshObj *elem, MEField<>  *cfield, int sdim, int max_num_nodes, int *num_nodes, double *coords) {
+
+      // Get number of nodes in element
+      const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+
+      // make sure that we're not bigger than max size
+      if (topo->num_nodes > max_num_nodes) {
+	Throw() << "Element exceeds maximum poly size";
+      }
+
+      // Get coords of element
+      int k=0;
+      for (ESMCI::UInt s = 0; s < topo->num_nodes; ++s){
+	const MeshObj &node = *(elem->Relations[s].obj);
+	double *c = cfield->data(node);
+        for (int i=0; i<sdim; i++) {
+	  coords[k]=c[i];
+          k++;
+	}
+      }
+
+      // Get number of nodes
+      *num_nodes=topo->num_nodes;
+  }
+
+
+
+void remove_0len_edges3D(int *num_p, double *p) {
+
+#define PNTS_EQUAL(p1,p2) ((std::abs(p1[0]-p2[0]) < 1E-15) &&	\
+                           (std::abs(p1[1]-p2[1]) < 1E-15) &&	\
+                           (std::abs(p1[2]-p2[2]) < 1E-15))
+    
+  // Get old value of num_p
+  int old_num_p=*num_p;
+
+  // See if there are any equal points
+  int j=-1;
+  double *last_pnt=p+3*(old_num_p-1);
+  for (int i=0; i<old_num_p; i++) {
+    double *pnti=p+3*i;
+    
+    if (PNTS_EQUAL(pnti,last_pnt)) {
+      j=i;
+      break;
+    }
+
+    // advance last point
+    last_pnt=pnti;
+  } 
+
+  // We found an equal point so start trimming them out
+  if (j>-1) {
+    for (int i=j; i<old_num_p; i++) {
+      double *pnti=p+3*i;
+      if (!PNTS_EQUAL(pnti,last_pnt)) {
+	double *pntj=p+3*j;
+
+	// copy the non-equal point to j
+	pntj[0]=pnti[0];
+	pntj[1]=pnti[1];
+	pntj[2]=pnti[2];
+
+	// move j
+	j++;
+
+	// reset the last pointer to the last non-repeating value
+	last_pnt=pntj;
+      }
+    }
+
+    // reset num_p to the new number of points
+    *num_p=j;
+  } else {
+    // Leave num_p as it is
+  }
+
+#undef PNTS_EQUAL
 }
 
 

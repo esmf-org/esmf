@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.50 2010/06/28 17:59:24 theurich Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.51 2010/09/17 03:13:32 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -105,35 +105,27 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
     double *factors = new double[iisize.first];
 
-    // Gather the data
-    WMat::WeightMap::iterator wi = wts.begin_row(), we = wts.end_row();
-
+    // Translate weights to sparse matrix representatio
     UInt i = 0;
+    WMat::WeightMap::iterator wi = wts.begin_row(), we = wts.end_row();
     for (; wi != we; ++wi) {
       const WMat::Entry &w = wi->first;
-
-
-      std::vector<WMat::Entry> &wcol = wi->second;
-
-      for (UInt j = 0; j < wcol.size(); ++j) {
-
-        UInt twoi = 2*i;
-
-        const WMat::Entry &wc = wcol[j];
-
-        // I expected things to be (dst,src), but they are (src_id,dst_id)
-        //iientries[twoi] = w.id;  iientries[twoi+1] = wc.id;
-        iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
-        
-        factors[i] = wc.value;
-
-        i++;
-
-      } // for j
       
+      std::vector<WMat::Entry> &wcol = wi->second;
+      
+      // Construct factor index list
+      for (UInt j = 0; j < wcol.size(); ++j) {
+	UInt twoi = 2*i;
+	const WMat::Entry &wc = wcol[j];
+	
+	// Construct factor list entry
+	iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
+	factors[i] = wc.value;
 
+	i++;
+      } // for j
     } // for wi
-
+    
 /*
 Par::Out() << "Matrix entries" << std::endl;
 for (UInt n = 0; n < num_entries; ++n) {
@@ -246,6 +238,49 @@ extern "C" void FTN(c_esmc_regrid_getiwts)(ESMCI::VM **vmpp, Grid **gridpp,
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
+
+extern "C" void FTN(c_esmc_regrid_getarea)(Grid **gridpp,
+                   Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
+                   int *regridScheme, int*rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_regrid_getarea()" 
+  Trace __trace(" FTN(regrid_getarea)()");
+  ESMCI::Array &array = **arraypp;
+
+  Mesh &mesh = **meshpp;
+  Grid &grid = **gridpp;
+
+  try {
+
+    PutElemAreaIntoArray(grid, *staggerLoc, mesh, array);
+ 
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), rc);
+    } else {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", rc);
+    }
+
+    return;
+  } catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", rc);
+    return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+
 
 // Copy the weights stored in the temporary tw into the fortran arrays.  Also,
 // delete the temp weights.
