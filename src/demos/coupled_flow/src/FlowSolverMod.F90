@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.10 2010/08/31 15:33:58 feiliu Exp $
+! $Id: FlowSolverMod.F90,v 1.11 2010/09/17 17:01:13 feiliu Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -171,7 +171,7 @@
       real(ESMF_KIND_R8), dimension(ESMF_MAXDIM) :: global_min_coord
       real(ESMF_KIND_R8), dimension(ESMF_MAXDIM) :: global_max_coord
       real :: x_min, x_max, y_min, y_max
-      integer, dimension(ESMF_MAXDIM) :: global_nmax
+      integer, dimension(ESMF_MAXDIM) :: global_nmax, global_nmin
       integer :: counts(2)
       namelist /input/ uin, rhoin, siein, &
                        gamma, akb, q0, u0, v0, sie0, rho0, &
@@ -261,6 +261,10 @@
       call ESMF_GridCompGet(gcomp, grid=grid, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
+      call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+        minIndex = global_nmin, &
+        maxIndex = global_nmax, &
+        rc = rc)
 ! TODO: restore the following code:
 !      call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
 !                              globalCellCountPerDim=global_nmax, &
@@ -271,12 +275,12 @@
 !
 ! Extract and calculate some other quantities
 !
-      counts(1) = global_nmax(1)
-      counts(2) = global_nmax(2)
-      x_min = global_min_coord(1)
-      y_min = global_min_coord(2)
-      x_max = global_max_coord(1)
-      y_max = global_max_coord(2)
+      counts(1) = global_nmax(1) - global_nmin(1)
+      counts(2) = global_nmax(2) - global_nmin(2)
+      x_min = 0.0 !global_min_coord(1)
+      y_min = 0.0 !global_min_coord(2)
+      x_max = 2.e+5 !global_max_coord(1)
+      y_max = 5.e+4 !global_max_coord(2)
       dx = (x_max - x_min)/counts(1)  ! Should be calls to PhysGrid eventually
       dy = (y_max - y_min)/counts(2)
 !

@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.9 2010/08/31 15:33:57 feiliu Exp $
+! $Id: CoupledFlowApp.F90,v 1.10 2010/09/17 17:01:13 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -31,7 +31,6 @@
     ! State, Virtual Machine, and DELayout
     type(ESMF_VM) :: vm
     type(ESMF_State) :: flowstate
-    type(ESMF_DELayout) :: DELayoutTop
     integer :: pet_id
 
     ! A common grid
@@ -87,7 +86,7 @@
 !     \item [s\_min]
 !           Simulation start time minute (integer).
 !     \item [e\_month]
-!           Simulationendt time month (integer).
+!           Simulation end time month (integer).
 !     \item [e\_day]
 !           Simulation end time day (integer).
 !     \item [e\_hour]
@@ -198,11 +197,11 @@
 !     And then we set the start time and stop time to input values for the month,
 !     day, and hour (assuming the year to be 2003):
 !\begin{verbatim}
-      call ESMF_TimeSet(startTime, yy=2003, mm=s_month, dd=s_day, &
+      call ESMF_TimeSet(startTime, yy=2010, mm=s_month, dd=s_day, &
                         h=s_hour, m=s_min, s=0, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-      call ESMF_TimeSet(stopTime, yy=2003, mm=e_month, dd=e_day, &
+      call ESMF_TimeSet(stopTime, yy=2010, mm=e_month, dd=e_day, &
                         h=e_hour, m=e_min, s=0, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !\end{verbatim}
@@ -219,10 +218,6 @@
       !
       ! Create the Grid and attach it to the Component
       !
-
-      ! Create a default DELayout for the grid based on the global VM
-      DELayoutTop = ESMF_DELayoutCreate(vm, rc=rc)
-      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !BOP
 !
 ! !DESCRIPTION:
@@ -242,14 +237,21 @@
       g_max(1) = x_max
       g_max(2) = y_max
       grid = ESMF_GridCreateShapeTile(maxIndex=counts, &
-                             !horzStagger=ESMF_GRID_HORZ_STAGGER_C_NE, &
                              coordDep1=(/1/), &
                              coordDep2=(/2/), &
                              name="source grid", rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      ! u
+      call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_EDGE1, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      ! v
+      call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_EDGE2, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      ! p
       call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      ! Get pointer reference to internal coordinate
+      ! Get pointer reference to internal coordinate for p
+      ! Compute center stagger coordinate values
       call ESMF_GridGetCoord(grid, localDE=0, &
         staggerLoc=ESMF_STAGGERLOC_CENTER, &
         coordDim=1, fptr=CoordX, rc=rc)
@@ -259,19 +261,65 @@
         coordDim=2, fptr=CoordY, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-      call ESMF_GridGetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, array=Ax, rc=rc)
-      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-
-      call ESMF_ArrayPrint(Ax, rc=rc)
-      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-
+      !print *, lbound(CoordX), ubound(CoordX)
+      !print *, lbound(CoordY), ubound(CoordY)
       dx = (x_max-x_min)/i_max
       dy = (y_max-y_min)/j_max
-      do i = 1, i_max
-        coordX(i) = x_min + dx*i
+      coordX(1) = x_min + dx/2
+      coordY(1) = y_min + dy/2
+      do i = 2, i_max-1
+        coordX(i) = coordX(i-1) + dx
       enddo
-      do j = 1, j_max
-        coordY(j) = y_min + dy*j
+      do j = 2, j_max-1
+        coordY(i) = coordY(j-1) + dy
+      enddo
+
+      ! Get pointer reference to internal coordinate for U
+      ! Compute edge1 (U) coordinate values
+      call ESMF_GridGetCoord(grid, localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_EDGE1, &
+        coordDim=1, fptr=CoordX, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_GridGetCoord(grid, localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_EDGE1, &
+        coordDim=2, fptr=CoordY, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+      !print *, lbound(CoordX), ubound(CoordX)
+      !print *, lbound(CoordY), ubound(CoordY)
+      dx = (x_max-x_min)/i_max
+      dy = (y_max-y_min)/j_max
+      coordX(1) = x_min
+      coordY(1) = y_min + dy/2
+      do i = 2, i_max
+        coordX(i) = coordX(i-1) + dx
+      enddo
+      do j = 2, j_max-1
+        coordY(i) = coordY(j-1) + dy
+      enddo
+
+      ! Get pointer reference to internal coordinate for V
+      ! Compute edge1 (V) coordinate values
+      call ESMF_GridGetCoord(grid, localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_EDGE2, &
+        coordDim=1, fptr=CoordX, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_GridGetCoord(grid, localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_EDGE2, &
+        coordDim=2, fptr=CoordY, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+      !print *, lbound(CoordX), ubound(CoordX)
+      !print *, lbound(CoordY), ubound(CoordY)
+      dx = (x_max-x_min)/i_max
+      dy = (y_max-y_min)/j_max
+      coordX(1) = x_min + dx/2
+      coordY(1) = y_min
+      do i = 2, i_max-1
+        coordX(i) = coordX(i-1) + dx
+      enddo
+      do j = 2, j_max
+        coordY(i) = coordY(j-1) + dy
       enddo
 
 !\end{verbatim}
@@ -332,10 +380,6 @@
 
       call ESMF_GridCompDestroy(compGridded, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-
-      call ESMF_DELayoutDestroy(DELayoutTop, rc=rc)
-      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.9 2010/08/27 14:52:25 feiliu Exp $
+! $Id: CoupledFlowDemo.F90,v 1.10 2010/09/17 17:01:13 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -241,14 +241,13 @@
           coordDim=2, array=CoordY, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-    call ESMF_ArrayPrint(coordX, rc=rc)
-    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-
     newCoordX = ESMF_ArrayCreate(coordX, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
     newCoordY = ESMF_ArrayCreate(coordY, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
+    ! print *, minIndex, maxIndex
+    ! Injector Flow Grid
     gridIN = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxIndex, &
                              regDecomp=(/ mid, by2 /), &
                              coordDep1=(/1/), &
@@ -266,14 +265,66 @@
           coordDim=2, array=newCoordY, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
+    ! Copy coordinates for the other staggers
+    call ESMF_GridGetCoord(gridTop, &
+          staggerLoc=ESMF_STAGGERLOC_EDGE1, &
+          coordDim=1, array=CoordX, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    call ESMF_GridGetCoord(gridTop, &
+          staggerLoc=ESMF_STAGGERLOC_EDGE1, &
+          coordDim=2, array=CoordY, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    call ESMF_GridSetCoord(gridIN, &
+          staggerLoc=ESMF_STAGGERLOC_EDGE1, &
+          coordDim=1, array=CoordX, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    call ESMF_GridSetCoord(gridIN, &
+          staggerLoc=ESMF_STAGGERLOC_EDGE1, &
+          coordDim=2, array=CoordY, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    call ESMF_GridGetCoord(gridTop, &
+          staggerLoc=ESMF_STAGGERLOC_EDGE2, &
+          coordDim=1, array=CoordX, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    call ESMF_GridGetCoord(gridTop, &
+          staggerLoc=ESMF_STAGGERLOC_EDGE2, &
+          coordDim=2, array=CoordY, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    call ESMF_GridSetCoord(gridIN, &
+          staggerLoc=ESMF_STAGGERLOC_EDGE2, &
+          coordDim=1, array=CoordX, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    call ESMF_GridSetCoord(gridIN, &
+          staggerLoc=ESMF_STAGGERLOC_EDGE2, &
+          coordDim=2, array=CoordY, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
     call ESMF_GridCompSet(INcomp, grid=gridIN, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
+    ! FlowSolver Grid
     gridFS = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxIndex, &
                              regDecomp=(/ quart, by4 /), &
                              coordDep1=(/1/), &
                              coordDep2=(/2/), &
                              name="Flow Solver grid", rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    call ESMF_GridGetCoord(gridTop, &
+          staggerLoc=ESMF_STAGGERLOC_CENTER, &
+          coordDim=1, array=CoordX, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    call ESMF_GridGetCoord(gridTop, &
+          staggerLoc=ESMF_STAGGERLOC_CENTER, &
+          coordDim=2, array=CoordY, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     call ESMF_GridSetCoord(gridFS, &
@@ -286,9 +337,48 @@
           coordDim=2, array=CoordY, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-    call ESMF_GridCompSet(FScomp, grid=gridFS, rc=rc)
+    call ESMF_GridGetCoord(gridTop, &
+          staggerLoc=ESMF_STAGGERLOC_EDGE1, &
+          coordDim=1, array=CoordX, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
+    call ESMF_GridGetCoord(gridTop, &
+          staggerLoc=ESMF_STAGGERLOC_EDGE1, &
+          coordDim=2, array=CoordY, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    call ESMF_GridSetCoord(gridIN, &
+          staggerLoc=ESMF_STAGGERLOC_EDGE1, &
+          coordDim=1, array=CoordX, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    call ESMF_GridSetCoord(gridIN, &
+          staggerLoc=ESMF_STAGGERLOC_EDGE1, &
+          coordDim=2, array=CoordY, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    call ESMF_GridGetCoord(gridTop, &
+          staggerLoc=ESMF_STAGGERLOC_EDGE2, &
+          coordDim=1, array=CoordX, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    call ESMF_GridGetCoord(gridTop, &
+          staggerLoc=ESMF_STAGGERLOC_EDGE2, &
+          coordDim=2, array=CoordY, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    call ESMF_GridSetCoord(gridIN, &
+          staggerLoc=ESMF_STAGGERLOC_EDGE2, &
+          coordDim=1, array=CoordX, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    call ESMF_GridSetCoord(gridIN, &
+          staggerLoc=ESMF_STAGGERLOC_EDGE2, &
+          coordDim=2, array=CoordY, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    call ESMF_GridCompSet(FScomp, grid=gridFS, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     !
     ! Create import/export states for Injection Component
