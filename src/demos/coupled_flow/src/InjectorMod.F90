@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.10 2010/08/25 17:23:23 feiliu Exp $
+! $Id: InjectorMod.F90,v 1.11 2010/09/17 20:43:41 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -355,19 +355,22 @@
       datanames(7) = "FLAG"
 
       ! Update any required fields in the export state
-      do i=1, datacount
+      ! Ojbects are referenced now, no need for relinking
+      !do i=1, datacount
 
-         ! check isneeded flag here
-         if (.not. ESMF_StateIsNeeded(importState, datanames(i), rc)) then 
-             cycle
-         endif
+      !   ! check isneeded flag here
+      !   if (.not. ESMF_StateIsNeeded(importState, datanames(i), rc)) then 
+      !       cycle
+      !   endif
 
-         call ESMF_StateGet(importState, datanames(i), thisfield, rc=rc)
-         if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-         call ESMF_StateAdd(exportState, thisfield, rc=rc)
-         if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      !   call ESMF_StateGet(importState, datanames(i), thisfield, rc=rc)
+      !   if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      !   !call ESMF_StateAdd(exportState, thisfield, rc=rc)
+      !   !if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-      enddo
+      !enddo
+
+      rc = ESMF_SUCCESS
 
     end subroutine injector_init2
 
@@ -494,19 +497,22 @@
         endif 
  
         ! Update any required fields in the export state
-        do i=1, datacount
+        ! TODO: determine if relinking is needed
+        !do i=1, datacount
 
-           ! check isneeded flag here
-           if (.not. ESMF_StateIsNeeded(importState, datanames(i), rc)) then 
-               cycle
-           endif
+        !   ! check isneeded flag here
+        !   if (.not. ESMF_StateIsNeeded(importState, datanames(i), rc)) then 
+        !       cycle
+        !   endif
 
-           call ESMF_StateGet(importState, datanames(i), thisfield, rc=rc)
-           if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-           call ESMF_StateAdd(exportState, thisfield, rc=rc)
-           if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+        !   call ESMF_StateGet(importState, datanames(i), thisfield, rc=rc)
+        !   if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+        !   call ESMF_StateAdd(exportState, thisfield, rc=rc)
+        !   if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-        enddo
+        !enddo
+
+      rc = ESMF_SUCCESS
 
     end subroutine injector_run
 

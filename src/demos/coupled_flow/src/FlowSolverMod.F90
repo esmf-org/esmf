@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.11 2010/09/17 17:01:13 feiliu Exp $
+! $Id: FlowSolverMod.F90,v 1.12 2010/09/17 20:43:41 feiliu Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -171,7 +171,7 @@
       real(ESMF_KIND_R8), dimension(ESMF_MAXDIM) :: global_min_coord
       real(ESMF_KIND_R8), dimension(ESMF_MAXDIM) :: global_max_coord
       real :: x_min, x_max, y_min, y_max
-      integer, dimension(ESMF_MAXDIM) :: global_nmax, global_nmin
+      integer, dimension(2) :: global_nmax, global_nmin
       integer :: counts(2)
       namelist /input/ uin, rhoin, siein, &
                        gamma, akb, q0, u0, v0, sie0, rho0, &
@@ -266,6 +266,7 @@
         maxIndex = global_nmax, &
         rc = rc)
 ! TODO: restore the following code:
+! Partially restored, need a way to determine coordinate range
 !      call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
 !                              globalCellCountPerDim=global_nmax, &
 !                              minGlobalCoordPerDim=global_min_coord, &
@@ -397,20 +398,21 @@
       !
       ! Update export state with needed fields
       !
-      do i=1, datacount
+      ! TODO: determine if relinking is needed
+      !do i=1, datacount
 
-        ! check isneeded flag here
-        if (.not. ESMF_StateIsNeeded(export_state, itemName=datanames(i), rc=rc)) then 
-           cycle
-        endif
+      !  ! check isneeded flag here
+      !  if (.not. ESMF_StateIsNeeded(export_state, itemName=datanames(i), rc=rc)) then 
+      !     cycle
+      !  endif
 
-        ! Set export data in export state
-        call ESMF_StateGet(import_state, itemName=datanames(i), field=thisfield, rc=rc)
-        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-        call ESMF_StateAdd(export_state, field=thisfield, rc=rc)
-        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      !  ! Set export data in export state
+      !  call ESMF_StateGet(import_state, itemName=datanames(i), field=thisfield, rc=rc)
+      !  if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      !  call ESMF_StateAdd(export_state, field=thisfield, rc=rc)
+      !  if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-      enddo
+      !enddo
 
       rc = ESMF_SUCCESS
 
@@ -503,27 +505,19 @@
 ! First, get size of delayout and position of my DE to determine if
 ! this DE is on the domain boundary
 !
-      call ESMF_GridGet(grid, distgrid=distgrid, rc=status)
-      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
-      call ESMF_DistGridGet(distgrid, delayout=layout, rc=status)
-      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in Flowinit:  grid comp get"
-      endif
-      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
-      call ESMF_DELayoutGetDeprecated(layout, deCountPerDim=ncounts, localDE=de_id, &
-                               rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in Flowinit:  delayout get size"
-      endif
-      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
+      !call ESMF_GridGet(grid, distgrid=distgrid, rc=status)
+      !if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
+      !call ESMF_DistGridGet(distgrid, delayout=layout, rc=status)
+      !if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
+      !call ESMF_DELayoutGet(layout, deCountPerDim=ncounts, localDE=de_id, &
+      !                         rc=status)
+      !call ESMF_DELayoutGetDELocalInfo(layout, de_id, coord=pos, rc=status)
+
+      ncounts = 1
+      de_id = 0
+      pos = 1
       nx = ncounts(1)
       ny = ncounts(2)
-      call ESMF_DELayoutGetDELocalInfo(layout, de_id, coord=pos, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in Flowinit:  delayout get position"
-      endif
-      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       x = pos(1)
       y = pos(2)
 !
@@ -624,8 +618,10 @@
           do i = iobs_min(n),iobs_max(n)
             global(1,1) = i
             ! TODO: restore
+            ! cheat for now on 1 PET
             !call ESMF_GridGlobalToDELocalIndex(grid, horzRelloc=ESMF_CELL_CENTER,&
             !                          global2d=global, local2d=local, rc=status)
+            local = global
             if (local(1,1).gt.-1) local(1,1) = local(1,1) + 1
             if (local(1,2).gt.-1) local(1,2) = local(1,2) + 1
   ! TODO:  The above two lines are junk, making up for the halo width which is
@@ -644,8 +640,10 @@
           global(1,1) = i
           global(1,2) = j
           ! TODO: restore
+          ! cheat for now on 1 PET
           !call ESMF_GridGlobalToDELocalIndex(grid, horzRelloc=ESMF_CELL_CENTER, &
           !                            global2d=global, local2d=local, rc=status)
+          local = global
           if (local(1,1).gt.-1) local(1,1) = local(1,1) + 1
           if (local(1,2).gt.-1) local(1,2) = local(1,2) + 1
 ! TODO:  The above two lines are junk, making up for the halo width which is
@@ -864,15 +862,16 @@
 !
 !  put needed data in export state
 !
-      do i=1, datacount
-          if (.not. ESMF_StateIsNeeded(export_state, itemName=datanames(i), rc=rc)) then 
-              cycle
-          endif
-          call ESMF_StateGet(import_state, itemName=datanames(i), field=thisfield, rc=rc)
-          if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-          call ESMF_StateAdd(export_state, field=thisfield, rc=rc)
-          if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-        enddo
+! TODO: determine if relinking is needed
+      !do i=1, datacount
+      !    if (.not. ESMF_StateIsNeeded(export_state, itemName=datanames(i), rc=rc)) then 
+      !        cycle
+      !    endif
+      !    call ESMF_StateGet(import_state, itemName=datanames(i), field=thisfield, rc=rc)
+      !    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      !    call ESMF_StateAdd(export_state, field=thisfield, rc=rc)
+      !    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      !enddo
 !
 ! Print graphics every printout steps
 !
