@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.119 2010/09/17 22:10:37 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.120 2010/09/17 23:34:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.119 2010/09/17 22:10:37 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.120 2010/09/17 23:34:36 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -9237,10 +9237,6 @@ int Array::sparseMatMul(
   // set filterBitField  
   int filterBitField = 0x0; // init. to execute _all_ operations in XXE stream
   
-  // prepare finishedflag
-  if (finishedflag)
-    *finishedflag = true;   // assume all ops finished unless find otherw.
-  
   if (commflag==ESMF_COMM_BLOCKING){
     // blocking mode
     filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
@@ -9250,7 +9246,6 @@ int Array::sparseMatMul(
     filterBitField |= XXE::filterBitNbWaitFinish;     // set NbWaitFinish filter
     filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
     filterBitField |= XXE::filterBitCancel;           // set Cancel filter
-    if (finishedflag) *finishedflag = false;  // since this is just start
   }else if(commflag==ESMF_COMM_NBTESTFINISH){
     // non-blocking test and finish
     filterBitField |= XXE::filterBitNbStart;          // set NbStart filter

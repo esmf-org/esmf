@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.30 2010/09/17 22:10:37 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.31 2010/09/17 23:34:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -316,6 +316,7 @@ class XXE{
     int storageMaxCount;            // maximum number of elements in storage
     int commhandleMaxCount;         // maximum number of elements in commhandle
     int xxeSubMaxCount;             // maximum number of elements in xxeSubList
+    bool lastFinishedFlag;          // whether there were outstanding calls
     
   public:
     XXE(VM *vmArg, int maxArg=1000, int storageMaxCountArg=1000,
