@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistUTest.F90,v 1.18 2010/03/04 18:57:41 svasquez Exp $
+! $Id: ESMF_ArrayRedistUTest.F90,v 1.19 2010/09/17 05:46:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayRedistUTest.F90,v 1.18 2010/03/04 18:57:41 svasquez Exp $'
+    '$Id: ESMF_ArrayRedistUTest.F90,v 1.19 2010/09/17 05:46:30 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -66,7 +66,7 @@ program ESMF_ArrayRedistUTest
   type(ESMF_RouteHandle):: routehandle66, routehandle66p
   integer(ESMF_KIND_I4), pointer :: farrayPtr2D(:,:)! matching Fortran array pointer
   integer               :: j
-  logical               :: finishedflag, evalflag
+  logical               :: finishedflag, cancelledflag, evalflag
 #endif
   integer               :: rc, i, petCount, localPet
   integer, allocatable  :: srcIndices(:)
@@ -1024,7 +1024,7 @@ program ESMF_ArrayRedistUTest
   
   ! The folling barrier call releases PET 0 which was waiting on the barrier
   ! call before the first call to ArrayRedist() above. Releasing PET 0 now will
-  ! allow the folling call with ESMF_COMM_NBWAITFINISH to finish up, where
+  ! allow the following call with ESMF_COMM_NBWAITFINISH to finish up, where
   ! the finishedflag on all PETs will be .true. on return.
   if (localPet/=0) call ESMF_VMBarrier(vm)
 
@@ -1100,6 +1100,34 @@ program ESMF_ArrayRedistUTest
   endif
 
 
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayRedist: srcArray2 -> dstArray2 (RRA) with cancel Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+
+  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
+    routehandle=routehandle, commflag=ESMF_COMM_NBSTART, &
+    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+write(100+localPet,*) "NBSTART: finishedflag = ", finishedflag, &
+"cancelledflag = ", cancelledflag
+
+  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
+    routehandle=routehandle, commflag=ESMF_COMM_CANCEL, &
+    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+write(100+localPet,*) "CANCEL: finishedflag = ", finishedflag, &
+"cancelledflag = ", cancelledflag
+
+  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
+    routehandle=routehandle, commflag=ESMF_COMM_NBWAITFINISH, &
+    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
+"cancelledflag = ", cancelledflag
 
 
 

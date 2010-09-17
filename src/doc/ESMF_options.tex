@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.42 2010/09/15 21:32:04 samsoncheung Exp $
+% $Id: ESMF_options.tex,v 1.43 2010/09/17 05:46:30 theurich Exp $
 
 \section{Global Options, Flags and Parameters}
 
@@ -180,6 +180,8 @@ Valid values are:
          completed. Finish up {\em all} data operations and set the returned 
          {\tt finishedflag} to {\tt .true.}. It is safe to access any of the
          in-bound data elements once the call has returned.
+\item [ESMF\_COMM\_CANCEL]
+         Cancel outstanding transfers for a precomputed communication pattern.
 \end{description}
 
 \subsubsection{ESMF\_ContextFlag}

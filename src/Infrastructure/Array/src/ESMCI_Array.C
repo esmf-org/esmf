@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.117 2010/07/08 04:48:03 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.118 2010/09/17 05:46:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.117 2010/07/08 04:48:03 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.118 2010/09/17 05:46:30 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4028,6 +4028,7 @@ int Array::halo(
   RouteHandle **routehandle,            // inout - handle to precomputed comm
   ESMC_CommFlag commflag,               // in    - communication options
   bool *finishedflag,                   // out   - TEST ops finished or not
+  bool *cancelledflag,                  // out   - any cancelled operations
   bool checkflag                        // in    - false: (def.) basic chcks
                                         //         true:  full input check
   ){    
@@ -4043,7 +4044,7 @@ int Array::halo(
 
   // implemented via sparseMatMul
   localrc = sparseMatMul(array, array, routehandle,
-    commflag, finishedflag, ESMF_REGION_SELECT, checkflag, true);
+    commflag, finishedflag, cancelledflag, ESMF_REGION_SELECT, checkflag, true);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -4619,6 +4620,7 @@ int Array::redist(
   RouteHandle **routehandle,            // inout - handle to precomputed comm
   ESMC_CommFlag commflag,               // in    - communication options
   bool *finishedflag,                   // out   - TEST ops finished or not
+  bool *cancelledflag,                  // out   - any cancelled operations
   bool checkflag                        // in    - false: (def.) basic chcks
                                         //         true:  full input check
   ){    
@@ -4634,7 +4636,7 @@ int Array::redist(
 
   // implemented via sparseMatMul
   localrc = sparseMatMul(srcArray, dstArray, routehandle,
-    commflag, finishedflag, ESMF_REGION_TOTAL, checkflag);
+    commflag, finishedflag, cancelledflag, ESMF_REGION_TOTAL, checkflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -5014,7 +5016,7 @@ namespace ArrayHelper{
       }
       xxe->optimizeElement(xxeIndex);
       double dt_sScalar;
-      localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, NULL,
+      localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, NULL, NULL,
         &dt_sScalar, xxeIndex, xxeIndex);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
@@ -5027,7 +5029,7 @@ namespace ArrayHelper{
       xxeProductSumSuperScalarContigRRAInfo->valueList = bufferInfo;
       xxe->optimizeElement(xxeIndex);
       double dt_sScalarC;
-      localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, NULL,
+      localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, NULL, NULL,
         &dt_sScalarC, xxeIndex, xxeIndex);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
@@ -5167,6 +5169,11 @@ namespace ArrayHelper{
       predicateBitField|XXE::filterBitNbWaitFinish, xxeSub, 0, 0, recvnbIndex);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
+    // cancel for this receive operations
+    localrc = xxe->appendCancelIndex(     
+      predicateBitField|XXE::filterBitCancel, recvnbIndex);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMPROFILE
     tempString = new char[160];
     sprintf(tempString, "/WaitProductSum (%d/)", k);
@@ -5272,7 +5279,7 @@ namespace ArrayHelper{
             linIndexContigBlockList[kk].linIndexCount;
         }
         double dt_tk;
-        localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, NULL,
+        localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, NULL, NULL,
           &dt_tk, xxeIndex, xxeIndex);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
@@ -5284,7 +5291,7 @@ namespace ArrayHelper{
           xxeMemGatherSrcRRAInfo->countList[kk] *= dataSizeSrc;
         }
         double dt_byte;
-        localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, NULL,
+        localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, NULL, NULL,
           &dt_byte, xxeIndex, xxeIndex);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
@@ -8575,7 +8582,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       vm->barrier();
       vm->wtime(&dtStart);
       localrc = xxe->exec(rraCount, rraList, &vectorLength,
-        0x0|XXE::filterBitRegionTotalZero|XXE::filterBitNbTestFinish);
+        0x0|XXE::filterBitRegionTotalZero|XXE::filterBitNbTestFinish
+        |XXE::filterBitCancel);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
       vm->barrier();
@@ -8674,7 +8682,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       vm->barrier();
       vm->wtime(&dtStart);
         localrc = xxe->exec(rraCount, rraList, &vectorLength,
-          0x0|XXE::filterBitRegionTotalZero|XXE::filterBitNbTestFinish);
+          0x0|XXE::filterBitRegionTotalZero|XXE::filterBitNbTestFinish
+          |XXE::filterBitCancel);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
       vm->barrier();
@@ -8768,7 +8777,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   // execute final XXE stream for consistent profile data
   vm->barrier();  // ensure all PETs are present before profile run
   localrc = xxe->exec(rraCount, rraList, &vectorLength, 
-    0x0|XXE::filterBitRegionTotalZero|XXE::filterBitNbTestFinish);
+    0x0|XXE::filterBitRegionTotalZero|XXE::filterBitNbTestFinish
+    |XXE::filterBitCancel);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -8984,6 +8994,10 @@ int sparseMatMulStoreEncodeXXEStream(
             pSendWait->sendnbIndex);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, &rc)) return rc;
+          localrc = xxe->appendCancelIndex(0x0|XXE::filterBitCancel,
+            pSendWait->sendnbIndex);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+            ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMPROFILE
           char *tempString = new char[160];
           sprintf(tempString, "done WaitOnIndex: %d",
@@ -9036,6 +9050,10 @@ int sparseMatMulStoreEncodeXXEStream(
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, &rc)) return rc;
           localrc = xxe->appendWaitOnIndex(0x0|XXE::filterBitNbWaitFinish,
+            pSendWait->sendnbIndex);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+            ESMF_ERR_PASSTHRU, &rc)) return rc;
+          localrc = xxe->appendCancelIndex(0x0|XXE::filterBitCancel,
             pSendWait->sendnbIndex);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -9107,6 +9125,7 @@ int Array::sparseMatMul(
   RouteHandle **routehandle,            // inout - handle to precomputed comm
   ESMC_CommFlag commflag,               // in    - communication options
   bool *finishedflag,                   // out   - TEST ops finished or not
+  bool *cancelledflag,                  // out   - any cancelled operations
   ESMC_RegionFlag zeroflag,             // in    - ESMF_REGION_TOTAL:
                                         //          -> zero out total region
                                         //         ESMF_REGION_SELECT:
@@ -9221,21 +9240,27 @@ int Array::sparseMatMul(
   if (commflag==ESMF_COMM_BLOCKING){
     // blocking mode
     filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
-  }else{
-    // non-blocking mode
-    if (commflag==ESMF_COMM_NBSTART){
-      // start
-      filterBitField |= XXE::filterBitNbWaitFinish;   // set NbWaitFinish filter
-      filterBitField |= XXE::filterBitNbTestFinish;   // set NbTestFinish filter
-    }else if(commflag==ESMF_COMM_NBTESTFINISH){
-      // test and finish
-      filterBitField |= XXE::filterBitNbStart;        // set NbStart filter
-      filterBitField |= XXE::filterBitNbWaitFinish;   // set NbWaitFinish filter
-    }else if(commflag==ESMF_COMM_NBWAITFINISH){
-      // wait and finish
-      filterBitField |= XXE::filterBitNbStart;        // set NbStart filter
-      filterBitField |= XXE::filterBitNbTestFinish;   // set NbTestFinish filter
-    }
+    filterBitField |= XXE::filterBitCancel;           // set Cancel filter
+  }else if (commflag==ESMF_COMM_NBSTART){
+    // non-blocking start
+    filterBitField |= XXE::filterBitNbWaitFinish;     // set NbWaitFinish filter
+    filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
+    filterBitField |= XXE::filterBitCancel;           // set Cancel filter
+  }else if(commflag==ESMF_COMM_NBTESTFINISH){
+    // non-blocking test and finish
+    filterBitField |= XXE::filterBitNbStart;          // set NbStart filter
+    filterBitField |= XXE::filterBitNbWaitFinish;     // set NbWaitFinish filter
+    filterBitField |= XXE::filterBitCancel;           // set Cancel filter
+  }else if(commflag==ESMF_COMM_NBWAITFINISH){
+    // non-blocking wait and finish
+    filterBitField |= XXE::filterBitNbStart;          // set NbStart filter
+    filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
+    filterBitField |= XXE::filterBitCancel;           // set Cancel filter
+  }else if(commflag==ESMF_COMM_CANCEL){
+    // cancel
+    filterBitField |= XXE::filterBitNbStart;          // set NbStart filter
+    filterBitField |= XXE::filterBitNbWaitFinish;     // set NbWaitFinish filter
+    filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
   }
   
   if (zeroflag!=ESMF_REGION_TOTAL)
@@ -9300,7 +9325,7 @@ int Array::sparseMatMul(
   
   // execute XXE stream
   localrc = xxe->exec(rraCount, rraList, &vectorLength, filterBitField,
-    finishedflag);
+    finishedflag, cancelledflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 

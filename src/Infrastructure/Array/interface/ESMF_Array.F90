@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.119 2010/07/07 21:38:48 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.120 2010/09/17 05:46:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.119 2010/07/07 21:38:48 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.120 2010/09/17 05:46:30 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -513,7 +513,7 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_ArraySMM(srcArray, dstArray, routehandle, commflag, &
-    finishedflag, zeroflag, checkflag, rc)
+    finishedflag, cancelledflag, zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in),   optional  :: srcArray
@@ -521,6 +521,7 @@ contains
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
     type(ESMF_CommFlag),    intent(in),   optional  :: commflag
     logical,                intent(out),  optional  :: finishedflag
+    logical,                intent(out),  optional  :: cancelledflag
     type(ESMF_RegionFlag),  intent(in),   optional  :: zeroflag
     logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
@@ -566,6 +567,13 @@ contains
 !     {\tt commflag = ESMF\_COMM\_NBTESTFINISH}, or a final call with
 !     {\tt commflag = ESMF\_COMM\_NBWAITFINISH}. For all other {\tt commflag}
 !     settings the returned value in {\tt finishedflag} is always {\tt .true.}.
+!   \item [{[cancelledflag]}]
+!     A value of {\tt .true.} indicates that were cancelled communication
+!     operations. In this case the data in the {\tt dstArray} must be considered
+!     invalid. It may have been partially modified by the call. A value of
+!     {\tt .false.} indicates that none of the communication operations was
+!     cancelled. The data in {\tt dstArray} is valid if {\tt finishedflag} 
+!     returns equal {\tt .true.}.
 !   \item [{[zeroflag]}]
 !     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of
 !     all DEs in {\tt dstArray} will be initialized to zero before updating the 
@@ -593,7 +601,8 @@ contains
     type(ESMF_Array)        :: opt_srcArray ! helper variable
     type(ESMF_Array)        :: opt_dstArray ! helper variable
     type(ESMF_CommFlag)     :: opt_commflag ! helper variable
-    type(ESMF_Logical)      :: opt_finishedflag! helper variable
+    type(ESMF_Logical)      :: opt_finishedflag   ! helper variable
+    type(ESMF_Logical)      :: opt_cancelledflag  ! helper variable
     type(ESMF_RegionFlag)   :: opt_zeroflag ! helper variable
     type(ESMF_Logical)      :: opt_checkflag! helper variable
 
@@ -630,13 +639,19 @@ contains
         
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMM(opt_srcArray, opt_dstArray, routehandle, &
-      opt_commflag, opt_finishedflag, opt_zeroflag, opt_checkflag, localrc)
+      opt_commflag, opt_finishedflag, opt_cancelledflag, opt_zeroflag, &
+      opt_checkflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! translate back finishedflag
     if (present(finishedflag)) then
       finishedflag = opt_finishedflag
+    endif
+    
+    ! translate back cancelledflag
+    if (present(cancelledflag)) then
+      cancelledflag = opt_cancelledflag
     endif
     
     ! return successfully

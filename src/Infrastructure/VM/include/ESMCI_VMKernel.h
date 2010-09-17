@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.h,v 1.9 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_VMKernel.h,v 1.10 2010/09/17 05:46:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -100,6 +100,7 @@ class VMK{
     commhandle *next_handle;// next handle in the queue
     int nelements;          // number of elements
     int type;       // 0: commhandle container, 1: MPI_Requests, 2: ... reserved
+    bool sendFlag;          // true if this is a send request
     commhandle **handles;   // sub handles
     MPI_Request *mpireq;    // request array
   };
@@ -356,7 +357,8 @@ class VMK{
     int commwait(commhandle **commh, status *status=NULL, int nanopause=0);
     void commqueuewait();
     void commcancel(commhandle **commh);
-    
+    bool cancelled(status *status);
+        
     // IntraProcessSharedMemoryAllocation Table Methods
     void *ipshmallocate(int bytes, int *firstFlag=NULL);
     void ipshmdeallocate(void *);

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.37 2010/06/23 23:01:08 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.38 2010/09/17 05:46:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.37 2010/06/23 23:01:08 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.38 2010/09/17 05:46:30 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2450,6 +2450,7 @@ int XXE::exec(
   int filterBitField, // in  - filter operations according to predicateBitField
   bool *finished,     // out - TEST ops executed as per filterBitField are
                       //       finished, or need additional FINISH calls 
+  bool *cancelled,    // out - indicates whether there are any cancelled ops
   double *dTime,      // out - execution time, NULL to disable
   int indexStart,     // in  - start index, < 0 for default (full stream)
   int indexStop       // in  - stop index, < 0 for default (full stream)
@@ -2491,9 +2492,9 @@ int XXE::exec(
   // store filterBitField in XXE
   lastFilterBitField = filterBitField;
   
-  // initialize finished flag
+  // initialize finished and cancelled flags
   if (finished) *finished = true; // assume all ops finished unless find otherw.
-  
+  if (cancelled) *cancelled = false; // assume no ops cancelled unless find ow.  
   // XXE element variables used below
   StreamElement *xxeElement, *xxeIndexElement;
   SendnbInfo *xxeSendnbInfo;
@@ -2506,6 +2507,7 @@ int XXE::exec(
   WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
   WaitOnIndexSubInfo *waitOnIndexSubInfo;
   TestOnIndexSubInfo *testOnIndexSubInfo;
+  CancelIndexInfo *xxeCancelIndexInfo;
   CommhandleInfo *xxeCommhandleInfo;
   ProductSumVectorInfo *xxeProductSumVectorInfo;
   ProductSumScalarInfo *xxeProductSumScalarInfo;
@@ -2580,7 +2582,8 @@ int XXE::exec(
           size *= *vectorLength;
         vm->send(buffer, size, xxeSendnbInfo->dstPet, xxeSendnbInfo->commhandle,
           xxeSendnbInfo->tag);
-        xxeSendnbInfo->activeFlag = true; // set
+        xxeSendnbInfo->activeFlag = true;     // set
+        xxeSendnbInfo->cancelledFlag = false; // set
       }
       break;
     case recvnb:
@@ -2594,7 +2597,8 @@ int XXE::exec(
           size *= *vectorLength;
         vm->recv(buffer, size, xxeRecvnbInfo->srcPet, xxeRecvnbInfo->commhandle,
           xxeRecvnbInfo->tag);
-        xxeRecvnbInfo->activeFlag = true; // set
+        xxeRecvnbInfo->activeFlag = true;     // set
+        xxeRecvnbInfo->cancelledFlag = false; // set
       }
       break;
     case sendnbRRA:
@@ -2609,7 +2613,8 @@ int XXE::exec(
         vm->send(rraList[xxeSendnbRRAInfo->rraIndex]
           + rraOffset, size, xxeSendnbRRAInfo->dstPet,
           xxeSendnbRRAInfo->commhandle, xxeSendnbRRAInfo->tag);
-        xxeSendnbRRAInfo->activeFlag = true; // set
+        xxeSendnbRRAInfo->activeFlag = true;      // set
+        xxeSendnbRRAInfo->cancelledFlag = false;  // set
       }
       break;
     case recvnbRRA:
@@ -2624,7 +2629,8 @@ int XXE::exec(
         vm->recv(rraList[xxeRecvnbRRAInfo->rraIndex]
           + rraOffset, size, xxeRecvnbRRAInfo->srcPet,
           xxeRecvnbRRAInfo->commhandle, xxeRecvnbRRAInfo->tag);
-        xxeRecvnbRRAInfo->activeFlag = true; // set
+        xxeRecvnbRRAInfo->activeFlag = true;      // set
+        xxeRecvnbRRAInfo->cancelledFlag = false;  // set
       }
       break;
     case waitOnIndex:
@@ -2634,9 +2640,12 @@ int XXE::exec(
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
         if (xxeCommhandleInfo->activeFlag){
           // there is an outstanding active communication
-          vm->commwait(xxeCommhandleInfo->commhandle);
+          VMK::status status;
+          vm->commwait(xxeCommhandleInfo->commhandle, &status);
+          xxeCommhandleInfo->cancelledFlag = vm->cancelled(&status);
           xxeCommhandleInfo->activeFlag = false;  // reset
         }
+        if (cancelled && xxeCommhandleInfo->cancelledFlag) *cancelled = true;
       }
       break;
     case testOnIndex:
@@ -2647,13 +2656,16 @@ int XXE::exec(
         if (xxeCommhandleInfo->activeFlag){
           // there is an outstanding active communication
           int completeFlag;
-          vm->commtest(xxeCommhandleInfo->commhandle, &completeFlag);
+          VMK::status status;
+          vm->commtest(xxeCommhandleInfo->commhandle, &completeFlag, &status);
+          xxeCommhandleInfo->cancelledFlag = vm->cancelled(&status);
           if (completeFlag){
             // comm finished
             xxeCommhandleInfo->activeFlag = false;  // reset
           }else
             if (finished) *finished = false;  // comm not finished
         }
+        if (cancelled && xxeCommhandleInfo->cancelledFlag) *cancelled = true;
       }
       break;
     case waitOnAnyIndexSub:
@@ -2671,16 +2683,22 @@ int XXE::exec(
               xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
               if (xxeCommhandleInfo->activeFlag){
                 // there is an outstanding active communication
-                vm->commtest(xxeCommhandleInfo->commhandle, &(completeFlag[k]));
+                VMK::status status;
+                vm->commtest(xxeCommhandleInfo->commhandle, &(completeFlag[k]),
+                  &status);
+                xxeCommhandleInfo->cancelledFlag = vm->cancelled(&status);
                 if (completeFlag[k]){
                   // comm finished -> recursive call into xxe execution
                   xxeCommhandleInfo->activeFlag = false;  // reset
                   bool localFinished;
+                  bool localCancelled;
                   xxeWaitOnAnyIndexSubInfo->xxe[k]->
                     exec(rraCount, rraList, vectorLength, filterBitField,
-                    &localFinished);
+                    &localFinished, &localCancelled);
                   if (!localFinished)
                     if (finished) *finished = false;  // unfinished ops in sub
+                 if (localCancelled)
+                   if (cancelled) *cancelled = true;  // cancelled ops in sub
                   ++completeTotal;
                 }else
                   if (finished) *finished = false;  // comm not finished
@@ -2689,6 +2707,8 @@ int XXE::exec(
                 completeFlag[k] = 1;
                 ++completeTotal;
               }
+              if (cancelled && xxeCommhandleInfo->cancelledFlag)
+                *cancelled = true;
             }
           }
           if (completeTotal == count) break;
@@ -2704,9 +2724,12 @@ int XXE::exec(
           xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
           if (xxeCommhandleInfo->activeFlag){
             // there is an outstanding active communication
-            vm->commwait(xxeCommhandleInfo->commhandle);
+            VMK::status status;
+            vm->commwait(xxeCommhandleInfo->commhandle, &status);
+            xxeCommhandleInfo->cancelledFlag = vm->cancelled(&status);
             xxeCommhandleInfo->activeFlag = false;  // reset
           }
+          if (cancelled && xxeCommhandleInfo->cancelledFlag) *cancelled = true;
         }
       }
       break;
@@ -2717,19 +2740,25 @@ int XXE::exec(
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
         if (xxeCommhandleInfo->activeFlag){
           // there is an outstanding active communication
-          vm->commwait(xxeCommhandleInfo->commhandle);
+          VMK::status status;
+          vm->commwait(xxeCommhandleInfo->commhandle, &status);
+          xxeCommhandleInfo->cancelledFlag = vm->cancelled(&status);
           xxeCommhandleInfo->activeFlag = false;  // reset
           if (waitOnIndexSubInfo->xxe){
             // recursive call into xxe execution
             bool localFinished;
+            bool localCancelled;
             waitOnIndexSubInfo->xxe->exec(rraCount,
               rraList + waitOnIndexSubInfo->rraShift,
               vectorLength + waitOnIndexSubInfo->vectorLengthShift,
-              filterBitField, &localFinished);
+              filterBitField, &localFinished, &localCancelled);
             if (!localFinished)
               if (finished) *finished = false;  // unfinished ops in sub
+            if (localCancelled)
+              if (cancelled) *cancelled = true;  // cancelled ops in sub
           }
         }
+        if (cancelled && xxeCommhandleInfo->cancelledFlag) *cancelled = true;
       }
       break;
     case testOnIndexSub:
@@ -2740,23 +2769,58 @@ int XXE::exec(
         if (xxeCommhandleInfo->activeFlag){
           // there is an outstanding active communication
           int completeFlag;
-          vm->commtest(xxeCommhandleInfo->commhandle, &completeFlag);
+          VMK::status status;
+          vm->commtest(xxeCommhandleInfo->commhandle, &completeFlag, &status);
+          xxeCommhandleInfo->cancelledFlag = vm->cancelled(&status);
           if (completeFlag){
             // comm finished -> recursive call into xxe execution
             xxeCommhandleInfo->activeFlag = false;  // reset
             if (testOnIndexSubInfo->xxe){
               // recursive call into xxe execution
               bool localFinished;
+              bool localCancelled;
               testOnIndexSubInfo->xxe->exec(rraCount,
                 rraList + testOnIndexSubInfo->rraShift,
                 vectorLength + testOnIndexSubInfo->vectorLengthShift,
-                filterBitField, &localFinished);
+                filterBitField, &localFinished, &localCancelled);
               if (!localFinished)
                 if (finished) *finished = false;  // unfinished ops in sub
+              if (localCancelled)
+                if (cancelled) *cancelled = true;  // cancelled ops in sub
             }
           }else
             if (finished) *finished = false;  // comm not finished
         }
+        if (cancelled && xxeCommhandleInfo->cancelledFlag) *cancelled = true;
+      }
+      break;
+    case cancelIndex:
+      {
+        xxeCancelIndexInfo = (CancelIndexInfo *)xxeElement;
+        xxeIndexElement = &(stream[xxeCancelIndexInfo->index]);
+        xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
+        if (xxeCommhandleInfo->activeFlag){
+          // there is an outstanding active communication
+          vm->commcancel(xxeCommhandleInfo->commhandle);  // try to cancel
+          // test the outstanding request
+          int completeFlag;
+          VMK::status status;
+          vm->commtest(xxeCommhandleInfo->commhandle, &completeFlag, &status);
+          xxeCommhandleInfo->cancelledFlag = vm->cancelled(&status);
+          if (completeFlag){
+            // comm finished
+            xxeCommhandleInfo->activeFlag = false;  // reset
+          }else
+            if (finished) *finished = false;  // comm not finished
+          
+
+if (xxeCommhandleInfo->cancelledFlag)
+printf("gjt - CANCELLED commhandle\n");
+else
+printf("gjt - DID NOT CANCEL commhandle\n");
+          
+        }
+        if (cancelled && xxeCommhandleInfo->cancelledFlag) *cancelled = true;
       }
       break;
     case productSumVector:
@@ -3192,11 +3256,14 @@ int XXE::exec(
         if (xxeSubInfo->xxe){
           // recursive call:
           bool localFinished;
+          bool localCancelled;
           xxeSubInfo->xxe->exec(rraCount, rraList + xxeSubInfo->rraShift,
             vectorLength + xxeSubInfo->vectorLengthShift, filterBitField,
-            &localFinished);
+            &localFinished, &localCancelled);
           if (!localFinished)
             if (finished) *finished = false;  // unfinished ops in sub
+          if (localCancelled)
+            if (cancelled) *cancelled = true;  // cancelled ops in sub
         }
       }
       break;
@@ -3207,10 +3274,13 @@ int XXE::exec(
           if (xxeSubMultiInfo->xxe[k]){
             // recursive call:
             bool localFinished;
+            bool localCancelled;
             xxeSubMultiInfo->xxe[k]->exec(rraCount, rraList, vectorLength,
-              filterBitField, &localFinished);
+              filterBitField, &localFinished, &localCancelled);
             if (!localFinished)
               if (finished) *finished = false;  // unfinished ops in sub
+            if (localCancelled)
+              if (cancelled) *cancelled = true;  // cancelled ops in sub
           }
         }
       }
@@ -4120,6 +4190,7 @@ int XXE::print(
   WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
   WaitOnIndexSubInfo *waitOnIndexSubInfo;
   TestOnIndexSubInfo *testOnIndexSubInfo;
+  CancelIndexInfo *xxeCancelIndexInfo;
   CommhandleInfo *xxeCommhandleInfo;
   ProductSumVectorInfo *xxeProductSumVectorInfo;
   ProductSumScalarInfo *xxeProductSumScalarInfo;
@@ -4260,6 +4331,16 @@ int XXE::print(
         testOnIndexSubInfo = (TestOnIndexSubInfo *)xxeElement;
         fprintf(fp, "  XXE::testOnIndexSubInfo <localPet=%d>\n",
           vm->getLocalPet());
+      }
+      break;
+    case cancelIndex:
+      {
+        xxeCancelIndexInfo = (CancelIndexInfo *)xxeElement;
+        xxeIndexElement = &(stream[xxeCancelIndexInfo->index]);
+        xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
+        fprintf(fp, "  XXE::CancelIndex: <localPet=%d> index=%d, "
+          " commhandle=%p\n", vm->getLocalPet(), xxeCancelIndexInfo->index,
+          xxeCommhandleInfo->commhandle);
       }
       break;
     case productSumVector:
@@ -6086,6 +6167,7 @@ int XXE::appendRecvnb(
   xxeRecvnbInfo->vectorFlag = vectorFlag;
   xxeRecvnbInfo->indirectionFlag = indirectionFlag;
   xxeRecvnbInfo->activeFlag = false;
+  xxeRecvnbInfo->cancelledFlag = false;
   xxeRecvnbInfo->commhandle = new VMK::commhandle*;
   *(xxeRecvnbInfo->commhandle) = new VMK::commhandle;
   localrc = incCount();
@@ -6144,6 +6226,7 @@ int XXE::appendSendnb(
   xxeSendnbInfo->vectorFlag = vectorFlag;
   xxeSendnbInfo->indirectionFlag = indirectionFlag;
   xxeSendnbInfo->activeFlag = false;
+  xxeSendnbInfo->cancelledFlag = false;
   xxeSendnbInfo->commhandle = new VMK::commhandle*;
   *(xxeSendnbInfo->commhandle) = new VMK::commhandle;
   localrc = incCount();
@@ -6202,6 +6285,7 @@ int XXE::appendSendnbRRA(
   xxeSendnbRRAInfo->tag = tag;
   xxeSendnbRRAInfo->vectorFlag = vectorFlag;
   xxeSendnbRRAInfo->activeFlag = false;
+  xxeSendnbRRAInfo->cancelledFlag = false;
   xxeSendnbRRAInfo->commhandle = new VMK::commhandle*;
   *(xxeSendnbRRAInfo->commhandle) = new VMK::commhandle;
   localrc = incCount();
@@ -6807,7 +6891,7 @@ int XXE::appendWaitOnIndex(
   ){
 //
 // !DESCRIPTION:
-//  Append a appendWaitOnIndex element at the end of the XXE stream.
+//  Append a waitOnIndex element at the end of the XXE stream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -6849,7 +6933,7 @@ int XXE::appendTestOnIndex(
   ){
 //
 // !DESCRIPTION:
-//  Append a appendTestOnIndex element at the end of the XXE stream.
+//  Append a testOnIndex element at the end of the XXE stream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -7057,6 +7141,48 @@ int XXE::appendTestOnIndexSub(
   testOnIndexSubInfo->index = index;
   localrc = incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendCancelIndex()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendCancelIndex
+//
+// !INTERFACE:
+int XXE::appendCancelIndex(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  int index
+  ){
+//
+// !DESCRIPTION:
+//  Append a cancelIndex element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  stream[count].opId = cancelIndex;
+  stream[count].predicateBitField = predicateBitField;
+  CancelIndexInfo *xxeCancelIndexInfo =
+    (CancelIndexInfo *)&(stream[count]);
+  xxeCancelIndexInfo->index = index;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   
   // return successfully

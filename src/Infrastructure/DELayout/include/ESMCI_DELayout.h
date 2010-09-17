@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.28 2010/06/23 08:19:07 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.29 2010/09/17 05:46:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -220,6 +220,8 @@ class XXE{
       waitOnIndex, waitOnAnyIndexSub, waitOnIndexRange, waitOnIndexSub,
       // --- test
       testOnIndex, testOnIndexSub,
+      // --- cancel
+      cancelIndex,
       // --- product and sum
       productSumVector,
       productSumScalar, productSumScalarRRA,
@@ -261,6 +263,7 @@ class XXE{
     static int const filterBitNbStart           = 0x4;  // non-block start
     static int const filterBitNbTestFinish      = 0x8;  // non-block test&finish
     static int const filterBitNbWaitFinish      = 0x10; // non-block wait&finish
+    static int const filterBitCancel            = 0x20; // cancel
 
     struct BufferInfo{
       // The BufferInfo provides an extra level of indirection to XXE managed
@@ -390,8 +393,8 @@ class XXE{
       }
     }
     int exec(int rraCount=0, char **rraList=NULL, int *vectorLength=NULL,
-      int filterBitField=0x0, bool *finished=NULL, double *dTime=NULL,
-      int indexStart=-1, int indexStop=-1);
+      int filterBitField=0x0, bool *finished=NULL, bool *cancelled=NULL, 
+      double *dTime=NULL, int indexStart=-1, int indexStop=-1);
     int print(FILE *fp, int rraCount=0, char **rraList=NULL,
       int filterBitField=0x0, int indexStart=-1, int indexStop=-1);
     int printProfile(FILE *fp);
@@ -463,6 +466,7 @@ class XXE{
       int vectorLengthShift, int index);
     int appendTestOnIndexSub(int predicateBitField, XXE *xxeSub, int rraShift,
       int vectorLengthShift, int index);
+    int appendCancelIndex(int predicateBitField, int index);
     int appendProfileMessage(int predicateBitField, char *messageString);
     int appendMessage(int predicateBitField, char *messageString);
     
@@ -507,6 +511,7 @@ class XXE{
       int predicateBitField;
       VMK::commhandle **commhandle;
       bool activeFlag;
+      bool cancelledFlag;
       void *buffer;
       int size;
       int dstPet;
@@ -520,6 +525,7 @@ class XXE{
       int predicateBitField;
       VMK::commhandle **commhandle;
       bool activeFlag;
+      bool cancelledFlag;
       void *buffer;
       int size;
       int srcPet;
@@ -533,6 +539,7 @@ class XXE{
       int predicateBitField;
       VMK::commhandle **commhandle;
       bool activeFlag;
+      bool cancelledFlag;
       int rraOffset;
       int size;
       int dstPet;
@@ -546,6 +553,7 @@ class XXE{
       int predicateBitField;
       VMK::commhandle **commhandle;
       bool activeFlag;
+      bool cancelledFlag;
       int rraOffset;
       int size;
       int srcPet;
@@ -600,6 +608,12 @@ class XXE{
       int index;
     }TestOnIndexSubInfo;
     
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      int index;
+    }CancelIndexInfo;
+
     typedef struct{
       OpId opId;
       int predicateBitField;
@@ -817,6 +831,7 @@ class XXE{
       int predicateBitField;
       VMK::commhandle **commhandle;
       bool activeFlag;
+      bool cancelledFlag;
     }CommhandleInfo;
 
 };  // class XXE

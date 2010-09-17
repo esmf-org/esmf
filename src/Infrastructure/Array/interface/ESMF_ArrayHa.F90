@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.4 2010/04/08 22:43:38 theurich Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.5 2010/09/17 05:46:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.4 2010/04/08 22:43:38 theurich Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.5 2010/09/17 05:46:30 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -119,13 +119,14 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_ArrayHalo(array, routehandle, commflag, &
-    finishedflag, checkflag, rc)
+    finishedflag, cancelledflag, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(inout)           :: array
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
     type(ESMF_CommFlag),    intent(in),   optional  :: commflag
     logical,                intent(out),  optional  :: finishedflag
+    logical,                intent(out),  optional  :: cancelledflag
     logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
 !
@@ -162,6 +163,13 @@ contains
 !     {\tt commflag = ESMF\_COMM\_NBTESTFINISH}, or a final call with
 !     {\tt commflag = ESMF\_COMM\_NBWAITFINISH}. For all other {\tt commflag}
 !     settings the returned value in {\tt finishedflag} is always {\tt .true.}.
+!   \item [{[cancelledflag]}]
+!     A value of {\tt .true.} indicates that were cancelled communication
+!     operations. In this case the data in the {\tt dstArray} must be considered
+!     invalid. It may have been partially modified by the call. A value of
+!     {\tt .false.} indicates that none of the communication operations was
+!     cancelled. The data in {\tt dstArray} is valid if {\tt finishedflag} 
+!     returns equal {\tt .true.}.
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input Array pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
@@ -176,7 +184,8 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_CommFlag)     :: opt_commflag ! helper variable
-    type(ESMF_Logical)      :: opt_finishedflag! helper variable
+    type(ESMF_Logical)      :: opt_finishedflag   ! helper variable
+    type(ESMF_Logical)      :: opt_cancelledflag  ! helper variable
     type(ESMF_Logical)      :: opt_checkflag! helper variable
 
     ! initialize return code; assume routine not implemented
@@ -195,13 +204,18 @@ contains
     
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayHalo(array, routehandle, &
-      opt_commflag, opt_finishedflag, opt_checkflag, localrc)
+      opt_commflag, opt_finishedflag, opt_cancelledflag, opt_checkflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! translate back finishedflag
     if (present(finishedflag)) then
       finishedflag = opt_finishedflag
+    endif
+    
+    ! translate back cancelledflag
+    if (present(cancelledflag)) then
+      cancelledflag = opt_cancelledflag
     endif
     
     ! return successfully
@@ -449,7 +463,7 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_ArrayRedist(srcArray, dstArray, routehandle, commflag, &
-    finishedflag, checkflag, rc)
+    finishedflag, cancelledflag, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in),   optional  :: srcArray
@@ -457,6 +471,7 @@ contains
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
     type(ESMF_CommFlag),    intent(in),   optional  :: commflag
     logical,                intent(out),  optional  :: finishedflag
+    logical,                intent(out),  optional  :: cancelledflag
     logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
 !
@@ -500,6 +515,13 @@ contains
 !     {\tt commflag = ESMF\_COMM\_NBTESTFINISH}, or a final call with
 !     {\tt commflag = ESMF\_COMM\_NBWAITFINISH}. For all other {\tt commflag}
 !     settings the returned value in {\tt finishedflag} is always {\tt .true.}.
+!   \item [{[cancelledflag]}]
+!     A value of {\tt .true.} indicates that were cancelled communication
+!     operations. In this case the data in the {\tt dstArray} must be considered
+!     invalid. It may have been partially modified by the call. A value of
+!     {\tt .false.} indicates that none of the communication operations was
+!     cancelled. The data in {\tt dstArray} is valid if {\tt finishedflag} 
+!     returns equal {\tt .true.}.
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input Array pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
@@ -517,6 +539,7 @@ contains
     type(ESMF_Array)        :: opt_dstArray ! helper variable
     type(ESMF_CommFlag)     :: opt_commflag ! helper variable
     type(ESMF_Logical)      :: opt_finishedflag! helper variable
+    type(ESMF_Logical)      :: opt_cancelledflag  ! helper variable
     type(ESMF_Logical)      :: opt_checkflag! helper variable
 
     ! initialize return code; assume routine not implemented
@@ -550,13 +573,18 @@ contains
         
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayRedist(opt_srcArray, opt_dstArray, routehandle, &
-      opt_commflag, opt_finishedflag, opt_checkflag, localrc)
+      opt_commflag, opt_finishedflag, opt_cancelledflag, opt_checkflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! translate back finishedflag
     if (present(finishedflag)) then
       finishedflag = opt_finishedflag
+    endif
+    
+    ! translate back cancelledflag
+    if (present(cancelledflag)) then
+      cancelledflag = opt_cancelledflag
     endif
     
     ! return successfully

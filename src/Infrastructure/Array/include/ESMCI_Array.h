@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.55 2010/07/08 04:48:03 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.56 2010/09/17 05:46:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -270,22 +270,23 @@ namespace ESMCI {
       InterfaceInt *haloLDepth=NULL, InterfaceInt *haloUDepth=NULL);
     static int halo(Array *array,
       RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,
-      bool *finishedflag=NULL, bool checkflag=false);
+      bool *finishedflag=NULL, bool *cancelledflag=NULL, bool checkflag=false);
     static int haloRelease(RouteHandle *routehandle);
     static int redistStore(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, InterfaceInt *srcToDstTransposeMap,
       ESMC_TypeKind typekindFactor = ESMF_NOKIND, void *factor = NULL);
     static int redist(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,
-      bool *finishedflag=NULL, bool checkflag=false);
+      bool *finishedflag=NULL, bool *cancelledflag=NULL, bool checkflag=false);
     static int redistRelease(RouteHandle *routehandle);
     static int sparseMatMulStore(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, vector<SparseMatrix> const &sparseMatrix,
       bool haloFlag=false);
     static int sparseMatMul(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,
-      bool *finishedflag=NULL, ESMC_RegionFlag zeroflag=ESMF_REGION_TOTAL,
-      bool checkflag=false, bool haloFlag=false);
+      bool *finishedflag=NULL, bool *cancelledflag=NULL,
+      ESMC_RegionFlag zeroflag=ESMF_REGION_TOTAL, bool checkflag=false,
+      bool haloFlag=false);
     static int sparseMatMulRelease(RouteHandle *routehandle);
     
   };  // class Array

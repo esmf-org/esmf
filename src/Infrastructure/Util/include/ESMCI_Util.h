@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.32 2010/06/24 07:42:58 theurich Exp $
+// $Id: ESMCI_Util.h,v 1.33 2010/09/17 05:46:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -95,7 +95,8 @@ enum ESMC_RegionFlag { ESMF_REGION_TOTAL=0,
 enum ESMC_CommFlag { ESMF_COMM_BLOCKING=0,
                      ESMF_COMM_NBSTART,
                      ESMF_COMM_NBTESTFINISH,
-                     ESMF_COMM_NBWAITFINISH};
+                     ESMF_COMM_NBWAITFINISH,
+                     ESMF_COMM_CANCEL};
 
 // Attribute reconcile type
 enum ESMC_AttCopyFlag { ESMC_ATTCOPY_HYBRID=0,

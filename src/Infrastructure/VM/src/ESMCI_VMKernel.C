@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.15 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_VMKernel.C,v 1.16 2010/09/17 05:46:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -2563,16 +2563,22 @@ int VMK::commtest(commhandle **ch, int *completeFlag, status *status){
         if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
 #endif
 //fprintf(stderr, "(%d)VMK::commtest: right after MPI_Test()\n", mypet);
-        if (status){
-          if (lpid[mpi_s->MPI_SOURCE] == mpi_s->MPI_SOURCE)
-            status->srcPet = mpi_s->MPI_SOURCE;
-          else{
-            for (int k=0; k<npets; k++)
-              if (lpid[k] == mpi_s->MPI_SOURCE)
+        if (status && localCompleteFlag){
+          if (!(*ch)->sendFlag){
+            int cancelled;
+            MPI_Test_cancelled(mpi_s, &cancelled);
+            if (!cancelled){
+              if (lpid[mpi_s->MPI_SOURCE] == mpi_s->MPI_SOURCE)
                 status->srcPet = mpi_s->MPI_SOURCE;
+              else{
+                for (int k=0; k<npets; k++)
+                  if (lpid[k] == mpi_s->MPI_SOURCE)
+                    status->srcPet = mpi_s->MPI_SOURCE;
+              }
+              status->tag     = mpi_s->MPI_TAG;
+              status->error   = mpi_s->MPI_ERROR;
+            }
           }
-          status->tag     = mpi_s->MPI_TAG;
-          status->error   = mpi_s->MPI_ERROR;
         }
       }
       if (localCompleteFlag)
@@ -2657,15 +2663,21 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
 #endif
           }
           if (status){
-            if (lpid[mpi_s->MPI_SOURCE] == mpi_s->MPI_SOURCE)
-              status->srcPet = mpi_s->MPI_SOURCE;
-            else{
-              for (int k=0; k<npets; k++)
-                if (lpid[k] == mpi_s->MPI_SOURCE)
+            if (!(*ch)->sendFlag){
+              int cancelled;
+              MPI_Test_cancelled(mpi_s, &cancelled);
+              if (!cancelled){
+                if (lpid[mpi_s->MPI_SOURCE] == mpi_s->MPI_SOURCE)
                   status->srcPet = mpi_s->MPI_SOURCE;
+                else{
+                  for (int k=0; k<npets; k++)
+                    if (lpid[k] == mpi_s->MPI_SOURCE)
+                      status->srcPet = mpi_s->MPI_SOURCE;
+                }
+                status->tag     = mpi_s->MPI_TAG;
+                status->error   = mpi_s->MPI_ERROR;
+              }
             }
-            status->tag     = mpi_s->MPI_TAG;
-            status->error   = mpi_s->MPI_ERROR;
           }
         }else{
 #ifndef ESMF_NO_PTHREADS
@@ -2676,15 +2688,21 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
           if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
 #endif
           if (status){
-            if (lpid[mpi_s->MPI_SOURCE] == mpi_s->MPI_SOURCE)
-              status->srcPet = mpi_s->MPI_SOURCE;
-            else{
-              for (int k=0; k<npets; k++)
-                if (lpid[k] == mpi_s->MPI_SOURCE)
+            if (!(*ch)->sendFlag){
+              int cancelled;
+              MPI_Test_cancelled(mpi_s, &cancelled);
+              if (!cancelled){
+                if (lpid[mpi_s->MPI_SOURCE] == mpi_s->MPI_SOURCE)
                   status->srcPet = mpi_s->MPI_SOURCE;
+                else{
+                  for (int k=0; k<npets; k++)
+                    if (lpid[k] == mpi_s->MPI_SOURCE)
+                      status->srcPet = mpi_s->MPI_SOURCE;
+                }
+                status->tag     = mpi_s->MPI_TAG;
+                status->error   = mpi_s->MPI_ERROR;
+              }
             }
-            status->tag     = mpi_s->MPI_TAG;
-            status->error   = mpi_s->MPI_ERROR;
           }
         }
       }
@@ -2742,6 +2760,21 @@ void VMK::commcancel(commhandle **commh){
     }else{
       printf("VMK: only MPI non-blocking implemented\n");
     }
+  }
+}
+
+
+bool VMK::cancelled(status *status){
+  if (status->comm_type == VM_COMM_TYPE_MPI1){
+    int flag;
+    MPI_Test_cancelled(&(status->mpi_s), &flag);
+    if (flag)
+      return true;
+    else
+      return false;
+  }else{
+    printf("VMK: only MPI cancelled status implemented\n");
+    return false;
   }
 }
 
@@ -2925,6 +2958,7 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
   case VM_COMM_TYPE_MPI1:
     (*ch)->nelements=1;
     (*ch)->type=1;
+    (*ch)->sendFlag=true; // send request
     (*ch)->mpireq = new MPI_Request[1];
     // MPI-1 implementation
     void *messageC; // for MPI C interface convert (const void *) -> (void *)
@@ -3028,15 +3062,19 @@ int VMK::recv(void *message, int size, int source, int tag, status *status){
     if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
 #endif
     if (status){
-      if (lpid[mpi_s->MPI_SOURCE] == mpi_s->MPI_SOURCE)
-        status->srcPet = mpi_s->MPI_SOURCE;
-      else{
-        for (int k=0; k<npets; k++)
-          if (lpid[k] == mpi_s->MPI_SOURCE)
-            status->srcPet = mpi_s->MPI_SOURCE;
+      int cancelled;
+      MPI_Test_cancelled(mpi_s, &cancelled);
+      if (!cancelled){
+        if (lpid[mpi_s->MPI_SOURCE] == mpi_s->MPI_SOURCE)
+          status->srcPet = mpi_s->MPI_SOURCE;
+        else{
+          for (int k=0; k<npets; k++)
+            if (lpid[k] == mpi_s->MPI_SOURCE)
+              status->srcPet = mpi_s->MPI_SOURCE;
+        }
+        status->tag     = mpi_s->MPI_TAG;
+        status->error   = mpi_s->MPI_ERROR;
       }
-      status->tag     = mpi_s->MPI_TAG;
-      status->error   = mpi_s->MPI_ERROR;
     }
     break;
   case VM_COMM_TYPE_PTHREAD:
@@ -3191,6 +3229,7 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
   case VM_COMM_TYPE_MPI1:
     (*ch)->nelements=1;
     (*ch)->type=1;
+    (*ch)->sendFlag=false;  // not a send request
     (*ch)->mpireq = new MPI_Request[1];
     // MPI-1 implementation
     // use mutex to serialize mpi comm calls if mpi thread support requires it
