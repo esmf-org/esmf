@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.75 2010/09/16 19:54:15 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.76 2010/09/20 05:55:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.75 2010/09/16 19:54:15 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.76 2010/09/20 05:55:08 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -226,25 +226,25 @@ namespace ESMCI {
             &localrc)) return localrc;
       // TODO: CongruentTiles & GridType will be at the mosaic level,
       //       others at the tile level
-      localrc = AttPackAddAttribute("GridType", "GridSpec", "General", object);
       localrc = AttPackAddAttribute("CongruentTiles", "GridSpec", "General", object);
-      localrc = AttPackAddAttribute("NumberOfGridTiles", "GridSpec", "General", object);
+      localrc = AttPackAddAttribute("GridType", "GridSpec", "General", object);
+      localrc = AttPackAddAttribute("DimensionOrder", "GridSpec", "General", object);
 
       // TODO: Area & Coordinatepoles await further spec from Sylvia Murphy & Co.
       //localrc = AttPackAddAttribute("Area", "GridSpec", "General", object);
       //localrc = AttPackAddAttribute("CoordinatePoles", "GridSpec", "General", object);
 
-      localrc = AttPackAddAttribute("DimensionOrder", "GridSpec", "General", object);
       localrc = AttPackAddAttribute("DiscretizationType", "GridSpec", "General", object);
+      localrc = AttPackAddAttribute("HorizontalResolution", "GridSpec", "General", object);
       localrc = AttPackAddAttribute("GeometryType", "GridSpec", "General", object);
       localrc = AttPackAddAttribute("IsConformal", "GridSpec", "General", object);
       localrc = AttPackAddAttribute("IsRegular", "GridSpec", "General", object);
       localrc = AttPackAddAttribute("IsUniform", "GridSpec", "General", object);
       localrc = AttPackAddAttribute("NorthPoleLocation", "GridSpec", "General", object);
       localrc = AttPackAddAttribute("NumberOfCells", "GridSpec", "General", object);
+      localrc = AttPackAddAttribute("NumberOfGridTiles", "GridSpec", "General", object);
       localrc = AttPackAddAttribute("NX", "GridSpec", "General", object);
       localrc = AttPackAddAttribute("NY", "GridSpec", "General", object);
-      localrc = AttPackAddAttribute("HorizontalResolution", "GridSpec", "General", object);
     }
     if (convention.compare("ESMF")==0 && purpose.compare("General")==0) {
       localrc = AttPackNest("ESMF", "General", object, "GridSpec", "General");
@@ -344,11 +344,11 @@ namespace ESMCI {
       localrc = AttPackAddAttribute("Agency", "ESG", "General", object);
       localrc = AttPackAddAttribute("Author", "ESG", "General", object);
       localrc = AttPackAddAttribute("CodingLanguage", "ESG", "General", object);
-      localrc = AttPackAddAttribute("Discipline", "ESG", "General", object);
       localrc = AttPackAddAttribute("ComponentLongName", "ESG", "General", object);
+      localrc = AttPackAddAttribute("ComponentShortName", "ESG", "General", object);
+      localrc = AttPackAddAttribute("Discipline", "ESG", "General", object);
       localrc = AttPackAddAttribute("Institution", "ESG", "General", object);
       localrc = AttPackAddAttribute("ModelComponentFramework", "ESG", "General", object);
-      localrc = AttPackAddAttribute("ComponentShortName", "ESG", "General", object);
       localrc = AttPackAddAttribute("PhysicalDomain", "ESG", "General", object);
       localrc = AttPackAddAttribute("Version", "ESG", "General", object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
@@ -362,10 +362,11 @@ namespace ESMCI {
     if (convention.compare("CIM 1.0")==0 &&
         purpose.compare("Model Component Simulation Description")==0) {
 
-      localrc = AttPackCreateCustom("CIM 1.0",
-                                    "Scientific Property Description", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-            &localrc)) return localrc;
+      // TODO: uncomment and expand when we have better definition from CIM
+      //localrc = AttPackCreateCustom("CIM 1.0",
+      //                              "Scientific Property Description", object);
+      //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      //      &localrc)) return localrc;
 
       localrc = AttPackCreateCustom("CIM 1.0",
                                     "Platform Description", object);
@@ -383,11 +384,12 @@ namespace ESMCI {
             &localrc)) return localrc;
 
       vector<string> nestconv, nestpurp;
-      int nestcount = 4;
+      int nestcount = 3;  // TODO: bump to 4 when Scientific Properties enabled
       nestconv.reserve(nestcount);
       nestpurp.reserve(nestcount);
-      nestconv.push_back("CIM 1.0");
-      nestpurp.push_back("Scientific Property Description");
+      // TODO: uncomment and expand when we have better definition from CIM
+      //nestconv.push_back("CIM 1.0");
+      //nestpurp.push_back("Scientific Property Description");
       nestconv.push_back("CIM 1.0");
       nestpurp.push_back("Platform Description");
       nestconv.push_back("ISO 19115");
@@ -457,14 +459,15 @@ namespace ESMCI {
       //  n <componentProperty>s in 1 <componentProperties> in
       //    <modelComponent>
       //
-      localrc = AttPackAddAttribute("ScientificPropertyShortName", "CIM 1.0",
-                            "Scientific Property Description", object);
-      localrc = AttPackAddAttribute("ScientificPropertyLongName", "CIM 1.0",
-                            "Scientific Property Description", object);
-      localrc = AttPackAddAttribute("ScientificPropertyValue", "CIM 1.0",
-                            "Scientific Property Description", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-            &localrc)) return localrc;
+      // TODO: uncomment and expand when we have better definition from CIM
+      //localrc = AttPackAddAttribute("ScientificPropertyShortName", "CIM 1.0",
+      //                      "Scientific Property Description", object);
+      //localrc = AttPackAddAttribute("ScientificPropertyLongName", "CIM 1.0",
+      //                      "Scientific Property Description", object);
+      //localrc = AttPackAddAttribute("ScientificPropertyValue", "CIM 1.0",
+      //                      "Scientific Property Description", object);
+      //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      //      &localrc)) return localrc;
 
       //
       // Platform attributes
@@ -541,13 +544,6 @@ namespace ESMCI {
          &empty, "ISO 19115", "Responsible Party Description",
          object, NULL, NULL);
 
-      localrc = AttPackAddAttribute("ResponsiblePartyRole", "ISO 19115",
-                                      "Responsible Party Description", object);
-      ESMC_Logical attrAttr=ESMF_TRUE;
-      localrc = AttPackSet("ResponsiblePartyRole", ESMC_TYPEKIND_CHARACTER, 1,
-         &empty, "ISO 19115", "Responsible Party Description",
-         object, NULL, &attrAttr);
-
       localrc = AttPackAddAttribute("InstitutionName", "ISO 19115",
                                       "Responsible Party Description", object);
       localrc = AttPackSet("InstitutionName", ESMC_TYPEKIND_CHARACTER, 1,
@@ -585,6 +581,13 @@ namespace ESMCI {
       localrc = AttPackSet("FundingSource", ESMC_TYPEKIND_CHARACTER, 1,
          &empty, "ISO 19115", "Responsible Party Description",
          object, NULL, NULL);
+
+      localrc = AttPackAddAttribute("ResponsiblePartyRole", "ISO 19115",
+                                      "Responsible Party Description", object);
+      ESMC_Logical attrAttr=ESMF_TRUE;
+      localrc = AttPackSet("ResponsiblePartyRole", ESMC_TYPEKIND_CHARACTER, 1,
+         &empty, "ISO 19115", "Responsible Party Description",
+         object, NULL, &attrAttr);
 
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
@@ -4075,6 +4078,12 @@ namespace ESMCI {
   IO_XML *io_xml = ESMCI_IO_XMLCreate(0, NULL, fileName.size(),fileName.c_str(),
                               (ESMCI::Attribute*)this, &localrc);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+
+  // Write ESMF header
+  string comment = "Generated with ESMF Version ";
+  comment += ESMF_VERSION_STRING;
+  comment += ", http://www.earthsystemmodeling.org";
+  localrc = io_xml->writeComment(comment);
 
   //
   // determine modelcompname, fullname, version for header
