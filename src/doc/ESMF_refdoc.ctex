@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.98 2010/09/20 21:46:03 rokuingh Exp $
+% $Id: ESMF_refdoc.ctex,v 1.99 2010/09/20 22:32:28 rokuingh Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -103,6 +103,8 @@
 \part{Applications}
 
 \label{part:Applications}
+
+\input{Applications}
 
 \input{ESMC_Info}
 
