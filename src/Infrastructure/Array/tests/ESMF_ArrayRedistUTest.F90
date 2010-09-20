@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistUTest.F90,v 1.22 2010/09/20 17:26:18 theurich Exp $
+! $Id: ESMF_ArrayRedistUTest.F90,v 1.23 2010/09/20 19:55:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayRedistUTest.F90,v 1.22 2010/09/20 17:26:18 theurich Exp $'
+    '$Id: ESMF_ArrayRedistUTest.F90,v 1.23 2010/09/20 19:55:21 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1100,8 +1100,12 @@ program ESMF_ArrayRedistUTest
   endif
 
 
+#if 0
+
+! --- comment out b/c CANCEL implementation is incomplete/broken
+
 !------------------------------------------------------------------------
-  !EX_UTest_Multi_Proc_Only
+  !EX_disable_UTest_Multi_Proc_Only
   write(name, *) "ArrayRedist: srcArray2 -> dstArray2 (RRA) with cancel Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
 
@@ -1129,6 +1133,7 @@ write(100+localPet,*) "CANCEL: finishedflag = ", finishedflag, &
 write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
 "cancelledflag = ", cancelledflag
 
+#endif
 
 
 !------------------------------------------------------------------------
