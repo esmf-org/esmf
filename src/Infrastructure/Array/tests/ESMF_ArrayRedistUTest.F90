@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistUTest.F90,v 1.21 2010/09/18 00:12:42 theurich Exp $
+! $Id: ESMF_ArrayRedistUTest.F90,v 1.22 2010/09/20 17:26:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayRedistUTest.F90,v 1.21 2010/09/18 00:12:42 theurich Exp $'
+    '$Id: ESMF_ArrayRedistUTest.F90,v 1.22 2010/09/20 17:26:18 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1100,19 +1100,10 @@ program ESMF_ArrayRedistUTest
   endif
 
 
-!--- disable CANCEL tests for now ---------------
-
-#if 0
-
-
 !------------------------------------------------------------------------
-  !EX_disable_UTest_Multi_Proc_Only
-  write(name, *) "ArrayRedist: srcArray2 -> dstArray2 (RRA) w/ CANCEL Test I.1"
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayRedist: srcArray2 -> dstArray2 (RRA) with cancel Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-
-write(100+localPet,*) "---- CANCEL Test I.1 ----"
-
-if (localPet/=0) call ESMF_VMBarrier(vm)
 
   call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
     routehandle=routehandle, commflag=ESMF_COMM_NBSTART, &
@@ -1122,260 +1113,6 @@ if (localPet/=0) call ESMF_VMBarrier(vm)
 write(100+localPet,*) "NBSTART: finishedflag = ", finishedflag, &
 "cancelledflag = ", cancelledflag
 
-if (localPet==0) then
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_CANCEL, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-write(100+localPet,*) "CANCEL: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-endif
-
-if (localPet==0) call ESMF_VMBarrier(vm)
-
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBWAITFINISH, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-!------------------------------------------------------------------------
-  !EX_disable_UTest_Multi_Proc_Only
-  write(name, *) "ArrayRedist: srcArray2 -> dstArray2 (RRA) w/ CANCEL Test I.2a"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-
-write(100+localPet,*) "---- CANCEL Test I.2a ----"
-
-if (localPet/=0) call ESMF_VMBarrier(vm)
-
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBSTART, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "NBSTART: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-
-if (localPet==0) call ESMF_VMBarrier(vm)
-call ESMF_VMBarrier(vm)
-
-if (localPet==0) then
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_CANCEL, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-write(100+localPet,*) "CANCEL: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-endif
-
-call ESMF_VMBarrier(vm)
-
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBWAITFINISH, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
-!------------------------------------------------------------------------
-  !EX_disable_UTest_Multi_Proc_Only
-  write(name, *) "ArrayRedist: srcArray2 -> dstArray2 (RRA) w/ CANCEL Test I.2b"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-
-write(100+localPet,*) "---- CANCEL Test I.2b ----"
-
-if (localPet==0) call ESMF_VMBarrier(vm)
-
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBSTART, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "NBSTART: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-
-if (localPet/=0) call ESMF_VMBarrier(vm)
-call ESMF_VMBarrier(vm)
-
-if (localPet==0) then
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_CANCEL, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-write(100+localPet,*) "CANCEL: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-endif
-
-call ESMF_VMBarrier(vm)
-
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBWAITFINISH, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!------------------------------------------------------------------------
-  !EX_disable_UTest_Multi_Proc_Only
-  write(name, *) "ArrayRedist: srcArray2 -> dstArray2 (RRA) w/ CANCEL Test I.3a"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-
-write(100+localPet,*) "---- CANCEL Test I.3a ----"
-
-if (localPet/=0) call ESMF_VMBarrier(vm)
-
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBSTART, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "NBSTART: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-
-if (localPet==0) call ESMF_VMBarrier(vm)
-if (localPet==0) call ESMF_VMBarrier(vm)
-
-if (localPet==0) then
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_CANCEL, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-write(100+localPet,*) "CANCEL: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-endif
-
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBWAITFINISH, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-
-if (localPet/=0) call ESMF_VMBarrier(vm)
-
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!------------------------------------------------------------------------
-  !EX_disable_UTest_Multi_Proc_Only
-  write(name, *) "ArrayRedist: srcArray2 -> dstArray2 (RRA) w/ CANCEL Test I.3b"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-
-write(100+localPet,*) "---- CANCEL Test I.3b ----"
-
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBSTART, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "NBSTART: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-
-call ESMF_VMBarrier(vm)
-if (localPet==0) call ESMF_VMBarrier(vm)
-
-if (localPet==0) then
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_CANCEL, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-write(100+localPet,*) "CANCEL: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-endif
-
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBWAITFINISH, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-
-if (localPet/=0) call ESMF_VMBarrier(vm)
-
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!------------------------------------------------------------------------
-  !EX_disable_UTest_Multi_Proc_Only
-  write(name, *) "ArrayRedist: srcArray2 -> dstArray2 (RRA) w/ CANCEL Test I.3c"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-
-write(100+localPet,*) "---- CANCEL Test I.3c ----"
-
-if (localPet==0) call ESMF_VMBarrier(vm)
-
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBSTART, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "NBSTART: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-
-if (localPet/=0) call ESMF_VMBarrier(vm)
-if (localPet==0) call ESMF_VMBarrier(vm)
-
-if (localPet==0) then
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_CANCEL, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-write(100+localPet,*) "CANCEL: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-endif
-
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBWAITFINISH, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-
-if (localPet/=0) call ESMF_VMBarrier(vm)
-
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!------------------------------------------------------------------------
-  !EX_disable_UTest_Multi_Proc_Only
-  write(name, *) "ArrayRedist: srcArray2 -> dstArray2 (RRA) w/ CANCEL Test II.1"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-
-write(100+localPet,*) "---- CANCEL Test II.1 ----"
-
-if (localPet/=0) call ESMF_VMBarrier(vm)
-
-if (localPet==0) then
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBSTART, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "NBSTART: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-else
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_BLOCKING, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "BLOCKING: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-endif
-
-if (localPet==0) then
   call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
     routehandle=routehandle, commflag=ESMF_COMM_CANCEL, &
     finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
@@ -1387,112 +1124,11 @@ write(100+localPet,*) "CANCEL: finishedflag = ", finishedflag, &
   call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
     routehandle=routehandle, commflag=ESMF_COMM_NBWAITFINISH, &
     finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
 "cancelledflag = ", cancelledflag
-endif
 
-if (localPet==0) call ESMF_VMBarrier(vm)
-
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!------------------------------------------------------------------------
-  !EX_disable_UTest_Multi_Proc_Only
-  write(name, *) "ArrayRedist: srcArray2 -> dstArray2 (RRA) w/ CANCEL Test II.2a"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-
-write(100+localPet,*) "---- CANCEL Test II.2a ----"
-
-if (localPet/=0) call ESMF_VMBarrier(vm)
-
-if (localPet==0) then
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBSTART, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "NBSTART: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-else
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_BLOCKING, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "BLOCKING: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-endif
-
-if (localPet==0) call ESMF_VMBarrier(vm)
-
-call ESMF_VMBarrier(vm)
-
-if (localPet==0) then
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_CANCEL, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-write(100+localPet,*) "CANCEL: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBWAITFINISH, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-endif
-
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!------------------------------------------------------------------------
-  !EX_disable_UTest_Multi_Proc_Only
-  write(name, *) "ArrayRedist: srcArray2 -> dstArray2 (RRA) w/ CANCEL Test II.2b"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-
-write(100+localPet,*) "---- CANCEL Test II.2b ----"
-
-if (localPet==0) then
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBSTART, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "NBSTART: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-else
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_BLOCKING, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "BLOCKING: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-endif
-
-if (localPet==0) then
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_CANCEL, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-write(100+localPet,*) "CANCEL: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBWAITFINISH, &
-    finishedflag=finishedflag, cancelledflag=cancelledflag, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
-"cancelledflag = ", cancelledflag
-endif
-
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-
-#endif
 
 
 !------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.40 2010/09/17 23:34:36 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.41 2010/09/20 17:26:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.40 2010/09/17 23:34:36 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.41 2010/09/20 17:26:18 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2492,10 +2492,8 @@ int XXE::exec(
   // store filterBitField in XXE
   lastFilterBitField = filterBitField;
   
-  // initialize some flags
-  bool finishedFlag = true; // assume all ops finished unless find otherwise
-  bool nbpostFlag = false;  // if any nb post ops were executed
-  bool nbcheckFlag = false; // if any nb check ops were executed
+  // initialize finished and cancelled flags
+  if (finished) *finished = true; // assume all ops finished unless find otherw.
   if (cancelled) *cancelled = false; // assume no ops cancelled unless find ow.  
   // XXE element variables used below
   StreamElement *xxeElement, *xxeIndexElement;
@@ -2531,8 +2529,6 @@ int XXE::exec(
   MessageInfo *xxeMessageInfo;
   
   double t0, t1;
-  
-  char cancelMsg[] = "CANCEL CANCEL CANCEL";
   
   if (dTime != NULL)
     VMK::wtime(&t0);
@@ -2588,7 +2584,6 @@ int XXE::exec(
           xxeSendnbInfo->tag);
         xxeSendnbInfo->activeFlag = true;     // set
         xxeSendnbInfo->cancelledFlag = false; // set
-        nbpostFlag = true;  // set
       }
       break;
     case recvnb:
@@ -2604,7 +2599,6 @@ int XXE::exec(
           xxeRecvnbInfo->tag);
         xxeRecvnbInfo->activeFlag = true;     // set
         xxeRecvnbInfo->cancelledFlag = false; // set
-        nbpostFlag = true;  // set
       }
       break;
     case sendnbRRA:
@@ -2621,7 +2615,6 @@ int XXE::exec(
           xxeSendnbRRAInfo->commhandle, xxeSendnbRRAInfo->tag);
         xxeSendnbRRAInfo->activeFlag = true;      // set
         xxeSendnbRRAInfo->cancelledFlag = false;  // set
-        nbpostFlag = true;  // set
       }
       break;
     case recvnbRRA:
@@ -2638,7 +2631,6 @@ int XXE::exec(
           xxeRecvnbRRAInfo->commhandle, xxeRecvnbRRAInfo->tag);
         xxeRecvnbRRAInfo->activeFlag = true;      // set
         xxeRecvnbRRAInfo->cancelledFlag = false;  // set
-        nbpostFlag = true;  // set
       }
       break;
     case waitOnIndex:
@@ -2650,15 +2642,10 @@ int XXE::exec(
           // there is an outstanding active communication
           VMK::status status;
           vm->commwait(xxeCommhandleInfo->commhandle, &status);
+          xxeCommhandleInfo->cancelledFlag = vm->cancelled(&status);
           xxeCommhandleInfo->activeFlag = false;  // reset
-          bool cancelledFlag = vm->cancelled(&status);
-          if (cancelledFlag)
-            xxeCommhandleInfo->cancelledFlag = true;
-          // the following call may set cancelledFlag
-          xxeCommhandleInfo->checkCancelMsg(rraList, vectorLength, cancelMsg); 
         }
         if (cancelled && xxeCommhandleInfo->cancelledFlag) *cancelled = true;
-        nbcheckFlag = true;  // set
       }
       break;
     case testOnIndex:
@@ -2671,19 +2658,14 @@ int XXE::exec(
           int completeFlag;
           VMK::status status;
           vm->commtest(xxeCommhandleInfo->commhandle, &completeFlag, &status);
-          bool cancelledFlag = vm->cancelled(&status);
-          if (cancelledFlag)
-            xxeCommhandleInfo->cancelledFlag = true;
+          xxeCommhandleInfo->cancelledFlag = vm->cancelled(&status);
           if (completeFlag){
             // comm finished
             xxeCommhandleInfo->activeFlag = false;  // reset
-            // the following call may set cancelledFlag
-            xxeCommhandleInfo->checkCancelMsg(rraList, vectorLength, cancelMsg);
           }else
-            finishedFlag = false;  // comm not finished
+            if (finished) *finished = false;  // comm not finished
         }
         if (cancelled && xxeCommhandleInfo->cancelledFlag) *cancelled = true;
-        nbcheckFlag = true;  // set
       }
       break;
     case waitOnAnyIndexSub:
@@ -2704,27 +2686,22 @@ int XXE::exec(
                 VMK::status status;
                 vm->commtest(xxeCommhandleInfo->commhandle, &(completeFlag[k]),
                   &status);
-                bool cancelledFlag = vm->cancelled(&status);
-                if (cancelledFlag)
-                  xxeCommhandleInfo->cancelledFlag = true;
+                xxeCommhandleInfo->cancelledFlag = vm->cancelled(&status);
                 if (completeFlag[k]){
                   // comm finished -> recursive call into xxe execution
                   xxeCommhandleInfo->activeFlag = false;  // reset
-                  // the following call may set cancelledFlag
-                  xxeCommhandleInfo->checkCancelMsg(rraList, vectorLength,
-                    cancelMsg);
                   bool localFinished;
                   bool localCancelled;
                   xxeWaitOnAnyIndexSubInfo->xxe[k]->
                     exec(rraCount, rraList, vectorLength, filterBitField,
                     &localFinished, &localCancelled);
                   if (!localFinished)
-                    finishedFlag = false;  // unfinished ops in sub
+                    if (finished) *finished = false;  // unfinished ops in sub
                  if (localCancelled)
                    if (cancelled) *cancelled = true;  // cancelled ops in sub
                   ++completeTotal;
                 }else
-                  finishedFlag = false;  // comm not finished
+                  if (finished) *finished = false;  // comm not finished
               }else{
                 // this communication is not active
                 completeFlag[k] = 1;
@@ -2736,7 +2713,6 @@ int XXE::exec(
           }
           if (completeTotal == count) break;
         }
-        nbcheckFlag = true;  // set
       }
       break;
     case waitOnIndexRange:
@@ -2750,16 +2726,11 @@ int XXE::exec(
             // there is an outstanding active communication
             VMK::status status;
             vm->commwait(xxeCommhandleInfo->commhandle, &status);
+            xxeCommhandleInfo->cancelledFlag = vm->cancelled(&status);
             xxeCommhandleInfo->activeFlag = false;  // reset
-            bool cancelledFlag = vm->cancelled(&status);
-            if (cancelledFlag)
-              xxeCommhandleInfo->cancelledFlag = true;
-            // the following call may set cancelledFlag
-            xxeCommhandleInfo->checkCancelMsg(rraList, vectorLength, cancelMsg);
           }
           if (cancelled && xxeCommhandleInfo->cancelledFlag) *cancelled = true;
         }
-        nbcheckFlag = true;  // set
       }
       break;
     case waitOnIndexSub:
@@ -2771,13 +2742,9 @@ int XXE::exec(
           // there is an outstanding active communication
           VMK::status status;
           vm->commwait(xxeCommhandleInfo->commhandle, &status);
+          xxeCommhandleInfo->cancelledFlag = vm->cancelled(&status);
           xxeCommhandleInfo->activeFlag = false;  // reset
-          bool cancelledFlag = vm->cancelled(&status);
-          if (cancelledFlag)
-            xxeCommhandleInfo->cancelledFlag = true;
-          // the following call may set cancelledFlag
-          xxeCommhandleInfo->checkCancelMsg(rraList, vectorLength, cancelMsg);
-          if (waitOnIndexSubInfo->xxe && !(xxeCommhandleInfo->cancelledFlag)){
+          if (waitOnIndexSubInfo->xxe){
             // recursive call into xxe execution
             bool localFinished;
             bool localCancelled;
@@ -2786,13 +2753,12 @@ int XXE::exec(
               vectorLength + waitOnIndexSubInfo->vectorLengthShift,
               filterBitField, &localFinished, &localCancelled);
             if (!localFinished)
-              finishedFlag = false;  // unfinished ops in sub
+              if (finished) *finished = false;  // unfinished ops in sub
             if (localCancelled)
               if (cancelled) *cancelled = true;  // cancelled ops in sub
           }
         }
         if (cancelled && xxeCommhandleInfo->cancelledFlag) *cancelled = true;
-        nbcheckFlag = true;  // set
       }
       break;
     case testOnIndexSub:
@@ -2805,15 +2771,11 @@ int XXE::exec(
           int completeFlag;
           VMK::status status;
           vm->commtest(xxeCommhandleInfo->commhandle, &completeFlag, &status);
-          bool cancelledFlag = vm->cancelled(&status);
-          if (cancelledFlag)
-            xxeCommhandleInfo->cancelledFlag = true;
+          xxeCommhandleInfo->cancelledFlag = vm->cancelled(&status);
           if (completeFlag){
             // comm finished -> recursive call into xxe execution
             xxeCommhandleInfo->activeFlag = false;  // reset
-            // the following call may set cancelledFlag
-            xxeCommhandleInfo->checkCancelMsg(rraList, vectorLength, cancelMsg);
-            if (testOnIndexSubInfo->xxe && !(xxeCommhandleInfo->cancelledFlag)){
+            if (testOnIndexSubInfo->xxe){
               // recursive call into xxe execution
               bool localFinished;
               bool localCancelled;
@@ -2822,15 +2784,14 @@ int XXE::exec(
                 vectorLength + testOnIndexSubInfo->vectorLengthShift,
                 filterBitField, &localFinished, &localCancelled);
               if (!localFinished)
-                finishedFlag = false;  // unfinished ops in sub
+                if (finished) *finished = false;  // unfinished ops in sub
               if (localCancelled)
                 if (cancelled) *cancelled = true;  // cancelled ops in sub
             }
           }else
-            finishedFlag = false;  // comm not finished
+            if (finished) *finished = false;  // comm not finished
         }
         if (cancelled && xxeCommhandleInfo->cancelledFlag) *cancelled = true;
-        nbcheckFlag = true;  // set
       }
       break;
     case cancelIndex:
@@ -2842,47 +2803,16 @@ int XXE::exec(
           // there is an outstanding active communication
           vm->commcancel(xxeCommhandleInfo->commhandle);  // try to cancel
           // test the outstanding request
+          int completeFlag;
           VMK::status status;
-          vm->commwait(xxeCommhandleInfo->commhandle, &status);
-          xxeCommhandleInfo->activeFlag = false;  // reset
-          bool cancelledFlag = vm->cancelled(&status);
-          if (cancelledFlag)
-            xxeCommhandleInfo->cancelledFlag = true;
+          vm->commtest(xxeCommhandleInfo->commhandle, &completeFlag, &status);
+          xxeCommhandleInfo->cancelledFlag = vm->cancelled(&status);
+          if (completeFlag){
+            // comm finished
+            xxeCommhandleInfo->activeFlag = false;  // reset
+          }else
+            if (finished) *finished = false;  // comm not finished
           
-          if (cancelledFlag && (*(xxeCommhandleInfo->commhandle))->sendFlag){
-            // operation was cancelled _and_ was a send operation
-            // -> must send a CANCEL message to the receiver PET instead
-            if (xxeIndexElement->opId == sendnb){
-              xxeSendnbInfo = (SendnbInfo *)xxeIndexElement;
-              char *buffer = (char *)xxeSendnbInfo->buffer;
-              if (xxeSendnbInfo->indirectionFlag)
-                buffer = *(char **)xxeSendnbInfo->buffer;
-              int size = xxeSendnbInfo->size;
-              strncpy(buffer, cancelMsg, size); // cancel message
-            }else{
-              printf("gjt -- trouble, opId != sendnb!!!!\n");
-              //TODO: I could implement this by attaching a buffer of size 
-              //TODO: cancelMsg, where I store the data that is in the RRA
-              //TODO: buffer, then copy the cancelMsg into the RRA buffer,
-              //TODO: send it. Once the send is complete, and there is 
-              //TODO: data stored in the local buffer I copy it back into the
-              //TODO: RRA buffer so that nothing in the srcArray has changed.
-            }
-            // post the nb send message again...
-   printf("gjt -- cancelMsg was sent!!!!\n");
-            // call into exec() again for the cancelled send, but with the
-            // cancelMsg in place. This will reset activeFlag and cancelledFlag.
-            exec(rraCount, rraList, vectorLength, 0x0, NULL, NULL, NULL,
-              xxeCancelIndexInfo->index, xxeCancelIndexInfo->index);
-            // must set cancellFlag back to true, because this was a cancelled
-            // operation, but the above exec() call resets this flag internally
-            xxeCommhandleInfo->cancelledFlag = true;
-            // also must indicate that this operation has not yet finished
-            finishedFlag = false;  // comm not finished
-          }else{
-            // operation was not cancelled and/or was a receive operation
-            // -> proceed without extra complications
-          }
 
 if (xxeCommhandleInfo->cancelledFlag)
 printf("gjt - CANCELLED commhandle\n");
@@ -3331,7 +3261,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
             vectorLength + xxeSubInfo->vectorLengthShift, filterBitField,
             &localFinished, &localCancelled);
           if (!localFinished)
-            finishedFlag = false;  // unfinished ops in sub
+            if (finished) *finished = false;  // unfinished ops in sub
           if (localCancelled)
             if (cancelled) *cancelled = true;  // cancelled ops in sub
         }
@@ -3348,7 +3278,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
             xxeSubMultiInfo->xxe[k]->exec(rraCount, rraList, vectorLength,
               filterBitField, &localFinished, &localCancelled);
             if (!localFinished)
-              finishedFlag = false;  // unfinished ops in sub
+              if (finished) *finished = false;  // unfinished ops in sub
             if (localCancelled)
               if (cancelled) *cancelled = true;  // cancelled ops in sub
           }
@@ -3388,13 +3318,6 @@ printf("gjt - DID NOT CANCEL commhandle\n");
       break;
     }
   }
-
-  // determine if finishedFlag must be set to false b/c of posts
-  if (nbpostFlag && !nbcheckFlag)
-    finishedFlag = false;
-  
-  lastFinishedFlag = finishedFlag;          // store within XXE
-  if (finished) *finished = finishedFlag;   // return if variable was provided
   
   if (dTime != NULL){
     VMK::wtime(&t1);
@@ -7358,76 +7281,6 @@ int XXE::appendMessage(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   
-  // return successfully
-  rc = ESMF_SUCCESS;
-  return rc;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::XXE::CommhandleInfo::checkCancelMsg()"
-//BOPI
-// !IROUTINE:  ESMCI::XXE::CommhandleInfo::checkCancelMsg
-//
-// !INTERFACE:
-int XXE::CommhandleInfo::checkCancelMsg(
-//
-// !RETURN VALUE:
-//    int return code
-//
-// !ARGUMENTS:
-//
-  char **rraList,
-  int const *vectorLength,
-  char const *cancelMsg
-  ){
-//
-// !DESCRIPTION:
-//  Check received buffer for cancelMsg
-//EOPI
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  int rc = ESMC_RC_NOT_IMPL;              // final return code
-
-  if ((*commhandle)->sendFlag==false){
-    // recv operation -> must inspect received message for CANCEL msg
-    char *recvMsg = NULL; // initialize
-    int size;
-    if (opId == recvnb){
-      RecvnbInfo *xxeRecvnbInfo = (RecvnbInfo *)this;
-      recvMsg = (char *)xxeRecvnbInfo->buffer;
-      if (xxeRecvnbInfo->indirectionFlag)
-        recvMsg = *(char **)xxeRecvnbInfo->buffer;
-      size = xxeRecvnbInfo->size;
-      if (xxeRecvnbInfo->vectorFlag)
-        size *= *vectorLength;
-    }else if(opId == recvnbRRA){
-      RecvnbRRAInfo *xxeRecvnbRRAInfo = (RecvnbRRAInfo *)this;
-      size = xxeRecvnbRRAInfo->size;
-      int rraOffset = xxeRecvnbRRAInfo->rraOffset;
-      if (xxeRecvnbRRAInfo->vectorFlag){
-        size *= *vectorLength;
-        rraOffset *= *vectorLength;
-      }
-      recvMsg = rraList[xxeRecvnbRRAInfo->rraIndex] + rraOffset;
-    }else{
-      printf("gjt -- trouble, opId not covered for cancelMsg check!!!!\n");
-    }
-
-    // check for cancel message in receive message
-    int cancelMsgLen = strlen(cancelMsg);
-    if (size > cancelMsgLen)
-      size = cancelMsgLen;
-    if (strncmp(recvMsg, cancelMsg, size)==0){
-      // messages match -> cancelMsg was received
-      cancelledFlag = true;  // indicate cancellation in cancelledFlag member
-      printf("gjt -- cancelMsg was received!!!!\n");
-    }
-  }
-
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
