@@ -1,4 +1,4 @@
-// $Id: ESMCI_SAX2WriteHandler.h,v 1.2 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMCI_SAX2WriteHandler.h,v 1.3 2010/09/20 05:53:07 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -86,6 +86,11 @@ namespace ESMCI{
         XMLFormatter* const  formatter
     );
 #endif
+
+    void comment(
+        const XMLCh* const chars,
+        const XMLSize_t    length
+    );
 
     // -----------------------------------------------------------------------
     //  Implementation of the SAX DefaultHandler interface

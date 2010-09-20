@@ -1,4 +1,4 @@
-// $Id: ESMCI_SAX2WriteHandler.C,v 1.2 2010/03/04 18:57:44 svasquez Exp $
+// $Id: ESMCI_SAX2WriteHandler.C,v 1.3 2010/09/20 05:53:07 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ using namespace std;
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_SAX2WriteHandler.C,v 1.2 2010/03/04 18:57:44 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_SAX2WriteHandler.C,v 1.3 2010/09/20 05:53:07 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -175,6 +175,15 @@ void SAX2WriteHandler::writeChars(const XMLByte* const toWrite,
     XERCES_STD_QUALIFIER cout.flush();
 }
 #endif
+
+void SAX2WriteHandler::comment(const XMLCh* const chars,
+                               const XMLSize_t    length)
+{
+//XERCES_STD_QUALIFIER cerr << "comment()" << XERCES_STD_QUALIFIER endl;
+    fFormatter << chOpenAngle << chBang << chDash << chDash << chSpace; // <!-- 
+    fFormatter.formatBuf(chars, length, XMLFormatter::CharEscapes);
+    fFormatter << chSpace<< chDash << chDash << chCloseAngle ; // -->
+}
 
 // ---------------------------------------------------------------------------
 //  SAX2WriteHandler: Overrides of the SAX DocumentHandler interface

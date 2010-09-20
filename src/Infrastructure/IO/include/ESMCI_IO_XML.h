@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.h,v 1.9 2010/07/24 05:56:23 eschwab Exp $
+// $Id: ESMCI_IO_XML.h,v 1.10 2010/09/20 05:53:07 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -89,6 +89,9 @@ namespace ESMCI{
     // maps to SAX2 endElement(); use to close a nested tag section
     int writeEndElement(const string& name,
                         const int     indentLevel);
+
+    // write an XML comment
+    int writeComment(const string& comment);
 
     int write(int fileNameLen, const char* fileName,
               const char* outChars, int flag);

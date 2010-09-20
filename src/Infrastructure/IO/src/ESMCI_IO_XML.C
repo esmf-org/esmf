@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.C,v 1.12 2010/07/24 05:56:23 eschwab Exp $
+// $Id: ESMCI_IO_XML.C,v 1.13 2010/09/20 05:53:07 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.12 2010/07/24 05:56:23 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.13 2010/09/20 05:53:07 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 
@@ -742,6 +742,64 @@ namespace ESMCI{
     return (rc);
 
 }  // end IO_XML::writeEndElement
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  IO_XML::writeComment - Writes an XML comment to an IO object
+//
+// !INTERFACE:
+      int IO_XML::writeComment(
+//
+// !RETURN VALUE:
+//     int error return code
+//
+// !ARGUMENTS:
+      const string &comment) {      // comment characters
+
+// !DESCRIPTION:
+//      Writes an {\tt ESMC\_IO\_XML} comment to file
+//
+//EOP
+// !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMCI::IO_XML::writeComment()"
+
+    int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
+#ifdef ESMF_XERCES
+    // if first write() call, instantiate a writeHandler for this IO_XML.
+    // TODO:  move instantiation to Create()/construct(), if we ever
+    //      create "r,w,rw" flags in Create(), as well as move
+    //      readHandler/parser instantiation to Create()/construct().  ?
+    if (writeHandler == ESMC_NULL_POINTER) {
+      writeHandler = new SAX2WriteHandler(this->fileName, "UTF-8",
+                                          XMLFormatter::UnRep_CharRef, false);
+    }
+
+    // write XML <!-- comment -->
+    XMLCh* cmt = XMLString::transcode(comment.c_str());
+    writeHandler->comment(cmt, XMLString::stringLen(cmt));
+    XMLString::release(&cmt);
+
+    // write end-of-line
+    XMLCh* newLine = XMLString::transcode("\n");
+    writeHandler->characters(newLine, XMLString::stringLen(newLine));
+    XMLString::release(&newLine);
+#else
+    // xerces library not present
+    rc = ESMF_RC_LIB_NOT_PRESENT;
+#endif
+
+    return (rc);
+
+}  // end IO_XML::writeComment
 
 //-------------------------------------------------------------------------
 //BOP
