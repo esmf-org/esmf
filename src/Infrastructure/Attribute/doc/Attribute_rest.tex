@@ -1,4 +1,4 @@
-% $Id: Attribute_rest.tex,v 1.16 2010/09/14 18:53:37 murphysj Exp $
+% $Id: Attribute_rest.tex,v 1.17 2010/09/22 05:50:00 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -8,35 +8,34 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-1.Future Capabilities by Category
- 
+
 \subsubsection{Attributes}
 
 \begin{itemize}
-\item Case insensitive Attribute names, conventions, purposes, and values
+\item Case insensitive Attribute names, conventions, purposes, and values will be enabled in a future release.
 \end{itemize}
 
 
 \subsubsection{Attribute Packages}
 
 \begin{itemize}
-\item Automatically create object Attribute packages upon object creation.
+\item A future capability may be to automatically create default object Attribute packages upon ESMF object creation.
 \item The implemention of Grids is still in flux within the CIM.  This will effect the final appearance of the Gridspec package in both ESMF and ESG. It is anticipated that an additional CIM Grid Attribute Package will be created.
-\item Add a CIM Scientific Property Attribute Package. For CMIP5, hundreds of Scientific Properties have been identified. All of these will be added to ESMF.    
+\item A CIM Scientific Property Attribute Package will be added. For CMIP5, hundreds of Scientific Properties have been identified. All of these will be added to ESMF. 
+\item The Attribute packages CIM Responsible Party, CIM Citation, and CIM Platform can only be created automatically within a CIM Main component Attribute package.  In a future release, it will be possible to create these within other CIM Attribute packages as required, or as separate, standalone packages.
 \end{itemize}
+
 
 \subsubsection{Attribute Hierarchies}
 
 \begin{itemize}
-\item The option of "deep" copies of an Attribute hierarchy
+\item The option of "deep" copies of an Attribute hierarchy will be added.
 \end{itemize}
 
 
-2.Restrictions
-
-\subsubsection{Attribute Export}
+\subsubsection{Attribute Export, Import}
 \begin{itemize}
-\item Only the CIM XML format is ingestable by ESG
+\item Only the CIM XML format is ingestable by ESG, not ESMF XML nor tab-delimited.
+\item CIM Attribute packages can only be output (to CIM XML); they may be inputtable (via XML) in a future release.
+\item The ESMF grid Attribute package XML output file only contains the nested GridSpec Attributes; Attributes RegDecompX and RegDecompY will be added in a future release. 
 \end{itemize}
-
-
