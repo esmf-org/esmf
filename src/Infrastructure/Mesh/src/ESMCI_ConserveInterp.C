@@ -1,4 +1,4 @@
-// $Id: ESMCI_ConserveInterp.C,v 1.3 2010/09/17 03:13:32 oehmke Exp $
+// $Id: ESMCI_ConserveInterp.C,v 1.4 2010/09/22 22:27:28 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.3 2010/09/17 03:13:32 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.4 2010/09/22 22:27:28 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -44,7 +44,7 @@ static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.3 2010/09/17
 namespace ESMCI {
 
 
-  //  bool debug=false;
+ bool debug=false;
   
   
   // Intersects between the line a and the seqment s
@@ -484,11 +484,14 @@ namespace ESMCI {
       double *p1=p+3*ip;
       double *p2=p+3*((ip+1)%num_p);
 
+
       //      if (debug) printf("ip=%d p1=[%f %f %f] p2=[%f %f %f] -------------------- \n ",ip,p1[0],p1[1],p1[2],p2[0],p2[1],p2[2]);
       
       // calc p_vec (vector along the current edge of p)
       double p_vec[3];
       p_vec[0]=p2[0]-p1[0]; p_vec[1]=p2[1]-p1[1]; p_vec[2]=p2[2]-p1[2];
+
+      double p_norm=NORM(p_vec);
       
       // Set initial t1 (last point in tmp polygon)
       double *t1=tmp+3*(num_tmp-1);
@@ -510,12 +513,13 @@ namespace ESMCI {
 	CROSS_PRODUCT3D(n_vec,p_vec,pt1_vec);
 	
 	// Get magnitude which is distance out * |p_vec| without sign to indicate direction
-	inout1=NORM(n_vec);
+	inout1=NORM(n_vec)/p_norm;
 	
 	// Dot normal with normal to sphere at point (i.e. just p1 since origin of sphere is (0,0,0)) 
 	// This gives angle with respect to surface of the sphere and hence allows us to assign
 	// a direction (i.e. a sign) to inout1
 	if (DOT_PRODUCT3D(n_vec,p1)<0.0) inout1=-inout1; 
+
       }
       
       // Make sure we don't have a degenerate polygon after clipping
@@ -547,7 +551,7 @@ namespace ESMCI {
 	  CROSS_PRODUCT3D(n2_vec,p_vec,pt2_vec);
 	  
 	  //// Get magnitude which is distance out * |p_vec| without sign to indicate direction
-	  inout2=NORM(n2_vec);      
+	  inout2=NORM(n2_vec)/p_norm;      
 	  	  
 	  //// Dot normal with normal to sphere at point (i.e. just p1 since origin of sphere is (0,0,0)) 
 	  //// This gives angle with respect to surface of the sphere and hence allows us to assign
@@ -647,6 +651,28 @@ namespace ESMCI {
 #undef CLIP_EQUAL_TOL
   }
 
+
+void norm_poly3D(int num_p, double *p) {
+#define NORM(a) sqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2])
+    
+  // See if there are any equal points
+  for (int i=0; i<num_p; i++) {
+    double *pnt=p+3*i;
+    
+    double n=NORM(pnt);
+
+    pnt[0] = pnt[0]/n;
+    pnt[1] = pnt[1]/n;
+    pnt[2] = pnt[2]/n;
+
+
+  }
+
+#undef NORM
+}
+
+
+
   // Here valid and wghts need to be resized to the same size as dst_elems before being passed into 
   // this call. 
   void calc_1st_order_weights_2D_3D_sph(const MeshObj *dst_elem, MEField<> *dst_cfield, 
@@ -668,6 +694,7 @@ namespace ESMCI {
 
     // Get dst coords
     get_elem_coords(dst_elem, dst_cfield, 3, MAX_NUM_POLY_NODES, &num_dst_nodes, dst_coords);
+
 
     // if no nodes then exit
     if (num_dst_nodes<1) return;
@@ -725,6 +752,7 @@ namespace ESMCI {
       }
 
 
+
       // Get rid of degenerate edges
       remove_0len_edges3D(&num_src_nodes, src_coords);
       
@@ -778,14 +806,15 @@ namespace ESMCI {
 #endif
 
 #if 0
-      if (((dst_elem->get_id()==173) && (src_elem->get_id()==409)) ||
-	  ((dst_elem->get_id()==171) && (src_elem->get_id()==406))) {
+      if ((dst_elem->get_id()==3460) && (src_elem->get_id()==211)) {
 	printf("%d %d sintd: ",dst_elem->get_id(),src_elem->get_id());
 	for (int j=0; j<num_sintd_nodes; j++) {
-	  printf(" [%f,%f,%f] ",sintd_coords[3*j],sintd_coords[3*j+1],sintd_coords[3*j+2]);
+	  printf(" [%20.17f,%20.17f,%20.17f] ",sintd_coords[3*j],sintd_coords[3*j+1],sintd_coords[3*j+2]);
 	}
 	printf("\n");
+	debug=true;
       }
+      
 #endif
 
       // Get rid of degenerate edges
@@ -800,9 +829,15 @@ namespace ESMCI {
 
       // calculate intersection area
       double sintd_area=great_circle_area(num_sintd_nodes, sintd_coords); 
+
    
       //      debug=false;
-      //      printf("sintd_area=%f %d dst_area=%f \n",sintd_area,num_sintd_nodes,dst_area);
+
+#if 0
+      if ((dst_elem->get_id()==3460) && (src_elem->get_id()==211)) {
+         printf("sintd_area=%f %d dst_area=%f \n",sintd_area,num_sintd_nodes,dst_area);
+      }
+#endif
 
       // calc weight
       (*valid)[i]=1;

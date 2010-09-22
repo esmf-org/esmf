@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.3 2010/09/17 03:13:32 oehmke Exp $
+// $Id: ESMCI_MathUtil.C,v 1.4 2010/09/22 22:27:28 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.3 2010/09/17 03:13:32 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.4 2010/09/22 22:27:28 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -234,6 +234,73 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
 //    ^
 //    | --- angle being calculated
 //      
+
+#if 0
+  double angle(double *u, double *v, double *w) {
+#define CROSS_PRODUCT3D(out,a,b) out[0]=a[1]*b[2]-a[2]*b[1]; out[1]=a[2]*b[0]-a[0]*b[2]; out[2]=a[0]*b[1]-a[1]*b[0];
+#define NORM2(a) (a[0]*a[0]+a[1]*a[1]+a[2]*a[2])
+
+  double cosa=u[0]*v[0]+u[1]*v[1]+u[2]*v[2];
+
+  double cosb=u[0]*w[0]+u[1]*w[1]+u[2]*w[2];
+
+  double cosc=v[0]*w[0]+v[1]*w[1]+v[2]*w[2];
+
+  //  printf("a=%f b=%f c=%f \n",cosa,cosb,cosc);
+
+  double tmp_vec[3];
+
+  CROSS_PRODUCT3D(tmp_vec,u,v);
+  double sina=NORM2(tmp_vec);
+
+  CROSS_PRODUCT3D(tmp_vec,u,w);
+  double sinb=NORM2(tmp_vec);
+
+
+#if 0
+    if (debug) {
+        printf("u=[%f %f %f] ",u[0],u[1],u[2]);
+        printf("v=[%f %f %f] ",v[0],v[1],v[2]);
+        printf("w=[%f %f %f] ",w[0],w[1],w[2]);
+	//        printf("sina=%f sinb=%f ",sina,sinb);
+	printf("sina*sinb=%f ",sina*sinb);
+	printf("cosc-(cosa*cosb)=%f ",cosc-(cosa*cosb));
+	printf("cosc-(cosa*cosb)/sina*sinb=%30.27f ",(cosc-(cosa*cosb))/(sina*sinb));
+        printf("angle=%f \n",acos((cosc-(cosa*cosb))/(sina*sinb)));
+
+
+    }
+#endif
+
+
+
+    // Calculate the cosine of the angle we're calculating
+    // using spherical trigonometry formula
+    double cos_angle=(cosc-(cosa*cosb))/sqrt(sina*sinb);
+
+   // If we've gone a little out of bounds due to round off, shift back
+   if (cos_angle > 1.0) cos_angle=1.0;
+   if (cos_angle < -1.0) cos_angle=-1.0;
+
+   // return angle
+   return acos(cos_angle);
+
+#undef CROSS_PRODUCT3D
+#undef NORM
+}
+
+#endif
+
+#if 1
+
+//    w
+//    | \
+//    |   \
+//    |     \
+//    u------v
+//    ^
+//    | --- angle being calculated
+//      
   double angle(double *u, double *v, double *w) {
   
   double cosa=u[0]*v[0]+u[1]*v[1]+u[2]*v[2];
@@ -265,7 +332,7 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
 
     // Calculate the cosine of the angle we're calculating
     // using spherical trigonometry formula
-   double cos_angle=(cosc-(cosa*cosb))/(sina*sinb);
+    double cos_angle=(cosc-(cosa*cosb))/(sina*sinb);
 
    // If we've gone a little out of bounds due to round off, shift back
    if (cos_angle > 1.0) cos_angle=1.0;
@@ -275,6 +342,7 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
    return acos(cos_angle);
 
 }
+#endif
 
 
 // Compute the great circle area of a polygon on a sphere
@@ -327,9 +395,10 @@ double great_circle_area(int n, double *pnts) {
 
 void remove_0len_edges3D(int *num_p, double *p) {
 
-#define PNTS_EQUAL(p1,p2) ((std::abs(p1[0]-p2[0]) < 1E-15) &&	\
-                           (std::abs(p1[1]-p2[1]) < 1E-15) &&	\
-                           (std::abs(p1[2]-p2[2]) < 1E-15))
+#define EQUAL_TOL 1E-7
+#define PNTS_EQUAL(p1,p2) ((std::abs(p1[0]-p2[0]) < EQUAL_TOL) &&	\
+                           (std::abs(p1[1]-p2[1]) < EQUAL_TOL) &&	\
+                           (std::abs(p1[2]-p2[2]) < EQUAL_TOL))
     
   // Get old value of num_p
   int old_num_p=*num_p;
@@ -375,6 +444,7 @@ void remove_0len_edges3D(int *num_p, double *p) {
     // Leave num_p as it is
   }
 
+#undef EQUAL_TOL
 #undef PNTS_EQUAL
 }
 
