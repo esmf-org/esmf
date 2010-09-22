@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.30 2010/09/16 04:33:44 theurich Exp $
+// $Id: ESMC_GridComp.h,v 1.31 2010/09/22 20:51:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -187,8 +187,8 @@ void *ESMC_GridCompGetInternalState(
 //
 // !DESCRIPTION:
 //
-//  Available to be called by an {\\tt ESMC\_GridComp} at any time after 
-//  {\\tt ESMC\_GridCompSetInternalState} has been called. Since init, run, and
+//  Available to be called by an {\tt ESMC\_GridComp} at any time after 
+//  {\tt ESMC\_GridCompSetInternalState} has been called. Since init, run, and
 //  finalize must be separate subroutines, data that they need to share in 
 //  common can either be global data, or can be allocated in a private data
 //  block and the address of that block can be registered with the framework 
