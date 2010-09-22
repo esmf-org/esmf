@@ -4,3 +4,74 @@
 \subsection{Description}
 
 The ESMF\_RegridWeightGen application is used to generate regridding weights in an offline mode.
+This program combines the two offline regrid applications in the previous release 
+(\cite{sec:regrid:offline}) into one application.  It takes a source grid file and a destination grid file
+in either the SCRIP format or the ESMF Unstructured grid format, and generate a regridding weight 
+file in the SCRIP format.  It supports bilinear, patch and conservative regridding methods.  
+The source and the destination grids can be either a regularly rectangular grid or an unstructured grid
+including cubed sphere grid.  This application is a parallel application that can be run on any number of PETs.
+
+The command line arguments are all keyword based.  Both the long keyward prefixed with {\tt'--'} or the 
+one character short keyword prefixed with {\tt'-'} are supported.  The format to run the application is 
+as follows:
+
+\begin{verbatim}
+ESMF_RegridWeightGen  [--source|-s] src_grid_filename 
+                      [--destination|-d] dst_grid_filename 
+                      [--weight|-w] out_weight_file 
+                      [--method|-m] [bilinear|patch|conservative] 
+                      [--pole|-p] [all|none|1|2|..] 
+                      --src_type [SCRIP|ESMF] 
+                      --dst_type [SCRIP|ESMF]
+                      -t [SCRIP|ESMF]
+
+where
+  --source or -s -- a required argument specifying the source grid file name
+
+  --destination or -d - a required argument specifying the destination grid file name
+
+  --weight or -w - a required argument specifying the output regridding weight file name
+
+  --method or -m - an optional argument specifying which interpolation method is used.  The value
+                   can be one of the following:
+
+                   bilinear     - for bilinear interpolation, also the default method if not specified.
+                   patch        - for patch recovery interpolation
+                   conservative - for first order conservative interpolation
+
+   --pole or -p - an optional argument indicating what to do with the pole.  The value can be one of
+                  the following:
+
+                  none - No pole, the source grid ends at the top (and bottom) row of 
+                        nodes specified in <source grid>.
+                  all  - Construct an artificial pole placed in the center of the 
+                        top (or bottom) row of nodes, but projected onto the sphere 
+                        formed by the rest of the grid. The value at this pole is the 
+                        average of all the pole values. This is the default option.
+                  <N>  - Construct an artificial pole placed in the center of the 
+                        top (or bottom) row of nodes, but projected onto the sphere 
+                        formed by the rest of the grid. The value at this pole is the 
+                        average of the N source nodes next to the pole and surrounding
+                        the destination point (i.e. the value may differ for each
+                        destination point. Here N ranges from 1 to the number of nodes 
+                        around the pole. 
+
+    --src_type - an optional argument specifying the source grid file type.  The value could be either
+                 SCRIP or ESMF.  Currently, the ESMF file type is only available for the unstructured 
+                 grid. The default option is SCRIP.
+
+    --dst_type - an optional argument specifying the destination grid file type.  The value could be 
+                 either SCRIP or ESMF.  Currently, the ESMF file type is only available for the
+                 unstructured grid. The default option is SCRIP.
+
+    -t         - an optional argument specifying the file types for both the source and the destination
+                 grid files.  The default option is SCRIP.  If both -t and --src_type or --dst_type
+                 are given at the same time and they disagree with each other, an error message will
+                 be generated.
+\end{verbatim}
+
+In this application, we use {\tt ESMF\_GridCreate}~\cite{example:2DLogRecFromScrip} to create a 
+ESMF_Grid object if the source or destination grid is a logically rectangular grid.  We use 
+{\tt ESMF\_MeshCreate}~\cite{sec:example:UnstructFromFile} to create a ESMF_Mesh object if the 
+source or destination grid is a cubed sphere grid or an unstructured grid.  We then use
+{\tt ESMF_FieldRegridStore} to generate the regridding weight table and indicies table.   
