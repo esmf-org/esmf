@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.57 2010/07/12 05:26:25 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.58 2010/09/22 05:52:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -47,6 +47,7 @@ extern "C" {
 #endif
 
 // Class declaration type
+//-----------------------------------------------------------------------------
 typedef struct { 
   // private:  // Members opaque on C side, philosophically.
     // Allocate enough memory to store members on the C side.
@@ -56,16 +57,94 @@ typedef struct {
     // TODO:  implement isInit initialization like in F90 API?
     char shallowMem[152];  // 18 8-byte members + 1 8-bytes extra = 19 * 8
 } ESMC_TimeInterval;
+//-----------------------------------------------------------------------------
 
 // Class API
-int ESMC_TimeIntervalSet(ESMC_TimeInterval *timeInterval,       
-                         ESMC_I4 h_I4);
 
-int ESMC_TimeIntervalGet(ESMC_TimeInterval timeInterval,
-                         ESMC_I8 *s_I8,
-                         ESMC_R8 *h_R8);
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_TimeIntervalSet - Initialize or set a TimeInterval
+//
+// !INTERFACE:
+int ESMC_TimeIntervalSet(
+  ESMC_TimeInterval *timeinterval,   // inout
+  ESMC_I4 h                          // in
+);
 
-int ESMC_TimeIntervalPrint(ESMC_TimeInterval timeInterval);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Sets the value of the {\tt ESMC\_TimeInterval} in units specified by
+//  the user.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[timeinterval]
+//    {\tt ESMC\_TimeInterval} object to initialize or set.
+//  \item[h]
+//    Integer hours.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_TimeIntervalGet - Get a TimeInterval value
+//
+// !INTERFACE:
+int ESMC_TimeIntervalGet(
+  ESMC_TimeInterval timeinterval,   // in
+  ESMC_I8 *s_i8,                    // out
+  ESMC_R8 *h_r8                     // out
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Gets the value of an {\tt ESMC\_TimeInteval} in units specified by the user.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[timeinterval]
+//    {\tt ESMC\_TimeInterval} object to be queried.
+//  \item[{[s\_i8]}]
+//    Integer seconds (large, >= 64-bit).
+//  \item[{[h\_r8]}]
+//    Double precision hours.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_TimeIntervalPrint - Print a TimeInterval
+//
+// !INTERFACE:
+int ESMC_TimeIntervalPrint(
+  ESMC_TimeInterval timeinterval   // in
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//  Prints out an {\tt ESMC\_TimeInterval}'s properties to {\tt stdio}, 
+//  in support of testing and debugging.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[timeinterval]
+//    {\tt ESMC\_TimeInterval} object to be printed.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
 
 #ifdef __cplusplus
 } // extern "C"

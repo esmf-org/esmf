@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.57 2010/07/12 05:26:25 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.58 2010/09/22 05:52:34 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -39,6 +39,7 @@ extern "C" {
 #endif
 
 // Class declaration type
+//-----------------------------------------------------------------------------
 typedef struct {
   // private:  // Members opaque on C side, philosophically.
     // Allocate enough memory to store members on the C side.
@@ -48,17 +49,114 @@ typedef struct {
     // TODO:  implement isInit initialization like in F90 API?
     char shallowMem[48];  // 5 8-byte members + 1 8-bytes extra = 6 * 8
 } ESMC_Time;
+//-----------------------------------------------------------------------------
 
 // Class API
-int ESMC_TimeSet(ESMC_Time *time, ESMC_I4 yy, ESMC_I4 h,
-                 ESMC_Calendar calendar, enum ESMC_CalendarType calendartype,
-                 int timeZone);
 
-int ESMC_TimeGet(ESMC_Time time, ESMC_I4 *yy, ESMC_I4 *h,
-                 ESMC_Calendar *calendar, enum ESMC_CalendarType *calendartype,
-                 int *timeZone);
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_TimeSet - Initialize or set a Time
+//
+// !INTERFACE:
+int ESMC_TimeSet(
+  ESMC_Time *time,                       // inout
+  ESMC_I4 yy,                            // in
+  ESMC_I4 h,                             // in
+  ESMC_Calendar calendar,                // in
+  enum ESMC_CalendarType calendartype,   // in
+  int timeZone                           // in
+);
 
-int ESMC_TimePrint(ESMC_Time time);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Initializes an {\tt ESMC\_Time} with a set of user-specified units.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[time]
+//    {\tt ESMC\_Time} object to initialize or set.
+//  \item[yy]
+//    Integer year (>= 32-bit).
+//  \item[h]
+//    Integer hours.
+//  \item[calendar]
+//    Associated {\tt ESMC\_Calendar}.  If not created, defaults to calendar
+//    {\tt ESMC\_CAL\_NOCALENDAR} or default specified in
+//    {\tt ESMC\_Initialize()}.  If created, has precedence over
+//    calendarType below.
+//  \item[calendarType]
+//    Specifies associated {\tt ESMC\_Calendar} if calendar argument above
+//    not created.  More convenient way of specifying a built-in calendar type.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_TimeGet - Get a Time value
+//
+// !INTERFACE:
+int ESMC_TimeGet(
+  ESMC_Time time,                         // in
+  ESMC_I4 *yy,                            // out
+  ESMC_I4 *h,                             // out
+  ESMC_Calendar *calendar,                // out
+  enum ESMC_CalendarType *calendartype,   // out
+  int *timeZone                           // out
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Gets the value of an {\tt ESMC\_Time} in units specified by the user.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[time]
+//    {\tt ESMC\_Time} object to be queried.
+//  \item[{[yy]}]
+//    Integer year (>= 32-bit).
+//  \item[{[h]}]
+//    Integer hours.
+//  \item[{[calendar]}]
+//    Associated {\tt ESMC\_Calendar}.
+//  \item[{[calendarType]}]
+//    Associated {\tt ESMC\_CalendarType}.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_TimePrint - Print a Time
+//
+// !INTERFACE:
+int ESMC_TimePrint(
+  ESMC_Time time   // in
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//  Prints out an {\tt ESMC\_Time}'s properties to {\tt stdio}, 
+//  in support of testing and debugging.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[time]
+//    {\tt ESMC\_Time} object to be printed.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
 
 #ifdef __cplusplus
 } // extern "C"

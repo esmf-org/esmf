@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.73 2010/08/02 06:01:33 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.74 2010/09/22 05:52:34 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -24,6 +24,12 @@
 #define ESMC_Calendar_H
 
 //-----------------------------------------------------------------------------
+// ESMC_Calendar - Public C interface to the ESMF Calendar class
+//
+// The code in this file defines the public C Calendar interfaces and declares
+// method signatures (prototypes).  The companion file {\tt ESMC\_Calendar.C}
+// contains the definitions (full code bodies) for the Calendar methods.
+//-----------------------------------------------------------------------------
 
 // TODO: these definitions need different home (shared with ESMCI_Calendar)
 #define CALENDAR_TYPE_COUNT 8
@@ -48,7 +54,6 @@ extern "C" {
 #endif
 
 // Class declaration type
-
 //-----------------------------------------------------------------------------
 typedef struct {
   // private:  // members opaque on C side, philosophically.
@@ -67,20 +72,21 @@ typedef struct {
 ESMC_Calendar ESMC_CalendarCreate(
   const char *name,                      // in
   enum ESMC_CalendarType calendartype,   // in
-  int *rc);                              // out
+  int *rc                                // out
+);
 
 // !RETURN VALUE:
 //  Newly created ESMC_Calendar object.
 //
 // !DESCRIPTION:
 //
-//  Creates and sets a {\tt calendar} to the given built-in
+//  Creates and sets a {\tt ESMC\_Calendar} object to the given built-in
 //  {\tt ESMC\_CalendarType}. 
 //
 //  The arguments are:
 //  \begin{description}
 //  \item[{[name]}]
-//    The name for the newly created calendar.  If not specified, i.e. NULL,
+//    The name for the newly created Calendar.  If not specified, i.e. NULL,
 //    a default unique name will be generated: "CalendarNNN" where NNN
 //    is a unique sequence number from 001 to 999.
 //  \item[calendartype]
@@ -104,7 +110,8 @@ ESMC_Calendar ESMC_CalendarCreate(
 //
 // !INTERFACE:
 int ESMC_CalendarDestroy(
-  ESMC_Calendar *calendar);              // inout
+  ESMC_Calendar *calendar   // inout
+);
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -128,7 +135,8 @@ int ESMC_CalendarDestroy(
 //
 // !INTERFACE:
 int ESMC_CalendarPrint(
-  ESMC_Calendar calendar);               // in
+  ESMC_Calendar calendar   // in
+);
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -140,12 +148,11 @@ int ESMC_CalendarPrint(
 //  The arguments are:
 //  \begin{description}
 //  \item[calendar]
-//    {\tt ESMC\_Calendar} to be printed out.
+//    {\tt ESMC\_Calendar} object to be printed.
 //  \end{description}
 //
 //EOP
 //-----------------------------------------------------------------------------
-
 
 #ifdef __cplusplus
 } // extern "C"
