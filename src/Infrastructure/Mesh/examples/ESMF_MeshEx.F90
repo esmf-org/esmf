@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.26 2010/09/22 06:27:09 peggyli Exp $
+! $Id: ESMF_MeshEx.F90,v 1.27 2010/09/22 13:47:45 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -707,19 +707,20 @@ program ESMF_MeshEx
 !	double grid_imask(grid_size) ;
 !		grid_imask:_FillValue = -9999. ;
 !	int grid_dims(grid_rank) ;
+!}
 !\end{verbatim}
 !
-! The grid cells are organized as a one dimensional array ({\tt grid\_rank = 1}. The
-! cell connection is defined using {\tt grid_\corner_\lat} and {\tt grid_\corner_\lon} with
-! the maximal number of corners defined in {\tt grid\_corner}.  
-! For the SCRIP grid, the data is located at the center of the grid.  On the contrary,
-! in a ESMF Mesh object, the data is located at the corner nodes of a cell.  Therefore,
+! The grid cells are organized as a one dimensional array ({\tt grid\_rank = 1}). The
+! cell connection is defined using {\tt grid\_corner\_lat} and {\tt grid\_corner\_lon} with
+! the maximal number of corners defined in {\tt grid\_corners}.  
+! The data is located at the center of the grid cell in a SCRIP grid; whereas
+! the data is located at the corner of a cell in an ESMF Mesh object.  Therefore,
 ! we create a Mesh object by constructing a "dual" mesh using {\tt grid\_center\_lat} and
-! {\tt grid\_center\_lon}.  {\tt grid_imask} is currently not used in the Mesh object.
+! {\tt grid\_center\_lon}.  {\tt grid\_imask} is not used in the Mesh object in the current implementation.
 ! 
-! The following example code shows you how to create a Mesh using a SCRIP file. Note that
-! you have to set the filetype to ESMF_FILEFORMAT_SCRIP.  If the optional argument <\tt convert3D>
-! is set to one, the coordinates will be converted into 3D cartisian first.  If the grid
+! The following example code dipicts how to create a Mesh using a SCRIP file. Note that
+! you have to set the filetype to ESMF_FILEFORMAT_SCRIP.  If the optional argument {\tt convert3D}
+! is set to one, the coordinates will be converted into 3D Cartisian first.  If the grid
 ! is a global grid and will be used in a regrid operation, this flag should be set to 1.
 !EOE
 
@@ -734,14 +735,14 @@ program ESMF_MeshEx
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 !BOE
-! We defined a more general unstructured grid file format for the ESMF Mesh.  The major difference of
-! this grid format from the SCRIP grid format is that we define node coordinates in a seperate array
-! </tt nodeCoords> and use index to point to the nodeCoords array when we define the element
-! connectitivities in </tt elementConn>.  In the SCRIP format, the two are combined into 
-! </tt grid\_corner\_lat> and </tt grid\_corner\_lon> arrays instead.  The ESMF file format matches
-! better with how the node and elements are defined in the ESMF Mesh object.  The ESMF format is also
+! We defined a more general unstructured grid file format for the ESMF Mesh.  In the ESMF file format,
+! the node coordinates is defined in a seperate array
+! {/tt nodeCoords} and indicies to the nodeCoords array are used in the element
+! connectitivity array {/tt elementConn}.  While in the SCRIP format, the two are combined into 
+! {/tt grid\_corner\_lat} and {/tt grid\_corner\_lon} arrays.  The ESMF file format matches
+! better with the way how the node and elements are defined in the ESMF Mesh object.  The ESMF format is also
 ! more general than the SCRIP format because it supports higher dimension coordinates and more general
-! topologies with mixed number of edges.  Following is a sample header of a ESMF Unstructured Grid.
+! topologies.  Following is a sample header of a ESMF Unstructured Grid.
 !  
 !\begin{verbatim}
 ! netcdf ne4np4-esmf {
