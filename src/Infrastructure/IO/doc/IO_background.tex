@@ -1,154 +1,89 @@
-% $Id: IO_background.tex,v 1.21 2009/06/26 17:00:19 eschwab Exp $
+% $Id: IO_background.tex,v 1.22 2010/09/22 22:47:00 samsoncheung Exp $
 
 %\subsection{Background}
 
-Earth system modeling applications require efficient and robust tools
-for input and output of structured and unstructured gridded data, as
-well as observational data streams.  Interfaces and methods provided
-by ESMF should allow reading and writing of data in several standard
-formats as well as support efficient internal data representations
-(see ESMF General Requirements \cite{ESMFGenReq}, Section 8.1.3). 
-The ESMF IO will provide a unified interface for input and output 
-of high level ESMF objects such as Fields.  The system is expected to 
-automatically detect file formats at runtime, and to output data in a variety 
-of formats, with the posibility of creating companion metadata files. Other 
-file IO functionalities, such as writing of error and log messages and input 
-of configuration parameters from an ASCII file, are not covered in this
-document. 
+The ESMF IO provides an unified interface for input and output of
+high level ESMF objects such as Fields.  The system is expected to
+automatically detect file formats at runtime, and to output data in 
+a variety of formats. In the current release, the ESMF IO capability
+is integrated with third-party software such as, Parallel IO (PIO)
+to read and write Fortran array data in binary/NetCDF format and Xerces
+Library to read and write Attribute data in XML format.  Other file IO
+functionalities, such as writing of error and log messages and input of
+configuration parameters from an ASCII file, are not covered in this
+document.
+
 
 \subsection{I/O architecture}
 
-We use the experience of the WRF \cite{WRF-Software} and FMS 
-\cite{Balaji_Parallel_IO_2000}  projects in defining the 
-ESMF I/O architecture that is efficient, flexible, end-to-end, and package 
-neutral. Our principles will be:
-
-\begin{description}
-\item[-] Define a standard unified I/O interface and API covering 
-         ESMF-supported data models.
-\item[-] Provide efficient implementation of this API for multiple data 
-         formats supported by the ESMF. 
-\end{description}
+The future development of ESMF IO would include an ESMF_IO object that
+combines other ESMF objects, such as Components, States, FieldBundles,
+ArrayBundles, Fields, Arrays, Grids, as well as Array and Attributes to 
+perform robust and unified input/output system.
 
 
 
-\subsection{Data models}
+%\subsection{Data models}
+%
+%Earth system models use a variety of discrete grids to maintain information 
+%about fields in continuous space, as well as observations. The primary ESMF 
+%codes employ finite-difference and finite-volume grids, spectral grids, 
+%unstructured land-surface grids, and ungridded observational networks.
+%
+%Fields within a model component are frequently defined on the same
+%physical grid and are decomposed in memory in an identical fashion;
+%that is, they share a distributed grid. They form a {\em bundle of
+%fields} defined on the same distributed grid. The gridded data are
+%supported by three ESMF elements: {\em PhysGrid} element 
+%for physical grids, {\em DistGrid} element for distributed grids, and 
+%{\em Fields} class for fields (\cite{ESMF-PhysGrid-Req},
+%\cite{ESMF-DistGrid-Req}, \cite{ESMF-Field-Req}). 
+%
+%ESMF I/O will support input/output of data defined on all ESMF
+%supported grids and location streams (\cite{ESMF-PhysGrid-Req},
+%\cite{ESMF-DistGrid-Req}). For
+%the purpose of this document, we will consider data belonging to three
+%broad categories:
+%
+%\begin{description}
+%
+%\item[\bf Structured Gridded Data.] A {\em structured grid} is one on 
+%which the relationship between gridpoints can be derived from their
+%indices, without the need for an explicit map.  A simple example is fields
+%defined on a rectangular lat/lon grid.
+%
+%\item[\bf Unstructured Gridded Data.] For the more general 
+%{\em unstructured grid} the relationship between gridpoints cannot be
+%derived from their indices, and the specification of an explicit map
+%is necessary.  An example is a {\em catchment grid} used by some
+%land-surface models.
+%
+%\item[\bf Observational Data on location streams.] As defined in 
+%the {\em Physical Grid Requirements}, a location stream contains 
+%a list of locations which 
+%describe the measurements. Each observation is 
+%associated with a spatial point or region. A neighbor relationship is not 
+%defined for observations. 
+%\end{description}
+%
+%As we have already mentioned, logically rectangular grids are naturally 
+%represented by multi-dimensional arrays. The two latter data models can be 
+%represented as one-dimensional arrays of structures with each structure 
+%containing information about location, field values associated with this 
+%location, and a list of neighbors, if relevant. 
 
-Earth system models use a variety of discrete grids to maintain information 
-about fields in continuous space, as well as observations. The primary ESMF 
-codes employ finite-difference and finite-volume grids, spectral grids, 
-unstructured land-surface grids, and ungridded observational networks.
 
-Fields within a model component are frequently defined on the same
-physical grid and are decomposed in memory in an identical fashion;
-that is, they share a distributed grid. They form a {\em bundle of
-fields} defined on the same distributed grid. The gridded data are
-supported by three ESMF elements: {\em PhysGrid} element 
-for physical grids, {\em DistGrid} element for distributed grids, and 
-{\em Fields} class for fields (\cite{ESMF-PhysGrid-Req},
-\cite{ESMF-DistGrid-Req}, \cite{ESMF-Field-Req}). 
+\subsection{ESMF Data Attribute}
 
-ESMF I/O will support input/output of data defined on all ESMF
-supported grids and location streams (\cite{ESMF-PhysGrid-Req},
-\cite{ESMF-DistGrid-Req}). For
-the purpose of this document, we will consider data belonging to three
-broad categories:
-
-\begin{description}
-
-\item[\bf Structured Gridded Data.] A {\em structured grid} is one on 
-which the relationship between gridpoints can be derived from their
-indices, without the need for an explicit map.  A simple example is fields
-defined on a rectangular lat/lon grid.
-
-\item[\bf Unstructured Gridded Data.] For the more general 
-{\em unstructured grid} the relationship between gridpoints cannot be
-derived from their indices, and the specification of an explicit map
-is necessary.  An example is a {\em catchment grid} used by some
-land-surface models.
-
-\item[\bf Observational Data on location streams.] As defined in 
-the {\em Physical Grid Requirements}, a location stream contains 
-a list of locations which 
-describe the measurements. Each observation is 
-associated with a spatial point or region. A neighbor relationship is not 
-defined for observations. 
-\end{description}
-
-As we have already mentioned, logically rectangular grids are naturally 
-represented by multi-dimensional arrays. The two latter data models can be 
-represented as one-dimensional arrays of structures with each structure 
-containing information about location, field values associated with this 
-location, and a list of neighbors, if relevant. 
-
-\subsection{ESMF metadata conventions}
-
-{\bf Metadata} is data about a digital object, ``structured data about the 
-data''. The metadata is usually provided by the creator or distributor of 
-the object, and often either accompanies the object or is embedded in the 
-file header. As such, metadata can be very useful as the basis for 
-information storage and retrieval systems, as well as for utilization of the 
-data within Earth Science models.
-The information about the object provided by metadata allows optimization of  
-resource allocation and organization of storage and retrieval of data. In 
-parallel computing such knowledge may be especially important. 
-
-If metadata are provided, the files may be either {\em self-described} or
-{\em co-described}, depending on the fashion in which metadata are allocated.
-\begin{description}
-\item[\bf A self-described file] contains in its header all metadata 
-necessary to provide a unique interpretation of the file content
-assuming certain conventions.  
-\item[\bf A co-described file] is accompanied by a metadata file. The
-metadata file provides a unique interpretation of the data file content
-under certain conventions. 
-\end{description}
-It is assumed the metadata can be rapidly read by a corresponding API without 
-reading an entire content of the data file. Some data files may contain 
-complete description of their content, but the way data are represented might 
-not allow rapid extraction of metadata. To make such a file co-described, its 
-metadata could be extracted and allocated to a companion metadata file.
-
-Some file formats that we discuss below, such as NetCDF and HDF, are 
-organized according to well-defined rules. Their structures and APIs enable 
-(but do not require) creation of self-described files. By narrowing 
-the definitions, conventions enable a complete and unique description of each 
-dataset.
-
-We assume that the NetCDF conventions for climate and forecast metadata, 
-``CF conventions'', will serve as a a basis for ESMF metadata conventions.
- NetCDF Climate-Forecast Metadata Conventions
-\cite{NetCDF_CF_v1_beta3} narrow definitions of NetCDF, an
-array-oriented data format and a library for gridded data 
-\cite{NetCDF3_UsersGuide_C}, to allow a unique and complete description
-of gridded data used in geoscience. CF conventions specify standard 
-dimensions, such as date or time ({\t t}), height or depth ({\it z}), 
-latitude ({\it y}), and longitude ({\it x}), and specify standard
-units for these dimensions and other quantities. 
-
-%%% Leonid %%%
-%%% We expect ESMF metadata conventions to be defined as extensions to
-%%% CF-conventions covering fields defined on both structured and unstructured 
-%%% grids, and observational data. Such conventions have to be accepted by all 
-%%% participants of the ESMF project.
-%%% Leonid %%%
-
-We expect ESMF metadata conventions to be based on the CF-conventions,
-and to cover fields defined on both structured and unstructured grids,
-as well as observational data. Unlike the CF conventions which are
-tightly associated with NetCDF, the ESMF conventions are supposed to
-be format neutral, and cover all of the ESMF data formats.  These
-extensions will become the ESMF standard, and will be enforced by the
-ESMF I/O subsystem. However, the specification of ESMF metadata is
-optional, and users desiring not to specify any metadata should be
-able to do so.
-
-%%% ESMF I\/O interfaces and software will cover only I/O of data covered by
-%%% the ESMF convention.
+The metadata IO is handled via ESMF Attribute object. The third
+party software Xerces Library is integrated with ESMF to provide
+the ability to read and write Attribute data in XML file format.
+To enable this capability, the environment variable ESMF_XERCES should be
+set. Details can be founds in ESMF User Guide, Third Party Libraries
+in "Building and Installing ESMF.
 
 
 \subsection{Data formats}
-
 
 Several standard formats are currently used in Earth Science modeling
 for input/output of data:
@@ -170,68 +105,6 @@ represented as one-dimensional arrays, NetCDF can also be used to store these
 data. However, it does not provide a high-level abstraction for this type of 
 data. 
 
-\item[\bf DODS] The Distributed Oceanographic Data System is a system that 
-allows access to data over the internet. DODS is created and supported by 
-Unidata Program Center in Boulder, Colorado. See \cite{DODS}. DODS enables an 
-implementation of NetCDF-client libraries that permits remote access to data 
-through the Internet.
-
-
-\item[\bf HDF] The Hierarchical Data Format (HDF) project provides
-interface,  software and file formats for scientific data management. 
-The HDF software includes I/O libraries and tools for analyzing,
-visualizing, and converting scientific data. 
-
-HDF is developed and supported at the National Center for Supercomputing 
-Applications, University of Illinois at Urbana-Champaign. There are two 
-different HDF formats, HDF (4.x and previous releases) and HDF5. These 
-formats are completely different and {\it not} compatible.  See
-\cite{HDF4_tutorials}, \cite{HDF5_tutorial}.
-
-HDF Scientific Data Sets API allows efficient operating with
-multi-dimensional arrays. Although HDF SDS itself does not provide a way
-to represent high-level abstractions for data on unstructured grids
-and observational data sets, HDF-based applications, such as HDF-EOS
-do so in HDF-EOS Point Structure.
-
-
-%%Because of hierarchical nature of data representation, the HDF
-%%interface and API may provide structural ways 
-%%to represent data on structured and unstructured grids, as well as 
-%%observational data. 
-
-
-\item[\bf HDF-EOS]  The Hierarchical Data Format - Earth Observing
-System (HDF-EOS) is the scientific data format standard selected by
-NASA as the baseline standard for the Earth Observing System (EOS). HDF-EOS
-is an extension of HDF and uses HDF library calls as its underlying
-basis. Version 4.1r1 of HDF is used. The library and tools are written
-in C language and a Fortran interface is provided. See \cite{HDF-EOS}.
-
-HDF-EOS can be used for different data models within ESMF. Regular
-gridded data are supported by HDF-EOS Grid Structures, while HDF-EOS  
-Point Structure covers unstructured grid and observational data.
-
-% \item[\bf GRIB] GRid in Binary (GRIB) format is a gridded data
-% standard from the World Meteorological Organization. NCEP uses GRIB
-% for all the files produced by its analyses. Unfortunately, not all
-% GRIBs are the same and the ECMWF and EMC use slightly different
-% formats, though they both claim to use GRIB. See \cite{GRIB_1}.  We
-% expect GRIB files to be co-described, e.g., accompanied by a metadata
-% file.  If metadata file is not provided, necessary information can be
-% extracted from GRIB file itself.
-
-\item[\bf GRIB] 
-GRIdded Binary (GRIB) is the standard gridded data format from the
-World Meteorological Organization (WMO).  GRIB is a general purpose,
-bit-oriented data exchange format. Most NWP centers use GRIB for all the 
-files produced from its analyses and forecasts. Since the GRIB standard does 
-not specify a standard API, NWP centers use a variety of software to process 
-GRIB files.
-
-The GRIB format used in ESMF shall be configurable, and shall allow the 
-creation of files which conform to the NCEP standard usage.  
-
 \item[\bf IEEE Binary Streams]
 A natural way for a machine to represent data is to use a native
 binary data representation. There are two choices of ordering of bytes
@@ -243,94 +116,37 @@ to be able to use efficient native representation, and optionally
 provide ESMF metadata on a companion file using for example XML
 \cite{XML-W3C}.
 
-\item[\bf GrADS] The Grid Analysis and Display System (GrADS) is popular 
-visualization software widely used by the earth science modeling
-communinity (http://grads.iges.org/grads/). GrADS can read COARDS
-compliant NetCDF and HDF files, as well as IEEE binary and GRIB files
-provided an appropriate companion metadadata file is provided (in
-GrADS parlance these are refered to as {\em control files}). Files
-produced by the ESMF are intended to be GrADS readable, and the ESMF
-shall produce GrADS control files upon request.
-
-\item[\bf BUFR] Binary Universal Form of Representation of the meteorological 
-data (BUFR) is a self-descriptive format for observational data
-transmission introduced by the World Meteorological Organization
-\cite{WMO-BUFR-CREX}. The form and content of data contained in a BUFR 
-message are described within BUFR message itself. In addition, BUFR provides 
-condensation, or packing of data. 
-
-The BUFR is a table-driven code since the Data Description Section
-contains a sequence of data descriptors referring to a set of
-predefined and internationally agreed tables. Thus, instead of writing
-all detailed definitions within a message, one will just write a
-number identifying a parameter with its descriptions. The BUFR format
-used in ESMF shall be configurable, and shall allow the creation of
-files which conform to the NCEP standard usage, in which the
-predefined tables are contained in the file.
-
 \end{description}
 
-Modern data management approaches could potentially provide significant 
-advantages in manipulating data and have to be carefully studied.
-For example, ESMWF has created and employed relational-database based 
-Observational Data Base (ODB) software \cite{ODB}.  However, such complex 
-data management systems are beyond the scope of the basic ESMF I/O. 
+%Modern data management approaches could potentially provide significant 
+%advantages in manipulating data and have to be carefully studied.
+%For example, ESMWF has created and employed relational-database based 
+%Observational Data Base (ODB) software \cite{ODB}.  However, such complex 
+%data management systems are beyond the scope of the basic ESMF I/O. 
 
 
 \subsection{Parallel I/O}
 
-The future development of ESMF IO facility will require further
-optimization with an expected increase in IO amount over the next few
-years. Two major factors contrubuting to the increase in I/O intensity are:
-\begin{description}
-\item[-] Enhancement in model resolution;
-\item[-] Increase in I/O frequency.
-\end{description}
-We also expect significant increase in the amount of satellite data, although 
-the amount of I/O related to observational data is not comparable with 
-the amount of gridded I/O which drives our performance analysis. 
-
-There are two aspects of  parallel IO:
+ESMF provides parallel IO capability by integrating a third-party IO
+software, Parallel I/O (PIO). This is a software interface layer, was 
+first developed by the team under CCSM Software Engineering Group at NCAR
+\cite{CESM_Site}. In the current release, the read and write of the 
+contents in the following ESMF objects are performed by PIO:
 
 \begin{description}
-\item[-] How a dataset distributed among multiple processors can be
-written to a single file efficiently;
-
-\item[-] How a single file can be distributed across multiple physical
-disks and IO channels.
-\end{description}
- 
-There are several possibilities to perform IO in parallel (\cite{MPI-2}):
-\begin{description}
-\item {\bf Single-threaded IO:} A single process acquires all the data and
-writes them out. The features of hardware and OS are used to distribute the 
-data over multiple channels and, possibly, to muliple disks.
-
-\item {\bf Multithreaded, multi-fileset IO:} Many processes write to
-multiple independent files. These files may be assembled later. Since each of 
-the processes operates with its file logically independently, we can again 
-rely on the hardware and OS to operate concurrently with multiple channels and 
-multiple disks. 
- 
-\item {\bf Multithreaded, single-fileset IO:} Many processes write to a
-single file. Although this approach is the most desirable one, its 
-implementation is the most complicated. Since it requires concurrent access 
-to the file by multiple processes, it can be implemented within the ESMF I/O 
-only when such functionality is provided by an underlying I/O library. 
+\item[-] ESMF_Array (ref)
+\item[-] ESMF_ArrayBundle (ref)
+\item[-] ESMF_Field (ref)
+\item[-] ESMF_FieldBundle (ref)
 \end{description}
 
-Multithreaded IO offers a simple way to stripe the data accross as many
-IO channels and disk channels as are available \cite{MPI-2, 
-Balaji_Parallel_IO_1999, Balaji_Parallel_IO_2000}. Parallel IO implemented in 
-GFDL (\cite{mpp_io}) supports parallel writing to single or multiple files. 
-It supports NetCDF and binary data formats.
+Two formats are supported, namely, binary format and NetCDF format.  
+It depends on the which environment variables are tuned on when ESMF is built,
+the system is expected to automatically detect file formats at runtime.
 
-\subsection{Synchronous and Asynchronous IO}
+Details of the environment variables can be founds in ESMF User Guide, 
+Third Party Libraries in "Building and Installing ESMF.
 
-ESMF shall provide an asynchronous option for all ESMF IO models.  It
-shall provide async read and write operations, the capability to wait
-on individual or groups of I/O operations, and query functions for the
-state of an operation.
 
 
 \subsection{Location}
