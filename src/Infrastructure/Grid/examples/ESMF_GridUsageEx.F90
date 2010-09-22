@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.72 2010/09/22 06:21:53 peggyli Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.73 2010/09/22 13:59:28 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -995,17 +995,42 @@ endif
 !BOC
    filename = 'data/T42_grid.nc'
    grid2D = ESMF_GridCreate(filename, (/PetCount,1/), rc=rc)
-!
+!EOC
+
+!BOE
 !  where T42_grid.nc is a 2D global grid of size (128x64) and the Grid is distributed
 !  by partitioning the rows evenly over all the PETs.
-!
-!EOC
+!EOE
+
    !-------------------------------------------------------------------
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
    call ESMF_GridDestroy(grid2D, rc=rc)
 
-! 
+
+!BOE
+!\subsubsection{Creating an Empty Grid in a Parent Component 
+! for Completion in a Child Component}\label{sec:usage:setcommit}
+!
+! ESMF Grids can be created incrementally. To do this,
+! the user first calls {\tt ESMF\_GridCreateEmpty()} to allocate the shell of
+! a Grid. Next, we use the {\tt ESMF\_GridSetCommitShapeTile()}
+! call that fills in the Grid and does an internal commit to make it usable.
+! For consistency's sake the {\tt ESMF\_GridSetCommitShapeTile()}
+! call must occur on the same or a subset of the PETs as the
+!  {\tt ESMF\_GridCreateEmpty()} call. The 
+! {\tt ESMF\_GridSetCommitShapeTile()} call uses the VM for
+! the context in which it's executed and the "empty" Grid contains
+! no information about the VM in which its create was run.  This
+! means that if the {\tt ESMF\_GridSetCommitShapeTile()} call occurs
+! in a subset of the PETs in which the {\tt ESMF\_GridCreateEmpty()} was 
+! executed that the Grid is created only in that subset. Inside the subset
+! the Grid will be fine, but outside the subset the Grid objects will
+! still be "empty" and not usable. The following example uses the
+! incremental technique to create a rectangular 10x20 Grid with coordinates at
+! the center and corner stagger locations. 
+!EOE
+
 !BOC
 !---------------------------------------------------------------------------
 ! IN THE PARENT COMPONENT:
@@ -1040,38 +1065,6 @@ endif
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
    call ESMF_GridDestroy(grid2D, rc=rc)
-
-!BOE
-!\subsubsection{Creating an Empty Grid in a Parent Component 
-! for Completion in a Child Component}\label{sec:usage:setcommit}
-!
-! ESMF Grids can be created incrementally. To do this,
-! the user first calls {\tt ESMF\_GridCreateEmpty()} to allocate the shell of
-! a Grid. Next, we use the {\tt ESMF\_GridSetCommitShapeTile()}
-! call that fills in the Grid and does an internal commit to make it usable.
-! For consistency's sake the {\tt ESMF\_GridSetCommitShapeTile()}
-! call must occur on the same or a subset of the PETs as the
-!  {\tt ESMF\_GridCreateEmpty()} call. The 
-! {\tt ESMF\_GridSetCommitShapeTile()} call uses the VM for
-! the context in which it's executed and the "empty" Grid contains
-! no information about the VM in which its create was run.  This
-! means that if the {\tt ESMF\_GridSetCommitShapeTile()} call occurs
-! in a subset of the PETs in which the {\tt ESMF\_GridCreateEmpty()} was 
-! executed that the Grid is created only in that subset. Inside the subset
-! the Grid will be fine, but outside the subset the Grid objects will
-! still be "empty" and not usable. The following example uses the
-! incremental technique to create a rectangular 10x20 Grid with coordinates at
-! the center and corner stagger locations. 
-!EOE
-
-!BOC
-!---------------------------------------------------------------------------
-! IN THE PARENT COMPONENT:
-! Create an empty Grid in the parent component for use in a child component.
-! The parent may be defined on more PETs than the child component.  
-! The child's [vm or pet list] is passed into the create call so that
-! the Grid is defined on the appropriate subset of the parent's PETs. 
-!---------------------------------------------------------------------------
 
 
 
