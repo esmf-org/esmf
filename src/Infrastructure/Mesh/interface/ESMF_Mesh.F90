@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.39 2010/09/17 03:13:32 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.40 2010/09/22 06:25:37 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.39 2010/09/17 03:13:32 oehmke Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.40 2010/09/22 06:25:37 peggyli Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -176,7 +176,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.39 2010/09/17 03:13:32 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.40 2010/09/22 06:25:37 peggyli Exp $'
 
 !==============================================================================
 ! 
@@ -758,8 +758,7 @@ module ESMF_MeshMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateFromFile()"
 !BOP
-! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a grid file defined in a SCRIP format
-!   file or a ESMF Unstructured grid file
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a grid file SCRIP format or ESMF Unstructured grid file
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
@@ -1181,8 +1180,8 @@ end function ESMF_MeshCreateFromUnstruct
 !      First find an available unit numer
        call ESMF_IOUnitGet(unit,rc)
        if (rc==ESMF_SUCCESS) then
-  	  open(unit, FILE=esmffilename,status='unknown')
-          close (unit, STATUS='delete')
+!  	  open(unit, FILE=esmffilename,status='unknown')
+!          close (unit, STATUS='delete')
        endif
     endif    
 
