@@ -1,1 +1,16 @@
-Applications are user level tools supplied and built within the ESMF library.
+The ESMF distribution comes with a set of applications that are thought to be
+of general use to ESMF users. The applications utilize the ESMF library to
+implement features such as printing general information about the ESMF
+installation, or generating regrid weight files. The provided ESMF applications
+are implemented as standard command line tools.
+
+The bundled ESMF applications are built and installed during the usual ESMF
+installation process, which is described in detail in the ESMF User's Guide. 
+After the installation the applications will be located in the binary directory
+that was specified during the installation. The exact installation specific
+path is available to the user via the {\tt esmf.mk} mechanism in form of the
+Makefile variable {\tt ESMF\_APPSDIR}. The ESMF User's Guide discusses the
+{\tt esmf.mk} mechanism in more detail.
+
+The following sections provide documentation of the bundled ESMF application command line tools.
+
