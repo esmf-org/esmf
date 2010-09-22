@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.71 2010/09/13 05:52:51 eschwab Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.72 2010/09/22 06:21:53 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -60,6 +60,7 @@ program ESMF_GridCreateEx
       integer :: lDE,localDECount
       integer :: xdim, ydim, zdim
       integer :: ind, localArbIndexCount, remain
+      character(len=80) :: filename
 
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
@@ -976,28 +977,35 @@ endif
 
 
 !BOE
-!\subsubsection{Creating an Empty Grid in a Parent Component 
-! for Completion in a Child Component}\label{sec:usage:setcommit}
+!\subsubsection{Creating a Curvilinear Grid Using the Coordinates Defined 
+! In A SCRIP file}\label{sec:example:2DLogRecFromScrip}
 !
-! ESMF Grids can be created incrementally. To do this,
-! the user first calls {\tt ESMF\_GridCreateEmpty()} to allocate the shell of
-! a Grid. Next, we use the {\tt ESMF\_GridSetCommitShapeTile()}
-! call that fills in the Grid and does an internal commit to make it usable.
-! For consistency's sake the {\tt ESMF\_GridSetCommitShapeTile()}
-! call must occur on the same or a subset of the PETs as the
-!  {\tt ESMF\_GridCreateEmpty()} call. The 
-! {\tt ESMF\_GridSetCommitShapeTile()} call uses the VM for
-! the context in which it's executed and the "empty" Grid contains
-! no information about the VM in which its create was run.  This
-! means that if the {\tt ESMF\_GridSetCommitShapeTile()} call occurs
-! in a subset of the PETs in which the {\tt ESMF\_GridCreateEmpty()} was 
-! executed that the Grid is created only in that subset. Inside the subset
-! the Grid will be fine, but outside the subset the Grid objects will
-! still be "empty" and not usable. The following example uses the
-! incremental technique to create a rectangular 10x20 Grid with coordinates at
-! the center and corner stagger locations. 
+! ESMF supports the creation of a 2D curvilinear Grid using the coordinates 
+! defined in a SCRIP format Grid file~\cite{ref:SCRIP}. The grid must be a 2D
+! logically rectangular grid with {\tt grid_rank} equal to 2.  The grid center
+! coordinates {\tt grid_center_lat} and {\tt grid_center_lon} are placed in the
+! ESMF_STAGGERLOC_CENTER location.  The {\tt grid_corner_lat} and {\tt grid_corner_lon}
+! are ignored.  {\tt grid_imask} are used to set the ESMF_GRIDITEM_MASK field,
+! where a zero value means the cell is masked out.
+! 
+! The following example code shows you how to create a 2D Grid using a SCRIP file
+! and a row only regular distribution:
 !EOE
 
+!BOC
+   filename = 'data/T42_grid.nc'
+   grid2D = ESMF_GridCreate(filename, (/PetCount,1/), rc=rc)
+!
+!  where T42_grid.nc is a 2D global grid of size (128x64) and the Grid is distributed
+!  by partitioning the rows evenly over all the PETs.
+!
+!EOC
+   !-------------------------------------------------------------------
+   ! Clean up to prepare for the next example.
+   !-------------------------------------------------------------------
+   call ESMF_GridDestroy(grid2D, rc=rc)
+
+! 
 !BOC
 !---------------------------------------------------------------------------
 ! IN THE PARENT COMPONENT:
@@ -1033,6 +1041,37 @@ endif
    !-------------------------------------------------------------------
    call ESMF_GridDestroy(grid2D, rc=rc)
 
+!BOE
+!\subsubsection{Creating an Empty Grid in a Parent Component 
+! for Completion in a Child Component}\label{sec:usage:setcommit}
+!
+! ESMF Grids can be created incrementally. To do this,
+! the user first calls {\tt ESMF\_GridCreateEmpty()} to allocate the shell of
+! a Grid. Next, we use the {\tt ESMF\_GridSetCommitShapeTile()}
+! call that fills in the Grid and does an internal commit to make it usable.
+! For consistency's sake the {\tt ESMF\_GridSetCommitShapeTile()}
+! call must occur on the same or a subset of the PETs as the
+!  {\tt ESMF\_GridCreateEmpty()} call. The 
+! {\tt ESMF\_GridSetCommitShapeTile()} call uses the VM for
+! the context in which it's executed and the "empty" Grid contains
+! no information about the VM in which its create was run.  This
+! means that if the {\tt ESMF\_GridSetCommitShapeTile()} call occurs
+! in a subset of the PETs in which the {\tt ESMF\_GridCreateEmpty()} was 
+! executed that the Grid is created only in that subset. Inside the subset
+! the Grid will be fine, but outside the subset the Grid objects will
+! still be "empty" and not usable. The following example uses the
+! incremental technique to create a rectangular 10x20 Grid with coordinates at
+! the center and corner stagger locations. 
+!EOE
+
+!BOC
+!---------------------------------------------------------------------------
+! IN THE PARENT COMPONENT:
+! Create an empty Grid in the parent component for use in a child component.
+! The parent may be defined on more PETs than the child component.  
+! The child's [vm or pet list] is passed into the create call so that
+! the Grid is defined on the appropriate subset of the parent's PETs. 
+!---------------------------------------------------------------------------
 
 
 
