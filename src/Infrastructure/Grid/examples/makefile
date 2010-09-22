@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2010/04/13 05:58:58 eschwab Exp $
+# $Id: makefile,v 1.24 2010/09/22 20:39:24 peggyli Exp $
 
 ALL:      build_examples
 run:      run_examples
@@ -28,12 +28,14 @@ CLOBBERDIRS =
 #  ESMF_GridUsage
 #
 run_ESMF_GridUsageEx:
-	cp -f $(ESMF_DIR)/src/Infrastructure/Grid/etc/esmf_grid_shape_tile.xml $(ESMF_EXDIR)
+	cp -f $(ESMF_DIR)/src/Infrastructure/Grid/etc/esmf_grid_shape_tile.xml $(ESMF_EXDIR)	
+	cp -f data $(ESMF_EXDIR)
 	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_EXDIR)
 	$(MAKE) EXNAME=GridUsage NP=4 exfrun
 
 run_ESMF_GridUsageEx_uni:
 	cp -f $(ESMF_DIR)/src/Infrastructure/Grid/etc/esmf_grid_shape_tile.xml $(ESMF_EXDIR)
+	cp -f data $(ESMF_EXDIR)
 	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_EXDIR)
 	$(MAKE) EXNAME=GridUsage NP=1 exfrun
 
